@@ -8,7 +8,7 @@ import ck.panda.domain.entity.CloudStackConfiguration;
  */
 public interface CloudStackConfigurationRepository extends PagingAndSortingRepository<CloudStackConfiguration, Long> {
 
-	// TODO for validation
-//	@Query(value = "select config from CloudStackConfiguration config where config.apiKey=:apiKey ")
-//	CloudStackConfiguration findByKeys(@Param("apiKey") String apiKey);
+// TODO for validation
+//@Query(value = "select config from CloudStackConfiguration config where config.apiKey=:apiKey ")
+//CloudStackConfiguration findByKeys(@Param("apiKey") String apiKey);
 }

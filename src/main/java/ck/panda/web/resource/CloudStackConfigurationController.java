@@ -72,4 +72,9 @@ public class CloudStackConfigurationController extends CRUDController<CloudStack
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
+
+    @Override
+    public void testMethod() throws Exception {
+        configService.findAll();
+    }
 }

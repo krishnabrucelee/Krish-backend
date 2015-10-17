@@ -37,7 +37,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
     public Role save(Role role) throws Exception {
-    	LOGGER.debug("Sample Debug Message");
+        LOGGER.debug("Sample Debug Message");
         Errors errors = validator.rejectIfNullEntity("role", role);
         errors = validator.validateEntity(role, errors);
 
@@ -92,10 +92,10 @@ public class RoleServiceImpl implements RoleService {
     }
 
 
-	@Override
-	public List<Role> findAll() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public List<Role> findAll() throws Exception {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

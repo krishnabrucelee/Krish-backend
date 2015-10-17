@@ -27,31 +27,33 @@ public class CRUDController<T> extends ExceptionHandlingController {
     /**
      * Rest action to create an entity from json object.
      *
-     * @param t - The generic entity to create
+     * @param t
+     *            - The generic entity to create
      * @return the entity in json based on the Accept headers
-     * @throws Exception in case of any errors
+     * @throws Exception
+     *             in case of any errors
      */
-    @RequestMapping (method = RequestMethod.POST,
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            consumes = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE }, consumes = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public T create(@RequestBody T t) throws Exception {
         return createT(t);
     }
 
-
     /**
      * Rest action to update an entity from json object.
      *
-     * @param id - Id of the entity to update
-     * @param t  - The generic entity to update
+     * @param id
+     *            - Id of the entity to update
+     * @param t
+     *            - The generic entity to update
      * @return the entity in json based on the Accept headers
-     * @throws Exception if internal error occurs.
+     * @throws Exception
+     *             if internal error occurs.
      */
-    @RequestMapping (value = "/{id}", method = RequestMethod.PUT,
-            produces = { MediaType.APPLICATION_JSON_VALUE },
-            consumes = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/{id}", method = RequestMethod.PUT, produces = {
+            MediaType.APPLICATION_JSON_VALUE }, consumes = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.ACCEPTED)
     @ResponseBody
     public T update(@RequestBody T t, @PathVariable("id") Long id) throws Exception {
@@ -66,25 +68,27 @@ public class CRUDController<T> extends ExceptionHandlingController {
     /**
      * Rest action to delete Entity.
      *
-     * @param id of entity
-     * @throws Exception if internal error occurs.
+     * @param id
+     *            of entity
+     * @throws Exception
+     *             if internal error occurs.
      */
-    @RequestMapping (value = "/{id}", method = RequestMethod.DELETE,
-            produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("id") Long id) throws Exception {
-       deleteT(id);
+        deleteT(id);
     }
 
     /**
      * Rest action to get Entity.
      *
-     * @param id of the entity
+     * @param id
+     *            of the entity
      * @return the entity T
-     * @throws Exception if internal error occurs.
+     * @throws Exception
+     *             if internal error occurs.
      */
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET,
-            produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public T read(@PathVariable("id") Long id) throws Exception {
@@ -95,33 +99,37 @@ public class CRUDController<T> extends ExceptionHandlingController {
      * Rest action to get list of Entities.
      *
      * @param sortBy
-     *        example request param: sort(+name) - for Ascending order
-     *                               sort(-name) - for Descending order
+     *            example request param: sort(+name) - for Ascending order
+     *            sort(-name) - for Descending order
      * @param range
-     *        example request header: Range: items=0-9
-     * @param limit 
-     * 		  example request param: 25   
-     * @param request to set
-     * @param response to set
-     * @return list
-     *         example response header: Content-Range: items 0-9/4500
-     * @throws Exception if any issue occurs
+     *            example request header: Range: items=0-9
+     * @param limit
+     *            example request param: 25
+     * @param request
+     *            to set
+     * @param response
+     *            to set
+     * @return list example response header: Content-Range: items 0-9/4500
+     * @throws Exception
+     *             if any issue occurs
      */
-    @RequestMapping(method = RequestMethod.GET,
-            produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<T> list(@RequestParam String sortBy, @RequestHeader(value = "Range") String range,
-    		@RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
+            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
+                    throws Exception {
         return null;
     }
 
     /**
      * Protected create method.
      *
-     * @param t type to set
+     * @param t
+     *            type to set
      * @return entity type
-     * @throws Exception if any issue occurs
+     * @throws Exception
+     *             if any issue occurs
      */
     protected T createT(T t) throws Exception {
         return t;
@@ -130,10 +138,13 @@ public class CRUDController<T> extends ExceptionHandlingController {
     /**
      * Protected updated method.
      *
-     * @param id of the entity
-     * @param t type to set
+     * @param id
+     *            of the entity
+     * @param t
+     *            type to set
      * @return entity type
-     * @throws Exception if any issue occurs
+     * @throws Exception
+     *             if any issue occurs
      */
     protected T updateT(Long id, T t) throws Exception {
         return t;
@@ -142,8 +153,10 @@ public class CRUDController<T> extends ExceptionHandlingController {
     /**
      * Protected delete method.
      *
-     * @param id of the entity to delete
-     * @throws Exception if any issue occurs
+     * @param id
+     *            of the entity to delete
+     * @throws Exception
+     *             if any issue occurs
      */
     protected void deleteT(Long id) throws Exception {
         // Do nothing
@@ -152,9 +165,11 @@ public class CRUDController<T> extends ExceptionHandlingController {
     /**
      * Protected get method.
      *
-     * @param id of the entity to get
+     * @param id
+     *            of the entity to get
      * @return entity type
-     * @throws Exception if any issue occurs
+     * @throws Exception
+     *             if any issue occurs
      */
     protected T get(Long id) throws Exception {
         return null;
@@ -164,10 +179,10 @@ public class CRUDController<T> extends ExceptionHandlingController {
      * Protected get method.
      *
      * @return entity type
-     * @throws Exception if any issue occurs
+     * @throws Exception
+     *             if any issue occurs
      */
     protected List<T> getAll() throws Exception {
         return null;
     }
 }
-

@@ -19,76 +19,73 @@ import ck.panda.util.error.exception.ApplicationException;
 @Service
 public class CloudStackConfigurationServiceImpl implements CloudStackConfigurationService {
 
-	/** Validator attribute. */
-	@Autowired
-	private AppValidator validator;
+    /** Validator attribute. */
+    @Autowired
+    private AppValidator validator;
 
-	/** ComputeOfferings repository . */
-	@Autowired
-	private CloudStackConfigurationRepository configRepo;
+    /** ComputeOfferings repository . */
+    @Autowired
+    private CloudStackConfigurationRepository configRepo;
 
-	@Override
-	public CloudStackConfiguration save(CloudStackConfiguration config) throws Exception {
+    @Override
+    public CloudStackConfiguration save(CloudStackConfiguration config) throws Exception {
 
-		Errors errors = validator.rejectIfNullEntity("config", config);
-		errors = validator.validateEntity(config, errors);
-		// TODO validation to be checked for the uniqueness of api key and
-		// secret key.
-		// errors = validator.validateKeys(errors, config.getApiKey());
+        Errors errors = validator.rejectIfNullEntity("config", config);
+        errors = validator.validateEntity(config, errors);
 
-		if (errors.hasErrors()) {
-			throw new ApplicationException(errors);
-		}
-		// TODO as Chakravarthi suggestion cloudstack server file removed .Now
-		// no connectivity with cloudstack.Cloud Stack
-		// server file to be changed and updated.So i commented the below line.
-		// server.setServer(config.getApiURL(), config.getSecretKey(),
-		// config.getApiKey());
-		return configRepo.save(config);
-	}
+        if (errors.hasErrors()) {
+            throw new ApplicationException(errors);
+        }
+        // TODO as Chakravarthi suggestion cloudstack server file removed .Now
+        // no connectivity with cloudstack.Cloud Stack
+        // server file to be changed and updated.So i commented the below line.
+        // server.setServer(config.getApiURL(), config.getSecretKey(),
+        // config.getApiKey());
+        return configRepo.save(config);
+    }
 
-	@Override
-	public CloudStackConfiguration update(CloudStackConfiguration config) throws Exception {
+    @Override
+    public CloudStackConfiguration update(CloudStackConfiguration config) throws Exception {
 
-		Errors errors = validator.rejectIfNullEntity("config", config);
-		errors = validator.validateEntity(config, errors);
+        Errors errors = validator.rejectIfNullEntity("config", config);
+        errors = validator.validateEntity(config, errors);
 
-		if (errors.hasErrors()) {
-			throw new ApplicationException(errors);
-		}
+        if (errors.hasErrors()) {
+            throw new ApplicationException(errors);
+        }
 
-		return configRepo.save(config);
-	}
+        return configRepo.save(config);
+    }
 
-	@Override
-	public void delete(CloudStackConfiguration config) throws Exception {
-		configRepo.delete(config);
-	}
+    @Override
+    public void delete(CloudStackConfiguration config) throws Exception {
+        configRepo.delete(config);
+    }
 
-	@Override
-	public void delete(Long id) throws Exception {
-		configRepo.delete(id);
-	}
+    @Override
+    public void delete(Long id) throws Exception {
+        configRepo.delete(id);
+    }
 
-	@Override
-	public CloudStackConfiguration find(Long id) throws Exception {
-		return configRepo.findOne(id);
-	}
+    @Override
+    public CloudStackConfiguration find(Long id) throws Exception {
+        return configRepo.findOne(id);
+    }
 
-	@Override
-	public Page<CloudStackConfiguration> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-		return configRepo.findAll(pagingAndSorting.toPageRequest());
-	}
+    @Override
+    public Page<CloudStackConfiguration> findAll(PagingAndSorting pagingAndSorting) throws Exception {
+        return configRepo.findAll(pagingAndSorting.toPageRequest());
+    }
 
-	@Override
-	public List<CloudStackConfiguration> findAll() throws Exception {
-		return null;
-	}
+    @Override
+    public List<CloudStackConfiguration> findAll() throws Exception {
+        return null;
+    }
 
-	// TODO for validation
-	// @Override
-	// public CloudStackConfiguration findByKeys(String apiKey) {
-	// return configRepo.findByKeys(apiKey);
-	// }
+    // TODO for validation
+    // @Override
+    // public CloudStackConfiguration findByKeys(String apiKey) {
+    // return configRepo.findByKeys(apiKey);
+    // }
 
 }

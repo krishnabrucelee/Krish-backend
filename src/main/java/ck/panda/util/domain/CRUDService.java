@@ -66,9 +66,9 @@ public interface CRUDService<T> {
     Page<T> findAll(PagingAndSorting pagingAndSorting) throws Exception;
 
     /**
-     * @return
-     * @throws Exception
+     * @return result of entities
+     * @throws Exception if error occurs.
      */
     List<T> findAll() throws Exception;
-    
+
 }

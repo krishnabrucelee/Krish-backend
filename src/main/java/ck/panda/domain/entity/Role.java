@@ -43,12 +43,12 @@ public class Role implements Serializable {
     @Size(min = 4, max = 20)
     @Column(name = "name", nullable = false)
     private String name;
-    
+
     /** Roles Department. */
     @ManyToOne
-    @JoinColumn(name="department_id", referencedColumnName = "id")
+    @JoinColumn(name = "department_id", referencedColumnName = "id")
     private Department department;
-    
+
     /** Description of the Department. */
     @Column(name = "description")
     private String description;
@@ -125,41 +125,41 @@ public class Role implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
-    
-    
+
+
     /**
      * Get the department.
      * @return department
      */
     public Department getDepartment() {
-		return department;
-	}
+        return department;
+    }
 
     /**
      * Set the department.
-     * @param department
+     * @param department - object to set
      */
-	public void setDepartment(Department department) {
-		this.department = department;
-	}
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
 
-	/**
+    /**
      * Get the description.
      * @return description
      */
     public String getDescription() {
-		return description;
-	}
+        return description;
+    }
 
     /**
      * Set the description.
-     * @param description
+     * @param description - String to set
      */
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	/**
+    /**
      * Get the version.
      * @return version
      */
@@ -238,5 +238,4 @@ public class Role implements Serializable {
     public void setLastModifiedDateTime(DateTime lastModifiedDateTime) {
         this.lastModifiedDateTime = lastModifiedDateTime;
     }
-
 }

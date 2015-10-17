@@ -13,6 +13,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * Configuration entity for cloudstack.
+ * It requires api key, secret key and url for getting connected with cloudstack.
  *
  */
 @Entity
