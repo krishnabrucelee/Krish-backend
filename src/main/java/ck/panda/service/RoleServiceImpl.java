@@ -48,7 +48,6 @@ public class RoleServiceImpl implements RoleService {
         }
     }
 
-
     @Override
     public Role update(Role role) throws Exception {
 
@@ -94,8 +93,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public List<Role> findAll() throws Exception {
-        // TODO Auto-generated method stub
-        return null;
+               return null;
     }
 
 }

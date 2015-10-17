@@ -68,8 +68,7 @@ public class CRUDController<T> extends ExceptionHandlingController {
     /**
      * Rest action to delete Entity.
      *
-     * @param id
-     *            of entity
+     * @param id - of the entity
      * @throws Exception
      *             if internal error occurs.
      */
@@ -82,8 +81,7 @@ public class CRUDController<T> extends ExceptionHandlingController {
     /**
      * Rest action to get Entity.
      *
-     * @param id
-     *            of the entity
+     * @param id of the entity
      * @return the entity T
      * @throws Exception
      *             if internal error occurs.
@@ -106,9 +104,9 @@ public class CRUDController<T> extends ExceptionHandlingController {
      * @param limit
      *            example request param: 25
      * @param request
-     *            to set
+     *            to set range
      * @param response
-     *            to set
+     *            to set range
      * @return list example response header: Content-Range: items 0-9/4500
      * @throws Exception
      *             if any issue occurs
@@ -141,7 +139,7 @@ public class CRUDController<T> extends ExceptionHandlingController {
      * @param id
      *            of the entity
      * @param t
-     *            type to set
+     *            type to set update
      * @return entity type
      * @throws Exception
      *             if any issue occurs
