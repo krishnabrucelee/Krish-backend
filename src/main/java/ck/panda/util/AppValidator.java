@@ -6,6 +6,7 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 
+import ck.panda.service.CloudStackConfigurationService;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 
@@ -30,6 +31,8 @@ public class AppValidator {
     /** Message source attribute. */
     @Autowired
     private MessageSource messageSource;
+
+    private CloudStackConfigurationService cloudStackConfigurationService;
 
     /**
      * Validates the given entity.
@@ -106,6 +109,7 @@ public class AppValidator {
 
         return errors;
     }
+
 
     /**
      * Converts the validation messages.
