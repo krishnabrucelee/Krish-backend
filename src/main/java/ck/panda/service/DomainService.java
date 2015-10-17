@@ -14,3 +14,4 @@ import ck.panda.util.domain.CRUDService;
 public interface DomainService extends CRUDService<Domain> {
 
 }
+

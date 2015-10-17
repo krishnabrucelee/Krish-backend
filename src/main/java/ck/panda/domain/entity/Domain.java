@@ -23,8 +23,6 @@ import org.springframework.data.annotation.LastModifiedDate;
  * relationship to each other and a set of delegated administrators with some authority over the
  * domain and its subdomains.
  *
- * @author Krishna<krishnakumar@assistanz.com>
- *
  */
 @Entity
 @Table(name = "ck_domain")

@@ -9,28 +9,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.domain.vo.PagingAndSorting;
-import ck.panda.util.error.exception.EntityNotFoundException;
 
 /**
  * Domain service implementation class.
  *
- * @author Krishna<krishnakumar@assistanz.com>
- *
  */
 @Service
 public class DomainServiceImpl implements DomainService {
-
-  /** Logger attribute. */
-  private static final Logger LOGGER = LoggerFactory.getLogger(DomainServiceImpl.class);
-
-  /** Validator attribute. */
-  @Autowired
-  private AppValidator validator;
 
   /** Department repository reference. */
   @Autowired
