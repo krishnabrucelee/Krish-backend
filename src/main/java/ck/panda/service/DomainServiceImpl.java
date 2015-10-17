@@ -26,7 +26,6 @@ public class DomainServiceImpl implements DomainService {
   private DomainRepository domainRepo;
 
   @Override
-  @PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
   public Domain save(Domain domain) throws Exception {
     return domainRepo.save(domain);
   }
@@ -47,7 +46,6 @@ public class DomainServiceImpl implements DomainService {
   }
 
   @Override
-  @PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
   public Domain find(Long id) throws Exception {
     Domain domain = domainRepo.findOne(id);
     return domain;
