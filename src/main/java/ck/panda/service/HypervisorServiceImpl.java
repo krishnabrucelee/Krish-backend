@@ -1,10 +1,8 @@
 package ck.panda.service;
 
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-
 import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.repository.jpa.HypervisorRepository;
 import ck.panda.util.domain.vo.PagingAndSorting;
