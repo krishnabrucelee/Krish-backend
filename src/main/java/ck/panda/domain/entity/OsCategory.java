@@ -18,7 +18,7 @@ import org.springframework.data.annotation.CreatedDate;
 @SuppressWarnings("serial")
 public class OsCategory implements Serializable {
 
-	/** Id of the OS category. */
+    /** Id of the OS category. */
     @Id
     @GeneratedValue
     @Column(name = "id")
@@ -40,61 +40,60 @@ public class OsCategory implements Serializable {
     /**
      * @return id of the OS category
      */
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
     /**
      * @param id
      * the OS category id to set.
      */
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	/**
+    /**
      * @return name of the OS category
      */
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	/**
+    /**
      * @param name
      * the OS category name to set.
      */
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	/**
+    /**
      * @return UUID of the OS category
      */
-	public String getUuid() {
-		return uuid;
-	}
+    public String getUuid() {
+        return uuid;
+    }
 
-	/**
+    /**
      * @param uuid
      * the OS category UUID to set.
      */
-	public void setUuid(String uuid) {
-		this.uuid = uuid;
-	}
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
-	/**
+    /**
      * @return the createdDateTime
      */
-	public DateTime getCreatedDateTime() {
-		return createdDateTime;
-	}
+    public DateTime getCreatedDateTime() {
+        return createdDateTime;
+    }
 
-	/**
+    /**
      * @param createdDateTime
      * the createdDateTime to set.
      */
-	public void setCreatedDateTime(DateTime createdDateTime) {
-		this.createdDateTime = createdDateTime;
-	}
-
+    public void setCreatedDateTime(DateTime createdDateTime) {
+        this.createdDateTime = createdDateTime;
+    }
 }

@@ -3,4 +3,5 @@
 .project
 .settings/
 .eclipse-pmd
+.gitignore.swp
 target/
