@@ -6,7 +6,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -32,7 +31,6 @@ import ck.panda.util.web.CRUDController;
 @RestController
 @RequestMapping("/api/cloudconfiguration")
 @Api(value = "CloudStackConfiguration", description = "URL formation for cloudstack", produces = "application/json")
-@PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
 public class CloudStackConfigurationController extends CRUDController<CloudStackConfiguration> implements ApiController {
 
     /** Service reference to CloudStackConfiguration. */

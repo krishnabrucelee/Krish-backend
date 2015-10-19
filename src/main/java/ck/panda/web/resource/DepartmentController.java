@@ -26,13 +26,12 @@ import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
 
 /**
- * Department controller .
+ * Department controller.
  *
  */
 @RestController
 @RequestMapping("/api/departments")
 @Api(value = "Departments", description = "Operations with departments", produces = "application/json")
-@PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
 public class DepartmentController extends CRUDController<Department> implements ApiController {
 
     /** Service reference to Department. */
