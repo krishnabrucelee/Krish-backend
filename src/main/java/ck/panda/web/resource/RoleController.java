@@ -32,7 +32,6 @@ import ck.panda.util.web.CRUDController;
 @RestController
 @RequestMapping("/api/roles")
 @Api(value = "Roles", description = "Operations with roles", produces = "application/json")
-@PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
 public class RoleController extends CRUDController<Role> implements ApiController {
 
     /** Service reference to Role. */
