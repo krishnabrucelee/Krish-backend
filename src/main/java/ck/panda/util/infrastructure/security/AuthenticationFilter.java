@@ -26,9 +26,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
-import java.util.Enumeration;
+
 
 /**
  * Authentication filter.
@@ -63,7 +62,7 @@ public class AuthenticationFilter extends GenericFilterBean {
         Optional<String> username = Optional.fromNullable(httpRequest.getHeader("x-auth-username"));
         Optional<String> password = Optional.fromNullable(httpRequest.getHeader("x-auth-password"));
         Optional<String> token = Optional.fromNullable(httpRequest.getHeader("x-auth-token"));
-       
+
         String resourcePath = new UrlPathHelper().getPathWithinApplication(httpRequest);
         try {
             if (postToAuthenticate(httpRequest, resourcePath)) {

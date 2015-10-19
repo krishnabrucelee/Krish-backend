@@ -25,10 +25,13 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
 
+/**
+ * Department controller.
+ *
+ */
 @RestController
 @RequestMapping("/api/departments")
 @Api(value = "Departments", description = "Operations with departments", produces = "application/json")
-@PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
 public class DepartmentController extends CRUDController<Department> implements ApiController {
 
     /** Service reference to Department. */
@@ -58,10 +61,10 @@ public class DepartmentController extends CRUDController<Department> implements 
     public void delete(@PathVariable(PATH_ID) Long id) throws Exception {
         departmentService.delete(id);
     }
-    
+
     @Override
     public List<Department> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-    		@RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
+            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Department.class);
         Page<Department> pageResponse = departmentService.findAll(page);
         System.out.println(pageResponse);
@@ -69,4 +72,8 @@ public class DepartmentController extends CRUDController<Department> implements 
         return pageResponse.getContent();
     }
 
+    @Override
+    public void testMethod() throws Exception {
+        departmentService.findAll();
+    }
 }

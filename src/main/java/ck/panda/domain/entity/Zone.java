@@ -1,20 +1,16 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -23,51 +19,65 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 
 /**
- * Departments are the first level hierarchy and we are grouping the departments
- * with different roles.
- *
- * Roles should be classified based on Departments.
- *
+ * A zone is the second largest organizational unit within a CloudStack
+ * deployment. A zone typically corresponds to a single datacenter, although it
+ * is permissible to have multiple zones in a datacenter. The benefit of
+ * organizing infrastructure into zones is to provide physical isolation and
+ * redundancy.
  */
 @Entity
-@Table(name = "ck_department")
+@Table(name = "ck_zone")
 @SuppressWarnings("serial")
-public class Department implements Serializable {
+public class Zone implements Serializable {
 
-    /** Id of the Department. */
+    /** Id of the Zone. */
     @Id
     @GeneratedValue
     @Column(name = "id")
     private Long id;
 
-    /** List of roles. */
-    @OneToMany(mappedBy = "department")
-    private List<Role> roles;
-
-    /** Name of the Department. */
-    @NotEmpty
+    /** Name of the Zone. */
     @Size(min = 4, max = 20)
     @Column(name = "name", nullable = false)
     private String name;
 
-    /** Description of the Department. */
-    @Column(name = "description")
-    private String description;
+    /** Unique id for the Zone. */
+    @Column(name = "uuid")
+    private String uuid;
+
+    /** id for the Domain. */
+    //@OneToMany(mappedBy = "domain")
+    @Column(name = "domain_id")
+    private Long domainId;
+
+    /** id for the Region. */
+    //@OneToOne
+    //@JoinColumn(name = "region_id", referencedColumnName = "id")
+    @Column(name = "region_id")
+    private Long regionId;
+
+    /** IsActive attribute to verify Active or Inactive. */
+    @Column(name = "is_active")
+    private Boolean isActive;
 
     /** Version attribute to handle optimistic locking. */
     @Version
     @Column(name = "version")
     private Long version;
 
+    /** Status attribute to verify status of the zone. */
+    @Column(name = "status")
+    private Boolean status;
+
     /** Created by user. */
     @CreatedBy
-    @JoinColumn(name = "created_user_id", referencedColumnName = "id")
+    @JoinColumn(name = "created_by", referencedColumnName = "id")
     @OneToOne
     private User createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @JoinColumn(name = "updated_user_id", referencedColumnName = "id")
+    @JoinColumn(name = "updated_by", referencedColumnName = "id")
     @OneToOne
     private User updatedBy;
 
@@ -80,176 +90,183 @@ public class Department implements Serializable {
     private DateTime lastModifiedDateTime;
 
     /**
-     * Default constructor.
-     */
-    public Department() {
-        super();
-    }
-
-    /**
-     * Parameterized constructor.
-     *
-     * @param name
-     *            to set
-     */
-    public Department(String name) {
-        super();
-        this.name = name;
-    }
-
-    /**
-     * Get the id.
-     *
-     * @return id
+     * @return id the id of the zone
      */
     public Long getId() {
         return id;
     }
 
     /**
-     * Set the id.
-     *
      * @param id
-     *            - the Long to set
+     * the zone id to set.
      */
     public void setId(Long id) {
         this.id = id;
     }
 
     /**
-     * Get the name.
-     *
-     * @return name
+     * @return name the name of the zone.
      */
     public String getName() {
         return name;
     }
 
     /**
-     * Set the name.
-     *
      * @param name
-     *            - the String to set
+     * the zone name to set.
      */
     public void setName(String name) {
         this.name = name;
     }
 
     /**
-     * Get the description.
-     *
-     * @return description
+     * @return the uuid
      */
-    public String getDescription() {
-        return description;
+    public String getUuid() {
+        return uuid;
     }
 
     /**
-     * Set the description.
-     *
-     * @param description - the String to set.
+     * @param uuid
+     * the zone uuid to set.
      */
-    public void setDescription(String description) {
-        this.description = description;
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     /**
-     * Get the version.
-     *
-     * @return version
+     * @return the domainId
+     */
+    public Long getDomainId() {
+        return domainId;
+    }
+
+    /**
+     * @param domainId
+     * the domain Id to set
+     */
+    public void setDomainId(Long domainId) {
+        this.domainId = domainId;
+    }
+
+    /**
+     * @return the regionId
+     */
+    public Long getRegionId() {
+        return regionId;
+    }
+
+    /**
+     * @param regionId
+     * the regionId to set.
+     */
+    public void setRegionId(Long regionId) {
+        this.regionId = regionId;
+    }
+
+    /**
+     * @return the isActive
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    /**
+     * @param isActive
+     * the isActive to set.
+     */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    /**
+     * @return the version
      */
     public Long getVersion() {
         return version;
     }
 
     /**
-     * Set the version.
-     *
      * @param version
-     *            - the Long to set
+     * the version to set.
      */
     public void setVersion(Long version) {
         this.version = version;
     }
 
     /**
-     * Get the createdBy.
-     *
-     * @return createdBy
+     * @return the status
+     */
+    public Boolean getStatus() {
+        return status;
+    }
+
+    /**
+     * @param status
+     * the status to set.
+     */
+    public void setStatus(Boolean status) {
+        this.status = status;
+    }
+
+    /**
+     * @return the createdBy.
      */
     public User getCreatedBy() {
         return createdBy;
     }
 
     /**
-     * Set the createdBy.
-     *
      * @param createdBy
-     *            - the User to set
+     * the createdBy to set.
      */
     public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
     }
 
     /**
-     * Get the updatedBy.
-     *
-     * @return updatedBy
+     * @return the updatedBy
      */
     public User getUpdatedBy() {
         return updatedBy;
     }
 
     /**
-     * Set the updatedBy.
-     *
      * @param updatedBy
-     *            - the User to set
+     * the updatedBy to set.
      */
     public void setUpdatedBy(User updatedBy) {
         this.updatedBy = updatedBy;
     }
 
     /**
-     * Get the createdDateTime.
-     *
-     * @return createdDateTime
+     * @return the createdDateTime
      */
     public DateTime getCreatedDateTime() {
         return createdDateTime;
     }
 
     /**
-     * Set the createdDateTime.
-     *
      * @param createdDateTime
-     *            - the DateTime to set
+     * the createdDateTime to set.
      */
     public void setCreatedDateTime(DateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
     }
 
     /**
-     * Get the lastModifiedDateTime.
-     *
-     * @return lastModifiedDateTime
+     * @return the lastModifiedDateTime
      */
     public DateTime getLastModifiedDateTime() {
         return lastModifiedDateTime;
     }
 
     /**
-     * Set the lastModifiedDateTime.
-     *
      * @param lastModifiedDateTime
-     *            - the DateTime to set
+     * the lastModifiedDateTime to set.
      */
     public void setLastModifiedDateTime(DateTime lastModifiedDateTime) {
         this.lastModifiedDateTime = lastModifiedDateTime;
     }
 
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this);
-    }
 }

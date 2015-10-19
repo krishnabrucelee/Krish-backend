@@ -25,6 +25,11 @@ public class AuthenticationController implements ApiController {
                  + "Nonetheless to authenticate Domain User POST request with X-Auth-Username and X-Auth-Password headers "
                  + "is mandatory to this URL. If username and password are correct valid token will be returned (just json string in response) "
                  + "This token must be present in X-Auth-Token header in all requests for all other URLs, including logout."
-                 + "Authentication can be issued multiple times and each call results in new ticket." ;
+                 + "Authentication can be issued multiple times and each call results in new ßticket.";
+    }
+
+    @Override
+    public void testMethod() throws Exception {
+        authenticate();
     }
 }
