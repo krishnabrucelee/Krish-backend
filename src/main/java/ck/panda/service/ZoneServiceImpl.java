@@ -4,14 +4,14 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-	import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Service;
 
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.ZoneRepository;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
- * Service implementation for Zone entity
+ * Service implementation for Zone entity.
  *
  */
 @Service
@@ -44,7 +44,7 @@ public class ZoneServiceImpl implements ZoneService {
 
     @Override
     public Zone find(Long id) throws Exception {
-    	return zoneRepo.findOne(id);
+        return zoneRepo.findOne(id);
     }
 
     @Override

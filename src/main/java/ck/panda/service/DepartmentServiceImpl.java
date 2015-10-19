@@ -40,7 +40,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         Errors errors = validator.rejectIfNullEntity("department", department);
         errors = validator.validateEntity(department, errors);
-        
+
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
@@ -88,15 +88,13 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public Page<Department> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-    	System.out.println(pagingAndSorting.toPageRequest());
-        return departmentRepo.findAll(pagingAndSorting.toPageRequest());
+           return departmentRepo.findAll(pagingAndSorting.toPageRequest());
     }
 
 
-	@Override
-	public List<Department> findAll() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public List<Department> findAll() throws Exception {
+            return null;
+    }
 
 }

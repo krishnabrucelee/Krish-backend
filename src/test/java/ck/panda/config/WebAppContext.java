@@ -15,7 +15,7 @@ import org.springframework.web.servlet.view.JstlView;
 import java.util.Properties;
 
 /**
- * 
+ *
  * @author Krishna <krishnakumar@assistanz.com>
  */
 @Configuration
@@ -25,7 +25,13 @@ import java.util.Properties;
 })
 public class WebAppContext extends WebMvcConfigurerAdapter {
 
+    /**
+     * String VIEW_RESOLVER_PREFIX.
+     */
     private static final String VIEW_RESOLVER_PREFIX = "/WEB-INF/jsp/";
+    /**
+     * String VIEW_RESOLVER_SUFFIX.
+     */
     private static final String VIEW_RESOLVER_SUFFIX = ".jsp";
 
     @Override
@@ -38,6 +44,9 @@ public class WebAppContext extends WebMvcConfigurerAdapter {
         configurer.enable();
     }
 
+    /**
+     * @return exceptionResolver.
+     */
     @Bean
     public SimpleMappingExceptionResolver exceptionResolver() {
         SimpleMappingExceptionResolver exceptionResolver = new SimpleMappingExceptionResolver();
@@ -60,6 +69,9 @@ public class WebAppContext extends WebMvcConfigurerAdapter {
         return exceptionResolver;
     }
 
+    /**
+     * @return viewResolver.
+     */
     @Bean
     public ViewResolver viewResolver() {
         InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();

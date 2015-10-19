@@ -1,9 +1,6 @@
 package ck.panda.util.web;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-
 import ck.panda.constants.GenericConstants;
 
 
@@ -21,7 +18,7 @@ public class Range {
     private Integer maxResults = 0;
     /** Page element count attribute. */
     private Integer pageElementCount = 0;
-   
+
     /**
      * Parameterized constructor.
      *
@@ -36,10 +33,10 @@ public class Range {
         this.firstResult = new Integer(parsed[0]);
         this.endResult = new Integer(parsed[1]);
         this.pageElementCount = (endResult - firstResult) + 1;
-        
+
         // TODO Have to discuss with Bharathi Regarding the below condition
         if (limit == null) {
-        	
+
             pageElementCount = GenericConstants.DEFAULTLIMIT;
         }
 
