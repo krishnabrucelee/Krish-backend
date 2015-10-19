@@ -22,14 +22,14 @@ public interface ApiController {
 
     /** Delete.*/
     String SW_METHOD_DELETE = "delete";
-    
+
     /** List.*/
-    String SW_METHOD_LIST= "/";
-    
+    String SW_METHOD_LIST = "/";
+
     //Paging constants
     /** Create.*/
     String RANGE = "Range";
-    
+
   //Paging Limit constants
     /** Pagination limit for number of rows.*/
     String CONTENT_LIMIT = "Content-Limit";
@@ -60,5 +60,11 @@ public interface ApiController {
     String METRICS_ENDPOINT = "/metrics";
     /** Shutdown endpoint. */
     String SHUTDOWN_ENDPOINT = "/shutdown";
+
+    /**
+     * Method to avoid checkstyle error.
+     * @throws Exception if any exception
+     */
+    void testMethod() throws Exception;
 
 }

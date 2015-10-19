@@ -5,10 +5,8 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
-
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
-
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
@@ -106,6 +104,7 @@ public class AppValidator {
 
         return errors;
     }
+
 
     /**
      * Converts the validation messages.

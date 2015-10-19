@@ -9,14 +9,20 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
 
 /**
- * 
+ *
  * @author Krishna <krishnakumar@assistanz.com>
  */
 @Configuration
 public class TestContext {
 
+    /**
+     * MESSAGE_SOURCE_BASE_NAME.
+     */
     private static final String MESSAGE_SOURCE_BASE_NAME = "i18n/messages";
 
+    /**
+     * @return MessageSource
+     */
     @Bean
     public MessageSource messageSource() {
         ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
@@ -27,6 +33,9 @@ public class TestContext {
         return messageSource;
     }
 
+    /**
+     * @return Mockito.mock(DepartmentService.class)
+     */
     @Bean
     public DepartmentService departmentService() {
         return Mockito.mock(DepartmentService.class);
