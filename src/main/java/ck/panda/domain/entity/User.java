@@ -1,7 +1,7 @@
 package ck.panda.domain.entity;
-
 import java.util.Date;
 
+import javax.management.relation.Role;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,11 +15,13 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
+import org.hibernate.usertype.UserType;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 
 /**
  * User entity.
+ *
  */
 @Entity
 @Table(name = "ck_users")
@@ -349,7 +351,4 @@ public class User {
     public void setUpdatedBy(User updatedBy) {
         this.updatedBy = updatedBy;
     }
-
-
-
 }
