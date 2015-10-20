@@ -74,7 +74,6 @@ public class ProjectController extends CRUDController<Project> implements ApiCon
      */
     @Override
     public void testMethod() throws Exception {
-
-
+        //TODO testing of project service will be handled here.
     }
 }
