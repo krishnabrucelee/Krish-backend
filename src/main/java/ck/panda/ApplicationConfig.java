@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.data.auditing.DateTimeProvider;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -19,6 +21,13 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
+
+import ck.panda.util.audit.AuditingDateTimeProvider;
+import ck.panda.util.audit.CurrentTimeDateTimeService;
+import ck.panda.util.audit.DateTimeService;
 
 /**
  * Spring boot application configuration class.
@@ -29,6 +38,7 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 @SpringBootApplication
 @EnableConfigurationProperties
 @EnableTransactionManagement
+@EnableJpaAuditing(dateTimeProviderRef = "dateTimeProvider")
 @EnableJpaRepositories("ck.panda.domain.repository")
 public class ApplicationConfig extends WebMvcConfigurerAdapter {
 
@@ -39,7 +49,32 @@ public class ApplicationConfig extends WebMvcConfigurerAdapter {
      * @throws Exception if any error
      */
     public static void main(String[] args) throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JSR310Module());
         SpringApplication.run(ApplicationConfig.class, args);
+    }
+
+
+    /**
+     * Configures the DateTimeService.
+     * @return CurrentTimeDateTimeService implementation
+     */
+    @Bean
+    DateTimeService currentTimeDateTimeService() {
+        return new CurrentTimeDateTimeService();
+    }
+
+
+    /**
+     * Configures the DateTimeProvider bean for providing date and time.
+     *
+     * @param dateTimeService DateTimeServiceObject.
+     *
+     * @return AuditingDateTimeProvider implementation
+     */
+    @Bean
+    DateTimeProvider dateTimeProvider(DateTimeService dateTimeService) {
+        return new AuditingDateTimeProvider(dateTimeService);
     }
 
     /**

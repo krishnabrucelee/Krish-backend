@@ -1,10 +1,14 @@
 package ck.panda.domain.entity;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
@@ -37,6 +41,10 @@ public class Domain {
   /** Unique ID from Cloud Stack. */
   @Column(name = "uuid")
   private String uuid;
+
+  /** List of departments. */
+  @OneToMany(mappedBy = "domain" , cascade = CascadeType.ALL)
+  private List<Department> departments;
 
   /**  Name of the Domain. */
   @NotEmpty

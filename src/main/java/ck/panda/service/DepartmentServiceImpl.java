@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Domain;
 import ck.panda.domain.repository.jpa.DepartmentReposiory;
 import ck.panda.util.AppValidator;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -40,6 +41,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         Errors errors = validator.rejectIfNullEntity("department", department);
         errors = validator.validateEntity(department, errors);
+        errors = this.validateName(errors, department.getName(), department.getDomain());
 
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
@@ -48,13 +50,32 @@ public class DepartmentServiceImpl implements DepartmentService {
         }
     }
 
+    /**
+     * Check the department name already exist or not for same domain.
+     *
+     * @param errors,an error object
+     *
+     * @param name,which is to be validated.
+     *
+     * @param domainId, to check the department is unique or not for the domain.
+     *
+     * @return error is present,else new error object is returned.
+     * @throws Exception if error is present.
+     */
+    private Errors validateName(Errors errors, String name, Domain domain) throws Exception {
+
+        if (this.findByNameAndDomain(name, domain) != null) {
+            errors.addFieldError("name", "department.already.exist");
+        }
+        return errors;
+    }
 
     @Override
     public Department update(Department department) throws Exception {
 
         Errors errors = validator.rejectIfNullEntity("department", department);
         errors = validator.validateEntity(department, errors);
-
+        errors = this.validateName(errors, department.getName(), department.getDomain());
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
@@ -95,6 +116,12 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public List<Department> findAll() throws Exception {
             return null;
+    }
+
+    @Override
+    public Department findByNameAndDomain(String name, Domain domain) throws Exception {
+        return	departmentRepo.findByNameAndDomain(name, domain);
+
     }
 
 }

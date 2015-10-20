@@ -2,6 +2,9 @@ package ck.panda.domian.entity;
 
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.User;
+
+import java.time.ZonedDateTime;
+
 import org.joda.time.DateTime;
 
 /**
@@ -53,17 +56,17 @@ public class DepartmentBuilder {
      * @param createdDateTime DateTime.
      * @return createdDateTime
      */
-    public DepartmentBuilder createdDateTime(DateTime createdDateTime) {
+    public DepartmentBuilder createdDateTime(ZonedDateTime createdDateTime) {
         department.setCreatedDateTime(createdDateTime);
         return this;
     }
 
     /**
-     * @param lastModifiedDateTime DateTime.
-     * @return lastModifiedDateTime
+     * @param updatedDateTime DateTime.
+     * @return updatedDateTime
      */
-    public DepartmentBuilder lastModifiedDateTime(DateTime lastModifiedDateTime) {
-        department.setLastModifiedDateTime(lastModifiedDateTime);
+    public DepartmentBuilder updatedDateTime(ZonedDateTime updatedDateTime) {
+        department.setUpdatedDateTime(updatedDateTime);
         return this;
     }
 
