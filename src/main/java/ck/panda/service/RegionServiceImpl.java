@@ -45,11 +45,11 @@ public class RegionServiceImpl implements RegionService {
 
     @Override
     public List<Region> findAll() throws Exception {
-    	return (List<Region>) regionRepo.findAll();
+    	return null;
     }
 
     @Override
     public Page<Region> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-    	return null;
+    	return regionRepo.findAll(pagingAndSorting.toPageRequest());
     }
 }
