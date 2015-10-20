@@ -1,9 +1,12 @@
 package ck.panda.service;
 
+import org.springframework.stereotype.Service;
+
 /**
- * Interface for synchronization with the CloudStack.
+ * Synchronization of zone,domain, region , template with cloudStack.
  *
  */
+@Service
 public interface SyncService {
 
     /**
