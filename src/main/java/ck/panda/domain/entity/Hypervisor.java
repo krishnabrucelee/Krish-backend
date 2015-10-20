@@ -17,7 +17,9 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 
 /**
- * Hypervisor Entity to lists all available hypervisor on the cloudstack server while saving template to local db.
+ *A hypervisor is also known as a Virtual Machine Manager (VMM) and its sole purpose is to allow multiple “machines”
+ *to share a single hardware platform.The hypervisor separates the operating system (OS) from the hardware by taking
+ *the responsibility of allowing each running OS time with the underlying hardware.
  *
  */
 @Entity
@@ -33,9 +35,8 @@ public class Hypervisor implements Serializable {
 
     /** Name of the hypervisor. */
     @Size(min = 4, max = 20)
-    @Column(name = "hypervisor_type", nullable = false)
+    @Column(name = "hypervisor_name", nullable = false)
     private String name;
-
 
     /** Version attribute to handle optimistic locking. */
     @Version
@@ -56,10 +57,12 @@ public class Hypervisor implements Serializable {
 
     /** Created date and time. */
     @CreatedDate
+    @Column(name = "created_date_time")
     private DateTime createdDateTime;
 
     /** Last modified date and time. */
     @LastModifiedDate
+    @Column(name = " last_modified_date_time")
     private DateTime lastModifiedDateTime;
 
     /**
@@ -70,8 +73,7 @@ public class Hypervisor implements Serializable {
     }
 
     /**
-     * @param id
-     *        -the id to set
+     * @param id - the id to set
      */
     public void setId(Long id) {
         this.id = id;
@@ -85,8 +87,7 @@ public class Hypervisor implements Serializable {
     }
 
     /**
-     * @param name
-     *        -the name to set
+     * @param name - the name to set
      */
     public void setName(String name) {
         this.name = name;
@@ -100,8 +101,7 @@ public class Hypervisor implements Serializable {
     }
 
     /**
-     * @param version
-     *        -the version to set
+     * @param version - the version to set
      */
     public void setVersion(Long version) {
         this.version = version;
@@ -115,8 +115,7 @@ public class Hypervisor implements Serializable {
     }
 
     /**
-     * @param createdBy
-     *        -the createdBy to set
+     * @param createdBy - the createdBy to set
      */
     public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
@@ -130,8 +129,7 @@ public class Hypervisor implements Serializable {
     }
 
     /**
-     * @param updatedBy
-     *        -the updatedBy to set
+     * @param updatedBy - the updatedBy to set
      */
     public void setUpdatedBy(User updatedBy) {
         this.updatedBy = updatedBy;
@@ -145,8 +143,7 @@ public class Hypervisor implements Serializable {
     }
 
     /**
-     * @param createdDateTime
-     *        -the createdDateTime to set
+     * @param createdDateTime - the createdDateTime to set
      */
     public void setCreatedDateTime(DateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
@@ -160,8 +157,7 @@ public class Hypervisor implements Serializable {
     }
 
     /**
-     * @param lastModifiedDateTime
-     *        -the lastModifiedDateTime to set
+     * @param lastModifiedDateTime - the lastModifiedDateTime to set
      */
     public void setLastModifiedDateTime(DateTime lastModifiedDateTime) {
         this.lastModifiedDateTime = lastModifiedDateTime;
