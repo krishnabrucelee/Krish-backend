@@ -4,8 +4,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import ck.panda.domain.entity.Region;
 
 /**
- * Jpa Repository for Region entity.
- *
+ * JPA Repository for Region entity.
  */
 public interface RegionRepository extends PagingAndSortingRepository<Region, Long> {
 

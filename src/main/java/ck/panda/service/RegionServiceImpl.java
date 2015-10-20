@@ -1,6 +1,5 @@
 package ck.panda.service;
 
-import java.util.HashMap;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,37 +25,31 @@ public class RegionServiceImpl implements RegionService {
 
     @Override
     public Region update(Region region) throws Exception {
-
         return regionRepo.save(region);
     }
 
     @Override
     public void delete(Region region) throws Exception {
         regionRepo.delete(region);
-
     }
 
     @Override
     public void delete(Long id) throws Exception {
         regionRepo.delete(id);
-
     }
 
     @Override
     public Region find(Long id) throws Exception {
-        Region region = regionRepo.findOne(id);
-        return region;
+        return regionRepo.findOne(id);
     }
 
     @Override
     public List<Region> findAll() throws Exception {
-        HashMap<String, String> hs = new HashMap<String, String>();
-        return (List<Region>) regionRepo.findAll();
+    	return (List<Region>) regionRepo.findAll();
     }
 
     @Override
     public Page<Region> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return null;
+    	return null;
     }
-
 }
