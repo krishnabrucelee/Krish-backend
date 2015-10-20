@@ -4,7 +4,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.repository.jpa.ProjectRepository;
 import ck.panda.util.domain.vo.PagingAndSorting;
