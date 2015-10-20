@@ -1,7 +1,6 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -30,13 +29,13 @@ public class Region implements Serializable {
 	@Column(name = "id")
 	private Long id;
 
-	/** unique id of the region in cloudStack. */
-	@Column(name = "region_id")
-	private Long regionId;
+	/** Unique ID from Cloud Stack. */
+	@Column(name = "uuid")
+	private String uuid;
 
 	/** Name of the region. */
-	@Column(name = "region_name")
-	private String regionName;
+	@Column(name = "name")
+	private String name;
 
 	/** End point of the region. */
 	@Column(name = "end_point")
@@ -48,7 +47,7 @@ public class Region implements Serializable {
 
 	/** Status of the region. */
 	@Column(name = "status")
-	private String status;
+	private Boolean status;
 
 	/** Version attribute to handle optimistic locking. */
 	@Version
@@ -56,15 +55,19 @@ public class Region implements Serializable {
 	private Long version;
 
 	/** Created by user. */
+	@Column(name = "created_by")
 	private User createdBy;
 
 	/** Last updated by user. */
+	@Column(name = "updated_by")
 	private User updatedBy;
 
 	/** Created date and time. */
+	@Column(name = "created_date_time")
 	private DateTime createdDateTime;
 
 	/** Updated date and time. */
+	@Column(name = "updated_date_time")
 	private DateTime updatedDateTime;
 
 	/**
@@ -79,51 +82,46 @@ public class Region implements Serializable {
 	/**
 	 * Set the id of the region.
 	 *
-	 * @param id
-	 *            the id to set
-	 *
+	 * @param id -the id to set
 	 */
 	public void setId(Long id) {
 		this.id = id;
 	}
 
 	/**
-	 * Get the regionId.
+	 * Get the uuid.
 	 *
-	 * @return the regionId
+	 * @return the uuid
 	 */
-	public Long getRegionId() {
-		return regionId;
+	public String getUuid() {
+		return uuid;
 	}
 
 	/**
-	 * Set the regionId.
+	 * Set the uuid.
 	 *
-	 * @param regionId
-	 *            the regionId to set
-	 *
+	 * @param uuid -the uuid to set
 	 */
-	public void setRegionId(Long regionId) {
-		this.regionId = regionId;
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
 
 	/**
-	 * Get the regionName.
+	 * Get the name of the region.
 	 *
-	 * @return the regionName
+	 * @return the name
 	 */
-	public String getRegionName() {
-		return regionName;
+	public String getName() {
+		return name;
 	}
 
 	/**
-	 * Set the regionName.
+	 * Set the name of the region.
 	 *
-	 * @param regionName
-	 *            the regionName to set
+	 * @param name -the name to set
 	 */
-	public void setRegionName(String regionName) {
-		this.regionName = regionName;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	/**
@@ -138,8 +136,7 @@ public class Region implements Serializable {
 	/**
 	 * Set the endPoint.
 	 *
-	 * @param endPoint
-	 *            the endPoint to set
+	 * @param endPoint -the endPoint to set
 	 */
 	public void setEndPoint(String endPoint) {
 		this.endPoint = endPoint;
@@ -157,8 +154,7 @@ public class Region implements Serializable {
 	/**
 	 * Set the isActive.
 	 *
-	 * @param isActive
-	 *            the isActive to set
+	 * @param isActive -the isActive to set
 	 */
 	public void setIsActive(Boolean isActive) {
 		this.isActive = isActive;
@@ -169,17 +165,16 @@ public class Region implements Serializable {
 	 *
 	 * @return the status
 	 */
-	public String getStatus() {
+	public Boolean getStatus() {
 		return status;
 	}
 
 	/**
 	 * Set the status.
 	 *
-	 * @param status
-	 *            the status to set
+	 * @param status -the status to set
 	 */
-	public void setStatus(String status) {
+	public void setStatus(Boolean status) {
 		this.status = status;
 	}
 
@@ -195,8 +190,7 @@ public class Region implements Serializable {
 	/**
 	 * Set the version.
 	 *
-	 * @param version
-	 *            the version to set
+	 * @param version -the version to set
 	 */
 	public void setVersion(Long version) {
 		this.version = version;
@@ -214,8 +208,7 @@ public class Region implements Serializable {
 	/**
 	 * Set the createdBy.
 	 *
-	 * @param createdBy
-	 *            the createdBy to set
+	 * @param createdBy -the createdBy to set
 	 */
 	public void setCreatedBy(User createdBy) {
 		this.createdBy = createdBy;
@@ -233,8 +226,7 @@ public class Region implements Serializable {
 	/**
 	 * Set the updatedBy.
 	 *
-	 * @param updatedBy
-	 *            the updatedBy to set
+	 * @param updatedBy -the updatedBy to set
 	 */
 	public void setUpdatedBy(User updatedBy) {
 		this.updatedBy = updatedBy;
@@ -252,8 +244,7 @@ public class Region implements Serializable {
 	/**
 	 * Set the createdDateTime.
 	 *
-	 * @param createdDateTime
-	 *            the createdDateTime to set
+	 * @param createdDateTime -the createdDateTime to set
 	 */
 	public void setCreatedDateTime(DateTime createdDateTime) {
 		this.createdDateTime = createdDateTime;
@@ -271,8 +262,7 @@ public class Region implements Serializable {
 	/**
 	 * Set the updatedDateTime.
 	 *
-	 * @param updatedDateTime
-	 *            the updatedDateTime to set
+	 * @param updatedDateTime -the updatedDateTime to set
 	 */
 	public void setUpdatedDateTime(DateTime updatedDateTime) {
 		this.updatedDateTime = updatedDateTime;
