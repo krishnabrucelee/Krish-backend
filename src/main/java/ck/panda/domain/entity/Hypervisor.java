@@ -35,7 +35,7 @@ public class Hypervisor implements Serializable {
 
     /** Name of the hypervisor. */
     @Size(min = 4, max = 20)
-    @Column(name = "hypervisor_name", nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
     /** Version attribute to handle optimistic locking. */
@@ -60,106 +60,106 @@ public class Hypervisor implements Serializable {
     @Column(name = "created_date_time")
     private DateTime createdDateTime;
 
-    /** Last modified date and time. */
+    /** Last updated date and time. */
     @LastModifiedDate
     @Column(name = "updated_date_time")
-    private DateTime lastModifiedDateTime;
+    private DateTime updatedDateTime;
 
     /**
-     * @return the id
+     * @return the id.
      */
     public Long getId() {
         return id;
     }
 
     /**
-     * @param id - the id to set
+     * @param id - the id to set.
      */
     public void setId(Long id) {
         this.id = id;
     }
 
     /**
-     * @return the name
+     * @return the name.
      */
     public String getName() {
         return name;
     }
 
     /**
-     * @param name - the name to set
+     * @param name - the name to set.
      */
     public void setName(String name) {
         this.name = name;
     }
 
     /**
-     * @return the version
+     * @return the version.
      */
     public Long getVersion() {
         return version;
     }
 
     /**
-     * @param version - the version to set
+     * @param version - the version to set.
      */
     public void setVersion(Long version) {
         this.version = version;
     }
 
     /**
-     * @return the createdBy
+     * @return the createdBy.
      */
     public User getCreatedBy() {
         return createdBy;
     }
 
     /**
-     * @param createdBy - the createdBy to set
+     * @param createdBy - the createdBy to set.
      */
     public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
     }
 
     /**
-     * @return the updatedBy
+     * @return the updatedBy.
      */
     public User getUpdatedBy() {
         return updatedBy;
     }
 
     /**
-     * @param updatedBy - the updatedBy to set
+     * @param updatedBy - the updatedBy to set.
      */
     public void setUpdatedBy(User updatedBy) {
         this.updatedBy = updatedBy;
     }
 
     /**
-     * @return the createdDateTime
+     * @return the createdDateTime.
      */
     public DateTime getCreatedDateTime() {
         return createdDateTime;
     }
 
     /**
-     * @param createdDateTime - the createdDateTime to set
+     * @param createdDateTime - the createdDateTime to set.
      */
     public void setCreatedDateTime(DateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
     }
 
     /**
-     * @return the lastModifiedDateTime
+     * @return the updatedDateTime.
      */
-    public DateTime getLastModifiedDateTime() {
-        return lastModifiedDateTime;
+    public DateTime getUpdatedDateTime() {
+        return updatedDateTime;
     }
 
     /**
-     * @param lastModifiedDateTime - the lastModifiedDateTime to set
+     * @param updatedDateTime - the updatedDateTime to set.
      */
-    public void setLastModifiedDateTime(DateTime lastModifiedDateTime) {
-        this.lastModifiedDateTime = lastModifiedDateTime;
+    public void setUpdatedDateTime(DateTime updatedDateTime) {
+        this.updatedDateTime = updatedDateTime;
     }
 }
