@@ -1,7 +1,6 @@
 package ck.panda.domain.entity;
-import java.util.Date;
 
-import javax.management.relation.Role;
+import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,15 +13,10 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
-
-import org.hibernate.usertype.UserType;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 
-/**
- * User entity.
- *
- */
+/** User entity. */
 @Entity
 @Table(name = "ck_users")
 public class User {

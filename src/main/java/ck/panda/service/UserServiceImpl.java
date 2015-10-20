@@ -3,11 +3,9 @@ package ck.panda.service;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
 import ck.panda.domain.entity.User;
 import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.util.AppValidator;
@@ -15,10 +13,7 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 
-/**
- *
- * UserService implementation class.
- */
+/** UserService implementation class. */
 @Service
 public class UserServiceImpl implements UserService {
 
