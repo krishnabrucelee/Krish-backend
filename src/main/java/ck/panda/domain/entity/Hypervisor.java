@@ -62,7 +62,7 @@ public class Hypervisor implements Serializable {
 
     /** Last modified date and time. */
     @LastModifiedDate
-    @Column(name = " last_modified_date_time")
+    @Column(name = "updated_date_time")
     private DateTime lastModifiedDateTime;
 
     /**
