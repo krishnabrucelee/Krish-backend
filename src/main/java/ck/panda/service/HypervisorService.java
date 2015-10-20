@@ -6,7 +6,7 @@ import ck.panda.util.domain.CRUDService;
 
 /**
  * Service interface for Hypervisor.
- *  This service provides basic list and save business actions.
+ * This service provides basic list and save business actions.
  */
 @Service
 public interface HypervisorService extends CRUDService<Hypervisor> {
