@@ -1,5 +1,9 @@
 package ck.panda.domain.entity;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -12,6 +16,8 @@ import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -333,4 +339,33 @@ public class Domain {
     this.lastModifiedDateTime = lastModifiedDateTime;
   }
 
+  /**
+   * Convert JSONObject to domain entity.
+   *
+   * @param obj
+   * @return
+   * @throws JSONException
+   */
+  public static Domain convert(JSONObject object) throws JSONException {
+      Domain domain = new Domain();
+      domain.uuid = object.get("id").toString();
+      domain.name = object.get("name").toString();
+
+      return domain;
+  }
+
+  /**
+   *
+   * @param domainList
+   * @return
+   */
+  public static Map<String, Domain> convert(List<Domain> domainList) {
+      Map<String, Domain> domainMap = new HashMap<String, Domain>();
+
+      for (Domain domain : domainList) {
+          domainMap.put(domain.getUuid(), domain);
+      }
+
+      return domainMap;
+  }
 }

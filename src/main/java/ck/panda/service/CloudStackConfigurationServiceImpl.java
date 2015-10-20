@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.repository.jpa.CloudStackConfigurationRepository;
 import ck.panda.util.AppValidator;
+import ck.panda.util.CloudStackServer;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -23,9 +24,19 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
     @Autowired
     private AppValidator validator;
 
+    /** CloudStack connector. */
+    @Autowired
+    private CloudStackServer server;
+
+    @Autowired
+    private DomainService domainservice;
+
     /** ComputeOfferings repository . */
     @Autowired
     private CloudStackConfigurationRepository configRepo;
+
+    @Autowired
+    private SyncService syncservice;
 
     @Override
     public CloudStackConfiguration save(CloudStackConfiguration config) throws Exception {
@@ -36,11 +47,8 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         }
-        // TODO as Chakravarthi suggestion cloudstack server file removed .Now
-        // no connectivity with cloudstack.Cloud Stack
-        // server file to be changed and updated.So i commented the below line.
-        // server.setServer(config.getApiURL(), config.getSecretKey(),
-        // config.getApiKey());
+        server.setServer(config.getApiURL(), config.getSecretKey(), config.getApiKey());
+        syncservice.sync();
         return configRepo.save(config);
     }
 

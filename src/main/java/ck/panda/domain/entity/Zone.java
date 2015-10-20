@@ -1,6 +1,9 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,6 +15,8 @@ import javax.persistence.Table;
 import javax.validation.constraints.Size;
 
 import org.joda.time.DateTime;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -269,4 +274,32 @@ public class Zone implements Serializable {
         this.lastModifiedDateTime = lastModifiedDateTime;
     }
 
+    /**
+     * Convert JSONObject to domain entity.
+     *
+     * @param obj
+     * @return
+     * @throws JSONException
+     */
+    public static Zone convert(JSONObject object) throws JSONException {
+        Zone zone = new Zone();
+        zone.uuid = object.get("id").toString();
+        zone.name = object.get("name").toString();
+
+        return zone;
+    }
+
+    /**
+     *
+     * @param domainList
+     * @return
+     */
+    public static Map<String, Zone> convert(List<Zone> ZoneList) {
+        Map<String, Zone> zoneMap = new HashMap<String, Zone>();
+
+        for (Zone zone : ZoneList) {
+            zoneMap.put(zone.getUuid(), zone);
+        }
+        return zoneMap;
+    }
 }
