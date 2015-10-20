@@ -73,7 +73,7 @@ public class Region implements Serializable {
 	/**
 	 * Get the id.
 	 *
-	 * @return the id
+	 * @return id
 	 */
 	public Long getId() {
 		return id;
@@ -82,7 +82,7 @@ public class Region implements Serializable {
 	/**
 	 * Set the id of the region.
 	 *
-	 * @param id -the id to set
+	 * @param id - the id to set
 	 */
 	public void setId(Long id) {
 		this.id = id;
@@ -91,7 +91,7 @@ public class Region implements Serializable {
 	/**
 	 * Get the uuid.
 	 *
-	 * @return the uuid
+	 * @return uuid
 	 */
 	public String getUuid() {
 		return uuid;
@@ -100,7 +100,7 @@ public class Region implements Serializable {
 	/**
 	 * Set the uuid.
 	 *
-	 * @param uuid -the uuid to set
+	 * @param uuid - the uuid to set
 	 */
 	public void setUuid(String uuid) {
 		this.uuid = uuid;
@@ -109,7 +109,7 @@ public class Region implements Serializable {
 	/**
 	 * Get the name of the region.
 	 *
-	 * @return the name
+	 * @return name
 	 */
 	public String getName() {
 		return name;
@@ -118,7 +118,7 @@ public class Region implements Serializable {
 	/**
 	 * Set the name of the region.
 	 *
-	 * @param name -the name to set
+	 * @param name - the name to set
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -127,7 +127,7 @@ public class Region implements Serializable {
 	/**
 	 * Get the endPoint.
 	 *
-	 * @return the endPoint
+	 * @return endPoint
 	 */
 	public String getEndPoint() {
 		return endPoint;
@@ -136,7 +136,7 @@ public class Region implements Serializable {
 	/**
 	 * Set the endPoint.
 	 *
-	 * @param endPoint -the endPoint to set
+	 * @param endPoint - the endPoint to set
 	 */
 	public void setEndPoint(String endPoint) {
 		this.endPoint = endPoint;
@@ -145,7 +145,7 @@ public class Region implements Serializable {
 	/**
 	 * Get the isActive.
 	 *
-	 * @return the isActive
+	 * @return isActive
 	 */
 	public Boolean getIsActive() {
 		return isActive;
@@ -154,7 +154,7 @@ public class Region implements Serializable {
 	/**
 	 * Set the isActive.
 	 *
-	 * @param isActive -the isActive to set
+	 * @param isActive - the isActive to set
 	 */
 	public void setIsActive(Boolean isActive) {
 		this.isActive = isActive;
@@ -163,7 +163,7 @@ public class Region implements Serializable {
 	/**
 	 * Get the status.
 	 *
-	 * @return the status
+	 * @return status
 	 */
 	public Boolean getStatus() {
 		return status;
@@ -172,7 +172,7 @@ public class Region implements Serializable {
 	/**
 	 * Set the status.
 	 *
-	 * @param status -the status to set
+	 * @param status - the status to set
 	 */
 	public void setStatus(Boolean status) {
 		this.status = status;
@@ -181,7 +181,7 @@ public class Region implements Serializable {
 	/**
 	 * Get the version.
 	 *
-	 * @return the version
+	 * @return version
 	 */
 	public Long getVersion() {
 		return version;
@@ -190,7 +190,7 @@ public class Region implements Serializable {
 	/**
 	 * Set the version.
 	 *
-	 * @param version -the version to set
+	 * @param version - the version to set
 	 */
 	public void setVersion(Long version) {
 		this.version = version;
@@ -199,7 +199,7 @@ public class Region implements Serializable {
 	/**
 	 * Get the createdBy.
 	 *
-	 * @return the createdBy
+	 * @return createdBy
 	 */
 	public User getCreatedBy() {
 		return createdBy;
@@ -208,7 +208,7 @@ public class Region implements Serializable {
 	/**
 	 * Set the createdBy.
 	 *
-	 * @param createdBy -the createdBy to set
+	 * @param createdBy - the createdBy to set
 	 */
 	public void setCreatedBy(User createdBy) {
 		this.createdBy = createdBy;
@@ -217,7 +217,7 @@ public class Region implements Serializable {
 	/**
 	 * Get the updatedBy.
 	 *
-	 * @return the updatedBy
+	 * @return updatedBy
 	 */
 	public User getUpdatedBy() {
 		return updatedBy;
@@ -226,7 +226,7 @@ public class Region implements Serializable {
 	/**
 	 * Set the updatedBy.
 	 *
-	 * @param updatedBy -the updatedBy to set
+	 * @param updatedBy - the updatedBy to set
 	 */
 	public void setUpdatedBy(User updatedBy) {
 		this.updatedBy = updatedBy;
@@ -235,7 +235,7 @@ public class Region implements Serializable {
 	/**
 	 * Get the createdDateTime.
 	 *
-	 * @return the createdDateTime
+	 * @return createdDateTime
 	 */
 	public DateTime getCreatedDateTime() {
 		return createdDateTime;
@@ -244,7 +244,7 @@ public class Region implements Serializable {
 	/**
 	 * Set the createdDateTime.
 	 *
-	 * @param createdDateTime -the createdDateTime to set
+	 * @param createdDateTime - the createdDateTime to set
 	 */
 	public void setCreatedDateTime(DateTime createdDateTime) {
 		this.createdDateTime = createdDateTime;
@@ -253,7 +253,7 @@ public class Region implements Serializable {
 	/**
 	 * Get the updatedDateTime.
 	 *
-	 * @return the updatedDateTime
+	 * @return updatedDateTime
 	 */
 	public DateTime getUpdatedDateTime() {
 		return updatedDateTime;
@@ -262,7 +262,7 @@ public class Region implements Serializable {
 	/**
 	 * Set the updatedDateTime.
 	 *
-	 * @param updatedDateTime -the updatedDateTime to set
+	 * @param updatedDateTime - the updatedDateTime to set
 	 */
 	public void setUpdatedDateTime(DateTime updatedDateTime) {
 		this.updatedDateTime = updatedDateTime;
