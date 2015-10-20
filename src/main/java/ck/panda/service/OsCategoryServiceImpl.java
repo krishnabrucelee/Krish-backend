@@ -34,23 +34,21 @@ public class OsCategoryServiceImpl implements OsCategoryService {
         return oscategoryrepository.save(oscategory);
     }
 
-    /** No need of implementation. */
     @Override
     public void delete(OsCategory oscategory) throws Exception {
+        oscategoryrepository.delete(oscategory);
     }
 
-    /** No need of implementation. */
     @Override
     public void delete(Long id) throws Exception {
+        oscategoryrepository.delete(id);
     }
 
-    /** No need of implementation. */
     @Override
     public OsCategory find(Long id) throws Exception {
-        return null;
+        return oscategoryrepository.findOne(id);
     }
 
-    /** No need of implementation. */
     @Override
     public Page<OsCategory> findAll(PagingAndSorting pagingAndSorting) throws Exception {
         return null;

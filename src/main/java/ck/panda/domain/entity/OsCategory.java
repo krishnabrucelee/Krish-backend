@@ -5,16 +5,26 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Version;
 import javax.validation.constraints.Size;
 import org.joda.time.DateTime;
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
 
 /**
- * OS category entity data pull from cloud database for template creation and instance creation page.
+ * OS category purpose is to create which category of operation system you want when creating the template.
+ * Get the OS category list from cloud stack server and push into the application database
+ * When creating the template and instance fetch the OS category from application database
+ *
  */
+
 @Entity
-@Table(name = "ck_oscategory")
+@Table(name = "ck_os_category")
 @SuppressWarnings("serial")
 public class OsCategory implements Serializable {
 
@@ -33,9 +43,32 @@ public class OsCategory implements Serializable {
     @Column(name = "uuid")
     private String uuid;
 
+    /** Version attribute to handle optimistic locking. */
+    @Version
+    @Column(name = "version")
+    private Long version;
+
+    /** Created by user. */
+    @CreatedBy
+    @JoinColumn(name = "created_by", referencedColumnName = "id")
+    @OneToOne
+    private User createdBy;
+
+    /** Last updated by user. */
+    @LastModifiedBy
+    @JoinColumn(name = "updated_by", referencedColumnName = "id")
+    @OneToOne
+    private User updatedBy;
+
     /** Created date and time. */
     @CreatedDate
+    @Column(name = "created_date_time")
     private DateTime createdDateTime;
+
+    /** Last updated date and time. */
+    @LastModifiedDate
+    @Column(name = "updated_date_time")
+    private DateTime updatedDateTime;
 
     /**
      * @return id of the OS category
@@ -83,6 +116,51 @@ public class OsCategory implements Serializable {
     }
 
     /**
+     * @return version of the OS category
+     */
+    public Long getVersion() {
+        return version;
+    }
+
+    /**
+     * @param version
+     * the OS category version to set.
+     */
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    /**
+     * @return the createdBy
+     */
+    public User getCreatedBy() {
+        return createdBy;
+    }
+
+    /**
+     * @param createdBy
+     * the OS category createdBy to set.
+     */
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    /**
+     * @return the updatedBy
+     */
+    public User getUpdatedBy() {
+        return updatedBy;
+    }
+
+    /**
+     * @param updatedBy
+     * the OS category updatedBy to set.
+     */
+    public void setUpdatedBy(User updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    /**
      * @return the createdDateTime
      */
     public DateTime getCreatedDateTime() {
@@ -95,5 +173,20 @@ public class OsCategory implements Serializable {
      */
     public void setCreatedDateTime(DateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
+    }
+
+    /**
+     * @return the updatedDateTime
+     */
+    public DateTime getUpdatedDateTime() {
+        return updatedDateTime;
+    }
+
+    /**
+     * @param updatedDateTime
+     * the updatedDateTime to set.
+     */
+    public void setUpdatedDateTime(DateTime updatedDateTime) {
+        this.updatedDateTime = updatedDateTime;
     }
 }
