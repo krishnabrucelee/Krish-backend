@@ -1,7 +1,6 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,65 +8,45 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Version;
 import javax.validation.constraints.Size;
-
 import org.joda.time.DateTime;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.annotation.Version;
 
 /**
- * A zone is the second largest organizational unit within a CloudStack
- * deployment. A zone typically corresponds to a single datacenter, although it
- * is permissible to have multiple zones in a datacenter. The benefit of
- * organizing infrastructure into zones is to provide physical isolation and
- * redundancy.
+ * OS category purpose is to create which category of operation system you want when creating the template.
+ * Get the OS category list from cloud stack server and push into the application database
+ * When creating the template and instance fetch the OS category from application database
+ *
  */
-@Entity
-@Table(name = "ck_zone")
-@SuppressWarnings("serial")
-public class Zone implements Serializable {
 
-    /** Id of the Zone. */
+@Entity
+@Table(name = "ck_os_category")
+@SuppressWarnings("serial")
+public class OsCategory implements Serializable {
+
+    /** Id of the OS category. */
     @Id
     @GeneratedValue
     @Column(name = "id")
     private Long id;
 
-    /** Name of the Zone. */
-    @Size(min = 4, max = 20)
+    /** Name of the OS category. */
+    @Size(min = 4, max = 25)
     @Column(name = "name", nullable = false)
     private String name;
 
-    /** Unique id for the Zone. */
+    /** Unique id for the OS category. */
     @Column(name = "uuid")
     private String uuid;
-
-    /** id for the Domain. */
-    //@OneToMany(mappedBy = "domain")
-    @Column(name = "domain_id")
-    private Long domainId;
-
-    /** id for the Region. */
-    //@OneToOne
-    //@JoinColumn(name = "region_id", referencedColumnName = "id")
-    @Column(name = "region_id")
-    private Long regionId;
-
-    /** IsActive attribute to verify Active or Inactive. */
-    @Column(name = "is_active")
-    private Boolean isActive;
 
     /** Version attribute to handle optimistic locking. */
     @Version
     @Column(name = "version")
     private Long version;
-
-    /** Status attribute to verify status of the zone. */
-    @Column(name = "status")
-    private Boolean status;
 
     /** Created by user. */
     @CreatedBy
@@ -83,14 +62,16 @@ public class Zone implements Serializable {
 
     /** Created date and time. */
     @CreatedDate
+    @Column(name = "created_date_time")
     private DateTime createdDateTime;
 
-    /** Last modified date and time. */
+    /** Last updated date and time. */
     @LastModifiedDate
-    private DateTime lastModifiedDateTime;
+    @Column(name = "updated_date_time")
+    private DateTime updatedDateTime;
 
     /**
-     * @return id the id of the zone
+     * @return id of the OS category
      */
     public Long getId() {
         return id;
@@ -98,14 +79,14 @@ public class Zone implements Serializable {
 
     /**
      * @param id
-     * the zone id to set.
+     * the OS category id to set.
      */
     public void setId(Long id) {
         this.id = id;
     }
 
     /**
-     * @return name the name of the zone.
+     * @return name of the OS category
      */
     public String getName() {
         return name;
@@ -113,14 +94,14 @@ public class Zone implements Serializable {
 
     /**
      * @param name
-     * the zone name to set.
+     * the OS category name to set.
      */
     public void setName(String name) {
         this.name = name;
     }
 
     /**
-     * @return the uuid
+     * @return UUID of the OS category
      */
     public String getUuid() {
         return uuid;
@@ -128,59 +109,14 @@ public class Zone implements Serializable {
 
     /**
      * @param uuid
-     * the zone uuid to set.
+     * the OS category UUID to set.
      */
     public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
     /**
-     * @return the domainId
-     */
-    public Long getDomainId() {
-        return domainId;
-    }
-
-    /**
-     * @param domainId
-     * the domain Id to set
-     */
-    public void setDomainId(Long domainId) {
-        this.domainId = domainId;
-    }
-
-    /**
-     * @return the regionId
-     */
-    public Long getRegionId() {
-        return regionId;
-    }
-
-    /**
-     * @param regionId
-     * the regionId to set.
-     */
-    public void setRegionId(Long regionId) {
-        this.regionId = regionId;
-    }
-
-    /**
-     * @return the isActive
-     */
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    /**
-     * @param isActive
-     * the isActive to set.
-     */
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
-    }
-
-    /**
-     * @return the version
+     * @return version of the OS category
      */
     public Long getVersion() {
         return version;
@@ -188,29 +124,14 @@ public class Zone implements Serializable {
 
     /**
      * @param version
-     * the version to set.
+     * the OS category version to set.
      */
     public void setVersion(Long version) {
         this.version = version;
     }
 
     /**
-     * @return the status
-     */
-    public Boolean getStatus() {
-        return status;
-    }
-
-    /**
-     * @param status
-     * the status to set.
-     */
-    public void setStatus(Boolean status) {
-        this.status = status;
-    }
-
-    /**
-     * @return the createdBy.
+     * @return the createdBy
      */
     public User getCreatedBy() {
         return createdBy;
@@ -218,7 +139,7 @@ public class Zone implements Serializable {
 
     /**
      * @param createdBy
-     * the createdBy to set.
+     * the OS category createdBy to set.
      */
     public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
@@ -233,7 +154,7 @@ public class Zone implements Serializable {
 
     /**
      * @param updatedBy
-     * the updatedBy to set.
+     * the OS category updatedBy to set.
      */
     public void setUpdatedBy(User updatedBy) {
         this.updatedBy = updatedBy;
@@ -255,18 +176,17 @@ public class Zone implements Serializable {
     }
 
     /**
-     * @return the lastModifiedDateTime
+     * @return the updatedDateTime
      */
-    public DateTime getLastModifiedDateTime() {
-        return lastModifiedDateTime;
+    public DateTime getUpdatedDateTime() {
+        return updatedDateTime;
     }
 
     /**
-     * @param lastModifiedDateTime
-     * the lastModifiedDateTime to set.
+     * @param updatedDateTime
+     * the updatedDateTime to set.
      */
-    public void setLastModifiedDateTime(DateTime lastModifiedDateTime) {
-        this.lastModifiedDateTime = lastModifiedDateTime;
+    public void setUpdatedDateTime(DateTime updatedDateTime) {
+        this.updatedDateTime = updatedDateTime;
     }
-
 }
