@@ -50,7 +50,6 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Role update(Role role) throws Exception {
-
         Errors errors = validator.rejectIfNullEntity("role", role);
         errors = validator.validateEntity(role, errors);
 
@@ -93,7 +92,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public List<Role> findAll() throws Exception {
-               return null;
+        return (List<Role>) roleRepo.findAll();
     }
 
 }

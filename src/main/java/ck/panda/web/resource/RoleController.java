@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -20,6 +19,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Role;
+import ck.panda.service.DepartmentService;
 import ck.panda.service.RoleService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -41,7 +41,6 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Role.", response = Role.class)
     @Override
     public Role create(@RequestBody Role role) throws Exception {
-        System.out.println("------------------------------------------");
         return roleService.save(role);
     }
 
@@ -72,8 +71,8 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
         return pageResponse.getContent();
     }
 
-    @Override
-    public void testMethod() throws Exception {
-        roleService.findAll();
-    }
+	@Override
+	public void testMethod() throws Exception {
+
+	}
 }

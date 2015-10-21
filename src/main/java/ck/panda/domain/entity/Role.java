@@ -60,23 +60,25 @@ public class Role implements Serializable {
 
     /** Created by user. */
     @CreatedBy
-    @JoinColumn(name = "created_user_id", referencedColumnName = "id")
+    @JoinColumn(name = "created_by", referencedColumnName = "id")
     @OneToOne
     private User createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @JoinColumn(name = "updated_user_id", referencedColumnName = "id")
+    @JoinColumn(name = "updated_by", referencedColumnName = "id")
     @OneToOne
     private User updatedBy;
 
     /** Created date and time. */
     @CreatedDate
+    @Column(name = "created_date_time")
     private DateTime createdDateTime;
 
-    /** Last modified date and time. */
+    /** Last updated date and time. */
     @LastModifiedDate
-    private DateTime lastModifiedDateTime;
+    @Column(name = "updated_date_time")
+    private DateTime updatedDateTime;
 
     /**
      * Default constructor.
@@ -224,18 +226,18 @@ public class Role implements Serializable {
     }
 
     /**
-     * Get the lastModifiedDateTime.
-     * @return lastModifiedDateTime
+     * Get the updatedDateTime.
+     * @return updatedDateTime
      */
     public DateTime getLastModifiedDateTime() {
-        return lastModifiedDateTime;
+        return updatedDateTime;
     }
 
     /**
-     * Set the lastModifiedDateTime.
-     * @param lastModifiedDateTime - the DateTime to set
+     * Set the updatedDateTime.
+     * @param updatedDateTime - the DateTime to set
      */
-    public void setLastModifiedDateTime(DateTime lastModifiedDateTime) {
-        this.lastModifiedDateTime = lastModifiedDateTime;
+    public void setLastModifiedDateTime(DateTime updatedDateTime) {
+        this.updatedDateTime = updatedDateTime;
     }
 }
