@@ -7,7 +7,7 @@ import ck.panda.util.domain.CRUDService;
 
 /**
  * Service interface for Zone entity.
- *s
+ *
  */
 @Service
 public interface ZoneService extends CRUDService<Zone> {
