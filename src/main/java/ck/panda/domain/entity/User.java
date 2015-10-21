@@ -13,6 +13,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
+
+import org.joda.time.DateTime;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 
@@ -70,14 +72,14 @@ public class User {
     private Long version;
 
     /** Created date and time. */
-    @Column(name = "create_date_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_date_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdDateTime;
+    private DateTime createdDateTime;
 
     /** Last modified date and time. */
-    @Column(name = "last_modified_date_time")
+    @Column(name = "updated_date_time")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date lastModifiedDateTime;
+    private DateTime updatedDateTime;
 
     /** Created by user. */
     @CreatedBy
@@ -294,7 +296,7 @@ public class User {
      *
      * @return the createdDateTime.
      */
-    public Date getCreatedDateTime() {
+    public DateTime getCreatedDateTime() {
         return createdDateTime;
     }
 
@@ -303,26 +305,26 @@ public class User {
      *
      * @param createdDateTime - the createdDateTime to set.
      */
-    public void setCreatedDateTime(Date createdDateTime) {
+    public void setCreatedDateTime(DateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
     }
 
     /**
-     * Get the lastModifiedDateTime.
+     * Get the updatedDateTime.
      *
-     * @return the lastModifiedDateTime.
+     * @return the updatedDateTime.
      */
-    public Date getLastModifiedDateTime() {
-        return lastModifiedDateTime;
+    public DateTime getUpdatedDateTime() {
+        return updatedDateTime;
     }
 
     /**
-     * Set the lastModifiedDateTime.
+     * Set the updatedDateTime.
      *
-     * @param lastModifiedDateTime - the lastModifiedDateTime to set.
+     * @param updatedDateTime - the updatedDateTime to set.
      */
-    public void setLastModifiedDateTime(Date lastModifiedDateTime) {
-        this.lastModifiedDateTime = lastModifiedDateTime;
+    public void setUpdatedDateTime(DateTime updatedDateTime) {
+        this.updatedDateTime = updatedDateTime;
     }
 
     /**
