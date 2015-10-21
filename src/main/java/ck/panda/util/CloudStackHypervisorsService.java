@@ -40,9 +40,7 @@ public class CloudStackHypervisorsService {
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("listHypervisors", optional);
         arguments.add(new NameValuePair("response", response));
-
         String responseDocument = server.request(arguments);
-
         return  responseDocument;
     }
 }
