@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- *
+ * CloudStack Zone service for cloudStack connectivity with the Cloud Stack server.
  *
  */
 @Service
@@ -24,7 +24,6 @@ public class CloudStackZoneService {
     public void setServer(CloudStackServer server) {
         this.server = server;
     }
-
 
    /* *//**
      * Creates a Zone.
@@ -107,7 +106,6 @@ public class CloudStackZoneService {
                 = server.getDefaultQuery("listZones", optional);
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
-
         return  responseDocument;
     }
 
@@ -134,7 +132,6 @@ public class CloudStackZoneService {
         return (DedicateZoneResponse) (responseDocument);
     }
 
-
     *//**
      * Release dedication of zone.
      *
@@ -153,8 +150,6 @@ public class CloudStackZoneService {
 
         return (ReleaseDedicatedZoneResponse) (responseDocument);
     }
-
-
 
     *//**
      * List dedicated zones.

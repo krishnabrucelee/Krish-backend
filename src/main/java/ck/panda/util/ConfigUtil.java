@@ -14,8 +14,6 @@ import ck.panda.util.error.exception.EntityNotFoundException;
 /**
  * This class acts as intermediate between cloudstack and cloudstack configuration repository.
  *
- * @author assistanz
- *
  */
 
 @Service

@@ -8,15 +8,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.Region;
 import ck.panda.domain.entity.Zone;
 import ck.panda.util.CloudStackDomainService;
+import ck.panda.util.CloudStackRegionService;
 import ck.panda.util.CloudStackZoneService;
 import ck.panda.util.error.exception.ApplicationException;
 
 /**
  * We have to sync up with cloudstack server for the following data
  *
- * 1. Zone
+ * 1. Region
  * 2. Domain
  * 3. Region
  * 4. Template
@@ -43,24 +45,37 @@ public class SyncServiceImpl  implements SyncService {
     @Autowired
     private CloudStackDomainService csdomain;
 
-    /** ZoneSerivce for listing zones. */
+    /** RegionSerivce for listing Regions. */
     @Autowired
     private ZoneService zoneService;
 
-    /** CloudStackZoneService for zone connectivity with cloudstack. */
+    /** CloudStackRegionService for Region connectivity with cloudstack. */
+
     @Autowired
     private CloudStackZoneService csZone;
 
+    /** RegionSerivce for listing Regions. */
+    @Autowired
+    private RegionService RegionService;
+
+    /** CloudStackRegionService for Region connectivity with cloudstack. */
+    @Autowired
+    private CloudStackRegionService csRegion;
+
     /**
-     * Sync call for synchronization list of zone, domain, region. template, hypervisor
+     * Sync call for synchronization list of Region, domain, region. template, hypervisor
      * @throws Exception unhandled errors.
      */
     public void sync() throws Exception {
 
         //1. Sync Domain entity
         this.syncDomain();
+
+      //2. Sync Region entity
+        this.syncRegion();
+
+      //3. Sync Zone entity
         this.syncZone();
-        //2. Sync Zone entity
 
     }
     /**
@@ -106,6 +121,7 @@ public class SyncServiceImpl  implements SyncService {
         }
     }
 
+
     /**
      * Sync with Cloud Server Zone.
      * @throws ApplicationException unhandled application errors.
@@ -121,21 +137,21 @@ public class SyncServiceImpl  implements SyncService {
         List<Zone> appZoneList = zoneService.findAll();
 
         // 3. Iterate application domain list
-        for (Zone zone: appZoneList) {
+        for (Zone Zone: appZoneList) {
              //3.1 Find the corresponding CS server domain object by finding it in a hash using uuid
-            if (csZoneMap.containsKey(zone.getUuid())) {
-                Zone csZone = csZoneMap.get(zone.getUuid());
+            if (csZoneMap.containsKey(Zone.getUuid())) {
+                Zone csZone = csZoneMap.get(Zone.getUuid());
 
-                zone.setName(csZone.getName());
+                Zone.setName(csZone.getName());
 
                 //3.2 If found, update the domain object in app db
-                zoneService.update(zone);
+                zoneService.update(Zone);
 
                 //3.3 Remove once updated, so that we can have the list of cs domain which is not added in the app
-                csZoneMap.remove(zone.getUuid());
+                csZoneMap.remove(Zone.getUuid());
             }
             else {
-                zoneService.delete(zone);
+                zoneService.delete(Zone);
                 //3.2 If not found, delete it from app db
                 //TODO clarify the business requirement, since it has impact in the application if it is used
                 //TODO clarify is this a soft or hard delete
@@ -145,6 +161,49 @@ public class SyncServiceImpl  implements SyncService {
         //add it to app db
         for (String key: csZoneMap.keySet()) {
             zoneService.save(csZoneMap.get(key));
+        }
+    }
+
+    /**
+     * Sync with Cloud Server Region.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    private void syncRegion() throws ApplicationException, Exception {
+
+        //1. Get all the domain objects from CS server as hash
+        List<Region> csRegionList = RegionService.findAllFromCSServer();
+        HashMap<String, Region> csRegionMap = (HashMap<String, Region>) Region.convert(csRegionList);
+
+        //2. Get all the domain objects from application
+        List<Region> appRegionList = RegionService.findAll();
+
+        // 3. Iterate application domain list
+        for (Region Region: appRegionList) {
+             //3.1 Find the corresponding CS server domain object by finding it in a hash using uuid
+            if (csRegionMap.containsKey(Region.getUuid())) {
+                Region csRegion = csRegionMap.get(Region.getName());
+
+                Region.setName(csRegion.getName());
+                Region.setEndPoint(csRegion.getEndPoint());
+
+                //3.2 If found, update the domain object in app db
+                RegionService.update(Region);
+
+                //3.3 Remove once updated, so that we can have the list of cs domain which is not added in the app
+                csRegionMap.remove(Region.getName());
+            }
+            else {
+                RegionService.delete(Region);
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete
+            }
+        }
+        //4. Get the remaining list of cs server hash domain object, then iterate and
+        //add it to app db
+        for (String key: csRegionMap.keySet()) {
+            RegionService.save(csRegionMap.get(key));
         }
     }
 }

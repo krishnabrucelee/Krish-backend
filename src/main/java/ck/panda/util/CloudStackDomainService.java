@@ -9,14 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- *
- * @author Krishna <krishnakumar@assistanz.com>
+ * CloudStack Domain service for cloudStack server connectivity with domain.
  *
  */
 @Service
 public class CloudStackDomainService {
 
-	@Autowired
+    @Autowired
     private CloudStackServer server;
 
     public void setServer(CloudStackServer server) {
@@ -38,9 +37,7 @@ public class CloudStackDomainService {
                 = server.getDefaultQuery("createDomain", optional);
         arguments.add(new NameValuePair("name", domainName));
         arguments.add(new NameValuePair("response", response));
-
         String responseDocument = server.request(arguments);
-
         return responseDocument;
     }
 
@@ -59,9 +56,7 @@ public class CloudStackDomainService {
                 = server.getDefaultQuery("updateDomain", optional);
         arguments.add(new NameValuePair("id", domainId));
         arguments.add(new NameValuePair("response", response));
-
         String responseDocument = server.request(arguments);
-
         return responseDocument;
     }
 
@@ -79,9 +74,7 @@ public class CloudStackDomainService {
                 = server.getDefaultQuery("deleteDomain", null);
         arguments.add(new NameValuePair("id", domainId));
         arguments.add(new NameValuePair("response", response));
-
         String responseDocument = server.request(arguments);
-
         return responseDocument;
     }
 

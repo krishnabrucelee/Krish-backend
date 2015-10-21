@@ -62,8 +62,7 @@ public class DomainServiceImpl implements DomainService {
 
   @Override
   public List<Domain> findAll() throws Exception {
-    // TODO Auto-generated method stub
-    return null;
+      return (List<Domain>) domainRepo.findAll();
   }
 
 @Override
