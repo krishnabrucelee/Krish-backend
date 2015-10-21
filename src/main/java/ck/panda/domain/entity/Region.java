@@ -14,6 +14,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
+
+import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,6 +44,7 @@ public class Region implements Serializable {
     private Long id;
 
     /** Unique ID from Cloud Stack. */
+    @NotEmpty
     @Column(name = "uuid")
     private String uuid;
 
@@ -59,7 +62,7 @@ public class Region implements Serializable {
 
     /** Status of the region. */
     @Column(name = "status")
-    private Boolean status;
+    private String status;
 
     /** Version attribute to handle optimistic locking. */
     @Version
@@ -179,20 +182,16 @@ public class Region implements Serializable {
     }
 
     /**
-     * Get the status.
-     *
-     * @return status
+     * @return the status
      */
-    public Boolean getStatus() {
+    public String getStatus() {
         return status;
     }
 
     /**
-     * Set the status.
-     *
-     * @param status - the status to set
+     * @param status the status to set
      */
-    public void setStatus(Boolean status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 

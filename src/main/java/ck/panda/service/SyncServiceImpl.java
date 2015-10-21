@@ -155,25 +155,25 @@ public class SyncServiceImpl  implements SyncService {
      */
     private void syncZone() throws ApplicationException, Exception {
 
-        //1. Get all the domain objects from CS server as hash
+        //1. Get all the zone objects from CS server as hash
         List<Zone> csZoneList = zoneService.findAllFromCSServer();
         HashMap<String, Zone> csZoneMap = (HashMap<String, Zone>) Zone.convert(csZoneList);
 
-        //2. Get all the domain objects from application
+        //2. Get all the zone objects from application
         List<Zone> appZoneList = zoneService.findAll();
 
         // 3. Iterate application domain list
         for (Zone zone: appZoneList) {
-             //3.1 Find the corresponding CS server domain object by finding it in a hash using uuid
+             //3.1 Find the corresponding CS server zone object by finding it in a hash using uuid
             if (csZoneMap.containsKey(zone.getUuid())) {
                 Zone csZone = csZoneMap.get(zone.getUuid());
 
                 zone.setName(csZone.getName());
 
-                //3.2 If found, update the domain object in app db
+                //3.2 If found, update the zone object in app db
                 zoneService.update(zone);
 
-                //3.3 Remove once updated, so that we can have the list of cs domain which is not added in the app
+                //3.3 Remove once updated, so that we can have the list of cs zone which is not added in the app
                 csZoneMap.remove(zone.getUuid());
             } else {
                 zoneService.delete(zone);
@@ -182,7 +182,7 @@ public class SyncServiceImpl  implements SyncService {
                 //TODO clarify is this a soft or hard delete
             }
         }
-        //4. Get the remaining list of cs server hash domain object, then iterate and
+        //4. Get the remaining list of cs server hash zone object, then iterate and
         //add it to app db
         for (String key: csZoneMap.keySet()) {
             zoneService.save(csZoneMap.get(key));
@@ -196,26 +196,26 @@ public class SyncServiceImpl  implements SyncService {
      */
     private void syncRegion() throws ApplicationException, Exception {
 
-        //1. Get all the domain objects from CS server as hash
+        //1. Get all the region objects from CS server as hash
         List<Region> csRegionList = regionService.findAllFromCSServer();
         HashMap<String, Region> csRegionMap = (HashMap<String, Region>) Region.convert(csRegionList);
 
-        //2. Get all the domain objects from application
+        //2. Get all the region objects from application
         List<Region> appRegionList = regionService.findAll();
 
         // 3. Iterate application domain list
         for (Region region: appRegionList) {
-             //3.1 Find the corresponding CS server domain object by finding it in a hash using uuid
+             //3.1 Find the corresponding CS server region object by finding it in a hash using uuid
             if (csRegionMap.containsKey(region.getName())) {
                 Region csRegion = csRegionMap.get(region.getName());
 
                 region.setName(csRegion.getName());
                 region.setEndPoint(csRegion.getEndPoint());
 
-                //3.2 If found, update the domain object in app db
+                //3.2 If found, update the region object in app db
                 regionService.update(region);
 
-                //3.3 Remove once updated, so that we can have the list of cs domain which is not added in the app
+                //3.3 Remove once updated, so that we can have the list of cs region which is not added in the app
                 csRegionMap.remove(region.getName());
             } else {
                 regionService.delete(region);
@@ -224,7 +224,7 @@ public class SyncServiceImpl  implements SyncService {
                 //TODO clarify is this a soft or hard delete
             }
         }
-        //4. Get the remaining list of cs server hash domain object, then iterate and
+        //4. Get the remaining list of cs server hash region object, then iterate and
         //add it to app db
         for (String key: csRegionMap.keySet()) {
             regionService.save(csRegionMap.get(key));
@@ -238,14 +238,14 @@ public class SyncServiceImpl  implements SyncService {
      */
     private void syncHypervisor() throws ApplicationException, Exception {
 
-        //1. Get all the domain objects from CS server as hash
+        //1. Get all the hypervisor objects from CS server as hash
         List<Hypervisor> csHypervisorList = hypervisorService.findAllFromCSServer();
         HashMap<String, Hypervisor> csHypervisorMap = (HashMap<String, Hypervisor>) Hypervisor.convert(csHypervisorList);
 
-        //2. Get all the domain objects from application
+        //2. Get all the hypervisor objects from application
         List<Hypervisor> appHypervisorList = hypervisorService.findAll();
 
-        // 3. Iterate application domain list
+        // 3. Iterate application hypervisor list
         for (Hypervisor hypervisor: appHypervisorList) {
 
             //3.1 Find the corresponding CS server domain object by finding it in a hash using uuid
@@ -256,7 +256,7 @@ public class SyncServiceImpl  implements SyncService {
                 //3.2 If found, update the domain object in app db
                 hypervisorService.update(hypervisor);
 
-                //3.3 Remove once updated, so that we can have the list of cs domain which is not added in the app
+                //3.3 Remove once updated, so that we can have the list of cs hypervisor which is not added in the app
                 csHypervisorMap.remove(hypervisor.getName());
             } else {
                 hypervisorService.delete(hypervisor);
@@ -265,7 +265,7 @@ public class SyncServiceImpl  implements SyncService {
                 //TODO clarify is this a soft or hard delete
             }
         }
-        //4. Get the remaining list of cs server hash domain object, then iterate and
+        //4. Get the remaining list of cs server hash hypervisor object, then iterate and
         //add it to app db
         for (String key: csHypervisorMap.keySet()) {
             hypervisorService.save(csHypervisorMap.get(key));
@@ -279,25 +279,25 @@ public class SyncServiceImpl  implements SyncService {
      */
     private void syncOsCategory() throws ApplicationException, Exception {
 
-        //1. Get all the domain objects from CS server as hash
+        //1. Get all the oscategory objects from CS server as hash
         List<OsCategory> csOsCategoryList = osCategoryService.findAllFromCSServer();
         HashMap<String, OsCategory> csOsCategoryMap = (HashMap<String, OsCategory>) OsCategory.convert(csOsCategoryList);
 
-        //2. Get all the domain objects from application
+        //2. Get all the oscategory objects from application
         List<OsCategory> appOsCategoryList = osCategoryService.findAll();
 
         // 3. Iterate application domain list
         for (OsCategory osCategory: appOsCategoryList) {
 
-            //3.1 Find the corresponding CS server domain object by finding it in a hash using uuid
+            //3.1 Find the corresponding CS server oscategory object by finding it in a hash using uuid
             if (csOsCategoryMap.containsKey(osCategory.getUuid())) {
                 OsCategory csOsCategory = csOsCategoryMap.get(osCategory.getUuid());
 
                 osCategory.setName(csOsCategory.getName());
-                //3.2 If found, update the domain object in app db
+                //3.2 If found, update the oscategory object in app db
                 osCategoryService.update(osCategory);
 
-                //3.3 Remove once updated, so that we can have the list of cs domain which is not added in the app
+                //3.3 Remove once updated, so that we can have the list of cs oscategory which is not added in the app
                 csOsCategoryMap.remove(osCategory.getUuid());
             } else {
                 osCategoryService.delete(osCategory);
@@ -306,7 +306,7 @@ public class SyncServiceImpl  implements SyncService {
                 //TODO clarify is this a soft or hard delete
             }
         }
-        //4. Get the remaining list of cs server hash domain object, then iterate and
+        //4. Get the remaining list of cs server hash oscategory object, then iterate and
         //add it to app db
         for (String key: csOsCategoryMap.keySet()) {
             osCategoryService.save(csOsCategoryMap.get(key));
