@@ -28,6 +28,7 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
     @Autowired
     private CloudStackServer server;
 
+    /** domain service reference. */
     @Autowired
     private DomainService domainservice;
 
@@ -35,6 +36,7 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
     @Autowired
     private CloudStackConfigurationRepository configRepo;
 
+    /** synchronization with cloudstack. */
     @Autowired
     private SyncService syncservice;
 

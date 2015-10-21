@@ -15,75 +15,24 @@ import org.springframework.stereotype.Service;
 @Service
 public class CloudStackDomainService {
 
+    /** Cloudstack server for connectivity. */
     @Autowired
     private CloudStackServer server;
 
+    /** sets api key , secret key and url.
+     * @param server sets these values.
+     */
     public void setServer(CloudStackServer server) {
         this.server = server;
     }
 
     /**
-     * Creates a domain
+     * Lists domains and provides detailed information for listed domains.
      *
-     * @param domainName creates domain with this name
-     * @param optional
-     * @return
-     * @throws Exception
-     */
-    public String createDomain(String domainName, String response,
-            HashMap<String, String> optional) throws Exception {
-
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("createDomain", optional);
-        arguments.add(new NameValuePair("name", domainName));
-        arguments.add(new NameValuePair("response", response));
-        String responseDocument = server.request(arguments);
-        return responseDocument;
-    }
-
-    /**
-     * Updates a domain with a new name
-     *
-     * @param domainId The ID of domain to update
-     * @param optional
-     * @return
-     * @throws Exception
-     */
-    public String updateDomain(String domainId, String response,
-            HashMap<String, String> optional) throws Exception {
-
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("updateDomain", optional);
-        arguments.add(new NameValuePair("id", domainId));
-        arguments.add(new NameValuePair("response", response));
-        String responseDocument = server.request(arguments);
-        return responseDocument;
-    }
-
-    /**
-     * Deletes a specified domain
-     *
-     * @param domainId The ID of domain to delete
-     * @return
-     * @throws Exception
-     */
-    public String deleteDomain(String domainId, String response)
-            throws Exception {
-
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("deleteDomain", null);
-        arguments.add(new NameValuePair("id", domainId));
-        arguments.add(new NameValuePair("response", response));
-        String responseDocument = server.request(arguments);
-        return responseDocument;
-    }
-
-    /**
-     * Lists domains and provides detailed information for listed domains
-     *
-     * @param optional
-     * @return
-     * @throws Exception
+     * @param optional values from cloudstack.
+     * @param response json or xml
+     * @return response Document.
+     * @throws Exception unhandled errors.
      */
     public String listDomains(String response,
             HashMap<String, String> optional) throws Exception {
@@ -91,30 +40,7 @@ public class CloudStackDomainService {
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("listDomains", optional);
         arguments.add(new NameValuePair("response", response));
-
         String responseDocument = server.request(arguments);
-
         return responseDocument;
     }
-
-//    /**
-//     * Lists all children domains belonging to a specified domain
-//     *
-//     * @param optional
-//     * @return
-//     * @throws Exception
-//     */
-//    public String listDomainChildren(String response,
-//            HashMap<String, String> optional) throws Exception {
-//
-//        LinkedList<NameValuePair> arguments
-//                = server.getDefaultQuery("listDomainChildren", optional);
-//        arguments.add(new NameValuePair("response", response));
-//
-//        String responseDocument = server.makeRequest(arguments);
-//
-//        return responseDocument;
-//    }
-
-
 }

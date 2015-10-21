@@ -40,8 +40,7 @@ public class ConfigUtil {
         CloudStackConfiguration config = configRepo.findOne(id);
         if (config == null) {
             throw new EntityNotFoundException("config.not.found");
-        }
-        else {
+        } else {
             server.setServer(config.getApiURL(), config.getSecretKey(), config.getApiKey());
         }
         return server;

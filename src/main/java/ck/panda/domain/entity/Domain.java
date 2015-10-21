@@ -342,9 +342,9 @@ public class Domain {
   /**
    * Convert JSONObject to domain entity.
    *
-   * @param obj
-   * @return
-   * @throws JSONException
+   * @param object json object
+   * @return domain entity object.
+   * @throws JSONException handles json exception.
    */
   public static Domain convert(JSONObject object) throws JSONException {
       Domain domain = new Domain();
@@ -355,9 +355,10 @@ public class Domain {
   }
 
   /**
+   *Mapping entity object into list.
    *
-   * @param domainList
-   * @return
+   * @param domainList list of domains.
+   * @return domain map
    */
   public static Map<String, Domain> convert(List<Domain> domainList) {
       Map<String, Domain> domainMap = new HashMap<String, Domain>();

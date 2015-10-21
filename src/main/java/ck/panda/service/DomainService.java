@@ -15,6 +15,12 @@ import ck.panda.util.domain.CRUDService;
 @Service
 public interface DomainService extends CRUDService<Domain> {
 
+    /**
+     * to get list of domains from cloudstack server.
+     *
+     * @return domain list from server
+     * @throws Exception unhandled errors.
+     */
     List<Domain> findAllFromCSServer() throws Exception;
 }
 

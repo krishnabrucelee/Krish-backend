@@ -24,6 +24,7 @@ public class RegionServiceImpl implements RegionService {
     @Autowired
     private RegionRepository regionRepo;
 
+    /** For connectivity with cloudstack region. */
     @Autowired
     private CloudStackRegionService regionService;
 
