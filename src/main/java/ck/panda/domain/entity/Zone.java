@@ -290,7 +290,7 @@ public class Zone implements Serializable {
     }
 
     /**
-     *Mapping zone entity object into list.
+     * Mapping zone entity object into list.
      *
      * @param zoneList list of Zones
      * @return zone mapping values.

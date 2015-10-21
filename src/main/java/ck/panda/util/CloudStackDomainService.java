@@ -40,10 +40,7 @@ public class CloudStackDomainService {
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("listDomains", optional);
         arguments.add(new NameValuePair("response", response));
-
         String responseDocument = server.request(arguments);
-
         return responseDocument;
     }
-
 }
