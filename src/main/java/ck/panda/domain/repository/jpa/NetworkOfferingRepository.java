@@ -6,6 +6,6 @@ import ck.panda.domain.entity.NetworkOffering;
 /**
  * JPA repository for Zone entity.
  */
-public interface NetworkOfferingRepository extends PagingAndSortingRepository<NetworkOffering, Long>{
+public interface NetworkOfferingRepository extends PagingAndSortingRepository<NetworkOffering, Long> {
 
 }

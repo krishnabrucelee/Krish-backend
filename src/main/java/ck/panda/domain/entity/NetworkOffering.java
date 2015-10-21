@@ -1,10 +1,6 @@
-/**
- *
- */
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -21,15 +17,14 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 
 /**
- *The CloudStack administrator can create any number of custom network offerings, in addition to the default network
- *offerings provided by CloudStack. By creating multiple custom network offerings, you can set up your cloud to offer
- *different classes of service on a single multi-tenant physical network.
+ *The CloudStack administrator can create any number of custom network offerings, in addition to
+ *the default network offerings provided by CloudStack.
  */
 @Entity
-@Table(name = "ck_networkOffering")
+@Table(name = "ck_network_offering")
 @SuppressWarnings("serial")
 public class NetworkOffering implements Serializable {
-	/** Id of the NetworkOffering. */
+    /** Id of the NetworkOffering. */
     @Id
     @GeneratedValue
     @Column(name = "id")
@@ -94,116 +89,199 @@ public class NetworkOffering implements Serializable {
     @Column(name = "updated_date_time")
     private DateTime updatedDateTime;
 
-	public Long getId() {
-		return id;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    /**
+     * @return the uuid
+     */
+    public String getUuid() {
+        return uuid;
+    }
 
-	public String getUuid() {
-		return uuid;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	public void setUuid(String uuid) {
-		this.uuid = uuid;
-	}
+    /**
+     * @return the displayText
+     */
+    public String getDisplayText() {
+        return displayText;
+    }
 
-	public String getName() {
-		return name;
-	}
+    /**
+     * @return the guestIpType
+     */
+    public String getGuestIpType() {
+        return guestIpType;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @return the trafficType
+     */
+    public String getTrafficType() {
+        return trafficType;
+    }
 
-	public String getDisplayText() {
-		return displayText;
-	}
+    /**
+     * @return the supportedServices
+     */
+    public String getSupportedServices() {
+        return supportedServices;
+    }
 
-	public void setDisplayText(String displayText) {
-		this.displayText = displayText;
-	}
+    /**
+     * @return the isActive
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
 
-	public String getGuestIpType() {
-		return guestIpType;
-	}
+    /**
+     * @return the version
+     */
+    public Long getVersion() {
+        return version;
+    }
 
-	public void setGuestIpType(String guestIpType) {
-		this.guestIpType = guestIpType;
-	}
+    /**
+     * @return the status
+     */
+    public Boolean getStatus() {
+        return status;
+    }
 
-	public String getTrafficType() {
-		return trafficType;
-	}
+    /**
+     * @return the createdBy
+     */
+    public User getCreatedBy() {
+        return createdBy;
+    }
 
-	public void setTrafficType(String trafficType) {
-		this.trafficType = trafficType;
-	}
+    /**
+     * @return the updatedBy
+     */
+    public User getUpdatedBy() {
+        return updatedBy;
+    }
 
-	public String getSupportedServices() {
-		return supportedServices;
-	}
+    /**
+     * @return the createdDateTime
+     */
+    public DateTime getCreatedDateTime() {
+        return createdDateTime;
+    }
 
-	public void setSupportedServices(String supportedServices) {
-		this.supportedServices = supportedServices;
-	}
+    /**
+     * @return the updatedDateTime
+     */
+    public DateTime getUpdatedDateTime() {
+        return updatedDateTime;
+    }
 
-	public Boolean getIsActive() {
-		return isActive;
-	}
+    /**
+     * @param id the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setIsActive(Boolean isActive) {
-		this.isActive = isActive;
-	}
+    /**
+     * @param uuid the uuid to set
+     */
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
-	public Long getVersion() {
-		return version;
-	}
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setVersion(Long version) {
-		this.version = version;
-	}
+    /**
+     * @param displayText the displayText to set
+     */
+    public void setDisplayText(String displayText) {
+        this.displayText = displayText;
+    }
 
-	public Boolean getStatus() {
-		return status;
-	}
+    /**
+     * @param guestIpType the guestIpType to set
+     */
+    public void setGuestIpType(String guestIpType) {
+        this.guestIpType = guestIpType;
+    }
 
-	public void setStatus(Boolean status) {
-		this.status = status;
-	}
+    /**
+     * @param trafficType the trafficType to set
+     */
+    public void setTrafficType(String trafficType) {
+        this.trafficType = trafficType;
+    }
 
-	public User getCreatedBy() {
-		return createdBy;
-	}
+    /**
+     * @param supportedServices the supportedServices to set
+     */
+    public void setSupportedServices(String supportedServices) {
+        this.supportedServices = supportedServices;
+    }
 
-	public void setCreatedBy(User createdBy) {
-		this.createdBy = createdBy;
-	}
+    /**
+     * @param isActive the isActive to set
+     */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
 
-	public User getUpdatedBy() {
-		return updatedBy;
-	}
+    /**
+     * @param version the version to set
+     */
+    public void setVersion(Long version) {
+        this.version = version;
+    }
 
-	public void setUpdatedBy(User updatedBy) {
-		this.updatedBy = updatedBy;
-	}
+    /**
+     * @param status the status to set
+     */
+    public void setStatus(Boolean status) {
+        this.status = status;
+    }
 
-	public DateTime getCreatedDateTime() {
-		return createdDateTime;
-	}
+    /**
+     * @param createdBy the createdBy to set
+     */
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
+    }
 
-	public void setCreatedDateTime(DateTime createdDateTime) {
-		this.createdDateTime = createdDateTime;
-	}
+    /**
+     * @param updatedBy the updatedBy to set
+     */
+    public void setUpdatedBy(User updatedBy) {
+        this.updatedBy = updatedBy;
+    }
 
-	public DateTime getUpdatedDateTime() {
-		return updatedDateTime;
-	}
+    /**
+     * @param createdDateTime the createdDateTime to set
+     */
+    public void setCreatedDateTime(DateTime createdDateTime) {
+        this.createdDateTime = createdDateTime;
+    }
 
-	public void setUpdatedDateTime(DateTime updatedDateTime) {
-		this.updatedDateTime = updatedDateTime;
-	}
-
+    /**
+     * @param updatedDateTime the updatedDateTime to set
+     */
+    public void setUpdatedDateTime(DateTime updatedDateTime) {
+        this.updatedDateTime = updatedDateTime;
+    }
 }
