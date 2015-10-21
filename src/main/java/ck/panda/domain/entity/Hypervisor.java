@@ -66,6 +66,8 @@ public class Hypervisor implements Serializable {
     private DateTime updatedDateTime;
 
     /**
+     * Get the id.
+     *
      * @return the id.
      */
     public Long getId() {
@@ -73,6 +75,8 @@ public class Hypervisor implements Serializable {
     }
 
     /**
+     * Set the id.
+     *
      * @param id - the id to set.
      */
     public void setId(Long id) {
@@ -80,6 +84,8 @@ public class Hypervisor implements Serializable {
     }
 
     /**
+     * Get the name.
+     *
      * @return the name.
      */
     public String getName() {
@@ -87,6 +93,8 @@ public class Hypervisor implements Serializable {
     }
 
     /**
+     * Set the name.
+     *
      * @param name - the name to set.
      */
     public void setName(String name) {
@@ -94,6 +102,8 @@ public class Hypervisor implements Serializable {
     }
 
     /**
+     * Get the version.
+     *
      * @return the version.
      */
     public Long getVersion() {
@@ -101,6 +111,8 @@ public class Hypervisor implements Serializable {
     }
 
     /**
+     * Set the version.
+     *
      * @param version - the version to set.
      */
     public void setVersion(Long version) {
@@ -108,6 +120,8 @@ public class Hypervisor implements Serializable {
     }
 
     /**
+     * Get the createdBy.
+     *
      * @return the createdBy.
      */
     public User getCreatedBy() {
@@ -115,6 +129,8 @@ public class Hypervisor implements Serializable {
     }
 
     /**
+     * Set the createdBy.
+     *
      * @param createdBy - the createdBy to set.
      */
     public void setCreatedBy(User createdBy) {
@@ -122,6 +138,8 @@ public class Hypervisor implements Serializable {
     }
 
     /**
+     * Get the updatedBy.
+     *
      * @return the updatedBy.
      */
     public User getUpdatedBy() {
@@ -129,6 +147,8 @@ public class Hypervisor implements Serializable {
     }
 
     /**
+     * Set the updatedBy.
+     *
      * @param updatedBy - the updatedBy to set.
      */
     public void setUpdatedBy(User updatedBy) {
@@ -136,6 +156,8 @@ public class Hypervisor implements Serializable {
     }
 
     /**
+     * Get the createdDateTime.
+     *
      * @return the createdDateTime.
      */
     public DateTime getCreatedDateTime() {
@@ -143,6 +165,8 @@ public class Hypervisor implements Serializable {
     }
 
     /**
+     * Set the createdDateTime.
+     *
      * @param createdDateTime - the createdDateTime to set.
      */
     public void setCreatedDateTime(DateTime createdDateTime) {
@@ -150,6 +174,8 @@ public class Hypervisor implements Serializable {
     }
 
     /**
+     * Get the updatedDateTime.
+     *
      * @return the updatedDateTime.
      */
     public DateTime getUpdatedDateTime() {
@@ -157,6 +183,8 @@ public class Hypervisor implements Serializable {
     }
 
     /**
+     * Set the updatedDateTime.
+     *
      * @param updatedDateTime - the updatedDateTime to set.
      */
     public void setUpdatedDateTime(DateTime updatedDateTime) {
