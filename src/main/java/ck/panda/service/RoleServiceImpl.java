@@ -89,7 +89,6 @@ public class RoleServiceImpl implements RoleService {
         return roleRepo.findAll(pagingAndSorting.toPageRequest());
     }
 
-
     @Override
     public List<Role> findAll() throws Exception {
         return (List<Role>) roleRepo.findAll();

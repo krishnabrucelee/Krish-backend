@@ -19,7 +19,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Role;
-import ck.panda.service.DepartmentService;
 import ck.panda.service.RoleService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -64,15 +63,19 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
 
     @Override
     public List<Role> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-            @RequestParam Integer limit,HttpServletRequest request, HttpServletResponse response) throws Exception {
+            @RequestParam Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Role.class);
         Page<Role> pageResponse = roleService.findAll(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
 
-	@Override
-	public void testMethod() throws Exception {
+    /**
+     * Empty method implementation.
+     */
+    @Override
+    public void testMethod() throws Exception {
+        roleService.findAll();
+    }
 
-	}
 }

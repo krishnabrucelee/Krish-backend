@@ -10,6 +10,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Version;
 import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -18,11 +19,9 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.annotation.Version;
 
 /**
  * Roles are categorize the departments with different permissions.
- *
  * We restrict the user based on the permission and the permission assigned with Role
  *  and give access based on the assigned permissions.
  *
@@ -229,7 +228,7 @@ public class Role implements Serializable {
      * Get the updatedDateTime.
      * @return updatedDateTime
      */
-    public DateTime getLastModifiedDateTime() {
+    public DateTime getUpdatedDateTime() {
         return updatedDateTime;
     }
 
@@ -237,7 +236,8 @@ public class Role implements Serializable {
      * Set the updatedDateTime.
      * @param updatedDateTime - the DateTime to set
      */
-    public void setLastModifiedDateTime(DateTime updatedDateTime) {
+    public void setUpdatedDateTime(DateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
+
 }
