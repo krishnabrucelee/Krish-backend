@@ -93,6 +93,7 @@ public class User {
 
     /**
      * Get the id.
+     *
      * @return the id.
      */
     public Long getId() {
@@ -101,8 +102,8 @@ public class User {
 
     /**
      * Set the id.
-     * @param id
-     * the id to set.
+     *
+     * @param id - the id to set.
      */
     public void setId(Long id) {
         this.id = id;
@@ -110,6 +111,7 @@ public class User {
 
     /**
      * Get the userName.
+     *
      * @return the userName.
      */
     public String getUserName() {
@@ -118,8 +120,8 @@ public class User {
 
     /**
      * Set the userName.
-     * @param userName
-     * the userName to set.
+     *
+     * @param userName - the userName to set.
      */
     public void setUserName(String userName) {
         this.userName = userName;
@@ -127,6 +129,7 @@ public class User {
 
     /**
      * Get the password.
+     *
      * @return the password.
      */
     public String getPassword() {
@@ -135,8 +138,8 @@ public class User {
 
     /**
      * Set the password.
-     * @param password
-     * the password to set.
+     *
+     * @param password - the password to set.
      */
     public void setPassword(String password) {
         this.password = password;
@@ -144,6 +147,7 @@ public class User {
 
     /**
      * Get the role.
+     *
      * @return the role.
      */
     public Role getRole() {
@@ -152,8 +156,8 @@ public class User {
 
     /**
      * Set the role.
-     * @param role
-     * the role to set.
+     *
+     * @param role - the role to set.
      */
     public void setRole(Role role) {
         this.role = role;
@@ -161,6 +165,7 @@ public class User {
 
     /**
      * Get the email.
+     *
      * @return the email.
      */
     public String getEmail() {
@@ -169,8 +174,8 @@ public class User {
 
     /**
      * Set the email.
-     * @param email
-     * the email to set.
+     *
+     * @param email - the email to set.
      */
     public void setEmail(String email) {
         this.email = email;
@@ -178,6 +183,7 @@ public class User {
 
     /**
      * Get the userType.
+     *
      * @return the userType.
      */
     public UserType getUserType() {
@@ -186,8 +192,8 @@ public class User {
 
     /**
      * Set the userType.
-     * @param userType
-     * the userType to set.
+     *
+     * @param userType - the userType to set.
      */
     public void setUserType(UserType userType) {
         this.userType = userType;
@@ -195,6 +201,7 @@ public class User {
 
     /**
      * Get the name.
+     *
      * @return the name.
      */
     public String getName() {
@@ -203,8 +210,8 @@ public class User {
 
     /**
      * Set the name.
-     * @param name
-     * the name to set.
+     *
+     * @param name - the name to set.
      */
     public void setName(String name) {
         this.name = name;
@@ -212,6 +219,7 @@ public class User {
 
     /**
      * Get the uuid.
+     *
      * @return the uuid.
      */
     public String getUuid() {
@@ -220,8 +228,8 @@ public class User {
 
     /**
      * Set the uuid.
-     * @param uuid
-     * the uuid to set.
+     *
+     * @param uuid - the uuid to set.
      */
     public void setUuid(String uuid) {
         this.uuid = uuid;
@@ -229,6 +237,7 @@ public class User {
 
     /**
      * Get the status.
+     *
      * @return the status.
      */
     public String getStatus() {
@@ -237,8 +246,8 @@ public class User {
 
     /**
      * Set the status.
-     * @param status
-     * the status to set.
+     *
+     * @param status - the status to set.
      */
     public void setStatus(String status) {
         this.status = status;
@@ -246,6 +255,7 @@ public class User {
 
     /**
      * Get the isActive.
+     *
      * @return the isActive.
      */
     public Boolean getIsActive() {
@@ -254,8 +264,8 @@ public class User {
 
     /**
      * Set the isActive.
-     * @param isActive
-     * the isActive to set.
+     *
+     * @param isActive - the isActive to set.
      */
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
@@ -263,6 +273,7 @@ public class User {
 
     /**
      * Get the version.
+     *
      * @return the version.
      */
     public Long getVersion() {
@@ -271,8 +282,8 @@ public class User {
 
     /**
      * Set the version.
-     * @param version
-     * the version to set.
+     *
+     * @param version - the version to set.
      */
     public void setVersion(Long version) {
         this.version = version;
@@ -280,6 +291,7 @@ public class User {
 
     /**
      * Get the createdDateTime.
+     *
      * @return the createdDateTime.
      */
     public Date getCreatedDateTime() {
@@ -288,8 +300,8 @@ public class User {
 
     /**
      * Set the createdDateTime.
-     * @param createdDateTime
-     * the createdDateTime to set.
+     *
+     * @param createdDateTime - the createdDateTime to set.
      */
     public void setCreatedDateTime(Date createdDateTime) {
         this.createdDateTime = createdDateTime;
@@ -297,6 +309,7 @@ public class User {
 
     /**
      * Get the lastModifiedDateTime.
+     *
      * @return the lastModifiedDateTime.
      */
     public Date getLastModifiedDateTime() {
@@ -305,8 +318,8 @@ public class User {
 
     /**
      * Set the lastModifiedDateTime.
-     * @param lastModifiedDateTime
-     * the lastModifiedDateTime to set.
+     *
+     * @param lastModifiedDateTime - the lastModifiedDateTime to set.
      */
     public void setLastModifiedDateTime(Date lastModifiedDateTime) {
         this.lastModifiedDateTime = lastModifiedDateTime;
@@ -314,6 +327,7 @@ public class User {
 
     /**
      * Get the createdBy.
+     *
      * @return the createdBy.
      */
     public User getCreatedBy() {
@@ -322,8 +336,8 @@ public class User {
 
     /**
      * Set the createdBy.
-     * @param createdBy
-     * the createdBy to set.
+     *
+     * @param createdBy - the createdBy to set.
      */
     public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
@@ -331,6 +345,7 @@ public class User {
 
     /**
      * Get the updatedBy.
+     *
      * @return the updatedBy.
      */
     public User getUpdatedBy() {
@@ -339,8 +354,8 @@ public class User {
 
     /**
      * Set the updatedBy.
-     * @param updatedBy
-     * the updatedBy to set.
+     *
+     * @param updatedBy - the updatedBy to set.
      */
     public void setUpdatedBy(User updatedBy) {
         this.updatedBy = updatedBy;

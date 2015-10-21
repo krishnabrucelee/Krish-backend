@@ -44,8 +44,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User update(User t) throws Exception {
-        return null;
+    public User update(User user) throws Exception {
+    	  Errors errors = validator.rejectIfNullEntity("user", user);
+          errors = validator.validateEntity(user, errors);
+
+          if (errors.hasErrors()) {
+              throw new ApplicationException(errors);
+          } else {
+              return userRepository.save(user);
+          }
     }
 
     @Override
@@ -55,7 +62,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void delete(Long id) throws Exception {
-
+    	userRepository.delete(id);
     }
 
     @Override

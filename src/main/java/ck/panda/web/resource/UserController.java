@@ -5,7 +5,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -25,7 +24,6 @@ import ck.panda.util.web.CRUDController;
 @RestController
 @RequestMapping("/api/users")
 @Api(value = "Users", description = "Operations with user", produces = "application/json")
-@PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
 public class UserController extends CRUDController<User> implements ApiController {
 
     /** Inject userService business logic.*/
@@ -66,6 +64,6 @@ public class UserController extends CRUDController<User> implements ApiControlle
 
    @Override
   public void testMethod() throws Exception {
-   // TODO Auto-generated method stub
+
   }
 }
