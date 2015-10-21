@@ -8,9 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.Hypervisor;
+import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.Region;
 import ck.panda.domain.entity.Zone;
 import ck.panda.util.CloudStackDomainService;
+import ck.panda.util.CloudStackHypervisorsService;
+import ck.panda.util.CloudStackOSService;
 import ck.panda.util.CloudStackRegionService;
 import ck.panda.util.CloudStackZoneService;
 import ck.panda.util.error.exception.ApplicationException;
@@ -18,7 +22,7 @@ import ck.panda.util.error.exception.ApplicationException;
 /**
  * We have to sync up with cloudstack server for the following data
  *
- * 1. Region
+ * 1. Zone
  * 2. Domain
  * 3. Region
  * 4. Template
@@ -56,11 +60,28 @@ public class SyncServiceImpl  implements SyncService {
 
     /** RegionSerivce for listing Regions. */
     @Autowired
-    private RegionService RegionService;
+    private RegionService regionService;
 
     /** CloudStackRegionService for Region connectivity with cloudstack. */
     @Autowired
     private CloudStackRegionService csRegion;
+
+    /** RegionSerivce for listing Regions. */
+    @Autowired
+    private HypervisorService hypervisorService;
+
+    /** CloudStackRegionService for Region connectivity with cloudstack. */
+    @Autowired
+    private CloudStackHypervisorsService csHypervisor;
+
+    /** OSCategoryService for listing operating sytem in cloudstack server. */
+    @Autowired
+    private OsCategoryService osCategoryService;
+
+    /** CloudStackRegionService for Region connectivity with cloudstack. */
+    @Autowired
+    private CloudStackOSService csOsCategory;
+
 
     /**
      * Sync call for synchronization list of Region, domain, region. template, hypervisor
@@ -76,6 +97,13 @@ public class SyncServiceImpl  implements SyncService {
 
       //3. Sync Zone entity
         this.syncZone();
+
+      //4. Sync Hypervisor entity
+        this.syncHypervisor();
+
+      //5. Sync OSCategory entity
+        this.syncOsCategory();
+
 
     }
     /**
@@ -106,8 +134,7 @@ public class SyncServiceImpl  implements SyncService {
 
                 //3.3 Remove once updated, so that we can have the list of cs domain which is not added in the app
                 csDomainMap.remove(domain.getUuid());
-            }
-            else {
+            } else {
                 domainService.delete(domain);
                 //3.2 If not found, delete it from app db
                 //TODO clarify the business requirement, since it has impact in the application if it is used
@@ -120,7 +147,6 @@ public class SyncServiceImpl  implements SyncService {
             domainService.save(csDomainMap.get(key));
         }
     }
-
 
     /**
      * Sync with Cloud Server Zone.
@@ -137,21 +163,20 @@ public class SyncServiceImpl  implements SyncService {
         List<Zone> appZoneList = zoneService.findAll();
 
         // 3. Iterate application domain list
-        for (Zone Zone: appZoneList) {
+        for (Zone zone: appZoneList) {
              //3.1 Find the corresponding CS server domain object by finding it in a hash using uuid
-            if (csZoneMap.containsKey(Zone.getUuid())) {
-                Zone csZone = csZoneMap.get(Zone.getUuid());
+            if (csZoneMap.containsKey(zone.getUuid())) {
+                Zone csZone = csZoneMap.get(zone.getUuid());
 
-                Zone.setName(csZone.getName());
+                zone.setName(csZone.getName());
 
                 //3.2 If found, update the domain object in app db
-                zoneService.update(Zone);
+                zoneService.update(zone);
 
                 //3.3 Remove once updated, so that we can have the list of cs domain which is not added in the app
-                csZoneMap.remove(Zone.getUuid());
-            }
-            else {
-                zoneService.delete(Zone);
+                csZoneMap.remove(zone.getUuid());
+            } else {
+                zoneService.delete(zone);
                 //3.2 If not found, delete it from app db
                 //TODO clarify the business requirement, since it has impact in the application if it is used
                 //TODO clarify is this a soft or hard delete
@@ -172,29 +197,28 @@ public class SyncServiceImpl  implements SyncService {
     private void syncRegion() throws ApplicationException, Exception {
 
         //1. Get all the domain objects from CS server as hash
-        List<Region> csRegionList = RegionService.findAllFromCSServer();
+        List<Region> csRegionList = regionService.findAllFromCSServer();
         HashMap<String, Region> csRegionMap = (HashMap<String, Region>) Region.convert(csRegionList);
 
         //2. Get all the domain objects from application
-        List<Region> appRegionList = RegionService.findAll();
+        List<Region> appRegionList = regionService.findAll();
 
         // 3. Iterate application domain list
-        for (Region Region: appRegionList) {
+        for (Region region: appRegionList) {
              //3.1 Find the corresponding CS server domain object by finding it in a hash using uuid
-            if (csRegionMap.containsKey(Region.getUuid())) {
-                Region csRegion = csRegionMap.get(Region.getName());
+            if (csRegionMap.containsKey(region.getName())) {
+                Region csRegion = csRegionMap.get(region.getName());
 
-                Region.setName(csRegion.getName());
-                Region.setEndPoint(csRegion.getEndPoint());
+                region.setName(csRegion.getName());
+                region.setEndPoint(csRegion.getEndPoint());
 
                 //3.2 If found, update the domain object in app db
-                RegionService.update(Region);
+                regionService.update(region);
 
                 //3.3 Remove once updated, so that we can have the list of cs domain which is not added in the app
-                csRegionMap.remove(Region.getName());
-            }
-            else {
-                RegionService.delete(Region);
+                csRegionMap.remove(region.getName());
+            } else {
+                regionService.delete(region);
                 //3.2 If not found, delete it from app db
                 //TODO clarify the business requirement, since it has impact in the application if it is used
                 //TODO clarify is this a soft or hard delete
@@ -203,7 +227,89 @@ public class SyncServiceImpl  implements SyncService {
         //4. Get the remaining list of cs server hash domain object, then iterate and
         //add it to app db
         for (String key: csRegionMap.keySet()) {
-            RegionService.save(csRegionMap.get(key));
+            regionService.save(csRegionMap.get(key));
+        }
+    }
+
+    /**
+     * Sync with Cloud Server Region.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    private void syncHypervisor() throws ApplicationException, Exception {
+
+        //1. Get all the domain objects from CS server as hash
+        List<Hypervisor> csHypervisorList = hypervisorService.findAllFromCSServer();
+        HashMap<String, Hypervisor> csHypervisorMap = (HashMap<String, Hypervisor>) Hypervisor.convert(csHypervisorList);
+
+        //2. Get all the domain objects from application
+        List<Hypervisor> appHypervisorList = hypervisorService.findAll();
+
+        // 3. Iterate application domain list
+        for (Hypervisor hypervisor: appHypervisorList) {
+
+            //3.1 Find the corresponding CS server domain object by finding it in a hash using uuid
+            if (csHypervisorMap.containsKey(hypervisor.getName())) {
+                 Hypervisor csHypervisor = csHypervisorMap.get(hypervisor.getName());
+
+                 hypervisor.setName(csHypervisor.getName());
+                //3.2 If found, update the domain object in app db
+                hypervisorService.update(hypervisor);
+
+                //3.3 Remove once updated, so that we can have the list of cs domain which is not added in the app
+                csHypervisorMap.remove(hypervisor.getName());
+            } else {
+                hypervisorService.delete(hypervisor);
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete
+            }
+        }
+        //4. Get the remaining list of cs server hash domain object, then iterate and
+        //add it to app db
+        for (String key: csHypervisorMap.keySet()) {
+            hypervisorService.save(csHypervisorMap.get(key));
+        }
+    }
+
+    /**
+     * Sync with Cloud Server Region.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    private void syncOsCategory() throws ApplicationException, Exception {
+
+        //1. Get all the domain objects from CS server as hash
+        List<OsCategory> csOsCategoryList = osCategoryService.findAllFromCSServer();
+        HashMap<String, OsCategory> csOsCategoryMap = (HashMap<String, OsCategory>) OsCategory.convert(csOsCategoryList);
+
+        //2. Get all the domain objects from application
+        List<OsCategory> appOsCategoryList = osCategoryService.findAll();
+
+        // 3. Iterate application domain list
+        for (OsCategory osCategory: appOsCategoryList) {
+
+            //3.1 Find the corresponding CS server domain object by finding it in a hash using uuid
+            if (csOsCategoryMap.containsKey(osCategory.getUuid())) {
+                OsCategory csOsCategory = csOsCategoryMap.get(osCategory.getUuid());
+
+                osCategory.setName(csOsCategory.getName());
+                //3.2 If found, update the domain object in app db
+                osCategoryService.update(osCategory);
+
+                //3.3 Remove once updated, so that we can have the list of cs domain which is not added in the app
+                csOsCategoryMap.remove(osCategory.getUuid());
+            } else {
+                osCategoryService.delete(osCategory);
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete
+            }
+        }
+        //4. Get the remaining list of cs server hash domain object, then iterate and
+        //add it to app db
+        for (String key: csOsCategoryMap.keySet()) {
+            osCategoryService.save(csOsCategoryMap.get(key));
         }
     }
 }

@@ -11,7 +11,8 @@ public interface SyncService {
 
     /**
      * consits of method to be called.
-     * @throws Exception
+     *
+     * @throws Exception unhandled errors.
      */
      void sync() throws Exception;
 }

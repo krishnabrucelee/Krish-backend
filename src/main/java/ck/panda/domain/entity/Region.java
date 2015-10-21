@@ -281,28 +281,29 @@ public class Region implements Serializable {
     /**
      * Convert JSONObject to region entity.
      *
-     * @param obj
-     * @return
-     * @throws JSONException
+     * @param object json object
+     * @return region entity object
+     * @throws JSONException unhandled json errors.
      */
     public static Region convert(JSONObject object) throws JSONException {
-        Region Region = new Region();
-        Region.uuid = object.get("id").toString();
-        Region.name = object.get("name").toString();
+        Region region = new Region();
+        region.uuid = object.get("id").toString();
+        region.name = object.get("name").toString();
 
-        return Region;
+        return region;
     }
 
     /**
+     * Mapping region entity object into list.
      *
-     * @param domainList
-     * @return
+     * @param regionList list of regions
+     * @return region mapped values.
      */
-    public static Map<String, Region> convert(List<Region> RegionList) {
+    public static Map<String, Region> convert(List<Region> regionList) {
         Map<String, Region> regionMap = new HashMap<String, Region>();
 
-        for (Region Region : RegionList) {
-            regionMap.put(Region.getName(), Region);
+        for (Region region : regionList) {
+            regionMap.put(region.getName(), region);
         }
         return regionMap;
     }

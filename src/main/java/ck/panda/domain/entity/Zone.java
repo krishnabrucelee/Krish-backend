@@ -72,7 +72,7 @@ public class Zone implements Serializable {
 
     /** Status attribute to verify status of the zone. */
     @Column(name = "status")
-    private Boolean status;
+    private String status;
 
     /** Created by user. */
     @CreatedBy
@@ -199,18 +199,18 @@ public class Zone implements Serializable {
         this.version = version;
     }
 
+
     /**
      * @return the status
      */
-    public Boolean getStatus() {
+    public String getStatus() {
         return status;
     }
 
     /**
-     * @param status
-     * the status to set.
+     * @param status the status to set
      */
-    public void setStatus(Boolean status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 
@@ -277,9 +277,9 @@ public class Zone implements Serializable {
     /**
      * Convert JSONObject to domain entity.
      *
-     * @param obj
-     * @return
-     * @throws JSONException
+     * @param object json object
+     * @return zone object
+     * @throws JSONException unhandled json errors.
      */
     public static Zone convert(JSONObject object) throws JSONException {
         Zone zone = new Zone();
@@ -290,14 +290,15 @@ public class Zone implements Serializable {
     }
 
     /**
+     *Mapping zone entity object into list.
      *
-     * @param domainList
-     * @return
+     * @param zoneList list of Zones
+     * @return zone mapping values.
      */
-    public static Map<String, Zone> convert(List<Zone> ZoneList) {
+    public static Map<String, Zone> convert(List<Zone> zoneList) {
         Map<String, Zone> zoneMap = new HashMap<String, Zone>();
 
-        for (Zone zone : ZoneList) {
+        for (Zone zone : zoneList) {
             zoneMap.put(zone.getUuid(), zone);
         }
         return zoneMap;
