@@ -17,6 +17,10 @@ import javax.persistence.Version;
 import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
@@ -64,20 +68,24 @@ public class Region implements Serializable {
 
     /** Created by user. */
     @JoinColumn(name = "created_by", referencedColumnName = "id")
+    @CreatedBy
     @OneToOne
     private User createdBy;
 
     /** Last updated by user. */
     @JoinColumn(name = "updated_by", referencedColumnName = "id")
+    @LastModifiedBy
     @OneToOne
     private User updatedBy;
 
     /** Created date and time. */
     @Column(name = "created_date_time")
+    @CreatedDate
     private DateTime createdDateTime;
 
     /** Updated date and time. */
     @Column(name = "updated_date_time")
+    @LastModifiedDate
     private DateTime updatedDateTime;
 
     /**
