@@ -18,8 +18,11 @@ public class CloudStackRegionService {
     @Autowired
     private CloudStackServer server;
 
-    /** sets api key , secret key and url.
-     * @param server sets these values.
+    /**
+     * setServer passes apikey, url, secretkey from UI and aids to establish
+     * cloudstack connectivity.
+     *
+     * @param server sets apikey and url.
      */
     public void setServer(CloudStackServer server) {
         this.server = server;
@@ -44,5 +47,4 @@ public class CloudStackRegionService {
 
         return responseDocument;
     }
-
 }
