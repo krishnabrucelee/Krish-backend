@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -20,7 +19,9 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Domain;
 import ck.panda.service.DepartmentService;
+import ck.panda.service.DomainService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -38,9 +39,19 @@ public class DepartmentController extends CRUDController<Department> implements 
     @Autowired
     private DepartmentService departmentService;
 
+    /** Service reference to Domain. */
+    @Autowired
+    private DomainService domainService;
+
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Department.", response = Department.class)
     @Override
     public Department create(@RequestBody Department department) throws Exception {
+        Domain domain = new Domain();
+        domain.setName("assistanz.com");
+        domain.setCompanyName("Assistanz Networks");
+        domain.setDomainOwner("Assistanz");
+        domain = domainService.save(domain);
+        department.setDomain(domain);
         return departmentService.save(department);
     }
 

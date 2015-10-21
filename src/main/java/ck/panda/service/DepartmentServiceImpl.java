@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Domain;
 import ck.panda.domain.repository.jpa.DepartmentReposiory;
 import ck.panda.util.AppValidator;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -35,11 +36,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     private DepartmentReposiory departmentRepo;
 
     @Override
-    @PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
     public Department save(Department department) throws Exception {
 
         Errors errors = validator.rejectIfNullEntity("department", department);
         errors = validator.validateEntity(department, errors);
+        errors = this.validateName(errors, department.getName(), department.getDomain());
 
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
@@ -48,13 +49,29 @@ public class DepartmentServiceImpl implements DepartmentService {
         }
     }
 
+    /**
+     * Check the department name already exist or not for same domain.
+     *
+     * @param errors already existing error list.
+     * @param name name of the department.
+     * @param domain domain object.
+     * @return errors.
+     * @throws Exception
+     */
+    private Errors validateName(Errors errors, String name, Domain domain) throws Exception {
+
+        if (this.findByNameAndDomain(name, domain) != null) {
+            errors.addFieldError("name", "department.already.exist");
+        }
+        return errors;
+    }
 
     @Override
     public Department update(Department department) throws Exception {
 
         Errors errors = validator.rejectIfNullEntity("department", department);
         errors = validator.validateEntity(department, errors);
-
+        errors = this.validateName(errors, department.getName(), department.getDomain());
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
@@ -73,7 +90,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    @PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
     public Department find(Long id) throws Exception {
         Department department = departmentRepo.findOne(id);
 
@@ -95,6 +111,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public List<Department> findAll() throws Exception {
             return null;
+    }
+
+    @Override
+    public Department findByNameAndDomain(String name, Domain domain) throws Exception {
+        return departmentRepo.findByNameAndDomain(name, domain);
     }
 
 }

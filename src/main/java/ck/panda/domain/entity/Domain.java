@@ -1,10 +1,14 @@
 package ck.panda.domain.entity;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
@@ -17,320 +21,333 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 
-
 /**
- * Accounts are grouped by domains. Domains usually contain multiple accounts that have some logical
- * relationship to each other and a set of delegated administrators with some authority over the
- * domain and its subdomains.
+ * Accounts are grouped by domains. Domains usually contain multiple accounts
+ * that have some logical relationship to each other and a set of delegated
+ * administrators with some authority over the domain and its subdomains.
  *
  */
 @Entity
 @Table(name = "ck_domain")
 public class Domain {
 
-  /** Unique ID of the Domain. */
-  @Id
-  @GeneratedValue
-  @Column(name = "id")
-  private Long id;
+    /** Unique ID of the Domain. */
+    @Id
+    @GeneratedValue
+    @Column(name = "id")
+    private Long id;
 
-  /** Unique ID from Cloud Stack. */
-  @Column(name = "uuid")
-  private String uuid;
+    /** Unique ID from Cloud Stack. */
+    @Column(name = "uuid")
+    private String uuid;
 
-  /**  Name of the Domain. */
-  @NotEmpty
-  @Size(min = 4, max = 20)
-  @Column(name = "name", nullable = false)
-  private String name;
+    /** List of departments. */
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Department> departments;
 
-  /** Company name for the Domain. */
-  @Column(name = "company_name")
-  private String companyName;
+    /** Name of the Domain. */
+    @NotEmpty
+    @Size(min = 4, max = 20)
+    @Column(name = "name", nullable = false)
+    private String name;
 
-  /** Domain owner for the account. */
-  @Column(name = "domain_owner")
-  private String domainOwner;
+    /** Company name for the Domain. */
+    @Column(name = "company_name")
+    private String companyName;
 
-  /** Whether Domain child is present. */
-  @Column(name = "is_child")
-  private Boolean isChild;
+    /** Domain owner for the account. */
+    @Column(name = "domain_owner")
+    private String domainOwner;
 
-  /** Check whether Domain is in active state or in active state. */
-  @Column(name = "is_active")
-  private Boolean isActive;
+    /** Whether Domain child is present. */
+    @Column(name = "is_child")
+    private Boolean isChild;
 
-  /** State for Domain, whether it is Active or InActive. */
-  @Column(name = "status", columnDefinition = "tinyint default 0")
-  private Boolean status;
+    /** Check whether Domain is in active state or in active state. */
+    @Column(name = "is_active")
+    private Boolean isActive;
 
-  /** Version attribute to handle optimistic locking. */
-  @Version
-  @Column(name = "version")
-  private Long version;
+    /** State for Domain, whether it is Active or InActive. */
+    @Column(name = "status", columnDefinition = "tinyint default 0")
+    private Boolean status;
 
-  /** Created by user. */
-  @CreatedBy
-  @JoinColumn(name = "created_user_id", referencedColumnName = "id")
-  @OneToOne
-  private User createdBy;
+    /** Version attribute to handle optimistic locking. */
+    @Version
+    @Column(name = "version")
+    private Long version;
 
-  /** Last updated by user. */
-  @LastModifiedBy
-  @JoinColumn(name = "updated_user_id", referencedColumnName = "id")
-  @OneToOne
-  private User updatedBy;
+    /** Created by user. */
+    @CreatedBy
+    @JoinColumn(name = "created_user_id", referencedColumnName = "id")
+    @OneToOne
+    private User createdBy;
 
-  /** Created date and time. */
-  @CreatedDate
-  private DateTime createdDateTime;
+    /** Last updated by user. */
+    @LastModifiedBy
+    @JoinColumn(name = "updated_user_id", referencedColumnName = "id")
+    @OneToOne
+    private User updatedBy;
 
-  /** Last modified date and time. */
-  @LastModifiedDate
-  private DateTime lastModifiedDateTime;
+    /** Created date and time. */
+    @CreatedDate
+    private DateTime createdDateTime;
 
-  /**
-   * Get id of the Domain.
-   *
-   * @return the id
-   */
-  public Long getId() {
-    return id;
-  }
+    /** Last modified date and time. */
+    @LastModifiedDate
+    private DateTime lastModifiedDateTime;
 
-  /**
-   * Set id of the Domain.
-   *
-   * @param id
-   *          the id to set
-   */
-  public void setId(Long id) {
-    this.id = id;
-  }
+    /**
+     * Get id of the Domain.
+     *
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-  /**
-   * Get uuid of the Domain.
-   *
-   * @return the uuid
-   */
-  public String getUuid() {
-    return uuid;
-  }
+    /**
+     * Set id of the Domain.
+     *
+     * @param id
+     *            the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-  /**
-   * Set uuid of the Domain.
-   *
-   * @param uuid
-   *          the uuid to set
-   */
-  public void setUuid(String uuid) {
-    this.uuid = uuid;
-  }
+    /**
+     * Get uuid of the Domain.
+     *
+     * @return the uuid
+     */
+    public String getUuid() {
+        return uuid;
+    }
 
-  /**
-   * Get name of the Domain.
-   *
-   * @return the name
-   */
-  public String getName() {
-    return name;
-  }
+    /**
+     * Set uuid of the Domain.
+     *
+     * @param uuid
+     *            the uuid to set
+     */
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
-  /**
-   * Set name of the Domain.
-   *
-   * @param name
-   *          the name to set
-   */
-  public void setName(String name) {
-    this.name = name;
-  }
+    /**
+     * Get the list of departments.
+     *
+     * @return the departments
+     */
+    public List<Department> getDepartments() {
+        return departments;
+    }
 
+    /**
+     * Set the departments for the domain.
+     *
+     * @param departments the departments to set
+     */
+    public void setDepartments(List<Department> departments) {
+        this.departments = departments;
+    }
 
-  /**
-   * Get Company name.
-   *
-   * @return the companyName
-   */
-  public String getCompanyName() {
-    return companyName;
-  }
+    /**
+     * Get name of the Domain.
+     *
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-  /**
-   * Set company name of the Domain.
-   *
-   * @param companyName the companyName to set
-   */
-  public void setCompanyName(String companyName) {
-    this.companyName = companyName;
-  }
+    /**
+     * Set name of the Domain.
+     *
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-  /**
-   * Get Domain Owner of the Domain.
-   *
-   * @return the domainOwner
-   */
-  public String getDomainOwner() {
-    return domainOwner;
-  }
+    /**
+     * Get Company name.
+     *
+     * @return the companyName
+     */
+    public String getCompanyName() {
+        return companyName;
+    }
 
-  /**
-   * Set Domain Owner of the Domain.
-   *
-   * @param domainOwner the domainOwner to set
-   */
-  public void setDomainOwner(String domainOwner) {
-    this.domainOwner = domainOwner;
-  }
+    /**
+     * Set company name of the Domain.
+     *
+     * @param companyName the companyName to set
+     */
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
 
-  /**
-   * Get is child state of the Domain.
-   *
-   * @return the isChild
-   */
-  public Boolean getIsChild() {
-    return isChild;
-  }
+    /**
+     * Get Domain Owner of the Domain.
+     *
+     * @return the domainOwner
+     */
+    public String getDomainOwner() {
+        return domainOwner;
+    }
 
-  /**
-   * Set is child state of the Domain.
-   *
-   * @param isChild the isChild to set
-   */
-  public void setIsChild(Boolean isChild) {
-    this.isChild = isChild;
-  }
+    /**
+     * Set Domain Owner of the Domain.
+     *
+     * @param domainOwner the domainOwner to set
+     */
+    public void setDomainOwner(String domainOwner) {
+        this.domainOwner = domainOwner;
+    }
 
-  /**
-   * Get is Active state of the Domain.
-   *
-   * @return the isActive
-   */
-  public Boolean getIsActive() {
-    return isActive;
-  }
+    /**
+     * Get is child state of the Domain.
+     *
+     * @return the isChild
+     */
+    public Boolean getIsChild() {
+        return isChild;
+    }
 
-  /**
-   * Set is Active state of the Domain.
-   *
-   * @param isActive the isActive to set
-   */
-  public void setIsActive(Boolean isActive) {
-    this.isActive = isActive;
-  }
+    /**
+     * Set is child state of the Domain.
+     *
+     * @param isChild the isChild to set
+     */
+    public void setIsChild(Boolean isChild) {
+        this.isChild = isChild;
+    }
 
-  /**
-   * Get status of the Domain.
-   *
-   * @return the status
-   */
-  public Boolean getStatus() {
-    return status;
-  }
+    /**
+     * Get is Active state of the Domain.
+     *
+     * @return the isActive
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
 
-  /**
-   * Set status of the Domain.
-   *
-   * @param status
-   *          the status to set
-   */
-  public void setStatus(Boolean status) {
-    this.status = status;
-  }
+    /**
+     * Set is Active state of the Domain.
+     *
+     * @param isActive the isActive to set
+     */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
 
-  /**
-   * Get version of the Domain.
-   *
-   * @return the version
-   */
-  public Long getVersion() {
-    return version;
-  }
+    /**
+     * Get status of the Domain.
+     *
+     * @return the status
+     */
+    public Boolean getStatus() {
+        return status;
+    }
 
-  /**
-   * Set version of the Domain.
-   *
-   * @param version
-   *          the version to set
-   */
-  public void setVersion(Long version) {
-    this.version = version;
-  }
+    /**
+     * Set status of the Domain.
+     *
+     * @param status the status to set
+     */
+    public void setStatus(Boolean status) {
+        this.status = status;
+    }
 
-  /**
-   * Get Created user.
-   *
-   * @return the createdBy
-   */
-  public User getCreatedBy() {
-    return createdBy;
-  }
+    /**
+     * Get version of the Domain.
+     *
+     * @return the version
+     */
+    public Long getVersion() {
+        return version;
+    }
 
-  /**
-   * Set Created user.
-   *
-   * @param createdBy
-   *          the createdBy to set
-   */
-  public void setCreatedBy(User createdBy) {
-    this.createdBy = createdBy;
-  }
+    /**
+     * Set version of the Domain.
+     *
+     * @param version the version to set
+     */
+    public void setVersion(Long version) {
+        this.version = version;
+    }
 
-  /**
-   * Get updated user.
-   *
-   * @return the updatedBy
-   */
-  public User getUpdatedBy() {
-    return updatedBy;
-  }
+    /**
+     * Get Created user.
+     *
+     * @return the createdBy
+     */
+    public User getCreatedBy() {
+        return createdBy;
+    }
 
-  /**
-   * Set updated user.
-   *
-   * @param updatedBy
-   *          the updatedBy to set
-   */
-  public void setUpdatedBy(User updatedBy) {
-    this.updatedBy = updatedBy;
-  }
+    /**
+     * Set Created user.
+     *
+     * @param createdBy the createdBy to set
+     */
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
+    }
 
-  /**
-   * Get createdDateTime.
-   *
-   * @return the createdDateTime
-   */
-  public DateTime getCreatedDateTime() {
-    return createdDateTime;
-  }
+    /**
+     * Get updated user.
+     *
+     * @return the updatedBy
+     */
+    public User getUpdatedBy() {
+        return updatedBy;
+    }
 
-  /**
-   * Set createdDateTime.
-   *
-   * @param createdDateTime
-   *          the createdDateTime to set
-   */
-  public void setCreatedDateTime(DateTime createdDateTime) {
-    this.createdDateTime = createdDateTime;
-  }
+    /**
+     * Set updated user.
+     *
+     * @param updatedBy the updatedBy to set
+     */
+    public void setUpdatedBy(User updatedBy) {
+        this.updatedBy = updatedBy;
+    }
 
-  /**
-   * Get lastModifiedDateTime.
-   *
-   * @return the lastModifiedDateTime
-   */
-  public DateTime getLastModifiedDateTime() {
-    return lastModifiedDateTime;
-  }
+    /**
+     * Get createdDateTime.
+     *
+     * @return the createdDateTime
+     */
+    public DateTime getCreatedDateTime() {
+        return createdDateTime;
+    }
 
-  /**
-   * Set lastModifiedDateTime.
-   *
-   * @param lastModifiedDateTime
-   *          the lastModifiedDateTime to set
-   */
-  public void setLastModifiedDateTime(DateTime lastModifiedDateTime) {
-    this.lastModifiedDateTime = lastModifiedDateTime;
-  }
+    /**
+     * Set createdDateTime.
+     *
+     * @param createdDateTime the createdDateTime to set
+     */
+    public void setCreatedDateTime(DateTime createdDateTime) {
+        this.createdDateTime = createdDateTime;
+    }
+
+    /**
+     * Get lastModifiedDateTime.
+     *
+     * @return the lastModifiedDateTime
+     */
+    public DateTime getLastModifiedDateTime() {
+        return lastModifiedDateTime;
+    }
+
+    /**
+     * Set lastModifiedDateTime.
+     *
+     * @param lastModifiedDateTime the lastModifiedDateTime to set
+     */
+    public void setLastModifiedDateTime(DateTime lastModifiedDateTime) {
+        this.lastModifiedDateTime = lastModifiedDateTime;
+    }
 
 }
