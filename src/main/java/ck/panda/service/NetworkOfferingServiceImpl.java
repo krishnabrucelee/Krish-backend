@@ -34,13 +34,11 @@ public class NetworkOfferingServiceImpl implements NetworkOfferingService {
     @Override
     public void delete(NetworkOffering id) throws Exception {
         networkRepo.delete(id);
-
     }
 
     @Override
     public void delete(Long id) throws Exception {
         networkRepo.delete(id);
-
     }
 
     @Override

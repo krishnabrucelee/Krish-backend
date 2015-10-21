@@ -4,7 +4,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import ck.panda.domain.entity.NetworkOffering;
 
 /**
- * JPA repository for Zone entity.
+ * JPA repository for NetworkOffering entity.
  */
 public interface NetworkOfferingRepository extends PagingAndSortingRepository<NetworkOffering, Long> {
 
