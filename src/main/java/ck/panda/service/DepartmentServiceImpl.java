@@ -36,7 +36,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     private DepartmentReposiory departmentRepo;
 
     @Override
-    @PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
     public Department save(Department department) throws Exception {
 
         Errors errors = validator.rejectIfNullEntity("department", department);
@@ -53,14 +52,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     /**
      * Check the department name already exist or not for same domain.
      *
-     * @param errors,an error object
-     *
-     * @param name,which is to be validated.
-     *
-     * @param domainId, to check the department is unique or not for the domain.
-     *
-     * @return error is present,else new error object is returned.
-     * @throws Exception if error is present.
+     * @param errors already existing error list.
+     * @param name name of the department.
+     * @param domain domain object.
+     * @return errors.
+     * @throws Exception
      */
     private Errors validateName(Errors errors, String name, Domain domain) throws Exception {
 
@@ -94,7 +90,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    @PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
     public Department find(Long id) throws Exception {
         Department department = departmentRepo.findOne(id);
 
@@ -120,8 +115,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public Department findByNameAndDomain(String name, Domain domain) throws Exception {
-        return	departmentRepo.findByNameAndDomain(name, domain);
-
+        return departmentRepo.findByNameAndDomain(name, domain);
     }
 
 }

@@ -50,7 +50,7 @@ public class Department implements Serializable {
     private List<Role> roles;
 
     /** Domain of the department. */
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "domain_id", referencedColumnName = "id")
     private Domain domain;
 
@@ -133,8 +133,7 @@ public class Department implements Serializable {
     /**
      * Set the id.
      *
-     * @param id
-     *            - the Long to set
+     * @param id - the Long to set
      */
     public void setId(Long id) {
         this.id = id;
@@ -152,8 +151,7 @@ public class Department implements Serializable {
     /**
      * Set the name.
      *
-     * @param name
-     *            - the String to set
+     * @param name - the String to set
      */
     public void setName(String name) {
         this.name = name;
@@ -190,8 +188,7 @@ public class Department implements Serializable {
     /**
      * Set the description.
      *
-     * @param description
-     *            - the String to set.
+     * @param description - the String to set.
      */
     public void setDescription(String description) {
         this.description = description;
@@ -209,8 +206,7 @@ public class Department implements Serializable {
     /**
      * Set the version.
      *
-     * @param version
-     *            - the Long to set
+     * @param version - the Long to set
      */
     public void setVersion(Long version) {
         this.version = version;
@@ -228,8 +224,7 @@ public class Department implements Serializable {
     /**
      * Set the createdBy.
      *
-     * @param createdBy
-     *            - the User to set
+     * @param createdBy - the User to set
      */
     public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
@@ -247,8 +242,7 @@ public class Department implements Serializable {
     /**
      * Set the updatedBy.
      *
-     * @param updatedBy
-     *            - the User to set
+     * @param updatedBy - the User to set
      */
     public void setUpdatedBy(User updatedBy) {
         this.updatedBy = updatedBy;
@@ -266,8 +260,7 @@ public class Department implements Serializable {
     /**
      * Set the createdDateTime.
      *
-     * @param createdDateTime
-     *            - the DateTime to set
+     * @param createdDateTime - the DateTime to set
      */
     public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
@@ -285,8 +278,7 @@ public class Department implements Serializable {
     /**
      * Set the updatedDateTime.
      *
-     * @param updatedDateTime
-     *            - the DateTime to set
+     * @param updatedDateTime - the DateTime to set
      */
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
@@ -300,8 +292,7 @@ public class Department implements Serializable {
     }
 
     /**
-     * @param roles
-     *            the roles to set
+     * @param roles the roles to set
      */
     public void setRoles(List<Role> roles) {
         this.roles = roles;
@@ -319,8 +310,7 @@ public class Department implements Serializable {
     /**
      * Set is Active state of the Department.
      *
-     * @param isActive
-     *            the isActive to set
+     * @param isActive the isActive to set
      */
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
@@ -334,8 +324,7 @@ public class Department implements Serializable {
     }
 
     /**
-     * @param status
-     *            the status to set
+     * @param status the status to set
      */
     public void setStatus(String status) {
         this.status = status;
