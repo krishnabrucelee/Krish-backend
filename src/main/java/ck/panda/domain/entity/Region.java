@@ -62,7 +62,7 @@ public class Region implements Serializable {
 
     /** Status of the region. */
     @Column(name = "status")
-    private String status;
+    private Status status;
 
     /** Version attribute to handle optimistic locking. */
     @Version
@@ -90,6 +90,21 @@ public class Region implements Serializable {
     @Column(name = "updated_date_time")
     @LastModifiedDate
     private DateTime updatedDateTime;
+
+    /**
+     * Enumeration for Region status.
+     */
+    public enum Status {
+
+           /** If region is enabled we can create zones and pods. */
+           ENABLED,
+
+           /** If region is disabled cannot create any zones and pods until region gets enabled. */
+           DISABLED,
+
+           /** If region is deleted we cannot create zones and pods. */
+           DELETED
+    }
 
     /**
      * Get the id.
@@ -184,14 +199,14 @@ public class Region implements Serializable {
     /**
      * @return the status
      */
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
     /**
      * @param status the status to set
      */
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 

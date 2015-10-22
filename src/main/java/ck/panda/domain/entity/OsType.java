@@ -46,8 +46,8 @@ public class OsType implements Serializable {
 
     /** OS category type id. */
     @NotEmpty
-    @Column(name = "os_category_id")
-    private String osCategoryId;
+    @Column(name = "os_category_uuid")
+    private String osCategoryUuid;
 
     /** Display name of the OS type. */
     @Column(name = "description")
@@ -113,19 +113,17 @@ public class OsType implements Serializable {
     }
 
     /**
-     * Get the OS category id.
-     * @return osCategoryId
+     * @return the osCategoryUuid
      */
-    public String getOsCategoryId() {
-        return osCategoryId;
+    public String getOsCategoryUuid() {
+        return osCategoryUuid;
     }
 
     /**
-     * Set the OS category id.
-     * @param osCategoryId - the String to set
+     * @param osCategoryUuid the osCategoryUuid to set
      */
-    public void setOsCategoryId(String osCategoryId) {
-        this.osCategoryId = osCategoryId;
+    public void setOsCategoryUuid(String osCategoryUuid) {
+        this.osCategoryUuid = osCategoryUuid;
     }
 
     /**
@@ -233,7 +231,7 @@ public class OsType implements Serializable {
         OsType osType = new OsType();
         osType.uuid = object.get("id").toString();
         osType.description = object.get("description").toString();
-        osType.osCategoryId = object.get("oscategoryid").toString();
+        osType.osCategoryUuid = object.get("oscategoryid").toString();
         return osType;
     }
 
