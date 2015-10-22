@@ -1,8 +1,10 @@
 package ck.panda.domain.entity;
 
+import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -16,12 +18,16 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 import javax.validation.constraints.Size;
 
+import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.joda.time.DateTime;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.format.annotation.DateTimeFormat;
+
 
 /**
  * Accounts are grouped by domains. Domains usually contain multiple accounts
@@ -42,10 +48,6 @@ public class Domain {
     /** Unique ID from Cloud Stack. */
     @Column(name = "uuid")
     private String uuid;
-
-    /** List of departments. */
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<Department> departments;
 
     /** Name of the Domain. */
     @NotEmpty
@@ -93,11 +95,17 @@ public class Domain {
 
     /** Created date and time. */
     @CreatedDate
-    private DateTime createdDateTime;
+    @Column(name = "created_date_time")
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime createdDateTime;
 
     /** Last modified date and time. */
     @LastModifiedDate
-    private DateTime lastModifiedDateTime;
+    @Column(name = "updated_date_time")
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime updatedDateTime;
 
     /**
      * Get id of the Domain.
@@ -135,24 +143,6 @@ public class Domain {
      */
     public void setUuid(String uuid) {
         this.uuid = uuid;
-    }
-
-    /**
-     * Get the list of departments.
-     *
-     * @return the departments
-     */
-    public List<Department> getDepartments() {
-        return departments;
-    }
-
-    /**
-     * Set the departments for the domain.
-     *
-     * @param departments the departments to set
-     */
-    public void setDepartments(List<Department> departments) {
-        this.departments = departments;
     }
 
     /**
@@ -319,41 +309,45 @@ public class Domain {
         this.updatedBy = updatedBy;
     }
 
+
+
     /**
-     * Get createdDateTime.
+     * Get the domain created date time.
      *
      * @return the createdDateTime
      */
-    public DateTime getCreatedDateTime() {
+    public ZonedDateTime getCreatedDateTime() {
         return createdDateTime;
     }
 
     /**
-     * Set createdDateTime.
+     * Set the domain created date time.
      *
      * @param createdDateTime the createdDateTime to set
      */
-    public void setCreatedDateTime(DateTime createdDateTime) {
+    public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
     }
 
     /**
-     * Get lastModifiedDateTime.
+     * Get the Domain updated date and time.
      *
-     * @return the lastModifiedDateTime
+     * @return the updatedDateTime
      */
-    public DateTime getLastModifiedDateTime() {
-        return lastModifiedDateTime;
+    public ZonedDateTime getUpdatedDateTime() {
+        return updatedDateTime;
     }
 
     /**
-     * Set lastModifiedDateTime.
+     * Set the Domain updated date time.
      *
-     * @param lastModifiedDateTime the lastModifiedDateTime to set
+     * @param updatedDateTime the updatedDateTime to set
      */
-    public void setLastModifiedDateTime(DateTime lastModifiedDateTime) {
-        this.lastModifiedDateTime = lastModifiedDateTime;
+    public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
+        this.updatedDateTime = updatedDateTime;
     }
+
+
 
     /**
      * Enumeration status for Domain.
@@ -366,4 +360,34 @@ public class Domain {
         DELETED
     }
 
+  /**
+   * Convert JSONObject to domain entity.
+   *
+   * @param object json object
+   * @return domain entity object.
+   * @throws JSONException handles json exception.
+   */
+  public static Domain convert(JSONObject object) throws JSONException {
+      Domain domain = new Domain();
+      domain.uuid = object.get("id").toString();
+      domain.name = object.get("name").toString();
+
+      return domain;
+  }
+
+  /**
+   *Mapping entity object into list.
+   *
+   * @param domainList list of domains.
+   * @return domain map
+   */
+  public static Map<String, Domain> convert(List<Domain> domainList) {
+      Map<String, Domain> domainMap = new HashMap<String, Domain>();
+
+      for (Domain domain : domainList) {
+          domainMap.put(domain.getUuid(), domain);
+      }
+
+      return domainMap;
+  }
 }

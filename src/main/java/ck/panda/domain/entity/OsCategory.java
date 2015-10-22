@@ -1,6 +1,10 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,6 +15,8 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 import javax.validation.constraints.Size;
 import org.joda.time.DateTime;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -195,5 +201,35 @@ public class OsCategory implements Serializable {
      */
     public void setUpdatedDateTime(DateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
+    }
+
+    /**
+     * Convert JSONObject to oscategory entity.
+     *
+     * @param object json object.
+     * @return oscategory entity object
+     * @throws JSONException unhandled json errors.
+     */
+    public static OsCategory convert(JSONObject object) throws JSONException {
+        OsCategory osCategory = new OsCategory();
+        osCategory.uuid = object.get("id").toString();
+        osCategory.name = object.get("name").toString();
+
+        return osCategory;
+    }
+
+    /**
+     * Mapping the os categories entity in list.
+     *
+     * @param  osCategoryList list of operating systems
+     * @return mapped values
+     */
+    public static Map<String, OsCategory> convert(List<OsCategory> osCategoryList) {
+        Map<String, OsCategory> osCategoryMap = new HashMap<String, OsCategory>();
+
+        for (OsCategory osCategory : osCategoryList) {
+             osCategoryMap.put(osCategory.getUuid(), osCategory);
+        }
+        return  osCategoryMap;
     }
 }

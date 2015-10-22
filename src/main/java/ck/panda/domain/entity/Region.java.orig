@@ -17,8 +17,11 @@ import javax.persistence.Version;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
+<<<<<<< HEAD
 import org.json.JSONException;
 import org.json.JSONObject;
+=======
+>>>>>>> panda-origin/master
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -44,7 +47,10 @@ public class Region implements Serializable {
     private Long id;
 
     /** Unique ID from Cloud Stack. */
+<<<<<<< HEAD
     @NotEmpty
+=======
+>>>>>>> panda-origin/master
     @Column(name = "uuid")
     private String uuid;
 
@@ -62,7 +68,11 @@ public class Region implements Serializable {
 
     /** Status of the region. */
     @Column(name = "status")
+<<<<<<< HEAD
     private Status status;
+=======
+    private Boolean status;
+>>>>>>> panda-origin/master
 
     /** Version attribute to handle optimistic locking. */
     @Version
@@ -92,6 +102,7 @@ public class Region implements Serializable {
     private DateTime updatedDateTime;
 
     /**
+<<<<<<< HEAD
      * Enumeration for Region status.
      */
     public enum Status {
@@ -107,6 +118,8 @@ public class Region implements Serializable {
     }
 
     /**
+=======
+>>>>>>> panda-origin/master
      * Get the id.
      *
      * @return id
@@ -197,16 +210,32 @@ public class Region implements Serializable {
     }
 
     /**
+<<<<<<< HEAD
      * @return the status
      */
     public Status getStatus() {
+=======
+     * Get the status.
+     *
+     * @return status
+     */
+    public Boolean getStatus() {
+>>>>>>> panda-origin/master
         return status;
     }
 
     /**
+<<<<<<< HEAD
      * @param status the status to set
      */
     public void setStatus(Status status) {
+=======
+     * Set the status.
+     *
+     * @param status - the status to set
+     */
+    public void setStatus(Boolean status) {
+>>>>>>> panda-origin/master
         this.status = status;
     }
 
@@ -299,6 +328,7 @@ public class Region implements Serializable {
     public void setUpdatedDateTime(DateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
+<<<<<<< HEAD
 
     /**
      * Convert JSONObject to region entity.
@@ -329,5 +359,7 @@ public class Region implements Serializable {
         }
         return regionMap;
     }
+=======
+>>>>>>> panda-origin/master
 
 }

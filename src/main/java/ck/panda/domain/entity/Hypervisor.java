@@ -1,6 +1,10 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,8 +12,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.validation.constraints.Size;
 import org.joda.time.DateTime;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -34,7 +39,6 @@ public class Hypervisor implements Serializable {
     private Long id;
 
     /** Name of the hypervisor. */
-    @Size(min = 4, max = 20)
     @Column(name = "name", nullable = false)
     private String name;
 
@@ -189,5 +193,34 @@ public class Hypervisor implements Serializable {
      */
     public void setUpdatedDateTime(DateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
+    }
+
+    /**
+     * Convert JSONObject to hypervisor entity.
+     *
+     * @param object json object
+     * @return hypervisor entity objects
+     * @throws JSONException unhandled json errors
+     */
+    public static Hypervisor convert(JSONObject object) throws JSONException {
+        Hypervisor hypervisor = new Hypervisor();
+        hypervisor.name = object.get("name").toString();
+
+        return hypervisor;
+    }
+
+    /**
+     * Mapping hypervisor entity object in list.
+     *
+     * @param hypervisorList list of hypervisors
+     * @return hypervisor mapped values.
+     */
+    public static Map<String, Hypervisor> convert(List<Hypervisor> hypervisorList) {
+        Map<String, Hypervisor> hypervisorMap = new HashMap<String, Hypervisor>();
+
+        for (Hypervisor hypervisor : hypervisorList) {
+            hypervisorMap.put(hypervisor.getName(), hypervisor);
+        }
+        return hypervisorMap;
     }
 }
