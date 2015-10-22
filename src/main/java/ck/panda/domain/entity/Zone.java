@@ -103,13 +103,13 @@ public class Zone implements Serializable {
      */
     public enum Status {
 
-           /** . */
+           /** If zone is enabled we can create instance. */
            ENABLED,
 
-           /** . */
+           /** If zone is disabled cannot create any instances and offers. */
            DISABLED,
 
-           /** . */
+           /** If zone is deleted we cannot create instances. */
            DELETED
     }
 

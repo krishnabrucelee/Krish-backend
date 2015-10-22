@@ -13,6 +13,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
+
+import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,6 +45,7 @@ public class OsType implements Serializable {
     private String uuid;
 
     /** OS category type id. */
+    @NotEmpty
     @Column(name = "os_category_id")
     private String osCategoryId;
 
@@ -110,35 +113,20 @@ public class OsType implements Serializable {
     }
 
     /**
-     * @return the osCategoryId
+     * Get the OS category id.
+     * @return osCategoryId
      */
     public String getOsCategoryId() {
         return osCategoryId;
     }
 
     /**
-     * @param osCategoryId the osCategoryId to set
+     * Set the OS category id.
+     * @param osCategoryId - the String to set
      */
     public void setOsCategoryId(String osCategoryId) {
         this.osCategoryId = osCategoryId;
     }
-
-//    /**
-//     * Get the OS category id.
-//     * @return osCategoryId
-//     */
-//    public String getOsCategoryId() {
-//        return osCategoryId;
-//    }
-//
-//    /**
-//     * Set the OS category id.
-//     * @param osCategoryId - the OsCategory entity to set
-//     */
-//    public void setOsCategoryId(String osCategoryId) {
-//        this.osCategoryId = osCategoryId;
-//    }
-
 
     /**
      * @return the description
