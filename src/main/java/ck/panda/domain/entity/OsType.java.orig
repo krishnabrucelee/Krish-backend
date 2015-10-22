@@ -1,10 +1,13 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
+<<<<<<< HEAD
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+=======
+>>>>>>> panda-origin/master
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,11 +16,16 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
+<<<<<<< HEAD
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
+=======
+import org.hibernate.validator.constraints.NotEmpty;
+import org.joda.time.DateTime;
+>>>>>>> panda-origin/master
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -46,12 +54,22 @@ public class OsType implements Serializable {
 
     /** OS category type id. */
     @NotEmpty
+<<<<<<< HEAD
     @Column(name = "os_category_uuid")
     private String osCategoryUuid;
 
     /** Display name of the OS type. */
     @Column(name = "description")
     private String description;
+=======
+    @JoinColumn(name = "oscategory_id", referencedColumnName = "id")
+    @OneToOne
+    private OsCategory osCategoryId;
+
+    /** Display name of the OS type. */
+    @Column(name = "display_name")
+    private String displayName;
+>>>>>>> panda-origin/master
 
     /** Version attribute to handle optimistic locking. */
     @Version
@@ -113,6 +131,7 @@ public class OsType implements Serializable {
     }
 
     /**
+<<<<<<< HEAD
      * @return the osCategoryUuid
      */
     public String getOsCategoryUuid() {
@@ -138,6 +157,37 @@ public class OsType implements Serializable {
      */
     public void setDescription(String description) {
         this.description = description;
+=======
+     * Get the OS category id.
+     * @return osCategoryId
+     */
+    public OsCategory getOsCategoryId() {
+        return osCategoryId;
+    }
+
+    /**
+     * Set the OS category id.
+     * @param osCategoryId - the OsCategory entity to set
+     */
+    public void setOsCategoryId(OsCategory osCategoryId) {
+        this.osCategoryId = osCategoryId;
+    }
+
+    /**
+     * Get the display name.
+     * @return displayName
+     */
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    /**
+     * Set the display name.
+     * @param displayName - the String to set
+     */
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+>>>>>>> panda-origin/master
     }
 
     /**
@@ -219,6 +269,7 @@ public class OsType implements Serializable {
     public void setUpdatedDateTime(DateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
+<<<<<<< HEAD
 
     /**
      * Convert JSONObject to os type entity.
@@ -249,4 +300,6 @@ public class OsType implements Serializable {
         }
         return osTypeMap;
     }
+=======
+>>>>>>> panda-origin/master
 }

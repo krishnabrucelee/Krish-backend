@@ -1,9 +1,14 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -12,6 +17,8 @@ import javax.persistence.Table;
 import javax.validation.constraints.Size;
 
 import org.joda.time.DateTime;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -67,7 +74,8 @@ public class Zone implements Serializable {
 
     /** Status attribute to verify status of the zone. */
     @Column(name = "status")
-    private Boolean status;
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     /** Created by user. */
     @CreatedBy
@@ -88,6 +96,21 @@ public class Zone implements Serializable {
     /** Last modified date and time. */
     @LastModifiedDate
     private DateTime lastModifiedDateTime;
+
+    /**
+     * Enumeration for Zone status.
+     */
+    public enum Status {
+
+           /** If zone is enabled we can create instance. */
+           ENABLED,
+
+           /** If zone is disabled cannot create any instances and offers. */
+           DISABLED,
+
+           /** If zone is deleted we cannot create instances. */
+           DELETED
+    }
 
     /**
      * @return id the id of the zone
@@ -197,15 +220,14 @@ public class Zone implements Serializable {
     /**
      * @return the status
      */
-    public Boolean getStatus() {
+    public Status getStatus() {
         return status;
     }
 
     /**
-     * @param status
-     * the status to set.
+     * @param status the status to set
      */
-    public void setStatus(Boolean status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 
@@ -269,4 +291,33 @@ public class Zone implements Serializable {
         this.lastModifiedDateTime = lastModifiedDateTime;
     }
 
+    /**
+     * Convert JSONObject to domain entity.
+     *
+     * @param object json object
+     * @return zone object
+     * @throws JSONException unhandled json errors.
+     */
+    public static Zone convert(JSONObject object) throws JSONException {
+        Zone zone = new Zone();
+        zone.uuid = object.get("id").toString();
+        zone.name = object.get("name").toString();
+
+        return zone;
+    }
+
+    /**
+     * Mapping zone entity object into list.
+     *
+     * @param zoneList list of Zones
+     * @return zone mapping values.
+     */
+    public static Map<String, Zone> convert(List<Zone> zoneList) {
+        Map<String, Zone> zoneMap = new HashMap<String, Zone>();
+
+        for (Zone zone : zoneList) {
+            zoneMap.put(zone.getUuid(), zone);
+        }
+        return zoneMap;
+    }
 }

@@ -1,6 +1,9 @@
 package ck.panda.service;
 
+<<<<<<< HEAD
 import java.util.List;
+=======
+>>>>>>> panda-origin/master
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.OsType;
 import ck.panda.util.domain.CRUDService;
@@ -12,6 +15,7 @@ import ck.panda.util.domain.CRUDService;
 @Service
 public interface OsTypeService extends CRUDService<OsType> {
 
+<<<<<<< HEAD
      /**
      * To get list of os types from cloudstack server.
      *
@@ -19,5 +23,7 @@ public interface OsTypeService extends CRUDService<OsType> {
      * @throws Exception unhandled errors.
      */
     List<OsType> findAllFromCSServer() throws Exception;
+=======
+>>>>>>> panda-origin/master
 }
 
