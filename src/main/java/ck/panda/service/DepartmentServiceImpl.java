@@ -1,14 +1,11 @@
 package ck.panda.service;
 
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.repository.jpa.DepartmentReposiory;
@@ -45,6 +42,8 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
+            department.setIsActive(true);
+            department.setStatus(Department.Status.ENABLED);
             return departmentRepo.save(department);
         }
     }
@@ -107,15 +106,26 @@ public class DepartmentServiceImpl implements DepartmentService {
            return departmentRepo.findAll(pagingAndSorting.toPageRequest());
     }
 
-
     @Override
     public List<Department> findAll() throws Exception {
             return null;
     }
 
+    public Page<Department> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
+        return departmentRepo.findAllByActive(pagingAndSorting.toPageRequest());
+    }
+
     @Override
     public Department findByNameAndDomain(String name, Domain domain) throws Exception {
-        return departmentRepo.findByNameAndDomain(name, domain);
+        // TODO : Have to check the domain based duplication after completing the Domain CRUD.
+        return departmentRepo.findByNameAndDomain(name);
+    }
+
+    @Override
+    public Department softDelete(Department department) throws Exception {
+        department.setIsActive(false);
+        department.setStatus(Department.Status.DELETED);
+        return departmentRepo.save(department);
     }
 
 }

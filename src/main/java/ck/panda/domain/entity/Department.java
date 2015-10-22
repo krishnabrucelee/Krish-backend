@@ -8,6 +8,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -68,9 +70,10 @@ public class Department implements Serializable {
     @Column(name = "is_active")
     private Boolean isActive;
 
-    /** State for Department, whether it is Deleted, Disabled etc . */
+    /** Status for Department, whether it is Deleted, Disabled etc . */
     @Column(name = "status")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     /** Version attribute to handle optimistic locking. */
     @Version
@@ -316,18 +319,37 @@ public class Department implements Serializable {
         this.isActive = isActive;
     }
 
+
+
     /**
+     * Get the department status.
+     *
      * @return the status
      */
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
     /**
+     * Set the department status.
+     *
      * @param status the status to set
      */
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
+    }
+
+
+
+    /**
+     * Enumeration status for Department.
+     */
+    public enum Status {
+        /** Enabled status is used to list departments through out the application. */
+        ENABLED,
+
+        /** Deleted status make department as soft deleted and it will not list on the applicaiton. */
+        DELETED
     }
 
     @Override

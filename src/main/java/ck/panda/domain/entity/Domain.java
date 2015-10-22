@@ -5,6 +5,8 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -67,9 +69,10 @@ public class Domain {
     @Column(name = "is_active")
     private Boolean isActive;
 
-    /** State for Domain, whether it is Active or InActive. */
-    @Column(name = "status", columnDefinition = "tinyint default 0")
-    private Boolean status;
+    /** Status for Domain, whether it is Deleted, Disabled etc . */
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     /** Version attribute to handle optimistic locking. */
     @Version
@@ -242,21 +245,23 @@ public class Domain {
         this.isActive = isActive;
     }
 
+
+
     /**
-     * Get status of the Domain.
+     * Get the domain status.
      *
      * @return the status
      */
-    public Boolean getStatus() {
+    public Status getStatus() {
         return status;
     }
 
     /**
-     * Set status of the Domain.
+     * Set the domain status.
      *
      * @param status the status to set
      */
-    public void setStatus(Boolean status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 
@@ -348,6 +353,17 @@ public class Domain {
      */
     public void setLastModifiedDateTime(DateTime lastModifiedDateTime) {
         this.lastModifiedDateTime = lastModifiedDateTime;
+    }
+
+    /**
+     * Enumeration status for Domain.
+     */
+    public enum Status {
+        /** Enabled status is used to list domain through out the application. */
+        ENABLED,
+
+        /** Deleted status make domain as soft deleted and it will not list on the applicaiton. */
+        DELETED
     }
 
 }
