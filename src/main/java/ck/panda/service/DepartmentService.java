@@ -26,7 +26,6 @@ public interface DepartmentService  extends CRUDService<Department>  {
      */
      Department findByNameAndDomain(String name, Domain domain) throws Exception;
 
-
      /**
       * Method to soft delete department.
       *

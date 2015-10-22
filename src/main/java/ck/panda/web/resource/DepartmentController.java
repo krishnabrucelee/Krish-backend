@@ -1,10 +1,8 @@
 package ck.panda.web.resource;
 
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -17,10 +15,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
-
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
@@ -70,7 +66,6 @@ public class DepartmentController extends CRUDController<Department> implements 
     public Department update(@RequestBody Department department, @PathVariable(PATH_ID) Long id) throws Exception {
         return departmentService.update(department);
     }
-
 
     /**
      * Soft deleting the department from the table.
