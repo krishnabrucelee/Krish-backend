@@ -7,6 +7,8 @@ import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -72,7 +74,8 @@ public class Zone implements Serializable {
 
     /** Status attribute to verify status of the zone. */
     @Column(name = "status")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     /** Created by user. */
     @CreatedBy
@@ -93,6 +96,22 @@ public class Zone implements Serializable {
     /** Last modified date and time. */
     @LastModifiedDate
     private DateTime lastModifiedDateTime;
+
+
+    /**
+     * Enumeration for Zone status.
+     */
+    public enum Status {
+
+           /** If zone is enabled we can create instance. */
+           ENABLED,
+
+           /** If zone is disabled cannot create any instances and offers. */
+           DISABLED,
+
+           /** If zone is deleted we cannot create instances. */
+           DELETED
+    }
 
     /**
      * @return id the id of the zone
@@ -199,18 +218,17 @@ public class Zone implements Serializable {
         this.version = version;
     }
 
-
     /**
      * @return the status
      */
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
     /**
      * @param status the status to set
      */
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 

@@ -28,7 +28,7 @@ import ck.panda.util.web.CRUDController;
  *
  */
 @RestController
-@RequestMapping("/api/departments")
+@RequestMapping("/api/projects")
 @Api(value = "Projects", description = "Operations with projects", produces = "application/json")
 public class ProjectController extends CRUDController<Project> implements ApiController {
 

@@ -1,6 +1,10 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,8 +13,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
+
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -39,13 +46,12 @@ public class OsType implements Serializable {
 
     /** OS category type id. */
     @NotEmpty
-    @JoinColumn(name = "oscategory_id", referencedColumnName = "id")
-    @OneToOne
-    private OsCategory osCategoryId;
+    @Column(name = "os_category_id")
+    private String osCategoryId;
 
     /** Display name of the OS type. */
-    @Column(name = "display_name")
-    private String displayName;
+    @Column(name = "description")
+    private String description;
 
     /** Version attribute to handle optimistic locking. */
     @Version
@@ -110,32 +116,30 @@ public class OsType implements Serializable {
      * Get the OS category id.
      * @return osCategoryId
      */
-    public OsCategory getOsCategoryId() {
+    public String getOsCategoryId() {
         return osCategoryId;
     }
 
     /**
      * Set the OS category id.
-     * @param osCategoryId - the OsCategory entity to set
+     * @param osCategoryId - the String to set
      */
-    public void setOsCategoryId(OsCategory osCategoryId) {
+    public void setOsCategoryId(String osCategoryId) {
         this.osCategoryId = osCategoryId;
     }
 
     /**
-     * Get the display name.
-     * @return displayName
+     * @return the description
      */
-    public String getDisplayName() {
-        return displayName;
+    public String getDescription() {
+        return description;
     }
 
     /**
-     * Set the display name.
-     * @param displayName - the String to set
+     * @param description the description to set
      */
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     /**
@@ -216,5 +220,35 @@ public class OsType implements Serializable {
      */
     public void setUpdatedDateTime(DateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
+    }
+
+    /**
+     * Convert JSONObject to os type entity.
+     *
+     * @param object json object
+     * @return os type entity objects
+     * @throws JSONException unhandled json errors
+     */
+    public static OsType convert(JSONObject object) throws JSONException {
+        OsType osType = new OsType();
+        osType.uuid = object.get("id").toString();
+        osType.description = object.get("description").toString();
+        osType.osCategoryId = object.get("oscategoryid").toString();
+        return osType;
+    }
+
+    /**
+     * Mapping OS type entity object in list.
+     *
+     * @param osTypeList list of OStypes
+     * @return OStype mapped values.
+     */
+    public static Map<String, OsType> convert(List<OsType> osTypeList) {
+        Map<String, OsType> osTypeMap = new HashMap<String, OsType>();
+
+        for (OsType osType : osTypeList) {
+            osTypeMap.put(osType.getUuid(), osType);
+        }
+        return osTypeMap;
     }
 }

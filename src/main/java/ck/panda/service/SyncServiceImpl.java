@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.entity.OsCategory;
+import ck.panda.domain.entity.OsType;
 import ck.panda.domain.entity.Region;
 import ck.panda.domain.entity.Zone;
 import ck.panda.util.CloudStackDomainService;
@@ -82,6 +83,9 @@ public class SyncServiceImpl  implements SyncService {
     @Autowired
     private CloudStackOSService csOsCategory;
 
+    /** OSCategoryService for listing operating sytem in cloudstack server. */
+    @Autowired
+    private OsTypeService osTypeService;
 
     /**
      * Sync call for synchronization list of Region, domain, region. template, hypervisor
@@ -104,8 +108,11 @@ public class SyncServiceImpl  implements SyncService {
       //5. Sync OSCategory entity
         this.syncOsCategory();
 
+      //6. Sync OSType entity
+        this.syncOsTypes();
 
     }
+
     /**
      * Sync with CloudStack server Domain.
      *
@@ -312,5 +319,49 @@ public class SyncServiceImpl  implements SyncService {
             osCategoryService.save(csOsCategoryMap.get(key));
         }
     }
+
+    /**
+     * Sync with CloudStack server osType.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
+     */
+    private void syncOsTypes() throws ApplicationException, Exception {
+
+        //1. Get all the osType objects from CS server as hash
+        List<OsType> csOsTypesList = osTypeService.findAllFromCSServer();
+        HashMap<String, OsType> csOsTypeMap = (HashMap<String, OsType>) OsType.convert(csOsTypesList);
+
+        //2. Get all the osType objects from application
+        List<OsType> appOsTypeList = osTypeService.findAll();
+
+        // 3. Iterate application osType list
+        for (OsType osType: appOsTypeList) {
+             //3.1 Find the corresponding CS server osType object by finding it in a hash using uuid
+            if (csOsTypeMap.containsKey(osType.getUuid())) {
+                OsType csOsType = csOsTypeMap.get(osType.getUuid());
+
+                csOsType.setDescription(csOsType.getDescription());
+                csOsType.setOsCategoryId(csOsType.getOsCategoryId());
+
+                //3.2 If found, update the osType object in app db
+                osTypeService.update(osType);
+
+                //3.3 Remove once updated, so that we can have the list of cs osType which is not added in the app
+                csOsTypeMap.remove(osType.getUuid());
+            } else {
+                osTypeService.delete(osType);
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete
+            }
+        }
+        //4. Get the remaining list of cs server hash osType object, then iterate and
+        //add it to app db
+        for (String key: csOsTypeMap.keySet()) {
+            osTypeService.save(csOsTypeMap.get(key));
+        }
+    }
+
 }
 
