@@ -9,8 +9,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
 import org.joda.time.DateTime;
@@ -89,6 +87,14 @@ public class User {
     @JoinColumn(name = "updated_user_id", referencedColumnName = "id")
     @OneToOne(cascade = {CascadeType.ALL })
     private User updatedBy;
+
+    /** Define user type. */
+    public enum UserType {
+
+       /** Define user type constant. */
+        USER,
+        ADMIN;
+    }
 
     /**
      * Get the id.
