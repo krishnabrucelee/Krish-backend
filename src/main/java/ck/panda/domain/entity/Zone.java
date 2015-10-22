@@ -97,7 +97,6 @@ public class Zone implements Serializable {
     @LastModifiedDate
     private DateTime lastModifiedDateTime;
 
-
     /**
      * Enumeration for Zone status.
      */

@@ -13,7 +13,7 @@ import ck.panda.util.domain.CRUDService;
 public interface OsCategoryService extends CRUDService<OsCategory> {
 
     /**
-     * to get list of operating systems from cloudstack server.
+     * To get list of operating systems from cloudstack server.
      *
      * @return os list from server
      * @throws Exception unhandled errors.

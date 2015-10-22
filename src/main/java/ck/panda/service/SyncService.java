@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 public interface SyncService {
 
     /**
-     * sync method consists of method to be called.
+     * Sync method consists of method to be called.
      *
-     * @throws Exception unhandled errors.
+     * @throws Exception handles unhandled errors.
      */
      void sync() throws Exception;
 }

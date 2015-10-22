@@ -15,7 +15,7 @@ import ck.panda.util.domain.CRUDService;
 public interface ZoneService extends CRUDService<Zone> {
 
     /**
-     * to get list of zones from cloudstack server.
+     * To get list of zones from cloudstack server.
      *
      * @return zone list from server
      * @throws Exception unhandled errors.

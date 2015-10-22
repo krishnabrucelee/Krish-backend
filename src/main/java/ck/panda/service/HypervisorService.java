@@ -14,7 +14,7 @@ import ck.panda.util.domain.CRUDService;
 public interface HypervisorService extends CRUDService<Hypervisor> {
 
     /**
-     * to get list of hypervisor from cloudstack server.
+     * To get list of hypervisor from cloudstack server.
      *
      * @return hypervisor list from server
      * @throws Exception unhandled errors.

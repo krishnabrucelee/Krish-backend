@@ -38,7 +38,7 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
 
     /** synchronization with cloudstack. */
     @Autowired
-    private SyncService syncservice;
+    private SyncService syncService;
 
     @Override
     public CloudStackConfiguration save(CloudStackConfiguration config) throws Exception {
@@ -50,7 +50,7 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
             throw new ApplicationException(errors);
         }
         server.setServer(config.getApiURL(), config.getSecretKey(), config.getApiKey());
-        syncservice.sync();
+        syncService.sync();
         return configRepo.save(config);
     }
 

@@ -96,19 +96,19 @@ public class SyncServiceImpl  implements SyncService {
         //1. Sync Domain entity
         this.syncDomain();
 
-      //2. Sync Region entity
+        //2. Sync Region entity
         this.syncRegion();
 
-      //3. Sync Zone entity
+        //3. Sync Zone entity
         this.syncZone();
 
-      //4. Sync Hypervisor entity
+        //4. Sync Hypervisor entity
         this.syncHypervisor();
 
-      //5. Sync OSCategory entity
+        //5. Sync OSCategory entity
         this.syncOsCategory();
 
-      //6. Sync OSType entity
+        //6. Sync OSType entity
         this.syncOsTypes();
 
     }
@@ -169,7 +169,7 @@ public class SyncServiceImpl  implements SyncService {
         //2. Get all the zone objects from application
         List<Zone> appZoneList = zoneService.findAll();
 
-        // 3. Iterate application domain list
+        // 3. Iterate application zone list
         for (Zone zone: appZoneList) {
              //3.1 Find the corresponding CS server zone object by finding it in a hash using uuid
             if (csZoneMap.containsKey(zone.getUuid())) {
@@ -210,7 +210,7 @@ public class SyncServiceImpl  implements SyncService {
         //2. Get all the region objects from application
         List<Region> appRegionList = regionService.findAll();
 
-        // 3. Iterate application domain list
+        // 3. Iterate application region list
         for (Region region: appRegionList) {
              //3.1 Find the corresponding CS server region object by finding it in a hash using uuid
             if (csRegionMap.containsKey(region.getName())) {
@@ -255,12 +255,12 @@ public class SyncServiceImpl  implements SyncService {
         // 3. Iterate application hypervisor list
         for (Hypervisor hypervisor: appHypervisorList) {
 
-            //3.1 Find the corresponding CS server domain object by finding it in a hash using uuid
+            //3.1 Find the corresponding CS server hypervisor object by finding it in a hash using uuid
             if (csHypervisorMap.containsKey(hypervisor.getName())) {
                  Hypervisor csHypervisor = csHypervisorMap.get(hypervisor.getName());
 
                  hypervisor.setName(csHypervisor.getName());
-                //3.2 If found, update the domain object in app db
+                //3.2 If found, update the hypervisor object in app db
                 hypervisorService.update(hypervisor);
 
                 //3.3 Remove once updated, so that we can have the list of cs hypervisor which is not added in the app
@@ -293,7 +293,7 @@ public class SyncServiceImpl  implements SyncService {
         //2. Get all the oscategory objects from application
         List<OsCategory> appOsCategoryList = osCategoryService.findAll();
 
-        // 3. Iterate application domain list
+        // 3. Iterate application oscategory list
         for (OsCategory osCategory: appOsCategoryList) {
 
             //3.1 Find the corresponding CS server oscategory object by finding it in a hash using uuid
@@ -342,7 +342,7 @@ public class SyncServiceImpl  implements SyncService {
                 OsType csOsType = csOsTypeMap.get(osType.getUuid());
 
                 csOsType.setDescription(csOsType.getDescription());
-                csOsType.setOsCategoryId(csOsType.getOsCategoryId());
+                csOsType.setOsCategoryUuid(csOsType.getOsCategoryUuid());
 
                 //3.2 If found, update the osType object in app db
                 osTypeService.update(osType);
