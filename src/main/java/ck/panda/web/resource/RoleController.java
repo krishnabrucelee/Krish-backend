@@ -71,7 +71,7 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
     }
 
     /**
-     * Empty method implementation.
+     * Empty method No implementation.
      */
     @Override
     public void testMethod() throws Exception {
