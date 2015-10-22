@@ -1,41 +1,32 @@
 package ck.panda.web.resource;
 
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
-
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.User;
 import ck.panda.service.UserService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
-/**
- * User CRUD operations are handle here.
- */
+
+/** User CRUD operations are handle here. */
 @RestController
 @RequestMapping("/api/users")
 @Api(value = "Users", description = "Operations with user", produces = "application/json")
-@PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
 public class UserController extends CRUDController<User> implements ApiController {
 
-    /**
-     * Inject userService business logic.
-     */
+    /** Inject userService business logic.*/
     @Autowired
     private UserService userService;
 
@@ -73,6 +64,6 @@ public class UserController extends CRUDController<User> implements ApiControlle
 
    @Override
   public void testMethod() throws Exception {
-   // TODO Auto-generated method stub
+
   }
 }
