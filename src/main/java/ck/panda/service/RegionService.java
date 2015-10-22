@@ -16,7 +16,7 @@ import ck.panda.util.domain.CRUDService;
 public interface RegionService extends CRUDService<Region> {
 
     /**
-     * to get list of region from cloudstack server.
+     * To get list of region from cloudstack server.
      *
      * @return region list from server
      * @throws Exception unhandled errors.

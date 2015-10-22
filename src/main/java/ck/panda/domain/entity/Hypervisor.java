@@ -210,7 +210,7 @@ public class Hypervisor implements Serializable {
     }
 
     /**
-     *Mapping hypervisor entity object in list.
+     * Mapping hypervisor entity object in list.
      *
      * @param hypervisorList list of hypervisors
      * @return hypervisor mapped values.
