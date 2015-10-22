@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Role;
 import ck.panda.domain.repository.jpa.RoleReposiory;
 import ck.panda.util.AppValidator;
@@ -35,11 +36,11 @@ public class RoleServiceImpl implements RoleService {
     private RoleReposiory roleRepo;
 
     @Override
-    @PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
     public Role save(Role role) throws Exception {
         LOGGER.debug("Sample Debug Message");
         Errors errors = validator.rejectIfNullEntity("role", role);
         errors = validator.validateEntity(role, errors);
+        errors = validator.validateName(errors, role.getName(), role.getDepartment());
 
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
@@ -50,7 +51,6 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Role update(Role role) throws Exception {
-
         Errors errors = validator.rejectIfNullEntity("role", role);
         errors = validator.validateEntity(role, errors);
 
@@ -87,13 +87,17 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Page<Role> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return roleRepo.findAll(pagingAndSorting.toPageRequest());
+        return roleRepo.findAllByActive(pagingAndSorting.toPageRequest());
     }
-
 
     @Override
     public List<Role> findAll() throws Exception {
-               return null;
+        return (List<Role>) roleRepo.findAll();
+    }
+
+    @Override
+    public Role findByName(String name, Department department) throws Exception {
+        return roleRepo.findUniqueness(name, department);
     }
 
 }

@@ -4,27 +4,30 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.persistence.Version;
 import javax.validation.constraints.Size;
 
+import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.annotation.Version;
 
 /**
- * Roles are categorize the departments with different permissions.
- *
- * We restrict the user based on the permission and the permission assigned with Role
- *  and give access based on the assigned permissions.
+ * Roles are categorize the departments with different permissions. We restrict
+ * the user based on the permission and the permission assigned with Role and
+ * give access based on the assigned permissions.
  *
  */
 @Entity
@@ -58,25 +61,56 @@ public class Role implements Serializable {
     @Column(name = "version")
     private Long version;
 
+    /** Status attribute to verify status of the Role. */
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
     /** Created by user. */
     @CreatedBy
-    @JoinColumn(name = "created_user_id", referencedColumnName = "id")
+    @JoinColumn(name = "created_by", referencedColumnName = "id")
     @OneToOne
     private User createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @JoinColumn(name = "updated_user_id", referencedColumnName = "id")
+    @JoinColumn(name = "updated_by", referencedColumnName = "id")
     @OneToOne
     private User updatedBy;
 
     /** Created date and time. */
     @CreatedDate
+    @Column(name = "created_date_time")
     private DateTime createdDateTime;
 
-    /** Last modified date and time. */
+    /** Last updated date and time. */
     @LastModifiedDate
-    private DateTime lastModifiedDateTime;
+    @Column(name = "updated_date_time")
+    private DateTime updatedDateTime;
+
+    /** update status when delete an entity. */
+    @Column(name = "is_active", columnDefinition = "tinyint default 1")
+    @Type(type = "org.hibernate.type.NumericBooleanType")
+    private Boolean isActive;
+
+    /**
+     * To set the default value while creating tables in database.
+     */
+    @PrePersist
+    void preInsert() {
+        this.isActive = true;
+    }
+
+    /**
+     * Enum type for Role Status.
+     *
+     */
+    public enum Status {
+        /** Roles will be in a Enabled State. */
+        ENABLED,
+        /** Roles will be in a Disabled State. */
+        DISABLED
+    }
 
     /**
      * Default constructor.
@@ -87,6 +121,7 @@ public class Role implements Serializable {
 
     /**
      * Parameterized constructor.
+     *
      * @param name to set
      */
     public Role(String name) {
@@ -96,6 +131,7 @@ public class Role implements Serializable {
 
     /**
      * Get the id.
+     *
      * @return id
      */
     public Long getId() {
@@ -104,6 +140,7 @@ public class Role implements Serializable {
 
     /**
      * Set the id.
+     *
      * @param id - the Long to set
      */
     public void setId(Long id) {
@@ -112,6 +149,7 @@ public class Role implements Serializable {
 
     /**
      * Get the name.
+     *
      * @return name
      */
     public String getName() {
@@ -120,15 +158,16 @@ public class Role implements Serializable {
 
     /**
      * Set the name.
+     *
      * @param name - the String to set
      */
     public void setName(String name) {
         this.name = name;
     }
 
-
     /**
      * Get the department.
+     *
      * @return department
      */
     public Department getDepartment() {
@@ -137,6 +176,7 @@ public class Role implements Serializable {
 
     /**
      * Set the department.
+     *
      * @param department - object to set
      */
     public void setDepartment(Department department) {
@@ -145,6 +185,7 @@ public class Role implements Serializable {
 
     /**
      * Get the description.
+     *
      * @return description
      */
     public String getDescription() {
@@ -153,6 +194,7 @@ public class Role implements Serializable {
 
     /**
      * Set the description.
+     *
      * @param description - String to set
      */
     public void setDescription(String description) {
@@ -161,6 +203,7 @@ public class Role implements Serializable {
 
     /**
      * Get the version.
+     *
      * @return version
      */
     public Long getVersion() {
@@ -169,6 +212,7 @@ public class Role implements Serializable {
 
     /**
      * Set the version.
+     *
      * @param version - the Long to set
      */
     public void setVersion(Long version) {
@@ -177,6 +221,7 @@ public class Role implements Serializable {
 
     /**
      * Get the createdBy.
+     *
      * @return createdBy
      */
     public User getCreatedBy() {
@@ -185,6 +230,7 @@ public class Role implements Serializable {
 
     /**
      * Set the createdBy.
+     *
      * @param createdBy - the User to set
      */
     public void setCreatedBy(User createdBy) {
@@ -193,6 +239,7 @@ public class Role implements Serializable {
 
     /**
      * Get the updatedBy.
+     *
      * @return updatedBy
      */
     public User getUpdatedBy() {
@@ -201,6 +248,7 @@ public class Role implements Serializable {
 
     /**
      * Set the updatedBy.
+     *
      * @param updatedBy - the User to set
      */
     public void setUpdatedBy(User updatedBy) {
@@ -209,6 +257,7 @@ public class Role implements Serializable {
 
     /**
      * Get the createdDateTime.
+     *
      * @return createdDateTime
      */
     public DateTime getCreatedDateTime() {
@@ -217,6 +266,7 @@ public class Role implements Serializable {
 
     /**
      * Set the createdDateTime.
+     *
      * @param createdDateTime - the DateTime to set
      */
     public void setCreatedDateTime(DateTime createdDateTime) {
@@ -224,18 +274,58 @@ public class Role implements Serializable {
     }
 
     /**
-     * Get the lastModifiedDateTime.
-     * @return lastModifiedDateTime
+     * Get the updatedDateTime.
+     *
+     * @return updatedDateTime
      */
-    public DateTime getLastModifiedDateTime() {
-        return lastModifiedDateTime;
+    public DateTime getUpdatedDateTime() {
+        return updatedDateTime;
     }
 
     /**
-     * Set the lastModifiedDateTime.
-     * @param lastModifiedDateTime - the DateTime to set
+     * Set the updatedDateTime.
+     *
+     * @param updatedDateTime - the DateTime to set
      */
-    public void setLastModifiedDateTime(DateTime lastModifiedDateTime) {
-        this.lastModifiedDateTime = lastModifiedDateTime;
+    public void setUpdatedDateTime(DateTime updatedDateTime) {
+        this.updatedDateTime = updatedDateTime;
     }
+
+    /**
+     * Get the isActive status.
+     *
+     * @return the isActive
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    /**
+     * Set the isActive status.
+     *
+     * @param isActive - the isActive to set
+     */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    /**
+     * Get the initial status.
+     *
+     * @return the status
+     */
+    public Status getStatus() {
+        return status;
+    }
+
+    /**
+     * Set the initial status.
+     *
+     * @param status - the status to set
+     */
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+
 }

@@ -40,7 +40,6 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Role.", response = Role.class)
     @Override
     public Role create(@RequestBody Role role) throws Exception {
-        System.out.println("------------------------------------------");
         return roleService.save(role);
     }
 
@@ -64,15 +63,19 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
 
     @Override
     public List<Role> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-            @RequestParam Integer limit,HttpServletRequest request, HttpServletResponse response) throws Exception {
+            @RequestParam Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Role.class);
         Page<Role> pageResponse = roleService.findAll(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
 
+    /**
+     * Empty method No implementation.
+     */
     @Override
     public void testMethod() throws Exception {
         roleService.findAll();
     }
+
 }
