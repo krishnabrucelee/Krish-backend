@@ -1,6 +1,5 @@
 package ck.panda.domain.entity;
 
-import java.util.Date;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -72,13 +71,11 @@ public class User {
     private Long version;
 
     /** Created date and time. */
-    @Column(name = "created_date_time", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_date_time")
     private DateTime createdDateTime;
 
     /** Last modified date and time. */
     @Column(name = "updated_date_time")
-    @Temporal(TemporalType.TIMESTAMP)
     private DateTime updatedDateTime;
 
     /** Created by user. */
