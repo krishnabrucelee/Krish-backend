@@ -1,14 +1,11 @@
 package ck.panda.service;
 
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Role;
 import ck.panda.domain.repository.jpa.RoleReposiory;
@@ -72,7 +69,6 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    @PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
     public Role find(Long id) throws Exception {
         Role role = roleRepo.findOne(id);
 

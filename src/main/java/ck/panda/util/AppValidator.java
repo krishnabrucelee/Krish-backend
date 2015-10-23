@@ -5,14 +5,12 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
-
 import ck.panda.domain.entity.Department;
 import ck.panda.service.RoleService;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Set;
@@ -112,7 +110,6 @@ public class AppValidator {
         return errors;
     }
 
-
     /**
      * Converts the validation messages.
      *
@@ -140,20 +137,14 @@ public class AppValidator {
         return failureMessages;
     }
 
-
     /**
      * Validates the name and department field for roles.
      *
      * @param errors an error object
-     *
      * @param name which is to be validated.
-     *
      * @param department which is to be validated.
-     *
      * @return error is present,else new error object is returned.
-     *
-     * @throws Exception
-     *             if error is present.
+     * @throws Exception if error is present.
      */
     public Errors validateName(Errors errors, String name, Department department) throws Exception {
 
