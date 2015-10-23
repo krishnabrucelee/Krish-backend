@@ -1,30 +1,31 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.persistence.Version;
 import javax.validation.constraints.Size;
-
+import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.annotation.Version;
 
 /**
- * Roles are categorize the departments with different permissions.
- *
- * We restrict the user based on the permission and the permission assigned with Role
- *  and give access based on the assigned permissions.
+ * Roles are categorize the departments with different permissions. We restrict
+ * the user based on the permission and the permission assigned with Role and
+ * give access based on the assigned permissions.
  *
  */
 @Entity
@@ -58,25 +59,56 @@ public class Role implements Serializable {
     @Column(name = "version")
     private Long version;
 
+    /** Status attribute to verify status of the Role. */
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
     /** Created by user. */
     @CreatedBy
-    @JoinColumn(name = "created_user_id", referencedColumnName = "id")
+    @JoinColumn(name = "created_by", referencedColumnName = "id")
     @OneToOne
     private User createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @JoinColumn(name = "updated_user_id", referencedColumnName = "id")
+    @JoinColumn(name = "updated_by", referencedColumnName = "id")
     @OneToOne
     private User updatedBy;
 
     /** Created date and time. */
     @CreatedDate
+    @Column(name = "created_date_time")
     private DateTime createdDateTime;
 
-    /** Last modified date and time. */
+    /** Last updated date and time. */
     @LastModifiedDate
-    private DateTime lastModifiedDateTime;
+    @Column(name = "updated_date_time")
+    private DateTime updatedDateTime;
+
+    /** An active attribute is to check whether the role is active or not. */
+    @Column(name = "is_active", columnDefinition = "tinyint default 1")
+    @Type(type = "org.hibernate.type.NumericBooleanType")
+    private Boolean isActive;
+
+    /**
+     * To set the default value while creating tables in database.
+     */
+    @PrePersist
+    void preInsert() {
+        this.isActive = true;
+    }
+
+    /**
+     * Enum type for Role Status.
+     *
+     */
+    public enum Status {
+        /** Roles will be in a Enabled State. */
+        ENABLED,
+        /** Roles will be in a Disabled State. */
+        DISABLED
+    }
 
     /**
      * Default constructor.
@@ -87,6 +119,7 @@ public class Role implements Serializable {
 
     /**
      * Parameterized constructor.
+     *
      * @param name to set
      */
     public Role(String name) {
@@ -94,148 +127,202 @@ public class Role implements Serializable {
         this.name = name;
     }
 
-    /**
-     * Get the id.
-     * @return id
-     */
-    public Long getId() {
-        return id;
-    }
+	/**
+	 * Get the id of the role
+	 *
+	 * @return the id
+	 */
+	public Long getId() {
+		return id;
+	}
 
-    /**
-     * Set the id.
-     * @param id - the Long to set
-     */
-    public void setId(Long id) {
-        this.id = id;
-    }
+	/**
+	 * Set the id of the role
+	 *
+	 * @param id the id to set
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    /**
-     * Get the name.
-     * @return name
-     */
-    public String getName() {
-        return name;
-    }
+	/**
+	 * Get the name of the role
+	 *
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
 
-    /**
-     * Set the name.
-     * @param name - the String to set
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
+	/**
+	 * Set the name of the role
+	 *
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
 
+	/**
+	 * Get the department of the role
+	 *
+	 * @return the department
+	 */
+	public Department getDepartment() {
+		return department;
+	}
 
-    /**
-     * Get the department.
-     * @return department
-     */
-    public Department getDepartment() {
-        return department;
-    }
+	/**
+	 * Set the department of the role
+	 *
+	 * @param department the department to set
+	 */
+	public void setDepartment(Department department) {
+		this.department = department;
+	}
 
-    /**
-     * Set the department.
-     * @param department - object to set
-     */
-    public void setDepartment(Department department) {
-        this.department = department;
-    }
+	/**
+	 * Get the description of the role
+	 *
+	 * @return the description
+	 */
+	public String getDescription() {
+		return description;
+	}
 
-    /**
-     * Get the description.
-     * @return description
-     */
-    public String getDescription() {
-        return description;
-    }
+	/**
+	 * Set the description of the role
+	 *
+	 * @param description the description to set
+	 */
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    /**
-     * Set the description.
-     * @param description - String to set
-     */
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	/**
+	 * Get the version of the role
+	 *
+	 * @return the version
+	 */
+	public Long getVersion() {
+		return version;
+	}
 
-    /**
-     * Get the version.
-     * @return version
-     */
-    public Long getVersion() {
-        return version;
-    }
+	/**
+	 * Set the version of the role
+	 *
+	 * @param version the version to set
+	 */
+	public void setVersion(Long version) {
+		this.version = version;
+	}
 
-    /**
-     * Set the version.
-     * @param version - the Long to set
-     */
-    public void setVersion(Long version) {
-        this.version = version;
-    }
+	/**
+	 * Get the status of the role
+	 *
+	 * @return the status
+	 */
+	public Status getStatus() {
+		return status;
+	}
 
-    /**
-     * Get the createdBy.
-     * @return createdBy
-     */
-    public User getCreatedBy() {
-        return createdBy;
-    }
+	/**
+	 * Set the status of the role
+	 *
+	 * @param status the status to set
+	 */
+	public void setStatus(Status status) {
+		this.status = status;
+	}
 
-    /**
-     * Set the createdBy.
-     * @param createdBy - the User to set
-     */
-    public void setCreatedBy(User createdBy) {
-        this.createdBy = createdBy;
-    }
+	/**
+	 * Get the created by user of the role
+	 *
+	 * @return the createdBy
+	 */
+	public User getCreatedBy() {
+		return createdBy;
+	}
 
-    /**
-     * Get the updatedBy.
-     * @return updatedBy
-     */
-    public User getUpdatedBy() {
-        return updatedBy;
-    }
+	/**
+	 * Set the created by user of the role
+	 *
+	 * @param createdBy the created by to set
+	 */
+	public void setCreatedBy(User createdBy) {
+		this.createdBy = createdBy;
+	}
 
-    /**
-     * Set the updatedBy.
-     * @param updatedBy - the User to set
-     */
-    public void setUpdatedBy(User updatedBy) {
-        this.updatedBy = updatedBy;
-    }
+	/**
+	 * Get the updated by user of the role
+	 *
+	 * @return the updatedBy
+	 */
+	public User getUpdatedBy() {
+		return updatedBy;
+	}
 
-    /**
-     * Get the createdDateTime.
-     * @return createdDateTime
-     */
-    public DateTime getCreatedDateTime() {
-        return createdDateTime;
-    }
+	/**
+	 * Set the updated by user of the role
+	 *
+	 * @param updatedBy the updated by to set
+	 */
+	public void setUpdatedBy(User updatedBy) {
+		this.updatedBy = updatedBy;
+	}
 
-    /**
-     * Set the createdDateTime.
-     * @param createdDateTime - the DateTime to set
-     */
-    public void setCreatedDateTime(DateTime createdDateTime) {
-        this.createdDateTime = createdDateTime;
-    }
+	/**
+	 * Get the created date time of the role
+	 *
+	 * @return the createdDateTime
+	 */
+	public DateTime getCreatedDateTime() {
+		return createdDateTime;
+	}
 
-    /**
-     * Get the lastModifiedDateTime.
-     * @return lastModifiedDateTime
-     */
-    public DateTime getLastModifiedDateTime() {
-        return lastModifiedDateTime;
-    }
+	/**
+	 * Set the created date time of the role
+	 *
+	 * @param createdDateTime the created date time to set
+	 */
+	public void setCreatedDateTime(DateTime createdDateTime) {
+		this.createdDateTime = createdDateTime;
+	}
 
-    /**
-     * Set the lastModifiedDateTime.
-     * @param lastModifiedDateTime - the DateTime to set
-     */
-    public void setLastModifiedDateTime(DateTime lastModifiedDateTime) {
-        this.lastModifiedDateTime = lastModifiedDateTime;
-    }
+	/**
+	 * Get the updated date time of the role
+	 *
+	 * @return the updatedDateTime
+	 */
+	public DateTime getUpdatedDateTime() {
+		return updatedDateTime;
+	}
+
+	/**
+	 * Set the updated date time of the role
+	 *
+	 * @param updatedDateTime the updated date time to set
+	 */
+	public void setUpdatedDateTime(DateTime updatedDateTime) {
+		this.updatedDateTime = updatedDateTime;
+	}
+
+	/**
+	 * Get the is active of the role
+	 *
+	 * @return the isActive
+	 */
+	public Boolean getIsActive() {
+		return isActive;
+	}
+
+	/**
+	 * Set the is active of the role
+	 *
+	 * @param isActive the is active to set
+	 */
+	public void setIsActive(Boolean isActive) {
+		this.isActive = isActive;
+	}
+
 }
