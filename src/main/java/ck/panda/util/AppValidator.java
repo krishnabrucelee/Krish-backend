@@ -5,11 +5,11 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
+import ck.panda.service.ApplicationService;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Set;
@@ -28,6 +28,10 @@ public class AppValidator {
     /** Message source attribute. */
     @Autowired
     private MessageSource messageSource;
+
+    /** Application Service attribute. */
+    @Autowired
+    private ApplicationService applicationService;
 
     /**
      * Validates the given entity.
@@ -48,6 +52,26 @@ public class AppValidator {
 
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
+        }
+        return errors;
+    }
+
+    /**
+     * Validates the type field.
+     *
+     * @param errors - an error object
+     *
+     * @param type - which is to be validated.
+     *
+     * @return error is present,else new error object is returned.
+     *
+     * @throws Exception - if error is present.
+     *
+     */
+    public Errors validateType(Errors errors, String type) throws Exception {
+
+        if (applicationService.findByType(type) != null) {
+            errors.addFieldError("type", "Application Type is already exists");
         }
         return errors;
     }
