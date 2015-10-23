@@ -13,16 +13,13 @@ import ck.panda.util.domain.CRUDService;
 @Service
 public interface ApplicationService extends CRUDService<Application> {
 
-	/**
-	 * method to find type of the application.
-	 *
-	 * @param type - type of the department
-	 *
-	 * @return application type
-	 *
-	 * @throws Exception,if error occurs
-	 *
-	 */
-	Application findByType(String type) throws Exception;
+    /**
+     * method to find type of the application.
+     *
+     * @param type of the department
+     * @return application type
+     * @throws Exception if error occurs
+     */
+    Application findByType(String type) throws Exception;
 
 }

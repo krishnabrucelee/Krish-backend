@@ -12,7 +12,6 @@ import ck.panda.util.AppValidator;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
-import ck.panda.util.error.exception.EntityNotFoundException;
 
 /**Application service implementation class. */
 @Service
@@ -68,29 +67,21 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public Application find(Long id) throws Exception {
-        Application application = applicationRepo.findOne(id);
-
-        LOGGER.debug("Sample Debug Message");
-        LOGGER.trace("Sample Trace Message");
-
-        if (application == null) {
-            throw new EntityNotFoundException("application.not.found");
-        }
-        return application;
+        return applicationRepo.findOne(id);
     }
 
     @Override
     public Page<Application> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-           return applicationRepo.findAllByActive(pagingAndSorting.toPageRequest());
+        return applicationRepo.findAllByActive(pagingAndSorting.toPageRequest());
     }
 
     @Override
     public List<Application> findAll() throws Exception {
-            return null;
+        return null;
     }
 
-	@Override
-	public Application findByType(String type) throws Exception {
-		return	applicationRepo.findByType(type);
-	}
+    @Override
+    public Application findByType(String type) throws Exception {
+        return applicationRepo.findByType(type);
+    }
 }
