@@ -14,7 +14,7 @@ import ck.panda.util.domain.CRUDService;
 public interface ApplicationService extends CRUDService<Application> {
 
     /**
-     * method to find type of the application.
+     * Method to find type of the application.
      *
      * @param type of the department
      * @return application type

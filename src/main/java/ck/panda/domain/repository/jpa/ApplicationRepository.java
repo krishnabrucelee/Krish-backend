@@ -13,7 +13,7 @@ import ck.panda.domain.entity.Application;
 public interface ApplicationRepository extends PagingAndSortingRepository<Application, Long> {
 
     /**
-     * method to find list of entities having active status.
+     * Method to find list of entities having active status.
      *
      * @param pageable of the application
      * @return a page of entities
@@ -22,7 +22,7 @@ public interface ApplicationRepository extends PagingAndSortingRepository<Applic
     Page<Application> findAllByActive(Pageable pageable);
 
     /**
-     * method to find type of the application.
+     * Method to find type of the application.
      *
      * @param type of the application
      * @return application type

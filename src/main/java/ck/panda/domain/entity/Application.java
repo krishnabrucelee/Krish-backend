@@ -50,7 +50,7 @@ public class Application implements Serializable {
     @JoinColumn(name = "domain_id", referencedColumnName = "id")
     private Domain domain;
 
-    /** update status when delete an entity. */
+    /** Update status when delete an entity. */
     @Column(name = "is_active")
     private Boolean isActive;
 

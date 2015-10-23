@@ -59,14 +59,10 @@ public class AppValidator {
     /**
      * Validates the type field.
      *
-     * @param errors - an error object
-     *
-     * @param type - which is to be validated.
-     *
+     * @param errors ,an error object
+     * @param type of the entity to be validated.
      * @return error is present,else new error object is returned.
-     *
-     * @throws Exception - if error is present.
-     *
+     * @throws Exception if error is present.
      */
     public Errors validateType(Errors errors, String type) throws Exception {
 
@@ -79,7 +75,7 @@ public class AppValidator {
     /**
      * Validates the entity.
      *
-     * @param object ,which is to be validated.
+     * @param object to be validated.
      * @param errors ,an error object.
      * @return error is present,else new error object is returned.
      * @throws Exception if error is present.
