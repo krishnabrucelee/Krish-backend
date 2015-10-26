@@ -3,8 +3,12 @@ package ck.panda.web.resource;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+<<<<<<< Updated upstream
+=======
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+>>>>>>> Stashed changes
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,7 +46,14 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Role.", response = Role.class)
     @Override
     public Role create(@RequestBody Role role) throws Exception {
+<<<<<<< Updated upstream
         return roleService.save(role);
+=======
+    	System.out.println("==================================");
+    	System.out.println(role);
+    	System.out.println("==================================");
+        return null;
+>>>>>>> Stashed changes
     }
 
     @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing Role.", response = Role.class)

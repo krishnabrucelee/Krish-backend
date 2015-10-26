@@ -47,12 +47,8 @@ public class Department implements Serializable {
     @Column(name = "id")
     private Long id;
 
-    /** List of roles. */
-    @OneToMany(mappedBy = "department")
-    private List<Role> roles;
-
     /** Domain of the department. */
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne
     @JoinColumn(name = "domain_id", referencedColumnName = "id")
     private Domain domain;
 
@@ -285,20 +281,6 @@ public class Department implements Serializable {
      */
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
-    }
-
-    /**
-     * @return the roles
-     */
-    public List<Role> getRoles() {
-        return roles;
-    }
-
-    /**
-     * @param roles the roles to set
-     */
-    public void setRoles(List<Role> roles) {
-        this.roles = roles;
     }
 
     /**

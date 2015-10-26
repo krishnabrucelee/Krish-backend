@@ -37,7 +37,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         Errors errors = validator.rejectIfNullEntity("department", department);
         errors = validator.validateEntity(department, errors);
-        errors = this.validateName(errors, department.getName(), department.getDomain());
+        errors = this.validateName(errors, department.getName(), department.getDomain(), department);
 
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
@@ -57,10 +57,16 @@ public class DepartmentServiceImpl implements DepartmentService {
      * @return errors.
      * @throws Exception
      */
-    private Errors validateName(Errors errors, String name, Domain domain) throws Exception {
+    private Errors validateName(Errors errors, String name, Domain domain, Department department) throws Exception {
+    	Department dep;
+    	if(department.getId() != null) {
+    		dep = departmentRepo.findByNameAndDomainWithEdit(name, domain, department.getId());
+    	} else {
+    		dep = departmentRepo.findByNameAndDomain(name, domain);
+    	}
 
-        if (this.findByNameAndDomain(name, domain) != null) {
-            errors.addFieldError("name", "department.already.exist");
+        if (dep != null) {
+            errors.addFieldError("name", "department.already.exist.for.same.domain");
         }
         return errors;
     }
@@ -70,7 +76,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         Errors errors = validator.rejectIfNullEntity("department", department);
         errors = validator.validateEntity(department, errors);
-        errors = this.validateName(errors, department.getName(), department.getDomain());
+        errors = this.validateName(errors, department.getName(), department.getDomain(), department);
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
@@ -117,8 +123,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public Department findByNameAndDomain(String name, Domain domain) throws Exception {
-        // TODO : Have to check the domain based duplication after completing the Domain CRUD.
-        return departmentRepo.findByNameAndDomain(name);
+        return departmentRepo.findByNameAndDomain(name, domain);
     }
 
     @Override
