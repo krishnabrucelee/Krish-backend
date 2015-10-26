@@ -129,7 +129,7 @@ public class User {
     }
 
     /**
-     * Set the userName.
+     * Set the user name.
      *
      * @param userName to set.
      */
@@ -228,7 +228,7 @@ public class User {
     }
 
     /**
-     * Get the uuid.
+     * Get the user uuid.
      *
      * @return the uuid.
      */
@@ -237,7 +237,7 @@ public class User {
     }
 
     /**
-     * Set the uuid.
+     * Set the user uuid.
      *
      * @param uuid to set.
      */
@@ -264,7 +264,7 @@ public class User {
     }
 
     /**
-     * Get the isActive.
+     * Get the active data.
      *
      * @return the isActive.
      */
@@ -273,7 +273,7 @@ public class User {
     }
 
     /**
-     * Set the isActive.
+     * Set the active data.
      *
      * @param isActive to set.
      */
@@ -336,7 +336,7 @@ public class User {
     }
 
     /**
-     * Get the createdBy.
+     * Get the created user.
      *
      * @return the createdBy.
      */
@@ -345,7 +345,7 @@ public class User {
     }
 
     /**
-     * Set the createdBy.
+     * Set the created user.
      *
      * @param createdBy to set.
      */
@@ -354,7 +354,7 @@ public class User {
     }
 
     /**
-     * Get the updatedBy.
+     * Get the updated user.
      *
      * @return the updatedBy.
      */
@@ -363,7 +363,7 @@ public class User {
     }
 
     /**
-     * Set the updatedBy.
+     * Set the updated user.
      *
      * @param updatedBy to set.
      */
