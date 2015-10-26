@@ -19,21 +19,21 @@ import org.springframework.data.annotation.LastModifiedBy;
 @Table(name = "ck_users")
 public class User {
 
-    /** Id of the Subject. */
+    /** Id of the user. */
     @Id
     @GeneratedValue
     @Column(name = "id")
     private Long id;
 
-    /** User Name of the User. */
+    /** User name of the user. */
     @Column(name = "user_name", nullable = false, unique = true)
     private String userName;
 
-    /** password of the User. */
+    /** Password of the user. */
     @Column(name = "password", nullable = false)
     private String password;
 
-    /** user role. */
+    /** User role. */
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     private Role role;
@@ -58,7 +58,7 @@ public class User {
     @Column(name = "status")
     private Status status;
 
-    /** Check user is active/in-active. */
+    /** IsActive attribute to verify Active or Inactive. */
     @Column(name = "is_active")
     private Boolean isActive;
 
