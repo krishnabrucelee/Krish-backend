@@ -46,12 +46,6 @@ public class DepartmentController extends CRUDController<Department> implements 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Department.", response = Department.class)
     @Override
     public Department create(@RequestBody Department department) throws Exception {
-//        Domain domain = new Domain();
-//        domain.setName("assistanz.com");
-//        domain.setCompanyName("Assistanz Networks");
-//        domain.setDomainOwner("Assistanz");
-//        domain = domainService.save(domain);
-//        department.setDomain(domain);
     	System.err.println(department.getDomain());
         return departmentService.save(department);
     }

@@ -24,7 +24,6 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
     @Query(value = "select dpt from Department dpt where dpt.isActive IS TRUE AND dpt.name=:name AND dpt.domain=:domain")
     Department findByNameAndDomain(@Param("name") String name, @Param("domain") Domain domain);
 
-
     /**
      * Find the department already exist for the same domain while update.
      *
