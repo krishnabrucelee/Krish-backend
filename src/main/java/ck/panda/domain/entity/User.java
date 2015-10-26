@@ -10,7 +10,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
-
 import org.joda.time.DateTime;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -20,32 +19,32 @@ import org.springframework.data.annotation.LastModifiedBy;
 @Table(name = "ck_users")
 public class User {
 
-    /** Id of the Subject. */
+    /** Id of the user. */
     @Id
     @GeneratedValue
     @Column(name = "id")
     private Long id;
 
-    /** User Name of the User. */
-    @Column(name = "user_name", nullable = false,unique = true)
+    /** User name of the user. */
+    @Column(name = "user_name", nullable = false, unique = true)
     private String userName;
 
-    /** password of the User. */
+    /** Password of the user. */
     @Column(name = "password", nullable = false)
     private String password;
 
-    /** user role. */
+    /** User role. */
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     private Role role;
 
     /** Email of the user. */
-    @Column(name = "email", nullable = false,unique = true)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     /** User type of the user. */
-    @Column(name = "user_type")
-    private UserType userType;
+    @Column(name = "type")
+    private Type type;
 
     /** Name of the user.  */
     @Column(name = "name")
@@ -57,9 +56,9 @@ public class User {
 
     /** User status. */
     @Column(name = "status")
-    private String status;
+    private Status status;
 
-    /** Check user is active/in-active. */
+    /** IsActive attribute to verify Active or Inactive. */
     @Column(name = "is_active")
     private Boolean isActive;
 
@@ -89,11 +88,17 @@ public class User {
     private User updatedBy;
 
     /** Define user type. */
-    public enum UserType {
-
-       /** Define user type constant. */
+    public enum Type {
+       /** Define type constant. */
         USER,
         ADMIN;
+    }
+
+    /** Define status. */
+    public enum Status {
+       /** Define status constant. */
+        DELETED,
+        BLOCKED;
     }
 
     /**
@@ -108,7 +113,7 @@ public class User {
     /**
      * Set the id.
      *
-     * @param id - the id to set.
+     * @param id to set.
      */
     public void setId(Long id) {
         this.id = id;
@@ -124,9 +129,9 @@ public class User {
     }
 
     /**
-     * Set the userName.
+     * Set the user name.
      *
-     * @param userName - the userName to set.
+     * @param userName to set.
      */
     public void setUserName(String userName) {
         this.userName = userName;
@@ -144,7 +149,7 @@ public class User {
     /**
      * Set the password.
      *
-     * @param password - the password to set.
+     * @param password to set.
      */
     public void setPassword(String password) {
         this.password = password;
@@ -162,7 +167,7 @@ public class User {
     /**
      * Set the role.
      *
-     * @param role - the role to set.
+     * @param role to set.
      */
     public void setRole(Role role) {
         this.role = role;
@@ -180,28 +185,28 @@ public class User {
     /**
      * Set the email.
      *
-     * @param email - the email to set.
+     * @param email to set.
      */
     public void setEmail(String email) {
         this.email = email;
     }
 
     /**
-     * Get the userType.
+     * Get the type.
      *
-     * @return the userType.
+     * @return the type.
      */
-    public UserType getUserType() {
-        return userType;
+    public Type getType() {
+        return type;
     }
 
     /**
-     * Set the userType.
+     * Set the type.
      *
-     * @param userType - the userType to set.
+     * @param type to set.
      */
-    public void setUserType(UserType userType) {
-        this.userType = userType;
+    public void setType(Type type) {
+        this.type = type;
     }
 
     /**
@@ -216,14 +221,14 @@ public class User {
     /**
      * Set the name.
      *
-     * @param name - the name to set.
+     * @param name to set.
      */
     public void setName(String name) {
         this.name = name;
     }
 
     /**
-     * Get the uuid.
+     * Get the user uuid.
      *
      * @return the uuid.
      */
@@ -232,9 +237,9 @@ public class User {
     }
 
     /**
-     * Set the uuid.
+     * Set the user uuid.
      *
-     * @param uuid - the uuid to set.
+     * @param uuid to set.
      */
     public void setUuid(String uuid) {
         this.uuid = uuid;
@@ -245,21 +250,21 @@ public class User {
      *
      * @return the status.
      */
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
     /**
      * Set the status.
      *
-     * @param status - the status to set.
+     * @param status to set.
      */
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 
     /**
-     * Get the isActive.
+     * Get the active data.
      *
      * @return the isActive.
      */
@@ -268,9 +273,9 @@ public class User {
     }
 
     /**
-     * Set the isActive.
+     * Set the active data.
      *
-     * @param isActive - the isActive to set.
+     * @param isActive to set.
      */
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
@@ -288,14 +293,14 @@ public class User {
     /**
      * Set the version.
      *
-     * @param version - the version to set.
+     * @param version to set.
      */
     public void setVersion(Long version) {
         this.version = version;
     }
 
     /**
-     * Get the createdDateTime.
+     * Get the created date time.
      *
      * @return the createdDateTime.
      */
@@ -304,16 +309,16 @@ public class User {
     }
 
     /**
-     * Set the createdDateTime.
+     * Set the created date time.
      *
-     * @param createdDateTime - the createdDateTime to set.
+     * @param createdDateTime to set.
      */
     public void setCreatedDateTime(DateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
     }
 
     /**
-     * Get the updatedDateTime.
+     * Get the updated date time.
      *
      * @return the updatedDateTime.
      */
@@ -322,16 +327,16 @@ public class User {
     }
 
     /**
-     * Set the updatedDateTime.
+     * Set the updated date time.
      *
-     * @param updatedDateTime - the updatedDateTime to set.
+     * @param updatedDateTime to set.
      */
     public void setUpdatedDateTime(DateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
 
     /**
-     * Get the createdBy.
+     * Get the created user.
      *
      * @return the createdBy.
      */
@@ -340,16 +345,16 @@ public class User {
     }
 
     /**
-     * Set the createdBy.
+     * Set the created user.
      *
-     * @param createdBy - the createdBy to set.
+     * @param createdBy to set.
      */
     public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
     }
 
     /**
-     * Get the updatedBy.
+     * Get the updated user.
      *
      * @return the updatedBy.
      */
@@ -358,9 +363,9 @@ public class User {
     }
 
     /**
-     * Set the updatedBy.
+     * Set the updated user.
      *
-     * @param updatedBy - the updatedBy to set.
+     * @param updatedBy to set.
      */
     public void setUpdatedBy(User updatedBy) {
         this.updatedBy = updatedBy;

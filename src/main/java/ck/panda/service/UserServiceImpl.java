@@ -1,9 +1,11 @@
 package ck.panda.service;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
+import java.util.Base64;
 import java.util.List;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.User;
@@ -25,6 +27,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Value(value = "${aes.salt.secretKey}")
+    private String secretKey;
+
     @Override
     public User save(User user) throws Exception {
 
@@ -34,11 +39,12 @@ public class UserServiceImpl implements UserService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-            MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-            messageDigest.update(user.getUserName().getBytes(),0, user.getUserName().length());
-            String hashedPass = new BigInteger(1,messageDigest.digest()).toString(16);
-            user.setPassword(hashedPass);
-            user.setIsActive(true);
+        	String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+        	byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+        	SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+        	String encryptedPassword = new String(EncryptionUtil.encrypt(user.getUserName(), originalKey));
+        	user.setPassword(encryptedPassword);
+        	user.setIsActive(true);
             return userRepository.save(user);
         }
     }
