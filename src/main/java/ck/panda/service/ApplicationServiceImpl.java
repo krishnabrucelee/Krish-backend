@@ -33,7 +33,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         Errors errors = validator.rejectIfNullEntity("application", application);
         errors = validator.validateEntity(application, errors);
-        errors = validator.validateType(errors, application.getType());
+        errors = validateType(errors, application.getType());
 
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
@@ -83,5 +83,21 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public Application findByType(String type) throws Exception {
         return applicationRepo.findByType(type);
+    }
+
+    /**
+     * Validates the type field.
+     *
+     * @param errors ,an error object
+     * @param type of the entity to be validated.
+     * @return error is present,else new error object is returned.
+     * @throws Exception if error is present.
+     */
+    public Errors validateType(Errors errors, String type) throws Exception {
+
+        if (this.findByType(type) != null) {
+            errors.addFieldError("type", "Application Type is already exists");
+        }
+        return errors;
     }
 }
