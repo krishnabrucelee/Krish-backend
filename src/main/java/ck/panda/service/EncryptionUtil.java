@@ -25,9 +25,4 @@ public class EncryptionUtil {
 	    return cipher.doFinal(encriptText.getBytes());
 	}
 
-	/** To decrypt text using 'AES' algorithm. */
-	public static String decrypt(byte[] decryptText){
-		return null;
-	}
-
 }
