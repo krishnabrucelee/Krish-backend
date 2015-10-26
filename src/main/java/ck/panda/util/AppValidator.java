@@ -60,7 +60,7 @@ public class AppValidator {
     /**
      * Validates the entity.
      *
-     * @param object ,which is to be validated.
+     * @param object to be validated.
      * @param errors ,an error object.
      * @return error is present,else new error object is returned.
      * @throws Exception if error is present.
