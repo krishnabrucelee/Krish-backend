@@ -1,11 +1,11 @@
 package ck.panda.service;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
 import ck.panda.domain.entity.User;
 import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.util.AppValidator;
@@ -25,6 +25,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
+    /** To save user object into database. */
     @Override
     public User save(User user) throws Exception {
 
@@ -34,15 +35,14 @@ public class UserServiceImpl implements UserService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-            MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-            messageDigest.update(user.getUserName().getBytes(),0, user.getUserName().length());
-            String hashedPass = new BigInteger(1,messageDigest.digest()).toString(16);
-            user.setPassword(hashedPass);
-            user.setIsActive(true);
+        	String encryptedPassword = new String(EncryptionUtil.encrypt(user.getUserName()));
+        	user.setPassword(encryptedPassword);
+        	user.setIsActive(true);
             return userRepository.save(user);
         }
     }
 
+    /** To update user object into database. */
     @Override
     public User update(User user) throws Exception {
     	  Errors errors = validator.rejectIfNullEntity("user", user);
@@ -60,6 +60,7 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    /** To delete user object from database. */
     @Override
     public void delete(Long id) throws Exception {
     	userRepository.delete(id);
@@ -70,6 +71,7 @@ public class UserServiceImpl implements UserService {
         return null;
     }
 
+    /** To find all user object from database. */
     @Override
     public Page<User> findAll(PagingAndSorting pagingAndSorting) throws Exception {
         return userRepository.findAll(pagingAndSorting.toPageRequest());

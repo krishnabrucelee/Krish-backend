@@ -27,7 +27,7 @@ public class User {
     private Long id;
 
     /** User Name of the User. */
-    @Column(name = "user_name", nullable = false,unique = true)
+    @Column(name = "user_name", nullable = false, unique = true)
     private String userName;
 
     /** password of the User. */
@@ -40,12 +40,12 @@ public class User {
     private Role role;
 
     /** Email of the user. */
-    @Column(name = "email", nullable = false,unique = true)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     /** User type of the user. */
-    @Column(name = "user_type")
-    private UserType userType;
+    @Column(name = "type")
+    private Type type;
 
     /** Name of the user.  */
     @Column(name = "name")
@@ -57,7 +57,7 @@ public class User {
 
     /** User status. */
     @Column(name = "status")
-    private String status;
+    private Status status;
 
     /** Check user is active/in-active. */
     @Column(name = "is_active")
@@ -89,11 +89,19 @@ public class User {
     private User updatedBy;
 
     /** Define user type. */
-    public enum UserType {
+    public enum Type {
 
-       /** Define user type constant. */
+       /** Define type constant. */
         USER,
         ADMIN;
+    }
+
+    /** Define status. */
+    public enum Status {
+
+       /** Define status constant. */
+        DELETED,
+        BLOCKED;
     }
 
     /**
@@ -187,21 +195,21 @@ public class User {
     }
 
     /**
-     * Get the userType.
+     * Get the type.
      *
-     * @return the userType.
+     * @return the type.
      */
-    public UserType getUserType() {
-        return userType;
+    public Type getType() {
+        return type;
     }
 
     /**
-     * Set the userType.
+     * Set the type.
      *
-     * @param userType - the userType to set.
+     * @param type - the type to set.
      */
-    public void setUserType(UserType userType) {
-        this.userType = userType;
+    public void setType(Type type) {
+        this.type = type;
     }
 
     /**
@@ -245,7 +253,7 @@ public class User {
      *
      * @return the status.
      */
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
@@ -254,7 +262,7 @@ public class User {
      *
      * @param status - the status to set.
      */
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 
