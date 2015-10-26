@@ -56,8 +56,7 @@ public class Application implements Serializable {
 
     /** Enum type for Application Status. */
     public enum Status {
-
-    /** Application type will be in a Enabled State. */
+        /** Application type will be in a Enabled State. */
         ENABLED,
         /** Application type will be in a Disabled State. */
         DISABLED
