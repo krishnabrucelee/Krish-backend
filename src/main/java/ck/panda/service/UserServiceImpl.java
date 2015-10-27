@@ -33,9 +33,11 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
+    /** Autowired cloudstackaccountservice object. */
     @Autowired
     private CloudStackAccountService csAccountService;
 
+    /** Autowired configutill object. */
     @Autowired
     private ConfigUtil configServer;
 

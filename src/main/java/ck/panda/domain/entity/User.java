@@ -377,7 +377,7 @@ public class User {
     }
 
     /**
-     *Convert JSONObject into user object.
+     * Convert JSONObject into user object.
      *
      * @param object JSON object.
      * @return user object.
@@ -390,7 +390,7 @@ public class User {
     }
 
     /**
-     *Mapping entity object into list.
+     * Mapping entity object into list.
      *
      * @param userList list of users.
      * @return user map

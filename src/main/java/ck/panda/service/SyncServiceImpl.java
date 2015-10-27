@@ -92,7 +92,7 @@ public class SyncServiceImpl  implements SyncService {
     @Autowired
     private UserService userService;
 
-    /** CloudStackRegionService for Region connectivity with cloudstack. */
+    /** CloudStackAccountService for User connectivity with cloudstack. */
     @Autowired
     private CloudStackAccountService csAccountService;
 
