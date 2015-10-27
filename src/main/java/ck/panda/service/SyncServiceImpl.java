@@ -6,15 +6,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Hypervisor;
+import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.OsType;
 import ck.panda.domain.entity.Region;
 import ck.panda.domain.entity.Zone;
 import ck.panda.util.CloudStackDomainService;
 import ck.panda.util.CloudStackHypervisorsService;
+import ck.panda.util.CloudStackNetworkOfferingService;
 import ck.panda.util.CloudStackOSService;
 import ck.panda.util.CloudStackRegionService;
 import ck.panda.util.CloudStackZoneService;
@@ -26,10 +27,10 @@ import ck.panda.util.error.exception.ApplicationException;
  * 1. Zone
  * 2. Domain
  * 3. Region
- * 4. Template
- * 5. Hypervisor
- * 6. OS Catogory
- * 7. OS Type
+ * 4. Hypervisor
+ * 5. OS Catogory
+ * 6. OS Type
+ * 7. Network Offering
  *
  * Get the corresponding data from cloud stack server, if the application does not have the data add it.
  * If the application has the data update it, if the application has data which the cloud stack server does not have,
@@ -87,6 +88,14 @@ public class SyncServiceImpl  implements SyncService {
     @Autowired
     private OsTypeService osTypeService;
 
+    /** CloudStackNetworkOfferingService for network connectivity with cloudstack. */
+    @Autowired
+    private CloudStackNetworkOfferingService csNetworkOfferingService;
+
+   /** NetworkOfferingService for listing network offers in cloudstack server. */
+    @Autowired
+    private NetworkOfferingService networkOfferingService;
+
     /**
      * Sync call for synchronization list of Region, domain, region. template, hypervisor
      * @throws Exception unhandled errors.
@@ -110,6 +119,9 @@ public class SyncServiceImpl  implements SyncService {
 
         //6. Sync OSType entity
         this.syncOsTypes();
+
+        //7. Sync Network Offering entity
+        this.syncNetworkOffering();
 
     }
 
@@ -239,7 +251,7 @@ public class SyncServiceImpl  implements SyncService {
     }
 
     /**
-     * Sync with Cloud Server Region.
+     * Sync with Cloud Server Hypervisor.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
@@ -360,6 +372,48 @@ public class SyncServiceImpl  implements SyncService {
         //add it to app db
         for (String key: csOsTypeMap.keySet()) {
             osTypeService.save(csOsTypeMap.get(key));
+        }
+    }
+
+    /**
+     * Sync with CloudStack server Network offering.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
+     */
+    private void syncNetworkOffering() throws ApplicationException, Exception {
+
+        //1. Get all the networkOffering objects from CS server as hash
+        List<NetworkOffering> csNetworkOfferingList = networkOfferingService.findAllFromCSServer();
+        HashMap<String, NetworkOffering> csNetworkOfferingMap = (HashMap<String, NetworkOffering>) NetworkOffering.convert(csNetworkOfferingList);
+
+        //2. Get all the networkOffering objects from application
+        List<NetworkOffering> appNetworkOfferingList = networkOfferingService.findAll();
+
+        // 3. Iterate application networkOffering list
+        for (NetworkOffering networkOffering: appNetworkOfferingList) {
+             //3.1 Find the corresponding CS server networkOfferingService object by finding it in a hash using uuid
+            if (csNetworkOfferingMap.containsKey(networkOffering.getUuid())) {
+                NetworkOffering csNetworkOffering = csNetworkOfferingMap.get(networkOffering.getUuid());
+
+                networkOffering.setName(csNetworkOffering.getName());
+
+                //3.2 If found, update the networkOffering object in app db
+                networkOfferingService.update(networkOffering);
+
+                //3.3 Remove once updated, so that we can have the list of cs networkOffering which is not added in the app
+                csNetworkOfferingMap.remove(networkOffering.getUuid());
+            } else {
+                networkOfferingService.delete(networkOffering);
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete
+            }
+        }
+        //4. Get the remaining list of cs server hash NetworkOffering object, then iterate and
+        //add it to app db
+        for (String key: csNetworkOfferingMap.keySet()) {
+            networkOfferingService.save(csNetworkOfferingMap.get(key));
         }
     }
 

@@ -376,7 +376,7 @@ public class Domain {
   }
 
   /**
-   *Mapping entity object into list.
+   * Mapping entity object into list.
    *
    * @param domainList list of domains.
    * @return domain map

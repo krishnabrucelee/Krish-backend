@@ -2,19 +2,18 @@ package ck.panda.util;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-
 import org.apache.commons.httpclient.NameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * CloudStack Region Service for cloud Stack connectivity with Region.
+ * CloudStack NetworkOffering Service for cloud Stack connectivity with network.
  *
  */
 @Service
-public class CloudStackRegionService {
+public class CloudStackNetworkOfferingService {
 
-    /** Cloudstack server for connectivity. */
+     /** Cloudstack server for connectivity. */
     @Autowired
     private CloudStackServer server;
 
@@ -28,23 +27,23 @@ public class CloudStackRegionService {
         this.server = server;
     }
 
-     /**
-     * Lists Regions for cloud stack.
+    /**
+     * Lists Network Offerings for cloud stack.
      *
      * @param optional from values cloud stack
      * @param response json or xml.
      * @return response Document
      * @throws Exception unhandled errors.
      */
-    public String listRegions(String response, HashMap<String, String> optional)
-            throws Exception {
+    public String listNetworkOfferings(String response, HashMap<String, String> optional) throws Exception {
 
         LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("listRegions", optional);
+                = server.getDefaultQuery("listNetworkOfferings", optional);
         arguments.add(new NameValuePair("response", response));
 
         String responseDocument = server.request(arguments);
 
         return responseDocument;
     }
+
 }
