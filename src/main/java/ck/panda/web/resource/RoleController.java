@@ -3,6 +3,8 @@ package ck.panda.web.resource;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +17,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Role;
+import ck.panda.service.DepartmentServiceImpl;
 import ck.panda.service.RoleService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -28,6 +31,9 @@ import ck.panda.util.web.CRUDController;
 @RequestMapping("/api/roles")
 @Api(value = "Roles", description = "Operations with roles", produces = "application/json")
 public class RoleController extends CRUDController<Role> implements ApiController {
+
+	/** Logger attribute. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoleController.class);
 
     /** Service reference to Role. */
     @Autowired
