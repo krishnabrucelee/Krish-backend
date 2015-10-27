@@ -123,9 +123,6 @@ public class SyncServiceImpl  implements SyncService {
         //7. Sync Network Offering entity
         this.syncNetworkOffering();
 
-
-
-
     }
 
     /**

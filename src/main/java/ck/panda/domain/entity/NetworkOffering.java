@@ -115,10 +115,24 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * @param id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    /**
      * @return the uuid
      */
     public String getUuid() {
         return uuid;
+    }
+
+    /**
+     * @param uuid to set
+     */
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     /**
@@ -129,6 +143,13 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * @param name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
      * @return the displayText
      */
     public String getDisplayText() {
@@ -136,75 +157,7 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
-     * @return the isActive
-     */
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    /**
-     * @return the version
-     */
-    public Long getVersion() {
-        return version;
-    }
-
-    /**
-     * @return the createdBy
-     */
-    public User getCreatedBy() {
-        return createdBy;
-    }
-
-    /**
-     * @return the updatedBy
-     */
-    public User getUpdatedBy() {
-        return updatedBy;
-    }
-
-    /**
-     * @return the createdDateTime
-     */
-    public DateTime getCreatedDateTime() {
-        return createdDateTime;
-    }
-
-    /**
-     * @return the updatedDateTime
-     */
-    public DateTime getUpdatedDateTime() {
-        return updatedDateTime;
-    }
-
-    /**
-     * @param id
-     * the id to set
-     */
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-
-    /**
-     * @param uuid
-     * the uuid to set
-     */
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
-
-    /**
-     * @param name
-     * the name to set
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * @param displayText
-     * the displayText to set
+     * @param displayText  to set
      */
     public void setDisplayText(String displayText) {
         this.displayText = displayText;
@@ -218,23 +171,49 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
-     * @param guestIpType the guestIpType to set
+     * @param guestIpType to set
      */
     public void setGuestIpType(String guestIpType) {
         this.guestIpType = guestIpType;
     }
 
     /**
-     * @param isActive
-     * the isActive to set
+     * @return the trafficType
+     */
+    public String getTrafficType() {
+        return trafficType;
+    }
+
+    /**
+     * @param trafficType to set
+     */
+    public void setTrafficType(String trafficType) {
+        this.trafficType = trafficType;
+    }
+
+    /**
+     * @return the isActive
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    /**
+     * @param isActive to set
      */
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
     }
 
     /**
-     * @param version
-     * the version to set
+     * @return the version
+     */
+    public Long getVersion() {
+        return version;
+    }
+
+    /**
+     * @param version  to set
      */
     public void setVersion(Long version) {
         this.version = version;
@@ -248,40 +227,63 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
-     * @param status
-     * the status to set
+     * @param status to set
      */
     public void setStatus(Status status) {
         this.status = status;
     }
 
     /**
-     * @param createdBy
-     * the createdBy to set
+     * @return the createdBy
+     */
+    public User getCreatedBy() {
+        return createdBy;
+    }
+
+    /**
+     * @param createdBy  to set
      */
     public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
     }
 
     /**
-     * @param updatedBy
-     * the updatedBy to set
+     * @return the updatedBy
+     */
+    public User getUpdatedBy() {
+        return updatedBy;
+    }
+
+    /**
+     * @param updatedBy to set
      */
     public void setUpdatedBy(User updatedBy) {
         this.updatedBy = updatedBy;
     }
 
     /**
-     * @param createdDateTime
-     * the createdDateTime to set
+     * @return the createdDateTime
+     */
+    public DateTime getCreatedDateTime() {
+        return createdDateTime;
+    }
+
+    /**
+     * @param createdDateTime to set
      */
     public void setCreatedDateTime(DateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
     }
 
     /**
-     * @param updatedDateTime
-     * the updatedDateTime to set
+     * @return the updatedDateTime
+     */
+    public DateTime getUpdatedDateTime() {
+        return updatedDateTime;
+    }
+
+    /**
+      * @param updatedDateTime to update time.
      */
     public void setUpdatedDateTime(DateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
