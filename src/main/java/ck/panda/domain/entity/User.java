@@ -1,5 +1,8 @@
 package ck.panda.domain.entity;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,6 +14,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 import org.joda.time.DateTime;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 
@@ -369,5 +374,34 @@ public class User {
      */
     public void setUpdatedBy(User updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    /**
+     *Convert JSONObject into user object.
+     *
+     * @param object JSON object.
+     * @return user object.
+     */
+    public static User convert(JSONObject object) throws JSONException {
+        User user = new User();
+        user.uuid = object.get("id").toString();
+        user.userName = object.get("name").toString();
+        return user;
+    }
+
+    /**
+     *Mapping entity object into list.
+     *
+     * @param userList list of users.
+     * @return user map
+     */
+    public static Map<String, User> convert(List<User> userList) {
+        Map<String, User> userMap = new HashMap<String, User>();
+
+        for (User user : userList) {
+            userMap.put(user.getUuid(), user);
+        }
+
+        return userMap;
     }
 }
