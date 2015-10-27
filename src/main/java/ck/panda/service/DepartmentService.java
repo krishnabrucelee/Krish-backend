@@ -16,16 +16,6 @@ import org.springframework.stereotype.Service;
 @Service
 public interface DepartmentService  extends CRUDService<Department>  {
 
-    /**
-     * Method to find name of the department.
-     *
-     * @param name of the department
-     * @param domain - Domain of the department
-     * @return name
-     * @throws Exception if error occurs
-     */
-     Department findByNameAndDomain(String name, Domain domain) throws Exception;
-
      /**
       * Method to soft delete department.
       *

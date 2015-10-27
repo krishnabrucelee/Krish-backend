@@ -37,7 +37,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         Errors errors = validator.rejectIfNullEntity("department", department);
         errors = validator.validateEntity(department, errors);
-        errors = this.validateName(errors, department.getName(), department.getDomain(), department);
+        errors = this.validateName(errors, department.getName(), department.getDomain(), (long) 0);
 
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
@@ -57,15 +57,8 @@ public class DepartmentServiceImpl implements DepartmentService {
      * @return errors.
      * @throws Exception
      */
-    private Errors validateName(Errors errors, String name, Domain domain, Department department) throws Exception {
-    	Department dep;
-    	if(department.getId() != null) {
-    		dep = departmentRepo.findByNameAndDomainWithEdit(name, domain, department.getId());
-    	} else {
-    		dep = departmentRepo.findByNameAndDomain(name, domain);
-    	}
-
-        if (dep != null) {
+    private Errors validateName(Errors errors, String name, Domain domain, Long departmentId) throws Exception {
+        if (departmentRepo.findByNameAndDomain(name, domain, departmentId) != null) {
             errors.addFieldError("name", "department.already.exist.for.same.domain");
         }
         return errors;
@@ -76,7 +69,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         Errors errors = validator.rejectIfNullEntity("department", department);
         errors = validator.validateEntity(department, errors);
-        errors = this.validateName(errors, department.getName(), department.getDomain(), department);
+        errors = this.validateName(errors, department.getName(), department.getDomain(), department.getId());
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
@@ -121,10 +114,6 @@ public class DepartmentServiceImpl implements DepartmentService {
         return departmentRepo.findAllByActive(pagingAndSorting.toPageRequest());
     }
 
-    @Override
-    public Department findByNameAndDomain(String name, Domain domain) throws Exception {
-        return departmentRepo.findByNameAndDomain(name, domain);
-    }
 
     @Override
     public Department softDelete(Department department) throws Exception {

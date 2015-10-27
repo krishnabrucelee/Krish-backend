@@ -2,9 +2,6 @@ package ck.panda.domain.entity;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.List;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -14,7 +11,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
@@ -112,8 +108,7 @@ public class Department implements Serializable {
     /**
      * Parameterized constructor.
      *
-     * @param name
-     *            to set
+     * @param name to set
      */
     public Department(String name) {
         super();
@@ -132,7 +127,7 @@ public class Department implements Serializable {
     /**
      * Set the id.
      *
-     * @param id - the Long to set
+     * @param id the Long to set
      */
     public void setId(Long id) {
         this.id = id;
@@ -150,7 +145,7 @@ public class Department implements Serializable {
     /**
      * Set the name.
      *
-     * @param name - the String to set
+     * @param name the String to set
      */
     public void setName(String name) {
         this.name = name;
@@ -187,7 +182,7 @@ public class Department implements Serializable {
     /**
      * Set the description.
      *
-     * @param description - the String to set.
+     * @param description the String to set.
      */
     public void setDescription(String description) {
         this.description = description;
@@ -205,7 +200,7 @@ public class Department implements Serializable {
     /**
      * Set the version.
      *
-     * @param version - the Long to set
+     * @param version the Long to set
      */
     public void setVersion(Long version) {
         this.version = version;
@@ -223,7 +218,7 @@ public class Department implements Serializable {
     /**
      * Set the createdBy.
      *
-     * @param createdBy - the User to set
+     * @param createdBy the User to set
      */
     public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
@@ -241,7 +236,7 @@ public class Department implements Serializable {
     /**
      * Set the updatedBy.
      *
-     * @param updatedBy - the User to set
+     * @param updatedBy the User to set
      */
     public void setUpdatedBy(User updatedBy) {
         this.updatedBy = updatedBy;
@@ -259,7 +254,7 @@ public class Department implements Serializable {
     /**
      * Set the createdDateTime.
      *
-     * @param createdDateTime - the DateTime to set
+     * @param createdDateTime the DateTime to set
      */
     public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
@@ -277,7 +272,7 @@ public class Department implements Serializable {
     /**
      * Set the updatedDateTime.
      *
-     * @param updatedDateTime - the DateTime to set
+     * @param updatedDateTime the DateTime to set
      */
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
