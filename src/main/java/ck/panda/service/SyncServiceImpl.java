@@ -93,8 +93,8 @@ public class SyncServiceImpl  implements SyncService {
     /** UserService for listing Users. */
     @Autowired
     private UserService userService;
-    
-    
+
+
     /** CloudStackNetworkOfferingService for network connectivity with cloudstack. */
     @Autowired
     private CloudStackNetworkOfferingService csNetworkOfferingService;
@@ -103,7 +103,7 @@ public class SyncServiceImpl  implements SyncService {
     /** CloudStackAccountService for User connectivity with cloudstack. */
     @Autowired
     private CloudStackAccountService csAccountService;
-        
+
    /** NetworkOfferingService for listing network offers in cloudstack server. */
     @Autowired
     private NetworkOfferingService networkOfferingService;
@@ -135,7 +135,7 @@ public class SyncServiceImpl  implements SyncService {
 
        //7. Sync User entity
         this.syncUser();
-        
+
         //8. Sync Network Offering entity
         this.syncNetworkOffering();
 
@@ -429,10 +429,9 @@ public class SyncServiceImpl  implements SyncService {
         //add it to app db
         for (String key: csUserMap.keySet()) {
             userService.save(csUserMap.get(key));
-            networkOfferingService.save(csNetworkOfferingMap.get(key));
         }
     }
-     
+
         /**
      * Sync with CloudStack server Network offering.
      *
