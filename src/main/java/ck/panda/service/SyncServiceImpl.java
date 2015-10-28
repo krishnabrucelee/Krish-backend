@@ -12,7 +12,9 @@ import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.OsType;
 import ck.panda.domain.entity.Region;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.Zone;
+import ck.panda.util.CloudStackAccountService;
 import ck.panda.util.CloudStackDomainService;
 import ck.panda.util.CloudStackHypervisorsService;
 import ck.panda.util.CloudStackNetworkOfferingService;
@@ -88,13 +90,24 @@ public class SyncServiceImpl  implements SyncService {
     @Autowired
     private OsTypeService osTypeService;
 
+    /** UserService for listing Users. */
+    @Autowired
+    private UserService userService;
+
+
     /** CloudStackNetworkOfferingService for network connectivity with cloudstack. */
     @Autowired
     private CloudStackNetworkOfferingService csNetworkOfferingService;
 
+
+    /** CloudStackAccountService for User connectivity with cloudstack. */
+    @Autowired
+    private CloudStackAccountService csAccountService;
+
    /** NetworkOfferingService for listing network offers in cloudstack server. */
     @Autowired
     private NetworkOfferingService networkOfferingService;
+
 
     /**
      * Sync call for synchronization list of Region, domain, region. template, hypervisor
@@ -120,7 +133,10 @@ public class SyncServiceImpl  implements SyncService {
         //6. Sync OSType entity
         this.syncOsTypes();
 
-        //7. Sync Network Offering entity
+        //7. Sync User entity
+        this.syncUser();
+
+        //8. Sync Network Offering entity
         this.syncNetworkOffering();
 
     }
@@ -376,6 +392,47 @@ public class SyncServiceImpl  implements SyncService {
     }
 
     /**
+     * Sync with Cloud Server Account.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    private void syncUser() throws ApplicationException, Exception {
+
+        //1. Get all the user objects from CS server as hash
+        List<User> csAccountService = userService.findAllFromCSServer();
+        HashMap<String, User> csUserMap = (HashMap<String, User>) User.convert(csAccountService);
+
+        //2. Get all the user objects from application
+        List<User> appUserList = userService.findAll();
+
+        // 3. Iterate application user list
+        for (User user: appUserList) {
+             //3.1 Find the corresponding CS server user object by finding it in a hash using uuid
+            if (csUserMap.containsKey(user.getUuid())) {
+                User csUser = csUserMap.get(user.getUuid());
+
+                user.setName(csUser.getName());
+
+                //3.2 If found, update the user object in app db
+                userService.update(user);
+
+                //3.3 Remove once updated, so that we can have the list of cs user which is not added in the app
+                csUserMap.remove(user.getUuid());
+            } else {
+                userService.delete(user);
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete
+            }
+        }
+        //4. Get the remaining list of cs server hash user object, then iterate and
+        //add it to app db
+        for (String key: csUserMap.keySet()) {
+            userService.save(csUserMap.get(key));
+        }
+    }
+
+   /**
      * Sync with CloudStack server Network offering.
      *
      * @throws ApplicationException unhandled application errors.
