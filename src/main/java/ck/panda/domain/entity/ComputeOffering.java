@@ -1,13 +1,21 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -31,6 +39,7 @@ import org.springframework.data.annotation.Version;
 
 public class ComputeOffering implements Serializable {
 
+
     /** The id of the Compute offering table. */
     @Id
     @GeneratedValue
@@ -42,10 +51,7 @@ public class ComputeOffering implements Serializable {
     private String uuid;
 
     /** The name of the Compute offering. */
-    @NotEmpty
-    @Column(unique = true, nullable = false)
-    @Size(min = 4, max = 20)
-    //@Column(name = "name")
+    @Column(name = "name")
     private String name;
 
     /** The number of CPU cores needed. */
@@ -126,9 +132,13 @@ public class ComputeOffering implements Serializable {
     private Boolean isCustom;
 
     /** Domain id for this offering. */
-    //Todo : make ref id after adding zone entity
-    @Column(name = "domain_id")
+    @JoinColumn(name = "domain_id", referencedColumnName = "id" ,insertable=false, updatable=false)
+    @ManyToOne
+    private Domain domain;
+
+   @Column(name="domain_id")
     private Long domainId;
+
 
     /** The Disk iopsWriteRate for the Compute offering. */
     @Column(name = "disk_iops_write_rate")
@@ -137,7 +147,8 @@ public class ComputeOffering implements Serializable {
     /**
      * The storage type local, shared for this Compute offering. */
     @Column(name = "storage_type")
-    private String storageType;
+    @Enumerated(EnumType.STRING)
+    private StorageType storageType;
 
     /** Created by user. */
     @CreatedBy
@@ -170,8 +181,74 @@ public class ComputeOffering implements Serializable {
 
     /** Disk input and output is average or good or excellent. */
     @Column(name = "disk_io")
-    private String diskIo;
+    @Enumerated(EnumType.STRING)
+    private DiskIo diskIo;
 
+    /** Zone id for this offering. */
+    @JoinColumn(name = "zone_id", referencedColumnName = "id",insertable = false, updatable = false)
+    @OneToOne
+    private Zone zone;
+
+    /** id of the zone.*/
+    @Column(name = "zone_id")
+    private Long zoneId;
+
+    /** The Setup Cost. */
+    @Column(name = "setup_cost")
+    private Double setupCost;
+
+    /** Cost of Running Instance for vcpu. */
+    @Column(name = "instance_running_cost_vcpu")
+    private Double instanceRunningCostVcpu;
+
+    /** Cost of Running Instancefor memory */
+    @Column(name = "instance_running_cost_memory")
+    private Double instanceRunningCostMemory;
+
+    /** Cost of Running Instance for iops. */
+    @Column(name = "instance_running_cost_iops")
+    private Double instanceRunningCostIops;
+
+    /** Cost of Stoppage Instance for vcpu */
+    @Column(name = "instance_stoppage_cost_vcpu")
+    private Double instanceStoppageCostVcpu;
+
+    /** Cost of Stoppage Instance for memory */
+    @Column(name = "instance_stoppage_cost_memory")
+    private Double instanceStoppageCostMemory;
+
+    /** Cost of Stoppage Instance. for iops*/
+    @Column(name = "instance_stoppage_cost_iops")
+    private Double instanceStoppageCostIops;
+
+
+    /**
+     * Enumeration for Region status.
+     */
+    public enum DiskIo {
+
+           /** If region is enabled we can create zones and pods. */
+           AVERAGE,
+
+           /** If region is disabled cannot create any zones and pods until region gets enabled. */
+           GOOD,
+
+           /** If region is deleted we cannot create zones and pods. */
+           EXCELLENT
+    }
+
+    /**
+     * Enumeration for Region status.
+     */
+    public enum StorageType {
+
+           /** If region is enabled we can create zones and pods. */
+           SHARED,
+
+           /** If region is disabled cannot create any zones and pods until region gets enabled. */
+           LOCAL,
+
+    }
     /**
      * @return the id
      */
@@ -275,13 +352,6 @@ public class ComputeOffering implements Serializable {
      */
     public Integer getDiskIopsWriteRate() {
         return diskIopsWriteRate;
-    }
-
-    /**
-     * @return the storageType
-     */
-    public String getStorageType() {
-        return storageType;
     }
 
     /**
@@ -404,13 +474,6 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
-     * @param storageType the storageType to set
-     */
-    public void setStorageType(String storageType) {
-        this.storageType = storageType;
-    }
-
-    /**
      * @param createdBy the createdBy to set
      */
     public void setCreatedBy(User createdBy) {
@@ -431,7 +494,7 @@ public class ComputeOffering implements Serializable {
         return isPublic;
     }
 
-    /**
+   /**
      * @return the domainId
      */
     public Long getDomainId() {
@@ -466,17 +529,18 @@ public class ComputeOffering implements Serializable {
         this.version = version;
     }
 
+
     /**
      * @return the diskIo
      */
-    public String getDiskIo() {
+    public DiskIo getDiskIo() {
         return diskIo;
     }
 
     /**
      * @param diskIo the diskIo to set
      */
-    public void setDiskIo(String diskIo) {
+    public void setDiskIo(DiskIo diskIo) {
         this.diskIo = diskIo;
     }
 
@@ -606,6 +670,164 @@ public class ComputeOffering implements Serializable {
         this.isCustom = isCustom;
     }
 
+
+
+    /**
+     * @return the domain
+     */
+    public Domain getDomain() {
+        return domain;
+    }
+
+    /**
+     * @param domain the domain to set
+     */
+    public void setDomain(Domain domain) {
+        this.domain = domain;
+    }
+
+
+    /**
+     * @return the zone
+     */
+    public Zone getZone() {
+        return zone;
+    }
+
+    /**
+     * @param zone the zone to set
+     */
+    public void setZone(Zone zone) {
+        this.zone = zone;
+    }
+
+    /**
+     * @return the zoneId
+     */
+    public Long getZoneId() {
+        return zoneId;
+    }
+
+    /**
+     * @param zoneId the zoneId to set
+     */
+    public void setZoneId(Long zoneId) {
+        this.zoneId = zoneId;
+    }
+
+    /**
+     * @return the storageType
+     */
+    public StorageType getStorageType() {
+        return storageType;
+    }
+
+    /**
+     * @param storageType the storageType to set
+     */
+    public void setStorageType(StorageType storageType) {
+        this.storageType = storageType;
+    }
+
+
+    /**
+     * @return the setupCost
+     */
+    public Double getSetupCost() {
+        return setupCost;
+    }
+
+    /**
+     * @param setupCost the setupCost to set
+     */
+    public void setSetupCost(Double setupCost) {
+        this.setupCost = setupCost;
+    }
+
+    /**
+     * @return the instanceRunningCostVcpu
+     */
+    public Double getInstanceRunningCostVcpu() {
+        return instanceRunningCostVcpu;
+    }
+
+    /**
+     * @param instanceRunningCostVcpu the instanceRunningCostVcpu to set
+     */
+    public void setInstanceRunningCostVcpu(Double instanceRunningCostVcpu) {
+        this.instanceRunningCostVcpu = instanceRunningCostVcpu;
+    }
+
+    /**
+     * @return the instanceRunningCostMemory
+     */
+    public Double getInstanceRunningCostMemory() {
+        return instanceRunningCostMemory;
+    }
+
+    /**
+     * @param instanceRunningCostMemory the instanceRunningCostMemory to set
+     */
+    public void setInstanceRunningCostMemory(Double instanceRunningCostMemory) {
+        this.instanceRunningCostMemory = instanceRunningCostMemory;
+    }
+
+    /**
+     * @return the instanceRunningCostIops
+     */
+    public Double getInstanceRunningCostIops() {
+        return instanceRunningCostIops;
+    }
+
+    /**
+     * @param instanceRunningCostIops the instanceRunningCostIops to set
+     */
+    public void setInstanceRunningCostIops(Double instanceRunningCostIops) {
+        this.instanceRunningCostIops = instanceRunningCostIops;
+    }
+
+    /**
+     * @return the instanceStoppageCostVcpu
+     */
+    public Double getInstanceStoppageCostVcpu() {
+        return instanceStoppageCostVcpu;
+    }
+
+    /**
+     * @param instanceStoppageCostVcpu the instanceStoppageCostVcpu to set
+     */
+    public void setInstanceStoppageCostVcpu(Double instanceStoppageCostVcpu) {
+        this.instanceStoppageCostVcpu = instanceStoppageCostVcpu;
+    }
+
+    /**
+     * @return the instanceStoppageCostMemory
+     */
+    public Double getInstanceStoppageCostMemory() {
+        return instanceStoppageCostMemory;
+    }
+
+    /**
+     * @param instanceStoppageCostMemory the instanceStoppageCostMemory to set
+     */
+    public void setInstanceStoppageCostMemory(Double instanceStoppageCostMemory) {
+        this.instanceStoppageCostMemory = instanceStoppageCostMemory;
+    }
+
+    /**
+     * @return the instanceStoppageCostIops
+     */
+    public Double getInstanceStoppageCostIops() {
+        return instanceStoppageCostIops;
+    }
+
+    /**
+     * @param instanceStoppageCostIops the instanceStoppageCostIops to set
+     */
+    public void setInstanceStoppageCostIops(Double instanceStoppageCostIops) {
+        this.instanceStoppageCostIops = instanceStoppageCostIops;
+    }
+
     /**
      * Convert JSONObject to domain entity.
      *
@@ -616,6 +838,25 @@ public class ComputeOffering implements Serializable {
     public static ComputeOffering convert(JSONObject object) throws JSONException {
         ComputeOffering compute = new ComputeOffering();
         compute.uuid = object.get("id").toString();
+        compute.name = object.get("name").toString();
+        compute.displayText = object.get("displaytext").toString();
         return compute;
+    }
+
+
+    /**
+     * Mapping entity object into list.
+     *
+     * @param computeOfferingList list of domains.
+     * @return computeOffering map
+     */
+    public static Map<String, ComputeOffering> convert(List<ComputeOffering> computeOfferingList) {
+        Map<String, ComputeOffering> computeOfferingMap = new HashMap<String, ComputeOffering>();
+
+        for (ComputeOffering computeOffering : computeOfferingList) {
+            computeOfferingMap.put(computeOffering.getUuid(), computeOffering);
+        }
+
+        return computeOfferingMap;
     }
  }

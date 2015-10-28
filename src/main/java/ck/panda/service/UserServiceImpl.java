@@ -53,23 +53,23 @@ public class UserServiceImpl implements UserService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-        	String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
-        	byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
-        	SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-        	String encryptedPassword = new String(EncryptionUtil.encrypt(user.getPassword(), originalKey));
-        	user.setPassword(encryptedPassword);
-        	user.setIsActive(true);
-        	csAccountService.setServer(configServer.setServer(1L));
-        	HashMap<String, String> userMap = new HashMap<String, String>();
-        	csAccountService.createAccount(String.valueOf(user.getType().ordinal()),
-        			user.getEmail(), user.getName(), "test", user.getUserName(), user.getPassword(), "json", userMap);
+            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+            byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+            String encryptedPassword = new String(EncryptionUtil.encrypt(user.getPassword(), originalKey));
+            user.setPassword(encryptedPassword);
+            user.setIsActive(true);
+            csAccountService.setServer(configServer.setServer(1L));
+            HashMap<String, String> userMap = new HashMap<String, String>();
+            csAccountService.createAccount(String.valueOf(user.getType().ordinal()),
+                    user.getEmail(), user.getName(), "test", user.getUserName(), user.getPassword(), "json", userMap);
             return userRepository.save(user);
         }
     }
 
     @Override
     public User update(User user) throws Exception {
-    	  Errors errors = validator.rejectIfNullEntity("user", user);
+          Errors errors = validator.rejectIfNullEntity("user", user);
           errors = validator.validateEntity(user, errors);
 
           if (errors.hasErrors()) {
@@ -86,7 +86,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void delete(Long id) throws Exception {
-    	userRepository.delete(id);
+        userRepository.delete(id);
     }
 
     @Override

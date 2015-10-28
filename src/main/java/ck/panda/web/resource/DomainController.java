@@ -60,10 +60,10 @@ public class DomainController extends CRUDController<Domain> implements ApiContr
         return pageResponse.getContent();
     }
 
-	@Override
-	public void testMethod() throws Exception {
-		// TODO Auto-generated method stub
+    @Override
+    public void testMethod() throws Exception {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
 }
