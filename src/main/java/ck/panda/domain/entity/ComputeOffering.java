@@ -193,6 +193,35 @@ public class ComputeOffering implements Serializable {
     @Column(name = "zone_id")
     private Long zoneId;
 
+    /** The Setup Cost. */
+    @Column(name = "setup_cost")
+    private Double setupCost;
+
+    /** Cost of Running Instance for vcpu. */
+    @Column(name = "instance_running_cost_vcpu")
+    private Double instanceRunningCostVcpu;
+
+    /** Cost of Running Instancefor memory */
+    @Column(name = "instance_running_cost_memory")
+    private Double instanceRunningCostMemory;
+
+    /** Cost of Running Instance for iops. */
+    @Column(name = "instance_running_cost_iops")
+    private Double instanceRunningCostIops;
+
+    /** Cost of Stoppage Instance for vcpu */
+    @Column(name = "instance_stoppage_cost_vcpu")
+    private Double instanceStoppageCostVcpu;
+
+    /** Cost of Stoppage Instance for memory */
+    @Column(name = "instance_stoppage_cost_memory")
+    private Double instanceStoppageCostMemory;
+
+    /** Cost of Stoppage Instance. for iops*/
+    @Column(name = "instance_stoppage_cost_iops")
+    private Double instanceStoppageCostIops;
+
+
     /**
      * Enumeration for Region status.
      */
@@ -700,6 +729,104 @@ public class ComputeOffering implements Serializable {
         this.storageType = storageType;
     }
 
+
+    /**
+     * @return the setupCost
+     */
+    public Double getSetupCost() {
+        return setupCost;
+    }
+
+    /**
+     * @param setupCost the setupCost to set
+     */
+    public void setSetupCost(Double setupCost) {
+        this.setupCost = setupCost;
+    }
+
+    /**
+     * @return the instanceRunningCostVcpu
+     */
+    public Double getInstanceRunningCostVcpu() {
+        return instanceRunningCostVcpu;
+    }
+
+    /**
+     * @param instanceRunningCostVcpu the instanceRunningCostVcpu to set
+     */
+    public void setInstanceRunningCostVcpu(Double instanceRunningCostVcpu) {
+        this.instanceRunningCostVcpu = instanceRunningCostVcpu;
+    }
+
+    /**
+     * @return the instanceRunningCostMemory
+     */
+    public Double getInstanceRunningCostMemory() {
+        return instanceRunningCostMemory;
+    }
+
+    /**
+     * @param instanceRunningCostMemory the instanceRunningCostMemory to set
+     */
+    public void setInstanceRunningCostMemory(Double instanceRunningCostMemory) {
+        this.instanceRunningCostMemory = instanceRunningCostMemory;
+    }
+
+    /**
+     * @return the instanceRunningCostIops
+     */
+    public Double getInstanceRunningCostIops() {
+        return instanceRunningCostIops;
+    }
+
+    /**
+     * @param instanceRunningCostIops the instanceRunningCostIops to set
+     */
+    public void setInstanceRunningCostIops(Double instanceRunningCostIops) {
+        this.instanceRunningCostIops = instanceRunningCostIops;
+    }
+
+    /**
+     * @return the instanceStoppageCostVcpu
+     */
+    public Double getInstanceStoppageCostVcpu() {
+        return instanceStoppageCostVcpu;
+    }
+
+    /**
+     * @param instanceStoppageCostVcpu the instanceStoppageCostVcpu to set
+     */
+    public void setInstanceStoppageCostVcpu(Double instanceStoppageCostVcpu) {
+        this.instanceStoppageCostVcpu = instanceStoppageCostVcpu;
+    }
+
+    /**
+     * @return the instanceStoppageCostMemory
+     */
+    public Double getInstanceStoppageCostMemory() {
+        return instanceStoppageCostMemory;
+    }
+
+    /**
+     * @param instanceStoppageCostMemory the instanceStoppageCostMemory to set
+     */
+    public void setInstanceStoppageCostMemory(Double instanceStoppageCostMemory) {
+        this.instanceStoppageCostMemory = instanceStoppageCostMemory;
+    }
+
+    /**
+     * @return the instanceStoppageCostIops
+     */
+    public Double getInstanceStoppageCostIops() {
+        return instanceStoppageCostIops;
+    }
+
+    /**
+     * @param instanceStoppageCostIops the instanceStoppageCostIops to set
+     */
+    public void setInstanceStoppageCostIops(Double instanceStoppageCostIops) {
+        this.instanceStoppageCostIops = instanceStoppageCostIops;
+    }
 
     /**
      * Convert JSONObject to domain entity.
