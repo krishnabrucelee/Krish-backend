@@ -34,7 +34,6 @@ public class CloudStackNetworkService {
      * @param optional values from cloudstack
      * @param response json or xml
      * @return reponse document.
-     * @throws Exception unhandled errors.
      */
     public String createNetwork(String networkOfferingDisplayText,
             String networkOfferingName, String networkOfferingId, String networkOfferingZoneId, String response,
@@ -71,4 +70,23 @@ public class CloudStackNetworkService {
 
         return responseDocument;
     }
+    
+      /**
+     * Lists all available networks.
+     *
+     * @param optional
+     * @return
+     * @throws Exception
+     */
+    public String listNetworks( String response,HashMap<String, String> optional)
+            throws Exception {
+
+        LinkedList<NameValuePair> arguments
+                = server.getDefaultQuery("listNetworks", optional);
+        arguments.add(new NameValuePair("response",response));
+        String responseDocument = server.request(arguments);
+
+        return responseDocument;
+    }
+
 }

@@ -3,15 +3,25 @@ package ck.panda.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.repository.jpa.NetworkOfferingRepository;
+import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackNetworkOfferingService;
+import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
+import ck.panda.util.error.Errors;
+import ck.panda.util.error.exception.ApplicationException;
 
 /**
  * Service implementation for NetworkOffering entity.
@@ -20,67 +30,87 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 @Service
 public class NetworkOfferingServiceImpl implements NetworkOfferingService {
 
-    /** NetworkOffering repository reference. */
-    @Autowired
-    private NetworkOfferingRepository networkRepo;
+	/** Logger attribute. */
+	private static final Logger LOGGER = LoggerFactory.getLogger(NetworkOfferingServiceImpl.class);
 
-    /** CloudStack Network Offering service for connectivity with cloudstack. */
-    @Autowired
-    private CloudStackNetworkOfferingService networkOfferingService;
+	/** Validator attribute. */
+	@Autowired
+	private AppValidator validator;
 
-    @Override
-    public NetworkOffering save(NetworkOffering network) throws Exception {
-        return networkRepo.save(network);
+	/** NetworkOffering repository reference. */
+	@Autowired
+	private NetworkOfferingRepository networkRepo;
+
+	/** CloudStack Network Offering service for connectivity with cloudstack. */
+	@Autowired
+	private CloudStackNetworkOfferingService csNetworkOfferingService;
+
+	@Autowired
+	private ConfigUtil config;
+
+	@Override
+	public NetworkOffering save(NetworkOffering network) throws Exception {
+		Errors errors = validator.rejectIfNullEntity("networkOffering", network);
+		errors = validator.validateEntity(network, errors);
+
+		if (errors.hasErrors()) {
+			throw new ApplicationException(errors);
+		} else {
+
+			return networkRepo.save(network);
+		}
+	}
+
+	@Override
+	public NetworkOffering update(NetworkOffering network) throws Exception {
+		return networkRepo.save(network);
+	}
+
+	@Override
+	public void delete(NetworkOffering id) throws Exception {
+		networkRepo.delete(id);
+	}
+
+	@Override
+	public void delete(Long id) throws Exception {
+		networkRepo.delete(id);
+	}
+
+	@Override
+	public NetworkOffering find(Long id) throws Exception {
+		return networkRepo.findOne(id);
+	}
+
+	@Override
+	public Page<NetworkOffering> findAll(PagingAndSorting pagingAndSorting) throws Exception {
+
+		return networkRepo.findAllByIsolated(pagingAndSorting.toPageRequest());
+
+	}
+
+	@Override
+	public List<NetworkOffering> findAll() throws Exception {
+		return (List<NetworkOffering>) networkRepo.findAll();
     }
 
-    @Override
-    public NetworkOffering update(NetworkOffering network) throws Exception {
-        return networkRepo.save(network);
-    }
+	@Override
+	public List<NetworkOffering> findAllFromCSServer() throws Exception {
 
-    @Override
-    public void delete(NetworkOffering id) throws Exception {
-        networkRepo.delete(id);
-    }
+		List<NetworkOffering> networkOfferingList = new ArrayList<NetworkOffering>();
+		HashMap<String, String> networkOfferingMap = new HashMap<String, String>();
 
-    @Override
-    public void delete(Long id) throws Exception {
-        networkRepo.delete(id);
-    }
+		// 1. Get the list of domains from CS server using CS connector
+		String response = csNetworkOfferingService.listNetworkOfferings("json", networkOfferingMap);
 
-    @Override
-    public NetworkOffering find(Long id) throws Exception {
-        return networkRepo.findOne(id);
-    }
-
-    @Override
-    public Page<NetworkOffering> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return null;
-    }
-
-    @Override
-    public List<NetworkOffering> findAll() throws Exception {
-        return (List<NetworkOffering>) networkRepo.findAll();
-    }
-
-    @Override
-    public List<NetworkOffering> findAllFromCSServer() throws Exception {
-
-         List<NetworkOffering> networkOfferingList = new ArrayList<NetworkOffering>();
-          HashMap<String, String> networkOfferingMap = new HashMap<String, String>();
-
-          // 1. Get the list of network offering from CS server using CS connector
-          String response = networkOfferingService.listNetworkOfferings("json", networkOfferingMap);
-
-          JSONArray networkOfferingListJSON = new JSONObject(response).getJSONObject("listnetworkofferingsresponse")
-                  .getJSONArray("networkoffering");
-          // 2. Iterate the json list, convert the single json entity to domain
-          for (int i = 0, size = networkOfferingListJSON.length(); i < size; i++) {
-              // 2.1 Call convert by passing JSONObject to Domain network offering  and Add
-              // the converted network offering  to list
-              networkOfferingList.add(NetworkOffering.convert(networkOfferingListJSON.getJSONObject(i)));
-          }
-          return networkOfferingList;
-    }
+		JSONArray networkOfferingListJSON = new JSONObject(response).getJSONObject("listnetworkofferingsresponse")
+				.getJSONArray("networkoffering");
+		// 2. Iterate the json list, convert the single json entity to domain
+		for (int i = 0, size = networkOfferingListJSON.length(); i < size; i++) {
+			// 2.1 Call convert by passing JSONObject to Domain entity and Add
+			// the converted Domain entity to list
+			networkOfferingList.add(NetworkOffering.convert(networkOfferingListJSON.getJSONObject(i)));
+		}
+		return networkOfferingList;
+	}
 
 }

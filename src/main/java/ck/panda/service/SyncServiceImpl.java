@@ -153,8 +153,8 @@ public class SyncServiceImpl  implements SyncService {
         //6. Sync OSType entity
         this.syncOsTypes();
 
-       /* //7. Sync User entity
-        this.syncUser();*/
+        //7. Sync User entity
+        //this.syncUser();
 
         //8. Sync Network Offering entity
         this.syncNetworkOffering();
@@ -594,4 +594,3 @@ public class SyncServiceImpl  implements SyncService {
         }
     }
 }
-
