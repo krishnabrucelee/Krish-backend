@@ -1,12 +1,6 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -18,8 +12,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-
 import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,46 +22,56 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 
 /**
- * The CloudStack administrator can create any number of custom network
- * offerings, in addition to the default network offerings provided by
- * CloudStack.
+ * Guest Network is network where instances are attached to it.
+ * and it can be of either Shared or Isolated types.
  */
 @Entity
-@Table(name = "ck_network_offering")
+@Table(name = "ck_guest_network")
 @SuppressWarnings("serial")
-public class NetworkOffering implements Serializable {
+public class GuestNetwork implements Serializable{
 
-    /** Id of the NetworkOffering. */
+    /** Id of the Guest Network. */
     @Id
     @GeneratedValue
     @Column(name = "id")
     private Long id;
 
-    /** Unique id for the Network Offering. */
+    /** Unique id for the Guest Network. */
     @Column(name = "uuid")
     private String uuid;
 
-    /** Name of the Network Offering. */
+    /** Name of the Guest Network. */
     @Column(name = "name", nullable = false)
     private String name;
 
-    /** Description of the Network Offering. */
-    @Column(name = "display_text", nullable = false)
+    /** Description of the Guest Network. */
+    @Column(name = "display_text", nullable = true)
     private String displayText;
 
-    /** Guest IP Network Type. */
-    @Column(name = "guest_ip_type", nullable = false)
-    private String guestIpType;
+    /** id for the Domain. */
+    //@OneToMany(mappedBy = "domain")
+    @Column(name = "domain_id")
+    private Long domainId;
 
-    /** Traffic Network Type. */
-
-    @Column(name = "traffic_type", nullable = false)
-    private String trafficType;
-
-    /** Zone Name */
+    /** id for the Zone. */
     @ManyToOne
     @JoinColumn(name = "zone_id", referencedColumnName = "id")
-    private Zone zone;
+    private Zone zoneId;
+
+    /** id for the Network Offer. */
+    @ManyToOne
+    @JoinColumn(name = "network_offer_id", referencedColumnName = "id")
+    private NetworkOffering networkOffering;
+
+    /**  Network Type. */
+    //@Enumerated(EnumType.STRING)
+    @Column(name = "network_type")
+    private String networkType;
+
+    /**  CIDR Range of the IP address. */
+    // @Enumerated(EnumType.STRING)
+    @Column(name = "cidr")
+    private String cIDR;
 
     /** IsActive attribute to verify Active or Inactive. */
     @Column(name = "is_active")
@@ -107,103 +109,112 @@ public class NetworkOffering implements Serializable {
     @Column(name = "updated_date_time")
     private DateTime updatedDateTime;
 
-
-
-   /* *//**
-     * Enum type for TrafficTypes.
-     *
-     *//*
-    public enum TrafficType {
-        *//** Traffic type will be GUEST. *//*
-        GUEST,
-        *//** Traffic type will be PUBLIC. *//*
-        PUBLIC,
-        *//** Traffic type will be MANAGEMENT. *//*
-        MANAGEMENT,
-        *//** Traffic type will be CONTROL. *//*
-        CONTROL,
-        *//** Traffic type will be VLAN. *//*
-        VLAN,
-        *//** Traffic type will be STORAGE. *//*
-        STORAGE,
-    }*/
-
     /**
-     * Enum type for Network Offering Status.
+     * Enum type for Guest Network Status.
      *
      */
     public enum Status {
-        /** Network Offering will be in a Enabled State. */
+        /** Guest Network will be in a Enabled State. */
         ENABLED,
-        /** Network Offering will be in a Disabled State. */
+        /** Guest Network will be in a Disabled State. */
         DISABLED
     }
 
     /**
-     * @return the id
+     * @return the  Guest Network id
      */
     public Long getId() {
         return id;
     }
 
     /**
-     * @return the uuid
+     * @return the uuid of the Guest Network
      */
     public String getUuid() {
         return uuid;
     }
 
     /**
-     * @return the name
+     * @return the name of the Guest Network
      */
     public String getName() {
         return name;
     }
 
     /**
-     * @return the displayText
+     * @return the description of Guest Network
      */
     public String getDisplayText() {
         return displayText;
     }
 
     /**
-     * @return the isActive
+     * @return the id of the domain
+     */
+    public Long getDomainId() {
+        return domainId;
+    }
+
+
+
+    /**
+     * @return the type of the network
+     */
+    public String getNetworkType() {
+        return networkType;
+    }
+
+    /**
+     * @return the cIDR range of IP address
+     */
+    public String getCIDR() {
+        return cIDR;
+    }
+
+    /**
+     * @return Active or Inactive state
      */
     public Boolean getIsActive() {
         return isActive;
     }
 
     /**
-     * @return the version
+     * @return the version of Guest Network
      */
     public Long getVersion() {
         return version;
     }
 
     /**
-     * @return the createdBy
+     * @return the status of Guest Network
+     */
+    public Status getStatus() {
+        return status;
+    }
+
+    /**
+     * @return the id of the User who creates
      */
     public User getCreatedBy() {
         return createdBy;
     }
 
     /**
-     * @return the updatedBy
+     * @return the id of the User who updates
      */
     public User getUpdatedBy() {
         return updatedBy;
     }
 
     /**
-     * @return the createdDateTime
+     * @return the DateTime when it has been Created
      */
     public DateTime getCreatedDateTime() {
         return createdDateTime;
     }
 
     /**
-     * @return the updatedDateTime
+     * @return the DateTime when it has been Updated
      */
     public DateTime getUpdatedDateTime() {
         return updatedDateTime;
@@ -211,16 +222,15 @@ public class NetworkOffering implements Serializable {
 
     /**
      * @param id
-     * the id to set
+     * Guest Network id to set
      */
     public void setId(Long id) {
         this.id = id;
     }
 
-
     /**
      * @param uuid
-     * the uuid to set
+     * Guest Network uuid to set
      */
     public void setUuid(String uuid) {
         this.uuid = uuid;
@@ -228,7 +238,7 @@ public class NetworkOffering implements Serializable {
 
     /**
      * @param name
-     * the name to set
+     * Guest Network name to set
      */
     public void setName(String name) {
         this.name = name;
@@ -236,29 +246,82 @@ public class NetworkOffering implements Serializable {
 
     /**
      * @param displayText
-     * the displayText to set
+     *  Guest Network description to set
      */
     public void setDisplayText(String displayText) {
         this.displayText = displayText;
     }
 
     /**
-     * @return the guestIpType
+     * @param domainId
+     * the domainId to set
      */
-    public String getGuestIpType() {
-        return guestIpType;
+    public void setDomainId(Long domainId) {
+        this.domainId = domainId;
+    }
+
+
+    /**
+	 * @return the zoneId
+	 */
+	public Zone getZoneId() {
+		return zoneId;
+	}
+
+	/**
+	 * @return the networkOffering
+	 */
+	public NetworkOffering getNetworkOffering() {
+		return networkOffering;
+	}
+
+	/**
+	 * @return the cIDR
+	 */
+	public String getcIDR() {
+		return cIDR;
+	}
+
+	/**
+	 * @param zoneId the zoneId to set
+	 */
+	public void setZoneId(Zone zoneId) {
+		this.zoneId = zoneId;
+	}
+
+	/**
+	 * @param networkOffering the networkOffering to set
+	 */
+	public void setNetworkOffering(NetworkOffering networkOffering) {
+		this.networkOffering = networkOffering;
+	}
+
+	/**
+	 * @param cIDR the cIDR to set
+	 */
+	public void setcIDR(String cIDR) {
+		this.cIDR = cIDR;
+	}
+
+	/**
+     * @param networkType
+     * the networkType to set
+     */
+    public void setNetworkType(String networkType) {
+        this.networkType = networkType;
     }
 
     /**
-     * @param guestIpType the guestIpType to set
+     * @param cIDR
+     * the cIDR range to set
      */
-    public void setGuestIpType(String guestIpType) {
-        this.guestIpType = guestIpType;
+    public void setCIDR(String cIDR) {
+        this.cIDR = cIDR;
     }
 
     /**
      * @param isActive
-     * the isActive to set
+     * the isActive state to set
      */
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
@@ -272,15 +335,6 @@ public class NetworkOffering implements Serializable {
         this.version = version;
     }
 
-
-    /**
-     * @return the status
-     */
-    public Status getStatus() {
-        return status;
-    }
-
-
     /**
      * @param status
      * the status to set
@@ -291,7 +345,7 @@ public class NetworkOffering implements Serializable {
 
     /**
      * @param createdBy
-     * the createdBy to set
+     * Guest Network createdBy to set
      */
     public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
@@ -299,7 +353,7 @@ public class NetworkOffering implements Serializable {
 
     /**
      * @param updatedBy
-     * the updatedBy to set
+     *  Guest Network updatedBy to set
      */
     public void setUpdatedBy(User updatedBy) {
         this.updatedBy = updatedBy;
@@ -307,7 +361,7 @@ public class NetworkOffering implements Serializable {
 
     /**
      * @param createdDateTime
-     * the createdDateTime to set
+     * Guest Network createdDateTime to set
      */
     public void setCreatedDateTime(DateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
@@ -315,74 +369,21 @@ public class NetworkOffering implements Serializable {
 
     /**
      * @param updatedDateTime
-     * the updatedDateTime to set
+     * Guest Network updatedDateTime to set
      */
     public void setUpdatedDateTime(DateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
 
-
-
-    /**
-	 * @return the trafficType
-	 */
-	public String getTrafficType() {
-		return trafficType;
-	}
-
-	/**
-	 * @return the zone
-	 */
-	public Zone getZone() {
-		return zone;
-	}
-
-	/**
-	 * @param trafficType the trafficType to set
-	 */
-	public void setTrafficType(String trafficType) {
-		this.trafficType = trafficType;
-	}
-
-	/**
-	 * @param zone the zone to set
-	 */
-	public void setZone(Zone zone) {
-		this.zone = zone;
-	}
-
-	/**
-     * Convert JSONObject to network offering entity.
-     *
-     * @param object json object
-     * @return network offering entity object.
-     * @throws JSONException handles json exception.
-     */
-    public static NetworkOffering convert(JSONObject object) throws JSONException {
-        NetworkOffering networkOffering = new NetworkOffering();
-        networkOffering.uuid = object.get("id").toString();
-        networkOffering.name = object.get("name").toString();
-        networkOffering.trafficType = object.get("traffictype").toString();
-        networkOffering.guestIpType = object.get("guestiptype").toString();
-        networkOffering.displayText = object.get("displaytext").toString();
-
-
-        return networkOffering;
-    }
-
-    /**
-     * Mapping entity object into list.
-     *
-     * @param networkOfferingList list of network offering.
-     * @return network offering map
-     */
-    public static Map<String, NetworkOffering> convert(List<NetworkOffering> networkOfferingList) {
-        Map<String, NetworkOffering> networkOfferingMap = new HashMap<String, NetworkOffering>();
-
-        for (NetworkOffering networkOffering : networkOfferingList) {
-            networkOfferingMap.put(networkOffering.getUuid(), networkOffering);
-        }
-
-        return networkOfferingMap;
-    }
+    /* Convert JSONObject to domain entity.
+    *
+    * @param object json object
+    * @return domain entity object.
+    * @throws JSONException handles json exception.
+    */
+   public static GuestNetwork convert(JSONObject object) throws JSONException {
+    	GuestNetwork guestnetwork = new GuestNetwork();
+    	guestnetwork.uuid = object.get("id").toString();
+       return guestnetwork;
+   }
 }
