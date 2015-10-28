@@ -94,7 +94,6 @@ public class StorageOffering {
      * Appears only if Custom disk size is not selected. Define the volume size
      * in GB.
      */
-
     @Column(name = "disk_size", nullable = false, columnDefinition = "bigint(20) default 0")
     private Long diskSize;
 
@@ -203,22 +202,6 @@ public class StorageOffering {
     @Column(name = "is_active", columnDefinition = "tinyint default 1")
     @Type(type = "org.hibernate.type.NumericBooleanType")
     private Boolean isActive;
-
-    @Transient
-    private Boolean syncFlag;
-//    /**
-//     * Default constructor to set optional values to null
-//     */
-//    public StorageOffering() {
-//        super();
-//        this.storageTags = "";
-//        this.diskBytesWriteRate = null;
-//        this.diskBytesReadRate = null;
-//        this.diskIopsReadRate = null;
-//        this.diskIopsWriteRate = null;
-//        this.diskMaxIops = null;
-//        this.diskMinIops = null;
-//    }
 
     /**
      * To set the default value while creating tables in database.
@@ -711,29 +694,11 @@ public class StorageOffering {
         this.isActive = isActive;
     }
 
-
-
     /**
-     * Get the syncFlag of the storage offering.
-     * @return the syncFlag of the storage offering
-     */
-    public Boolean getSyncFlag() {
-        return syncFlag;
-    }
-
-    /**
-     * Set the syncFlag of the storage offering.
-     * @param syncFlag the syncFlag to set
-     */
-    public void setSyncFlag(Boolean syncFlag) {
-        this.syncFlag = syncFlag;
-    }
-
-    /**
-     * Convert JSONObject to os type entity.
+     * Convert JSONObject to Storage Offering entity.
      *
      * @param object json object
-     * @return os type entity objects
+     * @return Storage Offering entity objects
      * @throws JSONException unhandled json errors
      */
     public static StorageOffering convert(JSONObject object) throws JSONException {
@@ -743,16 +708,14 @@ public class StorageOffering {
         storageOffering.description = object.get("displaytext").toString();
         storageOffering.diskSize = object.getLong("disksize");
 
-
- //
         return storageOffering;
     }
 
     /**
-     * Mapping OS type entity object in list.
+     * Mapping Storage Offering entity object in list.
      *
-     * @param osTypeList list of OStypes
-     * @return OStype mapped values.
+     * @param Storage Offering lists of Storage Offering
+     * @return Storage Offering mapped values.
      */
     public static Map<String, StorageOffering> convert(List<StorageOffering> storageOfferingList) {
         Map<String, StorageOffering> storageOfferingMap = new HashMap<String, StorageOffering>();
