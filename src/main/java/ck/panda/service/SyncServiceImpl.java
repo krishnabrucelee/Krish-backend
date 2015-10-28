@@ -16,6 +16,7 @@ import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.OsType;
 import ck.panda.domain.entity.Region;
 import ck.panda.domain.entity.StorageOffering;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.Zone;
 import ck.panda.util.CloudStackAccountService;
 import ck.panda.util.CloudStackComputeOffering;
@@ -98,8 +99,6 @@ public class SyncServiceImpl  implements SyncService {
     @Autowired
     private StorageOfferingService storageService;
 
-
-
     /** CloudStackNetworkOfferingService for network connectivity with cloudstack. */
     @Autowired
     private CloudStackNetworkOfferingService csNetworkOfferingService;
@@ -129,6 +128,10 @@ public class SyncServiceImpl  implements SyncService {
     @Autowired
     private ComputeOfferingService computeService;
 
+    @Autowired
+    private UserService userService;
+
+
     /**
      * Sync call for synchronization list of Region, domain, region. template, hypervisor
      * @throws Exception unhandled errors.
@@ -153,8 +156,8 @@ public class SyncServiceImpl  implements SyncService {
         //6. Sync OSType entity
         this.syncOsTypes();
 
+        //7. Sync Storage offering entity
         this.syncStorageOffering();
-
 
         //8. Sync Network Offering entity
         this.syncNetworkOffering();
@@ -164,6 +167,9 @@ public class SyncServiceImpl  implements SyncService {
 
         //10. Sync Compute Offering entity
         this.syncComputeOffering();
+
+        //11. Sync User entity
+        this.syncUser();
     }
 
     /**
@@ -459,7 +465,7 @@ public class SyncServiceImpl  implements SyncService {
             storageService.save(csStorageOfferingMap.get(key));
         }
     }
-       
+
      /**
      * Sync with Cloud Server Account.
      * @throws ApplicationException unhandled application errors.
@@ -491,9 +497,9 @@ public class SyncServiceImpl  implements SyncService {
                 userService.delete(user);
                 //3.2 If not found, delete it from app db
                 //TODO clarify the business requirement, since it has impact in the application if it is used
-                //TODO clarify is this a soft or hard delete  
+                //TODO clarify is this a soft or hard delete
              }
-           
+
              }
         //4. Get the remaining list of cs server hash user object, then iterate and
         //add it to app db
