@@ -78,6 +78,8 @@ public class AppValidator {
         }
         return errors;
     }
+    
+    
 
     /**
      * Reject if null entity.
