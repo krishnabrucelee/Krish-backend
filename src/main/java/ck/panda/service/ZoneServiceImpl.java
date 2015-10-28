@@ -63,7 +63,7 @@ public class ZoneServiceImpl implements ZoneService {
 
     @Override
     public Page<Zone> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return null;
+        return zoneRepo.findAll(pagingAndSorting.toPageRequest());
     }
 
     /**
