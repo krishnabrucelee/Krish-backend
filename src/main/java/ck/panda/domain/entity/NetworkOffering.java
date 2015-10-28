@@ -298,6 +298,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Set the offer updated user.
+     *
      * @param updatedBy
      * the updatedBy to set
      */
@@ -306,6 +308,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Set Network offer created date.
+     *
      * @param createdDateTime
      * the createdDateTime to set
      */
@@ -314,6 +318,7 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Set Network offer updated time
      * @param updatedDateTime
      * the updatedDateTime to set
      */
@@ -321,9 +326,9 @@ public class NetworkOffering implements Serializable {
         this.updatedDateTime = updatedDateTime;
     }
 
-
-
     /**
+     * Get the traffic type.
+     *
 	 * @return the trafficType
 	 */
 	public String getTrafficType() {
@@ -331,6 +336,8 @@ public class NetworkOffering implements Serializable {
 	}
 
 	/**
+	 * Get the Zone.
+	 *
 	 * @return the zone
 	 */
 	public Zone getZone() {
