@@ -140,6 +140,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Get the NetworkOffer Id
+     *
      * @return the id
      */
     public Long getId() {
@@ -147,6 +149,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Get the NetworkOffer uuid
+     *
      * @return the uuid
      */
     public String getUuid() {
@@ -154,6 +158,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Get the NetworkOffer Name
+     *
      * @return the name
      */
     public String getName() {
@@ -161,6 +167,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Get the NetworkOffer Description
+     *
      * @return the displayText
      */
     public String getDisplayText() {
@@ -168,6 +176,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Get the NetworkOffer State
+     *
      * @return the isActive
      */
     public Boolean getIsActive() {
@@ -175,6 +185,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Get the NetworkOffer Version
+     *
      * @return the version
      */
     public Long getVersion() {
@@ -182,6 +194,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Get the user who creates NetworkOffer
+     *
      * @return the createdBy
      */
     public User getCreatedBy() {
@@ -189,6 +203,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Get the user who updates NetworkOffer
+     *
      * @return the updatedBy
      */
     public User getUpdatedBy() {
@@ -196,6 +212,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Get the NetworkOffer Created Date
+     *
      * @return the createdDateTime
      */
     public DateTime getCreatedDateTime() {
@@ -203,6 +221,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Get the NetworkOffer Updated Date
+	 *
      * @return the updatedDateTime
      */
     public DateTime getUpdatedDateTime() {
@@ -210,6 +230,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Set the NetworkOffer Id
+     *
      * @param id
      * the id to set
      */
@@ -219,6 +241,8 @@ public class NetworkOffering implements Serializable {
 
 
     /**
+     * Set the NetworkOffer uuid
+     *
      * @param uuid
      * the uuid to set
      */
@@ -227,6 +251,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Set the NetworkOffer Name
+     *
      * @param name
      * the name to set
      */
@@ -235,6 +261,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Set the NetworkOffer description
+     *
      * @param displayText
      * the displayText to set
      */
@@ -243,6 +271,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Get the NetworkOffer guestIpType
+     *
      * @return the guestIpType
      */
     public String getGuestIpType() {
@@ -250,13 +280,18 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
-     * @param guestIpType the guestIpType to set
+     * Set the NetworkOffer guestIpType
+     *
+     * @param guestIpType
+     *  the guestIpType to set
      */
     public void setGuestIpType(String guestIpType) {
         this.guestIpType = guestIpType;
     }
 
     /**
+     * Set the NetworkOffer State
+     *
      * @param isActive
      * the isActive to set
      */
@@ -265,6 +300,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Set the NetworkOffer Version
+     *
      * @param version
      * the version to set
      */
@@ -274,6 +311,8 @@ public class NetworkOffering implements Serializable {
 
 
     /**
+     * Get the NetworkOffer status
+     *
      * @return the status
      */
     public Status getStatus() {
@@ -282,6 +321,8 @@ public class NetworkOffering implements Serializable {
 
 
     /**
+     * Set the NetworkOffer status
+     *
      * @param status
      * the status to set
      */
@@ -290,6 +331,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Set the user who creates NetworkOffer
+     *
      * @param createdBy
      * the createdBy to set
      */
@@ -319,6 +362,7 @@ public class NetworkOffering implements Serializable {
 
     /**
      * Set Network offer updated time
+     *
      * @param updatedDateTime
      * the updatedDateTime to set
      */
@@ -327,7 +371,7 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
-     * Get the traffic type.
+     * Get the Network Offer traffic type.
      *
 	 * @return the trafficType
 	 */
@@ -345,14 +389,19 @@ public class NetworkOffering implements Serializable {
 	}
 
 	/**
-	 * @param trafficType the trafficType to set
+	 * Set the Network Offer Traffic type
+	 *
+	 * @param trafficType
+	 * the trafficType to set
 	 */
 	public void setTrafficType(String trafficType) {
 		this.trafficType = trafficType;
 	}
 
 	/**
-	 * @param zone the zone to set
+	 * Set the Zone
+	 * @param zone
+	 * the zone to set
 	 */
 	public void setZone(Zone zone) {
 		this.zone = zone;
