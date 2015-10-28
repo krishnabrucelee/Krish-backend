@@ -14,7 +14,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.Size;
 import org.hibernate.annotations.Type;
@@ -161,6 +160,38 @@ public class StorageOffering {
      */
     @Column(name = "min_iops")
     private Long diskMinIops;
+
+    /**
+     * The Zone ID, this disk offering belongs to. Ignore this information as it
+     * is not currently applicable.
+     */
+    @JoinColumn(name = "zone_id", referencedColumnName = "id")
+    @OneToOne
+    private Zone zone;
+
+    /**
+     * Cost per month usage.
+     */
+    @Column(name = "cost_per_hour_disk")
+    private Double costPerMonth;
+
+    /**
+     * Cost for 1 Gb per month usage.
+     */
+    @Column(name = "cost_gb_per_month")
+    private Double costGbPerMonth;
+
+    /**
+     * Cost per month usage.
+     */
+    @Column(name = "cost_per_hour_iops")
+    private Double costPerIops;
+
+    /**
+     * Cost for 1 Iops per month usage.
+     */
+    @Column(name = "cost_iops_per_month")
+    private Double costIopsPerMonth;
 
     /** Status attribute to verify status of the Storage offering. */
     @Column(name = "status")
@@ -566,6 +597,86 @@ public class StorageOffering {
      */
     public void setDiskMinIops(Long diskMinIops) {
         this.diskMinIops = diskMinIops;
+    }
+
+    /**
+     * Get the zone of the storage offering.
+     * @return the zone of the storage offering
+     */
+    public Zone getZone() {
+        return zone;
+    }
+
+    /**
+     * Set the zone of the storage offering.
+     * @param zone the zone to set
+     */
+    public void setZone(Zone zone) {
+        this.zone = zone;
+    }
+
+    /**
+     * Get the cost per month of the storage offering.
+     * @return the costPerMonth of the storage offering
+     */
+    public Double getCostPerMonth() {
+        return costPerMonth;
+    }
+
+    /**
+     * Set the cost per month of the storage offering.
+     * @param costPerMonth the costPerMonth to set
+     */
+    public void setCostPerMonth(Double costPerMonth) {
+        this.costPerMonth = costPerMonth;
+    }
+
+    /**
+     * Get the cost Gb per month of the storage offering.
+     * @return the costGbPerMonth of the storage offering
+     */
+    public Double getCostGbPerMonth() {
+        return costGbPerMonth;
+    }
+
+    /**
+     * Set the cost Gb per month of the storage offering.
+     * @param costGbPerMonth the costGbPerMonth to set
+     */
+    public void setCostGbPerMonth(Double costGbPerMonth) {
+        this.costGbPerMonth = costGbPerMonth;
+    }
+
+    /**
+     * Get the cost per iops of the storage offering.
+     * @return the costPerIops of the storage offering
+     */
+    public Double getCostPerIops() {
+        return costPerIops;
+    }
+
+    /**
+     * Set the cost per iops of the storage offering.
+     * @param costPerIops the costPerIops to set
+     */
+    public void setCostPerIops(Double costPerIops) {
+        this.costPerIops = costPerIops;
+    }
+
+    /**
+     * Get the cost iops per month of the storage offering.
+     * @return the costIopsPerMonth of the storage offering
+     */
+    public Double getCostIopsPerMonth() {
+        return costIopsPerMonth;
+    }
+
+    /**
+     * Set the cost iops per month of the storage offering.
+     * @param costIopsPerMonth the costIopsPerMonth to set
+     */
+    public void setCostIopsPerMonth(Double costIopsPerMonth) {
+        this.costIopsPerMonth = costIopsPerMonth;
     }
 
     /**
