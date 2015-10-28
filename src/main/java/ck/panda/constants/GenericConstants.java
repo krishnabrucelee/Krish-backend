@@ -19,9 +19,10 @@ public class GenericConstants {
 
     /** Constant used to set content range response for pagination. */
     public static final String CONTENT_RANGE_HEADER = "Content-Range";
-    
+
     /**
      * constant for default limit.
      */
     public static final Integer DEFAULTLIMIT = 10;
+
 }

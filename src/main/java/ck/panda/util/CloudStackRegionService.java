@@ -28,7 +28,7 @@ public class CloudStackRegionService {
         this.server = server;
     }
 
-      /**
+     /**
      * Lists Regions for cloud stack.
      *
      * @param optional from values cloud stack
