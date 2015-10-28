@@ -31,22 +31,29 @@ public class CloudStackNetworkService {
 
 
     /**
-     * Lists supported network services from cloud stack.
+     * Creates a network
      *
-     * @param optional from values cloud stack
-     * @param response json or xml.
-     * @return response Document
-     * @throws Exception unhandled errors.
+     * @param networkOfferingDisplayText the display text of the network
+     * @param networkOfferingName the name of the network
+     * @param networkOfferingId the network offering id
+     * @param networkOfferingZoneId the Zone ID for the network
+     * @param optional
+     * @return
+     * @throws Exception
      */
-    public String listSupportedNetworkServices(String response,
-            HashMap<String, String> optional) throws Exception {
+    public String createNetwork(String networkOfferingDisplayText,
+            String networkOfferingName, String response,
+            HashMap<String, String> optional)
+            throws Exception {
 
         LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("listSupportedNetworkServices", optional);
-        arguments.add(new NameValuePair("response", response));
+                = server.getDefaultQuery("createNetwork", optional);
+        arguments.add(new NameValuePair("displaytext", networkOfferingDisplayText));
+        arguments.add(new NameValuePair("name", networkOfferingName));
+        arguments.add(new NameValuePair("response",response));
         String responseDocument = server.request(arguments);
 
-        return  responseDocument;
+        return responseDocument;
     }
 
 
@@ -69,5 +76,24 @@ public class CloudStackNetworkService {
 
         return responseDocument;
     }
+    
+      /**
+     * Lists all available networks.
+     *
+     * @param optional
+     * @return
+     * @throws Exception
+     */
+    public String listNetworks( String response,HashMap<String, String> optional)
+            throws Exception {
+
+        LinkedList<NameValuePair> arguments
+                = server.getDefaultQuery("listNetworks", optional);
+        arguments.add(new NameValuePair("response",response));
+        String responseDocument = server.request(arguments);
+
+        return responseDocument;
+    }
+
 
 }
