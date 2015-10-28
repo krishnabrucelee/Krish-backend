@@ -1,7 +1,7 @@
 package ck.panda.service;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
-
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.util.domain.CRUDService;
 
@@ -11,5 +11,13 @@ import ck.panda.util.domain.CRUDService;
  */
 @Service
 public interface NetworkOfferingService extends CRUDService<NetworkOffering> {
+
+    /**
+     * To get list of network offering from cloudstack server.
+     *
+     * @return network offering list from server
+     * @throws Exception unhandled errors.
+     */
+    List<NetworkOffering> findAllFromCSServer() throws Exception;
 
 }

@@ -1,6 +1,12 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -8,9 +14,15 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+
 import org.joda.time.DateTime;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -26,6 +38,7 @@ import org.springframework.data.annotation.Version;
 @Table(name = "ck_network_offering")
 @SuppressWarnings("serial")
 public class NetworkOffering implements Serializable {
+
     /** Id of the NetworkOffering. */
     @Id
     @GeneratedValue
@@ -46,17 +59,17 @@ public class NetworkOffering implements Serializable {
 
     /** Guest IP Network Type. */
     @Column(name = "guest_ip_type", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private GuestIpType guestIpType;
+    private String guestIpType;
 
     /** Traffic Network Type. */
-    @Enumerated(EnumType.STRING)
-    @Column(name = "traffic_type", nullable = false)
-    private TrafficType trafficType;
 
-    /** Supported Services for Network Offering. */
-    @Column(name = "supported_services", nullable = false)
-    private NetworkOfferingServiceList supportedServices;
+    @Column(name = "traffic_type", nullable = false)
+    private String trafficType;
+
+    /** Zone Name */
+    @ManyToOne
+    @JoinColumn(name = "zone_id", referencedColumnName = "id")
+    private Zone zone;
 
     /** IsActive attribute to verify Active or Inactive. */
     @Column(name = "is_active")
@@ -94,35 +107,26 @@ public class NetworkOffering implements Serializable {
     @Column(name = "updated_date_time")
     private DateTime updatedDateTime;
 
-    /**
-     * Enum type for GuestIpTypes.
-     *
-     */
-    public enum GuestIpType {
-        /** Network type will be Shared. */
-        SHARED,
-        /** Network type will be Private. */
-        ISOLATED
-    }
 
-    /**
+
+   /* *//**
      * Enum type for TrafficTypes.
      *
-     */
+     *//*
     public enum TrafficType {
-        /** Traffic type will be GUEST. */
+        *//** Traffic type will be GUEST. *//*
         GUEST,
-        /** Traffic type will be PUBLIC. */
+        *//** Traffic type will be PUBLIC. *//*
         PUBLIC,
-        /** Traffic type will be MANAGEMENT. */
+        *//** Traffic type will be MANAGEMENT. *//*
         MANAGEMENT,
-        /** Traffic type will be CONTROL. */
+        *//** Traffic type will be CONTROL. *//*
         CONTROL,
-        /** Traffic type will be VLAN. */
+        *//** Traffic type will be VLAN. *//*
         VLAN,
-        /** Traffic type will be STORAGE. */
+        *//** Traffic type will be STORAGE. *//*
         STORAGE,
-    }
+    }*/
 
     /**
      * Enum type for Network Offering Status.
@@ -136,6 +140,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Get the NetworkOffer Id
+     *
      * @return the id
      */
     public Long getId() {
@@ -143,6 +149,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Get the NetworkOffer uuid
+     *
      * @return the uuid
      */
     public String getUuid() {
@@ -150,6 +158,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Get the NetworkOffer Name
+     *
      * @return the name
      */
     public String getName() {
@@ -157,6 +167,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Get the NetworkOffer Description
+     *
      * @return the displayText
      */
     public String getDisplayText() {
@@ -164,6 +176,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Get the NetworkOffer State
+     *
      * @return the isActive
      */
     public Boolean getIsActive() {
@@ -171,6 +185,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Get the NetworkOffer Version
+     *
      * @return the version
      */
     public Long getVersion() {
@@ -178,6 +194,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Get the user who creates NetworkOffer
+     *
      * @return the createdBy
      */
     public User getCreatedBy() {
@@ -185,6 +203,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Get the user who updates NetworkOffer
+     *
      * @return the updatedBy
      */
     public User getUpdatedBy() {
@@ -192,6 +212,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Get the NetworkOffer Created Date
+     *
      * @return the createdDateTime
      */
     public DateTime getCreatedDateTime() {
@@ -199,6 +221,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Get the NetworkOffer Updated Date
+	 *
      * @return the updatedDateTime
      */
     public DateTime getUpdatedDateTime() {
@@ -206,21 +230,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
-     * @return the supportedServices
-     */
-    public NetworkOfferingServiceList getSupportedServices() {
-        return supportedServices;
-    }
-
-    /**
-     * @param supportedServices
-     * the supportedServices to set
-     */
-    public void setSupportedServices(NetworkOfferingServiceList supportedServices) {
-        this.supportedServices = supportedServices;
-    }
-
-    /**
+     * Set the NetworkOffer Id
+     *
      * @param id
      * the id to set
      */
@@ -228,7 +239,10 @@ public class NetworkOffering implements Serializable {
         this.id = id;
     }
 
+
     /**
+     * Set the NetworkOffer uuid
+     *
      * @param uuid
      * the uuid to set
      */
@@ -237,6 +251,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Set the NetworkOffer Name
+     *
      * @param name
      * the name to set
      */
@@ -245,6 +261,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Set the NetworkOffer description
+     *
      * @param displayText
      * the displayText to set
      */
@@ -253,21 +271,27 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Get the NetworkOffer guestIpType
+     *
      * @return the guestIpType
      */
-    public GuestIpType getGuestIpType() {
+    public String getGuestIpType() {
         return guestIpType;
     }
 
     /**
+     * Set the NetworkOffer guestIpType
+     *
      * @param guestIpType
-     * the guestIpType to set
+     *  the guestIpType to set
      */
-    public void setGuestIpType(GuestIpType guestIpType) {
+    public void setGuestIpType(String guestIpType) {
         this.guestIpType = guestIpType;
     }
 
     /**
+     * Set the NetworkOffer State
+     *
      * @param isActive
      * the isActive to set
      */
@@ -276,6 +300,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Set the NetworkOffer Version
+     *
      * @param version
      * the version to set
      */
@@ -283,29 +309,20 @@ public class NetworkOffering implements Serializable {
         this.version = version;
     }
 
-    /**
-     * @return the trafficType
-     */
-    public TrafficType getTrafficType() {
-        return trafficType;
-    }
 
     /**
+     * Get the NetworkOffer status
+     *
      * @return the status
      */
     public Status getStatus() {
         return status;
     }
 
-    /**
-     * @param trafficType
-     * the trafficType to set
-     */
-    public void setTrafficType(TrafficType trafficType) {
-        this.trafficType = trafficType;
-    }
 
     /**
+     * Set the NetworkOffer status
+     *
      * @param status
      * the status to set
      */
@@ -314,6 +331,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Set the user who creates NetworkOffer
+     *
      * @param createdBy
      * the createdBy to set
      */
@@ -322,6 +341,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Set the offer updated user.
+     *
      * @param updatedBy
      * the updatedBy to set
      */
@@ -330,6 +351,8 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Set Network offer created date.
+     *
      * @param createdDateTime
      * the createdDateTime to set
      */
@@ -338,10 +361,85 @@ public class NetworkOffering implements Serializable {
     }
 
     /**
+     * Set Network offer updated time
+     *
      * @param updatedDateTime
      * the updatedDateTime to set
      */
     public void setUpdatedDateTime(DateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
+
+    /**
+     * Get the Network Offer traffic type.
+     *
+	 * @return the trafficType
+	 */
+	public String getTrafficType() {
+		return trafficType;
+	}
+
+	/**
+	 * Get the Zone.
+	 *
+	 * @return the zone
+	 */
+	public Zone getZone() {
+		return zone;
+	}
+
+	/**
+	 * Set the Network Offer Traffic type
+	 *
+	 * @param trafficType
+	 * the trafficType to set
+	 */
+	public void setTrafficType(String trafficType) {
+		this.trafficType = trafficType;
+	}
+
+	/**
+	 * Set the Zone
+	 * @param zone
+	 * the zone to set
+	 */
+	public void setZone(Zone zone) {
+		this.zone = zone;
+	}
+
+	/**
+     * Convert JSONObject to network offering entity.
+     *
+     * @param object json object
+     * @return network offering entity object.
+     * @throws JSONException handles json exception.
+     */
+    public static NetworkOffering convert(JSONObject object) throws JSONException {
+        NetworkOffering networkOffering = new NetworkOffering();
+        networkOffering.uuid = object.get("id").toString();
+        networkOffering.name = object.get("name").toString();
+        networkOffering.trafficType = object.get("traffictype").toString();
+        networkOffering.guestIpType = object.get("guestiptype").toString();
+        networkOffering.displayText = object.get("displaytext").toString();
+
+
+        return networkOffering;
+    }
+
+    /**
+     * Mapping entity object into list.
+     *
+     * @param networkOfferingList list of network offering.
+     * @return network offering map
+     */
+    public static Map<String, NetworkOffering> convert(List<NetworkOffering> networkOfferingList) {
+        Map<String, NetworkOffering> networkOfferingMap = new HashMap<String, NetworkOffering>();
+
+        for (NetworkOffering networkOffering : networkOfferingList) {
+            networkOfferingMap.put(networkOffering.getUuid(), networkOffering);
+        }
+
+        return networkOfferingMap;
+    }
 }
+

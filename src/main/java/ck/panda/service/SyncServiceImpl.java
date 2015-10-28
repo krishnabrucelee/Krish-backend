@@ -7,15 +7,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Hypervisor;
+import ck.panda.domain.entity.Network;
+import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.OsType;
 import ck.panda.domain.entity.Region;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Zone;
+import ck.panda.util.CloudStackAccountService;
+import ck.panda.util.CloudStackComputeOffering;
 import ck.panda.util.CloudStackDomainService;
 import ck.panda.util.CloudStackHypervisorsService;
+import ck.panda.util.CloudStackNetworkOfferingService;
+import ck.panda.util.CloudStackNetworkService;
 import ck.panda.util.CloudStackOSService;
 import ck.panda.util.CloudStackRegionService;
 import ck.panda.util.CloudStackZoneService;
@@ -27,10 +34,10 @@ import ck.panda.util.error.exception.ApplicationException;
  * 1. Zone
  * 2. Domain
  * 3. Region
- * 4. Template
- * 5. Hypervisor
- * 6. OS Catogory
- * 7. OS Type
+ * 4. Hypervisor
+ * 5. OS Catogory
+ * 6. OS Type
+ * 7. Network Offering
  *
  * Get the corresponding data from cloud stack server, if the application does not have the data add it.
  * If the application has the data update it, if the application has data which the cloud stack server does not have,
@@ -91,6 +98,37 @@ public class SyncServiceImpl  implements SyncService {
     @Autowired
     private StorageOfferingService storageService;
 
+
+
+    /** CloudStackNetworkOfferingService for network connectivity with cloudstack. */
+    @Autowired
+    private CloudStackNetworkOfferingService csNetworkOfferingService;
+
+
+    /** CloudStackAccountService for User connectivity with cloudstack. */
+    @Autowired
+    private CloudStackAccountService csAccountService;
+
+   /** NetworkOfferingService for listing network offers in cloudstack server. */
+    @Autowired
+    private NetworkOfferingService networkOfferingService;
+
+    /** CloudStackNetworkOfferingService for network connectivity with cloudstack. */
+    @Autowired
+    private CloudStackNetworkService csNetworkService;
+
+   /** NetworkOfferingService for listing network offers in cloudstack server. */
+    @Autowired
+    private NetworkService networkService;
+
+    /** CloudStackNetworkOfferingService for network connectivity with cloudstack. */
+    @Autowired
+    private CloudStackComputeOffering csComputeService;
+
+   /** NetworkOfferingService for listing network offers in cloudstack server. */
+    @Autowired
+    private ComputeOfferingService computeService;
+
     /**
      * Sync call for synchronization list of Region, domain, region. template, hypervisor
      * @throws Exception unhandled errors.
@@ -117,6 +155,15 @@ public class SyncServiceImpl  implements SyncService {
 
         this.syncStorageOffering();
 
+
+        //8. Sync Network Offering entity
+        this.syncNetworkOffering();
+
+        //9. Sync Network  entity
+        this.syncNetwork();
+
+        //10. Sync Compute Offering entity
+        this.syncComputeOffering();
     }
 
     /**
@@ -245,7 +292,7 @@ public class SyncServiceImpl  implements SyncService {
     }
 
     /**
-     * Sync with Cloud Server Region.
+     * Sync with Cloud Server Hypervisor.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
@@ -412,5 +459,183 @@ public class SyncServiceImpl  implements SyncService {
             storageService.save(csStorageOfferingMap.get(key));
         }
     }
-}
+       
+     /**
+     * Sync with Cloud Server Account.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    private void syncUser() throws ApplicationException, Exception {
 
+        //1. Get all the user objects from CS server as hash
+        List<User> csAccountService = userService.findAllFromCSServer();
+        HashMap<String, User> csUserMap = (HashMap<String, User>) User.convert(csAccountService);
+
+        //2. Get all the user objects from application
+        List<User> appUserList = userService.findAll();
+
+        // 3. Iterate application user list
+        for (User user: appUserList) {
+             //3.1 Find the corresponding CS server user object by finding it in a hash using uuid
+            if (csUserMap.containsKey(user.getUuid())) {
+                User csUser = csUserMap.get(user.getUuid());
+
+                user.setName(csUser.getName());
+
+                //3.2 If found, update the user object in app db
+                userService.update(user);
+
+                //3.3 Remove once updated, so that we can have the list of cs user which is not added in the app
+                csUserMap.remove(user.getUuid());
+            } else {
+                userService.delete(user);
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete  
+             }
+           
+             }
+        //4. Get the remaining list of cs server hash user object, then iterate and
+        //add it to app db
+        for (String key: csUserMap.keySet()) {
+            userService.save(csUserMap.get(key));
+        }
+    }
+
+   /**
+     * Sync with CloudStack server Network offering.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
+     */
+    private void syncNetworkOffering() throws ApplicationException, Exception {
+
+        //1. Get all the networkOffering objects from CS server as hash
+        List<NetworkOffering> csNetworkOfferingList = networkOfferingService.findAllFromCSServer();
+        HashMap<String, NetworkOffering> csNetworkOfferingMap = (HashMap<String, NetworkOffering>) NetworkOffering.convert(csNetworkOfferingList);
+
+        //2. Get all the networkOffering objects from application
+        List<NetworkOffering> appNetworkOfferingList = networkOfferingService.findAll();
+
+        // 3. Iterate application networkOffering list
+        for (NetworkOffering networkOffering: appNetworkOfferingList) {
+             //3.1 Find the corresponding CS server networkOfferingService object by finding it in a hash using uuid
+            if (csNetworkOfferingMap.containsKey(networkOffering.getUuid())) {
+                NetworkOffering csNetworkOffering = csNetworkOfferingMap.get(networkOffering.getUuid());
+
+                networkOffering.setName(csNetworkOffering.getName());
+
+                //3.2 If found, update the networkOffering object in app db
+                networkOfferingService.update(networkOffering);
+
+                //3.3 Remove once updated, so that we can have the list of cs networkOffering which is not added in the app
+                csNetworkOfferingMap.remove(networkOffering.getUuid());
+            } else {
+                networkOfferingService.delete(networkOffering);
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete
+            }
+        }
+        //4. Get the remaining list of cs server hash NetworkOffering object, then iterate and
+        //add it to app db
+        for (String key: csNetworkOfferingMap.keySet()) {
+            networkOfferingService.save(csNetworkOfferingMap.get(key));
+        }
+    }
+
+    /**
+     * Sync with CloudStack server Domain.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
+     */
+    private void syncNetwork() throws ApplicationException, Exception {
+
+        //1. Get all the domain objects from CS server as hash
+        List<Network> csNetworkList = networkService.findAllFromCSServer();
+        HashMap<String, Network> csDomainMap = (HashMap<String, Network>) Network.convert(csNetworkList);
+
+        //2. Get all the domain objects from application
+        List<Network> appDomainList = networkService.findAll();
+
+        // 3. Iterate application domain list
+        for (Network network: appDomainList) {
+             //3.1 Find the corresponding CS server domain object by finding it in a hash using uuid
+            if (csDomainMap.containsKey(network.getUuid())) {
+                Network csNetwork = csDomainMap.get(network.getUuid());
+
+                network.setName(csNetwork.getName());
+                network.setDomainId(csNetwork.getDomainId());
+                network.setNetworkOfferingId(csNetwork.getNetworkOfferingId());
+                network.setZoneId(csNetwork.getZoneId());
+                network.setCidr(csNetwork.getCidr());
+                network.setState(csNetwork.getState());
+                network.setDisplayNetwork(csNetwork.getDisplayNetwork());
+                network.setDisplayText(csNetwork.getDisplayText());
+
+                //3.2 If found, update the domain object in app db
+                networkService.update(network);
+
+                //3.3 Remove once updated, so that we can have the list of cs domain which is not added in the app
+                csDomainMap.remove(network.getUuid());
+            } else {
+                networkService.delete(network);
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete
+            }
+        }
+        //4. Get the remaining list of cs server hash domain object, then iterate and
+        //add it to app db
+        for (String key: csDomainMap.keySet()) {
+            networkService.save(csDomainMap.get(key));
+        }
+    }
+
+    /**
+     * Sync with CloudStack server Domain.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
+     */
+    private void syncComputeOffering() throws ApplicationException, Exception {
+
+        //1. Get all the domain objects from CS server as hash
+        List<ComputeOffering> csComputeOfferingList = computeService.findAllFromCSServer();
+        HashMap<String, ComputeOffering> csComputeOfferingMap = (HashMap<String, ComputeOffering>) ComputeOffering.convert(csComputeOfferingList);
+
+        //2. Get all the domain objects from application
+        List<ComputeOffering> appDomainList = computeService.findAll();
+
+        // 3. Iterate application domain list
+        for (ComputeOffering computeOffering: appDomainList) {
+             //3.1 Find the corresponding CS server domain object by finding it in a hash using uuid
+            if (csComputeOfferingMap.containsKey(computeOffering.getUuid())) {
+                ComputeOffering csComputeService = csComputeOfferingMap.get(computeOffering.getUuid());
+
+                computeOffering.setName(csComputeService.getName());
+                computeOffering.setDisplayText(csComputeService.getDisplayText());
+
+                //3.2 If found, update the domain object in app db
+                computeService.update(computeOffering);
+
+                //3.3 Remove once updated, so that we can have the list of cs domain which is not added in the app
+                csComputeOfferingMap.remove(computeOffering.getUuid());
+            } else {
+
+                computeService.delete(computeOffering);
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete
+            }
+        }
+        //4. Get the remaining list of cs server hash domain object, then iterate and
+        //add it to app db
+        for (String key: csComputeOfferingMap.keySet()) {
+            ComputeOffering computeOffering = new ComputeOffering();
+
+            computeService.save(csComputeOfferingMap.get(key));
+        }
+    }
+}
