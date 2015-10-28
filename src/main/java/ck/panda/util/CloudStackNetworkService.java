@@ -29,14 +29,12 @@ public class CloudStackNetworkService {
      *
      * @param networkOfferingDisplayText the display text of the network
      * @param networkOfferingName the name of the network
-     * @param networkOfferingId the network offering id
-     * @param networkOfferingZoneId the Zone ID for the network
      * @param optional values from cloudstack
      * @param response json or xml
      * @return reponse document.
      */
     public String createNetwork(String networkOfferingDisplayText,
-            String networkOfferingName, String networkOfferingId, String networkOfferingZoneId, String response,
+            String networkOfferingName,  String response,
             HashMap<String, String> optional)
             throws Exception {
 
@@ -44,9 +42,7 @@ public class CloudStackNetworkService {
                 = server.getDefaultQuery("createNetwork", optional);
         arguments.add(new NameValuePair("displaytext", networkOfferingDisplayText));
         arguments.add(new NameValuePair("name", networkOfferingName));
-        arguments.add(new NameValuePair("networkofferingid", networkOfferingId));
-        arguments.add(new NameValuePair("zoneid", networkOfferingZoneId));
-        arguments.add(new NameValuePair("response",response));
+               arguments.add(new NameValuePair("response",response));
         String responseDocument = server.request(arguments);
 
         return responseDocument;
@@ -70,23 +66,5 @@ public class CloudStackNetworkService {
 
         return responseDocument;
     }
-    
-      /**
-     * Lists all available networks.
-     *
-     * @param optional
-     * @return
-     * @throws Exception
-     */
-    public String listNetworks( String response,HashMap<String, String> optional)
-            throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("listNetworks", optional);
-        arguments.add(new NameValuePair("response",response));
-        String responseDocument = server.request(arguments);
-
-        return responseDocument;
-    }
-
-}
+   }
