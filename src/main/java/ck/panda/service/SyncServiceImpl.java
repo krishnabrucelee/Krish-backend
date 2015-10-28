@@ -12,6 +12,7 @@ import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.OsType;
 import ck.panda.domain.entity.Region;
+import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Zone;
 import ck.panda.util.CloudStackDomainService;
 import ck.panda.util.CloudStackHypervisorsService;
@@ -87,6 +88,9 @@ public class SyncServiceImpl  implements SyncService {
     @Autowired
     private OsTypeService osTypeService;
 
+    @Autowired
+    private StorageOfferingService storageService;
+
     /**
      * Sync call for synchronization list of Region, domain, region. template, hypervisor
      * @throws Exception unhandled errors.
@@ -110,6 +114,8 @@ public class SyncServiceImpl  implements SyncService {
 
         //6. Sync OSType entity
         this.syncOsTypes();
+
+        this.syncStorageOffering();
 
     }
 
@@ -363,5 +369,48 @@ public class SyncServiceImpl  implements SyncService {
         }
     }
 
+    /**
+     * Sync with CloudStack server osType.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
+     */
+    private void syncStorageOffering() throws ApplicationException, Exception {
+
+        //1. Get all the StorageOffering objects from CS server as hash
+        List<StorageOffering> csStorageOfferingsList = storageService.findAllFromCSServer();
+        HashMap<String, StorageOffering> csStorageOfferingMap = (HashMap<String, StorageOffering>) StorageOffering.convert(csStorageOfferingsList);
+
+        //2. Get all the osType objects from application
+        List<StorageOffering> appstorageServiceList = storageService.findAll();
+
+        // 3. Iterate application osType list
+        for (StorageOffering storageOffering: appstorageServiceList) {
+             //3.1 Find the corresponding CS server osType object by finding it in a hash using uuid
+            if (csStorageOfferingMap.containsKey(storageOffering.getUuid())) {
+                StorageOffering csStorageOffering = csStorageOfferingMap.get(storageOffering.getUuid());
+
+                csStorageOffering.setDescription(csStorageOffering.getDescription());
+//                csOsType.setOsCategoryUuid(csOsType.getOsCategoryUuid());
+
+                //3.2 If found, update the osType object in app db
+                storageService.update(storageOffering);
+
+                //3.3 Remove once updated, so that we can have the list of cs osType which is not added in the app
+                csStorageOfferingMap.remove(storageOffering.getUuid());
+            } else {
+                storageService.delete(storageOffering);
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete
+            }
+        }
+        //4. Get the remaining list of cs server hash osType object, then iterate and
+        //add it to app db
+        for (String key: csStorageOfferingMap.keySet()) {
+
+            storageService.save(csStorageOfferingMap.get(key));
+        }
+    }
 }
 
