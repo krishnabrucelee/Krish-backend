@@ -93,26 +93,6 @@ public class NetworkOfferingServiceImpl implements NetworkOfferingService {
 		return (List<NetworkOffering>) networkRepo.findAll();
     }
 
-    @Override
-    public List<NetworkOffering> findAllFromCSServer() throws Exception {
-
-         List<NetworkOffering> networkOfferingList = new ArrayList<NetworkOffering>();
-          HashMap<String, String> networkOfferingMap = new HashMap<String, String>();
-
-          // 1. Get the list of network offering from CS server using CS connector
-          String response = networkOfferingService.listNetworkOfferings("json", networkOfferingMap);
-
-          JSONArray networkOfferingListJSON = new JSONObject(response).getJSONObject("listnetworkofferingsresponse")
-                  .getJSONArray("networkoffering");
-          // 2. Iterate the json list, convert the single json entity to domain
-          for (int i = 0, size = networkOfferingListJSON.length(); i < size; i++) {
-              // 2.1 Call convert by passing JSONObject to Domain network offering  and Add
-              // the converted network offering  to list
-              networkOfferingList.add(NetworkOffering.convert(networkOfferingListJSON.getJSONObject(i)));
-          }
-          return networkOfferingList;
-	}
-
 	@Override
 	public List<NetworkOffering> findAllFromCSServer() throws Exception {
 
