@@ -3,9 +3,12 @@ package ck.panda.domain.entity;
 import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
@@ -126,9 +129,13 @@ public class ComputeOffering implements Serializable {
     private Boolean isCustom;
 
     /** Domain id for this offering. */
-    //Todo : make ref id after adding zone entity
-    @Column(name = "domain_id")
+    @JoinColumn(name = "domain_id", referencedColumnName = "id" ,insertable=false, updatable=false)
+    @ManyToOne
+    private Domain domain;
+
+   @Column(name="domain_id")
     private Long domainId;
+
 
     /** The Disk iopsWriteRate for the Compute offering. */
     @Column(name = "disk_iops_write_rate")
@@ -170,7 +177,23 @@ public class ComputeOffering implements Serializable {
 
     /** Disk input and output is average or good or excellent. */
     @Column(name = "disk_io")
-    private String diskIo;
+    @Enumerated(EnumType.STRING)
+    private DiskIo diskIo;
+
+    /**
+     * Enumeration for Region status.
+     */
+    public enum DiskIo {
+
+           /** If region is enabled we can create zones and pods. */
+           AVERAGE,
+
+           /** If region is disabled cannot create any zones and pods until region gets enabled. */
+           GOOD,
+
+           /** If region is deleted we cannot create zones and pods. */
+           EXCELLENT
+    }
 
     /**
      * @return the id
@@ -431,7 +454,7 @@ public class ComputeOffering implements Serializable {
         return isPublic;
     }
 
-    /**
+   /**
      * @return the domainId
      */
     public Long getDomainId() {
@@ -466,17 +489,18 @@ public class ComputeOffering implements Serializable {
         this.version = version;
     }
 
+
     /**
      * @return the diskIo
      */
-    public String getDiskIo() {
+    public DiskIo getDiskIo() {
         return diskIo;
     }
 
     /**
      * @param diskIo the diskIo to set
      */
-    public void setDiskIo(String diskIo) {
+    public void setDiskIo(DiskIo diskIo) {
         this.diskIo = diskIo;
     }
 
@@ -605,6 +629,23 @@ public class ComputeOffering implements Serializable {
     public void setIsCustom(Boolean isCustom) {
         this.isCustom = isCustom;
     }
+
+
+
+    /**
+     * @return the domain
+     */
+    public Domain getDomain() {
+        return domain;
+    }
+
+    /**
+     * @param domain the domain to set
+     */
+    public void setDomain(Domain domain) {
+        this.domain = domain;
+    }
+
 
     /**
      * Convert JSONObject to domain entity.

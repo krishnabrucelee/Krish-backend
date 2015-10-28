@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Hypervisor;
+import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.OsType;
@@ -16,6 +17,7 @@ import ck.panda.domain.entity.Zone;
 import ck.panda.util.CloudStackDomainService;
 import ck.panda.util.CloudStackHypervisorsService;
 import ck.panda.util.CloudStackNetworkOfferingService;
+import ck.panda.util.CloudStackNetworkService;
 import ck.panda.util.CloudStackOSService;
 import ck.panda.util.CloudStackRegionService;
 import ck.panda.util.CloudStackZoneService;
@@ -96,6 +98,14 @@ public class SyncServiceImpl  implements SyncService {
     @Autowired
     private NetworkOfferingService networkOfferingService;
 
+    /** CloudStackNetworkOfferingService for network connectivity with cloudstack. */
+    @Autowired
+    private CloudStackNetworkService csNetworkService;
+
+   /** NetworkOfferingService for listing network offers in cloudstack server. */
+    @Autowired
+    private NetworkService networkService;
+
     /**
      * Sync call for synchronization list of Region, domain, region. template, hypervisor
      * @throws Exception unhandled errors.
@@ -123,6 +133,8 @@ public class SyncServiceImpl  implements SyncService {
         //7. Sync Network Offering entity
         this.syncNetworkOffering();
 
+        //8. Sync Network  entity
+        this.syncNetwork();
     }
 
     /**
@@ -417,5 +429,53 @@ public class SyncServiceImpl  implements SyncService {
         }
     }
 
+    /**
+     * Sync with CloudStack server Domain.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
+     */
+    private void syncNetwork() throws ApplicationException, Exception {
+
+        //1. Get all the domain objects from CS server as hash
+        List<Network> csNetworkList = networkService.findAllFromCSServer();
+        HashMap<String, Network> csDomainMap = (HashMap<String, Network>) Network.convert(csNetworkList);
+
+        //2. Get all the domain objects from application
+        List<Network> appDomainList = networkService.findAll();
+
+        // 3. Iterate application domain list
+        for (Network network: appDomainList) {
+             //3.1 Find the corresponding CS server domain object by finding it in a hash using uuid
+            if (csDomainMap.containsKey(network.getUuid())) {
+                Network csNetwork = csDomainMap.get(network.getUuid());
+
+                network.setName(csNetwork.getName());
+                network.setDomainId(csNetwork.getDomainId());
+                network.setNetworkOfferingId(csNetwork.getNetworkOfferingId());
+                network.setZoneId(csNetwork.getZoneId());
+                network.setCidr(csNetwork.getCidr());
+                network.setState(csNetwork.getState());
+                network.setDisplayNetwork(csNetwork.getDisplayNetwork());
+                network.setDisplayText(csNetwork.getDisplayText());
+
+                //3.2 If found, update the domain object in app db
+                networkService.update(network);
+
+                //3.3 Remove once updated, so that we can have the list of cs domain which is not added in the app
+                csDomainMap.remove(network.getUuid());
+            } else {
+                networkService.delete(network);
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete
+            }
+        }
+        //4. Get the remaining list of cs server hash domain object, then iterate and
+        //add it to app db
+        for (String key: csDomainMap.keySet()) {
+            networkService.save(csDomainMap.get(key));
+        }
+    }
 }
 

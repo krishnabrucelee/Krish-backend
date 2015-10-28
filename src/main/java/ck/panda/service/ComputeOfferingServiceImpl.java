@@ -123,16 +123,41 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     public HashMap<String, String> addOptionalValues(ComputeOffering compute) {
         HashMap<String, String> computeMap = new HashMap<String, String>();
 
-        System.err.println("compute.getQosType()" + compute.getQosType());
-
         if (compute.getStorageTags() != null) {
             computeMap.put("tags", compute.getStorageTags().toString());
         }
 
-       /* if (compute.getQosType().equals("hypervisor")) {
+        if (compute.getHostTags() != null) {
+            computeMap.put("hosttags", compute.getHostTags().toString());
+        }
+
+       if (compute.getDiskBytesReadRate() != null) {
             computeMap.put("diskbytesreadrate",compute.getDiskBytesReadRate().toString());
+       }
+
+        if (compute.getDiskBytesWriteRate() != null) {
             computeMap.put("diskbyteswriterate",compute.getDiskBytesWriteRate().toString());
         }
-*/        return computeMap;
+
+        if (compute.getDiskIopsReadRate() != null) {
+            computeMap.put("iopsreadrate",compute.getDiskIopsReadRate().toString());
+        }
+
+        if (compute.getDiskIopsWriteRate() != null) {
+            computeMap.put("iopswriterate",compute.getDiskIopsWriteRate().toString());
+        }
+
+        if (compute.getMinIops() != null) {
+            computeMap.put("miniops",compute.getMinIops().toString());
+        }
+
+        if (compute.getMaxIops() != null) {
+            computeMap.put("maxiops",compute.getMaxIops().toString());
+        }
+
+        if (compute.getNetworkRate() != null) {
+            computeMap.put("networkrate",compute.getNetworkRate().toString());
+        }
+       return computeMap;
     }
 }
