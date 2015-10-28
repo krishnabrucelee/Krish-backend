@@ -1,10 +1,10 @@
 package ck.panda.web.resource;
 
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,12 +13,11 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
-
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Role;
+import ck.panda.service.DepartmentServiceImpl;
 import ck.panda.service.RoleService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -33,6 +32,9 @@ import ck.panda.util.web.CRUDController;
 @Api(value = "Roles", description = "Operations with roles", produces = "application/json")
 public class RoleController extends CRUDController<Role> implements ApiController {
 
+	/** Logger attribute. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoleController.class);
+
     /** Service reference to Role. */
     @Autowired
     private RoleService roleService;
@@ -40,7 +42,6 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Role.", response = Role.class)
     @Override
     public Role create(@RequestBody Role role) throws Exception {
-        System.out.println("------------------------------------------");
         return roleService.save(role);
     }
 
@@ -64,15 +65,19 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
 
     @Override
     public List<Role> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-            @RequestParam Integer limit,HttpServletRequest request, HttpServletResponse response) throws Exception {
+            @RequestParam Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Role.class);
         Page<Role> pageResponse = roleService.findAll(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
 
+    /**
+     * Empty method No implementation.
+     */
     @Override
     public void testMethod() throws Exception {
         roleService.findAll();
     }
+
 }

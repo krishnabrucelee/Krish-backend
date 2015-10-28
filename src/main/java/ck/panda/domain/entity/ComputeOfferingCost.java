@@ -30,11 +30,12 @@ public class ComputeOfferingCost {
     private Long id;
 
     /** Zone id for this offering. */
-    @JoinColumn(name = "zone_id", referencedColumnName = "id",insertable=false, updatable=false)
+    @JoinColumn(name = "zone_id", referencedColumnName = "id",insertable = false, updatable = false)
     @OneToOne
     private Zone zone;
 
-    @Column(name="zone_id")
+    /** id of the zone.*/
+    @Column(name = "zone_id")
     private Long zoneId;
 
     /** The id of the Compute offering.  */

@@ -1,6 +1,7 @@
 package ck.panda.service;
 
 import org.springframework.stereotype.Service;
+
 import ck.panda.domain.entity.ComputeOfferingCost;
 import ck.panda.util.domain.CRUDService;
 
@@ -10,5 +11,7 @@ import ck.panda.util.domain.CRUDService;
  */
 @Service
 public interface ComputeOfferingCostService  extends CRUDService<ComputeOfferingCost>  {
+
+   /* void save(ComputeOfferingAndPrice compute);*/
 
 }

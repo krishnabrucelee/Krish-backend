@@ -1,6 +1,10 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -11,6 +15,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -34,6 +39,7 @@ import org.springframework.data.annotation.Version;
 
 public class ComputeOffering implements Serializable {
 
+
     /** The id of the Compute offering table. */
     @Id
     @GeneratedValue
@@ -45,10 +51,7 @@ public class ComputeOffering implements Serializable {
     private String uuid;
 
     /** The name of the Compute offering. */
-    @NotEmpty
-    @Column(unique = true, nullable = false)
-    @Size(min = 4, max = 20)
-    //@Column(name = "name")
+    @Column(name = "name")
     private String name;
 
     /** The number of CPU cores needed. */
@@ -144,7 +147,8 @@ public class ComputeOffering implements Serializable {
     /**
      * The storage type local, shared for this Compute offering. */
     @Column(name = "storage_type")
-    private String storageType;
+    @Enumerated(EnumType.STRING)
+    private StorageType storageType;
 
     /** Created by user. */
     @CreatedBy
@@ -180,6 +184,15 @@ public class ComputeOffering implements Serializable {
     @Enumerated(EnumType.STRING)
     private DiskIo diskIo;
 
+    /** Zone id for this offering. */
+    @JoinColumn(name = "zone_id", referencedColumnName = "id",insertable = false, updatable = false)
+    @OneToOne
+    private Zone zone;
+
+    /** id of the zone.*/
+    @Column(name = "zone_id")
+    private Long zoneId;
+
     /**
      * Enumeration for Region status.
      */
@@ -195,6 +208,18 @@ public class ComputeOffering implements Serializable {
            EXCELLENT
     }
 
+    /**
+     * Enumeration for Region status.
+     */
+    public enum StorageType {
+
+           /** If region is enabled we can create zones and pods. */
+           SHARED,
+
+           /** If region is disabled cannot create any zones and pods until region gets enabled. */
+           LOCAL,
+
+    }
     /**
      * @return the id
      */
@@ -298,13 +323,6 @@ public class ComputeOffering implements Serializable {
      */
     public Integer getDiskIopsWriteRate() {
         return diskIopsWriteRate;
-    }
-
-    /**
-     * @return the storageType
-     */
-    public String getStorageType() {
-        return storageType;
     }
 
     /**
@@ -424,13 +442,6 @@ public class ComputeOffering implements Serializable {
      */
     public void setDiskIopsWriteRate(Integer diskIopsWriteRate) {
         this.diskIopsWriteRate = diskIopsWriteRate;
-    }
-
-    /**
-     * @param storageType the storageType to set
-     */
-    public void setStorageType(String storageType) {
-        this.storageType = storageType;
     }
 
     /**
@@ -648,6 +659,49 @@ public class ComputeOffering implements Serializable {
 
 
     /**
+     * @return the zone
+     */
+    public Zone getZone() {
+        return zone;
+    }
+
+    /**
+     * @param zone the zone to set
+     */
+    public void setZone(Zone zone) {
+        this.zone = zone;
+    }
+
+    /**
+     * @return the zoneId
+     */
+    public Long getZoneId() {
+        return zoneId;
+    }
+
+    /**
+     * @param zoneId the zoneId to set
+     */
+    public void setZoneId(Long zoneId) {
+        this.zoneId = zoneId;
+    }
+
+    /**
+     * @return the storageType
+     */
+    public StorageType getStorageType() {
+        return storageType;
+    }
+
+    /**
+     * @param storageType the storageType to set
+     */
+    public void setStorageType(StorageType storageType) {
+        this.storageType = storageType;
+    }
+
+
+    /**
      * Convert JSONObject to domain entity.
      *
      * @param object json object
@@ -657,6 +711,25 @@ public class ComputeOffering implements Serializable {
     public static ComputeOffering convert(JSONObject object) throws JSONException {
         ComputeOffering compute = new ComputeOffering();
         compute.uuid = object.get("id").toString();
+        compute.name = object.get("name").toString();
+        compute.displayText = object.get("displaytext").toString();
         return compute;
+    }
+
+
+    /**
+     * Mapping entity object into list.
+     *
+     * @param computeOfferingList list of domains.
+     * @return computeOffering map
+     */
+    public static Map<String, ComputeOffering> convert(List<ComputeOffering> computeOfferingList) {
+        Map<String, ComputeOffering> computeOfferingMap = new HashMap<String, ComputeOffering>();
+
+        for (ComputeOffering computeOffering : computeOfferingList) {
+            computeOfferingMap.put(computeOffering.getUuid(), computeOffering);
+        }
+
+        return computeOfferingMap;
     }
  }

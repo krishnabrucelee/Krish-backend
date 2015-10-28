@@ -1,7 +1,10 @@
 package ck.panda.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.ComputeOffering;
+import ck.panda.domain.entity.Domain;
 import ck.panda.domain.repository.jpa.ComputeOfferingRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackComputeOffering;
@@ -49,6 +53,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     @PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
     public ComputeOffering save(ComputeOffering compute) throws Exception {
 
+
         Errors errors = validator.rejectIfNullEntity("compute", compute);
         errors = validator.validateEntity(compute, errors);
 
@@ -66,7 +71,9 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             compute.setUuid((String) createComputeResponseJSON.get("id"));
                  return computeRepo.save(compute);
         }
+
     }
+
 
     @Override
     public ComputeOffering update(ComputeOffering compute) throws Exception {
@@ -160,4 +167,26 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
         }
        return computeMap;
     }
-}
+
+    @Override
+    public List<ComputeOffering> findAllFromCSServer() throws Exception {
+
+         List<ComputeOffering> computeOfferingList = new ArrayList<ComputeOffering>();
+          HashMap<String, String> computeOfferingMap = new HashMap<String, String>();
+
+          // 1. Get the list of ComputeOffering from CS server using CS connector
+          String response = computeOffer.listComputeOfferings("json", computeOfferingMap);
+
+          JSONArray computeOfferingListJSON = new JSONObject(response).getJSONObject("listserviceofferingsresponse")
+                  .getJSONArray("serviceoffering");
+          // 2. Iterate the json list, convert the single json entity to domain
+          for (int i = 0, size = computeOfferingListJSON.length(); i < size; i++) {
+              // 2.1 Call convert by passing JSONObject to ComputeOffering entity and Add
+              // the converted ComputeOffering entity to list
+              computeOfferingList.add(ComputeOffering.convert(computeOfferingListJSON.getJSONObject(i)));
+          }
+          return computeOfferingList;
+      }
+
+    }
+
