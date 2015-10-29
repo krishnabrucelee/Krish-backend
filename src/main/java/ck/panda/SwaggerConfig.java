@@ -13,11 +13,11 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 /**
  * Swagger configurations will be added here.
  */
-@Configuration
-@ComponentScan(basePackages = "ck.panda.web.resource")
-@EnableSwagger2
-@PropertySource("classpath:swagger.properties")
-@Import(SwaggerUiConfig.class)
+// @Configuration
+// @ComponentScan(basePackages = "ck.panda.web.resource")
+// @EnableSwagger2
+// @PropertySource("classpath:swagger.properties")
+//@Import(SwaggerUiConfig.class)
 public class SwaggerConfig {
     /**
      * Application information.
