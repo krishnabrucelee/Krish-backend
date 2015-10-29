@@ -122,4 +122,9 @@ public class UserServiceImpl implements UserService {
           return userList;
       }
 
+	@Override
+	public List<User> findByName(String query) throws Exception {
+		return userRepository.findAllByActive(query);
+	}
+
 }

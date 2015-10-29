@@ -56,7 +56,7 @@ public class SyncServiceImpl  implements SyncService {
     private DomainService domainService;
 
     /** Logger attribute. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(DomainServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SyncServiceImpl.class);
 
     /** CloudStackDomainService for domain connectivity with cloudstack. */
     @Autowired
@@ -147,42 +147,81 @@ public class SyncServiceImpl  implements SyncService {
      * @throws Exception unhandled errors.
      */
     public void sync() throws Exception {
-
+        try{
         //1. Sync Domain entity
         this.syncDomain();
-
+        }
+        catch(Exception e){
+        	LOGGER.error("ERROR AT synch Domaim", e);
+        }
+        try{
         //2. Sync Region entity
         this.syncRegion();
-
+	    }
+	    catch(Exception e){
+	    	LOGGER.error("ERROR AT synch Region", e);
+	    }
+        try{
         //3. Sync Zone entity
         this.syncZone();
-
+        }catch(Exception e){
+        	LOGGER.error("ERROR AT synch Zone", e);
+	    }
+        try{
         //4. Sync Hypervisor entity
         this.syncHypervisor();
-
+        }catch(Exception e){
+        	LOGGER.error("ERROR AT synch Hypervisor", e);
+	    }
+        try{
         //5. Sync OSCategory entity
         this.syncOsCategory();
-
+	    }catch(Exception e){
+	    	LOGGER.error("ERROR AT synch OS Category", e);
+	    }
+        try{
         //6. Sync OSType entity
         this.syncOsTypes();
-
+	    }catch(Exception e){
+	    	LOGGER.error("ERROR AT synch OS Types", e);
+	    }
+        try{
         //7. Sync Storage offering entity
         this.syncStorageOffering();
-
+        }
+        catch(Exception e){
+        	LOGGER.error("ERROR AT synch Storage Offering", e);
+	    }
+        try{
         //8. Sync Network Offering entity
         this.syncNetworkOffering();
-
+        }catch(Exception e){
+        	LOGGER.error("ERROR AT synch Network Offering", e);
+	    }
+        try{
         //9. Sync Network  entity
         this.syncNetwork();
-
+        }catch(Exception e){
+        	LOGGER.error("ERROR AT synch Network ", e);
+	    }
+        try{
         //10. Sync Compute Offering entity
         this.syncComputeOffering();
-
+        }catch(Exception e){
+        	LOGGER.error("ERROR AT synch Compute Offering", e);
+	    }
+        try{
         //11. Sync User entity
         this.syncUser();
-
+        }catch(Exception e){
+        	LOGGER.error("ERROR AT synch User", e);
+	    }
+        try{
         //12. Sync Templates entity
         this.syncTemplates();
+        }catch(Exception e){
+        	LOGGER.error("ERROR AT synch Templates", e);
+	    }
     }
 
     /**
@@ -452,6 +491,7 @@ public class SyncServiceImpl  implements SyncService {
 
         // 3. Iterate application osType list
         for (StorageOffering storageOffering: appstorageServiceList) {
+        	storageOffering.setIsSyncFlag(false);
              //3.1 Find the corresponding CS server osType object by finding it in a hash using uuid
             if (csStorageOfferingMap.containsKey(storageOffering.getUuid())) {
                 StorageOffering csStorageOffering = csStorageOfferingMap.get(storageOffering.getUuid());
@@ -629,6 +669,7 @@ public class SyncServiceImpl  implements SyncService {
 
         // 3. Iterate application domain list
         for (ComputeOffering computeOffering: appDomainList) {
+        	computeOffering.setIsSyncFlag(false);
              //3.1 Find the corresponding CS server domain object by finding it in a hash using uuid
             if (csComputeOfferingMap.containsKey(computeOffering.getUuid())) {
                 ComputeOffering csComputeService = csComputeOfferingMap.get(computeOffering.getUuid());

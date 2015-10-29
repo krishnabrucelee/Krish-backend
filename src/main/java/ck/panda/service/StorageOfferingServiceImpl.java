@@ -51,7 +51,9 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
 
     @Override
     public StorageOffering save(StorageOffering storage) throws Exception {
-        Errors errors = validator.rejectIfNullEntity("storageOffering", storage);
+    	if(storage.getIsSyncFlag()){
+
+    	Errors errors = validator.rejectIfNullEntity("storageOffering", storage);
         errors = validator.validateEntity(storage, errors);
 
         if (errors.hasErrors()) {
@@ -70,18 +72,23 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
 
             return storageOfferingRepo.save(storage);
         }
+
+    	} else {
+    		  return storageOfferingRepo.save(storage);
+    	}
+
     }
 
     @Override
     public StorageOffering update(StorageOffering storage) throws Exception {
-
+    	if(storage.getIsSyncFlag()){
         Errors errors = validator.rejectIfNullEntity("storageOffering", storage);
         errors = validator.validateEntity(storage, errors);
 
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-            config.setServer(21L);
+            config.setServer(1L);
             String storageOfferings = csStorageService.updateStorageOffering(storage.getUuid(), "json",
                     optional(storage));
             LOGGER.info("storage offer update response " + storageOfferings);
@@ -94,10 +101,14 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
                     .replace("\"", "").trim());
             return storageOfferingRepo.save(storage);
         }
+    	} else{
+    		return storageOfferingRepo.save(storage);
+    	}
     }
 
     @Override
     public void delete(StorageOffering storage) throws Exception {
+    	if(storage.getIsSyncFlag()){
         String storageOfferings = csStorageService.deleteStorageOffering(String.valueOf(storage.getId()), "json");
         LOGGER.info("storage offer delete response " + storageOfferings);
 
@@ -108,6 +119,9 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
         storage.setUuid(json.get("deletediskofferingresponse").get("diskoffering").get("id").toString()
                 .replace("\"", "").trim());
         storageOfferingRepo.delete(storage);
+    	} else {
+    		storageOfferingRepo.delete(storage);
+    	}
     }
 
     @Override
@@ -218,4 +232,6 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
         }
         return storageOfferingList;
     }
+
+
 }

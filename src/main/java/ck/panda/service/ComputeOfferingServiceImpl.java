@@ -53,7 +53,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     @PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
     public ComputeOffering save(ComputeOffering compute) throws Exception {
 
-
+    	if(compute.getIsSyncFlag()) {
         Errors errors = validator.rejectIfNullEntity("compute", compute);
         errors = validator.validateEntity(compute, errors);
 
@@ -62,7 +62,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
         } else {
 
             //set server for maintain session with configuration values
-            computeOffer.setServer(configServer.setServer(2L));
+        	  computeOffer.setServer(configServer.setServer(1L));
             String createComputeResponse = computeOffer.createComputeOffering(compute.getName(), compute.getDisplayText(),
                     "json", addOptionalValues(compute));
             JSONObject createComputeResponseJSON = new JSONObject(createComputeResponse).getJSONObject("createserviceofferingresponse")
@@ -71,13 +71,15 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             compute.setUuid((String) createComputeResponseJSON.get("id"));
                  return computeRepo.save(compute);
         }
-
+    	} else {
+    		 return computeRepo.save(compute);
+    	}
     }
 
 
     @Override
     public ComputeOffering update(ComputeOffering compute) throws Exception {
-
+    	if(compute.getIsSyncFlag()) {
         Errors errors = validator.rejectIfNullEntity("compute", compute);
         errors = validator.validateEntity(compute, errors);
 
@@ -85,20 +87,29 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             throw new ApplicationException(errors);
         } else {
             HashMap<String, String> hs = new HashMap<String, String>();
-            computeOffer.setServer(configServer.setServer(2L));
+            computeOffer.setServer(configServer.setServer(1L));
             String editComputeResponse = computeOffer.updateComputeOffering(compute.getUuid(),compute.getName(),compute.getDisplayText(),"json", hs);
             JSONObject domainListJSON = new JSONObject(editComputeResponse).getJSONObject("updateserviceofferingresponse")
                     .getJSONObject("serviceoffering");
         }
         return computeRepo.save(compute);
+    	} else {
+    		 return computeRepo.save(compute);
+    	}
+
     }
 
     @Override
     public void delete(ComputeOffering compute) throws Exception {
+    	if(compute.getIsSyncFlag()) {
         //set server for finding value in configuration
         computeOffer.setServer(configServer.setServer(2L));
         String deletecompute = computeOffer.deleteComputeOffering(compute.getUuid(), "json");
         computeRepo.delete(compute);
+    }
+    else {
+    	computeRepo.delete(compute);
+    }
     }
 
     @Override

@@ -7,11 +7,16 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wordnik.swagger.annotations.Api;
@@ -19,6 +24,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.StorageOffering;
+import ck.panda.domain.entity.User;
 import ck.panda.service.StorageOfferingService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -42,6 +48,7 @@ public class StorageOfferingController extends CRUDController<StorageOffering>
   @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new StorageOffering.", response = StorageOffering.class)
   @Override
   public StorageOffering create(@RequestBody StorageOffering storage) throws Exception {
+	storage.setIsSyncFlag(true);
     return storageOfferingService.save(storage);
   }
 
@@ -55,6 +62,7 @@ public class StorageOfferingController extends CRUDController<StorageOffering>
   @Override
   public StorageOffering update(@RequestBody StorageOffering storage,
       @PathVariable(PATH_ID) Long id) throws Exception {
+	storage.setIsSyncFlag(true);
     return storageOfferingService.update(storage);
   }
 
@@ -75,6 +83,18 @@ public class StorageOfferingController extends CRUDController<StorageOffering>
         page.getPageHeaderValue(pageResponse));
     return pageResponse.getContent();
   }
+
+  /**
+   * list all storage service for instance.
+   * @return storage service
+   * @throws Exception
+   */
+	@RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	protected List<StorageOffering> getSearch() throws Exception {
+		return storageOfferingService.findAll();
+	}
 
 @Override
 public void testMethod() throws Exception {

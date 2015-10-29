@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
@@ -20,6 +21,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.GuestNetwork;
 import ck.panda.service.DepartmentService;
 import ck.panda.service.DomainService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -85,6 +87,31 @@ public class DepartmentController extends CRUDController<Department> implements 
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
+
+    /**
+     * list all departments.
+     * @return projects project list.
+     * @throws Exception
+     */
+  	@RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+  	@ResponseStatus(HttpStatus.OK)
+  	@ResponseBody
+  	protected List<Department> getSearch() throws Exception {
+  		return departmentService.findAll();
+  	}
+
+  	/**
+  	 * list the departments with query.
+  	 * @param query query String.
+  	 * @return
+  	 * @throws Exception
+  	 */
+  	@RequestMapping(value = "search",method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	protected List<Department> getSearch(@RequestParam("q") String query) throws Exception {
+		return departmentService.findByName(query);
+	}
 
     @Override
     public void testMethod() throws Exception {

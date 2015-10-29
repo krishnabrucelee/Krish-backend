@@ -20,7 +20,7 @@ import ck.panda.util.error.exception.EntityNotFoundException;
 public class ConfigUtil {
 
     /** Logger attribute. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(DepartmentServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigUtil.class);
 
     /** Repository to store apikey, secretkey and url. */
     @Autowired

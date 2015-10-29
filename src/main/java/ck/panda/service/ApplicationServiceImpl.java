@@ -77,7 +77,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public List<Application> findAll() throws Exception {
-        return null;
+        return (List<Application>) applicationRepo.findAll();
     }
 
     @Override

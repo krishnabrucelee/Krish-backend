@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.repository.jpa.DepartmentReposiory;
+import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
@@ -32,6 +33,9 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Autowired
     private DepartmentReposiory departmentRepo;
 
+    @Autowired
+    private DomainRepository domainRepository;
+
     @Override
     public Department save(Department department) throws Exception {
 
@@ -42,6 +46,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
+        	department.setDomain(domainRepository.findOne(department.getDomain().getId()));
             department.setIsActive(true);
             department.setStatus(Department.Status.ENABLED);
             return departmentRepo.save(department);
@@ -107,7 +112,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Department> findAll() throws Exception {
-            return null;
+            return (List<Department>) departmentRepo.findAll();
     }
 
     public Page<Department> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
@@ -121,5 +126,10 @@ public class DepartmentServiceImpl implements DepartmentService {
         department.setStatus(Department.Status.DELETED);
         return departmentRepo.save(department);
     }
+
+    @Override
+	public List<Department> findByName(String query) throws Exception {
+			return (List<Department>) departmentRepo.findAllByActive(query);
+	}
 
 }
