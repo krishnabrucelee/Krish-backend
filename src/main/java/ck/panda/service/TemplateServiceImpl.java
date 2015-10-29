@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,6 +28,8 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 import ck.panda.util.error.exception.EntityNotFoundException;
+import ck.panda.util.infrastructure.security.AuthenticationFilter;
+import groovy.json.JsonException;
 
 /**
  * Service implementation for Template entity.
@@ -62,6 +66,9 @@ public class TemplateServiceImpl implements TemplateService {
     @Autowired
     private HypervisorRepository hypervisorRepository;
 
+    /** Logger constant. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationFilter.class);
+
     @Override
     @PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
     public Template save(Template template) throws Exception {
@@ -73,20 +80,14 @@ public class TemplateServiceImpl implements TemplateService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
+        	try {
             configUtil.setServer(1L);
             HashMap<String, String> optional = new HashMap<String, String>();
-            if(template.getDynamicallyScalable() != null) { optional.put("isdynamicallyscalable", template.getDynamicallyScalable().toString()); }
-            if(template.getExtractable() != null) { optional.put("isextractable", template.getExtractable().toString()); }
-            if(template.getFeatured() != null) { optional.put("isfeatured", template.getFeatured().toString()); }
-            if(template.getShare() != null) { optional.put("ispublic", template.getShare().toString()); }
-            if(template.getRouting() != null) { optional.put("isrouting", template.getRouting().toString()); }
-            if(template.getPasswordEnabled() != null) { optional.put("passwordenabled", template.getPasswordEnabled().toString()); }
-            if(template.getHvm() != null) { optional.put("requireshvm", template.getHvm().toString()); }
 
             String resp = cloudStackTemplateService.registerTemplate(template.getDescription(), template.getFormat().name(),
                     template.getHypervisor().getName(), template.getName(),
                     template.getOsType().getUuid(), template.getUrl(),
-                    template.getZone().getUuid(), "json", optional);
+                    template.getZone().getUuid(), "json", templateFieldNullValidation(template, optional));
 
             JSONArray templateJSON = new JSONObject(resp).getJSONObject("registertemplateresponse")
                     .getJSONArray("template");
@@ -95,8 +96,12 @@ public class TemplateServiceImpl implements TemplateService {
                 template.setUuid(rec.getString("id"));
                 template.setStatus(Status.valueOf("Active"));
                 template.setType(Type.valueOf(rec.getString("templatetype")));
+                template.setDisplayText(template.getDescription());
             }
-            return templateRepository.save(template);
+        	} catch (JsonException jsonException) {
+        		LOGGER.error("Cloud stack template creation exception", jsonException);
+        	}
+        	return templateRepository.save(template);
         }
         } else {
             return templateRepository.save(template);
@@ -114,13 +119,7 @@ public class TemplateServiceImpl implements TemplateService {
         } else {
             configUtil.setServer(1L);
             HashMap<String, String> optional = new HashMap<String, String>();
-            if(template.getDynamicallyScalable() != null) { optional.put("isdynamicallyscalable", template.getDynamicallyScalable().toString()); }
-            if(template.getExtractable() != null) { optional.put("isextractable", template.getExtractable().toString()); }
-            if(template.getFeatured() != null) { optional.put("isfeatured", template.getFeatured().toString()); }
-            if(template.getShare() != null) { optional.put("ispublic", template.getShare().toString()); }
-            if(template.getRouting() != null) { optional.put("isrouting", template.getRouting().toString()); }
-            if(template.getPasswordEnabled() != null) { optional.put("passwordenabled", template.getPasswordEnabled().toString()); }
-            if(template.getHvm() != null) { optional.put("requireshvm", template.getHvm().toString()); }
+            templateFieldNullValidation(template, optional);
             optional.put("name", template.getName());
             optional.put("displaytext", template.getDescription());
 
@@ -199,5 +198,16 @@ public class TemplateServiceImpl implements TemplateService {
             templateList.add(template);
         }
         return templateList;
+    }
+
+    public HashMap<String, String> templateFieldNullValidation(Template template, HashMap<String, String> optional) {
+        if(template.getDynamicallyScalable() != null) { optional.put("isdynamicallyscalable", template.getDynamicallyScalable().toString()); }
+        if(template.getExtractable() != null) { optional.put("isextractable", template.getExtractable().toString()); }
+        if(template.getFeatured() != null) { optional.put("isfeatured", template.getFeatured().toString()); }
+        if(template.getShare() != null) { optional.put("ispublic", template.getShare().toString()); }
+        if(template.getRouting() != null) { optional.put("isrouting", template.getRouting().toString()); }
+        if(template.getPasswordEnabled() != null) { optional.put("passwordenabled", template.getPasswordEnabled().toString()); }
+        if(template.getHvm() != null) { optional.put("requireshvm", template.getHvm().toString()); }
+        return optional;
     }
 }

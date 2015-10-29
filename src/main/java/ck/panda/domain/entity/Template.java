@@ -308,8 +308,7 @@ public class Template implements Serializable {
     private Boolean syncFlag;
 
     /** Display text of the template. */
-    @NotEmpty
-    @Column(name = "display_text", nullable = false)
+    @Column(name = "display_text")
     private String displayText;
 
     /**
