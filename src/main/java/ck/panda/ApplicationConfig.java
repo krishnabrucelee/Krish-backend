@@ -12,7 +12,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.data.auditing.DateTimeProvider;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -21,9 +20,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 
 import ck.panda.util.audit.AuditingDateTimeProvider;
 import ck.panda.util.audit.CurrentTimeDateTimeService;
@@ -38,7 +34,6 @@ import ck.panda.util.audit.DateTimeService;
 @SpringBootApplication
 @EnableConfigurationProperties
 @EnableTransactionManagement
-@EnableJpaAuditing(dateTimeProviderRef = "dateTimeProvider")
 @EnableJpaRepositories("ck.panda.domain.repository")
 public class ApplicationConfig extends WebMvcConfigurerAdapter {
 
@@ -49,11 +44,8 @@ public class ApplicationConfig extends WebMvcConfigurerAdapter {
      * @throws Exception if any error
      */
     public static void main(String[] args) throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JSR310Module());
         SpringApplication.run(ApplicationConfig.class, args);
     }
-
 
     /**
      * Configures the DateTimeService.
@@ -85,7 +77,6 @@ public class ApplicationConfig extends WebMvcConfigurerAdapter {
     public javax.validation.Validator localValidatorFactoryBean() {
        return new LocalValidatorFactoryBean();
     }
-
 
     /**
      * Internationalization messages configuration.

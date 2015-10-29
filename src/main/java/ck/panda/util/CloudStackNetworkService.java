@@ -2,14 +2,16 @@ package ck.panda.util;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+
 import org.apache.commons.httpclient.NameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
+ *  CloudStack Network Service provider for cloud Stack connectivity with network providers.
  *
- *  CloudStack Network service for cloudStack server connectivity with network.
  */
+
 @Service
 public class CloudStackNetworkService {
 
@@ -17,24 +19,30 @@ public class CloudStackNetworkService {
     @Autowired
     private CloudStackServer server;
 
-    /** sets api key , secret key and url.
-     * @param server sets these values.
+    /**
+     * setServer passes apikey, url, secretkey from UI and aids to establish
+     * cloudstack connectivity.
+     *
+     * @param server sets apikey and url.
      */
     public void setServer(CloudStackServer server) {
         this.server = server;
     }
 
+
     /**
-     * Creates a network.
+     * Creates a network
      *
      * @param networkOfferingDisplayText the display text of the network
      * @param networkOfferingName the name of the network
-     * @param optional values from cloudstack
-     * @param response json or xml
-     * @return reponse document.
+     * @param networkOfferingId the network offering id
+     * @param networkOfferingZoneId the Zone ID for the network
+     * @param optional
+     * @return
+     * @throws Exception
      */
     public String createNetwork(String networkOfferingDisplayText,
-            String networkOfferingName,  String response,
+            String networkOfferingName, String response,
             HashMap<String, String> optional)
             throws Exception {
 
@@ -42,21 +50,41 @@ public class CloudStackNetworkService {
                 = server.getDefaultQuery("createNetwork", optional);
         arguments.add(new NameValuePair("displaytext", networkOfferingDisplayText));
         arguments.add(new NameValuePair("name", networkOfferingName));
-               arguments.add(new NameValuePair("response",response));
+        arguments.add(new NameValuePair("response",response));
         String responseDocument = server.request(arguments);
 
         return responseDocument;
     }
 
+
     /**
-     * Lists networks and provides detailed information for listed networks.
+     * Lists network service providers for cloud stack.
      *
-     * @param optional values from cloudstack.
-     * @param response json or xml
-     * @return response Document.
+     * @param optional from values cloud stack
+     * @param response json or xml.
+     * @return response Document
      * @throws Exception unhandled errors.
      */
-    public String listNetworks(String response, HashMap<String, String> optional)
+    public String listNetworkServiceProviders(String response,
+            HashMap<String, String> optional)
+            throws Exception {
+
+        LinkedList<NameValuePair> arguments
+                = server.getDefaultQuery("listNetworkServiceProviders", optional);
+        arguments.add(new NameValuePair("response", response));
+        String responseDocument = server.request(arguments);
+
+        return responseDocument;
+    }
+    
+      /**
+     * Lists all available networks.
+     *
+     * @param optional
+     * @return
+     * @throws Exception
+     */
+    public String listNetworks( String response,HashMap<String, String> optional)
             throws Exception {
 
         LinkedList<NameValuePair> arguments
@@ -67,4 +95,5 @@ public class CloudStackNetworkService {
         return responseDocument;
     }
 
-   }
+
+}

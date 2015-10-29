@@ -17,4 +17,11 @@ public interface UserService extends CRUDService<User> {
      */
     List<User> findAllFromCSServer() throws Exception;
 
+    /**
+	 * @param query search term.
+	 * @return list of user.
+	 * @throws Exception
+	 */
+	List<User> findByName(String query) throws Exception;
+
 }
