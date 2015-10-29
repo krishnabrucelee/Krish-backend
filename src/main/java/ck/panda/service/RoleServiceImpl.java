@@ -96,4 +96,9 @@ public class RoleServiceImpl implements RoleService {
         return roleRepo.findUniqueness(name, department);
     }
 
+    @Override
+    public List<Role> getRolesByDepartment(Department department) throws Exception {
+        return (List<Role>) roleRepo.getRolesByDepartment(department);
+    }
+
 }
