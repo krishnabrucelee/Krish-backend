@@ -111,7 +111,7 @@ public class UserServiceImpl implements UserService {
 
           // 1. Get the list of users from CS server using CS connector
           String response = csAccountService.listAccounts("json", userMap);
-         JSONArray userListJSON = new JSONObject(response).getJSONObject("listaccountsresponse")
+          JSONArray userListJSON = new JSONObject(response).getJSONObject("listaccountsresponse")
                   .getJSONArray("account");
           // 2. Iterate the json list, convert the single json entity to user
           for (int i = 0, size = userListJSON.length(); i < size; i++) {
