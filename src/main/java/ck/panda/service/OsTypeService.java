@@ -13,11 +13,19 @@ import ck.panda.util.domain.CRUDService;
 public interface OsTypeService extends CRUDService<OsType> {
 
      /**
-     * To get list of os types from cloudstack server.
+     * To get list of OS types from cloudstack server.
      *
-     * @return os types list from server
+     * @return OS types list from server
      * @throws Exception unhandled errors.
      */
     List<OsType> findAllFromCSServer() throws Exception;
+
+    /**
+     * To get list of OS types based on OS category name selection from cloudstack server.
+     *
+     * @return OS types list from server
+     * @throws Exception unhandled errors.
+     */
+    List<OsType> findByCategoryName(String categoryName) throws Exception;
 }
 

@@ -60,7 +60,7 @@ public class OsTypeServiceImpl implements OsTypeService {
 
     @Override
     public Page<OsType> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return null;
+    	return ostyperepository.findAll(pagingAndSorting.toPageRequest());
     }
 
     @Override
@@ -81,4 +81,9 @@ public class OsTypeServiceImpl implements OsTypeService {
           }
           return osTypeList;
       }
+
+	@Override
+	public List<OsType> findByCategoryName(String categoryName) throws Exception {
+		return ostyperepository.findByCategoryName(categoryName);
+	}
 }
