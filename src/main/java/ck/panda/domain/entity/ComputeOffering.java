@@ -79,7 +79,8 @@ public class ComputeOffering implements Serializable {
 
     /** The hostTags for the Compute offering. */
     @Column(name = "qos_type")
-    private String qosType;
+    @Enumerated(EnumType.STRING)
+    private QosType qosType;
 
     /** Restrict the CPU usage to committed Compute offering. */
     @Column(name = "cpu_capacity")
@@ -131,8 +132,8 @@ public class ComputeOffering implements Serializable {
     private Boolean isActive;
 
     /** Is this offering is custom. */
-    @Column(name = "is_Custom")
-    private Boolean isCustom;
+    @Column(name = "customized")
+    private Boolean customized;
 
     /** Domain id for this offering. */
     @JoinColumn(name = "domain_id", referencedColumnName = "id" ,insertable=false, updatable=false)
@@ -252,6 +253,20 @@ public class ComputeOffering implements Serializable {
            LOCAL,
 
     }
+
+    /**
+     * Enumeration for Region status.
+     */
+    public enum QosType {
+
+           /** If region is enabled we can create zones and pods. */
+           HYPERVISOR,
+
+           /** If region is disabled cannot create any zones and pods until region gets enabled. */
+           STORAGE,
+
+    }
+
     /**
      * @return the id
      */
@@ -599,7 +614,7 @@ public class ComputeOffering implements Serializable {
     /**
      * @return the qosType
      */
-    public String getQosType() {
+    public QosType getQosType() {
         return qosType;
     }
 
@@ -634,7 +649,7 @@ public class ComputeOffering implements Serializable {
     /**
      * @param qosType the qosType to set
      */
-    public void setQosType(String qosType) {
+    public void setQosType(QosType qosType) {
         this.qosType = qosType;
     }
 
@@ -662,15 +677,15 @@ public class ComputeOffering implements Serializable {
     /**
      * @return the isCustom
      */
-    public Boolean getIsCustom() {
-        return isCustom;
+    public Boolean getCustomized() {
+        return customized;
     }
 
     /**
      * @param isCustom the isCustom to set
      */
-    public void setIsCustom(Boolean isCustom) {
-        this.isCustom = isCustom;
+    public void setCustomized(Boolean customized) {
+        this.customized = customized;
     }
 
 
@@ -860,6 +875,9 @@ public class ComputeOffering implements Serializable {
         compute.uuid = object.get("id").toString();
         compute.name = object.get("name").toString();
         compute.displayText = object.get("displaytext").toString();
+        compute.memory = Integer.parseInt(object.getString("memory"));
+        compute.clockSpeed = Integer.parseInt(object.getString("cpuspeed"));
+        compute.numberOfCores = Integer.parseInt(object.getString("cpunumber"));
         compute.setIsSyncFlag(false);
         return compute;
     }

@@ -135,7 +135,8 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     /**
      * Method to add optional values from cloud stack.
      *
-     * @param compute object for compute offering
+     * @param compute
+     *            object for compute offering
      * @return optional values.
      */
     public HashMap<String, String> addOptionalValues(ComputeOffering compute) {
@@ -149,34 +150,61 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             computeMap.put("hosttags", compute.getHostTags().toString());
         }
 
-       if (compute.getDiskBytesReadRate() != null) {
-            computeMap.put("diskbytesreadrate",compute.getDiskBytesReadRate().toString());
-       }
+        if (compute.getCpuCapacity() != null) {
+            computeMap.put("limitcpuuse", compute.getCpuCapacity().toString());
+        }
+
+
+        if(compute.getClockSpeed() != null) { computeMap.put("cpuspeed",
+        		compute.getClockSpeed().toString()); }
+
+        if(compute.getNumberOfCores() !=null) { computeMap.put("cpunumber",
+    		compute.getNumberOfCores().toString()); }
+
+        if (compute.getDiskBytesReadRate() != null) {
+            computeMap.put("bytesreadrate", compute.getDiskBytesReadRate().toString());
+        }
 
         if (compute.getDiskBytesWriteRate() != null) {
-            computeMap.put("diskbyteswriterate",compute.getDiskBytesWriteRate().toString());
+            computeMap.put("byteswriterate", compute.getDiskBytesWriteRate().toString());
         }
 
         if (compute.getDiskIopsReadRate() != null) {
-            computeMap.put("iopsreadrate",compute.getDiskIopsReadRate().toString());
+            computeMap.put("iopsreadrate", compute.getDiskIopsReadRate().toString());
         }
 
         if (compute.getDiskIopsWriteRate() != null) {
-            computeMap.put("iopswriterate",compute.getDiskIopsWriteRate().toString());
+            computeMap.put("iopswriterate", compute.getDiskIopsWriteRate().toString());
         }
 
         if (compute.getMinIops() != null) {
-            computeMap.put("miniops",compute.getMinIops().toString());
+            computeMap.put("miniops", compute.getMinIops().toString());
         }
 
         if (compute.getMaxIops() != null) {
-            computeMap.put("maxiops",compute.getMaxIops().toString());
+            computeMap.put("maxiops", compute.getMaxIops().toString());
         }
 
         if (compute.getNetworkRate() != null) {
-            computeMap.put("networkrate",compute.getNetworkRate().toString());
+            computeMap.put("networkrate", compute.getNetworkRate().toString());
         }
-       return computeMap;
+
+        if (compute.getDomain() != null) {
+            computeMap.put("domain", compute.getDomain().getName());
+        }
+        if (compute.getIsHighAvailabilityEnabled() != null) {
+            computeMap.put("offerha", compute.getIsHighAvailabilityEnabled().toString());
+
+           }
+
+        if(compute.getMemory() !=null) {
+        	computeMap.put("memory", compute.getMemory().toString());
+        }
+        if (compute.getCustomized()!= null ) {
+            computeMap.put("customized", compute.getCustomized().toString());
+        }
+
+        return computeMap;
     }
 
     @Override
