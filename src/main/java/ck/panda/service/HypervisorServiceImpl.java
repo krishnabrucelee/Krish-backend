@@ -58,7 +58,7 @@ public class HypervisorServiceImpl implements HypervisorService {
 
     @Override
     public Page<Hypervisor> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return null;
+    	return hypervisorRepo.findAll(pagingAndSorting.toPageRequest());
     }
 
     @Override
