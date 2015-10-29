@@ -57,7 +57,7 @@ public class GuestNetworkServiceImpl implements GuestNetworkService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-            config.setServer(4L);
+            config.setServer(1L);
             String networkOfferings = csNetwork.createNetwork("guest network",guestNetwork.getName(),"json",optional(guestNetwork));
                     JSONObject createComputeResponseJSON = new JSONObject(networkOfferings).getJSONObject("createnetworkresponse")
                         .getJSONObject("network");
