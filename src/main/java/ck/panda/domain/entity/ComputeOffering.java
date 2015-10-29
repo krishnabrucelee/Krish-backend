@@ -85,6 +85,9 @@ public class ComputeOffering implements Serializable {
     @Column(name = "cpu_capacity")
     private Boolean cpuCapacity;
 
+    @Transient
+    private Boolean isSyncFlag;
+
     /** The CPU memory in Mebi Bytes Per Second. */
     //@Size(min = 32)
     @Column(name = "memory")
@@ -671,8 +674,25 @@ public class ComputeOffering implements Serializable {
     }
 
 
-
     /**
+	 * Get the Sync Flag.
+	 *
+	 * @return the isSyncFlag.
+	 */
+	public Boolean getIsSyncFlag() {
+		return isSyncFlag;
+	}
+
+	/**
+	 * Set the Sync Flag.
+	 *
+	 * @param isSyncFlag - the isSyncFlag to set.
+	 */
+	public void setIsSyncFlag(Boolean isSyncFlag) {
+		this.isSyncFlag = isSyncFlag;
+	}
+
+	/**
      * @return the domain
      */
     public Domain getDomain() {
@@ -840,6 +860,7 @@ public class ComputeOffering implements Serializable {
         compute.uuid = object.get("id").toString();
         compute.name = object.get("name").toString();
         compute.displayText = object.get("displaytext").toString();
+        compute.setIsSyncFlag(false);
         return compute;
     }
 

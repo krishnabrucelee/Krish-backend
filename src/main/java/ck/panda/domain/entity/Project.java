@@ -1,19 +1,28 @@
 package ck.panda.domain.entity;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.annotation.CreatedBy;
@@ -21,6 +30,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
@@ -30,19 +40,16 @@ import org.springframework.format.annotation.DateTimeFormat;
  * be billed to either a user account or a project.
  */
 @Entity
-@Table(name = "ck_projects")
-public class Project {
+@Table(name = "projects")
+@EntityListeners(AuditingEntityListener.class)
+@SuppressWarnings("serial")
+public class Project implements Serializable {
 
     /** Id of the project. */
     @Id
     @GeneratedValue
     @Column(name = "id")
     private Long id;
-
-    /** cloudstack's project uuid. */
-    @Size(min = 128)
-    @Column(name = "uuid")
-    private String uuid;
 
     /** Name of the Project. */
     @NotEmpty
@@ -55,46 +62,47 @@ public class Project {
     private String description;
 
     /** Project owner id. */
-    @NotEmpty
+    @NotNull
     @JoinColumn(name = "project_owner_id", referencedColumnName = "id")
-    @ManyToOne(targetEntity = Project.class)
+    @ManyToOne(cascade = CascadeType.ALL)
     private User projectOwner;
 
     /** List of users for an project. */
-    @NotEmpty
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "projects_users",
-            joinColumns = @JoinColumn(name = "project_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
+    @OneToMany(cascade = CascadeType.ALL)
     private List<User> userList;
 
     /** Project domain id. */
-    @NotEmpty
+    @NotNull
     @JoinColumn(name = "domain_id", referencedColumnName = "id")
-    @ManyToOne(targetEntity = Project.class)
+    @ManyToOne(targetEntity = Domain.class, fetch = FetchType.EAGER)
     private Domain domain;
 
     /** Project department id. */
-    @NotEmpty
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "projects_departments",
-            joinColumns = @JoinColumn(name = "project_id"),
-            inverseJoinColumns = @JoinColumn(name = "department_id")
-    )
-    private List<Department> department;
-
-    /** Project current state. */
-    @NotEmpty
-    @Column(name = "state", nullable = false)
-    private String state;
+    @NotNull
+    @JoinColumn(name = "department_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.EAGER,targetEntity = Department.class )
+    private Department department;
 
     /** Project is whether active or disable. */
-    @NotEmpty
+    @NotNull
     @Column(name = "is_active", nullable = false, columnDefinition = "TINYINT DEFAULT FALSE")
     private Boolean isActive;
+
+    /** Status for project, whether it is Deleted, Enabled etc . */
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
+    /**
+     * Enumeration status for Project.
+     */
+    public enum Status {
+        /** Enabled status is used to list projects through out the application. */
+        ENABLED,
+
+        /** Deleted status make projects as soft deleted and it will not list on the applicaiton. */
+        DELETED
+    }
 
     /** Version attribute to handle optimistic locking. */
     @Version
@@ -146,24 +154,6 @@ public class Project {
     }
 
     /**
-     * Get the uuid.
-     *
-     * @return the uuid.
-     */
-    public String getUuid() {
-        return uuid;
-    }
-
-    /**
-     * Set the uuid.
-     *
-     * @param uuid - the uuid to set.
-     */
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
-
-    /**
      * Get the name.
      *
      * @return the name.
@@ -175,7 +165,7 @@ public class Project {
     /**
      * Set the name.
      *
-     * @param name - the name to set.
+     * @param name the name to set.
      */
     public void setName(String name) {
         this.name = name;
@@ -193,7 +183,7 @@ public class Project {
     /**
      * Set the description.
      *
-     * @param description - the description to set.
+     * @param description the description to set.
      */
     public void setDescription(String description) {
         this.description = description;
@@ -209,17 +199,17 @@ public class Project {
     }
 
     /**
-     * Set the projectOwner.
+     * Set the project owner.
      *
-     * @param projectOwner - the projectOwner to set.
+     * @param projectOwner the project owner to set.
      */
     public void setProjectOwner(User projectOwner) {
         this.projectOwner = projectOwner;
     }
 
     /**
-     * Get the userList.
-     *
+     * Get the list of user.
+     *uper.toString();
      * @return the userList.
      */
     public List<User> getUserList() {
@@ -227,7 +217,7 @@ public class Project {
     }
 
     /**
-     * Set the userList.
+     * Set the list of user.
      *
      * @param userList - the userList to set.
      */
@@ -247,68 +237,50 @@ public class Project {
     /**
      * Set the domain.
      *
-     * @param domain - the domain to set.
+     * @param domain the domain to set.
      */
     public void setDomain(Domain domain) {
         this.domain = domain;
     }
 
     /**
-     * Get the department.
-     *
-     * @return the department.
-     */
-    public List<Department> getDepartment() {
-        return department;
-    }
+	 * Get the department.
+	 *
+	 * @return the department.
+	 */
+	public Department getDepartment() {
+		return department;
+	}
 
-    /**
-     * Set the department.
-     *
-     * @param department - the department to set.
-     */
-    public void setDepartment(List<Department> department) {
-        this.department = department;
-    }
+	/**
+	 * Set the department.
+	 *
+	 * @param department - the department to set.
+	 */
+	public void setDepartment(Department department) {
+		this.department = department;
+	}
 
-    /**
-     * Get the isActive.
+	/**
+     * Get the status of project.
      *
-     * @return the isActive.
+     * @return the status.
      */
     public Boolean getIsActive() {
         return isActive;
     }
 
     /**
-     * Set the isActive.
+     * Set the status of project.
      *
-     * @param isActive - the isActive to set.
+     * @param isActive the status to set.
      */
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
     }
 
     /**
-     * Get the state.
-     *
-     * @return the state.
-     */
-    public String getState() {
-        return state;
-    }
-
-    /**
-     * Set the state.
-     *
-     * @param state - the state to set.
-     */
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    /**
-     * Get the version.
+     * Get the version count.
      *
      * @return the version.
      */
@@ -317,16 +289,16 @@ public class Project {
     }
 
     /**
-     * Set the version.
+     * Set the version count.
      *
-     * @param version - the version to set.
+     * @param version the version count to set.
      */
     public void setVersion(Long version) {
         this.version = version;
     }
 
     /**
-     * Get the createdBy.
+     * Get the created user details.
      *
      * @return the createdBy.
      */
@@ -335,16 +307,16 @@ public class Project {
     }
 
     /**
-     * Set the createdBy.
+     * Set the created user details.
      *
-     * @param createdBy - the createdBy to set.
+     * @param createdBy the createdBy to set.
      */
     public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
     }
 
     /**
-     * Get the updatedBy.
+     * Get the last updated user details.
      *
      * @return the updatedBy.
      */
@@ -353,16 +325,16 @@ public class Project {
     }
 
     /**
-     * Set the updatedBy.
+     * Set the last updated user details.
      *
-     * @param updatedBy - the updatedBy to set.
+     * @param updatedBy the updatedBy to set.
      */
     public void setUpdatedBy(User updatedBy) {
         this.updatedBy = updatedBy;
     }
 
     /**
-     * Get the createdDateTime.
+     * Get the created date and time.
      *
      * @return the createdDateTime.
      */
@@ -371,16 +343,16 @@ public class Project {
     }
 
     /**
-     * Set the createdDateTime.
+     * Set the created date and time.
      *
-     * @param createdDateTime - the createdDateTime to set.
+     * @param createdDateTime the createdDateTime to set.
      */
     public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
     }
 
     /**
-     * Get the updatedDateTime.
+     * Get the updated date and time.
      *
      * @return the updatedDateTime.
      */
@@ -389,11 +361,36 @@ public class Project {
     }
 
     /**
-     * Set the updatedDateTime.
+     * Set the updated date and time.
      *
-     * @param updatedDateTime - the updatedDateTime to set.
+     * @param updatedDateTime the updatedDateTime to set.
      */
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
+
+	/**
+	 * Get the status.
+	 *
+	 * @return the status.
+	 */
+	public Status getStatus() {
+		return status;
+	}
+
+	/**
+	 * Set the status.
+	 *
+	 * @param status - the status to set.
+	 */
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+
+
+	@Override
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this);
+	}
+
 }
