@@ -16,6 +16,7 @@ import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.OsType;
 import ck.panda.domain.entity.Region;
 import ck.panda.domain.entity.StorageOffering;
+import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.Zone;
 import ck.panda.util.CloudStackAccountService;
@@ -26,6 +27,7 @@ import ck.panda.util.CloudStackNetworkOfferingService;
 import ck.panda.util.CloudStackNetworkService;
 import ck.panda.util.CloudStackOSService;
 import ck.panda.util.CloudStackRegionService;
+import ck.panda.util.CloudStackTemplateService;
 import ck.panda.util.CloudStackZoneService;
 import ck.panda.util.error.exception.ApplicationException;
 
@@ -39,6 +41,7 @@ import ck.panda.util.error.exception.ApplicationException;
  * 5. OS Catogory
  * 6. OS Type
  * 7. Network Offering
+ * 8. Template
  *
  * Get the corresponding data from cloud stack server, if the application does not have the data add it.
  * If the application has the data update it, if the application has data which the cloud stack server does not have,
@@ -131,6 +134,13 @@ public class SyncServiceImpl  implements SyncService {
     @Autowired
     private UserService userService;
 
+    /** Template Service  for listing templates. */
+    @Autowired
+    private TemplateService templateService;
+
+    /** CloudStack template service for template connectivity with cloudstack. */
+    @Autowired
+    private CloudStackTemplateService cloudStackTemplateService;
 
     /**
      * Sync call for synchronization list of Region, domain, region. template, hypervisor
@@ -170,6 +180,9 @@ public class SyncServiceImpl  implements SyncService {
 
         //11. Sync User entity
         this.syncUser();
+
+        //12. Sync Templates entity
+        this.syncTemplates();
     }
 
     /**
@@ -642,6 +655,63 @@ public class SyncServiceImpl  implements SyncService {
             ComputeOffering computeOffering = new ComputeOffering();
 
             computeService.save(csComputeOfferingMap.get(key));
+        }
+    }
+
+    /**
+     * Sync with CloudStack server template.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
+     */
+    private void syncTemplates() throws ApplicationException, Exception {
+
+        //1. Get all the template objects from CS server as hash
+        List<Template> csTemplatesList = templateService.findAllFromCSServer();
+        HashMap<String, Template> csTemplateMap = (HashMap<String, Template>) Template.convert(csTemplatesList);
+
+        //2. Get all the template objects from application
+        List<Template> appTemplateList = templateService.findAll();
+
+        // 3. Iterate application template list
+        for (Template template: appTemplateList) {
+             //3.1 Find the corresponding CS server template object by finding it in a hash using uuid
+            if (csTemplateMap.containsKey(template.getUuid())) {
+                Template csTemplate = csTemplateMap.get(template.getUuid());
+
+                template.setSyncFlag(false);
+                csTemplate.setUuid(csTemplate.getUuid());
+                csTemplate.setName(csTemplate.getName());
+                csTemplate.setDescription(csTemplate.getDescription());
+                csTemplate.setShare(csTemplate.getShare());
+                csTemplate.setPasswordEnabled(csTemplate.getPasswordEnabled());
+                csTemplate.setFormat(csTemplate.getFormat());
+                csTemplate.setFeatured(csTemplate.getFeatured());
+                csTemplate.setOsType(csTemplate.getOsType());
+                csTemplate.setZone(csTemplate.getZone());
+                csTemplate.setStatus(csTemplate.getStatus());
+                csTemplate.setType(csTemplate.getType());
+                csTemplate.setHypervisor(csTemplate.getHypervisor());
+                csTemplate.setExtractable(csTemplate.getExtractable());
+                csTemplate.setDynamicallyScalable(csTemplate.getDynamicallyScalable());
+
+                //3.2 If found, update the template object in app db
+                templateService.update(template);
+
+                //3.3 Remove once updated, so that we can have the list of cs template which is not added in the app
+                csTemplateMap.remove(template.getUuid());
+            } else {
+                template.setSyncFlag(false);
+                templateService.delete(template);
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete
+            }
+        }
+        //4. Get the remaining list of cs server hash template object, then iterate and
+        //add it to app db
+        for (String key: csTemplateMap.keySet()) {
+            templateService.save(csTemplateMap.get(key));
         }
     }
 }
