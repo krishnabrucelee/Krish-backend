@@ -204,7 +204,7 @@ public class Hypervisor implements Serializable {
      */
     public static Hypervisor convert(JSONObject object) throws JSONException {
         Hypervisor hypervisor = new Hypervisor();
-        hypervisor.name = object.get("name").toString();
+        hypervisor.name = object.has("name") ? object.get("name").toString() : "";
 
         return hypervisor;
     }

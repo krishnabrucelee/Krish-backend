@@ -535,6 +535,7 @@ public class SyncServiceImpl  implements SyncService {
 
         // 3. Iterate application user list
         for (User user: appUserList) {
+        	user.setSyncFlag(false);
              //3.1 Find the corresponding CS server user object by finding it in a hash using uuid
             if (csUserMap.containsKey(user.getUuid())) {
                 User csUser = csUserMap.get(user.getUuid());

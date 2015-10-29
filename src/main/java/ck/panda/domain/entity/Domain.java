@@ -369,8 +369,8 @@ public class Domain {
    */
   public static Domain convert(JSONObject object) throws JSONException {
       Domain domain = new Domain();
-      domain.uuid = object.get("id").toString();
-      domain.name = object.get("name").toString();
+      domain.uuid = object.has("id") ? object.get("id").toString() : "";
+      domain.name = object.has("name") ? object.get("name").toString() : "";
 
       return domain;
   }

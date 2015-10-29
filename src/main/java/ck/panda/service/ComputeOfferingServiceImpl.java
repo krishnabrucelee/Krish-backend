@@ -154,12 +154,13 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             computeMap.put("limitcpuuse", compute.getCpuCapacity().toString());
         }
 
-
         if(compute.getClockSpeed() != null) { computeMap.put("cpuspeed",
-        		compute.getClockSpeed().toString()); }
+        	compute.getClockSpeed().toString());
+        }
 
         if(compute.getNumberOfCores() !=null) { computeMap.put("cpunumber",
-    		compute.getNumberOfCores().toString()); }
+    		compute.getNumberOfCores().toString());
+        }
 
         if (compute.getDiskBytesReadRate() != null) {
             computeMap.put("bytesreadrate", compute.getDiskBytesReadRate().toString());
@@ -192,14 +193,15 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
         if (compute.getDomain() != null) {
             computeMap.put("domain", compute.getDomain().getName());
         }
+
         if (compute.getIsHighAvailabilityEnabled() != null) {
             computeMap.put("offerha", compute.getIsHighAvailabilityEnabled().toString());
-
-           }
+        }
 
         if(compute.getMemory() !=null) {
         	computeMap.put("memory", compute.getMemory().toString());
         }
+
         if (compute.getCustomized()!= null ) {
             computeMap.put("customized", compute.getCustomized().toString());
         }

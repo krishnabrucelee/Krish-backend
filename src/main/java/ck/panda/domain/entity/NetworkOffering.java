@@ -416,12 +416,11 @@ public class NetworkOffering implements Serializable {
      */
     public static NetworkOffering convert(JSONObject object) throws JSONException {
         NetworkOffering networkOffering = new NetworkOffering();
-        networkOffering.uuid = object.get("id").toString();
-        networkOffering.name = object.get("name").toString();
-        networkOffering.trafficType = object.get("traffictype").toString();
-        networkOffering.guestIpType = object.get("guestiptype").toString();
-        networkOffering.displayText = object.get("displaytext").toString();
-
+        networkOffering.uuid = object.has("id") ? object.get("id").toString() : "";
+        networkOffering.name = object.has("name") ? object.get("name").toString() : "";
+        networkOffering.trafficType = object.has("traffictype") ? object.get("traffictype").toString() : "";
+        networkOffering.guestIpType = object.has("guestiptype") ? object.get("guestiptype").toString() : "";
+        networkOffering.displayText = object.has("displaytext") ? object.get("displaytext").toString() : "";
 
         return networkOffering;
     }

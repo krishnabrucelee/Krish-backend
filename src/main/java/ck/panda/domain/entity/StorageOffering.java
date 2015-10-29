@@ -817,10 +817,10 @@ public class StorageOffering {
      */
     public static StorageOffering convert(JSONObject object) throws JSONException {
         StorageOffering storageOffering = new StorageOffering();
-        storageOffering.uuid = object.get("id").toString();
-        storageOffering.name = object.get("name").toString();
-        storageOffering.description = object.get("displaytext").toString();
-        storageOffering.diskSize = object.getLong("disksize");
+        storageOffering.uuid = object.has("id") ? object.get("id").toString() : "";
+        storageOffering.name = object.has("name") ? object.get("name").toString() : "";
+        storageOffering.description = object.has("displaytext") ? object.get("displaytext").toString() : "";
+        storageOffering.diskSize = object.has("disksize") ? object.getLong("disksize") : 0;
         storageOffering.setIsSyncFlag(false);
 
         return storageOffering;

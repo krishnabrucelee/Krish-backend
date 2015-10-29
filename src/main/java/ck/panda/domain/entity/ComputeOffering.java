@@ -872,12 +872,12 @@ public class ComputeOffering implements Serializable {
      */
     public static ComputeOffering convert(JSONObject object) throws JSONException {
         ComputeOffering compute = new ComputeOffering();
-        compute.uuid = object.get("id").toString();
-        compute.name = object.get("name").toString();
-        compute.displayText = object.get("displaytext").toString();
-        compute.memory = Integer.parseInt(object.getString("memory"));
-        compute.clockSpeed = Integer.parseInt(object.getString("cpuspeed"));
-        compute.numberOfCores = Integer.parseInt(object.getString("cpunumber"));
+        compute.uuid = object.has("id") ? object.get("id").toString() : "";
+        compute.name = object.has("name") ? object.get("name").toString(): "";
+        compute.displayText = object.has("displaytext") ? object.get("displaytext").toString() : "";
+        compute.memory = object.has("memory") ? Integer.parseInt(object.getString("memory").toString()) : 0;
+        compute.clockSpeed = object.has("cpuspeed") ? Integer.parseInt(object.getString("cpuspeed")) : 0;
+        compute.numberOfCores = object.has("cpunumber") ? Integer.parseInt(object.getString("cpunumber")) : 0;
         compute.setIsSyncFlag(false);
         return compute;
     }

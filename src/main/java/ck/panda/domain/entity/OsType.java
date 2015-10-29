@@ -229,9 +229,9 @@ public class OsType implements Serializable {
      */
     public static OsType convert(JSONObject object) throws JSONException {
         OsType osType = new OsType();
-        osType.uuid = object.get("id").toString();
-        osType.description = object.get("description").toString();
-        osType.osCategoryUuid = object.get("oscategoryid").toString();
+        osType.uuid = object.has("id") ? object.get("id").toString() : "";
+        osType.description = object.has("description") ? object.get("description").toString() : "";
+        osType.osCategoryUuid = object.has("oscategoryid") ? object.get("oscategoryid").toString() : "";
         return osType;
     }
 

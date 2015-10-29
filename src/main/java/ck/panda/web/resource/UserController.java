@@ -39,6 +39,7 @@ public class UserController extends CRUDController<User> implements ApiControlle
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new User.", response = User.class)
     @Override
     public User create(@RequestBody User user) throws Exception {
+    	user.setSyncFlag(true);
         return userService.save(user);
     }
 
@@ -51,6 +52,7 @@ public class UserController extends CRUDController<User> implements ApiControlle
     @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing User.", response = User.class)
     @Override
     public User update(@RequestBody User user, @PathVariable(PATH_ID) Long id) throws Exception {
+    	user.setSyncFlag(true);
         return userService.update(user);
     }
 

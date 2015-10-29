@@ -309,8 +309,8 @@ public class Region implements Serializable {
      */
     public static Region convert(JSONObject object) throws JSONException {
         Region region = new Region();
-        region.uuid = object.get("id").toString();
-        region.name = object.get("name").toString();
+        region.uuid = object.has("id") ? object.get("id").toString() : "";
+        region.name = object.has("name") ? object.get("name").toString() : "";
 
         return region;
     }

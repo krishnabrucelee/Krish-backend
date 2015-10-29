@@ -12,6 +12,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.Version;
 import org.joda.time.DateTime;
 import org.json.JSONException;
@@ -35,7 +36,7 @@ public class User {
     private String userName;
 
     /** Password of the user. */
-    @Column(name = "password", nullable = false)
+    @Column(name = "password")
     private String password;
 
     /** User role. */
@@ -44,7 +45,7 @@ public class User {
     private Role role;
 
     /** Email of the user. */
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(name = "email", unique = true)
     private String email;
 
     /** User type of the user. */
@@ -92,7 +93,10 @@ public class User {
     @OneToOne(cascade = {CascadeType.ALL })
     private User updatedBy;
 
-    /** Define user type. */
+    @Transient
+    private Boolean syncFlag;
+
+	/** Define user type. */
     public enum Type {
        /** Define type constant. */
         USER,
@@ -377,6 +381,24 @@ public class User {
     }
 
     /**
+     * Get the sync flag.
+     *
+     * @return the syncFlag.
+     */
+    public Boolean getSyncFlag() {
+		return syncFlag;
+	}
+
+    /**
+     * Set the sync flag.
+     *
+     * @param syncFlag to set.
+     */
+	public void setSyncFlag(Boolean syncFlag) {
+		this.syncFlag = syncFlag;
+	}
+
+    /**
      * Convert JSONObject into user object.
      *
      * @param object JSON object.
@@ -384,8 +406,11 @@ public class User {
      */
     public static User convert(JSONObject object) throws JSONException {
         User user = new User();
-        user.uuid = object.get("id").toString();
-        user.userName = object.get("name").toString();
+        user.uuid = object.has("id") ? object.get("id").toString() : "";
+        user.userName = object.has("name") ? object.get("name").toString() : "";
+        user.email = "test@assistanz.com";
+        user.password = "l3tm3in";
+        user.setSyncFlag(false);
         return user;
     }
 

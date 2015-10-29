@@ -1009,19 +1009,19 @@ public class Template implements Serializable {
     public static Template convert(JSONObject object) throws JSONException {
         Template template = new Template();
         template.setSyncFlag(false);
-        template.uuid = object.get("id").toString();
-        template.name = object.get("name").toString();
-        template.description = object.get("displaytext").toString();
-        template.share = object.getBoolean("ispublic");
-        template.passwordEnabled = object.getBoolean("passwordenabled");
-        template.featured = object.getBoolean("isfeatured");
-        template.extractable = object.getBoolean("isextractable");
-        template.dynamicallyScalable = object.getBoolean("isdynamicallyscalable");
-        template.transOsType = object.get("ostypeid").toString();
-        template.transZone = object.get("zoneid").toString();
-        template.transHypervisor = object.get("hypervisor").toString();
-        template.setFormat(template.getFormat().valueOf(object.get("format").toString()));
-        template.setType(template.getType().valueOf(object.get("templatetype").toString()));
+        template.uuid = object.has("id") ? object.get("id").toString() : "";
+        template.name = object.has("name") ? object.get("name").toString() : "";
+        template.description = object.has("displaytext") ? object.get("displaytext").toString() : "";
+        template.share = object.has("ispublic") ? object.getBoolean("ispublic") : false;
+        template.passwordEnabled = object.has("passwordenabled") ? object.getBoolean("passwordenabled") : false;
+        template.featured = object.has("isfeatured") ? object.getBoolean("isfeatured") : false;
+        template.extractable = object.has("isextractable") ? object.getBoolean("isextractable") : false;
+        template.dynamicallyScalable = object.has("isdynamicallyscalable") ? object.getBoolean("isdynamicallyscalable") : false;
+        template.transOsType = object.has("ostypeid") ? object.get("ostypeid").toString() : "";
+        template.transZone = object.has("zoneid") ? object.get("zoneid").toString() : "";
+        template.transHypervisor = object.has("hypervisor") ? object.get("hypervisor").toString() : "";
+        template.setFormat(template.getFormat().valueOf(object.has("format") ? object.get("format").toString() : ""));
+        template.setType(template.getType().valueOf(object.has("templatetype") ? object.get("templatetype").toString() : ""));
         template.setStatus(template.getStatus().valueOf("Active"));
         return template;
     }

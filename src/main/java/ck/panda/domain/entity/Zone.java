@@ -300,8 +300,8 @@ public class Zone implements Serializable {
      */
     public static Zone convert(JSONObject object) throws JSONException {
         Zone zone = new Zone();
-        zone.uuid = object.get("id").toString();
-        zone.name = object.get("name").toString();
+        zone.uuid = object.has("id") ? object.get("id").toString() : "";
+        zone.name = object.has("name") ? object.get("name").toString() : "";
 
         return zone;
     }

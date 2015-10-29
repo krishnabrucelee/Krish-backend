@@ -212,8 +212,8 @@ public class OsCategory implements Serializable {
      */
     public static OsCategory convert(JSONObject object) throws JSONException {
         OsCategory osCategory = new OsCategory();
-        osCategory.uuid = object.get("id").toString();
-        osCategory.name = object.get("name").toString();
+        osCategory.uuid = object.has("id") ? object.get("id").toString() : "";
+        osCategory.name = object.has("name") ? object.get("name").toString() : "";
 
         return osCategory;
     }

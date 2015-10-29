@@ -322,14 +322,14 @@ public class Network implements Serializable {
      */
     public static Network convert(JSONObject object) throws JSONException {
         Network network = new Network();
-        network.uuid = object.get("id").toString();
-        network.name = object.get("name").toString();
-        network.networkOfferingId = object.get("networkofferingid").toString();
-        network.cidr = object.get("cidr").toString();
-        network.domainId = object.get("domainid").toString();
-        network.zoneId = object.get("zoneid").toString();
-        network.state = object.get("state").toString();
-        network.isSystem = (Boolean) object.get("issystem");
+        network.uuid = object.has("id") ? object.get("id").toString() : "";
+        network.name = object.has("name") ? object.get("name").toString() : "";
+        network.networkOfferingId = object.has("networkofferingid") ? object.get("networkofferingid").toString() : "";
+        network.cidr = object.has("cidr") ? object.get("cidr").toString() : "";
+        network.domainId = object.has("domainid") ? object.get("domainid").toString() : "";
+        network.zoneId = object.has("zoneid") ? object.get("zoneid").toString() : "";
+        network.state = object.has("state") ? object.get("state").toString() : "";
+        network.isSystem = object.has("issystem") ? object.getBoolean("issystem") : false;
         return network;
     }
 

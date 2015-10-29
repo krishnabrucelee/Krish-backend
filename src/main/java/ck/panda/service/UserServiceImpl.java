@@ -47,6 +47,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User save(User user) throws Exception {
 
+    	if(user.getSyncFlag()) {
         Errors errors = validator.rejectIfNullEntity("user", user);
         errors = validator.validateEntity(user, errors);
 
@@ -65,10 +66,14 @@ public class UserServiceImpl implements UserService {
                     user.getEmail(), user.getName(), "test", user.getUserName(), user.getPassword(), "json", userMap);
             return userRepository.save(user);
         }
+    	} else {
+    		return userRepository.save(user);
+    	}
     }
 
     @Override
     public User update(User user) throws Exception {
+    	if(user.getSyncFlag()) {
           Errors errors = validator.rejectIfNullEntity("user", user);
           errors = validator.validateEntity(user, errors);
 
@@ -77,6 +82,9 @@ public class UserServiceImpl implements UserService {
           } else {
               return userRepository.save(user);
           }
+    	} else {
+    		return userRepository.save(user);
+    	}
     }
 
     @Override
