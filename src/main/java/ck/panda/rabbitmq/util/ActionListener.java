@@ -63,7 +63,7 @@ public class ActionListener implements MessageListener {
 		if (event.getEntityuuid() != null) {
 			event.setId(event.getEntityuuid());
 		}
-		if(EventTypes.EVENT_VM_CREATE == event.getEvent()){
+		if(EventTypes.EVENT_VM_CREATE.equals(event.getEvent())){
 			VmInstance vmInstance = virtualmachineservice.findByUUID(event.getId());
 			if(event.getStatus() ==  EventTypes.EVENT_COMPLETED){
 				vmInstance.setStatus(EventTypes.EVENT_STATUS_RUNNING);
@@ -76,7 +76,7 @@ public class ActionListener implements MessageListener {
 			}
 			virtualmachineservice.update(vmInstance);
 		}
-		if(EventTypes.EVENT_VM_START == event.getEvent()){
+		if(EventTypes.EVENT_VM_START.equals(event.getEvent())){
 			VmInstance vmInstance = virtualmachineservice.findByUUID(event.getId());
 			if(event.getStatus() ==  EventTypes.EVENT_COMPLETED){
 				vmInstance.setStatus(EventTypes.EVENT_STATUS_RUNNING);
@@ -89,7 +89,7 @@ public class ActionListener implements MessageListener {
 			}
 			virtualmachineservice.update(vmInstance);
 		}
-		if(EventTypes.EVENT_VM_STOP == event.getEvent()) {
+		if(EventTypes.EVENT_VM_STOP.equals(event.getEvent())) {
 			VmInstance vmInstance = virtualmachineservice.findByUUID(event.getId());
 			if(event.getStatus() ==  EventTypes.EVENT_COMPLETED){
 				vmInstance.setStatus(EventTypes.EVENT_STATUS_STOPPED);
@@ -102,7 +102,7 @@ public class ActionListener implements MessageListener {
 			}
 			virtualmachineservice.update(vmInstance);
 		}
-		if(EventTypes.EVENT_VM_DESTROY == event.getEvent()) {
+		if(EventTypes.EVENT_VM_DESTROY.equals(event.getEvent())) {
 			VmInstance vmInstance = virtualmachineservice.findByUUID(event.getId());
 			if(event.getStatus() ==  EventTypes.EVENT_COMPLETED){
 				vmInstance.setStatus(EventTypes.EVENT_STATUS_DESTROYED);
@@ -115,7 +115,7 @@ public class ActionListener implements MessageListener {
 			}
 			virtualmachineservice.update(vmInstance);
 		}
-		if(EventTypes.EVENT_VM_REBOOT == event.getEvent()) {
+		if(EventTypes.EVENT_VM_REBOOT.equals(event.getEvent())) {
 			VmInstance vmInstance = virtualmachineservice.findByUUID(event.getId());
 			if(event.getStatus() ==  EventTypes.EVENT_COMPLETED){
 				vmInstance.setStatus(EventTypes.EVENT_STATUS_RUNNING);
@@ -128,7 +128,7 @@ public class ActionListener implements MessageListener {
 			}
 			virtualmachineservice.update(vmInstance);
 		}
-		if(EventTypes.EVENT_VM_RESTORE == event.getEvent()) {
+		if(EventTypes.EVENT_VM_RESTORE.equals(event.getEvent())) {
 			VmInstance vmInstance = virtualmachineservice.findByUUID(event.getId());
 			if(event.getStatus() ==  EventTypes.EVENT_COMPLETED){
 				vmInstance.setStatus(EventTypes.EVENT_STATUS_RUNNING);
@@ -141,7 +141,7 @@ public class ActionListener implements MessageListener {
 			}
 			virtualmachineservice.update(vmInstance);
 		}
-		if(EventTypes.EVENT_VM_EXPUNGE == event.getEvent()) {
+		if(EventTypes.EVENT_VM_EXPUNGE.equals(event.getEvent())) {
 			VmInstance vmInstance = virtualmachineservice.findByUUID(event.getId());
 			if(event.getStatus() ==  EventTypes.EVENT_COMPLETED){
 				vmInstance.setStatus(EventTypes.EVENT_STATUS_DESTROYED);

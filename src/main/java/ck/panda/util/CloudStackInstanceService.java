@@ -72,11 +72,12 @@ public class CloudStackInstanceService {
      * @return json response.
      * @throws Exception connector exception.
      */
-    public String rebootVirtualMachine(String virtualMachineId) throws Exception {
+    public String rebootVirtualMachine(String virtualMachineId,String response) throws Exception {
 
         LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("rebootVirtualMachine", null);
+                = server.getDefaultQuery("rebootVirtualMachine",null);
         arguments.add(new NameValuePair("id", virtualMachineId));
+        arguments.add(new NameValuePair("response", response));
         return server.request(arguments);
     }
 
@@ -107,7 +108,7 @@ public class CloudStackInstanceService {
     public String stopVirtualMachine(String virtualMachineId,String response,
             HashMap<String, String> optional)
             throws Exception {
-
+    	optional.put("force","true");
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("stopVirtualMachine", optional);
         arguments.add(new NameValuePair("id", virtualMachineId));

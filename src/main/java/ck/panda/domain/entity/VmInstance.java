@@ -10,10 +10,12 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -63,7 +65,7 @@ public class VmInstance {
 	 * Instance owner id
 	 */
 	@JoinColumn(name = "instance_owner_id", referencedColumnName = "id", updatable = false, insertable = false)
-	@OneToOne(cascade = CascadeType.ALL)
+	@OneToOne
 	private User instanceOwner;
 
 	@NotNull
@@ -77,7 +79,7 @@ public class VmInstance {
 	private String application;
 
 	/** List of Application Class for an instance */
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToMany
 	private List<Application> applicationList;
 
 	/**
@@ -115,7 +117,7 @@ public class VmInstance {
 	 * Instance domain id
 	 */
 	@JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
 	private Domain domain;
 
 	@NotNull
@@ -162,10 +164,13 @@ public class VmInstance {
 
 	@JoinColumn(name = "network_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @OneToOne
-	private Network network;
+	private GuestNetwork network;
 
 	@Column(name = "network_id")
 	private Long networkId;
+
+	@Transient
+	private String networkUuid;
 
 	/**
 	 * Instance current state
@@ -841,7 +846,7 @@ public class VmInstance {
 	 *
 	 * @return the network.
 	 */
-	public Network getNetwork() {
+	public GuestNetwork getNetwork() {
 		return network;
 	}
 
@@ -850,7 +855,7 @@ public class VmInstance {
 	 *
 	 * @param network - the network to set.
 	 */
-	public void setNetwork(Network network) {
+	public void setNetwork(GuestNetwork network) {
 		this.network = network;
 	}
 
@@ -872,6 +877,23 @@ public class VmInstance {
 		this.networkId = networkId;
 	}
 
+	/**
+	 * Get the networkUuid.
+	 *
+	 * @return the networkUuid.
+	 */
+	public String getNetworkUuid() {
+		return networkUuid;
+	}
+
+	/**
+	 * Set the networkUuid.
+	 *
+	 * @param networkUuid - the networkUuid to set.
+	 */
+	public void setNetworkUuid(String networkUuid) {
+		this.networkUuid = networkUuid;
+	}
 
 	@Override
 	public String toString() {
