@@ -2,6 +2,8 @@ package ck.panda.domain.entity;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -44,7 +46,7 @@ public class Department implements Serializable {
     private Long id;
 
     /** Domain of the department. */
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "domain_id", referencedColumnName = "id")
     private Domain domain;
 

@@ -14,6 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.Size;
 import org.hibernate.annotations.Type;
@@ -93,7 +94,7 @@ public class StorageOffering {
      * Appears only if Custom disk size is not selected. Define the volume size
      * in GB.
      */
-    @Column(name = "disk_size", nullable = false, columnDefinition = "bigint(20) default 0")
+    @Column(name = "disk_size", nullable = false, columnDefinition = "bigint(20) default 1")
     private Long diskSize;
 
     /**
@@ -187,6 +188,8 @@ public class StorageOffering {
     @Column(name = "cost_per_hour_iops")
     private Double costPerIops;
 
+    @Transient
+    private Boolean isSyncFlag;
     /**
      * Cost for 1 Iops per month usage.
      */
@@ -818,11 +821,30 @@ public class StorageOffering {
         storageOffering.name = object.get("name").toString();
         storageOffering.description = object.get("displaytext").toString();
         storageOffering.diskSize = object.getLong("disksize");
+        storageOffering.setIsSyncFlag(false);
 
         return storageOffering;
     }
 
     /**
+	 * Get the synch flag .
+	 *
+	 * @return the isSyncFlag.
+	 */
+	public Boolean getIsSyncFlag() {
+		return isSyncFlag;
+	}
+
+	/**
+	 * Set the Sync Flag.
+	 *
+	 * @param isSyncFlag - the isSyncFlag to set.
+	 */
+	public void setIsSyncFlag(Boolean isSyncFlag) {
+		this.isSyncFlag = isSyncFlag;
+	}
+
+	/**
      * Mapping Storage Offering entity object in list.
      *
      * @param Storage Offering lists of Storage Offering

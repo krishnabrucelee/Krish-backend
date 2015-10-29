@@ -29,12 +29,8 @@ public class ComputeOfferingCost {
     @Column(name = "id")
     private Long id;
 
-    /** Zone id for this offering. */
-    @JoinColumn(name = "zone_id", referencedColumnName = "id",insertable = false, updatable = false)
-    @OneToOne
-    private Zone zone;
-
-    /** id of the zone.*/
+    /** The id of the Zone. */
+    //Todo : make ref id after adding zone entity
     @Column(name = "zone_id")
     private Long zoneId;
 
@@ -221,22 +217,6 @@ public class ComputeOfferingCost {
      */
     public void setLastModifiedDateTime(DateTime lastModifiedDateTime) {
         this.lastModifiedDateTime = lastModifiedDateTime;
-    }
-
-
-
-    /**
-     * @return the zone
-     */
-    public Zone getZone() {
-        return zone;
-    }
-
-    /**
-     * @param zone the zone to set
-     */
-    public void setZone(Zone zone) {
-        this.zone = zone;
     }
 
     /**
