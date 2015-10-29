@@ -19,4 +19,11 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
 	 * @return
 	 */
 	VmInstance findByUUID(String uuid);
+
+	/**
+	 * Event handling.
+	 * @param vmId Virtual machine Id.
+	 * @param event
+	 */
+	void vmEventHandle(String vmId, String event) throws Exception;
 }
