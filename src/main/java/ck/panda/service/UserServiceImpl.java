@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
             csAccountService.setServer(configServer.setServer(1L));
             HashMap<String, String> userMap = new HashMap<String, String>();
             csAccountService.createAccount(String.valueOf(user.getType().ordinal()),
-                    user.getEmail(), user.getName(), "test", user.getUserName(), user.getPassword(), "json", userMap);
+                    user.getEmail(), user.getFirstName(), user.getLastName(), user.getUserName(), user.getPassword(), "json", userMap);
             return userRepository.save(user);
         }
     	} else {

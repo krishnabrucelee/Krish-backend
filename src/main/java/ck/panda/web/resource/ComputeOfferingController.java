@@ -63,9 +63,9 @@ public class ComputeOfferingController extends CRUDController<ComputeOffering> i
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing ComputeOffering.")
     @Override
     public void delete(@PathVariable(PATH_ID) Long id) throws Exception {
-        ComputeOffering compute = computeService.find(id);
-        computeService.delete(compute);
-           }
+    	 computeService.delete(id);
+
+    }
 
     /**
      * list all compute offing and offer Id for instance.

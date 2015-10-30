@@ -540,7 +540,7 @@ public class SyncServiceImpl  implements SyncService {
             if (csUserMap.containsKey(user.getUuid())) {
                 User csUser = csUserMap.get(user.getUuid());
 
-                user.setName(csUser.getName());
+                user.setFirstName(csUser.getFirstName());
 
                 //3.2 If found, update the user object in app db
                 userService.update(user);

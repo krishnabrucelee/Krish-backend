@@ -14,6 +14,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,7 +34,8 @@ public class User {
     private Long id;
 
     /** User name of the user. */
-    @Column(name = "user_name", nullable = false, unique = true)
+    @NotNull
+    @Column(name = "user_name", nullable = false)
     private String userName;
 
     /** Password of the user. */
@@ -45,16 +48,20 @@ public class User {
     private Role role;
 
     /** Email of the user. */
-    @Column(name = "email", unique = true)
+    @Column(name = "email")
     private String email;
 
     /** User type of the user. */
     @Column(name = "type")
     private Type type;
 
-    /** Name of the user.  */
-    @Column(name = "name")
-    private String name;
+    /** First name of the user.  */
+    @Column(name = "first_name")
+    private String firstName;
+
+    /** Last name of the user.  */
+    @Column(name = "last_name")
+    private String lastName;
 
     /** User uuid. */
     @Column(name = "uuid")
@@ -93,10 +100,11 @@ public class User {
     @OneToOne(cascade = {CascadeType.ALL })
     private User updatedBy;
 
+    /** Set syncFlag. */
     @Transient
     private Boolean syncFlag;
 
-	/** Define user type. */
+    /** Define user type. */
     public enum Type {
        /** Define type constant. */
         USER,
@@ -219,24 +227,42 @@ public class User {
     }
 
     /**
-     * Get the name.
+     * Get the firstName.
      *
-     * @return the name.
+     * @return the firstName.
      */
-    public String getName() {
-        return name;
+    public String getFirstName() {
+        return firstName;
     }
 
     /**
-     * Set the name.
+     * Set the firstName.
      *
-     * @param name to set.
+     * @param firstName to set.
      */
-    public void setName(String name) {
-        this.name = name;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
     /**
+     * Get the lastName.
+     *
+     * @return the lastName.
+     */
+    public String getLastName() {
+        return lastName;
+    }
+
+    /**
+     * Set the lastName.
+     *
+     * @param lastName to set.
+     */
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+	/**
      * Get the user uuid.
      *
      * @return the uuid.
@@ -380,13 +406,13 @@ public class User {
         this.updatedBy = updatedBy;
     }
 
-    /**
+   /**
      * Get the sync flag.
      *
      * @return the syncFlag.
      */
     public Boolean getSyncFlag() {
-		return syncFlag;
+	return syncFlag;
 	}
 
     /**
@@ -394,9 +420,9 @@ public class User {
      *
      * @param syncFlag to set.
      */
-	public void setSyncFlag(Boolean syncFlag) {
-		this.syncFlag = syncFlag;
-	}
+    public void setSyncFlag(Boolean syncFlag) {
+	this.syncFlag = syncFlag;
+    }
 
     /**
      * Convert JSONObject into user object.
@@ -406,11 +432,11 @@ public class User {
      */
     public static User convert(JSONObject object) throws JSONException {
         User user = new User();
-        user.uuid = object.has("id") ? object.get("id").toString() : "";
-        user.userName = object.has("name") ? object.get("name").toString() : "";
+        user.uuid = object.get("id").toString();
+        user.userName = object.get("name").toString();
         user.email = "test@assistanz.com";
         user.password = "l3tm3in";
-        user.setSyncFlag(false);
+        user.isActive = true;
         return user;
     }
 

@@ -115,23 +115,35 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     vminstance.setEventMessage(csInstance.getJSONObject("jobresult").getString("errortext"));
                 }
                 else if(instance.getString("jobstatus").equals("0")) {
-                	vminstance.setStatus(EventTypes.EVENT_STATUS_CREATE);}
-                else{
-                	vminstance.setStatus(EventTypes.EVENT_STATUS_RUNNING);
-                }
-                	Domain domain = domainRepository.findOne(vminstance.getDomainId());
-                	User user = userRepository.findOne(vminstance.getInstanceOwnerId());
-                	Department department = departmentReposiory.findOne(vminstance.getDepartmentId());
-                	GuestNetwork guestNetwork = gNetworkRepository.findByUUID(vminstance.getNetworkUuid());
-                	vminstance.setInstanceOwner(user);
-                	vminstance.setDomain(domain);
-                	vminstance.setDepartment(department);
-                	vminstance.setNetwork(guestNetwork);
+                	String instancestat = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"), "json");
+                	JSONObject instancestatus = new JSONObject(instancestat).getJSONObject("queryasyncjobresultresponse");
+                	 if(instancestatus.getString("jobstatus").equals("1")){
+                		 if(instancestatus.has("jobresult")){
+                		  if(instancestatus.getString("jobresult").contains("Error")){
+                			 vminstance.setStatus(EventTypes.EVENT_ERROR);
+                			 vminstance.setEventMessage("Error on creating VM");
+                		  }
+                		 else{
+                			 vminstance.setStatus(EventTypes.EVENT_STATUS_RUNNING);
+                		 }
+                  }}
+                  else{
+                		 vminstance.setStatus(EventTypes.EVENT_STATUS_CREATE);
+                	 	}
             	}
-            }
+
+            	Domain domain = domainRepository.findOne(vminstance.getDomainId());
+            	User user = userRepository.findOne(vminstance.getInstanceOwnerId());
+            	Department department = departmentReposiory.findOne(vminstance.getDepartmentId());
+            	GuestNetwork guestNetwork = gNetworkRepository.findByUUID(vminstance.getNetworkUuid());
+            	vminstance.setInstanceOwner(user);
+            	vminstance.setDomain(domain);
+            	vminstance.setDepartment(department);
+            	vminstance.setNetwork(guestNetwork);
+        }
+        }
             return virtualmachinerepository.save(vminstance);
         }
-
 
     @Override
     public VmInstance update(VmInstance vminstance) throws Exception {

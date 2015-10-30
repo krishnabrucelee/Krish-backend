@@ -101,19 +101,15 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
 
     @Override
     public void delete(ComputeOffering compute) throws Exception {
-    	if(compute.getIsSyncFlag()) {
-        //set server for finding value in configuration
-        computeOffer.setServer(configServer.setServer(2L));
-        String deletecompute = computeOffer.deleteComputeOffering(compute.getUuid(), "json");
-        computeRepo.delete(compute);
-    }
-    else {
-    	computeRepo.delete(compute);
-    }
+            computeRepo.delete(compute);
     }
 
     @Override
     public void delete(Long id) throws Exception {
+    	ComputeOffering compute = this.find(id);
+        //set server for finding value in configuration
+        computeOffer.setServer(configServer.setServer(1L));
+        computeOffer.deleteComputeOffering(compute.getUuid(), "json");
         computeRepo.delete(id);
     }
 
