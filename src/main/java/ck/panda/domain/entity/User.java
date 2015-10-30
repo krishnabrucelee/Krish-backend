@@ -39,19 +39,24 @@ public class User {
     private String userName;
 
     /** Password of the user. */
-    @Column(name = "password")
+    @NotNull
+    @Size(min = 3, max = 100)
+    @Column(name = "password", nullable = false)
     private String password;
 
     /** User role. */
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     private Role role;
 
     /** Email of the user. */
     @Column(name = "email")
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     /** User type of the user. */
+    @NotNull
     @Column(name = "type")
     private Type type;
 
@@ -61,7 +66,7 @@ public class User {
 
     /** Last name of the user.  */
     @Column(name = "last_name")
-    private String lastName;
+    private String lastName;  
 
     /** User uuid. */
     @Column(name = "uuid")
@@ -434,9 +439,12 @@ public class User {
         User user = new User();
         user.uuid = object.get("id").toString();
         user.userName = object.get("name").toString();
+        user.uuid = object.get("id").toString();
+        user.userName = object.get("name").toString();
         user.email = "test@assistanz.com";
         user.password = "l3tm3in";
         user.isActive = true;
+        user.setSyncFlag(false);
         return user;
     }
 
