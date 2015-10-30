@@ -114,24 +114,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     vminstance.setStatus(EventTypes.EVENT_ERROR);
                     vminstance.setEventMessage(csInstance.getJSONObject("jobresult").getString("errortext"));
                 }
-                else if(instance.getString("jobstatus").equals("0")) {
-                	String instancestat = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"), "json");
-                	JSONObject instancestatus = new JSONObject(instancestat).getJSONObject("queryasyncjobresultresponse");
-                	 if(instancestatus.getString("jobstatus").equals("1")){
-                		 if(instancestatus.has("jobresult")){
-                		  if(instancestatus.getString("jobresult").contains("Error")){
-                			 vminstance.setStatus(EventTypes.EVENT_ERROR);
-                			 vminstance.setEventMessage("Error on creating VM");
-                		  }
-                		 else{
-                			 vminstance.setEventMessage("");
-                			 vminstance.setStatus(EventTypes.EVENT_STATUS_RUNNING);
-                		 }
-                  }}
-                  else{
-                		 vminstance.setStatus(EventTypes.EVENT_STATUS_CREATE);
-                		 vminstance.setEventMessage("Started create VM on Server");
-                	 	}
+                else{
+					vminstance.setStatus(EventTypes.EVENT_STATUS_CREATE);
+					vminstance.setEventMessage("Started creating VM on Server");
             	}
 
             	Domain domain = domainRepository.findOne(vminstance.getDomainId());
