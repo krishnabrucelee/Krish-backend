@@ -15,7 +15,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,28 +34,23 @@ public class User {
 
     /** User name of the user. */
     @NotNull
-    @Column(name = "user_name", nullable = false)
+    @Column(name = "user_name")
     private String userName;
 
     /** Password of the user. */
-    @NotNull
-    @Size(min = 3, max = 100)
-    @Column(name = "password", nullable = false)
+    @Column(name = "password")
     private String password;
 
     /** User role. */
-    @NotNull
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     private Role role;
 
     /** Email of the user. */
     @Column(name = "email")
-    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     /** User type of the user. */
-    @NotNull
     @Column(name = "type")
     private Type type;
 
@@ -66,7 +60,7 @@ public class User {
 
     /** Last name of the user.  */
     @Column(name = "last_name")
-    private String lastName;  
+    private String lastName;
 
     /** User uuid. */
     @Column(name = "uuid")
