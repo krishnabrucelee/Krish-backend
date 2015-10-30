@@ -2,6 +2,7 @@ package ck.panda.rabbitmq.util;
 
 import java.util.List;
 
+import org.json.JSONObject;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -33,10 +34,9 @@ public class ActionListener implements MessageListener {
 	public void onMessage(Message message) {
 		try {
 			ObjectMapper mapper = new ObjectMapper();
-			eventResponse = mapper.readValue(new String(message.getBody()), ResponseEvent.class);
+			//eventResponse = mapper.readValue(new String(message.getBody()), ResponseEvent.class);
 			System.out.println("==event response=====");
-			System.out.println(eventResponse.toString());
-			this.handleActionEvent(eventResponse);
+			this.handleActionEvent(new String(message.getBody()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -51,109 +51,24 @@ public class ActionListener implements MessageListener {
 	 *            json object.
 	 * @throws Exception
 	 */
-	public void handleActionEvent(ResponseEvent eventObject) throws Exception {
-		System.out.println(eventObject.getEvent());
+	public void handleActionEvent(String eventObject) throws Exception {
+		System.out.println(eventObject);
 		// VM Event Update.
-		if (eventObject.getEvent().startsWith(EventTypes.EVENT_VM_START)) {
 			handleVmEvent(eventObject);
-		}
 	}
 
-	private void handleVmEvent(ResponseEvent event) throws Exception {
-		if (event.getEntityuuid() != null) {
-			event.setId(event.getEntityuuid());
-		}
-		if(EventTypes.EVENT_VM_CREATE.equals(event.getEvent())){
-			VmInstance vmInstance = virtualmachineservice.findByUUID(event.getId());
-			if(event.getStatus() ==  EventTypes.EVENT_COMPLETED){
-				vmInstance.setStatus(EventTypes.EVENT_STATUS_RUNNING);
+	private void handleVmEvent(String event) throws Exception {
+		JSONObject instance = new JSONObject(event);
+		if (instance.has("id")) {
+			VmInstance vmInstance = virtualmachineservice.findByUUID(instance.getString("id"));
+			if(instance.getString("new-state").equals("Error")){
+				vmInstance.setStatus(instance.getString("new-state"));
+				vmInstance.setEventMessage(instance.getString("new-state") + "occured");
 			}
-			else if(event.getStatus() ==  EventTypes.EVENT_ERROR){
-				vmInstance.setStatus(EventTypes.EVENT_ERROR);
-			}
-			else{
-				vmInstance.setStatus(EventTypes.EVENT_STATUS_CREATE);
-			}
+			vmInstance.setStatus(instance.getString("new-state"));
+			vmInstance.setEventMessage("");
 			virtualmachineservice.update(vmInstance);
-		}
-		if(EventTypes.EVENT_VM_START.equals(event.getEvent())){
-			VmInstance vmInstance = virtualmachineservice.findByUUID(event.getId());
-			if(event.getStatus() ==  EventTypes.EVENT_COMPLETED){
-				vmInstance.setStatus(EventTypes.EVENT_STATUS_RUNNING);
-			}
-			else if(event.getStatus() ==  EventTypes.EVENT_STARTED){
-				vmInstance.setStatus(EventTypes.EVENT_STATUS_CREATE);
-			}
-			else{
-				vmInstance.setStatus(EventTypes.EVENT_ERROR);
-			}
-			virtualmachineservice.update(vmInstance);
-		}
-		if(EventTypes.EVENT_VM_STOP.equals(event.getEvent())) {
-			VmInstance vmInstance = virtualmachineservice.findByUUID(event.getId());
-			if(event.getStatus() ==  EventTypes.EVENT_COMPLETED){
-				vmInstance.setStatus(EventTypes.EVENT_STATUS_STOPPED);
-			}
-			else if(event.getStatus() ==  EventTypes.EVENT_STARTED){
-				vmInstance.setStatus(EventTypes.EVENT_STATUS_STOPPING);
-			}
-			else{
-				vmInstance.setStatus(EventTypes.EVENT_ERROR);
-			}
-			virtualmachineservice.update(vmInstance);
-		}
-		if(EventTypes.EVENT_VM_DESTROY.equals(event.getEvent())) {
-			VmInstance vmInstance = virtualmachineservice.findByUUID(event.getId());
-			if(event.getStatus() ==  EventTypes.EVENT_COMPLETED){
-				vmInstance.setStatus(EventTypes.EVENT_STATUS_DESTROYED);
-			}
-			else if(event.getStatus() ==  EventTypes.EVENT_STARTED){
-				vmInstance.setStatus(EventTypes.EVENT_STATUS_STOPPING);
-			}
-			else{
-				vmInstance.setStatus(EventTypes.EVENT_ERROR);
-			}
-			virtualmachineservice.update(vmInstance);
-		}
-		if(EventTypes.EVENT_VM_REBOOT.equals(event.getEvent())) {
-			VmInstance vmInstance = virtualmachineservice.findByUUID(event.getId());
-			if(event.getStatus() ==  EventTypes.EVENT_COMPLETED){
-				vmInstance.setStatus(EventTypes.EVENT_STATUS_RUNNING);
-			}
-			else if(event.getStatus() ==  EventTypes.EVENT_STARTED){
-				vmInstance.setStatus(EventTypes.EVENT_STATUS_CREATE);
-			}
-			else{
-				vmInstance.setStatus(EventTypes.EVENT_ERROR);
-			}
-			virtualmachineservice.update(vmInstance);
-		}
-		if(EventTypes.EVENT_VM_RESTORE.equals(event.getEvent())) {
-			VmInstance vmInstance = virtualmachineservice.findByUUID(event.getId());
-			if(event.getStatus() ==  EventTypes.EVENT_COMPLETED){
-				vmInstance.setStatus(EventTypes.EVENT_STATUS_RUNNING);
-			}
-			else if(event.getStatus() ==  EventTypes.EVENT_STARTED){
-				vmInstance.setStatus(EventTypes.EVENT_STATUS_CREATE);
-			}
-			else{
-				vmInstance.setStatus(EventTypes.EVENT_ERROR);
-			}
-			virtualmachineservice.update(vmInstance);
-		}
-		if(EventTypes.EVENT_VM_EXPUNGE.equals(event.getEvent())) {
-			VmInstance vmInstance = virtualmachineservice.findByUUID(event.getId());
-			if(event.getStatus() ==  EventTypes.EVENT_COMPLETED){
-				vmInstance.setStatus(EventTypes.EVENT_STATUS_DESTROYED);
-			}
-			else if(event.getStatus() ==  EventTypes.EVENT_STARTED){
-				vmInstance.setStatus(EventTypes.EVENT_STATUS_STOPPING);
-			}
-			else{
-				vmInstance.setStatus(EventTypes.EVENT_ERROR);
-			}
-			virtualmachineservice.update(vmInstance);
-		}
-	}
 
+	    }
+	}
 }

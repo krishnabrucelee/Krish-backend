@@ -124,11 +124,13 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 			 vminstance.setEventMessage("Error on creating VM");
                 		  }
                 		 else{
+                			 vminstance.setEventMessage("");
                 			 vminstance.setStatus(EventTypes.EVENT_STATUS_RUNNING);
                 		 }
                   }}
                   else{
                 		 vminstance.setStatus(EventTypes.EVENT_STATUS_CREATE);
+                		 vminstance.setEventMessage("Started create VM on Server");
                 	 	}
             	}
 
@@ -183,10 +185,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 		                    vminstance.setEventMessage(instance1.getJSONObject("jobresult").getString("errortext"));
 		                }
 		                else {
-		                	vminstance.setStatus(EventTypes.EVENT_STATUS_RUNNING);
-		                }
-		            }
-			} catch (Exception e) {
+		                	vminstance.setStatus(EventTypes.EVENT_STATUS_CREATE);
+		                	vminstance.setEventMessage("");
+
+		                 }
+			}} catch (Exception e) {
 				LOGGER.error("ERROR AT VM START", e);
 			}
 
@@ -209,7 +212,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 		                    vminstance.setEventMessage(instance1.getJSONObject("jobresult").getString("errortext"));
 		                }
 		                else {
-		                	vminstance.setStatus(EventTypes.EVENT_STATUS_STOPPED);
+		                	vminstance.setStatus(EventTypes.EVENT_STATUS_STOPPING);
+		                	vminstance.setEventMessage("");
 		                }
 		            }
 
@@ -231,13 +235,14 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
  				 if(instance.has("jobid")){
  					 String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"), "json");
 		            	JSONObject instance1 = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
-		                if(instance1.getString("jobstatus").equals("2")){
-		                	vminstance.setStatus(EventTypes.EVENT_ERROR);
-		                    vminstance.setEventMessage(instance1.getJSONObject("jobresult").getString("errortext"));
-		                }
-		                else {
-		                	vminstance.setStatus(EventTypes.EVENT_STATUS_RUNNING);
-		                }
+		            	 if(instance1.getString("jobstatus").equals("2")){
+			                	vminstance.setStatus(EventTypes.EVENT_ERROR);
+			                    vminstance.setEventMessage(instance1.getJSONObject("jobresult").getString("errortext"));
+			                }
+			                else {
+			                	vminstance.setStatus(EventTypes.EVENT_STATUS_CREATE);
+			                	vminstance.setEventMessage("");
+			                }
  		            }
  			} catch (Exception e) {
  				LOGGER.error("ERROR AT VM REBOOT", e);
@@ -249,8 +254,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 	@Override
     public void delete(Long id) throws Exception {
         // TODO Auto-generated method stub
-
-    }
+	}
 
     @Override
     public VmInstance find(Long id) throws Exception {
