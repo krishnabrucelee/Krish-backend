@@ -175,7 +175,7 @@ public class VmInstance {
 	/**
 	 * Instance current state
 	 */
-	@Column(name = "instance_state")
+	@Column(name = "status")
 	private String status;
 
 	/**
@@ -191,7 +191,13 @@ public class VmInstance {
 	private String podId;
 
 	/**
-	 * event type
+	 *  Instance event message.
+	 */
+	@Column(name = "event_message")
+	private String eventMessage;
+
+	/**
+	 * Event type
 	 */
 	@Column(name = "instance_event_type")
 	private String eventType;
@@ -893,6 +899,20 @@ public class VmInstance {
 	 */
 	public void setNetworkUuid(String networkUuid) {
 		this.networkUuid = networkUuid;
+	}
+
+	/**
+	 * @return the eventMessage
+	 */
+	public String getEventMessage() {
+		return eventMessage;
+	}
+
+	/**
+	 * @param eventMessage the eventMessage to set
+	 */
+	public void setEventMessage(String eventMessage) {
+		this.eventMessage = eventMessage;
 	}
 
 	@Override

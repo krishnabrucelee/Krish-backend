@@ -20,6 +20,8 @@ import ck.panda.util.CloudStackServer;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
+import ck.panda.util.error.exception.EntityNotFoundException;
+
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,32 +98,40 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             optional.put("displayvm", "true");
             optional.put("name", vminstance.getName());
             optional.put("displayname", vminstance.getName());
-            try {
-            String instanceResponse = cloudStackInstanceService.deployVirtualMachine(vminstance.getComputeOffering().getUuid(),
+            String csResponse = cloudStackInstanceService.deployVirtualMachine(vminstance.getComputeOffering().getUuid(),
             		vminstance.getTemplate().getUuid(),vminstance.getZone().getUuid(),"json",optional);
-            JSONObject instance = new JSONObject(instanceResponse).getJSONObject("deployvirtualmachineresponse");
-            vminstance.setUuid(instance.getString("id"));
-            if(instance.has("id")){
-            	vminstance.setStatus(EventTypes.EVENT_STATUS_RUNNING);
+            JSONObject csInstance = new JSONObject(csResponse).getJSONObject("deployvirtualmachineresponse");
+            if(csInstance.has("errorcode")){
+            	 errors = this.validateEvent(errors, csInstance.getString("errortext"));
+            	 throw new ApplicationException(errors);
             }
-            else {
-            	vminstance.setStatus(EventTypes.EVENT_ERROR);
+            else{
+            	vminstance.setUuid(csInstance.getString("id"));
+            	String instanceResponse = cloudStackInstanceService.queryAsyncJobResult(csInstance.getString("jobid"), "json");
+            	JSONObject instance = new JSONObject(instanceResponse).getJSONObject("queryasyncjobresultresponse");
+                if(instance.getString("jobstatus").equals("2")){
+                	errors = this.validateEvent(errors, csInstance.getString("errortext"));
+                    vminstance.setStatus(EventTypes.EVENT_ERROR);
+                    vminstance.setEventMessage(csInstance.getJSONObject("jobresult").getString("errortext"));
+                }
+                else if(instance.getString("jobstatus").equals("0")) {
+                	vminstance.setStatus(EventTypes.EVENT_STATUS_CREATE);}
+                else{
+                	vminstance.setStatus(EventTypes.EVENT_STATUS_RUNNING);
+                }
+                	Domain domain = domainRepository.findOne(vminstance.getDomainId());
+                	User user = userRepository.findOne(vminstance.getInstanceOwnerId());
+                	Department department = departmentReposiory.findOne(vminstance.getDepartmentId());
+                	GuestNetwork guestNetwork = gNetworkRepository.findByUUID(vminstance.getNetworkUuid());
+                	vminstance.setInstanceOwner(user);
+                	vminstance.setDomain(domain);
+                	vminstance.setDepartment(department);
+                	vminstance.setNetwork(guestNetwork);
+            	}
             }
-            }
-            catch(Exception e){
-            	LOGGER.error("ERROR AT VM Creation", e);
-            }
-            Domain domain = domainRepository.findOne(vminstance.getDomainId());
-            User user = userRepository.findOne(vminstance.getInstanceOwnerId());
-            Department department = departmentReposiory.findOne(vminstance.getDepartmentId());
-            GuestNetwork guestNetwork = gNetworkRepository.findByUUID(vminstance.getNetworkUuid());
-            vminstance.setInstanceOwner(user);
-            vminstance.setDomain(domain);
-            vminstance.setDepartment(department);
-            vminstance.setNetwork(guestNetwork);
             return virtualmachinerepository.save(vminstance);
         }
-    }
+
 
     @Override
     public VmInstance update(VmInstance vminstance) throws Exception {
@@ -140,7 +150,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     }
 
  	@Override
-	public void vmEventHandle(String vmId, String event) throws Exception {
+	public VmInstance vmEventHandle(String vmId, String event) throws Exception {
  		VmInstance vminstance = virtualmachinerepository.findByUUID(vmId);
  		HashMap<String, String> optional = new HashMap<String, String>();
  		 if(EventTypes.EVENT_VM_START.equals(event)){
@@ -154,8 +164,15 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 				 JSONObject instance = new JSONObject(instanceResponse).getJSONObject("startvirtualmachineresponse");
 		         System.out.println(instance);
 				 if(instance.has("jobid")){
-		            	vminstance.setStatus(EventTypes.EVENT_STATUS_RUNNING);
-		            	virtualmachinerepository.save(vminstance);
+					 String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"), "json");
+		            	JSONObject instance1 = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
+		                if(instance1.getString("jobstatus").equals("2")){
+		                	vminstance.setStatus(EventTypes.EVENT_ERROR);
+		                    vminstance.setEventMessage(instance1.getJSONObject("jobresult").getString("errortext"));
+		                }
+		                else {
+		                	vminstance.setStatus(EventTypes.EVENT_STATUS_RUNNING);
+		                }
 		            }
 			} catch (Exception e) {
 				LOGGER.error("ERROR AT VM START", e);
@@ -173,9 +190,17 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
  				 JSONObject instance = new JSONObject(instanceResponse).getJSONObject("stopvirtualmachineresponse");
  				   System.out.println(instance);
  				 if(instance.has("jobid")){
- 		            	vminstance.setStatus(EventTypes.EVENT_STATUS_STOPPED);
- 		            	virtualmachinerepository.save(vminstance);
- 		            }
+ 					 String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"), "json");
+		            	JSONObject instance1 = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
+		                if(instance1.getString("jobstatus").equals("2")){
+		                	vminstance.setStatus(EventTypes.EVENT_ERROR);
+		                    vminstance.setEventMessage(instance1.getJSONObject("jobresult").getString("errortext"));
+		                }
+		                else {
+		                	vminstance.setStatus(EventTypes.EVENT_STATUS_STOPPED);
+		                }
+		            }
+
  			} catch (Exception e) {
  				LOGGER.error("ERROR AT VM STOP", e);
  			}
@@ -192,14 +217,21 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
  				 JSONObject instance = new JSONObject(instanceResponse).getJSONObject("rebootvirtualmachineresponse");
  				   System.out.println(instance);
  				 if(instance.has("jobid")){
- 		            	vminstance.setStatus(EventTypes.EVENT_STATUS_RUNNING);
- 		            	virtualmachinerepository.save(vminstance);
+ 					 String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"), "json");
+		            	JSONObject instance1 = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
+		                if(instance1.getString("jobstatus").equals("2")){
+		                	vminstance.setStatus(EventTypes.EVENT_ERROR);
+		                    vminstance.setEventMessage(instance1.getJSONObject("jobresult").getString("errortext"));
+		                }
+		                else {
+		                	vminstance.setStatus(EventTypes.EVENT_STATUS_RUNNING);
+		                }
  		            }
  			} catch (Exception e) {
  				LOGGER.error("ERROR AT VM REBOOT", e);
  			}
-
     	 }
+    	 return virtualmachinerepository.save(vminstance);
 	}
 
 	@Override
@@ -231,6 +263,34 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 		return virtualmachinerepository.findByUUID(uuid);
 	}
 
+	 /**
+     * Check the virtual machine CS error handling.
+     *
+     * @param errors error creating status.
+     * @param errmessage error message.
+     * @return errors.
+     * @throws Exception
+     */
+    private Errors validateEvent(Errors errors, String errmessage) throws Exception {
+            errors.addGlobalError(errmessage);
+        return errors;
+    }
+
+    /**
+     * Check the instance name already exist.
+     *
+     * @param errors already existing error list.
+     * @param name name of the instance.
+     * @param department department object.
+     * @return errors.
+     * @throws Exception
+     */
+    private Errors validateName(Errors errors, String name, Department department, Long id) throws Exception {
+        if (virtualmachinerepository.findByNameAndDepartment(name, department, id) != null) {
+            errors.addFieldError("name", "instance already exist");
+        }
+        return errors;
+    }
 
 
 }

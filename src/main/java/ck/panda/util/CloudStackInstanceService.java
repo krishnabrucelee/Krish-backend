@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import org.apache.commons.httpclient.NameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
 
 /**
  * @author Dev-Cloud
@@ -95,6 +96,23 @@ public class CloudStackInstanceService {
         arguments.add(new NameValuePair("id", virtualMachineId));
         arguments.add(new NameValuePair("response", response));
         return server.request(arguments);
+    }
+
+    /**
+     * event status of virtual machine.
+     *
+     * @param virtualMachineId The ID of the virtual machine
+     * @param optional
+     * @return json response.
+     * @throws Exception
+     */
+    public String queryAsyncJobResult(String asychronousJobid, String response)
+            throws Exception {
+        LinkedList<NameValuePair> arguments
+                = server.getDefaultQuery("queryAsyncJobResult", null);
+        arguments.add(new NameValuePair("jobid", asychronousJobid));
+        arguments.add(new NameValuePair("response", response));
+        return  server.request(arguments);
     }
 
     /**

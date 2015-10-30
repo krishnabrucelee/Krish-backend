@@ -5,6 +5,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.VmInstance;
 
 /**
@@ -19,4 +20,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
 	 */
 	@Query(value = "select vm from VmInstance vm where vm.uuid LIKE :uuid ")
     VmInstance findByUUID(@Param("uuid") String uuid);
+
+	@Query(value = "select vm from VmInstance vm where vm.name=:name AND vm.department=:department AND vm.id!=:id)")
+	VmInstance findByNameAndDepartment(String name, Department department, Long id);
 }

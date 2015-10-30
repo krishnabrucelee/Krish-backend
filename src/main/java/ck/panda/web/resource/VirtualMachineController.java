@@ -81,9 +81,8 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     @RequestMapping(value = "event",method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
    	@ResponseStatus(HttpStatus.OK)
    	@ResponseBody
-   	protected String handleVmEvent(@RequestParam("vm") String vm, @RequestParam("event") String event) throws Exception {
-    	virtualmachineservice.vmEventHandle(vm, event);
-    	return "event";
+   	protected VmInstance handleVmEvent(@RequestParam("vm") String vm, @RequestParam("event") String event) throws Exception {
+    	return virtualmachineservice.vmEventHandle(vm, event);
    	}
 
 	@Override
