@@ -225,7 +225,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 			                    vminstance.setEventMessage(instance1.getJSONObject("jobresult").getString("errortext"));
 			                }
 			                else {
-			                	vminstance.setStatus(EventTypes.EVENT_STATUS_CREATE);
+			                	vminstance.setStatus(EventTypes.EVENT_STATUS_RUNNING);
 			                	vminstance.setEventMessage("");
 			                }
  		            }
@@ -295,5 +295,3 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
 
 }
-
-
