@@ -5,16 +5,9 @@ package ck.panda.util;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.apache.commons.httpclient.NameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import ck.panda.domain.entity.StorageOffering;
 
 /**
  * CloudStack Storage Offering service for cloudStack connectivity with the
@@ -24,67 +17,98 @@ import ck.panda.domain.entity.StorageOffering;
 @Service
 public class CloudStackStorageOfferingService {
 
-    /** CloudStack server for connectivity. */
-    @Autowired
-    private CloudStackServer server;
+	/** CloudStack server for connectivity. */
+	@Autowired
+	private CloudStackServer server;
 
-    private StorageOffering storage;
+	/**
+	 * Set values in CloudStack server.
+	 *
+	 * @param server setting apikey, secretkey, URL in cloudStack server.
+	 */
+	public void setServer(CloudStackServer server) {
+		this.server = server;
+	}
 
-    /**
-     * Set values in CloudStack server.
-     *
-     * @param server
-     *            setting apikey, secretkey, URL in cloudStack server.
-     */
-    public void setServer(CloudStackServer server) {
-        this.server = server;
-    }
+	/**
+	 * Creating Storage offering in cloud stack.
+	 *
+	 * @param displayText description of the storage offering.
+	 * @param name storage offering name.
+	 * @param response JSON response.
+	 * @param optional optional values for storage offering.
+	 * @return created response.
+	 * @throws Exception if error.
+	 */
+	public String createStorageOffering(String displayText, String name, String response,
+			HashMap<String, String> optional) throws Exception {
 
-    public String createStorageOffering(String displayText, String name, String response,
-            HashMap<String, String> optional) throws Exception {
+		LinkedList<NameValuePair> arguments = server.getDefaultQuery("createDiskOffering", optional);
+		arguments.add(new NameValuePair("displaytext", displayText));
+		arguments.add(new NameValuePair("name", name));
+		arguments.add(new NameValuePair("response", response));
 
-        LinkedList<NameValuePair> arguments = server.getDefaultQuery("createDiskOffering", optional);
-        arguments.add(new NameValuePair("displaytext", displayText));
-        arguments.add(new NameValuePair("name", name));
-        arguments.add(new NameValuePair("response", response));
+		String createResponse = server.request(arguments);
 
-        String resp = server.request(arguments);
+		return createResponse;
+	}
 
-        return resp;
-    }
+	/**
+	 * Updating Storage offering in cloud stack.
+	 *
+	 * @param storageOfferingId storage offering id.
+	 * @param response JSON response.
+	 * @param optional optional values for storage offering.
+	 * @return updated response.
+	 * @throws Exception if error.
+	 */
+	public String updateStorageOffering(String storageOfferingId, String response, HashMap<String, String> optional)
+			throws Exception {
 
-    public String updateStorageOffering(String diskOfferingId, String response,
-              HashMap<String, String> optional) throws Exception {
+		LinkedList<NameValuePair> arguments = server.getDefaultQuery("updateDiskOffering", optional);
+		arguments.add(new NameValuePair("id", storageOfferingId));
+		arguments.add(new NameValuePair("response", response));
 
-            LinkedList<NameValuePair> arguments = server.getDefaultQuery("updateDiskOffering", optional);
-            arguments.add(new NameValuePair("id", diskOfferingId));
-            arguments.add(new NameValuePair("response", response));
+		String updateResponse = server.request(arguments);
 
-            String resp = server.request(arguments);
+		return updateResponse;
+	}
 
-            return resp;
-          }
+	/**
+	 * Deleting Storage offering in cloud stack.
+	 *
+	 * @param srotageOfferingId storage offering id.
+	 * @param response JSON response.
+	 * @return deleted response.
+	 * @throws Exception if error.
+	 */
+	public String deleteStorageOffering(String srotageOfferingId, String response) throws Exception {
 
-      public String deleteStorageOffering(String diskOfferingId, String response) throws Exception {
+		LinkedList<NameValuePair> arguments = server.getDefaultQuery("deleteDiskOffering", null);
+		arguments.add(new NameValuePair("id", srotageOfferingId));
+		arguments.add(new NameValuePair("response", response));
 
-            LinkedList<NameValuePair> arguments = server.getDefaultQuery("deleteDiskOffering", null);
-            arguments.add(new NameValuePair("id", diskOfferingId));
-            arguments.add(new NameValuePair("response", response));
+		String deleteResponse = server.request(arguments);
 
-            String responseDocument = server.request(arguments);
+		return deleteResponse;
+	}
 
-            return responseDocument;
-          }
+	/**
+	 * Listing Storage offering from cloud stack.
+	 *
+	 * @param response JSON response.
+	 * @param optional optional values for storage offering.
+	 * @return list response.
+	 * @throws Exception if error.
+	 */
+	public String listStorageOfferings(String response, HashMap<String, String> optional) throws Exception {
 
-      public String listStorageOfferings(String response,
-                HashMap<String, String> optional) throws Exception {
+		LinkedList<NameValuePair> arguments = server.getDefaultQuery("listDiskOfferings", optional);
+		arguments.add(new NameValuePair("response", response));
 
-            LinkedList<NameValuePair> arguments
-                    = server.getDefaultQuery("listDiskOfferings", optional);
-            arguments.add(new NameValuePair("response", response));
+		String listResponse = server.request(arguments);
 
-            String responseDocument = server.request(arguments);
+		return listResponse;
+	}
 
-            return responseDocument;
-        }
 }

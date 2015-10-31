@@ -262,9 +262,9 @@ public class StorageOffering {
      */
     public enum StorageType {
         /** Shared is storage accessible via NFS. */
-        shared,
+        SHARED,
         /** Isolated is attached to the hypervisor host where vm is running. */
-        local
+        LOCAL
     }
 
     /**
