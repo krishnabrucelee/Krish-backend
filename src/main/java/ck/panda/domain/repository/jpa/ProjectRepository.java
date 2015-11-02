@@ -42,4 +42,12 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, L
     @Query(value = "select prrjct from Project prrjct where prrjct.isActive IS TRUE AND lower(prrjct.name) LIKE '%' || lower(:query) || '%' ")
     List<Project> findByName(@Param("query") String query);
 
+    /**
+     * find all the project with active status.
+     *
+     * @return
+     */
+    @Query(value = "select prjct from Project prjct where prjct.isActive IS TRUE")
+    List<Project> findAllByActive();
+
 }

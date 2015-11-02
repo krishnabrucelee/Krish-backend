@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -41,6 +42,11 @@ public class User {
     @Column(name = "password")
     private String password;
 
+    /** User domain. */
+    @ManyToOne
+    @JoinColumn(name = "domain_id", referencedColumnName = "id")
+    private Domain domain;
+
     /** User role. */
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id")
@@ -61,6 +67,10 @@ public class User {
     /** Last name of the user.  */
     @Column(name = "last_name")
     private String lastName;
+
+    /** List of projects for users. */
+    @ManyToMany
+	private List<Project> projectList;
 
     /** User uuid. */
     @Column(name = "uuid")
@@ -172,6 +182,20 @@ public class User {
     }
 
     /**
+	 * @return the domain
+	 */
+	public Domain getDomain() {
+		return domain;
+	}
+
+	/**
+	 * @param domain the domain to set
+	 */
+	public void setDomain(Domain domain) {
+		this.domain = domain;
+	}
+
+	/**
      * Get the role.
      *
      * @return the role.
@@ -260,6 +284,20 @@ public class User {
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
+
+	/**
+	 * @return the projectList
+	 */
+	public List<Project> getProjectList() {
+		return projectList;
+	}
+
+	/**
+	 * @param projectList the projectList to set
+	 */
+	public void setProjectList(List<Project> projectList) {
+		this.projectList = projectList;
+	}
 
 	/**
      * Get the user uuid.

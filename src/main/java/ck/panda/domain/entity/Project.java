@@ -13,15 +13,12 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -67,8 +64,8 @@ public class Project implements Serializable {
     @ManyToOne(cascade = CascadeType.ALL)
     private User projectOwner;
 
-    /** List of users for an project. */
-    @OneToMany(cascade = CascadeType.ALL)
+    /** List of users for projects. */
+    @ManyToMany
     private List<User> userList;
 
     /** Project domain id. */
