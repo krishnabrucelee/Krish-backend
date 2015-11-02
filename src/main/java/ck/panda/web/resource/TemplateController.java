@@ -85,19 +85,6 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<Template> templateList() throws Exception {
-        return templateService.findAll();
-    }
-
-    /**
-     * Get the list of templates without system type.
-     *
-     * @return
-     * @throws Exception
-     */
-    @RequestMapping(value = "/templatelist", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public List<Template> userTemplateList() throws Exception {
         return templateService.findByTemplate();
     }
 
