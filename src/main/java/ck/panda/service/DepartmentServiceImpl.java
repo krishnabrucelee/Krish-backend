@@ -132,4 +132,8 @@ public class DepartmentServiceImpl implements DepartmentService {
 			return (List<Department>) departmentRepo.findAllByActive(query);
 	}
 
+    @Override
+    public List<Department> findAllByActive() throws Exception {
+        return departmentRepo.findAllByActive();
+    }
 }

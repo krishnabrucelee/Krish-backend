@@ -97,7 +97,7 @@ public class DepartmentController extends CRUDController<Department> implements 
   	@ResponseStatus(HttpStatus.OK)
   	@ResponseBody
   	protected List<Department> getSearch() throws Exception {
-  		return departmentService.findAll();
+  		return departmentService.findAllByActive();
   	}
 
   	/**

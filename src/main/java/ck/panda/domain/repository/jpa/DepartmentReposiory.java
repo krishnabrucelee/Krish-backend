@@ -1,7 +1,6 @@
 package ck.panda.domain.repository.jpa;
 
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -42,4 +41,13 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
      */
     @Query(value = "select dept from Department dept where dept.isActive IS TRUE AND lower(dept.name) LIKE '%' || lower(:query) || '%' ")
     List<Department> findAllByActive(@Param("query") String query);
+
+    /**
+     * find all the departmen with active status.
+     *
+     * @return
+     */
+    @Query(value = "select dpt from Department dpt where dpt.isActive IS TRUE")
+    List<Department> findAllByActive();
+
 }
