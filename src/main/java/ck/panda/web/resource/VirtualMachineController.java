@@ -41,7 +41,8 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Virtual Machine.", response = VmInstance.class)
     @Override
     public VmInstance create(@RequestBody VmInstance vminstance) throws Exception {
-        return virtualmachineservice.save(vminstance);
+    	vminstance.setProjectId(vminstance.getProject().getId());
+    	return virtualmachineservice.save(vminstance);
     }
 
 	@ApiOperation(value = SW_METHOD_READ, notes = "Read an existing Virtual Machine.", response = VmInstance.class)
