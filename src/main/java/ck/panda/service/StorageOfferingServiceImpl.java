@@ -68,6 +68,12 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
 
 				storage.setUuid(json.get("creatediskofferingresponse").get("diskoffering").get("id").toString()
 						.replace("\"", "").trim());
+				if(json.get("creatediskofferingresponse").get("diskoffering").get("disksize").toString() == "0") {
+					storage.setDiskSize(0L);
+				}
+				if(json.get("creatediskofferingresponse").get("diskoffering").get("iscustomized").toString() == "false") {
+					storage.setIsCustomDisk(false);
+				}
 
 				return storageOfferingRepo.save(storage);
 			}

@@ -243,10 +243,8 @@ public class StorageOffering {
     @PrePersist
     void preInsert() {
         this.isActive = true;
-        this.diskSize = 0L;
-        this.isCustomDisk = false;
-        this.isCustomizedIops = false;
     }
+
 
     /**
      * Enum type for Storage Offering Status.
