@@ -37,4 +37,12 @@ public interface ProjectService extends CRUDService<Project> {
  	 * @throws Exception
  	 */
  	List<Project> findByName(String query) throws Exception;
+
+ 	/**
+     * Find all the projects with active status.
+     *
+     * @return
+     * @throws Exception
+     */
+    List<Project> findAllByActive() throws Exception;
 }

@@ -38,6 +38,6 @@ public interface RoleReposiory extends PagingAndSortingRepository<Role, Long> {
      * @param department - department entity
      * @return List of roles
      */
-    @Query(value = "SELECT role FROM Role AS role WHERE role.department=:department")
+    @Query(value = "SELECT role FROM Role AS role WHERE role.department=:department AND role.isActive IS TRUE")
     List<Role> getRolesByDepartment(@Param("department") Department department);
 }

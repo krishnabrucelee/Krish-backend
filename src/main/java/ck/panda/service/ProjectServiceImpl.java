@@ -129,4 +129,9 @@ public class ProjectServiceImpl implements ProjectService {
 	public List<Project> findByName(String query) throws Exception {
 			return (List<Project>) projectRepository.findByName(query);
 	}
+
+	@Override
+	public List<Project> findAllByActive() throws Exception {
+		return projectRepository.findAllByActive();
+	}
 }

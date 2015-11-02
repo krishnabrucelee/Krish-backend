@@ -42,4 +42,12 @@ public interface DepartmentService  extends CRUDService<Department>  {
  	 * @throws Exception
  	 */
  	List<Department> findByName(String query) throws Exception;
+
+ 	/**
+     * Find all the departments with active status.
+     *
+     * @return
+     * @throws Exception
+     */
+    List<Department> findAllByActive() throws Exception;
 }
