@@ -210,4 +210,9 @@ public class TemplateServiceImpl implements TemplateService {
         if(template.getHvm() != null) { optional.put("requireshvm", template.getHvm().toString()); }
         return optional;
     }
+
+    @Override
+    public List<Template> findByTemplate() throws Exception {
+        return templateRepository.findByTemplate(Type.SYSTEM);
+    }
 }

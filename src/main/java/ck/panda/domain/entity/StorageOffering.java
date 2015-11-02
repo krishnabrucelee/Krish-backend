@@ -94,7 +94,7 @@ public class StorageOffering {
      * Appears only if Custom disk size is not selected. Define the volume size
      * in GB.
      */
-    @Column(name = "disk_size", nullable = false, columnDefinition = "bigint(20) default 1")
+    @Column(name = "disk_size", columnDefinition = "bigint(20) default 0")
     private Long diskSize;
 
     /**
@@ -243,6 +243,9 @@ public class StorageOffering {
     @PrePersist
     void preInsert() {
         this.isActive = true;
+        this.diskSize = 0L;
+        this.isCustomDisk = false;
+        this.isCustomizedIops = false;
     }
 
     /**
@@ -262,9 +265,9 @@ public class StorageOffering {
      */
     public enum StorageType {
         /** Shared is storage accessible via NFS. */
-        SHARED,
+        shared,
         /** Isolated is attached to the hypervisor host where vm is running. */
-        LOCAL
+        local
     }
 
     /**
@@ -821,6 +824,8 @@ public class StorageOffering {
         storageOffering.name = object.has("name") ? object.get("name").toString() : "";
         storageOffering.description = object.has("displaytext") ? object.get("displaytext").toString() : "";
         storageOffering.diskSize = object.has("disksize") ? object.getLong("disksize") : 0;
+        storageOffering.setStorageType(storageOffering.getStorageType().valueOf(object.has("storagetype") ? object.get("storagetype").toString() : ""));
+        storageOffering.setIsCustomDisk(storageOffering.getIsCustomDisk().valueOf(object.has("iscustomized") ? object.get("iscustomized").toString() : ""));
         storageOffering.setIsSyncFlag(false);
 
         return storageOffering;

@@ -247,10 +247,10 @@ public class ComputeOffering implements Serializable {
     public enum StorageType {
 
            /** If region is enabled we can create zones and pods. */
-           SHARED,
+           shared,
 
            /** If region is disabled cannot create any zones and pods until region gets enabled. */
-           LOCAL,
+           local,
 
     }
 
@@ -878,6 +878,7 @@ public class ComputeOffering implements Serializable {
         compute.memory = object.has("memory") ? Integer.parseInt(object.getString("memory").toString()) : 0;
         compute.clockSpeed = object.has("cpuspeed") ? Integer.parseInt(object.getString("cpuspeed")) : 0;
         compute.numberOfCores = object.has("cpunumber") ? Integer.parseInt(object.getString("cpunumber")) : 0;
+        compute.setStorageType(compute.getStorageType().valueOf(object.has("storagetype") ? object.get("storagetype").toString() : ""));
         compute.setIsSyncFlag(false);
         return compute;
     }

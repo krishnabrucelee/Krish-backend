@@ -20,4 +20,12 @@ public interface TemplateService extends CRUDService<Template> {
      * @throws Exception unhandled errors.
      */
     List<Template> findAllFromCSServer() throws Exception;
+
+    /**
+     * To get list of templates without system type from cloudstack server.
+     *
+     * @return template list from server
+     * @throws Exception unhandled errors.
+     */
+    List<Template> findByTemplate() throws Exception;
 }
