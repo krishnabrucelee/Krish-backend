@@ -3,13 +3,11 @@ package ck.panda.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
 import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.repository.jpa.HypervisorRepository;
 import ck.panda.util.CloudStackHypervisorsService;
@@ -58,7 +56,7 @@ public class HypervisorServiceImpl implements HypervisorService {
 
     @Override
     public Page<Hypervisor> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-    	return hypervisorRepo.findAll(pagingAndSorting.toPageRequest());
+        return hypervisorRepo.findAll(pagingAndSorting.toPageRequest());
     }
 
     @Override

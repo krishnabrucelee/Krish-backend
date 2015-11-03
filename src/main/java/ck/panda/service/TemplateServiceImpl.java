@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,8 +26,6 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 import ck.panda.util.error.exception.EntityNotFoundException;
-import ck.panda.util.infrastructure.security.AuthenticationFilter;
-import groovy.json.JsonException;
 
 /**
  * Service implementation for Template entity.
@@ -66,21 +62,17 @@ public class TemplateServiceImpl implements TemplateService {
     @Autowired
     private HypervisorRepository hypervisorRepository;
 
-    /** Logger constant. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationFilter.class);
-
     @Override
     @PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
     public Template save(Template template) throws Exception {
 
-        if(template.getSyncFlag() == true) {
+      if (template.getSyncFlag()) {
         Errors errors = validator.rejectIfNullEntity("template", template);
         errors = validator.validateEntity(template, errors);
 
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-        	try {
             configUtil.setServer(1L);
             HashMap<String, String> optional = new HashMap<String, String>();
 
@@ -89,28 +81,26 @@ public class TemplateServiceImpl implements TemplateService {
                     template.getOsType().getUuid(), template.getUrl(),
                     template.getZone().getUuid(), "json", templateFieldNullValidation(template, optional));
 
-            JSONArray templateJSON = new JSONObject(resp).getJSONObject("registertemplateresponse")
-                    .getJSONArray("template");
-            for (int i = 0; i < templateJSON.length(); ++i) {
-                JSONObject rec = templateJSON.getJSONObject(i);
-                template.setUuid(rec.getString("id"));
+            JSONObject templateJSON = new JSONObject(resp).getJSONObject("registertemplateresponse");
+            if (templateJSON.has("errorcode")) {
+                errors = this.validateCSEvent(errors, templateJSON.getString("errortext"));
+                throw new ApplicationException(errors);
+            } else {
+                template.setUuid(templateJSON.getJSONObject("template").getString("id"));
                 template.setStatus(Status.valueOf("Active"));
-                template.setType(Type.valueOf(rec.getString("templatetype")));
+                template.setType(Type.valueOf(templateJSON.getJSONObject("template").getString("templatetype")));
                 template.setDisplayText(template.getDescription());
             }
-        	} catch (JsonException jsonException) {
-        		LOGGER.error("Cloud stack template creation exception", jsonException);
-        	}
-        	return templateRepository.save(template);
-        }
-        } else {
             return templateRepository.save(template);
         }
+      } else {
+          return templateRepository.save(template);
+      }
     }
 
     @Override
     public Template update(Template template) throws Exception {
-        if(template.getSyncFlag() == true) {
+      if (template.getSyncFlag()) {
         Errors errors = validator.rejectIfNullEntity("template", template);
         errors = validator.validateEntity(template, errors);
 
@@ -126,28 +116,22 @@ public class TemplateServiceImpl implements TemplateService {
             cloudStackTemplateService.updateTemplate(template.getUuid(), "json", optional);
             return templateRepository.save(template);
         }
-        } else {
-            return templateRepository.save(template);
-        }
+      } else {
+          return templateRepository.save(template);
+      }
     }
 
     @Override
     public void delete(Template template) throws Exception {
-        if(template.getSyncFlag() == true) {
-        configUtil.setServer(1L);
-        HashMap<String, String> optional = new HashMap<String, String>();
-        cloudStackTemplateService.deleteTemplate(template.getId().toString(), "json", optional);
         templateRepository.delete(template);
-        } else {
-            templateRepository.delete(template);
-        }
     }
 
     @Override
     public void delete(Long id) throws Exception {
         configUtil.setServer(1L);
         HashMap<String, String> optional = new HashMap<String, String>();
-        cloudStackTemplateService.deleteTemplate(id.toString(), "json", optional);
+        Template template = templateRepository.findOne(id);
+        cloudStackTemplateService.deleteTemplate(template.getUuid(), "json", optional);
         templateRepository.delete(id);
     }
 
@@ -200,15 +184,47 @@ public class TemplateServiceImpl implements TemplateService {
         return templateList;
     }
 
+    /**
+     * @param template entity
+     * @param optional value for null checking
+     * @return optional values
+     */
     public HashMap<String, String> templateFieldNullValidation(Template template, HashMap<String, String> optional) {
-        if(template.getDynamicallyScalable() != null) { optional.put("isdynamicallyscalable", template.getDynamicallyScalable().toString()); }
-        if(template.getExtractable() != null) { optional.put("isextractable", template.getExtractable().toString()); }
-        if(template.getFeatured() != null) { optional.put("isfeatured", template.getFeatured().toString()); }
-        if(template.getShare() != null) { optional.put("ispublic", template.getShare().toString()); }
-        if(template.getRouting() != null) { optional.put("isrouting", template.getRouting().toString()); }
-        if(template.getPasswordEnabled() != null) { optional.put("passwordenabled", template.getPasswordEnabled().toString()); }
-        if(template.getHvm() != null) { optional.put("requireshvm", template.getHvm().toString()); }
+        if (template.getDynamicallyScalable() != null) {
+            optional.put("isdynamicallyscalable", template.getDynamicallyScalable().toString());
+        }
+        if (template.getExtractable() != null) {
+            optional.put("isextractable", template.getExtractable().toString());
+        }
+        if (template.getFeatured() != null) {
+            optional.put("isfeatured", template.getFeatured().toString());
+        }
+        if (template.getShare() != null) {
+            optional.put("ispublic", template.getShare().toString());
+        }
+        if (template.getRouting() != null) {
+            optional.put("isrouting", template.getRouting().toString());
+        }
+        if (template.getPasswordEnabled() != null) {
+            optional.put("passwordenabled", template.getPasswordEnabled().toString());
+        }
+        if (template.getHvm() != null) {
+            optional.put("requireshvm", template.getHvm().toString());
+        }
         return optional;
+    }
+
+    /**
+     * Check the template CS error handling.
+     *
+     * @param errors error creating status.
+     * @param eMessage error message
+     * @return errors
+     * @throws Exception raise if error
+     */
+    private Errors validateCSEvent(Errors errors, String eMessage) throws Exception {
+        errors.addGlobalError(eMessage);
+    return errors;
     }
 
     @Override

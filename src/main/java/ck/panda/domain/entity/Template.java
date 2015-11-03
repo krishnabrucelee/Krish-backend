@@ -940,18 +940,18 @@ public class Template implements Serializable {
      * @return displayText
      */
     public String getDisplayText() {
-		return displayText;
-	}
+        return displayText;
+    }
 
     /**
      * Set the display text.
      * @param displayText - the String to set
      */
-	public void setDisplayText(String displayText) {
-		this.displayText = displayText;
-	}
+    public void setDisplayText(String displayText) {
+        this.displayText = displayText;
+    }
 
-	/**
+    /**
      * Get the Transient type.
      * @return transZone
      */
