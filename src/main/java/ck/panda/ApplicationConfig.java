@@ -32,7 +32,6 @@ import ck.panda.util.audit.DateTimeService;
 @ComponentScan
 @SpringBootApplication
 @EnableConfigurationProperties
-@EnableJpaAuditing(dateTimeProviderRef = "dateTimeProvider")
 @EnableTransactionManagement
 @EnableJpaAuditing(dateTimeProviderRef = "dateTimeProvider")
 @EnableJpaRepositories("ck.panda.domain.repository")
