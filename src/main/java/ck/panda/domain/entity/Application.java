@@ -1,8 +1,12 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -12,12 +16,14 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Version;
 import javax.validation.constraints.Size;
+import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.joda.time.DateTime;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  * Application consists of different application types. Application types are unique to domain.
@@ -26,8 +32,17 @@ import org.springframework.data.annotation.LastModifiedDate;
  */
 @Entity
 @Table(name = "ck_application")
+@EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class Application implements Serializable {
+
+	/** Status enum type used to list the status values. */
+    public enum Status {
+        /** Application status as Enabled. */
+    	ENABLED,
+        /** Application status as Disabled. */
+    	DISABLED
+    }
 
     /** Id of the Application. */
     @Id
@@ -54,15 +69,12 @@ public class Application implements Serializable {
     @Column(name = "is_active")
     private Boolean isActive;
 
-    /** Enum type for Application Status. */
-    public enum Status {
-        /** Application type will be in a Enabled State. */
-        ENABLED,
-        /** Application type will be in a Disabled State. */
-        DISABLED
-    }
+    /** Application current state. */
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
-    /** Version attribute to handle optimistic locking. */
+	/** Version attribute to handle optimistic locking. */
     @Version
     @Column(name = "version")
     private Long version;
@@ -82,12 +94,16 @@ public class Application implements Serializable {
     /** Created date and time. */
     @CreatedDate
     @Column(name = "created_date_time")
-    private DateTime createdDateTime;
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime createdDateTime;
 
-    /** Updated date and time. */
+    /** Last modified date and time. */
     @LastModifiedDate
     @Column(name = "updated_date_time")
-    private DateTime updatedDateTime;
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime updatedDateTime;
 
     /** Default constructor. */
     public Application() {
@@ -185,6 +201,24 @@ public class Application implements Serializable {
     }
 
     /**
+     * Get the status of the application.
+     *
+     * @return status
+     */
+    public Status getStatus() {
+		return status;
+	}
+
+	/**
+	 * Set the status of the application.
+	 *
+	 * @param status to set
+	 */
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+
+    /**
      * Get the version.
      *
      * @return version
@@ -243,7 +277,7 @@ public class Application implements Serializable {
      *
      * @return createdDateTime
      */
-    public DateTime getCreatedDateTime() {
+    public ZonedDateTime getCreatedDateTime() {
         return createdDateTime;
     }
 
@@ -252,7 +286,7 @@ public class Application implements Serializable {
      *
      * @param createdDateTime to set
      */
-    public void setCreatedDateTime(DateTime createdDateTime) {
+    public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
     }
 
@@ -261,7 +295,7 @@ public class Application implements Serializable {
      *
      * @return updatedDateTime
      */
-    public DateTime getUpdatedDateTime() {
+    public ZonedDateTime getUpdatedDateTime() {
         return updatedDateTime;
     }
 
@@ -270,7 +304,7 @@ public class Application implements Serializable {
      *
      * @param updatedDateTime to set
      */
-    public void setUpdatedDateTime(DateTime updatedDateTime) {
+    public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
 
@@ -279,4 +313,5 @@ public class Application implements Serializable {
     void preInsert() {
         this.isActive = true;
     }
+
 }
