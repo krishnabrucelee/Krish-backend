@@ -15,6 +15,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -46,9 +47,13 @@ public class Department implements Serializable {
     private Long id;
 
     /** Domain of the department. */
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "domain_id", referencedColumnName = "id")
+    @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
+	@ManyToOne
     private Domain domain;
+
+    @NotNull
+	@Column(name = "domain_id")
+	private Long domainId;
 
     /** Name of the Department. */
     @NotEmpty
@@ -165,14 +170,33 @@ public class Department implements Serializable {
     /**
      * Set the domain.
      *
-     * @param domain
-     *            the domain to set
+     * @param domain the domain to set
      */
     public void setDomain(Domain domain) {
         this.domain = domain;
     }
 
+
+
     /**
+     * Get the domain id.
+     *
+	 * @return the domainId
+	 */
+	public Long getDomainId() {
+		return domainId;
+	}
+
+	/**
+	 * Set the domain id.
+	 *
+	 * @param domainId the domainId to set
+	 */
+	public void setDomainId(Long domainId) {
+		this.domainId = domainId;
+	}
+
+	/**
      * Get the description.
      *
      * @return description
