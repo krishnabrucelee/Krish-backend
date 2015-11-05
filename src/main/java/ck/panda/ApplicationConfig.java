@@ -1,7 +1,6 @@
 package ck.panda;
 
 import java.util.Locale;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -21,7 +20,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
-
 import ck.panda.util.audit.AuditingDateTimeProvider;
 import ck.panda.util.audit.CurrentTimeDateTimeService;
 import ck.panda.util.audit.DateTimeService;
@@ -36,6 +34,7 @@ import ck.panda.util.audit.DateTimeService;
 @EnableConfigurationProperties
 @EnableJpaAuditing(dateTimeProviderRef = "dateTimeProvider")
 @EnableTransactionManagement
+@EnableJpaAuditing(dateTimeProviderRef = "dateTimeProvider")
 @EnableJpaRepositories("ck.panda.domain.repository")
 public class ApplicationConfig extends WebMvcConfigurerAdapter {
 
