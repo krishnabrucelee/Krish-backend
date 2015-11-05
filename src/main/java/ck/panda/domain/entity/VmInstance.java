@@ -54,23 +54,17 @@ public class VmInstance {
    @Column(name = "vnc_password")
    private String vncPassword;
 
-   /**
-    * Instance owner id.
-    */
+   /** Instance owner id. */
    @JoinColumn(name = "instance_owner_id", referencedColumnName = "id", updatable = false, insertable = false)
    @OneToOne
    private User instanceOwner;
 
-   /**
-    * Instance owner id.
-    */
+   /** Instance owner id. */
    @NotNull
    @Column(name = "instance_owner_id")
    private Long instanceOwnerId;
 
-   /**
-    * Instance application id.
-    */
+   /** Instance application id. */
    @Column(name = "application_name")
    private String application;
 
@@ -78,90 +72,64 @@ public class VmInstance {
    @ManyToMany
    private List<Application> applicationList;
 
-   /**
-    * Instance project id.
-    */
+   /** Instance project id. */
    @JoinColumn(name = "project_id", referencedColumnName = "id", updatable = false, insertable = false)
    @ManyToOne
    private Project project;
 
-   /**
-    * Instance project id.
-    */
+   /** Instance project id. */
    @Column(name = "project_id")
    private Long projectId;
 
-   /**
-    * Instance department id.
-    */
+   /** Instance department id. */
    @JoinColumn(name = "department_id", referencedColumnName = "id", updatable = false, insertable = false)
    @ManyToOne
    private Department department;
 
-   /**
-    * Instance department id.
-    */
+   /** Instance department id. */
    @NotNull
    @Column(name = "department_id")
    private Long departmentId;
 
-   /**
-    * Instance template id.
-    */
+   /** Instance template id. */
    @JoinColumn(name = "template_id", referencedColumnName = "id", updatable = false, insertable = false)
    @OneToOne
    private Template template;
 
-   /**
-    * Instance template id.
-    */
+   /** Instance template id. */
    @Column(name = "template_id")
    private Long templateId;
 
-   /**
-    * Instance domain id.
-    */
+   /** Instance domain id. */
    @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
    @ManyToOne
    private Domain domain;
 
-   /**
-    * Instance domain id.
-    */
+   /** Instance domain id. */
    @NotNull
    @Column(name = "domain_id")
    private Long domainId;
 
-   /**
-    * Instance zone id.
-    */
+   /** Instance zone. */
    @JoinColumn(name = "zone_id", referencedColumnName = "Id", updatable = false, insertable = false)
    @ManyToOne
    private Zone zone;
 
-   /**
-    * Instance zone id.
-    */
+   /** Instance zone id. */
    @NotNull
    @Column(name = "zone_id")
    private Long zoneId;
 
-   /**
-    * Instance compute offer id.
-    */
+   /** Instance compute offer. */
    @JoinColumn(name = "compute_offer_id", referencedColumnName = "Id", updatable = false, insertable = false)
    @OneToOne
    private ComputeOffering computeOffering;
 
-   /**
-    * Instance compute offer id.
-    */
+   /** Instance compute offer id. */
    @Column(name = "compute_offer_id")
    private Long computeOfferingId;
 
-   /**
-    * Instance disk offer id.
-    */
+   /** Instance disk offer. */
    @JoinColumn(name = "storage_offer_id", referencedColumnName = "Id", updatable = false, insertable = false)
    @OneToOne
    private ComputeOffering storageOffering;
@@ -170,47 +138,33 @@ public class VmInstance {
    @Column(name = "storage_offer_id")
    private Long storageOfferingId;
 
-   /**
-    * Instance network offer id.
-    */
+   /** Instance network offer. */
    @JoinColumn(name = "network_offer_id", referencedColumnName = "Id", updatable = false, insertable = false)
    @OneToOne
    private ComputeOffering networkOffering;
 
-   /**
-    * Instance network offer id.
-    */
+   /** Instance network offer id. */
    @Column(name = "network_offer_id")
    private Long networkOfferingId;
 
-   /**
-    * Instance network id.
-    */
+   /** Instance network. */
    @JoinColumn(name = "network_id", referencedColumnName = "Id", updatable = false, insertable = false)
    @OneToOne
    private GuestNetwork network;
 
-   /**
-    * Instance network id.
-    */
+   /** Instance network id. */
    @Column(name = "network_id")
    private Long networkId;
 
-   /**
-    * Instance network uuid.
-    */
+   /** Instance network uuid. */
    @Transient
    private String networkUuid;
 
-   /**
-    * Instance current state.
-    */
+   /** Instance current state. */
    @Column(name = "status")
    private Status status;
 
-   /**
-    * Enumeration status for instance.
-    */
+   /** Enumeration status for instance. */
    public enum Status {
         /** Running status of instance. */
         Running,
@@ -232,39 +186,27 @@ public class VmInstance {
         Ready
    }
 
-   /**
-    * Instance host id.
-    */
+   /** Instance host id. */
    @Column(name = "host_id")
    private String hostId;
 
-   /**
-    * Instance pod id.
-    */
+   /** Instance pod id. */
    @Column(name = "pod_id")
    private String podId;
 
-   /**
-    * Instance event message.
-    */
+   /** Instance event message. */
    @Column(name = "event_message")
    private String eventMessage;
 
-   /**
-    * Event type.
-    */
+   /** Event type. */
    @Column(name = "instance_event_type")
    private String eventType;
 
-   /**
-    * Check instance available or not.
-    */
+   /** Check instance available or not. */
    @Column(name = "is_removed")
    private Boolean isRemoved;
 
-   /**
-    * instance private ip address.
-    */
+   /** instance private ip address. */
    @Column(name = "instance_private_ip")
    private String ipAddress;
 
@@ -297,12 +239,13 @@ public class VmInstance {
    @Column(name = "last_modified_date_time")
    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-   private ZonedDateTime lastModifiedDateTime;
+   private ZonedDateTime updatedDateTime;
+
 
    /**
     * Get the the status of instance.
     *
-    * @return the status
+    * @return the status.
     */
    public Status getStatus() {
       return status;
@@ -311,8 +254,7 @@ public class VmInstance {
    /**
     * Set the instance status.
     *
-    * @param status
-    *           to set
+    * @param status to set.
     */
    public void setStatus(Status status) {
       this.status = status;
@@ -321,7 +263,7 @@ public class VmInstance {
    /**
     * Check whether instance removed or not.
     *
-    * @return the isRemoved
+    * @return the isRemoved.
     */
    public Boolean getIsRemoved() {
       return isRemoved;
@@ -330,8 +272,7 @@ public class VmInstance {
    /**
     * Delete the instance.
     *
-    * @param isRemoved
-    *           to set
+    * @param isRemoved to set.
     */
    public void setIsRemoved(Boolean isRemoved) {
       this.isRemoved = isRemoved;
@@ -340,7 +281,7 @@ public class VmInstance {
    /**
     * get the instance id.
     *
-    * @return the id
+    * @return the id.
     */
    public Long getId() {
       return id;
@@ -349,8 +290,7 @@ public class VmInstance {
    /**
     * set the instance id.
     *
-    * @param id
-    *           to set
+    * @param id to set.
     */
    public void setId(Long id) {
       this.id = id;
@@ -359,7 +299,7 @@ public class VmInstance {
    /**
     * get the instance.
     *
-    * @return the name
+    * @return the name.
     */
    public String getName() {
       return name;
@@ -368,8 +308,7 @@ public class VmInstance {
    /**
     * set the instance name.
     *
-    * @param name
-    *           to set
+    * @param name to set.
     */
    public void setName(String name) {
       this.name = name;
@@ -378,7 +317,7 @@ public class VmInstance {
    /**
     * get instance UUID.
     *
-    * @return the uuid
+    * @return the uuid.
     */
    public String getUuid() {
       return uuid;
@@ -387,8 +326,7 @@ public class VmInstance {
    /**
     * set UUID from cloud stack.
     *
-    * @param uuid
-    *           to set
+    * @param uuid to set.
     */
    public void setUuid(String uuid) {
       this.uuid = uuid;
@@ -397,7 +335,7 @@ public class VmInstance {
    /**
     * get instance owner.
     *
-    * @return the instanceOwner
+    * @return the instanceOwner.
     */
    public User getInstanceOwner() {
       return instanceOwner;
@@ -406,23 +344,21 @@ public class VmInstance {
    /**
     * set instance owner.
     *
-    * @param instanceOwner
-    *           to set
+    * @param instanceOwner to set.
     */
    public void setInstanceOwner(User instanceOwner) {
       this.instanceOwner = instanceOwner;
    }
 
    /**
-    * @return the application
+    * @return the application.
     */
    public String getApplication() {
       return application;
    }
 
    /**
-    * @param application
-    *           the application to set
+    * @param application the application name to set.
     */
    public void setApplication(String application) {
       this.application = application;
@@ -431,7 +367,7 @@ public class VmInstance {
    /**
     * get instance project.
     *
-    * @return the project
+    * @return the project.
     */
    public Project getProject() {
       return project;
@@ -440,8 +376,7 @@ public class VmInstance {
    /**
     * set instance project.
     *
-    * @param project
-    *           to set
+    * @param project to set.
     */
    public void setProject(Project project) {
       this.project = project;
@@ -459,8 +394,7 @@ public class VmInstance {
    /**
     * set instance department.
     *
-    * @param department
-    *           to set
+    * @param department to set.
     */
    public void setDepartment(Department department) {
       this.department = department;
@@ -469,7 +403,7 @@ public class VmInstance {
    /**
     * get instance template.
     *
-    * @return the template
+    * @return the template.
     */
    public Template getTemplate() {
       return template;
@@ -478,53 +412,49 @@ public class VmInstance {
    /**
     * set instance template.
     *
-    * @param template
-    *           to set
+    * @param template to set.
     */
    public void setTemplate(Template template) {
       this.template = template;
    }
 
    /**
-    * @return the computeOfferingId
+    * @return the computeOfferingId.
     */
    public Long getComputeOfferingId() {
       return computeOfferingId;
    }
 
    /**
-    * @param computeOfferingId
-    *           the computeOfferingId to set
+    * @param computeOfferingId the compute offering id to set.
     */
    public void setComputeOfferingId(Long computeOfferingId) {
       this.computeOfferingId = computeOfferingId;
    }
 
    /**
-    * @return the storageOfferingId
+    * @return the storageOfferingId.
     */
    public Long getStorageOfferingId() {
       return storageOfferingId;
    }
 
    /**
-    * @param storageOfferingId
-    *           the storageOfferingId to set
+    * @param storageOfferingId the storage offering id to set.
     */
    public void setStorageOfferingId(Long storageOfferingId) {
       this.storageOfferingId = storageOfferingId;
    }
 
    /**
-    * @return the networkOfferingId
+    * @return the networkOfferingId.
     */
    public Long getNetworkOfferingId() {
       return networkOfferingId;
    }
 
    /**
-    * @param networkOfferingId
-    *           the networkOfferingId to set
+    * @param networkOfferingId the network offering id to set.
     */
    public void setNetworkOfferingId(Long networkOfferingId) {
       this.networkOfferingId = networkOfferingId;
@@ -542,8 +472,7 @@ public class VmInstance {
    /**
     * Set the version count.
     *
-    * @param version
-    *           to set
+    * @param version to set.
     */
    public void setVersion(Long version) {
       this.version = version;
@@ -552,7 +481,7 @@ public class VmInstance {
    /**
     * Get created user id.
     *
-    * @return the createdBy
+    * @return the createdBy.
     */
    public User getCreatedBy() {
       return createdBy;
@@ -561,8 +490,7 @@ public class VmInstance {
    /**
     * Set created user id.
     *
-    * @param createdBy
-    *           to set
+    * @param createdBy to set.
     */
    public void setCreatedBy(User createdBy) {
       this.createdBy = createdBy;
@@ -571,7 +499,7 @@ public class VmInstance {
    /**
     * Get the last modified user id.
     *
-    * @return the updatedBy
+    * @return the updated user.
     */
    public User getUpdatedBy() {
       return updatedBy;
@@ -580,8 +508,7 @@ public class VmInstance {
    /**
     * Set the last modified user id.
     *
-    * @param updatedBy
-    *           to set
+    * @param updatedBy to set.
     */
    public void setUpdatedBy(User updatedBy) {
       this.updatedBy = updatedBy;
@@ -590,7 +517,7 @@ public class VmInstance {
    /**
     * Get the created date and time.
     *
-    * @return the createdDateTime
+    * @return the createdDateTime.
     */
    public ZonedDateTime getCreatedDateTime() {
       return createdDateTime;
@@ -599,8 +526,7 @@ public class VmInstance {
    /**
     * Set the created date and time.
     *
-    * @param createdDateTime
-    *           to set
+    * @param createdDateTime to set.
     */
    public void setCreatedDateTime(ZonedDateTime createdDateTime) {
       this.createdDateTime = createdDateTime;
@@ -609,20 +535,19 @@ public class VmInstance {
    /**
     * Get last modified date and time.
     *
-    * @return the lastModifiedDateTime
+    * @return the updatedDateTime.
     */
    public ZonedDateTime getLastModifiedDateTime() {
-      return lastModifiedDateTime;
+      return updatedDateTime;
    }
 
    /**
     * Set last modified date and time.
     *
-    * @param lastModifiedDateTime
-    *           to set
+    * @param updatedDateTime last modified  to set
     */
-   public void setLastModifiedDateTime(ZonedDateTime lastModifiedDateTime) {
-      this.lastModifiedDateTime = lastModifiedDateTime;
+   public void setLastModifiedDateTime(ZonedDateTime updatedDateTime) {
+      this.updatedDateTime = updatedDateTime;
    }
 
    /**
@@ -637,8 +562,7 @@ public class VmInstance {
    /**
     * set domain for instance.
     *
-    * @param domain
-    *           to set
+    * @param domain domain to set.
     */
    public void setDomain(Domain domain) {
       this.domain = domain;
@@ -656,8 +580,7 @@ public class VmInstance {
    /**
     * Set the instance IPAddress.
     *
-    * @param ipAddress
-    *           to set
+    * @param ipAddress ip address to set.
     */
    public void setIpAddress(String ipAddress) {
       this.ipAddress = ipAddress;
@@ -666,7 +589,7 @@ public class VmInstance {
    /**
     * Get the VNC console password.
     *
-    * @return the vncPassword
+    * @return the vncPassword.
     */
    public String getVncPassword() {
       return vncPassword;
@@ -675,8 +598,7 @@ public class VmInstance {
    /**
     * Set the VNC console password.
     *
-    * @param vncPassword
-    *           to set
+    * @param vncPassword vnc password to set.
     */
    public void setVncPassword(String vncPassword) {
       this.vncPassword = vncPassword;
@@ -685,7 +607,7 @@ public class VmInstance {
    /**
     * Get the host id of instance.
     *
-    * @return the hostId
+    * @return the hostId.
     */
    public String getHostId() {
       return hostId;
@@ -703,7 +625,7 @@ public class VmInstance {
    /**
     * Get the pod id.
     *
-    * @return the podId
+    * @return the podId.
     */
    public String getPodId() {
       return podId;
@@ -712,16 +634,16 @@ public class VmInstance {
    /**
     * Set the pod id.
     *
-    * @param podID to set
+    * @param podID to set.
     */
    public void setPodId(String podID) {
       this.podId = podID;
    }
 
    /**
-    * Get the eventType.
+    * Get the event type.
     *
-    * @return the eventType.
+    * @return the event type.
     */
    public String getEventType() {
       return eventType;
@@ -730,128 +652,119 @@ public class VmInstance {
    /**
     * Set the eventType.
     *
-    * @param eventType
-    *           - the eventType to set.
+    * @param eventType the event type to set.
     */
    public void setEventType(String eventType) {
       this.eventType = eventType;
    }
 
    /**
-    * @return the zone
+    * @return the zone.
     */
    public Zone getZone() {
       return zone;
    }
 
    /**
-    * @param zone
-    *           the zone to set
+    * @param zone the zone to set.
     */
    public void setZone(Zone zone) {
       this.zone = zone;
    }
 
    /**
-    * @return the instanceOwnerId
+    * @return the instance owner id.
     */
    public Long getInstanceOwnerId() {
       return instanceOwnerId;
    }
 
    /**
-    * @param instanceOwnerId
-    *           the instanceOwnerId to set
+    * @param instanceOwnerId the instance owner id to set.
     */
    public void setInstanceOwnerId(Long instanceOwnerId) {
       this.instanceOwnerId = instanceOwnerId;
    }
 
    /**
-    * @return the projectId
+    * @return the projectId.
     */
    public Long getProjectId() {
       return projectId;
    }
 
    /**
-    * @param projectId
-    *           the projectId to set
+    * @param projectId the project id to set.
     */
    public void setProjectId(Long projectId) {
       this.projectId = projectId;
    }
 
    /**
-    * @return the departmentId
+    * @return the departmentId.
     */
    public Long getDepartmentId() {
       return departmentId;
    }
 
    /**
-    * @param departmentId
-    *           the departmentId to set
+    * @param departmentId the department id to set.
     */
    public void setDepartmentId(Long departmentId) {
       this.departmentId = departmentId;
    }
 
    /**
-    * @return the templateId
+    * @return the templateId.
     */
    public Long getTemplateId() {
       return templateId;
    }
 
    /**
-    * @param templateId
-    *           the templateId to set
+    * @param templateId the template id to set.
     */
    public void setTemplateId(Long templateId) {
       this.templateId = templateId;
    }
 
    /**
-    * @return the domainId
+    * @return the domainId.
     */
    public Long getDomainId() {
       return domainId;
    }
 
    /**
-    * @param domainId
-    *           the domainId to set
+    * @param domainId the domain id to set.
     */
    public void setDomainId(Long domainId) {
       this.domainId = domainId;
    }
 
    /**
-    * @return the zoneId
+    * @return the zoneId.
     */
    public Long getZoneId() {
       return zoneId;
    }
 
    /**
-    * @param zoneId
-    *           the zoneId to set
+    * @param zoneId  the zone id to set.
     */
    public void setZoneId(Long zoneId) {
       this.zoneId = zoneId;
    }
 
    /**
-    * @return the computeOffering
+    * @return the computeOffering.
     */
    public ComputeOffering getComputeOffering() {
       return computeOffering;
    }
 
    /**
-    * @param computeOffering
-    *           the computeOffering to set
+    * @param computeOffering compute Offering to set.
     */
    public void setComputeOffering(ComputeOffering computeOffering) {
       this.computeOffering = computeOffering;
@@ -860,7 +773,7 @@ public class VmInstance {
    /**
     * Get the application list.
     *
-    * @return the applicationList.
+    * @return the application list.
     */
    public List<Application> getApplicationList() {
       return applicationList;
@@ -869,8 +782,7 @@ public class VmInstance {
    /**
     * Set the application list.
     *
-    * @param applicationList
-    *           - the applicationList to set.
+    * @param applicationList the application list to set.
     */
    public void setApplicationList(List<Application> applicationList) {
       this.applicationList = applicationList;
@@ -888,8 +800,7 @@ public class VmInstance {
    /**
     * Set the storage Offering.
     *
-    * @param storageOffering
-    *           - the storageOffering to set.
+    * @param storageOffering the storage Offering to set.
     */
    public void setStorageOffering(ComputeOffering storageOffering) {
       this.storageOffering = storageOffering;
@@ -907,8 +818,7 @@ public class VmInstance {
    /**
     * Set the network Offering.
     *
-    * @param networkOffering
-    *           - the networkOffering to set.
+    * @param networkOffering the network Offering to set.
     */
    public void setNetworkOffering(ComputeOffering networkOffering) {
       this.networkOffering = networkOffering;
@@ -926,8 +836,7 @@ public class VmInstance {
    /**
     * Set the network.
     *
-    * @param network
-    *           - the network to set.
+    * @param network the network to set.
     */
    public void setNetwork(GuestNetwork network) {
       this.network = network;
@@ -945,8 +854,7 @@ public class VmInstance {
    /**
     * Set the network id..
     *
-    * @param networkId
-    *           - the networkId to set.
+    * @param networkId network id to set.
     */
    public void setNetworkId(Long networkId) {
       this.networkId = networkId;
@@ -964,23 +872,21 @@ public class VmInstance {
    /**
     * Set the networkUuid.
     *
-    * @param networkUuid
-    *           - the networkUuid to set.
+    * @param networkUuid network uuid to set.
     */
    public void setNetworkUuid(String networkUuid) {
       this.networkUuid = networkUuid;
    }
 
    /**
-    * @return the eventMessage
+    * @return the eventMessage.
     */
    public String getEventMessage() {
       return eventMessage;
    }
 
    /**
-    * @param eventMessage
-    *           the eventMessage to set
+    * @param eventMessage event message to set.
     */
    public void setEventMessage(String eventMessage) {
       this.eventMessage = eventMessage;
@@ -999,7 +905,7 @@ public class VmInstance {
             + networkId + ", status=" + status + ", hostId=" + hostId + ", podId=" + podId + ", type=" + eventType
             + ", isRemoved=" + isRemoved + ", ipAddress=" + ipAddress + ", version=" + version + ", createdBy="
             + createdBy + ", updatedBy=" + updatedBy + ", createdDateTime=" + createdDateTime
-            + ", lastModifiedDateTime=" + lastModifiedDateTime + "]";
+            + ", lastModifiedDateTime=" + updatedDateTime + "]";
    }
 
 }

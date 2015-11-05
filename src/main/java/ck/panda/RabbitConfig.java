@@ -29,100 +29,67 @@ import ck.panda.service.VirtualMachineService;
 @Configuration
 public class RabbitConfig {
 
-    /**
-     * The hostname.
-     */
+    /** The hostname.*/
     @Value(value = "${spring.rabbit.host}")
     private String hostName;
 
-    /**
-     * The virtual hostname.
-     */
+    /** The virtual hostname.*/
     @Value(value = "${spring.rabbit.vhost}")
     private String vhost;
 
-    /**
-     * RabbitMQ login user name.
-     */
+    /** RabbitMQ login user name.*/
     @Value(value = "${spring.rabbit.username}")
     private String username;
 
-    /**
-     * RabbitMQ login password.
-     */
+    /** RabbitMQ login password.*/
     @Value(value = "${spring.rabbit.password}")
     private String password;
 
-    /**
-     * CS server action routing key pattern.
-     */
+    /** CS server action routing key pattern.*/
     @Value(value = "${spring.rabbit.server.action.pattern}")
     private String csActionPattern;
 
-    /**
-     * CS server alert routing key pattern.
-     */
+    /** CS server alert routing key pattern.*/
     @Value(value = "${spring.rabbit.server.alert.pattern}")
     private String csAlertPattern;
 
-    /**
-     * CS server usage routing key pattern.
-     */
+    /** CS server usage routing key pattern.*/
     @Value(value = "${spring.rabbit.server.usage.pattern}")
     private String csUsagePattern;
 
-    /**
-     * CS server asynchronous routing key pattern.
-     */
+    /** CS server asynchronous routing key pattern.*/
     @Value(value = "${spring.rabbit.server.asynchJob.pattern}")
     private String csAsynchJobPattern;
 
-    /**
-     * CS server usage routing key pattern.
-     */
+    /** CS server usage routing key pattern.*/
     @Value(value = "${spring.rabbit.server.resource.pattern}")
     private String csResourcePattern;
 
-    /**
-     * CS server exchange name.
-     */
+    /** CS server exchange name.*/
     @Value(value = "${spring.rabbit.exchange.name}")
     private String exchangeName;
 
-    /**
-     * CS server alert queue name.
-     */
+    /** CS server alert queue name.*/
     @Value(value = "${spring.rabbit.server.alert.queue}")
     private String csAlertQueueName;
 
-    /**
-     * CS server usage queue name.
-     */
+    /** CS server usage queue name.*/
     @Value(value = "${spring.rabbit.server.usage.queue}")
     private String csUsageQueueName;
 
-
-    /**
-     * CS server asyncJob queue name.
-     */
+    /** CS server asyncJob queue name.*/
     @Value(value = "${spring.rabbit.server.asynchJob.queue}")
     private String csAsynchJobQueueName;
 
-    /**
-     * CS server action queue name.
-     */
+    /** CS server action queue name.*/
     @Value(value = "${spring.rabbit.server.action.queue}")
     private String csActionQueueName;
 
-    /**
-     * CS server action queue name.
-     */
+    /** CS server action queue name.*/
     @Value(value = "${spring.rabbit.server.resource.queue}")
     private String csResourceQueueName;
 
-    /**
-     * Application context reference.
-     */
+    /** Application context reference.*/
     @Autowired
     private ApplicationContext applicationContext;
 
@@ -136,6 +103,7 @@ public class RabbitConfig {
     Queue queue() {
         return new Queue(csActionQueueName, true);
     }
+
     /**
      * Queue for asynchronous job messages.
      *
@@ -145,6 +113,7 @@ public class RabbitConfig {
     Queue queue1() {
         return new Queue(csAsynchJobQueueName, true);
     }
+
     /**
      * Queue for usage messages.
      *
@@ -154,6 +123,7 @@ public class RabbitConfig {
     Queue queue2() {
         return new Queue(csUsageQueueName, true);
     }
+
     /**
      * Queue for alert messages.
      *
@@ -343,7 +313,6 @@ public class RabbitConfig {
         return container;
     }
 
-
     /**
      * Add message listerner to message listener container with specified queue to listen/consume alert message.
      *
@@ -374,7 +343,6 @@ public class RabbitConfig {
         return container;
     }
 
-
     /**
      * Add message listerner to message listener container with specified queue to listen/consume asynchronous job message.
      *
@@ -404,6 +372,5 @@ public class RabbitConfig {
         container.setMessageListener(resourceStateListenerAdapter());
         return container;
     }
-
 
 }

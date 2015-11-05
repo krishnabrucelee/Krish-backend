@@ -40,6 +40,7 @@ public class ApplicationConfig extends WebMvcConfigurerAdapter {
 
     /**
      * Default spring boot main method.
+     *
      * @param args to pass from command line
      * @throws Exception if any error
      */
@@ -49,6 +50,7 @@ public class ApplicationConfig extends WebMvcConfigurerAdapter {
 
     /**
      * Configures the DateTimeService.
+     *
      * @return CurrentTimeDateTimeService implementation
      */
     @Bean
@@ -60,8 +62,7 @@ public class ApplicationConfig extends WebMvcConfigurerAdapter {
     /**
      * Configures the DateTimeProvider bean for providing date and time.
      *
-     * @param dateTimeService DateTimeServiceObject.
-     *
+     * @param dateTimeService DateTimeServiceObject.     *
      * @return AuditingDateTimeProvider implementation
      */
     @Bean

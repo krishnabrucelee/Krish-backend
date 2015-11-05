@@ -32,8 +32,7 @@ public interface ProjectService extends CRUDService<Project> {
    Page<Project> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
 
    /**
-    * @param query
-    *           search term.
+    * @param query search term.
     * @return list of department.
     * @throws Exception if error occurs.
     */

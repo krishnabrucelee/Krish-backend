@@ -11,128 +11,141 @@ public class ResponseEvent {
 
    /** event id. */
    private String id;
+
    /** event uuid. */
    private String entityuuid;
+
    /** event status. */
    private String status;
+
    /** event date and time. */
    private String eventDateTime;
+
    /** event domain account. */
    private String account;
+
    /** event user. */
    private String user;
+
    /** event type. */
    private String event;
+
    /** event type starts with. */
    private String eventStart;
+
    /** event type. */
    private String description;
+
    /** event subject. */
    private String subject;
+
    /** event body. */
    private String body;
+
    /** VM for event. */
    private String VirtualMachine;
+
    /** Zone for event. */
    private String DataCenter;
+
    /** Zone for event. */
    private String zone;
+
    /** Network for event. */
    private String Network;
+
    /** Resource for event. */
    private String resource;
+
    /** ServiceOffering for event. */
    private String ServiceOffering;
+
    /** ServiceOffering for event. */
    private String VirtualMachineTemplate;
+
    /** entity for event. */
    private String entity;
 
+
    /**
-    * @return the entityuuid
+    * @return the entityuuid.
     */
    public String getEntityuuid() {
       return entityuuid;
    }
 
    /**
-    * @param entityuuid
-    *           the entityuuid to set
+    * @param entityuuid the entity uuid to set.
     */
    public void setEntityuuid(String entityuuid) {
       this.entityuuid = entityuuid;
    }
 
    /**
-    * @return the status
+    * @return the status.
     */
    public String getStatus() {
       return status;
    }
 
    /**
-    * @param status
-    *           the status to set
+    * @param status the status to set.
     */
    public void setStatus(String status) {
       this.status = status;
    }
 
    /**
-    * @return the eventDateTime
+    * @return the eventDateTime.
     */
    public String getEventDateTime() {
       return eventDateTime;
    }
 
    /**
-    * @param eventDateTime
-    *           the eventDateTime to set
+    * @param eventDateTime the event date and time to set
     */
    public void setEventDateTime(String eventDateTime) {
       this.eventDateTime = eventDateTime;
    }
 
    /**
-    * @return the account
+    * @return the account.
     */
    public String getAccount() {
       return account;
    }
 
    /**
-    * @param account
-    *           the account to set
+    * @param account the account to set.
     */
    public void setAccount(String account) {
       this.account = account;
    }
 
    /**
-    * @return the user
+    * @return the user.
     */
    public String getUser() {
       return user;
    }
 
    /**
-    * @param user
-    *           the user to set
+    * @param user the user to set.
     */
    public void setUser(String user) {
       this.user = user;
    }
 
    /**
-    * @return the event
+    * @return the event.
     */
    public String getEvent() {
       return event;
    }
 
    /**
-    * @param event
-    *           the event to set
+    * @param event the event to set.
     */
    public void setEvent(String event) {
       this.event = event;
@@ -140,60 +153,56 @@ public class ResponseEvent {
    }
 
    /**
-    * @return the description
+    * @return the description.
     */
    public String getDescription() {
       return description;
    }
 
    /**
-    * @param description
-    *           the description to set
+    * @param description the description to set.
     */
    public void setDescription(String description) {
       this.description = description;
    }
 
    /**
-    * @return the subject
+    * @return the subject.
     */
    public String getSubject() {
       return subject;
    }
 
    /**
-    * @param subject
-    *           the subject to set
+    * @param subject the subject to set.
     */
    public void setSubject(String subject) {
       this.subject = subject;
    }
 
    /**
-    * @return the body
+    * @return the body.
     */
    public String getBody() {
       return body;
    }
 
    /**
-    * @param body
-    *           the body to set
+    * @param body the body to set.
     */
    public void setBody(String body) {
       this.body = body;
    }
 
    /**
-    * @return the id
+    * @return the id.
     */
    public String getId() {
       return id;
    }
 
    /**
-    * @param id
-    *           the id to set
+    * @param id the id to set.
     */
    public void setId(String id) {
       this.id = id;
@@ -207,38 +216,35 @@ public class ResponseEvent {
    }
 
    /**
-    * @param dataCenter
-    *           the dataCenter to set
+    * @param dataCenter the dataCenter to set.
     */
    public void setDataCenter(String dataCenter) {
       DataCenter = dataCenter;
    }
 
    /**
-    * @return the zone
+    * @return the zone.
     */
    public String getZone() {
       return zone;
    }
 
    /**
-    * @param zone
-    *           the zone to set
+    * @param zone the zone to set.
     */
    public void setZone(String zone) {
       this.zone = zone;
    }
 
    /**
-    * @return the network
+    * @return the network.
     */
    public String getNetwork() {
       return Network;
    }
 
    /**
-    * @param network
-    *           the network to set
+    * @param network the network to set.
     */
    public void setNetwork(String network) {
       Network = network;
@@ -252,68 +258,63 @@ public class ResponseEvent {
    }
 
    /**
-    * @param resource
-    *           the resource to set
+    * @param resource the resource to set.
     */
    public void setResource(String resource) {
       this.resource = resource;
    }
 
    /**
-    * @return the virtualMachine
+    * @return the virtualMachine.
     */
    public String getVirtualMachine() {
       return VirtualMachine;
    }
 
    /**
-    * @param virtualMachine
-    *           the virtualMachine to set
+    * @param virtualMachine the virtual machine to set.
     */
    public void setVirtualMachine(String virtualMachine) {
       VirtualMachine = virtualMachine;
    }
 
    /**
-    * @return the serviceOffering
+    * @return the serviceOffering.
     */
    public String getServiceOffering() {
       return ServiceOffering;
    }
 
    /**
-    * @param serviceOffering
-    *           the serviceOffering to set
+    * @param serviceOffering the service offering to set.
     */
    public void setServiceOffering(String serviceOffering) {
       ServiceOffering = serviceOffering;
    }
 
    /**
-    * @return the virtualMachineTemplate
+    * @return the virtualMachineTemplate.
     */
    public String getVirtualMachineTemplate() {
       return VirtualMachineTemplate;
    }
 
    /**
-    * @param virtualMachineTemplate
-    *           the virtualMachineTemplate to set
+    * @param virtualMachineTemplate the virtual machine template to set.
     */
    public void setVirtualMachineTemplate(String virtualMachineTemplate) {
       VirtualMachineTemplate = virtualMachineTemplate;
    }
 
    /**
-    * @return the entity
+    * @return the entity.
     */
    public String getEntity() {
       return entity;
    }
 
    /**
-    * @param entity
-    *           the entity to set
+    * @param entity the entity to set.
     */
    public void setEntity(String entity) {
       this.entity = entity;

@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import ck.panda.constants.EventTypes;
 import ck.panda.service.SyncService;
 

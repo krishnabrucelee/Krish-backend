@@ -2,7 +2,6 @@ package ck.panda.service;
 
 import java.util.HashMap;
 import java.util.List;
-
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Department;
@@ -250,10 +249,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
    /**
     * Check the virtual machine CS error handling.
     *
-    * @param errors
-    *           error creating status.
-    * @param errmessage
-    *           error message.
+    * @param errors error creating status.
+    * @param errmessage error message.
     * @return errors.
     * @throws Exception if error occurs.
     */
@@ -263,14 +260,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
    }
 
    /**
-    * Check the instance name already exist.
+    * Check the instance name already exist in department.
     *
-    * @param errors
-    *           already existing error list.
-    * @param name
-    *           name of the instance.
-    * @param department
-    *           department object.
+    * @param errors already existing error list.
+    * @param name name of the instance.
+    * @param department department object.
     * @param id instance id.
     * @return errors.
     * @throws Exception if error occurs.

@@ -16,8 +16,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
    /**
     * Find vm instance by uuid.
     *
-    * @param uuid
-    *           instance uuid.
+    * @param uuid instance uuid.
     * @return instance.
     */
    @Query(value = "select vm from VmInstance vm where vm.uuid LIKE :uuid ")

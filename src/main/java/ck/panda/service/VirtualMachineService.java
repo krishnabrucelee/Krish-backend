@@ -1,7 +1,6 @@
 package ck.panda.service;
 
 import org.springframework.stereotype.Service;
-
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.util.domain.CRUDService;
 
@@ -16,8 +15,7 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
    /**
     * Find vm instance by uuid.
     *
-    * @param uuid
-    *           instance uuid.
+    * @param uuid instance uuid.
     * @return instance.
     */
    VmInstance findByUUID(String uuid);
@@ -25,8 +23,7 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
    /**
     * Event handling.
     *
-    * @param vmId
-    *           Virtual machine Id.
+    * @param vmId Virtual machine Id.
     * @param event event message.
     * @return instance.
     * @throws Exception if error occurs.

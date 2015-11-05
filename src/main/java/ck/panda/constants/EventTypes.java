@@ -63,18 +63,22 @@ public class EventTypes {
 
    /** UserVO Events. */
    public static final String EVENT_USER = "USER.";
+
    /** UserVO Events. */
    public static final String EVENT_USER_LOGIN = "USER.LOGIN";
+
    /** UserVO Events. */
    public static final String EVENT_USER_LOGOUT = "USER.LOGOUT";
 
    /** registering SSH keypair events. */
    public static final String EVENT_REGISTER_SSH = "REGISTER.";
+
    /** registering SSH keypair events. */
    public static final String EVENT_REGISTER_SSH_KEYPAIR = "REGISTER.SSH.KEYPAIR";
 
    /** register for user API and secret keys. */
    public static final String EVENT_REGISTER_SECRET = "REGISTER.";
+
    /** register for user API and secret keys. */
    public static final String EVENT_REGISTER_FOR_SECRET_API_KEY = "REGISTER.USER.KEY";
 
@@ -122,21 +126,28 @@ public class EventTypes {
 
    /** Status of CloudStack server action event status. */
    public static final String EVENT_COMPLETED = "Completed";
+
    /** Status of CloudStack server action event status. */
    public static final String EVENT_STARTED = "Started";
+
    /** Status of CloudStack server action event status. */
    public static final String EVENT_ERROR = "Error";
 
    /** Status of VM instance. */
    public static final String EVENT_STATUS_CREATE = "Starting";
+
    /** Status of VM instance. */
    public static final String EVENT_STATUS_RUNNING = "Running";
+
    /** Status of VM instance. */
    public static final String EVENT_STATUS_STOPPED = "Stopped";
+
    /** Status of VM instance. */
    public static final String EVENT_STATUS_DESTROYED = "Destroyed";
+
    /** Status of VM instance. */
    public static final String EVENT_STATUS_STOPPING = "Stopping";
+
    /** Status of VM instance. */
    public static final String EVENT_STATUS_EXPUNGING = "Expunging";
 

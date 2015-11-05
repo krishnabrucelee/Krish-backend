@@ -90,19 +90,11 @@ public class Project implements Serializable {
    @Enumerated(EnumType.STRING)
    private Status status;
 
-   /**
-    * Enumeration status for Project.
-    */
+   /** Enumeration status for Project.*/
    public enum Status {
-      /**
-       * Enabled status is used to list projects through out the application.
-       */
+      /** Enabled status is used to list projects through out the application.*/
       ENABLED,
-
-      /**
-       * Deleted status make projects as soft deleted and it will not list on
-       * the applicaiton.
-       */
+      /** Deleted status make projects as soft deleted and it will not list on the applicaiton.*/
       DELETED
    }
 
@@ -149,8 +141,7 @@ public class Project implements Serializable {
    /**
     * Set the id.
     *
-    * @param id
-    *           - the id to set.
+    * @param id project unique id to set.
     */
    public void setId(Long id) {
       this.id = id;
@@ -159,7 +150,7 @@ public class Project implements Serializable {
    /**
     * Get the name.
     *
-    * @return the name.
+    * @return the project name.
     */
    public String getName() {
       return name;
@@ -168,8 +159,7 @@ public class Project implements Serializable {
    /**
     * Set the name.
     *
-    * @param name
-    *           the name to set.
+    * @param name project name to set.
     */
    public void setName(String name) {
       this.name = name;
@@ -187,8 +177,7 @@ public class Project implements Serializable {
    /**
     * Set the description.
     *
-    * @param description
-    *           the description to set.
+    * @param description project description to set.
     */
    public void setDescription(String description) {
       this.description = description;
@@ -197,7 +186,7 @@ public class Project implements Serializable {
    /**
     * Get the projectOwner.
     *
-    * @return the projectOwner.
+    * @return the project Owner.
     */
    public User getProjectOwner() {
       return projectOwner;
@@ -206,8 +195,7 @@ public class Project implements Serializable {
    /**
     * Set the project owner.
     *
-    * @param projectOwner
-    *           the project owner to set.
+    * @param projectOwner owner id to set.
     */
    public void setProjectOwner(User projectOwner) {
       this.projectOwner = projectOwner;
@@ -216,7 +204,7 @@ public class Project implements Serializable {
    /**
     * Get the list of user. uper.toString();
     *
-    * @return the userList.
+    * @return the list of user.
     */
    public List<User> getUserList() {
       return userList;
@@ -225,8 +213,7 @@ public class Project implements Serializable {
    /**
     * Set the list of user.
     *
-    * @param userList
-    *           - the userList to set.
+    * @param userList list of user to set.
     */
    public void setUserList(List<User> userList) {
       this.userList = userList;
@@ -244,8 +231,7 @@ public class Project implements Serializable {
    /**
     * Set the domain.
     *
-    * @param domain
-    *           the domain to set.
+    * @param domain domain id to set.
     */
    public void setDomain(Domain domain) {
       this.domain = domain;
@@ -263,8 +249,7 @@ public class Project implements Serializable {
    /**
     * Set the department.
     *
-    * @param department
-    *           - the department to set.
+    * @param department department object to set.
     */
    public void setDepartment(Department department) {
       this.department = department;
@@ -282,8 +267,7 @@ public class Project implements Serializable {
    /**
     * Set the status of project.
     *
-    * @param isActive
-    *           the status to set.
+    * @param isActive project's status to set.
     */
    public void setIsActive(Boolean isActive) {
       this.isActive = isActive;
@@ -292,7 +276,7 @@ public class Project implements Serializable {
    /**
     * Get the version count.
     *
-    * @return the version.
+    * @return the version count.
     */
    public Long getVersion() {
       return version;
@@ -301,8 +285,7 @@ public class Project implements Serializable {
    /**
     * Set the version count.
     *
-    * @param version
-    *           the version count to set.
+    * @param version version count to set.
     */
    public void setVersion(Long version) {
       this.version = version;
@@ -311,7 +294,7 @@ public class Project implements Serializable {
    /**
     * Get the created user details.
     *
-    * @return the createdBy.
+    * @return the created user.
     */
    public User getCreatedBy() {
       return createdBy;
@@ -320,8 +303,7 @@ public class Project implements Serializable {
    /**
     * Set the created user details.
     *
-    * @param createdBy
-    *           the createdBy to set.
+    * @param createdBy created user to set.
     */
    public void setCreatedBy(User createdBy) {
       this.createdBy = createdBy;
@@ -330,7 +312,7 @@ public class Project implements Serializable {
    /**
     * Get the last updated user details.
     *
-    * @return the updatedBy.
+    * @return the updated user.
     */
    public User getUpdatedBy() {
       return updatedBy;
@@ -339,8 +321,7 @@ public class Project implements Serializable {
    /**
     * Set the last updated user details.
     *
-    * @param updatedBy
-    *           the updatedBy to set.
+    * @param updatedBy updated user to set.
     */
    public void setUpdatedBy(User updatedBy) {
       this.updatedBy = updatedBy;
@@ -349,7 +330,7 @@ public class Project implements Serializable {
    /**
     * Get the created date and time.
     *
-    * @return the createdDateTime.
+    * @return the created date and time.
     */
    public ZonedDateTime getCreatedDateTime() {
       return createdDateTime;
@@ -358,8 +339,7 @@ public class Project implements Serializable {
    /**
     * Set the created date and time.
     *
-    * @param createdDateTime
-    *           the createdDateTime to set.
+    * @param createdDateTime created date and time to set.
     */
    public void setCreatedDateTime(ZonedDateTime createdDateTime) {
       this.createdDateTime = createdDateTime;
@@ -368,7 +348,7 @@ public class Project implements Serializable {
    /**
     * Get the updated date and time.
     *
-    * @return the updatedDateTime.
+    * @return the updated date and time.
     */
    public ZonedDateTime getUpdatedDateTime() {
       return updatedDateTime;
@@ -377,8 +357,7 @@ public class Project implements Serializable {
    /**
     * Set the updated date and time.
     *
-    * @param updatedDateTime
-    *           the updatedDateTime to set.
+    * @param updatedDateTime updated date and time to set.
     */
    public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
       this.updatedDateTime = updatedDateTime;
@@ -396,8 +375,7 @@ public class Project implements Serializable {
    /**
     * Set the status.
     *
-    * @param status
-    *           - the status to set.
+    * @param status status of project to set.
     */
    public void setStatus(Status status) {
       this.status = status;
