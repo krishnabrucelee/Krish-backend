@@ -12,6 +12,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.data.auditing.DateTimeProvider;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -33,6 +34,7 @@ import ck.panda.util.audit.DateTimeService;
 @ComponentScan
 @SpringBootApplication
 @EnableConfigurationProperties
+@EnableJpaAuditing(dateTimeProviderRef = "dateTimeProvider")
 @EnableTransactionManagement
 @EnableJpaRepositories("ck.panda.domain.repository")
 public class ApplicationConfig extends WebMvcConfigurerAdapter {

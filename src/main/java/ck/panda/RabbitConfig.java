@@ -12,107 +12,124 @@ import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import ck.panda.rabbitmq.util.*;
+import ck.panda.rabbitmq.util.ActionListener;
+import ck.panda.rabbitmq.util.AlertEventListener;
+import ck.panda.rabbitmq.util.AsynchronousJobListener;
+import ck.panda.rabbitmq.util.ResourceStateListener;
+import ck.panda.rabbitmq.util.UsageEventListener;
+import ck.panda.service.SyncService;
 import ck.panda.service.VirtualMachineService;
-import ck.panda.service.VirtualMachineServiceImpl;
 
 /**
- * RabbitMQ configuration class.
- *
+ * RabbitMQ configuration to publish/consume messages from CS server via RabbitMQ server with specified Exchange name.
+ * All CS server events are tracked and update the status of resources in APP DB, update usage of resource in APP DB, sync APP DB while action directly handled at CS server, CS server Alert.
  */
 @Configuration
 public class RabbitConfig {
 
     /**
-     * Initialize the hostname.
+     * The hostname.
      */
     @Value(value = "${spring.rabbit.host}")
     private String hostName;
 
     /**
-     * Initialize the virtual hostname.
+     * The virtual hostname.
      */
     @Value(value = "${spring.rabbit.vhost}")
     private String vhost;
 
     /**
-     * Initialize the rabbitmq login user name.
+     * RabbitMQ login user name.
      */
     @Value(value = "${spring.rabbit.username}")
     private String username;
 
     /**
-     * Initialize rabbitmq login password.
+     * RabbitMQ login password.
      */
     @Value(value = "${spring.rabbit.password}")
     private String password;
 
     /**
-     * Initialize cs server action pattern.
+     * CS server action routing key pattern.
      */
     @Value(value = "${spring.rabbit.server.action.pattern}")
     private String csActionPattern;
 
     /**
-     * Initialize cs server alert pattern.
+     * CS server alert routing key pattern.
      */
     @Value(value = "${spring.rabbit.server.alert.pattern}")
     private String csAlertPattern;
 
     /**
-     * Initialize cs server uasge pattern.
+     * CS server usage routing key pattern.
      */
     @Value(value = "${spring.rabbit.server.usage.pattern}")
     private String csUsagePattern;
 
     /**
-     * Initialize cs server action pattern.
+     * CS server asynchronous routing key pattern.
      */
     @Value(value = "${spring.rabbit.server.asynchJob.pattern}")
     private String csAsynchJobPattern;
 
+    /**
+     * CS server usage routing key pattern.
+     */
+    @Value(value = "${spring.rabbit.server.resource.pattern}")
+    private String csResourcePattern;
 
     /**
-     * Initialize exchange name.
+     * CS server exchange name.
      */
     @Value(value = "${spring.rabbit.exchange.name}")
     private String exchangeName;
 
     /**
-     * Initialize server cloudstack alert queue name.
+     * CS server alert queue name.
      */
     @Value(value = "${spring.rabbit.server.alert.queue}")
     private String csAlertQueueName;
 
     /**
-     * Initialize server cloudstack usage queue name.
+     * CS server usage queue name.
      */
     @Value(value = "${spring.rabbit.server.usage.queue}")
     private String csUsageQueueName;
 
 
     /**
-     * Initialize server cloudstack asyncJob queue name.
+     * CS server asyncJob queue name.
      */
     @Value(value = "${spring.rabbit.server.asynchJob.queue}")
     private String csAsynchJobQueueName;
 
-
     /**
-     * Initialize server cloudstack action queue name.
+     * CS server action queue name.
      */
     @Value(value = "${spring.rabbit.server.action.queue}")
     private String csActionQueueName;
 
+    /**
+     * CS server action queue name.
+     */
+    @Value(value = "${spring.rabbit.server.resource.queue}")
+    private String csResourceQueueName;
+
+    /**
+     * Application context reference.
+     */
     @Autowired
-	private ApplicationContext applicationContext;
+    private ApplicationContext applicationContext;
 
 
     /**
+     * Queue for action event messages.
+     *
      * @return queue name
      */
     @Bean
@@ -120,6 +137,8 @@ public class RabbitConfig {
         return new Queue(csActionQueueName, true);
     }
     /**
+     * Queue for asynchronous job messages.
+     *
      * @return queue name
      */
     @Bean
@@ -127,6 +146,8 @@ public class RabbitConfig {
         return new Queue(csAsynchJobQueueName, true);
     }
     /**
+     * Queue for usage messages.
+     *
      * @return queue name
      */
     @Bean
@@ -134,6 +155,18 @@ public class RabbitConfig {
         return new Queue(csUsageQueueName, true);
     }
     /**
+     * Queue for alert messages.
+     *
+     * @return queue name
+     */
+    @Bean
+    Queue queue4() {
+        return new Queue(csResourceQueueName, true);
+    }
+
+    /**
+     * Queue for resource's state messages.
+     *
      * @return queue name
      */
     @Bean
@@ -142,6 +175,8 @@ public class RabbitConfig {
     }
 
     /**
+     * Create Topic Exchange from given exchange name specified in CS server event-bus configuration.
+     *
      * @return exchange name
      */
     @Bean
@@ -150,8 +185,10 @@ public class RabbitConfig {
     }
 
     /**
-     * @param queue name to set
-     * @param exchange name to set
+     * Binding Queue with exchange to get action related event message from CS server.
+     *
+     * @param queue name of the queue.
+     * @param exchange name of the exchange.
      * @return binding object
      */
     @Bean
@@ -160,8 +197,10 @@ public class RabbitConfig {
     }
 
     /**
-     * @param queue name to set
-     * @param exchange name to set
+     * Binding Queue with exchange to get asynchronous job related event message from CS server.
+     *
+     * @param queue1 name of the queue1.
+     * @param exchange name of the exchange.
      * @return binding object
      */
     @Bean
@@ -170,8 +209,10 @@ public class RabbitConfig {
     }
 
     /**
-     * @param queue name to set
-     * @param exchange name to set
+     * Binding Queue with exchange to get usage related event message from CS server.
+     *
+     * @param queue2 name of the queue2.
+     * @param exchange name of the exchange.
      * @return binding object
      */
     @Bean
@@ -180,8 +221,10 @@ public class RabbitConfig {
     }
 
     /**
-     * @param queue name to set
-     * @param exchange name to set
+     * Binding Queue with exchange to get alert related event message from CS server.
+     *
+     * @param queue3 name of the queue2.
+     * @param exchange name of the exchange.
      * @return binding object
      */
     @Bean
@@ -190,6 +233,20 @@ public class RabbitConfig {
     }
 
     /**
+     * Binding Queue with exchange to get resources state event message from CS server.
+     *
+     * @param queue4 name of the queue4.
+     * @param exchange name of the exchange.
+     * @return binding object
+     */
+    @Bean
+    Binding binding4(Queue queue4, TopicExchange exchange) {
+        return BindingBuilder.bind(queue4).to(exchange).with(csResourcePattern);
+    }
+
+    /**
+     * Convenience "factory" to facilitate opening a link Connection to an AMQP broker.
+     *
      * @return connection factory
      */
     @Bean
@@ -202,6 +259,8 @@ public class RabbitConfig {
     }
 
     /**
+     * It simplifies synchronous RabbitMQ access (sending and receiving messages).
+     *
      * @return rabbit template setup
      */
     @Bean
@@ -213,44 +272,67 @@ public class RabbitConfig {
     }
 
     /**
+     * Message listener adapter that delegates the handling of action event messages to target listener methods via reflection, with
+     * flexible type conversion.
+     *
      * @return message action event listener.
      */
     @Bean
     MessageListenerAdapter actionListenerAdapter() {
-		VirtualMachineService virtualmachineservice = applicationContext.getBean(VirtualMachineService.class);
-        return new MessageListenerAdapter(new ActionListener(virtualmachineservice));
+        SyncService syncService = applicationContext.getBean(SyncService.class);
+        return new MessageListenerAdapter(new ActionListener(syncService));
     }
 
     /**
+     * Message listener adapter that delegates the handling of asynchronous job messages to target listener methods via reflection, with
+     * flexible type conversion.
+     *
      * @return message asynchronous job listener.
      */
     @Bean
-    MessageListenerAdapter AsynchJobListenerAdapter() {
+    MessageListenerAdapter asynchJobListenerAdapter() {
         return new MessageListenerAdapter(new AsynchronousJobListener());
     }
 
-
     /**
-     * @return message Alert listener.
+     * Message listener adapter that delegates the handling of resource state event messages to target listener methods via reflection, with
+     * flexible type conversion.
+     *
+     * @return message asynchronous job listener.
      */
     @Bean
-    MessageListenerAdapter AlertListenerAdapter() {
+    MessageListenerAdapter resourceStateListenerAdapter() {
+        VirtualMachineService virtualMachineService = applicationContext.getBean(VirtualMachineService.class);
+        return new MessageListenerAdapter(new ResourceStateListener(virtualMachineService));
+    }
+
+    /**
+     * Message listener adapter that delegates the handling of alert messages to target listener methods via reflection, with
+     * flexible type conversion.
+     *
+     * @return message alert listener.
+     */
+    @Bean
+    MessageListenerAdapter alertListenerAdapter() {
         return new MessageListenerAdapter(new AlertEventListener());
     }
 
     /**
+     * Message listener adapter that delegates the handling of usage messages to target listener methods via reflection, with
+     * flexible type conversion.
+     *
      * @return message usage listener.
      */
     @Bean
-    MessageListenerAdapter UsageListenerAdapter() {
+    MessageListenerAdapter usageListenerAdapter() {
         return new MessageListenerAdapter(new UsageEventListener());
     }
 
     /**
-     * Set Action Event Queue and Listener.
+     * Add message listerner to message listener container with specified queue to listen/consume action event message.
      *
-     * @param listenerAdapter class to set.
-     * @return message listener actionContainer.
+     * @param queue queue for action event.
+     * @return message listener container for action event messages.
      */
     @Bean
     SimpleMessageListenerContainer actionContainer(Queue queue) {
@@ -263,49 +345,65 @@ public class RabbitConfig {
 
 
     /**
-     * Set Alert Queue and Listener.
+     * Add message listerner to message listener container with specified queue to listen/consume alert message.
      *
-     * @param listenerAdapter class to set.
-     * @return message listener alertContainer.
+     * @param queue3 queue for alert event.
+     * @return message listener container for alert message.
      */
     @Bean
     SimpleMessageListenerContainer alertContainer(Queue queue3) {
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
         container.setConnectionFactory(connectionFactory());
         container.setQueues(queue3);
-        container.setMessageListener(AlertListenerAdapter());
+        container.setMessageListener(alertListenerAdapter());
         return container;
     }
 
     /**
-     * Set Usage Queue and Listener.
+     * Add message listerner to message listener container with specified queue to listen/consume usage message.
      *
-     * @param listenerAdapter class to set.
-     * @return message listener usageContainer.
+     * @param queue2 queue for usage event.
+     * @return message listener container for usage message.
      */
     @Bean
     SimpleMessageListenerContainer usageContainer(Queue queue2) {
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
         container.setConnectionFactory(connectionFactory());
         container.setQueues(queue2);
-        container.setMessageListener(UsageListenerAdapter());
+        container.setMessageListener(usageListenerAdapter());
         return container;
     }
 
 
     /**
-     * Set AsynchronousJob Queue and Listener.
+     * Add message listerner to message listener container with specified queue to listen/consume asynchronous job message.
      *
-     * @param listenerAdapter class to set.
-     * @return message listener asynchJobContainer.
+     * @param queue1 queue for asynchronous event.
+     * @return message listener container for asynchronous message.
      */
     @Bean
     SimpleMessageListenerContainer asynchJobContainer(Queue queue1) {
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
         container.setConnectionFactory(connectionFactory());
         container.setQueues(queue1);
-        container.setMessageListener(AsynchJobListenerAdapter());
+        container.setMessageListener(asynchJobListenerAdapter());
         return container;
     }
+
+    /**
+     * Add message listerner to message listener container with specified queue to listen/consume resource's state message.
+     *
+     * @param queue4 queue for asynchronous event.
+     * @return message listener container for resource's state message.
+     */
+    @Bean
+    SimpleMessageListenerContainer resourceStateContainer(Queue queue4) {
+        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+        container.setConnectionFactory(connectionFactory());
+        container.setQueues(queue4);
+        container.setMessageListener(resourceStateListenerAdapter());
+        return container;
+    }
+
 
 }

@@ -1,74 +1,150 @@
 package ck.panda.rabbitmq.util;
 
-import java.util.List;
-
-import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Required;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.stereotype.Component;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ck.panda.ApplicationConfig;
-import ck.panda.domain.entity.VmInstance;
-import ck.panda.service.VirtualMachineService;
+import ck.panda.constants.EventTypes;
+import ck.panda.service.SyncService;
 
+/**
+ * Action event listener will listen and update resource data to our App DB when
+ * an event handled directly in CS server.
+ *
+ */
 public class ActionListener implements MessageListener {
-	/** Response event entity. */
-	private ResponseEvent eventResponse = null;
 
-	private VirtualMachineService virtualmachineservice;
+   /** Logger attribute. */
+   private static final Logger LOGGER = LoggerFactory.getLogger(ActionListener.class);
 
-	public ActionListener(VirtualMachineService virtualmachineservice) {
-		this.virtualmachineservice = virtualmachineservice;
-		System.out.println("==============");
-		System.out.println(virtualmachineservice.getClass().getName());
-	}
+   /** Response event entity. */
+   private ResponseEvent eventResponse = null;
 
-	@Override
-	public void onMessage(Message message) {
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			//eventResponse = mapper.readValue(new String(message.getBody()), ResponseEvent.class);
-			System.out.println("==event response=====");
-			this.handleActionEvent(new String(message.getBody()));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+   /** Sync service. */
+   private SyncService syncService;
 
-	/**
-	 * Handling VM events and updated those in our application DB according to the type of events.
-	 *
-	 * @param event
-	 *            event type.
-	 * @param ResponseEvent
-	 *            json object.
-	 * @throws Exception
-	 */
-	public void handleActionEvent(String eventObject) throws Exception {
-		System.out.println(eventObject);
-		// VM Event Update.
-			handleVmEvent(eventObject);
-	}
+   /**
+    * Inject SyncService.
+    *
+    * @param syncService syncService object.
+    */
+   public ActionListener(SyncService syncService) {
+      this.syncService = syncService;
+   }
 
-	private void handleVmEvent(String event) throws Exception {
-		JSONObject instance = new JSONObject(event);
-		if (instance.has("id")) {
-			VmInstance vmInstance = virtualmachineservice.findByUUID(instance.getString("id"));
-			if(instance.getString("new-state").equals("Error")){
-				vmInstance.setStatus(instance.getString("new-state"));
-				vmInstance.setEventMessage(instance.getString("new-state") + "occured");
-			}
-			vmInstance.setStatus(instance.getString("new-state"));
-			vmInstance.setEventMessage("");
-			virtualmachineservice.update(vmInstance);
+   /** Action event listener .*/
+   @Override
+   public void onMessage(Message message) {
+      try {
+         ObjectMapper mapper = new ObjectMapper();
+         eventResponse = mapper.readValue(new String(message.getBody()), ResponseEvent.class);
+         this.handleActionEvent(eventResponse);
+      } catch (Exception e) {
+         LOGGER.debug("Error on convert action event message", e);
+         e.printStackTrace();
+      }
+   }
 
-	    }
-	}
+   /**
+    * Handling VM events and updated those in our application DB according to the type of events.
+    *
+    * @param eventObject event object.
+    * @throws Exception exception.
+    */
+   public void handleActionEvent(ResponseEvent eventObject) throws Exception {
+      syncService.init();
+      switch (eventObject.getEventStart()) {
+      case EventTypes.EVENT_VM:
+           LOGGER.debug("VM Sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           break;
+      case EventTypes.EVENT_USER:
+           LOGGER.debug("User sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           if (!eventObject.getEvent().equals(EventTypes.EVENT_USER_LOGIN) || eventObject.getEvent().equals(EventTypes.EVENT_USER_LOGOUT)) {
+              LOGGER.debug("Account sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           } else {
+              syncService.syncUser();
+           }
+           break;
+      case EventTypes.EVENT_REGISTER_SSH:
+           LOGGER.debug("Register SSH/API sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           break;
+      case EventTypes.EVENT_ACCOUNT:
+           LOGGER.debug("Account sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           if (!eventObject.getEvent().equals(EventTypes.EVENT_USER_LOGIN) || eventObject.getEvent().equals(EventTypes.EVENT_USER_LOGOUT)) {
+              LOGGER.debug("Account sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           } else {
+              syncService.syncUser();
+           }
+           break;
+      case EventTypes.EVENT_DISK:
+           LOGGER.debug("Storage offer sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           syncService.syncStorageOffering();
+           break;
+      case EventTypes.EVENT_DOMAIN:
+           LOGGER.debug("Domain sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           syncService.syncDomain();
+           break;
+      case EventTypes.EVENT_ZONE:
+           LOGGER.debug("Zone sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           syncService.syncZone();
+           break;
+      case EventTypes.EVENT_GUEST:
+           LOGGER.debug("OSType sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           syncService.syncOsCategory();
+           syncService.syncOsTypes();
+           break;
+      case EventTypes.EVENT_ISO:
+           LOGGER.debug("ISO sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           break;
+      case EventTypes.EVENT_NETWORK:
+           if (eventObject.getEvent().contains("OFFERING")) {
+           LOGGER.debug("Network Offering sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           syncService.syncNetworkOffering();
+           } else {
+           LOGGER.debug("Network sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           syncService.syncNetwork();
+           }
+           break;
+      case EventTypes.EVENT_PHYSICAL:
+           LOGGER.debug("Physical Network sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           break;
+      case EventTypes.EVENT_POD:
+           LOGGER.debug("POD sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           break;
+      case EventTypes.EVENT_PROXY:
+           LOGGER.debug("Proxy sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           break;
+      case EventTypes.EVENT_ROUTER:
+           LOGGER.debug("Router sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           break;
+      case EventTypes.EVENT_SERVICE:
+           LOGGER.debug("Compute Offering sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           syncService.syncComputeOffering();
+           break;
+      case EventTypes.EVENT_SNAPSHOT:
+           LOGGER.debug("Volume snapshot sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           break;
+      case EventTypes.EVENT_VOLUME:
+           LOGGER.debug("Volume sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           break;
+      case EventTypes.EVENT_TEMPLATE:
+           LOGGER.debug("templates sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           syncService.syncTemplates();
+           break;
+      case EventTypes.EVENT_VM_SNAPSHOT:
+           LOGGER.debug("VM snapshot sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           break;
+      case EventTypes.EVENT_VNC:
+           LOGGER.debug("VNC sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           break;
+      case EventTypes.EVENT_VPC:
+           LOGGER.debug("VPC sync",eventObject.getEntityuuid() + "===" + eventObject.getId());
+           break;
+      default:
+           LOGGER.debug("No sync required",eventObject.getEvent());
+     }
+   }
+
 }
