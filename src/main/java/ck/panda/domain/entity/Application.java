@@ -36,12 +36,12 @@ import org.springframework.format.annotation.DateTimeFormat;
 @SuppressWarnings("serial")
 public class Application implements Serializable {
 
-	/** Status enum type used to list the status values. */
+    /** Status enum type used to list the status values. */
     public enum Status {
         /** Application status as Enabled. */
-    	ENABLED,
+        ENABLED,
         /** Application status as Disabled. */
-    	DISABLED
+        DISABLED
     }
 
     /** Id of the Application. */
@@ -74,7 +74,7 @@ public class Application implements Serializable {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-	/** Version attribute to handle optimistic locking. */
+    /** Version attribute to handle optimistic locking. */
     @Version
     @Column(name = "version")
     private Long version;
@@ -206,17 +206,17 @@ public class Application implements Serializable {
      * @return status
      */
     public Status getStatus() {
-		return status;
-	}
+        return status;
+    }
 
-	/**
-	 * Set the status of the application.
-	 *
-	 * @param status to set
-	 */
-	public void setStatus(Status status) {
-		this.status = status;
-	}
+    /**
+     * Set the status of the application.
+     *
+     * @param status to set
+     */
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 
     /**
      * Get the version.
