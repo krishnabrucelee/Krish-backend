@@ -9,8 +9,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import org.joda.time.DateTime;
 import org.json.JSONException;
@@ -28,7 +28,7 @@ import org.springframework.data.annotation.Version;
 @Entity
 @Table(name = "ck_guest_network")
 @SuppressWarnings("serial")
-public class GuestNetwork implements Serializable{
+public class GuestNetwork implements Serializable {
 
     /** Id of the Guest Network. */
     @Id
@@ -49,14 +49,18 @@ public class GuestNetwork implements Serializable{
     private String displayText;
 
     /** id for the Domain. */
-    //@OneToMany(mappedBy = "domain")
-    @Column(name = "domain_id")
-    private Long domainId;
+    @ManyToOne
+    @JoinColumn(name = "domain_id", referencedColumnName = "id")
+    private Domain domainId;
+
+    /** Zone Object for the GuestNetwork. */
+    @JoinColumn(name = "zone_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Zone zone;
 
     /** id for the Zone. */
-    @ManyToOne
-    @JoinColumn(name = "zone_id", referencedColumnName = "id")
-    private Zone zoneId;
+    @Column(name = "zone_id")
+    private Long zoneId;
 
     /** id for the Network Offer. */
     @ManyToOne
@@ -64,12 +68,10 @@ public class GuestNetwork implements Serializable{
     private NetworkOffering networkOffering;
 
     /**  Network Type. */
-    //@Enumerated(EnumType.STRING)
     @Column(name = "network_type")
     private String networkType;
 
     /**  CIDR Range of the IP address. */
-    // @Enumerated(EnumType.STRING)
     @Column(name = "cidr")
     private String cIDR;
 
@@ -110,6 +112,16 @@ public class GuestNetwork implements Serializable{
     private DateTime updatedDateTime;
 
     /**
+     * Enum type for Network Type.
+     *
+     */
+    @PrePersist
+    void preInsert() {
+        /** Guest Network will be Isolated Type. */
+        this.networkType = "Isolated";
+    }
+
+    /**
      * Enum type for Guest Network Status.
      *
      */
@@ -121,7 +133,7 @@ public class GuestNetwork implements Serializable{
     }
 
     /**
-     * Get the Guest Network Id
+     * Get the Guest Network Id.
      *
      * @return the  Guest Network Id
      */
@@ -130,7 +142,7 @@ public class GuestNetwork implements Serializable{
     }
 
     /**
-     * Get the Guest Network uuid
+     * Get the Guest Network uuid.
      *
      * @return the uuid of the Guest Network
      */
@@ -139,7 +151,35 @@ public class GuestNetwork implements Serializable{
     }
 
     /**
-     * Get the Guest Network Name
+     * @return the zone
+     */
+    public Zone getZone() {
+        return zone;
+    }
+
+    /**
+     * @param zone the zone to set
+     */
+    public void setZone(Zone zone) {
+        this.zone = zone;
+    }
+
+    /**
+     * @return the zoneId
+     */
+    public Long getZoneId() {
+        return zoneId;
+    }
+
+    /**
+     * @param zoneId the zoneId to set
+     */
+    public void setZoneId(Long zoneId) {
+        this.zoneId = zoneId;
+    }
+
+    /**
+     * Get the Guest Network Name.
      *
      * @return the name of the Guest Network
      */
@@ -148,7 +188,7 @@ public class GuestNetwork implements Serializable{
     }
 
     /**
-     * Get the Guest Network Description
+     * Get the Guest Network Description.
      *
      * @return the description of Guest Network
      */
@@ -157,17 +197,16 @@ public class GuestNetwork implements Serializable{
     }
 
     /**
-     * Get the Domain
+     * Get the Domain.
      *
      * @return the id of the domain
      */
-    public Long getDomainId() {
+    public Domain getDomainId() {
         return domainId;
     }
 
-
     /**
-     * Get the Guest Network type
+     * Get the Guest Network type.
      *
      * @return the type of the network
      */
@@ -176,7 +215,7 @@ public class GuestNetwork implements Serializable{
     }
 
     /**
-     * Get the Guest Network State
+     * Get the Guest Network State.
      *
      * @return Active or Inactive state
      */
@@ -185,7 +224,7 @@ public class GuestNetwork implements Serializable{
     }
 
     /**
-     * Get the Guest Network Version
+     * Get the Guest Network Version.
      *
      * @return the version of Guest Network
      */
@@ -194,7 +233,7 @@ public class GuestNetwork implements Serializable{
     }
 
     /**
-     * Get the Guest Network Status
+     * Get the Guest Network Status.
      *
      * @return the status of Guest Network
      */
@@ -203,7 +242,7 @@ public class GuestNetwork implements Serializable{
     }
 
     /**
-     * Get the user who creates Guest Network
+     * Get the user who creates Guest Network.
      *
      * @return the createdBy
      */
@@ -212,7 +251,7 @@ public class GuestNetwork implements Serializable{
     }
 
     /**
-     * Get the user who updates Guest Network
+     * Get the user who updates Guest Network.
      *
      * @return the updatedBy
      */
@@ -221,7 +260,7 @@ public class GuestNetwork implements Serializable{
     }
 
     /**
-     * Get the DateTime of created Guest Network
+     * Get the DateTime of created Guest Network.
      *
      * @return the DateTime
      */
@@ -230,7 +269,7 @@ public class GuestNetwork implements Serializable{
     }
 
     /**
-     * Get the DateTime of updated Guest Network
+     * Get the DateTime of updated Guest Network.
      *
      * @return the DateTime
      */
@@ -238,7 +277,8 @@ public class GuestNetwork implements Serializable{
         return updatedDateTime;
     }
 
-    /**Set the Guest Network Id
+    /**
+     * Set the Guest Network Id.
      *
      * @param id
      * Guest Network id to set
@@ -248,7 +288,7 @@ public class GuestNetwork implements Serializable{
     }
 
     /**
-     * Set the Guest Network uuid
+     * Set the Guest Network uuid.
      *
      * @param uuid
      * Guest Network uuid to set
@@ -258,7 +298,7 @@ public class GuestNetwork implements Serializable{
     }
 
     /**
-     * Set the Guest Network namee
+     * Set the Guest Network name.
      *
      * @param name
      * Guest Network name to set
@@ -268,7 +308,7 @@ public class GuestNetwork implements Serializable{
     }
 
     /**
-     * Set the Guest Network Description
+     * Set the Guest Network Description.
      *
      * @param displayText
      *  Guest Network description to set
@@ -278,72 +318,55 @@ public class GuestNetwork implements Serializable{
     }
 
     /**
-     * Set the Domain Id
+     * Set the Domain Id.
      *
      * @param domainId
      * the domainId to set
      */
-    public void setDomainId(Long domainId) {
+    public void setDomainId(Domain domainId) {
         this.domainId = domainId;
     }
 
 
+
     /**
-     * Get the Zone Id
+     * Get the NetworkOffering Id.
      *
-	 * @return the zoneId
-	 */
-	public Zone getZoneId() {
-		return zoneId;
-	}
+     * @return the networkOffering
+     */
+    public NetworkOffering getNetworkOffering() {
+      return networkOffering;
+    }
 
-	/**
-	 * Get the NetworkOffering Id
-	 *
-	 * @return the networkOffering
-	 */
-	public NetworkOffering getNetworkOffering() {
-		return networkOffering;
-	}
+    /**
+     * Get the Guest Network cIDR.
+     * @return the cIDR
+     */
+    public String getcIDR() {
+        return cIDR;
+    }
 
-	/**
-	 * Get the Guest Network cIDR
-	 * @return the cIDR
-	 */
-	public String getcIDR() {
-		return cIDR;
-	}
+    /**
+     * Set the Network Offering Id.
+     *
+     * @param networkOffering the networkOffering to set
+     */
+    public void setNetworkOffering(NetworkOffering networkOffering) {
+        this.networkOffering = networkOffering;
+    }
 
-	/**
-	 * Set the Zone Id
-	 *
-	 * @param zoneId the zoneId to set
-	 */
-	public void setZoneId(Zone zoneId) {
-		this.zoneId = zoneId;
-	}
+    /**
+     * Set the Guest Network cIDR.
+     *
+     * @param cIDR the cIDR to set
+     */
+    public void setcIDR(String cIDR) {
+        this.cIDR = cIDR;
+    }
 
-	/**
-	 * Set the Network Offering Id
-	 *
-	 * @param networkOffering the networkOffering to set
-	 */
-	public void setNetworkOffering(NetworkOffering networkOffering) {
-		this.networkOffering = networkOffering;
-	}
-
-	/**
-	 * Set the Guest Network cIDR
-	 *
-	 * @param cIDR the cIDR to set
-	 */
-	public void setcIDR(String cIDR) {
-		this.cIDR = cIDR;
-	}
-
-	/**
-	 * Set the Guest Network Type
-	 *
+    /**
+     * Set the Guest Network Type.
+     *
      * @param networkType
      * the networkType to set
      */
@@ -351,9 +374,8 @@ public class GuestNetwork implements Serializable{
         this.networkType = networkType;
     }
 
-
     /**
-     * Set the Guest Network State
+     * Set the Guest Network State.
      *
      * @param isActive
      * the isActive state to set
@@ -363,7 +385,7 @@ public class GuestNetwork implements Serializable{
     }
 
     /**
-     * Set the Guest Network Version
+     * Set the Guest Network Version.
      *
      * @param version
      * the version to set
@@ -373,7 +395,7 @@ public class GuestNetwork implements Serializable{
     }
 
     /**
-     * Set the Guest Network Status
+     * Set the Guest Network Status.
      *
      * @param status
      * the status to set
@@ -383,7 +405,7 @@ public class GuestNetwork implements Serializable{
     }
 
     /**
-     * Set the user who creates Guest Network
+     * Set the user who creates Guest Network.
      *
      * @param createdBy
      * Guest Network createdBy to set
@@ -393,7 +415,7 @@ public class GuestNetwork implements Serializable{
     }
 
     /**
-     * Set the user who updates Guest Network
+     * Set the user who updates Guest Network.
      *
      * @param updatedBy
      *  Guest Network updatedBy to set
@@ -403,7 +425,7 @@ public class GuestNetwork implements Serializable{
     }
 
     /**
-     * Set the Created DateTime for Guest Network
+     * Set the Created DateTime for Guest Network.
      *
      * @param createdDateTime
      * Guest Network createdDateTime to set
@@ -413,7 +435,7 @@ public class GuestNetwork implements Serializable{
     }
 
     /**
-     * Set the Updated DateTime for Guest Network
+     * Set the Updated DateTime for Guest Network.
      *
      * @param updatedDateTime
      * Guest Network updatedDateTime to set
@@ -422,15 +444,15 @@ public class GuestNetwork implements Serializable{
         this.updatedDateTime = updatedDateTime;
     }
 
-    /* Convert JSONObject to domain entity.
-    *
-    * @param object json object
-    * @return domain entity object.
-    * @throws JSONException handles json exception.
-    */
+    /** Convert JSONObject to domain entity.
+     *
+     * @param object json object
+     * @return domain entity object.
+     * @throws JSONException handles json exception.
+     */
    public static GuestNetwork convert(JSONObject object) throws JSONException {
-    	GuestNetwork guestnetwork = new GuestNetwork();
-    	guestnetwork.uuid = object.get("id").toString();
+       GuestNetwork guestnetwork = new GuestNetwork();
+       guestnetwork.uuid = object.get("id").toString();
        return guestnetwork;
    }
 }

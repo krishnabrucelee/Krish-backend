@@ -20,7 +20,6 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.GuestNetwork;
-import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.service.GuestNetworkService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -35,7 +34,7 @@ import ck.panda.util.web.CRUDController;
 @Api(value = "GuestNetwork", description = "Operations with GuestNetworks", produces = "application/json")
 public class GuestNetworkController extends CRUDController<GuestNetwork> implements ApiController {
 
-	/** Service reference to Guest Network. */
+    /** Service reference to Guest Network. */
     @Autowired
     private GuestNetworkService guestNetworkService;
 
@@ -60,7 +59,7 @@ public class GuestNetworkController extends CRUDController<GuestNetwork> impleme
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Network.")
     @Override
     public void delete(@PathVariable(PATH_ID) Long id) throws Exception {
-    	guestNetworkService.delete(id);
+        guestNetworkService.delete(id);
     }
 
     @Override
@@ -68,7 +67,6 @@ public class GuestNetworkController extends CRUDController<GuestNetwork> impleme
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, GuestNetwork.class);
         Page<GuestNetwork> pageResponse = guestNetworkService.findAll(page);
-        System.out.println(pageResponse);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
@@ -76,17 +74,17 @@ public class GuestNetworkController extends CRUDController<GuestNetwork> impleme
     /**
      * list all network for instance.
      * @return projects
-     * @throws Exception
+     * @throws Exception Exception
      */
-  	@RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-  	@ResponseStatus(HttpStatus.OK)
-  	@ResponseBody
-  	protected List<GuestNetwork> getSearch() throws Exception {
-  		return guestNetworkService.findAll();
-  	}
+      @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+      @ResponseStatus(HttpStatus.OK)
+      @ResponseBody
+      protected List<GuestNetwork> getSearch() throws Exception {
+          return guestNetworkService.findAll();
+      }
 
     @Override
     public void testMethod() throws Exception {
-    	guestNetworkService.findAll();
+        guestNetworkService.findAll();
     }
 }
