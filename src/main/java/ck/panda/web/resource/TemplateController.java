@@ -20,7 +20,6 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Template;
-import ck.panda.domain.entity.Zone;
 import ck.panda.service.TemplateService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -70,7 +69,6 @@ public class TemplateController extends CRUDController<Template> implements ApiC
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Template.class);
         Page<Template> pageResponse = templateService.findAll(page);
-        System.out.println(pageResponse);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
@@ -78,8 +76,8 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     /**
      * Get the list of templates.
      *
-     * @return
-     * @throws Exception
+     * @return template list from server
+     * @throws Exception raise if error
      */
     @RequestMapping(value = "/list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
