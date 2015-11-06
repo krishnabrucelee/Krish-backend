@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,6 +35,9 @@ import ck.panda.util.error.exception.EntityNotFoundException;
  */
 @Service
 public class TemplateServiceImpl implements TemplateService {
+
+    /** Logger attribute. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(VirtualMachineServiceImpl.class);
 
     /** Validator attribute. */
     @Autowired
@@ -68,7 +73,7 @@ public class TemplateServiceImpl implements TemplateService {
         if (template.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity("template", template);
             errors = validator.validateEntity(template, errors);
-            errors = customValidateEntity(template, errors, "save");
+            errors = customValidateEntity(template, errors, true);
 
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
@@ -86,7 +91,7 @@ public class TemplateServiceImpl implements TemplateService {
         if (template.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity("template", template);
             errors = validator.validateEntity(template, errors);
-            errors = customValidateEntity(template, errors, "update");
+            errors = customValidateEntity(template, errors, false);
 
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
@@ -164,26 +169,31 @@ public class TemplateServiceImpl implements TemplateService {
         configUtil.setServer(1L);
         HashMap<String, String> optional = new HashMap<String, String>();
         String resp = cloudStackTemplateService.registerTemplate(template.getDescription(), template.getFormat().name(),
-                template.getHypervisor().getName(), template.getName(),
-                template.getOsType().getUuid(), template.getUrl(),
-                template.getZone().getUuid(), "json", optionalFieldValidation(template, optional));
-        JSONObject templateJSON = new JSONObject(resp).getJSONObject("registertemplateresponse");
-        if (templateJSON.has("errorcode")) {
-            errors = this.validateCSEvent(errors, templateJSON.getString("errortext"));
-            throw new ApplicationException(errors);
-        } else {
-            JSONArray templateArray = (JSONArray) templateJSON.get("template");
-            for (int i = 0; i < templateArray.length(); i++) {
-                JSONObject jsonobject = templateArray.getJSONObject(i);
-                template.setUuid(jsonobject.getString("id"));
-                if (jsonobject.getBoolean("isready")) {
-                    template.setStatus(Status.valueOf("Active"));
-                } else {
-                    template.setStatus(Status.valueOf("InActive"));
+            template.getHypervisor().getName(), template.getName(),
+            template.getOsType().getUuid(), template.getUrl(),
+            template.getZone().getUuid(), "json", optionalFieldValidation(template, optional));
+        try {
+            JSONObject templateJSON = new JSONObject(resp).getJSONObject("registertemplateresponse");
+            if (templateJSON.has("errorcode")) {
+                errors = this.validateCSEvent(errors, templateJSON.getString("errortext"));
+                throw new ApplicationException(errors);
+            } else {
+                JSONArray templateArray = (JSONArray) templateJSON.get("template");
+                for (int i = 0; i < templateArray.length(); i++) {
+                    JSONObject jsonobject = templateArray.getJSONObject(i);
+                    LOGGER.debug("Template UUID", jsonobject.getString("id"));
+                    template.setUuid(jsonobject.getString("id"));
+                    if (jsonobject.getBoolean("isready")) {
+                        template.setStatus(Status.valueOf("ACTIVE"));
+                    } else {
+                        template.setStatus(Status.valueOf("INACTIVE"));
+                    }
+                    template.setType(Type.valueOf(jsonobject.getString("templatetype")));
                 }
-                template.setType(Type.valueOf(jsonobject.getString("templatetype")));
+                template.setDisplayText(template.getDescription());
             }
-            template.setDisplayText(template.getDescription());
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT TEMPLATE CREATION", e);
         }
     }
 
@@ -197,7 +207,11 @@ public class TemplateServiceImpl implements TemplateService {
         optionalFieldValidation(template, optional);
         optional.put("name", template.getName());
         optional.put("displaytext", template.getDescription());
-        cloudStackTemplateService.updateTemplate(template.getUuid(), "json", optional);
+        try {
+            cloudStackTemplateService.updateTemplate(template.getUuid(), "json", optional);
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT TEMPLATE UPDATION", e);
+        }
     }
 
     /**
@@ -208,16 +222,21 @@ public class TemplateServiceImpl implements TemplateService {
         configUtil.setServer(1L);
         HashMap<String, String> optional = new HashMap<String, String>();
         Template template = templateRepository.findOne(id);
-        cloudStackTemplateService.deleteTemplate(template.getUuid(), "json", optional);
+        try {
+            cloudStackTemplateService.deleteTemplate(template.getUuid(), "json", optional);
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT TEMPLATE DELETE", e);
+        }
     }
 
     /**
      * @param template entity object
      * @param errors object for validation
+     * @param validstatus whether need to check validation or not
      * @return errors list
      * @throws Exception raise if error
      */
-    public Errors customValidateEntity(Template template, Errors errors, String flag) throws Exception {
+    public Errors customValidateEntity(Template template, Errors errors, Boolean validstatus) throws Exception {
 
         if (template.getArchitecture().isEmpty()) {
             errors.addFieldError("architecture", "template.architecture");
@@ -225,7 +244,7 @@ public class TemplateServiceImpl implements TemplateService {
         if (template.getOsVersion().isEmpty()) {
             errors.addFieldError("osVersion", "template.osversion.error");
         }
-        if (template.getUrl() == null && flag == "save") {
+        if (template.getUrl() == null && validstatus) {
             errors.addFieldError("url", "template.url.error");
         }
         if (template.getDetailedDescription().isEmpty()) {

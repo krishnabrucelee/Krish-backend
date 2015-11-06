@@ -28,6 +28,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import ck.panda.util.JsonValidator;
 
 /**
  * Template are the first level hierarchy and we are creating the instance based
@@ -929,10 +930,10 @@ public class Template implements Serializable {
 
     /** RootDiskController enum type used to list the static root disk controller values. */
     public enum RootDiskController {
-        /** Root disk controller type as scsi. */
-        scsi,
-        /** Root disk controller type as ide. */
-        ide
+        /** Root disk controller type as SCSI. */
+        SCSI,
+        /** Root disk controller type as IDE. */
+        IDE
     }
 
     /** NicAdapter enum type used to list the static NIC adapter values. */
@@ -950,13 +951,13 @@ public class Template implements Serializable {
     /** KeyboardType enum type used to list the static Keyboard type values. */
     public enum KeyboardType {
         /** Keyboard type as US. */
-        US_Keyboard,
+        US_KEYBOARD,
         /** Keyboard type as UK. */
-        UK_Keyboard,
+        UK_KEYBOARD,
         /** Keyboard type as Japanese. */
-        Japanese_Keyboard,
+        JAPANESE_KEYBOARD,
         /** Keyboard type as simplified chinese. */
-        Simplified_Chinese
+        SIMPLIFIED_CHINESE
     }
 
     /** Format enum type used to list the static format values. */
@@ -973,8 +974,8 @@ public class Template implements Serializable {
         VMDK,
         /** Hypervisor format type as OVA. */
         OVA,
-        /** Hypervisor format type as BareMetal. */
-        BareMetal,
+        /** Hypervisor format type as BAREMETAL. */
+        BAREMETAL,
         /** Hypervisor format type as TAR. */
         TAR
     }
@@ -995,10 +996,10 @@ public class Template implements Serializable {
 
     /** Status enum type used to list the status values. */
     public enum Status {
-        /** Template status as Active. */
-        Active,
-        /** Template status as InActive. */
-        InActive
+        /** Template status as ACTIVE. */
+        ACTIVE,
+        /** Template status as INACTIVE. */
+        INACTIVE
     }
 
     /**
@@ -1012,23 +1013,27 @@ public class Template implements Serializable {
     public static Template convert(JSONObject object) throws JSONException {
         Template template = new Template();
         template.setSyncFlag(false);
-        template.uuid = object.getString("id");
-        template.name = object.getString("name");
-        template.description = object.getString("displaytext");
-        template.share = object.getBoolean("ispublic");
-        template.passwordEnabled = object.getBoolean("passwordenabled");
-        template.featured = object.getBoolean("isfeatured");
-        template.extractable = object.getBoolean("isextractable");
-        template.dynamicallyScalable = object.getBoolean("isdynamicallyscalable");
-        template.transOsType = object.getString("ostypeid");
-        template.transZone = object.getString("zoneid");
-        template.transHypervisor = object.getString("hypervisor");
-        template.setFormat(template.getFormat().valueOf(object.getString("format")));
-        template.setType(template.getType().valueOf(object.getString("templatetype")));
-        if (object.getBoolean("isready")) {
-            template.setStatus(template.getStatus().valueOf("Active"));
-        } else {
-            template.setStatus(template.getStatus().valueOf("InActive"));
+        try {
+            template.uuid = JsonValidator.jsonStringValidation(object, "id");
+            template.name = JsonValidator.jsonStringValidation(object, "name");
+            template.description = JsonValidator.jsonStringValidation(object, "displaytext");
+            template.share = JsonValidator.jsonBooleanValidation(object, "ispublic");
+            template.passwordEnabled = JsonValidator.jsonBooleanValidation(object, "passwordenabled");
+            template.featured = JsonValidator.jsonBooleanValidation(object, "isfeatured");
+            template.extractable = JsonValidator.jsonBooleanValidation(object, "isextractable");
+            template.dynamicallyScalable = JsonValidator.jsonBooleanValidation(object, "isdynamicallyscalable");
+            template.transOsType = JsonValidator.jsonStringValidation(object, "ostypeid");
+            template.transZone = JsonValidator.jsonStringValidation(object, "zoneid");
+            template.transHypervisor = JsonValidator.jsonStringValidation(object, "hypervisor");
+            template.setFormat(template.getFormat().valueOf(JsonValidator.jsonStringValidation(object, "format")));
+            template.setType(template.getType().valueOf(JsonValidator.jsonStringValidation(object, "templatetype")));
+            if (JsonValidator.jsonBooleanValidation(object, "isready")) {
+                template.setStatus(template.getStatus().valueOf("ACTIVE"));
+            } else {
+                template.setStatus(template.getStatus().valueOf("INACTIVE"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return template;
     }
