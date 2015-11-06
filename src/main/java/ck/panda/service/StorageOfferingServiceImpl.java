@@ -11,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.repository.jpa.StorageOfferingRepository;
 import ck.panda.util.AppValidator;
@@ -131,8 +129,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     /**
      * To set optional values by validating null and empty parameters.
      *
-     * @param storage
-     *            optional storage offering values
+     * @param storage optional storage offering values
      * @return optional values
      */
     public HashMap<String, String> optional(StorageOffering storage) {
