@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.util.AppValidator;
@@ -50,10 +53,11 @@ public class UserServiceImpl implements UserService {
     	if(user.getSyncFlag()) {
         Errors errors = validator.rejectIfNullEntity("user", user);
         errors = validator.validateEntity(user, errors);
-
+        errors = this.validateName(errors, user.getUserName(), user.getDomain());
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
+        	user.setType(User.Type.USER);
             String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
             byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
             SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
@@ -62,13 +66,32 @@ public class UserServiceImpl implements UserService {
             user.setIsActive(true);
             csAccountService.setServer(configServer.setServer(1L));
             HashMap<String, String> userMap = new HashMap<String, String>();
-            csAccountService.createAccount(String.valueOf(user.getType().ordinal()),
+            String cloudResponse = csAccountService.createAccount(String.valueOf(user.getType().ordinal()),
                     user.getEmail(), user.getFirstName(), user.getLastName(), user.getUserName(), user.getPassword(), "json", userMap);
+            JSONObject createUserResponseJSON = new JSONObject(cloudResponse).getJSONObject("createaccountresponse")
+                    .getJSONObject("account");
+            user.setUuid((String) createUserResponseJSON.get("id"));
             return userRepository.save(user);
         }
     	} else {
     		return userRepository.save(user);
     	}
+    }
+
+    /**
+     * Check the user name already exist or not for same domain.
+     *
+     * @param errors already existing error list.
+     * @param name name of the user.
+     * @param domain domain object.
+     * @return errors.
+     * @throws Exception
+     */
+    private Errors validateName(Errors errors, String name, Domain domain) throws Exception {
+        if (userRepository.findByUserNameAndDomain(name, domain) != null) {
+            errors.addFieldError("username", "user.already.exist.for.same.domain");
+        }
+        return errors;
     }
 
     @Override
