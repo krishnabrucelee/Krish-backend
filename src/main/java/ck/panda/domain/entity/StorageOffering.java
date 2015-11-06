@@ -3,7 +3,7 @@ package ck.panda.domain.entity;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -11,6 +11,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
@@ -71,7 +72,7 @@ public class StorageOffering {
      * Description of Storage Offering.
      */
     @NotEmpty
-    @Size(min = 4, max = 20)
+    @Size(min = 4, max = 400)
     @Column(name = "description")
     private String description;
 
@@ -87,14 +88,14 @@ public class StorageOffering {
      * If checked, the user can set their own disk size. If not checked, the
      * root administrator must define a value in Disk size.
      */
-    @Column(name = "is_custom_disk", columnDefinition = "tinyint default 0")
+    @Column(name = "is_custom_disk", nullable = false, columnDefinition = "tinyint default 0")
     private Boolean isCustomDisk;
 
     /**
      * Appears only if Custom disk size is not selected. Define the volume size
      * in GB.
      */
-    @Column(name = "disk_size", columnDefinition = "bigint(20) default 0")
+    @Column(name = "disk_size", nullable = false)
     private Long diskSize;
 
     /**
@@ -162,40 +163,6 @@ public class StorageOffering {
     @Column(name = "min_iops")
     private Long diskMinIops;
 
-    /**
-     * The Zone ID, this disk offering belongs to. Ignore this information as it
-     * is not currently applicable.
-     */
-    @JoinColumn(name = "zone_id", referencedColumnName = "id")
-    @OneToOne
-    private Zone zone;
-
-    /**
-     * Cost per month usage.
-     */
-    @Column(name = "cost_per_hour_disk")
-    private Double costPerMonth;
-
-    /**
-     * Cost for 1 Gb per month usage.
-     */
-    @Column(name = "cost_gb_per_month")
-    private Double costGbPerMonth;
-
-    /**
-     * Cost per month usage.
-     */
-    @Column(name = "cost_per_hour_iops")
-    private Double costPerIops;
-
-    @Transient
-    private Boolean isSyncFlag;
-    /**
-     * Cost for 1 Iops per month usage.
-     */
-    @Column(name = "cost_iops_per_month")
-    private Double costIopsPerMonth;
-
     /** Status attribute to verify status of the Storage offering. */
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
@@ -238,13 +205,27 @@ public class StorageOffering {
     private Boolean isActive;
 
     /**
+     * Storage offering price.
+     */
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "storage_id")
+    private List<StorageOfferingCost> storagePrice;
+
+    /**
+     * isSyncFlag field is not to be serialized,
+     * whereas JPA's @Transient annotation is used to indicate
+     * that a field is not to be persisted in the database.
+     */
+    @Transient
+    private Boolean isSyncFlag;
+
+    /**
      * To set the default value while creating tables in database.
      */
     @PrePersist
     void preInsert() {
         this.isActive = true;
     }
-
 
     /**
      * Enum type for Storage Offering Status.
@@ -604,86 +585,6 @@ public class StorageOffering {
     }
 
     /**
-     * Get the zone of the storage offering.
-     * @return the zone of the storage offering
-     */
-    public Zone getZone() {
-        return zone;
-    }
-
-    /**
-     * Set the zone of the storage offering.
-     * @param zone the zone to set
-     */
-    public void setZone(Zone zone) {
-        this.zone = zone;
-    }
-
-    /**
-     * Get the cost per month of the storage offering.
-     * @return the costPerMonth of the storage offering
-     */
-    public Double getCostPerMonth() {
-        return costPerMonth;
-    }
-
-    /**
-     * Set the cost per month of the storage offering.
-     * @param costPerMonth the costPerMonth to set
-     */
-    public void setCostPerMonth(Double costPerMonth) {
-        this.costPerMonth = costPerMonth;
-    }
-
-    /**
-     * Get the cost Gb per month of the storage offering.
-     * @return the costGbPerMonth of the storage offering
-     */
-    public Double getCostGbPerMonth() {
-        return costGbPerMonth;
-    }
-
-    /**
-     * Set the cost Gb per month of the storage offering.
-     * @param costGbPerMonth the costGbPerMonth to set
-     */
-    public void setCostGbPerMonth(Double costGbPerMonth) {
-        this.costGbPerMonth = costGbPerMonth;
-    }
-
-    /**
-     * Get the cost per iops of the storage offering.
-     * @return the costPerIops of the storage offering
-     */
-    public Double getCostPerIops() {
-        return costPerIops;
-    }
-
-    /**
-     * Set the cost per iops of the storage offering.
-     * @param costPerIops the costPerIops to set
-     */
-    public void setCostPerIops(Double costPerIops) {
-        this.costPerIops = costPerIops;
-    }
-
-    /**
-     * Get the cost iops per month of the storage offering.
-     * @return the costIopsPerMonth of the storage offering
-     */
-    public Double getCostIopsPerMonth() {
-        return costIopsPerMonth;
-    }
-
-    /**
-     * Set the cost iops per month of the storage offering.
-     * @param costIopsPerMonth the costIopsPerMonth to set
-     */
-    public void setCostIopsPerMonth(Double costIopsPerMonth) {
-        this.costIopsPerMonth = costIopsPerMonth;
-    }
-
-    /**
      * Get the status of the storage offering.
      *
      * @return the status of the storage offering
@@ -792,6 +693,24 @@ public class StorageOffering {
     }
 
     /**
+     * Get the storage price of the StorageOffering.java.
+     *
+     * @return the storagePrice of the StorageOffering.java
+     */
+    public List<StorageOfferingCost> getStoragePrice() {
+        return storagePrice;
+    }
+
+    /**
+     * Set the storage price of the StorageOffering.java.
+     *
+     * @param storagePrice the storagePrice to set
+     */
+    public void setStoragePrice(List<StorageOfferingCost> storagePrice) {
+        this.storagePrice = storagePrice;
+    }
+
+    /**
      * Get the is active of the storage offering.
      *
      * @return the isActive of the storage offering
@@ -818,39 +737,39 @@ public class StorageOffering {
      */
     public static StorageOffering convert(JSONObject object) throws JSONException {
         StorageOffering storageOffering = new StorageOffering();
-        storageOffering.uuid = object.has("id") ? object.get("id").toString() : "";
-        storageOffering.name = object.has("name") ? object.get("name").toString() : "";
-        storageOffering.description = object.has("displaytext") ? object.get("displaytext").toString() : "";
-        storageOffering.diskSize = object.has("disksize") ? object.getLong("disksize") : 0;
-        storageOffering.setStorageType(storageOffering.getStorageType().valueOf(object.has("storagetype") ? object.get("storagetype").toString() : ""));
-        storageOffering.setIsCustomDisk(storageOffering.getIsCustomDisk().valueOf(object.has("iscustomized") ? object.get("iscustomized").toString() : ""));
+        storageOffering.uuid = object.getString("id");
+        storageOffering.name = object.getString("name");
+        storageOffering.description = object.getString("displaytext");
+        storageOffering.diskSize = object.getLong("disksize");
+        storageOffering.setStorageType(storageOffering.getStorageType().valueOf(object.getString("storagetype")));
+        storageOffering.setIsCustomDisk(storageOffering.getIsCustomDisk().valueOf(object.getString("iscustomized")));
         storageOffering.setIsSyncFlag(false);
 
         return storageOffering;
     }
 
     /**
-	 * Get the synch flag .
-	 *
-	 * @return the isSyncFlag.
-	 */
-	public Boolean getIsSyncFlag() {
-		return isSyncFlag;
-	}
+     * Get the sync flag.
+     *
+     * @return the isSyncFlag.
+     */
+    public Boolean getIsSyncFlag() {
+        return isSyncFlag;
+    }
 
-	/**
-	 * Set the Sync Flag.
-	 *
-	 * @param isSyncFlag - the isSyncFlag to set.
-	 */
-	public void setIsSyncFlag(Boolean isSyncFlag) {
-		this.isSyncFlag = isSyncFlag;
-	}
+    /**
+     * Set the Sync Flag.
+     *
+     * @param isSyncFlag of the isSyncFlag to set.
+     */
+    public void setIsSyncFlag(Boolean isSyncFlag) {
+        this.isSyncFlag = isSyncFlag;
+    }
 
-	/**
+    /**
      * Mapping Storage Offering entity object in list.
      *
-     * @param Storage Offering lists of Storage Offering
+     * @param storageOfferingList Storage Offering lists of Storage Offering
      * @return Storage Offering mapped values.
      */
     public static Map<String, StorageOffering> convert(List<StorageOffering> storageOfferingList) {
