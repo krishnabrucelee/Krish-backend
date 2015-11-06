@@ -117,7 +117,7 @@ public class Project implements Serializable {
 
    /** Created by user. */
    @CreatedBy
-   @JoinColumn(name = "created_by", referencedColumnName = "id")
+   @JoinColumn(name = "created_by", referencedColumnName = "id", insertable = false, updatable = false)
    @OneToOne
    private User createdBy;
 
