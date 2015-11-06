@@ -31,34 +31,34 @@ public interface SyncService {
       * @throws ApplicationException unhandled application errors.
       * @throws Exception cloudstack unhandled errors
       */
-     void syncDomain() throws ApplicationException,Exception;
+     void syncDomain() throws ApplicationException, Exception;
 
      /**
       * Sync with Cloud Server Zone.
       * @throws ApplicationException unhandled application errors.
       * @throws Exception cloudstack unhandled errors.
       */
-     void syncZone() throws ApplicationException,Exception;
+     void syncZone() throws ApplicationException, Exception;
 
      /**
       * Sync with Cloud Server Region.
       * @throws ApplicationException unhandled application errors.
       * @throws Exception cloudstack unhandled errors.
       */
-     void syncRegion() throws ApplicationException,Exception;
+     void syncRegion() throws ApplicationException, Exception;
      /**
       * Sync with Cloud Server Hypervisor.
       * @throws ApplicationException unhandled application errors.
       * @throws Exception cloudstack unhandled errors.
       */
-     void syncHypervisor() throws ApplicationException,Exception;
+     void syncHypervisor() throws ApplicationException, Exception;
 
      /**
       * Sync with Cloud Server OSCategory.
       * @throws ApplicationException unhandled application errors.
       * @throws Exception cloudstack unhandled errors.
       */
-     void syncOsCategory() throws ApplicationException,Exception;
+     void syncOsCategory() throws ApplicationException, Exception;
 
      /**
       * Sync with CloudStack server osType.
@@ -66,21 +66,21 @@ public interface SyncService {
       * @throws ApplicationException unhandled application errors.
       * @throws Exception cloudstack unhandled errors
       */
-     void syncOsTypes() throws ApplicationException,Exception;
+     void syncOsTypes() throws ApplicationException, Exception;
      /**
       * Sync with CloudStack server Storage Offering.
       *
       * @throws ApplicationException unhandled application errors.
       * @throws Exception cloudstack unhandled errors
       */
-     void syncStorageOffering() throws ApplicationException,Exception;
+     void syncStorageOffering() throws ApplicationException, Exception;
 
      /**
       * Sync with Cloud Server Account.
       * @throws ApplicationException unhandled application errors.
       * @throws Exception cloudstack unhandled errors.
       */
-     void syncUser() throws ApplicationException,Exception;
+     void syncUser() throws ApplicationException, Exception;
 
      /**
       * Sync with CloudStack server Network offering.
@@ -88,7 +88,7 @@ public interface SyncService {
       * @throws ApplicationException unhandled application errors.
       * @throws Exception cloudstack unhandled errors
       */
-     void syncNetworkOffering() throws ApplicationException,Exception;
+     void syncNetworkOffering() throws ApplicationException, Exception;
 
      /**
       * Sync with CloudStack server Network.
@@ -96,7 +96,7 @@ public interface SyncService {
       * @throws ApplicationException unhandled application errors.
       * @throws Exception cloudstack unhandled errors
       */
-     void syncNetwork() throws ApplicationException,Exception;
+     void syncNetwork() throws ApplicationException, Exception;
 
      /**
       * Sync with CloudStack server Compute Offering.
@@ -104,7 +104,7 @@ public interface SyncService {
       * @throws ApplicationException unhandled application errors.
       * @throws Exception cloudstack unhandled errors
       */
-     void syncComputeOffering() throws ApplicationException,Exception;
+     void syncComputeOffering() throws ApplicationException, Exception;
 
      /**
       * Sync with CloudStack server Templates.
@@ -112,6 +112,6 @@ public interface SyncService {
       * @throws ApplicationException unhandled application errors.
       * @throws Exception cloudstack unhandled errors
       */
-     void syncTemplates() throws ApplicationException,Exception;
+     void syncTemplates() throws ApplicationException, Exception;
 
 }
