@@ -37,12 +37,6 @@ public class StorageOfferingCost {
     private Long id;
 
     /**
-     * Unique ID of the Storage offering.
-     */
-    @ManyToOne
-    private StorageOffering storageOffering;
-
-    /**
      * The Zone ID, this disk offering belongs to. Ignore this information as it
      * is not currently applicable.
      */
@@ -131,24 +125,6 @@ public class StorageOfferingCost {
      */
     public void setId(Long id) {
         this.id = id;
-    }
-
-    /**
-     * Get the storageOffering of the StorageOfferingCost.java.
-     *
-     * @return the storageOffering of the StorageOfferingCost.java
-     */
-    public StorageOffering getStorageOffering() {
-        return storageOffering;
-    }
-
-    /**
-     * Set the storageOffering of the StorageOfferingCost.java.
-     *
-     * @param storageOffering the storageOffering to set
-     */
-    public void setStorageOffering(StorageOffering storageOffering) {
-        this.storageOffering = storageOffering;
     }
 
     /**

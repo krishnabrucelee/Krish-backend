@@ -64,25 +64,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                config.setServer(1L);
-                String storageOfferings = csStorageService.createStorageOffering(storage.getName(),
-                        storage.getDescription(), JSON, optional(storage));
-                LOGGER.info("storage offer create response " + storageOfferings);
-                JSONObject storageOfferingsResponse = new JSONObject(storageOfferings).getJSONObject("creatediskofferingresponse")
-                        .getJSONObject("diskoffering");
-                if (storageOfferingsResponse.has("errorcode")) {
-                    errors = this.validateEvent(errors, storageOfferingsResponse.getString("errortext"));
-                    throw new ApplicationException(errors);
-                } else {
-                    storage.setUuid((String) storageOfferingsResponse.get("id"));
-
-                    if (storageOfferingsResponse.get("disksize").equals("0")) {
-                        storage.setDiskSize(0L);
-                    }
-                    if (storageOfferingsResponse.get("iscustomized").equals("false")) {
-                        storage.setIsCustomDisk(false);
-                    }
-                }
+                createStorage(storage, errors);
                 return storageOfferingRepo.save(storage);
             }
         } else {
@@ -100,15 +82,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                config.setServer(1L);
-                String storageOfferings = csStorageService.updateStorageOffering(String.valueOf(storage.getUuid()),
-                        JSON, optional(storage));
-                LOGGER.info("storage offer update response " + storageOfferings);
-                ObjectMapper mapper = new ObjectMapper();
-                JsonNode json = mapper.readTree(storageOfferings);
-                LOGGER.info("uuid" + json.get("updatediskofferingresponse").get(DISK).get("id"));
-                storage.setUuid(
-                        json.get("updatediskofferingresponse").get(DISK).get("id").toString().replace("\"", "").trim());
+                updateStorageOffering(storage, errors);
                 return storageOfferingRepo.save(storage);
             }
         } else {
@@ -238,12 +212,61 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     }
 
     /**
+     * Cloud stack create storage offering.
+     *
+     * @param storage Storage offering
+     * @param errors global error and field errors
+     * @throws Exception error
+     */
+    private void createStorage(StorageOffering storage, Errors errors) throws Exception {
+        config.setServer(1L);
+        String storageOfferings = csStorageService.createStorageOffering(storage.getName(),
+                storage.getDescription(), JSON, optional(storage));
+        LOGGER.info("storage offer create response " + storageOfferings);
+        JSONObject storageOfferingsResponse = new JSONObject(storageOfferings).getJSONObject("creatediskofferingresponse")
+                .getJSONObject("diskoffering");
+        if (storageOfferingsResponse.has("errorcode")) {
+            errors = this.validateEvent(errors, storageOfferingsResponse.getString("errortext"));
+            throw new ApplicationException(errors);
+        } else {
+            storage.setUuid((String) storageOfferingsResponse.get("id"));
+
+            if (storageOfferingsResponse.get("disksize").equals("0")) {
+                storage.setDiskSize(0L);
+            }
+            if (storageOfferingsResponse.get("iscustomized").equals("false")) {
+                storage.setIsCustomDisk(false);
+            }
+        }
+    }
+
+    /**
+     * Cloud stack update storage offering.
+     *
+     * @param storage Storage offering
+     * @param errors global error and field errors
+     * @throws Exception error
+     */
+    private void updateStorageOffering(StorageOffering storage, Errors errors) throws Exception {
+      config.setServer(1L);
+      String storageOfferings = csStorageService.updateStorageOffering(String.valueOf(storage.getUuid()),
+              JSON, optional(storage));
+      LOGGER.info("storage offer update response " + storageOfferings);
+      JSONObject storageOfferingsResponse = new JSONObject(storageOfferings).getJSONObject("updatediskofferingresponse")
+              .getJSONObject("diskoffering");
+      if (storageOfferingsResponse.has("errorcode")) {
+          errors = this.validateEvent(errors, storageOfferingsResponse.getString("errortext"));
+          throw new ApplicationException(errors);
+      } else {
+          storage.setUuid((String) storageOfferingsResponse.get("id"));
+          }
+    }
+
+    /**
      * Check the Storage offering CS error handling.
      *
-     * @param errors
-     *            error creating status.
-     * @param errmessage
-     *            error message.
+     * @param errors error creating status.
+     * @param errmessage error message.
      * @return errors.
      * @throws Exception error
      */

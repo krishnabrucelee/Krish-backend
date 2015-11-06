@@ -207,8 +207,7 @@ public class StorageOffering {
     /**
      * Storage offering price.
      */
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "storage_id")
+    @OneToMany(cascade = CascadeType.ALL)
     private List<StorageOfferingCost> storagePrice;
 
     /**
