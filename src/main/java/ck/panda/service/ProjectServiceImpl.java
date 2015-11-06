@@ -6,9 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Project;
-import ck.panda.domain.entity.User;
 import ck.panda.domain.repository.jpa.ProjectRepository;
-import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
@@ -31,10 +29,6 @@ public class ProjectServiceImpl implements ProjectService {
    @Autowired
    private ProjectRepository projectRepository;
 
-   /** Department repository reference. */
-   @Autowired
-   private UserRepository userRepository;
-
    @Override
    public Project save(Project project) throws Exception {
       Errors errors = validator.rejectIfNullEntity("project", project);
@@ -44,8 +38,6 @@ public class ProjectServiceImpl implements ProjectService {
       if (errors.hasErrors()) {
          throw new ApplicationException(errors);
       } else {
-         User user = userRepository.findOne(project.getProjectOwner().getId());
-         project.setProjectOwner(user);
          project.setIsActive(true);
          return projectRepository.save(project);
       }
@@ -60,8 +52,6 @@ public class ProjectServiceImpl implements ProjectService {
       if (errors.hasErrors()) {
          throw new ApplicationException(errors);
       } else {
-         User user = userRepository.findOne(project.getProjectOwner().getId());
-         project.setProjectOwner(user);
          return projectRepository.save(project);
       }
    }

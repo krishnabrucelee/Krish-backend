@@ -59,26 +59,38 @@ public class Project implements Serializable {
    private String description;
 
    /** Project owner id. */
-   @NotNull
-   @JoinColumn(name = "project_owner_id", referencedColumnName = "id")
+   @JoinColumn(name = "project_owner_id", referencedColumnName = "id", updatable = false, insertable = false)
    @ManyToOne(cascade = CascadeType.ALL)
    private User projectOwner;
+
+   /** Project owner id. */
+   @NotNull
+   @Column(name = "project_owner_id")
+   private Long projectOwnerId;
 
    /** List of users for projects. */
    @ManyToMany
    private List<User> userList;
 
    /** Project domain id. */
-   @NotNull
-   @JoinColumn(name = "domain_id", referencedColumnName = "id")
+   @JoinColumn(name = "domain_id", referencedColumnName = "id", updatable = false, insertable = false)
    @ManyToOne(targetEntity = Domain.class, fetch = FetchType.EAGER)
    private Domain domain;
 
-   /** Project department id. */
+   /** Project domain id. */
    @NotNull
-   @JoinColumn(name = "department_id", referencedColumnName = "id")
+   @Column(name = "domain_id")
+   private Long domainId;
+
+   /** Project department id. */
+   @JoinColumn(name = "department_id", referencedColumnName = "id", updatable = false, insertable = false)
    @ManyToOne(fetch = FetchType.EAGER, targetEntity = Department.class)
    private Department department;
+
+   /** Project department id. */
+   @NotNull
+   @Column(name = "department_id")
+   private Long departmentId;
 
    /** Project is whether active or disable. */
    @NotNull
@@ -110,10 +122,18 @@ public class Project implements Serializable {
    private User createdBy;
 
    /** Last updated by user. */
+   @Column(name = "created_by")
+   private Long createdById;
+
+   /** Last updated by user. */
    @LastModifiedBy
-   @JoinColumn(name = "updated_by", referencedColumnName = "id")
+   @JoinColumn(name = "updated_by", referencedColumnName = "id", insertable = false, updatable = false)
    @OneToOne
    private User updatedBy;
+
+   /** Last updated by user. */
+   @Column(name = "updated_by")
+   private Long updatedById;
 
    /** Created date and time. */
    @CreatedDate
@@ -379,6 +399,98 @@ public class Project implements Serializable {
     */
    public void setStatus(Status status) {
       this.status = status;
+   }
+
+
+
+   /**
+    * Get project owner id.
+    *
+    * @return the projectOwnerId.
+    */
+   public Long getProjectOwnerId() {
+      return projectOwnerId;
+   }
+
+   /**
+    * Set project owner id.
+    *
+    * @param projectOwnerId the project owner id to set.
+    */
+   public void setProjectOwnerId(Long projectOwnerId) {
+      this.projectOwnerId = projectOwnerId;
+   }
+
+   /**
+    * Get domain id.
+    *
+    * @return the domainId.
+    */
+   public Long getDomainId() {
+      return domainId;
+   }
+
+   /**
+    * Set domain id.
+    *
+    * @param domainId the domain id to set.
+    */
+   public void setDomainId(Long domainId) {
+      this.domainId = domainId;
+   }
+
+   /**
+    * Get department id.
+    *
+    * @return the departmentId.
+    */
+   public Long getDepartmentId() {
+      return departmentId;
+   }
+
+   /**
+    * Set department id.
+    *
+    * @param departmentId the department id to set.
+    */
+   public void setDepartmentId(Long departmentId) {
+      this.departmentId = departmentId;
+   }
+
+   /**
+    * Get created user id.
+    *
+    * @return the createdById.
+    */
+   public Long getCreatedById() {
+      return createdById;
+   }
+
+   /**
+    * Set updated user id.
+    *
+    * @param createdById the created user id to set.
+    */
+   public void setCreatedById(Long createdById) {
+      this.createdById = createdById;
+   }
+
+   /**
+    * Get updated user id.
+    *
+    * @return the updatedById.
+    */
+   public Long getUpdatedById() {
+      return updatedById;
+   }
+
+   /**
+    * Set updated user id.
+    *
+    * @param updatedById the updatedById to set
+    */
+   public void setUpdatedById(Long updatedById) {
+      this.updatedById = updatedById;
    }
 
    @Override

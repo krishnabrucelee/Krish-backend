@@ -236,7 +236,7 @@ public class VmInstance {
 
    /** Last modified date and time. */
    @LastModifiedDate
-   @Column(name = "last_modified_date_time")
+   @Column(name = "updated_date_time")
    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
    private ZonedDateTime updatedDateTime;
