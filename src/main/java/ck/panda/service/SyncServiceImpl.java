@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Hypervisor;
@@ -27,6 +28,7 @@ import ck.panda.util.CloudStackNetworkOfferingService;
 import ck.panda.util.CloudStackNetworkService;
 import ck.panda.util.CloudStackOSService;
 import ck.panda.util.CloudStackRegionService;
+import ck.panda.util.CloudStackServer;
 import ck.panda.util.CloudStackTemplateService;
 import ck.panda.util.CloudStackZoneService;
 import ck.panda.util.error.exception.ApplicationException;
@@ -42,6 +44,8 @@ import ck.panda.util.error.exception.ApplicationException;
  * 6. OS Type
  * 7. Network Offering
  * 8. Template
+ * 9. User
+ * 10. Network
  *
  * Get the corresponding data from cloud stack server, if the application does not have the data add it.
  * If the application has the data update it, if the application has data which the cloud stack server does not have,
@@ -67,7 +71,6 @@ public class SyncServiceImpl  implements SyncService {
     private ZoneService zoneService;
 
     /** CloudStackRegionService for Region connectivity with cloudstack. */
-
     @Autowired
     private CloudStackZoneService csZone;
 
@@ -99,13 +102,13 @@ public class SyncServiceImpl  implements SyncService {
     @Autowired
     private OsTypeService osTypeService;
 
+    /** Storage Offering Service  for listing storage offering. */
     @Autowired
     private StorageOfferingService storageService;
 
     /** CloudStackNetworkOfferingService for network connectivity with cloudstack. */
     @Autowired
     private CloudStackNetworkOfferingService csNetworkOfferingService;
-
 
     /** CloudStackAccountService for User connectivity with cloudstack. */
     @Autowired
@@ -131,6 +134,7 @@ public class SyncServiceImpl  implements SyncService {
     @Autowired
     private ComputeOfferingService computeService;
 
+    /** User Service  for listing users. */
     @Autowired
     private UserService userService;
 
@@ -142,95 +146,110 @@ public class SyncServiceImpl  implements SyncService {
     @Autowired
     private CloudStackTemplateService cloudStackTemplateService;
 
-    /**
+    /** CloudStack connector. */
+    @Autowired
+    private CloudStackServer server;
+
+    /** CloudStack configuration . */
+    @Autowired
+    private CloudStackConfigurationService cloudConfigService;
+
+
+    @Override
+    public void init() throws Exception {
+       CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
+       System.out.println(server.getClass().getName());
+       server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
+    }
+
+   /**
      * Sync call for synchronization list of Region, domain, region. template, hypervisor
      * @throws Exception unhandled errors.
      */
+    @Override
     public void sync() throws Exception {
-        try{
-        //1. Sync Domain entity
-        this.syncDomain();
-        }
-        catch(Exception e){
-        	LOGGER.error("ERROR AT synch Domaim", e);
-        }
-        try{
-        //2. Sync Region entity
-        this.syncRegion();
-	    }
-	    catch(Exception e){
-	    	LOGGER.error("ERROR AT synch Region", e);
-	    }
-        try{
-        //3. Sync Zone entity
-        this.syncZone();
-        }catch(Exception e){
-        	LOGGER.error("ERROR AT synch Zone", e);
-	    }
-        try{
-        //4. Sync Hypervisor entity
-        this.syncHypervisor();
-        }catch(Exception e){
-        	LOGGER.error("ERROR AT synch Hypervisor", e);
-	    }
-        try{
-        //5. Sync OSCategory entity
-        this.syncOsCategory();
-	    }catch(Exception e){
-	    	LOGGER.error("ERROR AT synch OS Category", e);
-	    }
-        try{
-        //6. Sync OSType entity
-        this.syncOsTypes();
-	    }catch(Exception e){
-	    	LOGGER.error("ERROR AT synch OS Types", e);
-	    }
-        try{
-        //7. Sync Storage offering entity
-        this.syncStorageOffering();
-        }
-        catch(Exception e){
-        	LOGGER.error("ERROR AT synch Storage Offering", e);
-	    }
-        try{
-        //8. Sync Network Offering entity
-        this.syncNetworkOffering();
-        }catch(Exception e){
-        	LOGGER.error("ERROR AT synch Network Offering", e);
-	    }
-        try{
-        //9. Sync Network  entity
-        this.syncNetwork();
-        }catch(Exception e){
-        	LOGGER.error("ERROR AT synch Network ", e);
-	    }
-        try{
-        //10. Sync Compute Offering entity
-        this.syncComputeOffering();
-        }catch(Exception e){
-        	LOGGER.error("ERROR AT synch Compute Offering", e);
-	    }
-        try{
-        //11. Sync User entity
-        this.syncUser();
-        }catch(Exception e){
-        	LOGGER.error("ERROR AT synch User", e);
-	    }
-        try{
-        //12. Sync Templates entity
-        this.syncTemplates();
-        }catch(Exception e){
-        	LOGGER.error("ERROR AT synch Templates", e);
-	    }
+      try {
+         // 1. Sync Domain entity
+         this.syncDomain();
+      } catch (Exception e) {
+         LOGGER.error("ERROR AT synch Domaim", e);
+      }
+      try {
+         // 2. Sync Region entity
+         this.syncRegion();
+      } catch (Exception e) {
+         LOGGER.error("ERROR AT synch Region", e);
+      }
+      try {
+         // 3. Sync Zone entity
+         this.syncZone();
+      } catch (Exception e) {
+         LOGGER.error("ERROR AT synch Zone", e);
+      }
+      try {
+         // 4. Sync Hypervisor entity
+         this.syncHypervisor();
+      } catch (Exception e) {
+         LOGGER.error("ERROR AT synch Hypervisor", e);
+      }
+      try {
+         // 5. Sync OSCategory entity
+         this.syncOsCategory();
+      } catch (Exception e) {
+         LOGGER.error("ERROR AT synch OS Category", e);
+      }
+      try {
+         // 6. Sync OSType entity
+         this.syncOsTypes();
+      } catch (Exception e) {
+         LOGGER.error("ERROR AT synch OS Types", e);
+      }
+      try {
+         // 7. Sync Storage offering entity
+         this.syncStorageOffering();
+      } catch (Exception e) {
+         LOGGER.error("ERROR AT synch Storage Offering", e);
+      }
+      try {
+         // 8. Sync Network Offering entity
+         this.syncNetworkOffering();
+      } catch (Exception e) {
+         LOGGER.error("ERROR AT synch Network Offering", e);
+      }
+      try {
+         // 9. Sync Network entity
+         this.syncNetwork();
+      } catch (Exception e) {
+         LOGGER.error("ERROR AT synch Network ", e);
+      }
+      try {
+         // 10. Sync Compute Offering entity
+         this.syncComputeOffering();
+      } catch (Exception e) {
+         LOGGER.error("ERROR AT synch Compute Offering", e);
+      }
+      try {
+         // 11. Sync User entity
+         this.syncUser();
+      } catch (Exception e) {
+         LOGGER.error("ERROR AT synch User", e);
+      }
+      try {
+         // 12. Sync Templates entity
+         this.syncTemplates();
+      } catch (Exception e) {
+         LOGGER.error("ERROR AT synch Templates", e);
+      }
     }
 
-    /**
+   /**
      * Sync with CloudStack server Domain.
      *
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors
      */
-    private void syncDomain() throws ApplicationException, Exception {
+    @Override
+    public void syncDomain() throws ApplicationException, Exception {
 
         //1. Get all the domain objects from CS server as hash
         List<Domain> csDomainList = domainService.findAllFromCSServer();
@@ -271,7 +290,8 @@ public class SyncServiceImpl  implements SyncService {
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    private void syncZone() throws ApplicationException, Exception {
+    @Override
+    public void syncZone() throws ApplicationException, Exception {
 
         //1. Get all the zone objects from CS server as hash
         List<Zone> csZoneList = zoneService.findAllFromCSServer();
@@ -312,7 +332,8 @@ public class SyncServiceImpl  implements SyncService {
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    private void syncRegion() throws ApplicationException, Exception {
+    @Override
+    public void syncRegion() throws ApplicationException, Exception {
 
         //1. Get all the region objects from CS server as hash
         List<Region> csRegionList = regionService.findAllFromCSServer();
@@ -354,7 +375,8 @@ public class SyncServiceImpl  implements SyncService {
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    private void syncHypervisor() throws ApplicationException, Exception {
+    @Override
+    public void syncHypervisor() throws ApplicationException, Exception {
 
         //1. Get all the hypervisor objects from CS server as hash
         List<Hypervisor> csHypervisorList = hypervisorService.findAllFromCSServer();
@@ -395,7 +417,8 @@ public class SyncServiceImpl  implements SyncService {
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    private void syncOsCategory() throws ApplicationException, Exception {
+    @Override
+    public void syncOsCategory() throws ApplicationException, Exception {
 
         //1. Get all the oscategory objects from CS server as hash
         List<OsCategory> csOsCategoryList = osCategoryService.findAllFromCSServer();
@@ -437,7 +460,8 @@ public class SyncServiceImpl  implements SyncService {
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors
      */
-    private void syncOsTypes() throws ApplicationException, Exception {
+    @Override
+    public void syncOsTypes() throws ApplicationException, Exception {
 
         //1. Get all the osType objects from CS server as hash
         List<OsType> csOsTypesList = osTypeService.findAllFromCSServer();
@@ -480,7 +504,8 @@ public class SyncServiceImpl  implements SyncService {
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors
      */
-    private void syncStorageOffering() throws ApplicationException, Exception {
+    @Override
+    public void syncStorageOffering() throws ApplicationException, Exception {
 
         //1. Get all the StorageOffering objects from CS server as hash
         List<StorageOffering> csStorageOfferingsList = storageService.findAllFromCSServer();
@@ -491,7 +516,7 @@ public class SyncServiceImpl  implements SyncService {
 
         // 3. Iterate application osType list
         for (StorageOffering storageOffering: appstorageServiceList) {
-        	storageOffering.setIsSyncFlag(false);
+           storageOffering.setIsSyncFlag(false);
              //3.1 Find the corresponding CS server osType object by finding it in a hash using uuid
             if (csStorageOfferingMap.containsKey(storageOffering.getUuid())) {
                 StorageOffering csStorageOffering = csStorageOfferingMap.get(storageOffering.getUuid());
@@ -524,7 +549,8 @@ public class SyncServiceImpl  implements SyncService {
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    private void syncUser() throws ApplicationException, Exception {
+    @Override
+    public void syncUser() throws ApplicationException, Exception {
 
         //1. Get all the user objects from CS server as hash
         List<User> csAccountService = userService.findAllFromCSServer();
@@ -535,7 +561,7 @@ public class SyncServiceImpl  implements SyncService {
 
         // 3. Iterate application user list
         for (User user: appUserList) {
-        	user.setSyncFlag(false);
+           user.setSyncFlag(false);
              //3.1 Find the corresponding CS server user object by finding it in a hash using uuid
             if (csUserMap.containsKey(user.getUuid())) {
                 User csUser = csUserMap.get(user.getUuid());
@@ -568,7 +594,8 @@ public class SyncServiceImpl  implements SyncService {
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors
      */
-    private void syncNetworkOffering() throws ApplicationException, Exception {
+    @Override
+    public void syncNetworkOffering() throws ApplicationException, Exception {
 
         //1. Get all the networkOffering objects from CS server as hash
         List<NetworkOffering> csNetworkOfferingList = networkOfferingService.findAllFromCSServer();
@@ -610,7 +637,8 @@ public class SyncServiceImpl  implements SyncService {
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors
      */
-    private void syncNetwork() throws ApplicationException, Exception {
+    @Override
+    public void syncNetwork() throws ApplicationException, Exception {
 
         //1. Get all the domain objects from CS server as hash
         List<Network> csNetworkList = networkService.findAllFromCSServer();
@@ -659,7 +687,8 @@ public class SyncServiceImpl  implements SyncService {
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors
      */
-    private void syncComputeOffering() throws ApplicationException, Exception {
+    @Override
+    public void syncComputeOffering() throws ApplicationException, Exception {
 
         //1. Get all the domain objects from CS server as hash
         List<ComputeOffering> csComputeOfferingList = computeService.findAllFromCSServer();
@@ -670,7 +699,7 @@ public class SyncServiceImpl  implements SyncService {
 
         // 3. Iterate application domain list
         for (ComputeOffering computeOffering: appDomainList) {
-        	computeOffering.setIsSyncFlag(false);
+           computeOffering.setIsSyncFlag(false);
              //3.1 Find the corresponding CS server domain object by finding it in a hash using uuid
             if (csComputeOfferingMap.containsKey(computeOffering.getUuid())) {
                 ComputeOffering csComputeService = csComputeOfferingMap.get(computeOffering.getUuid());
@@ -706,7 +735,8 @@ public class SyncServiceImpl  implements SyncService {
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors
      */
-    private void syncTemplates() throws ApplicationException, Exception {
+    @Override
+    public void syncTemplates() throws ApplicationException, Exception {
 
         //1. Get all the template objects from CS server as hash
         List<Template> csTemplatesList = templateService.findAllFromCSServer();
