@@ -102,6 +102,8 @@ public class GuestNetworkServiceImpl implements GuestNetworkService {
     }
 
     /**
+     * Hash Map to map the optional values to cloudstack.
+     *
      * @param guestNetwork Network
      * @return optional
      * @throws Exception Exception
