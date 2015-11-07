@@ -11,11 +11,21 @@ import ck.panda.domain.entity.OsType;
  */
 public interface OsTypeRepository extends PagingAndSortingRepository<OsType, Long> {
 
-	/** Get the OS type based on the uuid */
+    /**
+     * Get the OS type based on the uuid.
+     *
+     * @param uuid of the OS type
+     * @return OS type
+     */
     @Query(value = "select ost from OsType ost where ost.uuid = :uuid")
     OsType findByUUID(@Param("uuid") String uuid);
 
-    /** Get the OS type based on the OS category name */
+    /**
+     * Get the OS type based on the OS category name.
+     *
+     * @param categoryName of the OS type
+     * @return OS type
+     */
     @Query(value = "select ost from OsType ost where ost.osCategoryUuid IN (select osc.uuid from OsCategory osc where osc.name = :categoryName)")
     List<OsType> findByCategoryName(@Param("categoryName") String categoryName);
 }

@@ -48,8 +48,8 @@ public class OsCategoryController extends CRUDController<OsCategory> implements 
     /**
      * Get the list of OS category.
      *
-     * @return
-     * @throws Exception
+     * @return OS category list
+     * @throws Exception raise if error
      */
     @RequestMapping(value = "/list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
@@ -62,5 +62,4 @@ public class OsCategoryController extends CRUDController<OsCategory> implements 
     public void testMethod() throws Exception {
 
     }
-
 }
