@@ -34,82 +34,92 @@ import ck.panda.util.web.CRUDController;
 @Api(value = "Projects", description = "Operations with projects", produces = "application/json")
 public class ProjectController extends CRUDController<Project>implements ApiController {
 
-	/** Service reference to project. */
-	@Autowired
-	private ProjectService projectService;
+   /** Service reference to project. */
+   @Autowired
+   private ProjectService projectService;
 
-	@ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new project.", response = Project.class)
-	@Override
-	public Project create(@RequestBody Project project) throws Exception {
-		return projectService.save(project);
-	}
+   @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new project.", response = Project.class)
+   @Override
+   public Project create(@RequestBody Project project) throws Exception {
+      project.setDomainId(project.getDomain().getId());
+      project.setDepartmentId(project.getDepartment().getId());
+      project.setProjectOwnerId(project.getProjectOwner().getId());
+      return projectService.save(project);
+   }
 
-	@ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing project.", response = Project.class)
-	@Override
-	public Project update(@RequestBody Project project, @PathVariable(PATH_ID) Long id) throws Exception {
-		return projectService.update(project);
-	}
+   @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing project.", response = Project.class)
+   @Override
+   public Project update(@RequestBody Project project, @PathVariable(PATH_ID) Long id) throws Exception {
+      return projectService.update(project);
+   }
 
-	@ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing project.")
-	@Override
-	public void delete(@PathVariable(PATH_ID) Long id) throws Exception {
-		projectService.delete(id);
-	}
+   @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing project.")
+   @Override
+   public void delete(@PathVariable(PATH_ID) Long id) throws Exception {
+      projectService.delete(id);
+   }
 
-	@ApiOperation(value = SW_METHOD_DELETE, notes = "Disable an existing project.")
-	@RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = {
-			MediaType.APPLICATION_JSON_VALUE })
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void softDelete(@RequestBody Project project, @PathVariable(PATH_ID) Long id) throws Exception {
-		projectService.softDelete(project);
-	}
+   /** soft delete apply for project.
+   *
+   * @param project project object.
+   * @param id project id.
+   * @throws Exception if error occurs.
+   *
+   */
+   @ApiOperation(value = SW_METHOD_DELETE, notes = "Disable an existing project.")
+   @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = {
+         MediaType.APPLICATION_JSON_VALUE })
+   @ResponseStatus(HttpStatus.NO_CONTENT)
+   public void softDelete(@RequestBody Project project, @PathVariable(PATH_ID) Long id) throws Exception {
+      projectService.softDelete(project);
+   }
 
-	@ApiOperation(value = SW_METHOD_READ, notes = "Read an existing project.", response = Project.class)
-	@Override
-	public Project read(@PathVariable(PATH_ID) Long id) throws Exception {
-		return projectService.find(id);
-	}
+   @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing project.", response = Project.class)
+   @Override
+   public Project read(@PathVariable(PATH_ID) Long id) throws Exception {
+      return projectService.find(id);
+   }
 
-	@Override
-	public List<Project> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-			@RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
-					throws Exception {
-		PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Project.class);
-		Page<Project> pageResponse = projectService.findAllByActive(page);
-		response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
-		return pageResponse.getContent();
-	}
+   @Override
+   public List<Project> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
+         @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
+               throws Exception {
+      PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Project.class);
+      Page<Project> pageResponse = projectService.findAllByActive(page);
+      response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+      return pageResponse.getContent();
+   }
 
-	 /**
-     * list all projects for instance.
-     *
-     * @return projects
-     * @throws Exception
-     */
-  	@RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-  	@ResponseStatus(HttpStatus.OK)
-  	@ResponseBody
-  	protected List<Project> getSearch() throws Exception {
-  		return projectService.findAllByActive();
-  	}
+   /**
+    * list all projects for instance.
+    *
+    * @return projects
+    * @throws Exception if error occurs.
+    */
+   @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+   @ResponseStatus(HttpStatus.OK)
+   @ResponseBody
+   protected List<Project> getSearch() throws Exception {
+      return projectService.findAllByActive();
+   }
 
-  	/**
-  	 * list all projects for instance with query.
-  	 *
-  	 * @param query
-  	 * @return
-  	 * @throws Exception
-  	 */
-  	@RequestMapping(value = "search",method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	@ResponseStatus(HttpStatus.OK)
-	@ResponseBody
-	protected List<Project> getSearch(@RequestParam("q") String query) throws Exception {
-		return projectService.findByName(query);
-	}
+   /**
+    * list all projects for instance with query.
+    *
+    * @param query search term.
+    * @return list of projects.
+    * @throws Exception if error occurs.
+    */
+   @RequestMapping(value = "search", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+   @ResponseStatus(HttpStatus.OK)
+   @ResponseBody
+   protected List<Project> getSearch(@RequestParam("q") String query) throws Exception {
+      return projectService.findByName(query);
+   }
 
-	@Override
-	public void testMethod() throws Exception {
+   @Override
+   public void testMethod() throws Exception {
 
-	}
+   }
 
 }

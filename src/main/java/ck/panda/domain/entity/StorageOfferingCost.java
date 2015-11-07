@@ -2,84 +2,76 @@ package ck.panda.domain.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
-import javax.validation.constraints.Size;
-
-import org.hibernate.validator.constraints.NotEmpty;
+import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.format.annotation.DateTimeFormat;
+import ck.panda.domain.entity.StorageOffering.Status;
 
 /**
+ * Storage offering pricing that includes cost for disk and iops for per zone.
  *
- * @author Krishna<krishnakumar@assistanz.com>
  */
 @Entity
 @Table(name = "ck_storage_offering_cost")
 public class StorageOfferingCost {
 
-	/**
-	 * Unique ID of the disk offering cost.
-	 */
-	@Id
-	@GeneratedValue
-	@Column(name = "id")
-	private Long id;
+    /**
+     * Unique ID of the disk offering cost.
+     */
+    @Id
+    @GeneratedValue
+    @Column(name = "id")
+    private Long id;
 
-	/**
-	 * Unique ID of the Storage offering.
-	 */
-	@JoinColumn(name = "storage_offering_id", referencedColumnName = "id")
-    @OneToOne
-	private StorageOffering storageOfferingId;
+    /**
+     * The Zone ID, this disk offering belongs to. Ignore this information as it
+     * is not currently applicable.
+     */
+    @JoinColumn(name = "zone_id", referencedColumnName = "Id")
+    @ManyToOne
+    private Zone zone;
 
-	/**
-	 * Unique ID from Cloud Stack.
-	 */
-	@Size(min = 128)
-	@Column(name = "uuid")
-	private String uuid;
+    /**
+     * Cost per month usage.
+     */
+    @Column(name = "cost_per_hour_disk")
+    private Double costPerMonth;
 
-	/**
-	 * The domain ID, this disk offering belongs to. Ignore this information as
-	 * it is not currently applicable.
-	 */
-	@JoinColumn(name = "domain_id", referencedColumnName = "id")
-	@OneToOne
-	private Domain domain;
+    /**
+     * Cost for 1 Gb per month usage.
+     */
+    @Column(name = "cost_gb_per_month")
+    private Double costGbPerMonth;
 
-	/**
-	 * The Zone ID, this disk offering belongs to. Ignore this information as it
-	 * is not currently applicable.
-	 */
-	@JoinColumn(name = "zone_id", referencedColumnName = "id")
-	@OneToOne
-	private Zone zone;
+    /**
+     * Cost per month usage.
+     */
+    @Column(name = "cost_per_hour_iops")
+    private Double costPerIops;
 
-	/**
-	 * Cost per month usage. 
-	 */
-	@Column(name = "cost_per_month")
-	private Double costPerMonth;
-	
-	/**
-	 * Cost for 1 Gb per month usage. 
-	 */
-	@Column(name = "cost_gb_per_month")
-	private Double costGbPerMonth;
-	
-	/**
-	 * State for storage offering, whether it is Active or InActive
-	 */
-	@Column(name = "status", columnDefinition = "tinyint default 0")
-	private Boolean status;
+    /**
+     * Cost for 1 Iops per month usage.
+     */
+    @Column(name = "cost_iops_per_month")
+    private Double costIopsPerMonth;
+
+    /** Status attribute to verify status of the Storage offering. */
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     /** Version attribute to handle optimistic locking. */
     @Version
@@ -88,127 +80,267 @@ public class StorageOfferingCost {
 
     /** Created by user. */
     @CreatedBy
-    @JoinColumn(name = "created_user_id", referencedColumnName = "id")
+    @JoinColumn(name = "created_by", referencedColumnName = "id")
     @OneToOne
     private User createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @JoinColumn(name = "updated_user_id", referencedColumnName = "id")
+    @JoinColumn(name = "updated_by", referencedColumnName = "id")
     @OneToOne
     private User updatedBy;
 
     /** Created date and time. */
     @CreatedDate
+    @Column(name = "created_date_time")
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private DateTime createdDateTime;
 
-    /** Last modified date and time. */
+    /** Last updated date and time. */
     @LastModifiedDate
-    private DateTime lastModifiedDateTime;
+    @Column(name = "updated_date_time")
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private DateTime updatedDateTime;
 
-	public Long getId() {
-		return id;
-	}
+    /** An active attribute is to check whether the role is active or not. */
+    @Column(name = "is_active", columnDefinition = "tinyint default 1")
+    @Type(type = "org.hibernate.type.NumericBooleanType")
+    private Boolean isActive;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    /**
+     * Get the id of the Storage offering cost.
+     *
+     * @return the id of the Storage offering cost.
+     */
+    public Long getId() {
+        return id;
+    }
 
-	public StorageOffering getStorageOfferingId() {
-		return storageOfferingId;
-	}
+    /**
+     * Set the id of the Storage offering cost.
+     *
+     * @param id the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setStorageOfferingId(StorageOffering storageOfferingId) {
-		this.storageOfferingId = storageOfferingId;
-	}
+    /**
+     * Get the zone of the Storage offering cost.
+     *
+     * @return the zone of the Storage offering cost.
+     */
+    public Zone getZone() {
+        return zone;
+    }
 
-	public String getUuid() {
-		return uuid;
-	}
+    /**
+     * Set the zone of the Storage offering cost.
+     *
+     * @param zone the zone to set
+     */
+    public void setZone(Zone zone) {
+        this.zone = zone;
+    }
 
-	public void setUuid(String uuid) {
-		this.uuid = uuid;
-	}
+    /**
+     * Get the cost per month of the Storage offering cost.
+     *
+     * @return the costPerMonth of the Storage offering cost.
+     */
+    public Double getCostPerMonth() {
+        return costPerMonth;
+    }
 
-	public Domain getDomain() {
-		return domain;
-	}
+    /**
+     * Set the cost per month of the Storage offering cost.
+     *
+     * @param costPerMonth the costPerMonth to set
+     */
+    public void setCostPerMonth(Double costPerMonth) {
+        this.costPerMonth = costPerMonth;
+    }
 
-	public void setDomain(Domain domain) {
-		this.domain = domain;
-	}
+    /**
+     * Get the cost gb per month of the Storage offering cost.
+     *
+     * @return the costGbPerMonth of the Storage offering cost.
+     */
+    public Double getCostGbPerMonth() {
+        return costGbPerMonth;
+    }
 
-	public Zone getZone() {
-		return zone;
-	}
+    /**
+     * Set the cost gb per month of the Storage offering cost.
+     *
+     * @param costGbPerMonth the costGbPerMonth to set
+     */
+    public void setCostGbPerMonth(Double costGbPerMonth) {
+        this.costGbPerMonth = costGbPerMonth;
+    }
 
-	public void setZone(Zone zone) {
-		this.zone = zone;
-	}
+    /**
+     * Get the cost per iops of the Storage offering cost.
+     *
+     * @return the costPerIops of the Storage offering cost.
+     */
+    public Double getCostPerIops() {
+        return costPerIops;
+    }
 
-	public Double getCostPerMonth() {
-		return costPerMonth;
-	}
+    /**
+     * Set the cost per iops of the Storage offering cost.
+     *
+     * @param costPerIops the costPerIops to set
+     */
+    public void setCostPerIops(Double costPerIops) {
+        this.costPerIops = costPerIops;
+    }
 
-	public void setCostPerMonth(Double costPerMonth) {
-		this.costPerMonth = costPerMonth;
-	}
+    /**
+     * Get the cost iops per month of the Storage offering cost.
+     *
+     * @return the costIopsPerMonth of the Storage offering cost.
+     */
+    public Double getCostIopsPerMonth() {
+        return costIopsPerMonth;
+    }
 
-	public Double getCostGbPerMonth() {
-		return costGbPerMonth;
-	}
+    /**
+     * Set the cost iops per month of the Storage offering cost.
+     *
+     * @param costIopsPerMonth the costIopsPerMonth to set
+     */
+    public void setCostIopsPerMonth(Double costIopsPerMonth) {
+        this.costIopsPerMonth = costIopsPerMonth;
+    }
 
-	public void setCostGbPerMonth(Double costGbPerMonth) {
-		this.costGbPerMonth = costGbPerMonth;
-	}
+    /**
+     * Get the status of the Storage offering cost.
+     *
+     * @return the status of the Storage offering cost.
+     */
+    public Status getStatus() {
+        return status;
+    }
 
-	public Boolean getStatus() {
-		return status;
-	}
+    /**
+     * Set the status of the Storage offering cost.
+     *
+     * @param status the status to set
+     */
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 
-	public void setStatus(Boolean status) {
-		this.status = status;
-	}
+    /**
+     * Get the version of the Storage offering cost.
+     *
+     * @return the version of the Storage offering cost.
+     */
+    public Long getVersion() {
+        return version;
+    }
 
-	public Long getVersion() {
-		return version;
-	}
+    /**
+     * Set the version of the Storage offering cost.
+     *
+     * @param version the version to set
+     */
+    public void setVersion(Long version) {
+        this.version = version;
+    }
 
-	public void setVersion(Long version) {
-		this.version = version;
-	}
+    /**
+     * Get the created by of the storage offering.
+     *
+     * @return the createdBy of the storage offering
+     */
+    public User getCreatedBy() {
+        return createdBy;
+    }
 
-	public User getCreatedBy() {
-		return createdBy;
-	}
+    /**
+     * Set the created by of the storage offering cost.
+     *
+     * @param createdBy the created by to set
+     */
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
+    }
 
-	public void setCreatedBy(User createdBy) {
-		this.createdBy = createdBy;
-	}
+    /**
+     * Get the updated by of the storage offering cost.
+     *
+     * @return the updatedBy of the storage offering cost
+     */
+    public User getUpdatedBy() {
+        return updatedBy;
+    }
 
-	public User getUpdatedBy() {
-		return updatedBy;
-	}
+    /**
+     * Set the updated by of the storage offering cost.
+     *
+     * @param updatedBy the updated by to set
+     */
+    public void setUpdatedBy(User updatedBy) {
+        this.updatedBy = updatedBy;
+    }
 
-	public void setUpdatedBy(User updatedBy) {
-		this.updatedBy = updatedBy;
-	}
+    /**
+     * Get the created date time of the storage offering cost.
+     *
+     * @return the createdDateTime of the storage offering cost
+     */
+    public DateTime getCreatedDateTime() {
+        return createdDateTime;
+    }
 
-	public DateTime getCreatedDateTime() {
-		return createdDateTime;
-	}
+    /**
+     * Set the created date time of the storage offering cost.
+     *
+     * @param createdDateTime the created date time to set
+     */
+    public void setCreatedDateTime(DateTime createdDateTime) {
+        this.createdDateTime = createdDateTime;
+    }
 
-	public void setCreatedDateTime(DateTime createdDateTime) {
-		this.createdDateTime = createdDateTime;
-	}
+    /**
+     * Get the updated date time of the storage offering cost.
+     *
+     * @return the updatedDateTime of the storage offering cost
+     */
+    public DateTime getUpdatedDateTime() {
+        return updatedDateTime;
+    }
 
-	public DateTime getLastModifiedDateTime() {
-		return lastModifiedDateTime;
-	}
+    /**
+     * Set the updated date time of the storage offering cost.
+     *
+     * @param updatedDateTime the updated date time to set
+     */
+    public void setUpdatedDateTime(DateTime updatedDateTime) {
+        this.updatedDateTime = updatedDateTime;
+    }
 
-	public void setLastModifiedDateTime(DateTime lastModifiedDateTime) {
-		this.lastModifiedDateTime = lastModifiedDateTime;
-	}
+    /**
+     * Get the is active of the storage offering cost.
+     *
+     * @return the isActive of the storage offering cost
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
 
-    
+    /**
+     * Set the is active of the storage offering cost.
+     *
+     * @param isActive the is active to set
+     */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
 }

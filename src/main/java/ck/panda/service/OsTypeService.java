@@ -23,6 +23,7 @@ public interface OsTypeService extends CRUDService<OsType> {
     /**
      * To get list of OS types based on OS category name selection from cloudstack server.
      *
+     * @param categoryName name of the OS category
      * @return OS types list from server
      * @throws Exception unhandled errors.
      */

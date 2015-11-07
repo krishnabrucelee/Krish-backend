@@ -12,7 +12,7 @@ import ck.panda.domain.entity.Template.Type;
  */
 public interface TemplateRepository extends PagingAndSortingRepository<Template, Long> {
 
-	/**
+    /**
      * Get the template without system type.
      *
      * @param type of template
@@ -20,5 +20,4 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      */
     @Query(value = "select template from Template template where template.type != :type")
     List<Template> findByTemplate(@Param("type") Type type);
-
 }

@@ -1,7 +1,10 @@
 subject.not.found = Subject not found
 department.already.exist.for.same.domain = Department already exist for same domain
+<<<<<<< HEAD
 user.already.exist.for.same.domain = User already exist for same domain
+=======
 
 #Roles
 role.name.unique.error = Role Name already exists in department
 role.name.is.required = Role name is required
+>>>>>>> upstream/master
