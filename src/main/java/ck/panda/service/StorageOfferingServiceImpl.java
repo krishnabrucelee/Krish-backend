@@ -228,10 +228,10 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
         } else {
             storage.setUuid((String) storageOfferingsResponse.get("id"));
 
-            if (storageOfferingsResponse.get("disksize").equals("0")) {
+            if (storageOfferingsResponse.get("disksize").equals(0)) {
                 storage.setDiskSize(0L);
             }
-            if (storageOfferingsResponse.get("iscustomized").equals("false")) {
+            if (storageOfferingsResponse.get("iscustomized").equals(false)) {
                 storage.setIsCustomDisk(false);
             }
         }
