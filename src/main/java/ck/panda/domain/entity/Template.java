@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -12,6 +13,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -26,6 +28,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import ck.panda.util.JsonValidator;
 
 /**
  * Template are the first level hierarchy and we are creating the instance based
@@ -38,80 +41,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 @Table(name = "ck_template")
 @SuppressWarnings("serial")
 public class Template implements Serializable {
-
-    /** RootDiskController enum type used to list the static root disk controller values. */
-    public enum RootDiskController {
-        /** Root disk controller type as scsi. */
-        scsi,
-        /** Root disk controller type as ide. */
-        ide
-    }
-
-    /** NicAdapter enum type used to list the static NIC adapter values. */
-    public enum NicAdapter {
-        /** NIC adapter type as E1000. */
-        E1000,
-        /** NIC adapter type as PCNET32. */
-        PCNET32,
-        /** NIC adapter type as VMXNET2. */
-        VMXNET2,
-        /** NIC adapter type as VMXNET3. */
-        VMXNET3
-    }
-
-    /** KeyboardType enum type used to list the static Keyboard type values. */
-    public enum KeyboardType {
-        /** Keyboard type as US. */
-        US_Keyboard,
-        /** Keyboard type as UK. */
-        UK_Keyboard,
-        /** Keyboard type as Japanese. */
-        Japanese_Keyboard,
-        /** Keyboard type as simplified chinese. */
-        Simplified_Chinese
-    }
-
-    /** Format enum type used to list the static format values. */
-    public enum Format {
-        /** Hypervisor format type as VHD. */
-        VHD,
-        /** Hypervisor format type as VHDX. */
-        VHDX,
-        /** Hypervisor format type as QCOW2. */
-        QCOW2,
-        /** Hypervisor format type as RAW. */
-        RAW,
-        /** Hypervisor format type as VMDK. */
-        VMDK,
-        /** Hypervisor format type as OVA. */
-        OVA,
-        /** Hypervisor format type as BareMetal. */
-        BareMetal,
-        /** Hypervisor format type as TAR. */
-        TAR
-    }
-
-    /** TemplateType enum type used to list the static template type values. */
-    public enum Type {
-        /** Template type as SYSTEM. */
-        SYSTEM,
-        /** Template type as BUILTIN. */
-        BUILTIN,
-        /** Template type as PERHOST. */
-        PERHOST,
-        /** Template type as USER. */
-        USER,
-        /** Template type as ROUTING. */
-        ROUTING
-    }
-
-    /** Status enum type used to list the status values. */
-    public enum Status {
-        /** Template status as Active. */
-        Active,
-        /** Template status as InActive. */
-        InActive
-    }
 
     /** Id of the template. */
     @Id
@@ -216,8 +145,8 @@ public class Template implements Serializable {
     private String osVersion;
 
     /** Cost of the template. */
-    @Column(name = "cost")
-    private Integer cost;
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<TemplateCost> templateCost;
 
     /** Minimum core of the template. */
     @Column(name = "minimum_core")
@@ -600,19 +529,19 @@ public class Template implements Serializable {
     }
 
     /**
-     * Get the cost.
-     * @return cost
+     * Get the templateCost.
+     * @return templateCost
      */
-    public Integer getCost() {
-        return cost;
+    public List<TemplateCost> getTemplateCost() {
+        return templateCost;
     }
 
     /**
-     * Set the cost.
-     * @param cost - the Integer to set
+     * Set the templateCost.
+     * @param templateCost - the Template cost to set
      */
-    public void setCost(Integer cost) {
-        this.cost = cost;
+    public void setTemplateCost(List<TemplateCost> templateCost) {
+        this.templateCost = templateCost;
     }
 
     /**
@@ -940,18 +869,18 @@ public class Template implements Serializable {
      * @return displayText
      */
     public String getDisplayText() {
-		return displayText;
-	}
+        return displayText;
+    }
 
     /**
      * Set the display text.
      * @param displayText - the String to set
      */
-	public void setDisplayText(String displayText) {
-		this.displayText = displayText;
-	}
+    public void setDisplayText(String displayText) {
+        this.displayText = displayText;
+    }
 
-	/**
+    /**
      * Get the Transient type.
      * @return transZone
      */
@@ -999,6 +928,80 @@ public class Template implements Serializable {
         this.transHypervisor = transHypervisor;
     }
 
+    /** RootDiskController enum type used to list the static root disk controller values. */
+    public enum RootDiskController {
+        /** Root disk controller type as SCSI. */
+        SCSI,
+        /** Root disk controller type as IDE. */
+        IDE
+    }
+
+    /** NicAdapter enum type used to list the static NIC adapter values. */
+    public enum NicAdapter {
+        /** NIC adapter type as E1000. */
+        E1000,
+        /** NIC adapter type as PCNET32. */
+        PCNET32,
+        /** NIC adapter type as VMXNET2. */
+        VMXNET2,
+        /** NIC adapter type as VMXNET3. */
+        VMXNET3
+    }
+
+    /** KeyboardType enum type used to list the static Keyboard type values. */
+    public enum KeyboardType {
+        /** Keyboard type as US. */
+        US_KEYBOARD,
+        /** Keyboard type as UK. */
+        UK_KEYBOARD,
+        /** Keyboard type as Japanese. */
+        JAPANESE_KEYBOARD,
+        /** Keyboard type as simplified chinese. */
+        SIMPLIFIED_CHINESE
+    }
+
+    /** Format enum type used to list the static format values. */
+    public enum Format {
+        /** Hypervisor format type as VHD. */
+        VHD,
+        /** Hypervisor format type as VHDX. */
+        VHDX,
+        /** Hypervisor format type as QCOW2. */
+        QCOW2,
+        /** Hypervisor format type as RAW. */
+        RAW,
+        /** Hypervisor format type as VMDK. */
+        VMDK,
+        /** Hypervisor format type as OVA. */
+        OVA,
+        /** Hypervisor format type as BAREMETAL. */
+        BAREMETAL,
+        /** Hypervisor format type as TAR. */
+        TAR
+    }
+
+    /** TemplateType enum type used to list the static template type values. */
+    public enum Type {
+        /** Template type as SYSTEM. */
+        SYSTEM,
+        /** Template type as BUILTIN. */
+        BUILTIN,
+        /** Template type as PERHOST. */
+        PERHOST,
+        /** Template type as USER. */
+        USER,
+        /** Template type as ROUTING. */
+        ROUTING
+    }
+
+    /** Status enum type used to list the status values. */
+    public enum Status {
+        /** Template status as ACTIVE. */
+        ACTIVE,
+        /** Template status as INACTIVE. */
+        INACTIVE
+    }
+
     /**
      * Convert JSONObject to template entity.
      *
@@ -1006,39 +1009,46 @@ public class Template implements Serializable {
      * @return template entity object.
      * @throws JSONException handles json exception.
      */
+    @SuppressWarnings("static-access")
     public static Template convert(JSONObject object) throws JSONException {
         Template template = new Template();
         template.setSyncFlag(false);
-        template.uuid = object.has("id") ? object.get("id").toString() : "";
-        template.name = object.has("name") ? object.get("name").toString() : "";
-        template.description = object.has("displaytext") ? object.get("displaytext").toString() : "";
-        template.share = object.has("ispublic") ? object.getBoolean("ispublic") : false;
-        template.passwordEnabled = object.has("passwordenabled") ? object.getBoolean("passwordenabled") : false;
-        template.featured = object.has("isfeatured") ? object.getBoolean("isfeatured") : false;
-        template.extractable = object.has("isextractable") ? object.getBoolean("isextractable") : false;
-        template.dynamicallyScalable = object.has("isdynamicallyscalable") ? object.getBoolean("isdynamicallyscalable") : false;
-        template.transOsType = object.has("ostypeid") ? object.get("ostypeid").toString() : "";
-        template.transZone = object.has("zoneid") ? object.get("zoneid").toString() : "";
-        template.transHypervisor = object.has("hypervisor") ? object.get("hypervisor").toString() : "";
-        template.setFormat(template.getFormat().valueOf(object.has("format") ? object.get("format").toString() : ""));
-        template.setType(template.getType().valueOf(object.has("templatetype") ? object.get("templatetype").toString() : ""));
-        template.setStatus(template.getStatus().valueOf("Active"));
+        try {
+            template.uuid = JsonValidator.jsonStringValidation(object, "id");
+            template.name = JsonValidator.jsonStringValidation(object, "name");
+            template.description = JsonValidator.jsonStringValidation(object, "displaytext");
+            template.share = JsonValidator.jsonBooleanValidation(object, "ispublic");
+            template.passwordEnabled = JsonValidator.jsonBooleanValidation(object, "passwordenabled");
+            template.featured = JsonValidator.jsonBooleanValidation(object, "isfeatured");
+            template.extractable = JsonValidator.jsonBooleanValidation(object, "isextractable");
+            template.dynamicallyScalable = JsonValidator.jsonBooleanValidation(object, "isdynamicallyscalable");
+            template.transOsType = JsonValidator.jsonStringValidation(object, "ostypeid");
+            template.transZone = JsonValidator.jsonStringValidation(object, "zoneid");
+            template.transHypervisor = JsonValidator.jsonStringValidation(object, "hypervisor");
+            template.setFormat(template.getFormat().valueOf(JsonValidator.jsonStringValidation(object, "format")));
+            template.setType(template.getType().valueOf(JsonValidator.jsonStringValidation(object, "templatetype")));
+            if (JsonValidator.jsonBooleanValidation(object, "isready")) {
+                template.setStatus(template.getStatus().valueOf("ACTIVE"));
+            } else {
+                template.setStatus(template.getStatus().valueOf("INACTIVE"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return template;
     }
 
     /**
-     *Mapping entity object into list.
+     * Mapping entity object into list.
      *
      * @param templateList list of templates.
      * @return template map
      */
     public static Map<String, Template> convert(List<Template> templateList) {
         Map<String, Template> templateMap = new HashMap<String, Template>();
-
         for (Template template : templateList) {
             templateMap.put(template.getUuid(), template);
         }
-
         return templateMap;
     }
 }
