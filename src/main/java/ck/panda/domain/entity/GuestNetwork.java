@@ -10,7 +10,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
-import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import org.joda.time.DateTime;
 import org.json.JSONException;
@@ -69,7 +68,8 @@ public class GuestNetwork implements Serializable {
 
     /**  Network Type. */
     @Column(name = "network_type")
-    private String networkType;
+    @Enumerated(EnumType.STRING)
+    private NetworkType networkType;
 
     /**  CIDR Range of the IP address. */
     @Column(name = "cidr")
@@ -115,12 +115,12 @@ public class GuestNetwork implements Serializable {
      * Enum type for Network Type.
      *
      */
-    @PrePersist
-    void preInsert() {
-        /** Guest Network will be Isolated Type. */
-        this.networkType = "Isolated";
+    public enum NetworkType {
+        /** Guest Network type be Shared. */
+        SHARED,
+        /** Guest Network type be Isolated. */
+        ISOLATED
     }
-
     /**
      * Enum type for Guest Network Status.
      *
@@ -210,7 +210,7 @@ public class GuestNetwork implements Serializable {
      *
      * @return the type of the network
      */
-    public String getNetworkType() {
+    public NetworkType getNetworkType() {
         return networkType;
     }
 
@@ -370,7 +370,7 @@ public class GuestNetwork implements Serializable {
      * @param networkType
      * the networkType to set
      */
-    public void setNetworkType(String networkType) {
+    public void setNetworkType(NetworkType networkType) {
         this.networkType = networkType;
     }
 

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.GuestNetwork;
+import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.GuestNetworkRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackNetworkService;
@@ -31,6 +32,9 @@ public class GuestNetworkServiceImpl implements GuestNetworkService {
     /** Service Object for zone. */
     @Autowired
     private ZoneService zoneService;
+
+    @Autowired
+    private DomainRepository domainRepository;
 
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(GuestNetworkServiceImpl.class);
@@ -57,12 +61,14 @@ public class GuestNetworkServiceImpl implements GuestNetworkService {
             throw new ApplicationException(errors);
         } else {
             config.setServer(1L);
+
             String networkOfferings = csNetwork.createNetwork(guestNetwork.getDisplayText(),guestNetwork.getName(),"json",optional(guestNetwork));
                     JSONObject createComputeResponseJSON = new JSONObject(networkOfferings).getJSONObject("createnetworkresponse")
                         .getJSONObject("network");
-                guestNetwork.setUuid((String) createComputeResponseJSON.get("id"));
-                guestNetwork.setName((String)createComputeResponseJSON.get("name"));
-                guestNetwork.setDisplayText((String)createComputeResponseJSON.get("displaytext"));
+                guestNetwork.setUuid(createComputeResponseJSON.getString("id"));
+                guestNetwork.setNetworkType(guestNetwork.getNetworkType().valueOf(createComputeResponseJSON.getString("type").toUpperCase()));
+                guestNetwork.setDisplayText(createComputeResponseJSON.getString("displaytext"));
+                guestNetwork.setDomainId(domainRepository.findByUUID(createComputeResponseJSON.getString("domainid")));
 
             return guestnetworkRepo.save(guestNetwork);
         }

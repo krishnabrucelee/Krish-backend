@@ -22,6 +22,8 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 
+import ck.panda.util.JsonValidator;
+
 /**
  * The CloudStack administrator can create any number of custom network
  * offerings, in addition to the default network offerings provided by
@@ -361,11 +363,15 @@ public class NetworkOffering implements Serializable {
      */
     public static NetworkOffering convert(JSONObject object) throws JSONException {
         NetworkOffering networkOffering = new NetworkOffering();
-        networkOffering.uuid = object.getString("id");
-        networkOffering.name = object.getString("name");
-        networkOffering.trafficType = object.getString("traffictype");
-        networkOffering.guestIpType = object.getString("guestiptype");
-        networkOffering.displayText = object.getString("displaytext");
+        try {
+            networkOffering.uuid =  JsonValidator.jsonStringValidation(object, "id");
+            networkOffering.name = JsonValidator.jsonStringValidation(object, "name");
+            networkOffering.trafficType = JsonValidator.jsonStringValidation(object, "traffictype");
+            networkOffering.guestIpType = JsonValidator.jsonStringValidation(object, "guestiptype");
+            networkOffering.displayText = JsonValidator.jsonStringValidation(object, "displaytext");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return networkOffering;
     }
