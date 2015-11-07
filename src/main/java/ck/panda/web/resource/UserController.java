@@ -90,7 +90,7 @@ public class UserController extends CRUDController<User> implements ApiControlle
    	}
 
    @Override
-  public void testMethod() throws Exception {
+   public void testMethod() throws Exception {
 
   }
 }

@@ -55,4 +55,11 @@ public interface DepartmentService  extends CRUDService<Department>  {
      * @throws Exception unhandled errors.
      */
     List<Department> findAllFromCSServer() throws Exception;
+
+    /**
+     * @param uuid.
+     * @return department.
+     * @throws Exception
+     */
+    Department findByUuid(String uuid) throws Exception;
 }

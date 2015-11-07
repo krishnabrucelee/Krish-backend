@@ -65,7 +65,7 @@ public class UserServiceImpl implements UserService {
             user.setIsActive(true);
             csUserService.setServer(configServer.setServer(1L));
             HashMap<String, String> userMap = new HashMap<String, String>();
-            String cloudResponse = csUserService.createUser("admin",
+            String cloudResponse = csUserService.createUser(user.getDepartment().getUuid(),
                     user.getEmail(), user.getFirstName(), user.getLastName(), user.getUserName(), user.getPassword(), "json", userMap);
             JSONObject createUserResponseJSON = new JSONObject(cloudResponse).getJSONObject("createuserresponse")
                     .getJSONObject("user");
@@ -98,7 +98,6 @@ public class UserServiceImpl implements UserService {
     	if(user.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity("user", user);
             errors = validator.validateEntity(user, errors);
-            // errors = this.validateName(errors, user.getUserName(), user.getDomain());
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
@@ -158,8 +157,8 @@ public class UserServiceImpl implements UserService {
 
           // 1. Get the list of users from CS server using CS connector
           String response = csUserService.listUsers(userMap,"json");
-          JSONArray userListJSON = new JSONObject(response).getJSONObject("listaccountsresponse")
-                  .getJSONArray("account");
+          JSONArray userListJSON = new JSONObject(response).getJSONObject("listusersresponse")
+                  .getJSONArray("user");
           // 2. Iterate the json list, convert the single json entity to user
           for (int i = 0, size = userListJSON.length(); i < size; i++) {
               // 2.1 Call convert by passing JSONObject to User entity and Add

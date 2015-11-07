@@ -208,12 +208,12 @@ public class SyncServiceImpl  implements SyncService {
          LOGGER.error("ERROR AT synch Templates", e);
       }
 
-        try{
-            //12. Sync Templates entity
-            this.syncDepartment();
-            }catch(Exception e){
-                LOGGER.error("ERROR AT synch Department", e);
-            }
+      try{
+          // 13. Sync Department entity
+    	  this.syncDepartment();
+      }catch(Exception e){
+    	  LOGGER.error("ERROR AT synch Department", e);
+      }
     }
 
    /**
@@ -527,8 +527,8 @@ public class SyncServiceImpl  implements SyncService {
     public void syncUser() throws ApplicationException, Exception {
 
         //1. Get all the user objects from CS server as hash
-        List<User> csAccountService = userService.findAllFromCSServer();
-        HashMap<String, User> csUserMap = (HashMap<String, User>) User.convert(csAccountService);
+        List<User> csUserService = userService.findAllFromCSServer();
+        HashMap<String, User> csUserMap = (HashMap<String, User>) User.convert(csUserService);
 
         //2. Get all the user objects from application
         List<User> appUserList = userService.findAll();

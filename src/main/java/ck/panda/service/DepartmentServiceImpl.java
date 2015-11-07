@@ -205,4 +205,9 @@ public class DepartmentServiceImpl implements DepartmentService {
           return departmentList;
       }
 
+    @Override
+    public Department findByUuid(String uuid) throws Exception {
+            return (Department) departmentRepo.findByUuid(uuid);
+    }
+
     }
