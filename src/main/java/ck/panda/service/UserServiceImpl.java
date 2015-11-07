@@ -12,13 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.util.AppValidator;
-import ck.panda.util.CloudStackAccountService;
+import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
@@ -36,14 +34,15 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
-    /** Autowired cloudstackaccountservice object. */
+    /** Autowired CloudStackUserService object. */
     @Autowired
-    private CloudStackAccountService csAccountService;
+    private CloudStackUserService csUserService;
 
     /** Autowired configutill object. */
     @Autowired
     private ConfigUtil configServer;
 
+    /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
 
@@ -64,12 +63,12 @@ public class UserServiceImpl implements UserService {
             String encryptedPassword = new String(EncryptionUtil.encrypt(user.getPassword(), originalKey));
             user.setPassword(encryptedPassword);
             user.setIsActive(true);
-            csAccountService.setServer(configServer.setServer(1L));
+            csUserService.setServer(configServer.setServer(1L));
             HashMap<String, String> userMap = new HashMap<String, String>();
-            String cloudResponse = csAccountService.createAccount(String.valueOf(user.getType().ordinal()),
+            String cloudResponse = csUserService.createUser("admin",
                     user.getEmail(), user.getFirstName(), user.getLastName(), user.getUserName(), user.getPassword(), "json", userMap);
-            JSONObject createUserResponseJSON = new JSONObject(cloudResponse).getJSONObject("createaccountresponse")
-                    .getJSONObject("account");
+            JSONObject createUserResponseJSON = new JSONObject(cloudResponse).getJSONObject("createuserresponse")
+                    .getJSONObject("user");
             user.setUuid((String) createUserResponseJSON.get("id"));
             return userRepository.save(user);
         }
@@ -97,12 +96,20 @@ public class UserServiceImpl implements UserService {
     @Override
     public User update(User user) throws Exception {
     	if(user.getSyncFlag()) {
-          Errors errors = validator.rejectIfNullEntity("user", user);
-          errors = validator.validateEntity(user, errors);
-
-          if (errors.hasErrors()) {
-              throw new ApplicationException(errors);
-          } else {
+            Errors errors = validator.rejectIfNullEntity("user", user);
+            errors = validator.validateEntity(user, errors);
+            // errors = this.validateName(errors, user.getUserName(), user.getDomain());
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
+            } else {
+        	  configServer.setServer(1L);
+              HashMap<String, String> optional = new HashMap<String, String>();
+              optional.put("username", user.getUserName());
+              optional.put("email", user.getEmail());
+              optional.put("firstname", user.getFirstName());
+              optional.put("lastname", user.getLastName());
+              optional.put("password", user.getPassword());
+        	  csUserService.updateUser(user.getUuid(), optional,"json");
               return userRepository.save(user);
           }
     	} else {
@@ -111,12 +118,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void delete(User t) throws Exception {
-
+    public void delete(User user) throws Exception {
+    	if(user.getSyncFlag() == true) {
+    		configServer.setServer(1L);
+            csUserService.deleteUser(user.getId().toString(), "json");
+            userRepository.delete(user);
+        } else {
+            	userRepository.delete(user);
+        }
     }
 
     @Override
     public void delete(Long id) throws Exception {
+    	User user = userRepository.findOne(id);
+    	configServer.setServer(1L);
+        csUserService.deleteUser(user.getUuid(), "json");
         userRepository.delete(id);
     }
 
@@ -141,7 +157,7 @@ public class UserServiceImpl implements UserService {
           HashMap<String, String> userMap = new HashMap<String, String>();
 
           // 1. Get the list of users from CS server using CS connector
-          String response = csAccountService.listAccounts("json", userMap);
+          String response = csUserService.listUsers(userMap,"json");
           JSONArray userListJSON = new JSONObject(response).getJSONObject("listaccountsresponse")
                   .getJSONArray("account");
           // 2. Iterate the json list, convert the single json entity to user
