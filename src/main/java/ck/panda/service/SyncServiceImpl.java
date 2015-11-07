@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ck.panda.domain.entity.ComputeOffering;
+import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.entity.Network;
@@ -58,78 +59,43 @@ public class SyncServiceImpl  implements SyncService {
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(SyncServiceImpl.class);
 
-    /** CloudStackDomainService for domain connectivity with cloudstack. */
-    @Autowired
-    private CloudStackDomainService csdomain;
-
     /** RegionSerivce for listing Regions. */
     @Autowired
     private ZoneService zoneService;
-
-    /** CloudStackRegionService for Region connectivity with cloudstack. */
-
-    @Autowired
-    private CloudStackZoneService csZone;
 
     /** RegionSerivce for listing Regions. */
     @Autowired
     private RegionService regionService;
 
-    /** CloudStackRegionService for Region connectivity with cloudstack. */
-    @Autowired
-    private CloudStackRegionService csRegion;
-
     /** RegionSerivce for listing Regions. */
     @Autowired
     private HypervisorService hypervisorService;
-
-    /** CloudStackRegionService for Region connectivity with cloudstack. */
-    @Autowired
-    private CloudStackHypervisorsService csHypervisor;
 
     /** OSCategoryService for listing operating sytem in cloudstack server. */
     @Autowired
     private OsCategoryService osCategoryService;
 
-    /** CloudStackRegionService for Region connectivity with cloudstack. */
-    @Autowired
-    private CloudStackOSService csOsCategory;
-
-    /** OSCategoryService for listing operating sytem in cloudstack server. */
+      /** OSCategoryService for listing operating sytem in cloudstack server. */
     @Autowired
     private OsTypeService osTypeService;
 
     @Autowired
     private StorageOfferingService storageService;
 
-    /** CloudStackNetworkOfferingService for network connectivity with cloudstack. */
-    @Autowired
-    private CloudStackNetworkOfferingService csNetworkOfferingService;
-
-
-    /** CloudStackAccountService for User connectivity with cloudstack. */
-    @Autowired
-    private CloudStackAccountService csAccountService;
-
-   /** NetworkOfferingService for listing network offers in cloudstack server. */
+    /** NetworkOfferingService for listing network offers in cloudstack server. */
     @Autowired
     private NetworkOfferingService networkOfferingService;
-
-    /** CloudStackNetworkOfferingService for network connectivity with cloudstack. */
-    @Autowired
-    private CloudStackNetworkService csNetworkService;
 
    /** NetworkOfferingService for listing network offers in cloudstack server. */
     @Autowired
     private NetworkService networkService;
 
-    /** CloudStackNetworkOfferingService for network connectivity with cloudstack. */
-    @Autowired
-    private CloudStackComputeOffering csComputeService;
-
-   /** NetworkOfferingService for listing network offers in cloudstack server. */
+    /** NetworkOfferingService for listing network offers in cloudstack server. */
     @Autowired
     private ComputeOfferingService computeService;
+
+    @Autowired
+    private DepartmentService departmentService;
 
     @Autowired
     private UserService userService;
@@ -222,6 +188,13 @@ public class SyncServiceImpl  implements SyncService {
         }catch(Exception e){
         	LOGGER.error("ERROR AT synch Templates", e);
 	    }
+
+        try{
+            //12. Sync Templates entity
+            this.syncDepartment();
+            }catch(Exception e){
+            	LOGGER.error("ERROR AT synch Department", e);
+    	    }
     }
 
     /**
@@ -754,6 +727,49 @@ public class SyncServiceImpl  implements SyncService {
         //add it to app db
         for (String key: csTemplateMap.keySet()) {
             templateService.save(csTemplateMap.get(key));
+        }
+    }
+
+    /**
+     * Sync with Cloud Server Account.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    private void syncDepartment() throws ApplicationException, Exception {
+
+        //1. Get all the user objects from CS server as hash
+        List<Department> csAccountService = departmentService.findAllFromCSServer();
+        HashMap<String, Department> csUserMap = (HashMap<String, Department>) Department.convert(csAccountService);
+
+        //2. Get all the user objects from application
+        List<Department> appUserList = departmentService.findAll();
+
+        // 3. Iterate application user list
+        for (Department department: appUserList) {
+        	department.setSyncFlag(false);
+             //3.1 Find the corresponding CS server user object by finding it in a hash using uuid
+            if (csUserMap.containsKey(department.getUuid())) {
+            	Department csUser = csUserMap.get(department.getUuid());
+
+            	department.setFirstName(csUser.getFirstName());
+
+                //3.2 If found, update the user object in app db
+                departmentService.update(department);
+
+                //3.3 Remove once updated, so that we can have the list of cs user which is not added in the app
+                csUserMap.remove(department.getUuid());
+            } else {
+            	departmentService.delete(department);
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete
+             }
+
+             }
+        //4. Get the remaining list of cs server hash user object, then iterate and
+        //add it to app db
+        for (String key: csUserMap.keySet()) {
+        	departmentService.save(csUserMap.get(key));
         }
     }
 }

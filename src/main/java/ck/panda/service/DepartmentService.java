@@ -50,4 +50,12 @@ public interface DepartmentService  extends CRUDService<Department>  {
      * @throws Exception
      */
     List<Department> findAllByActive() throws Exception;
+
+    /**
+     * To get list of domains from cloudstack server.
+     *
+     * @return domain list from server
+     * @throws Exception unhandled errors.
+     */
+    List<Department> findAllFromCSServer() throws Exception;
 }

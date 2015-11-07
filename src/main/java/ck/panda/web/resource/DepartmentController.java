@@ -48,7 +48,7 @@ public class DepartmentController extends CRUDController<Department> implements 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Department.", response = Department.class)
     @Override
     public Department create(@RequestBody Department department) throws Exception {
-    	System.err.println(department.getDomain());
+    	department.setSyncFlag(true);
         return departmentService.save(department);
     }
 
@@ -61,7 +61,8 @@ public class DepartmentController extends CRUDController<Department> implements 
     @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing Department.", response = Department.class)
     @Override
     public Department update(@RequestBody Department department, @PathVariable(PATH_ID) Long id) throws Exception {
-        return departmentService.update(department);
+    	department.setSyncFlag(true);
+    	return departmentService.update(department);
     }
 
     /**
