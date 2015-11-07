@@ -13,7 +13,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -56,7 +55,7 @@ public class StorageOffering {
      * A desired name of the Storage offering.
      */
     @NotEmpty
-    @Size(min = 4, max = 20)
+    @Size(min = 4, max = 20, message = "storage.name.size.error")
     @Column(name = "name", nullable = false)
     private String name;
 
@@ -72,7 +71,7 @@ public class StorageOffering {
      * Description of Storage Offering.
      */
     @NotEmpty
-    @Size(min = 4, max = 400)
+    @Size(min = 4, max = 400, message = "storage.description.size.error")
     @Column(name = "description")
     private String description;
 
@@ -221,8 +220,8 @@ public class StorageOffering {
     /**
      * To set the default value while creating tables in database.
      */
-    @PrePersist
-    void preInsert() {
+    public StorageOffering() {
+        super();
         this.isActive = true;
     }
 
