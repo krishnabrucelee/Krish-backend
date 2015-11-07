@@ -13,36 +13,36 @@ import ck.panda.util.domain.vo.PagingAndSorting;
  */
 @Service
 public interface ProjectService extends CRUDService<Project> {
-	 /**
-     * Method to soft delete project.
-     *
-     * @param project
-     * @return
-     * @throws Exception error occurs
-     */
-	Project softDelete(Project project) throws Exception;
+   /**
+    * Method to soft delete project.
+    *
+    * @param project project object.
+    * @return project.
+    * @throws Exception if error occurs.
+    */
+   Project softDelete(Project project) throws Exception;
 
-    /**
-     * Find all the projects with active status.
-     *
-     * @param pagingAndSorting
-     * @return
-     * @throws Exception
-     */
-    Page<Project> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
+   /**
+    * Find all the projects with active status.
+    *
+    * @param pagingAndSorting paging and sorting information.
+    * @return list of project.
+    * @throws Exception if error occurs.
+    */
+   Page<Project> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
 
-    /**
- 	 * @param query search term.
- 	 * @return list of department.
- 	 * @throws Exception
- 	 */
- 	List<Project> findByName(String query) throws Exception;
+   /**
+    * @param query search term.
+    * @return list of department.
+    * @throws Exception if error occurs.
+    */
+   List<Project> findByName(String query) throws Exception;
 
- 	/**
-     * Find all the projects with active status.
-     *
-     * @return
-     * @throws Exception
-     */
-    List<Project> findAllByActive() throws Exception;
+   /**
+    * Find all the projects with active status.
+    *
+    * @return list of active project.
+    * @throws Exception if error occurs.
+    */
+   List<Project> findAllByActive() throws Exception;
 }

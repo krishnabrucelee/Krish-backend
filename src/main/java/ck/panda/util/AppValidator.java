@@ -78,8 +78,8 @@ public class AppValidator {
         }
         return errors;
     }
-    
-    
+
+
 
     /**
      * Reject if null entity.
@@ -151,7 +151,7 @@ public class AppValidator {
     public Errors validateName(Errors errors, String name, Department department) throws Exception {
 
         if (roleService.findByName(name, department) != null) {
-            errors.addFieldError("name", "Role Name is already exists in department");
+            errors.addFieldError("name", "role.name.unique.error");
         }
         return errors;
     }

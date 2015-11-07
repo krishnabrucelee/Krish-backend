@@ -39,7 +39,7 @@ public class DepartmentBuilder {
      * @return name
      */
     public DepartmentBuilder name(String name) {
-        department.setName(name);
+        department.setUserName(name);
         return this;
     }
 

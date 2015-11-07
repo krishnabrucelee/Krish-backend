@@ -18,7 +18,9 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, L
     /**
      * Find the project already exist for the same department.
      *
-     * @param name of the project
+     * @param name project name.
+     * @param department department object.
+     * @param projectId project id.
      * @return project name
      */
     @Query(value = "select prjct from Project prjct where prjct.isActive IS TRUE AND prjct.name=:name AND prjct.department=:department AND prjct.id!=:projectId)")
@@ -27,8 +29,8 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, L
     /**
      * find all the project with active status.
      *
-     * @param pageable
-     * @return
+     * @param pageable pagination information.
+     * @return list of project.
      */
     @Query(value = "select prjct from Project prjct where prjct.isActive IS TRUE")
     Page<Project> findAllByActive(Pageable pageable);
@@ -36,8 +38,8 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, L
     /**
      * find all the department with active status with query.
      *
-     * @param query
-     * @return
+     * @param query search term.
+     * @return list of project.
      */
     @Query(value = "select prrjct from Project prrjct where prrjct.isActive IS TRUE AND lower(prrjct.name) LIKE '%' || lower(:query) || '%' ")
     List<Project> findByName(@Param("query") String query);
@@ -45,7 +47,7 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, L
     /**
      * find all the project with active status.
      *
-     * @return
+     * @return list of active project.
      */
     @Query(value = "select prjct from Project prjct where prjct.isActive IS TRUE")
     List<Project> findAllByActive();
