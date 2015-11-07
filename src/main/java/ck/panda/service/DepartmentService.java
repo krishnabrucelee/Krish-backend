@@ -1,12 +1,9 @@
 package ck.panda.service;
 
 import ck.panda.domain.entity.Department;
-import ck.panda.domain.entity.Domain;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
-
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -37,13 +34,13 @@ public interface DepartmentService  extends CRUDService<Department>  {
      Page<Department> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
 
      /**
- 	 * @param query search term.
- 	 * @return list of department.
- 	 * @throws Exception
- 	 */
- 	List<Department> findByName(String query) throws Exception;
+      * @param query search term.
+      * @return list of department.
+      * @throws Exception
+      */
+     List<Department> findByName(String query) throws Exception;
 
- 	/**
+     /**
      * Find all the departments with active status.
      *
      * @return

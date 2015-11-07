@@ -5,7 +5,6 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -106,7 +105,7 @@ public class Department implements Serializable {
     private ZonedDateTime updatedDateTime;
 
     /** User name of the account. */
-      @Column(name = "user_name")
+    @Column(name = "user_name")
     private String userName;
 
     /** Password of the account. */

@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Department;
@@ -213,8 +212,8 @@ public class SyncServiceImpl  implements SyncService {
             //12. Sync Templates entity
             this.syncDepartment();
             }catch(Exception e){
-            	LOGGER.error("ERROR AT synch Department", e);
-    	    }
+                LOGGER.error("ERROR AT synch Department", e);
+            }
     }
 
    /**
@@ -778,12 +777,12 @@ public class SyncServiceImpl  implements SyncService {
 
         // 3. Iterate application user list
         for (Department department: appUserList) {
-        	department.setSyncFlag(false);
+            department.setSyncFlag(false);
              //3.1 Find the corresponding CS server user object by finding it in a hash using uuid
             if (csUserMap.containsKey(department.getUuid())) {
-            	Department csUser = csUserMap.get(department.getUuid());
+                Department csUser = csUserMap.get(department.getUuid());
 
-            	department.setFirstName(csUser.getFirstName());
+                department.setFirstName(csUser.getFirstName());
 
                 //3.2 If found, update the user object in app db
                 departmentService.update(department);
@@ -791,7 +790,7 @@ public class SyncServiceImpl  implements SyncService {
                 //3.3 Remove once updated, so that we can have the list of cs user which is not added in the app
                 csUserMap.remove(department.getUuid());
             } else {
-            	departmentService.delete(department);
+                departmentService.delete(department);
                 //3.2 If not found, delete it from app db
                 //TODO clarify the business requirement, since it has impact in the application if it is used
                 //TODO clarify is this a soft or hard delete
@@ -801,7 +800,7 @@ public class SyncServiceImpl  implements SyncService {
         //4. Get the remaining list of cs server hash user object, then iterate and
         //add it to app db
         for (String key: csUserMap.keySet()) {
-        	departmentService.save(csUserMap.get(key));
+            departmentService.save(csUserMap.get(key));
         }
     }
 }
