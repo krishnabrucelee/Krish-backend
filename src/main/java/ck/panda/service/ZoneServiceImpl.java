@@ -6,6 +6,8 @@ import java.util.HashMap;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,9 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 @Service
 public class ZoneServiceImpl implements ZoneService {
 
+	/** Logger attribute. */
+	 private static final Logger LOGGER = LoggerFactory.getLogger(ZoneServiceImpl.class);
+
     /** Zone repository reference. */
     @Autowired
     private ZoneRepository zoneRepo;
@@ -32,11 +37,13 @@ public class ZoneServiceImpl implements ZoneService {
 
     @Override
     public Zone save(Zone zone) throws Exception {
+        LOGGER.debug(zone.getUuid());
         return zoneRepo.save(zone);
     }
 
     @Override
     public Zone update(Zone zone) throws Exception {
+    	 LOGGER.debug(zone.getUuid());
         return zoneRepo.save(zone);
     }
 

@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,9 @@ import ck.panda.util.domain.vo.PagingAndSorting;
  */
 @Service
 public class OsTypeServiceImpl implements OsTypeService {
+
+	/** Logger attribute. */
+	 private static final Logger LOGGER = LoggerFactory.getLogger(OsTypeServiceImpl.class);
 
     /** OS type repository reference. */
     @Autowired
@@ -35,11 +40,13 @@ public class OsTypeServiceImpl implements OsTypeService {
 
     @Override
     public OsType save(OsType ostype) throws Exception {
+    	 LOGGER.debug(ostype.getUuid());
         return ostyperepository.save(ostype);
     }
 
     @Override
     public OsType update(OsType ostype) throws Exception {
+    	LOGGER.debug(ostype.getUuid());
         return ostyperepository.save(ostype);
     }
 

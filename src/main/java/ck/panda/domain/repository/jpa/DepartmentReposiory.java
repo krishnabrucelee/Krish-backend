@@ -26,7 +26,7 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
     Department findByNameAndDomain(@Param("name") String name, @Param("domain") Domain domain, @Param("departmentId") Long departmentId);
 
     /**
-     * find all the departmen with active status.
+     * find all the department with active status.
      *
      * @param pageable
      * @return
@@ -43,7 +43,7 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
     List<Department> findAllByActive(@Param("query") String query);
 
     /**
-     * find all the departmen with active status.
+     * find all the department with active status.
      *
      * @return
      */

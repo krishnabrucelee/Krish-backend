@@ -12,8 +12,13 @@ import ck.panda.domain.entity.NetworkOffering;
  */
 public interface NetworkOfferingRepository extends PagingAndSortingRepository<NetworkOffering, Long> {
 
+    /**
+     * Get the Network offering based on the name.
+     * @param pageable
+     * @return
+     */
     @Query(value = "select networkOffer from NetworkOffering networkOffer where networkOffer.guestIpType = 'Isolated'")
-	Page<NetworkOffering> findAllByIsolated(Pageable pageable);
+    Page<NetworkOffering> findAllByIsolated(Pageable pageable);
 
 
 }

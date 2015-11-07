@@ -6,6 +6,8 @@ import java.util.HashMap;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,9 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 @Service
 public class DomainServiceImpl implements DomainService {
 
+  /** Logger attribute. */
+  private static final Logger LOGGER = LoggerFactory.getLogger(DomainServiceImpl.class);
+
   /** Department repository reference. */
   @Autowired
   private DomainRepository domainRepo;
@@ -31,11 +36,13 @@ public class DomainServiceImpl implements DomainService {
 
   @Override
   public Domain save(Domain domain) throws Exception {
+      LOGGER.debug(domain.getUuid());
     return domainRepo.save(domain);
   }
 
   @Override
   public Domain update(Domain domain) throws Exception {
+      LOGGER.debug(domain.getUuid());
     return domainRepo.save(domain);
   }
 

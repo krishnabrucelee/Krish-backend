@@ -2,6 +2,8 @@ package ck.panda.service;
 
 import java.util.HashMap;
 import java.util.List;
+
+import org.neo4j.cypher.internal.compiler.v2_1.perty.docbuilders.toStringDocBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,16 +21,6 @@ import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.Zone;
-import ck.panda.util.CloudStackAccountService;
-import ck.panda.util.CloudStackComputeOffering;
-import ck.panda.util.CloudStackDomainService;
-import ck.panda.util.CloudStackHypervisorsService;
-import ck.panda.util.CloudStackNetworkOfferingService;
-import ck.panda.util.CloudStackNetworkService;
-import ck.panda.util.CloudStackOSService;
-import ck.panda.util.CloudStackRegionService;
-import ck.panda.util.CloudStackTemplateService;
-import ck.panda.util.CloudStackZoneService;
 import ck.panda.util.error.exception.ApplicationException;
 
 /**
@@ -58,79 +50,43 @@ public class SyncServiceImpl  implements SyncService {
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(SyncServiceImpl.class);
 
-    /** CloudStackDomainService for domain connectivity with cloudstack. */
-    @Autowired
-    private CloudStackDomainService csdomain;
-
     /** RegionSerivce for listing Regions. */
     @Autowired
     private ZoneService zoneService;
-
-    /** CloudStackRegionService for Region connectivity with cloudstack. */
-
-    @Autowired
-    private CloudStackZoneService csZone;
 
     /** RegionSerivce for listing Regions. */
     @Autowired
     private RegionService regionService;
 
-    /** CloudStackRegionService for Region connectivity with cloudstack. */
-    @Autowired
-    private CloudStackRegionService csRegion;
-
     /** RegionSerivce for listing Regions. */
     @Autowired
     private HypervisorService hypervisorService;
-
-    /** CloudStackRegionService for Region connectivity with cloudstack. */
-    @Autowired
-    private CloudStackHypervisorsService csHypervisor;
 
     /** OSCategoryService for listing operating sytem in cloudstack server. */
     @Autowired
     private OsCategoryService osCategoryService;
 
-    /** CloudStackRegionService for Region connectivity with cloudstack. */
-    @Autowired
-    private CloudStackOSService csOsCategory;
-
     /** OSCategoryService for listing operating sytem in cloudstack server. */
     @Autowired
     private OsTypeService osTypeService;
 
+    /** Storage offering service for listing storage offers. */
     @Autowired
     private StorageOfferingService storageService;
 
-    /** CloudStackNetworkOfferingService for network connectivity with cloudstack. */
-    @Autowired
-    private CloudStackNetworkOfferingService csNetworkOfferingService;
-
-
-    /** CloudStackAccountService for User connectivity with cloudstack. */
-    @Autowired
-    private CloudStackAccountService csAccountService;
-
-   /** NetworkOfferingService for listing network offers in cloudstack server. */
+    /** NetworkOfferingService for listing network offers in cloudstack server. */
     @Autowired
     private NetworkOfferingService networkOfferingService;
 
-    /** CloudStackNetworkOfferingService for network connectivity with cloudstack. */
-    @Autowired
-    private CloudStackNetworkService csNetworkService;
-
-   /** NetworkOfferingService for listing network offers in cloudstack server. */
+    /** NetworkOfferingService for listing network offers in cloudstack server. */
     @Autowired
     private NetworkService networkService;
-
-    /** CloudStackNetworkOfferingService for network connectivity with cloudstack. */
-    @Autowired
-    private CloudStackComputeOffering csComputeService;
 
    /** NetworkOfferingService for listing network offers in cloudstack server. */
     @Autowired
     private ComputeOfferingService computeService;
 
+    /** User service for listing users. */
     @Autowired
     private UserService userService;
 
@@ -138,90 +94,83 @@ public class SyncServiceImpl  implements SyncService {
     @Autowired
     private TemplateService templateService;
 
-    /** CloudStack template service for template connectivity with cloudstack. */
-    @Autowired
-    private CloudStackTemplateService cloudStackTemplateService;
-
     /**
      * Sync call for synchronization list of Region, domain, region. template, hypervisor
      * @throws Exception unhandled errors.
      */
     public void sync() throws Exception {
-        try{
+        try {
         //1. Sync Domain entity
         this.syncDomain();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Domaim", e);
         }
-        catch(Exception e){
-        	LOGGER.error("ERROR AT synch Domaim", e);
-        }
-        try{
+        try {
         //2. Sync Region entity
         this.syncRegion();
-	    }
-	    catch(Exception e){
-	    	LOGGER.error("ERROR AT synch Region", e);
-	    }
-        try{
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Region", e);
+        }
+        try {
         //3. Sync Zone entity
         this.syncZone();
-        }catch(Exception e){
-        	LOGGER.error("ERROR AT synch Zone", e);
-	    }
-        try{
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Zone", e);
+        }
+        try {
         //4. Sync Hypervisor entity
         this.syncHypervisor();
-        }catch(Exception e){
-        	LOGGER.error("ERROR AT synch Hypervisor", e);
-	    }
-        try{
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Hypervisor", e);
+        }
+        try {
         //5. Sync OSCategory entity
         this.syncOsCategory();
-	    }catch(Exception e){
-	    	LOGGER.error("ERROR AT synch OS Category", e);
-	    }
-        try{
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch OS Category", e);
+        }
+        try {
         //6. Sync OSType entity
         this.syncOsTypes();
-	    }catch(Exception e){
-	    	LOGGER.error("ERROR AT synch OS Types", e);
-	    }
-        try{
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch OS Types", e);
+        }
+        try {
         //7. Sync Storage offering entity
         this.syncStorageOffering();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Storage Offering", e);
         }
-        catch(Exception e){
-        	LOGGER.error("ERROR AT synch Storage Offering", e);
-	    }
-        try{
+        try {
         //8. Sync Network Offering entity
         this.syncNetworkOffering();
-        }catch(Exception e){
-        	LOGGER.error("ERROR AT synch Network Offering", e);
-	    }
-        try{
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Network Offering", e);
+        }
+        try {
         //9. Sync Network  entity
         this.syncNetwork();
-        }catch(Exception e){
-        	LOGGER.error("ERROR AT synch Network ", e);
-	    }
-        try{
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Network ", e);
+        }
+        try {
         //10. Sync Compute Offering entity
         this.syncComputeOffering();
-        }catch(Exception e){
-        	LOGGER.error("ERROR AT synch Compute Offering", e);
-	    }
-        try{
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Compute Offering", e);
+        }
+        try {
         //11. Sync User entity
         this.syncUser();
-        }catch(Exception e){
-        	LOGGER.error("ERROR AT synch User", e);
-	    }
-        try{
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch User", e);
+        }
+        try {
         //12. Sync Templates entity
         this.syncTemplates();
-        }catch(Exception e){
-        	LOGGER.error("ERROR AT synch Templates", e);
-	    }
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Templates", e);
+        }
     }
 
     /**
@@ -240,8 +189,9 @@ public class SyncServiceImpl  implements SyncService {
         List<Domain> appDomainList = domainService.findAll();
 
         // 3. Iterate application domain list
+        LOGGER.debug("Total rows updated : " + String.valueOf(appDomainList.size()));
         for (Domain domain: appDomainList) {
-             //3.1 Find the corresponding CS server domain object by finding it in a hash using uuid
+               //3.1 Find the corresponding CS server domain object by finding it in a hash using uuid
             if (csDomainMap.containsKey(domain.getUuid())) {
                 Domain csDomain = csDomainMap.get(domain.getUuid());
 
@@ -261,9 +211,14 @@ public class SyncServiceImpl  implements SyncService {
         }
         //4. Get the remaining list of cs server hash domain object, then iterate and
         //add it to app db
-        for (String key: csDomainMap.keySet()) {
+           for (String key: csDomainMap.keySet()) {
+            Domain domain = new Domain();
+            LOGGER.debug("Syncservice domain uuid:");
             domainService.save(csDomainMap.get(key));
+
         }
+     LOGGER.debug("Total rows added",String.valueOf(csDomainMap.size()));
+
     }
 
     /**
@@ -282,6 +237,7 @@ public class SyncServiceImpl  implements SyncService {
 
         // 3. Iterate application zone list
         for (Zone zone: appZoneList) {
+            LOGGER.debug("Total rows updated : " + String.valueOf(appZoneList.size()));
              //3.1 Find the corresponding CS server zone object by finding it in a hash using uuid
             if (csZoneMap.containsKey(zone.getUuid())) {
                 Zone csZone = csZoneMap.get(zone.getUuid());
@@ -303,8 +259,10 @@ public class SyncServiceImpl  implements SyncService {
         //4. Get the remaining list of cs server hash zone object, then iterate and
         //add it to app db
         for (String key: csZoneMap.keySet()) {
+            LOGGER.debug("Syncservice zone uuid:");
             zoneService.save(csZoneMap.get(key));
         }
+        LOGGER.debug("Total rows added : " + String.valueOf(csZoneMap.size()));
     }
 
     /**
@@ -323,6 +281,7 @@ public class SyncServiceImpl  implements SyncService {
 
         // 3. Iterate application region list
         for (Region region: appRegionList) {
+             LOGGER.debug("Total rows updated : " + String.valueOf(appRegionList.size()));
              //3.1 Find the corresponding CS server region object by finding it in a hash using uuid
             if (csRegionMap.containsKey(region.getName())) {
                 Region csRegion = csRegionMap.get(region.getName());
@@ -345,8 +304,11 @@ public class SyncServiceImpl  implements SyncService {
         //4. Get the remaining list of cs server hash region object, then iterate and
         //add it to app db
         for (String key: csRegionMap.keySet()) {
+            LOGGER.debug("Syncservice region name:");
             regionService.save(csRegionMap.get(key));
         }
+        LOGGER.debug("Total rows added : " + String.valueOf(csRegionMap.size()));
+
     }
 
     /**
@@ -365,7 +327,7 @@ public class SyncServiceImpl  implements SyncService {
 
         // 3. Iterate application hypervisor list
         for (Hypervisor hypervisor: appHypervisorList) {
-
+             LOGGER.debug("Total rows updated : " + String.valueOf(appHypervisorList.size()));
             //3.1 Find the corresponding CS server hypervisor object by finding it in a hash using uuid
             if (csHypervisorMap.containsKey(hypervisor.getName())) {
                  Hypervisor csHypervisor = csHypervisorMap.get(hypervisor.getName());
@@ -386,8 +348,11 @@ public class SyncServiceImpl  implements SyncService {
         //4. Get the remaining list of cs server hash hypervisor object, then iterate and
         //add it to app db
         for (String key: csHypervisorMap.keySet()) {
+            LOGGER.debug("Syncservice hypervisor uuid :");
             hypervisorService.save(csHypervisorMap.get(key));
         }
+        LOGGER.debug("Total rows added : " + String.valueOf(csHypervisorMap.size()));
+
     }
 
     /**
@@ -406,7 +371,7 @@ public class SyncServiceImpl  implements SyncService {
 
         // 3. Iterate application oscategory list
         for (OsCategory osCategory: appOsCategoryList) {
-
+            LOGGER.debug("Total rows updated : " + String.valueOf(appOsCategoryList.size()));
             //3.1 Find the corresponding CS server oscategory object by finding it in a hash using uuid
             if (csOsCategoryMap.containsKey(osCategory.getUuid())) {
                 OsCategory csOsCategory = csOsCategoryMap.get(osCategory.getUuid());
@@ -427,8 +392,11 @@ public class SyncServiceImpl  implements SyncService {
         //4. Get the remaining list of cs server hash oscategory object, then iterate and
         //add it to app db
         for (String key: csOsCategoryMap.keySet()) {
+            LOGGER.debug("Syncservice os category uuid:");
             osCategoryService.save(csOsCategoryMap.get(key));
         }
+        LOGGER.debug("Total rows added : " + String.valueOf(csOsCategoryMap.size()));
+
     }
 
     /**
@@ -448,6 +416,7 @@ public class SyncServiceImpl  implements SyncService {
 
         // 3. Iterate application osType list
         for (OsType osType: appOsTypeList) {
+               LOGGER.debug("Total rows updated : " + String.valueOf(appOsTypeList.size()));
              //3.1 Find the corresponding CS server osType object by finding it in a hash using uuid
             if (csOsTypeMap.containsKey(osType.getUuid())) {
                 OsType csOsType = csOsTypeMap.get(osType.getUuid());
@@ -470,8 +439,11 @@ public class SyncServiceImpl  implements SyncService {
         //4. Get the remaining list of cs server hash osType object, then iterate and
         //add it to app db
         for (String key: csOsTypeMap.keySet()) {
+            LOGGER.debug("Syncservice osType uuid :");
             osTypeService.save(csOsTypeMap.get(key));
         }
+        LOGGER.debug("Total rows added : " + String.valueOf(csOsTypeMap.size()));
+
     }
 
     /**
@@ -491,7 +463,8 @@ public class SyncServiceImpl  implements SyncService {
 
         // 3. Iterate application osType list
         for (StorageOffering storageOffering: appstorageServiceList) {
-        	storageOffering.setIsSyncFlag(false);
+              LOGGER.debug("Total rows updated : " + String.valueOf(appstorageServiceList.size()));
+            storageOffering.setIsSyncFlag(false);
              //3.1 Find the corresponding CS server osType object by finding it in a hash using uuid
             if (csStorageOfferingMap.containsKey(storageOffering.getUuid())) {
                 StorageOffering csStorageOffering = csStorageOfferingMap.get(storageOffering.getUuid());
@@ -514,9 +487,11 @@ public class SyncServiceImpl  implements SyncService {
         //4. Get the remaining list of cs server hash osType object, then iterate and
         //add it to app db
         for (String key: csStorageOfferingMap.keySet()) {
-
+            LOGGER.debug("Syncservice storage offering uuid:");
             storageService.save(csStorageOfferingMap.get(key));
         }
+        LOGGER.debug("Total rows added : " + String.valueOf(csStorageOfferingMap.size()));
+
     }
 
      /**
@@ -535,7 +510,8 @@ public class SyncServiceImpl  implements SyncService {
 
         // 3. Iterate application user list
         for (User user: appUserList) {
-        	user.setSyncFlag(false);
+              LOGGER.debug("Total rows updated : " + String.valueOf(appUserList.size()));
+            user.setSyncFlag(false);
              //3.1 Find the corresponding CS server user object by finding it in a hash using uuid
             if (csUserMap.containsKey(user.getUuid())) {
                 User csUser = csUserMap.get(user.getUuid());
@@ -558,8 +534,11 @@ public class SyncServiceImpl  implements SyncService {
         //4. Get the remaining list of cs server hash user object, then iterate and
         //add it to app db
         for (String key: csUserMap.keySet()) {
+            LOGGER.debug("Syncservice user uuid:");
             userService.save(csUserMap.get(key));
         }
+        LOGGER.debug("Total rows added : " + String.valueOf(csUserMap.size()));
+
     }
 
    /**
@@ -579,6 +558,7 @@ public class SyncServiceImpl  implements SyncService {
 
         // 3. Iterate application networkOffering list
         for (NetworkOffering networkOffering: appNetworkOfferingList) {
+              LOGGER.debug("Total rows updated : " + String.valueOf(appNetworkOfferingList.size()));
              //3.1 Find the corresponding CS server networkOfferingService object by finding it in a hash using uuid
             if (csNetworkOfferingMap.containsKey(networkOffering.getUuid())) {
                 NetworkOffering csNetworkOffering = csNetworkOfferingMap.get(networkOffering.getUuid());
@@ -600,6 +580,7 @@ public class SyncServiceImpl  implements SyncService {
         //4. Get the remaining list of cs server hash NetworkOffering object, then iterate and
         //add it to app db
         for (String key: csNetworkOfferingMap.keySet()) {
+            LOGGER.debug("Syncservice networking offering uuid:");
             networkOfferingService.save(csNetworkOfferingMap.get(key));
         }
     }
@@ -612,18 +593,19 @@ public class SyncServiceImpl  implements SyncService {
      */
     private void syncNetwork() throws ApplicationException, Exception {
 
-        //1. Get all the domain objects from CS server as hash
+        //1. Get all the network objects from CS server as hash
         List<Network> csNetworkList = networkService.findAllFromCSServer();
-        HashMap<String, Network> csDomainMap = (HashMap<String, Network>) Network.convert(csNetworkList);
+        HashMap<String, Network> csNetworkMap = (HashMap<String, Network>) Network.convert(csNetworkList);
 
-        //2. Get all the domain objects from application
-        List<Network> appDomainList = networkService.findAll();
+        //2. Get all the network objects from application
+        List<Network> appNetworkList = networkService.findAll();
 
-        // 3. Iterate application domain list
-        for (Network network: appDomainList) {
-             //3.1 Find the corresponding CS server domain object by finding it in a hash using uuid
-            if (csDomainMap.containsKey(network.getUuid())) {
-                Network csNetwork = csDomainMap.get(network.getUuid());
+        // 3. Iterate application network list
+        for (Network network: appNetworkList) {
+             LOGGER.debug("Total rows updated : " + String.valueOf(appNetworkList.size()));
+             //3.1 Find the corresponding CS server network object by finding it in a hash using uuid
+            if (csNetworkMap.containsKey(network.getUuid())) {
+                Network csNetwork = csNetworkMap.get(network.getUuid());
 
                 network.setName(csNetwork.getName());
                 network.setDomainId(csNetwork.getDomainId());
@@ -634,11 +616,11 @@ public class SyncServiceImpl  implements SyncService {
                 network.setDisplayNetwork(csNetwork.getDisplayNetwork());
                 network.setDisplayText(csNetwork.getDisplayText());
 
-                //3.2 If found, update the domain object in app db
+                //3.2 If found, update the network object in app db
                 networkService.update(network);
 
-                //3.3 Remove once updated, so that we can have the list of cs domain which is not added in the app
-                csDomainMap.remove(network.getUuid());
+                //3.3 Remove once updated, so that we can have the list of cs network which is not added in the app
+                csNetworkMap.remove(network.getUuid());
             } else {
                 networkService.delete(network);
                 //3.2 If not found, delete it from app db
@@ -646,11 +628,14 @@ public class SyncServiceImpl  implements SyncService {
                 //TODO clarify is this a soft or hard delete
             }
         }
-        //4. Get the remaining list of cs server hash domain object, then iterate and
+        //4. Get the remaining list of cs server hash network object, then iterate and
         //add it to app db
-        for (String key: csDomainMap.keySet()) {
-            networkService.save(csDomainMap.get(key));
+        for (String key: csNetworkMap.keySet()) {
+            LOGGER.debug("Syncservice network uuid:");
+            networkService.save(csNetworkMap.get(key));
         }
+        LOGGER.debug("Total rows added : " + String.valueOf(csNetworkMap.size()));
+
     }
 
     /**
@@ -661,27 +646,28 @@ public class SyncServiceImpl  implements SyncService {
      */
     private void syncComputeOffering() throws ApplicationException, Exception {
 
-        //1. Get all the domain objects from CS server as hash
+        //1. Get all the compute offering objects from CS server as hash
         List<ComputeOffering> csComputeOfferingList = computeService.findAllFromCSServer();
         HashMap<String, ComputeOffering> csComputeOfferingMap = (HashMap<String, ComputeOffering>) ComputeOffering.convert(csComputeOfferingList);
 
-        //2. Get all the domain objects from application
-        List<ComputeOffering> appDomainList = computeService.findAll();
+        //2. Get all the compute offering objects from application
+        List<ComputeOffering> appComputeList = computeService.findAll();
 
-        // 3. Iterate application domain list
-        for (ComputeOffering computeOffering: appDomainList) {
-        	computeOffering.setIsSyncFlag(false);
-             //3.1 Find the corresponding CS server domain object by finding it in a hash using uuid
+        // 3. Iterate application compute offering list
+        for (ComputeOffering computeOffering: appComputeList) {
+             LOGGER.debug("Total rows updated : " + String.valueOf(appComputeList.size()));
+            computeOffering.setIsSyncFlag(false);
+             //3.1 Find the corresponding CS server compute offering object by finding it in a hash using uuid
             if (csComputeOfferingMap.containsKey(computeOffering.getUuid())) {
                 ComputeOffering csComputeService = csComputeOfferingMap.get(computeOffering.getUuid());
 
                 computeOffering.setName(csComputeService.getName());
                 computeOffering.setDisplayText(csComputeService.getDisplayText());
 
-                //3.2 If found, update the domain object in app db
+                //3.2 If found, update the compute offering object in app db
                 computeService.update(computeOffering);
 
-                //3.3 Remove once updated, so that we can have the list of cs domain which is not added in the app
+                //3.3 Remove once updated, so that we can have the list of cs compute offering which is not added in the app
                 csComputeOfferingMap.remove(computeOffering.getUuid());
             } else {
 
@@ -695,9 +681,10 @@ public class SyncServiceImpl  implements SyncService {
         //add it to app db
         for (String key: csComputeOfferingMap.keySet()) {
             ComputeOffering computeOffering = new ComputeOffering();
-
+            LOGGER.debug("Syncservice compute offering uuid:");
             computeService.save(csComputeOfferingMap.get(key));
         }
+        LOGGER.debug("Total rows added : " + String.valueOf(csComputeOfferingMap.size()));
     }
 
     /**
@@ -717,6 +704,7 @@ public class SyncServiceImpl  implements SyncService {
 
         // 3. Iterate application template list
         for (Template template: appTemplateList) {
+             LOGGER.debug("Total rows updated : " + String.valueOf(appTemplateList.size()));
              //3.1 Find the corresponding CS server template object by finding it in a hash using uuid
             if (csTemplateMap.containsKey(template.getUuid())) {
                 Template csTemplate = csTemplateMap.get(template.getUuid());
@@ -755,5 +743,7 @@ public class SyncServiceImpl  implements SyncService {
         for (String key: csTemplateMap.keySet()) {
             templateService.save(csTemplateMap.get(key));
         }
+        LOGGER.debug("Total rows added : " + String.valueOf(csTemplateMap.size()));
+
     }
 }

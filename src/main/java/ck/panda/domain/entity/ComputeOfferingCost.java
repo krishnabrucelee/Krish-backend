@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.joda.time.DateTime;
@@ -29,26 +30,46 @@ public class ComputeOfferingCost {
     @Column(name = "id")
     private Long id;
 
-    /** The id of the Zone. */
-    //Todo : make ref id after adding zone entity
+    /** Zone id for this offering. */
+    @JoinColumn(name = "zone_id", referencedColumnName = "id",insertable = false, updatable = false)
+    @OneToOne
+    private Zone zone;
+
+    /** Id of the zone.*/
     @Column(name = "zone_id")
     private Long zoneId;
 
-    /** The id of the Compute offering.  */
-    @Column(name = "compute_offering_id")
-    private Long computeOfferingId;
+    /** Many cost for one compute offfering. */
+    @ManyToOne
+    private ComputeOffering computeOffering;
 
     /** The Setup Cost. */
     @Column(name = "setup_cost")
     private Double setupCost;
 
-    /** Cost of Running Instance. */
-    @Column(name = "instance_running_cost")
-    private Double instanceRunningCost;
+    /** Cost of Running Instance for vcpu. */
+    @Column(name = "instance_running_cost_vcpu")
+    private Double instanceRunningCostVcpu;
 
-    /** Cost of Stoppage Instance. */
-    @Column(name = "instance_stoppage_cost")
-    private Double instanceStoppageCost;
+    /** Cost of Running Instancefor memory. */
+    @Column(name = "instance_running_cost_memory")
+    private Double instanceRunningCostMemory;
+
+    /** Cost of Running Instance for iops. */
+    @Column(name = "instance_running_cost_iops")
+    private Double instanceRunningCostIops;
+
+    /** Cost of Stoppage Instance for vcpu. */
+    @Column(name = "instance_stoppage_cost_vcpu")
+    private Double instanceStoppageCostVcpu;
+
+    /** Cost of Stoppage Instance for memory. */
+    @Column(name = "instance_stoppage_cost_memory")
+    private Double instanceStoppageCostMemory;
+
+    /** Cost of Stoppage Instance. for iops.*/
+    @Column(name = "instance_stoppage_cost_iops")
+    private Double instanceStoppageCostIops;
 
     /** Created by user. */
     @CreatedBy
@@ -94,34 +115,6 @@ public class ComputeOfferingCost {
     }
 
     /**
-     * @return the computeOfferingId
-     */
-    public Long getComputeOfferingId() {
-        return computeOfferingId;
-    }
-
-    /**
-     * @return the setupCost
-     */
-    public Double getSetupCost() {
-        return setupCost;
-    }
-
-    /**
-     * @return the instanceRunningCost
-     */
-    public Double getInstanceRunningCost() {
-        return instanceRunningCost;
-    }
-
-    /**
-     * @return the instanceStoppageCost
-     */
-    public Double getInstanceStoppageCost() {
-        return instanceStoppageCost;
-    }
-
-    /**
      * @return the createdBy
      */
     public User getCreatedBy() {
@@ -163,12 +156,6 @@ public class ComputeOfferingCost {
         this.zoneId = zoneId;
     }
 
-    /**
-     * @param computeOfferingId the computeOfferingId to set
-     */
-    public void setComputeOfferingId(Long computeOfferingId) {
-        this.computeOfferingId = computeOfferingId;
-    }
 
     /**
      * @param setupCost the setupCost to set
@@ -177,18 +164,122 @@ public class ComputeOfferingCost {
         this.setupCost = setupCost;
     }
 
-    /**
-     * @param instanceRunningCost the instanceRunningCost to set
-     */
-    public void setInstanceRunningCost(Double instanceRunningCost) {
-        this.instanceRunningCost = instanceRunningCost;
+
+    /** @return the zone. */
+    public Zone getZone() {
+        return zone;
     }
 
     /**
-     * @param instanceStoppageCost the instanceStoppageCost to set
+     * @param zone the zone to set
      */
-    public void setInstanceStoppageCost(Double instanceStoppageCost) {
-        this.instanceStoppageCost = instanceStoppageCost;
+    public void setZone(Zone zone) {
+        this.zone = zone;
+    }
+
+    /**
+     * @return the computeOffering
+     */
+    public ComputeOffering getComputeOffering() {
+        return computeOffering;
+    }
+
+    /**
+     * @param computeOffering the computeOffering to set
+     */
+    public void setComputeOffering(ComputeOffering computeOffering) {
+        this.computeOffering = computeOffering;
+    }
+
+    /**
+     * @return the instanceRunningCostVcpu
+     */
+    public Double getInstanceRunningCostVcpu() {
+        return instanceRunningCostVcpu;
+    }
+
+    /**
+     * @param instanceRunningCostVcpu the instanceRunningCostVcpu to set
+     */
+    public void setInstanceRunningCostVcpu(Double instanceRunningCostVcpu) {
+        this.instanceRunningCostVcpu = instanceRunningCostVcpu;
+    }
+
+    /**
+     * @return the instanceRunningCostMemory
+     */
+    public Double getInstanceRunningCostMemory() {
+        return instanceRunningCostMemory;
+    }
+
+    /**
+     * @param instanceRunningCostMemory the instanceRunningCostMemory to set
+     */
+    public void setInstanceRunningCostMemory(Double instanceRunningCostMemory) {
+        this.instanceRunningCostMemory = instanceRunningCostMemory;
+    }
+
+    /**
+     * @return the instanceRunningCostIops
+     */
+    public Double getInstanceRunningCostIops() {
+        return instanceRunningCostIops;
+    }
+
+    /**
+     * @param instanceRunningCostIops the instanceRunningCostIops to set
+     */
+    public void setInstanceRunningCostIops(Double instanceRunningCostIops) {
+        this.instanceRunningCostIops = instanceRunningCostIops;
+    }
+
+    /**
+     * @return the instanceStoppageCostVcpu
+     */
+    public Double getInstanceStoppageCostVcpu() {
+        return instanceStoppageCostVcpu;
+    }
+
+    /**
+     * @param instanceStoppageCostVcpu the instanceStoppageCostVcpu to set
+     */
+    public void setInstanceStoppageCostVcpu(Double instanceStoppageCostVcpu) {
+        this.instanceStoppageCostVcpu = instanceStoppageCostVcpu;
+    }
+
+    /**
+     * @return the instanceStoppageCostMemory
+     */
+    public Double getInstanceStoppageCostMemory() {
+        return instanceStoppageCostMemory;
+    }
+
+    /**
+     * @param instanceStoppageCostMemory the instanceStoppageCostMemory to set
+     */
+    public void setInstanceStoppageCostMemory(Double instanceStoppageCostMemory) {
+        this.instanceStoppageCostMemory = instanceStoppageCostMemory;
+    }
+
+    /**
+     * @return the instanceStoppageCostIops
+     */
+    public Double getInstanceStoppageCostIops() {
+        return instanceStoppageCostIops;
+    }
+
+    /**
+     * @param instanceStoppageCostIops the instanceStoppageCostIops to set
+     */
+    public void setInstanceStoppageCostIops(Double instanceStoppageCostIops) {
+        this.instanceStoppageCostIops = instanceStoppageCostIops;
+    }
+
+    /**
+     * @return the setupCost
+     */
+    public Double getSetupCost() {
+        return setupCost;
     }
 
     /**
@@ -246,4 +337,6 @@ public class ComputeOfferingCost {
     public void setStatus(String status) {
         this.status = status;
     }
+
+
 }

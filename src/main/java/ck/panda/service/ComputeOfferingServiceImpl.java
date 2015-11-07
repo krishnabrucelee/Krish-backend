@@ -53,7 +53,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     @PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
     public ComputeOffering save(ComputeOffering compute) throws Exception {
 
-    	if(compute.getIsSyncFlag()) {
+        if(compute.getIsSyncFlag()) {
         Errors errors = validator.rejectIfNullEntity("compute", compute);
         errors = validator.validateEntity(compute, errors);
 
@@ -62,7 +62,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
         } else {
 
             //set server for maintain session with configuration values
-        	  computeOffer.setServer(configServer.setServer(1L));
+              computeOffer.setServer(configServer.setServer(1L));
             String createComputeResponse = computeOffer.createComputeOffering(compute.getName(), compute.getDisplayText(),
                     "json", addOptionalValues(compute));
             JSONObject createComputeResponseJSON = new JSONObject(createComputeResponse).getJSONObject("createserviceofferingresponse")
@@ -71,15 +71,16 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             compute.setUuid((String) createComputeResponseJSON.get("id"));
                  return computeRepo.save(compute);
         }
-    	} else {
-    		 return computeRepo.save(compute);
-    	}
+        } else {
+             LOGGER.debug(compute.getUuid());
+             return computeRepo.save(compute);
+        }
     }
 
 
     @Override
     public ComputeOffering update(ComputeOffering compute) throws Exception {
-    	if(compute.getIsSyncFlag()) {
+        if(compute.getIsSyncFlag()) {
         Errors errors = validator.rejectIfNullEntity("compute", compute);
         errors = validator.validateEntity(compute, errors);
 
@@ -93,9 +94,10 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
                     .getJSONObject("serviceoffering");
         }
         return computeRepo.save(compute);
-    	} else {
-    		 return computeRepo.save(compute);
-    	}
+        } else {
+             LOGGER.debug(compute.getUuid());
+             return computeRepo.save(compute);
+        }
 
     }
 
@@ -106,7 +108,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
 
     @Override
     public void delete(Long id) throws Exception {
-    	ComputeOffering compute = this.find(id);
+        ComputeOffering compute = this.find(id);
         //set server for finding value in configuration
         computeOffer.setServer(configServer.setServer(1L));
         computeOffer.deleteComputeOffering(compute.getUuid(), "json");
@@ -150,12 +152,12 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             computeMap.put("limitcpuuse", compute.getCpuCapacity().toString());
         }
 
-        if(compute.getClockSpeed() != null) { computeMap.put("cpuspeed",
-        	compute.getClockSpeed().toString());
+         if(compute.getClockSpeed() != null) {
+             computeMap.put("cpuspeed", compute.getClockSpeed().toString());
         }
 
-        if(compute.getNumberOfCores() !=null) { computeMap.put("cpunumber",
-    		compute.getNumberOfCores().toString());
+        if(compute.getNumberOfCores() !=null) {
+            computeMap.put("cpunumber", compute.getNumberOfCores().toString());
         }
 
         if (compute.getDiskBytesReadRate() != null) {
@@ -172,6 +174,10 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
 
         if (compute.getDiskIopsWriteRate() != null) {
             computeMap.put("iopswriterate", compute.getDiskIopsWriteRate().toString());
+        }
+
+        if(compute.getCustomizedIops()!= null){
+            computeMap.put("customizediops", compute.getCustomizedIops().toString());
         }
 
         if (compute.getMinIops() != null) {
@@ -195,13 +201,8 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
         }
 
         if(compute.getMemory() !=null) {
-        	computeMap.put("memory", compute.getMemory().toString());
+            computeMap.put("memory", compute.getMemory().toString());
         }
-
-        if (compute.getCustomized()!= null ) {
-            computeMap.put("customized", compute.getCustomized().toString());
-        }
-
         return computeMap;
     }
 

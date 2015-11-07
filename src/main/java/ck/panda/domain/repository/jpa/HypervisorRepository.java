@@ -10,7 +10,11 @@ import ck.panda.domain.entity.Hypervisor;
  */
 public interface HypervisorRepository extends PagingAndSortingRepository<Hypervisor, Long> {
 
-	/** Get the hypervisor based on the name */
+    /**
+     * Get the hypervisor based on the name.
+     * @param name of the hypervisor
+     * @return name.
+     */
     @Query(value = "select hyper from Hypervisor hyper where hyper.name = :name")
     Hypervisor findByName(@Param("name") String name);
 }

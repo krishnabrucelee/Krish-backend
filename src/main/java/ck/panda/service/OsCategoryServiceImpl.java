@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,9 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 @Service
 public class OsCategoryServiceImpl implements OsCategoryService {
 
+	/** Logger attribute. */
+	 private static final Logger LOGGER = LoggerFactory.getLogger(OsCategoryServiceImpl.class);
+
     /** OS category repository reference. */
     @Autowired
     private OsCategoryRepository osCategoryRepo;
@@ -31,11 +36,13 @@ public class OsCategoryServiceImpl implements OsCategoryService {
 
     @Override
     public OsCategory save(OsCategory oscategory) throws Exception {
+    	 LOGGER.debug(oscategory.getUuid());
         return osCategoryRepo.save(oscategory);
     }
 
     @Override
     public OsCategory update(OsCategory oscategory) throws Exception {
+   	    LOGGER.debug(oscategory.getUuid());
         return osCategoryRepo.save(oscategory);
     }
 

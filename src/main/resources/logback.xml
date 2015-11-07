@@ -43,7 +43,7 @@
         </encoder>
     </appender>
 
-    <logger name="com.bharathi.online.exam" additivity="false">
+    <logger name="ck.panda" additivity="false">
         <level value="TRACE" />
         <appender-ref ref="dailyRollingFileAppender" />
         <appender-ref ref="minuteRollingFileAppender" />

@@ -13,14 +13,15 @@ import ck.panda.domain.entity.VmInstance;
  */
 @Repository
 public interface VirtualMachineRepository extends PagingAndSortingRepository<VmInstance, Long> {
-	/**
-	 * Find vm instance by uuid.
-	 * @param uuid instance uuid.
-	 * @return
-	 */
-	@Query(value = "select vm from VmInstance vm where vm.uuid LIKE :uuid ")
+
+    /**
+     * Find vm instance by uuid.
+     * @param uuid instance uuid.
+     * @return uuid.
+     */
+    @Query(value = "select vm from VmInstance vm where vm.uuid LIKE :uuid ")
     VmInstance findByUUID(@Param("uuid") String uuid);
 
-	@Query(value = "select vm from VmInstance vm where vm.name=:name AND vm.department=:department AND vm.id!=:id)")
-	VmInstance findByNameAndDepartment(String name, Department department, Long id);
+    @Query(value = "select vm from VmInstance vm where vm.name=:name AND vm.department=:department AND vm.id!=:id)")
+    VmInstance findByNameAndDepartment(String name, Department department, Long id);
 }
