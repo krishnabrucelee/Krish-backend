@@ -35,7 +35,7 @@ import ck.panda.util.web.CRUDController;
 @Api(value = "NetworkOffer", description = "Operations with NetworkOffer", produces = "application/json")
 public class NetworkOfferingController extends CRUDController<NetworkOffering> implements ApiController {
 
-	/** Service reference to Network Offering. */
+    /** Service reference to Network Offering. */
     @Autowired
     private NetworkOfferingService networkOffer;
 
@@ -60,7 +60,7 @@ public class NetworkOfferingController extends CRUDController<NetworkOffering> i
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Network.")
     @Override
     public void delete(@PathVariable(PATH_ID) Long id) throws Exception {
-    	networkOffer.delete(id);
+        networkOffer.delete(id);
     }
 
     @Override
@@ -68,7 +68,6 @@ public class NetworkOfferingController extends CRUDController<NetworkOffering> i
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, NetworkOffering.class);
         Page<NetworkOffering> pageResponse = networkOffer.findAll(page);
-        System.out.println(pageResponse);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
@@ -76,17 +75,17 @@ public class NetworkOfferingController extends CRUDController<NetworkOffering> i
     /**
      * list all projects for instance.
      * @return projects
-     * @throws Exception
+     * @throws Exception Exception
      */
-  	@RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-  	@ResponseStatus(HttpStatus.OK)
-  	@ResponseBody
-  	protected List<NetworkOffering> getSearch() throws Exception {
-  		return networkOffer.findAll();
-  	}
+      @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+      @ResponseStatus(HttpStatus.OK)
+      @ResponseBody
+      protected List<NetworkOffering> getSearch() throws Exception {
+          return networkOffer.findAll();
+      }
 
     @Override
     public void testMethod() throws Exception {
-    	networkOffer.findAll();
+        networkOffer.findAll();
     }
 }

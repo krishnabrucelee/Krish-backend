@@ -48,7 +48,7 @@ public class CloudStackNetworkService {
 
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("createNetwork", optional);
-        arguments.add(new NameValuePair("displaytext", networkOfferingDisplayText));
+        arguments.add(new NameValuePair("displaytext", networkOfferingName));
         arguments.add(new NameValuePair("name", networkOfferingName));
         arguments.add(new NameValuePair("response",response));
         String responseDocument = server.request(arguments);
@@ -76,7 +76,7 @@ public class CloudStackNetworkService {
 
         return responseDocument;
     }
-    
+
       /**
      * Lists all available networks.
      *
