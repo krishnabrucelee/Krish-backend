@@ -95,7 +95,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User update(User user) throws Exception {
-        if(user.getSyncFlag()) {
+<<<<<<< Updated upstream
+    	if(user.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity("user", user);
             errors = validator.validateEntity(user, errors);
             if (errors.hasErrors()) {
@@ -109,6 +110,15 @@ public class UserServiceImpl implements UserService {
               optional.put("lastname", user.getLastName());
               optional.put("password", user.getPassword());
         	  csUserService.updateUser(user.getUuid(), optional,"json");
+=======
+        if(user.getSyncFlag()) {
+          Errors errors = validator.rejectIfNullEntity("user", user);
+          errors = validator.validateEntity(user, errors);
+
+          if (errors.hasErrors()) {
+              throw new ApplicationException(errors);
+          } else {
+>>>>>>> Stashed changes
               return userRepository.save(user);
           }
         } else {
@@ -156,7 +166,11 @@ public class UserServiceImpl implements UserService {
           HashMap<String, String> userMap = new HashMap<String, String>();
 
           // 1. Get the list of users from CS server using CS connector
+<<<<<<< Updated upstream
           String response = csUserService.listUsers(userMap,"json");
+=======
+          String response = csAccountService.listAccounts("json", userMap);
+>>>>>>> Stashed changes
           JSONArray userListJSON = new JSONObject(response).getJSONObject("listusersresponse")
                   .getJSONArray("user");
           // 2. Iterate the json list, convert the single json entity to user

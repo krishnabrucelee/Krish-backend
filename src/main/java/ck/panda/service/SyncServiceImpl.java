@@ -203,9 +203,9 @@ public class SyncServiceImpl  implements SyncService {
 
       try{
           // 13. Sync Department entity
-    	  this.syncDepartment();
+          this.syncDepartment();
       }catch(Exception e){
-    	  LOGGER.error("ERROR AT synch Department", e);
+          LOGGER.error("ERROR AT synch Department", e);
       }
     }
 
@@ -754,12 +754,13 @@ public class SyncServiceImpl  implements SyncService {
         }
     }
 
-    /**
+   /**
      * Sync with Cloud Server Account.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    private void syncDepartment() throws ApplicationException, Exception {
+    @Override
+    public void syncDepartment() throws ApplicationException, Exception {
 
         //1. Get all the user objects from CS server as hash
         List<Department> csAccountService = departmentService.findAllFromCSServer();

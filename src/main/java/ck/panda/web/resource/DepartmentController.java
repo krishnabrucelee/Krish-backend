@@ -20,8 +20,6 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Department;
-import ck.panda.domain.entity.Domain;
-import ck.panda.domain.entity.GuestNetwork;
 import ck.panda.service.DepartmentService;
 import ck.panda.service.DomainService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -48,7 +46,7 @@ public class DepartmentController extends CRUDController<Department> implements 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Department.", response = Department.class)
     @Override
     public Department create(@RequestBody Department department) throws Exception {
-    	department.setSyncFlag(true);
+        department.setSyncFlag(true);
         return departmentService.save(department);
     }
 
@@ -61,17 +59,16 @@ public class DepartmentController extends CRUDController<Department> implements 
     @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing Department.", response = Department.class)
     @Override
     public Department update(@RequestBody Department department, @PathVariable(PATH_ID) Long id) throws Exception {
-    	department.setSyncFlag(true);
-    	return departmentService.update(department);
+        department.setSyncFlag(true);
+        return departmentService.update(department);
     }
 
     /**
-     * //TODO Jamseer: JDI
-     * Soft deleting the department from the table.
+     * Delete the department.
      *
-     * @param department
-     * @param id
-     * @throws Exception
+     * @param department reference of the department.
+     * @param id department id.
+     * @throws Exception error occurs.
      */
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Department.")
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -91,31 +88,17 @@ public class DepartmentController extends CRUDController<Department> implements 
     }
 
     /**
-     * //TODO Jamseer: JDI
-     * list all departments.
+     * Find the list of active departments.
+     *
      * @return projects project list.
-     * @throws Exception
+     * @throws Exception error occurs.
      */
-  	@RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-  	@ResponseStatus(HttpStatus.OK)
-  	@ResponseBody
-  	protected List<Department> getSearch() throws Exception {
-  		return departmentService.findAllByActive();
-  	}
-
-  	/**
-  	 * //TODO Jamseer: JDI
-  	 * list the departments with query.
-  	 * @param query query String.
-  	 * @return
-  	 * @throws Exception
-  	 */
-  	@RequestMapping(value = "search",method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	@ResponseStatus(HttpStatus.OK)
-	@ResponseBody
-	protected List<Department> getSearch(@RequestParam("q") String query) throws Exception {
-		return departmentService.findByName(query);
-	}
+    @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<Department> getSearch() throws Exception {
+        return departmentService.findAllByIsActive(true);
+    }
 
     @Override
     public void testMethod() throws Exception {
