@@ -66,6 +66,7 @@ public class DepartmentController extends CRUDController<Department> implements 
     }
 
     /**
+     * //TODO Jamseer: JDI
      * Soft deleting the department from the table.
      *
      * @param department
@@ -90,6 +91,7 @@ public class DepartmentController extends CRUDController<Department> implements 
     }
 
     /**
+     * //TODO Jamseer: JDI
      * list all departments.
      * @return projects project list.
      * @throws Exception
@@ -102,6 +104,7 @@ public class DepartmentController extends CRUDController<Department> implements 
   	}
 
   	/**
+  	 * //TODO Jamseer: JDI
   	 * list the departments with query.
   	 * @param query query String.
   	 * @return

@@ -39,13 +39,16 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Autowired
     private DepartmentReposiory departmentRepo;
 
+    //TODO Jamseer: not javadoc comment
     @Autowired
     private DomainRepository domainRepository;
 
+    //TODO Jamseer: comment is not valid
     /** Autowired cloudstackaccountservice object. */
     @Autowired
     private CloudStackAccountService csAccountService;
 
+    //TODO Jamseer: comment is not valid
     /** Autowired configutill object. */
     @Autowired
     private ConfigUtil configServer;
@@ -54,6 +57,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public Department save(Department department) throws Exception {
 
+        //TODO Jamseer: move validation completely to private method
         if(department.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity("department", department);
             errors = validator.validateEntity(department, errors);
@@ -76,11 +80,13 @@ public class DepartmentServiceImpl implements DepartmentService {
 
                 JSONObject createAccountResponseJSON = new JSONObject(createAccountResponse).getJSONObject("createaccountresponse")
                         .getJSONObject("account");
+                //TODO Jamseer: no s.o.p should be there in the code
                 System.out.println(createAccountResponseJSON);
                 department.setUuid((String) createAccountResponseJSON.get("id"));
                 return departmentRepo.save(department);
             }
             } else {
+                //TODO Jamseer: this line is repeated, you can handle it better
                 return departmentRepo.save(department);
         }
     }
@@ -104,6 +110,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public Department update(Department department) throws Exception {
         if(department.getSyncFlag()) {
+            //TODO Jamseer: comment is not valid
             Errors errors = validator.rejectIfNullEntity("department", department);
             errors = validator.validateEntity(department, errors);
             errors = this.validateName(errors, department.getUserName(),  department.getDomain(), department.getId());
@@ -122,6 +129,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             }
 
         } else {
+        		//TODO Jamseer: this line is repeated, you can handle it better
               return departmentRepo.save(department);
           }
     }
@@ -139,7 +147,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public Department find(Long id) throws Exception {
         Department department = departmentRepo.findOne(id);
-
+        //TODO Jamseer: why sample debug message is here?
         LOGGER.debug("Sample Debug Message");
         if (department == null) {
             throw new EntityNotFoundException("department.not.found");
@@ -149,15 +157,18 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public Page<Department> findAll(PagingAndSorting pagingAndSorting) throws Exception {
+    	//TODO Jamseer: indentation issue
            return departmentRepo.findAll(pagingAndSorting.toPageRequest());
     }
 
     @Override
     public List<Department> findAll() throws Exception {
+    	//TODO Jamseer: indentation issue
             return (List<Department>) departmentRepo.findAll();
     }
 
     public Page<Department> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
+    	//TODO Jamseer: indentation issue
                 return departmentRepo.findAllByActive(pagingAndSorting.toPageRequest());
     }
 
@@ -174,6 +185,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Department> findByName(String query) throws Exception {
+    	//TODO Jamseer: indentation issue
             return (List<Department>) departmentRepo.findAllByActive(query);
     }
 
@@ -198,6 +210,7 @@ public class DepartmentServiceImpl implements DepartmentService {
                   .getJSONArray("account");
           // 2. Iterate the json list, convert the single json entity to user
           for (int i = 0, size = userListJSON.length(); i < size; i++) {
+        	  //TODO Jamseer: what user is doing here in the comment?
               // 2.1 Call convert by passing JSONObject to User entity and Add
               // the converted User entity to list
               departmentList.add(Department.convert(userListJSON.getJSONObject(i)));
@@ -207,7 +220,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public Department findByUuid(String uuid) throws Exception {
-            return (Department) departmentRepo.findByUuid(uuid);
+    	return (Department) departmentRepo.findByUuid(uuid);
     }
-
+    //TODO Jamseer: indentation issue
     }

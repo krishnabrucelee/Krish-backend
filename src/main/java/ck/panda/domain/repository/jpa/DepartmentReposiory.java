@@ -14,9 +14,11 @@ import ck.panda.domain.entity.Domain;
  * JPA Repository for Department entity.
  */
 @Repository
+//TODO Jamseer: java doc is not perfect
 public interface DepartmentReposiory extends PagingAndSortingRepository<Department, Long> {
 
     /**
+     * TODO Jamseer: method name is irrelevant to what action we are doing here.
      * Find the department already exist for the same domain.
      *
      * @param name of the department
@@ -26,7 +28,8 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
     Department findByNameAndDomain(@Param("name") String name, @Param("domain") Domain domain, @Param("departmentId") Long departmentId);
 
     /**
-     * find all the departmen with active status.
+     * TODO Jamseer: method signature is irrelevant to its name
+     * Find all the department with active status.
      *
      * @param pageable
      * @return
@@ -35,7 +38,8 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
     Page<Department> findAllByActive(Pageable pageable);
 
     /**
-     * find all the department with active status with query.
+     * TODO Jamseer: not sure why we need this method?
+     * Find all the department with active status with query.
      * @param query
      * @return
      */
@@ -43,7 +47,7 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
     List<Department> findAllByActive(@Param("query") String query);
 
     /**
-     * find all the departmen with active status.
+     * find all the department with active status.
      *
      * @return
      */
@@ -57,5 +61,4 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
      */
     @Query(value = "select dpt from Department dpt where dpt.isActive IS TRUE AND dpt.uuid=:uuid)")
     Department findByUuid(@Param("uuid") String uuid);
-
 }
