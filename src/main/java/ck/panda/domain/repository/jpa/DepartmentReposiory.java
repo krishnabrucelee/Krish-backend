@@ -22,7 +22,7 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
      * @param name of the department
      * @return department name
      */
-    @Query(value = "select dpt from Department dpt where dpt.isActive IS TRUE AND dpt.name=:name AND dpt.domain=:domain AND dpt.id!=:departmentId)")
+    @Query(value = "select dpt from Department dpt where dpt.isActive IS TRUE AND dpt.userName=:name AND dpt.domain=:domain AND dpt.id!=:departmentId)")
     Department findByNameAndDomain(@Param("name") String name, @Param("domain") Domain domain, @Param("departmentId") Long departmentId);
 
     /**
@@ -39,7 +39,7 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
      * @param query
      * @return
      */
-    @Query(value = "select dept from Department dept where dept.isActive IS TRUE AND lower(dept.name) LIKE '%' || lower(:query) || '%' ")
+    @Query(value = "select dept from Department dept where dept.isActive IS TRUE AND lower(dept.userName) LIKE '%' || lower(:query) || '%' ")
     List<Department> findAllByActive(@Param("query") String query);
 
     /**

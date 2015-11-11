@@ -2,26 +2,22 @@ package ck.panda.service;
 
 import java.util.HashMap;
 import java.util.List;
+import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Department;
-import ck.panda.domain.entity.Domain;
-import ck.panda.domain.entity.GuestNetwork;
-import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.domain.repository.jpa.DepartmentReposiory;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.GuestNetworkRepository;
 import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
-import ck.panda.rabbitmq.util.EventTypes;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
-import ck.panda.util.error.exception.EntityNotFoundException;
-
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,66 +34,66 @@ import org.springframework.stereotype.Service;
 public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     /** Logger attribute. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(VirtualMachineServiceImpl.class);
+   private static final Logger LOGGER = LoggerFactory.getLogger(VirtualMachineServiceImpl.class);
 
-    /** Validator attribute. */
-    @Autowired
-    private AppValidator validator;
+   /** Validator attribute. */
+   @Autowired
+   private AppValidator validator;
 
-    /** Virtual Machine repository reference. */
-    @Autowired
-    VirtualMachineRepository virtualmachinerepository;
+   /** Virtual Machine repository reference. */
+   @Autowired
+   private VirtualMachineRepository virtualmachinerepository;
 
-    /** Domain repository reference. */
-    @Autowired
-    DomainRepository domainRepository;
+   /** Domain repository reference. */
+   @Autowired
+   private DomainRepository domainRepository;
 
-    /** Guest network repository reference. */
-    @Autowired
-    GuestNetworkRepository gNetworkRepository;
+   /** Guest network repository reference. */
+   @Autowired
+   private GuestNetworkRepository gNetworkRepository;
 
-    /** Department repository reference. */
-    @Autowired
-    DepartmentReposiory departmentReposiory;
+   /** Department repository reference. */
+   @Autowired
+   private DepartmentReposiory departmentReposiory;
 
-    /** User repository reference. */
-    @Autowired
-    UserRepository userRepository;
+   /** User repository reference. */
+   @Autowired
+   private UserRepository userRepository;
 
-    /** CloudStack connector reference for instance. */
-    @Autowired
-    CloudStackInstanceService cloudStackInstanceService;
+   /** CloudStack connector reference for instance. */
+   @Autowired
+   private CloudStackInstanceService cloudStackInstanceService;
 
-    /** CloudStack connector. */
-    @Autowired
-    private CloudStackServer server;
+   /** CloudStack connector. */
+   @Autowired
+   private CloudStackServer server;
 
-    /** CloudStack vm event. */
-    private String VmEvent;
+   /** CloudStack vm event. */
+   private String vmEvent;
 
-    /** CloudStack configuration . */
-    @Autowired
-    private CloudStackConfigurationService cloudConfigService;
+   /** CloudStack configuration . */
+   @Autowired
+   private CloudStackConfigurationService cloudConfigService;
 
-    @Override
-    public VmInstance save(VmInstance vminstance) throws Exception {
-        Errors errors = validator.rejectIfNullEntity("vminstance", vminstance);
-        errors = validator.validateEntity(vminstance, errors);
-        if (errors.hasErrors()) {
-            throw new ApplicationException(errors);
-        } else {
-            HashMap<String, String> optional = new HashMap<String, String>();
-            optional.put("displayvm", vminstance.getName());
-            optional.put("name", vminstance.getName());
-            CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
-            server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
-            cloudStackInstanceService.setServer(server);
+   @Override
+   public VmInstance save(VmInstance vminstance) throws Exception {
+      Errors errors = validator.rejectIfNullEntity("vminstance", vminstance);
+      errors = validator.validateEntity(vminstance, errors);
+      if (errors.hasErrors()) {
+         throw new ApplicationException(errors);
+      } else {
+         HashMap<String, String> optional = new HashMap<String, String>();
+         optional.put("displayvm", vminstance.getName());
+         optional.put("name", vminstance.getName());
+         CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
+         server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
+         cloudStackInstanceService.setServer(server);
             System.out.println(vminstance.getNetworkUuid());
             System.out.println(vminstance.getNetworkOffering());
-            optional.put("networkids", vminstance.getNetworkUuid());
-            optional.put("displayvm", "true");
-            optional.put("name", vminstance.getName());
-            optional.put("displayname", vminstance.getName());
+         optional.put("networkids", vminstance.getNetworkUuid());
+         optional.put("displayvm", "true");
+         optional.put("name", vminstance.getName());
+         optional.put("displayname", vminstance.getName());
            if (vminstance.getComputeOffering().getCustomized() != false) {
                 optional.put("details[0].cpunumber", vminstance.getCpuCore().toString());
                 optional.put("details[0].cpuspeed", vminstance.getCpuSpeed().toString());
@@ -107,23 +103,24 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 optional.put("miniops", vminstance.getMinIops().toString());
                 optional.put("maxiops", vminstance.getMaxIops().toString());
             }
-            String csResponse = cloudStackInstanceService.deployVirtualMachine(vminstance.getComputeOffering().getUuid(),
+         String csResponse = cloudStackInstanceService.deployVirtualMachine(vminstance.getComputeOffering().getUuid(),
                     vminstance.getTemplate().getUuid(),vminstance.getZone().getUuid(),"xml",optional);
-            JSONObject csInstance = new JSONObject(csResponse).getJSONObject("deployvirtualmachineresponse");
+         JSONObject csInstance = new JSONObject(csResponse).getJSONObject("deployvirtualmachineresponse");
             if(csInstance.has("errorcode")) {
                  errors = this.validateEvent(errors, csInstance.getString("errortext"));
                  throw new ApplicationException(errors);
-            }
-            else{
+         } else {
+            LOGGER.debug("VM UUID", csInstance.getString("id"));
                 vminstance.setUuid(csInstance.getString("id"));
                 String instanceResponse = cloudStackInstanceService.queryAsyncJobResult(csInstance.getString("jobid"), "json");
+                  "json");
                 JSONObject instance = new JSONObject(instanceResponse).getJSONObject("queryasyncjobresultresponse");
-                if(instance.getString("jobstatus").equals("2")){
+            if (instance.getString("jobstatus").equals("2")) {
                     errors = this.validateEvent(errors, csInstance.getString("errortext"));
-                    vminstance.setStatus(EventTypes.EVENT_ERROR);
-                    vminstance.setEventMessage(csInstance.getJSONObject("jobresult").getString("errortext"));
-                }
-                else{
+               vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
+               vminstance.setEventMessage(csInstance.getJSONObject("jobresult").getString("errortext"));
+            } else {
+               vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_CREATE));
                     vminstance.setStatus(EventTypes.EVENT_STATUS_CREATE);
                     vminstance.setEventMessage("Started creating VM on Server");
                 }
@@ -136,26 +133,26 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 vminstance.setDomain(domain);
                 vminstance.setDepartment(department);
                 vminstance.setNetwork(guestNetwork);
-        }
-        }
-            return virtualmachinerepository.save(vminstance);
-        }
+         }
+      }
+      return virtualmachinerepository.save(vminstance);
+   }
 
-    @Override
-    public VmInstance update(VmInstance vminstance) throws Exception {
+   @Override
+   public VmInstance update(VmInstance vminstance) throws Exception {
         Errors errors = validator.rejectIfNullEntity("vminstance", vminstance);
-        errors = validator.validateEntity(vminstance, errors);
-        if (errors.hasErrors()) {
-            throw new ApplicationException(errors);
-        } else {
-             return virtualmachinerepository.save(vminstance);
-    }
-    }
+      errors = validator.validateEntity(vminstance, errors);
+      if (errors.hasErrors()) {
+         throw new ApplicationException(errors);
+      } else {
+         return virtualmachinerepository.save(vminstance);
+      }
+   }
 
-    @Override
-    public void delete(VmInstance vminstance) throws Exception {
+   @Override
+   public void delete(VmInstance vminstance) throws Exception {
         virtualmachinerepository.delete(vminstance);
-    }
+   }
 
      @Override
     public VmInstance vmEventHandle(String vmId, String event) throws Exception {
@@ -184,6 +181,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
                          }
             }} catch (Exception e) {
+         } catch (Exception e) {
                 LOGGER.error("ERROR AT VM START", e);
             }
 
@@ -246,21 +244,18 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     }
 
     @Override
-    public void delete(Long id) throws Exception {
-        // TODO Auto-generated method stub
+   public void delete(Long id) throws Exception {
     }
 
-    @Override
-    public VmInstance find(Long id) throws Exception {
-        // TODO Auto-generated method stub
-        return virtualmachinerepository.findOne(id);
-    }
+   @Override
+   public VmInstance find(Long id) throws Exception {
+      return virtualmachinerepository.findOne(id);
+   }
 
-    @Override
-    public Page<VmInstance> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        // TODO Auto-generated method stub
-        return null;
-    }
+   @Override
+   public Page<VmInstance> findAll(PagingAndSorting pagingAndSorting) throws Exception {
+      return null;
+   }
 
        @Override
     public List<VmInstance> findAll() throws Exception {
@@ -274,33 +269,33 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     }
 
      /**
-     * Check the virtual machine CS error handling.
-     *
-     * @param errors error creating status.
-     * @param errmessage error message.
-     * @return errors.
-     * @throws Exception
-     */
-    private Errors validateEvent(Errors errors, String errmessage) throws Exception {
-            errors.addGlobalError(errmessage);
-        return errors;
-    }
+    * Check the virtual machine CS error handling.
+    *
+    * @param errors error creating status.
+    * @param errmessage error message.
+    * @return errors.
+    * @throws Exception if error occurs.
+    */
+   private Errors validateEvent(Errors errors, String errmessage) throws Exception {
+      errors.addGlobalError(errmessage);
+      return errors;
+   }
 
-    /**
-     * Check the instance name already exist.
-     *
-     * @param errors already existing error list.
-     * @param name name of the instance.
-     * @param department department object.
-     * @return errors.
-     * @throws Exception
-     */
-    private Errors validateName(Errors errors, String name, Department department, Long id) throws Exception {
-        if (virtualmachinerepository.findByNameAndDepartment(name, department, id) != null) {
-            errors.addFieldError("name", "instance already exist");
-        }
-        return errors;
-    }
-
+   /**
+    * Check the instance name already exist in department.
+    *
+    * @param errors already existing error list.
+    * @param name name of the instance.
+    * @param department department object.
+    * @param id instance id.
+    * @return errors.
+    * @throws Exception if error occurs.
+    */
+   private Errors validateName(Errors errors, String name, Department department, Long id) throws Exception {
+      if (virtualmachinerepository.findByNameAndDepartment(name, department, id) != null) {
+         errors.addFieldError("name", "instance already exist");
+      }
+      return errors;
+   }
 
 }

@@ -66,9 +66,7 @@ public class CloudStackAccountService {
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("deleteAccount", null);
         arguments.add(new NameValuePair("id", accountId));
-
         String responseDocument = server.request(arguments);
-
         return responseDocument;
 
     }
@@ -81,16 +79,12 @@ public class CloudStackAccountService {
      * @return
      * @throws Exception
      */
-    public String updateAccount(String newName, String accountName,
-            String domainId, HashMap<String, String> optional) throws Exception {
+    public String updateAccount(String newName, HashMap<String, String> optional) throws Exception {
 
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("updateAccount", optional);
         arguments.add(new NameValuePair("newname", newName));
-        arguments.add(new NameValuePair("account", accountName));
-        arguments.add(new NameValuePair("doaminid", domainId));
-
-        String responseDocument = server.request(arguments);
+               String responseDocument = server.request(arguments);
 
         return responseDocument;
 

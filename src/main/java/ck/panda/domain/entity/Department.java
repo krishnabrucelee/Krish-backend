@@ -2,8 +2,9 @@ package ck.panda.domain.entity;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
-
-import javax.persistence.CascadeType;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -13,13 +14,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.validation.constraints.Size;
-
-import org.apache.commons.lang.builder.ToStringBuilder;
+import javax.persistence.Transient;
 import org.hibernate.annotations.Type;
-import org.hibernate.validator.constraints.NotEmpty;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -46,15 +48,17 @@ public class Department implements Serializable {
     private Long id;
 
     /** Domain of the department. */
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "domain_id", referencedColumnName = "id")
+    @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
     private Domain domain;
 
-    /** Name of the Department. */
-    @NotEmpty
-    @Size(min = 4, max = 20)
-    @Column(name = "name", nullable = false)
-    private String name;
+
+    @Column(name = "domain_id")
+    private Long domainId;
+
+
+    @OneToMany
+    private List<User> user;
 
     /** Description of the Department. */
     @Column(name = "description")
@@ -100,6 +104,38 @@ public class Department implements Serializable {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
 
+    /** User name of the account. */
+    @Column(name = "user_name")
+    private String userName;
+
+    /** Password of the account. */
+    @Column(name = "password")
+    private String password;
+
+    /** First name of the user.  */
+    @Column(name = "first_name")
+    private String firstName;
+
+    /** Last name of the user.  */
+    @Column(name = "last_name")
+    private String lastName;
+
+    /** User uuid. */
+    @Column(name = "uuid")
+    private String uuid;
+
+    /** Set syncFlag. */
+    @Transient
+    private Boolean syncFlag;
+
+    /** Email of the user. */
+    @Column(name = "email")
+    private String email;
+
+    /** User type of the user. */
+    @Column(name = "account_type")
+    private AccountType type;
+
     /**
      * Default constructor.
      */
@@ -114,7 +150,6 @@ public class Department implements Serializable {
      */
     public Department(String name) {
         super();
-        this.name = name;
     }
 
     /**
@@ -135,23 +170,6 @@ public class Department implements Serializable {
         this.id = id;
     }
 
-    /**
-     * Get the name.
-     *
-     * @return name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Set the name.
-     *
-     * @param name the String to set
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
 
     /**
      * Get the domain.
@@ -165,11 +183,29 @@ public class Department implements Serializable {
     /**
      * Set the domain.
      *
-     * @param domain
-     *            the domain to set
+     * @param domain the domain to set
      */
     public void setDomain(Domain domain) {
         this.domain = domain;
+    }
+
+
+    /**
+     * Get the domain id.
+     *
+     * @return the domainId
+     */
+    public Long getDomainId() {
+        return domainId;
+    }
+
+    /**
+     * Set the domain id.
+     *
+     * @param domainId the domainId to set
+     */
+    public void setDomainId(Long domainId) {
+        this.domainId = domainId;
     }
 
     /**
@@ -298,8 +334,6 @@ public class Department implements Serializable {
         this.isActive = isActive;
     }
 
-
-
     /**
      * Get the department status.
      *
@@ -319,6 +353,168 @@ public class Department implements Serializable {
     }
 
 
+    /**
+     * Get the email.
+     *
+     * @return the email
+     */
+    public String getEmail() {
+        return email;
+    }
+
+    /**
+     * Set the email.
+     *
+     * @param email the email to set
+     */
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    /**
+     * Get the department account type.
+     *
+     * @return the type
+     */
+    public AccountType getType() {
+        return type;
+    }
+
+    /**
+     * Set the department account type.
+     *
+     * @param type the type to set
+     */
+    public void setType(AccountType type) {
+        this.type = type;
+    }
+
+    /**
+     * Get the username of the department.
+     *
+     * @return the userName
+     */
+    public String getUserName() {
+        return userName;
+    }
+
+    /**
+     * Set the username of the department.
+     *
+     * @param userName the userName to set
+     */
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    /**
+     * Get the department password.
+     *
+     * @return the password
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * Set the department account password.
+     *
+     * @param password the password to set
+     */
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    /**
+     * Get the department firstname.
+     *
+     * @return the firstName
+     */
+    public String getFirstName() {
+        return firstName;
+    }
+
+    /**
+     * Set the department firstname.
+     *
+     * @param firstName the firstName to set
+     */
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    /**
+     * Get the lastname.
+     *
+     * @return the lastName
+     */
+    public String getLastName() {
+        return lastName;
+    }
+
+    /**
+     * Set the lastname.
+     *
+     * @param lastName the lastName to set
+     */
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    /**
+     * Get the uuid of the department.
+     *
+     * @return the uuid
+     */
+    public String getUuid() {
+        return uuid;
+    }
+
+    /**
+     * Set the department uuid from cloudstack.
+     *
+     * @param uuid the uuid to set
+     */
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+
+
+    /**
+     * @return the user
+     */
+    public List<User> getUser() {
+        return user;
+    }
+
+    /**
+     * @param user the user to set
+     */
+    public void setUser(List<User> user) {
+        this.user = user;
+    }
+
+    /**
+     * @return the syncFlag
+     */
+    public Boolean getSyncFlag() {
+        return syncFlag;
+    }
+
+    /**
+     * @param syncFlag the syncFlag to set
+     */
+    public void setSyncFlag(Boolean syncFlag) {
+        this.syncFlag = syncFlag;
+    }
+
+     /** Define user type. */
+    public enum AccountType {
+       /** Define type constant. */
+        USER,
+        ADMIN;
+    }
 
     /**
      * Enumeration status for Department.
@@ -331,8 +527,40 @@ public class Department implements Serializable {
         DELETED
     }
 
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this);
+    /**
+     * Convert JSONObject into user object.
+     *
+     * @param object JSON object.
+     * @return user object.
+     */
+    public static Department convert(JSONObject object) throws JSONException {
+        Department department = new Department();
+        // TODO: have to update user list
+        JSONArray userArray = object.getJSONArray("user");
+        department.userName = object.has("name") ? object.get("name").toString() : "";
+        department.firstName = object.has("firstname") ? object.get("firstname").toString() : "";
+        department.lastName = object.has("lastname") ? object.get("lastname").toString() : "";
+        department.uuid = object.has("id") ? object.get("id").toString() : "";
+        department.email = "test@assistanz.com";
+        department.password = "l3tm3in";
+        department.isActive = true;
+        department.setSyncFlag(false);
+        return department;
+    }
+
+    /**
+     * Mapping entity object into list.
+     *
+     * @param userList list of users.
+     * @return user map
+     */
+    public static Map<String, Department> convert(List<Department> departmentList) {
+        Map<String, Department> departmentMap = new HashMap<String, Department>();
+
+        for (Department department : departmentList) {
+            departmentMap.put(department.getUuid(), department);
+        }
+
+        return departmentMap;
     }
 }

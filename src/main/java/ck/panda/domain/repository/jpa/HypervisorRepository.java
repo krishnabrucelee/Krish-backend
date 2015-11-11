@@ -12,8 +12,9 @@ public interface HypervisorRepository extends PagingAndSortingRepository<Hypervi
 
     /**
      * Get the hypervisor based on the name.
+     *
      * @param name of the hypervisor
-     * @return name.
+     * @return hypervisor
      */
     @Query(value = "select hyper from Hypervisor hyper where hyper.name = :name")
     Hypervisor findByName(@Param("name") String name);

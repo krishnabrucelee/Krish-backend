@@ -10,7 +10,12 @@ import ck.panda.domain.entity.Zone;
  */
 public interface ZoneRepository extends PagingAndSortingRepository<Zone, Long> {
 
-	/** Get the zone based on the uuid */
+    /**
+     * Get the zone based on the uuid.
+     *
+     * @param uuid of the zone
+     * @return zone
+     */
     @Query(value = "select zone from Zone zone where zone.uuid = :uuid")
     Zone findByUUID(@Param("uuid") String uuid);
 }

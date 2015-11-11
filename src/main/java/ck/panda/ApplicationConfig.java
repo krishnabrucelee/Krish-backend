@@ -1,7 +1,6 @@
 package ck.panda;
 
 import java.util.Locale;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,6 +11,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.data.auditing.DateTimeProvider;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -20,7 +20,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
-
 import ck.panda.util.audit.AuditingDateTimeProvider;
 import ck.panda.util.audit.CurrentTimeDateTimeService;
 import ck.panda.util.audit.DateTimeService;
@@ -34,12 +33,14 @@ import ck.panda.util.audit.DateTimeService;
 @SpringBootApplication
 @EnableConfigurationProperties
 @EnableTransactionManagement
+@EnableJpaAuditing(dateTimeProviderRef = "dateTimeProvider")
 @EnableJpaRepositories("ck.panda.domain.repository")
 public class ApplicationConfig extends WebMvcConfigurerAdapter {
 
 
     /**
      * Default spring boot main method.
+     *
      * @param args to pass from command line
      * @throws Exception if any error
      */
@@ -49,6 +50,7 @@ public class ApplicationConfig extends WebMvcConfigurerAdapter {
 
     /**
      * Configures the DateTimeService.
+     *
      * @return CurrentTimeDateTimeService implementation
      */
     @Bean
@@ -60,8 +62,7 @@ public class ApplicationConfig extends WebMvcConfigurerAdapter {
     /**
      * Configures the DateTimeProvider bean for providing date and time.
      *
-     * @param dateTimeService DateTimeServiceObject.
-     *
+     * @param dateTimeService DateTimeServiceObject.     *
      * @return AuditingDateTimeProvider implementation
      */
     @Bean

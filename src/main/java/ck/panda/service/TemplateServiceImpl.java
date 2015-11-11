@@ -28,8 +28,6 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 import ck.panda.util.error.exception.EntityNotFoundException;
-import ck.panda.util.infrastructure.security.AuthenticationFilter;
-import groovy.json.JsonException;
 
 /**
  * Service implementation for Template entity.
@@ -37,6 +35,9 @@ import groovy.json.JsonException;
  */
 @Service
 public class TemplateServiceImpl implements TemplateService {
+
+    /** Logger attribute. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(VirtualMachineServiceImpl.class);
 
     /** Validator attribute. */
     @Autowired
@@ -66,43 +67,20 @@ public class TemplateServiceImpl implements TemplateService {
     @Autowired
     private HypervisorRepository hypervisorRepository;
 
-    /** Logger constant. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationFilter.class);
-
     @Override
     @PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
     public Template save(Template template) throws Exception {
+        if (template.getSyncFlag()) {
+            Errors errors = validator.rejectIfNullEntity("template", template);
+            errors = validator.validateEntity(template, errors);
+            errors = customValidateEntity(template, errors, true);
 
-        if(template.getSyncFlag() == true) {
-        Errors errors = validator.rejectIfNullEntity("template", template);
-        errors = validator.validateEntity(template, errors);
-
-        if (errors.hasErrors()) {
-            throw new ApplicationException(errors);
-        } else {
-        	try {
-            configUtil.setServer(1L);
-            HashMap<String, String> optional = new HashMap<String, String>();
-
-            String resp = cloudStackTemplateService.registerTemplate(template.getDescription(), template.getFormat().name(),
-                    template.getHypervisor().getName(), template.getName(),
-                    template.getOsType().getUuid(), template.getUrl(),
-                    template.getZone().getUuid(), "json", templateFieldNullValidation(template, optional));
-
-            JSONArray templateJSON = new JSONObject(resp).getJSONObject("registertemplateresponse")
-                    .getJSONArray("template");
-            for (int i = 0; i < templateJSON.length(); ++i) {
-                JSONObject rec = templateJSON.getJSONObject(i);
-                template.setUuid(rec.getString("id"));
-                template.setStatus(Status.valueOf("Active"));
-                template.setType(Type.valueOf(rec.getString("templatetype")));
-                template.setDisplayText(template.getDescription());
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
+            } else {
+                csRegisterTemplate(template, errors);
+                return templateRepository.save(template);
             }
-        	} catch (JsonException jsonException) {
-        		LOGGER.error("Cloud stack template creation exception", jsonException);
-        	}
-        	return templateRepository.save(template);
-        }
         } else {
             return templateRepository.save(template);
         }
@@ -110,22 +88,17 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public Template update(Template template) throws Exception {
-        if(template.getSyncFlag() == true) {
-        Errors errors = validator.rejectIfNullEntity("template", template);
-        errors = validator.validateEntity(template, errors);
+        if (template.getSyncFlag()) {
+            Errors errors = validator.rejectIfNullEntity("template", template);
+            errors = validator.validateEntity(template, errors);
+            errors = customValidateEntity(template, errors, false);
 
-        if (errors.hasErrors()) {
-            throw new ApplicationException(errors);
-        } else {
-            configUtil.setServer(1L);
-            HashMap<String, String> optional = new HashMap<String, String>();
-            templateFieldNullValidation(template, optional);
-            optional.put("name", template.getName());
-            optional.put("displaytext", template.getDescription());
-
-            cloudStackTemplateService.updateTemplate(template.getUuid(), "json", optional);
-            return templateRepository.save(template);
-        }
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
+            } else {
+                csUpdateTemplate(template);
+                return templateRepository.save(template);
+            }
         } else {
             return templateRepository.save(template);
         }
@@ -133,28 +106,18 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public void delete(Template template) throws Exception {
-        if(template.getSyncFlag() == true) {
-        configUtil.setServer(1L);
-        HashMap<String, String> optional = new HashMap<String, String>();
-        cloudStackTemplateService.deleteTemplate(template.getId().toString(), "json", optional);
         templateRepository.delete(template);
-        } else {
-            templateRepository.delete(template);
-        }
     }
 
     @Override
     public void delete(Long id) throws Exception {
-        configUtil.setServer(1L);
-        HashMap<String, String> optional = new HashMap<String, String>();
-        cloudStackTemplateService.deleteTemplate(id.toString(), "json", optional);
+        csDeleteTemplate(id);
         templateRepository.delete(id);
     }
 
     @Override
     public Template find(Long id) throws Exception {
         Template template = templateRepository.findOne(id);
-
         if (template == null) {
             throw new EntityNotFoundException("Template not found");
         }
@@ -175,17 +138,10 @@ public class TemplateServiceImpl implements TemplateService {
     public List<Template> findAllFromCSServer() throws Exception {
         List<Template> templateList = new ArrayList<Template>();
         HashMap<String, String> templateMap = new HashMap<String, String>();
-
-        // 1. Get the list of templates from CS server using CS connector
         String response = cloudStackTemplateService.listTemplates("all", "json", templateMap);
-
         JSONArray templateListJSON = new JSONObject(response).getJSONObject("listtemplatesresponse")
                 .getJSONArray("template");
-        // 2. Iterate the json list, convert the single json entity to template
         for (int i = 0, size = templateListJSON.length(); i < size; i++) {
-            // 2.1 Call convert by passing JSONObject to Template entity and Add
-            // the converted Template entity to list
-
             Template template = Template.convert(templateListJSON.getJSONObject(i));
             OsType osType = osTypeRepository.findByUUID(template.getTransOsType());
             template.setOsType(osType);
@@ -194,25 +150,164 @@ public class TemplateServiceImpl implements TemplateService {
             template.setZone(zone);
             Hypervisor hypervisor = hypervisorRepository.findByName(template.getTransHypervisor());
             template.setHypervisor(hypervisor);
-
             templateList.add(template);
         }
         return templateList;
     }
 
-    public HashMap<String, String> templateFieldNullValidation(Template template, HashMap<String, String> optional) {
-        if(template.getDynamicallyScalable() != null) { optional.put("isdynamicallyscalable", template.getDynamicallyScalable().toString()); }
-        if(template.getExtractable() != null) { optional.put("isextractable", template.getExtractable().toString()); }
-        if(template.getFeatured() != null) { optional.put("isfeatured", template.getFeatured().toString()); }
-        if(template.getShare() != null) { optional.put("ispublic", template.getShare().toString()); }
-        if(template.getRouting() != null) { optional.put("isrouting", template.getRouting().toString()); }
-        if(template.getPasswordEnabled() != null) { optional.put("passwordenabled", template.getPasswordEnabled().toString()); }
-        if(template.getHvm() != null) { optional.put("requireshvm", template.getHvm().toString()); }
-        return optional;
-    }
-
     @Override
     public List<Template> findByTemplate() throws Exception {
         return templateRepository.findByTemplate(Type.SYSTEM);
+    }
+
+    /**
+     * @param template entity object
+     * @param errors object for validation
+     * @throws Exception raise if error
+     */
+    public void csRegisterTemplate(Template template, Errors errors) throws Exception {
+        configUtil.setServer(1L);
+        HashMap<String, String> optional = new HashMap<String, String>();
+        String resp = cloudStackTemplateService.registerTemplate(template.getDescription(), template.getFormat().name(),
+            template.getHypervisor().getName(), template.getName(),
+            template.getOsType().getUuid(), template.getUrl(),
+            template.getZone().getUuid(), "json", optionalFieldValidation(template, optional));
+        try {
+            JSONObject templateJSON = new JSONObject(resp).getJSONObject("registertemplateresponse");
+            if (templateJSON.has("errorcode")) {
+                errors = this.validateCSEvent(errors, templateJSON.getString("errortext"));
+                throw new ApplicationException(errors);
+            } else {
+                JSONArray templateArray = (JSONArray) templateJSON.get("template");
+                for (int i = 0; i < templateArray.length(); i++) {
+                    JSONObject jsonobject = templateArray.getJSONObject(i);
+                    LOGGER.debug("Template UUID", jsonobject.getString("id"));
+                    template.setUuid(jsonobject.getString("id"));
+                    if (jsonobject.getBoolean("isready")) {
+                        template.setStatus(Status.valueOf("ACTIVE"));
+                    } else {
+                        template.setStatus(Status.valueOf("INACTIVE"));
+                    }
+                    template.setType(Type.valueOf(jsonobject.getString("templatetype")));
+                }
+                template.setDisplayText(template.getDescription());
+            }
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT TEMPLATE CREATION", e);
+        }
+    }
+
+    /**
+     * @param template entity object
+     * @throws Exception raise if error
+     */
+    public void csUpdateTemplate(Template template) throws Exception {
+        configUtil.setServer(1L);
+        HashMap<String, String> optional = new HashMap<String, String>();
+        optionalFieldValidation(template, optional);
+        optional.put("name", template.getName());
+        optional.put("displaytext", template.getDescription());
+        try {
+            cloudStackTemplateService.updateTemplate(template.getUuid(), "json", optional);
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT TEMPLATE UPDATION", e);
+        }
+    }
+
+    /**
+     * @param id template id
+     * @throws Exception raise if error
+     */
+    public void csDeleteTemplate(Long id) throws Exception {
+        configUtil.setServer(1L);
+        HashMap<String, String> optional = new HashMap<String, String>();
+        Template template = templateRepository.findOne(id);
+        try {
+            cloudStackTemplateService.deleteTemplate(template.getUuid(), "json", optional);
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT TEMPLATE DELETE", e);
+        }
+    }
+
+    /**
+     * @param template entity object
+     * @param errors object for validation
+     * @param validstatus whether need to check validation or not
+     * @return errors list
+     * @throws Exception raise if error
+     */
+    public Errors customValidateEntity(Template template, Errors errors, Boolean validstatus) throws Exception {
+
+        if (template.getArchitecture().isEmpty()) {
+            errors.addFieldError("architecture", "template.architecture");
+        }
+        if (template.getOsVersion().isEmpty()) {
+            errors.addFieldError("osVersion", "template.osversion.error");
+        }
+        if (template.getUrl() == null && validstatus) {
+            errors.addFieldError("url", "template.url.error");
+        }
+        if (template.getDetailedDescription().isEmpty()) {
+            errors.addFieldError("detailedDescription", "template.detaileddescription");
+        }
+        if (template.getTemplateCost() == null) {
+            errors.addFieldError("cost", "template.cost.error");
+        }
+        if (template.getMinimumMemory() == null) {
+            errors.addFieldError("minimumMemory", "template.minimummemory.error");
+        }
+        if (template.getMinimumCore() == null) {
+            errors.addFieldError("minimumCore", "template.minimumcore.error");
+        }
+        if (template.getOsCategory() == null) {
+            errors.addFieldError("osCategory", "template.oscategory.error");
+        }
+        if (errors.hasErrors()) {
+            throw new ApplicationException(errors);
+        }
+        return errors;
+    }
+
+    /**
+     * @param template entity object
+     * @param optional for null value checking
+     * @return optional values list
+     */
+    public HashMap<String, String> optionalFieldValidation(Template template, HashMap<String, String> optional) {
+        if (template.getDynamicallyScalable() != null) {
+            optional.put("isdynamicallyscalable", template.getDynamicallyScalable().toString());
+        }
+        if (template.getExtractable() != null) {
+            optional.put("isextractable", template.getExtractable().toString());
+        }
+        if (template.getFeatured() != null) {
+            optional.put("isfeatured", template.getFeatured().toString());
+        }
+        if (template.getShare() != null) {
+            optional.put("ispublic", template.getShare().toString());
+        }
+        if (template.getRouting() != null) {
+            optional.put("isrouting", template.getRouting().toString());
+        }
+        if (template.getPasswordEnabled() != null) {
+            optional.put("passwordenabled", template.getPasswordEnabled().toString());
+        }
+        if (template.getHvm() != null) {
+            optional.put("requireshvm", template.getHvm().toString());
+        }
+        return optional;
+    }
+
+    /**
+     * Check the template CS error handling.
+     *
+     * @param errors object for validation
+     * @param eMessage error message
+     * @return global errors list
+     * @throws Exception raise if error
+     */
+    private Errors validateCSEvent(Errors errors, String eMessage) throws Exception {
+        errors.addGlobalError(eMessage);
+        return errors;
     }
 }
