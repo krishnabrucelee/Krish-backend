@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,9 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 @Service
 public class RegionServiceImpl implements RegionService {
 
+	/** Logger attribute. */
+	 private static final Logger LOGGER = LoggerFactory.getLogger(RegionServiceImpl.class);
+
     /** Region repository reference. */
     @Autowired
     private RegionRepository regionRepo;
@@ -30,11 +35,13 @@ public class RegionServiceImpl implements RegionService {
 
     @Override
     public Region save(Region region) throws Exception {
-        return regionRepo.save(region);
+    	 LOGGER.debug(region.getUuid());
+         return regionRepo.save(region);
     }
 
     @Override
     public Region update(Region region) throws Exception {
+   	    LOGGER.debug(region.getUuid());
         return regionRepo.save(region);
     }
 

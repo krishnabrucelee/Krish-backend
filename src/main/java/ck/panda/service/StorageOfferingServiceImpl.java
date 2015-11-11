@@ -66,6 +66,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
                 return storageOfferingRepo.save(storage);
             }
         } else {
+			 LOGGER.debug(storage.getUuid());
             return storageOfferingRepo.save(storage);
         }
 
@@ -84,6 +85,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
                 return storageOfferingRepo.save(storage);
             }
         } else {
+			LOGGER.debug(storage.getUuid());
             return storageOfferingRepo.save(storage);
         }
     }
