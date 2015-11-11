@@ -176,7 +176,35 @@ public class VmInstance {
      * Instance current state
      */
     @Column(name = "status")
-    private String status;
+    private Status status;
+
+    /** Enumeration status for instance. */
+    public enum Status {
+        /** Running status of instance. */
+        Running,
+        /** destroy status of instance. */
+        Destroy,
+        /** destroyed status of instance. */
+        Destroyed,
+        /** Stopped status of instance. */
+        Stopped,
+        /** after launch or start instance get status as starting. */
+        Starting,
+        /** after stop or destroy instance get status as stopping. */
+        Stopping,
+        /** after destroy or expunge instance get status as expunging. */
+        Expunging,
+        /** after destroy or expunge instance get status as expunged. */
+        Expunged,
+        /** while instance creation if get failure get status as Error . */
+        Error,
+        /** while instance creation if get status as creating . */
+        Creating,
+        /** while instance creation if get status as Implemented . */
+        Implemented,
+        /** after launch instance if get status as ready . */
+        Ready
+    }
 
     /**
      * Instance host id
@@ -274,7 +302,7 @@ public class VmInstance {
      *
      * @return the status
      */
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
@@ -284,7 +312,7 @@ public class VmInstance {
      * @param status
      *            to set
      */
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 

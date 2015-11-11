@@ -67,6 +67,10 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
                     "json", addOptionalValues(compute));
             JSONObject createComputeResponseJSON = new JSONObject(createComputeResponse).getJSONObject("createserviceofferingresponse")
                     .getJSONObject("serviceoffering");
+            if(createComputeResponseJSON.has("errorcode")) {
+                errors = this.validateEvent(errors, createComputeResponseJSON.getString("errortext"));
+                throw new ApplicationException(errors);
+        }
             System.out.println(createComputeResponseJSON);
             compute.setUuid((String) createComputeResponseJSON.get("id"));
                  return computeRepo.save(compute);
@@ -123,6 +127,19 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     @Override
     public ComputeOffering find(Long id) throws Exception {
               return computeRepo.findOne(id);
+    }
+
+    /**
+     * Check the compute offering CS error handling.
+     *
+     * @param errors error creating status.
+     * @param errmessage error message.
+     * @return errors.
+     * @throws Exception if error occurs.
+     */
+    private Errors validateEvent(Errors errors, String errmessage) throws Exception {
+       errors.addGlobalError(errmessage);
+       return errors;
     }
 
     @Override
