@@ -2,10 +2,12 @@ package ck.panda.service;
 
 import java.util.HashMap;
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Department;
@@ -20,17 +22,8 @@ import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.Zone;
-import ck.panda.util.CloudStackAccountService;
-import ck.panda.util.CloudStackComputeOffering;
-import ck.panda.util.CloudStackDomainService;
-import ck.panda.util.CloudStackHypervisorsService;
-import ck.panda.util.CloudStackNetworkOfferingService;
-import ck.panda.util.CloudStackNetworkService;
-import ck.panda.util.CloudStackOSService;
-import ck.panda.util.CloudStackRegionService;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.CloudStackTemplateService;
-import ck.panda.util.CloudStackZoneService;
 import ck.panda.util.error.exception.ApplicationException;
 
 /**
@@ -208,12 +201,12 @@ public class SyncServiceImpl  implements SyncService {
          LOGGER.error("ERROR AT synch Templates", e);
       }
 
-        try{
-            //12. Sync Templates entity
-            this.syncDepartment();
-            }catch(Exception e){
-                LOGGER.error("ERROR AT synch Department", e);
-            }
+      try{
+          // 13. Sync Department entity
+    	  this.syncDepartment();
+      }catch(Exception e){
+    	  LOGGER.error("ERROR AT synch Department", e);
+      }
     }
 
    /**
@@ -527,8 +520,8 @@ public class SyncServiceImpl  implements SyncService {
     public void syncUser() throws ApplicationException, Exception {
 
         //1. Get all the user objects from CS server as hash
-        List<User> csAccountService = userService.findAllFromCSServer();
-        HashMap<String, User> csUserMap = (HashMap<String, User>) User.convert(csAccountService);
+        List<User> csUserService = userService.findAllFromCSServer();
+        HashMap<String, User> csUserMap = (HashMap<String, User>) User.convert(csUserService);
 
         //2. Get all the user objects from application
         List<User> appUserList = userService.findAll();

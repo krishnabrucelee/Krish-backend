@@ -17,10 +17,11 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 import org.joda.time.DateTime;
-import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
+import ck.panda.service.DepartmentService;
 
 /** User entity. */
 @Entity
@@ -41,6 +42,11 @@ public class User {
     /** Password of the user. */
     @Column(name = "password")
     private String password;
+
+    /** Department of the user. */
+    @ManyToOne
+    @JoinColumn(name = "department_id", referencedColumnName = "id")
+    private Department department;
 
     /** User domain. */
     @ManyToOne
@@ -113,6 +119,10 @@ public class User {
     @Transient
     private Boolean syncFlag;
 
+    /** Autowired department object. */
+    @Autowired
+	private static DepartmentService departmentService;
+
     /** Define user type. */
     public enum Type {
        /** Define type constant. */
@@ -182,6 +192,20 @@ public class User {
     }
 
     /**
+	 * @return the department
+	 */
+	public Department getDepartment() {
+		return department;
+	}
+
+	/**
+	 * @param department the department to set
+	 */
+	public void setDepartment(Department department) {
+		this.department = department;
+	}
+
+	/**
 	 * @return the domain
 	 */
 	public Domain getDomain() {
@@ -466,16 +490,18 @@ public class User {
      *
      * @param object JSON object.
      * @return user object.
+     * @throws Exception
      */
-    public static User convert(JSONObject object) throws JSONException {
+    public static User convert(JSONObject object) throws Exception {
+
         User user = new User();
         user.uuid = object.get("id").toString();
-        user.userName = object.get("name").toString();
-        user.uuid = object.get("id").toString();
-        user.userName = object.get("name").toString();
-        user.email = "test@assistanz.com";
-        user.password = "l3tm3in";
-        user.isActive = true;
+        user.userName = object.get("username").toString();
+        user.firstName = object.get("firstname").toString();
+        user.lastName = object.get("lastname").toString();
+        user.email = object.has("email") ? object.get("email").toString() : "";
+        user.type = ((Integer)object.get("accounttype") == 0 ? User.Type.USER : User.Type.ADMIN);
+        user.department = departmentService.findByUuid(object.get("accountid").toString());
         user.setSyncFlag(false);
         return user;
     }

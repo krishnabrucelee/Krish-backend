@@ -1,15 +1,15 @@
 package ck.panda.domain.repository.jpa;
 
 import java.util.List;
-
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-
+import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
 
 /** JPA repository for user CRUD operations. */
 public interface UserRepository extends PagingAndSortingRepository<User, Long> {
+
 	/**
 	 * Find user by active and query.
 	 * @param query
@@ -17,5 +17,16 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
 	 */
 	@Query(value = "select user from User user where user.isActive IS TRUE and lower(user.userName) LIKE '%' || lower(:query) || '%' ")
     List<User> findAllByActive(@Param("query") String query);
+
+    /**
+     * Find the department already exist for the same domain.
+     *
+     * @param userName userName of the user
+     * @param domain domain of the user
+     * @return user
+     */
+    @Query(value = "select user from User user where user.userName=:userName AND user.domain=:domain)")
+    User findByUserNameAndDomain(@Param("userName") String userName, @Param("domain") Domain domain);
+
 
 }

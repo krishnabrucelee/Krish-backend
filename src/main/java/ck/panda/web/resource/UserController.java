@@ -20,7 +20,6 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.User;
-import ck.panda.domain.entity.VmInstance;
 import ck.panda.service.UserService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -90,7 +89,7 @@ public class UserController extends CRUDController<User> implements ApiControlle
    	}
 
    @Override
-  public void testMethod() throws Exception {
+   public void testMethod() throws Exception {
 
   }
 }
