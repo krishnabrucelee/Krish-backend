@@ -48,6 +48,30 @@ public class ComputeOfferingCost {
     private Double setupCost;
 
     /** Cost of Running Instance for vcpu. */
+    @Column(name = "instance_running_cost_per_vcpu")
+    private Double instanceRunningCostPerVcpu;
+
+    /** Cost of Running Instancefor memory. */
+    @Column(name = "instance_running_cost_per_mb")
+    private Double instanceRunningCostPerMB;
+
+    /** Cost of Running Instance for iops. */
+    @Column(name = "instance_running_cost_per_iops")
+    private Double instanceRunningCostPerIops;
+
+    /** Cost of Stoppage Instance for vcpu. */
+    @Column(name = "instance_stoppage_cost_per_vcpu")
+    private Double instanceStoppageCostPerVcpu;
+
+    /** Cost of Stoppage Instance for memory. */
+    @Column(name = "instance_stoppage_cost_per_mb")
+    private Double instanceStoppageCostPerMB;
+
+    /** Cost of Running Instance for vcpu. */
+    @Column(name = "instance_stoppage_cost_per_iops")
+    private Double instanceStoppageCostPerIops;
+
+    /** Cost of Stoppage Instance for vcpu. */
     @Column(name = "instance_running_cost_vcpu")
     private Double instanceRunningCostVcpu;
 
@@ -280,6 +304,90 @@ public class ComputeOfferingCost {
      */
     public Double getSetupCost() {
         return setupCost;
+    }
+
+    /**
+     * @return the instanceRunningCostPerVcpu
+     */
+    public Double getInstanceRunningCostPerVcpu() {
+        return instanceRunningCostPerVcpu;
+    }
+
+    /**
+     * @param instanceRunningCostPerVcpu the instanceRunningCostPerVcpu to set
+     */
+    public void setInstanceRunningCostPerVcpu(Double instanceRunningCostPerVcpu) {
+        this.instanceRunningCostPerVcpu = instanceRunningCostPerVcpu;
+    }
+
+    /**
+     * @return the instanceRunningCostPerMB
+     */
+    public Double getInstanceRunningCostPerMB() {
+        return instanceRunningCostPerMB;
+    }
+
+    /**
+     * @param instanceRunningCostPerMB the instanceRunningCostPerMB to set
+     */
+    public void setInstanceRunningCostPerMB(Double instanceRunningCostPerMB) {
+        this.instanceRunningCostPerMB = instanceRunningCostPerMB;
+    }
+
+    /**
+     * @return the instanceRunningCostPerIops
+     */
+    public Double getInstanceRunningCostPerIops() {
+        return instanceRunningCostPerIops;
+    }
+
+    /**
+     * @param instanceRunningCostPerIops the instanceRunningCostPerIops to set
+     */
+    public void setInstanceRunningCostPerIops(Double instanceRunningCostPerIops) {
+        this.instanceRunningCostPerIops = instanceRunningCostPerIops;
+    }
+
+    /**
+     * @return the instanceStoppageCostPerVcpu
+     */
+    public Double getInstanceStoppageCostPerVcpu() {
+        return instanceStoppageCostPerVcpu;
+    }
+
+    /**
+     * @param instanceStoppageCostPerVcpu the instanceStoppageCostPerVcpu to set
+     */
+    public void setInstanceStoppageCostPerVcpu(Double instanceStoppageCostPerVcpu) {
+        this.instanceStoppageCostPerVcpu = instanceStoppageCostPerVcpu;
+    }
+
+    /**
+     * @return the instanceStoppageCostPerMB
+     */
+    public Double getInstanceStoppageCostPerMB() {
+        return instanceStoppageCostPerMB;
+    }
+
+    /**
+     * @param instanceStoppageCostPerMB the instanceStoppageCostPerMB to set
+     */
+    public void setInstanceStoppageCostPerMB(Double instanceStoppageCostPerMB) {
+        this.instanceStoppageCostPerMB = instanceStoppageCostPerMB;
+    }
+
+    /**
+     * @return the instanceStoppageCostPerIops
+     */
+    public Double getInstanceStoppageCostPerIops() {
+        return instanceStoppageCostPerIops;
+    }
+
+    /**
+     * @param instanceStoppageCostPerIops the instanceStoppageCostPerIops to set
+     */
+    public void setInstanceStoppageCostPerIops(Double instanceStoppageCostPerIops) {
+        this.instanceStoppageCostPerIops = instanceStoppageCostPerIops;
     }
 
     /**

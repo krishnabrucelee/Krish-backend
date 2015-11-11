@@ -13,6 +13,7 @@ import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.Host;
 import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
@@ -91,13 +92,17 @@ public class SyncServiceImpl  implements SyncService {
     @Autowired
     private ComputeOfferingService computeService;
 
-    /** User service for listing users. */
+    /** Department service for listing users. */
     @Autowired
     private DepartmentService departmentService;
 
     /** For listing users in cloudstack server. */
     @Autowired
     private UserService userService;
+
+    /** For listing hosts in cloudstack server. */
+    @Autowired
+    private HostService hostService;
 
     /** Template Service  for listing templates. */
     @Autowired
@@ -203,6 +208,13 @@ public class SyncServiceImpl  implements SyncService {
           this.syncDepartment();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch Department", e);
+      }
+
+      try {
+          // 13. Sync Department entity
+          this.syncHost();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Host", e);
       }
     }
 
@@ -832,6 +844,48 @@ public class SyncServiceImpl  implements SyncService {
         //add it to app db
         for (String key: csUserMap.keySet()) {
             departmentService.save(csUserMap.get(key));
+        }
+    }
+
+    /**
+     * Sync with Cloud Server Account.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    private void syncHost() throws ApplicationException, Exception {
+
+        //1. Get all the host objects from CS server as hash
+        List<Host> csHostService = hostService.findAllFromCSServer();
+        HashMap<String, Host> csHostMap = (HashMap<String, Host>) Host.convert(csHostService);
+
+        //2. Get all the host objects from application
+        List<Host> appHostList = hostService.findAll();
+
+        // 3. Iterate application host list
+        for (Host host: appHostList) {
+             //3.1 Find the corresponding CS server host object by finding it in a hash using uuid
+            if (csHostMap.containsKey(host.getUuid())) {
+                Host csUser = csHostMap.get(host.getUuid());
+
+                host.setName(csUser.getName());
+
+                //3.2 If found, update the user object in app db
+                hostService.update(host);
+
+                //3.3 Remove once updated, so that we can have the list of cs host which is not added in the app
+                csHostMap.remove(host.getUuid());
+            } else {
+                hostService.delete(host);
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete
+             }
+
+             }
+        //4. Get the remaining list of cs server hash user object, then iterate and
+        //add it to app db
+        for (String key: csHostMap.keySet()) {
+            hostService.save(csHostMap.get(key));
         }
     }
 }

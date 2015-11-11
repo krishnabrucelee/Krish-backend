@@ -101,11 +101,11 @@ public class ComputeOffering implements Serializable {
     @Column(name = "memory")
     private Integer memory;
 
-    /** The Disk bytesReadRate for the Compute offering. */
+    /** The Disk bytes Read Rate. */
     @Column(name = "disk_bytes_read_rate")
     private Integer diskBytesReadRate;
 
-    /** The Disk bytesWriteRate for the Compute offering. */
+    /** The Disk bytes Write Rate . */
     @Column(name = "disk_bytes_write_rate")
     private Integer diskBytesWriteRate;
 
@@ -211,40 +211,38 @@ public class ComputeOffering implements Serializable {
      */
     public enum DiskIo {
 
-           /** If region is enabled we can create zones and pods. */
+           /** If average disk input and speed at is better level. */
            AVERAGE,
 
-           /** If region is disabled cannot create any zones and pods until region gets enabled. */
+           /** If good disk input and output speed is above average level. */
            GOOD,
 
-           /** If region is deleted we cannot create zones and pods. */
+           /** If excellent disk input and output speed is at highest level. */
            EXCELLENT
     }
 
     /**
-     * Enumeration for Region status.
+     * Enumeration for Storage Type status.
      */
     public enum StorageType {
 
-           /** If region is enabled we can create zones and pods. */
+           /** If shared is selected we can create instance without enabling zone to use local storage. */
            shared,
 
-           /** If region is disabled cannot create any zones and pods until region gets enabled. */
+           /** If zone is enabled to access local storage then only we can create vm using this option. */
            local,
-
     }
 
     /**
-     * Enumeration for Region status.
+     * Enumeration for QOS type status.
      */
     public enum QosType {
 
-           /** If region is enabled we can create zones and pods. */
+           /** If hypervisor is chosed we can specify disk bytes read and write bytes value. */
            HYPERVISOR,
 
-           /** If region is disabled cannot create any zones and pods until region gets enabled. */
+           /** If storage is chosed we can specify minimum and maximum iops values. */
            STORAGE,
-
     }
 
     /**

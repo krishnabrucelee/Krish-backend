@@ -13,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.ComputeOffering;
-import ck.panda.domain.entity.Domain;
 import ck.panda.domain.repository.jpa.ComputeOfferingRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackComputeOffering;
@@ -221,6 +220,8 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             computeMap.put("memory", compute.getMemory().toString());
         }
         if (compute.getCustomized() != null) {
+             computeMap.put("customized", compute.getCustomized().toString());
+        }
         return computeMap;
     }
 
