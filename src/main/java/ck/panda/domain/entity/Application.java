@@ -60,6 +60,7 @@ public class Application implements Serializable {
     @Column(name = "description")
     private String description;
 
+    //TODO Yasin: JDI
     /** Application Domain. */
     @ManyToOne
     @JoinColumn(name = "domain_id", referencedColumnName = "id")
@@ -309,6 +310,7 @@ public class Application implements Serializable {
     }
 
     /** Set the default value for isActive before executing entity manager. */
+    //TODO Yasin: we should not set default values here. move it to service layer.
     @PrePersist
     void preInsert() {
         this.isActive = true;

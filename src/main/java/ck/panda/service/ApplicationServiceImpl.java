@@ -18,6 +18,7 @@ import ck.panda.util.error.exception.ApplicationException;
 public class ApplicationServiceImpl implements ApplicationService {
 
     /** Logger attribute. */
+	//TODO Yasin: remove not used attribute.
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationServiceImpl.class);
 
     /** Validator attribute. */
@@ -30,7 +31,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public Application save(Application application) throws Exception {
-
+    	//TODO Yasin: move all the validations to private method with a relevant method name
         Errors errors = validator.rejectIfNullEntity("application", application);
         errors = validator.validateEntity(application, errors);
         errors = validateType(errors, application.getType());
@@ -47,6 +48,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         Errors errors = validator.rejectIfNullEntity("application", application);
         errors = validator.validateEntity(application, errors);
+        //TODO Yasin: incomplete validation as referred in create
 
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
@@ -57,11 +59,13 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public void delete(Application application) throws Exception {
+    	//TODO Yasin: Validation missing. When a domain is using this application, can we able to delete?
         applicationRepo.delete(application);
     }
 
     @Override
     public void delete(Long id) throws Exception {
+    	//TODO Yasin: Same as above
         applicationRepo.delete(id);
     }
 
@@ -93,6 +97,7 @@ public class ApplicationServiceImpl implements ApplicationService {
      * @return error is present,else new error object is returned.
      * @throws Exception if error is present.
      */
+    //TODO Yasin: why we are having public access specifier here?
     public Errors validateType(Errors errors, String type) throws Exception {
 
         if (this.findByType(type) != null) {
