@@ -19,7 +19,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.hibernate.annotations.Type;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
@@ -47,22 +46,54 @@ public class Department implements Serializable {
     @Column(name = "id")
     private Long id;
 
+    /** User uuid. */
+    @Column(name = "uuid")
+    private String uuid;
+
     /** Domain of the department. */
     @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
     private Domain domain;
 
-
+    /** Domain id of the department. */
     @Column(name = "domain_id")
     private Long domainId;
 
-
+    /** Department users. */
     @OneToMany
     private List<User> user;
 
     /** Description of the Department. */
     @Column(name = "description")
     private String description;
+
+    /** First name of the user. */
+    @Column(name = "first_name")
+    private String firstName;
+
+    /** Last name of the user.  */
+    @Column(name = "last_name")
+    private String lastName;
+
+    /** User name of the account. */
+    @Column(name = "user_name")
+    private String userName;
+
+    /** Password of the account. */
+    @Column(name = "password")
+    private String password;
+
+    /** Set syncFlag. */
+    @Transient
+    private Boolean syncFlag;
+
+    /** Email of the user. */
+    @Column(name = "email")
+    private String email;
+
+    /** User type of the user. */
+    @Column(name = "account_type")
+    private AccountType type;
 
     /** Check whether Department is in active state or in active state. */
     @Column(name = "is_active")
@@ -103,38 +134,6 @@ public class Department implements Serializable {
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
-
-    /** User name of the account. */
-    @Column(name = "user_name")
-    private String userName;
-
-    /** Password of the account. */
-    @Column(name = "password")
-    private String password;
-
-    /** First name of the user.  */
-    @Column(name = "first_name")
-    private String firstName;
-
-    /** Last name of the user.  */
-    @Column(name = "last_name")
-    private String lastName;
-
-    /** User uuid. */
-    @Column(name = "uuid")
-    private String uuid;
-
-    /** Set syncFlag. */
-    @Transient
-    private Boolean syncFlag;
-
-    /** Email of the user. */
-    @Column(name = "email")
-    private String email;
-
-    /** User type of the user. */
-    @Column(name = "account_type")
-    private AccountType type;
 
     /**
      * Default constructor.
@@ -511,9 +510,10 @@ public class Department implements Serializable {
 
      /** Define user type. */
     public enum AccountType {
-       /** Define type constant. */
+       /** User status make department as user type. */
         USER,
-        ADMIN;
+        /** Admin status make department as admin type. */
+        ADMIN
     }
 
     /**
@@ -535,12 +535,12 @@ public class Department implements Serializable {
      */
     public static Department convert(JSONObject object) throws JSONException {
         Department department = new Department();
-        // TODO: have to update user list
-        JSONArray userArray = object.getJSONArray("user");
+        //TODO: have to update user list
         department.userName = object.has("name") ? object.get("name").toString() : "";
         department.firstName = object.has("firstname") ? object.get("firstname").toString() : "";
         department.lastName = object.has("lastname") ? object.get("lastname").toString() : "";
         department.uuid = object.has("id") ? object.get("id").toString() : "";
+        department.domainId = object.has("domainId") ? (Long) object.get("domainId") : null;
         department.email = "test@assistanz.com";
         department.password = "l3tm3in";
         department.isActive = true;
@@ -551,7 +551,7 @@ public class Department implements Serializable {
     /**
      * Mapping entity object into list.
      *
-     * @param userList list of users.
+     * @param departmentList list of department.
      * @return user map
      */
     public static Map<String, Department> convert(List<Department> departmentList) {

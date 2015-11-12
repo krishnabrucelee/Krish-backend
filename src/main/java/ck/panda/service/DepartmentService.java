@@ -16,10 +16,10 @@ import org.springframework.stereotype.Service;
 public interface DepartmentService  extends CRUDService<Department>  {
 
      /**
-      * Method to soft delete department.
+      * Delete the department.
       *
-      * @param department
-      * @return
+      * @param department Department entity.
+      * @return Department.
       * @throws Exception error occurs
       */
      Department softDelete(Department department) throws Exception;
@@ -27,26 +27,20 @@ public interface DepartmentService  extends CRUDService<Department>  {
      /**
       * Find all the departments with active status.
       *
-      * @param pagingAndSorting
-      * @return
-      * @throws Exception
+      * @param pagingAndSorting pagination and sorting values.
+      * @return list of departments with pagination.
+      * @throws Exception error occurs
       */
      Page<Department> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
 
      /**
-      * @param query search term.
-      * @return list of department.
-      * @throws Exception
-      */
-     List<Department> findByName(String query) throws Exception;
-
-     /**
      * Find all the departments with active status.
      *
-     * @return
-     * @throws Exception
+     * @param isActive department status Active/Inactive
+     * @return list of departments with active status
+     * @throws Exception error occurs.
      */
-    List<Department> findAllByActive() throws Exception;
+    List<Department> findAllByIsActive(Boolean isActive) throws Exception;
 
     /**
      * To get list of domains from cloudstack server.
@@ -57,9 +51,12 @@ public interface DepartmentService  extends CRUDService<Department>  {
     List<Department> findAllFromCSServer() throws Exception;
 
     /**
-     * @param uuid.
+     * Find the departments based on the given Uuid and isActive status.
+     *
+     * @param uuid department uuid.
+     * @param isActive department status Active/Inactive
      * @return department.
-     * @throws Exception
+     * @throws Exception error occurs.
      */
-    Department findByUuid(String uuid) throws Exception;
+    Department findByUuidAndIsActive(String uuid, Boolean isActive) throws Exception;
 }

@@ -119,4 +119,12 @@ public interface SyncService {
     */
    void syncTemplates() throws ApplicationException, Exception;
 
+   /**
+   * Sync with CloudStack server Templates.
+   *
+   * @throws ApplicationException unhandled application errors.
+   * @throws Exception cloudstack unhandled errors
+   */
+  void syncDepartment() throws ApplicationException, Exception;
+
 }
