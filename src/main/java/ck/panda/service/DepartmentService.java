@@ -59,4 +59,5 @@ public interface DepartmentService  extends CRUDService<Department>  {
      * @throws Exception error occurs.
      */
     Department findByUuidAndIsActive(String uuid, Boolean isActive) throws Exception;
+
 }

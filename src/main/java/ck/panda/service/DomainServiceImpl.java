@@ -65,6 +65,12 @@ public class DomainServiceImpl implements DomainService {
       return (List<Domain>) domainRepo.findAll();
   }
 
+  @Override
+  public Domain findbyUUID(String uuid) throws Exception {
+      return domainRepo.findByUUID(uuid);
+  }
+
+
 @Override
 public List<Domain> findAllFromCSServer() throws Exception {
       List<Domain> domainList = new ArrayList<Domain>();
@@ -83,5 +89,7 @@ public List<Domain> findAllFromCSServer() throws Exception {
       }
       return domainList;
   }
+
+
 }
 

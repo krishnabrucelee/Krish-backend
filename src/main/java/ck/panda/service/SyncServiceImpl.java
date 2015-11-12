@@ -21,6 +21,7 @@ import ck.panda.domain.entity.Region;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Zone;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.CloudStackTemplateService;
@@ -39,6 +40,7 @@ import ck.panda.util.error.exception.ApplicationException;
  * 8. Template
  * 9. User
  * 10. Network
+ * 11. Instance
  *
  * Get the corresponding data from cloud stack server, if the application does not have the data add it.
  * If the application has the data update it, if the application has data which the cloud stack server does not have,
@@ -58,6 +60,10 @@ public class SyncServiceImpl  implements SyncService {
     /** RegionSerivce for listing Regions. */
     @Autowired
     private ZoneService zoneService;
+
+    /** Virtual machine Service for listing vms. */
+    @Autowired
+    private VirtualMachineService virtualMachineService;
 
     /** RegionSerivce for listing Regions. */
     @Autowired
@@ -206,6 +212,12 @@ public class SyncServiceImpl  implements SyncService {
           this.syncDepartment();
       }catch(Exception e){
           LOGGER.error("ERROR AT synch Department", e);
+      }
+      try {
+          // 13. Sync Instance entity
+          this.syncInstances();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Instance", e);
       }
     }
 
@@ -795,6 +807,43 @@ public class SyncServiceImpl  implements SyncService {
         //add it to app db
         for (String key: csUserMap.keySet()) {
             departmentService.save(csUserMap.get(key));
+        }
+    }
+
+    /**
+     * Sync with Cloud Server Instance.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    @Override
+    public void syncInstances() throws ApplicationException, Exception {
+        // 1. Get all the vm objects from CS server as hash
+        List<VmInstance> csInstanceService = virtualMachineService.findAllFromCSServer();
+        HashMap<String, VmInstance> vmMap = (HashMap<String, VmInstance>) VmInstance.convert(csInstanceService);
+        // 2. Get all the vm objects from application
+        List<VmInstance> appVmList = virtualMachineService.findAll();
+        // 3. Iterate application user list
+        for (VmInstance instance : appVmList) {
+            instance.setSyncFlag(false);
+            // 3.1 Find the corresponding CS server vm object by finding it in a hash using uuid
+            if (vmMap.containsKey(instance.getUuid())) {
+                VmInstance csVm = vmMap.get(instance.getUuid());
+                instance.setName(csVm.getName());
+                // 3.2 If found, update the vm object in app db
+                virtualMachineService.update(instance);
+                // 3.3 Remove once updated, so that we can have the list of cs vm which is not added in the
+                // app
+                vmMap.remove(instance.getUuid());
+            } else {
+                // 3.2 If not found, delete it from app db
+                virtualMachineService.delete(instance);
+            }
+        }
+        // 4. Get the remaining list of cs server hash vm object, then iterate and
+        // add it to app db
+        for (String key : vmMap.keySet()) {
+            virtualMachineService.save(vmMap.get(key));
         }
     }
 }

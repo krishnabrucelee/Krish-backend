@@ -89,4 +89,10 @@ public class ZoneServiceImpl implements ZoneService {
         }
         return zoneList;
     }
+
+    @Override
+    public Zone findByUUID(String uuid) throws Exception {
+       return zoneRepo.findByUUID(uuid);
+    }
+
 }

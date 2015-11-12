@@ -6,14 +6,17 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
-
 /**
  * Jpa Repository for Domain entity.
- *
  */
 @Service
 public interface DomainRepository extends PagingAndSortingRepository<Domain, Long> {
-
+    /**
+     * Find domain by uuid.
+     *
+     * @param uuid uuid of domain.
+     * @return domain object.
+     */
     @Query(value = "select domain from Domain domain where domain.uuid = :uuid")
     Domain findByUUID(@Param("uuid") String uuid);
 }

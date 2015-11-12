@@ -3,7 +3,6 @@ package ck.panda.domain.entity;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.List;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -31,471 +30,444 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
- * Projects are used to organize people and resources. CloudStack users within a single domain can group themselves
- * into project teams so they can collaborate and share virtual resources such as VMs, snapshots, templates, data
- * disks, and IP addresses. CloudStack tracks resource usage per project as well as per user, so the usage can
- * be billed to either a user account or a project.
+ * Projects are used to organize people and resources. CloudStack users within a single domain can group
+ * themselves into project teams so they can collaborate and share virtual resources such as VMs, snapshots,
+ * templates, data disks, and IP addresses. CloudStack tracks resource usage per project as well as per user,
+ * so the usage can be billed to either a user account or a project.
  */
 @Entity
 @Table(name = "projects")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class Project implements Serializable {
+    /** Id of the project. */
+    @Id
+    @GeneratedValue
+    @Column(name = "id")
+    private Long id;
 
-   /** Id of the project. */
-   @Id
-   @GeneratedValue
-   @Column(name = "id")
-   private Long id;
+    /** Name of the Project. */
+    @NotEmpty
+    @Size(min = 4, max = 20)
+    @Column(name = "name", nullable = false)
+    private String name;
 
-   /** Name of the Project. */
-   @NotEmpty
-   @Size(min = 4, max = 20)
-   @Column(name = "name", nullable = false)
-   private String name;
+    /** Name of the project description. */
+    @Column(name = "description")
+    private String description;
 
-   /** Name of the project description. */
-   @Column(name = "description")
-   private String description;
+    /** Project owner id. */
+    @JoinColumn(name = "project_owner_id", referencedColumnName = "id", updatable = false, insertable = false)
+    @ManyToOne
+    private User projectOwner;
 
-   /** Project owner id. */
-   @JoinColumn(name = "project_owner_id", referencedColumnName = "id", updatable = false, insertable = false)
-   @ManyToOne(cascade = CascadeType.ALL)
-   private User projectOwner;
+    /** cloudstack's project uuid. */
+    @Column(name = "uuid")
+    private String uuid;
 
-   /** Project owner id. */
-   @NotNull
-   @Column(name = "project_owner_id")
-   private Long projectOwnerId;
+    /** Project owner id. */
+    @NotNull
+    @Column(name = "project_owner_id")
+    private Long projectOwnerId;
 
-   /** List of users for projects. */
-   @ManyToMany
-   private List<User> userList;
+    /** List of users for projects. */
+    @ManyToMany
+    private List<User> userList;
 
-   /** Project domain id. */
-   @JoinColumn(name = "domain_id", referencedColumnName = "id", updatable = false, insertable = false)
-   @ManyToOne(targetEntity = Domain.class, fetch = FetchType.EAGER)
-   private Domain domain;
+    /** Project domain id. */
+    @JoinColumn(name = "domain_id", referencedColumnName = "id", updatable = false, insertable = false)
+    @ManyToOne(targetEntity = Domain.class, fetch = FetchType.EAGER)
+    private Domain domain;
 
-   /** Project domain id. */
-   @NotNull
-   @Column(name = "domain_id")
-   private Long domainId;
+    /** Project domain id. */
+    @NotNull
+    @Column(name = "domain_id")
+    private Long domainId;
 
-   /** Project department id. */
-   @JoinColumn(name = "department_id", referencedColumnName = "id", updatable = false, insertable = false)
-   @ManyToOne(fetch = FetchType.EAGER, targetEntity = Department.class)
-   private Department department;
+    /** Project department id. */
+    @JoinColumn(name = "department_id", referencedColumnName = "id", updatable = false, insertable = false)
+    @ManyToOne(fetch = FetchType.EAGER, targetEntity = Department.class)
+    private Department department;
 
-   /** Project department id. */
-   @NotNull
-   @Column(name = "department_id")
-   private Long departmentId;
+    /** Project department id. */
+    @NotNull
+    @Column(name = "department_id")
+    private Long departmentId;
 
-   /** Project is whether active or disable. */
-   @NotNull
-   @Column(name = "is_active", nullable = false, columnDefinition = "TINYINT DEFAULT FALSE")
-   private Boolean isActive;
+    /** Project is whether active or disable. */
+    @NotNull
+    @Column(name = "is_active", nullable = false, columnDefinition = "TINYINT DEFAULT FALSE")
+    private Boolean isActive;
 
-   /** Status for project, whether it is Deleted, Enabled etc . */
-   @Column(name = "status")
-   @Enumerated(EnumType.STRING)
-   private Status status;
+    /** Status for project, whether it is Deleted, Enabled etc . */
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
-   /** Enumeration status for Project.*/
-   public enum Status {
-      /** Enabled status is used to list projects through out the application.*/
-      ENABLED,
-      /** Deleted status make projects as soft deleted and it will not list on the applicaiton.*/
-      DELETED
-   }
+    /** Enumeration status for Project. */
+    public enum Status {
+        /** Enabled status is used to list projects through out the application. */
+        ENABLED, /** Deleted status make projects as soft deleted and it will not list on the applicaiton. */
+        DELETED
+    }
 
-   /** Version attribute to handle optimistic locking. */
-   @Version
-   @Column(name = "version")
-   private Long version;
+    /** Version attribute to handle optimistic locking. */
+    @Version
+    @Column(name = "version")
+    private Long version;
 
-   /** Created by user. */
-   @CreatedBy
-   @JoinColumn(name = "created_by", referencedColumnName = "id", insertable = false, updatable = false)
-   @OneToOne
-   private User createdBy;
+    /** Created by user. */
+    @CreatedBy
+    @JoinColumn(name = "created_by", referencedColumnName = "id")
+    @OneToOne
+    private User createdBy;
 
-   /** Last updated by user. */
-   @Column(name = "created_by")
-   private Long createdById;
+    /** Last updated by user. */
+    @LastModifiedBy
+    @JoinColumn(name = "updated_by", referencedColumnName = "id")
+    @OneToOne
+    private User updatedBy;
 
-   /** Last updated by user. */
-   @LastModifiedBy
-   @JoinColumn(name = "updated_by", referencedColumnName = "id", insertable = false, updatable = false)
-   @OneToOne
-   private User updatedBy;
+    /** Created date and time. */
+    @CreatedDate
+    @Column(name = "created_date_time")
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime createdDateTime;
 
-   /** Last updated by user. */
-   @Column(name = "updated_by")
-   private Long updatedById;
+    /** Last modified date and time. */
+    @LastModifiedDate
+    @Column(name = "updated_date_time")
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime updatedDateTime;
 
-   /** Created date and time. */
-   @CreatedDate
-   @Column(name = "created_date_time")
-   @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
-   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-   private ZonedDateTime createdDateTime;
+    /**
+     * Get the id.
+     *
+     * @return the id.
+     */
+    public Long getId() {
+        return id;
+    }
 
-   /** Last modified date and time. */
-   @LastModifiedDate
-   @Column(name = "updated_date_time")
-   @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
-   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-   private ZonedDateTime updatedDateTime;
+    /**
+     * Set the id.
+     *
+     * @param id project unique id to set.
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-   /**
-    * Get the id.
-    *
-    * @return the id.
-    */
-   public Long getId() {
-      return id;
-   }
+    /**
+     * Get the name.
+     *
+     * @return the project name.
+     */
+    public String getName() {
+        return name;
+    }
 
-   /**
-    * Set the id.
-    *
-    * @param id project unique id to set.
-    */
-   public void setId(Long id) {
-      this.id = id;
-   }
+    /**
+     * Set the name.
+     *
+     * @param name project name to set.
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-   /**
-    * Get the name.
-    *
-    * @return the project name.
-    */
-   public String getName() {
-      return name;
-   }
+    /**
+     * Get the description.
+     *
+     * @return the description.
+     */
+    public String getDescription() {
+        return description;
+    }
 
-   /**
-    * Set the name.
-    *
-    * @param name project name to set.
-    */
-   public void setName(String name) {
-      this.name = name;
-   }
+    /**
+     * Set the description.
+     *
+     * @param description project description to set.
+     */
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-   /**
-    * Get the description.
-    *
-    * @return the description.
-    */
-   public String getDescription() {
-      return description;
-   }
+    /**
+     * Get the projectOwner.
+     *
+     * @return the project Owner.
+     */
+    public User getProjectOwner() {
+        return projectOwner;
+    }
 
-   /**
-    * Set the description.
-    *
-    * @param description project description to set.
-    */
-   public void setDescription(String description) {
-      this.description = description;
-   }
+    /**
+     * Set the project owner.
+     *
+     * @param projectOwner owner id to set.
+     */
+    public void setProjectOwner(User projectOwner) {
+        this.projectOwner = projectOwner;
+    }
 
-   /**
-    * Get the projectOwner.
-    *
-    * @return the project Owner.
-    */
-   public User getProjectOwner() {
-      return projectOwner;
-   }
+    /**
+     * Get the list of user. uper.toString();
+     *
+     * @return the list of user.
+     */
+    public List<User> getUserList() {
+        return userList;
+    }
 
-   /**
-    * Set the project owner.
-    *
-    * @param projectOwner owner id to set.
-    */
-   public void setProjectOwner(User projectOwner) {
-      this.projectOwner = projectOwner;
-   }
+    /**
+     * Set the list of user.
+     *
+     * @param userList list of user to set.
+     */
+    public void setUserList(List<User> userList) {
+        this.userList = userList;
+    }
 
-   /**
-    * Get the list of user. uper.toString();
-    *
-    * @return the list of user.
-    */
-   public List<User> getUserList() {
-      return userList;
-   }
+    /**
+     * Get the domain.
+     *
+     * @return the domain.
+     */
+    public Domain getDomain() {
+        return domain;
+    }
 
-   /**
-    * Set the list of user.
-    *
-    * @param userList list of user to set.
-    */
-   public void setUserList(List<User> userList) {
-      this.userList = userList;
-   }
+    /**
+     * Set the domain.
+     *
+     * @param domain domain id to set.
+     */
+    public void setDomain(Domain domain) {
+        this.domain = domain;
+    }
 
-   /**
-    * Get the domain.
-    *
-    * @return the domain.
-    */
-   public Domain getDomain() {
-      return domain;
-   }
+    /**
+     * Get the department.
+     *
+     * @return the department.
+     */
+    public Department getDepartment() {
+        return department;
+    }
 
-   /**
-    * Set the domain.
-    *
-    * @param domain domain id to set.
-    */
-   public void setDomain(Domain domain) {
-      this.domain = domain;
-   }
+    /**
+     * Set the department.
+     *
+     * @param department department object to set.
+     */
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
 
-   /**
-    * Get the department.
-    *
-    * @return the department.
-    */
-   public Department getDepartment() {
-      return department;
-   }
+    /**
+     * Get the status of project.
+     *
+     * @return the status.
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
 
-   /**
-    * Set the department.
-    *
-    * @param department department object to set.
-    */
-   public void setDepartment(Department department) {
-      this.department = department;
-   }
+    /**
+     * Set the status of project.
+     *
+     * @param isActive project's status to set.
+     */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
 
-   /**
-    * Get the status of project.
-    *
-    * @return the status.
-    */
-   public Boolean getIsActive() {
-      return isActive;
-   }
+    /**
+     * Get the version count.
+     *
+     * @return the version count.
+     */
+    public Long getVersion() {
+        return version;
+    }
 
-   /**
-    * Set the status of project.
-    *
-    * @param isActive project's status to set.
-    */
-   public void setIsActive(Boolean isActive) {
-      this.isActive = isActive;
-   }
+    /**
+     * Set the version count.
+     *
+     * @param version version count to set.
+     */
+    public void setVersion(Long version) {
+        this.version = version;
+    }
 
-   /**
-    * Get the version count.
-    *
-    * @return the version count.
-    */
-   public Long getVersion() {
-      return version;
-   }
+    /**
+     * Get the created user details.
+     *
+     * @return the created user.
+     */
+    public User getCreatedBy() {
+        return createdBy;
+    }
 
-   /**
-    * Set the version count.
-    *
-    * @param version version count to set.
-    */
-   public void setVersion(Long version) {
-      this.version = version;
-   }
+    /**
+     * Set the created user details.
+     *
+     * @param createdBy created user to set.
+     */
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
+    }
 
-   /**
-    * Get the created user details.
-    *
-    * @return the created user.
-    */
-   public User getCreatedBy() {
-      return createdBy;
-   }
+    /**
+     * Get the last updated user details.
+     *
+     * @return the updated user.
+     */
+    public User getUpdatedBy() {
+        return updatedBy;
+    }
 
-   /**
-    * Set the created user details.
-    *
-    * @param createdBy created user to set.
-    */
-   public void setCreatedBy(User createdBy) {
-      this.createdBy = createdBy;
-   }
+    /**
+     * Set the last updated user details.
+     *
+     * @param updatedBy updated user to set.
+     */
+    public void setUpdatedBy(User updatedBy) {
+        this.updatedBy = updatedBy;
+    }
 
-   /**
-    * Get the last updated user details.
-    *
-    * @return the updated user.
-    */
-   public User getUpdatedBy() {
-      return updatedBy;
-   }
+    /**
+     * Get the created date and time.
+     *
+     * @return the created date and time.
+     */
+    public ZonedDateTime getCreatedDateTime() {
+        return createdDateTime;
+    }
 
-   /**
-    * Set the last updated user details.
-    *
-    * @param updatedBy updated user to set.
-    */
-   public void setUpdatedBy(User updatedBy) {
-      this.updatedBy = updatedBy;
-   }
+    /**
+     * Set the created date and time.
+     *
+     * @param createdDateTime created date and time to set.
+     */
+    public void setCreatedDateTime(ZonedDateTime createdDateTime) {
+        this.createdDateTime = createdDateTime;
+    }
 
-   /**
-    * Get the created date and time.
-    *
-    * @return the created date and time.
-    */
-   public ZonedDateTime getCreatedDateTime() {
-      return createdDateTime;
-   }
+    /**
+     * Get the updated date and time.
+     *
+     * @return the updated date and time.
+     */
+    public ZonedDateTime getUpdatedDateTime() {
+        return updatedDateTime;
+    }
 
-   /**
-    * Set the created date and time.
-    *
-    * @param createdDateTime created date and time to set.
-    */
-   public void setCreatedDateTime(ZonedDateTime createdDateTime) {
-      this.createdDateTime = createdDateTime;
-   }
+    /**
+     * Set the updated date and time.
+     *
+     * @param updatedDateTime updated date and time to set.
+     */
+    public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
+        this.updatedDateTime = updatedDateTime;
+    }
 
-   /**
-    * Get the updated date and time.
-    *
-    * @return the updated date and time.
-    */
-   public ZonedDateTime getUpdatedDateTime() {
-      return updatedDateTime;
-   }
+    /**
+     * Get the status.
+     *
+     * @return the status.
+     */
+    public Status getStatus() {
+        return status;
+    }
 
-   /**
-    * Set the updated date and time.
-    *
-    * @param updatedDateTime updated date and time to set.
-    */
-   public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
-      this.updatedDateTime = updatedDateTime;
-   }
+    /**
+     * Set the status.
+     *
+     * @param status status of project to set.
+     */
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 
-   /**
-    * Get the status.
-    *
-    * @return the status.
-    */
-   public Status getStatus() {
-      return status;
-   }
+    /**
+     * Get project owner id.
+     *
+     * @return the projectOwnerId.
+     */
+    public Long getProjectOwnerId() {
+        return projectOwnerId;
+    }
 
-   /**
-    * Set the status.
-    *
-    * @param status status of project to set.
-    */
-   public void setStatus(Status status) {
-      this.status = status;
-   }
+    /**
+     * Set project owner id.
+     *
+     * @param projectOwnerId the project owner id to set.
+     */
+    public void setProjectOwnerId(Long projectOwnerId) {
+        this.projectOwnerId = projectOwnerId;
+    }
 
+    /**
+     * Get domain id.
+     *
+     * @return the domainId.
+     */
+    public Long getDomainId() {
+        return domainId;
+    }
 
+    /**
+     * Set domain id.
+     *
+     * @param domainId the domain id to set.
+     */
+    public void setDomainId(Long domainId) {
+        this.domainId = domainId;
+    }
 
-   /**
-    * Get project owner id.
-    *
-    * @return the projectOwnerId.
-    */
-   public Long getProjectOwnerId() {
-      return projectOwnerId;
-   }
+    /**
+     * Get department id.
+     *
+     * @return the departmentId.
+     */
+    public Long getDepartmentId() {
+        return departmentId;
+    }
 
-   /**
-    * Set project owner id.
-    *
-    * @param projectOwnerId the project owner id to set.
-    */
-   public void setProjectOwnerId(Long projectOwnerId) {
-      this.projectOwnerId = projectOwnerId;
-   }
+    /**
+     * Set department id.
+     *
+     * @param departmentId the department id to set.
+     */
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
+    }
 
-   /**
-    * Get domain id.
-    *
-    * @return the domainId.
-    */
-   public Long getDomainId() {
-      return domainId;
-   }
+    /**
+     * get instance UUID.
+     *
+     * @return the uuid.
+     */
+    public String getUuid() {
+        return uuid;
+    }
 
-   /**
-    * Set domain id.
-    *
-    * @param domainId the domain id to set.
-    */
-   public void setDomainId(Long domainId) {
-      this.domainId = domainId;
-   }
+    /**
+     * set UUID from cloud stack.
+     *
+     * @param uuid to set.
+     */
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
-   /**
-    * Get department id.
-    *
-    * @return the departmentId.
-    */
-   public Long getDepartmentId() {
-      return departmentId;
-   }
-
-   /**
-    * Set department id.
-    *
-    * @param departmentId the department id to set.
-    */
-   public void setDepartmentId(Long departmentId) {
-      this.departmentId = departmentId;
-   }
-
-   /**
-    * Get created user id.
-    *
-    * @return the createdById.
-    */
-   public Long getCreatedById() {
-      return createdById;
-   }
-
-   /**
-    * Set updated user id.
-    *
-    * @param createdById the created user id to set.
-    */
-   public void setCreatedById(Long createdById) {
-      this.createdById = createdById;
-   }
-
-   /**
-    * Get updated user id.
-    *
-    * @return the updatedById.
-    */
-   public Long getUpdatedById() {
-      return updatedById;
-   }
-
-   /**
-    * Set updated user id.
-    *
-    * @param updatedById the updatedById to set
-    */
-   public void setUpdatedById(Long updatedById) {
-      this.updatedById = updatedById;
-   }
-
-   @Override
-   public String toString() {
-      return ToStringBuilder.reflectionToString(this);
-   }
-
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
 }

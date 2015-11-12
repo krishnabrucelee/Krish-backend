@@ -106,6 +106,10 @@ public class NetworkServiceImpl implements NetworkService {
           return networkList;
       }
 
+      @Override
+      public Network findByUUID(String uuid) throws Exception {
+          return networkRepo.findByUUID(uuid);
+      }
 
 
 }
