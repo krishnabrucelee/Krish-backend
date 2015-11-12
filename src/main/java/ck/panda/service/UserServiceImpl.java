@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.repository.jpa.UserRepository;
@@ -37,6 +39,10 @@ public class UserServiceImpl implements UserService {
     /** Autowired CloudStackUserService object. */
     @Autowired
     private CloudStackUserService csUserService;
+
+    /** Inject departmentService business logic. */
+    @Autowired
+    private DepartmentService departmentService;
 
     /** Autowired configutill object. */
     @Autowired
@@ -171,6 +177,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> findByName(String query) throws Exception {
         return userRepository.findAllByActive(query);
+    }
+
+    @Override
+    public List<User> findByDepartment(Long departmentId) throws Exception {
+        Department department = departmentService.find(departmentId);
+        return userRepository.findByDepartment(department);
+    }
+
+    @Override
+    public User findByUserNameAndDomain(String userName, Domain domain) throws Exception {
+        return userRepository.findByUserNameAndDomain(userName, domain);
     }
 
 }

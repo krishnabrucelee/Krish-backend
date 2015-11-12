@@ -28,5 +28,14 @@ public interface OsTypeService extends CRUDService<OsType> {
      * @throws Exception unhandled errors.
      */
     List<OsType> findByCategoryName(String categoryName) throws Exception;
+
+    /**
+     * Get the OS type based on the uuid.
+     *
+     * @param uuid of the OS type
+     * @return OS type
+     */
+    OsType findByUUID(String uuid);
+
 }
 

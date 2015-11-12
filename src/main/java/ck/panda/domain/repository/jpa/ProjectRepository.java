@@ -8,48 +8,43 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Project;
+import ck.panda.domain.entity.Project.Status;
 
 /**
- * JPA repository for Project entity.
- * Project related crud and pagination are handled by this Repository.
+ * JPA repository for Project entity. Project related crud and pagination are handled by this Repository.
  */
 public interface ProjectRepository extends PagingAndSortingRepository<Project, Long> {
-
     /**
      * Find the project already exist for the same department.
      *
      * @param name project name.
      * @param department department object.
+     * @param isActive true/false.
      * @param projectId project id.
      * @return project name
      */
-    @Query(value = "select prjct from Project prjct where prjct.isActive IS TRUE AND prjct.name=:name AND prjct.department=:department AND prjct.id!=:projectId)")
-    Project findByNameAndDepartment(@Param("name") String name, @Param("department") Department department, @Param("projectId") Long projectId);
+    @Query(value = "select project from Project project where project.isActive IS :isactive AND project.name=:name AND project.department=:department AND project.id!=:projectId)")
+    Project findByNameAndDepartment(@Param("isactive") Boolean isActive, @Param("name") String name,
+            @Param("department") Department department, @Param("projectId") Long projectId);
 
     /**
      * find all the project with active status.
      *
      * @param pageable pagination information.
+     * @param isActive true/false.
+     * @param status of project.
      * @return list of project.
      */
-    @Query(value = "select prjct from Project prjct where prjct.isActive IS TRUE")
-    Page<Project> findAllByActive(Pageable pageable);
-
-    /**
-     * find all the department with active status with query.
-     *
-     * @param query search term.
-     * @return list of project.
-     */
-    @Query(value = "select prrjct from Project prrjct where prrjct.isActive IS TRUE AND lower(prrjct.name) LIKE '%' || lower(:query) || '%' ")
-    List<Project> findByName(@Param("query") String query);
+    @Query(value = "select project from Project project where project.isActive IS :isactive and project.status = :status ")
+    Page<Project> findAllByActive(Pageable pageable, @Param("isactive") Boolean isActive,
+            @Param("status") Status status);
 
     /**
      * find all the project with active status.
      *
+     * @param isActive true/false.
      * @return list of active project.
      */
-    @Query(value = "select prjct from Project prjct where prjct.isActive IS TRUE")
-    List<Project> findAllByActive();
-
+    @Query(value = "select project from Project project where project.isActive IS :isactive ")
+    List<Project> findAllByActive(@Param("isactive") Boolean isActive);
 }

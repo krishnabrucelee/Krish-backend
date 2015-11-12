@@ -20,4 +20,14 @@ public interface NetworkService extends CRUDService<Network> {
      * @throws Exception unhandled errors.
      */
     List<Network> findAllFromCSServer() throws Exception;
+
+    /**
+     * To get network from cloudstack server.
+     *
+     * @param uuid network uuid.
+     * @return zone from server
+     * @throws Exception unhandled errors.
+     */
+    Network findByUUID(String uuid) throws Exception;
+
 }

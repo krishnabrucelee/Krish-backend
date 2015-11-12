@@ -1,7 +1,11 @@
 package ck.panda.service;
 
 import java.util.List;
+
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
 import ck.panda.util.domain.CRUDService;
 
@@ -23,5 +27,24 @@ public interface UserService extends CRUDService<User> {
 	 * @throws Exception
 	 */
 	List<User> findByName(String query) throws Exception;
+
+	/**
+     * To get list of users by department.
+     *
+     * @param departmentId department id.
+     * @return list of user.
+     * @throws Exception if error occurs.
+     */
+    List<User> findByDepartment(Long departmentId) throws Exception;
+
+	/**
+     * Find the User already exist for the same domain.
+     *
+     * @param userName userName of the user
+     * @param domain domain of the user
+     * @return user
+     * @throws Exception unhandled exception.
+     */
+    User findByUserNameAndDomain(@Param("userName") String userName, @Param("domain") Domain domain) throws Exception;
 
 }

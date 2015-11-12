@@ -86,4 +86,10 @@ public class OsTypeServiceImpl implements OsTypeService {
     public List<OsType> findByCategoryName(String categoryName) throws Exception {
         return ostyperepository.findByCategoryName(categoryName);
     }
+
+    @Override
+    public OsType findByUUID(String uuid) {
+        return ostyperepository.findByUUID(uuid);
+    }
+
 }

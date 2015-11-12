@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
 
@@ -28,5 +29,13 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     @Query(value = "select user from User user where user.userName=:userName AND user.domain=:domain)")
     User findByUserNameAndDomain(@Param("userName") String userName, @Param("domain") Domain domain);
 
+    /**
+     * Find user by department.
+     *
+     * @param department department object.
+     * @return list of users.
+     */
+    @Query(value = "select user from User user where user.isActive IS TRUE AND user.department=:department")
+    List<User> findByDepartment(Department department);
 
 }

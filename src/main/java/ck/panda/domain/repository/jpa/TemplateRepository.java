@@ -20,4 +20,13 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      */
     @Query(value = "select template from Template template where template.type != :type")
     List<Template> findByTemplate(@Param("type") Type type);
+
+    /**
+     * Get the template based on the uuid.
+     *
+     * @param uuid of the template
+     * @return template
+     */
+    @Query(value = "select template from Template template where template.uuid = :uuid")
+    Template findByUUID(@Param("uuid") String uuid);
 }
