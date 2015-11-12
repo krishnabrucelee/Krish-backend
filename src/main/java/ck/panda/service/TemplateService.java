@@ -28,4 +28,14 @@ public interface TemplateService extends CRUDService<Template> {
      * @throws Exception unhandled errors.
      */
     List<Template> findByTemplate() throws Exception;
+
+    /**
+     * To get template by uuid.
+     *
+     * @param uuid uuid of template.
+     * @return template.
+     * @throws Exception unhandled errors.
+     */
+    Template findByUUID(String uuid);
+
 }

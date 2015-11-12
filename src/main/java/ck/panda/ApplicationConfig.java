@@ -36,8 +36,6 @@ import ck.panda.util.audit.DateTimeService;
 @EnableJpaAuditing(dateTimeProviderRef = "dateTimeProvider")
 @EnableJpaRepositories("ck.panda.domain.repository")
 public class ApplicationConfig extends WebMvcConfigurerAdapter {
-
-
     /**
      * Default spring boot main method.
      *
@@ -58,11 +56,10 @@ public class ApplicationConfig extends WebMvcConfigurerAdapter {
         return new CurrentTimeDateTimeService();
     }
 
-
     /**
      * Configures the DateTimeProvider bean for providing date and time.
      *
-     * @param dateTimeService DateTimeServiceObject.     *
+     * @param dateTimeService DateTimeServiceObject. *
      * @return AuditingDateTimeProvider implementation
      */
     @Bean
@@ -72,15 +69,17 @@ public class ApplicationConfig extends WebMvcConfigurerAdapter {
 
     /**
      * Instantiates validator bean for javax.validation.Validator interface.
+     *
      * @return Validator implementation
      */
     @Bean
     public javax.validation.Validator localValidatorFactoryBean() {
-       return new LocalValidatorFactoryBean();
+        return new LocalValidatorFactoryBean();
     }
 
     /**
      * Internationalization messages configuration.
+     *
      * @return MessageSource
      */
     @Bean
@@ -93,6 +92,7 @@ public class ApplicationConfig extends WebMvcConfigurerAdapter {
 
     /**
      * Configuring default locale resolver.
+     *
      * @return LocaleResolver
      */
     @Bean
@@ -104,6 +104,7 @@ public class ApplicationConfig extends WebMvcConfigurerAdapter {
 
     /**
      * Locale change interceptor configuration.
+     *
      * @return LocaleChangeInterceptor
      */
     @Bean

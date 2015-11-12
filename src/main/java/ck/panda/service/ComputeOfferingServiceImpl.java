@@ -245,5 +245,10 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
           return computeOfferingList;
       }
 
+    @Override
+    public ComputeOffering findByUUID(String uuid) {
+        return computeRepo.findByUUID(uuid);
+    }
+
     }
 

@@ -22,5 +22,15 @@ public interface DomainService extends CRUDService<Domain> {
      * @throws Exception unhandled errors.
      */
     List<Domain> findAllFromCSServer() throws Exception;
+
+    /**
+     * Find domain by uuid.
+     *
+     * @param uuid uuid of domain.
+     * @return domain object.
+     * @throws Exception unhandled errors.
+     */
+    Domain findbyUUID(String uuid) throws Exception;
+
 }
 

@@ -127,4 +127,12 @@ public interface SyncService {
    */
   void syncDepartment() throws ApplicationException, Exception;
 
+  /**
+   * Sync with CloudStack server Instance list.
+   *
+   * @throws ApplicationException unhandled application errors.
+   * @throws Exception cloudstack unhandled errors
+   */
+  void syncInstances() throws ApplicationException, Exception;
+
 }

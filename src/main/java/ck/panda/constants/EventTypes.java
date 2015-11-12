@@ -2,156 +2,166 @@ package ck.panda.constants;
 
 /**
  * Event Types from Cloudstack Server.
- *
  */
 public class EventTypes {
+    /**
+     * Makes sure that utility classes (classes that contain only static methods or fields in their API) do
+     * not have a public constructor.
+     */
+    protected EventTypes() {
+        throw new UnsupportedOperationException();
+    }
 
-   /**
-    * Makes sure that utility classes (classes that contain only static methods or fields in their API)
-    * do not have a public constructor.
-    */
-   protected EventTypes() {
-       throw new UnsupportedOperationException();
-   }
+    /** VM Events . */
+    public static final String EVENT_VM = "VM.";
 
-   /** VM Events .*/
-   public static final String EVENT_VM = "VM.";
-   /** VM Events .*/
-   public static final String EVENT_VM_CREATE = "VM.CREATE";
-   /** VM Events .*/
-   public static final String EVENT_VM_DESTROY = "VM.DESTROY";
-   /** VM Events .*/
-   public static final String EVENT_VM_START = "VM.START";
-   /** VM Events .*/
-   public static final String EVENT_VM_STOP = "VM.STOP";
-   /** VM Events .*/
-   public static final String EVENT_VM_REBOOT = "VM.REBOOT";
-   /** VM Events .*/
-   public static final String EVENT_VM_UPDATE = "VM.UPDATE";
-   /** VM Events .*/
-   public static final String EVENT_VM_UPGRADE = "VM.UPGRADE";
-   /** VM Events .*/
-   public static final String EVENT_VM_DYNAMIC_SCALE = "VM.DYNAMIC.SCALE";
-   /** VM Events .*/
-   public static final String EVENT_VM_RESETPASSWORD = "VM.RESETPASSWORD";
-   /** VM Events .*/
-   public static final String EVENT_VM_RESETSSHKEY = "VM.RESETSSHKEY";
-   /** VM Events .*/
-   public static final String EVENT_VM_MIGRATE = "VM.MIGRATE";
-   /** VM Events .*/
-   public static final String EVENT_VM_MOVE = "VM.MOVE";
-   /** VM Events .*/
-   public static final String EVENT_VM_RESTORE = "VM.RESTORE";
-   /** VM Events .*/
-   public static final String EVENT_VM_EXPUNGE = "VM.EXPUNGE";
+    /** VM Events . */
+    public static final String EVENT_VM_CREATE = "VM.CREATE";
 
+    /** VM Events . */
+    public static final String EVENT_VM_DESTROY = "VM.DESTROY";
 
-   /** Domain Router. */
-   public static final String EVENT_ROUTER = "ROUTER.";
+    /** VM Events . */
+    public static final String EVENT_VM_START = "VM.START";
 
-   /**  Console proxy. */
-   public static final String EVENT_PROXY = "PROXY.";
+    /** VM Events . */
+    public static final String EVENT_VM_STOP = "VM.STOP";
 
-   /**  VNC Console Events. */
-   public static final String EVENT_VNC = "VNC.";
+    /** VM Events . */
+    public static final String EVENT_VM_REBOOT = "VM.REBOOT";
 
-   /** Global Load Balancer rules. */
-   public static final String EVENT_GLOBAL_LB = "GLOBAL.LB.";
+    /** VM Events . */
+    public static final String EVENT_VM_UPDATE = "VM.UPDATE";
 
-   /** Account events. */
-   public static final String EVENT_ACCOUNT = "ACCOUNT.";
+    /** VM Events . */
+    public static final String EVENT_VM_UPGRADE = "VM.UPGRADE";
 
-   /** UserVO Events. */
-   public static final String EVENT_USER = "USER.";
+    /** VM Events . */
+    public static final String EVENT_VM_DYNAMIC_SCALE = "VM.DYNAMIC.SCALE";
 
-   /** UserVO Events. */
-   public static final String EVENT_USER_LOGIN = "USER.LOGIN";
+    /** VM Events . */
+    public static final String EVENT_VM_RESETPASSWORD = "VM.RESETPASSWORD";
 
-   /** UserVO Events. */
-   public static final String EVENT_USER_LOGOUT = "USER.LOGOUT";
+    /** VM Events . */
+    public static final String EVENT_VM_RESETSSHKEY = "VM.RESETSSHKEY";
 
-   /** registering SSH keypair events. */
-   public static final String EVENT_REGISTER_SSH = "REGISTER.";
+    /** VM Events . */
+    public static final String EVENT_VM_MIGRATE = "VM.MIGRATE";
 
-   /** registering SSH keypair events. */
-   public static final String EVENT_REGISTER_SSH_KEYPAIR = "REGISTER.SSH.KEYPAIR";
+    /** VM Events . */
+    public static final String EVENT_VM_MOVE = "VM.MOVE";
 
-   /** register for user API and secret keys. */
-   public static final String EVENT_REGISTER_SECRET = "REGISTER.";
+    /** VM Events . */
+    public static final String EVENT_VM_RESTORE = "VM.RESTORE";
 
-   /** register for user API and secret keys. */
-   public static final String EVENT_REGISTER_FOR_SECRET_API_KEY = "REGISTER.USER.KEY";
+    /** VM Events . */
+    public static final String EVENT_VM_EXPUNGE = "VM.EXPUNGE";
 
-   /** Template Events. */
-   public static final String EVENT_TEMPLATE = "TEMPLATE.";
+    /** Domain Router. */
+    public static final String EVENT_ROUTER = "ROUTER.";
 
-   /** Volume Events. */
-   public static final String EVENT_VOLUME = "VOLUME.";
+    /** Console proxy. */
+    public static final String EVENT_PROXY = "PROXY.";
 
-   /** Domains. */
-   public static final String EVENT_DOMAIN = "DOMAIN.";
+    /** VNC Console Events. */
+    public static final String EVENT_VNC = "VNC.";
 
-   /** Snapshots. */
-   public static final String EVENT_SNAPSHOT = "SNAPSHOT.";
+    /** Global Load Balancer rules. */
+    public static final String EVENT_GLOBAL_LB = "GLOBAL.LB.";
 
-   /** ISO. */
-   public static final String EVENT_ISO = "ISO.";
+    /** Account events. */
+    public static final String EVENT_ACCOUNT = "ACCOUNT.";
 
-   /** Service Offerings. */
-   public static final String EVENT_SERVICE = "SERVICE.";
+    /** UserVO Events. */
+    public static final String EVENT_USER = "USER.";
 
-   /** Disk Offerings. */
-   public static final String EVENT_DISK = "DISK.";
+    /** UserVO Events. */
+    public static final String EVENT_USER_LOGIN = "USER.LOGIN";
 
-   /** Network offerings. */
-   public static final String EVENT_NETWORK = "NETWORK.";
+    /** UserVO Events. */
+    public static final String EVENT_USER_LOGOUT = "USER.LOGOUT";
 
-   /** Pods.*/
-   public static final String EVENT_POD = "POD.";
+    /** registering SSH keypair events. */
+    public static final String EVENT_REGISTER_SSH = "REGISTER.";
 
-   /** Zones. */
-   public static final String EVENT_ZONE = "ZONE.";
+    /** registering SSH keypair events. */
+    public static final String EVENT_REGISTER_SSH_KEYPAIR = "REGISTER.SSH.KEYPAIR";
 
-   /** Physical Network Events. */
-   public static final String EVENT_PHYSICAL = "PHYSICAL.";
+    /** register for user API and secret keys. */
+    public static final String EVENT_REGISTER_SECRET = "REGISTER.";
 
-   /** VPC. */
-   public static final String EVENT_VPC = "VPC.";
+    /** register for user API and secret keys. */
+    public static final String EVENT_REGISTER_FOR_SECRET_API_KEY = "REGISTER.USER.KEY";
 
-   /** vm snapshot events. */
-   public static final String EVENT_VM_SNAPSHOT = "VMSNAPSHOT.";
+    /** Template Events. */
+    public static final String EVENT_TEMPLATE = "TEMPLATE.";
 
-   /** Guest OS related events. */
-   public static final String EVENT_GUEST = "GUEST.";
+    /** Volume Events. */
+    public static final String EVENT_VOLUME = "VOLUME.";
 
-   /** Status of CloudStack server action event status. */
-   public static final String EVENT_COMPLETED = "Completed";
+    /** Domains. */
+    public static final String EVENT_DOMAIN = "DOMAIN.";
 
-   /** Status of CloudStack server action event status. */
-   public static final String EVENT_STARTED = "Started";
+    /** Snapshots. */
+    public static final String EVENT_SNAPSHOT = "SNAPSHOT.";
 
-   /** Status of CloudStack server action event status. */
-   public static final String EVENT_ERROR = "Error";
+    /** ISO. */
+    public static final String EVENT_ISO = "ISO.";
 
-   /** Status of VM instance. */
-   public static final String EVENT_STATUS_CREATE = "Starting";
+    /** Service Offerings. */
+    public static final String EVENT_SERVICE = "SERVICE.";
 
-   /** Status of VM instance. */
-   public static final String EVENT_STATUS_RUNNING = "Running";
+    /** Disk Offerings. */
+    public static final String EVENT_DISK = "DISK.";
 
-   /** Status of VM instance. */
-   public static final String EVENT_STATUS_STOPPED = "Stopped";
+    /** Network offerings. */
+    public static final String EVENT_NETWORK = "NETWORK.";
 
-   /** Status of VM instance. */
-   public static final String EVENT_STATUS_DESTROYED = "Destroyed";
+    /** Pods. */
+    public static final String EVENT_POD = "POD.";
 
-   /** Status of VM instance. */
-   public static final String EVENT_STATUS_STOPPING = "Stopping";
+    /** Zones. */
+    public static final String EVENT_ZONE = "ZONE.";
 
-   /** Status of VM instance. */
-   public static final String EVENT_STATUS_EXPUNGING = "Expunging";
+    /** Physical Network Events. */
+    public static final String EVENT_PHYSICAL = "PHYSICAL.";
 
-   /** State of resources. */
-   public static final String RESOURCE_STATE = "new-state";
+    /** VPC. */
+    public static final String EVENT_VPC = "VPC.";
 
+    /** vm snapshot events. */
+    public static final String EVENT_VM_SNAPSHOT = "VMSNAPSHOT.";
+
+    /** Guest OS related events. */
+    public static final String EVENT_GUEST = "GUEST.";
+
+    /** Status of CloudStack server action event status. */
+    public static final String EVENT_COMPLETED = "Completed";
+
+    /** Status of CloudStack server action event status. */
+    public static final String EVENT_STARTED = "Started";
+
+    /** Status of CloudStack server action event status. */
+    public static final String EVENT_ERROR = "Error";
+
+    /** Status of VM instance. */
+    public static final String EVENT_STATUS_CREATE = "Starting";
+
+    /** Status of VM instance. */
+    public static final String EVENT_STATUS_RUNNING = "Running";
+
+    /** Status of VM instance. */
+    public static final String EVENT_STATUS_STOPPED = "Stopped";
+
+    /** Status of VM instance. */
+    public static final String EVENT_STATUS_DESTROYED = "Destroyed";
+
+    /** Status of VM instance. */
+    public static final String EVENT_STATUS_STOPPING = "Stopping";
+
+    /** Status of VM instance. */
+    public static final String EVENT_STATUS_EXPUNGING = "Expunging";
+
+    /** State of resources. */
+    public static final String RESOURCE_STATE = "new-state";
 }

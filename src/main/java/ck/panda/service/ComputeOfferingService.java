@@ -1,9 +1,7 @@
 package ck.panda.service;
 
 import java.util.List;
-
 import org.springframework.stereotype.Service;
-
 import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.util.domain.CRUDService;
 
@@ -21,5 +19,13 @@ public interface ComputeOfferingService  extends CRUDService<ComputeOffering>  {
      * @throws Exception unhandled errors.
      */
     List<ComputeOffering> findAllFromCSServer() throws Exception;
+
+    /**
+     * Get the compute offer based on the uuid.
+     *
+     * @param uuid of the compute offer.
+     * @return compute offer
+     */
+    ComputeOffering findByUUID(String uuid);
 }
 

@@ -310,4 +310,9 @@ public class TemplateServiceImpl implements TemplateService {
         errors.addGlobalError(eMessage);
         return errors;
     }
+
+    @Override
+    public Template findByUUID(String uuid) {
+        return templateRepository.findByUUID(uuid);
+    }
 }

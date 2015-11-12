@@ -23,76 +23,75 @@ import ck.panda.service.SyncService;
 import ck.panda.service.VirtualMachineService;
 
 /**
- * RabbitMQ configuration to publish/consume messages from CS server via RabbitMQ server with specified Exchange name.
- * All CS server events are tracked and update the status of resources in APP DB, update usage of resource in APP DB, sync APP DB while action directly handled at CS server, CS server Alert.
+ * RabbitMQ configuration to publish/consume messages from CS server via RabbitMQ server with specified
+ * Exchange name. All CS server events are tracked and update the status of resources in APP DB, update usage
+ * of resource in APP DB, sync APP DB while action directly handled at CS server, CS server Alert.
  */
 @Configuration
 public class RabbitConfig {
-
-    /** The hostname.*/
+    /** The hostname. */
     @Value(value = "${spring.rabbit.host}")
     private String hostName;
 
-    /** The virtual hostname.*/
+    /** The virtual hostname. */
     @Value(value = "${spring.rabbit.vhost}")
     private String vhost;
 
-    /** RabbitMQ login user name.*/
+    /** RabbitMQ login user name. */
     @Value(value = "${spring.rabbit.username}")
     private String username;
 
-    /** RabbitMQ login password.*/
+    /** RabbitMQ login password. */
     @Value(value = "${spring.rabbit.password}")
     private String password;
 
-    /** CS server action routing key pattern.*/
+    /** CS server action routing key pattern. */
     @Value(value = "${spring.rabbit.server.action.pattern}")
     private String csActionPattern;
 
-    /** CS server alert routing key pattern.*/
+    /** CS server alert routing key pattern. */
     @Value(value = "${spring.rabbit.server.alert.pattern}")
     private String csAlertPattern;
 
-    /** CS server usage routing key pattern.*/
+    /** CS server usage routing key pattern. */
     @Value(value = "${spring.rabbit.server.usage.pattern}")
     private String csUsagePattern;
 
-    /** CS server asynchronous routing key pattern.*/
+    /** CS server asynchronous routing key pattern. */
     @Value(value = "${spring.rabbit.server.asynchJob.pattern}")
     private String csAsynchJobPattern;
 
-    /** CS server usage routing key pattern.*/
+    /** CS server usage routing key pattern. */
     @Value(value = "${spring.rabbit.server.resource.pattern}")
     private String csResourcePattern;
 
-    /** CS server exchange name.*/
+    /** CS server exchange name. */
     @Value(value = "${spring.rabbit.exchange.name}")
     private String exchangeName;
 
-    /** CS server alert queue name.*/
+    /** CS server alert queue name. */
     @Value(value = "${spring.rabbit.server.alert.queue}")
     private String csAlertQueueName;
 
-    /** CS server usage queue name.*/
+    /** CS server usage queue name. */
     @Value(value = "${spring.rabbit.server.usage.queue}")
     private String csUsageQueueName;
 
-    /** CS server asyncJob queue name.*/
+    /** CS server asyncJob queue name. */
     @Value(value = "${spring.rabbit.server.asynchJob.queue}")
     private String csAsynchJobQueueName;
 
-    /** CS server action queue name.*/
+    /** CS server action queue name. */
     @Value(value = "${spring.rabbit.server.action.queue}")
     private String csActionQueueName;
 
-    /** CS server action queue name.*/
+    /** CS server action queue name. */
     @Value(value = "${spring.rabbit.server.resource.queue}")
     private String csResourceQueueName;
 
-    /** Application context reference.*/
+    /** Application context reference. */
     @Autowired
     private ApplicationContext applicationContext;
-
 
     /**
      * Queue for action event messages.
@@ -242,8 +241,8 @@ public class RabbitConfig {
     }
 
     /**
-     * Message listener adapter that delegates the handling of action event messages to target listener methods via reflection, with
-     * flexible type conversion.
+     * Message listener adapter that delegates the handling of action event messages to target listener
+     * methods via reflection, with flexible type conversion.
      *
      * @return message action event listener.
      */
@@ -254,8 +253,8 @@ public class RabbitConfig {
     }
 
     /**
-     * Message listener adapter that delegates the handling of asynchronous job messages to target listener methods via reflection, with
-     * flexible type conversion.
+     * Message listener adapter that delegates the handling of asynchronous job messages to target listener
+     * methods via reflection, with flexible type conversion.
      *
      * @return message asynchronous job listener.
      */
@@ -265,8 +264,8 @@ public class RabbitConfig {
     }
 
     /**
-     * Message listener adapter that delegates the handling of resource state event messages to target listener methods via reflection, with
-     * flexible type conversion.
+     * Message listener adapter that delegates the handling of resource state event messages to target
+     * listener methods via reflection, with flexible type conversion.
      *
      * @return message asynchronous job listener.
      */
@@ -277,8 +276,8 @@ public class RabbitConfig {
     }
 
     /**
-     * Message listener adapter that delegates the handling of alert messages to target listener methods via reflection, with
-     * flexible type conversion.
+     * Message listener adapter that delegates the handling of alert messages to target listener methods via
+     * reflection, with flexible type conversion.
      *
      * @return message alert listener.
      */
@@ -288,8 +287,8 @@ public class RabbitConfig {
     }
 
     /**
-     * Message listener adapter that delegates the handling of usage messages to target listener methods via reflection, with
-     * flexible type conversion.
+     * Message listener adapter that delegates the handling of usage messages to target listener methods via
+     * reflection, with flexible type conversion.
      *
      * @return message usage listener.
      */
@@ -299,7 +298,8 @@ public class RabbitConfig {
     }
 
     /**
-     * Add message listerner to message listener container with specified queue to listen/consume action event message.
+     * Add message listerner to message listener container with specified queue to listen/consume action event
+     * message.
      *
      * @param queue queue for action event.
      * @return message listener container for action event messages.
@@ -314,7 +314,8 @@ public class RabbitConfig {
     }
 
     /**
-     * Add message listerner to message listener container with specified queue to listen/consume alert message.
+     * Add message listerner to message listener container with specified queue to listen/consume alert
+     * message.
      *
      * @param queue3 queue for alert event.
      * @return message listener container for alert message.
@@ -329,7 +330,8 @@ public class RabbitConfig {
     }
 
     /**
-     * Add message listerner to message listener container with specified queue to listen/consume usage message.
+     * Add message listerner to message listener container with specified queue to listen/consume usage
+     * message.
      *
      * @param queue2 queue for usage event.
      * @return message listener container for usage message.
@@ -344,7 +346,8 @@ public class RabbitConfig {
     }
 
     /**
-     * Add message listerner to message listener container with specified queue to listen/consume asynchronous job message.
+     * Add message listerner to message listener container with specified queue to listen/consume asynchronous
+     * job message.
      *
      * @param queue1 queue for asynchronous event.
      * @return message listener container for asynchronous message.
@@ -359,7 +362,8 @@ public class RabbitConfig {
     }
 
     /**
-     * Add message listerner to message listener container with specified queue to listen/consume resource's state message.
+     * Add message listerner to message listener container with specified queue to listen/consume resource's
+     * state message.
      *
      * @param queue4 queue for asynchronous event.
      * @return message listener container for resource's state message.
@@ -372,5 +376,4 @@ public class RabbitConfig {
         container.setMessageListener(resourceStateListenerAdapter());
         return container;
     }
-
 }
