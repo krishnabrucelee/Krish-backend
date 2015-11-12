@@ -52,7 +52,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     @PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
     public ComputeOffering save(ComputeOffering compute) throws Exception {
 
-        if(compute.getIsSyncFlag()) {
+        if (compute.getIsSyncFlag()) {
         Errors errors = validator.rejectIfNullEntity("compute", compute);
         errors = validator.validateEntity(compute, errors);
 
@@ -66,7 +66,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
                     "json", addOptionalValues(compute));
             JSONObject createComputeResponseJSON = new JSONObject(createComputeResponse).getJSONObject("createserviceofferingresponse")
                     .getJSONObject("serviceoffering");
-            if(createComputeResponseJSON.has("errorcode")) {
+            if (createComputeResponseJSON.has("errorcode")) {
                 errors = this.validateEvent(errors, createComputeResponseJSON.getString("errortext"));
                 throw new ApplicationException(errors);
         }
@@ -172,7 +172,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             computeMap.put("cpuspeed",compute.getClockSpeed().toString());
         }
 
-        if (compute.getNumberOfCores() !=null) {
+        if (compute.getNumberOfCores() != null) {
             computeMap.put("cpunumber", compute.getNumberOfCores().toString());
         }
 
@@ -192,7 +192,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             computeMap.put("iopswriterate", compute.getDiskIopsWriteRate().toString());
         }
 
-        if(compute.getCustomizedIops()!= null){
+        if (compute.getCustomizedIops() != null) {
             computeMap.put("customizediops", compute.getCustomizedIops().toString());
         }
 

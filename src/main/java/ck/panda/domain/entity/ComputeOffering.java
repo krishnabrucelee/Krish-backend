@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,7 +18,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.Size;
-
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
 import org.json.JSONException;
@@ -29,14 +27,13 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
-
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
 import ck.panda.util.JsonValidator;
 
 /**
- *  Service offering is a set of virtual hardware features such as CPU core count and speed,
- *  memory, and disk size.
+ *  A service offering is a set of virtual hardware features such as CPU core count and speed, memory, and disk size.
+ *  The CloudStack administrator can set up various offerings, and then end users choose from the
+ *  available offerings when they create a new VM.
+ *
  */
 
 @Entity
@@ -61,12 +58,12 @@ public class ComputeOffering implements Serializable {
     private String name;
 
     /** The number of CPU cores needed. */
-    //@Size(min = 1, max = 200000)
+    @Size(min = 1, max = 200)
     @Column(name = "number_of_cores")
     private Integer numberOfCores;
 
     /** The clock rate of CPU speed in MHz. */
-    //@Size(min = 1, max=1000)
+    @Size(min = 500, max = 3000)
     @Column(name = "clock_speed")
     private Integer clockSpeed;
 
@@ -101,7 +98,7 @@ public class ComputeOffering implements Serializable {
     @Column(name = "memory")
     private Integer memory;
 
-    /** The Disk bytes Read Rate. */
+    /** The Disk Bytes read rate.  */
     @Column(name = "disk_bytes_read_rate")
     private Integer diskBytesReadRate;
 
@@ -109,7 +106,7 @@ public class ComputeOffering implements Serializable {
     @Column(name = "disk_bytes_write_rate")
     private Integer diskBytesWriteRate;
 
-    /** The Disk iopsReadRate for the Compute offering. */
+    /** The Disk Input and Output write rate per second. */
     @Column(name = "disk_iops_read_rate")
     private Integer diskIopsReadRate;
 
@@ -142,7 +139,7 @@ public class ComputeOffering implements Serializable {
     @Column(name = "customized")
     private Boolean customized;
 
-    /** Is this offering is custom. */
+    /** Is this offering consists of customized iops. */
     @Column(name = "customized_iops")
     private Boolean customizedIops;
 
@@ -156,7 +153,7 @@ public class ComputeOffering implements Serializable {
     private Long domainId;
 
 
-    /** The Disk iopsWriteRate for the Compute offering. */
+    /** The Disk Input and Output write rate per second. */
     @Column(name = "disk_iops_write_rate")
     private Integer diskIopsWriteRate;
 
@@ -762,7 +759,7 @@ public class ComputeOffering implements Serializable {
         compute.numberOfCores = JsonValidator.jsonIntegerValidation(object, "cpunumber");
         compute.setStorageType(compute.getStorageType().valueOf(object.has("storagetype") ? object.get("storagetype").toString() : ""));
         compute.setIsSyncFlag(false);
-        } catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
         return compute;

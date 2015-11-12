@@ -2,13 +2,10 @@ package ck.panda.service;
 
 import java.util.HashMap;
 import java.util.List;
-
-import org.neo4j.cypher.internal.compiler.v2_1.perty.docbuilders.toStringDocBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Department;
@@ -258,7 +255,6 @@ public class SyncServiceImpl  implements SyncService {
         //4. Get the remaining list of cs server hash domain object, then iterate and
         //add it to app db
            for (String key: csDomainMap.keySet()) {
-            Domain domain = new Domain();
             LOGGER.debug("Syncservice domain uuid:");
             domainService.save(csDomainMap.get(key));
 
@@ -736,7 +732,6 @@ public class SyncServiceImpl  implements SyncService {
         //4. Get the remaining list of cs server hash domain object, then iterate and
         //add it to app db
         for (String key: csComputeOfferingMap.keySet()) {
-            ComputeOffering computeOffering = new ComputeOffering();
             LOGGER.debug("Syncservice compute offering uuid:");
             computeService.save(csComputeOfferingMap.get(key));
         }

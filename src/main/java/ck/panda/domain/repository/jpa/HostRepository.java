@@ -10,4 +10,5 @@ import ck.panda.domain.entity.Host;
  */
 @Service
 public interface HostRepository extends PagingAndSortingRepository<Host, Long> {
+
 }

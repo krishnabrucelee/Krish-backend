@@ -26,7 +26,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonValidator;
 
 /**
- * Host
+ * A host is a single computer. Hosts provide the computing resources that run guest virtual machines. Each host has
+ * hypervisor software installed on it to manage the guest VMs.
  *
  */
 
@@ -319,7 +320,7 @@ public class Host {
           host.zoneId = JsonValidator.jsonStringValidation(object,"zoneid");
           host.zoneName = JsonValidator.jsonStringValidation(object,"zonename");
           host.state = JsonValidator.jsonStringValidation(object,"state");
-          } catch(Exception e){
+          } catch (Exception e) {
               e.printStackTrace();
           }
         return host;
@@ -337,9 +338,6 @@ public class Host {
           for (Host host : hostList) {
               hostMap.put(host.getUuid(), host);
           }
-
           return hostMap;
       }
-
-
 }

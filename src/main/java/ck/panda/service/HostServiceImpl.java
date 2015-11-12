@@ -25,11 +25,11 @@ public class HostServiceImpl implements HostService {
   /** Logger attribute. */
   private static final Logger LOGGER = LoggerFactory.getLogger(DomainServiceImpl.class);
 
-  /** Department repository reference. */
+  /** Host repository reference. */
   @Autowired
   private HostRepository hostRepo;
 
-  /** CloudStack Domain service for connectivity with cloudstack. */
+  /** CloudStack Host service for getting host connectivity with cloudstack. */
   @Autowired
   private CloudStackHostService hostService;
 
@@ -58,12 +58,12 @@ public class HostServiceImpl implements HostService {
   @Override
   public Host find(Long id) throws Exception {
       Host host = hostRepo.findOne(id);
-    return host;
+      return host;
   }
 
   @Override
   public Page<Host> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-    return hostRepo.findAll(pagingAndSorting.toPageRequest());
+      return hostRepo.findAll(pagingAndSorting.toPageRequest());
   }
 
   @Override
@@ -81,7 +81,7 @@ public List<Host> findAllFromCSServer() throws Exception {
 
       JSONArray hostListJSON = new JSONObject(response).getJSONObject("listhostsresponse")
               .getJSONArray("host");
-      // 2. Iterate the json list, convert the single json entity to domain
+      // 2. Iterate the json list, convert the single json entity to host
       for (int i = 0, size = hostListJSON.length(); i < size; i++) {
           // 2.1 Call convert by passing JSONObject to host entity and Add
           // the converted host entity to list
