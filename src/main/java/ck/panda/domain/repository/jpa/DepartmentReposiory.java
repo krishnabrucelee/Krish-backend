@@ -14,51 +14,45 @@ import ck.panda.domain.entity.Domain;
  * JPA Repository for Department entity.
  */
 @Repository
-//TODO Jamseer: java doc is not perfect
 public interface DepartmentReposiory extends PagingAndSortingRepository<Department, Long> {
 
     /**
-     * TODO Jamseer: method name is irrelevant to what action we are doing here.
-     * Find the department already exist for the same domain.
+     * Find the department for same domain with username and is active status.
      *
-     * @param name of the department
-     * @return department name
+     * @param userName user name of the department.
+     * @param domain Domain reference.
+     * @param isActive get the department list based on active/inactive status.
+     * @return department name.
      */
-    @Query(value = "select dpt from Department dpt where dpt.isActive IS TRUE AND dpt.userName=:name AND dpt.domain=:domain AND dpt.id!=:departmentId)")
-    Department findByNameAndDomain(@Param("name") String name, @Param("domain") Domain domain, @Param("departmentId") Long departmentId);
+    @Query(value = "select dpt from Department dpt where dpt.userName=:userName AND  dpt.domain =:domain AND dpt.isActive =:isActive")
+    Department findByNameAndDomainAndIsActive(@Param("userName") String userName, @Param("domain") Domain domain, @Param("isActive")  Boolean isActive);
 
     /**
-     * TODO Jamseer: method signature is irrelevant to its name
+     * Find all the active or inactive departments with pagination.
+     *
+     * @param pageable to get the list with pagination.
+     * @param isActive get the department list based on active/inactive status.
+     * @return list of departments.
+     */
+    @Query(value = "select dpt from Department dpt where dpt.isActive =:isActive")
+    Page<Department> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
+
+    /**
      * Find all the department with active status.
      *
-     * @param pageable
-     * @return
+     * @param isActive get the department list based on active/inactive status.
+     * @return list of departments.
      */
-    @Query(value = "select dpt from Department dpt where dpt.isActive IS TRUE")
-    Page<Department> findAllByActive(Pageable pageable);
+    @Query(value = "select dpt from Department dpt where dpt.isActive =:isActive")
+    List<Department> findAllByIsActive(@Param("isActive") Boolean isActive);
 
     /**
-     * TODO Jamseer: not sure why we need this method?
-     * Find all the department with active status with query.
-     * @param query
-     * @return
-     */
-    @Query(value = "select dept from Department dept where dept.isActive IS TRUE AND lower(dept.userName) LIKE '%' || lower(:query) || '%' ")
-    List<Department> findAllByActive(@Param("query") String query);
-
-    /**
-     * find all the department with active status.
+     * Find the department by uuid.
      *
-     * @return
+     * @param uuid department uuid.
+     * @param isActive get the department list based on active/inactive status.
+     * @return Department.
      */
-    @Query(value = "select dpt from Department dpt where dpt.isActive IS TRUE")
-    List<Department> findAllByActive();
-
-    /**
-     * find the department by uuid.
-     * @param uuid
-     * @return Department
-     */
-    @Query(value = "select dpt from Department dpt where dpt.isActive IS TRUE AND dpt.uuid=:uuid)")
-    Department findByUuid(@Param("uuid") String uuid);
+    @Query(value = "select dpt from Department dpt where dpt.isActive =:isActive AND dpt.uuid=:uuid)")
+    Department findByUuidAndIsActive(@Param("uuid") String uuid, @Param("isActive") Boolean isActive);
 }

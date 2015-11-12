@@ -58,12 +58,12 @@ public class ComputeOffering implements Serializable {
     private String name;
 
     /** The number of CPU cores needed. */
-    @Size(min = 1, max = 200)
+    // @Size(min = 1, max = 200)
     @Column(name = "number_of_cores")
     private Integer numberOfCores;
 
     /** The clock rate of CPU speed in MHz. */
-    @Size(min = 500, max = 3000)
+    //@Size(min = 500, max = 3000)
     @Column(name = "clock_speed")
     private Integer clockSpeed;
 

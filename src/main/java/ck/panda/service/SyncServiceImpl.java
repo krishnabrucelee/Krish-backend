@@ -17,6 +17,7 @@ import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.OsType;
 import ck.panda.domain.entity.Region;
+import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
@@ -100,6 +101,10 @@ public class SyncServiceImpl  implements SyncService {
     /** For listing hosts in cloudstack server. */
     @Autowired
     private HostService hostService;
+
+    /** For listing snapshots in cloudstack server. */
+    @Autowired
+    private SnapshotService snapshotService;
 
     /** Template Service  for listing templates. */
     @Autowired
@@ -208,10 +213,17 @@ public class SyncServiceImpl  implements SyncService {
       }
 
       try {
-          // 13. Sync Department entity
+          // 13. Sync Host entity
           this.syncHost();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch Host", e);
+      }
+
+      try {
+          // 13. Sync Snapshot entity
+          this.syncSnapshot();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Snapshot", e);
       }
     }
 
@@ -799,12 +811,13 @@ public class SyncServiceImpl  implements SyncService {
 
     }
 
-    /**
+   /**
      * Sync with Cloud Server Account.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    private void syncDepartment() throws ApplicationException, Exception {
+    @Override
+    public void syncDepartment() throws ApplicationException, Exception {
 
         //1. Get all the user objects from CS server as hash
         List<Department> csAccountService = departmentService.findAllFromCSServer();
@@ -881,6 +894,48 @@ public class SyncServiceImpl  implements SyncService {
         //add it to app db
         for (String key: csHostMap.keySet()) {
             hostService.save(csHostMap.get(key));
+        }
+    }
+
+    /**
+     * Sync with Cloud Server Account.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    private void syncSnapshot() throws ApplicationException, Exception {
+
+        //1. Get all the snapshot objects from CS server as hash
+        List<Snapshot> csSnapshotService = snapshotService.findAllFromCSServer();
+        HashMap<String, Snapshot> csSnapshotMap = (HashMap<String, Snapshot>) Snapshot.convert(csSnapshotService);
+
+        //2. Get all the snapshot objects from application
+        List<Snapshot> appSnapshotList = snapshotService.findAll();
+
+        // 3. Iterate application snapshot list
+        for (Snapshot snapshot: appSnapshotList) {
+             //3.1 Find the corresponding CS server snapshot object by finding it in a hash using uuid
+            if (csSnapshotMap.containsKey(snapshot.getUuid())) {
+                Snapshot csUser = csSnapshotMap.get(snapshot.getUuid());
+
+                snapshot.setName(csUser.getName());
+
+                //3.2 If found, update the snapshot object in app db
+                snapshotService.update(snapshot);
+
+                //3.3 Remove once updated, so that we can have the list of cs snapshot which is not added in the app
+                csSnapshotMap.remove(snapshot.getUuid());
+            } else {
+                snapshotService.delete(snapshot);
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete
+             }
+
+             }
+        //4. Get the remaining list of cs server hash user object, then iterate and
+        //add it to app db
+        for (String key: csSnapshotMap.keySet()) {
+            snapshotService.save(csSnapshotMap.get(key));
         }
     }
 }

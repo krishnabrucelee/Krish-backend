@@ -76,7 +76,7 @@ public class User {
 
     /** List of projects for users. */
     @ManyToMany
-	private List<Project> projectList;
+    private List<Project> projectList;
 
     /** User uuid. */
     @Column(name = "uuid")
@@ -121,7 +121,7 @@ public class User {
 
     /** Autowired department object. */
     @Autowired
-	private static DepartmentService departmentService;
+    private static DepartmentService departmentService;
 
     /** Define user type. */
     public enum Type {
@@ -192,34 +192,34 @@ public class User {
     }
 
     /**
-	 * @return the department
-	 */
-	public Department getDepartment() {
-		return department;
-	}
+     * @return the department
+     */
+    public Department getDepartment() {
+        return department;
+    }
 
-	/**
-	 * @param department the department to set
-	 */
-	public void setDepartment(Department department) {
-		this.department = department;
-	}
+    /**
+     * @param department the department to set
+     */
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
 
-	/**
-	 * @return the domain
-	 */
-	public Domain getDomain() {
-		return domain;
-	}
+    /**
+     * @return the domain
+     */
+    public Domain getDomain() {
+        return domain;
+    }
 
-	/**
-	 * @param domain the domain to set
-	 */
-	public void setDomain(Domain domain) {
-		this.domain = domain;
-	}
+    /**
+     * @param domain the domain to set
+     */
+    public void setDomain(Domain domain) {
+        this.domain = domain;
+    }
 
-	/**
+    /**
      * Get the role.
      *
      * @return the role.
@@ -309,21 +309,21 @@ public class User {
         this.lastName = lastName;
     }
 
-	/**
-	 * @return the projectList
-	 */
-	public List<Project> getProjectList() {
-		return projectList;
-	}
+    /**
+     * @return the projectList
+     */
+    public List<Project> getProjectList() {
+        return projectList;
+    }
 
-	/**
-	 * @param projectList the projectList to set
-	 */
-	public void setProjectList(List<Project> projectList) {
-		this.projectList = projectList;
-	}
+    /**
+     * @param projectList the projectList to set
+     */
+    public void setProjectList(List<Project> projectList) {
+        this.projectList = projectList;
+    }
 
-	/**
+    /**
      * Get the user uuid.
      *
      * @return the uuid.
@@ -473,8 +473,8 @@ public class User {
      * @return the syncFlag.
      */
     public Boolean getSyncFlag() {
-	return syncFlag;
-	}
+    return syncFlag;
+    }
 
     /**
      * Set the sync flag.
@@ -482,7 +482,7 @@ public class User {
      * @param syncFlag to set.
      */
     public void setSyncFlag(Boolean syncFlag) {
-	this.syncFlag = syncFlag;
+    this.syncFlag = syncFlag;
     }
 
     /**
@@ -501,7 +501,7 @@ public class User {
         user.lastName = object.get("lastname").toString();
         user.email = object.has("email") ? object.get("email").toString() : "";
         user.type = ((Integer)object.get("accounttype") == 0 ? User.Type.USER : User.Type.ADMIN);
-        user.department = departmentService.findByUuid(object.get("accountid").toString());
+        user.department = departmentService.findByUuidAndIsActive(object.get("accountid").toString(), true);
         user.setSyncFlag(false);
         return user;
     }
