@@ -320,8 +320,8 @@ public class Host {
           host.zoneId = JsonValidator.jsonStringValidation(object,"zoneid");
           host.zoneName = JsonValidator.jsonStringValidation(object,"zonename");
           host.state = JsonValidator.jsonStringValidation(object,"state");
-          } catch (Exception e) {
-              e.printStackTrace();
+          } catch (Exception ex) {
+              ex.printStackTrace();
           }
         return host;
       }
