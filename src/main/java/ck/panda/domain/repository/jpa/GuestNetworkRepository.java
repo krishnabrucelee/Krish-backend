@@ -9,6 +9,7 @@ import ck.panda.domain.entity.GuestNetwork;
  * JPA repository for GuestNetwork entity.
  */
 public interface GuestNetworkRepository extends PagingAndSortingRepository<GuestNetwork, Long> {
+
     /**
      * Find GuestNetwork by uuid.
      * @param uuid GuestNetwork uuid.

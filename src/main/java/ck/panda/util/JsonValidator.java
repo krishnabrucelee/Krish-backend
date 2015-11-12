@@ -35,4 +35,19 @@ public abstract class JsonValidator {
             return false;
         }
     }
+
+    /**
+     *
+     * @param object JSON array
+     * @param key value
+     * @return integer value
+     * @throws Exception raise if error.
+     */
+    public static Integer jsonIntegerValidation(JSONObject object, String key) throws Exception {
+        if (object.has(key)) {
+            return object.getInt(key);
+        } else {
+            return 0;
+        }
+    }
 }

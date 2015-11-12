@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -13,11 +13,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.Size;
-
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
 import org.json.JSONException;
@@ -27,10 +27,13 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
+import ck.panda.util.JsonValidator;
 
 /**
- *  Service offering is a set of virtual hardware features such as CPU core count and speed,
- *  memory, and disk size.
+ *  A service offering is a set of virtual hardware features such as CPU core count and speed, memory, and disk size.
+ *  The CloudStack administrator can set up various offerings, and then end users choose from the
+ *  available offerings when they create a new VM.
+ *
  */
 
 @Entity
@@ -55,12 +58,12 @@ public class ComputeOffering implements Serializable {
     private String name;
 
     /** The number of CPU cores needed. */
-    //@Size(min = 1, max = 200000)
+    // @Size(min = 1, max = 200)
     @Column(name = "number_of_cores")
     private Integer numberOfCores;
 
     /** The clock rate of CPU speed in MHz. */
-    //@Size(min = 1, max=1000)
+    //@Size(min = 500, max = 3000)
     @Column(name = "clock_speed")
     private Integer clockSpeed;
 
@@ -86,6 +89,7 @@ public class ComputeOffering implements Serializable {
     @Column(name = "cpu_capacity")
     private Boolean cpuCapacity;
 
+    /** Temporary variable. */
     @Transient
     private Boolean isSyncFlag;
 
@@ -94,15 +98,15 @@ public class ComputeOffering implements Serializable {
     @Column(name = "memory")
     private Integer memory;
 
-    /** The Disk bytesReadRate for the Compute offering. */
+    /** The Disk Bytes read rate.  */
     @Column(name = "disk_bytes_read_rate")
     private Integer diskBytesReadRate;
 
-    /** The Disk bytesWriteRate for the Compute offering. */
+    /** The Disk bytes Write Rate . */
     @Column(name = "disk_bytes_write_rate")
     private Integer diskBytesWriteRate;
 
-    /** The Disk iopsReadRate for the Compute offering. */
+    /** The Disk Input and Output write rate per second. */
     @Column(name = "disk_iops_read_rate")
     private Integer diskIopsReadRate;
 
@@ -135,16 +139,21 @@ public class ComputeOffering implements Serializable {
     @Column(name = "customized")
     private Boolean customized;
 
-    /** Domain id for this offering. */
-    @JoinColumn(name = "domain_id", referencedColumnName = "id" ,insertable=false, updatable=false)
+    /** Is this offering consists of customized iops. */
+    @Column(name = "customized_iops")
+    private Boolean customizedIops;
+
+    /** Reference Domain id for this offering. */
+    @JoinColumn(name = "domain_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne
     private Domain domain;
 
-   @Column(name="domain_id")
+    /**  Domain id for offer. */
+   @Column(name = "domain_id")
     private Long domainId;
 
 
-    /** The Disk iopsWriteRate for the Compute offering. */
+    /** The Disk Input and Output write rate per second. */
     @Column(name = "disk_iops_write_rate")
     private Integer diskIopsWriteRate;
 
@@ -188,42 +197,10 @@ public class ComputeOffering implements Serializable {
     @Enumerated(EnumType.STRING)
     private DiskIo diskIo;
 
-    /** Zone id for this offering. */
-    @JoinColumn(name = "zone_id", referencedColumnName = "id",insertable = false, updatable = false)
-    @OneToOne
-    private Zone zone;
-
-    /** id of the zone.*/
-    @Column(name = "zone_id")
-    private Long zoneId;
-
-    /** The Setup Cost. */
-    @Column(name = "setup_cost")
-    private Double setupCost;
-
-    /** Cost of Running Instance for vcpu. */
-    @Column(name = "instance_running_cost_vcpu")
-    private Double instanceRunningCostVcpu;
-
-    /** Cost of Running Instancefor memory */
-    @Column(name = "instance_running_cost_memory")
-    private Double instanceRunningCostMemory;
-
-    /** Cost of Running Instance for iops. */
-    @Column(name = "instance_running_cost_iops")
-    private Double instanceRunningCostIops;
-
-    /** Cost of Stoppage Instance for vcpu */
-    @Column(name = "instance_stoppage_cost_vcpu")
-    private Double instanceStoppageCostVcpu;
-
-    /** Cost of Stoppage Instance for memory */
-    @Column(name = "instance_stoppage_cost_memory")
-    private Double instanceStoppageCostMemory;
-
-    /** Cost of Stoppage Instance. for iops*/
-    @Column(name = "instance_stoppage_cost_iops")
-    private Double instanceStoppageCostIops;
+    /** cost of the compute offering. */
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "compute_id")
+    private List<ComputeOfferingCost> computeCost;
 
 
     /**
@@ -231,40 +208,38 @@ public class ComputeOffering implements Serializable {
      */
     public enum DiskIo {
 
-           /** If region is enabled we can create zones and pods. */
+           /** If average disk input and speed at is better level. */
            AVERAGE,
 
-           /** If region is disabled cannot create any zones and pods until region gets enabled. */
+           /** If good disk input and output speed is above average level. */
            GOOD,
 
-           /** If region is deleted we cannot create zones and pods. */
+           /** If excellent disk input and output speed is at highest level. */
            EXCELLENT
     }
 
     /**
-     * Enumeration for Region status.
+     * Enumeration for Storage Type status.
      */
     public enum StorageType {
 
-           /** If region is enabled we can create zones and pods. */
+           /** If shared is selected we can create instance without enabling zone to use local storage. */
            shared,
 
-           /** If region is disabled cannot create any zones and pods until region gets enabled. */
+           /** If zone is enabled to access local storage then only we can create vm using this option. */
            local,
-
     }
 
     /**
-     * Enumeration for Region status.
+     * Enumeration for QOS type status.
      */
     public enum QosType {
 
-           /** If region is enabled we can create zones and pods. */
+           /** If hypervisor is chosed we can specify disk bytes read and write bytes value. */
            HYPERVISOR,
 
-           /** If region is disabled cannot create any zones and pods until region gets enabled. */
+           /** If storage is chosed we can specify minimum and maximum iops values. */
            STORAGE,
-
     }
 
     /**
@@ -682,32 +657,45 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
-     * @param isCustom the isCustom to set
+     * @return the customizedIops
+     */
+    public Boolean getCustomizedIops() {
+        return customizedIops;
+    }
+
+    /**
+     * @param customizedIops the customizedIops to set
+     */
+    public void setCustomizedIops(Boolean customizedIops) {
+        this.customizedIops = customizedIops;
+    }
+
+    /**
+     * @param customized the customized to set
      */
     public void setCustomized(Boolean customized) {
         this.customized = customized;
     }
 
+    /**
+     * Get the Sync Flag.
+     *
+     * @return the isSyncFlag.
+     */
+    public Boolean getIsSyncFlag() {
+        return isSyncFlag;
+    }
 
     /**
-	 * Get the Sync Flag.
-	 *
-	 * @return the isSyncFlag.
-	 */
-	public Boolean getIsSyncFlag() {
-		return isSyncFlag;
-	}
+     * Set the Sync Flag.
+     *
+     * @param isSyncFlag - the isSyncFlag to set.
+     */
+    public void setIsSyncFlag(Boolean isSyncFlag) {
+        this.isSyncFlag = isSyncFlag;
+    }
 
-	/**
-	 * Set the Sync Flag.
-	 *
-	 * @param isSyncFlag - the isSyncFlag to set.
-	 */
-	public void setIsSyncFlag(Boolean isSyncFlag) {
-		this.isSyncFlag = isSyncFlag;
-	}
-
-	/**
+    /**
      * @return the domain
      */
     public Domain getDomain() {
@@ -719,35 +707,6 @@ public class ComputeOffering implements Serializable {
      */
     public void setDomain(Domain domain) {
         this.domain = domain;
-    }
-
-
-    /**
-     * @return the zone
-     */
-    public Zone getZone() {
-        return zone;
-    }
-
-    /**
-     * @param zone the zone to set
-     */
-    public void setZone(Zone zone) {
-        this.zone = zone;
-    }
-
-    /**
-     * @return the zoneId
-     */
-    public Long getZoneId() {
-        return zoneId;
-    }
-
-    /**
-     * @param zoneId the zoneId to set
-     */
-    public void setZoneId(Long zoneId) {
-        this.zoneId = zoneId;
     }
 
     /**
@@ -766,101 +725,17 @@ public class ComputeOffering implements Serializable {
 
 
     /**
-     * @return the setupCost
+     * @return the computeCost
      */
-    public Double getSetupCost() {
-        return setupCost;
+    public List<ComputeOfferingCost> getComputeCost() {
+        return computeCost;
     }
 
     /**
-     * @param setupCost the setupCost to set
+     * @param computeCost the computeCost to set
      */
-    public void setSetupCost(Double setupCost) {
-        this.setupCost = setupCost;
-    }
-
-    /**
-     * @return the instanceRunningCostVcpu
-     */
-    public Double getInstanceRunningCostVcpu() {
-        return instanceRunningCostVcpu;
-    }
-
-    /**
-     * @param instanceRunningCostVcpu the instanceRunningCostVcpu to set
-     */
-    public void setInstanceRunningCostVcpu(Double instanceRunningCostVcpu) {
-        this.instanceRunningCostVcpu = instanceRunningCostVcpu;
-    }
-
-    /**
-     * @return the instanceRunningCostMemory
-     */
-    public Double getInstanceRunningCostMemory() {
-        return instanceRunningCostMemory;
-    }
-
-    /**
-     * @param instanceRunningCostMemory the instanceRunningCostMemory to set
-     */
-    public void setInstanceRunningCostMemory(Double instanceRunningCostMemory) {
-        this.instanceRunningCostMemory = instanceRunningCostMemory;
-    }
-
-    /**
-     * @return the instanceRunningCostIops
-     */
-    public Double getInstanceRunningCostIops() {
-        return instanceRunningCostIops;
-    }
-
-    /**
-     * @param instanceRunningCostIops the instanceRunningCostIops to set
-     */
-    public void setInstanceRunningCostIops(Double instanceRunningCostIops) {
-        this.instanceRunningCostIops = instanceRunningCostIops;
-    }
-
-    /**
-     * @return the instanceStoppageCostVcpu
-     */
-    public Double getInstanceStoppageCostVcpu() {
-        return instanceStoppageCostVcpu;
-    }
-
-    /**
-     * @param instanceStoppageCostVcpu the instanceStoppageCostVcpu to set
-     */
-    public void setInstanceStoppageCostVcpu(Double instanceStoppageCostVcpu) {
-        this.instanceStoppageCostVcpu = instanceStoppageCostVcpu;
-    }
-
-    /**
-     * @return the instanceStoppageCostMemory
-     */
-    public Double getInstanceStoppageCostMemory() {
-        return instanceStoppageCostMemory;
-    }
-
-    /**
-     * @param instanceStoppageCostMemory the instanceStoppageCostMemory to set
-     */
-    public void setInstanceStoppageCostMemory(Double instanceStoppageCostMemory) {
-        this.instanceStoppageCostMemory = instanceStoppageCostMemory;
-    }
-
-    /**
-     * @return the instanceStoppageCostIops
-     */
-    public Double getInstanceStoppageCostIops() {
-        return instanceStoppageCostIops;
-    }
-
-    /**
-     * @param instanceStoppageCostIops the instanceStoppageCostIops to set
-     */
-    public void setInstanceStoppageCostIops(Double instanceStoppageCostIops) {
-        this.instanceStoppageCostIops = instanceStoppageCostIops;
+    public void setComputeCost(List<ComputeOfferingCost> computeCost) {
+        this.computeCost = computeCost;
     }
 
     /**
@@ -871,15 +746,22 @@ public class ComputeOffering implements Serializable {
      * @throws JSONException handles json exception.
      */
     public static ComputeOffering convert(JSONObject object) throws JSONException {
+
         ComputeOffering compute = new ComputeOffering();
-        compute.uuid = object.has("id") ? object.get("id").toString() : "";
-        compute.name = object.has("name") ? object.get("name").toString(): "";
-        compute.displayText = object.has("displaytext") ? object.get("displaytext").toString() : "";
-        compute.memory = object.has("memory") ? Integer.parseInt(object.getString("memory").toString()) : 0;
-        compute.clockSpeed = object.has("cpuspeed") ? Integer.parseInt(object.getString("cpuspeed")) : 0;
-        compute.numberOfCores = object.has("cpunumber") ? Integer.parseInt(object.getString("cpunumber")) : 0;
+        try {
+        compute.uuid =  JsonValidator.jsonStringValidation(object, "id");
+        compute.name =  JsonValidator.jsonStringValidation(object, "name");
+        compute.displayText = JsonValidator.jsonStringValidation(object, "displaytext");
+        compute.memory = JsonValidator.jsonIntegerValidation(object, "memory");
+        compute.clockSpeed = JsonValidator.jsonIntegerValidation(object, "cpuspeed");
+        compute.customized = JsonValidator.jsonBooleanValidation(object, "iscustomized");
+        compute.customizedIops = JsonValidator.jsonBooleanValidation(object, "iscustomizediops");
+        compute.numberOfCores = JsonValidator.jsonIntegerValidation(object, "cpunumber");
         compute.setStorageType(compute.getStorageType().valueOf(object.has("storagetype") ? object.get("storagetype").toString() : ""));
         compute.setIsSyncFlag(false);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         return compute;
     }
 

@@ -51,7 +51,6 @@ public class Domain {
 
     /** Name of the Domain. */
     @NotEmpty
-    @Size(min = 4, max = 20)
     @Column(name = "name", nullable = false)
     private String name;
 

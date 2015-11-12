@@ -2,10 +2,7 @@ package ck.panda.domian.entity;
 
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.User;
-
 import java.time.ZonedDateTime;
-
-import org.joda.time.DateTime;
 
 /**
  *
