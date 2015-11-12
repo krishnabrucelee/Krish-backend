@@ -18,6 +18,7 @@ public interface ApplicationRepository extends PagingAndSortingRepository<Applic
      * @param pageable of the application
      * @return a page of entities
      */
+	//TODO Yasin: method signature and its usage is incorrect.
     @Query(value = "select app from Application app where app.isActive IS TRUE")
     Page<Application> findAllByActive(Pageable pageable);
 
@@ -27,6 +28,7 @@ public interface ApplicationRepository extends PagingAndSortingRepository<Applic
      * @param type of the application
      * @return application type
      */
+    //TODO Yasin: method signature and its usage is incorrect.
     @Query(value = "select app from Application app where app.isActive IS TRUE AND app.type=:type")
     Application findByType(@Param("type") String type);
 }
