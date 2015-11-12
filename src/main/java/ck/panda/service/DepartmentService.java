@@ -60,12 +60,4 @@ public interface DepartmentService  extends CRUDService<Department>  {
      */
     Department findByUuidAndIsActive(String uuid, Boolean isActive) throws Exception;
 
-    /**
-     * To get department from cloudstack server.
-     *
-     * @param uuid uuid of department.
-     * @return department.
-     * @throws Exception unhandled errors.
-     */
-    Department findByUuid(String uuid) throws Exception;
 }

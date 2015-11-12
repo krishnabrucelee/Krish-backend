@@ -166,6 +166,6 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Department getDepartment(String uuid) throws Exception {
-        return departmentService.findByUuid(uuid);
+        return departmentService.findByUuidAndIsActive(uuid, true);
     }
 }
