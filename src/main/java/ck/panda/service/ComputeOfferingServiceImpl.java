@@ -60,7 +60,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             throw new ApplicationException(errors);
         } else {
 
-            //set server for maintain session with configuration values
+            //set server for maintain session with configuration values                   
               computeOffer.setServer(configServer.setServer(1L));
             String createComputeResponse = computeOffer.createComputeOffering(compute.getName(), compute.getDisplayText(),
                     "json", addOptionalValues(compute));
