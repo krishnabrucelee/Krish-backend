@@ -18,10 +18,10 @@ import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
-import ck.panda.service.DepartmentService;
+import ck.panda.util.ConvertUtil;
+import ck.panda.util.JsonUtil;
 
 /** User entity. */
 @Entity
@@ -118,10 +118,6 @@ public class User {
     /** Set syncFlag. */
     @Transient
     private Boolean syncFlag;
-
-    /** Autowired department object. */
-    @Autowired
-    private static DepartmentService departmentService;
 
     /** Define user type. */
     public enum Type {
@@ -492,17 +488,18 @@ public class User {
      * @return user object.
      * @throws Exception
      */
-    public static User convert(JSONObject object) throws Exception {
+    public static User convert(JSONObject jsonObject, ConvertUtil convertUtil) throws Exception {
 
         User user = new User();
-        user.uuid = object.get("id").toString();
-        user.userName = object.get("username").toString();
-        user.firstName = object.get("firstname").toString();
-        user.lastName = object.get("lastname").toString();
-        user.email = object.has("email") ? object.get("email").toString() : "";
-        user.type = ((Integer)object.get("accounttype") == 0 ? User.Type.USER : User.Type.ADMIN);
-        user.department = departmentService.findByUuidAndIsActive(object.get("accountid").toString(), true);
         user.setSyncFlag(false);
+        user.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
+        user.setUserName(JsonUtil.getStringValue(jsonObject, "username"));
+        user.setFirstName(JsonUtil.getStringValue(jsonObject, "firstname"));
+        user.setLastName(JsonUtil.getStringValue(jsonObject, "lastname"));
+        user.setEmail(JsonUtil.getStringValue(jsonObject, "email"));
+        user.setType(JsonUtil.getIntegerValue(jsonObject, "accounttype") == 0 ? User.Type.USER : User.Type.ADMIN);
+        user.setDomain(convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid")));
+        user.setDepartment(convertUtil.getDepartment(JsonUtil.getStringValue(jsonObject, "accountid")));
         return user;
     }
 
