@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
@@ -20,6 +19,7 @@ import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
+import ck.panda.util.ConvertUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -48,6 +48,10 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private ConfigUtil configServer;
 
+    /** Convert entity repository reference. */
+    @Autowired
+    private ConvertUtil entity;
+
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
@@ -71,7 +75,7 @@ public class UserServiceImpl implements UserService {
             user.setIsActive(true);
             csUserService.setServer(configServer.setServer(1L));
             HashMap<String, String> userMap = new HashMap<String, String>();
-            String cloudResponse = csUserService.createUser(user.getDepartment().getUuid(),
+            String cloudResponse = csUserService.createUser(user.getDepartment().getUserName(),
                     user.getEmail(), user.getFirstName(), user.getLastName(), user.getUserName(), user.getPassword(), "json", userMap);
             JSONObject createUserResponseJSON = new JSONObject(cloudResponse).getJSONObject("createuserresponse")
                     .getJSONObject("user");
@@ -169,7 +173,7 @@ public class UserServiceImpl implements UserService {
           for (int i = 0, size = userListJSON.length(); i < size; i++) {
               // 2.1 Call convert by passing JSONObject to User entity and Add
               // the converted User entity to list
-              userList.add(User.convert(userListJSON.getJSONObject(i)));
+              userList.add(User.convert(userListJSON.getJSONObject(i), entity));
           }
           return userList;
       }
