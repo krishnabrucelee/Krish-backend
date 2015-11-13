@@ -108,6 +108,8 @@ public class Pod {
     }
 
     /**
+     * Get the uuid
+     *
      * @return the uuid
      */
     public String getUuid() {
@@ -115,13 +117,17 @@ public class Pod {
     }
 
     /**
-     * @param uuid the uuid to set
+     * Set the uuid
+     *
+     * @param uuid  to set
      */
     public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
     /**
+     * Get name
+     *
      * @return the name
      */
     public String getName() {
@@ -129,13 +135,17 @@ public class Pod {
     }
 
     /**
-     * @param name the name to set
+     * Set the name
+     *
+     * @param name to set
      */
     public void setName(String name) {
         this.name = name;
     }
 
     /**
+     * Get Gateway
+     *
      * @return the gateway
      */
     public String getGateway() {
@@ -143,13 +153,17 @@ public class Pod {
     }
 
     /**
-     * @param gateway the gateway to set
+     * Set the gateway
+     *
+     * @param gateway to set
      */
     public void setGateway(String gateway) {
         this.gateway = gateway;
     }
 
     /**
+     * Get netmask
+     *
      * @return the netmask
      */
     public String getNetmask() {
@@ -157,13 +171,17 @@ public class Pod {
     }
 
     /**
-     * @param netmask the netmask to set
+     * Set the netmask
+     *
+     * @param netmask  to set
      */
     public void setNetmask(String netmask) {
         this.netmask = netmask;
     }
 
     /**
+     * Get the zone
+     *
      * @return the zone
      */
     public Zone getZone() {
@@ -171,13 +189,17 @@ public class Pod {
     }
 
     /**
-     * @param zone the zone to set
+     * Set the zone
+     *
+     * @param zone to set
      */
     public void setZone(Zone zone) {
         this.zone = zone;
     }
 
     /**
+     * Get ZoneId
+     *
      * @return the zoneId
      */
     public Long getZoneId() {
@@ -185,13 +207,17 @@ public class Pod {
     }
 
     /**
-     * @param zoneId the zoneId to set
+     * Set the zoneId
+     *
+     * @param zoneId  to set
      */
     public void setZoneId(Long zoneId) {
         this.zoneId = zoneId;
     }
 
     /**
+     * Get createdBy
+     *
      * @return the createdBy
      */
     public User getCreatedBy() {
@@ -199,13 +225,17 @@ public class Pod {
     }
 
     /**
-     * @param createdBy the createdBy to set
+     * Set the createdBy
+     *
+     * @param createdBy  to set
      */
     public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
     }
 
     /**
+     * Get UpdatedBy
+     *
      * @return the updatedBy
      */
     public User getUpdatedBy() {
@@ -213,13 +243,17 @@ public class Pod {
     }
 
     /**
-     * @param updatedBy the updatedBy to set
+     * Set the updatedBy
+     *
+     * @param updatedBy  to set
      */
     public void setUpdatedBy(User updatedBy) {
         this.updatedBy = updatedBy;
     }
 
     /**
+     * Get the createdDatetime
+     *
      * @return the createdDateTime
      */
     public ZonedDateTime getCreatedDateTime() {
@@ -227,13 +261,17 @@ public class Pod {
     }
 
     /**
-     * @param createdDateTime the createdDateTime to set
+     * Set the createdDateTime
+     *
+     * @param createdDateTime  to set
      */
     public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
     }
 
     /**
+     * Get the updatedDatetime
+     *
      * @return the updatedDateTime
      */
     public ZonedDateTime getUpdatedDateTime() {
@@ -241,7 +279,9 @@ public class Pod {
     }
 
     /**
-     * @param updatedDateTime the updatedDateTime to set
+     * Set the updatedDateTime
+     *
+     * @param updatedDateTime to set
      */
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;

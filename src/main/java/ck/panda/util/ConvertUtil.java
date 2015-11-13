@@ -176,10 +176,10 @@ public class ConvertUtil {
     }
 
     /**
-     * Get department object.
+     * Get pod id.
      *
-     * @param uuid uuid of department.
-     * @return department.
+     * @param uuid of pod.
+     * @return pod id.
      * @throws Exception unhandled exception.
      */
     public Long getPodId(String uuid) throws Exception {

@@ -4,7 +4,6 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,7 +12,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.json.JSONException;
@@ -23,7 +21,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 import ck.panda.util.JsonValidator;
@@ -111,7 +108,6 @@ public class Host {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
 
-
     /**
      * @return the id
      */
@@ -120,7 +116,9 @@ public class Host {
     }
 
     /**
-     * @param id the id to set
+     * set the id
+     *
+     * @param id  to set
      */
     public void setId(Long id) {
         this.id = id;
@@ -134,13 +132,17 @@ public class Host {
     }
 
     /**
-     * @param uuid the uuid to set
+     * set the uuid
+     *
+     * @param uuid  to set
      */
     public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
     /**
+     * Get name
+     *
      * @return the name
      */
     public String getName() {
@@ -148,13 +150,17 @@ public class Host {
     }
 
     /**
-     * @param name the name to set
+     * Set the name
+     *
+     * @param name  to set
      */
     public void setName(String name) {
         this.name = name;
     }
 
     /**
+     * Get Pod
+     *
      * @return the pod
      */
     public Pod getPod() {
@@ -162,13 +168,17 @@ public class Host {
     }
 
     /**
-     * @param pod the pod to set
+     * Set the pod
+     *
+     * @param pod  to set
      */
     public void setPod(Pod pod) {
         this.pod = pod;
     }
 
     /**
+     * Get Pod Id
+     *
      * @return the podId
      */
     public Long getPodId() {
@@ -176,7 +186,9 @@ public class Host {
     }
 
     /**
-     * @param podId the podId to set
+     * Set the podId
+     *
+     * @param podId  to set
      */
     public void setPodId(Long podId) {
         this.podId = podId;
@@ -190,13 +202,17 @@ public class Host {
     }
 
     /**
-     * @param zone the zone to set
+     * Set the zone
+     *
+     * @param zone  to set
      */
     public void setZone(Zone zone) {
         this.zone = zone;
     }
 
     /**
+     * Get the zoneId
+     *
      * @return the zoneId
      */
     public Long getZoneId() {
@@ -204,7 +220,9 @@ public class Host {
     }
 
     /**
-     * @param zoneId the zoneId to set
+     * Set the zoneId
+     *
+     * @param zoneId  to set
      */
     public void setZoneId(Long zoneId) {
         this.zoneId = zoneId;
@@ -218,13 +236,17 @@ public class Host {
     }
 
     /**
-     * @param cluster the cluster to set
+     * Set the cluster
+     *
+     * @param cluster to set
      */
     public void setCluster(Cluster cluster) {
         this.cluster = cluster;
     }
 
     /**
+     * Get the cluster
+     *
      * @return the clusterId
      */
     public Long getClusterId() {
@@ -232,13 +254,17 @@ public class Host {
     }
 
     /**
-     * @param clusterId the clusterId to set
+     * Set the clusterId
+     *
+     * @param clusterId  to set
      */
     public void setClusterId(Long clusterId) {
         this.clusterId = clusterId;
     }
 
     /**
+     * Get the state
+     *
      * @return the state
      */
     public String getState() {
@@ -246,13 +272,17 @@ public class Host {
     }
 
     /**
-     * @param state the state to set
+     * Set the state
+     *
+     * @param state  to set
      */
     public void setState(String state) {
         this.state = state;
     }
 
     /**
+     * Get createdBy
+     *
      * @return the createdBy
      */
     public User getCreatedBy() {
@@ -260,7 +290,9 @@ public class Host {
     }
 
     /**
-     * @param createdBy the createdBy to set
+     * Set the createdBy
+     *
+     * @param createdBy  to set
      */
     public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
@@ -274,13 +306,17 @@ public class Host {
     }
 
     /**
-     * @param updatedBy the updatedBy to set
+     * Set the updatedBy
+     *
+     * @param updatedBy to set
      */
     public void setUpdatedBy(User updatedBy) {
         this.updatedBy = updatedBy;
     }
 
     /**
+     * Get CreatedDateTime
+     *
      * @return the createdDateTime
      */
     public ZonedDateTime getCreatedDateTime() {
@@ -288,13 +324,17 @@ public class Host {
     }
 
     /**
-     * @param createdDateTime the createdDateTime to set
+     * Set the createdDateTime
+     *
+     * @param createdDateTime to set
      */
     public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
     }
 
     /**
+     * Get the updatedDate time
+     *
      * @return the updatedDateTime
      */
     public ZonedDateTime getUpdatedDateTime() {
@@ -302,7 +342,9 @@ public class Host {
     }
 
     /**
-     * @param updatedDateTime the updatedDateTime to set
+     * Set the updatedDateTime
+     *
+     * @param updatedDateTime to set
      */
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;

@@ -100,6 +100,8 @@ public class Cluster {
     private ZonedDateTime updatedDateTime;
 
     /**
+     * Get id
+     *
      * @return the id
      */
     public Long getId() {
@@ -107,13 +109,17 @@ public class Cluster {
     }
 
     /**
-     * @param id the id to set
+     * Set the id
+     *
+     * @param id  to set
      */
     public void setId(Long id) {
         this.id = id;
     }
 
     /**
+     * Get Uuid
+     *
      * @return the uuid
      */
     public String getUuid() {
@@ -121,13 +127,17 @@ public class Cluster {
     }
 
     /**
-     * @param uuid the uuid to set
+     * Set the uuid
+     *
+     * @param uuid  to set
      */
     public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
     /**
+     * Get name
+     *
      * @return the name
      */
     public String getName() {
@@ -135,13 +145,17 @@ public class Cluster {
     }
 
     /**
-     * @param name the name to set
+     * Set the name
+     *
+     * @param name  to set
      */
     public void setName(String name) {
         this.name = name;
     }
 
     /**
+     * Get the ClusterType
+     *
      * @return the clusterType
      */
     public String getClusterType() {
@@ -156,6 +170,8 @@ public class Cluster {
     }
 
     /**
+     * Get the hypervisor type
+     *
      * @return the hypervisorType
      */
     public String getHypervisorType() {
@@ -163,13 +179,17 @@ public class Cluster {
     }
 
     /**
-     * @param hypervisorType the hypervisorType to set
+     * Set the hypervisorType
+     *
+     * @param hypervisorType  to set
      */
     public void setHypervisorType(String hypervisorType) {
         this.hypervisorType = hypervisorType;
     }
 
     /**
+     * Get pod
+     *
      * @return the pod
      */
     public Pod getPod() {
@@ -177,7 +197,9 @@ public class Cluster {
     }
 
     /**
-     * @param pod the pod to set
+     * Set the pod
+     *
+     * @param pod  to set
      */
     public void setPod(Pod pod) {
         this.pod = pod;
@@ -191,13 +213,17 @@ public class Cluster {
     }
 
     /**
-     * @param podId the podId to set
+     * Set the podId
+     *
+     * @param podId to set
      */
     public void setPodId(Long podId) {
         this.podId = podId;
     }
 
     /**
+     * Get the zone
+     *
      * @return the zone
      */
     public Zone getZone() {
@@ -205,13 +231,17 @@ public class Cluster {
     }
 
     /**
-     * @param zone the zone to set
+     * Set the zone
+     *
+     * @param zone to set
      */
     public void setZone(Zone zone) {
         this.zone = zone;
     }
 
     /**
+     * Get zoneId
+     *
      * @return the zoneId
      */
     public Long getZoneId() {
@@ -219,13 +249,17 @@ public class Cluster {
     }
 
     /**
-     * @param zoneId the zoneId to set
+     * Set the zoneId
+     *
+     * @param zoneId  to set
      */
     public void setZoneId(Long zoneId) {
         this.zoneId = zoneId;
     }
 
     /**
+     * Get CreatedBy
+     *
      * @return the createdBy
      */
     public User getCreatedBy() {
@@ -233,13 +267,17 @@ public class Cluster {
     }
 
     /**
-     * @param createdBy the createdBy to set
+     * Set the createdBy
+     *
+     * @param createdBy  to set
      */
     public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
     }
 
     /**
+     * Get updatedBy
+     *
      * @return the updatedBy
      */
     public User getUpdatedBy() {
@@ -247,13 +285,17 @@ public class Cluster {
     }
 
     /**
-     * @param updatedBy the updatedBy to set
+     * Set the updatedBy
+     *
+     * @param updatedBy  to set
      */
     public void setUpdatedBy(User updatedBy) {
         this.updatedBy = updatedBy;
     }
 
     /**
+     * Get createdDateTime
+     *
      * @return the createdDateTime
      */
     public ZonedDateTime getCreatedDateTime() {
@@ -261,13 +303,17 @@ public class Cluster {
     }
 
     /**
-     * @param createdDateTime the createdDateTime to set
+     * Set the createdDateTime
+     *
+     * @param createdDateTime to set
      */
     public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
     }
 
     /**
+     * Get the updatedDatetime
+     *
      * @return the updatedDateTime
      */
     public ZonedDateTime getUpdatedDateTime() {
@@ -275,7 +321,9 @@ public class Cluster {
     }
 
     /**
-     * @param updatedDateTime the updatedDateTime to set
+     * Set the updatedDateTime
+     *
+     * @param updatedDateTime  to set
      */
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
