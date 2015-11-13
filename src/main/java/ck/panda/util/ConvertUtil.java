@@ -185,4 +185,19 @@ public class ConvertUtil {
     public Long getPodId(String uuid) throws Exception {
         return podService.findByUUID(uuid).getId();
     }
+
+    /**
+     * Get Storage object.
+     *
+     * @param uuid uuid of department.
+     * @return storage.
+     * @throws Exception unhandled exception.
+     */
+    public Long getStorageOfferId(String uuid) throws Exception {
+        if (storageService.findUuid(uuid) != null) {
+            return storageService.findUuid(uuid).getId();
+        }
+        return null;
+    }
+
 }

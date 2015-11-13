@@ -135,4 +135,12 @@ public interface SyncService {
    */
   void syncInstances() throws ApplicationException, Exception;
 
+  /**
+   * Sync with Cloud Server Account.
+   * @throws ApplicationException unhandled application errors.
+   * @throws Exception cloudstack unhandled errors.
+   */
+  void syncVolume() throws ApplicationException, Exception;
+
+
 }

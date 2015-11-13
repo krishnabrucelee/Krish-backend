@@ -22,4 +22,29 @@ public interface StorageOfferingService extends CRUDService<StorageOffering> {
     * @throws Exception unhandled errors.
     */
    List<StorageOffering> findAllFromCSServer() throws Exception;
+
+   /**
+    * To get Uuid list of Storage Offer from cloudstack server.
+    *
+    * @param uuid unique id.
+    * @return storage tags
+    */
+    StorageOffering findUuid(String uuid);
+
+    /**
+     * To get Tags list of Storage Offer from cloudstack server.
+     *
+     * @param isActive unique id.
+     * @return storage tags
+     */
+     List<String> findTags(Boolean isActive);
+
+     /**
+      * To get Tags list of Storage Offer from cloudstack server.
+      *
+      * @param isActive unique id.
+      * @return storage tags
+      */
+      List<StorageOffering> findAllByTags(String tags);
+
 }
