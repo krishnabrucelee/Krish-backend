@@ -229,22 +229,14 @@ public class SyncServiceImpl  implements SyncService {
       }
 
       try {
-          // 14. Sync Host entity
-          this.syncHost();
-      } catch (Exception e) {
-          LOGGER.error("ERROR AT synch Host", e);
-      }
-
-      try {
-          // 15. Sync Instance entity
+          // 14. Sync Instance entity
           this.syncInstances();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch Instance", e);
       }
 
-
       try {
-          // 16. Sync Snapshot entity
+          // 15. Sync Snapshot entity
           this.syncSnapshot();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch Snapshot", e);
@@ -262,6 +254,13 @@ public class SyncServiceImpl  implements SyncService {
           this.syncCluster();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch cluster", e);
+      }
+
+      try {
+          // 18. Sync Host entity
+          this.syncHost();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Host", e);
       }
     }
 
