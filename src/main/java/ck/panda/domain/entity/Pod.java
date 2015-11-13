@@ -13,55 +13,50 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
 import org.hibernate.annotations.Type;
-import org.hibernate.validator.constraints.NotEmpty;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
-import ck.panda.util.JsonValidator;
 
 /**
- * A host is a single computer. Hosts provide the computing resources that run guest virtual machines. Each host has
- * hypervisor software installed on it to manage the guest VMs.
+ * A pod is the third-largest organizational unit within a CloudStack deployment. Pods are contained within zones.
+ *  Each zone can contain one or more pods. A pod consists of one or more clusters of hosts and one or more primary storage
+ *  servers.
+ *
+ *  Pods are not visible to the end user.
  *
  */
 
 @Entity
-@Table(name = "ck_host")
-@SuppressWarnings("serial")
-public class Host {
+@Table(name = "ck_pod")
+public class Pod {
 
-     /** Unique ID of the Domain. */
+     /** Unique Id of the pod. */
     @Id
     @GeneratedValue
     @Column(name = "id")
     private Long id;
 
-    /** Unique ID from Cloud Stack. */
+    /** Cloudstack's pod uuid. */
     @Column(name = "uuid")
     private String uuid;
 
-    /** Name of the Domain. */
-    @NotEmpty
-    @Column(name = "name", nullable = false)
+    /** Name of the pod. */
+    @Column(name = "name")
     private String name;
 
-    /** Pod Object for the pod. */
-    @JoinColumn(name = "pod_id", referencedColumnName = "Id", updatable = false, insertable = false)
-    @ManyToOne
-    private Pod pod;
+    /** The gateway for the pod. */
+    @Column(name = "gateway")
+    private String gateway;
 
-    /** id for the pod. */
-    @Column(name = "pod_id")
-    private Long podId;
+    /** The net mask for the pod. */
+    @Column(name = "netmask")
+    private String netmask;
 
     /** Zone Object for the pod. */
     @JoinColumn(name = "zone_id", referencedColumnName = "Id", updatable = false, insertable = false)
@@ -71,19 +66,6 @@ public class Host {
     /** id for the Zone. */
     @Column(name = "zone_id")
     private Long zoneId;
-
-    /** Zone Object for the pod. */
-    @JoinColumn(name = "zone_id", referencedColumnName = "Id", updatable = false, insertable = false)
-    @ManyToOne
-    private Cluster cluster;
-
-    /** id for the Zone. */
-    @Column(name = "cluster_id")
-    private Long clusterId;
-
-    /** State of the host. */
-    @Column(name = "state")
-    private String state;
 
     /** Created by user. */
     @CreatedBy
@@ -110,7 +92,6 @@ public class Host {
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
-
 
     /**
      * @return the id
@@ -155,31 +136,31 @@ public class Host {
     }
 
     /**
-     * @return the pod
+     * @return the gateway
      */
-    public Pod getPod() {
-        return pod;
+    public String getGateway() {
+        return gateway;
     }
 
     /**
-     * @param pod the pod to set
+     * @param gateway the gateway to set
      */
-    public void setPod(Pod pod) {
-        this.pod = pod;
+    public void setGateway(String gateway) {
+        this.gateway = gateway;
     }
 
     /**
-     * @return the podId
+     * @return the netmask
      */
-    public Long getPodId() {
-        return podId;
+    public String getNetmask() {
+        return netmask;
     }
 
     /**
-     * @param podId the podId to set
+     * @param netmask the netmask to set
      */
-    public void setPodId(Long podId) {
-        this.podId = podId;
+    public void setNetmask(String netmask) {
+        this.netmask = netmask;
     }
 
     /**
@@ -208,48 +189,6 @@ public class Host {
      */
     public void setZoneId(Long zoneId) {
         this.zoneId = zoneId;
-    }
-
-    /**
-     * @return the cluster
-     */
-    public Cluster getCluster() {
-        return cluster;
-    }
-
-    /**
-     * @param cluster the cluster to set
-     */
-    public void setCluster(Cluster cluster) {
-        this.cluster = cluster;
-    }
-
-    /**
-     * @return the clusterId
-     */
-    public Long getClusterId() {
-        return clusterId;
-    }
-
-    /**
-     * @param clusterId the clusterId to set
-     */
-    public void setClusterId(Long clusterId) {
-        this.clusterId = clusterId;
-    }
-
-    /**
-     * @return the state
-     */
-    public String getState() {
-        return state;
-    }
-
-    /**
-     * @param state the state to set
-     */
-    public void setState(String state) {
-        this.state = state;
     }
 
     /**
@@ -309,40 +248,41 @@ public class Host {
     }
 
      /**
-       * Convert JSONObject to domain entity.
-       *
-       * @param jsonObject json object
-       * @param convertUtil convert Entity object from UUID.
-       * @return domain entity object.
-       * @throws JSONException handles json exception.
-       */
-      public static Host convert(JSONObject jsonObject, ConvertUtil convertUtil) throws JSONException {
-          Host host = new Host();
-          try {
-              host.setName(JsonUtil.getStringValue(jsonObject, "name"));
-              host.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-              host.setClusterId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
-              host.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
-              host.setPodId(convertUtil.getPodId(JsonUtil.getStringValue(jsonObject, "podid")));
+     * Convert JSONObject into pod object.
+     *
+     * @param jsonObject JSON object.
+     * @param convertUtil convert Entity object from UUID.
+     * @return pod object.
+     */
+    public static Pod convert(JSONObject jsonObject, ConvertUtil convertUtil) {
+        Pod pod = new Pod();
+        try {
+            pod.setName(JsonUtil.getStringValue(jsonObject, "name"));
+            pod.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
+            pod.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
+            pod.setNetmask(JsonUtil.getStringValue(jsonObject, "netmask"));
+            pod.setGateway(JsonUtil.getStringValue(jsonObject, "gateway"));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+      return pod;
+    }
 
-          } catch (Exception ex) {
-              ex.printStackTrace();
-          }
-        return host;
-      }
+    /**
+     * Mapping entity object into list.
+     *
+     * @param podList list of pods.
+     * @return pod map
+     */
+    public static Map<String, Pod> convert(List<Pod> podList) {
+        Map<String, Pod> podMap = new HashMap<String, Pod>();
 
-      /**
-       * Mapping entity object into list.
-       *
-       * @param hostList list of hosts.
-       * @return host map
-       */
-      public static Map<String, Host> convert(List<Host> hostList) {
-          Map<String, Host> hostMap = new HashMap<String, Host>();
+        for (Pod pod : podList) {
+            podMap.put(pod.getUuid(), pod);
+        }
 
-          for (Host host : hostList) {
-              hostMap.put(host.getUuid(), host);
-          }
-          return hostMap;
-      }
+        return podMap;
+    }
 }
+
+

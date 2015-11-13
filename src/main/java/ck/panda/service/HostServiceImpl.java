@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Host;
 import ck.panda.domain.repository.jpa.HostRepository;
 import ck.panda.util.CloudStackHostService;
+import ck.panda.util.ConvertUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
@@ -28,6 +29,10 @@ public class HostServiceImpl implements HostService {
   /** Host repository reference. */
   @Autowired
   private HostRepository hostRepo;
+
+  /** Convert entity repository reference. */
+  @Autowired
+  private ConvertUtil entity;
 
   /** CloudStack Host service for getting host connectivity with cloudstack. */
   @Autowired
@@ -85,7 +90,7 @@ public List<Host> findAllFromCSServer() throws Exception {
       for (int i = 0, size = hostListJSON.length(); i < size; i++) {
           // 2.1 Call convert by passing JSONObject to host entity and Add
           // the converted host entity to list
-          hostList.add(Host.convert(hostListJSON.getJSONObject(i)));
+          hostList.add(Host.convert(hostListJSON.getJSONObject(i), entity));
       }
       return hostList;
     }

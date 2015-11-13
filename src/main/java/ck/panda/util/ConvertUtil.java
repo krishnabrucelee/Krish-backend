@@ -12,6 +12,7 @@ import ck.panda.service.NetworkOfferingService;
 import ck.panda.service.NetworkService;
 import ck.panda.service.OsCategoryService;
 import ck.panda.service.OsTypeService;
+import ck.panda.service.PodService;
 import ck.panda.service.RegionService;
 import ck.panda.service.StorageOfferingService;
 import ck.panda.service.TemplateService;
@@ -80,6 +81,10 @@ public class ConvertUtil {
     @Autowired
     private TemplateService templateService;
 
+    /** Pod service for listing pods. */
+    @Autowired
+    private PodService podService;
+
     /**
      * Get domain id.
      *
@@ -100,6 +105,7 @@ public class ConvertUtil {
      */
     public Long getZoneId(String uuid) throws Exception {
         return zoneService.findByUUID(uuid).getId();
+
     }
 
     /**
@@ -167,5 +173,16 @@ public class ConvertUtil {
      */
     public Department getDepartment(String uuid) throws Exception {
         return departmentService.findByUuidAndIsActive(uuid, true);
+    }
+
+    /**
+     * Get department object.
+     *
+     * @param uuid uuid of department.
+     * @return department.
+     * @throws Exception unhandled exception.
+     */
+    public Long getPodId(String uuid) throws Exception {
+        return podService.findByUUID(uuid).getId();
     }
 }
