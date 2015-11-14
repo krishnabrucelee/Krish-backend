@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Service;
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.VmInstance;
@@ -25,6 +26,10 @@ import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 import ck.panda.util.error.exception.EntityNotFoundException;
 
+/**
+ * VmSnapshot Service Implementation.
+ */
+@Service
 public class VmSnapshotServiceImpl implements VmSnapshotService {
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(VmSnapshotServiceImpl.class);
