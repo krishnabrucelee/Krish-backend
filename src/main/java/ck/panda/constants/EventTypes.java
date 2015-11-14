@@ -5,8 +5,8 @@ package ck.panda.constants;
  */
 public class EventTypes {
     /**
-     * Makes sure that utility classes (classes that contain only static methods or fields in their API) do
-     * not have a public constructor.
+     * Makes sure that utility classes (classes that contain only static methods
+     * or fields in their API) do not have a public constructor.
      */
     protected EventTypes() {
         throw new UnsupportedOperationException();
@@ -36,6 +36,12 @@ public class EventTypes {
     /** VM Events . */
     public static final String EVENT_VM_UPGRADE = "VM.UPGRADE";
 
+    /** VM ATTACH ISO . */
+    public static final String EVENT_ISO_ATTACH = "ISO.ATTACH";
+
+    /** VM DETACH ISO . */
+    public static final String EVENT_ISO_DETACH = "ISO.DETACH";
+
     /** VM Events . */
     public static final String EVENT_VM_DYNAMIC_SCALE = "VM.DYNAMIC.SCALE";
 
@@ -56,6 +62,15 @@ public class EventTypes {
 
     /** VM Events . */
     public static final String EVENT_VM_EXPUNGE = "VM.EXPUNGE";
+
+    /** VM snapshot Events . */
+    public static final String EVENT_VM_SNAPSHOT_CREATE = "VMSNAPSHOT.CREATE";
+
+    /** VM snapshot Events . */
+    public static final String EVENT_VM_SNAPSHOT_DELETE = "VMSNAPSHOT.DELETE";
+
+    /** VM snapshot Events . */
+    public static final String EVENT_VM_SNAPSHOT_REVERT = "VMSNAPSHOT.REVERTTO";
 
     /** Domain Router. */
     public static final String EVENT_ROUTER = "ROUTER.";
@@ -170,5 +185,11 @@ public class EventTypes {
 
     /** State of resources. */
     public static final String Ready = "Ready";
+
+    /** State of snapshot. */
+    public static final String EVENT_CREATE = "Creating";
+
+    /** State of snapshot. */
+    public static final String EVENT_READY = "Ready";
 
 }

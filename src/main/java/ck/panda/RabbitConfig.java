@@ -260,7 +260,8 @@ public class RabbitConfig {
      */
     @Bean
     MessageListenerAdapter asynchJobListenerAdapter() {
-        return new MessageListenerAdapter(new AsynchronousJobListener());
+        SyncService syncService = applicationContext.getBean(SyncService.class);
+        return new MessageListenerAdapter(new AsynchronousJobListener(syncService));
     }
 
     /**
