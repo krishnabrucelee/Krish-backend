@@ -66,7 +66,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
                 return storageOfferingRepo.save(storage);
             }
         } else {
-			 LOGGER.debug(storage.getUuid());
+             LOGGER.debug(storage.getUuid());
             return storageOfferingRepo.save(storage);
         }
 
@@ -85,7 +85,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
                 return storageOfferingRepo.save(storage);
             }
         } else {
-			LOGGER.debug(storage.getUuid());
+            LOGGER.debug(storage.getUuid());
             return storageOfferingRepo.save(storage);
         }
     }
@@ -274,4 +274,19 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
         return errors;
     }
 
+    @Override
+    public StorageOffering findUuid(String uuid) {
+        return storageOfferingRepo.findByUUID(uuid);
+    }
+
+    @Override
+    public List<String> findTags(Boolean isActive) {
+        return storageOfferingRepo.findByTags(isActive);
+
+    }
+
+    @Override
+    public List<StorageOffering> findAllByTags(String tags) {
+        return storageOfferingRepo.findAllByTags(tags);
+    }
 }

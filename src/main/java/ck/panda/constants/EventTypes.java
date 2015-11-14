@@ -164,4 +164,11 @@ public class EventTypes {
 
     /** State of resources. */
     public static final String RESOURCE_STATE = "new-state";
+
+    /** State of resources. */
+    public static final String Allocated = "Allocated";
+
+    /** State of resources. */
+    public static final String Ready = "Ready";
+
 }
