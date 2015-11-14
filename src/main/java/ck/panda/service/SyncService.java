@@ -2,6 +2,7 @@ package ck.panda.service;
 
 import org.springframework.stereotype.Service;
 import ck.panda.util.error.exception.ApplicationException;
+import org.json.JSONObject;
 
 /**
  * Synchronization of zone,domain, region , template with cloudStack. *
@@ -142,5 +143,21 @@ public interface SyncService {
    */
   void syncVolume() throws ApplicationException, Exception;
 
+  /**
+   * Sync with CloudStack server Instance snapshot list.
+   *
+   * @throws ApplicationException unhandled application errors.
+   * @throws Exception cloudstack unhandled errors
+   */
+  void syncVmSnapshots() throws ApplicationException, Exception;
+
+  /**
+   * Sync with CloudStack server Instance snapshot list.
+   *
+   * @param Object response object.
+   * @throws ApplicationException unhandled application errors.
+   * @throws Exception cloudstack unhandled errors
+   */
+  void syncResourceStatus(JSONObject Object) throws ApplicationException, Exception;
 
 }

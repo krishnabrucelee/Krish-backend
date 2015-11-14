@@ -57,6 +57,14 @@ public class VmInstance implements Serializable {
     @Column(name = "uuid")
     private String uuid;
 
+    /** cloudstack's instance iso uuid. */
+    @Column(name = "iso")
+    private String iso;
+
+    /** cloudstack's instance iso name. */
+    @Column(name = "iso_name")
+    private String isoName;
+
     /** instance vnc password. */
     @Column(name = "vnc_password")
     private String vncPassword;
@@ -78,6 +86,10 @@ public class VmInstance implements Serializable {
     /** Set syncFlag. */
     @Transient
     private Boolean syncFlag;
+
+    /** Set password. */
+    @Transient
+    private String password;
 
     /** List of Application Class for an instance. */
     @ManyToMany
@@ -177,27 +189,50 @@ public class VmInstance implements Serializable {
     /** Enumeration status for instance. */
     public enum Status {
         /** Running status of instance. */
-        Running, /** destroy status of instance. */
-        Destroy, /** destroyed status of instance. */
-        Destroyed, /** Stopped status of instance. */
-        Stopped, /** after launch or start instance get status as starting. */
-        Starting, /** after stop or destroy instance get status as stopping. */
-        Stopping, /** after destroy or expunge instance get status as expunging. */
-        Expunging, /** after destroy or expunge instance get status as expunged. */
-        Expunged, /** while instance creation if get failure get status as Error . */
-        Error, /** while instance creation if get status as creating . */
-        Creating, /** while instance creation if get status as Implemented . */
-        Implemented, /** after launch instance if get status as ready . */
+        Running,
+        /** destroy status of instance. */
+        Destroy,
+        /** destroyed status of instance. */
+        Destroyed,
+        /** Stopped status of instance. */
+        Stopped,
+        /** Status of instance. */
+        Migrating,
+        /** after launch or start instance get status as starting. */
+        Starting,
+        /** after stop or destroy instance get status as stopping. */
+        Stopping,
+        /** after destroy or expunge instance get status as expunging. */
+        Expunging,
+        /** after destroy or expunge instance get status as expunged. */
+        Expunged,
+        /** while instance creation if get failure get status as Error . */
+        Error,
+        /** while instance creation if get status as creating . */
+        Creating,
+        /** while instance creation if get status as Implemented . */
+        Implemented,
+        /** after launch instance if get status as ready . */
         Ready
     }
 
+    /** Instance host. */
+    @JoinColumn(name = "host_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @OneToOne
+    private Host host;
+
     /** Instance host id. */
     @Column(name = "host_id")
-    private String hostId;
+    private Long hostId;
+
+    /** Instance pod. */
+    @JoinColumn(name = "pod_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @OneToOne
+    private Pod pod;
 
     /** Instance pod id. */
     @Column(name = "pod_id")
-    private String podId;
+    private Long podId;
 
     /** Instance event message. */
     @Column(name = "event_message")
@@ -214,6 +249,10 @@ public class VmInstance implements Serializable {
     /** Check instance available or not. */
     @Column(name = "is_removed")
     private Boolean isRemoved;
+
+    /** Check instance available or not. */
+    @Column(name = "is_password_enabled")
+    private Boolean passwordEnabled;
 
     /** instance private ip address. */
     @Column(name = "instance_private_ip")
@@ -665,11 +704,47 @@ public class VmInstance implements Serializable {
     }
 
     /**
+     * Get the host.
+     *
+     * @return the host
+     */
+    public Host getHost() {
+        return host;
+    }
+
+    /**
+     * Set the host.
+     *
+     * @param host the host to set
+     */
+    public void setHost(Host host) {
+        this.host = host;
+    }
+
+    /**
+     * Get the host.
+     *
+     * @return the pod
+     */
+    public Pod getPod() {
+        return pod;
+    }
+
+    /**
+     * Set the host.
+     *
+     * @param pod the pod to set
+     */
+    public void setPod(Pod pod) {
+        this.pod = pod;
+    }
+
+    /**
      * Get the host id of instance.
      *
      * @return the hostId.
      */
-    public String getHostId() {
+    public Long getHostId() {
         return hostId;
     }
 
@@ -678,7 +753,7 @@ public class VmInstance implements Serializable {
      *
      * @param hostID to set.
      */
-    public void setHostId(String hostID) {
+    public void setHostId(Long hostID) {
         this.hostId = hostID;
     }
 
@@ -687,7 +762,7 @@ public class VmInstance implements Serializable {
      *
      * @return the podId.
      */
-    public String getPodId() {
+    public Long getPodId() {
         return podId;
     }
 
@@ -696,7 +771,7 @@ public class VmInstance implements Serializable {
      *
      * @param podID to set.
      */
-    public void setPodId(String podID) {
+    public void setPodId(Long podID) {
         this.podId = podID;
     }
 
@@ -1042,6 +1117,78 @@ public class VmInstance implements Serializable {
         this.instanceNote = instanceNote;
     }
 
+    /**
+     * Get temp password.
+     *
+     * @return the password
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * Set temp password.
+     *
+     * @param password the password to set
+     */
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    /**
+     * Get status of vnc password for an instance is enabled/disabled.
+     *
+     * @return the passwordEnabled
+     */
+    public Boolean getPasswordEnabled() {
+        return passwordEnabled;
+    }
+
+    /**
+     * Set status of vnc password for an instance is enabled/disabled.
+     *
+     * @param passwordEnabled the passwordEnabled to set
+     */
+    public void setPasswordEnabled(Boolean passwordEnabled) {
+        this.passwordEnabled = passwordEnabled;
+    }
+
+    /**
+     * Get the iso.
+     *
+     * @return the iso
+     */
+    public String getIso() {
+        return iso;
+    }
+
+    /**
+     * Set the iso.
+     *
+     * @param iso the iso to set
+     */
+    public void setIso(String iso) {
+        this.iso = iso;
+    }
+
+    /**
+     * Get the iso name.
+     *
+     * @return the isoName
+     */
+    public String getIsoName() {
+        return isoName;
+    }
+
+    /**
+     * Set the iso name.
+     *
+     * @param isoName the isoName to set
+     */
+    public void setIsoName(String isoName) {
+        this.isoName = isoName;
+    }
+
     @Override
     public String toString() {
         return "VmInstance [Id=" + id + ", name=" + name + ", uuid=" + uuid + ", vncPassword=" + vncPassword
@@ -1074,22 +1221,26 @@ public class VmInstance implements Serializable {
             vmInstance.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(jsonObject, "domainid")));
             vmInstance.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
             vmInstance.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
-            vmInstance.setHostId(JsonUtil.getStringValue(jsonObject, "hostid"));
-            vmInstance.setTemplateId(
-                    convertUtil.getTemplateId(JsonUtil.getStringValue(jsonObject, "templateid")));
+            vmInstance.setHostId(convertUtil.getHostId(JsonUtil.getStringValue(jsonObject, "hostid")));
+            vmInstance.setPodId(
+                    convertUtil.getPodId(convertUtil.getHostId(JsonUtil.getStringValue(jsonObject, "hostid"))));
+            vmInstance.setTemplateId(convertUtil.getTemplateId(JsonUtil.getStringValue(jsonObject, "templateid")));
             vmInstance.setComputeOfferingId(
                     convertUtil.getComputeOfferId(JsonUtil.getStringValue(jsonObject, "serviceofferingid")));
             vmInstance.setCpuCore(JsonUtil.getIntegerValue(jsonObject, "cpunumber"));
             vmInstance.setCpuSpeed(JsonUtil.getIntegerValue(jsonObject, "cpuspeed"));
             vmInstance.setMemory(JsonUtil.getIntegerValue(jsonObject, "memory"));
             vmInstance.setCpuUsage(JsonUtil.getStringValue(jsonObject, "cpuused"));
+            vmInstance.setPasswordEnabled(JsonUtil.getBooleanValue(jsonObject, "passwordenabled"));
+            vmInstance.setPassword(JsonUtil.getStringValue(jsonObject, "password"));
+            vmInstance.setIso(JsonUtil.getStringValue(jsonObject, "isoid"));
+            vmInstance.setIsoName(JsonUtil.getStringValue(jsonObject, "isoname"));
             JSONArray nicArray = jsonObject.getJSONArray("nic");
             vmInstance.setIpAddress(JsonUtil.getStringValue(nicArray.getJSONObject(0), "ipaddress"));
-            vmInstance.setNetworkId(convertUtil
-                    .getNetworkId(JsonUtil.getStringValue(nicArray.getJSONObject(0), "networkid")));
-            vmInstance
-                    .setInstanceOwnerId(convertUtil.getOwnerId(JsonUtil.getStringValue(jsonObject, "account"),
-                            convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid"))));
+            vmInstance.setNetworkId(
+                    convertUtil.getNetworkId(JsonUtil.getStringValue(nicArray.getJSONObject(0), "networkid")));
+            vmInstance.setInstanceOwnerId(convertUtil.getOwnerId(JsonUtil.getStringValue(jsonObject, "account"),
+                    convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid"))));
         } catch (Exception e) {
             e.printStackTrace();
         }
