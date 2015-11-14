@@ -142,7 +142,7 @@ public class VmInstance implements Serializable {
     /** Instance disk offer. */
     @JoinColumn(name = "storage_offer_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @OneToOne
-    private ComputeOffering storageOffering;
+    private StorageOffering storageOffering;
 
     /** Instance disk offer id. */
     @Column(name = "storage_offer_id")
@@ -151,7 +151,7 @@ public class VmInstance implements Serializable {
     /** Instance network offer. */
     @JoinColumn(name = "network_offer_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @OneToOne
-    private ComputeOffering networkOffering;
+    private NetworkOffering networkOffering;
 
     /** Instance network offer id. */
     @Column(name = "network_offer_id")
@@ -853,7 +853,7 @@ public class VmInstance implements Serializable {
      *
      * @return the storageOffering.
      */
-    public ComputeOffering getStorageOffering() {
+    public StorageOffering getStorageOffering() {
         return storageOffering;
     }
 
@@ -862,7 +862,7 @@ public class VmInstance implements Serializable {
      *
      * @param storageOffering the storage Offering to set.
      */
-    public void setStorageOffering(ComputeOffering storageOffering) {
+    public void setStorageOffering(StorageOffering storageOffering) {
         this.storageOffering = storageOffering;
     }
 
@@ -871,7 +871,7 @@ public class VmInstance implements Serializable {
      *
      * @return the networkOffering.
      */
-    public ComputeOffering getNetworkOffering() {
+    public NetworkOffering getNetworkOffering() {
         return networkOffering;
     }
 
@@ -880,7 +880,7 @@ public class VmInstance implements Serializable {
      *
      * @param networkOffering the network Offering to set.
      */
-    public void setNetworkOffering(ComputeOffering networkOffering) {
+    public void setNetworkOffering(NetworkOffering networkOffering) {
         this.networkOffering = networkOffering;
     }
 

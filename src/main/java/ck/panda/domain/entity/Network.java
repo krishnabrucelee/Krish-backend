@@ -4,347 +4,545 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.Version;
+
+import ck.panda.util.ConvertUtil;
+import ck.panda.util.JsonUtil;
 
 /**
- *  Network can be accessed by virtual machines that belong to many different accounts.
- *
+ * Network is network where instances are attached to it.
+ * and it can be of either Shared or Isolated types.
  */
 @Entity
 @Table(name = "ck_network")
 @SuppressWarnings("serial")
 public class Network implements Serializable {
 
-     /** Id of the network. */
+    /** Id of the Network. */
     @Id
     @GeneratedValue
     @Column(name = "id")
     private Long id;
 
-    /** Name of the network. */
-    @Column(name = "name", nullable = false)
-    private String name;
-
-    /** whether this network can be used for deployment. */
-    @Column(name = "can_use_for_deploy")
-    private Boolean canUseForDeploy;
-
-    /** cidr value.*/
-    @Column(name = "cidr")
-    private String cidr;
-
-    /** Unique ID from Cloud Stack. */
+    /** Unique id for the Network. */
     @Column(name = "uuid")
     private String uuid;
 
-    /** whether to display network or not. */
-    @Column(name = "display_network")
-    private Boolean displayNetwork;
+    /** Name of the Network. */
+    @Column(name = "name", nullable = false)
+    private String name;
 
-    /** display text for network. */
-    @Column(name = "display_text")
+    /** Description of the Network. */
+    @Column(name = "display_text", nullable = true)
     private String displayText;
 
-    /** Id of the domain. */
+    /** Zone Object for the Network. */
+    @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Domain domain;
+
+    /** id for the Domain. */
     @Column(name = "domain_id")
-    private String domainId;
+    private Long domainId;
 
-    /** whether to defualt or not. */
-    @Column(name = "is_default")
-    private Boolean isDefault;
+    /** Zone Object for the Network. */
+    @JoinColumn(name = "zone_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Zone zone;
 
-    /** whether issystem for network. */
-    @Column(name = "is_system")
-    private Boolean isSystem;
-
-    /** Id of the network offering. */
-    @Column(name = "network_offering_id")
-    private String networkOfferingId;
-
-    /** state of the network. */
-    @Column(name = "state")
-    private String state;
-
-    /** traffic type of the network.*/
-    @Column(name = "traffic_type")
-    private String trafficType;
-
-    /** Id of the zone. */
+    /** id for the Zone. */
     @Column(name = "zone_id")
-    private String zoneId;
+    private Long zoneId;
 
-    /** whether issystem for network. */
-    @Column(name = "list_all", columnDefinition = "tinyint default 1")
-    private Boolean listAll;
+    /** id for the Network Offer. */
+    @ManyToOne
+    @JoinColumn(name = "networkoffering_id", referencedColumnName = "id", updatable = false, insertable = false)
+    private NetworkOffering networkOffering;
 
-    /** boolean is recursive. */
-    @Column(name = "is_recursive", columnDefinition = "tinyint default 1")
-    private Boolean isRecursive;
+    /** id for the Zone. */
+    @Column(name = "networkoffering_id")
+    private Long networkOfferingId;
+
+    /**  Network Type. */
+    @Column(name = "network_type")
+    @Enumerated(EnumType.STRING)
+    private NetworkType networkType;
+
+    /**  CIDR Range of the IP address. */
+    @Column(name = "cidr")
+    private String cIDR;
+
+    /** IsActive attribute to verify Active or Inactive. */
+    @Column(name = "is_active")
+    private Boolean isActive;
+
+    /** Version attribute to handle optimistic locking. */
+    @Version
+    @Column(name = "version")
+    private Long version;
+
+    /** Status attribute to verify status of the Network Offering. */
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
+    /** Created by user. */
+    @CreatedBy
+    @JoinColumn(name = "created_by", referencedColumnName = "id")
+    @OneToOne
+    private User createdBy;
+
+    /** Last updated by user. */
+    @LastModifiedBy
+    @JoinColumn(name = "updated_by", referencedColumnName = "id")
+    @OneToOne
+    private User updatedBy;
+
+    /** Created date and time. */
+    @CreatedDate
+    @Column(name = "created_date_time")
+    private DateTime createdDateTime;
+
+    /** Last modified date and time. */
+    @LastModifiedDate
+    @Column(name = "updated_date_time")
+    private DateTime updatedDateTime;
 
     /**
-     * @return the id
+     * Enum type for Network Type.
+     *
+     */
+    public enum NetworkType {
+        /**  Network type be Shared. */
+        Shared,
+        /**  Network type be Isolated. */
+        Isolated
+    }
+    /**
+     * Enum type for  Network Status.
+     *
+     */
+    public enum Status {
+        /**  Network will be in a Enabled State. */
+        Implemented,
+        /**  Network will be in a Disabled State. */
+        Allocated
+    }
+
+    /** Set syncFlag. */
+    @Transient
+    private Boolean syncFlag;
+
+
+    /**
+     * Get the Network Id.
+     *
+     * @return the Network Id
      */
     public Long getId() {
         return id;
     }
 
     /**
-     * @param id the id to set
-     */
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    /**
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @param name the name to set
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * @return the canUseForDeploy
-     */
-    public Boolean getCanUseForDeploy() {
-        return canUseForDeploy;
-    }
-
-    /**
-     * @param canUseForDeploy the canUseForDeploy to set
-     */
-    public void setCanUseForDeploy(Boolean canUseForDeploy) {
-        this.canUseForDeploy = canUseForDeploy;
-    }
-
-    /**
-     * @return the cidr
-     */
-    public String getCidr() {
-        return cidr;
-    }
-
-    /**
-     * @param cidr the cidr to set
-     */
-    public void setCidr(String cidr) {
-        this.cidr = cidr;
-    }
-
-    /**
-     * @return the displayNetwork
-     */
-    public Boolean getDisplayNetwork() {
-        return displayNetwork;
-    }
-
-    /**
-     * @param displayNetwork the displayNetwork to set
-     */
-    public void setDisplayNetwork(Boolean displayNetwork) {
-        this.displayNetwork = displayNetwork;
-    }
-
-    /**
-     * @return the displayText
-     */
-    public String getDisplayText() {
-        return displayText;
-    }
-
-    /**
-     * @param displayText the displayText to set
-     */
-    public void setDisplayText(String displayText) {
-        this.displayText = displayText;
-    }
-
-    /**
-     * @return the domainId
-     */
-    public String getDomainId() {
-        return domainId;
-    }
-
-    /**
-     * @param domainId the domainId to set
-     */
-    public void setDomainId(String domainId) {
-        this.domainId = domainId;
-    }
-
-    /**
-     * @return the isDefault
-     */
-    public Boolean getIsDefault() {
-        return isDefault;
-    }
-
-    /**
-     * @param isDefault the isDefault to set
-     */
-    public void setIsDefault(Boolean isDefault) {
-        this.isDefault = isDefault;
-    }
-
-    /**
-     * @return the isSystem
-     */
-    public Boolean getIsSystem() {
-        return isSystem;
-    }
-
-    /**
-     * @param isSystem the isSystem to set
-     */
-    public void setIsSystem(Boolean isSystem) {
-        this.isSystem = isSystem;
-    }
-
-    /**
-     * @return the networkOfferingId
-     */
-    public String getNetworkOfferingId() {
-        return networkOfferingId;
-    }
-
-    /**
-     * @param networkOfferingId the networkOfferingId to set
-     */
-    public void setNetworkOfferingId(String networkOfferingId) {
-        this.networkOfferingId = networkOfferingId;
-    }
-
-    /**
-     * @return the state
-     */
-    public String getState() {
-        return state;
-    }
-
-    /**
-     * @param state the state to set
-     */
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    /**
-     * @return the trafficType
-     */
-    public String getTrafficType() {
-        return trafficType;
-    }
-
-    /**
-     * @param trafficType the trafficType to set
-     */
-    public void setTrafficType(String trafficType) {
-        this.trafficType = trafficType;
-    }
-
-    /**
-     * @return the zoneId
-     */
-    public String getZoneId() {
-        return zoneId;
-    }
-
-    /**
-     * @param zoneId the zoneId to set
-     */
-    public void setZoneId(String zoneId) {
-        this.zoneId = zoneId;
-    }
-
-    /**
-     * @return the uuid
+     * Get the  Network uuid.
+     *
+     * @return the uuid of the Network
      */
     public String getUuid() {
         return uuid;
     }
 
     /**
-     * @param uuid the uuid to set
+     * @return the zone
+     */
+    public Zone getZone() {
+        return zone;
+    }
+
+    /**
+     * @param zone the zone to set
+     */
+    public void setZone(Zone zone) {
+        this.zone = zone;
+    }
+
+    /**
+     * @return the zoneId
+     */
+    public Long getZoneId() {
+        return zoneId;
+    }
+
+    /**
+     * @param zoneId the zoneId to set
+     */
+    public void setZoneId(Long zoneId) {
+        this.zoneId = zoneId;
+    }
+
+    /**
+     * Get the  Network Name.
+     *
+     * @return the name of the Network
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Get the  Network Description.
+     *
+     * @return the description of Network
+     */
+    public String getDisplayText() {
+        return displayText;
+    }
+
+    /**
+     * Get the Domain.
+     *
+     * @return the id of the domain
+     */
+    public Long getDomainId() {
+        return domainId;
+    }
+
+    /**
+     * Get the  Network type.
+     *
+     * @return the type of the network
+     */
+    public NetworkType getNetworkType() {
+        return networkType;
+    }
+
+    /**
+     * Get the Network State.
+     *
+     * @return Active or Inactive state
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    /**
+     * Get the Network Version.
+     *
+     * @return the version of Network
+     */
+    public Long getVersion() {
+        return version;
+    }
+
+    /**
+     * Get the Network Status.
+     *
+     * @return the status of  Network
+     */
+    public Status getStatus() {
+        return status;
+    }
+
+    /**
+     * Get the user who creates Network.
+     *
+     * @return the createdBy
+     */
+    public User getCreatedBy() {
+        return createdBy;
+    }
+
+    /**
+     * Get the user who updates Network.
+     *
+     * @return the updatedBy
+     */
+    public User getUpdatedBy() {
+        return updatedBy;
+    }
+
+    /**
+     * Get the DateTime of created Network.
+     *
+     * @return the DateTime
+     */
+    public DateTime getCreatedDateTime() {
+        return createdDateTime;
+    }
+
+    /**
+     * Get the DateTime of updated Network.
+     *
+     * @return the DateTime
+     */
+    public DateTime getUpdatedDateTime() {
+        return updatedDateTime;
+    }
+
+    /**
+     * Set the Network Id.
+     *
+     * @param id
+     * Network id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    /**
+     * Set the Network uuid.
+     *
+     * @param uuid
+     * Network uuid to set
      */
     public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
-
     /**
-     * @return the listAll
+     * Set the Network name.
+     *
+     * @param name
+     * Network name to set
      */
-    public Boolean getListAll() {
-        return listAll;
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**
-     * @param listAll the listAll to set
+     * Set the Network Description.
+     *
+     * @param displayText
+     *  Network description to set
      */
-    public void setListAll(Boolean listAll) {
-        this.listAll = listAll;
+    public void setDisplayText(String displayText) {
+        this.displayText = displayText;
+    }
+
+    /**
+	 * @param domainId the domainId to set
+	 */
+	public void setDomainId(Long domainId) {
+		this.domainId = domainId;
+	}
+
+	/**
+     * Get the NetworkOffering Id.
+     *
+     * @return the networkOffering
+     */
+    public NetworkOffering getNetworkOffering() {
+      return networkOffering;
+    }
+
+    /**
+     * Get the Network cIDR.
+     * @return the cIDR
+     */
+    public String getcIDR() {
+        return cIDR;
+    }
+
+    /**
+     * Set the Network Offering Id.
+     *
+     * @param networkOffering the networkOffering to set
+     */
+    public void setNetworkOffering(NetworkOffering networkOffering) {
+        this.networkOffering = networkOffering;
+    }
+
+    /**
+     * Set the Network cIDR.
+     *
+     * @param cIDR the cIDR to set
+     */
+    public void setcIDR(String cIDR) {
+        this.cIDR = cIDR;
+    }
+
+    /**
+     * Set the Network Type.
+     *
+     * @param networkType
+     * the networkType to set
+     */
+    public void setNetworkType(NetworkType networkType) {
+        this.networkType = networkType;
+    }
+
+    /**
+     * Set the Network State.
+     *
+     * @param isActive
+     * the isActive state to set
+     */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    /**
+     * Set the Network Version.
+     *
+     * @param version
+     * the version to set
+     */
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    /**
+     * Set the  Network Status.
+     *
+     * @param status
+     * the status to set
+     */
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    /**
+     * Set the user who creates Network.
+     *
+     * @param createdBy
+     * Network createdBy to set
+     */
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    /**
+     * Set the user who updates Network.
+     *
+     * @param updatedBy
+     *  Network updatedBy to set
+     */
+    public void setUpdatedBy(User updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    /**
+     * Set the Created DateTime for Network.
+     *
+     * @param createdDateTime
+     * Network createdDateTime to set
+     */
+    public void setCreatedDateTime(DateTime createdDateTime) {
+        this.createdDateTime = createdDateTime;
+    }
+
+    /**
+     * Set the Updated DateTime for Network.
+     *
+     * @param updatedDateTime
+     * Network updatedDateTime to set
+     */
+    public void setUpdatedDateTime(DateTime updatedDateTime) {
+        this.updatedDateTime = updatedDateTime;
     }
 
 
     /**
-     * @return the isRecursive
-     */
-    public Boolean getIsRecursive() {
-        return isRecursive;
-    }
+	 * @return the syncFlag
+	 */
+	public Boolean getSyncFlag() {
+		return syncFlag;
+	}
 
-    /**
-     * @param isRecursive the isRecursive to set
-     */
-    public void setIsRecursive(Boolean isRecursive) {
-        this.isRecursive = isRecursive;
-    }
+	/**
+	 * @param syncFlag the syncFlag to set
+	 */
+	public void setSyncFlag(Boolean syncFlag) {
+		this.syncFlag = syncFlag;
+	}
 
-    /**
-     * Convert JSONObject to network entity.
+	/**
+	 * @return the domain
+	 */
+	public Domain getDomain() {
+		return domain;
+	}
+
+	/**
+	 * @param domain the domain to set
+	 */
+	public void setDomain(Domain domain) {
+		this.domain = domain;
+	}
+
+	/**
+	 * @return the networkOfferingId
+	 */
+	public Long getNetworkOfferingId() {
+		return networkOfferingId;
+	}
+
+	/**
+	 * @param networkOfferingId the networkOfferingId to set
+	 */
+	public void setNetworkOfferingId(Long networkOfferingId) {
+		this.networkOfferingId = networkOfferingId;
+	}
+
+	/** Convert JSONObject to domain entity.
      *
      * @param object json object
      * @return domain entity object.
      * @throws JSONException handles json exception.
      */
-    public static Network convert(JSONObject object) throws JSONException {
-        Network network = new Network();
-        network.uuid = object.has("id") ? object.get("id").toString() : "";
-        network.name = object.has("name") ? object.get("name").toString() : "";
-        network.networkOfferingId = object.has("networkofferingid") ? object.get("networkofferingid").toString() : "";
-        network.cidr = object.has("cidr") ? object.get("cidr").toString() : "";
-        network.domainId = object.has("domainid") ? object.get("domainid").toString() : "";
-        network.zoneId = object.has("zoneid") ? object.get("zoneid").toString() : "";
-        network.state = object.has("state") ? object.get("state").toString() : "";
-        network.isSystem = object.has("issystem") ? object.getBoolean("issystem") : false;
-        return network;
-    }
+   public static Network convert(JSONObject jsonObject, ConvertUtil convertUtil) throws JSONException {
+       Network network = new Network();
+       network.setSyncFlag(false);
+       try {
+    	   network.setName(JsonUtil.getStringValue(jsonObject, "name"));
+    	   network.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
+           network.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
+           network.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(jsonObject, "domainid")));;
+           network.setNetworkType(NetworkType.valueOf(JsonUtil.getStringValue(jsonObject, "type")));
+           network.setNetworkOfferingId(convertUtil.getNetworkOfferingId(JsonUtil.getStringValue(jsonObject, "networkofferingid")));
+           network.setcIDR(JsonUtil.getStringValue(jsonObject, "cidr"));
+           network.setDisplayText(JsonUtil.getStringValue(jsonObject, "displaytext"));
+           network.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
+       } catch ( Exception ex){
+    	   ex.printStackTrace();
 
-    /**
-     * Mapping entity object into list.
-     *
-     * @param networkList list of domains.
-     * @return network map
-     */
-    public static Map<String, Network> convert(List<Network> networkList) {
-        Map<String, Network> networkMap = new HashMap<String, Network>();
+       }
+       return network;
+   }
 
-        for (Network network : networkList) {
-            networkMap.put(network.getUuid(), network);
-        }
-        return networkMap;
-    }
-  }
+   /**
+    * Mapping entity object into list.
+    *
+    * @param networkList list of networks.
+    * @return network map
+    */
+   public static Map<String, Network> convert(List<Network> networkList) {
+       Map<String, Network> networkMap = new HashMap<String, Network>();
+
+       for (Network network : networkList) {
+    	   networkMap.put(network.getUuid(), network);
+       }
+
+       return networkMap;
+   }
+}
