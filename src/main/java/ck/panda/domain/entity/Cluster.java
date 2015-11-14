@@ -13,8 +13,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.hibernate.annotations.Type;
-import org.hibernate.validator.constraints.NotEmpty;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -23,33 +21,39 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
-import ck.panda.util.JsonValidator;
 
 /**
- * A host is a single computer. Hosts provide the computing resources that run guest virtual machines. Each host has
- * hypervisor software installed on it to manage the guest VMs.
+ * A cluster is a XenServer server pool, a set of KVM servers, , or a VMware cluster preconfigured in vCenter.
+ *
+ * The hosts in a cluster all have identical hardware, run the same hypervisor,are on the same subnet,
+ * and access the same shared primary storage.
  *
  */
-
 @Entity
-@Table(name = "ck_host")
-@SuppressWarnings("serial")
-public class Host {
+@Table(name = "ck_cluster")
+public class Cluster {
 
-     /** Unique ID of the Domain. */
+    /** Unique Id of the cluster. */
     @Id
     @GeneratedValue
     @Column(name = "id")
     private Long id;
 
-    /** Unique ID from Cloud Stack. */
+    /** Cloudstack's cluster uuid. */
     @Column(name = "uuid")
     private String uuid;
 
-    /** Name of the Domain. */
-    @NotEmpty
-    @Column(name = "name", nullable = false)
+    /** Name of the cluster. */
+    @Column(name = "name")
     private String name;
+
+    /** Type of the cluster. */
+    @Column(name = "cluster_type")
+    private String clusterType;
+
+    /** Type of the hypervisor. */
+    @Column(name = "hypervisor_type")
+    private String hypervisorType;
 
     /** Pod Object for the pod. */
     @JoinColumn(name = "pod_id", referencedColumnName = "Id", updatable = false, insertable = false)
@@ -68,19 +72,6 @@ public class Host {
     /** id for the Zone. */
     @Column(name = "zone_id")
     private Long zoneId;
-
-    /** Zone Object for the pod. */
-    @JoinColumn(name = "zone_id", referencedColumnName = "Id", updatable = false, insertable = false)
-    @ManyToOne
-    private Cluster cluster;
-
-    /** id for the Zone. */
-    @Column(name = "cluster_id")
-    private Long clusterId;
-
-    /** State of the host. */
-    @Column(name = "state")
-    private String state;
 
     /** Created by user. */
     @CreatedBy
@@ -109,6 +100,8 @@ public class Host {
     private ZonedDateTime updatedDateTime;
 
     /**
+     * Get id
+     *
      * @return the id
      */
     public Long getId() {
@@ -116,7 +109,7 @@ public class Host {
     }
 
     /**
-     * set the id
+     * Set the id
      *
      * @param id  to set
      */
@@ -125,6 +118,8 @@ public class Host {
     }
 
     /**
+     * Get Uuid
+     *
      * @return the uuid
      */
     public String getUuid() {
@@ -132,7 +127,7 @@ public class Host {
     }
 
     /**
-     * set the uuid
+     * Set the uuid
      *
      * @param uuid  to set
      */
@@ -159,7 +154,41 @@ public class Host {
     }
 
     /**
-     * Get Pod
+     * Get the ClusterType
+     *
+     * @return the clusterType
+     */
+    public String getClusterType() {
+        return clusterType;
+    }
+
+    /**
+     * @param clusterType the clusterType to set
+     */
+    public void setClusterType(String clusterType) {
+        this.clusterType = clusterType;
+    }
+
+    /**
+     * Get the hypervisor type
+     *
+     * @return the hypervisorType
+     */
+    public String getHypervisorType() {
+        return hypervisorType;
+    }
+
+    /**
+     * Set the hypervisorType
+     *
+     * @param hypervisorType  to set
+     */
+    public void setHypervisorType(String hypervisorType) {
+        this.hypervisorType = hypervisorType;
+    }
+
+    /**
+     * Get pod
      *
      * @return the pod
      */
@@ -177,8 +206,6 @@ public class Host {
     }
 
     /**
-     * Get Pod Id
-     *
      * @return the podId
      */
     public Long getPodId() {
@@ -188,13 +215,15 @@ public class Host {
     /**
      * Set the podId
      *
-     * @param podId  to set
+     * @param podId to set
      */
     public void setPodId(Long podId) {
         this.podId = podId;
     }
 
     /**
+     * Get the zone
+     *
      * @return the zone
      */
     public Zone getZone() {
@@ -204,14 +233,14 @@ public class Host {
     /**
      * Set the zone
      *
-     * @param zone  to set
+     * @param zone to set
      */
     public void setZone(Zone zone) {
         this.zone = zone;
     }
 
     /**
-     * Get the zoneId
+     * Get zoneId
      *
      * @return the zoneId
      */
@@ -229,59 +258,7 @@ public class Host {
     }
 
     /**
-     * @return the cluster
-     */
-    public Cluster getCluster() {
-        return cluster;
-    }
-
-    /**
-     * Set the cluster
-     *
-     * @param cluster to set
-     */
-    public void setCluster(Cluster cluster) {
-        this.cluster = cluster;
-    }
-
-    /**
-     * Get the cluster
-     *
-     * @return the clusterId
-     */
-    public Long getClusterId() {
-        return clusterId;
-    }
-
-    /**
-     * Set the clusterId
-     *
-     * @param clusterId  to set
-     */
-    public void setClusterId(Long clusterId) {
-        this.clusterId = clusterId;
-    }
-
-    /**
-     * Get the state
-     *
-     * @return the state
-     */
-    public String getState() {
-        return state;
-    }
-
-    /**
-     * Set the state
-     *
-     * @param state  to set
-     */
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    /**
-     * Get createdBy
+     * Get CreatedBy
      *
      * @return the createdBy
      */
@@ -299,6 +276,8 @@ public class Host {
     }
 
     /**
+     * Get updatedBy
+     *
      * @return the updatedBy
      */
     public User getUpdatedBy() {
@@ -308,14 +287,14 @@ public class Host {
     /**
      * Set the updatedBy
      *
-     * @param updatedBy to set
+     * @param updatedBy  to set
      */
     public void setUpdatedBy(User updatedBy) {
         this.updatedBy = updatedBy;
     }
 
     /**
-     * Get CreatedDateTime
+     * Get createdDateTime
      *
      * @return the createdDateTime
      */
@@ -333,7 +312,7 @@ public class Host {
     }
 
     /**
-     * Get the updatedDate time
+     * Get the updatedDatetime
      *
      * @return the updatedDateTime
      */
@@ -344,47 +323,46 @@ public class Host {
     /**
      * Set the updatedDateTime
      *
-     * @param updatedDateTime to set
+     * @param updatedDateTime  to set
      */
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
 
-     /**
-       * Convert JSONObject to domain entity.
-       *
-       * @param jsonObject json object
-       * @param convertUtil convert Entity object from UUID.
-       * @return domain entity object.
-       * @throws JSONException handles json exception.
-       */
-      public static Host convert(JSONObject jsonObject, ConvertUtil convertUtil) throws JSONException {
-          Host host = new Host();
-          try {
-              host.setName(JsonUtil.getStringValue(jsonObject, "name"));
-              host.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-              host.setClusterId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
-              host.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
-              host.setPodId(convertUtil.getPodId(JsonUtil.getStringValue(jsonObject, "podid")));
+    /**
+     * Convert JSONObject into pod object.
+     *
+     * @param jsonObject JSON object.
+     * @param convertUtil convert Entity object from UUID.
+     * @return pod object.
+     */
+    public static Cluster convert(JSONObject jsonObject, ConvertUtil convertUtil) {
+        Cluster cluster = new Cluster();
+        try {
+            cluster.setName(JsonUtil.getStringValue(jsonObject, "name"));
+            cluster.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
+            cluster.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
+            cluster.setPodId(convertUtil.getPodId(JsonUtil.getStringValue(jsonObject, "podid")));
+            cluster.setHypervisorType(JsonUtil.getStringValue(jsonObject, "hypervisortype"));
+            cluster.setClusterType(JsonUtil.getStringValue(jsonObject, "clustertype"));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+      return cluster;
+    }
 
-          } catch (Exception ex) {
-              ex.printStackTrace();
-          }
-        return host;
-      }
+    /**
+     * Mapping entity object into list.
+     *
+     * @param clusterList list of cluster.
+     * @return cluster map
+     */
+    public static Map<String, Cluster> convert(List<Cluster> clusterList) {
+        Map<String, Cluster> clusterMap = new HashMap<String, Cluster>();
 
-      /**
-       * Mapping entity object into list.
-       *
-       * @param hostList list of hosts.
-       * @return host map
-       */
-      public static Map<String, Host> convert(List<Host> hostList) {
-          Map<String, Host> hostMap = new HashMap<String, Host>();
-
-          for (Host host : hostList) {
-              hostMap.put(host.getUuid(), host);
-          }
-          return hostMap;
-      }
+        for (Cluster cluster : clusterList) {
+            clusterMap.put(cluster.getUuid(), cluster);
+        }
+        return clusterMap;
+    }
 }

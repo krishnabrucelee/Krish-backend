@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.CloudStackConfiguration;
+import ck.panda.domain.entity.Cluster;
 import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
@@ -16,12 +17,14 @@ import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.OsType;
+import ck.panda.domain.entity.Pod;
 import ck.panda.domain.entity.Region;
 import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Zone;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.error.exception.ApplicationException;
@@ -115,6 +118,19 @@ public class SyncServiceImpl  implements SyncService {
     /** Template Service  for listing templates. */
     @Autowired
     private TemplateService templateService;
+
+
+    /** Volume Service  for listing volumes. */
+    @Autowired
+    private VolumeService volumeService;
+
+     /** Pod service for listing pods. */
+    @Autowired
+    private PodService podService;
+
+    /** Cluster service for listing clusters. */
+    @Autowired
+    private ClusterService clusterService;
 
     /** CloudStack connector. */
     @Autowired
@@ -219,25 +235,45 @@ public class SyncServiceImpl  implements SyncService {
       }
 
       try {
-          // 14. Sync Host entity
-          this.syncHost();
-      } catch (Exception e) {
-          LOGGER.error("ERROR AT synch Host", e);
-      }
-
-      try {
-          // 15. Sync Instance entity
+          // 14. Sync Instance entity
           this.syncInstances();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch Instance", e);
       }
+      try{
+          // 15. Sync Volume entity
+          this.syncVolume();
+      }catch(Exception e){
+          LOGGER.error("ERROR AT synch Volume", e);
+      }
 
-
-      try {
-          // 16. Sync Snapshot entity
+            try {
+          // 15. Sync Snapshot entity
           this.syncSnapshot();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch Snapshot", e);
+      }
+
+
+      try {
+          // 16. Sync Pod entity
+          this.syncPod();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Pod", e);
+      }
+
+      try {
+          // 17. Sync Cluster entity
+          this.syncCluster();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch cluster", e);
+      }
+
+      try {
+          // 18. Sync Host entity
+          this.syncHost();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Host", e);
       }
     }
 
@@ -945,6 +981,49 @@ public class SyncServiceImpl  implements SyncService {
         }
     }
 
+    /**
+     * Sync with Cloud Server Account.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    public void syncVolume() throws ApplicationException, Exception {
+
+        //1. Get all the StorageOffering objects from CS server as hash
+        List<Volume> volumeList = volumeService.findAllFromCSServer();
+        HashMap<String, Volume> csVolumeMap = (HashMap<String, Volume>) Volume.convert(volumeList);
+
+        //2. Get all the osType objects from application
+        List<Volume> appvolumeServiceList = volumeService.findAll();
+
+        // 3. Iterate application osType list
+        for (Volume volume: appvolumeServiceList) {
+           volume.setIsSyncFlag(false);
+             //3.1 Find the corresponding CS server osType object by finding it in a hash using uuid
+            if (csVolumeMap.containsKey(volume.getUuid())) {
+                Volume csvolume = csVolumeMap.get(volume.getUuid());
+
+                csvolume.setName(csvolume.getName());
+//                csOsType.setOsCategoryUuid(csOsType.getOsCategoryUuid());
+
+                //3.2 If found, update the osType object in app db
+                volumeService.update(volume);
+
+                //3.3 Remove once updated, so that we can have the list of cs osType which is not added in the app
+                csVolumeMap.remove(volume.getUuid());
+            } else {
+                volumeService.delete(volume);
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete
+            }
+        }
+        //4. Get the remaining list of cs server hash osType object, then iterate and
+        //add it to app db
+        for (String key: csVolumeMap.keySet()) {
+
+            volumeService.save(csVolumeMap.get(key));
+        }
+    }
 
     /**
      * Sync with Cloud Server Account.
@@ -987,4 +1066,90 @@ public class SyncServiceImpl  implements SyncService {
             snapshotService.save(csSnapshotMap.get(key));
         }
     }
-}
+
+    /**
+     * Sync with Cloud Server Account.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    private void syncPod() throws ApplicationException, Exception {
+
+        //1. Get all the pod objects from CS server as hash
+        List<Pod> csPodService = podService.findAllFromCSServer();
+        HashMap<String, Pod> csPodMap = (HashMap<String, Pod>) Pod.convert(csPodService);
+
+        //2. Get all the pod objects from application
+        List<Pod> appPodList = podService.findAll();
+
+        // 3. Iterate application pod list
+        for (Pod pod: appPodList) {
+             //3.1 Find the corresponding CS server host object by finding it in a hash using uuid
+            if (csPodMap.containsKey(pod.getUuid())) {
+                Pod csUser = csPodMap.get(pod.getUuid());
+
+                pod.setName(csUser.getName());
+
+                //3.2 If found, update the pod object in app db
+                podService.update(pod);
+
+                //3.3 Remove once updated, so that we can have the list of cs host which is not added in the app
+                csPodMap.remove(pod.getUuid());
+            } else {
+                podService.delete(pod);
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete
+             }
+
+             }
+        //4. Get the remaining list of cs server hash user object, then iterate and
+        //add it to app db
+        for (String key: csPodMap.keySet()) {
+            podService.save(csPodMap.get(key));
+        }
+    }
+
+    /**
+     * Sync with Cloud Server Account.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    private void syncCluster() throws ApplicationException, Exception {
+
+        //1. Get all the cluster objects from CS server as hash
+        List<Cluster> csClusterService = clusterService.findAllFromCSServer();
+        HashMap<String, Cluster> csClusterMap = (HashMap<String, Cluster>) Cluster.convert(csClusterService);
+
+        //2. Get all the cluster objects from application
+        List<Cluster> appClusterList = clusterService.findAll();
+
+        // 3. Iterate application cluster list
+        for (Cluster cluster: appClusterList) {
+             //3.1 Find the corresponding CS server host object by finding it in a hash using uuid
+            if (csClusterMap.containsKey(cluster.getUuid())) {
+                Cluster csCluster = csClusterMap.get(cluster.getUuid());
+
+                cluster.setName(csCluster.getName());
+
+                //3.2 If found, update the cluster object in app db
+                clusterService.update(cluster);
+
+                //3.3 Remove once updated, so that we can have the list of cs cluster which is not added in the app
+                csClusterMap.remove(cluster.getUuid());
+            } else {
+                clusterService.delete(cluster);
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete
+             }
+             }
+        //4. Get the remaining list of cs server hash user object, then iterate and
+        //add it to app db
+        for (String key: csClusterMap.keySet()) {
+            clusterService.save(csClusterMap.get(key));
+        }
+    }
+
+
+ }
+

@@ -24,8 +24,8 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 @Service
 public class ZoneServiceImpl implements ZoneService {
 
-	/** Logger attribute. */
-	 private static final Logger LOGGER = LoggerFactory.getLogger(ZoneServiceImpl.class);
+    /** Logger attribute. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZoneServiceImpl.class);
 
     /** Zone repository reference. */
     @Autowired
@@ -43,8 +43,8 @@ public class ZoneServiceImpl implements ZoneService {
 
     @Override
     public Zone update(Zone zone) throws Exception {
-    	 LOGGER.debug(zone.getUuid());
-        return zoneRepo.save(zone);
+         LOGGER.debug(zone.getUuid());
+         return zoneRepo.save(zone);
     }
 
     @Override
