@@ -42,7 +42,7 @@ public class CloudStackNetworkService {
      * @throws Exception
      */
     public String createNetwork(String networkOfferingDisplayText,
-            String networkOfferingName, String response,
+            String networkOfferingName,  String zoneId, String response,
             HashMap<String, String> optional)
             throws Exception {
 
@@ -50,6 +50,7 @@ public class CloudStackNetworkService {
                 = server.getDefaultQuery("createNetwork", optional);
         arguments.add(new NameValuePair("displaytext", networkOfferingName));
         arguments.add(new NameValuePair("name", networkOfferingName));
+        arguments.add(new NameValuePair("zoneid",zoneId));
         arguments.add(new NameValuePair("response",response));
         String responseDocument = server.request(arguments);
 

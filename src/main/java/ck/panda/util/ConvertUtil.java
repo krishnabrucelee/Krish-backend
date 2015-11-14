@@ -141,6 +141,19 @@ public class ConvertUtil {
         return networkService.findByUUID(uuid).getId();
     }
 
+
+    /**
+     * Get the networkoffering id.
+     *
+     * @param uuid uuid of nic network.
+     * @return netwotk id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getNetworkOfferingId(String uuid) throws Exception {
+        return networkOfferingService.findByUUID(uuid).getId();
+    }
+
+
     /**
      * Get domain object.
      *

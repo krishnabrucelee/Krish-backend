@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.NetworkOffering;
+import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.NetworkOfferingRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackNetworkOfferingService;
@@ -104,5 +105,11 @@ public class NetworkOfferingServiceImpl implements NetworkOfferingService {
         }
         return networkOfferingList;
     }
+
+    @Override
+    public NetworkOffering findByUUID(String uuid) throws Exception {
+       return networkRepo.findByUUID(uuid);
+    }
+
 
 }

@@ -3,6 +3,7 @@ package ck.panda.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -11,15 +12,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Network;
+import ck.panda.domain.repository.jpa.DomainRepository;
+import ck.panda.domain.repository.jpa.NetworkOfferingRepository;
 import ck.panda.domain.repository.jpa.NetworkRepository;
+import ck.panda.domain.repository.jpa.ZoneRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackNetworkService;
+import ck.panda.util.ConfigUtil;
+import ck.panda.util.ConvertUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 
 /**
- * Service implementation for Guest Network entity.
+ * Service implementation for Network entity.
  *
  */
 @Service
@@ -29,6 +35,19 @@ public class NetworkServiceImpl implements NetworkService {
     @Autowired
     private NetworkRepository networkRepo;
 
+    @Autowired
+    private DomainRepository domainRepository;
+
+    @Autowired
+    private ZoneRepository zoneRepository;
+
+    @Autowired
+    private NetworkOfferingRepository networkofferingRepo;
+
+    /** Convert entity repository reference. */
+    @Autowired
+    private ConvertUtil entity;
+
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkServiceImpl.class);
 
@@ -36,21 +55,44 @@ public class NetworkServiceImpl implements NetworkService {
     @Autowired
     private AppValidator validator;
 
-    /** CloudStack Network service for connectivity with cloudstack. */
+    /** Service implementation for Cloudstack Network . */
     @Autowired
     private CloudStackNetworkService csNetwork;
 
-     @Override
+    /** Configuration Utilities. */
+    @Autowired
+    private ConfigUtil config;
+
+    @Override
     public Network save(Network network) throws Exception {
 
+    	if (network.getSyncFlag()) {
         Errors errors = validator.rejectIfNullEntity("Network", network);
         errors = validator.validateEntity(network, errors);
 
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-              return networkRepo.save(network);
+            config.setServer(1L);
+
+            String networkOfferings = csNetwork.createNetwork(network.getDisplayText(),network.getName(), network.getZone().getUuid(),"json",optional(network));
+                    JSONObject createComputeResponseJSON = new JSONObject(networkOfferings).getJSONObject("createnetworkresponse")
+                        .getJSONObject("network");
+                    network.setUuid(createComputeResponseJSON.getString("id"));
+                    network.setNetworkType(network.getNetworkType().valueOf(createComputeResponseJSON.getString("type")));
+                    network.setDisplayText(createComputeResponseJSON.getString("displaytext"));
+                    network.setcIDR(createComputeResponseJSON.getString("cidr"));
+                    network.setDomainId(domainRepository.findByUUID(createComputeResponseJSON.getString("domainid")).getId());
+                    network.setZoneId(zoneRepository.findByUUID(createComputeResponseJSON.getString("zoneid")).getId());
+                    network.setNetworkOfferingId(networkofferingRepo.findByUUID(createComputeResponseJSON.getString("networkofferingid")).getId());
+                    network.setStatus(network.getStatus().valueOf(createComputeResponseJSON.getString("state")));
+            return networkRepo.save(network);
         }
+     } else {
+         LOGGER.debug(network.getUuid());
+         return networkRepo.save(network);
+    }
+
     }
 
     @Override
@@ -101,7 +143,7 @@ public class NetworkServiceImpl implements NetworkService {
           for (int i = 0, size = networkListJSON.length(); i < size; i++) {
               // 2.1 Call convert by passing JSONObject to Domain entity and Add
               // the converted Domain entity to list
-              networkList.add(Network.convert(networkListJSON.getJSONObject(i)));
+              networkList.add(Network.convert(networkListJSON.getJSONObject(i),entity));
           }
           return networkList;
       }
@@ -111,5 +153,20 @@ public class NetworkServiceImpl implements NetworkService {
           return networkRepo.findByUUID(uuid);
       }
 
+    /**
+     * Hash Map to map the optional values to cloudstack.
+     *
+     * @param Network Network
+     * @return optional
+     * @throws Exception Exception
+     */
+    public HashMap<String, String> optional(Network network) throws Exception {
+
+        HashMap<String, String> optional = new HashMap<String, String>();
+
+        optional.put("networkofferingid", network.getNetworkOffering().getUuid().toString());
+
+        return optional;
+    }
 
 }

@@ -6,15 +6,15 @@ import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.Network;
 
 /**
- * JPA repository for GuestNetwork entity.
+ * JPA repository for Network entity.
  */
 public interface NetworkRepository extends PagingAndSortingRepository<Network, Long> {
 
-	/**
-    * Find Network by uuid.
-    * @param uuid GuestNetwork uuid.
-    * @return uuid
-    */
-   @Query(value = "select net from Network net where net.uuid LIKE :uuid ")
-   Network findByUUID(@Param("uuid") String uuid);
+    /**
+     * Find Network by uuid.
+     * @param uuid Network uuid.
+     * @return uuid
+     */
+    @Query(value = "select net from Network net where net.uuid LIKE :uuid ")
+    Network findByUUID(@Param("uuid") String uuid);
 }

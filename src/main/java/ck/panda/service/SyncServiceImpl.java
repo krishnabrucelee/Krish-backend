@@ -716,17 +716,14 @@ public class SyncServiceImpl  implements SyncService {
         // 3. Iterate application network list
         for (Network network: appNetworkList) {
              LOGGER.debug("Total rows updated : " + String.valueOf(appNetworkList.size()));
+             network.setSyncFlag(false);
              //3.1 Find the corresponding CS server network object by finding it in a hash using uuid
             if (csNetworkMap.containsKey(network.getUuid())) {
                 Network csNetwork = csNetworkMap.get(network.getUuid());
 
                 network.setName(csNetwork.getName());
                 network.setDomainId(csNetwork.getDomainId());
-                network.setNetworkOfferingId(csNetwork.getNetworkOfferingId());
                 network.setZoneId(csNetwork.getZoneId());
-                network.setCidr(csNetwork.getCidr());
-                network.setState(csNetwork.getState());
-                network.setDisplayNetwork(csNetwork.getDisplayNetwork());
                 network.setDisplayText(csNetwork.getDisplayText());
 
                 //3.2 If found, update the network object in app db
