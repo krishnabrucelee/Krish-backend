@@ -10,7 +10,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
@@ -24,55 +23,45 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
-/**
- * Application consists of different application types. Application types are unique to domain.
- * Application types may vary with respect to domain.
- *
- */
 @Entity
-@Table(name = "ck_application")
+@Table(name = "ck_sshkey")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
-public class Application implements Serializable {
+public class SSHKey implements Serializable {
 
-    /** Status enum type used to list the status values. */
+	/** Status enum type used to list the status values. */
     public enum Status {
-        /** Application status as Enabled. */
+        /** SSHKey status as Enabled. */
         ENABLED,
-        /** Application status as Disabled. */
+        /** SSHKey status as Disabled. */
         DISABLED
     }
 
-    /** Id of the Application. */
+    /** Id of the sshkey. */
     @Id
     @GeneratedValue
     @Column(name = "id")
     private Long id;
 
-    /** Type of the Application. */
+    /** Name of the Keypair. */
     @NotEmpty
     @Size(min = 4, max = 20)
-    @Column(name = "type", nullable = false)
-    private String type;
+    @Column(name = "name", nullable = false)
+    private String name;
 
-    /** Description of the Application. */
-    @Column(name = "description")
-    private String description;
+    /** Fingerprint of the public key. */
+    @Column(name = "finger_print")
+    private String fingerPrint;
 
-    /** Domain of the application. */
-    @ManyToOne
-    @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
-    private Domain domain;
-
-    /** Domain id of the application. */
-    @Column(name = "domain_id")
-    private Long domainId;
+    /** Private key. */
+    @Column(name = "private_key")
+    private String privatekey;
 
     /** Update status when delete an entity. */
     @Column(name = "is_active")
     private Boolean isActive;
 
-    /** Application current state. */
+    /** SSHKey current state. */
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private Status status;
@@ -109,12 +98,12 @@ public class Application implements Serializable {
     private ZonedDateTime updatedDateTime;
 
     /** Default constructor. */
-    public Application() {
+    public SSHKey() {
         super();
     }
 
     /**
-     * Get the id of the application.
+     * Get the id of the sshkey.
      *
      * @return id
      */
@@ -123,7 +112,7 @@ public class Application implements Serializable {
     }
 
     /**
-     * Set the id of the application.
+     * Set the id of the sshkey.
      *
      * @param id to set
      */
@@ -132,78 +121,61 @@ public class Application implements Serializable {
     }
 
     /**
-     * Get the application type.
+     * Get the name of the keypair.
      *
-     * @return type
+     * @return name
      */
-    public String getType() {
-        return type;
+    public String getName() {
+        return name;
     }
 
     /**
-     * Set the application type.
+     * Set the name of the keypair.
      *
-     * @param type to set
+     * @param name to set
      */
-    public void setType(String type) {
-        this.type = type;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    /**
-     * Get the description.
-     *
-     * @return description
-     */
-    public String getDescription() {
-        return description;
-    }
 
     /**
-     * Set the description.
+     * Get the fingerprint of the public key.
      *
-     * @param description to set
+     * @return fingerPrint
      */
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public String getFingerPrint() {
+		return fingerPrint;
+	}
 
-    /**
-     * Get the domain.
-     *
-     * @return domain
-     */
-    public Domain getDomain() {
-        return domain;
-    }
+	/**
+	 * Set the fingerprint of the public key.
+	 *
+	 * @param fingerPrint
+	 */
+	public void setFingerPrint(String fingerPrint) {
+		this.fingerPrint = fingerPrint;
+	}
 
-    /**
-     * Set the domain.
-     *
-     * @param domain to set
-     */
-    public void setDomain(Domain domain) {
-        this.domain = domain;
-    }
+	/**
+	 * Get the private key.
+	 *
+	 * @return privateKey
+	 */
+	public String getPrivatekey() {
+		return privatekey;
+	}
 
-    /**
-     * Get the domain id.
-     *
-     * @return the domainId
-     */
-    public Long getDomainId() {
-        return domainId;
-    }
+	/**
+	 * Set the private key.
+	 *
+	 * @param privatekey
+	 */
+	public void setPrivatekey(String privatekey) {
+		this.privatekey = privatekey;
+	}
 
-    /**
-     * Set the domain id.
-     *
-     * @param domainId the domainId to set
-     */
-    public void setDomainId(Long domainId) {
-        this.domainId = domainId;
-    }
-
-    /**
+	/**
      * Get the active status.
      *
      * @return isActive

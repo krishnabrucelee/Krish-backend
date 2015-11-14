@@ -1,8 +1,6 @@
 package ck.panda.service;
 
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -12,14 +10,11 @@ import ck.panda.util.AppValidator;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
+import ck.panda.util.error.exception.EntityNotFoundException;
 
 /**Application service implementation class. */
 @Service
 public class ApplicationServiceImpl implements ApplicationService {
-
-    /** Logger attribute. */
-	//TODO Yasin: remove not used attribute.
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationServiceImpl.class);
 
     /** Validator attribute. */
     @Autowired
@@ -31,52 +26,59 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public Application save(Application application) throws Exception {
-    	//TODO Yasin: move all the validations to private method with a relevant method name
+        this.validateApplication(application);
+        application.setDomainId(application.getDomain().getId());
+        application.setIsActive(true);
+        return applicationRepo.save(application);
+    }
+
+    /**
+     * Validate the application.
+     *
+     * @param application reference of the application.
+     * @throws Exception error occurs
+     */
+    private void validateApplication(Application application) throws Exception {
         Errors errors = validator.rejectIfNullEntity("application", application);
         errors = validator.validateEntity(application, errors);
-        errors = validateType(errors, application.getType());
-
+        Application app = applicationRepo.findByTypeAndDomainAndIsActive(application.getType(), application.getDomain(),
+                true);
+        if (app != null && application.getId() != app.getId()) {
+            errors.addFieldError("type", "application.already.exist.for.same.domain");
+        }
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
-        } else {
-            return applicationRepo.save(application);
         }
     }
 
     @Override
     public Application update(Application application) throws Exception {
-
-        Errors errors = validator.rejectIfNullEntity("application", application);
-        errors = validator.validateEntity(application, errors);
-        //TODO Yasin: incomplete validation as referred in create
-
-        if (errors.hasErrors()) {
-            throw new ApplicationException(errors);
-        } else {
-            return applicationRepo.save(application);
-        }
+        this.validateApplication(application);
+        return applicationRepo.save(application);
     }
 
     @Override
     public void delete(Application application) throws Exception {
-    	//TODO Yasin: Validation missing. When a domain is using this application, can we able to delete?
         applicationRepo.delete(application);
     }
 
     @Override
     public void delete(Long id) throws Exception {
-    	//TODO Yasin: Same as above
         applicationRepo.delete(id);
     }
 
     @Override
     public Application find(Long id) throws Exception {
-        return applicationRepo.findOne(id);
+        Application application = applicationRepo.findOne(id);
+        if (application == null) {
+            throw new EntityNotFoundException("application.not.found");
+        }
+        return application;
     }
 
     @Override
     public Page<Application> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return applicationRepo.findAllByActive(pagingAndSorting.toPageRequest());
+        return applicationRepo.findAll(pagingAndSorting.toPageRequest());
     }
 
     @Override
@@ -85,24 +87,20 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public Application findByType(String type) throws Exception {
-        return applicationRepo.findByType(type);
+    public Page<Application> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
+        return applicationRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
     }
 
-    /**
-     * Validates the type field.
-     *
-     * @param errors ,an error object
-     * @param type of the entity to be validated.
-     * @return error is present,else new error object is returned.
-     * @throws Exception if error is present.
-     */
-    //TODO Yasin: why we are having public access specifier here?
-    public Errors validateType(Errors errors, String type) throws Exception {
-
-        if (this.findByType(type) != null) {
-            errors.addFieldError("type", "Application Type is already exists");
-        }
-        return errors;
+    @Override
+    public Application softDelete(Application application) throws Exception {
+        application.setIsActive(false);
+        application.setStatus(Application.Status.DISABLED);
+        return applicationRepo.save(application);
     }
+
+    @Override
+    public List<Application> findAllByIsActive(Boolean isActive) throws Exception {
+        return applicationRepo.findAllByIsActive(true);
+    }
+
 }

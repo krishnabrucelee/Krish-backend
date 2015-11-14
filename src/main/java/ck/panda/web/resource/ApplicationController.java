@@ -20,8 +20,6 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Application;
-//TODO Yasin: why unused imports are here?
-import ck.panda.domain.entity.Zone;
 import ck.panda.service.ApplicationService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -33,59 +31,67 @@ import ck.panda.util.web.CRUDController;
 @Api(value = "Applications", description = "Operations with applications", produces = "application/json")
 public class ApplicationController extends CRUDController<Application>implements ApiController {
 
-	/** Service reference to Application. */
-	@Autowired
-	private ApplicationService applicationService;
+    /** Service reference to Application. */
+    @Autowired
+    private ApplicationService applicationService;
 
-	@ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new application.", response = Application.class)
-	@Override
-	public Application create(@RequestBody Application application) throws Exception {
-		return applicationService.save(application);
-	}
-
-	@ApiOperation(value = SW_METHOD_READ, notes = "Read an existing application.", response = Application.class)
-	@Override
-	public Application read(@PathVariable(PATH_ID) Long id) throws Exception {
-		return applicationService.find(id);
-	}
-
-	@ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing application.", response = Application.class)
-	@Override
-	public Application update(@RequestBody Application application, @PathVariable(PATH_ID) Long id) throws Exception {
-		return applicationService.update(application);
-	}
-
-	@ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing application.")
-	@Override
-	public void delete(@PathVariable(PATH_ID) Long id) throws Exception {
-		applicationService.delete(id);
-	}
-
-	@Override
-	public List<Application> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-			@RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
-					throws Exception {
-		PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Application.class);
-		Page<Application> pageResponse = applicationService.findAll(page);
-		response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
-		return pageResponse.getContent();
-	}
-
-	 /**
-     * Get the list of applications.
-     *
-     * @return
-     * @throws Exception
-     */
-    @RequestMapping(value = "/list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public List<Application> applicationList() throws Exception {
-        return applicationService.findAll();
+    @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new application.", response = Application.class)
+    @Override
+    public Application create(@RequestBody Application application) throws Exception {
+        return applicationService.save(application);
     }
 
-	@Override
-	public void testMethod() throws Exception {
-		applicationService.findAll();
-	}
+    @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing application.", response = Application.class)
+    @Override
+    public Application read(@PathVariable(PATH_ID) Long id) throws Exception {
+        return applicationService.find(id);
+    }
+
+    @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing application.", response = Application.class)
+    @Override
+    public Application update(@RequestBody Application application, @PathVariable(PATH_ID) Long id) throws Exception {
+        return applicationService.update(application);
+    }
+
+    /**
+     * Delete the application.
+     *
+     * @param application reference of the application.
+     * @param id application id.
+     * @throws Exception error occurs.
+     */
+    @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Application Type.")
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void softDelete(@RequestBody Application application, @PathVariable(PATH_ID) Long id) throws Exception {
+        /** Doing Soft delete from the application table. */
+        applicationService.softDelete(application);
+    }
+
+    @Override
+    public List<Application> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
+            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Application.class);
+        Page<Application> pageResponse = applicationService.findAllByActive(page);
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
+    }
+
+    /**
+     * Find the list of active applications.
+     *
+     * @return projects project list.
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<Application> getSearch() throws Exception {
+        return applicationService.findAllByIsActive(true);
+    }
+
+    @Override
+    public void testMethod() throws Exception {
+        applicationService.findAll();
+    }
 }
