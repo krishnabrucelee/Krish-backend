@@ -63,6 +63,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     private String secretKey;
 
     /** Iso service cloud connector. */
+    @Autowired
     private CSIsoService csIso;
 
     /** CloudStack configuration . */
@@ -146,6 +147,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
         server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
         cloudStackInstanceService.setServer(server);
+        csIso.setServer(server);
         VmInstance vminstance = virtualmachinerepository.findByUUID(vmId);
         return vminstance;
     }

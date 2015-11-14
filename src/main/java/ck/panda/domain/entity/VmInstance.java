@@ -49,7 +49,6 @@ public class VmInstance implements Serializable {
 
     /** Name of the instance. */
     @NotEmpty
-    @Size(min = 4, max = 20)
     @Column(name = "name", nullable = false)
     private String name;
 
@@ -75,7 +74,6 @@ public class VmInstance implements Serializable {
     private User instanceOwner;
 
     /** Instance owner id. */
-    @NotNull
     @Column(name = "instance_owner_id")
     private Long instanceOwnerId;
 

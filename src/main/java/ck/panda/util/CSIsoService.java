@@ -15,7 +15,7 @@ public class CSIsoService {
     @Autowired
     private CloudStackServer server;
 
-    public CSIsoService(CloudStackServer server) {
+    public void setServer(CloudStackServer server) {
         this.server = server;
     }
 
