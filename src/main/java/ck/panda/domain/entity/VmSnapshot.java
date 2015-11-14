@@ -50,7 +50,7 @@ public class VmSnapshot implements Serializable {
     private String name;
 
     /** description of the snapshot. */
-    @Column(name = "name")
+    @Column(name = "description")
     private String description;
 
     /** cloudstack's snapshot uuid. */
