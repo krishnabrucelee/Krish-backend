@@ -34,7 +34,7 @@ public class AsynchronousJobListener implements MessageListener {
     @Override
     public void onMessage(Message message) {
         try {
-            JSONObject instance = new JSONObject(new String(message.getBody())).getJSONObject("queryasyncjobresultresponse");
+            JSONObject instance = new JSONObject(new String(message.getBody()));
             this.handleStatusEvent(instance);
         } catch (Exception e) {
             LOGGER.debug("Error on convert action event message", e);
@@ -49,8 +49,9 @@ public class AsynchronousJobListener implements MessageListener {
      * @throws Exception exception.
      */
     public void handleStatusEvent(JSONObject eventObject) throws Exception {
-        if(eventObject.has("jobresulttype")){
-            if(eventObject.getJSONObject("jobresult").has("virtualmachine")){
+        if(eventObject.has("status")){
+            if(eventObject.getString("status").equalsIgnoreCase("SUCCEEDED")){
+            	System.out.println();
                 syncService.init();
                 syncService.syncResourceStatus(eventObject.getJSONObject("jobresult").getJSONObject("virtualmachine"));
             }

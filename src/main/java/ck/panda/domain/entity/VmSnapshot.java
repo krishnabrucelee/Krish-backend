@@ -669,12 +669,12 @@ public class VmSnapshot implements Serializable {
             vmSnapshot.setParent(JsonUtil.getStringValue(jsonObject, "parent"));
             vmSnapshot.setIsCurrent(JsonUtil.getBooleanValue(jsonObject, "current"));
             vmSnapshot.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            vmSnapshot.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(jsonObject, "domainid")));
+            vmSnapshot.setVmId(convertUtil.getVmId(JsonUtil.getStringValue(jsonObject, "virtualmachineid")));
+            vmSnapshot.setDomainId(convertUtil.getVm(JsonUtil.getStringValue(jsonObject, "virtualmachineid")).getDomainId());
             vmSnapshot.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
             vmSnapshot.setType(SnapshotType.valueOf(JsonUtil.getStringValue(jsonObject, "type")));
-            vmSnapshot.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
-            vmSnapshot.setOwnerId(convertUtil.getOwnerId(JsonUtil.getStringValue(jsonObject, "account"),
-                    convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid"))));
+            vmSnapshot.setZoneId(convertUtil.getVm(JsonUtil.getStringValue(jsonObject, "virtualmachineid")).getZoneId());
+            vmSnapshot.setOwnerId(convertUtil.getVm(JsonUtil.getStringValue(jsonObject, "virtualmachineid")).getInstanceOwnerId());
         } catch (Exception e) {
             e.printStackTrace();
         }

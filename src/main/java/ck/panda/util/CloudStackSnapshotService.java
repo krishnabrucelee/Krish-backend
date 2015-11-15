@@ -178,7 +178,7 @@ public class CloudStackSnapshotService {
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("createVMSnapshot", optional);
         arguments.add(new NameValuePair("virtualmachineid", virtualmachineid));
-
+        arguments.add(new NameValuePair("response", "json"));
         String responseDocument = server.request(arguments);
 
         return responseDocument;
@@ -195,7 +195,7 @@ public class CloudStackSnapshotService {
 
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("listVMSnapshot", optional);
-
+        arguments.add(new NameValuePair("response", "json"));
         String responseDocument = server.request(arguments);
 
         return responseDocument;
@@ -213,7 +213,7 @@ public class CloudStackSnapshotService {
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("deleteVMSnapshot", null);
         arguments.add(new NameValuePair("vmsnapshotid", vmsnapshotid));
-
+        arguments.add(new NameValuePair("response", "json"));
         String responseDocument = server.request(arguments);
 
         return responseDocument;
@@ -232,7 +232,7 @@ public class CloudStackSnapshotService {
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("revertToVMSnapshot", null);
         arguments.add(new NameValuePair("vmsnapshotid", vmsnapshotid));
-
+        arguments.add(new NameValuePair("response", "json"));
         String responseDocument = server.request(arguments);
 
         return responseDocument;
@@ -251,7 +251,7 @@ public class CloudStackSnapshotService {
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("queryAsyncJobResult", null);
         arguments.add(new NameValuePair("jobid", asychronousJobid));
-
+        arguments.add(new NameValuePair("response", "json"));
         String responseDocument = server.request(arguments);
 
         return responseDocument;

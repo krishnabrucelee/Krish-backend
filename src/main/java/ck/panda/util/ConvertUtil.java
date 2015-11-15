@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.VmInstance;
 import ck.panda.service.ComputeOfferingService;
 import ck.panda.service.DepartmentService;
 import ck.panda.service.DomainService;
@@ -280,6 +281,36 @@ public class ConvertUtil {
             return storageService.findUuid(uuid).getId();
         }
         return null;
+    }
+
+    /**
+     * Get Vm id.
+     *
+     * @param uuid of vm.
+     * @return vm id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getVmId(String uuid) throws Exception {
+        if (virtualMachineService.findByUUID(uuid) != null) {
+            return virtualMachineService.findByUUID(uuid).getId();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get Vm.
+     *
+     * @param uuid of vm.
+     * @return vm.
+     * @throws Exception unhandled exception.
+     */
+    public VmInstance getVm(String uuid) throws Exception {
+        if (virtualMachineService.findByUUID(uuid) != null) {
+            return virtualMachineService.findByUUID(uuid);
+        } else {
+            return null;
+        }
     }
 
 }
