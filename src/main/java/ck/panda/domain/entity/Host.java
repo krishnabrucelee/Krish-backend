@@ -16,6 +16,8 @@ import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -35,7 +37,10 @@ import ck.panda.util.JsonUtil;
 @SuppressWarnings("serial")
 public class Host {
 
-     /** Unique ID of the Domain. */
+    /** Logger attribute. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(Snapshot.class);
+
+    /** Unique ID of the Domain. */
     @Id
     @GeneratedValue
     @Column(name = "id")
@@ -108,6 +113,8 @@ public class Host {
     private ZonedDateTime updatedDateTime;
 
     /**
+     * Get id.
+     *
      * @return the id.
      */
     public Long getId() {
@@ -115,7 +122,7 @@ public class Host {
     }
 
     /**
-     * set the id.
+     * Set id.
      *
      * @param id  to set
      */
@@ -124,6 +131,8 @@ public class Host {
     }
 
     /**
+     * Get UUID of the host.
+     *
      * @return the uuid
      */
     public String getUuid() {
@@ -131,7 +140,7 @@ public class Host {
     }
 
     /**
-     * set the uuid.
+     * Set uuid of the host.
      *
      * @param uuid  to set
      */

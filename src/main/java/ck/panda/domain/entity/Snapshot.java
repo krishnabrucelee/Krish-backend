@@ -18,11 +18,15 @@ import javax.persistence.Transient;
 import org.hibernate.annotations.Type;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import ck.panda.service.SnapshotServiceImpl;
 import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 import ck.panda.util.JsonValidator;
@@ -36,6 +40,9 @@ import ck.panda.util.JsonValidator;
 @Entity
 @Table(name = "ck_snapshot")
 public class Snapshot {
+
+    /** Logger attribute. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(Snapshot.class);
 
     /** Unique Id of the instance. */
     @Id
@@ -135,16 +142,16 @@ public class Snapshot {
     public enum Status {
 
         /** Intial response while creating a snapshot. */
-        BackingUp,
+        BACKINGUP,
 
         /** Backed up is when snapshot is created. */
-        BackedUp,
+        BACKEDUP,
 
         /** Ready to create a snapshot. */
-        Ready,
+        READY,
 
         /** When snapshot gets destroyed. */
-        Destroyed
+        DESTROYED
     }
 
     /**
@@ -505,12 +512,12 @@ public class Snapshot {
             snapshot.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
             snapshot.setVolumeId(convertUtil.getVolumeId(JsonUtil.getStringValue(jsonObject, "volumeid")));
             snapshot.setSnapshotType(JsonUtil.getStringValue(jsonObject,"snapshottype"));
-            snapshot.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
+            snapshot.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state").toUpperCase()));
             snapshot.account = JsonValidator.jsonStringValidation(jsonObject, "account");
             snapshot.intervalType = JsonValidator.jsonStringValidation(jsonObject, "intervaltype");
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.error("Snapshot-convert", ex);
         }
           return snapshot;
     }

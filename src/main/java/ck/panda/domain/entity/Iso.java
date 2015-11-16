@@ -17,12 +17,13 @@ import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 
@@ -33,6 +34,9 @@ import ck.panda.util.JsonUtil;
 @Entity
 @Table(name = "ck_iso")
 public class Iso {
+
+    /** Logger attribute. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(Iso.class);
 
     /** Unique ID of the volume. */
     @Id
@@ -306,7 +310,7 @@ public class Iso {
             iso.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(jsonObject, "domainid")));
             iso.setOsTypeId(convertUtil.getOsTypeId(JsonUtil.getStringValue(jsonObject,"ostypeid")));
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.error("Iso-convert", ex);
         }
         return iso;
     }

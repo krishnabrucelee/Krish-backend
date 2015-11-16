@@ -43,7 +43,7 @@ public class SnapshotServiceImpl implements SnapshotService {
 
     /** Convert entity repository reference. */
     @Autowired
-    private ConvertUtil entity;
+    private ConvertUtil convertUtil;
 
     /** object(server) created for CloudStackServer. */
     @Autowired
@@ -159,7 +159,7 @@ public class SnapshotServiceImpl implements SnapshotService {
         for (int i = 0, size = snapshotListJSON.length(); i < size; i++) {
             // 2.1 Call convert by passing JSONObject to Domain entity and Add
             // the converted snapshot entity to list
-            snapshotList.add(Snapshot.convert(snapshotListJSON.getJSONObject(i), entity));
+            snapshotList.add(Snapshot.convert(snapshotListJSON.getJSONObject(i), convertUtil));
         }
         return snapshotList;
     }
@@ -184,7 +184,7 @@ public class SnapshotServiceImpl implements SnapshotService {
 
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
                 if (jobresult.getString("jobstatus").equals("0")) {
-                    snapshot.setStatus(Status.BackedUp);
+                    snapshot.setStatus(Status.BACKEDUP);
                 }
             }
         }
@@ -194,7 +194,7 @@ public class SnapshotServiceImpl implements SnapshotService {
     @Override
     public Snapshot softDelete(Snapshot snapshot) throws Exception {
         snapshot.setIsActive(false);
-        snapshot.setStatus(Snapshot.Status.Destroyed);
+        snapshot.setStatus(Snapshot.Status.DESTROYED);
         if (snapshot.getSyncFlag()) {
             // set server for finding value in configuration
             snapshotService.setServer(configServer.setServer(1L));
