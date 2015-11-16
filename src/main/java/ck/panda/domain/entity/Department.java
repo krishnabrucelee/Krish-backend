@@ -19,6 +19,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.hibernate.annotations.Type;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
@@ -28,6 +29,9 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import ck.panda.util.ConvertUtil;
+import ck.panda.util.JsonUtil;
 
 /**
  * Departments are the first level hierarchy and we are grouping the departments
@@ -533,18 +537,25 @@ public class Department implements Serializable {
      * @param object JSON object.
      * @return user object.
      */
-    public static Department convert(JSONObject object) throws JSONException {
+    public static Department convert(JSONObject jsonObject, ConvertUtil convertUtil) throws JSONException {
         Department department = new Department();
         //TODO: have to update user list
-        department.userName = object.has("name") ? object.get("name").toString() : "";
-        department.firstName = object.has("firstname") ? object.get("firstname").toString() : "";
-        department.lastName = object.has("lastname") ? object.get("lastname").toString() : "";
-        department.uuid = object.has("id") ? object.get("id").toString() : "";
-        department.domainId = object.has("domainId") ? (Long) object.get("domainId") : null;
-        department.email = "test@assistanz.com";
-        department.password = "l3tm3in";
-        department.isActive = true;
-        department.setSyncFlag(false);
+        try {
+            department.setUuid(JsonUtil.getStringValue(jsonObject, "uuid"));
+            department.setUserName(JsonUtil.getStringValue(jsonObject, "username"));
+            JSONArray userList = jsonObject.getJSONArray("user");
+            JSONObject userObject = userList.getJSONObject(0);
+            department.setFirstName(JsonUtil.getStringValue(userObject, "firstname"));
+            department.setLastName(JsonUtil.getStringValue(userObject, "lastname"));
+            department.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(jsonObject, "domainid")));
+            department.setEmail(JsonUtil.getStringValue(userObject, "email"));
+            department.setPassword("l3tm3in");
+            department.setIsActive(true);
+            department.setSyncFlag(false);
+            department.setStatus(Status.valueOf(JsonUtil.getStringValue(userObject, "state")));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         return department;
     }
 
