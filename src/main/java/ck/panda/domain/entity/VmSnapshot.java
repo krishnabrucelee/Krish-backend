@@ -74,6 +74,10 @@ public class VmSnapshot implements Serializable {
     @Transient
     private Boolean syncFlag;
 
+    /** Set Memory. */
+    @Transient
+    private Boolean snapshotMemory;
+
     /** Instance id. */
     @JoinColumn(name = "vm_id", referencedColumnName = "id", updatable = false, insertable = false)
     @ManyToOne
@@ -603,7 +607,26 @@ public class VmSnapshot implements Serializable {
         this.isCurrent = isCurrent;
     }
 
-    @Override
+
+    /**
+     * Get the memory snapshot.
+     *
+	 * @return the snapshotMemory
+	 */
+	public Boolean getSnapshotMemory() {
+		return snapshotMemory;
+	}
+
+	/**
+	 * Set the memory snapshot.
+	 *
+	 * @param snapshotMemory the snapshotMemory to set
+	 */
+	public void setSnapshotMemory(Boolean snapshotMemory) {
+		this.snapshotMemory = snapshotMemory;
+	}
+
+	@Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("VmSnapshot [id=");

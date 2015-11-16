@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +34,11 @@ import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Zone;
+import ck.panda.domain.entity.VmInstance.Status;
+import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.ConvertUtil;
+import ck.panda.util.JsonUtil;
 import ck.panda.util.error.exception.ApplicationException;
 
 /**
@@ -97,6 +102,10 @@ public class SyncServiceImpl  implements SyncService {
     /** NetworkOfferingService for listing network offers in cloudstack server. */
     @Autowired
     private NetworkOfferingService networkOfferingService;
+
+    /** CloudStack connector reference for instance. */
+    @Autowired
+    private CloudStackInstanceService cloudStackInstanceService;
 
     /** NetworkOfferingService for listing network offers in cloudstack server. */
     @Autowired
@@ -251,13 +260,6 @@ public class SyncServiceImpl  implements SyncService {
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch Department", e);
       }
-
-      try {
-          // 14. Sync Instance entity
-          this.syncInstances();
-      } catch (Exception e) {
-          LOGGER.error("ERROR AT synch Instance", e);
-      }
       try{
           // 15. Sync Volume entity
           this.syncVolume();
@@ -292,6 +294,13 @@ public class SyncServiceImpl  implements SyncService {
           this.syncHost();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch Host", e);
+      }
+
+      try {
+          // 14. Sync Instance entity
+          this.syncInstances();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Instance", e);
       }
 
       try {
@@ -1234,19 +1243,48 @@ public class SyncServiceImpl  implements SyncService {
      * @throws Exception cloudstack unhandled errors.
      */
     @Override
-    public void syncResourceStatus(JSONObject Object) throws ApplicationException, Exception {
-        VmInstance vmInstance = VmInstance.convert(Object, entity);
+    public void syncResourceStatus(String Object) throws ApplicationException, Exception {
+    	CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
+        server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
+        cloudStackInstanceService.setServer(server);
+        String instances = cloudStackInstanceService.queryAsyncJobResult(Object,
+                "json");
+        JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
+    	VmInstance vmInstance = VmInstance.convert(jobresult.getJSONObject("jobresult").getJSONObject("virtualmachine"), entity);
         VmInstance instance = virtualMachineService.findByUUID(vmInstance.getUuid());
-        // VNC password set.
-        if(vmInstance.getPassword() != null){
-        String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
-        byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
-        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-        String encryptedPassword = new String(EncryptionUtil.encrypt(vmInstance.getPassword(), originalKey));
-        instance.setVncPassword(encryptedPassword);
-        }
-        // 3.2 If found, update the vm object in app db
-        virtualMachineService.update(instance);
+            instance.setSyncFlag(false);
+            // 3.1 Find the corresponding CS server vm object by finding it in a hash using uuid
+            if (vmInstance.getUuid().equals(instance.getUuid())) {
+                VmInstance csVm = vmInstance;
+                instance.setName(csVm.getName());
+                instance.setCpuCore(csVm.getCpuCore());
+                instance.setDomainId(csVm.getDomainId());
+                instance.setStatus(csVm.getStatus());
+                instance.setZoneId(csVm.getZoneId());
+                instance.setHostId(csVm.getHostId());
+                instance.setPodId(csVm.getPodId());
+                instance.setComputeOfferingId(csVm.getComputeOfferingId());
+                instance.setCpuSpeed(csVm.getCpuSpeed());
+                instance.setMemory(csVm.getMemory());
+                instance.setCpuUsage(csVm.getCpuUsage());
+                instance.setPasswordEnabled(csVm.getPasswordEnabled());
+                instance.setPassword(csVm.getPassword());
+                instance.setIso(csVm.getIso());
+                instance.setIsoName(csVm.getIsoName());
+                instance.setIpAddress(csVm.getIpAddress());
+                instance.setNetworkId(csVm.getNetworkId());
+                // VNC password set.
+                if(csVm.getPassword() != null){
+                String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+                byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+                SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+                String encryptedPassword = new String(EncryptionUtil.encrypt(csVm.getPassword(), originalKey));
+                instance.setVncPassword(encryptedPassword);
+                }
+                // 3.2 If found, update the vm object in app db
+                virtualMachineService.update(instance);
+            }
+
     }
 
 

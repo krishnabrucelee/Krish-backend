@@ -129,19 +129,19 @@ public interface SyncService {
   void syncDepartment() throws ApplicationException, Exception;
 
   /**
+   * Sync with Cloud Server Account.
+   * @throws ApplicationException unhandled application errors.
+   * @throws Exception cloudstack unhandled errors.
+   */
+  void syncVolume() throws ApplicationException, Exception;
+
+  /**
    * Sync with CloudStack server Instance list.
    *
    * @throws ApplicationException unhandled application errors.
    * @throws Exception cloudstack unhandled errors
    */
   void syncInstances() throws ApplicationException, Exception;
-
-  /**
-   * Sync with Cloud Server Account.
-   * @throws ApplicationException unhandled application errors.
-   * @throws Exception cloudstack unhandled errors.
-   */
-  void syncVolume() throws ApplicationException, Exception;
 
   /**
    * Sync with CloudStack server Instance snapshot list.
@@ -158,6 +158,6 @@ public interface SyncService {
    * @throws ApplicationException unhandled application errors.
    * @throws Exception cloudstack unhandled errors
    */
-  void syncResourceStatus(JSONObject Object) throws ApplicationException, Exception;
+  void syncResourceStatus(String Object) throws ApplicationException, Exception;
 
 }

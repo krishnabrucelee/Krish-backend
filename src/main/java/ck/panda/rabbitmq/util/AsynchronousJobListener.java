@@ -51,9 +51,9 @@ public class AsynchronousJobListener implements MessageListener {
     public void handleStatusEvent(JSONObject eventObject) throws Exception {
         if(eventObject.has("status")){
             if(eventObject.getString("status").equalsIgnoreCase("SUCCEEDED")){
-            	System.out.println();
+            	System.out.println(eventObject.toString());
                 syncService.init();
-                syncService.syncResourceStatus(eventObject.getJSONObject("jobresult").getJSONObject("virtualmachine"));
+                syncService.syncResourceStatus(eventObject.getString("jobId"));
             }
         }
     }

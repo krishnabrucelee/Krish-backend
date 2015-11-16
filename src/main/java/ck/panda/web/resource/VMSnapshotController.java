@@ -27,7 +27,7 @@ import ck.panda.util.web.CRUDController;
 
 @RestController
 @RequestMapping("/api/vmsnapshot")
-@Api(value = "Domains", description = "Operations with vmsnapshot", produces = "application/json")
+@Api(value = "vmsnapshots", description = "Operations with vmsnapshot", produces = "application/json")
 public class VMSnapshotController extends CRUDController<VmSnapshot>implements ApiController {
 
     /** Service reference to Snapshot. */
@@ -37,7 +37,8 @@ public class VMSnapshotController extends CRUDController<VmSnapshot>implements A
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new vmsnapshot.", response = VmSnapshot.class)
     @Override
     public VmSnapshot create(@RequestBody VmSnapshot snapshot) throws Exception {
-        return snapshotService.save(snapshot);
+    	snapshot.setSyncFlag(true);
+    	return snapshotService.save(snapshot);
     }
 
     @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing vmsnapshot.", response = VmSnapshot.class)

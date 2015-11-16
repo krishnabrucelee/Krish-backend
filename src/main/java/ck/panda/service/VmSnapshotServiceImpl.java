@@ -71,9 +71,12 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                 throw new ApplicationException(errors);
             } else {
                 HashMap<String, String> optional = new HashMap<String, String>();
-                getCSConnector();
+                CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
+                server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
+                csSnapshotService.setServer(server);
+                LOGGER.debug("Cloud stack connectivity at Snapshot", cloudConfig.getApiKey());
                 optional.put("response", "json");
-                if (vmSnapshot.getType().equals(VmSnapshot.SnapshotType.DiskAndMemory)) {
+                if (vmSnapshot.getSnapshotMemory()) {
                     optional.put("snapshotmemory", "true");
                 }
                 VmInstance vmInstance = virtualMachineService.find(vmSnapshot.getVmId());

@@ -11,6 +11,7 @@ import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
+import ck.panda.domain.repository.jpa.NetworkRepository;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CSIsoService;
@@ -50,6 +51,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Autowired
     private ConvertUtil entity;
 
+    /** Network repository reference. */
+    @Autowired
+    private NetworkRepository networkRepo;
+
     /** CloudStack connector reference for instance. */
     @Autowired
     private CloudStackInstanceService cloudStackInstanceService;
@@ -72,15 +77,20 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     @Override
     public VmInstance save(VmInstance vminstance) throws Exception {
-        if (vminstance.getSyncFlag()) {
+        System.out.println(vminstance.getSyncFlag() +" hi");
+    	if (vminstance.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity("vminstance", vminstance);
             errors = validator.validateEntity(vminstance, errors);
+            errors = this.validateName(errors, vminstance.getName(), vminstance.getDepartment(),0L);
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
                 HashMap<String, String> optional = new HashMap<String, String>();
                 optional.put("displayvm", vminstance.getName());
                 optional.put("name", vminstance.getName());
+                if(networkRepo.findByUUID(vminstance.getNetworkUuid())!= null){
+                vminstance.setNetworkId(networkRepo.findByUUID(vminstance.getNetworkUuid()).getId());
+                }
                 CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
                 server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
                 cloudStackInstanceService.setServer(server);
@@ -115,7 +125,13 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             }
             return virtualmachinerepository.save(vminstance);
         } else {
-            return virtualmachinerepository.save(vminstance);
+        	Errors errors = validator.createErrors();
+        	errors = this.validateName(errors, vminstance.getName(), vminstance.getDepartment(), vminstance.getId());
+			if (errors.hasErrors()) {
+				return null;
+			} else {
+				return virtualmachinerepository.save(vminstance);
+			}
         }
     }
 
@@ -477,7 +493,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     @Override
     public Page<VmInstance> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return null;
+        return virtualmachinerepository.findAll(pagingAndSorting.toPageRequest());
     }
 
     @Override
@@ -514,8 +530,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
      * @throws Exception unhandled exceptions.
      */
     private Errors validateName(Errors errors, String name, Department department, Long id) throws Exception {
-        if (virtualmachinerepository.findByNameAndDepartment(name, department, id) != null) {
-            errors.addFieldError("name", "instance already exist");
+        if ((virtualmachinerepository.findByNameAndDepartment(name, department)) != null) {
+            errors.addGlobalError("Instance name already exist");
         }
         return errors;
     }

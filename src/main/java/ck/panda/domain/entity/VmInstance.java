@@ -1220,8 +1220,9 @@ public class VmInstance implements Serializable {
             vmInstance.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
             vmInstance.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
             vmInstance.setHostId(convertUtil.getHostId(JsonUtil.getStringValue(jsonObject, "hostid")));
-            vmInstance.setPodId(
-                    convertUtil.getPodId(convertUtil.getHostId(JsonUtil.getStringValue(jsonObject, "hostid"))));
+            if(vmInstance.getHostId() != null){
+            vmInstance.setPodId(convertUtil.getPodId(convertUtil.getHostId(JsonUtil.getStringValue(jsonObject, "hostid"))));
+            }
             vmInstance.setTemplateId(convertUtil.getTemplateId(JsonUtil.getStringValue(jsonObject, "templateid")));
             vmInstance.setComputeOfferingId(
                     convertUtil.getComputeOfferId(JsonUtil.getStringValue(jsonObject, "serviceofferingid")));
