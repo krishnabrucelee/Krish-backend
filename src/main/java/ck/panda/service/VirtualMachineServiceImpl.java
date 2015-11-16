@@ -305,7 +305,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     @Override
     public Page<VmInstance> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return null;
+         return virtualmachinerepository.findAll(pagingAndSorting.toPageRequest());
     }
 
     @Override

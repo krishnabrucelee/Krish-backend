@@ -540,7 +540,7 @@ public class Department implements Serializable {
         department.firstName = object.has("firstname") ? object.get("firstname").toString() : "";
         department.lastName = object.has("lastname") ? object.get("lastname").toString() : "";
         department.uuid = object.has("id") ? object.get("id").toString() : "";
-        department.domainId = object.has("domainId") ? (Long) object.get("domainId") : null;
+        department.domainId = object.has("domainid") ? (Long) object.get("domainid") : null;
         department.email = "test@assistanz.com";
         department.password = "l3tm3in";
         department.isActive = true;

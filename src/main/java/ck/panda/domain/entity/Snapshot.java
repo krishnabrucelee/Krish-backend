@@ -1,18 +1,31 @@
 package ck.panda.domain.entity;
 
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
+import javax.persistence.Transient;
+import org.hibernate.annotations.Type;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import ck.panda.util.ConvertUtil;
+import ck.panda.util.JsonUtil;
 import ck.panda.util.JsonValidator;
 
 /**
@@ -43,18 +56,33 @@ public class Snapshot {
     @Column(name = "account")
     private String account;
 
-    /** Id of the domain. */
-    @Column(name = "domain_id")
-    private String domainId;
+    /** Instance domain id. */
+    @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Domain domain;
 
-    /** Id of the zone. */
+    /** Instance domain id. */
+    @Column(name = "domain_id")
+    private Long domainId;
+
+    /** Instance zone. */
+    @JoinColumn(name = "zone_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Zone zone;
+
+    /** Instance zone id. */
     @Column(name = "zone_id")
-    private String zoneId;
+    private Long zoneId;
+
+    /** Instance volume id. */
+    @JoinColumn(name = "volume_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Volume volume;
 
     // Todo relational mapping to be done with volume.
     /** Id of the volume. */
     @Column(name = "volume_id")
-    private String volumeId;
+    private Long volumeId;
 
     /** Type of the snapshot. */
     @Column(name = "snapshottype")
@@ -65,8 +93,60 @@ public class Snapshot {
     private String intervalType;
 
     /** state of the snapshot. */
-    @Column(name = "state")
-    private String state;
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
+    /** */
+    @Column(name = "is_active")
+    private Boolean isActive;
+
+    /** Set syncFlag. */
+    @Transient
+    private Boolean syncFlag;
+
+    /** Created by user. */
+    @CreatedBy
+    @JoinColumn(name = "created_user_id", referencedColumnName = "id")
+    @OneToOne
+    private User createdBy;
+
+    /** Last updated by user. */
+    @LastModifiedBy
+    @JoinColumn(name = "updated_user_id", referencedColumnName = "id")
+    @OneToOne
+    private User updatedBy;
+
+    /** Created date and time. */
+    @CreatedDate
+    @Column(name = "created_date_time")
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime createdDateTime;
+
+    /** Last modified date and time. */
+    @LastModifiedDate
+    @Column(name = "updated_date_time")
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime updatedDateTime;
+
+
+    /** Status for snapshot. */
+    public enum Status {
+
+        /** Intial response while creating a snapshot. */
+        BackingUp,
+
+        /** Backed up is when snapshot is created. */
+        BackedUp,
+
+        /** Ready to create a snapshot. */
+        Ready,
+
+        /** When snapshot gets destroyed. */
+        Destroyed
+    }
 
     /**
      * @return the id
@@ -76,10 +156,12 @@ public class Snapshot {
     }
 
     /**
-     * @param id the id to set
+     * Set the id.
+     *
+     * @param id  to set
      */
     public void setId(Long id) {
-        id = id;
+        this.id = id;
     }
 
     /**
@@ -90,13 +172,17 @@ public class Snapshot {
     }
 
     /**
-     * @param uuid the uuid to set
+     * Set the uuid.
+     *
+     * @param uuid to set
      */
     public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
     /**
+     * Get name.
+     *
      * @return the name
      */
     public String getName() {
@@ -104,13 +190,17 @@ public class Snapshot {
     }
 
     /**
-     * @param name the name to set
+     * Set the name.
+     *
+     * @param name  to set
      */
     public void setName(String name) {
         this.name = name;
     }
 
     /**
+     * Set Account.
+     *
      * @return the account
      */
     public String getAccount() {
@@ -118,55 +208,125 @@ public class Snapshot {
     }
 
     /**
-     * @param account the account to set
+     * Set the account.
+     *
+     * @param account  to set
      */
     public void setAccount(String account) {
         this.account = account;
     }
 
     /**
+     * Get Domain.
+     *
+     * @return the domain
+     */
+    public Domain getDomain() {
+        return domain;
+    }
+
+    /**
+     * Set the domain.
+     *
+     * @param domain  to set
+     */
+    public void setDomain(Domain domain) {
+        this.domain = domain;
+    }
+
+    /**
+     * Get DomainId.
+     *
      * @return the domainId
      */
-    public String getDomainId() {
+    public Long getDomainId() {
         return domainId;
     }
 
     /**
-     * @param domainId the domainId to set
+     * Set the domainId.
+     *
+     * @param domainId  to set
      */
-    public void setDomainId(String domainId) {
+    public void setDomainId(Long domainId) {
         this.domainId = domainId;
     }
 
     /**
+     * Get Zone.
+     *
+     * @return the zone
+     */
+    public Zone getZone() {
+        return zone;
+    }
+
+    /**
+     * Set the zone .
+     *
+     * @param zone to set
+     */
+    public void setZone(Zone zone) {
+        this.zone = zone;
+    }
+
+    /**
+     * Get zoneID.
+     *
      * @return the zoneId
      */
-    public String getZoneId() {
+    public Long getZoneId() {
         return zoneId;
     }
 
     /**
-     * @param zoneId the zoneId to set
+     * Set the zoneId.
+     *
+     * @param zoneId  to set
      */
-    public void setZoneId(String zoneId) {
+    public void setZoneId(Long zoneId) {
         this.zoneId = zoneId;
     }
 
     /**
+     * Get volume.
+     *
+     * @return the volume
+     */
+    public Volume getVolume() {
+        return volume;
+    }
+
+    /**
+     * Set the volume.
+     *
+     * @param volume  to set
+     */
+    public void setVolume(Volume volume) {
+        this.volume = volume;
+    }
+
+    /**
+     * Get volume Id.
+     *
      * @return the volumeId
      */
-    public String getVolumeId() {
+    public Long getVolumeId() {
         return volumeId;
     }
 
     /**
-     * @param volumeId the volumeId to set
+     * Set the volumeId.
+     *
+     * @param volumeId  to set
      */
-    public void setVolumeId(String volumeId) {
+    public void setVolumeId(Long volumeId) {
         this.volumeId = volumeId;
     }
 
     /**
+     * Get snapshottype.
+     *
      * @return the snapshotType
      */
     public String getSnapshotType() {
@@ -174,13 +334,17 @@ public class Snapshot {
     }
 
     /**
-     * @param snapshotType the snapshotType to set
+     * Set the snapshotType.
+     *
+     * @param snapshotType  to set
      */
     public void setSnapshotType(String snapshotType) {
         this.snapshotType = snapshotType;
     }
 
     /**
+     * Get intervaltype.
+     *
      * @return the intervalType
      */
     public String getIntervalType() {
@@ -188,45 +352,163 @@ public class Snapshot {
     }
 
     /**
-     * @param intervalType the intervalType to set
+     * Set the intervalType.
+     *
+     * @param intervalType to set
      */
     public void setIntervalType(String intervalType) {
         this.intervalType = intervalType;
     }
 
     /**
-     * @return the state
+     * Get Status.
+     *
+     * @return the status
      */
-    public String getState() {
-        return state;
+    public Status getStatus() {
+        return status;
     }
 
     /**
-     * @param state the state to set
+     * Set the status .
+     *
+     * @param status to set
      */
-    public void setState(String state) {
-        this.state = state;
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    /**
+     * Get Isactive.
+     *
+     * @return the isActive
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    /**
+     * Set isActive.
+     *
+     * @param isActive  to set
+     */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    /**
+     * Get SyncFlag.
+     *
+     * @return the syncFlag
+     */
+    public Boolean getSyncFlag() {
+        return syncFlag;
+    }
+
+    /**
+     * Set the syncFlag.
+     *
+     * @param syncFlag  to set
+     */
+    public void setSyncFlag(Boolean syncFlag) {
+        this.syncFlag = syncFlag;
+    }
+
+    /**
+     * Get the created user id.
+     *
+     * @return the createdBy
+     */
+    public User getCreatedBy() {
+        return createdBy;
+    }
+
+    /**
+     * Get the created user id.
+     *
+     * @param createdBy to set
+     */
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    /**
+     * Get the updated user id.
+     *
+     * @return the updatedBy
+     */
+    public User getUpdatedBy() {
+        return updatedBy;
+    }
+
+    /**
+     * Set the updated by User id.
+     *
+     * @param updatedBy to set
+     */
+    public void setUpdatedBy(User updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    /**
+     * Get the  createdDateTime.
+     *
+     * @return the createdDateTime
+     */
+    public ZonedDateTime getCreatedDateTime() {
+        return createdDateTime;
+    }
+
+    /**
+     * Set the createdDateTime.
+     *
+     * @param createdDateTime to set
+     */
+    public void setCreatedDateTime(ZonedDateTime createdDateTime) {
+        this.createdDateTime = createdDateTime;
+    }
+
+    /**
+     * Get the updatedDateTime.
+     *
+     * @return the updatedDateTime
+     */
+    public ZonedDateTime getUpdatedDateTime() {
+        return updatedDateTime;
+    }
+
+    /**
+     * Set the updatedDateTime.
+     *
+     * @param updatedDateTime to set
+     */
+    public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
+        this.updatedDateTime = updatedDateTime;
     }
 
     /**
      * Convert JSONObject to domain entity.
      *
-     * @param object json object
+     * @param jsonObject json object
+     * @param convertUtil convert Entity object from UUID.
      * @return domain entity object.
      * @throws JSONException handles json exception.
      */
-    public static Snapshot convert(JSONObject object) throws JSONException {
+    public static Snapshot convert(JSONObject jsonObject, ConvertUtil convertUtil) throws JSONException {
         Snapshot snapshot = new Snapshot();
+        snapshot.setSyncFlag(false);
+
         try {
-            snapshot.uuid =  JsonValidator.jsonStringValidation(object, "id");
-            snapshot.name =  JsonValidator.jsonStringValidation(object, "name");
-            snapshot.domainId = JsonValidator.jsonStringValidation(object, "domainid");
-            snapshot.zoneId = JsonValidator.jsonStringValidation(object, "zoneid");
-            snapshot.volumeId = JsonValidator.jsonStringValidation(object, "volumeid");
-            snapshot.account = JsonValidator.jsonStringValidation(object, "account");
-            snapshot.snapshotType = JsonValidator.jsonStringValidation(object, "snapshottype");
-            snapshot.intervalType = JsonValidator.jsonStringValidation(object, "intervaltype");
-            snapshot.state = JsonValidator.jsonStringValidation(object, "state");
+            snapshot.setName(JsonUtil.getStringValue(jsonObject, "name"));
+            snapshot.setIsActive(true);
+            snapshot.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
+            snapshot.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(jsonObject, "domainid")));
+            snapshot.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
+            snapshot.setVolumeId(convertUtil.getVolumeId(JsonUtil.getStringValue(jsonObject, "volumeid")));
+            snapshot.setSnapshotType(JsonUtil.getStringValue(jsonObject,"snapshottype"));
+            snapshot.account = JsonValidator.jsonStringValidation(jsonObject, "account");
+            snapshot.intervalType = JsonValidator.jsonStringValidation(jsonObject, "intervaltype");
+
         } catch (Exception ex) {
             ex.printStackTrace();
         }

@@ -18,6 +18,7 @@ import ck.panda.service.StorageOfferingService;
 import ck.panda.service.TemplateService;
 import ck.panda.service.UserService;
 import ck.panda.service.VirtualMachineService;
+import ck.panda.service.VolumeService;
 import ck.panda.service.ZoneService;
 
 /**
@@ -85,6 +86,10 @@ public class ConvertUtil {
     @Autowired
     private PodService podService;
 
+    /** volume servcie for listing volumes. */
+    @Autowired
+    private VolumeService volumeService;
+
     /**
      * Get domain id.
      *
@@ -142,6 +147,18 @@ public class ConvertUtil {
     }
 
     /**
+     * Get the ostype id.
+     *
+     * @param uuid uuid of nic network.
+     * @return netwotk id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getOsTypeId(String uuid) throws Exception {
+        return osTypeService.findByUUID(uuid).getId();
+    }
+
+
+    /**
      * Get domain object.
      *
      * @param uuid uuid of domain
@@ -184,6 +201,28 @@ public class ConvertUtil {
      */
     public Long getPodId(String uuid) throws Exception {
         return podService.findByUUID(uuid).getId();
+    }
+
+    /**
+     * Get volume id.
+     *
+     * @param uuid of pod.
+     * @return pod id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getVolumeId(String uuid) throws Exception {
+        return volumeService.findByUUID(uuid).getId();
+    }
+
+    /**
+     * Get volume id.
+     *
+     * @param uuid of pod.
+     * @return pod id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getVmInstanceId(String uuid) throws Exception {
+        return virtualMachineService.findByUUID(uuid).getId();
     }
 
     /**

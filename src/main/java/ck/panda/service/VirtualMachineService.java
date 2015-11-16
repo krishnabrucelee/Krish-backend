@@ -11,6 +11,7 @@ import ck.panda.util.domain.CRUDService;
  */
 @Service
 public interface VirtualMachineService extends CRUDService<VmInstance> {
+
     /**
      * Find vm instance by uuid.
      *
@@ -36,4 +37,6 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * @throws Exception unhandled errors.
      */
     List<VmInstance> findAllFromCSServer() throws Exception;
+
+
 }

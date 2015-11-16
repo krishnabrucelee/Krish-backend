@@ -49,7 +49,6 @@ public class VmInstance implements Serializable {
 
     /** Name of the instance. */
     @NotEmpty
-    @Size(min = 4, max = 20)
     @Column(name = "name", nullable = false)
     private String name;
 
