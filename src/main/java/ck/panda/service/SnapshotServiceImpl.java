@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.Snapshot.Status;
 import ck.panda.domain.repository.jpa.SnapshotRepository;
@@ -78,6 +80,24 @@ public class SnapshotServiceImpl implements SnapshotService {
 
         }
         return snapshotRepo.save(snapshot);
+    }
+
+    /**
+     * Validate the department.
+     *
+     * @param department reference of the department.
+     * @throws Exception error occurs
+     */
+    private void validateSnapshot(Snapshot snapshot) throws Exception {
+        Errors errors = validator.rejectIfNullEntity("snapshots", snapshot);
+        errors = validator.validateEntity(snapshot, errors);
+        snapshot = snapshotRepo.findByNameAndIsActive(snapshot.getName(),true);
+        if (snapshot != null && snapshot.getId() != snapshot.getId()) {
+            errors.addFieldError("name", "snapshot.already.exist");
+        }
+        if (errors.hasErrors()) {
+            throw new ApplicationException(errors);
+        }
     }
 
     @Override

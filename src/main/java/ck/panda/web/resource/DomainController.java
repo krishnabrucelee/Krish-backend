@@ -20,7 +20,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Domain;
-import ck.panda.domain.entity.GuestNetwork;
+import ck.panda.domain.entity.Network;
 import ck.panda.service.DomainService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;

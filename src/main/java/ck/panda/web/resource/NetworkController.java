@@ -19,54 +19,55 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
-import ck.panda.domain.entity.GuestNetwork;
-import ck.panda.service.GuestNetworkService;
+import ck.panda.domain.entity.Network;
+import ck.panda.service.NetworkService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
 
 /**
- * GuestNetwork controller.
+ * Network controller.
  *
  */
 @RestController
 @RequestMapping("/api/guestnetwork")
-@Api(value = "GuestNetwork", description = "Operations with GuestNetworks", produces = "application/json")
-public class GuestNetworkController extends CRUDController<GuestNetwork> implements ApiController {
+@Api(value = "Network", description = "Operations with Networks", produces = "application/json")
+public class NetworkController extends CRUDController<Network> implements ApiController {
 
-    /** Service reference to Guest Network. */
+    /** Service reference to Network. */
     @Autowired
-    private GuestNetworkService guestNetworkService;
+    private NetworkService networkService;
 
-    @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Network.", response = GuestNetwork.class)
+    @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Network.", response = Network.class)
     @Override
-    public GuestNetwork create(@RequestBody GuestNetwork network) throws Exception {
-        return guestNetworkService.save(network);
+    public Network create(@RequestBody Network network) throws Exception {
+    	network.setSyncFlag(true);
+        return networkService.save(network);
     }
 
-    @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing Network.", response = GuestNetwork.class)
+    @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing Network.", response = Network.class)
     @Override
-    public GuestNetwork read(@PathVariable(PATH_ID) Long id) throws Exception {
-        return guestNetworkService.find(id);
+    public Network read(@PathVariable(PATH_ID) Long id) throws Exception {
+        return networkService.find(id);
     }
 
-    @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing Network.", response = GuestNetwork.class)
+    @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing Network.", response = Network.class)
     @Override
-    public GuestNetwork update(@RequestBody GuestNetwork network, @PathVariable(PATH_ID) Long id) throws Exception {
-        return guestNetworkService.update(network);
+    public Network update(@RequestBody Network network, @PathVariable(PATH_ID) Long id) throws Exception {
+        return networkService.update(network);
     }
 
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Network.")
     @Override
     public void delete(@PathVariable(PATH_ID) Long id) throws Exception {
-        guestNetworkService.delete(id);
+        networkService.delete(id);
     }
 
     @Override
-    public List<GuestNetwork> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
+    public List<Network> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, GuestNetwork.class);
-        Page<GuestNetwork> pageResponse = guestNetworkService.findAll(page);
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Network.class);
+        Page<Network> pageResponse = networkService.findAll(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
@@ -79,12 +80,12 @@ public class GuestNetworkController extends CRUDController<GuestNetwork> impleme
       @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
       @ResponseStatus(HttpStatus.OK)
       @ResponseBody
-      protected List<GuestNetwork> getSearch() throws Exception {
-          return guestNetworkService.findAll();
+      protected List<Network> getSearch() throws Exception {
+          return networkService.findAll();
       }
 
     @Override
     public void testMethod() throws Exception {
-        guestNetworkService.findAll();
+        networkService.findAll();
     }
 }

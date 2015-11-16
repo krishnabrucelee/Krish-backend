@@ -136,6 +136,7 @@ public class ActionListener implements MessageListener {
             break;
         case EventTypes.EVENT_VM_SNAPSHOT:
             LOGGER.debug("VM snapshot sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            syncService.syncVmSnapshots();
             break;
         case EventTypes.EVENT_VNC:
             LOGGER.debug("VNC sync", eventObject.getEntityuuid() + "===" + eventObject.getId());

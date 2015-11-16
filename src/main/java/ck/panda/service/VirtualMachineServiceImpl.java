@@ -1,8 +1,11 @@
 package ck.panda.service;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Department;
@@ -10,6 +13,7 @@ import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.util.AppValidator;
+import ck.panda.util.CSIsoService;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.ConvertUtil;
@@ -21,11 +25,13 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 /**
- * Virtual Machine creation, update, start, reboot, stop all operations are handled by this controller.
+ * Virtual Machine creation, update, start, reboot, stop all operations are
+ * handled by this controller.
  */
 @Service
 public class VirtualMachineServiceImpl implements VirtualMachineService {
@@ -51,6 +57,14 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     /** CloudStack connector. */
     @Autowired
     private CloudStackServer server;
+
+    /** Secret key value is append. */
+    @Value(value = "${aes.salt.secretKey}")
+    private String secretKey;
+
+    /** Iso service cloud connector. */
+    @Autowired
+    private CSIsoService csIso;
 
     /** CloudStack configuration . */
     @Autowired
@@ -90,7 +104,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                             .queryAsyncJobResult(csInstance.getString("jobid"), "json");
                     JSONObject instance = new JSONObject(instanceResponse).getJSONObject("queryasyncjobresultresponse");
                     if (instance.getString("jobstatus").equals("2")) {
-                        errors = this.validateEvent(errors, csInstance.getString("errortext"));
+                        errors = this.validateEvent(errors, instance.getJSONObject("jobresult").getString("errortext"));
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
                         vminstance.setEventMessage(csInstance.getJSONObject("jobresult").getString("errortext"));
                     } else {
@@ -133,6 +147,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
         server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
         cloudStackInstanceService.setServer(server);
+        csIso.setServer(server);
         VmInstance vminstance = virtualmachinerepository.findByUUID(vmId);
         return vminstance;
     }
@@ -146,6 +161,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     public VmInstance vmEventHandle(String vmId, String event) throws Exception {
         VmInstance vminstance = getCSConnector(vmId);
         HashMap<String, String> optional = new HashMap<String, String>();
+        Errors errors = validator.createErrors();
         switch (event) {
         case EventTypes.EVENT_VM_START:
             try {
@@ -157,6 +173,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
+                        errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        if (errors.hasErrors()) {
+                            throw new ApplicationException(errors);
+                        }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_CREATE));
@@ -178,6 +198,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
+                        errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        if (errors.hasErrors()) {
+                            throw new ApplicationException(errors);
+                        }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_STOPPING));
@@ -198,6 +222,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
+                        errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        if (errors.hasErrors()) {
+                            throw new ApplicationException(errors);
+                        }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_RUNNING));
@@ -218,6 +246,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
+                        errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        if (errors.hasErrors()) {
+                            throw new ApplicationException(errors);
+                        }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
                         vminstance.setEventMessage("Re-installed");
@@ -237,6 +269,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
+                        errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        if (errors.hasErrors()) {
+                            throw new ApplicationException(errors);
+                        }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_DESTROYED));
@@ -258,6 +294,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
+                        errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        if (errors.hasErrors()) {
+                            throw new ApplicationException(errors);
+                        }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_EXPUNGING));
@@ -279,6 +319,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
+                        errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        if (errors.hasErrors()) {
+                            throw new ApplicationException(errors);
+                        }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
                         vminstance.setEventMessage("Re-installed");
@@ -286,6 +330,134 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 }
             } catch (Exception e) {
                 LOGGER.error("ERROR AT VM RECOVER", e);
+            }
+            break;
+        case EventTypes.EVENT_VM_RESETPASSWORD:
+            try {
+                if (vminstance.getStatus().equals("Stopped")) {
+                    String instanceResponse = cloudStackInstanceService
+                            .resetPasswordForVirtualMachine(vminstance.getUuid());
+                    JSONObject instance = new JSONObject(instanceResponse)
+                            .getJSONObject("resetpasswordforvirtualmachineresponse");
+                    if (instance.has("jobid")) {
+                        String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"),
+                                "json");
+                        JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
+                        if (jobresult.getString("jobstatus").equals("2")) {
+                            vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
+                            errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                            if (errors.hasErrors()) {
+                                throw new ApplicationException(errors);
+                            }
+                            vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        } else if (jobresult.getString("jobstatus").equals("1")) {
+                            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+                            byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+                            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+                            String encryptedPassword = new String(
+                                    EncryptionUtil.encrypt(jobresult.getJSONObject("jobresult")
+                                            .getJSONObject("virtualmachine").getString("password"), originalKey));
+                            vminstance.setVncPassword(encryptedPassword);
+                            virtualmachinerepository.save(vminstance);
+                            errors.addGlobalError(jobresult.getJSONObject("jobresult").getJSONObject("virtualmachine")
+                                    .getString("password"));
+                            if (errors.hasErrors()) {
+                                throw new ApplicationException(errors);
+                            }
+                        }
+                    }
+                } else {
+                    errors.addGlobalError(
+                            "Your instance must be stopped before attempting to change its current password");
+                    if (errors.hasErrors()) {
+                        throw new ApplicationException(errors);
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.error("ERROR AT VM Reset password", e);
+            }
+            break;
+        case EventTypes.EVENT_VM_MIGRATE:
+            try {
+                if (vminstance.getStatus().equals("Running")) {
+                    optional.put("hostid", vminstance.getHost().getUuid());
+                    String instanceResponse = cloudStackInstanceService.migrateVirtualMachine(vminstance.getUuid(),
+                            optional);
+                    JSONObject instance = new JSONObject(instanceResponse)
+                            .getJSONObject("migratevirtualmachineresponse");
+                    if (instance.has("jobid")) {
+                        String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"),
+                                "json");
+                        JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
+                        if (jobresult.getString("jobstatus").equals("2")) {
+                            vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
+                            errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                            if (errors.hasErrors()) {
+                                throw new ApplicationException(errors);
+                            }
+                            vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        } else {
+                            vminstance.setStatus(Status.Migrating);
+                        }
+                    }
+                } else {
+                    errors.addGlobalError("Your instance must be Running before attempting to change its current host");
+                    if (errors.hasErrors()) {
+                        throw new ApplicationException(errors);
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.error("ERROR AT VM Migrating ", e);
+            }
+            break;
+        case EventTypes.EVENT_ISO_ATTACH:
+            try {
+                String instanceResponse = csIso.attachIso(vminstance.getIso(), vminstance.getUuid(), "json");
+                JSONObject instance = new JSONObject(instanceResponse).getJSONObject("attachisoresponse");
+                if (instance.has("jobid")) {
+                    String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"),
+                            "json");
+                    JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
+                    if (jobresult.getString("jobstatus").equals("2")) {
+                        vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
+                        errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        if (errors.hasErrors()) {
+                            throw new ApplicationException(errors);
+                        }
+                        vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
+                    } else {
+                        vminstance.setIsoName(jobresult.getJSONObject("jobresult").getJSONObject("virtualmachine").getString("isoname"));
+                        vminstance.setIso(jobresult.getJSONObject("jobresult").getJSONObject("virtualmachine").getString("isoid"));
+                    }
+                }
+
+            } catch (Exception e) {
+                LOGGER.error("ERROR AT VM ATTACH ISO ", e);
+            }
+            break;
+        case EventTypes.EVENT_ISO_DETACH:
+            try {
+                String instanceResponse = csIso.detachIso(vminstance.getUuid(), "json");
+                JSONObject instance = new JSONObject(instanceResponse).getJSONObject("detachisoresponse");
+                if (instance.has("jobid")) {
+                    String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"),
+                            "json");
+                    JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
+                    if (jobresult.getString("jobstatus").equals("2")) {
+                        vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
+                        errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        if (errors.hasErrors()) {
+                            throw new ApplicationException(errors);
+                        }
+                        vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
+                    } else {
+                        vminstance.setIsoName(null);
+                        vminstance.setIso(null);
+                    }
+                }
+
+            } catch (Exception e) {
+                LOGGER.error("ERROR AT VM DETACH ISO ", e);
             }
             break;
         default:

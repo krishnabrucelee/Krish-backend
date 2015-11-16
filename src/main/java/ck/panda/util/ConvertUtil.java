@@ -4,9 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.VmInstance;
 import ck.panda.service.ComputeOfferingService;
 import ck.panda.service.DepartmentService;
 import ck.panda.service.DomainService;
+import ck.panda.service.HostService;
 import ck.panda.service.HypervisorService;
 import ck.panda.service.NetworkOfferingService;
 import ck.panda.service.NetworkService;
@@ -54,15 +56,21 @@ public class ConvertUtil {
     @Autowired
     private StorageOfferingService storageService;
 
-    /** NetworkOfferingService for listing network offers in cloudstack server. */
+    /**
+     * NetworkOfferingService for listing network offers in cloudstack server.
+     */
     @Autowired
     private NetworkOfferingService networkOfferingService;
 
-    /** NetworkOfferingService for listing network offers in cloudstack server. */
+    /**
+     * NetworkOfferingService for listing network offers in cloudstack server.
+     */
     @Autowired
     private NetworkService networkService;
 
-    /** NetworkOfferingService for listing network offers in cloudstack server. */
+    /**
+     * NetworkOfferingService for listing network offers in cloudstack server.
+     */
     @Autowired
     private ComputeOfferingService computeService;
 
@@ -90,7 +98,11 @@ public class ConvertUtil {
     @Autowired
     private VolumeService volumeService;
 
-    /**
+    /** Host service for listing hosts. */
+    @Autowired
+    private HostService hostService;
+
+     /**
      * Get domain id.
      *
      * @param uuid uuid of domain.
@@ -98,7 +110,11 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Long getDomainId(String uuid) throws Exception {
-        return domainService.findbyUUID(uuid).getId();
+        if (domainService.findbyUUID(uuid) != null) {
+            return domainService.findbyUUID(uuid).getId();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -109,7 +125,11 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Long getZoneId(String uuid) throws Exception {
-        return zoneService.findByUUID(uuid).getId();
+        if (zoneService.findByUUID(uuid) != null) {
+            return zoneService.findByUUID(uuid).getId();
+        } else {
+            return null;
+        }
 
     }
 
@@ -121,7 +141,11 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Long getTemplateId(String uuid) throws Exception {
-        return templateService.findByUUID(uuid).getId();
+        if (templateService.findByUUID(uuid) != null) {
+            return templateService.findByUUID(uuid).getId();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -132,7 +156,11 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Long getComputeOfferId(String uuid) throws Exception {
-        return computeService.findByUUID(uuid).getId();
+        if (computeService.findByUUID(uuid) != null) {
+            return computeService.findByUUID(uuid).getId();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -143,8 +171,25 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Long getNetworkId(String uuid) throws Exception {
-        return networkService.findByUUID(uuid).getId();
+        if (networkService.findByUUID(uuid) != null) {
+            return networkService.findByUUID(uuid).getId();
+        } else {
+            return null;
+        }
     }
+
+
+    /**
+     * Get the networkoffering id.
+     *
+     * @param uuid uuid of nic network.
+     * @return netwotk id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getNetworkOfferingId(String uuid) throws Exception {
+        return networkOfferingService.findByUUID(uuid).getId();
+    }
+
 
     /**
      * Get the ostype id.
@@ -178,7 +223,11 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Long getOwnerId(String name, Domain domain) throws Exception {
-        return userService.findByUserNameAndDomain(name, domain).getId();
+        if (userService.findByUserNameAndDomain(name, domain) != null) {
+            return userService.findByUserNameAndDomain(name, domain).getId();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -200,9 +249,8 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Long getPodId(String uuid) throws Exception {
-        return podService.findByUUID(uuid).getId();
+            return podService.findByUUID(uuid).getId();
     }
-
     /**
      * Get volume id.
      *
@@ -215,14 +263,28 @@ public class ConvertUtil {
     }
 
     /**
-     * Get volume id.
+     * Get instance id.
      *
-     * @param uuid of pod.
-     * @return pod id.
+     * @param uuid of instance.
+     * @return instance id.
      * @throws Exception unhandled exception.
      */
     public Long getVmInstanceId(String uuid) throws Exception {
         return virtualMachineService.findByUUID(uuid).getId();
+    }
+    /**
+     *  Get Host id.
+     *
+     * @param uuid of host.
+     * @return host id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getHostId(String uuid) throws Exception {
+        if (hostService.findByUUID(uuid) != null) {
+            return hostService.findByUUID(uuid).getId();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -237,6 +299,36 @@ public class ConvertUtil {
             return storageService.findUuid(uuid).getId();
         }
         return null;
+    }
+
+    /**
+     * Get Vm id.
+     *
+     * @param uuid of vm.
+     * @return vm id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getVmId(String uuid) throws Exception {
+        if (virtualMachineService.findByUUID(uuid) != null) {
+            return virtualMachineService.findByUUID(uuid).getId();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get Vm.
+     *
+     * @param uuid of vm.
+     * @return vm.
+     * @throws Exception unhandled exception.
+     */
+    public VmInstance getVm(String uuid) throws Exception {
+        if (virtualMachineService.findByUUID(uuid) != null) {
+            return virtualMachineService.findByUUID(uuid);
+        } else {
+            return null;
+        }
     }
 
 }

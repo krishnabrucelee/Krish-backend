@@ -57,7 +57,7 @@ public class SnapshotController extends CRUDController<Snapshot> implements ApiC
     @Override
     public List<Snapshot> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Domain.class);
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Snapshot.class);
         Page<Snapshot> pageResponse = snapshotService.findAllByActive(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();

@@ -7,6 +7,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Snapshot;
 
 /**
@@ -23,6 +26,18 @@ public interface SnapshotRepository extends PagingAndSortingRepository<Snapshot,
      * @param isActive get the snapshot list based on active/inactive status.
      * @return list of snapshots.
      */
-    @Query(value = "select s from Snapshot s where s.isActive =:isActive")
+    @Query(value = "select snap from Snapshot snap where snap.isActive =:isActive")
     Page<Snapshot> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find the snapshot for same domain with username and is active status.
+     *
+     * @param userName user name of the department.
+     * @param snapshot snapshot reference.
+     * @param isActive get the snapshot list based on active/inactive status.
+     * @return snapshot name.
+     */
+    @Query(value = "select snap from Snapshot snap where snap.name=:name AND snap.isActive =:isActive")
+    Snapshot findByNameAndIsActive(@Param("name") String name, @Param("isActive")  Boolean isActive);
+
 }

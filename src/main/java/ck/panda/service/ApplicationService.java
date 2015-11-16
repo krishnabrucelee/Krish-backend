@@ -1,8 +1,11 @@
 package ck.panda.service;
 
+import java.util.List;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Application;
 import ck.panda.util.domain.CRUDService;
+import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
  * Service class for Application.
@@ -14,12 +17,30 @@ import ck.panda.util.domain.CRUDService;
 public interface ApplicationService extends CRUDService<Application> {
 
     /**
-     * Method to find type of the application.
+     * Delete the application.
      *
-     * @param type of the department
-     * @return application type
-     * @throws Exception if error occurs
+     * @param application Application entity.
+     * @return Application.
+     * @throws Exception error occurs
      */
-    Application findByType(String type) throws Exception;
+    Application softDelete(Application application) throws Exception;
+
+    /**
+     * Find all the applications with active status.
+     *
+     * @param pagingAndSorting pagination and sorting values.
+     * @return list of applications with pagination.
+     * @throws Exception error occurs
+     */
+    Page<Application> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
+
+    /**
+    * Find all the applications with active status.
+    *
+    * @param isActive application status Active/Inactive
+    * @return list of applications with active status
+    * @throws Exception error occurs.
+    */
+   List<Application> findAllByIsActive(Boolean isActive) throws Exception;
 
 }

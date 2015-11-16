@@ -94,4 +94,11 @@ public List<Host> findAllFromCSServer() throws Exception {
       }
       return hostList;
     }
+
+    @Override
+    public Host findByUUID(String uuid) throws Exception {
+        return hostRepo.findByUUID(uuid);
+    }
+
+
   }

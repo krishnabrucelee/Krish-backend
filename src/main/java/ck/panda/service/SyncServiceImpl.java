@@ -1,10 +1,15 @@
 package ck.panda.service;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Cluster;
@@ -25,9 +30,11 @@ import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Zone;
 import ck.panda.util.CloudStackServer;
+import ck.panda.util.ConvertUtil;
 import ck.panda.util.error.exception.ApplicationException;
 
 /**
@@ -116,6 +123,10 @@ public class SyncServiceImpl  implements SyncService {
     @Autowired
     private SnapshotService snapshotService;
 
+    /** For listing snapshots in cloudstack server. */
+    @Autowired
+    private VmSnapshotService vmsnapshotService;
+
     /** Template Service  for listing templates. */
     @Autowired
     private TemplateService templateService;
@@ -141,10 +152,17 @@ public class SyncServiceImpl  implements SyncService {
     @Autowired
     private CloudStackServer server;
 
+    /** Convert entity repository reference. */
+    @Autowired
+    private ConvertUtil entity;
+
     /** CloudStack configuration . */
     @Autowired
     private CloudStackConfigurationService cloudConfigService;
 
+    /** Secret key value is append. */
+    @Value(value = "${aes.salt.secretKey}")
+    private String secretKey;
 
     @Override
     public void init() throws Exception {
@@ -286,6 +304,13 @@ public class SyncServiceImpl  implements SyncService {
           this.syncIso();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch Iso", e);
+      }
+
+       try {
+          // 20. Sync Vm snapshots entity
+          this.syncVmSnapshots();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch vm snapshots", e);
       }
     }
 
@@ -728,17 +753,14 @@ public class SyncServiceImpl  implements SyncService {
         // 3. Iterate application network list
         for (Network network: appNetworkList) {
              LOGGER.debug("Total rows updated : " + String.valueOf(appNetworkList.size()));
+             network.setSyncFlag(false);
              //3.1 Find the corresponding CS server network object by finding it in a hash using uuid
             if (csNetworkMap.containsKey(network.getUuid())) {
                 Network csNetwork = csNetworkMap.get(network.getUuid());
 
                 network.setName(csNetwork.getName());
                 network.setDomainId(csNetwork.getDomainId());
-                network.setNetworkOfferingId(csNetwork.getNetworkOfferingId());
                 network.setZoneId(csNetwork.getZoneId());
-                network.setCidr(csNetwork.getCidr());
-                network.setState(csNetwork.getState());
-                network.setDisplayNetwork(csNetwork.getDisplayNetwork());
                 network.setDisplayText(csNetwork.getDisplayText());
 
                 //3.2 If found, update the network object in app db
@@ -937,6 +959,14 @@ public class SyncServiceImpl  implements SyncService {
             if (vmMap.containsKey(instance.getUuid())) {
                 VmInstance csVm = vmMap.get(instance.getUuid());
                 instance.setName(csVm.getName());
+                // VNC password set.
+                if(csVm.getPassword() != null){
+                String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+                byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+                SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+                String encryptedPassword = new String(EncryptionUtil.encrypt(csVm.getPassword(), originalKey));
+                instance.setVncPassword(encryptedPassword);
+                }
                 // 3.2 If found, update the vm object in app db
                 virtualMachineService.update(instance);
                 // 3.3 Remove once updated, so that we can have the list of cs vm which is not added in the
@@ -955,7 +985,7 @@ public class SyncServiceImpl  implements SyncService {
         }
 
     /**
-     * Sync with Cloud Server Account.
+     * Sync with Cloud Server Host.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
@@ -997,7 +1027,7 @@ public class SyncServiceImpl  implements SyncService {
     }
 
     /**
-     * Sync with Cloud Server Account.
+     * Sync with Cloud Server Volume.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
@@ -1041,7 +1071,7 @@ public class SyncServiceImpl  implements SyncService {
     }
 
     /**
-     * Sync with Cloud Server Account.
+     * Sync with Cloud Server Snapshot.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
@@ -1084,7 +1114,7 @@ public class SyncServiceImpl  implements SyncService {
     }
 
     /**
-     * Sync with Cloud Server Account.
+     * Sync with Cloud Server Pod.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
@@ -1126,7 +1156,7 @@ public class SyncServiceImpl  implements SyncService {
     }
 
     /**
-     * Sync with Cloud Server Account.
+     * Sync with Cloud Server Cluster.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
@@ -1167,7 +1197,73 @@ public class SyncServiceImpl  implements SyncService {
     }
 
     /**
-     * Sync with Cloud Server Account.
+     * Sync with Cloud Server Instance snapshots.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    @Override
+    public void syncVmSnapshots() throws ApplicationException, Exception {
+        //1. Get all the vm snapshot objects from CS server as hash
+        List<VmSnapshot> csSnapshotService = vmsnapshotService.findAllFromCSServer();
+        HashMap<String, VmSnapshot> csSnapshotMap = (HashMap<String, VmSnapshot>) VmSnapshot.convert(csSnapshotService);
+
+        //2. Get all the vm snapshot objects from application
+        List<VmSnapshot> appSnapshotList = vmsnapshotService.findAll();
+
+        // 3. Iterate application vm snapshot list
+        for (VmSnapshot snapshot: appSnapshotList) {
+             //3.1 Find the corresponding CS server snapshot object by finding it in a hash using uuid
+            if (csSnapshotMap.containsKey(snapshot.getUuid())) {
+                VmSnapshot snaps = csSnapshotMap.get(snapshot.getUuid());
+
+                snapshot.setName(snaps.getName());
+
+                //3.2 If found, update the vm snapshot object in app db
+                vmsnapshotService.update(snapshot);
+
+                //3.3 Remove once updated, so that we can have the list of cs vm snapshot which is not added in the app
+                csSnapshotMap.remove(snapshot.getUuid());
+            } else {
+                vmsnapshotService.delete(snapshot);
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete
+             }
+
+             }
+        //4. Get the remaining list of cs server hash user object, then iterate and
+        //add it to app db
+        for (String key: csSnapshotMap.keySet()) {
+            vmsnapshotService.save(csSnapshotMap.get(key));
+        }
+    }
+
+    /**
+     * Sync status of Vm resource with Cloud Server.
+     *
+     * @param Object response object.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    @Override
+    public void syncResourceStatus(JSONObject Object) throws ApplicationException, Exception {
+        VmInstance vmInstance = VmInstance.convert(Object, entity);
+        VmInstance instance = virtualMachineService.findByUUID(vmInstance.getUuid());
+        // VNC password set.
+        if(vmInstance.getPassword() != null){
+        String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+        byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+        String encryptedPassword = new String(EncryptionUtil.encrypt(vmInstance.getPassword(), originalKey));
+        instance.setVncPassword(encryptedPassword);
+        }
+        // 3.2 If found, update the vm object in app db
+        virtualMachineService.update(instance);
+    }
+
+    /**
+     * Sync with Cloud Server Iso.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */

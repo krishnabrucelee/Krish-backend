@@ -1,11 +1,13 @@
 package ck.panda.domain.repository.jpa;
 
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.Application;
+import ck.panda.domain.entity.Domain;
 
 /**
  * JPA Repository for Application entity.
@@ -13,22 +15,32 @@ import ck.panda.domain.entity.Application;
 public interface ApplicationRepository extends PagingAndSortingRepository<Application, Long> {
 
     /**
-     * Method to find list of entities having active status.
+     * Find the application for same domain with application type and is active status.
      *
-     * @param pageable of the application
-     * @return a page of entities
+     * @param type type of the application.
+     * @param domain Domain reference.
+     * @param isActive get the application list based on active/inactive status.
+     * @return application type.
      */
-	//TODO Yasin: method signature and its usage is incorrect.
-    @Query(value = "select app from Application app where app.isActive IS TRUE")
-    Page<Application> findAllByActive(Pageable pageable);
+    @Query(value = "select app from Application app where app.type=:type AND  app.domain =:domain AND app.isActive =:isActive")
+    Application findByTypeAndDomainAndIsActive(@Param("type") String type, @Param("domain") Domain domain, @Param("isActive")  Boolean isActive);
 
     /**
-     * Method to find type of the application.
+     * Find all the active or inactive applications with pagination.
      *
-     * @param type of the application
-     * @return application type
+     * @param pageable to get the list with pagination.
+     * @param isActive get the application list based on active/inactive status.
+     * @return list of applications.
      */
-    //TODO Yasin: method signature and its usage is incorrect.
-    @Query(value = "select app from Application app where app.isActive IS TRUE AND app.type=:type")
-    Application findByType(@Param("type") String type);
+    @Query(value = "select app from Application app where app.isActive =:isActive")
+    Page<Application> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find all the application with active status.
+     *
+     * @param isActive get the application list based on active/inactive status.
+     * @return list of applications.
+     */
+    @Query(value = "select app from Application app where app.isActive =:isActive")
+    List<Application> findAllByIsActive(@Param("isActive") Boolean isActive);
 }

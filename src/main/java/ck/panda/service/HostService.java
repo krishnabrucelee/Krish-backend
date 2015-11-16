@@ -20,4 +20,13 @@ public interface HostService extends CRUDService<Host> {
      * @throws Exception unhandled errors.
      */
     List<Host> findAllFromCSServer() throws Exception;
+
+    /**
+     * To get host from cloudstack server.
+     *
+     * @param uuid uuid of host.
+     * @return Host from server
+     * @throws Exception unhandled errors.
+     */
+    Host findByUUID(String uuid) throws Exception;
 }
