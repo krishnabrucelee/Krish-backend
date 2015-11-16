@@ -258,56 +258,56 @@ public class SyncServiceImpl  implements SyncService {
       }
 
       try {
-          // 14. Sync Instance entity
-          this.syncInstances();
-      } catch (Exception e) {
-          LOGGER.error("ERROR AT synch Instance", e);
-      }
-      try {
-          // 15. Sync Volume entity
-          this.syncVolume();
-      } catch (Exception e) {
-          LOGGER.error("ERROR AT synch Volume", e);
-      }
-
-            try {
-          // 15. Sync Snapshot entity
-          this.syncSnapshot();
-      } catch (Exception e) {
-          LOGGER.error("ERROR AT synch Snapshot", e);
-      }
-
-
-      try {
-          // 16. Sync Pod entity
+          // 14. Sync Pod entity
           this.syncPod();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch Pod", e);
       }
 
       try {
-          // 17. Sync Cluster entity
+          // 15. Sync Cluster entity
           this.syncCluster();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch cluster", e);
       }
 
       try {
-          // 18. Sync Host entity
+          // 16. Sync Host entity
           this.syncHost();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch Host", e);
       }
 
       try {
-          // 19. Sync Iso entity
+          // 17. Sync Iso entity
           this.syncIso();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch Iso", e);
       }
 
+      try {
+          // 18. Sync Instance entity
+          this.syncInstances();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Instance", e);
+      }
+
+      try {
+          // 19. Sync Volume entity
+          this.syncVolume();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Volume", e);
+      }
+
+      try {
+          // 20. Sync Snapshot entity
+          this.syncSnapshot();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Snapshot", e);
+      }
+
        try {
-          // 20. Sync Vm snapshots entity
+          // 21. Sync Vm snapshots entity
           this.syncVmSnapshots();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch vm snapshots", e);
