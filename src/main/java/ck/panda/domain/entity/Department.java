@@ -534,8 +534,10 @@ public class Department implements Serializable {
     /**
      * Convert JSONObject into user object.
      *
-     * @param object JSON object.
+     * @param jsonObject json object from cloud stack.
+     * @param convertUtil to convert the string uuid and get the app id.
      * @return user object.
+     * @throws error occurs.
      */
     public static Department convert(JSONObject jsonObject, ConvertUtil convertUtil) throws JSONException {
         Department department = new Department();
