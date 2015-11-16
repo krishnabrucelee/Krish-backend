@@ -61,7 +61,7 @@ public class Application implements Serializable {
 
     /** Domain of the application. */
     @ManyToOne
-    @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @JoinColumn(name = "domain_id", referencedColumnName = "id", updatable = false, insertable = false)
     private Domain domain;
 
     /** Domain id of the application. */
