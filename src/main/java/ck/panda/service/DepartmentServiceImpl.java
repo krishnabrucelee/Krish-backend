@@ -197,7 +197,10 @@ public class DepartmentServiceImpl implements DepartmentService {
         for (int i = 0, size = userListJSON.length(); i < size; i++) {
             // 2.1 Call convert by passing JSONObject to Department entity and
             // Add the converted Department entity to list
-            departmentList.add(Department.convert(userListJSON.getJSONObject(i), convertUtil));
+            Department department = Department.convert(userListJSON.getJSONObject(i), convertUtil);
+            if(department.getType() == Department.AccountType.USER) {
+                departmentList.add(department);
+            }
         }
         return departmentList;
     }
