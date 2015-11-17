@@ -83,9 +83,4 @@ public class NetworkOfferingController extends CRUDController<NetworkOffering> i
       protected List<NetworkOffering> getSearch() throws Exception {
           return networkOffer.findAll();
       }
-
-    @Override
-    public void testMethod() throws Exception {
-        networkOffer.findAll();
-    }
 }

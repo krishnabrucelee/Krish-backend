@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -57,12 +56,7 @@ public class CRUDController<T> extends ExceptionHandlingController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     @ResponseBody
     public T update(@RequestBody T t, @PathVariable("id") Long id) throws Exception {
-        Class<?> clazz = t.getClass();
-
-        Method method = clazz.getDeclaredMethod("getId");
-        Long genericEntityId = (Long) method.invoke(t, null);
-
-        return updateT(id, t);
+          return updateT(id, t);
     }
 
     /**

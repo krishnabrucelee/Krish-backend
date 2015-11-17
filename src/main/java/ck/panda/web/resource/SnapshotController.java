@@ -78,10 +78,4 @@ public class SnapshotController extends CRUDController<Snapshot> implements ApiC
          snapshot.setSyncFlag(true);
         snapshotService.softDelete(snapshot);
     }
-
-    @Override
-    public void testMethod() throws Exception {
-        // TODO Auto-generated method stub
-
-    }
 }

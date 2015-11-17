@@ -83,9 +83,4 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
       protected List<Network> getSearch() throws Exception {
           return networkService.findAll();
       }
-
-    @Override
-    public void testMethod() throws Exception {
-        networkService.findAll();
-    }
 }

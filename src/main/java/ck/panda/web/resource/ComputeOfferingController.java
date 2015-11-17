@@ -89,9 +89,4 @@ public class ComputeOfferingController extends CRUDController<ComputeOffering> i
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
-
-    @Override
-    public void testMethod() throws Exception {
-
-    }
 }

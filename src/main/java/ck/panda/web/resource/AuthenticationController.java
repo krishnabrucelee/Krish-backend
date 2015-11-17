@@ -28,8 +28,4 @@ public class AuthenticationController implements ApiController {
                  + "Authentication can be issued multiple times and each call results in new ßticket.";
     }
 
-    @Override
-    public void testMethod() throws Exception {
-        authenticate();
-    }
 }

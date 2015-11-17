@@ -55,9 +55,4 @@ public class OsTypeController extends CRUDController<OsType> implements ApiContr
         return osTypeService.findByCategoryName(filter);
     }
 
-    @Override
-    public void testMethod() throws Exception {
-
-    }
-
 }

@@ -57,9 +57,4 @@ public class OsCategoryController extends CRUDController<OsCategory> implements 
     public List<OsCategory> osCategoryList() throws Exception {
         return osCategoryService.findAll();
     }
-
-    @Override
-    public void testMethod() throws Exception {
-
-    }
 }

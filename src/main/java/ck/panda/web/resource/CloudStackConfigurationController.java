@@ -71,8 +71,4 @@ public class CloudStackConfigurationController extends CRUDController<CloudStack
         return pageResponse.getContent();
     }
 
-    @Override
-    public void testMethod() throws Exception {
-        configService.findAll();
-    }
 }

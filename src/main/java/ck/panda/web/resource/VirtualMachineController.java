@@ -103,8 +103,4 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
             throws Exception {
         return virtualmachineservice.vmEventHandle(vm, event);
     }
-
-    @Override
-    public void testMethod() throws Exception {
-    }
 }
