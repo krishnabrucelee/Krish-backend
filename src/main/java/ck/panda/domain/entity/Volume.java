@@ -107,6 +107,15 @@ public class Volume {
     @Column(name = "version")
     private Long version;
 
+    /** Instance volume id. */
+    @JoinColumn(name = "instance_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private VmInstance vmInstance;
+
+    /** Instance id for disk. */
+    @Column(name = "instance_id")
+    private Long vmInstanceId;
+
     /** Created by user. */
     @CreatedBy
     @JoinColumn(name = "created_by", referencedColumnName = "id")
@@ -510,6 +519,43 @@ public class Volume {
         this.isSyncFlag = isSyncFlag;
     }
 
+
+    /**
+     * Get the instance.
+     *
+     * @return the vminstance
+     */
+    public VmInstance getVmInstance() {
+        return vmInstance;
+    }
+
+    /**
+     * Set the vminstance.
+     *
+     * @param vmInstance to set
+     */
+    public void setVmInstance(VmInstance vmInstance) {
+        this.vmInstance = vmInstance;
+    }
+
+    /**
+     * Get instance Id.
+     *
+     * @return the vmInstanceId
+     */
+    public Long getVmInstanceId() {
+        return vmInstanceId;
+    }
+
+    /**
+     * Set the vmInstanceId .
+     *
+     * @param vmInstanceId to set
+     */
+    public void setVmInstanceId(Long vmInstanceId) {
+        this.vmInstanceId = vmInstanceId;
+    }
+
     /**
      * Convert JSONObject to Volume entity.
      *
@@ -528,6 +574,7 @@ public class Volume {
             volume.diskSize = object.getLong("size");
             volume.setVolumeType(volume.getVolumeType().valueOf(JsonValidator.jsonStringValidation(object, "type")));
             volume.setStatus(volume.getStatus().valueOf(JsonValidator.jsonStringValidation(object, "state")));
+            volume.setVmInstanceId(convertUtil.getVmInstanceId(JsonUtil.getStringValue(object, "virtualmachineid")));
          //   volume.setCreatedDateTime(volume.getCreatedDateTime().);
             volume.setStorageOfferingId(convertUtil.getStorageOfferId(JsonUtil.getStringValue(object, "diskofferingid")));
             volume.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(object, "zoneid")));

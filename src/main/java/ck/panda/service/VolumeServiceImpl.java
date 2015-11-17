@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.EventTypes;
+import ck.panda.domain.entity.Pod;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.Status;
 import ck.panda.domain.repository.jpa.VolumeRepository;
@@ -197,4 +198,10 @@ public class VolumeServiceImpl implements VolumeService {
         errors.addGlobalError(errmessage);
         return errors;
     }
+
+    @Override
+    public Volume findByUUID(String uuid) throws Exception {
+        return volumeRepo.findByUUID(uuid);
+    }
+
 }

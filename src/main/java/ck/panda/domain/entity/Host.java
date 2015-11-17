@@ -16,6 +16,8 @@ import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -23,7 +25,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
-import ck.panda.util.JsonValidator;
 
 /**
  * A host is a single computer. Hosts provide the computing resources that run guest virtual machines. Each host has
@@ -36,7 +37,10 @@ import ck.panda.util.JsonValidator;
 @SuppressWarnings("serial")
 public class Host {
 
-     /** Unique ID of the Domain. */
+    /** Logger attribute. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(Snapshot.class);
+
+    /** Unique ID of the Domain. */
     @Id
     @GeneratedValue
     @Column(name = "id")
@@ -109,14 +113,16 @@ public class Host {
     private ZonedDateTime updatedDateTime;
 
     /**
-     * @return the id
+     * Get id.
+     *
+     * @return the id.
      */
     public Long getId() {
         return id;
     }
 
     /**
-     * set the id
+     * Set id.
      *
      * @param id  to set
      */
@@ -125,6 +131,8 @@ public class Host {
     }
 
     /**
+     * Get UUID of the host.
+     *
      * @return the uuid
      */
     public String getUuid() {
@@ -132,7 +140,7 @@ public class Host {
     }
 
     /**
-     * set the uuid
+     * Set uuid of the host.
      *
      * @param uuid  to set
      */
@@ -141,7 +149,7 @@ public class Host {
     }
 
     /**
-     * Get name
+     * Get name.
      *
      * @return the name
      */
@@ -150,7 +158,7 @@ public class Host {
     }
 
     /**
-     * Set the name
+     * Set the name.
      *
      * @param name  to set
      */
@@ -159,7 +167,7 @@ public class Host {
     }
 
     /**
-     * Get Pod
+     * Get Pod.
      *
      * @return the pod
      */
@@ -168,7 +176,7 @@ public class Host {
     }
 
     /**
-     * Set the pod
+     * Set the pod.
      *
      * @param pod  to set
      */
@@ -177,7 +185,7 @@ public class Host {
     }
 
     /**
-     * Get Pod Id
+     * Get Pod Id.
      *
      * @return the podId
      */
@@ -186,7 +194,7 @@ public class Host {
     }
 
     /**
-     * Set the podId
+     * Set the podId.
      *
      * @param podId  to set
      */
@@ -202,7 +210,7 @@ public class Host {
     }
 
     /**
-     * Set the zone
+     * Set the zone.
      *
      * @param zone  to set
      */
@@ -211,7 +219,7 @@ public class Host {
     }
 
     /**
-     * Get the zoneId
+     * Get the zoneId.
      *
      * @return the zoneId
      */
@@ -220,7 +228,7 @@ public class Host {
     }
 
     /**
-     * Set the zoneId
+     * Set the zoneId.
      *
      * @param zoneId  to set
      */
@@ -236,7 +244,7 @@ public class Host {
     }
 
     /**
-     * Set the cluster
+     * Set the cluster.
      *
      * @param cluster to set
      */
@@ -245,7 +253,7 @@ public class Host {
     }
 
     /**
-     * Get the cluster
+     * Get the cluster.
      *
      * @return the clusterId
      */
@@ -254,7 +262,7 @@ public class Host {
     }
 
     /**
-     * Set the clusterId
+     * Set the clusterId.
      *
      * @param clusterId  to set
      */
@@ -263,7 +271,7 @@ public class Host {
     }
 
     /**
-     * Get the state
+     * Get the state.
      *
      * @return the state
      */
@@ -272,7 +280,7 @@ public class Host {
     }
 
     /**
-     * Set the state
+     * Set the state.
      *
      * @param state  to set
      */
@@ -281,7 +289,7 @@ public class Host {
     }
 
     /**
-     * Get createdBy
+     * Get createdBy.
      *
      * @return the createdBy
      */
@@ -290,7 +298,7 @@ public class Host {
     }
 
     /**
-     * Set the createdBy
+     * Set the createdBy.
      *
      * @param createdBy  to set
      */
@@ -306,7 +314,7 @@ public class Host {
     }
 
     /**
-     * Set the updatedBy
+     * Set the updatedBy.
      *
      * @param updatedBy to set
      */
@@ -315,7 +323,7 @@ public class Host {
     }
 
     /**
-     * Get CreatedDateTime
+     * Get CreatedDateTime.
      *
      * @return the createdDateTime
      */
@@ -324,7 +332,7 @@ public class Host {
     }
 
     /**
-     * Set the createdDateTime
+     * Set the createdDateTime.
      *
      * @param createdDateTime to set
      */
@@ -333,7 +341,7 @@ public class Host {
     }
 
     /**
-     * Get the updatedDate time
+     * Get the updatedDate time.
      *
      * @return the updatedDateTime
      */
@@ -342,7 +350,7 @@ public class Host {
     }
 
     /**
-     * Set the updatedDateTime
+     * Set the updatedDateTime.
      *
      * @param updatedDateTime to set
      */

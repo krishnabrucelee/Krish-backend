@@ -20,6 +20,7 @@ import ck.panda.service.StorageOfferingService;
 import ck.panda.service.TemplateService;
 import ck.panda.service.UserService;
 import ck.panda.service.VirtualMachineService;
+import ck.panda.service.VolumeService;
 import ck.panda.service.ZoneService;
 
 /**
@@ -93,11 +94,15 @@ public class ConvertUtil {
     @Autowired
     private PodService podService;
 
+    /** volume servcie for listing volumes. */
+    @Autowired
+    private VolumeService volumeService;
+
     /** Host service for listing hosts. */
     @Autowired
     private HostService hostService;
 
-    /**
+     /**
      * Get domain id.
      *
      * @param uuid uuid of domain.
@@ -187,6 +192,18 @@ public class ConvertUtil {
 
 
     /**
+     * Get the ostype id.
+     *
+     * @param uuid uuid of nic network.
+     * @return netwotk id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getOsTypeId(String uuid) throws Exception {
+        return osTypeService.findByUUID(uuid).getId();
+    }
+
+
+    /**
      * Get domain object.
      *
      * @param uuid uuid of domain
@@ -232,30 +249,31 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Long getPodId(String uuid) throws Exception {
-        if (podService.findByUUID(uuid) != null) {
             return podService.findByUUID(uuid).getId();
-        } else {
-            return null;
-        }
     }
-
     /**
-     * Get the pod id.
+     * Get volume id.
      *
-     * @param host of pod.
+     * @param uuid of pod.
      * @return pod id.
      * @throws Exception unhandled exception.
      */
-    public Long getPodId(Long host) throws Exception {
-        if (hostService.find(host) != null) {
-            return hostService.find(host).getPodId();
-        } else {
-            return null;
-        }
+    public Long getVolumeId(String uuid) throws Exception {
+        return volumeService.findByUUID(uuid).getId();
     }
 
     /**
-     * Get Host id.
+     * Get instance id.
+     *
+     * @param uuid of instance.
+     * @return instance id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getVmInstanceId(String uuid) throws Exception {
+        return virtualMachineService.findByUUID(uuid).getId();
+    }
+    /**
+     *  Get Host id.
      *
      * @param uuid of host.
      * @return host id.
