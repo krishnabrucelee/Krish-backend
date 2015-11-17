@@ -100,8 +100,4 @@ public class ProjectController extends CRUDController<Project>implements ApiCont
     protected List<Project> getSearch() throws Exception {
         return projectService.findAllByActive(true);
     }
-
-    @Override
-    public void testMethod() throws Exception {
-    }
 }

@@ -105,9 +105,4 @@ public class VMSnapshotController extends CRUDController<VmSnapshot>implements A
             throws Exception {
         return snapshotService.vmSnapshotEventHandle(vm, event);
     }
-
-    @Override
-    public void testMethod() throws Exception {
-        // TODO Auto-generated method stub
-    }
 }

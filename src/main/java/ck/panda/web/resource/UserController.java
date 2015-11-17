@@ -87,9 +87,4 @@ public class UserController extends CRUDController<User> implements ApiControlle
    	protected List<User> getSearch(@RequestParam("q") String query) throws Exception {
    		return userService.findByName(query);
    	}
-
-   @Override
-   public void testMethod() throws Exception {
-
-  }
 }

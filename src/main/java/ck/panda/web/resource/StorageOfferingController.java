@@ -113,10 +113,4 @@ public class StorageOfferingController extends CRUDController<StorageOffering> i
     protected List<String> getStorageTags() throws Exception {
         return storageOfferingService.findTags(true);
     }
-
-    @Override
-    public void testMethod() throws Exception {
-        // TODO Auto-generated method stub
-    }
-
 }
