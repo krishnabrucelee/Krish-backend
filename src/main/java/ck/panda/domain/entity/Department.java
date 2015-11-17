@@ -544,11 +544,11 @@ public class Department implements Serializable {
         //TODO: have to update user list
         try {
             department.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            department.setUserName(JsonUtil.getStringValue(jsonObject, "username"));
             JSONArray userList = jsonObject.getJSONArray("user");
             JSONObject userObject = userList.getJSONObject(0);
             department.setFirstName(JsonUtil.getStringValue(userObject, "firstname"));
             department.setLastName(JsonUtil.getStringValue(userObject, "lastname"));
+            department.setUserName(JsonUtil.getStringValue(userObject, "username"));
             department.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(jsonObject, "domainid")));
             department.setEmail(JsonUtil.getStringValue(userObject, "email"));
             department.setPassword("l3tm3in");
