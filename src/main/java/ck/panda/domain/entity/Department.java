@@ -29,7 +29,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 
@@ -541,9 +540,10 @@ public class Department implements Serializable {
      */
     public static Department convert(JSONObject jsonObject, ConvertUtil convertUtil) throws JSONException {
         Department department = new Department();
+        department.setSyncFlag(false);
         //TODO: have to update user list
         try {
-            department.setUuid(JsonUtil.getStringValue(jsonObject, "uuid"));
+            department.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
             department.setUserName(JsonUtil.getStringValue(jsonObject, "username"));
             JSONArray userList = jsonObject.getJSONArray("user");
             JSONObject userObject = userList.getJSONObject(0);
@@ -553,7 +553,6 @@ public class Department implements Serializable {
             department.setEmail(JsonUtil.getStringValue(userObject, "email"));
             department.setPassword("l3tm3in");
             department.setIsActive(true);
-            department.setSyncFlag(false);
             department.setStatus(Status.valueOf(JsonUtil.getStringValue(userObject, "state")));
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -569,11 +568,9 @@ public class Department implements Serializable {
      */
     public static Map<String, Department> convert(List<Department> departmentList) {
         Map<String, Department> departmentMap = new HashMap<String, Department>();
-
         for (Department department : departmentList) {
             departmentMap.put(department.getUuid(), department);
         }
-
         return departmentMap;
     }
 }

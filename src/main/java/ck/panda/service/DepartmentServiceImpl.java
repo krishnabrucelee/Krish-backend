@@ -52,13 +52,13 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Autowired
     private ConfigUtil configServer;
 
-    /** Convert Util reference. */
-    @Autowired
-    private ConvertUtil convertUtil;
-
     /** Secret key for the user encryption. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
+
+    /** Reference of the convertutil. */
+    @Autowired
+    private ConvertUtil convertUtil;
 
     @Override
     public Department save(Department department) throws Exception {
