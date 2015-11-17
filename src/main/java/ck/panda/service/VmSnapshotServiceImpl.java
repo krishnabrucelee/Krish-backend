@@ -14,7 +14,6 @@ import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmSnapshot;
-import ck.panda.domain.entity.VmSnapshot.SnapshotType;
 import ck.panda.domain.entity.VmSnapshot.Status;
 import ck.panda.domain.repository.jpa.VmSnapshotRepository;
 import ck.panda.util.AppValidator;
@@ -230,7 +229,7 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
     /**
      * Open connection for CS API call.
      *
-     * @param snapshotId VM snapshot uuid.
+     * @param vmId VM snapshot id.
      * @return VmSnapshot.
      * @throws Exception unhandled exceptions.
      */
@@ -260,7 +259,6 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
     /**
      * Open connection for CS API call.
      *
-     * @return VmSnapshot.
      * @throws Exception unhandled exceptions.
      */
     public void getCSConnector() throws Exception {

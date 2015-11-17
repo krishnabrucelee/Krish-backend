@@ -77,19 +77,19 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     @Override
     public VmInstance save(VmInstance vminstance) throws Exception {
-        System.out.println(vminstance.getSyncFlag() +" hi");
-    	if (vminstance.getSyncFlag()) {
+        LOGGER.debug("instance sync ", vminstance.getSyncFlag());
+        if (vminstance.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity("vminstance", vminstance);
             errors = validator.validateEntity(vminstance, errors);
-            errors = this.validateName(errors, vminstance.getName(), vminstance.getDepartment(),0L);
+            errors = this.validateName(errors, vminstance.getName(), vminstance.getDepartment(), 0L);
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
                 HashMap<String, String> optional = new HashMap<String, String>();
                 optional.put("displayvm", vminstance.getName());
                 optional.put("name", vminstance.getName());
-                if(networkRepo.findByUUID(vminstance.getNetworkUuid())!= null){
-                vminstance.setNetworkId(networkRepo.findByUUID(vminstance.getNetworkUuid()).getId());
+                if (networkRepo.findByUUID(vminstance.getNetworkUuid()) != null) {
+                    vminstance.setNetworkId(networkRepo.findByUUID(vminstance.getNetworkUuid()).getId());
                 }
                 CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
                 server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
@@ -125,13 +125,13 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             }
             return virtualmachinerepository.save(vminstance);
         } else {
-        	Errors errors = validator.createErrors();
-        	errors = this.validateName(errors, vminstance.getName(), vminstance.getDepartment(), vminstance.getId());
-			if (errors.hasErrors()) {
-				return null;
-			} else {
-				return virtualmachinerepository.save(vminstance);
-			}
+            Errors errors = validator.createErrors();
+            errors = this.validateName(errors, vminstance.getName(), vminstance.getDepartment(), vminstance.getId());
+            if (errors.hasErrors()) {
+                return null;
+            } else {
+                return virtualmachinerepository.save(vminstance);
+            }
         }
     }
 
@@ -442,8 +442,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
-                        vminstance.setIsoName(jobresult.getJSONObject("jobresult").getJSONObject("virtualmachine").getString("isoname"));
-                        vminstance.setIso(jobresult.getJSONObject("jobresult").getJSONObject("virtualmachine").getString("isoid"));
+                        vminstance.setIsoName(jobresult.getJSONObject("jobresult").getJSONObject("virtualmachine")
+                                .getString("isoname"));
+                        vminstance.setIso(jobresult.getJSONObject("jobresult").getJSONObject("virtualmachine")
+                                .getString("isoid"));
                     }
                 }
 

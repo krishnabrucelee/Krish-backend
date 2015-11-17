@@ -117,7 +117,7 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = projectRepository.findOne(id);
         // find validation
         if (project == null) {
-            throw new EntityNotFoundException("project not found");
+            throw new EntityNotFoundException("project.not.found");
         }
         return projectRepository.findOne(id);
     }
@@ -144,7 +144,7 @@ public class ProjectServiceImpl implements ProjectService {
      */
     private Errors validateByName(Errors errors, String name, Department department, Long projectId) throws Exception {
         if (projectRepository.findByNameAndDepartment(true, name, department, projectId) != null) {
-            errors.addFieldError("name", "project already exist for same department");
+            errors.addFieldError("name", "project.already.exist.for.same.department");
         }
         return errors;
     }

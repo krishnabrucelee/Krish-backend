@@ -130,7 +130,7 @@ public class VmSnapshot implements Serializable {
 
     /** Enumeration Type for snapshot. */
     public enum SnapshotType {
-        /** snapshot disk of current VM */
+        /** snapshot disk of current VM. */
         Disk,
         /** snapshot disk and memory of current VM. */
         DiskAndMemory
@@ -611,22 +611,22 @@ public class VmSnapshot implements Serializable {
     /**
      * Get the memory snapshot.
      *
-	 * @return the snapshotMemory
-	 */
-	public Boolean getSnapshotMemory() {
-		return snapshotMemory;
-	}
+     * @return the snapshotMemory
+     */
+    public Boolean getSnapshotMemory() {
+        return snapshotMemory;
+    }
 
-	/**
-	 * Set the memory snapshot.
-	 *
-	 * @param snapshotMemory the snapshotMemory to set
-	 */
-	public void setSnapshotMemory(Boolean snapshotMemory) {
-		this.snapshotMemory = snapshotMemory;
-	}
+    /**
+     * Set the memory snapshot.
+     *
+     * @param snapshotMemory the snapshotMemory to set
+     */
+    public void setSnapshotMemory(Boolean snapshotMemory) {
+        this.snapshotMemory = snapshotMemory;
+    }
 
-	@Override
+    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("VmSnapshot [id=");
@@ -707,7 +707,7 @@ public class VmSnapshot implements Serializable {
     /**
      * Mapping entity object into list.
      *
-     * @param csInstanceService list of vms snapshot.
+     * @param csSnapshotService list of vms snapshot.
      * @return vm snapshot.
      */
     public static Map<String, VmSnapshot> convert(List<VmSnapshot> csSnapshotService) {

@@ -102,7 +102,7 @@ public class ConvertUtil {
     @Autowired
     private HostService hostService;
 
-     /**
+    /**
      * Get domain id.
      *
      * @param uuid uuid of domain.
@@ -178,7 +178,6 @@ public class ConvertUtil {
         }
     }
 
-
     /**
      * Get the networkoffering id.
      *
@@ -190,7 +189,6 @@ public class ConvertUtil {
         return networkOfferingService.findByUUID(uuid).getId();
     }
 
-
     /**
      * Get the ostype id.
      *
@@ -201,7 +199,6 @@ public class ConvertUtil {
     public Long getOsTypeId(String uuid) throws Exception {
         return osTypeService.findByUUID(uuid).getId();
     }
-
 
     /**
      * Get domain object.
@@ -249,8 +246,9 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Long getPodId(String uuid) throws Exception {
-            return podService.findByUUID(uuid).getId();
+        return podService.findByUUID(uuid).getId();
     }
+
     /**
      * Get volume id.
      *
@@ -272,8 +270,9 @@ public class ConvertUtil {
     public Long getVmInstanceId(String uuid) throws Exception {
         return virtualMachineService.findByUUID(uuid).getId();
     }
+
     /**
-     *  Get Host id.
+     * Get Host id.
      *
      * @param uuid of host.
      * @return host id.
@@ -326,6 +325,21 @@ public class ConvertUtil {
     public VmInstance getVm(String uuid) throws Exception {
         if (virtualMachineService.findByUUID(uuid) != null) {
             return virtualMachineService.findByUUID(uuid);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get pod id.
+     *
+     * @param hostId host id.
+     * @return pod id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getPodIdByHost(Long hostId) throws Exception {
+        if (hostService.find(hostId) != null) {
+            return hostService.find(hostId).getPodId();
         } else {
             return null;
         }

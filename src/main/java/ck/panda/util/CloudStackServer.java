@@ -102,12 +102,12 @@ public class CloudStackServer {
         LOGER.debug(method.getQueryString());
         LOGER.debug(method.getPath());
 
-        System.out.println(method.getQueryString());
+
         String response = null;
         client.executeMethod(method);
 
         LOGER.debug(method.getResponseBodyAsString());
-        System.out.println(method.getResponseBodyAsString());
+
 
         response = method.getResponseBodyAsString();
 

@@ -17,7 +17,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.json.JSONArray;
@@ -1220,8 +1219,9 @@ public class VmInstance implements Serializable {
             vmInstance.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
             vmInstance.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
             vmInstance.setHostId(convertUtil.getHostId(JsonUtil.getStringValue(jsonObject, "hostid")));
-            if(vmInstance.getHostId() != null){
-            vmInstance.setPodId(convertUtil.getPodId(convertUtil.getHostId(JsonUtil.getStringValue(jsonObject, "hostid"))));
+            if (vmInstance.getHostId() != null) {
+                vmInstance.setPodId(convertUtil
+                        .getPodIdByHost(convertUtil.getHostId(JsonUtil.getStringValue(jsonObject, "hostid"))));
             }
             vmInstance.setTemplateId(convertUtil.getTemplateId(JsonUtil.getStringValue(jsonObject, "templateid")));
             vmInstance.setComputeOfferingId(

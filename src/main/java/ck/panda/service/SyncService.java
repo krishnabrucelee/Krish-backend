@@ -138,26 +138,23 @@ public interface SyncService {
   /**
    * Sync with CloudStack server Instance list.
    *
-   * @throws ApplicationException unhandled application errors.
    * @throws Exception cloudstack unhandled errors
    */
-  void syncInstances() throws ApplicationException, Exception;
+  void syncInstances() throws  Exception;
 
   /**
    * Sync with CloudStack server Instance snapshot list.
    *
-   * @throws ApplicationException unhandled application errors.
    * @throws Exception cloudstack unhandled errors
    */
-  void syncVmSnapshots() throws ApplicationException, Exception;
+  void syncVmSnapshots() throws Exception;
 
   /**
    * Sync with CloudStack server Instance snapshot list.
    *
-   * @param Object response object.
-   * @throws ApplicationException unhandled application errors.
+   * @param Object response json object.
    * @throws Exception cloudstack unhandled errors
    */
-  void syncResourceStatus(String Object) throws ApplicationException, Exception;
+  void syncResourceStatus(String Object) throws  Exception;
 
 }

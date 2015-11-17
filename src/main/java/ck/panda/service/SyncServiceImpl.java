@@ -176,7 +176,6 @@ public class SyncServiceImpl  implements SyncService {
     @Override
     public void init() throws Exception {
        CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
-       System.out.println(server.getClass().getName());
        server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
     }
 
@@ -962,7 +961,7 @@ public class SyncServiceImpl  implements SyncService {
      * @throws Exception cloudstack unhandled errors.
      */
     @Override
-    public void syncInstances() throws ApplicationException, Exception {
+    public void syncInstances() throws Exception {
         // 1. Get all the vm objects from CS server as hash
         List<VmInstance> csInstanceService = virtualMachineService.findAllFromCSServer();
         HashMap<String, VmInstance> vmMap = (HashMap<String, VmInstance>) VmInstance.convert(csInstanceService);
@@ -1219,7 +1218,7 @@ public class SyncServiceImpl  implements SyncService {
      * @throws Exception cloudstack unhandled errors.
      */
     @Override
-    public void syncVmSnapshots() throws ApplicationException, Exception {
+    public void syncVmSnapshots() throws Exception {
         //1. Get all the vm snapshot objects from CS server as hash
         List<VmSnapshot> csSnapshotService = vmsnapshotService.findAllFromCSServer();
         HashMap<String, VmSnapshot> csSnapshotMap = (HashMap<String, VmSnapshot>) VmSnapshot.convert(csSnapshotService);
@@ -1263,7 +1262,7 @@ public class SyncServiceImpl  implements SyncService {
      * @throws Exception cloudstack unhandled errors.
      */
     @Override
-    public void syncResourceStatus(String Object) throws ApplicationException, Exception {
+    public void syncResourceStatus(String Object) throws Exception {
     	CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
         server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
         cloudStackInstanceService.setServer(server);
