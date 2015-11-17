@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import com.google.common.base.Optional;
+
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
@@ -192,6 +195,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findByUserNameAndDomain(String userName, Domain domain) throws Exception {
         return userRepository.findByUserNameAndDomain(userName, domain);
+    }
+
+    @Override
+    public User findByUser(Optional<String> userName, Optional<String> password) throws Exception {
+        String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+        byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+        String encryptedPassword = new String(EncryptionUtil.encrypt(password.get(), originalKey));
+        return userRepository.findByUser(userName.get(), encryptedPassword);
     }
 
 }

@@ -1,10 +1,9 @@
 package ck.panda.service;
 
 import java.util.List;
-
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
-
+import com.google.common.base.Optional;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
 import ck.panda.util.domain.CRUDService;
@@ -47,4 +46,13 @@ public interface UserService extends CRUDService<User> {
      */
     User findByUserNameAndDomain(@Param("userName") String userName, @Param("domain") Domain domain) throws Exception;
 
+    /**
+     * Find the user for login authentication.
+     *
+     * @param userName login user name
+     * @param password login password
+     * @return user details
+     * @throws Exception raise if error
+     */
+     User findByUser(Optional<String> userName, Optional<String> password) throws Exception;
 }

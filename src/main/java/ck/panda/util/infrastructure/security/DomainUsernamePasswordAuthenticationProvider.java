@@ -37,10 +37,11 @@ public class DomainUsernamePasswordAuthenticationProvider implements Authenticat
             throw new BadCredentialsException("Invalid Domain User Credentials");
         }
 
-        AuthenticationWithToken resultOfAuthentication = externalServiceAuthenticator.authenticate(username.get(), password.get());
-        String newToken = tokenService.generateNewToken();
-        resultOfAuthentication.setToken(newToken);
-        tokenService.store(newToken, resultOfAuthentication);
+        AuthenticationWithToken resultOfAuthentication = null;
+//        AuthenticationWithToken resultOfAuthentication = externalServiceAuthenticator.authenticate(username.get(), password.get());
+//        String newToken = tokenService.generateNewToken();
+//        resultOfAuthentication.setToken(newToken);
+//        tokenService.store(newToken, resultOfAuthentication);
 
         return resultOfAuthentication;
     }

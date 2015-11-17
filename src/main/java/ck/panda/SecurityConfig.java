@@ -1,5 +1,6 @@
 package ck.panda;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,17 +13,13 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-
 import ck.panda.util.infrastructure.externalwebservice.SomeExternalServiceAuthenticator;
 import ck.panda.util.infrastructure.security.AuthenticationFilter;
-import ck.panda.util.infrastructure.security.BackendAdminUsernamePasswordAuthenticationProvider;
-import ck.panda.util.infrastructure.security.DomainUsernamePasswordAuthenticationProvider;
+import ck.panda.util.infrastructure.security.DatabaseAuthenticationManager;
 import ck.panda.util.infrastructure.security.ExternalServiceAuthenticator;
-import ck.panda.util.infrastructure.security.ManagementEndpointAuthenticationFilter;
 import ck.panda.util.infrastructure.security.TokenAuthenticationProvider;
 import ck.panda.util.infrastructure.security.TokenService;
 import ck.panda.util.web.ApiController;
-
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -38,21 +35,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Value("${backend.admin.role}")
     private String backendAdminRole;
 
+    /** Database authentication manager reference. */
+    @Autowired
+    private DatabaseAuthenticationManager databaseAuthenticationManager;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
         http.csrf().disable().
                 sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).
                 and().
-                authorizeRequests().
-                antMatchers(actuatorEndpoints()).hasRole(backendAdminRole).
-                anyRequest().authenticated().
+                  authorizeRequests().
+                  antMatchers(actuatorEndpoints()).hasRole(backendAdminRole).
+                  anyRequest().authenticated().
                 and().
-                anonymous().disable().
-                exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint());
+                  anonymous().disable().
+                  exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint());
 
-        http.addFilterBefore(new AuthenticationFilter(authenticationManager()), BasicAuthenticationFilter.class).
-                addFilterBefore(new ManagementEndpointAuthenticationFilter(authenticationManager()), BasicAuthenticationFilter.class);
+        http.addFilterBefore(new AuthenticationFilter(databaseAuthenticationManager), BasicAuthenticationFilter.class);
     }
 
     /** Actuator management endpoints.
@@ -71,9 +71,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(domainUsernamePasswordAuthenticationProvider()).
-                authenticationProvider(backendAdminUsernamePasswordAuthenticationProvider()).
-                authenticationProvider(tokenAuthenticationProvider());
+        auth.authenticationProvider(tokenAuthenticationProvider());
     }
 
     /**
@@ -95,30 +93,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     * Factory method to get domain username password authentication provider.
-     * @return AuthenticationProvider
-     */
-    @Bean
-    public AuthenticationProvider domainUsernamePasswordAuthenticationProvider() {
-        return new DomainUsernamePasswordAuthenticationProvider(tokenService(), someExternalServiceAuthenticator());
-    }
-
-    /**
-     * Factory method to get backend admin username password authentication provider.
-     * @return AuthenticationProvider
-     */
-    @Bean
-    public AuthenticationProvider backendAdminUsernamePasswordAuthenticationProvider() {
-        return new BackendAdminUsernamePasswordAuthenticationProvider();
-    }
-
-    /**
      * Factory method to get  token authentication provider.
      * @return AuthenticationProvider
      */
     @Bean
     public AuthenticationProvider tokenAuthenticationProvider() {
-        return new TokenAuthenticationProvider(tokenService());
+        return new TokenAuthenticationProvider(tokenService(), someExternalServiceAuthenticator());
     }
 
     /**
@@ -129,5 +109,4 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public AuthenticationEntryPoint unauthorizedEntryPoint() {
         return (request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
     }
-
 }
