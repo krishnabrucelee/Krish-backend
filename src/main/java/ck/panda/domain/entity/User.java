@@ -123,7 +123,8 @@ public class User {
     public enum Type {
        /** Define type constant. */
         USER,
-        ADMIN;
+        ROOT_ADMIN,
+        DOMAIN_ADMIN;
     }
 
     /** Define status. */
@@ -497,7 +498,7 @@ public class User {
         user.setFirstName(JsonUtil.getStringValue(jsonObject, "firstname"));
         user.setLastName(JsonUtil.getStringValue(jsonObject, "lastname"));
         user.setEmail(JsonUtil.getStringValue(jsonObject, "email"));
-        user.setType(JsonUtil.getIntegerValue(jsonObject, "accounttype") == 0 ? User.Type.USER : User.Type.ADMIN);
+        user.setType(JsonUtil.getIntegerValue(jsonObject, "accounttype") == 0 ? User.Type.USER : User.Type.DOMAIN_ADMIN);
         user.setDomain(convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid")));
         user.setDepartment(convertUtil.getDepartment(JsonUtil.getStringValue(jsonObject, "accountid")));
         return user;

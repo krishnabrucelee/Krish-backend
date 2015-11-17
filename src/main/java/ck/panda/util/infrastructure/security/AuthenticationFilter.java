@@ -3,13 +3,10 @@ package ck.panda.util.infrastructure.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-
 import ck.panda.util.web.ApiController;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
@@ -19,7 +16,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.util.UrlPathHelper;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -28,12 +24,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-
 /**
  * Authentication filter.
  *
  */
 public class AuthenticationFilter extends GenericFilterBean {
+
     /** Logger constant. */
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationFilter.class);
 
@@ -44,14 +40,14 @@ public class AuthenticationFilter extends GenericFilterBean {
     public static final String USER_SESSION_KEY = "user";
 
     /** Authentication manager attribute. */
-    private AuthenticationManager authenticationManager;
+    private DatabaseAuthenticationManager databaseAuthenticationManager;
 
     /**
      * Parameterized constructor.
-     * @param authenticationManager to set
+     * @param databaseAuthenticationManager to set
      */
-    public AuthenticationFilter(AuthenticationManager authenticationManager) {
-        this.authenticationManager = authenticationManager;
+    public AuthenticationFilter(DatabaseAuthenticationManager databaseAuthenticationManager) {
+        this.databaseAuthenticationManager = databaseAuthenticationManager;
     }
 
     @Override
@@ -62,12 +58,13 @@ public class AuthenticationFilter extends GenericFilterBean {
         Optional<String> username = Optional.fromNullable(httpRequest.getHeader("x-auth-username"));
         Optional<String> password = Optional.fromNullable(httpRequest.getHeader("x-auth-password"));
         Optional<String> token = Optional.fromNullable(httpRequest.getHeader("x-auth-token"));
+        Optional<String> domain = Optional.fromNullable(httpRequest.getHeader("x-requested-with"));
 
         String resourcePath = new UrlPathHelper().getPathWithinApplication(httpRequest);
         try {
             if (postToAuthenticate(httpRequest, resourcePath)) {
                 LOGGER.debug("Trying to authenticate user {} by x-auth-username method", username);
-                processUsernamePasswordAuthentication(httpResponse, username, password);
+                processUsernamePasswordAuthentication(httpResponse, username, password, domain);
                 return;
             }
 
@@ -143,10 +140,11 @@ public class AuthenticationFilter extends GenericFilterBean {
      * @param httpResponse to set
      * @param username to set
      * @param password to set
+     * @param domain to set
      * @throws IOException if any error occurs
      */
-    private void processUsernamePasswordAuthentication(HttpServletResponse httpResponse, Optional<String> username, Optional<String> password) throws IOException {
-        Authentication resultOfAuthentication = tryToAuthenticateWithUsernameAndPassword(username, password);
+    private void processUsernamePasswordAuthentication(HttpServletResponse httpResponse, Optional<String> username, Optional<String> password, Optional<String> domain) throws IOException {
+        Authentication resultOfAuthentication = tryToAuthenticateWithUsernameAndPassword(username, password, domain);
         SecurityContextHolder.getContext().setAuthentication(resultOfAuthentication);
         httpResponse.setStatus(HttpServletResponse.SC_OK);
         TokenResponse tokenResponse = new TokenResponse(resultOfAuthentication.getDetails().toString());
@@ -159,10 +157,12 @@ public class AuthenticationFilter extends GenericFilterBean {
      * Try to authenticate with username and password.
      * @param username to set
      * @param password to set
+     * @param domain to set
      * @return Authentication
      */
-    private Authentication tryToAuthenticateWithUsernameAndPassword(Optional<String> username, Optional<String> password) {
+    private Authentication tryToAuthenticateWithUsernameAndPassword(Optional<String> username, Optional<String> password, Optional<String> domain) {
         UsernamePasswordAuthenticationToken requestAuthentication = new UsernamePasswordAuthenticationToken(username, password);
+        requestAuthentication.setDetails(domain);
         return tryToAuthenticate(requestAuthentication);
     }
 
@@ -191,7 +191,7 @@ public class AuthenticationFilter extends GenericFilterBean {
      * @return Authentication
      */
     private Authentication tryToAuthenticate(Authentication requestAuthentication) {
-        Authentication responseAuthentication = authenticationManager.authenticate(requestAuthentication);
+        Authentication responseAuthentication = databaseAuthenticationManager.authenticate(requestAuthentication);
         if (responseAuthentication == null || !responseAuthentication.isAuthenticated()) {
             throw new InternalAuthenticationServiceException("Unable to authenticate Domain User for provided credentials");
         }

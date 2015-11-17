@@ -38,4 +38,13 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     @Query(value = "select user from User user where user.isActive IS TRUE AND user.department=:department")
     List<User> findByDepartment(Department department);
 
+    /**
+     * Find the user for login authentication.
+     *
+     * @param userName login user name
+     * @param password login password
+     * @return user details
+     */
+    @Query(value = "select user from User user where user.userName = :userName AND user.password = :password")
+    User findByUser(@Param("userName") String userName, @Param("password") String password);
 }
