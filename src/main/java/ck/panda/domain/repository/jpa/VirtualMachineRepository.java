@@ -27,9 +27,8 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
     *
     * @param name instance name.
     * @param department department object.
-    * @param id instance id.
     * @return instance.
     */
-   @Query(value = "select vm from VmInstance vm where vm.name=:name AND vm.department=:department AND vm.id!=:id)")
-   VmInstance findByNameAndDepartment(String name, Department department, Long id);
+   @Query(value = "select vm from VmInstance vm where vm.name=:name AND vm.department=:department)")
+   VmInstance findByNameAndDepartment(@Param("name") String name, @Param("department") Department department);
 }

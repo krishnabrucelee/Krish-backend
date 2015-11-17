@@ -5,6 +5,10 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.util.domain.CRUDService;
 
+/**
+ * Service class for Virtual Machine Snapshot. This service provides Take VM snapshot, Restore Snapshot
+ * related actions.
+ */
 @Service
 public interface VmSnapshotService extends CRUDService<VmSnapshot> {
     /**
