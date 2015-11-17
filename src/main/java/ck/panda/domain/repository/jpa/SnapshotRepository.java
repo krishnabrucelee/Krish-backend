@@ -38,6 +38,6 @@ public interface SnapshotRepository extends PagingAndSortingRepository<Snapshot,
      * @return snapshot name.
      */
     @Query(value = "select snap from Snapshot snap where snap.name=:name AND snap.isActive =:isActive")
-    Snapshot findByNameAndIsActive(@Param("name") String name, @Param("isActive")  Boolean isActive);
+    Snapshot findByNameAndIsActive(@Param("name") String Name, @Param("isActive")  Boolean isActive);
 
 }

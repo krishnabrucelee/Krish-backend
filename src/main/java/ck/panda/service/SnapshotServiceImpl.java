@@ -56,6 +56,7 @@ public class SnapshotServiceImpl implements SnapshotService {
     @Override
     public Snapshot save(Snapshot snapshot) throws Exception {
         if (snapshot.getSyncFlag()) {
+            this.validateSnapshot(snapshot);
             Errors errors = validator.rejectIfNullEntity("snapshots", snapshot);
             errors = validator.validateEntity(snapshot, errors);
             if (errors.hasErrors()) {
@@ -69,7 +70,6 @@ public class SnapshotServiceImpl implements SnapshotService {
                 snapMap.put("name", snapshot.getName());
                 String snapresponse = snapshotService.createSnapshot(snapshot.getVolume().getUuid(), snapMap, "json");
                 LOGGER.debug(snapshot.getUuid());
-                System.out.println(snapresponse);
                 JSONObject jobId = new JSONObject(snapresponse).getJSONObject("createsnapshotresponse");
                 if (jobId.has("errorcode")) {
                     errors = this.validateEvent(errors, jobId.getString("errortext"));
@@ -83,16 +83,16 @@ public class SnapshotServiceImpl implements SnapshotService {
     }
 
     /**
-     * Validate the department.
+     * Validate the Snapshot.
      *
-     * @param department reference of the department.
+     * @param department reference of the Snapshot.
      * @throws Exception error occurs
      */
     private void validateSnapshot(Snapshot snapshot) throws Exception {
         Errors errors = validator.rejectIfNullEntity("snapshots", snapshot);
         errors = validator.validateEntity(snapshot, errors);
-        snapshot = snapshotRepo.findByNameAndIsActive(snapshot.getName(),true);
-        if (snapshot != null && snapshot.getId() != snapshot.getId()) {
+        Snapshot validateSnapshot = snapshotRepo.findByNameAndIsActive(snapshot.getName(),true);
+        if (validateSnapshot != null && snapshot.getId() != validateSnapshot.getId()) {
             errors.addFieldError("name", "snapshot.already.exist");
         }
         if (errors.hasErrors()) {
@@ -118,8 +118,7 @@ public class SnapshotServiceImpl implements SnapshotService {
 
     @Override
     public Snapshot find(Long id) throws Exception {
-        Snapshot snapshot = snapshotRepo.findOne(id);
-        return snapshot;
+        return snapshotRepo.findOne(id);
     }
 
     @Override
