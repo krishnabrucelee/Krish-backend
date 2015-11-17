@@ -20,6 +20,7 @@ import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Host;
 import ck.panda.domain.entity.Hypervisor;
+import ck.panda.domain.entity.Iso;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.OsCategory;
@@ -152,6 +153,10 @@ public class SyncServiceImpl  implements SyncService {
     @Autowired
     private ClusterService clusterService;
 
+    /** For listing iso image in cloudstack server. */
+    @Autowired
+    private IsoService isoService;
+
     /** CloudStack connector. */
     @Autowired
     private CloudStackServer server;
@@ -260,43 +265,57 @@ public class SyncServiceImpl  implements SyncService {
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch Department", e);
       }
-      try{
-          // 15. Sync Volume entity
-          this.syncVolume();
-      }catch(Exception e){
-          LOGGER.error("ERROR AT synch Volume", e);
-      }
-
-            try {
-          // 15. Sync Snapshot entity
-          this.syncSnapshot();
-      } catch (Exception e) {
-          LOGGER.error("ERROR AT synch Snapshot", e);
-      }
-
 
       try {
-          // 16. Sync Pod entity
+          // 14. Sync Pod entity
           this.syncPod();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch Pod", e);
       }
 
       try {
-          // 17. Sync Cluster entity
+          // 15. Sync Cluster entity
           this.syncCluster();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch cluster", e);
       }
 
       try {
-          // 18. Sync Host entity
+          // 16. Sync Host entity
           this.syncHost();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch Host", e);
       }
 
       try {
+          // 17. Sync Iso entity
+          this.syncIso();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Iso", e);
+      }
+
+      try {
+          // 18. Sync Instance entity
+          this.syncInstances();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Instance", e);
+      }
+
+      try {
+          // 19. Sync Volume entity
+          this.syncVolume();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Volume", e);
+      }
+
+      try {
+          // 20. Sync Snapshot entity
+          this.syncSnapshot();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Snapshot", e);
+      }
+
+       try {
           // 14. Sync Instance entity
           this.syncInstances();
       } catch (Exception e) {
@@ -304,7 +323,7 @@ public class SyncServiceImpl  implements SyncService {
       }
 
       try {
-          // 19. Sync Host entity
+          // 19. Sync VmSnapshot entity
           this.syncVmSnapshots();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch vm snapshots", e);
@@ -982,7 +1001,7 @@ public class SyncServiceImpl  implements SyncService {
         }
 
     /**
-     * Sync with Cloud Server Account.
+     * Sync with Cloud Server Host.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
@@ -1024,7 +1043,7 @@ public class SyncServiceImpl  implements SyncService {
     }
 
     /**
-     * Sync with Cloud Server Account.
+     * Sync with Cloud Server Volume.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
@@ -1068,7 +1087,7 @@ public class SyncServiceImpl  implements SyncService {
     }
 
     /**
-     * Sync with Cloud Server Account.
+     * Sync with Cloud Server Snapshot.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
@@ -1083,6 +1102,7 @@ public class SyncServiceImpl  implements SyncService {
 
         // 3. Iterate application snapshot list
         for (Snapshot snapshot: appSnapshotList) {
+              snapshot.setSyncFlag(false);
              //3.1 Find the corresponding CS server snapshot object by finding it in a hash using uuid
             if (csSnapshotMap.containsKey(snapshot.getUuid())) {
                 Snapshot csUser = csSnapshotMap.get(snapshot.getUuid());
@@ -1110,7 +1130,7 @@ public class SyncServiceImpl  implements SyncService {
     }
 
     /**
-     * Sync with Cloud Server Account.
+     * Sync with Cloud Server Pod.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
@@ -1152,7 +1172,7 @@ public class SyncServiceImpl  implements SyncService {
     }
 
     /**
-     * Sync with Cloud Server Account.
+     * Sync with Cloud Server Cluster.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
@@ -1287,6 +1307,46 @@ public class SyncServiceImpl  implements SyncService {
 
     }
 
+    /**
+     * Sync with Cloud Server Iso.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    private void syncIso() throws ApplicationException, Exception {
 
+        //1. Get all the iso objects from CS server as hash
+        List<Iso> csIsoService = isoService.findAllFromCSServer();
+        HashMap<String, Iso> csIsoMap = (HashMap<String, Iso>) Iso.convert(csIsoService);
+
+        //2. Get all the iso objects from application
+        List<Iso> appPodList = isoService.findAll();
+
+        // 3. Iterate application iso list
+        for (Iso iso: appPodList) {
+             //3.1 Find the corresponding CS server iso object by finding it in a hash using uuid
+            if (csIsoMap.containsKey(iso.getUuid())) {
+                Iso csIso = csIsoMap.get(iso.getUuid());
+
+                iso.setName(csIso.getName());
+
+                //3.2 If found, update the iso object in app db
+                isoService.update(iso);
+
+                //3.3 Remove once updated, so that we can have the list of cs host which is not added in the app
+                csIsoMap.remove(iso.getUuid());
+            } else {
+                isoService.delete(iso);
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete
+             }
+
+             }
+        //4. Get the remaining list of cs server hash iso object, then iterate and
+        //add it to app db
+        for (String key: csIsoMap.keySet()) {
+            isoService.save(csIsoMap.get(key));
+        }
+    }
  }
 
