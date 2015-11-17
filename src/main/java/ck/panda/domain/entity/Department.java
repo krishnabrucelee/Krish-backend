@@ -541,7 +541,6 @@ public class Department implements Serializable {
     public static Department convert(JSONObject jsonObject, ConvertUtil convertUtil) throws JSONException {
         Department department = new Department();
         department.setSyncFlag(false);
-        //TODO: have to update user list
         try {
             department.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
             JSONArray userList = jsonObject.getJSONArray("user");
@@ -549,6 +548,7 @@ public class Department implements Serializable {
             department.setFirstName(JsonUtil.getStringValue(userObject, "firstname"));
             department.setLastName(JsonUtil.getStringValue(userObject, "lastname"));
             department.setUserName(JsonUtil.getStringValue(userObject, "username"));
+            department.setType(AccountType.values()[(JsonUtil.getIntegerValue(userObject, "accounttype"))]);
             department.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(jsonObject, "domainid")));
             department.setEmail(JsonUtil.getStringValue(userObject, "email"));
             department.setPassword("l3tm3in");
