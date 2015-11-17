@@ -88,10 +88,4 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     protected List<Volume> getSearch() throws Exception {
         return volumeService.findAll();
     }
-
-    @Override
-    public void testMethod() throws Exception {
-        // TODO Auto-generated method stub
-    }
-
 }

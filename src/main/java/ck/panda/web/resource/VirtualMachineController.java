@@ -109,7 +109,6 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
 			throws Exception {
 		return virtualmachineservice.vmEventHandle(vm, event);
 	}
-
 	/**
 	 * get all instances.
 	 *
@@ -130,7 +129,4 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
 		return "{\"success\":"+"http://192.168.1.221/console/?token="+token+"}";
 	}
 
-	@Override
-	public void testMethod() throws Exception {
-	}
 }

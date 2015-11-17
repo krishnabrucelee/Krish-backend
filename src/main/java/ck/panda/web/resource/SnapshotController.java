@@ -56,10 +56,4 @@ public class SnapshotController extends CRUDController<Snapshot> implements ApiC
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
-
-    @Override
-    public void testMethod() throws Exception {
-        // TODO Auto-generated method stub
-
-    }
 }

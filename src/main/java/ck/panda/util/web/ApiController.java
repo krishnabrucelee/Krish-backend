@@ -61,10 +61,4 @@ public interface ApiController {
     /** Shutdown endpoint. */
     String SHUTDOWN_ENDPOINT = "/shutdown";
 
-    /**
-     * Method to avoid checkstyle error.
-     * @throws Exception if any exception
-     */
-    void testMethod() throws Exception;
-
 }

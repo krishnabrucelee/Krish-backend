@@ -82,14 +82,6 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
     }
 
     /**
-     * Empty method No implementation.
-     */
-    @Override
-    public void testMethod() throws Exception {
-        roleService.findAll();
-    }
-
-    /**
      * Method to find list of roles by department.
      *
      * @param id - department id

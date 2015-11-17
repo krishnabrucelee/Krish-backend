@@ -90,8 +90,4 @@ public class ApplicationController extends CRUDController<Application>implements
         return applicationService.findAllByIsActive(true);
     }
 
-    @Override
-    public void testMethod() throws Exception {
-        applicationService.findAll();
-    }
 }

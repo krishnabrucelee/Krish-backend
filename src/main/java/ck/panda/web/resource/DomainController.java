@@ -78,10 +78,4 @@ public class DomainController extends CRUDController<Domain> implements ApiContr
   		return domainService.findAll();
   	}
 
-    @Override
-    public void testMethod() throws Exception {
-        // TODO Auto-generated method stub
-
-    }
-
 }

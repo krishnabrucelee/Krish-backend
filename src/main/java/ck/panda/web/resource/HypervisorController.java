@@ -39,10 +39,4 @@ public class HypervisorController extends CRUDController<Hypervisor> implements 
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
-
-    @Override
-    public void testMethod() throws Exception {
-
-    }
-
 }
