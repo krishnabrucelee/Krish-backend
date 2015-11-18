@@ -246,22 +246,21 @@ public class SyncServiceImpl  implements SyncService {
             LOGGER.error("ERROR AT synch Compute Offering", e);
         }
 
-
         try {
-            // 13. Sync Department entity
+            // 11. Sync Department entity
             this.syncDepartment();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Department", e);
         }
 
         try {
-         // 11. Sync User entity
+         // 12. Sync User entity
          this.syncUser();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch User", e);
         }
         try {
-         // 12. Sync Templates entity
+         // 13. Sync Templates entity
          this.syncTemplates();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Templates", e);
@@ -318,14 +317,14 @@ public class SyncServiceImpl  implements SyncService {
       }
 
        try {
-          // 14. Sync Instance entity
+          // 21. Sync Instance entity
           this.syncInstances();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch Instance", e);
       }
 
       try {
-          // 19. Sync VmSnapshot entity
+          // 22. Sync VmSnapshot entity
           this.syncVmSnapshots();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch vm snapshots", e);

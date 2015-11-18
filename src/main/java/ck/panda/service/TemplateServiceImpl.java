@@ -68,7 +68,6 @@ public class TemplateServiceImpl implements TemplateService {
     private HypervisorRepository hypervisorRepository;
 
     @Override
-    @PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
     public Template save(Template template) throws Exception {
         if (template.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity("template", template);
