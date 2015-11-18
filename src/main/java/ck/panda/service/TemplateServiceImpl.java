@@ -186,7 +186,7 @@ public class TemplateServiceImpl implements TemplateService {
                     if (jsonobject.getBoolean("isready")) {
                         template.setStatus(Status.valueOf("ACTIVE"));
                     } else {
-                        template.setStatus(Status.valueOf("INACTIVE"));
+                        template.setStatus(Status.valueOf("ACTIVE"));
                     }
                     template.setType(Type.valueOf(jsonobject.getString("templatetype")));
                 }

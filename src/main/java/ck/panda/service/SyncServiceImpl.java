@@ -245,6 +245,15 @@ public class SyncServiceImpl  implements SyncService {
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Compute Offering", e);
         }
+
+
+        try {
+            // 13. Sync Department entity
+            this.syncDepartment();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Department", e);
+        }
+
         try {
          // 11. Sync User entity
          this.syncUser();
@@ -258,12 +267,6 @@ public class SyncServiceImpl  implements SyncService {
             LOGGER.error("ERROR AT synch Templates", e);
         }
 
-      try {
-          // 13. Sync Department entity
-          this.syncDepartment();
-      } catch (Exception e) {
-          LOGGER.error("ERROR AT synch Department", e);
-      }
 
       try {
           // 14. Sync Pod entity
@@ -687,7 +690,9 @@ public class SyncServiceImpl  implements SyncService {
                 //3.3 Remove once updated, so that we can have the list of cs user which is not added in the app
                 csUserMap.remove(user.getUuid());
             } else {
-                userService.delete(user);
+            	if(user.getIsActive() !=  true){
+            		userService.softDelete(user);
+            	}
                 //3.2 If not found, delete it from app db
                 //TODO clarify the business requirement, since it has impact in the application if it is used
                 //TODO clarify is this a soft or hard delete
