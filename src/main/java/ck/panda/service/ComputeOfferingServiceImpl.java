@@ -52,32 +52,32 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     @PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
     public ComputeOffering save(ComputeOffering compute) throws Exception {
 
-        if (compute.getIsSyncFlag()) {
-        Errors errors = validator.rejectIfNullEntity("compute", compute);
-        errors = validator.validateEntity(compute, errors);
+		if (compute.getIsSyncFlag()) {
+			Errors errors = validator.rejectIfNullEntity("compute", compute);
+			errors = validator.validateEntity(compute, errors);
 
-        if (errors.hasErrors()) {
-            throw new ApplicationException(errors);
-        } else {
+			if (errors.hasErrors()) {
+				throw new ApplicationException(errors);
+			} else {
 
-            //set server for maintain session with configuration values                   
-              computeOffer.setServer(configServer.setServer(1L));
-            String createComputeResponse = computeOffer.createComputeOffering(compute.getName(), compute.getDisplayText(),
-                    "json", addOptionalValues(compute));
-            JSONObject createComputeResponseJSON = new JSONObject(createComputeResponse).getJSONObject("createserviceofferingresponse")
-                    .getJSONObject("serviceoffering");
-            if (createComputeResponseJSON.has("errorcode")) {
-                errors = this.validateEvent(errors, createComputeResponseJSON.getString("errortext"));
-                throw new ApplicationException(errors);
-        }
-            System.out.println(createComputeResponseJSON);
-            compute.setUuid((String) createComputeResponseJSON.get("id"));
-                 return computeRepo.save(compute);
-        }
-        } else {
-             LOGGER.debug(compute.getUuid());
-             return computeRepo.save(compute);
-        }
+				// set server for maintain session with configuration values
+				computeOffer.setServer(configServer.setServer(1L));
+				String createComputeResponse = computeOffer.createComputeOffering(compute.getName(),
+						compute.getDisplayText(), "json", addOptionalValues(compute));
+				JSONObject createComputeResponseJSON = new JSONObject(createComputeResponse).getJSONObject("createserviceofferingresponse");
+
+				if (createComputeResponseJSON.has("errorcode")) {
+					errors = this.validateEvent(errors, createComputeResponseJSON.getString("errortext"));
+					throw new ApplicationException(errors);
+				}
+				JSONObject serviceOffering = createComputeResponseJSON.getJSONObject("serviceoffering");
+				compute.setUuid((String) serviceOffering.get("id"));
+				return computeRepo.save(compute);
+			}
+		} else {
+			LOGGER.debug(compute.getUuid());
+			return computeRepo.save(compute);
+		}
     }
 
 
