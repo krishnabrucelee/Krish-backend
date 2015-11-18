@@ -131,7 +131,7 @@ public class Permission implements Serializable {
     /**
      * Set the action of the permission.
      *
-     * @param action the action to set
+     * @param action action to set
      */
     public void setAction(String action) {
        this.action = action;

@@ -1,13 +1,22 @@
 package ck.panda.util;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Base64;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.service.ComputeOfferingService;
 import ck.panda.service.DepartmentService;
 import ck.panda.service.DomainService;
+import ck.panda.service.EncryptionUtil;
 import ck.panda.service.HostService;
 import ck.panda.service.HypervisorService;
 import ck.panda.service.NetworkOfferingService;
@@ -101,6 +110,10 @@ public class ConvertUtil {
     /** Host service for listing hosts. */
     @Autowired
     private HostService hostService;
+
+    /** Secret key value is append. */
+    @Value(value = "${aes.salt.secretKey}")
+    private String secretKey;
 
     /**
      * Get domain id.
@@ -377,6 +390,23 @@ public class ConvertUtil {
         } else {
             return null;
         }
-    }
+    }    
 
+    public SecretKey getSecretKey() throws UnsupportedEncodingException {
+    	String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+        byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+    	return originalKey;
+    }
+    
+     /**
+     * Get the osCategory.
+     *
+     * @param uuid of osCategory.
+     * @return osCategory id.
+     * @throws Exception unhandled exception.
+     */
+    public OsCategory getOsCategory(String uuid) throws Exception {
+    	 return osCategoryService.findbyUUID(uuid);
+   }
 }

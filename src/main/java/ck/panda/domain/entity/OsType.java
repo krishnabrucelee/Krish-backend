@@ -4,24 +4,26 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
-
-import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import ck.panda.util.ConvertUtil;
+import ck.panda.util.JsonUtil;
 
 /**
  * OS type purpose is to create which type of operation system you want when creating the template.
@@ -34,6 +36,9 @@ import org.springframework.data.annotation.LastModifiedDate;
 @SuppressWarnings("serial")
 public class OsType implements Serializable {
 
+	 /** Logger attribute. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(OsType.class);
+
     /** Id of the OS type. */
     @Id
     @GeneratedValue
@@ -44,10 +49,14 @@ public class OsType implements Serializable {
     @Column(name = "uuid")
     private String uuid;
 
-    /** OS category type id. */
-    @NotEmpty
-    @Column(name = "os_category_uuid")
-    private String osCategoryUuid;
+    /** OsCategory of the OS type. */
+    @JoinColumn(name = "oscategory_id", referencedColumnName = "id", updatable = false, insertable = false)
+    @ManyToOne
+    private OsCategory osCategory;
+
+    /** OSCategory id of the OS type. */
+    @Column(name = "oscategory_id")
+    private Long osCategoryId;
 
     /** Display name of the OS type. */
     @Column(name = "description")
@@ -113,20 +122,39 @@ public class OsType implements Serializable {
     }
 
     /**
-     * @return the osCategoryUuid
-     */
-    public String getOsCategoryUuid() {
-        return osCategoryUuid;
-    }
+   	 * Get the osCategory.
+   	 * @return the osCategory
+   	 */
+   	public OsCategory getOsCategory() {
+   		return osCategory;
+   	}
+
+   	/**
+   	 * Set the osCategory.
+   	 * @param osCategory the osCategory to set
+   	 */
+   	public void setOsCategory(OsCategory osCategory) {
+   		this.osCategory = osCategory;
+   	}
 
     /**
-     * @param osCategoryUuid the osCategoryUuid to set
-     */
-    public void setOsCategoryUuid(String osCategoryUuid) {
-        this.osCategoryUuid = osCategoryUuid;
-    }
+	 * Get the osCategoryId.
+	 * @return the osCategoryId
+	 */
+	public Long getOsCategoryId() {
+		return osCategoryId;
+	}
 
-    /**
+	/**
+	 * Set the osCategoryId.
+	 * @param osCategoryId the osCategoryId to set
+	 */
+	public void setOsCategoryId(Long osCategoryId) {
+		this.osCategoryId = osCategoryId;
+	}
+
+	/**
+     * Get the description of the OS type.
      * @return the description
      */
     public String getDescription() {
@@ -134,6 +162,7 @@ public class OsType implements Serializable {
     }
 
     /**
+     * Set the description of the OS type.
      * @param description the description to set
      */
     public void setDescription(String description) {
@@ -220,18 +249,22 @@ public class OsType implements Serializable {
         this.updatedDateTime = updatedDateTime;
     }
 
-    /**
+	/**
      * Convert JSONObject to os type entity.
      *
      * @param object json object
      * @return os type entity objects
      * @throws JSONException unhandled json errors
      */
-    public static OsType convert(JSONObject object) throws JSONException {
+    public static OsType convert(JSONObject jsonObject, ConvertUtil convertUtil ) throws JSONException {
         OsType osType = new OsType();
-        osType.uuid = object.has("id") ? object.get("id").toString() : "";
-        osType.description = object.has("description") ? object.get("description").toString() : "";
-        osType.osCategoryUuid = object.has("oscategoryid") ? object.get("oscategoryid").toString() : "";
+    	try {
+    		osType.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
+    		osType.setOsCategoryId(convertUtil.getOsCategory(JsonUtil.getStringValue(jsonObject, "oscategoryid")).getId());
+        }
+        catch (Exception ex) {
+        	LOGGER.error("OSType-convert", ex);
+        }
         return osType;
     }
 

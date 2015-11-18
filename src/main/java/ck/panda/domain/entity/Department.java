@@ -514,9 +514,9 @@ public class Department implements Serializable {
      /** Define user type. */
     public enum AccountType {
        /** User status make department as user type. */
-        USER,
-        /** Admin status make department as admin type. */
-        ADMIN
+    	 USER,
+         ROOT_ADMIN,
+         DOMAIN_ADMIN;
     }
 
     /**
@@ -553,7 +553,7 @@ public class Department implements Serializable {
             department.setEmail(JsonUtil.getStringValue(userObject, "email"));
             department.setPassword("l3tm3in");
             department.setIsActive(true);
-            department.setStatus(Status.valueOf(JsonUtil.getStringValue(userObject, "state")));
+            department.setStatus(Status.valueOf(JsonUtil.getStringValue(userObject, "state").toUpperCase()));
         } catch (Exception ex) {
             ex.printStackTrace();
         }
