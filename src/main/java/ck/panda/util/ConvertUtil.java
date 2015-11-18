@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.service.ComputeOfferingService;
 import ck.panda.service.DepartmentService;
@@ -355,7 +356,7 @@ public class ConvertUtil {
         } else {
             return null;
         }
-    }
+    }    
 
     public SecretKey getSecretKey() throws UnsupportedEncodingException {
     	String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
@@ -363,5 +364,15 @@ public class ConvertUtil {
         SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
     	return originalKey;
     }
-
+    
+     /**
+     * Get the osCategory.
+     *
+     * @param uuid of osCategory.
+     * @return osCategory id.
+     * @throws Exception unhandled exception.
+     */
+    public OsCategory getOsCategory(String uuid) throws Exception {
+    	 return osCategoryService.findbyUUID(uuid);
+   }
 }

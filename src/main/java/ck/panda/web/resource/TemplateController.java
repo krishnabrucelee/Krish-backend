@@ -25,10 +25,7 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
 
-/**
- * Template controller.
- *
- */
+/**Template controller. */
 @RestController
 @RequestMapping("/api/templates")
 @Api(value = "Templates", description = "Operations with templates", produces = "application/json")
@@ -84,5 +81,18 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     @ResponseBody
     public List<Template> templateList() throws Exception {
         return templateService.findByTemplate();
+    }
+
+    /**
+     * Find the list of templates by filters.
+     *
+     * @return template list from server
+     * @throws Exception raise if error
+     */
+    @RequestMapping(value = "/search", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Template> findByFilters(@RequestBody Template template) throws Exception {
+        return templateService.findByFilters(template);
     }
 }
