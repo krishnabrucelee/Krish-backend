@@ -39,7 +39,9 @@ public class ProjectController extends CRUDController<Project>implements ApiCont
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new project.", response = Project.class)
     @Override
     public Project create(@RequestBody Project project) throws Exception {
-        project.setDomainId(project.getDomain().getId());
+        if (project.getDomain() != null) {
+            project.setDomainId(project.getDomain().getId());
+        }
         project.setDepartmentId(project.getDepartment().getId());
         project.setProjectOwnerId(project.getProjectOwner().getId());
         return projectService.save(project);
@@ -99,9 +101,5 @@ public class ProjectController extends CRUDController<Project>implements ApiCont
     @ResponseBody
     protected List<Project> getSearch() throws Exception {
         return projectService.findAllByActive(true);
-    }
-
-    @Override
-    public void testMethod() throws Exception {
     }
 }

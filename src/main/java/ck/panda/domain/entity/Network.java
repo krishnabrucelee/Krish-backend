@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -16,7 +15,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
 import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,13 +23,12 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
-
 import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 
 /**
- * Network is network where instances are attached to it.
- * and it can be of either Shared or Isolated types.
+ * A virtual network is a logical construct that enables multi-tenancy on a single physical network.
+ * In CloudStack a virtual network can be shared or isolated.
  */
 @Entity
 @Table(name = "ck_network")
@@ -56,7 +53,7 @@ public class Network implements Serializable {
     @Column(name = "display_text", nullable = true)
     private String displayText;
 
-    /** Zone Object for the Network. */
+    /** Domain Object for the Network. */
     @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
     private Domain domain;
@@ -74,16 +71,20 @@ public class Network implements Serializable {
     @Column(name = "zone_id")
     private Long zoneId;
 
-    /** id for the Network Offer. */
+    /** Name of the account. */
+    @Column(name = "account")
+    private String account;
+
+    /** NetworkOffering Object for the Network Offer. */
     @ManyToOne
     @JoinColumn(name = "networkoffering_id", referencedColumnName = "id", updatable = false, insertable = false)
     private NetworkOffering networkOffering;
 
-    /** id for the Zone. */
+    /** NetworkOffering id for the Zone. */
     @Column(name = "networkoffering_id")
     private Long networkOfferingId;
 
-    /**  Network Type. */
+    /** Type of the Network. */
     @Column(name = "network_type")
     @Enumerated(EnumType.STRING)
     private NetworkType networkType;
@@ -91,6 +92,10 @@ public class Network implements Serializable {
     /**  CIDR Range of the IP address. */
     @Column(name = "cidr")
     private String cIDR;
+
+    /**  Gateway of the Network. */
+    @Column(name = "gateway")
+    private String gateway;
 
     /** IsActive attribute to verify Active or Inactive. */
     @Column(name = "is_active")
@@ -101,7 +106,7 @@ public class Network implements Serializable {
     @Column(name = "version")
     private Long version;
 
-    /** Status attribute to verify status of the Network Offering. */
+    /** Status attribute to verify status of the Network . */
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private Status status;
@@ -138,6 +143,7 @@ public class Network implements Serializable {
         /**  Network type be Isolated. */
         Isolated
     }
+
     /**
      * Enum type for  Network Status.
      *
@@ -152,7 +158,6 @@ public class Network implements Serializable {
     /** Set syncFlag. */
     @Transient
     private Boolean syncFlag;
-
 
     /**
      * Get the Network Id.
@@ -173,6 +178,8 @@ public class Network implements Serializable {
     }
 
     /**
+     * Get the Zone
+     *
      * @return the zone
      */
     public Zone getZone() {
@@ -180,6 +187,8 @@ public class Network implements Serializable {
     }
 
     /**
+     * Set the Zone
+     *
      * @param zone the zone to set
      */
     public void setZone(Zone zone) {
@@ -187,6 +196,8 @@ public class Network implements Serializable {
     }
 
     /**
+     * Get the zoneId
+     *
      * @return the zoneId
      */
     public Long getZoneId() {
@@ -194,6 +205,8 @@ public class Network implements Serializable {
     }
 
     /**
+     * Set the zoneId
+     *
      * @param zoneId the zoneId to set
      */
     public void setZoneId(Long zoneId) {
@@ -340,6 +353,8 @@ public class Network implements Serializable {
     }
 
     /**
+     * Set the Domain Id
+     *
 	 * @param domainId the domainId to set
 	 */
 	public void setDomainId(Long domainId) {
@@ -463,6 +478,8 @@ public class Network implements Serializable {
 
 
     /**
+     * Get the syncFlag
+     *
 	 * @return the syncFlag
 	 */
 	public Boolean getSyncFlag() {
@@ -470,6 +487,8 @@ public class Network implements Serializable {
 	}
 
 	/**
+	 * Set the syncFlag
+	 *
 	 * @param syncFlag the syncFlag to set
 	 */
 	public void setSyncFlag(Boolean syncFlag) {
@@ -477,6 +496,8 @@ public class Network implements Serializable {
 	}
 
 	/**
+	 * Get the Domain Object
+	 *
 	 * @return the domain
 	 */
 	public Domain getDomain() {
@@ -484,6 +505,8 @@ public class Network implements Serializable {
 	}
 
 	/**
+	 * Set the Domain Object
+	 *
 	 * @param domain the domain to set
 	 */
 	public void setDomain(Domain domain) {
@@ -491,6 +514,8 @@ public class Network implements Serializable {
 	}
 
 	/**
+	 * Get the networkOffering Id
+	 *
 	 * @return the networkOfferingId
 	 */
 	public Long getNetworkOfferingId() {
@@ -498,10 +523,49 @@ public class Network implements Serializable {
 	}
 
 	/**
+	 * Set the networkOffering Id
+	 *
 	 * @param networkOfferingId the networkOfferingId to set
 	 */
 	public void setNetworkOfferingId(Long networkOfferingId) {
 		this.networkOfferingId = networkOfferingId;
+	}
+
+
+	/**
+	 * Get the Network Gateway.
+	 *
+	 * @return the gateway
+	 */
+	public String getGateway() {
+		return gateway;
+	}
+
+	/**
+	 * Set the Network Gateway.
+	 *
+	 * @param gateway the gateway to set
+	 */
+	public void setGateway(String gateway) {
+		this.gateway = gateway;
+	}
+
+	/**
+	 * Get the account name.
+	 *
+	 * @return the account
+	 */
+	public String getAccount() {
+		return account;
+	}
+
+	/**
+	 * Set the account name.
+	 *
+	 * @param account the account to set
+	 */
+	public void setAccount(String account) {
+		this.account = account;
 	}
 
 	/** Convert JSONObject to domain entity.
@@ -522,6 +586,8 @@ public class Network implements Serializable {
            network.setNetworkOfferingId(convertUtil.getNetworkOfferingId(JsonUtil.getStringValue(jsonObject, "networkofferingid")));
            network.setcIDR(JsonUtil.getStringValue(jsonObject, "cidr"));
            network.setDisplayText(JsonUtil.getStringValue(jsonObject, "displaytext"));
+           network.setGateway(JsonUtil.getStringValue(jsonObject, "gateway"));
+           network.setAccount(JsonUtil.getStringValue(jsonObject, "account"));
            network.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
        } catch ( Exception ex){
     	   ex.printStackTrace();

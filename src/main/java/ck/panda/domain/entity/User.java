@@ -20,6 +20,8 @@ import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
+
+import ck.panda.service.EncryptionUtil;
 import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 
@@ -123,7 +125,8 @@ public class User {
     public enum Type {
        /** Define type constant. */
         USER,
-        ADMIN;
+        ROOT_ADMIN,
+        DOMAIN_ADMIN;
     }
 
     /** Define status. */
@@ -494,12 +497,14 @@ public class User {
         user.setSyncFlag(false);
         user.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
         user.setUserName(JsonUtil.getStringValue(jsonObject, "username"));
+        user.setPassword(EncryptionUtil.encrypt(user.getUserName(), convertUtil.getSecretKey()));
         user.setFirstName(JsonUtil.getStringValue(jsonObject, "firstname"));
         user.setLastName(JsonUtil.getStringValue(jsonObject, "lastname"));
         user.setEmail(JsonUtil.getStringValue(jsonObject, "email"));
-        user.setType(JsonUtil.getIntegerValue(jsonObject, "accounttype") == 0 ? User.Type.USER : User.Type.ADMIN);
+        user.setType(JsonUtil.getIntegerValue(jsonObject, "accounttype") == 0 ? User.Type.USER : User.Type.DOMAIN_ADMIN);
         user.setDomain(convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid")));
         user.setDepartment(convertUtil.getDepartment(JsonUtil.getStringValue(jsonObject, "accountid")));
+        user.setIsActive(true);
         return user;
     }
 

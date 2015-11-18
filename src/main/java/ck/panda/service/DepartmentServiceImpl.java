@@ -21,6 +21,7 @@ import ck.panda.domain.repository.jpa.DepartmentReposiory;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackAccountService;
 import ck.panda.util.ConfigUtil;
+import ck.panda.util.ConvertUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -54,6 +55,10 @@ public class DepartmentServiceImpl implements DepartmentService {
     /** Secret key for the user encryption. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
+
+    /** Reference of the convertutil. */
+    @Autowired
+    private ConvertUtil convertUtil;
 
     @Override
     public Department save(Department department) throws Exception {
@@ -184,7 +189,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     public List<Department> findAllFromCSServer() throws Exception {
         List<Department> departmentList = new ArrayList<Department>();
         HashMap<String, String> departmentMap = new HashMap<String, String>();
-
+        departmentMap.put("listall", "true");
         // 1. Get the list of accounts from CS server using CS connector
         String response = csAccountService.listAccounts("json", departmentMap);
         JSONArray userListJSON = new JSONObject(response).getJSONObject("listaccountsresponse").getJSONArray("account");
@@ -192,7 +197,10 @@ public class DepartmentServiceImpl implements DepartmentService {
         for (int i = 0, size = userListJSON.length(); i < size; i++) {
             // 2.1 Call convert by passing JSONObject to Department entity and
             // Add the converted Department entity to list
-            departmentList.add(Department.convert(userListJSON.getJSONObject(i)));
+            Department department = Department.convert(userListJSON.getJSONObject(i), convertUtil);
+            if(department.getType() == Department.AccountType.USER) {
+                departmentList.add(department);
+            }
         }
         return departmentList;
     }

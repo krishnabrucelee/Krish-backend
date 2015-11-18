@@ -12,8 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import com.google.common.base.Optional;
+
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.util.AppValidator;
@@ -173,7 +177,9 @@ public class UserServiceImpl implements UserService {
           for (int i = 0, size = userListJSON.length(); i < size; i++) {
               // 2.1 Call convert by passing JSONObject to User entity and Add
               // the converted User entity to list
-              userList.add(User.convert(userListJSON.getJSONObject(i), entity));
+
+              User user = User.convert(userListJSON.getJSONObject(i), entity);
+              userList.add(user);
           }
           return userList;
       }
@@ -192,6 +198,22 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findByUserNameAndDomain(String userName, Domain domain) throws Exception {
         return userRepository.findByUserNameAndDomain(userName, domain);
+    }
+
+    @Override
+    public User findByUser(Optional<String> userName, Optional<String> password) throws Exception {
+        String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+        byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+        String encryptedPassword = new String(EncryptionUtil.encrypt(password.get(), originalKey));
+        return userRepository.findByUser(userName.get(), encryptedPassword);
+    }
+
+    @Override
+    public User softDelete(User user) throws Exception {
+        user.setIsActive(false);
+        user.setStatus(User.Status.DELETED);
+        return userRepository.save(user);
     }
 
 }

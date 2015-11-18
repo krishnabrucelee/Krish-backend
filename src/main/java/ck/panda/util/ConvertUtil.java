@@ -1,6 +1,13 @@
 package ck.panda.util;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Base64;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
@@ -9,6 +16,7 @@ import ck.panda.domain.entity.VmInstance;
 import ck.panda.service.ComputeOfferingService;
 import ck.panda.service.DepartmentService;
 import ck.panda.service.DomainService;
+import ck.panda.service.EncryptionUtil;
 import ck.panda.service.HostService;
 import ck.panda.service.HypervisorService;
 import ck.panda.service.NetworkOfferingService;
@@ -21,6 +29,7 @@ import ck.panda.service.StorageOfferingService;
 import ck.panda.service.TemplateService;
 import ck.panda.service.UserService;
 import ck.panda.service.VirtualMachineService;
+import ck.panda.service.VolumeService;
 import ck.panda.service.ZoneService;
 
 /**
@@ -94,9 +103,17 @@ public class ConvertUtil {
     @Autowired
     private PodService podService;
 
+    /** volume servcie for listing volumes. */
+    @Autowired
+    private VolumeService volumeService;
+
     /** Host service for listing hosts. */
     @Autowired
     private HostService hostService;
+
+    /** Secret key value is append. */
+    @Value(value = "${aes.salt.secretKey}")
+    private String secretKey;
 
     /**
      * Get domain id.
@@ -174,7 +191,6 @@ public class ConvertUtil {
         }
     }
 
-
     /**
      * Get the networkoffering id.
      *
@@ -186,6 +202,16 @@ public class ConvertUtil {
         return networkOfferingService.findByUUID(uuid).getId();
     }
 
+    /**
+     * Get the ostype id.
+     *
+     * @param uuid uuid of nic network.
+     * @return netwotk id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getOsTypeId(String uuid) throws Exception {
+        return osTypeService.findByUUID(uuid).getId();
+    }
 
     /**
      * Get domain object.
@@ -233,26 +259,29 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Long getPodId(String uuid) throws Exception {
-        if (podService.findByUUID(uuid) != null) {
-            return podService.findByUUID(uuid).getId();
-        } else {
-            return null;
-        }
+        return podService.findByUUID(uuid).getId();
     }
 
     /**
-     * Get the pod id.
+     * Get volume id.
      *
-     * @param host of pod.
+     * @param uuid of pod.
      * @return pod id.
      * @throws Exception unhandled exception.
      */
-    public Long getPodId(Long host) throws Exception {
-        if (hostService.find(host) != null) {
-            return hostService.find(host).getPodId();
-        } else {
-            return null;
-        }
+    public Long getVolumeId(String uuid) throws Exception {
+        return volumeService.findByUUID(uuid).getId();
+    }
+
+    /**
+     * Get instance id.
+     *
+     * @param uuid of instance.
+     * @return instance id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getVmInstanceId(String uuid) throws Exception {
+        return virtualMachineService.findByUUID(uuid).getId();
     }
 
     /**
@@ -315,6 +344,28 @@ public class ConvertUtil {
     }
 
     /**
+     * Get pod id.
+     *
+     * @param hostId host id.
+     * @return pod id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getPodIdByHost(Long hostId) throws Exception {
+        if (hostService.find(hostId) != null) {
+            return hostService.find(hostId).getPodId();
+        } else {
+            return null;
+        }
+    }    
+
+    public SecretKey getSecretKey() throws UnsupportedEncodingException {
+    	String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+        byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+    	return originalKey;
+    }
+    
+     /**
      * Get the osCategory.
      *
      * @param uuid of osCategory.
@@ -323,6 +374,5 @@ public class ConvertUtil {
      */
     public OsCategory getOsCategory(String uuid) throws Exception {
     	 return osCategoryService.findbyUUID(uuid);
-    }
-
+   }
 }

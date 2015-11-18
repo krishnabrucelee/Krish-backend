@@ -3,6 +3,7 @@ package ck.panda.web.resource;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -39,11 +40,13 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Virtual Machine.", response = VmInstance.class)
     @Override
     public VmInstance create(@RequestBody VmInstance vminstance) throws Exception {
+    	if(vminstance.getProject() != null){
         vminstance.setProjectId(vminstance.getProject().getId());
+        }
         vminstance.setInstanceOwnerId(vminstance.getInstanceOwner().getId());
         vminstance.setDomainId(vminstance.getDomain().getId());
         vminstance.setDepartmentId(vminstance.getDepartment().getId());
-        vminstance.setNetworkId(vminstance.getNetwork().getId());
+        vminstance.setSyncFlag(true);
         return virtualmachineservice.save(vminstance);
     }
 
@@ -104,7 +107,24 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
         return virtualmachineservice.vmEventHandle(vm, event);
     }
 
-    @Override
-    public void testMethod() throws Exception {
+    /**
+     * get all instances.
+     *
+     * @param instanceName instance name.
+     * @throws Exception if error occurs.
+     * @return list of instances.
+     */
+    @RequestMapping(value = "console", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public String getVNC(@RequestParam("instance") String instanceName) throws Exception {
+        String token = null;
+        String host = "192.168.1.230"; // test the host's IP address
+        String instance = "i-2-6-VM"; // test virtual machine instance name
+        String display = "test"; // Novnc display
+        String str = host + "|" + instance + "|" + display;
+        token = Base64.encodeBase64String(str.getBytes());
+        return "{\"success\":" + "http://192.168.1.221/console/?token=" + token + "}";
     }
+
 }

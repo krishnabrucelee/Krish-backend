@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,7 @@ import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Host;
 import ck.panda.domain.entity.Hypervisor;
+import ck.panda.domain.entity.Iso;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.OsCategory;
@@ -32,8 +35,11 @@ import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Zone;
+import ck.panda.domain.entity.VmInstance.Status;
+import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.ConvertUtil;
+import ck.panda.util.JsonUtil;
 import ck.panda.util.error.exception.ApplicationException;
 
 /**
@@ -98,6 +104,10 @@ public class SyncServiceImpl  implements SyncService {
     @Autowired
     private NetworkOfferingService networkOfferingService;
 
+    /** CloudStack connector reference for instance. */
+    @Autowired
+    private CloudStackInstanceService cloudStackInstanceService;
+
     /** NetworkOfferingService for listing network offers in cloudstack server. */
     @Autowired
     private NetworkService networkService;
@@ -143,6 +153,10 @@ public class SyncServiceImpl  implements SyncService {
     @Autowired
     private ClusterService clusterService;
 
+    /** For listing iso image in cloudstack server. */
+    @Autowired
+    private IsoService isoService;
+
     /** CloudStack connector. */
     @Autowired
     private CloudStackServer server;
@@ -162,7 +176,6 @@ public class SyncServiceImpl  implements SyncService {
     @Override
     public void init() throws Exception {
        CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
-       System.out.println(server.getClass().getName());
        server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
     }
 
@@ -232,70 +245,86 @@ public class SyncServiceImpl  implements SyncService {
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Compute Offering", e);
         }
+
         try {
-         // 11. Sync User entity
+            // 11. Sync Department entity
+            this.syncDepartment();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Department", e);
+        }
+
+        try {
+         // 12. Sync User entity
          this.syncUser();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch User", e);
         }
         try {
-         // 12. Sync Templates entity
+         // 13. Sync Templates entity
          this.syncTemplates();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Templates", e);
         }
 
-      try {
-          // 13. Sync Department entity
-          this.syncDepartment();
-      } catch (Exception e) {
-          LOGGER.error("ERROR AT synch Department", e);
-      }
 
       try {
-          // 14. Sync Instance entity
-          this.syncInstances();
-      } catch (Exception e) {
-          LOGGER.error("ERROR AT synch Instance", e);
-      }
-      try{
-          // 15. Sync Volume entity
-          this.syncVolume();
-      }catch(Exception e){
-          LOGGER.error("ERROR AT synch Volume", e);
-      }
-
-            try {
-          // 15. Sync Snapshot entity
-          this.syncSnapshot();
-      } catch (Exception e) {
-          LOGGER.error("ERROR AT synch Snapshot", e);
-      }
-
-
-      try {
-          // 16. Sync Pod entity
+          // 14. Sync Pod entity
           this.syncPod();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch Pod", e);
       }
 
       try {
-          // 17. Sync Cluster entity
+          // 15. Sync Cluster entity
           this.syncCluster();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch cluster", e);
       }
 
       try {
-          // 18. Sync Host entity
+          // 16. Sync Host entity
           this.syncHost();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch Host", e);
       }
 
       try {
-          // 19. Sync Host entity
+          // 17. Sync Iso entity
+          this.syncIso();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Iso", e);
+      }
+
+      try {
+          // 18. Sync Instance entity
+          this.syncInstances();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Instance", e);
+      }
+
+      try {
+          // 19. Sync Volume entity
+          this.syncVolume();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Volume", e);
+      }
+
+      try {
+          // 20. Sync Snapshot entity
+          this.syncSnapshot();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Snapshot", e);
+      }
+
+       try {
+          // 21. Sync Instance entity
+          this.syncInstances();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Instance", e);
+      }
+
+      try {
+          // 22. Sync VmSnapshot entity
           this.syncVmSnapshots();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch vm snapshots", e);
@@ -660,7 +689,9 @@ public class SyncServiceImpl  implements SyncService {
                 //3.3 Remove once updated, so that we can have the list of cs user which is not added in the app
                 csUserMap.remove(user.getUuid());
             } else {
-                userService.delete(user);
+            	if(user.getIsActive() !=  true){
+            		userService.softDelete(user);
+            	}
                 //3.2 If not found, delete it from app db
                 //TODO clarify the business requirement, since it has impact in the application if it is used
                 //TODO clarify is this a soft or hard delete
@@ -934,7 +965,7 @@ public class SyncServiceImpl  implements SyncService {
      * @throws Exception cloudstack unhandled errors.
      */
     @Override
-    public void syncInstances() throws ApplicationException, Exception {
+    public void syncInstances() throws Exception {
         // 1. Get all the vm objects from CS server as hash
         List<VmInstance> csInstanceService = virtualMachineService.findAllFromCSServer();
         HashMap<String, VmInstance> vmMap = (HashMap<String, VmInstance>) VmInstance.convert(csInstanceService);
@@ -973,7 +1004,7 @@ public class SyncServiceImpl  implements SyncService {
         }
 
     /**
-     * Sync with Cloud Server Account.
+     * Sync with Cloud Server Host.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
@@ -1015,7 +1046,7 @@ public class SyncServiceImpl  implements SyncService {
     }
 
     /**
-     * Sync with Cloud Server Account.
+     * Sync with Cloud Server Volume.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
@@ -1059,7 +1090,7 @@ public class SyncServiceImpl  implements SyncService {
     }
 
     /**
-     * Sync with Cloud Server Account.
+     * Sync with Cloud Server Snapshot.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
@@ -1074,6 +1105,7 @@ public class SyncServiceImpl  implements SyncService {
 
         // 3. Iterate application snapshot list
         for (Snapshot snapshot: appSnapshotList) {
+              snapshot.setSyncFlag(false);
              //3.1 Find the corresponding CS server snapshot object by finding it in a hash using uuid
             if (csSnapshotMap.containsKey(snapshot.getUuid())) {
                 Snapshot csUser = csSnapshotMap.get(snapshot.getUuid());
@@ -1101,7 +1133,7 @@ public class SyncServiceImpl  implements SyncService {
     }
 
     /**
-     * Sync with Cloud Server Account.
+     * Sync with Cloud Server Pod.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
@@ -1143,7 +1175,7 @@ public class SyncServiceImpl  implements SyncService {
     }
 
     /**
-     * Sync with Cloud Server Account.
+     * Sync with Cloud Server Cluster.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
@@ -1190,7 +1222,7 @@ public class SyncServiceImpl  implements SyncService {
      * @throws Exception cloudstack unhandled errors.
      */
     @Override
-    public void syncVmSnapshots() throws ApplicationException, Exception {
+    public void syncVmSnapshots() throws Exception {
         //1. Get all the vm snapshot objects from CS server as hash
         List<VmSnapshot> csSnapshotService = vmsnapshotService.findAllFromCSServer();
         HashMap<String, VmSnapshot> csSnapshotMap = (HashMap<String, VmSnapshot>) VmSnapshot.convert(csSnapshotService);
@@ -1234,21 +1266,90 @@ public class SyncServiceImpl  implements SyncService {
      * @throws Exception cloudstack unhandled errors.
      */
     @Override
-    public void syncResourceStatus(JSONObject Object) throws ApplicationException, Exception {
-        VmInstance vmInstance = VmInstance.convert(Object, entity);
+    public void syncResourceStatus(String Object) throws Exception {
+    	CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
+        server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
+        cloudStackInstanceService.setServer(server);
+        String instances = cloudStackInstanceService.queryAsyncJobResult(Object,
+                "json");
+        JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
+    	VmInstance vmInstance = VmInstance.convert(jobresult.getJSONObject("jobresult").getJSONObject("virtualmachine"), entity);
         VmInstance instance = virtualMachineService.findByUUID(vmInstance.getUuid());
-        // VNC password set.
-        if(vmInstance.getPassword() != null){
-        String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
-        byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
-        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-        String encryptedPassword = new String(EncryptionUtil.encrypt(vmInstance.getPassword(), originalKey));
-        instance.setVncPassword(encryptedPassword);
-        }
-        // 3.2 If found, update the vm object in app db
-        virtualMachineService.update(instance);
+            instance.setSyncFlag(false);
+            // 3.1 Find the corresponding CS server vm object by finding it in a hash using uuid
+            if (vmInstance.getUuid().equals(instance.getUuid())) {
+                VmInstance csVm = vmInstance;
+                instance.setName(csVm.getName());
+                instance.setCpuCore(csVm.getCpuCore());
+                instance.setDomainId(csVm.getDomainId());
+                instance.setStatus(csVm.getStatus());
+                instance.setZoneId(csVm.getZoneId());
+                instance.setHostId(csVm.getHostId());
+                instance.setPodId(csVm.getPodId());
+                instance.setComputeOfferingId(csVm.getComputeOfferingId());
+                instance.setCpuSpeed(csVm.getCpuSpeed());
+                instance.setMemory(csVm.getMemory());
+                instance.setCpuUsage(csVm.getCpuUsage());
+                instance.setPasswordEnabled(csVm.getPasswordEnabled());
+                instance.setPassword(csVm.getPassword());
+                instance.setIso(csVm.getIso());
+                instance.setIsoName(csVm.getIsoName());
+                instance.setIpAddress(csVm.getIpAddress());
+                instance.setNetworkId(csVm.getNetworkId());
+                // VNC password set.
+                if(csVm.getPassword() != null){
+                String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+                byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+                SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+                String encryptedPassword = new String(EncryptionUtil.encrypt(csVm.getPassword(), originalKey));
+                instance.setVncPassword(encryptedPassword);
+                }
+                // 3.2 If found, update the vm object in app db
+                virtualMachineService.update(instance);
+            }
+
     }
 
+    /**
+     * Sync with Cloud Server Iso.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    private void syncIso() throws ApplicationException, Exception {
 
+        //1. Get all the iso objects from CS server as hash
+        List<Iso> csIsoService = isoService.findAllFromCSServer();
+        HashMap<String, Iso> csIsoMap = (HashMap<String, Iso>) Iso.convert(csIsoService);
+
+        //2. Get all the iso objects from application
+        List<Iso> appPodList = isoService.findAll();
+
+        // 3. Iterate application iso list
+        for (Iso iso: appPodList) {
+             //3.1 Find the corresponding CS server iso object by finding it in a hash using uuid
+            if (csIsoMap.containsKey(iso.getUuid())) {
+                Iso csIso = csIsoMap.get(iso.getUuid());
+
+                iso.setName(csIso.getName());
+
+                //3.2 If found, update the iso object in app db
+                isoService.update(iso);
+
+                //3.3 Remove once updated, so that we can have the list of cs host which is not added in the app
+                csIsoMap.remove(iso.getUuid());
+            } else {
+                isoService.delete(iso);
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete
+             }
+
+             }
+        //4. Get the remaining list of cs server hash iso object, then iterate and
+        //add it to app db
+        for (String key: csIsoMap.keySet()) {
+            isoService.save(csIsoMap.get(key));
+        }
+    }
  }
 

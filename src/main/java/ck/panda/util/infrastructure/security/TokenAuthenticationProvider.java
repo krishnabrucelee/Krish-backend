@@ -16,24 +16,34 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
     /** Token service attribute. */
     private TokenService tokenService;
 
+    /** External service authenticator attribute. */
+    private ExternalServiceAuthenticator externalServiceAuthenticator;
+
     /**
      * Parameterized constructor.
      * @param tokenService to set
+     * @param externalServiceAuthenticator to set
      */
-    public TokenAuthenticationProvider(TokenService tokenService) {
+    public TokenAuthenticationProvider(TokenService tokenService, ExternalServiceAuthenticator externalServiceAuthenticator) {
         this.tokenService = tokenService;
+        this.externalServiceAuthenticator = externalServiceAuthenticator;
     }
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         Optional<String> token = (Optional) authentication.getPrincipal();
         if (!token.isPresent() || token.get().isEmpty()) {
-            throw new BadCredentialsException("Invalid token");
+            throw new BadCredentialsException("Invalid token or token expired");
         }
         if (!tokenService.contains(token.get())) {
             throw new BadCredentialsException("Invalid token or token expired");
         }
-        return tokenService.retrieve(token.get());
+        try {
+            authentication = tokenService.retrieve(token.get(), authentication, tokenService, externalServiceAuthenticator);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return authentication;
     }
 
     @Override

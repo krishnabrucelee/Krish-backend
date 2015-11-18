@@ -1,22 +1,20 @@
 package ck.panda.util.web;
 
-
 import javax.persistence.OptimisticLockException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
 import ck.panda.util.BeanFactory;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 import ck.panda.util.error.exception.EntityNotFoundException;
-
 import org.springframework.http.HttpStatus;
-
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 
 /**
  * Generic Exception handling controller.
@@ -113,6 +111,51 @@ public class ExceptionHandlingController {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody Errors handleException(Exception ex) {
+        Errors errors = new Errors(messageSource);
+        ex.printStackTrace();
+        errors.addGlobalError(ex.getMessage());
+        return errors;
+    }
+
+    /**
+     * Handle bad credentials exception.
+     *
+     * @param ex the exception to handle
+     * @return errors
+     */
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody Errors handleException(BadCredentialsException ex) {
+        Errors errors = new Errors(messageSource);
+        ex.printStackTrace();
+        errors.addGlobalError(ex.getMessage());
+        return errors;
+    }
+
+    /**
+     * Handle locked exception.
+     *
+     * @param ex the exception to handle
+     * @return errors
+     */
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody Errors handleException(LockedException ex) {
+        Errors errors = new Errors(messageSource);
+        ex.printStackTrace();
+        errors.addGlobalError(ex.getMessage());
+        return errors;
+    }
+
+    /**
+     * Handle disabled exception.
+     *
+     * @param ex the exception to handle
+     * @return errors
+     */
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody Errors handleException(DisabledException ex) {
         Errors errors = new Errors(messageSource);
         ex.printStackTrace();
         errors.addGlobalError(ex.getMessage());

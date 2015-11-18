@@ -35,14 +35,7 @@ public class HypervisorController extends CRUDController<Hypervisor> implements 
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Hypervisor.class);
         Page<Hypervisor> pageResponse = hypervisorService.findAll(page);
-        System.out.println(pageResponse);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
-
-    @Override
-    public void testMethod() throws Exception {
-
-    }
-
 }

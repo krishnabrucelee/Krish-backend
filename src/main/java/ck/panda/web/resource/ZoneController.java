@@ -98,9 +98,4 @@ public class ZoneController extends CRUDController<Zone> implements ApiControlle
     public List<Zone> zoneList() throws Exception {
         return zoneService.findAll();
     }
-
-    @Override
-    public void testMethod() throws Exception {
-        zoneService.findAll();
-    }
 }

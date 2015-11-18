@@ -21,4 +21,5 @@ public interface PodRepository extends PagingAndSortingRepository<Pod, Long> {
      */
     @Query(value = "select pod from Pod pod where pod.uuid = :uuid")
     Pod findByUUID(@Param("uuid") String uuid);
+
 }

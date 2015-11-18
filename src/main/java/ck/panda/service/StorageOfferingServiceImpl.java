@@ -105,7 +105,6 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     }
 
     @Override
-    @PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
     public StorageOffering find(Long id) throws Exception {
         StorageOffering storageOffering = storageOfferingRepo.findOne(id);
 

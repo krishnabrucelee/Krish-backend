@@ -99,9 +99,4 @@ public class DepartmentController extends CRUDController<Department> implements 
     protected List<Department> getSearch() throws Exception {
         return departmentService.findAllByIsActive(true);
     }
-
-    @Override
-    public void testMethod() throws Exception {
-        departmentService.findAll();
-    }
 }

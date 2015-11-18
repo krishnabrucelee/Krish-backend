@@ -39,7 +39,7 @@ public class CloudStackSnapshotService {
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("createSnapshot", optional);
         arguments.add(new NameValuePair("volumeid", diskVolumeId));
-
+        arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
         return responseDocument;
     }
@@ -150,15 +150,16 @@ public class CloudStackSnapshotService {
      *
      * @param asychronousJobid the ID of the asychronous job
      * @return response Document.
+     * @param response json or xml.
      * @throws Exception unhandled errors.
      */
-    public String snapshotJobResult(String asychronousJobid)
+    public String snapshotJobResult(String asychronousJobid, String response)
             throws Exception {
 
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("queryAsyncJobResult", null);
         arguments.add(new NameValuePair("jobid", asychronousJobid));
-
+        arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
         return  responseDocument;
     }
