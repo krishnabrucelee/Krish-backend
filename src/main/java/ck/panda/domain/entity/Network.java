@@ -71,10 +71,9 @@ public class Network implements Serializable {
     @Column(name = "zone_id")
     private Long zoneId;
 
-    /** Department Object for the Network. */
-    @JoinColumn(name = "department_id", referencedColumnName = "Id", updatable = false, insertable = false)
-    @ManyToOne
-    private Department department;
+    /** Name of the account. */
+    @Column(name = "account")
+    private String account;
 
     /** NetworkOffering Object for the Network Offer. */
     @ManyToOne
@@ -159,7 +158,6 @@ public class Network implements Serializable {
     /** Set syncFlag. */
     @Transient
     private Boolean syncFlag;
-
 
     /**
      * Get the Network Id.
@@ -545,6 +543,7 @@ public class Network implements Serializable {
 
 	/**
 	 * Set the Network Gateway.
+	 *
 	 * @param gateway the gateway to set
 	 */
 	public void setGateway(String gateway) {
@@ -552,21 +551,21 @@ public class Network implements Serializable {
 	}
 
 	/**
-	 * Get the Department Object.
+	 * Get the account name.
 	 *
-	 * @return the department
+	 * @return the account
 	 */
-	public Department getDepartment() {
-		return department;
+	public String getAccount() {
+		return account;
 	}
 
 	/**
-	 * Set the department Object.
+	 * Set the account name.
 	 *
-	 * @param department the department to set
+	 * @param account the account to set
 	 */
-	public void setDepartment(Department department) {
-		this.department = department;
+	public void setAccount(String account) {
+		this.account = account;
 	}
 
 	/** Convert JSONObject to domain entity.
@@ -588,7 +587,7 @@ public class Network implements Serializable {
            network.setcIDR(JsonUtil.getStringValue(jsonObject, "cidr"));
            network.setDisplayText(JsonUtil.getStringValue(jsonObject, "displaytext"));
            network.setGateway(JsonUtil.getStringValue(jsonObject, "gateway"));
-           network.setDepartment(convertUtil.getDepartment(JsonUtil.getStringValue(jsonObject, "accountid")));
+           network.setAccount(JsonUtil.getStringValue(jsonObject, "account"));
            network.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
        } catch ( Exception ex){
     	   ex.printStackTrace();
