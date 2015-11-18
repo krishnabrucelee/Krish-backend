@@ -36,6 +36,22 @@ public class TokenService {
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
 
+    /** Admin username. */
+    @Value("${backend.admin.username}")
+    private String backendAdminUsername;
+
+    /** Admin role. */
+    @Value("${backend.admin.dominid}")
+    private String backendAdminDomainId;
+
+    /** Admin role. */
+    @Value("${backend.admin.departmentid}")
+    private String backendAdminDepartmentId;
+
+    /** Admin role. */
+    @Value("${backend.admin.role}")
+    private String backendAdminRole;
+
     /**
      * @param user token.
      * @return token
@@ -105,11 +121,11 @@ public class TokenService {
         StringBuilder stringBuilder = null;
         try {
             stringBuilder = new StringBuilder();
-            stringBuilder.append(user.getId()).append("@@");
-            stringBuilder.append(user.getUserName()).append("@@");
-            stringBuilder.append(user.getDomain().getId()).append("@@");
-            stringBuilder.append(user.getDepartment().getId()).append("@@");
-            stringBuilder.append(user.getRole().getName()).append("@@");
+            stringBuilder.append(user == null ? "1" : user.getId()).append("@@");
+            stringBuilder.append(user == null ? backendAdminUsername : user.getUserName()).append("@@");
+            stringBuilder.append(user == null ? backendAdminDomainId : user.getDomain().getId()).append("@@");
+            stringBuilder.append(user == null ? backendAdminDepartmentId : user.getDepartment() == null ? backendAdminDepartmentId : user.getDepartment().getId()).append("@@");
+            stringBuilder.append(user == null ? backendAdminRole : user.getRole() == null ? backendAdminRole : user.getRole().getName()).append("@@");
             stringBuilder.append(DateConvertUtil.getTimestamp());
         } catch (Exception e) {
             e.printStackTrace();
