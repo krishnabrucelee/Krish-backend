@@ -102,6 +102,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Get the id of the permission.
+     *
      * @return the id
      */
     public Long getId() {
@@ -109,6 +111,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Set the id of the permission.
+     *
      * @param id the id to set
      */
     public void setId(Long id) {
@@ -116,6 +120,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Get the action of the permission.
+     *
      * @return the action
      */
     public String getAction() {
@@ -123,6 +129,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Set the action of the permission.
+     *
      * @param action the action to set
      */
     public void setAction(String action) {
@@ -130,6 +138,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Get the description of the permission.
+     *
      * @return the description
      */
     public String getDescription() {
@@ -137,6 +147,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Set the description of the permission.
+     *
      * @param description the description to set
      */
     public void setDescription(String description) {
@@ -144,6 +156,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Get the module of the permission.
+     *
      * @return the module
      */
     public Module getModule() {
@@ -151,6 +165,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Set the module of the permission.
+     *
      * @param module the module to set
      */
     public void setModule(Module module) {
@@ -158,6 +174,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Get role list of the permission.
+     *
      * @return the roleList
      */
     public List<Role> getRoleList() {
@@ -165,6 +183,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Set the role list of the permission.
+     *
      * @param roleList the roleList to set
      */
     public void setRoleList(List<Role> roleList) {
@@ -172,6 +192,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Get the isActive of the permission.
+     *
      * @return the isActive
      */
     public Boolean getIsActive() {
@@ -179,6 +201,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Set the isActive of the permission.
+     *
      * @param isActive the isActive to set
      */
     public void setIsActive(Boolean isActive) {
@@ -186,6 +210,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Get the status of the permission.
+     *
      * @return the status
      */
     public Status getStatus() {
@@ -193,6 +219,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Set the status of the permission.
+     *
      * @param status the status to set
      */
     public void setStatus(Status status) {
@@ -200,6 +228,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Get the version of the permission.
+     *
      * @return the version
      */
     public Long getVersion() {
@@ -207,6 +237,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Set the version of the permission.
+     *
      * @param version the version to set
      */
     public void setVersion(Long version) {
@@ -214,6 +246,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Get the createdBy of the permission.
+     *
      * @return the createdBy
      */
     public User getCreatedBy() {
@@ -221,6 +255,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Set the createdBy of the permission.
+     *
      * @param createdBy the createdBy to set
      */
     public void setCreatedBy(User createdBy) {
@@ -228,6 +264,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Get the updatedBy of the permission.
+     *
      * @return the updatedBy
      */
     public User getUpdatedBy() {
@@ -235,6 +273,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Set the updatedBy of the permission.
+     *
      * @param updatedBy the updatedBy to set
      */
     public void setUpdatedBy(User updatedBy) {
@@ -242,6 +282,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Get the createdDateTime of the permission.
+     *
      * @return the createdDateTime
      */
     public ZonedDateTime getCreatedDateTime() {
@@ -249,6 +291,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Set the createdDateTime of the permission.
+     *
      * @param createdDateTime the createdDateTime to set
      */
     public void setCreatedDateTime(ZonedDateTime createdDateTime) {
@@ -256,6 +300,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Get the updatedDateTime of the permission.
+     *
      * @return the updatedDateTime
      */
     public ZonedDateTime getUpdatedDateTime() {
@@ -263,6 +309,8 @@ public class Permission implements Serializable {
     }
 
     /**
+     * Set the updatedDateTime of the permission.
+     *
      * @param updatedDateTime the updatedDateTime to set
      */
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {

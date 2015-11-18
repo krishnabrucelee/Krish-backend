@@ -206,6 +206,8 @@ public class Role implements Serializable {
     }
 
     /**
+     * Get the permissionList of the role.
+     *
      * @return the permissionList.
      */
     public List<Permission> getPermissionList() {
@@ -213,6 +215,8 @@ public class Role implements Serializable {
     }
 
     /**
+     * Set the permissionList of the role.
+     *
      * @param permissionList the permissionList to set.
      */
     public void setPermissionList(List<Permission> permissionList) {
