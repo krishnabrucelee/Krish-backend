@@ -488,7 +488,7 @@ public class SyncServiceImpl  implements SyncService {
     }
 
     /**
-     * Sync with Cloud Server Region.
+     * Sync with Cloud Server osCategory.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
@@ -556,7 +556,7 @@ public class SyncServiceImpl  implements SyncService {
                 OsType csOsType = csOsTypeMap.get(osType.getUuid());
 
                 csOsType.setDescription(csOsType.getDescription());
-                csOsType.setOsCategoryUuid(csOsType.getOsCategoryUuid());
+                csOsType.setOsCategoryId(csOsType.getOsCategoryId());
 
                 //3.2 If found, update the osType object in app db
                 osTypeService.update(osType);

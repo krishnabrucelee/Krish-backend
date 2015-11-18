@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.service.ComputeOfferingService;
 import ck.panda.service.DepartmentService;
@@ -311,6 +312,17 @@ public class ConvertUtil {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Get the osCategory.
+     *
+     * @param uuid of osCategory.
+     * @return osCategory id.
+     * @throws Exception unhandled exception.
+     */
+    public OsCategory getOsCategory(String uuid) throws Exception {
+    	 return osCategoryService.findbyUUID(uuid);
     }
 
 }
