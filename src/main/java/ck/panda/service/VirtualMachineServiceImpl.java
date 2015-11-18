@@ -125,13 +125,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             }
             return virtualmachinerepository.save(vminstance);
         } else {
-            Errors errors = validator.createErrors();
-            errors = this.validateName(errors, vminstance.getName(), vminstance.getDepartment(), vminstance.getId());
-            if (errors.hasErrors()) {
-                return null;
-            } else {
+
                 return virtualmachinerepository.save(vminstance);
-            }
+
         }
     }
 
