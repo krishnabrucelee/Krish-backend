@@ -739,8 +739,12 @@ public class StorageOffering {
         storageOffering.name = object.getString("name");
         storageOffering.description = object.getString("displaytext");
         storageOffering.diskSize = object.getLong("disksize");
+//        storageOffering.storageTags = object.has("tags") ? object.get("tags").toString() : "";
         storageOffering.setStorageType(storageOffering.getStorageType().valueOf(object.getString("storagetype")));
         storageOffering.setIsCustomDisk(storageOffering.getIsCustomDisk().valueOf(object.getString("iscustomized")));
+        if (object.has("tags")) {
+            storageOffering.storageTags = object.getString("tags");
+        }
         storageOffering.setIsSyncFlag(false);
 
         return storageOffering;

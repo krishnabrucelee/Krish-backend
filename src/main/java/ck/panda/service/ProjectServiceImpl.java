@@ -1,7 +1,9 @@
 package ck.panda.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,7 @@ import ck.panda.domain.repository.jpa.ProjectRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackProjectService;
 import ck.panda.util.CloudStackServer;
+import ck.panda.util.ConvertUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -48,6 +51,10 @@ public class ProjectServiceImpl implements ProjectService {
     /** CloudStack configuration . */
     @Autowired
     private CloudStackConfigurationService cloudConfigService;
+
+    /** Convert entity repository reference. */
+    @Autowired
+    private ConvertUtil entity;
 
     @Override
     public Project save(Project project) throws Exception {
@@ -178,4 +185,30 @@ public class ProjectServiceImpl implements ProjectService {
     public List<Project> findAllByActive(Boolean isActive) throws Exception {
         return projectRepository.findAllByActive(isActive);
     }
+
+    @Override
+    public List<Project> findbyDomain(Long id) {
+        return projectRepository.findbyDomain(id);
+    }
+
+    @Override
+    public List<Project> findAllFromCSServer() throws Exception {
+        List<Project> projectList = new ArrayList<Project>();
+        HashMap<String, String> projectMap = new HashMap<String, String>();
+        projectMap.put("listAll", "true");
+        // 1. Get the list of Project from CS server using CS connector
+        String response = cloudStackProjectService.listProjects("json", projectMap);
+        JSONArray projectListJSON = new JSONObject(response).getJSONObject("listprojectsresponse").getJSONArray("project");
+        // 2. Iterate the json list, convert the single json entity to
+        // Project
+        for (int i = 0, size = projectListJSON.length(); i < size; i++) {
+            // 2.1 Call convert by passing JSONObject to Project entity
+            // and Add
+            // the converted Project entity to list
+            projectList.add(Project.convert(projectListJSON.getJSONObject(i), entity));
+        }
+        return projectList;
+    }
+
+
 }

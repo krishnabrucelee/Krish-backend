@@ -86,7 +86,7 @@ public class Volume {
      * Appears only if Custom disk size is not selected. Define the volume size
      * in GB.
      */
-    @Column(name = "disk_size", nullable = false)
+    @Column(name = "disk_size")
     private Long diskSize;
 
     /** The maximum iops of the disk offering. */
@@ -574,10 +574,10 @@ public class Volume {
             volume.diskSize = object.getLong("size");
             volume.setVolumeType(volume.getVolumeType().valueOf(JsonValidator.jsonStringValidation(object, "type")));
             volume.setStatus(volume.getStatus().valueOf(JsonValidator.jsonStringValidation(object, "state")));
-            volume.setVmInstanceId(convertUtil.getVmInstanceId(JsonUtil.getStringValue(object, "virtualmachineid")));
          //   volume.setCreatedDateTime(volume.getCreatedDateTime().);
             volume.setStorageOfferingId(convertUtil.getStorageOfferId(JsonUtil.getStringValue(object, "diskofferingid")));
             volume.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(object, "zoneid")));
+            volume.setVmInstanceId(convertUtil.getVmInstanceId(JsonUtil.getStringValue(object, "virtualmachineid")));
         } catch (Exception e) {
             e.printStackTrace();
         }

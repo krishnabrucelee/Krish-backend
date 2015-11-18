@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.repository.jpa.StorageOfferingRepository;
@@ -105,7 +104,6 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     }
 
     @Override
-    @PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
     public StorageOffering find(Long id) throws Exception {
         StorageOffering storageOffering = storageOfferingRepo.findOne(id);
 
@@ -287,6 +285,9 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
 
     @Override
     public List<StorageOffering> findAllByTags(String tags) {
+        if (tags.equals("") || tags == null) {
+            tags = "ALL";
+        }
         return storageOfferingRepo.findAllByTags(tags);
     }
 }
