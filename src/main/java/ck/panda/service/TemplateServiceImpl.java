@@ -68,7 +68,6 @@ public class TemplateServiceImpl implements TemplateService {
     private HypervisorRepository hypervisorRepository;
 
     @Override
-    @PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
     public Template save(Template template) throws Exception {
         if (template.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity("template", template);
@@ -186,7 +185,7 @@ public class TemplateServiceImpl implements TemplateService {
                     if (jsonobject.getBoolean("isready")) {
                         template.setStatus(Status.valueOf("ACTIVE"));
                     } else {
-                        template.setStatus(Status.valueOf("INACTIVE"));
+                        template.setStatus(Status.valueOf("ACTIVE"));
                     }
                     template.setType(Type.valueOf(jsonobject.getString("templatetype")));
                 }

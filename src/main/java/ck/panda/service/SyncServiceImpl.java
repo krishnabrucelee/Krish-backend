@@ -245,25 +245,27 @@ public class SyncServiceImpl  implements SyncService {
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Compute Offering", e);
         }
+
         try {
-         // 11. Sync User entity
+            // 11. Sync Department entity
+            this.syncDepartment();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Department", e);
+        }
+
+        try {
+         // 12. Sync User entity
          this.syncUser();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch User", e);
         }
         try {
-         // 12. Sync Templates entity
+         // 13. Sync Templates entity
          this.syncTemplates();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Templates", e);
         }
 
-      try {
-          // 13. Sync Department entity
-          this.syncDepartment();
-      } catch (Exception e) {
-          LOGGER.error("ERROR AT synch Department", e);
-      }
 
       try {
           // 14. Sync Pod entity
@@ -315,14 +317,14 @@ public class SyncServiceImpl  implements SyncService {
       }
 
        try {
-          // 14. Sync Instance entity
+          // 21. Sync Instance entity
           this.syncInstances();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch Instance", e);
       }
 
       try {
-          // 19. Sync VmSnapshot entity
+          // 22. Sync VmSnapshot entity
           this.syncVmSnapshots();
       } catch (Exception e) {
           LOGGER.error("ERROR AT synch vm snapshots", e);
@@ -687,7 +689,9 @@ public class SyncServiceImpl  implements SyncService {
                 //3.3 Remove once updated, so that we can have the list of cs user which is not added in the app
                 csUserMap.remove(user.getUuid());
             } else {
-                userService.delete(user);
+            	if(user.getIsActive() !=  true){
+            		userService.softDelete(user);
+            	}
                 //3.2 If not found, delete it from app db
                 //TODO clarify the business requirement, since it has impact in the application if it is used
                 //TODO clarify is this a soft or hard delete

@@ -108,7 +108,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
             } else if (user != null && !user.getIsActive()) {
                 throw new DisabledException("Account is Inactive. Please Contact Admin");
             } else {
-                if (user.getRole().getName() != null) {
+                if (user.getRole() != null) {
                     backendAdminRole = user.getRole().getName();
                 }
                 resultOfAuthentication = externalServiceAuthenticator.authenticate(username.get(), backendAdminRole);

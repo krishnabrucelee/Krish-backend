@@ -49,7 +49,6 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     private CloudStackComputeOffering computeOffer;
 
     @Override
-    @PreAuthorize("hasAuthority('ROLE_DOMAIN_USER')")
     public ComputeOffering save(ComputeOffering compute) throws Exception {
 
 		if (compute.getIsSyncFlag()) {
