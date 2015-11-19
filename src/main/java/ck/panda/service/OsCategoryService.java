@@ -19,4 +19,13 @@ public interface OsCategoryService extends CRUDService<OsCategory> {
      * @throws Exception unhandled errors.
      */
     List<OsCategory> findAllFromCSServer() throws Exception;
+
+    /**
+     * Find osCategory by uuid.
+     *
+     * @param uuid uuid of osCategory.
+     * @return osCategory object.
+     * @throws Exception unhandled errors.
+     */
+    OsCategory findbyUUID(String uuid) throws Exception;
 }

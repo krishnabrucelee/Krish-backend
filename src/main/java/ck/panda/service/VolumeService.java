@@ -5,8 +5,6 @@ package ck.panda.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.Pod;
 import ck.panda.domain.entity.Volume;
 import ck.panda.util.domain.CRUDService;
 
@@ -27,7 +25,7 @@ public interface VolumeService extends CRUDService<Volume> {
    /**
     * To get volume from cloudstack server.
     *
-    * @param uuid uuid of pod.
+    * @param uuid uuid of volume.
     * @return zone from server
     * @throws Exception unhandled errors.
     */

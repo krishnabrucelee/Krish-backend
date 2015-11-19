@@ -10,7 +10,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 import ck.panda.domain.entity.Pod;
-import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Volume;
 
 /**
@@ -25,7 +24,7 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      * @return lists Active state volume
      */
     @Query(value = "select volume from Volume volume where volume.isActive IS TRUE")
-    Page<StorageOffering> findAllByActive(Pageable pageable);
+    Page<Volume> findAllByActive(Pageable pageable);
 
     /**
      * Get the volume based on the uuid.

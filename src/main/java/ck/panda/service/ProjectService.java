@@ -40,4 +40,21 @@ public interface ProjectService extends CRUDService<Project> {
      */
     List<Project> findAllByActive(Boolean isActive) throws Exception;
 
+    /**
+     * Find all the projects with Domain.
+     *
+     * @param id domain id .
+     * @return list of domains in project.
+     * @throws Exception if error occurs.
+     */
+    List<Project> findbyDomain(Long id);
+
+    /**
+     * Find all the projects from cloud stack server.
+     *
+     * @return list of active project.
+     * @throws Exception if error occurs.
+     */
+    List<Project> findAllFromCSServer() throws Exception;
+
 }

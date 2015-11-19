@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.service.ComputeOfferingService;
 import ck.panda.service.DepartmentService;
@@ -280,7 +281,11 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Long getVmInstanceId(String uuid) throws Exception {
-        return virtualMachineService.findByUUID(uuid).getId();
+       if (virtualMachineService.findByUUID(uuid) != null) {
+             return virtualMachineService.findByUUID(uuid).getId();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -357,11 +362,51 @@ public class ConvertUtil {
         }
     }
 
+    /**
+     * Get domain id.
+     *
+     * @param uuid uuid of domain.
+     * @return domain id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getDepartmentUuidId(String uuid) throws Exception {
+        if (departmentService.findByUuidAndIsActive(uuid, true) != null) {
+            return departmentService.findByUuidAndIsActive(uuid, true).getId();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get domain id.
+     *
+     * @param uuid uuid of domain.
+     * @return domain id.
+     * @throws Exception unhandled exception.
+     */
+    public Department getDepartmentByUsername(String name) throws Exception {
+        if (departmentService.findByUsername(name, true) != null) {
+            return departmentService.findByUsername(name, true);
+        } else {
+            return null;
+        }
+    }    
+
     public SecretKey getSecretKey() throws UnsupportedEncodingException {
     	String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
         byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
         SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
     	return originalKey;
     }
-
+    
+     /**
+     * Get the osCategory.
+     *
+     * @param uuid of osCategory.
+     * @return osCategory id.
+     * @throws Exception unhandled exception.
+     */
+    public OsCategory getOsCategory(String uuid) throws Exception {
+    	 return osCategoryService.findbyUUID(uuid);
+   }
 }

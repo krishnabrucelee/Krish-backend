@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.OsType;
 import ck.panda.domain.repository.jpa.OsTypeRepository;
 import ck.panda.util.CloudStackOSService;
+import ck.panda.util.ConvertUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
@@ -32,6 +33,9 @@ public class OsTypeServiceImpl implements OsTypeService {
     /** Lists types of operating systems in cloudstack server. */
     @Autowired
     private CloudStackOSService osTypeService;
+
+    @Autowired
+    private ConvertUtil convertUtil;
 
     @Override
     public List<OsType> findAll() throws Exception {
@@ -84,7 +88,7 @@ public class OsTypeServiceImpl implements OsTypeService {
           for (int i = 0, size = osTypeListJSON.length(); i < size; i++) {
               // 2.1 Call convert by passing JSONObject to ostype entity and Add
               // the converted ostype entity to list
-              osTypeList.add(OsType.convert(osTypeListJSON.getJSONObject(i)));
+              osTypeList.add(OsType.convert(osTypeListJSON.getJSONObject(i), convertUtil));
           }
           return osTypeList;
       }

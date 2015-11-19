@@ -16,7 +16,7 @@ import ck.panda.domain.entity.Domain;
 @Repository
 public interface DepartmentReposiory extends PagingAndSortingRepository<Department, Long> {
 
-	/**
+    /**
      * Find the department for same domain with username and is active status.
      *
      * @param userName user name of the department.
@@ -55,5 +55,11 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
      */
     @Query(value = "select dpt from Department dpt where dpt.isActive =:isActive AND dpt.uuid=:uuid)")
     Department findByUuidAndIsActive(@Param("uuid") String uuid, @Param("isActive") Boolean isActive);
+
+    @Query(value = "select dpt from Department dpt where dpt.isActive =:isActive AND dpt.domainId=:domainId)")
+    List<Department> findByDomain(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive);
+
+    @Query(value = "select dpt from Department dpt where dpt.isActive =:isActive AND dpt.userName=:name)")
+    Department findByUsername(@Param("name")String name, @Param("isActive") Boolean isActive);
 
 }

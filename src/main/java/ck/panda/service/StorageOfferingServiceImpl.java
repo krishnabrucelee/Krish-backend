@@ -9,13 +9,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.repository.jpa.StorageOfferingRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackStorageOfferingService;
 import ck.panda.util.ConfigUtil;
+import ck.panda.util.ConvertUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -45,6 +45,10 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     /** Cloud stack configuration utility class. */
     @Autowired
     private ConfigUtil config;
+
+    /** Conversation  utility class. */
+    @Autowired
+    private ConvertUtil convertUtil;
 
     /** Json response for storage offering. */
     private static final String JSON = "json";
@@ -204,7 +208,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
             // 2.1 Call convert by passing JSONObject to StorageOffering entity
             // and Add
             // the converted StorageOffering entity to list
-            storageOfferingList.add(StorageOffering.convert(storageOfferingListJSON.getJSONObject(i)));
+            storageOfferingList.add(StorageOffering.convert(storageOfferingListJSON.getJSONObject(i), convertUtil));
         }
         return storageOfferingList;
     }
@@ -286,6 +290,9 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
 
     @Override
     public List<StorageOffering> findAllByTags(String tags) {
+        if (tags.equals("") || tags == null) {
+            tags = "ALL";
+        }
         return storageOfferingRepo.findAllByTags(tags);
     }
 }

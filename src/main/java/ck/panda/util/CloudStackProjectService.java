@@ -133,7 +133,10 @@ public class CloudStackProjectService {
     public String listProjects(String response, HashMap<String, String> optional) throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("listProjects", optional);
         arguments.add(new NameValuePair("response", response));
-        return server.request(arguments);
+        String listResponse = server.request(arguments);
+
+        return listResponse;
+
     }
 
     /**

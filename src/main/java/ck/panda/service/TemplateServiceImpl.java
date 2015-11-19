@@ -159,6 +159,15 @@ public class TemplateServiceImpl implements TemplateService {
         return templateRepository.findByTemplate(Type.SYSTEM);
     }
 
+
+    @Override
+    public List<Template> findByFilters(Template template) throws Exception {
+    	if(template.getArchitecture() == null) {
+    		template.setArchitecture("ALL");
+    	}
+        return templateRepository.findByFilters(template.getOsCategory(), template.getArchitecture());
+    }
+
     /**
      * @param template entity object
      * @param errors object for validation

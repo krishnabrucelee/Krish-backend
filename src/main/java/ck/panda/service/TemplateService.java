@@ -30,6 +30,15 @@ public interface TemplateService extends CRUDService<Template> {
     List<Template> findByTemplate() throws Exception;
 
     /**
+     * To get list of templates by filters.
+     *
+     * @param template
+     * @return template list from server
+     * @throws Exception unhandled errors.
+     */
+    List<Template> findByFilters(Template template) throws Exception;
+
+    /**
      * To get template by uuid.
      *
      * @param uuid uuid of template.

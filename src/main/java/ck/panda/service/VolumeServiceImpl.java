@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.EventTypes;
-import ck.panda.domain.entity.Pod;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.Status;
 import ck.panda.domain.repository.jpa.VolumeRepository;
@@ -177,7 +176,7 @@ public class VolumeServiceImpl implements VolumeService {
                 if (jobresult.getString("jobstatus").equals("0")) {
                     volume.setStatus(Status.valueOf(EventTypes.Allocated));
                 }
-                volume.setDiskSize(volume.getStorageOffering().getDiskSize());
+                volume.setDiskSize(volume.getDiskSize());
                 volume.setStorageOfferingId(volume.getStorageOffering().getId());
                 volume.setZoneId(volume.getZone().getId());
                 volume.setVolumeType(Volume.VolumeType.DATADISK);

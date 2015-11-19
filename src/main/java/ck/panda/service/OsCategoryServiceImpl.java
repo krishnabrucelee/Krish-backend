@@ -3,7 +3,6 @@ package ck.panda.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -69,6 +68,11 @@ public class OsCategoryServiceImpl implements OsCategoryService {
     @Override
     public List<OsCategory> findAll() throws Exception {
         return (List<OsCategory>) osCategoryRepo.findAll();
+    }
+
+    @Override
+    public OsCategory findbyUUID(String uuid) throws Exception {
+        return osCategoryRepo.findByUUID(uuid);
     }
 
     @Override

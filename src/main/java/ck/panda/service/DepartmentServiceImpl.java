@@ -210,4 +210,15 @@ public class DepartmentServiceImpl implements DepartmentService {
         return (Department) departmentRepo.findByUuidAndIsActive(uuid, isActive);
     }
 
+    @Override
+    public List<Department> findByDomain(Long domainId, Boolean isActive) {
+        return departmentRepo.findByDomain(domainId, isActive);
+    }
+
+    @Override
+    public Department findByUsername(String name, Boolean isActive) {
+        return (Department) departmentRepo.findByUsername(name, isActive);
+    }
+
+
 }
