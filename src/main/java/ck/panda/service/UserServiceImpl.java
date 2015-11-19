@@ -79,6 +79,7 @@ public class UserServiceImpl implements UserService {
             user.setIsActive(true);
             csUserService.setServer(configServer.setServer(1L));
             HashMap<String, String> userMap = new HashMap<String, String>();
+            userMap.put("domainid", user.getDomain().getUuid());
             String cloudResponse = csUserService.createUser(user.getDepartment().getUserName(),
                     user.getEmail(), user.getFirstName(), user.getLastName(), user.getUserName(), user.getPassword(), "json", userMap);
             JSONObject createUserResponseJSON = new JSONObject(cloudResponse).getJSONObject("createuserresponse")
@@ -117,6 +118,7 @@ public class UserServiceImpl implements UserService {
             } else {
         	  configServer.setServer(1L);
               HashMap<String, String> optional = new HashMap<String, String>();
+              optional.put("domainid", user.getDomain().getUuid());
               optional.put("username", user.getUserName());
               optional.put("email", user.getEmail());
               optional.put("firstname", user.getFirstName());
