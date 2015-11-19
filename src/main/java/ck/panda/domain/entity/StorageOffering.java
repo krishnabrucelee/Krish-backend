@@ -28,6 +28,9 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import ck.panda.util.ConvertUtil;
+import ck.panda.util.JsonUtil;
+
 /**
  * Storage Offerings, defined by administrator. provide a choice of disk size
  * and IOPS (Quality of Service) for primary data storage
@@ -733,15 +736,35 @@ public class StorageOffering {
      * @return Storage Offering entity objects
      * @throws JSONException unhandled json errors
      */
-    public static StorageOffering convert(JSONObject object) throws JSONException {
+    public static StorageOffering convert(JSONObject object, ConvertUtil convertUtil) throws JSONException {
         StorageOffering storageOffering = new StorageOffering();
         storageOffering.uuid = object.getString("id");
         storageOffering.name = object.getString("name");
         storageOffering.description = object.getString("displaytext");
         storageOffering.diskSize = object.getLong("disksize");
-//        storageOffering.storageTags = object.has("tags") ? object.get("tags").toString() : "";
         storageOffering.setStorageType(storageOffering.getStorageType().valueOf(object.getString("storagetype")));
         storageOffering.setIsCustomDisk(storageOffering.getIsCustomDisk().valueOf(object.getString("iscustomized")));
+        if(object.has("iscustomizediops")) {
+        storageOffering.setIsCustomizedIops(storageOffering.getIsCustomizedIops().valueOf(object.getString("iscustomizediops")));
+        }
+        if(object.has("bytesreadrate")) {
+        storageOffering.diskBytesReadRate = object.getLong("bytesreadrate");
+        }
+        if(object.has("byteswriterate")) {
+        storageOffering.diskBytesWriteRate = object.getLong("byteswriterate");
+        }
+        if(object.has("iopsreadrate")) {
+        storageOffering.diskIopsReadRate = object.getLong("iopsreadrate");
+        }
+        if(object.has("iopswriterate")) {
+        storageOffering.diskIopsWriteRate = object.getLong("iopswriterate");
+        }
+        if(object.has("maxiops")) {
+        storageOffering.diskMaxIops = object.getLong("maxiops");
+        }
+        if(object.has("miniops")) {
+        storageOffering.diskMinIops = object.getLong("miniops");
+        }
         if (object.has("tags")) {
             storageOffering.storageTags = object.getString("tags");
         }
