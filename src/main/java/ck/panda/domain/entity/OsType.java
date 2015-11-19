@@ -260,6 +260,7 @@ public class OsType implements Serializable {
         OsType osType = new OsType();
     	try {
     		osType.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
+    		osType.setDescription(JsonUtil.getStringValue(jsonObject, "description"));
     		osType.setOsCategoryId(convertUtil.getOsCategory(JsonUtil.getStringValue(jsonObject, "oscategoryid")).getId());
         }
         catch (Exception ex) {
