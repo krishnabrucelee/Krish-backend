@@ -82,16 +82,19 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
 
         User user = null;
         if (domain.get().equals("BACKEND_ADMIN")) {
-            resultOfAuthentication = externalServiceAuthenticator.authenticate(backendAdminUsername, backendAdminRole);
-            String newToken = null;
-            try {
-                 newToken = tokenService.generateNewToken(user);
-            } catch (Exception e) {
-                LOGGER.error("Error to generating token :" + e);
+            if (username.get().equals(backendAdminUsername) && password.get().equals(backendAdminPassword)) {
+                resultOfAuthentication = externalServiceAuthenticator.authenticate(backendAdminUsername, backendAdminRole);
+                String newToken = null;
+                try {
+                    newToken = tokenService.generateNewToken(user);
+                } catch (Exception e) {
+                    LOGGER.error("Error to generating token :" + e);
+                }
+                resultOfAuthentication.setToken(newToken);
+                tokenService.store(newToken, resultOfAuthentication);
+            } else {
+                throw new BadCredentialsException("Invalid Login Credentials");
             }
-            resultOfAuthentication.setToken(newToken);
-            tokenService.store(newToken, resultOfAuthentication);
-            return resultOfAuthentication;
         } else {
             try {
                 user = userService.findByUser(username, password);
@@ -121,7 +124,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
                 resultOfAuthentication.setToken(newToken);
                 tokenService.store(newToken, resultOfAuthentication);
             }
-            return resultOfAuthentication;
         }
+        return resultOfAuthentication;
     }
 }
