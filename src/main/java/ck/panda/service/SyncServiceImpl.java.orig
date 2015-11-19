@@ -272,18 +272,35 @@ public class SyncServiceImpl implements SyncService {
         }
 
         try {
-         // 12. Sync User entity
+<<<<<<< HEAD
+            // 11. Sync User entity
             this.syncUser();
+=======
+         // 12. Sync User entity
+         this.syncUser();
+>>>>>>> 8a8304b26de3717908ff4774fd31dfc4cb1da913
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch User", e);
         }
         try {
-         // 13. Sync Templates entity
+<<<<<<< HEAD
+            // 12. Sync Templates entity
             this.syncTemplates();
+=======
+         // 13. Sync Templates entity
+         this.syncTemplates();
+>>>>>>> 8a8304b26de3717908ff4774fd31dfc4cb1da913
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Templates", e);
         }
 
+<<<<<<< HEAD
+        try {
+            // 13. Sync Department entity
+            this.syncDepartment();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Department", e);
+        }
 
         try {
             // 14. Sync Pod entity
@@ -335,14 +352,14 @@ public class SyncServiceImpl implements SyncService {
         }
 
         try {
-          // 21. Sync Instance entity
+            // 14. Sync Instance entity
             this.syncInstances();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Instance", e);
         }
 
         try {
-          // 22. Sync VmSnapshot entity
+            // 19. Sync VmSnapshot entity
             this.syncVmSnapshots();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch vm snapshots", e);
@@ -362,6 +379,71 @@ public class SyncServiceImpl implements SyncService {
         // LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
         // }
 
+=======
+
+      try {
+          // 14. Sync Pod entity
+          this.syncPod();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Pod", e);
+      }
+
+      try {
+          // 15. Sync Cluster entity
+          this.syncCluster();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch cluster", e);
+      }
+
+      try {
+          // 16. Sync Host entity
+          this.syncHost();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Host", e);
+      }
+
+      try {
+          // 17. Sync Iso entity
+          this.syncIso();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Iso", e);
+      }
+
+      try {
+          // 18. Sync Instance entity
+          this.syncInstances();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Instance", e);
+      }
+
+      try {
+          // 19. Sync Volume entity
+          this.syncVolume();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Volume", e);
+      }
+
+      try {
+          // 20. Sync Snapshot entity
+          this.syncSnapshot();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Snapshot", e);
+      }
+
+       try {
+          // 21. Sync Instance entity
+          this.syncInstances();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch Instance", e);
+      }
+
+      try {
+          // 22. Sync VmSnapshot entity
+          this.syncVmSnapshots();
+      } catch (Exception e) {
+          LOGGER.error("ERROR AT synch vm snapshots", e);
+      }
+>>>>>>> 8a8304b26de3717908ff4774fd31dfc4cb1da913
     }
 
     /**
@@ -578,12 +660,18 @@ public class SyncServiceImpl implements SyncService {
     }
 
     /**
-     * Sync with Cloud Server osCategory.
+<<<<<<< HEAD
+     * Sync with Cloud Server Region.
      *
      * @throws ApplicationException
      *             unhandled application errors.
      * @throws Exception
      *             cloudstack unhandled errors.
+=======
+     * Sync with Cloud Server osCategory.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+>>>>>>> 8a8304b26de3717908ff4774fd31dfc4cb1da913
      */
     @Override
     public void syncOsCategory() throws ApplicationException, Exception {
@@ -776,9 +864,8 @@ public class SyncServiceImpl implements SyncService {
                 // user which is not added in the app
                 csUserMap.remove(user.getUuid());
             } else {
-            	if(user.getIsActive() !=  true){
-            		userService.softDelete(user);
-            	}
+<<<<<<< HEAD
+                userService.delete(user);
                 // 3.2 If not found, delete it from app db
                 // TODO clarify the business requirement, since it has impact in
                 // the application if it is used
@@ -790,6 +877,20 @@ public class SyncServiceImpl implements SyncService {
         // and
         // add it to app db
         for (String key : csUserMap.keySet()) {
+=======
+            	if(user.getIsActive() !=  true){
+            		userService.softDelete(user);
+            	}
+                //3.2 If not found, delete it from app db
+                //TODO clarify the business requirement, since it has impact in the application if it is used
+                //TODO clarify is this a soft or hard delete
+             }
+
+             }
+        //4. Get the remaining list of cs server hash user object, then iterate and
+        //add it to app db
+        for (String key: csUserMap.keySet()) {
+>>>>>>> 8a8304b26de3717908ff4774fd31dfc4cb1da913
             LOGGER.debug("Syncservice user uuid:");
             userService.save(csUserMap.get(key));
         }

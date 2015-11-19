@@ -360,8 +360,9 @@ public class ConvertUtil {
         } else {
             return null;
         }
-    }
+    }    
 
+<<<<<<< HEAD
     /**
      * Get domain id.
      *
@@ -390,8 +391,10 @@ public class ConvertUtil {
         } else {
             return null;
         }
-    }    
+    }
 
+}
+=======
     public SecretKey getSecretKey() throws UnsupportedEncodingException {
     	String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
         byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
@@ -410,3 +413,4 @@ public class ConvertUtil {
     	 return osCategoryService.findbyUUID(uuid);
    }
 }
+>>>>>>> 8a8304b26de3717908ff4774fd31dfc4cb1da913

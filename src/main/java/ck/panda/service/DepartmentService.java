@@ -60,4 +60,8 @@ public interface DepartmentService  extends CRUDService<Department>  {
      */
     Department findByUuidAndIsActive(String uuid, Boolean isActive) throws Exception;
 
+    List<Department> findByDomain(Long domainId, Boolean isActive);
+
+    Department findByUsername(String name, Boolean isActive);
+
 }

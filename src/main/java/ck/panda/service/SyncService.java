@@ -157,4 +157,39 @@ public interface SyncService {
    */
   void syncResourceStatus(String Object) throws  Exception;
 
+  /**
+   * Sync with CloudStack server ResourceLimit list.
+   *
+   * @param Object response json object.
+   * @throws Exception cloudstack unhandled errors
+   */
+  void syncResourceLimit() throws ApplicationException, Exception;
+
+  /**
+   * Sync with Cloud Server Account.
+   * @throws ApplicationException unhandled application errors.
+   * @throws Exception cloudstack unhandled errors.
+   */
+  void syncResourceLimitDomian(String domainId) throws ApplicationException, Exception;
+
+  /**
+   * Sync with Cloud Server Account.
+   * @throws ApplicationException unhandled application errors.
+   * @throws Exception cloudstack unhandled errors.
+   */
+  void syncResourceLimitDepartment(String domainId, String department) throws ApplicationException, Exception;
+
+  /**
+   * Sync with Cloud Server Account.
+   * @throws ApplicationException unhandled application errors.
+   * @throws Exception cloudstack unhandled errors.
+   */
+  void syncResourceLimitProject(String projectId) throws ApplicationException, Exception;
+
+  /**
+   * Sync with Cloud Server Account.
+   * @throws ApplicationException unhandled application errors.
+   * @throws Exception cloudstack unhandled errors.
+   */
+  void syncProject() throws ApplicationException, Exception;
 }

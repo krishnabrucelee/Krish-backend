@@ -2,7 +2,10 @@ package ck.panda.domain.entity;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -21,6 +24,8 @@ import javax.validation.constraints.Size;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -28,6 +33,10 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import ck.panda.util.ConvertUtil;
+import ck.panda.util.JsonUtil;
+import ck.panda.util.JsonValidator;
 
 /**
  * Projects are used to organize people and resources. CloudStack users within a single domain can group
@@ -469,5 +478,44 @@ public class Project implements Serializable {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
+    }
+
+    /**
+     * Convert JSONObject to network offering entity.
+     *
+     * @param object json object
+     * @return network offering entity object.
+     * @throws JSONException handles json exception.
+     */
+    @SuppressWarnings("static-access")
+    public static Project convert(JSONObject object, ConvertUtil convertUtil ) throws JSONException {
+        Project project = new Project();
+        try {
+            project.setName(JsonUtil.getStringValue(object, "name"));
+            project.setUuid(JsonUtil.getStringValue(object, "id"));
+//            project.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(object, "domainid")));
+//            project.setProjectOwnerId(convertUtil.getDepartmentByUsername(JsonUtil.getStringValue(object, "account")).getId());
+            project.setDescription(JsonUtil.getStringValue(object, "displaytext"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return project;
+    }
+
+    /**
+     * Mapping entity object into list.
+     *
+     * @param networkOfferingList list of network offering.
+     * @return network offering map
+     */
+    public static Map<String, Project> convert(List<Project> projectList) {
+        Map<String, Project> projectMap = new HashMap<String, Project>();
+
+        for (Project project : projectList) {
+            projectMap.put(project.getUuid(), project);
+        }
+
+        return projectMap;
     }
 }
