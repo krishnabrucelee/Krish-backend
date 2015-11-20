@@ -3,7 +3,6 @@ package ck.panda.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -35,12 +34,15 @@ public class NetworkServiceImpl implements NetworkService {
     @Autowired
     private NetworkRepository networkRepo;
 
+    /** Domain repository reference. */
     @Autowired
     private DomainRepository domainRepository;
 
+    /** Zone repository reference. */
     @Autowired
     private ZoneRepository zoneRepository;
 
+    /** NetworkOffering repository reference. */
     @Autowired
     private NetworkOfferingRepository networkofferingRepo;
 
@@ -66,7 +68,7 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public Network save(Network network) throws Exception {
 
-    	if (network.getSyncFlag()) {
+        if (network.getSyncFlag()) {
         Errors errors = validator.rejectIfNullEntity("Network", network);
         errors = validator.validateEntity(network, errors);
 
@@ -86,6 +88,8 @@ public class NetworkServiceImpl implements NetworkService {
                     network.setZoneId(zoneRepository.findByUUID(createComputeResponseJSON.getString("zoneid")).getId());
                     network.setNetworkOfferingId(networkofferingRepo.findByUUID(createComputeResponseJSON.getString("networkofferingid")).getId());
                     network.setStatus(network.getStatus().valueOf(createComputeResponseJSON.getString("state")));
+                    network.setAccount(createComputeResponseJSON.getString("account"));
+                    network.setGateway(createComputeResponseJSON.getString("gateway"));
             return networkRepo.save(network);
         }
      } else {
@@ -156,8 +160,8 @@ public class NetworkServiceImpl implements NetworkService {
     /**
      * Hash Map to map the optional values to cloudstack.
      *
-     * @param Network Network
      * @return optional
+     * @param network Network
      * @throws Exception Exception
      */
     public HashMap<String, String> optional(Network network) throws Exception {

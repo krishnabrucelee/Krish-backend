@@ -41,7 +41,7 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Network.", response = Network.class)
     @Override
     public Network create(@RequestBody Network network) throws Exception {
-    	network.setSyncFlag(true);
+        network.setSyncFlag(true);
         return networkService.save(network);
     }
 
