@@ -106,7 +106,7 @@ public class VMSnapshotController extends CRUDController<VmSnapshot>implements A
     @RequestMapping(value = "event", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected VmSnapshot handleVmSnapshotEvent(@RequestParam("snapshot") String vm, @RequestParam("event") String event)
+    protected VmSnapshot handleVmSnapshotEvent(@RequestParam("vm") String vm, @RequestParam("event") String event)
             throws Exception {
         return snapshotService.vmSnapshotEventHandle(vm, event);
     }

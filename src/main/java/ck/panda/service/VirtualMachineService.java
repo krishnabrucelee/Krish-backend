@@ -38,5 +38,16 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      */
     List<VmInstance> findAllFromCSServer() throws Exception;
 
+    /**
+     * VM related events are handled.
+     *
+     * @param vmInstance Virtual machine.
+     * @param event event message.
+     * @return instance.
+     * @throws Exception if error occurs.
+     */
+    VmInstance vmEventHandleWithVM(VmInstance vmInstance, String event) throws Exception;
+
+
 
 }

@@ -56,12 +56,20 @@ public class VmInstance implements Serializable {
     private String uuid;
 
     /** cloudstack's instance iso uuid. */
-    @Column(name = "iso")
+    @Transient
     private String iso;
 
-    /** cloudstack's instance iso name. */
-    @Column(name = "iso_name")
+    /** cloudstack's instance host uuid. */
+    @Transient
+    private String hostUuid;
+
+    /** cloudstack's instance iso . */
+    @Column(name = "instance_iso_name")
     private String isoName;
+
+    /** Instance iso id. */
+    @Column(name = "instance_iso_id")
+    private Long isoId;
 
     /** instance vnc password. */
     @Column(name = "vnc_password")
@@ -83,6 +91,10 @@ public class VmInstance implements Serializable {
     /** Set syncFlag. */
     @Transient
     private Boolean syncFlag;
+
+    /** Set syncFlag. */
+    @Transient
+    private String event;
 
     /** Set password. */
     @Transient
@@ -1151,6 +1163,42 @@ public class VmInstance implements Serializable {
     }
 
     /**
+     * Get the host uuid.
+     *
+     * @return the hostUuid
+     */
+    public String getHostUuid() {
+        return hostUuid;
+    }
+
+    /**
+     * Set the host uuid.
+     *
+     * @param hostUuid the hostUuid to set
+     */
+    public void setHostUuid(String hostUuid) {
+        this.hostUuid = hostUuid;
+    }
+
+    /**
+     * Get the iso id.
+     *
+     * @return the isoId
+     */
+    public Long getIsoId() {
+        return isoId;
+    }
+
+    /**
+     * Set the iso id.
+     *
+     * @param isoId the isoId to set
+     */
+    public void setIsoId(Long isoId) {
+        this.isoId = isoId;
+    }
+
+    /**
      * Get the iso.
      *
      * @return the iso
@@ -1184,6 +1232,24 @@ public class VmInstance implements Serializable {
      */
     public void setIsoName(String isoName) {
         this.isoName = isoName;
+    }
+
+    /**
+     * Get the event name.
+     *
+     * @return the event
+     */
+    public String getEvent() {
+        return event;
+    }
+
+    /**
+     * Set the event name.
+     *
+     * @param event the event to set
+     */
+    public void setEvent(String event) {
+        this.event = event;
     }
 
     @Override
@@ -1234,6 +1300,7 @@ public class VmInstance implements Serializable {
             vmInstance.setPassword(JsonUtil.getStringValue(jsonObject, "password"));
             vmInstance.setIso(JsonUtil.getStringValue(jsonObject, "isoid"));
             vmInstance.setIsoName(JsonUtil.getStringValue(jsonObject, "isoname"));
+            vmInstance.setIsoId(convertUtil.getIso(JsonUtil.getStringValue(jsonObject, "isoid")));
             JSONArray nicArray = jsonObject.getJSONArray("nic");
             vmInstance.setIpAddress(JsonUtil.getStringValue(nicArray.getJSONObject(0), "ipaddress"));
             vmInstance.setNetworkId(

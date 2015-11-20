@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.CloudStackConfiguration;
@@ -74,10 +75,12 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                 server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
                 csSnapshotService.setServer(server);
                 LOGGER.debug("Cloud stack connectivity at Snapshot", cloudConfig.getApiKey());
-                optional.put("response", "json");
+
                 if (vmSnapshot.getSnapshotMemory()) {
                     optional.put("snapshotmemory", "true");
                 }
+                optional.put("name",vmSnapshot.getName());
+                optional.put("description",vmSnapshot.getDescription());
                 VmInstance vmInstance = virtualMachineService.find(vmSnapshot.getVmId());
                 if (vmInstance == null) {
                     errors.addGlobalError("Virtual machine may not be null");
@@ -143,7 +146,7 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
 
     @Override
     public Page<VmSnapshot> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return vmSnapshotRepository.findAll(pagingAndSorting.toPageRequest());
+        return vmSnapshotRepository.findAllByActive(pagingAndSorting.toPageRequest(), false);
     }
 
     @Override
@@ -160,7 +163,6 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
     public VmSnapshot vmSnapshotEventHandle(String snapshotId, String event) throws Exception {
         VmSnapshot vmSnapshot = getCSConnector(snapshotId);
         HashMap<String, String> optional = new HashMap<String, String>();
-        Errors errors = validator.createErrors();
         switch (event) {
         case EventTypes.EVENT_VM_SNAPSHOT_REVERT:
             try {
@@ -170,14 +172,14 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                     String snapshot = csSnapshotService.vmSnapshotJobResult(snapshots.getString("jobid"));
                     JSONObject jobresult = new JSONObject(snapshot).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
-                        errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
-                        throw new ApplicationException(errors);
+                        throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
                         vmSnapshot.setStatus(Status.valueOf(EventTypes.EVENT_READY));
                     }
                 }
-            } catch (Exception e) {
+            } catch (BadCredentialsException e) {
                 LOGGER.error("ERROR AT Restore VM Snapshot", e);
+                throw new BadCredentialsException(e.getMessage());
             }
             break;
         case EventTypes.EVENT_VM_SNAPSHOT_DELETE:
@@ -188,14 +190,14 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                     String snapshot = csSnapshotService.vmSnapshotJobResult(snapshots.getString("jobid"));
                     JSONObject jobresult = new JSONObject(snapshot).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
-                        errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
-                        throw new ApplicationException(errors);
+                        throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
                         vmSnapshot.setIsRemoved(true);
                     }
                 }
-            } catch (Exception e) {
+            } catch (BadCredentialsException e) {
                 LOGGER.error("ERROR AT Delete VM Snapshot", e);
+                throw new BadCredentialsException(e.getMessage());
             }
             break;
         default:

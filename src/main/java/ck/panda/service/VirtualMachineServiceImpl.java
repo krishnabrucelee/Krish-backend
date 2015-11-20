@@ -27,7 +27,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -114,7 +116,6 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                             .queryAsyncJobResult(csInstance.getString("jobid"), "json");
                     JSONObject instance = new JSONObject(instanceResponse).getJSONObject("queryasyncjobresultresponse");
                     if (instance.getString("jobstatus").equals("2")) {
-                        errors = this.validateEvent(errors, instance.getJSONObject("jobresult").getString("errortext"));
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
                         vminstance.setEventMessage(csInstance.getJSONObject("jobresult").getString("errortext"));
                     } else {
@@ -126,7 +127,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             return virtualmachinerepository.save(vminstance);
         } else {
 
-                return virtualmachinerepository.save(vminstance);
+            return virtualmachinerepository.save(vminstance);
 
         }
     }
@@ -173,7 +174,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     public VmInstance vmEventHandle(String vmId, String event) throws Exception {
         VmInstance vminstance = getCSConnector(vmId);
         HashMap<String, String> optional = new HashMap<String, String>();
-        Errors errors = validator.createErrors();
+        Errors errors = null;
         switch (event) {
         case EventTypes.EVENT_VM_START:
             try {
@@ -185,9 +186,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                        errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
                         if (errors.hasErrors()) {
-                            throw new ApplicationException(errors);
+                            throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
                         }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
@@ -195,8 +196,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         vminstance.setEventMessage("");
                     }
                 }
-            } catch (Exception e) {
+            } catch (BadCredentialsException e) {
                 LOGGER.error("ERROR AT VM START", e);
+                throw new BadCredentialsException(e.getMessage());
             }
             break;
         case EventTypes.EVENT_VM_STOP:
@@ -210,9 +212,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                        errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
                         if (errors.hasErrors()) {
-                            throw new ApplicationException(errors);
+                            throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
                         }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
@@ -220,8 +222,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         vminstance.setEventMessage("");
                     }
                 }
-            } catch (Exception e) {
+            } catch (BadCredentialsException e) {
                 LOGGER.error("ERROR AT VM STOP", e);
+                throw new BadCredentialsException(e.getMessage());
             }
             break;
         case EventTypes.EVENT_VM_REBOOT:
@@ -234,9 +237,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                        errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
                         if (errors.hasErrors()) {
-                            throw new ApplicationException(errors);
+                            throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
                         }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
@@ -244,8 +247,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         vminstance.setEventMessage("");
                     }
                 }
-            } catch (Exception e) {
+            } catch (BadCredentialsException e) {
                 LOGGER.error("ERROR AT VM REBOOT", e);
+                throw new BadCredentialsException(e.getMessage());
             }
             break;
         case EventTypes.EVENT_VM_RESTORE:
@@ -258,17 +262,18 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                        errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
                         if (errors.hasErrors()) {
-                            throw new ApplicationException(errors);
+                            throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
                         }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
                         vminstance.setEventMessage("Re-installed");
                     }
                 }
-            } catch (Exception e) {
+            } catch (BadCredentialsException e) {
                 LOGGER.error("ERROR AT VM RE-INSTALL", e);
+                throw new BadCredentialsException(e.getMessage());
             }
             break;
         case EventTypes.EVENT_VM_DESTROY:
@@ -281,9 +286,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                        errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
                         if (errors.hasErrors()) {
-                            throw new ApplicationException(errors);
+                            throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
                         }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
@@ -291,8 +296,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         vminstance.setEventMessage("Vm destroyed");
                     }
                 }
-            } catch (Exception e) {
+            } catch (BadCredentialsException e) {
                 LOGGER.error("ERROR AT VM DESTROY", e);
+                throw new BadCredentialsException(e.getMessage());
             }
             break;
         case EventTypes.EVENT_VM_EXPUNGE:
@@ -306,9 +312,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                        errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
                         if (errors.hasErrors()) {
-                            throw new ApplicationException(errors);
+                            throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
                         }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
@@ -317,8 +323,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         vminstance.setEventMessage("VM EXPUNGING");
                     }
                 }
-            } catch (Exception e) {
+            } catch (BadCredentialsException e) {
                 LOGGER.error("ERROR AT VM EXPUNGING", e);
+                throw new BadCredentialsException(e.getMessage());
             }
             break;
         case EventTypes.EVENT_VM_CREATE:
@@ -331,69 +338,42 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                        errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
                         if (errors.hasErrors()) {
-                            throw new ApplicationException(errors);
+                            throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
                         }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
                         vminstance.setEventMessage("Re-installed");
                     }
                 }
-            } catch (Exception e) {
+            } catch (BadCredentialsException e) {
                 LOGGER.error("ERROR AT VM RECOVER", e);
+                throw new BadCredentialsException(e.getMessage());
             }
             break;
-        case EventTypes.EVENT_VM_RESETPASSWORD:
-            try {
-                if (vminstance.getStatus().equals("Stopped")) {
-                    String instanceResponse = cloudStackInstanceService
-                            .resetPasswordForVirtualMachine(vminstance.getUuid());
-                    JSONObject instance = new JSONObject(instanceResponse)
-                            .getJSONObject("resetpasswordforvirtualmachineresponse");
-                    if (instance.has("jobid")) {
-                        String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"),
-                                "json");
-                        JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
-                        if (jobresult.getString("jobstatus").equals("2")) {
-                            vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                            errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
-                            if (errors.hasErrors()) {
-                                throw new ApplicationException(errors);
-                            }
-                            vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
-                        } else if (jobresult.getString("jobstatus").equals("1")) {
-                            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
-                            byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
-                            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-                            String encryptedPassword = new String(
-                                    EncryptionUtil.encrypt(jobresult.getJSONObject("jobresult")
-                                            .getJSONObject("virtualmachine").getString("password"), originalKey));
-                            vminstance.setVncPassword(encryptedPassword);
-                            virtualmachinerepository.save(vminstance);
-                            errors.addGlobalError(jobresult.getJSONObject("jobresult").getJSONObject("virtualmachine")
-                                    .getString("password"));
-                            if (errors.hasErrors()) {
-                                throw new ApplicationException(errors);
-                            }
-                        }
-                    }
-                } else {
-                    errors.addGlobalError(
-                            "Your instance must be stopped before attempting to change its current password");
-                    if (errors.hasErrors()) {
-                        throw new ApplicationException(errors);
-                    }
-                }
-            } catch (Exception e) {
-                LOGGER.error("ERROR AT VM Reset password", e);
-            }
-            break;
+        default:
+            LOGGER.debug("No VM Action ", event);
+        }
+        return virtualmachinerepository.save(vminstance);
+    }
+
+    /**
+     * VM related all quick actions are handled here.
+     *
+     * @throws Exception if unhandled exception occurs.
+     */
+    @Override
+    public VmInstance vmEventHandleWithVM(VmInstance vmInstance, String event) throws Exception {
+        VmInstance vminstance = getCSConnector(vmInstance.getUuid());
+        HashMap<String, String> optional = new HashMap<String, String>();
+        Errors errors = null;
+        switch (event) {
         case EventTypes.EVENT_VM_MIGRATE:
             try {
-                if (vminstance.getStatus().equals("Running")) {
-                    optional.put("hostid", vminstance.getHost().getUuid());
-                    String instanceResponse = cloudStackInstanceService.migrateVirtualMachine(vminstance.getUuid(),
+                if (vminstance.getStatus().equals(Status.Running)) {
+                    optional.put("hostid", vmInstance.getHostUuid());
+                    String instanceResponse = cloudStackInstanceService.migrateVirtualMachine(vmInstance.getUuid(),
                             optional);
                     JSONObject instance = new JSONObject(instanceResponse)
                             .getJSONObject("migratevirtualmachineresponse");
@@ -402,10 +382,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                                 "json");
                         JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                         if (jobresult.getString("jobstatus").equals("2")) {
-                            vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                            errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                            errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
                             if (errors.hasErrors()) {
-                                throw new ApplicationException(errors);
+                                throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
                             }
                             vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                         } else {
@@ -415,29 +394,29 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 } else {
                     errors.addGlobalError("Your instance must be Running before attempting to change its current host");
                     if (errors.hasErrors()) {
-                        throw new ApplicationException(errors);
+                        throw new BadCredentialsException("Your instance must be Running before attempting to change its current host");
                     }
                 }
-            } catch (Exception e) {
+            } catch (BadCredentialsException e) {
                 LOGGER.error("ERROR AT VM Migrating ", e);
+                throw new BadCredentialsException(e.getMessage());
             }
             break;
         case EventTypes.EVENT_ISO_ATTACH:
             try {
-                String instanceResponse = csIso.attachIso(vminstance.getIso(), vminstance.getUuid(), "json");
+                String instanceResponse = csIso.attachIso(vmInstance.getIso(), vmInstance.getUuid(), "json");
                 JSONObject instance = new JSONObject(instanceResponse).getJSONObject("attachisoresponse");
                 if (instance.has("jobid")) {
                     String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"),
                             "json");
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
-                        vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                        errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
                         if (errors.hasErrors()) {
-                            throw new ApplicationException(errors);
+                            throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
                         }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
-                    } else {
+                    } else if (jobresult.getString("jobstatus").equals("1")) {
                         vminstance.setIsoName(jobresult.getJSONObject("jobresult").getJSONObject("virtualmachine")
                                 .getString("isoname"));
                         vminstance.setIso(jobresult.getJSONObject("jobresult").getJSONObject("virtualmachine")
@@ -445,21 +424,21 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     }
                 }
 
-            } catch (Exception e) {
+            } catch (BadCredentialsException e) {
                 LOGGER.error("ERROR AT VM ATTACH ISO ", e);
+                throw new BadCredentialsException(e.getMessage());
             }
             break;
         case EventTypes.EVENT_ISO_DETACH:
             try {
-                String instanceResponse = csIso.detachIso(vminstance.getUuid(), "json");
+                String instanceResponse = csIso.detachIso(vmInstance.getUuid(), "json");
                 JSONObject instance = new JSONObject(instanceResponse).getJSONObject("detachisoresponse");
                 if (instance.has("jobid")) {
                     String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"),
                             "json");
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
-                        vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                        errors.addGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
                         if (errors.hasErrors()) {
                             throw new ApplicationException(errors);
                         }
@@ -470,8 +449,80 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     }
                 }
 
-            } catch (Exception e) {
+            } catch (BadCredentialsException e) {
                 LOGGER.error("ERROR AT VM DETACH ISO ", e);
+                throw new BadCredentialsException(e.getMessage());
+            }
+            break;
+        case EventTypes.EVENT_VM_RESETPASSWORD:
+            try {
+                if (vmInstance.getPassword().equalsIgnoreCase("show")) {
+                    String instanceResponse = cloudStackInstanceService
+                            .getVMPassword(vmInstance.getUuid());
+                    System.out.println(instanceResponse);
+                    JSONObject instance = new JSONObject(instanceResponse)
+                            .getJSONObject("getvmpasswordresponse");
+                    String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+                    byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+                    SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+                    if (vminstance.getVncPassword() != null) {
+                    String encryptedPassword = new String(
+                            EncryptionUtil.decrypt(vminstance.getVncPassword(), originalKey));
+                    errors =  validator.sendGlobalError("Your instance current password is " + encryptedPassword);
+                    if (errors.hasErrors()) {
+                        throw new BadCredentialsException("Your instance current password is " + encryptedPassword);
+                    }
+                    } else {
+                        errors =  validator.sendGlobalError("No password are currently assigned for VM");
+                        if (errors.hasErrors()) {
+                            throw new BadCredentialsException("No password are currently assigned for VM");
+                        }
+                    }
+                } else {
+                    if (vminstance.getStatus().equals(Status.Stopped)) {
+                        String instanceResponse = cloudStackInstanceService
+                                .resetPasswordForVirtualMachine(vmInstance.getUuid());
+                        JSONObject instance = new JSONObject(instanceResponse)
+                                .getJSONObject("resetpasswordforvirtualmachineresponse");
+                        if (instance.has("jobid")) {
+                            String instances = cloudStackInstanceService
+                                    .queryAsyncJobResult(instance.getString("jobid"), "json");
+                            JSONObject jobresult = new JSONObject(instances)
+                                    .getJSONObject("queryasyncjobresultresponse");
+                            if (jobresult.getString("jobstatus").equals("2")) {
+                                errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                                if (errors.hasErrors()) {
+                                    throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
+                                }
+                                vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
+                            } else if (jobresult.getString("jobstatus").equals("1")) {
+                                String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+                                byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+                                SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+                                String encryptedPassword = new String(
+                                        EncryptionUtil.encrypt(jobresult.getJSONObject("jobresult")
+                                                .getJSONObject("virtualmachine").getString("password"), originalKey));
+                                vminstance.setVncPassword(encryptedPassword);
+                                virtualmachinerepository.save(vminstance);
+                                errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult")
+                                        .getJSONObject("virtualmachine").getString("password"));
+                                if (errors.hasErrors()) {
+                                    throw new BadCredentialsException(jobresult.getJSONObject("jobresult")
+                                            .getJSONObject("virtualmachine").getString("password"));
+                                }
+                            }
+                        }
+                    } else {
+                        errors = validator.sendGlobalError(
+                                "Your instance must be stopped before attempting to change its current password");
+                        if (errors.hasErrors()) {
+                            throw new BadCredentialsException("Your instance must be stopped before attempting to change its current password");
+                        }
+                    }
+                }
+            } catch (BadCredentialsException e) {
+                LOGGER.error("ERROR AT VM Reset password", e);
+                throw new BadCredentialsException(e.getMessage());
             }
             break;
         default:
@@ -482,6 +533,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     @Override
     public void delete(Long id) throws Exception {
+        virtualmachinerepository.delete(id);
     }
 
     @Override
@@ -550,4 +602,5 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         }
         return vmList;
     }
+
 }

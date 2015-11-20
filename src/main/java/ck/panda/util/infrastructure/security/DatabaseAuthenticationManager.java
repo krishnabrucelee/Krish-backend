@@ -99,11 +99,11 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
             try {
                 user = userService.findByUser(username, password);
             } catch (Exception e) {
-                LOGGER.error("Invalid Login Credentials : " + e);
+                LOGGER.error("Invalid Login Credentials234234 : " + e);
             }
 
             if (user == null) {
-                throw new BadCredentialsException("Invalid Login Credentials");
+                throw new BadCredentialsException("Invalid Login Credentials1111111");
             } else if (!domain.get().equals("BACKEND_ADMIN") && !user.getDomain().getName().equals(domain.get().trim())) {
                 throw new LockedException("Invalid Domain Address");
             } else if (domain.get().equals("BACKEND_ADMIN") && user.getType() != Type.ROOT_ADMIN) {

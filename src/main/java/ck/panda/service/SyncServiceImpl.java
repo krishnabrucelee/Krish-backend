@@ -189,9 +189,10 @@ public class SyncServiceImpl implements SyncService {
     private String secretKey;
 
     @Override
-    public void init() throws Exception {
+    public void init(CloudStackServer server) throws Exception {
         CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
-        server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
+        this.server = server;
+        this.server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
     }
 
     /**
@@ -1471,12 +1472,14 @@ public class SyncServiceImpl implements SyncService {
             instance.setIsoName(csVm.getIsoName());
             instance.setIpAddress(csVm.getIpAddress());
             instance.setNetworkId(csVm.getNetworkId());
+            LOGGER.debug("sync VM for ASYNC");
             // VNC password set.
             if (csVm.getPassword() != null) {
                 String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
                 byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
                 SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
                 String encryptedPassword = new String(EncryptionUtil.encrypt(csVm.getPassword(), originalKey));
+                LOGGER.debug("sync VM for pass" + encryptedPassword);
                 instance.setVncPassword(encryptedPassword);
             }
             // 3.2 If found, update the vm object in app db
