@@ -71,7 +71,7 @@ public class Network implements Serializable {
     @Column(name = "zone_id")
     private Long zoneId;
 
-    /** Name of the account. */
+     /** Name of the account. */
     @Column(name = "account")
     private String account;
 
@@ -178,7 +178,7 @@ public class Network implements Serializable {
     }
 
     /**
-     * Get the Zone
+     * Get the Zone.
      *
      * @return the zone
      */
@@ -187,7 +187,7 @@ public class Network implements Serializable {
     }
 
     /**
-     * Set the Zone
+     * Set the Zone.
      *
      * @param zone the zone to set
      */
@@ -196,7 +196,7 @@ public class Network implements Serializable {
     }
 
     /**
-     * Get the zoneId
+     * Get the zoneId.
      *
      * @return the zoneId
      */
@@ -205,7 +205,7 @@ public class Network implements Serializable {
     }
 
     /**
-     * Set the zoneId
+     * Set the zoneId.
      *
      * @param zoneId the zoneId to set
      */
@@ -353,15 +353,15 @@ public class Network implements Serializable {
     }
 
     /**
-     * Set the Domain Id
+     * Set the Domain Id.
      *
-	 * @param domainId the domainId to set
-	 */
-	public void setDomainId(Long domainId) {
-		this.domainId = domainId;
-	}
+     * @param domainId the domainId to set
+     */
+    public void setDomainId(Long domainId) {
+        this.domainId = domainId;
+    }
 
-	/**
+    /**
      * Get the NetworkOffering Id.
      *
      * @return the networkOffering
@@ -478,99 +478,100 @@ public class Network implements Serializable {
 
 
     /**
-     * Get the syncFlag
+     * Get the syncFlag.
      *
-	 * @return the syncFlag
-	 */
-	public Boolean getSyncFlag() {
-		return syncFlag;
-	}
+     * @return the syncFlag
+     */
+    public Boolean getSyncFlag() {
+        return syncFlag;
+    }
 
-	/**
-	 * Set the syncFlag
-	 *
-	 * @param syncFlag the syncFlag to set
-	 */
-	public void setSyncFlag(Boolean syncFlag) {
-		this.syncFlag = syncFlag;
-	}
-
-	/**
-	 * Get the Domain Object
-	 *
-	 * @return the domain
-	 */
-	public Domain getDomain() {
-		return domain;
-	}
-
-	/**
-	 * Set the Domain Object
-	 *
-	 * @param domain the domain to set
-	 */
-	public void setDomain(Domain domain) {
-		this.domain = domain;
-	}
-
-	/**
-	 * Get the networkOffering Id
-	 *
-	 * @return the networkOfferingId
-	 */
-	public Long getNetworkOfferingId() {
-		return networkOfferingId;
-	}
-
-	/**
-	 * Set the networkOffering Id
-	 *
-	 * @param networkOfferingId the networkOfferingId to set
-	 */
-	public void setNetworkOfferingId(Long networkOfferingId) {
-		this.networkOfferingId = networkOfferingId;
-	}
-
-
-	/**
-	 * Get the Network Gateway.
-	 *
-	 * @return the gateway
-	 */
-	public String getGateway() {
-		return gateway;
-	}
-
-	/**
-	 * Set the Network Gateway.
-	 *
-	 * @param gateway the gateway to set
-	 */
-	public void setGateway(String gateway) {
-		this.gateway = gateway;
-	}
-
-	/**
-	 * Get the account name.
-	 *
-	 * @return the account
-	 */
-	public String getAccount() {
-		return account;
-	}
-
-	/**
-	 * Set the account name.
-	 *
-	 * @param account the account to set
-	 */
-	public void setAccount(String account) {
-		this.account = account;
-	}
-
-	/** Convert JSONObject to domain entity.
+    /**
+     * Set the syncFlag.
      *
-     * @param object json object
+     * @param syncFlag the syncFlag to set
+     */
+    public void setSyncFlag(Boolean syncFlag) {
+        this.syncFlag = syncFlag;
+    }
+
+    /**
+     * Get the Domain Object.
+     *
+     * @return the domain
+     */
+    public Domain getDomain() {
+        return domain;
+    }
+
+    /**
+     * Set the Domain Object.
+     *
+     * @param domain the domain to set
+     */
+    public void setDomain(Domain domain) {
+        this.domain = domain;
+    }
+
+    /**
+     * Get the networkOffering Id.
+     *
+     * @return the networkOfferingId
+     */
+    public Long getNetworkOfferingId() {
+        return networkOfferingId;
+    }
+
+    /**
+     * Set the networkOffering Id.
+     *
+     * @param networkOfferingId the networkOfferingId to set
+     */
+    public void setNetworkOfferingId(Long networkOfferingId) {
+        this.networkOfferingId = networkOfferingId;
+    }
+
+
+    /**
+     * Get the Network Gateway.
+     *
+     * @return the gateway
+     */
+    public String getGateway() {
+        return gateway;
+    }
+
+    /**
+     * Set the Network Gateway.
+     *
+     * @param gateway the gateway to set
+     */
+    public void setGateway(String gateway) {
+        this.gateway = gateway;
+    }
+
+    /**
+     * Get the account name.
+     *
+     * @return the account
+     */
+    public String getAccount() {
+        return account;
+    }
+
+    /**
+     * Set the account name.
+     *
+     * @param account the account to set
+     */
+    public void setAccount(String account) {
+        this.account = account;
+    }
+
+    /** Convert JSONObject to domain entity.
+     *
+     * @param convertUtil Utilities
+     * @param jsonObject Object
      * @return domain entity object.
      * @throws JSONException handles json exception.
      */
@@ -578,10 +579,10 @@ public class Network implements Serializable {
        Network network = new Network();
        network.setSyncFlag(false);
        try {
-    	   network.setName(JsonUtil.getStringValue(jsonObject, "name"));
-    	   network.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
+           network.setName(JsonUtil.getStringValue(jsonObject, "name"));
+           network.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
            network.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
-           network.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(jsonObject, "domainid")));;
+           network.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(jsonObject, "domainid")));
            network.setNetworkType(NetworkType.valueOf(JsonUtil.getStringValue(jsonObject, "type")));
            network.setNetworkOfferingId(convertUtil.getNetworkOfferingId(JsonUtil.getStringValue(jsonObject, "networkofferingid")));
            network.setcIDR(JsonUtil.getStringValue(jsonObject, "cidr"));
@@ -589,8 +590,8 @@ public class Network implements Serializable {
            network.setGateway(JsonUtil.getStringValue(jsonObject, "gateway"));
            network.setAccount(JsonUtil.getStringValue(jsonObject, "account"));
            network.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
-       } catch ( Exception ex){
-    	   ex.printStackTrace();
+       } catch (Exception ex) {
+           ex.printStackTrace();
 
        }
        return network;
@@ -606,7 +607,7 @@ public class Network implements Serializable {
        Map<String, Network> networkMap = new HashMap<String, Network>();
 
        for (Network network : networkList) {
-    	   networkMap.put(network.getUuid(), network);
+           networkMap.put(network.getUuid(), network);
        }
 
        return networkMap;
