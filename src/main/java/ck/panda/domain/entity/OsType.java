@@ -36,7 +36,7 @@ import ck.panda.util.JsonUtil;
 @SuppressWarnings("serial")
 public class OsType implements Serializable {
 
-	 /** Logger attribute. */
+    /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(OsType.class);
 
     /** Id of the OS type. */
@@ -122,38 +122,38 @@ public class OsType implements Serializable {
     }
 
     /**
-   	 * Get the osCategory.
-   	 * @return the osCategory
-   	 */
-   	public OsCategory getOsCategory() {
-   		return osCategory;
-   	}
-
-   	/**
-   	 * Set the osCategory.
-   	 * @param osCategory the osCategory to set
-   	 */
-   	public void setOsCategory(OsCategory osCategory) {
-   		this.osCategory = osCategory;
-   	}
+     * Get the osCategory.
+     * @return the osCategory
+     */
+    public OsCategory getOsCategory() {
+        return osCategory;
+    }
 
     /**
-	 * Get the osCategoryId.
-	 * @return the osCategoryId
-	 */
-	public Long getOsCategoryId() {
-		return osCategoryId;
-	}
+     * Set the osCategory.
+     * @param osCategory the osCategory to set
+     */
+    public void setOsCategory(OsCategory osCategory) {
+        this.osCategory = osCategory;
+    }
 
-	/**
-	 * Set the osCategoryId.
-	 * @param osCategoryId the osCategoryId to set
-	 */
-	public void setOsCategoryId(Long osCategoryId) {
-		this.osCategoryId = osCategoryId;
-	}
+    /**
+     * Get the osCategoryId.
+     * @return the osCategoryId
+     */
+     public Long getOsCategoryId() {
+         return osCategoryId;
+     }
 
-	/**
+    /**
+     * Set the osCategoryId.
+     * @param osCategoryId the osCategoryId to set
+     */
+    public void setOsCategoryId(Long osCategoryId) {
+        this.osCategoryId = osCategoryId;
+    }
+
+     /**
      * Get the description of the OS type.
      * @return the description
      */
@@ -249,21 +249,20 @@ public class OsType implements Serializable {
         this.updatedDateTime = updatedDateTime;
     }
 
-	/**
-     * Convert JSONObject to os type entity.
-     *
-     * @param object json object
-     * @return os type entity objects
-     * @throws JSONException unhandled json errors
+    /**
+     * @param jsonObject to set
+     * @param convertUtil to set
+     * @return OS type
+     * @throws JSONException raise if error
      */
-    public static OsType convert(JSONObject jsonObject, ConvertUtil convertUtil ) throws JSONException {
+    public static OsType convert(JSONObject jsonObject, ConvertUtil convertUtil) throws JSONException {
         OsType osType = new OsType();
-    	try {
-    		osType.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-    		osType.setOsCategoryId(convertUtil.getOsCategory(JsonUtil.getStringValue(jsonObject, "oscategoryid")).getId());
-        }
-        catch (Exception ex) {
-        	LOGGER.error("OSType-convert", ex);
+        try {
+            osType.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
+            osType.setDescription(JsonUtil.getStringValue(jsonObject, "description"));
+            osType.setOsCategoryId(convertUtil.getOsCategory(JsonUtil.getStringValue(jsonObject, "oscategoryid")).getId());
+        } catch (Exception ex) {
+            LOGGER.error("OSType-convert", ex);
         }
         return osType;
     }

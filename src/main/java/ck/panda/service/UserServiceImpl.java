@@ -124,6 +124,7 @@ public class UserServiceImpl implements UserService {
             } else {
               configServer.setServer(1L);
               HashMap<String, String> optional = new HashMap<String, String>();
+              optional.put("domainid", user.getDomain().getUuid());
               optional.put("username", user.getUserName());
               optional.put("email", user.getEmail());
               optional.put("firstname", user.getFirstName());
