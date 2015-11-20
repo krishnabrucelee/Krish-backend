@@ -2,10 +2,8 @@ package ck.panda.util;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
-
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -19,6 +17,7 @@ import ck.panda.service.DomainService;
 import ck.panda.service.EncryptionUtil;
 import ck.panda.service.HostService;
 import ck.panda.service.HypervisorService;
+import ck.panda.service.IsoService;
 import ck.panda.service.NetworkOfferingService;
 import ck.panda.service.NetworkService;
 import ck.panda.service.OsCategoryService;
@@ -52,6 +51,10 @@ public class ConvertUtil {
     /** RegionSerivce for listing Regions. */
     @Autowired
     private HypervisorService hypervisorService;
+
+    /** IsoSerivce for listing Iso. */
+    @Autowired
+    private IsoService isoService;
 
     /** OSCategoryService for listing operating sytem in cloudstack server. */
     @Autowired
@@ -281,8 +284,8 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Long getVmInstanceId(String uuid) throws Exception {
-       if (virtualMachineService.findByUUID(uuid) != null) {
-             return virtualMachineService.findByUUID(uuid).getId();
+        if (virtualMachineService.findByUUID(uuid) != null) {
+            return virtualMachineService.findByUUID(uuid).getId();
         } else {
             return null;
         }
@@ -390,16 +393,16 @@ public class ConvertUtil {
         } else {
             return null;
         }
-    }    
+    }
 
     public SecretKey getSecretKey() throws UnsupportedEncodingException {
-    	String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+        String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
         byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
         SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-    	return originalKey;
+        return originalKey;
     }
-    
-     /**
+
+    /**
      * Get the osCategory.
      *
      * @param uuid of osCategory.
@@ -407,6 +410,22 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public OsCategory getOsCategory(String uuid) throws Exception {
-    	 return osCategoryService.findbyUUID(uuid);
-   }
+        return osCategoryService.findbyUUID(uuid);
+    }
+
+    /**
+     * Get the Iso.
+     *
+     * @param uuid of Iso.
+     * @return Iso id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getIso(String uuid) throws Exception {
+        if (isoService.findbyUUID(uuid) != null) {
+            return isoService.findbyUUID(uuid).getId();
+        } else {
+            return null;
+        }
+    }
+
 }

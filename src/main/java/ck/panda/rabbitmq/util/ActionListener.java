@@ -7,6 +7,7 @@ import org.springframework.amqp.core.MessageListener;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ck.panda.constants.EventTypes;
 import ck.panda.service.SyncService;
+import ck.panda.util.CloudStackServer;
 
 /**
  * Action event listener will listen and update resource data to our App DB when an event handled directly in
@@ -22,13 +23,18 @@ public class ActionListener implements MessageListener {
     /** Sync service. */
     private SyncService syncService;
 
+    /** Cloud stack server service. */
+    private CloudStackServer cloudStackServer;
+
     /**
      * Inject SyncService.
      *
+     * @param cloudStackServer cloudStackServer object.
      * @param syncService syncService object.
      */
-    public ActionListener(SyncService syncService) {
+    public ActionListener(SyncService syncService, CloudStackServer cloudStackServer) {
         this.syncService = syncService;
+        this.cloudStackServer = cloudStackServer;
     }
 
     /** Action event listener . */
@@ -51,7 +57,7 @@ public class ActionListener implements MessageListener {
      * @throws Exception exception.
      */
     public void handleActionEvent(ResponseEvent eventObject) throws Exception {
-        syncService.init();
+        syncService.init(cloudStackServer);
         switch (eventObject.getEventStart()) {
         case EventTypes.EVENT_VM:
             LOGGER.debug("VM Sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
