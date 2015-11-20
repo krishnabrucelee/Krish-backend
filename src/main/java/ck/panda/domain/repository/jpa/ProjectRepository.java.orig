@@ -49,10 +49,17 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, L
     List<Project> findAllByActive(@Param("isactive") Boolean isActive);
 
     /**
-     * Find all the projects with domainid.
+<<<<<<< HEAD
+     * find all the projects with domainid.
      *
      * @param id domain id.
      * @return list of active project.
+=======
+     * Find all the project with isActive and domain Id.
+     *
+     * @param id of the domain.
+     * @return Domain.
+>>>>>>> mohana/feature-pod
      */
     @Query(value = "select project from Project project where project.isActive IS TRUE and project.domainId = :domain")
     List<Project> findbyDomain(@Param("domain")Long id);

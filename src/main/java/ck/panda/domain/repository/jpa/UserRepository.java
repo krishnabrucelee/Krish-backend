@@ -11,12 +11,12 @@ import ck.panda.domain.entity.User;
 /** JPA repository for user CRUD operations. */
 public interface UserRepository extends PagingAndSortingRepository<User, Long> {
 
-	/**
-	 * Find user by active and query.
-	 * @param query
-	 * @return
-	 */
-	@Query(value = "select user from User user where user.isActive IS TRUE and lower(user.userName) LIKE '%' || lower(:query) || '%' ")
+    /**
+     * Find user by active and query.
+     * @param query
+     * @return
+     */
+    @Query(value = "select user from User user where user.isActive IS TRUE and lower(user.userName) LIKE '%' || lower(:query) || '%' ")
     List<User> findAllByActive(@Param("query") String query);
 
     /**
@@ -42,9 +42,27 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * Find the user for login authentication.
      *
      * @param userName login user name
-     * @param password login password
+     * @param domain object
      * @return user details
      */
-    @Query(value = "select user from User user where user.userName = :userName AND user.password = :password")
-    User findByUser(@Param("userName") String userName, @Param("password") String password);
+    @Query(value = "select user from User user where user.userName = :userName AND user.domain=:domain")
+    User findByUser(@Param("userName") String userName, @Param("domain") Domain domain);
+
+    /**
+     * Find the user from account.
+     *
+     * @param accountId of the user.
+     * @return user.
+     */
+    @Query(value = "select user from User user where user.accountId =:accountId")
+    List<User> findByAccountId(@Param("accountId") Long accountId);
+
+    /**
+     * Update the user password when login.
+     *
+     * @param password login password
+     * @param id current user
+     */
+    @Query(value = "update User user set user.password = :password where user.id = :id")
+    void updatePassword(@Param("password") String password, @Param("id") Long id);
 }

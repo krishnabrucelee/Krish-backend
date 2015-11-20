@@ -19,6 +19,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -103,6 +104,15 @@ public class Project implements Serializable {
     @Column(name = "department_id")
     private Long departmentId;
 
+    /** Project account id. */
+    @JoinColumn(name = "account_id", referencedColumnName = "id", updatable = false, insertable = false)
+    @ManyToOne(fetch = FetchType.EAGER, targetEntity = Account.class)
+    private Account account;
+
+    /** Project account id. */
+    @Column(name = "account_id")
+    private Long accountId;
+
     /** Project is whether active or disable. */
     @NotNull
     @Column(name = "is_active", nullable = false, columnDefinition = "TINYINT DEFAULT FALSE")
@@ -150,6 +160,10 @@ public class Project implements Serializable {
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
+
+    /** Transient value . */
+    @Transient
+    private Boolean syncFlag;
 
     /**
      * Get the id.
@@ -480,22 +494,70 @@ public class Project implements Serializable {
         return ToStringBuilder.reflectionToString(this);
     }
 
+
     /**
-     * Convert JSONObject to network offering entity.
+     * @return the syncFlag
+     */
+    public Boolean getSyncFlag() {
+        return syncFlag;
+    }
+
+    /**
+     * @param syncFlag the syncFlag to set
+     */
+    public void setSyncFlag(Boolean syncFlag) {
+        this.syncFlag = syncFlag;
+    }
+
+
+    /**
+     * @return the account
+     */
+    public Account getAccount() {
+        return account;
+    }
+
+    /**
+     * @param account the account to set
+     */
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    /**
+     * @return the accountId
+     */
+    public Long getAccountId() {
+        return accountId;
+    }
+
+    /**
+     * @param accountId the accountId to set
+     */
+    public void setAccountId(Long accountId) {
+        this.accountId = accountId;
+    }
+
+    /**
+     * Convert JSONObject to project entity.
      *
      * @param object json object
-     * @return network offering entity object.
+     * @return project entity object.
      * @throws JSONException handles json exception.
      */
     @SuppressWarnings("static-access")
-    public static Project convert(JSONObject object, ConvertUtil convertUtil ) throws JSONException {
+    public static Project convert(JSONObject jsonObject, ConvertUtil convertUtil ) throws JSONException {
         Project project = new Project();
+        project.setSyncFlag(false);
         try {
-            project.setName(JsonUtil.getStringValue(object, "name"));
-            project.setUuid(JsonUtil.getStringValue(object, "id"));
-//            project.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(object, "domainid")));
-//            project.setProjectOwnerId(convertUtil.getDepartmentByUsername(JsonUtil.getStringValue(object, "account")).getId());
-            project.setDescription(JsonUtil.getStringValue(object, "displaytext"));
+            project.setName(JsonUtil.getStringValue(jsonObject, "name"));
+            project.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
+            project.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(jsonObject, "domainid")));
+            project.setDepartmentId(convertUtil.getAccountByUsernameAndDomain(JsonUtil.getStringValue(jsonObject, "account"),
+                    convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid"))).getId());
+            project.setDescription(JsonUtil.getStringValue(jsonObject, "displaytext"));
+            project.setProjectOwnerId(convertUtil.getUserIdByAccount(JsonUtil.getStringValue(jsonObject, "account"), convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid"))));
+            project.setIsActive(true);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -506,8 +568,8 @@ public class Project implements Serializable {
     /**
      * Mapping entity object into list.
      *
-     * @param networkOfferingList list of network offering.
-     * @return network offering map
+     * @param projectList to set.
+     * @return project map
      */
     public static Map<String, Project> convert(List<Project> projectList) {
         Map<String, Project> projectMap = new HashMap<String, Project>();

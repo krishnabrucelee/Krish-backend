@@ -6,21 +6,28 @@ import org.apache.commons.httpclient.NameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ *
+ * CloudStack cluster service for connectivity with CloudStack server.
+ */
+
 @Service
 public class CloudStackAccountService {
 
-	 @Autowired
-	 private CloudStackServer server;
+     /** Cloudstack server for connectivity. */
+     @Autowired
+     private CloudStackServer server;
 
-	    /** Sets api key , secret key and url.
-	     *
-	     * @param server sets these values.
-	     */
-	  public void setServer(CloudStackServer server) {
-	        this.server = server;
-	  }
-    /**
-     * Creates an account
+     /** Sets api key , secret key and url.
+      *
+      * @param server sets these values.
+      */
+      public void setServer(CloudStackServer server) {
+            this.server = server;
+      }
+
+     /**
+     * Creates an account.
      *
      * @param accountType Type of the account. Specify 0 for user, 1 for root
      * admin, and 2 for domain admin
@@ -33,7 +40,7 @@ public class CloudStackAccountService {
      * adapter See Docs section.Hashed password (Default is MD5). If you wish to
      * use any other hashing algorithm, you would need to write a custom
      * authentication adapter See Docs section.
-     * @param optional
+     * @param optional values for mclouds
      * @return
      * @throws Exception
      */

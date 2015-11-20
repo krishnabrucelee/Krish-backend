@@ -1,5 +1,7 @@
 package ck.panda.util.infrastructure.security;
 
+import java.util.HashMap;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,8 @@ import com.google.common.base.Optional;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.Type;
 import ck.panda.service.UserService;
+import ck.panda.util.CloudStackAuthenticationService;
+import ck.panda.util.ConfigUtil;
 
 /**
  * Database authentication manager to handle all the validation and authentication for login users.
@@ -42,6 +46,14 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
     /** Token service reference. */
     @Autowired
     private TokenService tokenService;
+
+    /** Cloud stack configuration reference. */
+    @Autowired
+    private ConfigUtil configUtil;
+
+    /** Cloud stack template service. */
+    @Autowired
+    private CloudStackAuthenticationService cloudStackAuthenticationService;
 
     /** Admin username. */
     @Value("${backend.admin.username}")
@@ -97,13 +109,16 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
             }
         } else {
             try {
-                user = userService.findByUser(username, password);
+                String domainUUID = csLoginAuthentication(username.get(), password.get(), domain.get());
+                if(domainUUID != "") {
+                    user = userService.findByUser(username, password, domainUUID);
+                }
             } catch (Exception e) {
-                LOGGER.error("Invalid Login Credentials234234 : " + e);
+                LOGGER.error("Invalid Login Credentials : " + e);
             }
 
             if (user == null) {
-                throw new BadCredentialsException("Invalid Login Credentials1111111");
+                throw new BadCredentialsException("Invalid Login Credentials");
             } else if (!domain.get().equals("BACKEND_ADMIN") && !user.getDomain().getName().equals(domain.get().trim())) {
                 throw new LockedException("Invalid Domain Address");
             } else if (domain.get().equals("BACKEND_ADMIN") && user.getType() != Type.ROOT_ADMIN) {
@@ -117,6 +132,8 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
                 resultOfAuthentication = externalServiceAuthenticator.authenticate(username.get(), backendAdminRole);
                 String newToken = null;
                 try {
+                	user.setSyncFlag(false);
+                	userService.update(user);
                     newToken = tokenService.generateNewToken(user);
                 } catch (Exception e) {
                     LOGGER.error("Error to generating token :" + e);
@@ -127,4 +144,23 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
         }
         return resultOfAuthentication;
     }
+
+	private String csLoginAuthentication(String username, String password, String domain) throws Exception {
+		configUtil.setServer(1L);
+		HashMap<String, String> optional = new HashMap<String, String>();
+		if(domain.equals("BACKEND_ADMIN")) {
+		    optional.put("domain", "/");
+		} else {
+			optional.put("domain", domain);
+		}
+		String resp = cloudStackAuthenticationService.login(username, password, "json", optional);
+		JSONObject userJSON = new JSONObject(resp).getJSONObject("loginresponse");
+		String response;
+		if (userJSON.has("errorcode")) {
+            response = "";
+        } else {
+        	response = userJSON.getString("domainid");
+        }
+		return response;
+	}
 }

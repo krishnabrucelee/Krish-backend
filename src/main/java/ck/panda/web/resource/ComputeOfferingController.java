@@ -21,6 +21,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Snapshot;
 import ck.panda.service.ComputeOfferingService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -43,8 +44,8 @@ public class ComputeOfferingController extends CRUDController<ComputeOffering> i
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new ComputeOffering.", response = ComputeOffering.class)
     @Override
     public ComputeOffering create(@RequestBody ComputeOffering compute) throws Exception {
-    	compute.setIsSyncFlag(true);
-    	return computeService.save(compute);
+        compute.setIsSyncFlag(true);
+        return computeService.save(compute);
     }
 
     @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing ComputeOffering.", response = ComputeOffering.class)
@@ -56,15 +57,24 @@ public class ComputeOfferingController extends CRUDController<ComputeOffering> i
     @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing ComputeOffering.", response = ComputeOffering.class)
     @Override
     public ComputeOffering update(@RequestBody ComputeOffering compute, @PathVariable(PATH_ID) Long id) throws Exception {
-    	compute.setIsSyncFlag(true);
-    	return computeService.update(compute);
+        compute.setIsSyncFlag(true);
+        return computeService.update(compute);
     }
 
-    @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing ComputeOffering.")
-    @Override
-    public void delete(@PathVariable(PATH_ID) Long id) throws Exception {
-    	 computeService.delete(id);
-
+    /**
+     * Delete the compute offering.
+     *
+     * @param compute reference of the compute offering.
+     * @param id compute offering id.
+     * @throws Exception error occurs.
+     */
+    @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing compute Offering.")
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void softDelete(@RequestBody ComputeOffering compute, @PathVariable(PATH_ID) Long id) throws Exception {
+        /** Doing Soft delete from the compute offering table. */
+         compute.setIsSyncFlag(true);
+         computeService.softDelete(compute);
     }
 
     /**
@@ -72,20 +82,18 @@ public class ComputeOfferingController extends CRUDController<ComputeOffering> i
      * @return compute offing.
      * @throws Exception
      */
-  	@RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-  	@ResponseStatus(HttpStatus.OK)
-  	@ResponseBody
-  	protected List<ComputeOffering> getSearch() throws Exception {
-  		return computeService.findAll();
-  	}
+      @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+      @ResponseStatus(HttpStatus.OK)
+      @ResponseBody
+      protected List<ComputeOffering> getSearch() throws Exception {
+          return computeService.findAll();
+      }
 
     @Override
     public List<ComputeOffering> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, ComputeOffering.class);
-        Page<ComputeOffering> pageResponse = computeService.findAll(page);
-        System.out.println(pageResponse);
-
+        Page<ComputeOffering> pageResponse = computeService.findAllByActive(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }

@@ -37,6 +37,10 @@ public class TokenService {
     private String secretKey;
 
     /** Admin username. */
+    @Value("${backend.admin.userid}")
+    private String backendAdminUserid;
+
+    /** Admin username. */
     @Value("${backend.admin.username}")
     private String backendAdminUsername;
 
@@ -105,7 +109,10 @@ public class TokenService {
         if (Long.parseLong(tokenDetails.get(5)) < timeDifference) {
             throw new BadCredentialsException("Your Session has Expired. Please Log in Again");
         } else {
-            token = updationTokenTimeout(tokenDetails).toString();
+            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+            byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+            token = new String(EncryptionUtil.encrypt(updationTokenTimeout(tokenDetails).toString(), originalKey));
         }
         resultOfAuthentication = externalServiceAuthenticator.authenticate(tokenDetails.get(1), tokenDetails.get(4));
         resultOfAuthentication.setToken(token);
@@ -121,7 +128,7 @@ public class TokenService {
         StringBuilder stringBuilder = null;
         try {
             stringBuilder = new StringBuilder();
-            stringBuilder.append(user == null ? "1" : user.getId()).append("@@");
+            stringBuilder.append(user == null ? backendAdminUserid : user.getId()).append("@@");
             stringBuilder.append(user == null ? backendAdminUsername : user.getUserName()).append("@@");
             stringBuilder.append(user == null ? backendAdminDomainId : user.getDomain().getId()).append("@@");
             stringBuilder.append(user == null ? backendAdminDepartmentId : user.getDepartment() == null ? backendAdminDepartmentId : user.getDepartment().getId()).append("@@");
