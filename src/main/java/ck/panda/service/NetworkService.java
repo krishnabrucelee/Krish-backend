@@ -20,7 +20,7 @@ public interface NetworkService extends CRUDService<Network> {
     * @return domain list from server
     * @throws Exception unhandled errors.
     */
-   List<Network> findAllFromCSServer() throws Exception;
+   List<Network> findAllFromCSServerByDomain(String domainUuid) throws Exception;
 
    /**
     * To get network from cloudstack server.

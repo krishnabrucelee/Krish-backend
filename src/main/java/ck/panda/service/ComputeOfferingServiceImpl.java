@@ -10,10 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.ComputeOffering;
-import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.repository.jpa.ComputeOfferingRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackComputeOffering;
@@ -72,6 +70,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
                 }
                 JSONObject serviceOffering = createComputeResponseJSON.getJSONObject("serviceoffering");
                 compute.setUuid((String) serviceOffering.get("id"));
+                compute.setIsActive(true);
                 return computeRepo.save(compute);
             }
         } else {
@@ -110,6 +109,11 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     }
 
     @Override
+    public void delete(Long id) throws Exception {
+        computeRepo.delete(id);
+    }
+
+    @Override
     public ComputeOffering softDelete(ComputeOffering compute) throws Exception {
         compute.setIsActive(false);
         if (compute.getIsSyncFlag()) {
@@ -118,11 +122,6 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             computeOffer.deleteComputeOffering(compute.getUuid(), "json");
         }
         return computeRepo.save(compute);
-    }
-
-    @Override
-    public void delete(Long id) throws Exception {
-        computeRepo.delete(id);
     }
 
     @Override
@@ -257,5 +256,17 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
         return computeRepo.findByUUID(uuid);
     }
 
+    /**
+     * Find all the compute offering with pagination.
+     *
+     * @throws Exception
+     *             application errors.
+     * @param pagingAndSorting
+     *            do pagination with sorting for computeofferings.
+     * @return list of compute offerings.
+     */
+    public Page<ComputeOffering> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
+        return computeRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
+    }
     }
 

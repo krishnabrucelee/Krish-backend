@@ -1,10 +1,11 @@
 package ck.panda.service;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.ComputeOffering;
-import ck.panda.domain.entity.Snapshot;
 import ck.panda.util.domain.CRUDService;
+import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
  * Service class for Compute Offering.
@@ -30,12 +31,22 @@ public interface ComputeOfferingService  extends CRUDService<ComputeOffering>  {
     ComputeOffering findByUUID(String uuid);
 
     /**
-     * Soft delete for compute.
+     * Paging and Sorting for displaying more number of elements in list.
      *
-     * @param compute get compute id.
+     * @param pagingAndSorting sortable method.
+     * @return sorted values.
+     * @throws Exception unhandled errors.
+     */
+    Page<ComputeOffering> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
+
+    /**
+     * Soft delete for compute Offering.
+     *
+     * @param compute get compute offering id.
      * @return deleted compute id.
      * @throws Exception unhandled errors.
      */
     ComputeOffering softDelete(ComputeOffering compute) throws Exception;
+
 }
 

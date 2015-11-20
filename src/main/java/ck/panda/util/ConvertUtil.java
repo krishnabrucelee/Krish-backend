@@ -2,21 +2,23 @@ package ck.panda.util;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
-
+import java.util.List;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ck.panda.domain.entity.Account;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.OsCategory;
+import ck.panda.domain.entity.Project;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.service.AccountService;
 import ck.panda.service.ComputeOfferingService;
 import ck.panda.service.DepartmentService;
 import ck.panda.service.DomainService;
-import ck.panda.service.EncryptionUtil;
 import ck.panda.service.HostService;
 import ck.panda.service.HypervisorService;
 import ck.panda.service.NetworkOfferingService;
@@ -24,6 +26,7 @@ import ck.panda.service.NetworkService;
 import ck.panda.service.OsCategoryService;
 import ck.panda.service.OsTypeService;
 import ck.panda.service.PodService;
+import ck.panda.service.ProjectService;
 import ck.panda.service.RegionService;
 import ck.panda.service.StorageOfferingService;
 import ck.panda.service.TemplateService;
@@ -78,6 +81,13 @@ public class ConvertUtil {
     private NetworkService networkService;
 
     /**
+     * AccountService for listing network offers in cloudstack server.
+     */
+    @Autowired
+    private AccountService accountService;
+
+
+    /**
      * NetworkOfferingService for listing network offers in cloudstack server.
      */
     @Autowired
@@ -110,6 +120,10 @@ public class ConvertUtil {
     /** Host service for listing hosts. */
     @Autowired
     private HostService hostService;
+
+    /** Project service for listing projects. */
+    @Autowired
+    private ProjectService projectService;
 
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
@@ -252,6 +266,28 @@ public class ConvertUtil {
     }
 
     /**
+     * Get account object.
+     *
+     * @param uuid uuid of account.
+     * @return account.
+     * @throws Exception unhandled exception.
+     */
+    public Account getAccount(String uuid) throws Exception {
+        return accountService.findByUuidAndIsActive(uuid, true);
+    }
+
+    /**
+     * Get account object.
+     *
+     * @param uuid uuid of account.
+     * @return account.
+     * @throws Exception unhandled exception.
+     */
+    public Project getProject(String uuid) throws Exception {
+        return projectService.findByUuidAndIsActive(uuid, true);
+    }
+
+    /**
      * Get pod id.
      *
      * @param uuid of pod.
@@ -380,7 +416,7 @@ public class ConvertUtil {
     /**
      * Get domain id.
      *
-     * @param uuid uuid of domain.
+     * @param name of the department.
      * @return domain id.
      * @throws Exception unhandled exception.
      */
@@ -390,15 +426,64 @@ public class ConvertUtil {
         } else {
             return null;
         }
-    }    
+    }
+
+    /**
+     * Get domain id.
+     *
+     * @param domain object for account.
+     * @param name of the domain.
+     * @return domain id.
+     * @throws Exception unhandled exception.
+     */
+    public Account getAccountByUsernameAndDomain(String name,Domain domain) throws Exception {
+        if (accountService.findByNameAndDomainAndIsActive(name, domain, true) != null) {
+            return accountService.findByNameAndDomainAndIsActive(name, domain, true);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get Account id.
+     *
+     * @param name of the account.
+     * @param domain uuid of domain.
+     * @return account id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getAccountIdByUsernameAndDomain(String name, Domain domain) throws Exception {
+        if (accountService.findByNameAndDomainAndIsActive(name, domain, true) != null) {
+            return accountService.findByNameAndDomainAndIsActive(name, domain, true).getId();
+        } else {
+            return null;
+        }
+    }
+
+
+    /**
+     * Get User id.
+     *
+     * @param domain object.
+     * @param name of the user.
+     * @return user id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getUserIdByAccount(String name, Domain domain) throws Exception {
+        List<User> user = userService.findByAccountId(getAccountIdByUsernameAndDomain(name,domain));
+        if (user.size() != 0) {
+           return user.get(0).getId();
+        }
+        return null;
+    }
 
     public SecretKey getSecretKey() throws UnsupportedEncodingException {
-    	String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+        String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
         byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
         SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-    	return originalKey;
+        return originalKey;
     }
-    
+
      /**
      * Get the osCategory.
      *
@@ -407,6 +492,6 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public OsCategory getOsCategory(String uuid) throws Exception {
-    	 return osCategoryService.findbyUUID(uuid);
+         return osCategoryService.findbyUUID(uuid);
    }
 }

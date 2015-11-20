@@ -58,6 +58,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Project save(Project project) throws Exception {
+        if (project.getSyncFlag()) {
         Errors errors = validator.rejectIfNullEntity("project", project);
         errors = validator.validateEntity(project, errors);
         errors = this.validateByName(errors, project.getName(), project.getDepartment(), 0L);
@@ -91,23 +92,26 @@ public class ProjectServiceImpl implements ProjectService {
                     project.setIsActive(true);
                     project.setStatus(Project.Status.ENABLED);
                 }
-            }
+             }
+          }
         }
-        return projectRepository.save(project);
+           return projectRepository.save(project);
     }
 
     @Override
     public Project update(Project project) throws Exception {
+        if (project.getSyncFlag()) {
         Errors errors = validator.rejectIfNullEntity("project", project);
         errors = validator.validateEntity(project, errors);
         errors = this.validateByName(errors, project.getName(), project.getDepartment(), project.getId());
         // Validation
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
-        } else {
-            return projectRepository.save(project);
         }
-    }
+     }
+       return projectRepository.save(project);
+   }
+
 
     @Override
     public void delete(Project project) throws Exception {
@@ -192,10 +196,10 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<Project> findAllFromCSServer() throws Exception {
+    public List<Project> findAllFromCSServerByDomain(String domainUuid) throws Exception {
         List<Project> projectList = new ArrayList<Project>();
         HashMap<String, String> projectMap = new HashMap<String, String>();
-        projectMap.put("listAll", "true");
+        projectMap.put("domainid", domainUuid);
         // 1. Get the list of Project from CS server using CS connector
         String response = cloudStackProjectService.listProjects("json", projectMap);
         JSONArray projectListJSON = new JSONObject(response).getJSONObject("listprojectsresponse").getJSONArray("project");
@@ -208,6 +212,11 @@ public class ProjectServiceImpl implements ProjectService {
             projectList.add(Project.convert(projectListJSON.getJSONObject(i), entity));
         }
         return projectList;
+    }
+
+    @Override
+    public Project findByUuidAndIsActive(String uuid, Boolean isActive) throws Exception {
+        return projectRepository.findByUuidAndIsActive(uuid, isActive);
     }
 
 

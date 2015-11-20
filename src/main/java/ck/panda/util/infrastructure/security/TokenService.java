@@ -105,7 +105,10 @@ public class TokenService {
         if (Long.parseLong(tokenDetails.get(5)) < timeDifference) {
             throw new BadCredentialsException("Your Session has Expired. Please Log in Again");
         } else {
-            token = updationTokenTimeout(tokenDetails).toString();
+            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+            byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+            token = new String(EncryptionUtil.encrypt(updationTokenTimeout(tokenDetails).toString(), originalKey));
         }
         resultOfAuthentication = externalServiceAuthenticator.authenticate(tokenDetails.get(1), tokenDetails.get(4));
         resultOfAuthentication.setToken(token);

@@ -14,8 +14,8 @@ import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.domain.repository.jpa.NetworkRepository;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.util.AppValidator;
-import ck.panda.util.CSIsoService;
 import ck.panda.util.CloudStackInstanceService;
+import ck.panda.util.CloudStackIsoService;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.ConvertUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -69,7 +69,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     /** Iso service cloud connector. */
     @Autowired
-    private CSIsoService csIso;
+    private CloudStackIsoService csIso;
 
     /** CloudStack configuration . */
     @Autowired

@@ -170,7 +170,7 @@ public interface SyncService {
    * @throws ApplicationException unhandled application errors.
    * @throws Exception cloudstack unhandled errors.
    */
-  void syncResourceLimitDomian(String domainId) throws ApplicationException, Exception;
+  void syncResourceLimitDomain(String domainId) throws ApplicationException, Exception;
 
   /**
    * Sync with Cloud Server Account.
@@ -192,4 +192,5 @@ public interface SyncService {
    * @throws Exception cloudstack unhandled errors.
    */
   void syncProject() throws ApplicationException, Exception;
+
 }

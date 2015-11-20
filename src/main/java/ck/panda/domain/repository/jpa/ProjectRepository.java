@@ -48,6 +48,22 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, L
     @Query(value = "select project from Project project where project.isActive IS :isactive ")
     List<Project> findAllByActive(@Param("isactive") Boolean isActive);
 
+    /**
+     * Find all the project with isActive and domain Id.
+     *
+     * @param id of the domain.
+     * @return Domain.
+     */
     @Query(value = "select project from Project project where project.isActive IS TRUE and project.domainId = :domain")
     List<Project> findbyDomain(@Param("domain")Long id);
+
+    /**
+     * Find all the project using Uuid and IsActive Status.
+     *
+     * @param uuid of the project.
+     * @param isActive get Status of the project.
+     * @return Project.
+     */
+    @Query(value = "select project from Project project where project.isActive =:isActive AND project.uuid =:uuid")
+    Project findByUuidAndIsActive(@Param("uuid") String uuid, @Param("isActive") Boolean isActive);
 }

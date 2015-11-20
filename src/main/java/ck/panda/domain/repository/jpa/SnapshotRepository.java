@@ -7,9 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.Department;
-import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Snapshot;
 
 /**
@@ -32,8 +29,7 @@ public interface SnapshotRepository extends PagingAndSortingRepository<Snapshot,
     /**
      * Find the snapshot for same domain with username and is active status.
      *
-     * @param userName user name of the department.
-     * @param snapshot snapshot reference.
+     * @param Name of the snapshot.
      * @param isActive get the snapshot list based on active/inactive status.
      * @return snapshot name.
      */

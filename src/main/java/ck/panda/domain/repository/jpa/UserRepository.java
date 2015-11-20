@@ -4,6 +4,8 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+
+import ck.panda.domain.entity.Account;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
@@ -11,12 +13,12 @@ import ck.panda.domain.entity.User;
 /** JPA repository for user CRUD operations. */
 public interface UserRepository extends PagingAndSortingRepository<User, Long> {
 
-	/**
-	 * Find user by active and query.
-	 * @param query
-	 * @return
-	 */
-	@Query(value = "select user from User user where user.isActive IS TRUE and lower(user.userName) LIKE '%' || lower(:query) || '%' ")
+    /**
+     * Find user by active and query.
+     * @param query
+     * @return
+     */
+    @Query(value = "select user from User user where user.isActive IS TRUE and lower(user.userName) LIKE '%' || lower(:query) || '%' ")
     List<User> findAllByActive(@Param("query") String query);
 
     /**
@@ -47,4 +49,13 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      */
     @Query(value = "select user from User user where user.userName = :userName AND user.password = :password")
     User findByUser(@Param("userName") String userName, @Param("password") String password);
+
+    /**
+     * Find the user from account.
+     *
+     * @param accountId of the user.
+     * @return user.
+     */
+    @Query(value = "select user from User user where user.accountId =:accountId")
+    List<User> findByAccountId(@Param("accountId") Long accountId);
 }

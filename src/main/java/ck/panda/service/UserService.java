@@ -4,6 +4,8 @@ import java.util.List;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import com.google.common.base.Optional;
+
+import ck.panda.domain.entity.Account;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
@@ -13,22 +15,22 @@ import ck.panda.util.domain.CRUDService;
 @Service
 public interface UserService extends CRUDService<User> {
 
-	/**
+    /**
      * To get list of users from cloudstack server.
      *
      * @return user list from server
      * @throws Exception unhandled errors.
      */
-    List<User> findAllFromCSServer() throws Exception;
+    List<User> findAllFromCSServerByDomain(String domainUuid) throws Exception;
 
     /**
-	 * @param query search term.
-	 * @return list of user.
-	 * @throws Exception
-	 */
-	List<User> findByName(String query) throws Exception;
+     * @param query search term.
+     * @return list of user.
+     * @throws Exception
+     */
+    List<User> findByName(String query) throws Exception;
 
-	/**
+    /**
      * To get list of users by department.
      *
      * @param departmentId department id.
@@ -37,7 +39,7 @@ public interface UserService extends CRUDService<User> {
      */
     List<User> findByDepartment(Long departmentId) throws Exception;
 
-	/**
+    /**
      * Find the User already exist for the same domain.
      *
      * @param userName userName of the user
@@ -57,6 +59,7 @@ public interface UserService extends CRUDService<User> {
      */
      User findByUser(Optional<String> userName, Optional<String> password) throws Exception;
 
+
      /**
       * Method to soft delete user.
       *
@@ -65,4 +68,13 @@ public interface UserService extends CRUDService<User> {
       * @throws Exception if error occurs.
       */
      User softDelete(User user) throws Exception;
+
+     /**
+      * Find user by account Id
+      *
+      * @param accountId of the user.
+      * @return account.
+      * @throws Exception if error occurs.
+      */
+     List<User> findByAccountId(Long accountId) throws Exception;
 }
