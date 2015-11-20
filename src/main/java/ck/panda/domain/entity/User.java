@@ -80,6 +80,15 @@ public class User {
     @ManyToMany
     private List<Project> projectList;
 
+    /** Account of the user. */
+    @ManyToOne
+    @JoinColumn(name = "account_id", referencedColumnName = "id", insertable = false, updatable = false)
+    private Account account;
+
+    /** Account Id of the user. */
+    @Column(name = "account_id")
+    private Long accountId;
+
     /** User uuid. */
     @Column(name = "uuid")
     private String uuid;
@@ -485,6 +494,34 @@ public class User {
     }
 
     /**
+     * @return the account
+     */
+    public Account getAccount() {
+        return account;
+    }
+
+    /**
+     * @param account the account to set
+     */
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    /**
+     * @return the accountId
+     */
+    public Long getAccountId() {
+        return accountId;
+    }
+
+    /**
+     * @param accountId the accountId to set
+     */
+    public void setAccountId(Long accountId) {
+        this.accountId = accountId;
+    }
+
+    /**
      * Convert JSONObject into user object.
      *
      * @param object JSON object.
@@ -504,6 +541,8 @@ public class User {
         user.setType(JsonUtil.getIntegerValue(jsonObject, "accounttype") == 0 ? User.Type.USER : User.Type.DOMAIN_ADMIN);
         user.setDomain(convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid")));
         user.setDepartment(convertUtil.getDepartment(JsonUtil.getStringValue(jsonObject, "accountid")));
+        user.setAccountId(convertUtil.getAccountIdByUsernameAndDomain(JsonUtil.getStringValue(jsonObject, "account"),
+                    convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid"))));
         user.setIsActive(true);
         return user;
     }

@@ -12,13 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
 import com.google.common.base.Optional;
-
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
-import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackUserService;
@@ -48,6 +46,10 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private DepartmentService departmentService;
 
+    /** Inject Account Service business logic. */
+    @Autowired
+    private AccountService accountService;
+
     /** Autowired configutill object. */
     @Autowired
     private ConfigUtil configServer;
@@ -56,6 +58,10 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private ConvertUtil entity;
 
+    /** Inject domain service business logic. */
+    @Autowired
+    private DomainRepository domainRepository;
+
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
@@ -63,28 +69,33 @@ public class UserServiceImpl implements UserService {
     @Override
     public User save(User user) throws Exception {
 
-        if(user.getSyncFlag()) {
+        if (user.getSyncFlag()) {
         Errors errors = validator.rejectIfNullEntity("user", user);
         errors = validator.validateEntity(user, errors);
         errors = this.validateName(errors, user.getUserName(), user.getDomain());
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-        	user.setType(User.Type.USER);
+            user.setType(User.Type.USER);
             String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
             byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
             SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
             String encryptedPassword = new String(EncryptionUtil.encrypt(user.getPassword(), originalKey));
-            user.setPassword(encryptedPassword);
             user.setIsActive(true);
             csUserService.setServer(configServer.setServer(1L));
             HashMap<String, String> userMap = new HashMap<String, String>();
             userMap.put("domainid", user.getDomain().getUuid());
             String cloudResponse = csUserService.createUser(user.getDepartment().getUserName(),
                     user.getEmail(), user.getFirstName(), user.getLastName(), user.getUserName(), user.getPassword(), "json", userMap);
-            JSONObject createUserResponseJSON = new JSONObject(cloudResponse).getJSONObject("createuserresponse")
-                    .getJSONObject("user");
-            user.setUuid((String) createUserResponseJSON.get("id"));
+            JSONObject createUserResponseJSON = new JSONObject(cloudResponse).getJSONObject("createuserresponse");
+                if (createUserResponseJSON.has("errorcode")) {
+                //errors = this.validateEvent(errors, createUserResponseJSON.getString("errortext"));
+                errors.addFieldError("username", "user.already.exist.for.same.domain");
+                throw new ApplicationException(errors);
+            }
+            JSONObject userRes = createUserResponseJSON.getJSONObject("user");
+            user.setUuid((String) userRes.get("id"));
+            user.setPassword(encryptedPassword);
             return userRepository.save(user);
         }
         } else {
@@ -110,13 +121,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User update(User user) throws Exception {
-        if(user.getSyncFlag()) {
+        if (user.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity("user", user);
             errors = validator.validateEntity(user, errors);
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-        	  configServer.setServer(1L);
+              configServer.setServer(1L);
               HashMap<String, String> optional = new HashMap<String, String>();
               optional.put("domainid", user.getDomain().getUuid());
               optional.put("username", user.getUserName());
@@ -124,7 +135,12 @@ public class UserServiceImpl implements UserService {
               optional.put("firstname", user.getFirstName());
               optional.put("lastname", user.getLastName());
               optional.put("password", user.getPassword());
-        	  csUserService.updateUser(user.getUuid(), optional,"json");
+              csUserService.updateUser(user.getUuid(), optional,"json");
+              String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+              byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+              SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+              String encryptedPassword = new String(EncryptionUtil.encrypt(user.getPassword(), originalKey));
+              user.setPassword(encryptedPassword);
               return userRepository.save(user);
           }
         } else {
@@ -134,19 +150,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void delete(User user) throws Exception {
-    	if(user.getSyncFlag() == true) {
-    		configServer.setServer(1L);
+        if (user.getSyncFlag() == true) {
+            configServer.setServer(1L);
             csUserService.deleteUser(user.getId().toString(), "json");
             userRepository.delete(user);
         } else {
-            	userRepository.delete(user);
+                userRepository.delete(user);
         }
     }
 
     @Override
     public void delete(Long id) throws Exception {
-    	User user = userRepository.findOne(id);
-    	configServer.setServer(1L);
+        User user = userRepository.findOne(id);
+        configServer.setServer(1L);
         csUserService.deleteUser(user.getUuid(), "json");
         userRepository.delete(id);
     }
@@ -167,10 +183,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> findAllFromCSServer() throws Exception {
+    public List<User> findAllFromCSServerByDomain(String domainUuid) throws Exception {
           List<User> userList = new ArrayList<User>();
           HashMap<String, String> userMap = new HashMap<String, String>();
-
+         // userMap.put("domainid", domainUuid);
+          userMap.put("listall", "true");
           // 1. Get the list of users from CS server using CS connector
           String response = csUserService.listUsers(userMap,"json");
           JSONArray userListJSON = new JSONObject(response).getJSONObject("listusersresponse")
@@ -203,12 +220,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findByUser(Optional<String> userName, Optional<String> password) throws Exception {
-        String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
-        byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
-        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-        String encryptedPassword = new String(EncryptionUtil.encrypt(password.get(), originalKey));
-        return userRepository.findByUser(userName.get(), encryptedPassword);
+    public User findByUser(Optional<String> userName, Optional<String> password, String domainUUID) throws Exception {
+    	User user = userRepository.findByUser(userName.get(), domainRepository.findByUUID(domainUUID));
+    	if(user != null) {
+    		String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+            byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+            String encryptedPassword = new String(EncryptionUtil.encrypt(password.get(), originalKey));
+            user.setPassword(encryptedPassword);
+            userRepository.save(user);
+    	}
+        return user;
     }
 
     @Override
@@ -216,6 +238,24 @@ public class UserServiceImpl implements UserService {
         user.setIsActive(false);
         user.setStatus(User.Status.DELETED);
         return userRepository.save(user);
+    }
+
+    @Override
+    public List<User> findByAccountId(Long accountId) throws Exception {
+        return userRepository.findByAccountId(accountId);
+    }
+
+    /**
+     * Check the user CS error handling.
+     *
+     * @param errors error creating status.
+     * @param errmessage error message.
+     * @return errors.
+     * @throws Exception if error occurs.
+     */
+    private Errors validateEvent(Errors errors, String errmessage) throws Exception {
+       errors.addGlobalError(errmessage);
+       return errors;
     }
 
 }

@@ -48,7 +48,7 @@ public interface DepartmentService  extends CRUDService<Department>  {
      * @return domain list from server
      * @throws Exception unhandled errors.
      */
-    List<Department> findAllFromCSServer() throws Exception;
+    List<Department> findAllFromCSServerByDomain(String domainUuid) throws Exception;
 
     /**
      * Find the departments based on the given Uuid and isActive status.
@@ -60,8 +60,22 @@ public interface DepartmentService  extends CRUDService<Department>  {
      */
     Department findByUuidAndIsActive(String uuid, Boolean isActive) throws Exception;
 
+    /**
+     * Find by domain using Domain Id and IsActive Status.
+     *
+     * @param domainId for department.
+     * @param isActive department status Active/Inactive
+     * @return Department.
+     */
     List<Department> findByDomain(Long domainId, Boolean isActive);
 
+    /**
+     * Find by Username using IsActive Status.
+     *
+     * @param name of the status.
+     * @param isActive department status Active/Inactive
+     * @return Department.
+     */
     Department findByUsername(String name, Boolean isActive);
 
 }

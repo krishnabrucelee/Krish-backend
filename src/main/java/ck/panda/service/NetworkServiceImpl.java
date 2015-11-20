@@ -133,11 +133,11 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public List<Network> findAllFromCSServer() throws Exception {
+    public List<Network> findAllFromCSServerByDomain(String domainUuid) throws Exception {
 
         List<Network> networkList = new ArrayList<Network>();
           HashMap<String, String> networkMap = new HashMap<String, String>();
-
+          networkMap.put("domainid", domainUuid);
           // 1. Get the list of domains from CS server using CS connector
           String response = csNetwork.listNetworks("json", networkMap);
 

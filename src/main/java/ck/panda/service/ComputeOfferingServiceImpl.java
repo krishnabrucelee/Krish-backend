@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.repository.jpa.ComputeOfferingRepository;
@@ -51,32 +50,33 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     @Override
     public ComputeOffering save(ComputeOffering compute) throws Exception {
 
-		if (compute.getIsSyncFlag()) {
-			Errors errors = validator.rejectIfNullEntity("compute", compute);
-			errors = validator.validateEntity(compute, errors);
+        if (compute.getIsSyncFlag()) {
+            Errors errors = validator.rejectIfNullEntity("compute", compute);
+            errors = validator.validateEntity(compute, errors);
 
-			if (errors.hasErrors()) {
-				throw new ApplicationException(errors);
-			} else {
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
+            } else {
 
-				// set server for maintain session with configuration values
-				computeOffer.setServer(configServer.setServer(1L));
-				String createComputeResponse = computeOffer.createComputeOffering(compute.getName(),
-						compute.getDisplayText(), "json", addOptionalValues(compute));
-				JSONObject createComputeResponseJSON = new JSONObject(createComputeResponse).getJSONObject("createserviceofferingresponse");
+                // set server for maintain session with configuration values
+                computeOffer.setServer(configServer.setServer(1L));
+                String createComputeResponse = computeOffer.createComputeOffering(compute.getName(),
+                        compute.getDisplayText(), "json", addOptionalValues(compute));
+                JSONObject createComputeResponseJSON = new JSONObject(createComputeResponse).getJSONObject("createserviceofferingresponse");
 
-				if (createComputeResponseJSON.has("errorcode")) {
-					errors = this.validateEvent(errors, createComputeResponseJSON.getString("errortext"));
-					throw new ApplicationException(errors);
-				}
-				JSONObject serviceOffering = createComputeResponseJSON.getJSONObject("serviceoffering");
-				compute.setUuid((String) serviceOffering.get("id"));
-				return computeRepo.save(compute);
-			}
-		} else {
-			LOGGER.debug(compute.getUuid());
-			return computeRepo.save(compute);
-		}
+                if (createComputeResponseJSON.has("errorcode")) {
+                    errors = this.validateEvent(errors, createComputeResponseJSON.getString("errortext"));
+                    throw new ApplicationException(errors);
+                }
+                JSONObject serviceOffering = createComputeResponseJSON.getJSONObject("serviceoffering");
+                compute.setUuid((String) serviceOffering.get("id"));
+                compute.setIsActive(true);
+                return computeRepo.save(compute);
+            }
+        } else {
+            LOGGER.debug(compute.getUuid());
+            return computeRepo.save(compute);
+        }
     }
 
 
@@ -110,11 +110,18 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
 
     @Override
     public void delete(Long id) throws Exception {
-        ComputeOffering compute = this.find(id);
-        //set server for finding value in configuration
-        computeOffer.setServer(configServer.setServer(1L));
-        computeOffer.deleteComputeOffering(compute.getUuid(), "json");
         computeRepo.delete(id);
+    }
+
+    @Override
+    public ComputeOffering softDelete(ComputeOffering compute) throws Exception {
+        compute.setIsActive(false);
+        if (compute.getIsSyncFlag()) {
+            // set server for finding value in configuration
+            computeOffer.setServer(configServer.setServer(1L));
+            computeOffer.deleteComputeOffering(compute.getUuid(), "json");
+        }
+        return computeRepo.save(compute);
     }
 
     @Override
@@ -249,5 +256,17 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
         return computeRepo.findByUUID(uuid);
     }
 
+    /**
+     * Find all the compute offering with pagination.
+     *
+     * @throws Exception
+     *             application errors.
+     * @param pagingAndSorting
+     *            do pagination with sorting for computeofferings.
+     * @return list of compute offerings.
+     */
+    public Page<ComputeOffering> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
+        return computeRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
+    }
     }
 

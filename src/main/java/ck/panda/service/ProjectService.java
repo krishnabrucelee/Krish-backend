@@ -50,11 +50,22 @@ public interface ProjectService extends CRUDService<Project> {
     List<Project> findbyDomain(Long id);
 
     /**
+     * Find by Uuid and IsActive status.
+     *
+     * @param uuid of the project.
+     * @param isActive status of the project.
+     * @return project.
+     * @throws Exception if error occurs.
+     */
+    Project findByUuidAndIsActive(String uuid, Boolean isActive) throws Exception;
+
+    /**
      * Find all the projects from cloud stack server.
      *
+     * @param domainUuid gives uuid of the domain.
      * @return list of active project.
      * @throws Exception if error occurs.
      */
-    List<Project> findAllFromCSServer() throws Exception;
+    List<Project> findAllFromCSServerByDomain(String domainUuid) throws Exception;
 
 }

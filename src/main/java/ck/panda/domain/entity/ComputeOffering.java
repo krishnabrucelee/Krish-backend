@@ -202,7 +202,6 @@ public class ComputeOffering implements Serializable {
     @JoinColumn(name = "compute_id")
     private List<ComputeOfferingCost> computeCost;
 
-
     /**
      * Enumeration for Region status.
      */
@@ -724,6 +723,7 @@ public class ComputeOffering implements Serializable {
     }
 
 
+
     /**
      * @return the computeCost
      */
@@ -746,8 +746,8 @@ public class ComputeOffering implements Serializable {
      * @throws JSONException handles json exception.
      */
     public static ComputeOffering convert(JSONObject object) throws JSONException {
-
         ComputeOffering compute = new ComputeOffering();
+        compute.setIsSyncFlag(false);
         try {
         compute.uuid =  JsonValidator.jsonStringValidation(object, "id");
         compute.name =  JsonValidator.jsonStringValidation(object, "name");
@@ -758,7 +758,8 @@ public class ComputeOffering implements Serializable {
         compute.customizedIops = JsonValidator.jsonBooleanValidation(object, "iscustomizediops");
         compute.numberOfCores = JsonValidator.jsonIntegerValidation(object, "cpunumber");
         compute.setStorageType(compute.getStorageType().valueOf(object.has("storagetype") ? object.get("storagetype").toString() : ""));
-        compute.setIsSyncFlag(false);
+        compute.setIsActive(true);
+
         } catch (Exception ex) {
             ex.printStackTrace();
         }
