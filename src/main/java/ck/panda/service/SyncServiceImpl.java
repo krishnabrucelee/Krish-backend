@@ -234,39 +234,33 @@ public class SyncServiceImpl implements SyncService {
         }
 
         try {
-            // 4. Sync Hypervisor entity
-            this.syncHypervisor();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch Hypervisor", e);
-        }
-
-        try {
-            // 5. Sync Pod entity
+            // 4. Sync Pod entity
             this.syncPod();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Pod", e);
         }
 
         try {
-            // 6. Sync Cluster entity
+            // 5. Sync Cluster entity
             this.syncCluster();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch cluster", e);
         }
 
         try {
-            // 7. Sync Host entity
+            // 6. Sync Host entity
             this.syncHost();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Host", e);
         }
 
         try {
-            // 7. Sync Account entity
-            this.syncAccount();
+            // 7. Sync Hypervisor entity
+            this.syncHypervisor();
         } catch (Exception e) {
-            LOGGER.error("ERROR AT synch Account", e);
+            LOGGER.error("ERROR AT synch Hypervisor", e);
         }
+
 
         try {
             // 8. Sync Department entity
@@ -276,18 +270,19 @@ public class SyncServiceImpl implements SyncService {
         }
 
         try {
-            // 9. Sync User entity
+            // 9. Sync Account entity
+            this.syncAccount();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Account", e);
+        }
+
+        try {
+            // 10. Sync User entity
                this.syncUser();
         } catch (Exception e) {
                LOGGER.error("ERROR AT synch User", e);
         }
 
-        try {
-            // 10. Sync Network entity
-            this.syncNetwork();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch Network ", e);
-        }
 
         try{
             // 11. Sync Project entity
@@ -297,82 +292,98 @@ public class SyncServiceImpl implements SyncService {
         }
 
         try {
-            // 12. Sync Instance entity
-              this.syncInstances();
-        } catch (Exception e) {
-              LOGGER.error("ERROR AT synch Instance", e);
-        }
-
-        try {
-            // 13. Sync Volume entity
-            this.syncVolume();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch Volume", e);
-        }
-
-        try {
-            // 14. Sync OSType entity
-            this.syncOsTypes();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch OS Types", e);
-        }
-
-        try {
-            // 15. Sync OSCategory entity
+            // 12. Sync OSCategory entity
             this.syncOsCategory();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch OS Category", e);
         }
 
+
         try {
-            // 16. Sync Templates entity
-               this.syncTemplates();
+            // 13. Sync OSType entity
+            this.syncOsTypes();
         } catch (Exception e) {
-               LOGGER.error("ERROR AT synch Templates", e);
+            LOGGER.error("ERROR AT synch OS Types", e);
+        }
+
+
+        try {
+            // 14. Sync Network offering entity
+               this.syncNetworkOffering();
+        } catch (Exception e) {
+               LOGGER.error("ERROR AT synch NetworkOffering", e);
         }
 
         try {
-               // 17. Sync Iso entity
-               this.syncIso();
-        } catch (Exception e) {
-               LOGGER.error("ERROR AT synch Iso", e);
-        }
-
-        try {
-            // 18. Sync Compute Offering entity
+            // 15. Sync Compute Offering entity
             this.syncComputeOffering();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Compute Offering", e);
         }
 
         try {
-            // 19. Sync Storage offering entity
+            // 16. Sync Storage offering entity
             this.syncStorageOffering();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Storage Offering", e);
         }
 
         try {
-            // 20. Sync Snapshot entity
+            // 17. Sync Iso entity
+            this.syncIso();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Iso", e);
+        }
+
+        try {
+            // 18. Sync Network entity
+            this.syncNetwork();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Network ", e);
+        }
+
+        try {
+            // 19. Sync Volume entity
+            this.syncVolume();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Volume", e);
+        }
+
+        try {
+            // 20. Sync Templates entity
+               this.syncTemplates();
+        } catch (Exception e) {
+               LOGGER.error("ERROR AT synch Templates", e);
+        }
+
+        try{
+            // 21. Sync ResourceLimit entity
+            this.syncResourceLimit();
+        }catch(Exception e){
+            LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
+        }
+
+        try {
+            // 22. Sync Instance entity
+              this.syncInstances();
+        } catch (Exception e) {
+              LOGGER.error("ERROR AT synch Instance", e);
+        }
+
+        try {
+            // 23. Sync VmSnapshot entity
+              this.syncVmSnapshots();
+          } catch (Exception e) {
+              LOGGER.error("ERROR AT synch vm snapshots", e);
+          }
+
+
+        try {
+            // 24. Sync Snapshot entity
             this.syncSnapshot();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Snapshot", e);
         }
-
-        try {
-          // 21. Sync VmSnapshot entity
-            this.syncVmSnapshots();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch vm snapshots", e);
-        }
-
-        try{
-         // 22. Sync ResourceLimit entity
-         this.syncResourceLimit();
-         }catch(Exception e){
-         LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
-         }
-
     }
 
     /**
@@ -1809,6 +1820,4 @@ public class SyncServiceImpl implements SyncService {
             accountService.save(csAccountMap.get(key));
         }
     }
-
-
 }

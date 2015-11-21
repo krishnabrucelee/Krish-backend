@@ -187,7 +187,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     public List<Department> findAllFromCSServerByDomain(String domainUuid) throws Exception {
         List<Department> departmentList = new ArrayList<Department>();
         HashMap<String, String> departmentMap = new HashMap<String, String>();
-        departmentMap.put("domainid", domainUuid);
+        departmentMap.put("listall", "true");
         // 1. Get the list of accounts from CS server using CS connector
         String response = csAccountService.listAccounts("json", departmentMap);
         JSONArray userListJSON = new JSONObject(response).getJSONObject("listaccountsresponse").getJSONArray("account");

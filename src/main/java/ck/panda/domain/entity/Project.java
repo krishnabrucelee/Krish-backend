@@ -104,15 +104,6 @@ public class Project implements Serializable {
     @Column(name = "department_id")
     private Long departmentId;
 
-    /** Project account id. */
-    @JoinColumn(name = "account_id", referencedColumnName = "id", updatable = false, insertable = false)
-    @ManyToOne(fetch = FetchType.EAGER, targetEntity = Account.class)
-    private Account account;
-
-    /** Project account id. */
-    @Column(name = "account_id")
-    private Long accountId;
-
     /** Project is whether active or disable. */
     @NotNull
     @Column(name = "is_active", nullable = false, columnDefinition = "TINYINT DEFAULT FALSE")
@@ -507,35 +498,6 @@ public class Project implements Serializable {
      */
     public void setSyncFlag(Boolean syncFlag) {
         this.syncFlag = syncFlag;
-    }
-
-
-    /**
-     * @return the account
-     */
-    public Account getAccount() {
-        return account;
-    }
-
-    /**
-     * @param account the account to set
-     */
-    public void setAccount(Account account) {
-        this.account = account;
-    }
-
-    /**
-     * @return the accountId
-     */
-    public Long getAccountId() {
-        return accountId;
-    }
-
-    /**
-     * @param accountId the accountId to set
-     */
-    public void setAccountId(Long accountId) {
-        this.accountId = accountId;
     }
 
     /**

@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.ComputeOffering;
+import ck.panda.domain.entity.Department;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
@@ -48,5 +49,12 @@ public interface ComputeOfferingService  extends CRUDService<ComputeOffering>  {
      */
     ComputeOffering softDelete(ComputeOffering compute) throws Exception;
 
+    /**
+     * Find by name of the offering
+     *
+     * @param name of the compute offering.
+     * @return compute offering.
+     */
+    ComputeOffering findByName(String name);
 }
 

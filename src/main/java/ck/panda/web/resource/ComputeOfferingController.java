@@ -51,6 +51,7 @@ public class ComputeOfferingController extends CRUDController<ComputeOffering> i
     @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing ComputeOffering.", response = ComputeOffering.class)
     @Override
     public ComputeOffering read(@PathVariable(PATH_ID) Long id) throws Exception {
+        System.out.println(id+"======================================");
         return computeService.find(id);
     }
 
@@ -73,6 +74,7 @@ public class ComputeOfferingController extends CRUDController<ComputeOffering> i
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDelete(@RequestBody ComputeOffering compute, @PathVariable(PATH_ID) Long id) throws Exception {
         /** Doing Soft delete from the compute offering table. */
+         compute = computeService.find(id);
          compute.setIsSyncFlag(true);
          computeService.softDelete(compute);
     }

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.ComputeOffering;
+import ck.panda.domain.entity.Department;
 import ck.panda.domain.repository.jpa.ComputeOfferingRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackComputeOffering;
@@ -51,6 +52,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     public ComputeOffering save(ComputeOffering compute) throws Exception {
 
         if (compute.getIsSyncFlag()) {
+             this.validateComputeOffering(compute);
             Errors errors = validator.rejectIfNullEntity("compute", compute);
             errors = validator.validateEntity(compute, errors);
 
@@ -268,5 +270,29 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     public Page<ComputeOffering> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
         return computeRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
     }
+
+    /**
+     * Validate the department.
+     *
+     * @param department reference of the department.
+     * @throws Exception error occurs
+     */
+    private void validateComputeOffering(ComputeOffering compute) throws Exception {
+        Errors errors = validator.rejectIfNullEntity("computes", compute);
+        errors = validator.validateEntity(compute, errors);
+        ComputeOffering computeOffering = computeRepo.findName(compute.getName());
+        if (computeOffering != null && compute.getId() != computeOffering.getId()) {
+            errors.addFieldError("name", "computeoffering.already.exist");
+        }
+        if (errors.hasErrors()) {
+            throw new ApplicationException(errors);
+        }
     }
+
+    @Override
+    public ComputeOffering findByName(String name) {
+        return (ComputeOffering) computeRepo.findName(name);
+    }
+
+  }
 
