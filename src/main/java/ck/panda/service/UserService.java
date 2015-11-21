@@ -1,12 +1,15 @@
 package ck.panda.service;
 
 import java.util.List;
+
+import org.springframework.data.domain.Page;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import com.google.common.base.Optional;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
 import ck.panda.util.domain.CRUDService;
+import ck.panda.util.domain.vo.PagingAndSorting;
 
 /** The UserService interface used for to perform CRUD operations and basic API's related business logic. */
 @Service
@@ -75,4 +78,21 @@ public interface UserService extends CRUDService<User> {
       * @throws Exception if error occurs.
       */
      List<User> findByAccountId(Long accountId) throws Exception;
+
+     /**
+      * Find all the user by domain.
+      *
+      * @param pagingAndSorting paging and sorting information.
+      * @return list of user.
+      * @throws Exception if error occurs.
+      */
+     Page<User> findAllUserByDomain(PagingAndSorting pagingAndSorting) throws Exception;
+
+     /**
+      * Find all the user by domain.
+      *
+      * @return list of user.
+      * @throws Exception if error occurs.
+      */
+     List<User> findAllUserByDomain() throws Exception;
 }

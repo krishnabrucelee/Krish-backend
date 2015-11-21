@@ -22,6 +22,7 @@ import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.ConvertUtil;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -62,6 +63,10 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private DomainRepository domainRepository;
 
+    /** Autowired TokenDetails */
+    @Autowired
+    private TokenDetails tokenDetails;
+
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
@@ -89,7 +94,6 @@ public class UserServiceImpl implements UserService {
                     user.getEmail(), user.getFirstName(), user.getLastName(), user.getUserName(), user.getPassword(), "json", userMap);
             JSONObject createUserResponseJSON = new JSONObject(cloudResponse).getJSONObject("createuserresponse");
                 if (createUserResponseJSON.has("errorcode")) {
-                //errors = this.validateEvent(errors, createUserResponseJSON.getString("errortext"));
                 errors.addFieldError("username", "user.already.exist.for.same.domain");
                 throw new ApplicationException(errors);
             }
@@ -260,6 +264,18 @@ public class UserServiceImpl implements UserService {
     private Errors validateEvent(Errors errors, String errmessage) throws Exception {
        errors.addGlobalError(errmessage);
        return errors;
+    }
+
+    @Override
+    public Page<User> findAllUserByDomain(PagingAndSorting pagingAndSorting) throws Exception {
+    	Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        return userRepository.findAllUserByDomain(pagingAndSorting.toPageRequest(), domain);
+    }
+
+    @Override
+    public List<User> findAllUserByDomain() throws Exception {
+    	Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        return userRepository.findAllUserByDomain(domain);
     }
 
 }
