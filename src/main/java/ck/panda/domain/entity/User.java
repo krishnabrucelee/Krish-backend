@@ -20,8 +20,6 @@ import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
-
-import ck.panda.service.EncryptionUtil;
 import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 
@@ -534,7 +532,6 @@ public class User {
         user.setSyncFlag(false);
         user.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
         user.setUserName(JsonUtil.getStringValue(jsonObject, "username"));
-        user.setPassword(EncryptionUtil.encrypt(user.getUserName(), convertUtil.getSecretKey()));
         user.setFirstName(JsonUtil.getStringValue(jsonObject, "firstname"));
         user.setLastName(JsonUtil.getStringValue(jsonObject, "lastname"));
         user.setEmail(JsonUtil.getStringValue(jsonObject, "email"));

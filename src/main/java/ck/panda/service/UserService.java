@@ -51,11 +51,11 @@ public interface UserService extends CRUDService<User> {
      *
      * @param userName login user name
      * @param password login password
-     * @param domainUUID login domain
+     * @param domainName login domain
      * @return user details
      * @throws Exception raise if error
      */
-     User findByUser(Optional<String> userName, Optional<String> password, String domainUUID) throws Exception;
+     User findByUser(Optional<String> userName, Optional<String> password, Optional<String> domainName) throws Exception;
 
 
      /**
@@ -67,8 +67,8 @@ public interface UserService extends CRUDService<User> {
       */
      User softDelete(User user) throws Exception;
 
-     /**
-      * Find user by account Id
+      /**
+      * Find user by account Id.
       *
       * @param accountId of the user.
       * @return account.

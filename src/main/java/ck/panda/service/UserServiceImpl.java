@@ -220,16 +220,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findByUser(Optional<String> userName, Optional<String> password, String domainUUID) throws Exception {
-    	User user = userRepository.findByUser(userName.get(), domainRepository.findByUUID(domainUUID));
-    	if(user != null) {
-    		String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+    public User findByUser(Optional<String> userName, Optional<String> password, Optional<String> domainName) throws Exception {
+        String domain = domainName.get().trim();
+        if (domain.equals("/")) {
+            domain = "ROOT";
+        }
+        User user = userRepository.findByUser(userName.get().trim(), domainRepository.findByName(domain));
+        if (user != null) {
+            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
             byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
             SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
             String encryptedPassword = new String(EncryptionUtil.encrypt(password.get(), originalKey));
             user.setPassword(encryptedPassword);
             userRepository.save(user);
-    	}
+        }
         return user;
     }
 
