@@ -66,6 +66,7 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
         volumeService.delete(id);
     }
 
+
     @Override
     public List<Volume> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -87,5 +88,35 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     @ResponseBody
     protected List<Volume> getSearch() throws Exception {
         return volumeService.findAll();
+    }
+
+    /**
+     * Attaches volume to the Instance.
+     *
+     * @param volume Volume
+     * @param id Id
+     * @return attachVolume
+     * @throws Exception exception
+     */
+    @RequestMapping(value = "attach/{id}", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected Volume attachVolume(@RequestBody Volume volume, @PathVariable(PATH_ID) Long id) throws Exception {
+        return volumeService.attachVolume(volume);
+    }
+
+    /**
+     * Datach volume from the Instance.
+     *
+     * @param volume Volume
+     * @param id Id
+     * @return attachVolume
+     * @throws Exception exception
+     */
+    @RequestMapping(value = "detach/{id}", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected Volume detachVolume(@RequestBody Volume volume, @PathVariable(PATH_ID) Long id) throws Exception {
+        return volumeService.detachVolume(volume);
     }
 }
