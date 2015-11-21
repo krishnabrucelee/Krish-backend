@@ -30,4 +30,20 @@ public interface VolumeService extends CRUDService<Volume> {
     * @throws Exception unhandled errors.
     */
    Volume findByUUID(String uuid) throws Exception;
+
+
+   /**
+    * @param volume volume.
+    * @return volume
+    * @throws Exception Exception
+    */
+   Volume attachVolume(Volume volume) throws Exception;
+
+
+   /**
+    * @param volume volume
+    * @return volume
+    * @throws Exception Exception
+    */
+   Volume detachVolume(Volume volume) throws Exception;
 }

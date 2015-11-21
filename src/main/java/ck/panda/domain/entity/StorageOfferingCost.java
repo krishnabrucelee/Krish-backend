@@ -53,7 +53,7 @@ public class StorageOfferingCost {
     /**
      * Cost for 1 Gb per month usage.
      */
-    @Column(name = "cost_gb_per_month")
+    @Column(name = "cost_gb_per_month", columnDefinition = "bigint(20) default 0")
     private Double costGbPerMonth;
 
     /**
@@ -65,7 +65,7 @@ public class StorageOfferingCost {
     /**
      * Cost for 1 Iops per month usage.
      */
-    @Column(name = "cost_iops_per_month")
+    @Column(name = "cost_iops_per_month", columnDefinition = "bigint(20) default 0")
     private Double costIopsPerMonth;
 
     /** Status attribute to verify status of the Storage offering. */

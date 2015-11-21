@@ -575,7 +575,7 @@ public class Volume {
             volume.setVolumeType(volume.getVolumeType().valueOf(JsonValidator.jsonStringValidation(object, "type")));
             volume.setStatus(volume.getStatus().valueOf(JsonValidator.jsonStringValidation(object, "state")));
          //   volume.setCreatedDateTime(volume.getCreatedDateTime().);
-            if(object.has("diskofferingid")) {
+            if (object.has("diskofferingid")) {
             volume.setStorageOfferingId(convertUtil.getStorageOfferId(JsonUtil.getStringValue(object, "diskofferingid")));
             }
             volume.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(object, "zoneid")));
