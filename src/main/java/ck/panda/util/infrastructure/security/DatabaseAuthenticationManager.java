@@ -110,7 +110,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
         } else {
             try {
                 String domainUUID = csLoginAuthentication(username.get(), password.get(), domain.get());
-                if(domainUUID != "") {
+                if (domainUUID != "") {
                     user = userService.findByUser(username, password, domainUUID);
                 }
             } catch (Exception e) {
@@ -132,8 +132,6 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
                 resultOfAuthentication = externalServiceAuthenticator.authenticate(username.get(), backendAdminRole);
                 String newToken = null;
                 try {
-                	user.setSyncFlag(false);
-                	userService.update(user);
                     newToken = tokenService.generateNewToken(user);
                 } catch (Exception e) {
                     LOGGER.error("Error to generating token :" + e);
@@ -145,22 +143,31 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
         return resultOfAuthentication;
     }
 
-	private String csLoginAuthentication(String username, String password, String domain) throws Exception {
-		configUtil.setServer(1L);
-		HashMap<String, String> optional = new HashMap<String, String>();
-		if(domain.equals("BACKEND_ADMIN")) {
-		    optional.put("domain", "/");
-		} else {
-			optional.put("domain", domain);
-		}
-		String resp = cloudStackAuthenticationService.login(username, password, "json", optional);
-		JSONObject userJSON = new JSONObject(resp).getJSONObject("loginresponse");
-		String response;
-		if (userJSON.has("errorcode")) {
+    /**
+     * Cloud stack connection to verify user authentication.
+     *
+     * @param username to set
+     * @param password to set
+     * @param domain to set
+     * @return domain UUID
+     * @throws Exception raise if error
+     */
+    private String csLoginAuthentication(String username, String password, String domain) throws Exception {
+        configUtil.setServer(1L);
+        HashMap<String, String> optional = new HashMap<String, String>();
+        if (domain.equals("BACKEND_ADMIN")) {
+            optional.put("domain", "/");
+        } else {
+            optional.put("domain", domain);
+        }
+        String resp = cloudStackAuthenticationService.login(username, password, "json", optional);
+        JSONObject userJSON = new JSONObject(resp).getJSONObject("loginresponse");
+        String response;
+        if (userJSON.has("errorcode")) {
             response = "";
         } else {
-        	response = userJSON.getString("domainid");
+            response = userJSON.getString("domainid");
         }
-		return response;
-	}
+        return response;
+    }
 }
