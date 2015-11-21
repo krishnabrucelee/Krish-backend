@@ -39,6 +39,7 @@ public class ProjectController extends CRUDController<Project>implements ApiCont
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new project.", response = Project.class)
     @Override
     public Project create(@RequestBody Project project) throws Exception {
+        project.setSyncFlag(true);
         if (project.getDomain() != null) {
             project.setDomainId(project.getDomain().getId());
         }
@@ -50,6 +51,7 @@ public class ProjectController extends CRUDController<Project>implements ApiCont
     @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing project.", response = Project.class)
     @Override
     public Project update(@RequestBody Project project, @PathVariable(PATH_ID) Long id) throws Exception {
+        project.setSyncFlag(true);
         return projectService.update(project);
     }
 
@@ -91,7 +93,7 @@ public class ProjectController extends CRUDController<Project>implements ApiCont
     }
 
     /**
-     * list all projects for instance.
+     * list all active projects for an instance.
      *
      * @return projects list of projects.
      * @throws Exception if error occurs.
@@ -99,7 +101,20 @@ public class ProjectController extends CRUDController<Project>implements ApiCont
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected List<Project> getSearch() throws Exception {
+    protected List<Project> getActiveProjects() throws Exception {
         return projectService.findAllByActive(true);
+    }
+
+    /**
+     * list all projects.
+     *
+     * @return projects list of projects.
+     * @throws Exception if error occurs.
+     */
+    @RequestMapping(value = "listall", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<Project> getAllProjects() throws Exception {
+        return projectService.findAll();
     }
 }

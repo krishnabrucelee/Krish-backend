@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ck.panda.domain.entity.Account;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Cluster;
 import ck.panda.domain.entity.ComputeOffering;
@@ -37,11 +38,10 @@ import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Zone;
-import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.ConvertUtil;
-import ck.panda.util.JsonUtil;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.error.exception.ApplicationException;
 
 /**
@@ -124,6 +124,10 @@ public class SyncServiceImpl implements SyncService {
     @Autowired
     private DepartmentService departmentService;
 
+    /** Account service for listing users. */
+    @Autowired
+    private AccountService accountService;
+
     /** For listing users in cloudstack server. */
     @Autowired
     private UserService userService;
@@ -188,10 +192,14 @@ public class SyncServiceImpl implements SyncService {
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
 
+    @Autowired
+    private TokenDetails tokenDetails;
+
     @Override
-    public void init() throws Exception {
+    public void init(CloudStackServer server) throws Exception {
         CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
-        server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
+        this.server = server;
+        this.server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
     }
 
     /**
@@ -203,128 +211,145 @@ public class SyncServiceImpl implements SyncService {
      */
     @Override
     public void sync() throws Exception {
+
+         try {
+             // 1. Sync Region entity
+             this.syncRegion();
+         } catch (Exception e) {
+             LOGGER.error("ERROR AT synch Region", e);
+         }
+
+         try {
+             // 2. Sync Zone entity
+             this.syncZone();
+         } catch (Exception e) {
+             LOGGER.error("ERROR AT synch Zone", e);
+         }
+
         try {
-            // 1. Sync Domain entity
+            // 3. Sync Domain entity
             this.syncDomain();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Domaim", e);
         }
-        try {
-            // 2. Sync Region entity
-            this.syncRegion();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch Region", e);
-        }
-        try {
-            // 3. Sync Zone entity
-            this.syncZone();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch Zone", e);
-        }
+
         try {
             // 4. Sync Hypervisor entity
             this.syncHypervisor();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Hypervisor", e);
         }
-        try {
-            // 5. Sync OSCategory entity
-            this.syncOsCategory();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch OS Category", e);
-        }
-        try {
-            // 6. Sync OSType entity
-            this.syncOsTypes();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch OS Types", e);
-        }
-        try {
-            // 7. Sync Storage offering entity
-            this.syncStorageOffering();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch Storage Offering", e);
-        }
-        try {
-            // 8. Sync Network Offering entity
-            this.syncNetworkOffering();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch Network Offering", e);
-        }
-        try {
-            // 9. Sync Network entity
-            this.syncNetwork();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch Network ", e);
-        }
-        try {
-            // 10. Sync Compute Offering entity
-            this.syncComputeOffering();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch Compute Offering", e);
-        }
 
         try {
-            // 11. Sync Department entity
-            this.syncDepartment();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch Department", e);
-        }
-
-        try {
-         // 12. Sync User entity
-            this.syncUser();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch User", e);
-        }
-        try {
-         // 13. Sync Templates entity
-            this.syncTemplates();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch Templates", e);
-        }
-
-
-        try {
-            // 14. Sync Pod entity
+            // 5. Sync Pod entity
             this.syncPod();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Pod", e);
         }
 
         try {
-            // 15. Sync Cluster entity
+            // 6. Sync Cluster entity
             this.syncCluster();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch cluster", e);
         }
 
         try {
-            // 16. Sync Host entity
+            // 7. Sync Host entity
             this.syncHost();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Host", e);
         }
 
         try {
-            // 17. Sync Iso entity
-            this.syncIso();
+            // 7. Sync Account entity
+            this.syncAccount();
         } catch (Exception e) {
-            LOGGER.error("ERROR AT synch Iso", e);
+            LOGGER.error("ERROR AT synch Account", e);
         }
 
         try {
-            // 18. Sync Instance entity
-            this.syncInstances();
+            // 8. Sync Department entity
+            this.syncDepartment();
         } catch (Exception e) {
-            LOGGER.error("ERROR AT synch Instance", e);
+            LOGGER.error("ERROR AT synch Department", e);
         }
 
         try {
-            // 19. Sync Volume entity
+            // 9. Sync User entity
+               this.syncUser();
+        } catch (Exception e) {
+               LOGGER.error("ERROR AT synch User", e);
+        }
+
+        try {
+            // 10. Sync Network entity
+            this.syncNetwork();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Network ", e);
+        }
+
+        try{
+            // 11. Sync Project entity
+            this.syncProject();
+        } catch(Exception e){
+            LOGGER.error("ERROR AT sync Project", e);
+        }
+
+        try {
+            // 12. Sync Instance entity
+              this.syncInstances();
+        } catch (Exception e) {
+              LOGGER.error("ERROR AT synch Instance", e);
+        }
+
+        try {
+            // 13. Sync Volume entity
             this.syncVolume();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Volume", e);
+        }
+
+        try {
+            // 14. Sync OSType entity
+            this.syncOsTypes();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch OS Types", e);
+        }
+
+        try {
+            // 15. Sync OSCategory entity
+            this.syncOsCategory();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch OS Category", e);
+        }
+
+        try {
+            // 16. Sync Templates entity
+               this.syncTemplates();
+        } catch (Exception e) {
+               LOGGER.error("ERROR AT synch Templates", e);
+        }
+
+        try {
+               // 17. Sync Iso entity
+               this.syncIso();
+        } catch (Exception e) {
+               LOGGER.error("ERROR AT synch Iso", e);
+        }
+
+        try {
+            // 18. Sync Compute Offering entity
+            this.syncComputeOffering();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Compute Offering", e);
+        }
+
+        try {
+            // 19. Sync Storage offering entity
+            this.syncStorageOffering();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Storage Offering", e);
         }
 
         try {
@@ -335,32 +360,18 @@ public class SyncServiceImpl implements SyncService {
         }
 
         try {
-          // 21. Sync Instance entity
-            this.syncInstances();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch Instance", e);
-        }
-
-        try {
-          // 22. Sync VmSnapshot entity
+          // 21. Sync VmSnapshot entity
             this.syncVmSnapshots();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch vm snapshots", e);
         }
 
-        // try{
-        // // 20. Sync Project entity
-        // this.syncProject();
-        // }catch(Exception e){
-        // LOGGER.error("ERROR AT sync Project", e);
-        // }
-
-        // try{
-        // // 21. Sync ResourceLimit entity
-        // this.syncResourceLimit();
-        // }catch(Exception e){
-        // LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
-        // }
+        try{
+         // 22. Sync ResourceLimit entity
+         this.syncResourceLimit();
+         }catch(Exception e){
+         LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
+         }
 
     }
 
@@ -752,7 +763,7 @@ public class SyncServiceImpl implements SyncService {
     public void syncUser() throws ApplicationException, Exception {
 
         // 1. Get all the user objects from CS server as hash
-        List<User> csUserService = userService.findAllFromCSServer();
+        List<User> csUserService = userService.findAllFromCSServerByDomain(tokenDetails.getTokenDetails("domainid"));
         HashMap<String, User> csUserMap = (HashMap<String, User>) User.convert(csUserService);
 
         // 2. Get all the user objects from application
@@ -776,9 +787,9 @@ public class SyncServiceImpl implements SyncService {
                 // user which is not added in the app
                 csUserMap.remove(user.getUuid());
             } else {
-            	if(user.getIsActive() !=  true){
-            		userService.softDelete(user);
-            	}
+                if(user.getIsActive() !=  true){
+                    userService.softDelete(user);
+                }
                 // 3.2 If not found, delete it from app db
                 // TODO clarify the business requirement, since it has impact in
                 // the application if it is used
@@ -861,7 +872,7 @@ public class SyncServiceImpl implements SyncService {
     public void syncNetwork() throws ApplicationException, Exception {
 
         // 1. Get all the network objects from CS server as hash
-        List<Network> csNetworkList = networkService.findAllFromCSServer();
+        List<Network> csNetworkList = networkService.findAllFromCSServerByDomain(tokenDetails.getTokenDetails("domainid"));
         HashMap<String, Network> csNetworkMap = (HashMap<String, Network>) Network.convert(csNetworkList);
 
         // 2. Get all the network objects from application
@@ -1041,7 +1052,7 @@ public class SyncServiceImpl implements SyncService {
     public void syncDepartment() throws ApplicationException, Exception {
 
         // 1. Get all the user objects from CS server as hash
-        List<Department> csAccountService = departmentService.findAllFromCSServer();
+        List<Department> csAccountService = departmentService.findAllFromCSServerByDomain(tokenDetails.getTokenDetails("domainid"));
         HashMap<String, Department> csUserMap = (HashMap<String, Department>) Department.convert(csAccountService);
 
         // 2. Get all the user objects from application
@@ -1471,12 +1482,14 @@ public class SyncServiceImpl implements SyncService {
             instance.setIsoName(csVm.getIsoName());
             instance.setIpAddress(csVm.getIpAddress());
             instance.setNetworkId(csVm.getNetworkId());
+            LOGGER.debug("sync VM for ASYNC");
             // VNC password set.
             if (csVm.getPassword() != null) {
                 String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
                 byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
                 SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
                 String encryptedPassword = new String(EncryptionUtil.encrypt(csVm.getPassword(), originalKey));
+                LOGGER.debug("sync VM for pass" + encryptedPassword);
                 instance.setVncPassword(encryptedPassword);
             }
             // 3.2 If found, update the vm object in app db
@@ -1488,22 +1501,23 @@ public class SyncServiceImpl implements SyncService {
     public void syncResourceLimit() throws ApplicationException, Exception {
         List<Domain> domains = domainService.findAll();
         for (Domain domain : domains) {
-            syncResourceLimitDomian(domain.getUuid());
-            List<Department> departments = departmentService.findByDomain(domain.getId(), true);
-            for (Department department : departments) {
-                syncResourceLimitDepartment(domain.getUuid(), department.getUserName());
-            }
-            // List<Project> projects =
-            // projectService.findbyDomain(domain.getId());
-            // for(Project project:projects){
-            // syncResourceLimitProject(project.getUuid());
-            // }
+            syncResourceLimitDomain(domain.getUuid());
+        }
+
+        List<Department> departments = departmentService.findAllByIsActive(true);
+        for (Department department : departments) {
+            syncResourceLimitDepartment(department.getDomain().getUuid(), department.getUserName());
+        }
+
+        List<Project> projects = projectService.findAllByActive(true);
+        for (Project project : projects) {
+            syncResourceLimitProject(project.getUuid());
         }
 
     }
 
     @Override
-    public void syncResourceLimitDomian(String domainId) throws ApplicationException, Exception {
+    public void syncResourceLimitDomain(String domainId) throws ApplicationException, Exception {
 
         // 1. Get all the ResourceLimit objects from CS server as hash
         List<ResourceLimitDomain> csResourceList = resourceDomainService.findAllFromCSServerDomain(domainId);
@@ -1533,7 +1547,7 @@ public class SyncServiceImpl implements SyncService {
                 csResourceMap.remove(resource.getDomainId());
             } else {
                 // resource.setIsSyncFlag(false);
-                // resourceDomainService.update(resource);
+                  resourceDomainService.update(resource);
                 // resourceDomainService.delete(resource);
                 // 3.2 If not found, delete it from app db
                 // TODO clarify the business requirement, since it has impact in
@@ -1610,7 +1624,7 @@ public class SyncServiceImpl implements SyncService {
 
         // 1. Get all the ResourceLimit objects from CS server as hash
         List<ResourceLimitProject> csResourceList = resourceProjectService.findAllFromCSServerProject(projectId);
-        HashMap<String, ResourceLimitProject> csResourceMap = (HashMap<String, ResourceLimitProject>) ResourceLimitProject
+               HashMap<String, ResourceLimitProject> csResourceMap = (HashMap<String, ResourceLimitProject>) ResourceLimitProject
                 .convert(csResourceList);
 
         // 2. Get all the resource objects from application
@@ -1707,7 +1721,7 @@ public class SyncServiceImpl implements SyncService {
     public void syncProject() throws ApplicationException, Exception {
 
         // 1. Get all the networkOffering objects from CS server as hash
-        List<Project> csProjectList = projectService.findAllFromCSServer();
+       List<Project> csProjectList = projectService.findAllFromCSServerByDomain(tokenDetails.getTokenDetails("domainid"));
         HashMap<String, Project> csProjectMap = (HashMap<String, Project>) Project.convert(csProjectList);
 
         // 2. Get all the networkOffering objects from application
@@ -1715,6 +1729,7 @@ public class SyncServiceImpl implements SyncService {
 
         // 3. Iterate application networkOffering list
         for (Project project : appProjectList) {
+            project.setSyncFlag(false);
             LOGGER.debug("Total rows updated : " + String.valueOf(appProjectList.size()));
             // 3.1 Find the corresponding CS server projectService object by
             // finding it in a hash using uuid
@@ -1745,4 +1760,55 @@ public class SyncServiceImpl implements SyncService {
             projectService.save(csProjectMap.get(key));
         }
     }
+
+    /**
+     * Sync with Cloud Server Account.
+     *
+     * @throws ApplicationException
+     *             unhandled application errors.
+     * @throws Exception
+     *             cloudstack unhandled errors.
+     */
+    public void syncAccount() throws ApplicationException, Exception {
+
+        // 1. Get all the account objects from CS server as hash
+        List<Account> csAccountService = accountService.findAllFromCSServerByDomain(tokenDetails.getTokenDetails("domainid"));
+        HashMap<String, Account> csAccountMap = (HashMap<String, Account>) Account.convert(csAccountService);
+
+        // 2. Get all the account objects from application
+        List<Account> appAccountList = accountService.findAll();
+
+        // 3. Iterate application account list
+        for (Account account : appAccountList) {
+            // 3.1 Find the corresponding CS server account object by finding it in
+            // a hash using uuid
+            if (csAccountMap.containsKey(account.getUuid())) {
+                Account csUser = csAccountMap.get(account.getUuid());
+
+                account.setFirstName(csUser.getFirstName());
+
+                // 3.2 If found, update the account object in app db
+                accountService.update(account);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // user which is not added in the app
+                csAccountMap.remove(account.getUuid());
+            } else {
+                accountService.delete(account);
+                // 3.2 If not found, delete it from app db
+                // TODO clarify the business requirement, since it has impact in
+                // the application if it is used
+                // TODO clarify is this a soft or hard delete
+            }
+
+        }
+        // 4. Get the remaining list of cs server hash account object, then iterate
+        // and
+        // add it to app db
+        for (String key : csAccountMap.keySet()) {
+            accountService.save(csAccountMap.get(key));
+        }
+    }
+
+
 }

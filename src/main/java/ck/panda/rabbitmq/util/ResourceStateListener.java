@@ -59,7 +59,7 @@ public class ResourceStateListener implements MessageListener {
         LOGGER.info("VM event message", event);
         JSONObject instance = new JSONObject(event);
         if (instance != null && !event.trim().isEmpty()) {
-            if (instance.has("id") && instance.getString("id") != null) {
+            if (instance.has("id") && instance.has("resource") && instance.getString("resource").equalsIgnoreCase("VirtualMachine")) {
                 LOGGER.info("VM event UUID", instance.getString("id"));
                 VmInstance vmInstance = virtualmachineservice.findByUUID(instance.getString("id"));
                 if (vmInstance != null) {

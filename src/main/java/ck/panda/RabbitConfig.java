@@ -21,6 +21,7 @@ import ck.panda.rabbitmq.util.ResourceStateListener;
 import ck.panda.rabbitmq.util.UsageEventListener;
 import ck.panda.service.SyncService;
 import ck.panda.service.VirtualMachineService;
+import ck.panda.util.CloudStackServer;
 
 /**
  * RabbitMQ configuration to publish/consume messages from CS server via RabbitMQ server with specified
@@ -249,7 +250,8 @@ public class RabbitConfig {
     @Bean
     MessageListenerAdapter actionListenerAdapter() {
         SyncService syncService = applicationContext.getBean(SyncService.class);
-        return new MessageListenerAdapter(new ActionListener(syncService));
+        CloudStackServer cloudStackServer = applicationContext.getBean(CloudStackServer.class);
+        return new MessageListenerAdapter(new ActionListener(syncService, cloudStackServer));
     }
 
     /**
@@ -261,7 +263,8 @@ public class RabbitConfig {
     @Bean
     MessageListenerAdapter asynchJobListenerAdapter() {
         SyncService syncService = applicationContext.getBean(SyncService.class);
-        return new MessageListenerAdapter(new AsynchronousJobListener(syncService));
+        CloudStackServer cloudStackServer = applicationContext.getBean(CloudStackServer.class);
+        return new MessageListenerAdapter(new AsynchronousJobListener(syncService, cloudStackServer));
     }
 
     /**

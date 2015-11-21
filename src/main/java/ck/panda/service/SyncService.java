@@ -1,6 +1,7 @@
 package ck.panda.service;
 
 import org.springframework.stereotype.Service;
+import ck.panda.util.CloudStackServer;
 import ck.panda.util.error.exception.ApplicationException;
 import org.json.JSONObject;
 
@@ -13,9 +14,10 @@ public interface SyncService {
    /**
     * Sync initialize method used to set CS server api,secret Key.
     *
+    * @param server inject cloudstack server.
     * @throws Exception handles unhandled errors.
     */
-   void init() throws Exception;
+   void init(CloudStackServer server) throws Exception;
 
    /**
     * Sync method consists of method to be called.
@@ -170,7 +172,7 @@ public interface SyncService {
    * @throws ApplicationException unhandled application errors.
    * @throws Exception cloudstack unhandled errors.
    */
-  void syncResourceLimitDomian(String domainId) throws ApplicationException, Exception;
+  void syncResourceLimitDomain(String domainId) throws ApplicationException, Exception;
 
   /**
    * Sync with Cloud Server Account.
@@ -192,4 +194,5 @@ public interface SyncService {
    * @throws Exception cloudstack unhandled errors.
    */
   void syncProject() throws ApplicationException, Exception;
+
 }

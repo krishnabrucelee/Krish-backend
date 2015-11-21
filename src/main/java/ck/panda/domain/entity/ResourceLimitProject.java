@@ -391,14 +391,14 @@ public class ResourceLimitProject {
      * @throws JSONException unhandled json errors
      */
     @SuppressWarnings("static-access")
-    public static ResourceLimitProject convert(JSONObject object, ConvertUtil convertUtil) throws JSONException {
+    public static ResourceLimitProject convert(JSONObject jsonObject, ConvertUtil convertUtil) throws JSONException {
         ResourceLimitProject resource = new ResourceLimitProject();
         resource.setIsSyncFlag(false);
         try {
 //            resource.uuid = JsonUtil.getStringValue(object, "id");
-            resource.setResourceType(ResourceType.values()[(JsonUtil.getIntegerValue(object, "resourcetype"))]);
-            resource.setProjectId(convertUtil.getDepartmentByUsername(JsonUtil.getStringValue(object, "account")).getId());
-            resource.setMax(resource.getMax().valueOf(JsonUtil.getIntegerValue(object, "max")));
+            resource.setResourceType(ResourceType.values()[(JsonUtil.getIntegerValue(jsonObject, "resourcetype"))]);
+            resource.setProjectId(convertUtil.getProject(JsonUtil.getStringValue(jsonObject, "projectid")).getId());
+            resource.setMax(resource.getMax().valueOf(JsonUtil.getIntegerValue(jsonObject, "max")));
         } catch (Exception e) {
             e.printStackTrace();
         }

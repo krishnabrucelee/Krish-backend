@@ -40,8 +40,8 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Virtual Machine.", response = VmInstance.class)
     @Override
     public VmInstance create(@RequestBody VmInstance vminstance) throws Exception {
-    	if(vminstance.getProject() != null){
-        vminstance.setProjectId(vminstance.getProject().getId());
+        if (vminstance.getProject() != null) {
+            vminstance.setProjectId(vminstance.getProject().getId());
         }
         vminstance.setInstanceOwnerId(vminstance.getInstanceOwner().getId());
         vminstance.setDomainId(vminstance.getDomain().getId());
@@ -53,18 +53,21 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing Virtual Machine.", response = VmInstance.class)
     @Override
     public VmInstance read(@PathVariable(PATH_ID) Long id) throws Exception {
+        System.out.println("In real read ");
         return virtualmachineservice.find(id);
     }
 
     @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing Virtual Machine.", response = VmInstance.class)
     @Override
     public VmInstance update(@RequestBody VmInstance vminstance, @PathVariable(PATH_ID) Long id) throws Exception {
+        System.out.println("In real update");
         return virtualmachineservice.update(vminstance);
     }
 
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Virtual Machine.")
     @Override
     public void delete(@PathVariable(PATH_ID) Long id) throws Exception {
+        System.out.println("In real long");
         virtualmachineservice.delete(id);
     }
 
@@ -72,6 +75,8 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     public List<VmInstance> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
+
+        System.out.println("In real long");
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, VmInstance.class);
         Page<VmInstance> pageResponse = virtualmachineservice.findAll(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
@@ -87,7 +92,7 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected List<VmInstance> getSearch() throws Exception {
+    public List<VmInstance> getSearch() throws Exception {
         return virtualmachineservice.findAll();
     }
 
@@ -102,29 +107,45 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     @RequestMapping(value = "event", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected VmInstance handleVmEvent(@RequestParam("vm") String vm, @RequestParam("event") String event)
+    public VmInstance handleVmEvent(@RequestParam("vm") String vm, @RequestParam("event") String event)
             throws Exception {
         return virtualmachineservice.vmEventHandle(vm, event);
     }
 
     /**
-     * get all instances.
+     * get instance with latest state update.
      *
-     * @param instanceName instance name.
+     * @param vminstance vm object.
      * @throws Exception if error occurs.
      * @return list of instances.
      */
-    @RequestMapping(value = "console", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/vm", method = RequestMethod.PUT, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public String getVNC(@RequestParam("instance") String instanceName) throws Exception {
+    public VmInstance handleVmEventWithInstance(@RequestBody VmInstance vminstance) throws Exception {
+        String event = vminstance.getEvent();
+        return virtualmachineservice.vmEventHandleWithVM(vminstance, event);
+    }
+
+    /**
+     * get all instances.
+     *
+     * @param vminstance instance name.
+     * @throws Exception if error occurs.
+     * @return list of instances.
+     */
+    @RequestMapping(value = "/console", method = RequestMethod.PUT, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public String getVNC(@RequestBody VmInstance vminstance) throws Exception {
+        System.out.println(" in side console ");
         String token = null;
-        String host = "192.168.1.230"; // test the host's IP address
-        String instance = "i-2-6-VM"; // test virtual machine instance name
-        String display = "test"; // Novnc display
+        String host = "192.168.1.221"; // test the host's IP address
+        String instance = "i-2-8-VM"; // test virtual machine instance name
+        String display = "sibin1"; // Novnc display
         String str = host + "|" + instance + "|" + display;
         token = Base64.encodeBase64String(str.getBytes());
-        return "{\"success\":" + "http://192.168.1.221/console/?token=" + token + "}";
+        return "{\"success\":" + "\"http://192.168.1.221/console/?token=" + token + "\"}";
     }
 
 }

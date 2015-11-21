@@ -134,6 +134,7 @@ public class CloudStackInstanceService {
     public String resetPasswordForVirtualMachine(String virtualMachineId) throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("resetPasswordForVirtualMachine", null);
         arguments.add(new NameValuePair("id", virtualMachineId));
+        arguments.add(new NameValuePair("response", "json"));
         return server.request(arguments);
     }
 
@@ -149,6 +150,7 @@ public class CloudStackInstanceService {
     public String changeServiceForVirtualMachine(String virtualMachineId, String serviceOfferingId) throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("changeServiceForVirtualMachine", null);
         arguments.add(new NameValuePair("id", virtualMachineId));
+        arguments.add(new NameValuePair("response", "json"));
         arguments.add(new NameValuePair("serviceofferingid", serviceOfferingId));
         return server.request(arguments);
     }
@@ -164,6 +166,7 @@ public class CloudStackInstanceService {
     public String updateVirtualMachine(String virtualMachineId, HashMap<String, String> optional) throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("updateVirtualMachine", optional);
         arguments.add(new NameValuePair("id", virtualMachineId));
+        arguments.add(new NameValuePair("response", "json"));
         return server.request(arguments);
     }
 
@@ -206,6 +209,7 @@ public class CloudStackInstanceService {
     public String getVMPassword(String virtualMachineId) throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("getVMPassword", null);
         arguments.add(new NameValuePair("id", virtualMachineId));
+        arguments.add(new NameValuePair("response", "json"));
         return server.request(arguments);
     }
 
@@ -221,6 +225,7 @@ public class CloudStackInstanceService {
     public String migrateVirtualMachine(String virtualMachineId, HashMap<String, String> optional) throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("migrateVirtualMachine", optional);
         arguments.add(new NameValuePair("virtualmachineid", virtualMachineId));
+        arguments.add(new NameValuePair("response", "json"));
         return server.request(arguments);
     }
 
@@ -297,6 +302,7 @@ public class CloudStackInstanceService {
      */
     public String cleanVMReservations() throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("cleanVMReservations", null);
+        arguments.add(new NameValuePair("response", "json"));
         return server.request(arguments);
     }
 
@@ -314,6 +320,7 @@ public class CloudStackInstanceService {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("addNicToVirtualMachine", optional);
         arguments.add(new NameValuePair("networkid", networkId));
         arguments.add(new NameValuePair("virtualmachineid", virtualMachineId));
+        arguments.add(new NameValuePair("response", "json"));
         return server.request(arguments);
     }
 
@@ -331,6 +338,7 @@ public class CloudStackInstanceService {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("removeNicFromVirtualMachine", optional);
         arguments.add(new NameValuePair("nicid", nicId));
         arguments.add(new NameValuePair("virtualmachineid", virtualMachineId));
+        arguments.add(new NameValuePair("response", "json"));
         return server.request(arguments);
     }
 
@@ -348,6 +356,7 @@ public class CloudStackInstanceService {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("updateDefaultNicForVirtualMachine", optional);
         arguments.add(new NameValuePair("nicid", nicId));
         arguments.add(new NameValuePair("virtualmachineid", virtualMachineId));
+        arguments.add(new NameValuePair("response", "json"));
         return server.request(arguments);
     }
 }
