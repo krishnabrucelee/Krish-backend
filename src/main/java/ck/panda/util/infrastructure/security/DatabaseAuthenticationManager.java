@@ -119,8 +119,6 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
 
             if (user == null) {
                 throw new BadCredentialsException("Invalid Login Credentials");
-            } else if (!domain.get().equals("BACKEND_ADMIN") && !user.getDomain().getName().equals(domain.get().trim())) {
-                throw new LockedException("Invalid Domain Address");
             } else if (domain.get().equals("BACKEND_ADMIN") && user.getType() != Type.ROOT_ADMIN) {
                 throw new LockedException("Unauthorized Admin Details");
             } else if (user != null && !user.getIsActive()) {
