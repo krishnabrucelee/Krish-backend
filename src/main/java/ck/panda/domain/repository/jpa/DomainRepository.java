@@ -19,4 +19,11 @@ public interface DomainRepository extends PagingAndSortingRepository<Domain, Lon
      */
     @Query(value = "select domain from Domain domain where domain.uuid = :uuid")
     Domain findByUUID(@Param("uuid") String uuid);
+
+    /**
+     * @param domainName for login check
+     * @return domain object
+     */
+    @Query(value = "select domain from Domain domain where domain.name = :domainName")
+    Domain findByName(@Param("domainName") String domainName);
 }
