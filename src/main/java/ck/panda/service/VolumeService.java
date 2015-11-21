@@ -33,6 +33,8 @@ public interface VolumeService extends CRUDService<Volume> {
 
 
    /**
+    * Attach volume to the Instance.
+    *
     * @param volume volume.
     * @return volume
     * @throws Exception Exception
@@ -41,6 +43,8 @@ public interface VolumeService extends CRUDService<Volume> {
 
 
    /**
+    * Detach volume to the Instance.
+    *
     * @param volume volume
     * @return volume
     * @throws Exception Exception

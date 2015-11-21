@@ -90,7 +90,6 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
         return volumeService.findAll();
     }
 
-
     /**
      * Attaches volume to the Instance.
      *
@@ -106,7 +105,6 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
         return volumeService.attachVolume(volume);
     }
 
-
     /**
      * Datach volume from the Instance.
      *
@@ -121,7 +119,4 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     protected Volume detachVolume(@RequestBody Volume volume, @PathVariable(PATH_ID) Long id) throws Exception {
         return volumeService.detachVolume(volume);
     }
-
-
-
 }
