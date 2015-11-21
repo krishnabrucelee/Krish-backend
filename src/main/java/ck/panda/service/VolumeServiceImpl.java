@@ -203,4 +203,58 @@ public class VolumeServiceImpl implements VolumeService {
         return volumeRepo.findByUUID(uuid);
     }
 
+    @Override
+    public Volume attachVolume(Volume volume) throws Exception {
+        Errors errors = validator.rejectIfNullEntity("volumes", volume);
+        errors = validator.validateEntity(volume, errors);
+        config.setServer(1L);
+        String volumeS = csVolumeService.attachVolume(volume.getUuid(), volume.getVmInstance().getUuid(),"json", optional(volume));
+        JSONObject jobId = new JSONObject(volumeS).getJSONObject("attachvolumeresponse");
+
+        if (jobId.has("errorcode")) {
+            errors = this.validateEvent(errors, jobId.getString("errortext"));
+            throw new ApplicationException(errors);
+        } else {
+            volume.setUuid((String) jobId.get("jobid"));
+            volume.setVmInstanceId(volume.getVmInstance().getId());
+            if (jobId.has("jobid")) {
+                String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
+                JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+                if (jobresult.getString("jobstatus").equals("0")) {
+                       volume.setStatus(Status.Ready);
+                }
+            }
+            volumeRepo.save(volume);
+        }
+        return volume;
+    }
+
+    @Override
+    public Volume detachVolume(Volume volume) throws Exception {
+        Errors errors = validator.rejectIfNullEntity("volumes", volume);
+        errors = validator.validateEntity(volume, errors);
+        config.setServer(1L);
+        HashMap<String, String> optional = new HashMap<String, String>();
+        optional.put("virtualmachineid", volume.getVmInstance().getUuid());
+        String volumeS = csVolumeService.detachVolume("json",  optional);
+        JSONObject jobId = new JSONObject(volumeS).getJSONObject("detachvolumeresponse");
+
+        if (jobId.has("errorcode")) {
+            errors = this.validateEvent(errors, jobId.getString("errortext"));
+            throw new ApplicationException(errors);
+        } else {
+            volume.setUuid((String) jobId.get("jobid"));
+            volume.setVmInstanceId(null);
+            if (jobId.has("jobid")) {
+                String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
+                JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+                if (jobresult.getString("jobstatus").equals("0")) {
+                       volume.setStatus(Status.Destroy);
+                }
+            }
+            volumeRepo.save(volume);
+        }
+        return volume;
+    }
+
 }

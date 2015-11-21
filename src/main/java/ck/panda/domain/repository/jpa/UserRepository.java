@@ -13,8 +13,8 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
 
     /**
      * Find user by active and query.
-     * @param query
-     * @return
+     * @param query for user name
+     * @return user list
      */
     @Query(value = "select user from User user where user.isActive IS TRUE and lower(user.userName) LIKE '%' || lower(:query) || '%' ")
     List<User> findAllByActive(@Param("query") String query);
@@ -56,13 +56,4 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      */
     @Query(value = "select user from User user where user.accountId =:accountId")
     List<User> findByAccountId(@Param("accountId") Long accountId);
-
-    /**
-     * Update the user password when login.
-     *
-     * @param password login password
-     * @param id current user
-     */
-    @Query(value = "update User user set user.password = :password where user.id = :id")
-    void updatePassword(@Param("password") String password, @Param("id") Long id);
 }
