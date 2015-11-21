@@ -1,6 +1,8 @@
 package ck.panda.domain.repository.jpa;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -56,4 +58,23 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      */
     @Query(value = "select user from User user where user.accountId =:accountId")
     List<User> findByAccountId(@Param("accountId") Long accountId);
+
+    /**
+     * find all the user by domain.
+     *
+     * @param pageable pagination information.
+     * @param domain domain object.
+     * @return list of user.
+     */
+    @Query(value = "select user from User user where user.domain =:domain ")
+    Page<User> findAllUserByDomain(Pageable pageable, @Param("domain") Domain domain);
+
+    /**
+     * find all the user by domain.
+     *
+     * @param domain domain object.
+     * @return list of user.
+     */
+    @Query(value = "select user from User user where user.domain =:domain ")
+    List<User> findAllUserByDomain(@Param("domain") Domain domain);
 }

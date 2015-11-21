@@ -64,7 +64,7 @@ public class UserController extends CRUDController<User> implements ApiControlle
     public List<User> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, User.class);
-        Page<User> pageResponse = userService.findAll(page);
+        Page<User> pageResponse = userService.findAllUserByDomain(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
@@ -86,5 +86,17 @@ public class UserController extends CRUDController<User> implements ApiControlle
    	@ResponseBody
    	protected List<User> getSearch(@RequestParam("q") String query) throws Exception {
    		return userService.findByName(query);
+   	}
+
+    /**
+     * list all user for instance.
+     * @return user
+     * @throws Exception
+     */
+    @RequestMapping(value = "listbydomain",method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+   	@ResponseStatus(HttpStatus.OK)
+   	@ResponseBody
+   	protected List<User> findAllUserByDomain() throws Exception {
+   		return userService.findAllUserByDomain();
    	}
 }
