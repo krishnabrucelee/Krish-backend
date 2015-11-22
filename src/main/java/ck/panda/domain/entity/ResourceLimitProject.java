@@ -44,6 +44,24 @@ public class ResourceLimitProject {
     @Column(name = "id")
     private Long id;
 
+    /** Resource limit for domain id. */
+    @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Domain domain;
+
+    /** Resource limit for domain id. */
+    @Column(name = "domain_id")
+    private Long domainId;
+
+    /** Resource limit for department id. */
+    @JoinColumn(name = "department_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Department department;
+
+    /** Resource limit for department id. */
+    @Column(name = "department_id")
+    private Long departmentId;
+
     /** Resource limit for project id. */
     @JoinColumn(name = "project_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
@@ -168,6 +186,79 @@ public class ResourceLimitProject {
      */
     public void setId(Long id) {
         this.id = id;
+    }
+
+    /**
+     * Get the domain of the Resource limit.
+     *
+     * @return the domain of the Resource limit.
+     */
+    public Domain getDomain() {
+        return domain;
+    }
+
+    /**
+     * Set the domain of the Resource limit.
+     *
+     * @param domain the domain to set
+     */
+    public void setDomain(Domain domain) {
+        this.domain = domain;
+    }
+
+    /**
+     * Get the domain Id of the Resource limit.
+     *
+     * @return the domainId of the Resource limit.
+     */
+    public Long getDomainId() {
+        return domainId;
+    }
+
+    /**
+     * Set the domain Id of the Resource limit.
+     *
+     * @param domainId the domainId to set
+     */
+    public void setDomainId(Long domainId) {
+        this.domainId = domainId;
+    }
+
+
+    /**
+     * Get the department of the Resource limit.
+     *
+     * @return the department of the Resource limit.
+     */
+    public Department getDepartment() {
+        return department;
+    }
+
+    /**
+     * Set the department of the Resource limit.
+     *
+     * @param department the department to set
+     */
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
+
+    /**
+     * Get the department Id of the Resource limit.
+     *
+     * @return the departmentId of the Resource limit.
+     */
+    public Long getDepartmentId() {
+        return departmentId;
+    }
+
+    /**
+     * Set the department Id of the Resource limit.
+     *
+     * @param departmentId the departmentId to set
+     */
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
     }
 
     /**

@@ -40,19 +40,34 @@ public class ResourceLimitDomainController extends CRUDController<ResourceLimitD
 
     /** Service reference to resource. */
     @Autowired
-    private ResourceLimitDomainService resourceLimitService;
+    private ResourceLimitDomainService resourceLimitDomainService;
 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new resource.", response = ResourceLimitDomain.class)
     @Override
     public ResourceLimitDomain create(@RequestBody ResourceLimitDomain resource) throws Exception {
         resource.setIsSyncFlag(true);
-        return resourceLimitService.save(resource);
+        return resourceLimitDomainService.save(resource);
+    }
+
+    /**
+     * Creating resource limit for domain.
+     *
+     * @param resourceLimits resource limit
+     * @return resource limit
+     * @throws Exception error
+     */
+    @RequestMapping(value = "/create", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE }, consumes = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public List<ResourceLimitDomain> createResourceLimits(@RequestBody List<ResourceLimitDomain> resourceLimits) throws Exception {
+        return resourceLimitDomainService.createResourceLimits(resourceLimits);
     }
 
     @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing resource.", response = ResourceLimitDomain.class)
     @Override
     public ResourceLimitDomain read(@PathVariable(PATH_ID) Long id) throws Exception {
-        return resourceLimitService.find(id);
+        return resourceLimitDomainService.find(id);
     }
 
     @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing resource.", response = ResourceLimitDomain.class)
@@ -60,20 +75,20 @@ public class ResourceLimitDomainController extends CRUDController<ResourceLimitD
     public ResourceLimitDomain update(@RequestBody ResourceLimitDomain resource, @PathVariable(PATH_ID) Long id)
             throws Exception {
         resource.setIsSyncFlag(true);
-        return resourceLimitService.update(resource);
+        return resourceLimitDomainService.update(resource);
     }
 
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing resource.")
     @Override
     public void delete(@PathVariable(PATH_ID) Long id) throws Exception {
-        resourceLimitService.delete(id);
+        resourceLimitDomainService.delete(id);
     }
 
     @Override
     public List<ResourceLimitDomain> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Volume.class);
-        Page<ResourceLimitDomain> pageResponse = resourceLimitService.findAll(page);
+        Page<ResourceLimitDomain> pageResponse = resourceLimitDomainService.findAll(page);
         System.out.println(pageResponse);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
@@ -89,7 +104,21 @@ public class ResourceLimitDomainController extends CRUDController<ResourceLimitD
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<ResourceLimitDomain> getSearch() throws Exception {
-        return resourceLimitService.findAll();
+        return resourceLimitDomainService.findAll();
+    }
+
+    /**
+     * List all resource limits by domain.
+     *
+     * @param id domain id
+     * @return resource service
+     * @throws Exception error
+     */
+    @RequestMapping(value = "domain/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<ResourceLimitDomain> getResourceLimitByDomain(@PathVariable(PATH_ID) Long id) throws Exception {
+        return resourceLimitDomainService.findAllByDomainIdAndIsActive(id, true);
     }
 
 }

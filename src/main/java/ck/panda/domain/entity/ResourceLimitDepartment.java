@@ -44,6 +44,15 @@ public class ResourceLimitDepartment {
     @Column(name = "id")
     private Long id;
 
+    /** Resource limit for domain id. */
+    @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Domain domain;
+
+    /** Resource limit for domain id. */
+    @Column(name = "domain_id")
+    private Long domainId;
+
     /** Resource limit for department id. */
     @JoinColumn(name = "department_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
@@ -169,6 +178,42 @@ public class ResourceLimitDepartment {
      */
     public void setId(Long id) {
         this.id = id;
+    }
+
+    /**
+     * Get the domain of the Resource limit.
+     *
+     * @return the domain of the Resource limit.
+     */
+    public Domain getDomain() {
+        return domain;
+    }
+
+    /**
+     * Set the domain of the Resource limit.
+     *
+     * @param domain the domain to set
+     */
+    public void setDomain(Domain domain) {
+        this.domain = domain;
+    }
+
+    /**
+     * Get the domain Id of the Resource limit.
+     *
+     * @return the domainId of the Resource limit.
+     */
+    public Long getDomainId() {
+        return domainId;
+    }
+
+    /**
+     * Set the domain Id of the Resource limit.
+     *
+     * @param domainId the domainId to set
+     */
+    public void setDomainId(Long domainId) {
+        this.domainId = domainId;
     }
 
     /**
@@ -419,6 +464,7 @@ public class ResourceLimitDepartment {
         resource.setIsSyncFlag(false);
         try {
             resource.setResourceType(ResourceType.values()[(JsonUtil.getIntegerValue(object, "resourcetype"))]);
+            resource.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(object, "domainid")));
             resource.setDepartmentId(convertUtil.getDepartmentByUsername(JsonUtil.getStringValue(object, "account")).getId());
             resource.setMax(resource.getMax().valueOf(JsonUtil.getIntegerValue(object, "max")));
             resource.setUniqueSeperator(resource.getDepartmentId()+"-"+resource.getResourceType());

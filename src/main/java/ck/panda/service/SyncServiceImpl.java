@@ -357,12 +357,12 @@ public class SyncServiceImpl implements SyncService {
                LOGGER.error("ERROR AT synch Templates", e);
         }
 
-        try{
-            // 21. Sync ResourceLimit entity
-            this.syncResourceLimit();
-        }catch(Exception e){
-            LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
-        }
+//        try{
+//            // 21. Sync ResourceLimit entity
+//            this.syncResourceLimit();
+//        }catch(Exception e){
+//            LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
+//        }
 
         try {
             // 22. Sync Instance entity

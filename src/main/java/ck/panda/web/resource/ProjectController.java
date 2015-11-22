@@ -117,4 +117,17 @@ public class ProjectController extends CRUDController<Project>implements ApiCont
     protected List<Project> getAllProjects() throws Exception {
         return projectService.findAll();
     }
+
+    /**
+     * Get the department by Domain.
+     *
+     * @param id department id.
+     * @return department
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/department/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public List<Project> findByDepartmentAndIsActive(@PathVariable(PATH_ID) Long id) throws Exception {
+       return projectService.findByDepartmentAndIsActive(id, true);
+    }
 }

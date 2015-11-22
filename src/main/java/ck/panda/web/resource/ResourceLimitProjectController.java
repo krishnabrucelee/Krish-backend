@@ -47,6 +47,21 @@ public class ResourceLimitProjectController extends CRUDController<ResourceLimit
         return resourceLimitService.save(resource);
     }
 
+    /**
+     * Creating resource limit for project.
+     *
+     * @param resourceLimits resource limit
+     * @return resource limit
+     * @throws Exception error
+     */
+    @RequestMapping(value = "/create", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE }, consumes = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public List<ResourceLimitProject> createResourceLimits(@RequestBody List<ResourceLimitProject> resourceLimits) throws Exception {
+        return resourceLimitService.createResourceLimits(resourceLimits);
+    }
+
     @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing resource.", response = ResourceLimitDomain.class)
     @Override
     public ResourceLimitProject read(@PathVariable(PATH_ID) Long id) throws Exception {
@@ -90,4 +105,17 @@ public class ResourceLimitProjectController extends CRUDController<ResourceLimit
         return resourceLimitService.findAll();
     }
 
+    /**
+     * List all resource limits by project.
+     *
+     * @param projectId project id
+     * @return resource service.
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "project/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<ResourceLimitProject> getResourceLimitByProject(@PathVariable(PATH_ID) Long projectId) throws Exception {
+        return resourceLimitService.findAllByProjectIdAndIsActive(projectId, true);
+    }
 }

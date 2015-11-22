@@ -64,7 +64,7 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
      * @return Department.
      */
     @Query(value = "select dpt from Department dpt where dpt.isActive =:isActive AND dpt.domainId=:domainId)")
-    List<Department> findByDomain(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive);
+    List<Department> findByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive);
 
     /**
      * Find the department by username and isActive.

@@ -94,7 +94,7 @@ public class AccountServiceImpl implements AccountService {
     public List<Account> findAllFromCSServerByDomain() throws Exception {
         List<Account> accountList = new ArrayList<Account>();
         HashMap<String, String> accountMap = new HashMap<String, String>();
-        accountMap.put("listall", "true");
+         accountMap.put("listall", "true");
         // 1. Get the list of accounts from CS server using CS connector
         String response = csAccountService.listAccounts("json", accountMap);
         JSONArray accountListJSON = null;
