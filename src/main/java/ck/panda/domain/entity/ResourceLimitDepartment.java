@@ -81,6 +81,10 @@ public class ResourceLimitDepartment {
     @Column(name = "version")
     private Long version;
 
+    /** unique separator for each department with resource type.*/
+    @Transient
+    private String uniqueSeperator;
+
     /** Created by user. */
     @CreatedBy
     @JoinColumn(name = "created_by", referencedColumnName = "id")
@@ -429,6 +433,24 @@ public class ResourceLimitDepartment {
     }
 
     /**
+     * Set the unique separator for the Resource limit.
+     *
+     * @return the unique Separator for the Resource limit.
+     */
+    public String getUniqueSeperator() {
+        return uniqueSeperator;
+    }
+
+    /**
+     * Get the unique Separator for the Resource limit.
+     *
+     * @param unique Separator for the Resource limit.
+     */
+    public void setUniqueSeperator(String uniqueSeperator) {
+        this.uniqueSeperator = uniqueSeperator;
+    }
+
+    /**
      * Convert JSONObject to ResourceLimit entity.
      *
      * @param object json object
@@ -445,6 +467,8 @@ public class ResourceLimitDepartment {
             resource.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(object, "domainid")));
             resource.setDepartmentId(convertUtil.getDepartmentByUsername(JsonUtil.getStringValue(object, "account")).getId());
             resource.setMax(resource.getMax().valueOf(JsonUtil.getIntegerValue(object, "max")));
+            resource.setUniqueSeperator(resource.getDepartmentId()+"-"+resource.getResourceType());
+            resource.setIsActive(true);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -462,7 +486,7 @@ public class ResourceLimitDepartment {
         Map<String, ResourceLimitDepartment> resourceMap = new HashMap<String, ResourceLimitDepartment>();
 
         for (ResourceLimitDepartment resource : resourceList) {
-            resourceMap.put(resource.getDepartmentId() + "-" + resource.getResourceType(), resource);
+            resourceMap.put(resource.getUniqueSeperator(), resource);
         }
         return resourceMap;
     }

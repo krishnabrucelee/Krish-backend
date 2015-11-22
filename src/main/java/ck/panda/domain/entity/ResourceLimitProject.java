@@ -85,6 +85,10 @@ public class ResourceLimitProject {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    /** unique separator for each project with resource type.*/
+    @Transient
+    private String uniqueSeperator;
+
     /** Version attribute to handle optimistic locking. */
     @Version
     @Column(name = "version")
@@ -474,6 +478,25 @@ public class ResourceLimitProject {
     }
 
     /**
+     * Set the unique separator for the Resource limit.
+     *
+     * @return the unique Separator for the Resource limit.
+     */
+    public String getUniqueSeperator() {
+        return uniqueSeperator;
+    }
+
+    /**
+     * Get the unique Separator for the Resource limit.
+     *
+     * @param unique Separator for the Resource limit.
+     */
+    public void setUniqueSeperator(String uniqueSeperator) {
+        this.uniqueSeperator = uniqueSeperator;
+    }
+
+
+    /**
      * Convert JSONObject to ResourceLimit entity.
      *
      * @param object json object
@@ -486,9 +509,11 @@ public class ResourceLimitProject {
         ResourceLimitProject resource = new ResourceLimitProject();
         resource.setIsSyncFlag(false);
         try {
+            resource.setIsActive(true);
             resource.setResourceType(ResourceType.values()[(JsonUtil.getIntegerValue(jsonObject, "resourcetype"))]);
             resource.setProjectId(convertUtil.getProject(JsonUtil.getStringValue(jsonObject, "projectid")).getId());
             resource.setMax(resource.getMax().valueOf(JsonUtil.getIntegerValue(jsonObject, "max")));
+            resource.setUniqueSeperator(convertUtil.getProject(JsonUtil.getStringValue(jsonObject, "projectid")).getId()+"-"+ResourceType.values()[(JsonUtil.getIntegerValue(jsonObject, "resourcetype"))]);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -506,7 +531,7 @@ public class ResourceLimitProject {
         Map<String, ResourceLimitProject> resourceMap = new HashMap<String, ResourceLimitProject>();
 
         for (ResourceLimitProject resource : resourceList) {
-            resourceMap.put(resource.getProjectId() + "-" + resource.getResourceType(), resource);
+            resourceMap.put(resource.getUniqueSeperator(), resource);
         }
         return resourceMap;
     }

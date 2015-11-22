@@ -136,9 +136,13 @@ public class VolumeServiceImpl implements VolumeService {
     public List<Volume> findAllFromCSServer() throws Exception {
         List<Volume> volumeList = new ArrayList<Volume>();
         HashMap<String, String> volumeMap = new HashMap<String, String>();
+        volumeMap.put("listall", "true");
         // 1. Get the list of Volume from CS server using CS connector
         String response = csVolumeService.listVolumes("json", volumeMap);
-        JSONArray volumeListJSON = new JSONObject(response).getJSONObject("listvolumesresponse").getJSONArray("volume");
+        JSONArray volumeListJSON = null;
+        JSONObject responseObject = new JSONObject(response).getJSONObject("listvolumesresponse");
+        if (responseObject.has("volume")) {
+            volumeListJSON = responseObject.getJSONArray("volume");
         // 2. Iterate the json list, convert the single json entity to
         // Volume
         for (int i = 0, size = volumeListJSON.length(); i < size; i++) {
@@ -146,6 +150,7 @@ public class VolumeServiceImpl implements VolumeService {
             // and Add
             // the converted Volume entity to list
             volumeList.add(Volume.convert(volumeListJSON.getJSONObject(i), entity));
+        }
         }
         return volumeList;
     }

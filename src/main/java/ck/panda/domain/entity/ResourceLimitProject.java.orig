@@ -31,12 +31,12 @@ import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 
 /**
- * Resource limit Domain entity.
+ * Resource limit Project entity.
  *
  */
 @Entity
-@Table(name = "ck_resource_limit_domain")
-public class ResourceLimitDomain {
+@Table(name = "ck_resource_limit_project")
+public class ResourceLimitProject {
 
     /** Unique ID of the Resource limit. */
     @Id
@@ -53,6 +53,24 @@ public class ResourceLimitDomain {
     @Column(name = "domain_id")
     private Long domainId;
 
+    /** Resource limit for department id. */
+    @JoinColumn(name = "department_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Department department;
+
+    /** Resource limit for department id. */
+    @Column(name = "department_id")
+    private Long departmentId;
+
+    /** Resource limit for project id. */
+    @JoinColumn(name = "project_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Project project;
+
+    /** Resource limit forS project id. */
+    @Column(name = "project_id")
+    private Long projectId;
+
     /**  Type of resource. */
     @Column(name = "resource_type", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -66,6 +84,10 @@ public class ResourceLimitDomain {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    /** unique separator for each project with resource type.*/
+    @Transient
+    private String uniqueSeperator;
 
     /** Version attribute to handle optimistic locking. */
     @Version
@@ -110,10 +132,6 @@ public class ResourceLimitDomain {
      */
     @Transient
     private Boolean isSyncFlag;
-
-    /** unique separator for each domain with resource type.*/
-    @Transient
-    private String uniqueSeperator;
 
     /** Enum type for Resource Limit. */
     public enum ResourceType {
@@ -204,6 +222,79 @@ public class ResourceLimitDomain {
      */
     public void setDomainId(Long domainId) {
         this.domainId = domainId;
+    }
+
+
+    /**
+     * Get the department of the Resource limit.
+     *
+     * @return the department of the Resource limit.
+     */
+    public Department getDepartment() {
+        return department;
+    }
+
+    /**
+     * Set the department of the Resource limit.
+     *
+     * @param department the department to set
+     */
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
+
+    /**
+     * Get the department Id of the Resource limit.
+     *
+     * @return the departmentId of the Resource limit.
+     */
+    public Long getDepartmentId() {
+        return departmentId;
+    }
+
+    /**
+     * Set the department Id of the Resource limit.
+     *
+     * @param departmentId the departmentId to set
+     */
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
+    }
+
+    /**
+     * Get the project of the Resource limit.
+     *
+     * @return the project of the Resource limit.
+     */
+    public Project getProject() {
+        return project;
+    }
+
+    /**
+     * Set the project of the Resource limit.
+     *
+     * @param project the project to set
+     */
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    /**
+     * Get the project Id of the Resource limit.
+     *
+     * @return the projectId of the Resource limit.
+     */
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    /**
+     * Set the project Id of the Resource limit.
+     *
+     * @param projectId the projectId to set
+     */
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
     }
 
     /**
@@ -386,7 +477,6 @@ public class ResourceLimitDomain {
         this.isSyncFlag = isSyncFlag;
     }
 
-
     /**
      * Set the unique separator for the Resource limit.
      *
@@ -405,6 +495,7 @@ public class ResourceLimitDomain {
         this.uniqueSeperator = uniqueSeperator;
     }
 
+
     /**
      * Convert JSONObject to ResourceLimit entity.
      *
@@ -414,15 +505,18 @@ public class ResourceLimitDomain {
      * @throws JSONException unhandled json errors
      */
     @SuppressWarnings("static-access")
-    public static ResourceLimitDomain convert(JSONObject object, ConvertUtil convertUtil) throws JSONException {
-        ResourceLimitDomain resource = new ResourceLimitDomain();
+    public static ResourceLimitProject convert(JSONObject jsonObject, ConvertUtil convertUtil) throws JSONException {
+        ResourceLimitProject resource = new ResourceLimitProject();
         resource.setIsSyncFlag(false);
         try {
-            resource.setResourceType(ResourceType.values()[(JsonUtil.getIntegerValue(object, "resourcetype"))]);
-            resource.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(object, "domainid")));
-            resource.setMax(resource.getMax().valueOf(JsonUtil.getIntegerValue(object, "max")));
+<<<<<<< HEAD
+=======
             resource.setIsActive(true);
-            resource.setUniqueSeperator(convertUtil.getDomainId(JsonUtil.getStringValue(object, "domainid"))+"-"+ResourceType.values()[(JsonUtil.getIntegerValue(object, "resourcetype"))]);
+>>>>>>> dd05457ceb3b0ee3d35b2ce9471ea83260e365e5
+            resource.setResourceType(ResourceType.values()[(JsonUtil.getIntegerValue(jsonObject, "resourcetype"))]);
+            resource.setProjectId(convertUtil.getProject(JsonUtil.getStringValue(jsonObject, "projectid")).getId());
+            resource.setMax(resource.getMax().valueOf(JsonUtil.getIntegerValue(jsonObject, "max")));
+            resource.setUniqueSeperator(convertUtil.getProject(JsonUtil.getStringValue(jsonObject, "projectid")).getId()+"-"+ResourceType.values()[(JsonUtil.getIntegerValue(jsonObject, "resourcetype"))]);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -436,10 +530,10 @@ public class ResourceLimitDomain {
      * @param resourceList lists of resource limits
      * @return resourceMap mapped values.
      */
-    public static Map<String, ResourceLimitDomain> convert(List<ResourceLimitDomain> resourceList) {
-        Map<String, ResourceLimitDomain> resourceMap = new HashMap<String, ResourceLimitDomain>();
+    public static Map<String, ResourceLimitProject> convert(List<ResourceLimitProject> resourceList) {
+        Map<String, ResourceLimitProject> resourceMap = new HashMap<String, ResourceLimitProject>();
 
-        for (ResourceLimitDomain resource : resourceList) {
+        for (ResourceLimitProject resource : resourceList) {
             resourceMap.put(resource.getUniqueSeperator(), resource);
         }
         return resourceMap;

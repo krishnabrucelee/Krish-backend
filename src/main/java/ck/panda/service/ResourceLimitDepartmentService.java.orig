@@ -23,7 +23,8 @@ public interface ResourceLimitDepartmentService extends CRUDService<ResourceLimi
        * @return ResourceLimit list from server
        * @throws Exception unhandled errors.
        */
-      List<ResourceLimitDepartment> findAllFromCSServerDepartment(Long domainId, String department) throws Exception;
+<<<<<<< HEAD
+      List<ResourceLimitDepartment> findAllFromCSServerDepartment(String domainId, String department) throws Exception;
 
       /**
        * Create the quota limit for Department.
@@ -66,4 +67,7 @@ public interface ResourceLimitDepartmentService extends CRUDService<ResourceLimi
        * @throws Exception error
        */
       ResourceLimitDepartment findByDepartmentAndResourceType(Long departmentId, ResourceLimitDepartment.ResourceType resourceType, Boolean isActive);
+=======
+      List<ResourceLimitDepartment> findAllFromCSServerDepartment(Long domainId, String department) throws Exception;
+>>>>>>> dd05457ceb3b0ee3d35b2ce9471ea83260e365e5
 }

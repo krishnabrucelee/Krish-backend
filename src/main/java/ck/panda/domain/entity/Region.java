@@ -1,6 +1,7 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
-
+import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
 import org.json.JSONException;
@@ -24,6 +25,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  * A region is the largest available organizational unit within a CloudStack
@@ -84,12 +86,16 @@ public class Region implements Serializable {
     /** Created date and time. */
     @Column(name = "created_date_time")
     @CreatedDate
-    private DateTime createdDateTime;
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime createdDateTime;
 
     /** Updated date and time. */
     @Column(name = "updated_date_time")
     @LastModifiedDate
-    private DateTime updatedDateTime;
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime updatedDateTime;
 
     /**
      * Enumeration for Region status.
@@ -269,7 +275,7 @@ public class Region implements Serializable {
      *
      * @return createdDateTime
      */
-    public DateTime getCreatedDateTime() {
+    public ZonedDateTime getCreatedDateTime() {
         return createdDateTime;
     }
 
@@ -278,7 +284,7 @@ public class Region implements Serializable {
      *
      * @param createdDateTime - the createdDateTime to set
      */
-    public void setCreatedDateTime(DateTime createdDateTime) {
+    public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
     }
 
@@ -287,7 +293,7 @@ public class Region implements Serializable {
      *
      * @return updatedDateTime
      */
-    public DateTime getUpdatedDateTime() {
+    public ZonedDateTime getUpdatedDateTime() {
         return updatedDateTime;
     }
 
@@ -296,7 +302,7 @@ public class Region implements Serializable {
      *
      * @param updatedDateTime - the updatedDateTime to set
      */
-    public void setUpdatedDateTime(DateTime updatedDateTime) {
+    public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
 

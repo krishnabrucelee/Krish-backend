@@ -196,20 +196,24 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<Project> findAllFromCSServerByDomain(String domainUuid) throws Exception {
+    public List<Project> findAllFromCSServerByDomain() throws Exception {
         List<Project> projectList = new ArrayList<Project>();
         HashMap<String, String> projectMap = new HashMap<String, String>();
-        projectMap.put("domainid", domainUuid);
+        projectMap.put("listall", "true");
         // 1. Get the list of Project from CS server using CS connector
         String response = cloudStackProjectService.listProjects("json", projectMap);
-        JSONArray projectListJSON = new JSONObject(response).getJSONObject("listprojectsresponse").getJSONArray("project");
-        // 2. Iterate the json list, convert the single json entity to
-        // Project
-        for (int i = 0, size = projectListJSON.length(); i < size; i++) {
-            // 2.1 Call convert by passing JSONObject to Project entity
-            // and Add
-            // the converted Project entity to list
-            projectList.add(Project.convert(projectListJSON.getJSONObject(i), entity));
+        JSONArray projectListJSON = null;
+        JSONObject responseObject = new JSONObject(response).getJSONObject("listprojectsresponse");
+        if (responseObject.has("project")) {
+            projectListJSON = responseObject.getJSONArray("project");
+            // 2. Iterate the json list, convert the single json entity to
+            // Project
+            for (int i = 0, size = projectListJSON.length(); i < size; i++) {
+                // 2.1 Call convert by passing JSONObject to Project entity
+                // and Add
+                // the converted Project entity to list
+                projectList.add(Project.convert(projectListJSON.getJSONObject(i), entity));
+            }
         }
         return projectList;
     }

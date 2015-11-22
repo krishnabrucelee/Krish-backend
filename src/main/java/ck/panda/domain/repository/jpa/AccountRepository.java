@@ -8,6 +8,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ck.panda.domain.entity.Account;
+import ck.panda.domain.entity.Account.AccountType;
 import ck.panda.domain.entity.Domain;
 
 /**
@@ -66,4 +67,16 @@ public interface AccountRepository extends PagingAndSortingRepository<Account, L
      */
     @Query(value = "select dpt from Account dpt where dpt.isActive =:isActive AND dpt.domainId=:domainId)")
     List<Account> findByDomain(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find the department for same domain with username and is active status.
+     *
+     * @param userName user name of the department.
+     * @param domain Domain reference.
+     * @param isActive get the department list based on active/inactive status.
+     * @return department name.
+     */
+    @Query(value = "select dpt from Account dpt where dpt.userName=:userName AND  dpt.domain =:domain AND dpt.isActive =:isActive AND dpt.type=:user")
+    Account findByNameAndDomainAndIsActiveAndUserType(@Param("userName") String userName,@Param("domain") Domain domain,@Param("isActive") Boolean isActive,
+            @Param("user") AccountType user);
 }

@@ -450,6 +450,24 @@ public class ConvertUtil {
     }
 
     /**
+     * Get department id.
+     *
+     * @param domain object for account.
+     * @param name of the domain.
+     * @return domain id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getDepartmentByUsernameAndDomain(String name, Domain domain) throws Exception {
+        if (accountService.findByNameAndDomainAndIsActiveAndUserType(name, domain, true) != null) {
+            return departmentService.findByUuidAndIsActive(
+                    accountService.findByNameAndDomainAndIsActiveAndUserType(name, domain, true).getUuid(), true)
+                    .getId();
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Get Account id.
      *
      * @param name of the account.
@@ -480,6 +498,34 @@ public class ConvertUtil {
            return user.get(0).getId();
         }
         return null;
+    }
+
+    /**
+     * Get state of resource.
+     *
+     * @param state of the user.
+     * @return true/false.
+     * @throws Exception unhandled exception.
+     */
+    public Boolean getState(String state) throws Exception {
+        if(state.equalsIgnoreCase("Active")){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Get status of resource.
+     *
+     * @param status of the user.
+     * @return status enum string.
+     * @throws Exception unhandled exception.
+     */
+    public Enum getStatus(String status) throws Exception {
+        if(status.equalsIgnoreCase("Active")){
+            return Project.Status.ENABLED;
+        }
+        return Project.Status.DELETED;
     }
 
     public SecretKey getSecretKey() throws UnsupportedEncodingException {

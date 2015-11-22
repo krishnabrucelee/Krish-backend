@@ -179,7 +179,7 @@ public interface SyncService {
    * @throws ApplicationException unhandled application errors.
    * @throws Exception cloudstack unhandled errors.
    */
-  void syncResourceLimitDepartment(String domainId, String department) throws ApplicationException, Exception;
+  void syncResourceLimitDepartment(Long domainId, String department) throws ApplicationException, Exception;
 
   /**
    * Sync with Cloud Server Account.

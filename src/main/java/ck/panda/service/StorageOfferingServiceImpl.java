@@ -198,17 +198,22 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     public List<StorageOffering> findAllFromCSServer() throws Exception {
         List<StorageOffering> storageOfferingList = new ArrayList<StorageOffering>();
         HashMap<String, String> storageOfferingMap = new HashMap<String, String>();
+        storageOfferingMap.put("listall", "true");
         // 1. Get the list of StorageOffering from CS server using CS connector
         String response = csStorageService.listStorageOfferings(JSON, storageOfferingMap);
-        JSONArray storageOfferingListJSON = new JSONObject(response).getJSONObject("listdiskofferingsresponse")
-                .getJSONArray(DISK);
-        // 2. Iterate the json list, convert the single json entity to
-        // StorageOffering
-        for (int i = 0, size = storageOfferingListJSON.length(); i < size; i++) {
-            // 2.1 Call convert by passing JSONObject to StorageOffering entity
-            // and Add
-            // the converted StorageOffering entity to list
-            storageOfferingList.add(StorageOffering.convert(storageOfferingListJSON.getJSONObject(i), convertUtil));
+        JSONArray storageOfferingListJSON = null;
+        JSONObject responseObject = new JSONObject(response).getJSONObject("listdiskofferingsresponse");
+        if (responseObject.has(DISK)) {
+            storageOfferingListJSON = responseObject.getJSONArray(DISK);
+            // 2. Iterate the json list, convert the single json entity to
+            // StorageOffering
+            for (int i = 0, size = storageOfferingListJSON.length(); i < size; i++) {
+                // 2.1 Call convert by passing JSONObject to StorageOffering
+                // entity
+                // and Add
+                // the converted StorageOffering entity to list
+                storageOfferingList.add(StorageOffering.convert(storageOfferingListJSON.getJSONObject(i), convertUtil));
+            }
         }
         return storageOfferingList;
     }

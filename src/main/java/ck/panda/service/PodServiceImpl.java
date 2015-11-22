@@ -85,12 +85,17 @@ public class PodServiceImpl implements PodService {
         // 1. Get the list of pods from CS server using CS connector
         String response = podService.listPods("json", podMap);
 
-        JSONArray podListJSON = new JSONObject(response).getJSONObject("listpodsresponse").getJSONArray("pod");
-        // 2. Iterate the json list, convert the single json entity to pod
-        for (int i = 0, size = podListJSON.length(); i < size; i++) {
-            // 2.1 Call convert by passing JSONObject to Domain entity and Add
-            // the converted pod entity to list
-            podList.add(Pod.convert(podListJSON.getJSONObject(i), entity));
+        JSONArray podListJSON = null;
+        JSONObject responseObject = new JSONObject(response).getJSONObject("listpodsresponse");
+        if (responseObject.has("pod")) {
+            podListJSON = responseObject.getJSONArray("pod");
+            // 2. Iterate the json list, convert the single json entity to pod
+            for (int i = 0, size = podListJSON.length(); i < size; i++) {
+                // 2.1 Call convert by passing JSONObject to Domain entity and
+                // Add
+                // the converted pod entity to list
+                podList.add(Pod.convert(podListJSON.getJSONObject(i), entity));
+            }
         }
         return podList;
     }

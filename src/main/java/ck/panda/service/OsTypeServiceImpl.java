@@ -76,22 +76,26 @@ public class OsTypeServiceImpl implements OsTypeService {
 
     @Override
     public List<OsType> findAllFromCSServer() throws Exception {
-          List<OsType> osTypeList = new ArrayList<OsType>();
-          HashMap<String, String> osTypeMap = new HashMap<String, String>();
+        List<OsType> osTypeList = new ArrayList<OsType>();
+        HashMap<String, String> osTypeMap = new HashMap<String, String>();
 
-          // 1. Get the list of domains from CS server using CS connector
-          String response = osTypeService.listOsTypes("json", osTypeMap);
-
-          JSONArray osTypeListJSON = new JSONObject(response).getJSONObject("listostypesresponse")
-                  .getJSONArray("ostype");
-          // 2. Iterate the json list, convert the single json entity to domain
-          for (int i = 0, size = osTypeListJSON.length(); i < size; i++) {
-              // 2.1 Call convert by passing JSONObject to ostype entity and Add
-              // the converted ostype entity to list
-              osTypeList.add(OsType.convert(osTypeListJSON.getJSONObject(i), convertUtil));
-          }
-          return osTypeList;
-      }
+        // 1. Get the list of domains from CS server using CS connector
+        String response = osTypeService.listOsTypes("json", osTypeMap);
+        JSONArray osTypeListJSON = null;
+        JSONObject responseObject = new JSONObject(response).getJSONObject("listostypesresponse");
+        if (responseObject.has("ostype")) {
+            osTypeListJSON = responseObject.getJSONArray("ostype");
+            // 2. Iterate the json list, convert the single json entity to
+            // domain
+            for (int i = 0, size = osTypeListJSON.length(); i < size; i++) {
+                // 2.1 Call convert by passing JSONObject to ostype entity and
+                // Add
+                // the converted ostype entity to list
+                osTypeList.add(OsType.convert(osTypeListJSON.getJSONObject(i), convertUtil));
+            }
+        }
+        return osTypeList;
+    }
 
     @Override
     public List<OsType> findByCategoryName(String categoryName) throws Exception {

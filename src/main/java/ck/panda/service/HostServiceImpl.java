@@ -76,23 +76,25 @@ public class HostServiceImpl implements HostService {
       return (List<Host>) hostRepo.findAll();
   }
 
-@Override
-public List<Host> findAllFromCSServer() throws Exception {
-      List<Host> hostList = new ArrayList<Host>();
-      HashMap<String, String> hostMap = new HashMap<String, String>();
+    @Override
+    public List<Host> findAllFromCSServer() throws Exception {
+        List<Host> hostList = new ArrayList<Host>();
+        HashMap<String, String> hostMap = new HashMap<String, String>();
 
-      // 1. Get the list of hosts from CS server using CS connector
-      String response = hostService.listHosts("json", hostMap);
-
-      JSONArray hostListJSON = new JSONObject(response).getJSONObject("listhostsresponse")
-              .getJSONArray("host");
-      // 2. Iterate the json list, convert the single json entity to host
-      for (int i = 0, size = hostListJSON.length(); i < size; i++) {
-          // 2.1 Call convert by passing JSONObject to host entity and Add
-          // the converted host entity to list
-          hostList.add(Host.convert(hostListJSON.getJSONObject(i), entity));
-      }
-      return hostList;
+        // 1. Get the list of hosts from CS server using CS connector
+        String response = hostService.listHosts("json", hostMap);
+        JSONArray hostListJSON = null;
+        JSONObject responseObject = new JSONObject(response).getJSONObject("listhostsresponse");
+        if (responseObject.has("host")) {
+            hostListJSON = responseObject.getJSONArray("host");
+            // 2. Iterate the json list, convert the single json entity to host
+            for (int i = 0, size = hostListJSON.length(); i < size; i++) {
+                // 2.1 Call convert by passing JSONObject to host entity and Add
+                // the converted host entity to list
+                hostList.add(Host.convert(hostListJSON.getJSONObject(i), entity));
+            }
+        }
+        return hostList;
     }
 
     @Override

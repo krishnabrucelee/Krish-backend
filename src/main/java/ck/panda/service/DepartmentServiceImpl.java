@@ -184,22 +184,27 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Department> findAllFromCSServerByDomain(String domainUuid) throws Exception {
+    public List<Department> findAllFromCSServerByDomain() throws Exception {
         List<Department> departmentList = new ArrayList<Department>();
         HashMap<String, String> departmentMap = new HashMap<String, String>();
         //departmentMap.put("domainid", domainUuid);
          departmentMap.put("listall", "true");
         // 1. Get the list of accounts from CS server using CS connector
         String response = csAccountService.listAccounts("json", departmentMap);
-        JSONArray userListJSON = new JSONObject(response).getJSONObject("listaccountsresponse").getJSONArray("account");
-        // 2. Iterate the json list, convert the single json entity to user
-        for (int i = 0, size = userListJSON.length(); i < size; i++) {
-            // 2.1 Call convert by passing JSONObject to Department entity and
-            // Add the converted Department entity to list
-            Department department = Department.convert(userListJSON.getJSONObject(i), convertUtil);
-           if (department.getType() == Department.AccountType.USER) {
-                departmentList.add(department);
-           }
+        JSONArray userListJSON = null;
+        JSONObject responseObject = new JSONObject(response).getJSONObject("listaccountsresponse");
+        if (responseObject.has("account")) {
+            userListJSON = responseObject.getJSONArray("account");
+            // 2. Iterate the json list, convert the single json entity to user
+            for (int i = 0, size = userListJSON.length(); i < size; i++) {
+                // 2.1 Call convert by passing JSONObject to Department entity
+                // and
+                // Add the converted Department entity to list
+                Department department = Department.convert(userListJSON.getJSONObject(i), convertUtil);
+                if (department.getType() == Department.AccountType.USER) {
+                    departmentList.add(department);
+                }
+            }
         }
         return departmentList;
     }

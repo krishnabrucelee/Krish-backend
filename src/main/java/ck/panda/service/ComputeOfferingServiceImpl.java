@@ -236,22 +236,26 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     @Override
     public List<ComputeOffering> findAllFromCSServer() throws Exception {
 
-         List<ComputeOffering> computeOfferingList = new ArrayList<ComputeOffering>();
-          HashMap<String, String> computeOfferingMap = new HashMap<String, String>();
-
-          // 1. Get the list of ComputeOffering from CS server using CS connector
-          String response = computeOffer.listComputeOfferings("json", computeOfferingMap);
-
-          JSONArray computeOfferingListJSON = new JSONObject(response).getJSONObject("listserviceofferingsresponse")
-                  .getJSONArray("serviceoffering");
-          // 2. Iterate the json list, convert the single json entity to domain
-          for (int i = 0, size = computeOfferingListJSON.length(); i < size; i++) {
-              // 2.1 Call convert by passing JSONObject to ComputeOffering entity and Add
-              // the converted ComputeOffering entity to list
-              computeOfferingList.add(ComputeOffering.convert(computeOfferingListJSON.getJSONObject(i)));
-          }
-          return computeOfferingList;
-      }
+        List<ComputeOffering> computeOfferingList = new ArrayList<ComputeOffering>();
+        HashMap<String, String> computeOfferingMap = new HashMap<String, String>();
+        computeOfferingMap.put("listall", "true");
+        // 1. Get the list of ComputeOffering from CS server using CS connector
+        String response = computeOffer.listComputeOfferings("json", computeOfferingMap);
+        JSONArray computeOfferingListJSON = null;
+        JSONObject responseObject = new JSONObject(response).getJSONObject("listserviceofferingsresponse");
+        if (responseObject.has("serviceoffering")) {
+            computeOfferingListJSON = responseObject.getJSONArray("serviceoffering");
+            // 2. Iterate the json list, convert the single json entity to
+            // domain
+            for (int i = 0, size = computeOfferingListJSON.length(); i < size; i++) {
+                // 2.1 Call convert by passing JSONObject to ComputeOffering
+                // entity and Add
+                // the converted ComputeOffering entity to list
+                computeOfferingList.add(ComputeOffering.convert(computeOfferingListJSON.getJSONObject(i)));
+            }
+        }
+        return computeOfferingList;
+    }
 
     @Override
     public ComputeOffering findByUUID(String uuid) {

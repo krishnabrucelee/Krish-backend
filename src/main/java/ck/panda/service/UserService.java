@@ -21,7 +21,7 @@ public interface UserService extends CRUDService<User> {
      * @return user list from server
      * @throws Exception unhandled errors.
      */
-    List<User> findAllFromCSServerByDomain(String domainUuid) throws Exception;
+    List<User> findAllFromCSServerByDomain() throws Exception;
 
     /**
      * @param query search term.

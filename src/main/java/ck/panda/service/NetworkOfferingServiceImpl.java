@@ -93,14 +93,18 @@ public class NetworkOfferingServiceImpl implements NetworkOfferingService {
 
         // 1. Get the list of networkOffering from CS server using CS connector
         String response = csNetworkOfferingService.listNetworkOfferings("json", networkOfferingMap);
-
-        JSONArray networkOfferingListJSON = new JSONObject(response).getJSONObject("listnetworkofferingsresponse")
-                .getJSONArray("networkoffering");
-        // 2. Iterate the json list, convert the single json entity to domain
-        for (int i = 0, size = networkOfferingListJSON.length(); i < size; i++) {
-            // 2.1 Call convert by passing JSONObject to Domain entity and Add
-            // the converted networkOffering entity to list
-            networkOfferingList.add(NetworkOffering.convert(networkOfferingListJSON.getJSONObject(i)));
+        JSONArray networkOfferingListJSON = null;
+        JSONObject responseObject = new JSONObject(response).getJSONObject("listnetworkofferingsresponse");
+        if (responseObject.has("networkoffering")) {
+            networkOfferingListJSON = responseObject.getJSONArray("networkoffering");
+            // 2. Iterate the json list, convert the single json entity to
+            // domain
+            for (int i = 0, size = networkOfferingListJSON.length(); i < size; i++) {
+                // 2.1 Call convert by passing JSONObject to Domain entity and
+                // Add
+                // the converted networkOffering entity to list
+                networkOfferingList.add(NetworkOffering.convert(networkOfferingListJSON.getJSONObject(i)));
+            }
         }
         return networkOfferingList;
     }

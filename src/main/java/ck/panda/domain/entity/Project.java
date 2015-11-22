@@ -76,7 +76,6 @@ public class Project implements Serializable {
     private String uuid;
 
     /** Project owner id. */
-    @NotNull
     @Column(name = "project_owner_id")
     private Long projectOwnerId;
 
@@ -100,7 +99,6 @@ public class Project implements Serializable {
     private Department department;
 
     /** Project department id. */
-    @NotNull
     @Column(name = "department_id")
     private Long departmentId;
 
@@ -515,11 +513,12 @@ public class Project implements Serializable {
             project.setName(JsonUtil.getStringValue(jsonObject, "name"));
             project.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
             project.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(jsonObject, "domainid")));
-            project.setDepartmentId(convertUtil.getAccountByUsernameAndDomain(JsonUtil.getStringValue(jsonObject, "account"),
-                    convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid"))).getId());
+            project.setDepartmentId(convertUtil.getDepartmentByUsernameAndDomain(JsonUtil.getStringValue(jsonObject, "account"),
+                    convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid"))));
+            project.setIsActive(convertUtil.getState(JsonUtil.getStringValue(jsonObject, "state")));
+            project.setStatus((Project.Status)convertUtil.getStatus(JsonUtil.getStringValue(jsonObject, "state")));
             project.setDescription(JsonUtil.getStringValue(jsonObject, "displaytext"));
             project.setProjectOwnerId(convertUtil.getUserIdByAccount(JsonUtil.getStringValue(jsonObject, "account"), convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid"))));
-            project.setIsActive(true);
         } catch (Exception e) {
             e.printStackTrace();
         }

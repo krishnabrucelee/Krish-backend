@@ -187,25 +187,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> findAllFromCSServerByDomain(String domainUuid) throws Exception {
-          List<User> userList = new ArrayList<User>();
-          HashMap<String, String> userMap = new HashMap<String, String>();
-         // userMap.put("domainid", domainUuid);
-          userMap.put("listall", "true");
-          // 1. Get the list of users from CS server using CS connector
-          String response = csUserService.listUsers(userMap,"json");
-          JSONArray userListJSON = new JSONObject(response).getJSONObject("listusersresponse")
-                  .getJSONArray("user");
-          // 2. Iterate the json list, convert the single json entity to user
-          for (int i = 0, size = userListJSON.length(); i < size; i++) {
-              // 2.1 Call convert by passing JSONObject to User entity and Add
-              // the converted User entity to list
+    public List<User> findAllFromCSServerByDomain() throws Exception {
+        List<User> userList = new ArrayList<User>();
+        HashMap<String, String> userMap = new HashMap<String, String>();
+        // userMap.put("domainid", domainUuid);
+        userMap.put("listall", "true");
+        // 1. Get the list of users from CS server using CS connector
+        String response = csUserService.listUsers(userMap, "json");
+        JSONArray userListJSON = null;
+        JSONObject responseObject = new JSONObject(response).getJSONObject("listusersresponse");
+        if (responseObject.has("user")) {
+            userListJSON = responseObject.getJSONArray("user");
+            // 2. Iterate the json list, convert the single json entity to user
+            for (int i = 0, size = userListJSON.length(); i < size; i++) {
+                // 2.1 Call convert by passing JSONObject to User entity and Add
+                // the converted User entity to list
 
-              User user = User.convert(userListJSON.getJSONObject(i), entity);
-              userList.add(user);
-          }
-          return userList;
-      }
+                User user = User.convert(userListJSON.getJSONObject(i), entity);
+                userList.add(user);
+            }
+        }
+        return userList;
+    }
 
     @Override
     public List<User> findByName(String query) throws Exception {

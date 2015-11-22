@@ -83,12 +83,17 @@ public class ClusterServiceImpl implements ClusterService {
 
         // 1. Get the list of cluster from CS server using CS connector
         String response = clusterService.listClusters("json", clusterMap);
-        JSONArray clusterListJSON = new JSONObject(response).getJSONObject("listclustersresponse").getJSONArray("cluster");
-        // 2. Iterate the json list, convert the single json entity to pod
-        for (int i = 0, size = clusterListJSON.length(); i < size; i++) {
-            // 2.1 Call convert by passing JSONObject to cluster entity and Add
-            // the converted cluster entity to list
-            clusterList.add(Cluster.convert(clusterListJSON.getJSONObject(i), entity));
+        JSONArray clusterListJSON = null;
+        JSONObject responseObject = new JSONObject(response).getJSONObject("listclustersresponse");
+        if (responseObject.has("cluster")) {
+            clusterListJSON = responseObject.getJSONArray("cluster");
+            // 2. Iterate the json list, convert the single json entity to pod
+            for (int i = 0, size = clusterListJSON.length(); i < size; i++) {
+                // 2.1 Call convert by passing JSONObject to cluster entity and
+                // Add
+                // the converted cluster entity to list
+                clusterList.add(Cluster.convert(clusterListJSON.getJSONObject(i), entity));
+            }
         }
         return clusterList;
     }
