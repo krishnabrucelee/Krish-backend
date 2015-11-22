@@ -35,13 +35,12 @@ public class CloudStackResourceLimitService {
      * @return updated resource response
      * @throws Exception error.
      */
-    public String updateResourceLimit(String resourceType, String response,
-            HashMap<String, String> optional)
+    public String updateResourceLimit(Integer resourceType, String response, HashMap<String, String> optional)
             throws Exception {
 
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("updateResourceLimit", optional);
-        arguments.add(new NameValuePair("resourcetype", resourceType));
+        arguments.add(new NameValuePair("resourcetype", resourceType.toString()));
         arguments.add(new NameValuePair("response", response));
 
         String updateResponse = server.request(arguments);

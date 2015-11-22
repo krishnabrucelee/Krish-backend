@@ -46,6 +46,21 @@ public class ResourceLimitDepartmentController extends CRUDController<ResourceLi
         return resourceLimitService.save(resource);
     }
 
+    /**
+     * Creating resource limit for department.
+     *
+     * @param resourceLimits resource limit
+     * @return resource limit
+     * @throws Exception error
+     */
+    @RequestMapping(value = "/create", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE }, consumes = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public List<ResourceLimitDepartment> createResourceLimits(@RequestBody List<ResourceLimitDepartment> resourceLimits) throws Exception {
+        return resourceLimitService.createResourceLimits(resourceLimits);
+    }
+
     @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing resource.", response = ResourceLimitDepartment.class)
     @Override
     public ResourceLimitDepartment read(@PathVariable(PATH_ID) Long id) throws Exception {
@@ -87,6 +102,20 @@ public class ResourceLimitDepartmentController extends CRUDController<ResourceLi
     @ResponseBody
     protected List<ResourceLimitDepartment> getSearch() throws Exception {
         return resourceLimitService.findAll();
+    }
+
+    /**
+     * List all resource limits by department.
+     *
+     * @param departmentId department id
+     * @return resource service.
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "department/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<ResourceLimitDepartment> getResourceLimitByDepartment(@PathVariable(PATH_ID) Long departmentId) throws Exception {
+        return resourceLimitService.findAllByDepartmentIdAndIsActive(departmentId, true);
     }
 
 }

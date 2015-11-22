@@ -99,4 +99,18 @@ public class DepartmentController extends CRUDController<Department> implements 
     protected List<Department> getSearch() throws Exception {
         return departmentService.findAllByIsActive(true);
     }
+
+
+    /**
+     * Get the department by Domain.
+     *
+     * @param id department id.
+     * @return domain
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/domain/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public List<Department> findByDomain(@PathVariable(PATH_ID) Long id) throws Exception {
+       return departmentService.findByDomainAndIsActive(id, true);
+    }
 }

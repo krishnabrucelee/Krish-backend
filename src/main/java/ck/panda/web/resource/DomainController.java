@@ -20,7 +20,6 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Domain;
-import ck.panda.domain.entity.Network;
 import ck.panda.service.DomainService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -68,14 +67,15 @@ public class DomainController extends CRUDController<Domain> implements ApiContr
 
     /**
      * list all domain.
+     *
      * @return projects
-     * @throws Exception
+     * @throws Exception error
      */
-  	@RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-  	@ResponseStatus(HttpStatus.OK)
-  	@ResponseBody
-  	protected List<Domain> getSearch() throws Exception {
-  		return domainService.findAll();
-  	}
+      @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+      @ResponseStatus(HttpStatus.OK)
+      @ResponseBody
+      protected List<Domain> getSearch() throws Exception {
+          return domainService.findAll();
+      }
 
 }

@@ -382,6 +382,7 @@ public class ResourceLimitDomain {
         this.isSyncFlag = isSyncFlag;
     }
 
+
     /**
      * Convert JSONObject to ResourceLimit entity.
      *
@@ -395,7 +396,6 @@ public class ResourceLimitDomain {
         ResourceLimitDomain resource = new ResourceLimitDomain();
         resource.setIsSyncFlag(false);
         try {
-//            resource.uuid = JsonUtil.getStringValue(object, "id");
             resource.setResourceType(ResourceType.values()[(JsonUtil.getIntegerValue(object, "resourcetype"))]);
             resource.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(object, "domainid")));
             resource.setMax(resource.getMax().valueOf(JsonUtil.getIntegerValue(object, "max")));

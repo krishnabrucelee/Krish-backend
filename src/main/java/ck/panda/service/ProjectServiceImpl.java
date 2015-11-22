@@ -219,5 +219,9 @@ public class ProjectServiceImpl implements ProjectService {
         return projectRepository.findByUuidAndIsActive(uuid, isActive);
     }
 
+    @Override
+    public List<Project> findByDepartmentAndIsActive(Long id, Boolean isActive) throws Exception {
+        return projectRepository.findByDepartmentAndIsActive(id, true);
+    }
 
 }

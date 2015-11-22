@@ -68,4 +68,14 @@ public interface ProjectService extends CRUDService<Project> {
      */
     List<Project> findAllFromCSServerByDomain(String domainUuid) throws Exception;
 
+    /**
+     * Find all the projects with department.
+     *
+     * @param id department id .
+     * @param isActive department status Active/Inactive
+     * @return list of departments in project.
+     * @throws Exception if error occurs.
+     */
+    List<Project> findByDepartmentAndIsActive(Long id, Boolean isActive) throws Exception;
+
 }

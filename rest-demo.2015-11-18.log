@@ -1,0 +1,29 @@
+10:37:10.753 [restartedMain] INFO  ck.panda.ApplicationConfig - Starting ApplicationConfig on e1.assistanz.local with PID 4583 (/home/Assistanz/repository/ck/pandaproject/target/classes started by Assistanz in /home/Assistanz/repository/ck/pandaproject) 
+10:37:10.758 [restartedMain] DEBUG ck.panda.ApplicationConfig - Running with Spring Boot v1.3.0.M4, Spring v4.2.0.RELEASE 
+10:37:31.669 [pool-5-thread-1] INFO  c.p.u.i.security.TokenService - Evicting expired tokens 
+10:37:31.846 [restartedMain] INFO  ck.panda.ApplicationConfig - Started ApplicationConfig in 21.56 seconds (JVM running for 23.083) 
+10:38:50.332 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user Optional.of(user) by x-auth-username method 
+10:38:50.350 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+10:38:52.182 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(d80e459a-53fb-468b-8b93-ebd6b9efb2c1) 
+10:38:52.184 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+10:38:52.188 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+10:38:52.243 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.ManagementEndpointAuthenticationFilter - ManagementEndpointAuthenticationFilter is passing request down the filter chain 
+10:41:30.173 [SimpleAsyncTaskExecutor-1] DEBUG c.p.rabbitmq.util.ActionListener - User sync 
+10:41:30.832 [SimpleAsyncTaskExecutor-1] DEBUG ck.panda.util.CloudStackServer - apiKey=njvsbc4XgcJy4LietGzvPxAIaVBE5LXFt7PvoORRcxog9Uc5R97Bo2Cmx2s9NgSSpMSyoBlal_4_8GTSkPjeSQ&command=listUsers&response=json&signature=SHjBqZmFivQw%2BaAbkuMEM3MyL34%3D 
+10:41:30.833 [SimpleAsyncTaskExecutor-1] DEBUG ck.panda.util.CloudStackServer - /client/api 
+10:41:30.897 [SimpleAsyncTaskExecutor-1] DEBUG ck.panda.util.CloudStackServer - {"listusersresponse":{"count":4,"user":[{"id":"731c7514-7233-11e5-8994-668027a61620","username":"admin","firstname":"admin","lastname":"cloud","created":"2015-10-14T16:21:40+0530","state":"enabled","account":"admin","accounttype":1,"domainid":"a7415d60-7232-11e5-8994-668027a61620","domain":"ROOT","apikey":"njvsbc4XgcJy4LietGzvPxAIaVBE5LXFt7PvoORRcxog9Uc5R97Bo2Cmx2s9NgSSpMSyoBlal_4_8GTSkPjeSQ","secretkey":"KOzK6EaUg_4BG5AJOgbvcwHKE2R-66G_vtTFwq25_EyimmbQUbeUIBEB3gX6AZJFZEx36yqC-ORJC9rFCDHkPg","accountid":"731c6588-7233-11e5-8994-668027a61620","iscallerchilddomain":false,"isdefault":true},{"id":"e7920f8b-aeb6-4158-a8bd-374161bc5b5a","username":"mona","firstname":"mona","lastname":"priya","email":"mona@gmail.com","created":"2015-10-30T12:46:22+0530","state":"enabled","account":"admin","accounttype":1,"domainid":"a7415d60-7232-11e5-8994-668027a61620","domain":"ROOT","accountid":"731c6588-7233-11e5-8994-668027a61620","iscallerchilddomain":false,"isdefault":false},{"id":"ea2831ee-8046-478a-bff7-d416eed9004c","username":"sreetest","firstname":"sree","lastname":"test","email":"test@gmail.com","created":"2015-11-11T16:26:38+0530","state":"enabled","account":"admin","accounttype":1,"domainid":"a7415d60-7232-11e5-8994-668027a61620","domain":"ROOT","accountid":"731c6588-7233-11e5-8994-668027a61620","iscallerchilddomain":false,"isdefault":false},{"id":"4d976cbc-26c3-4285-9f7f-a14ac2144f03","username":"sampletest1","firstname":"testing","lastname":"testing","email":"test@gmail.com","created":"2015-11-11T16:36:33+0530","state":"enabled","account":"admin","accounttype":1,"domainid":"a7415d60-7232-11e5-8994-668027a61620","domain":"ROOT","accountid":"731c6588-7233-11e5-8994-668027a61620","iscallerchilddomain":false,"isdefault":false}]}} 
+10:41:30.974 [SimpleAsyncTaskExecutor-1] DEBUG ck.panda.service.SyncServiceImpl - Total rows updated : 4 
+10:41:31.023 [SimpleAsyncTaskExecutor-1] DEBUG ck.panda.service.SyncServiceImpl - Total rows updated : 4 
+10:41:31.030 [SimpleAsyncTaskExecutor-1] DEBUG ck.panda.service.SyncServiceImpl - Total rows updated : 4 
+10:41:31.035 [SimpleAsyncTaskExecutor-1] DEBUG ck.panda.service.SyncServiceImpl - Total rows updated : 4 
+10:41:31.040 [SimpleAsyncTaskExecutor-1] DEBUG ck.panda.service.SyncServiceImpl - Total rows added : 0 
+10:51:38.544 [SimpleAsyncTaskExecutor-1] INFO  c.p.r.util.ResourceStateListener - VM event message 
+10:51:38.545 [SimpleAsyncTaskExecutor-1] INFO  c.p.r.util.ResourceStateListener - VM event UUID 
+10:51:39.362 [SimpleAsyncTaskExecutor-1] INFO  c.p.r.util.ResourceStateListener - VM event message 
+10:51:39.362 [SimpleAsyncTaskExecutor-1] INFO  c.p.r.util.ResourceStateListener - VM event UUID 
+10:51:39.770 [SimpleAsyncTaskExecutor-1] INFO  c.p.r.util.ResourceStateListener - VM event message 
+10:51:39.771 [SimpleAsyncTaskExecutor-1] INFO  c.p.r.util.ResourceStateListener - VM event UUID 
+11:45:15.314 [restartedMain] INFO  ck.panda.ApplicationConfig - Starting ApplicationConfig on e1.assistanz.local with PID 4583 (/home/Assistanz/repository/ck/pandaproject/target/classes started by Assistanz in /home/Assistanz/repository/ck/pandaproject) 
+11:45:15.316 [restartedMain] DEBUG ck.panda.ApplicationConfig - Running with Spring Boot v1.3.0.M4, Spring v4.2.0.RELEASE 
+11:45:23.422 [pool-25-thread-1] INFO  c.p.u.i.security.TokenService - Evicting expired tokens 
+11:45:23.431 [restartedMain] INFO  ck.panda.ApplicationConfig - Started ApplicationConfig in 8.338 seconds (JVM running for 4094.668) 
