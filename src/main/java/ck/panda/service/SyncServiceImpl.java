@@ -1126,6 +1126,23 @@ public class SyncServiceImpl implements SyncService {
             if (vmMap.containsKey(instance.getUuid())) {
                 VmInstance csVm = vmMap.get(instance.getUuid());
                 instance.setName(csVm.getName());
+                instance.setCpuCore(csVm.getCpuCore());
+                instance.setDomainId(csVm.getDomainId());
+                instance.setStatus(csVm.getStatus());
+                instance.setZoneId(csVm.getZoneId());
+                instance.setHostId(csVm.getHostId());
+                instance.setPodId(csVm.getPodId());
+                instance.setComputeOfferingId(csVm.getComputeOfferingId());
+                instance.setCpuSpeed(csVm.getCpuSpeed());
+                instance.setMemory(csVm.getMemory());
+                instance.setCpuUsage(csVm.getCpuUsage());
+                instance.setPasswordEnabled(csVm.getPasswordEnabled());
+                instance.setPassword(csVm.getPassword());
+                instance.setIso(csVm.getIso());
+                instance.setIsoName(csVm.getIsoName());
+                instance.setIpAddress(csVm.getIpAddress());
+                instance.setNetworkId(csVm.getNetworkId());
+                LOGGER.debug("sync VM for ASYNC");
                 // VNC password set.
                 if (csVm.getPassword() != null) {
                     String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));

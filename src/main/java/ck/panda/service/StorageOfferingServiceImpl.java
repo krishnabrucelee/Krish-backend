@@ -144,6 +144,14 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
             optional.put("tags", storage.getStorageTags().toString());
         }
 
+        if (storage.getName() != null) {
+            optional.put("name", storage.getName());
+        }
+
+        if (storage.getDescription() != null) {
+            optional.put("displaytext", storage.getDescription());
+        }
+
         if (storage.getIsPublic() != null) {
             optional.put("public", storage.getIsPublic().toString());
         }

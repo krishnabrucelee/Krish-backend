@@ -221,6 +221,7 @@ public class TemplateServiceImpl implements TemplateService {
         optional.put("displaytext", template.getDescription());
         try {
             cloudStackTemplateService.updateTemplate(template.getUuid(), "json", optional);
+            cloudStackTemplateService.updateTemplatePermissions(template.getUuid(), "json", optional);
         } catch (Exception e) {
             LOGGER.error("ERROR AT TEMPLATE UPDATION", e);
         }
