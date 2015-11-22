@@ -80,17 +80,20 @@ public class OsCategoryServiceImpl implements OsCategoryService {
 
         List<OsCategory> osCategoryList = new ArrayList<OsCategory>();
         HashMap<String, String> osCategoryMap = new HashMap<String, String>();
-
         // 1. Get the list of domains from CS server using CS connector
         String response = osCategoryService.listOsCategories("json", osCategoryMap);
-
-        JSONArray osCategoryListJSON = new JSONObject(response).getJSONObject("listoscategoriesresponse")
-                .getJSONArray("oscategory");
-        // 2. Iterate the json list, convert the single json entity to domain
-        for (int i = 0, size = osCategoryListJSON.length(); i < size; i++) {
-            // 2.1 Call convert by passing JSONObject to Domain entity and Add
-            // the converted Domain entity to list
-            osCategoryList.add(OsCategory.convert(osCategoryListJSON.getJSONObject(i)));
+        JSONArray osCategoryListJSON = null;
+        JSONObject responseObject = new JSONObject(response).getJSONObject("listoscategoriesresponse");
+        if (responseObject.has("oscategory")) {
+            osCategoryListJSON = responseObject.getJSONArray("oscategory");
+            // 2. Iterate the json list, convert the single json entity to
+            // domain
+            for (int i = 0, size = osCategoryListJSON.length(); i < size; i++) {
+                // 2.1 Call convert by passing JSONObject to Domain entity and
+                // Add
+                // the converted Domain entity to list
+                osCategoryList.add(OsCategory.convert(osCategoryListJSON.getJSONObject(i)));
+            }
         }
         return osCategoryList;
     }

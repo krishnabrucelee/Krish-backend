@@ -37,11 +37,10 @@ public interface AccountService  extends CRUDService<Account>  {
     /**
      * To get list of accounts from cloudstack server.
      *
-     * @param domainUuid of the domain.
      * @return domain list from server
      * @throws Exception unhandled errors.
      */
-    List<Account> findAllFromCSServerByDomain(String domainUuid) throws Exception;
+    List<Account> findAllFromCSServerByDomain() throws Exception;
 
     /**
      * Find the accounts based on the given Uuid and isActive status.
@@ -80,6 +79,16 @@ public interface AccountService  extends CRUDService<Account>  {
      * @return account.
      */
     Account findByNameAndDomainAndIsActive(String userName, Domain domain, Boolean isActive);
+
+    /**
+     * Find by Department and isActive Status.
+     *
+     * @param userName of the account.
+     * @param domain object.
+     * @param isActive account status Active/Inactive.
+     * @return account.
+     */
+    Account findByNameAndDomainAndIsActiveAndUserType(String userName, Domain domain, Boolean isActive);
 
 
 }

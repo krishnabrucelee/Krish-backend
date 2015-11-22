@@ -210,15 +210,21 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
     public List<VmSnapshot> findAllFromCSServer() throws Exception {
         List<VmSnapshot> vmsnapshotList = new ArrayList<VmSnapshot>();
         HashMap<String, String> vmsnapshotMap = new HashMap<String, String>();
+        vmsnapshotMap.put("listall", "true");
         // 1. Get the list of vm snapshot from CS server using CS connector
         String response = csSnapshotService.listVMSnapshot(vmsnapshotMap);
-        JSONArray vmSnapshotListJSON = new JSONObject(response).getJSONObject("listvmsnapshotresponse")
-                .getJSONArray("vmSnapshot");
-        // 2. Iterate the json list, convert the single json entity to vm snapshot.
-        for (int i = 0, size = vmSnapshotListJSON.length(); i < size; i++) {
-            // 2.1 Call convert by passing JSONObject to vm snapshot entity and Add
-            // the converted vm snapshot entity to list
-            vmsnapshotList.add(VmSnapshot.convert(vmSnapshotListJSON.getJSONObject(i), entity));
+        JSONArray vmSnapshotListJSON = null;
+        JSONObject responseObject = new JSONObject(response).getJSONObject("listvmsnapshotresponse");
+        if (responseObject.has("vmSnapshot")) {
+            vmSnapshotListJSON = responseObject.getJSONArray("vmSnapshot");
+            // 2. Iterate the json list, convert the single json entity to vm
+            // snapshot.
+            for (int i = 0, size = vmSnapshotListJSON.length(); i < size; i++) {
+                // 2.1 Call convert by passing JSONObject to vm snapshot entity
+                // and Add
+                // the converted vm snapshot entity to list
+                vmsnapshotList.add(VmSnapshot.convert(vmSnapshotListJSON.getJSONObject(i), entity));
+            }
         }
         return vmsnapshotList;
     }

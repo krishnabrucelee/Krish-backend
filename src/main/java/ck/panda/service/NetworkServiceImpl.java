@@ -133,24 +133,28 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public List<Network> findAllFromCSServerByDomain(String domainUuid) throws Exception {
+    public List<Network> findAllFromCSServerByDomain() throws Exception {
 
         List<Network> networkList = new ArrayList<Network>();
-          HashMap<String, String> networkMap = new HashMap<String, String>();
-          networkMap.put("domainid", domainUuid);
-          // 1. Get the list of domains from CS server using CS connector
-          String response = csNetwork.listNetworks("json", networkMap);
-
-          JSONArray networkListJSON = new JSONObject(response).getJSONObject("listnetworksresponse")
-                  .getJSONArray("network");
-          // 2. Iterate the json list, convert the single json entity to domain
-          for (int i = 0, size = networkListJSON.length(); i < size; i++) {
-              // 2.1 Call convert by passing JSONObject to Domain entity and Add
-              // the converted Domain entity to list
-              networkList.add(Network.convert(networkListJSON.getJSONObject(i),entity));
-          }
-          return networkList;
-      }
+        HashMap<String, String> networkMap = new HashMap<String, String>();
+        networkMap.put("listall", "true");
+        // 1. Get the list of domains from CS server using CS connector
+        String response = csNetwork.listNetworks("json", networkMap);
+        JSONArray networkListJSON = null;
+        JSONObject responseObject = new JSONObject(response).getJSONObject("listnetworksresponse");
+        if (responseObject.has("network")) {
+            networkListJSON = responseObject.getJSONArray("network");
+            // 2. Iterate the json list, convert the single json entity to
+            // domain
+            for (int i = 0, size = networkListJSON.length(); i < size; i++) {
+                // 2.1 Call convert by passing JSONObject to Domain entity and
+                // Add
+                // the converted Domain entity to list
+                networkList.add(Network.convert(networkListJSON.getJSONObject(i), entity));
+            }
+        }
+        return networkList;
+    }
 
       @Override
       public Network findByUUID(String uuid) throws Exception {

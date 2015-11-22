@@ -148,17 +148,21 @@ public class SnapshotServiceImpl implements SnapshotService {
     public List<Snapshot> findAllFromCSServer() throws Exception {
         List<Snapshot> snapshotList = new ArrayList<Snapshot>();
         HashMap<String, String> snapshotMap = new HashMap<String, String>();
-
+        snapshotMap.put("listall", "true");
         // 1. Get the list of domains from CS server using CS connector
         String response = snapshotService.listSnapshots(snapshotMap, "json");
-
-        JSONArray snapshotListJSON = new JSONObject(response).getJSONObject("listsnapshotsresponse")
-                .getJSONArray("snapshot");
-        // 2. Iterate the json list, convert the single json entity to domain
-        for (int i = 0, size = snapshotListJSON.length(); i < size; i++) {
-            // 2.1 Call convert by passing JSONObject to Domain entity and Add
-            // the converted snapshot entity to list
-            snapshotList.add(Snapshot.convert(snapshotListJSON.getJSONObject(i), convertUtil));
+        JSONArray snapshotListJSON = null;
+        JSONObject responseObject = new JSONObject(response).getJSONObject("listsnapshotsresponse");
+        if (responseObject.has("snapshot")) {
+            snapshotListJSON = responseObject.getJSONArray("snapshot");
+            // 2. Iterate the json list, convert the single json entity to
+            // domain
+            for (int i = 0, size = snapshotListJSON.length(); i < size; i++) {
+                // 2.1 Call convert by passing JSONObject to Domain entity and
+                // Add
+                // the converted snapshot entity to list
+                snapshotList.add(Snapshot.convert(snapshotListJSON.getJSONObject(i), convertUtil));
+            }
         }
         return snapshotList;
     }

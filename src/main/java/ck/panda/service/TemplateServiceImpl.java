@@ -137,19 +137,23 @@ public class TemplateServiceImpl implements TemplateService {
     public List<Template> findAllFromCSServer() throws Exception {
         List<Template> templateList = new ArrayList<Template>();
         HashMap<String, String> templateMap = new HashMap<String, String>();
+        templateMap.put("listall", "true");
         String response = cloudStackTemplateService.listTemplates("all", "json", templateMap);
-        JSONArray templateListJSON = new JSONObject(response).getJSONObject("listtemplatesresponse")
-                .getJSONArray("template");
-        for (int i = 0, size = templateListJSON.length(); i < size; i++) {
-            Template template = Template.convert(templateListJSON.getJSONObject(i));
-            OsType osType = osTypeRepository.findByUUID(template.getTransOsType());
-            template.setOsType(osType);
-            template.setDisplayText(osType.getDescription());
-            Zone zone = zoneRepo.findByUUID(template.getTransZone());
-            template.setZone(zone);
-            Hypervisor hypervisor = hypervisorRepository.findByName(template.getTransHypervisor());
-            template.setHypervisor(hypervisor);
-            templateList.add(template);
+        JSONArray templateListJSON = null;
+        JSONObject responseObject = new JSONObject(response).getJSONObject("listtemplatesresponse");
+        if (responseObject.has("template")) {
+            templateListJSON = responseObject.getJSONArray("template");
+            for (int i = 0, size = templateListJSON.length(); i < size; i++) {
+                Template template = Template.convert(templateListJSON.getJSONObject(i));
+                OsType osType = osTypeRepository.findByUUID(template.getTransOsType());
+                template.setOsType(osType);
+                template.setDisplayText(osType.getDescription());
+                Zone zone = zoneRepo.findByUUID(template.getTransZone());
+                template.setZone(zone);
+                Hypervisor hypervisor = hypervisorRepository.findByName(template.getTransHypervisor());
+                template.setHypervisor(hypervisor);
+                templateList.add(template);
+            }
         }
         return templateList;
     }

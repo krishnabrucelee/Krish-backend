@@ -590,15 +590,19 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     public List<VmInstance> findAllFromCSServer() throws Exception {
         List<VmInstance> vmList = new ArrayList<VmInstance>();
         HashMap<String, String> vmMap = new HashMap<String, String>();
+        vmMap.put("listall", "true");
         // 1. Get the list of vms from CS server using CS connector
         String response = cloudStackInstanceService.listVirtualMachines("json", vmMap);
-        JSONArray vmListJSON = new JSONObject(response).getJSONObject("listvirtualmachinesresponse")
-                .getJSONArray("virtualmachine");
-        // 2. Iterate the json list, convert the single json entity to vm.
-        for (int i = 0, size = vmListJSON.length(); i < size; i++) {
-            // 2.1 Call convert by passing JSONObject to vm entity and Add
-            // the converted vm entity to list
-            vmList.add(VmInstance.convert(vmListJSON.getJSONObject(i), entity));
+        JSONArray vmListJSON = null;
+        JSONObject responseObject = new JSONObject(response).getJSONObject("listvirtualmachinesresponse");
+        if (responseObject.has("virtualmachine")) {
+            vmListJSON = responseObject.getJSONArray("virtualmachine");
+            // 2. Iterate the json list, convert the single json entity to vm.
+            for (int i = 0, size = vmListJSON.length(); i < size; i++) {
+                // 2.1 Call convert by passing JSONObject to vm entity and Add
+                // the converted vm entity to list
+                vmList.add(VmInstance.convert(vmListJSON.getJSONObject(i), entity));
+            }
         }
         return vmList;
     }

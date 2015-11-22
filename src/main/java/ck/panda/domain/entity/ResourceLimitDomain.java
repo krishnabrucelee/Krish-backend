@@ -111,6 +111,10 @@ public class ResourceLimitDomain {
     @Transient
     private Boolean isSyncFlag;
 
+    /** unique separator for each domain with resource type.*/
+    @Transient
+    private String uniqueSeperator;
+
     /** Enum type for Resource Limit. */
     public enum ResourceType {
         /**  Number of instances a user can create. */
@@ -383,6 +387,24 @@ public class ResourceLimitDomain {
     }
 
     /**
+     * Set the unique separator for the Resource limit.
+     *
+     * @return the unique Separator for the Resource limit.
+     */
+    public String getUniqueSeperator() {
+        return uniqueSeperator;
+    }
+
+    /**
+     * Get the unique Separator for the Resource limit.
+     *
+     * @param unique Separator for the Resource limit.
+     */
+    public void setUniqueSeperator(String uniqueSeperator) {
+        this.uniqueSeperator = uniqueSeperator;
+    }
+
+    /**
      * Convert JSONObject to ResourceLimit entity.
      *
      * @param object json object
@@ -395,10 +417,11 @@ public class ResourceLimitDomain {
         ResourceLimitDomain resource = new ResourceLimitDomain();
         resource.setIsSyncFlag(false);
         try {
-//            resource.uuid = JsonUtil.getStringValue(object, "id");
             resource.setResourceType(ResourceType.values()[(JsonUtil.getIntegerValue(object, "resourcetype"))]);
             resource.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(object, "domainid")));
             resource.setMax(resource.getMax().valueOf(JsonUtil.getIntegerValue(object, "max")));
+            resource.setIsActive(true);
+            resource.setUniqueSeperator(convertUtil.getDomainId(JsonUtil.getStringValue(object, "domainid"))+"-"+ResourceType.values()[(JsonUtil.getIntegerValue(object, "resourcetype"))]);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -416,7 +439,7 @@ public class ResourceLimitDomain {
         Map<String, ResourceLimitDomain> resourceMap = new HashMap<String, ResourceLimitDomain>();
 
         for (ResourceLimitDomain resource : resourceList) {
-            resourceMap.put(resource.getDomainId() + "-" + resource.getResourceType(), resource);
+            resourceMap.put(resource.getUniqueSeperator(), resource);
         }
         return resourceMap;
     }

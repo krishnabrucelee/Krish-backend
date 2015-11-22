@@ -82,7 +82,7 @@ public class ZoneServiceImpl implements ZoneService {
     public List<Zone> findAllFromCSServer() throws Exception {
         List<Zone> zoneList = new ArrayList<Zone>();
         HashMap<String, String> zoneMap = new HashMap<String, String>();
-
+        zoneMap.put("available", "true");
         // 1. Get the list of Zones from CS server using CS connector
         String response = zoneService.listZones(zoneMap, "json");
         JSONArray zoneListJSON = new JSONObject(response).getJSONObject("listzonesresponse")

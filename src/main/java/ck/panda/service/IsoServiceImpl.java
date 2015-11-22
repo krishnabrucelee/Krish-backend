@@ -89,13 +89,16 @@ public class IsoServiceImpl implements IsoService {
         isoMap.put("isofilter", "all");
         // 1. Get the list of iso from CS server using CS connector
         String response = isoService.listIsos("json", isoMap);
-
-        JSONArray isoListJSON = new JSONObject(response).getJSONObject("listisosresponse").getJSONArray("iso");
-        // 2. Iterate the json list, convert the single json entity to iso
-        for (int i = 0, size = isoListJSON.length(); i < size; i++) {
-            // 2.1 Call convert by passing JSONObject to iso entity and Add
-            // the converted Domain entity to list
-            isoList.add(Iso.convert(isoListJSON.getJSONObject(i), entity));
+        JSONArray isoListJSON = null;
+        JSONObject responseObject = new JSONObject(response).getJSONObject("listisosresponse");
+        if (responseObject.has("iso")) {
+            isoListJSON = responseObject.getJSONArray("iso");
+            // 2. Iterate the json list, convert the single json entity to iso
+            for (int i = 0, size = isoListJSON.length(); i < size; i++) {
+                // 2.1 Call convert by passing JSONObject to iso entity and Add
+                // the converted Domain entity to list
+                isoList.add(Iso.convert(isoListJSON.getJSONObject(i), entity));
+            }
         }
         return isoList;
     }

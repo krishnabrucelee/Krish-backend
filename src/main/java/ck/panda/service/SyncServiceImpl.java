@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -774,7 +775,7 @@ public class SyncServiceImpl implements SyncService {
     public void syncUser() throws ApplicationException, Exception {
 
         // 1. Get all the user objects from CS server as hash
-        List<User> csUserService = userService.findAllFromCSServerByDomain(tokenDetails.getTokenDetails("domainid"));
+        List<User> csUserService = userService.findAllFromCSServerByDomain();
         HashMap<String, User> csUserMap = (HashMap<String, User>) User.convert(csUserService);
 
         // 2. Get all the user objects from application
@@ -883,7 +884,7 @@ public class SyncServiceImpl implements SyncService {
     public void syncNetwork() throws ApplicationException, Exception {
 
         // 1. Get all the network objects from CS server as hash
-        List<Network> csNetworkList = networkService.findAllFromCSServerByDomain(tokenDetails.getTokenDetails("domainid"));
+        List<Network> csNetworkList = networkService.findAllFromCSServerByDomain();
         HashMap<String, Network> csNetworkMap = (HashMap<String, Network>) Network.convert(csNetworkList);
 
         // 2. Get all the network objects from application
@@ -1063,7 +1064,7 @@ public class SyncServiceImpl implements SyncService {
     public void syncDepartment() throws ApplicationException, Exception {
 
         // 1. Get all the user objects from CS server as hash
-        List<Department> csAccountService = departmentService.findAllFromCSServerByDomain(tokenDetails.getTokenDetails("domainid"));
+        List<Department> csAccountService = departmentService.findAllFromCSServerByDomain();
         HashMap<String, Department> csUserMap = (HashMap<String, Department>) Department.convert(csAccountService);
 
         // 2. Get all the user objects from application
@@ -1467,44 +1468,46 @@ public class SyncServiceImpl implements SyncService {
         server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
         cloudStackInstanceService.setServer(server);
         String instances = cloudStackInstanceService.queryAsyncJobResult(Object, "json");
-        JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
-        VmInstance vmInstance = VmInstance.convert(jobresult.getJSONObject("jobresult").getJSONObject("virtualmachine"),
-                entity);
-        VmInstance instance = virtualMachineService.findByUUID(vmInstance.getUuid());
-        instance.setSyncFlag(false);
-        // 3.1 Find the corresponding CS server vm object by finding it in a
-        // hash using uuid
-        if (vmInstance.getUuid().equals(instance.getUuid())) {
-            VmInstance csVm = vmInstance;
-            instance.setName(csVm.getName());
-            instance.setCpuCore(csVm.getCpuCore());
-            instance.setDomainId(csVm.getDomainId());
-            instance.setStatus(csVm.getStatus());
-            instance.setZoneId(csVm.getZoneId());
-            instance.setHostId(csVm.getHostId());
-            instance.setPodId(csVm.getPodId());
-            instance.setComputeOfferingId(csVm.getComputeOfferingId());
-            instance.setCpuSpeed(csVm.getCpuSpeed());
-            instance.setMemory(csVm.getMemory());
-            instance.setCpuUsage(csVm.getCpuUsage());
-            instance.setPasswordEnabled(csVm.getPasswordEnabled());
-            instance.setPassword(csVm.getPassword());
-            instance.setIso(csVm.getIso());
-            instance.setIsoName(csVm.getIsoName());
-            instance.setIpAddress(csVm.getIpAddress());
-            instance.setNetworkId(csVm.getNetworkId());
-            LOGGER.debug("sync VM for ASYNC");
-            // VNC password set.
-            if (csVm.getPassword() != null) {
-                String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
-                byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
-                SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-                String encryptedPassword = new String(EncryptionUtil.encrypt(csVm.getPassword(), originalKey));
-                LOGGER.debug("sync VM for pass" + encryptedPassword);
-                instance.setVncPassword(encryptedPassword);
+        JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse")
+                .getJSONObject("jobresult");
+        if (jobresult.has("virtualmachine")) {
+            VmInstance vmInstance = VmInstance.convert(jobresult.getJSONObject("virtualmachine"), entity);
+            VmInstance instance = virtualMachineService.findByUUID(vmInstance.getUuid());
+            instance.setSyncFlag(false);
+            // 3.1 Find the corresponding CS server vm object by finding it in a
+            // hash using uuid
+            if (vmInstance.getUuid().equals(instance.getUuid())) {
+                VmInstance csVm = vmInstance;
+                instance.setName(csVm.getName());
+                instance.setCpuCore(csVm.getCpuCore());
+                instance.setDomainId(csVm.getDomainId());
+                instance.setStatus(csVm.getStatus());
+                instance.setZoneId(csVm.getZoneId());
+                instance.setHostId(csVm.getHostId());
+                instance.setPodId(csVm.getPodId());
+                instance.setComputeOfferingId(csVm.getComputeOfferingId());
+                instance.setCpuSpeed(csVm.getCpuSpeed());
+                instance.setMemory(csVm.getMemory());
+                instance.setCpuUsage(csVm.getCpuUsage());
+                instance.setPasswordEnabled(csVm.getPasswordEnabled());
+                instance.setPassword(csVm.getPassword());
+                instance.setIso(csVm.getIso());
+                instance.setIsoName(csVm.getIsoName());
+                instance.setIpAddress(csVm.getIpAddress());
+                instance.setNetworkId(csVm.getNetworkId());
+                LOGGER.debug("sync VM for ASYNC");
+                // VNC password set.
+                if (csVm.getPassword() != null) {
+                    String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+                    byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+                    SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+                    String encryptedPassword = new String(EncryptionUtil.encrypt(csVm.getPassword(), originalKey));
+                    LOGGER.debug("sync VM for pass" + encryptedPassword);
+                    instance.setVncPassword(encryptedPassword);
+                }
+                // 3.2 If found, update the vm object in app db
+                virtualMachineService.update(instance);
             }
-            // 3.2 If found, update the vm object in app db
-            virtualMachineService.update(instance);
         }
     }
 
@@ -1517,7 +1520,7 @@ public class SyncServiceImpl implements SyncService {
 
         List<Department> departments = departmentService.findAllByIsActive(true);
         for (Department department : departments) {
-            syncResourceLimitDepartment(department.getDomain().getUuid(), department.getUserName());
+            syncResourceLimitDepartment(department.getDomainId(), department.getUserName());
         }
 
         List<Project> projects = projectService.findAllByActive(true);
@@ -1547,7 +1550,7 @@ public class SyncServiceImpl implements SyncService {
             // it in a hash using uuid
             if (csResourceMap.containsKey(resourceLimit)) {
                 ResourceLimitDomain csResource = csResourceMap.get(resourceLimit);
-
+                resource.setIsActive(true);
                 // resource.setName(csResource.getName());
 
                 // 3.2 If found, update the resource object in app db
@@ -1555,7 +1558,7 @@ public class SyncServiceImpl implements SyncService {
 
                 // 3.3 Remove once updated, so that we can have the list of cs
                 // resource which is not added in the app
-                csResourceMap.remove(resource.getDomainId());
+                csResourceMap.remove(resourceLimit);
             } else {
                 // resource.setIsSyncFlag(false);
                   resourceDomainService.update(resource);
@@ -1579,7 +1582,7 @@ public class SyncServiceImpl implements SyncService {
     }
 
     @Override
-    public void syncResourceLimitDepartment(String domainId, String department) throws ApplicationException, Exception {
+    public void syncResourceLimitDepartment(Long domainId, String department) throws ApplicationException, Exception {
 
         // 1. Get all the ResourceLimit objects from CS server as hash
         List<ResourceLimitDepartment> csResourceList = resourceDepartmentService.findAllFromCSServerDepartment(domainId,
@@ -1597,17 +1600,15 @@ public class SyncServiceImpl implements SyncService {
             String resourceLimit = resource.getDepartmentId() + "-" + resource.getResourceType();
             // 3.1 Find the corresponding CS server resource object by finding
             // it in a hash using uuid
-            if (csResourceMap.containsKey(resource.getDepartmentId())) {
-                ResourceLimitDepartment csResource = csResourceMap.get(resource.getDepartmentId());
-
-                resource.setDepartment(csResource.getDepartment());
-
+            if (csResourceMap.containsKey(resourceLimit)) {
+                ResourceLimitDepartment csResource = csResourceMap.get(resourceLimit);
+                resource.setIsActive(true);
                 // 3.2 If found, update the resource object in app db
                 resourceDepartmentService.update(resource);
 
                 // 3.3 Remove once updated, so that we can have the list of cs
                 // resource which is not added in the app
-                csResourceMap.remove(resource.getDepartmentId());
+                csResourceMap.remove(resourceLimit);
             } else {
                 resource.setIsSyncFlag(false);
                 resourceDepartmentService.update(resource);
@@ -1648,9 +1649,9 @@ public class SyncServiceImpl implements SyncService {
             String resourceLimit = resource.getProjectId() + "-" + resource.getResourceType();
             // 3.1 Find the corresponding CS server resource object by finding
             // it in a hash using uuid
-            if (csResourceMap.containsKey(resource.getProjectId())) {
-                ResourceLimitProject csResource = csResourceMap.get(resource.getProjectId());
-
+            if (csResourceMap.containsKey(resourceLimit)) {
+                ResourceLimitProject csResource = csResourceMap.get(resourceLimit);
+                resource.setIsActive(true);
                 // resource.setName(csResource.getName());
 
                 // 3.2 If found, update the resource object in app db
@@ -1658,9 +1659,9 @@ public class SyncServiceImpl implements SyncService {
 
                 // 3.3 Remove once updated, so that we can have the list of cs
                 // resource which is not added in the app
-                csResourceMap.remove(resource.getProjectId());
+                csResourceMap.remove(resourceLimit);
             } else {
-                resourceProjectService.delete(resource);
+                resourceProjectService.update(resource);
                 // 3.2 If not found, delete it from app db
                 // TODO clarify the business requirement, since it has impact in
                 // the application if it is used
@@ -1732,7 +1733,7 @@ public class SyncServiceImpl implements SyncService {
     public void syncProject() throws ApplicationException, Exception {
 
         // 1. Get all the networkOffering objects from CS server as hash
-       List<Project> csProjectList = projectService.findAllFromCSServerByDomain(tokenDetails.getTokenDetails("domainid"));
+       List<Project> csProjectList = projectService.findAllFromCSServerByDomain();
         HashMap<String, Project> csProjectMap = (HashMap<String, Project>) Project.convert(csProjectList);
 
         // 2. Get all the networkOffering objects from application
@@ -1783,7 +1784,7 @@ public class SyncServiceImpl implements SyncService {
     public void syncAccount() throws ApplicationException, Exception {
 
         // 1. Get all the account objects from CS server as hash
-        List<Account> csAccountService = accountService.findAllFromCSServerByDomain(tokenDetails.getTokenDetails("domainid"));
+        List<Account> csAccountService = accountService.findAllFromCSServerByDomain();
         HashMap<String, Account> csAccountMap = (HashMap<String, Account>) Account.convert(csAccountService);
 
         // 2. Get all the account objects from application

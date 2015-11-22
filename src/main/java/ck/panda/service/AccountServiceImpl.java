@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Account;
+import ck.panda.domain.entity.Account.AccountType;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.repository.jpa.AccountRepository;
 import ck.panda.util.CloudStackAccountService;
@@ -90,21 +91,25 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public List<Account> findAllFromCSServerByDomain(String domainUuid) throws Exception {
+    public List<Account> findAllFromCSServerByDomain() throws Exception {
         List<Account> accountList = new ArrayList<Account>();
         HashMap<String, String> accountMap = new HashMap<String, String>();
-        accountMap.put("domainid", domainUuid);
         accountMap.put("listall", "true");
         // 1. Get the list of accounts from CS server using CS connector
         String response = csAccountService.listAccounts("json", accountMap);
-        JSONArray accountListJSON = new JSONObject(response).getJSONObject("listaccountsresponse").getJSONArray("account");
-        // 2. Iterate the json list, convert the single json entity to user
-        for (int i = 0, size = accountListJSON.length(); i < size; i++) {
-            // 2.1 Call convert by passing JSONObject to Department entity and
-            // Add the converted Department entity to list
-            Account account = Account.convert(accountListJSON.getJSONObject(i), convertUtil);
+        JSONArray accountListJSON = null;
+        JSONObject responseObject = new JSONObject(response).getJSONObject("listaccountsresponse");
+        if (responseObject.has("account")) {
+            accountListJSON = responseObject.getJSONArray("account");
+            // 2. Iterate the json list, convert the single json entity to user
+            for (int i = 0, size = accountListJSON.length(); i < size; i++) {
+                // 2.1 Call convert by passing JSONObject to Department entity
+                // and
+                // Add the converted Department entity to list
+                Account account = Account.convert(accountListJSON.getJSONObject(i), convertUtil);
                 accountList.add(account);
 
+            }
         }
         return accountList;
     }
@@ -122,6 +127,12 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Account findByNameAndDomainAndIsActive(String userName, Domain domain, Boolean isActive) {
          return accountRepo.findByNameAndDomainAndIsActive(userName, domain, isActive);
+
+    }
+
+    @Override
+    public Account findByNameAndDomainAndIsActiveAndUserType(String userName, Domain domain, Boolean isActive) {
+         return accountRepo.findByNameAndDomainAndIsActiveAndUserType(userName, domain, isActive, AccountType.USER);
 
     }
 

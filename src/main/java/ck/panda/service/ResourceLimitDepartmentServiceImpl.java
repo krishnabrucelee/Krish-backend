@@ -41,6 +41,10 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
     @Autowired
     private CloudStackResourceLimitService csResourceService;
 
+    /** List the domains in cloudstack server. */
+    @Autowired
+    private DomainService domainService;
+
     /** Convert entity repository reference. */
     @Autowired
     private ConvertUtil entity;
@@ -114,24 +118,28 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
     }
 
     @Override
-    public List<ResourceLimitDepartment> findAllFromCSServerDepartment(String domainId, String department) throws Exception {
+    public List<ResourceLimitDepartment> findAllFromCSServerDepartment(Long domainId, String department)
+            throws Exception {
         List<ResourceLimitDepartment> resourceList = new ArrayList<ResourceLimitDepartment>();
         HashMap<String, String> resourceMap = new HashMap<String, String>();
-        resourceMap.put("domainid", domainId);
+        resourceMap.put("domainid", domainService.find(domainId).getUuid());
         resourceMap.put("account", department);
 
         // 1. Get the list of ResourceLimit from CS server using CS connector
         String response = csResourceService.listResourceLimits("json", resourceMap);
-        JSONArray resourceListJSON = new JSONObject(response).getJSONObject("listresourcelimitsresponse")
-                .getJSONArray("resourcelimit");
-
-        // 2. Iterate the json list, convert the single json entity to
-        // Resource limit
-        for (int i = 0, size = resourceListJSON.length(); i < size; i++) {
-            // 2.1 Call convert by passing JSONObject to StorageOffering entity
-            // and Add
-            // the converted Resource limit entity to list
-            resourceList.add(ResourceLimitDepartment.convert(resourceListJSON.getJSONObject(i), entity));
+        JSONArray resourceListJSON = null;
+        JSONObject responseObject = new JSONObject(response).getJSONObject("listresourcelimitsresponse");
+        if (responseObject.has("resourcelimit")) {
+            resourceListJSON = responseObject.getJSONArray("resourcelimit");
+            // 2. Iterate the json list, convert the single json entity to
+            // Resource limit
+            for (int i = 0, size = resourceListJSON.length(); i < size; i++) {
+                // 2.1 Call convert by passing JSONObject to StorageOffering
+                // entity
+                // and Add
+                // the converted Resource limit entity to list
+                resourceList.add(ResourceLimitDepartment.convert(resourceListJSON.getJSONObject(i), entity));
+            }
         }
         return resourceList;
     }

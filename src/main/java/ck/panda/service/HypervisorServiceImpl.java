@@ -69,17 +69,18 @@ public class HypervisorServiceImpl implements HypervisorService {
 
         List<Hypervisor> hypervisorList = new ArrayList<Hypervisor>();
         HashMap<String, String> hypervisorMap = new HashMap<String, String>();
-
+        JSONArray hypervisorListJSON = null;
         // 1. Get the list of Zones from CS server using CS connector
         String response = hypervisorService.listHypervisors("json", hypervisorMap);
-        JSONArray hypervisorListJSON = new JSONObject(response).getJSONObject("listhypervisorsresponse")
-                .getJSONArray("hypervisor");
-
-        // 2. Iterate the json list, convert the single json entity to Zone
-        for (int i = 0, size = hypervisorListJSON.length(); i < size; i++) {
-            // 2.1 Call convert by passing JSONObject to Zone entity and Add
-            // the converted Zone entity to list
-            hypervisorList.add(Hypervisor.convert(hypervisorListJSON.getJSONObject(i)));
+        JSONObject responseObject = new JSONObject(response).getJSONObject("listhypervisorsresponse");
+        if (responseObject.has("hypervisor")) {
+            hypervisorListJSON = responseObject.getJSONArray("hypervisor");
+            // 2. Iterate the json list, convert the single json entity to Zone
+            for (int i = 0, size = hypervisorListJSON.length(); i < size; i++) {
+                // 2.1 Call convert by passing JSONObject to Zone entity and Add
+                // the converted Zone entity to list
+                hypervisorList.add(Hypervisor.convert(hypervisorListJSON.getJSONObject(i)));
+            }
         }
         return hypervisorList;
     }

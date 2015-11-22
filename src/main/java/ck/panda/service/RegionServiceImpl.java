@@ -3,7 +3,6 @@ package ck.panda.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -22,8 +21,8 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 @Service
 public class RegionServiceImpl implements RegionService {
 
-	/** Logger attribute. */
-	 private static final Logger LOGGER = LoggerFactory.getLogger(RegionServiceImpl.class);
+    /** Logger attribute. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(RegionServiceImpl.class);
 
     /** Region repository reference. */
     @Autowired
@@ -35,13 +34,13 @@ public class RegionServiceImpl implements RegionService {
 
     @Override
     public Region save(Region region) throws Exception {
-    	 LOGGER.debug(region.getUuid());
-         return regionRepo.save(region);
+        LOGGER.debug(region.getUuid());
+        return regionRepo.save(region);
     }
 
     @Override
     public Region update(Region region) throws Exception {
-   	    LOGGER.debug(region.getUuid());
+        LOGGER.debug(region.getUuid());
         return regionRepo.save(region);
     }
 
@@ -72,13 +71,14 @@ public class RegionServiceImpl implements RegionService {
 
     @Override
     public List<Region> findAllFromCSServer() throws Exception {
-         List<Region> regionList = new ArrayList<Region>();
-            HashMap<String, String> regionMap = new HashMap<String, String>();
-
-            // 1. Get the list of Zones from CS server using CS connector
-            String response = regionService.listRegions("json", regionMap);
-            JSONArray regionListJSON = new JSONObject(response).getJSONObject("listregionsresponse")
-                    .getJSONArray("region");
+        List<Region> regionList = new ArrayList<Region>();
+        HashMap<String, String> regionMap = new HashMap<String, String>();
+        JSONArray regionListJSON = null;
+        // 1. Get the list of Zones from CS server using CS connector
+        String response = regionService.listRegions("json", regionMap);
+        JSONObject responseObject = new JSONObject(response).getJSONObject("listregionsresponse");
+        if (responseObject.has("region")) {
+            regionListJSON = responseObject.getJSONArray("region");
 
             // 2. Iterate the json list, convert the single json entity to Zone
             for (int i = 0, size = regionListJSON.length(); i < size; i++) {
@@ -86,6 +86,7 @@ public class RegionServiceImpl implements RegionService {
                 // the converted Zone entity to list
                 regionList.add(Region.convert(regionListJSON.getJSONObject(i)));
             }
-            return regionList;
         }
+        return regionList;
     }
+}

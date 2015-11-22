@@ -82,7 +82,7 @@ public class DomainServiceImpl implements DomainService {
 public List<Domain> findAllFromCSServer() throws Exception {
       List<Domain> domainList = new ArrayList<Domain>();
       HashMap<String, String> domainMap = new HashMap<String, String>();
-
+      domainMap.put("listall", "true");
       // 1. Get the list of domains from CS server using CS connector
       String response = domainService.listDomains("json", domainMap);
 

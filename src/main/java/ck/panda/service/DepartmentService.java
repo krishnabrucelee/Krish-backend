@@ -48,7 +48,7 @@ public interface DepartmentService  extends CRUDService<Department>  {
      * @return domain list from server
      * @throws Exception unhandled errors.
      */
-    List<Department> findAllFromCSServerByDomain(String domainUuid) throws Exception;
+    List<Department> findAllFromCSServerByDomain() throws Exception;
 
     /**
      * Find the departments based on the given Uuid and isActive status.

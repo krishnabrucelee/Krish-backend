@@ -25,5 +25,5 @@ public interface ResourceLimitDepartmentService extends CRUDService<ResourceLimi
        * @return ResourceLimit list from server
        * @throws Exception unhandled errors.
        */
-      List<ResourceLimitDepartment> findAllFromCSServerDepartment(String domainId, String department) throws Exception;
+      List<ResourceLimitDepartment> findAllFromCSServerDepartment(Long domainId, String department) throws Exception;
 }
