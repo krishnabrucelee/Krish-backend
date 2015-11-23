@@ -38,7 +38,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @return list of users.
      */
     @Query(value = "select user from User user where user.isActive IS TRUE AND user.department=:department")
-    List<User> findByDepartment(Department department);
+    List<User> findByDepartment(@Param("department") Department department);
 
     /**
      * Find the user for login authentication.

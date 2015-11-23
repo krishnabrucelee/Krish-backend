@@ -3,7 +3,6 @@ package ck.panda.service;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.util.CloudStackDomainService;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
@@ -33,6 +33,10 @@ public class DomainServiceImpl implements DomainService {
   /** CloudStack Domain service for connectivity with cloudstack. */
   @Autowired
   private CloudStackDomainService domainService;
+
+  /** Autowired TokenDetails */
+  @Autowired
+  private TokenDetails tokenDetails;
 
   @Override
   public Domain save(Domain domain) throws Exception {
@@ -69,6 +73,12 @@ public class DomainServiceImpl implements DomainService {
 
   @Override
   public List<Domain> findAll() throws Exception {
+      Domain domain = domainRepo.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+      List<Domain> domains = new ArrayList<Domain>();
+      if(!domain.getName().equals("ROOT")) {
+          domains.add(domain);
+          return domains;
+      }
       return (List<Domain>) domainRepo.findAll();
   }
 
@@ -96,7 +106,6 @@ public List<Domain> findAllFromCSServer() throws Exception {
       }
       return domainList;
   }
-
 
 }
 

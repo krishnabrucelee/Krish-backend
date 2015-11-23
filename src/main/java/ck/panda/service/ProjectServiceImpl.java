@@ -12,12 +12,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Project;
+import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.ProjectRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackProjectService;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.ConvertUtil;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -55,6 +58,14 @@ public class ProjectServiceImpl implements ProjectService {
     /** Convert entity repository reference. */
     @Autowired
     private ConvertUtil entity;
+
+    /** Autowired TokenDetails */
+    @Autowired
+    TokenDetails tokenDetails;
+
+    /** Domain repository reference. */
+    @Autowired
+    private DomainRepository domainRepository;
 
     @Override
     public Project save(Project project) throws Exception {
@@ -101,16 +112,31 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Project update(Project project) throws Exception {
         if (project.getSyncFlag()) {
-        Errors errors = validator.rejectIfNullEntity("project", project);
-        errors = validator.validateEntity(project, errors);
-        errors = this.validateByName(errors, project.getName(), project.getDepartment(), project.getId());
-        // Validation
-        if (errors.hasErrors()) {
-            throw new ApplicationException(errors);
+            Errors errors = validator.rejectIfNullEntity("project", project);
+            errors = validator.validateEntity(project, errors);
+            errors = this.validateByName(errors, project.getName(), project.getDepartment(), project.getId());
+            // Validation
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
+            } else {
+                CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
+                server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
+                cloudStackProjectService.setServer(server);
+                HashMap<String, String> optional = new HashMap<String, String>();
+                optional.put("domainid", project.getDepartment().getDomain().getUuid());
+                optional.put("account", project.getDepartment().getUserName());
+                String csResponse = cloudStackProjectService.updateProject(project.getUuid(), project.getDescription(),
+                        "json", optional);
+                JSONObject csProject = new JSONObject(csResponse).getJSONObject("updateprojectresponse");
+                if (csProject.has("errorcode")) {
+                    errors = this.validateEvent(errors, csProject.getString("errortext"));
+                    throw new ApplicationException(errors);
+                }
+            }
+
         }
-     }
-       return projectRepository.save(project);
-   }
+        return projectRepository.save(project);
+    }
 
 
     @Override
@@ -175,13 +201,36 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Project softDelete(Project project) throws Exception {
-        project.setIsActive(false);
-        project.setStatus(Project.Status.DELETED);
+        Errors errors = validator.rejectIfNullEntity("project", project);
+        // Validation
+        if (errors.hasErrors()) {
+            throw new ApplicationException(errors);
+        } else {
+            CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
+            server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
+            cloudStackProjectService.setServer(server);
+            HashMap<String, String> optional = new HashMap<String, String>();
+            optional.put("domainid", project.getDepartment().getDomain().getUuid());
+            optional.put("account", project.getDepartment().getUserName());
+            String csResponse = cloudStackProjectService.deleteProject(project.getUuid());
+            JSONObject csProject = new JSONObject(csResponse).getJSONObject("deleteprojectresponse");
+            if (csProject.has("errorcode")) {
+                errors = this.validateEvent(errors, csProject.getString("errortext"));
+                throw new ApplicationException(errors);
+            } else {
+                project.setIsActive(false);
+                project.setStatus(Project.Status.DELETED);
+            }
+        }
         return projectRepository.save(project);
     }
 
     @Override
     public Page<Project> findAllByActive(Boolean isActive, PagingAndSorting pagingAndSorting) throws Exception {
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if(!domain.getName().equals("ROOT")) {
+            return projectRepository.findAllProjectByDomain(domain.getId(), pagingAndSorting.toPageRequest(), isActive, Project.Status.ENABLED);
+        }
         return projectRepository.findAllByActive(pagingAndSorting.toPageRequest(), isActive, Project.Status.ENABLED);
     }
 

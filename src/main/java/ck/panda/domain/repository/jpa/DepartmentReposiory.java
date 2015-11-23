@@ -2,6 +2,7 @@ package ck.panda.domain.repository.jpa;
 
 import java.util.List;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -75,5 +76,15 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
      */
     @Query(value = "select dpt from Department dpt where dpt.isActive =:isActive AND dpt.userName=:userName)")
     Department findByUsername(@Param("userName")String userName, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find the department by Domain Id and IsActive.
+     *
+     * @param domainId for each domain.
+     * @param isActive get the department list based on active/inactive status.
+     * @return Department.
+     */
+    @Query(value = "select dpt from Department dpt where dpt.isActive =:isActive AND dpt.domainId=:domainId)")
+    Page<Department> findByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, Pageable pageable);
 
 }

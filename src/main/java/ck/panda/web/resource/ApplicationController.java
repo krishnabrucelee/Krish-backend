@@ -72,7 +72,7 @@ public class ApplicationController extends CRUDController<Application>implements
     public List<Application> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Application.class);
-        Page<Application> pageResponse = applicationService.findAllByActive(page);
+        Page<Application> pageResponse = applicationService.findAll(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }

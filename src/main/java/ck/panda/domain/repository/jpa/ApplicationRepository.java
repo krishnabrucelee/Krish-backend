@@ -2,6 +2,7 @@ package ck.panda.domain.repository.jpa;
 
 import java.util.List;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -43,4 +44,31 @@ public interface ApplicationRepository extends PagingAndSortingRepository<Applic
      */
     @Query(value = "select app from Application app where app.isActive =:isActive")
     List<Application> findAllByIsActive(@Param("isActive") Boolean isActive);
+
+    /**
+     * Find all the application.
+     *
+     * @param isActive get the application list.
+     * @return list of applications.
+     */
+    @Query(value = "select app from Application app where app.domainId=:domainId")
+    Page<Application> findAllByDomain(@Param("domainId") Long domainId, Pageable pageable);
+
+    /**
+     * Find all the application with active status.
+     *
+     * @param isActive get the application list based on active/inactive status.
+     * @return list of applications.
+     */
+    @Query(value = "select app from Application app where app.domainId=:domainId and app.isActive =:isActive")
+    Page<Application> findAllByDomainIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, Pageable pageable);
+
+    /**
+     * Find all the application with active status.
+     *
+     * @param isActive get the application list based on active/inactive status.
+     * @return list of applications.
+     */
+    @Query(value = "select app from Application app where app.domainId=:domainId and app.isActive =:isActive")
+    List<Application> findAllByDomain(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive);
 }

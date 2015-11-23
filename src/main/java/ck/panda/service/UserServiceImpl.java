@@ -271,7 +271,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<User> findAllUserByDomain(PagingAndSorting pagingAndSorting) throws Exception {
-    	Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if (domain.getName().equals("ROOT")) {
+            return userRepository.findAll(pagingAndSorting.toPageRequest());
+        }
         return userRepository.findAllUserByDomain(pagingAndSorting.toPageRequest(), domain);
     }
 

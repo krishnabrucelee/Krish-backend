@@ -100,8 +100,16 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 LOGGER.debug("Cloud stack connectivity at VM", vminstance.getNetworkUuid());
                 optional.put("networkids", vminstance.getNetworkUuid());
                 optional.put("displayvm", "true");
+                optional.put("keyboard", "us");
                 optional.put("name", vminstance.getName());
-                optional.put("displayname", vminstance.getName());
+                optional.put("displayname", vminstance.getInstanceOwner().getUserName() +"app-"+vminstance.getApplicationList().toString());
+                if(vminstance.getProjectId() != null){
+                    optional.put("projectid", vminstance.getProject().getUuid());
+                }
+                if(vminstance.getStorageOfferingId() != null){
+                    optional.put("diskofferingid", vminstance.getStorageOffering().getUuid());
+                }
+                optional.put("account",vminstance.getDepartment().getUserName());
                 String csResponse = cloudStackInstanceService.deployVirtualMachine(
                         vminstance.getComputeOffering().getUuid(), vminstance.getTemplate().getUuid(),
                         vminstance.getZone().getUuid(), "json", optional);

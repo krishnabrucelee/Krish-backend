@@ -293,6 +293,20 @@ public class ConvertUtil {
     }
 
     /**
+     * Get project id.
+     *
+     * @param uuid uuid of account.
+     * @return account.
+     * @throws Exception unhandled exception.
+     */
+    public Long getProjectId(String uuid) throws Exception {
+        if(projectService.findByUuidAndIsActive(uuid, true) != null){
+        return projectService.findByUuidAndIsActive(uuid, true).getId();
+        }
+        return null;
+    }
+
+    /**
      * Get pod id.
      *
      * @param uuid of pod.

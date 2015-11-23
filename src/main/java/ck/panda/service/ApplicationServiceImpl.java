@@ -1,12 +1,16 @@
 package ck.panda.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Application;
+import ck.panda.domain.entity.Domain;
 import ck.panda.domain.repository.jpa.ApplicationRepository;
+import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.util.AppValidator;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -23,6 +27,14 @@ public class ApplicationServiceImpl implements ApplicationService {
     /** Application repository reference. */
     @Autowired
     private ApplicationRepository applicationRepo;
+
+    /** Autowired TokenDetails */
+    @Autowired
+    TokenDetails tokenDetails;
+
+    /** Domain repository reference. */
+    @Autowired
+    private DomainRepository domainRepository;
 
     @Override
     public Application save(Application application) throws Exception {
@@ -78,16 +90,28 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public Page<Application> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return applicationRepo.findAll(pagingAndSorting.toPageRequest());
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if(!domain.getName().equals("ROOT")) {
+            return applicationRepo.findAllByDomainIsActive(domain.getId(), true, pagingAndSorting.toPageRequest());
+        }
+        return applicationRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
     }
 
     @Override
     public List<Application> findAll() throws Exception {
-        return (List<Application>) applicationRepo.findAll();
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if(!domain.getName().equals("ROOT")) {
+            return applicationRepo.findAllByDomain(domain.getId(), true);
+        }
+        return (List<Application>) applicationRepo.findAllByIsActive(true);
     }
 
     @Override
     public Page<Application> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if(!domain.getName().equals("ROOT")) {
+            return applicationRepo.findAllByDomain(domain.getId(), pagingAndSorting.toPageRequest());
+        }
         return applicationRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
     }
 

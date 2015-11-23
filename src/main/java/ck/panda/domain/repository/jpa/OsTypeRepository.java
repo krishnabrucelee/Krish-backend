@@ -26,6 +26,6 @@ public interface OsTypeRepository extends PagingAndSortingRepository<OsType, Lon
      * @param categoryName of the OS type
      * @return OS type
      */
-    @Query(value = "select ost from OsType ost where ost.osCategoryId IN (select osc.id from OsCategory osc where osc.name = :categoryName)")
+    @Query(value = "select ost from OsType ost where ost.osCategoryId IN (select osc.id from OsCategory osc where osc.name = :categoryName) order by ost.description ASC")
     List<OsType> findByCategoryName(@Param("categoryName") String categoryName);
 }

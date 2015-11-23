@@ -84,8 +84,8 @@ public class UserController extends CRUDController<User> implements ApiControlle
     @RequestMapping(value = "search",method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
    	@ResponseStatus(HttpStatus.OK)
    	@ResponseBody
-   	protected List<User> getSearch(@RequestParam("q") String query) throws Exception {
-   		return userService.findByName(query);
+   	protected List<User> findAllByDepartment(@RequestParam("dept") Long deptId) throws Exception {
+   		return userService.findByDepartment(deptId);
    	}
 
     /**

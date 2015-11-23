@@ -70,6 +70,7 @@ public class CloudStackProjectService {
     public String deleteProject(String projectId) throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("deleteProject", null);
         arguments.add(new NameValuePair("id", projectId));
+        arguments.add(new NameValuePair("response", "json"));
         return server.request(arguments);
     }
 

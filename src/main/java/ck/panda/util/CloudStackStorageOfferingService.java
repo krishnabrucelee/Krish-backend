@@ -40,12 +40,10 @@ public class CloudStackStorageOfferingService {
      * @return created response.
      * @throws Exception if error.
      */
-    public String createStorageOffering(String displayText, String name, String response,
+    public String createStorageOffering(String response,
             HashMap<String, String> optional) throws Exception {
 
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("createDiskOffering", optional);
-        arguments.add(new NameValuePair("displaytext", displayText));
-        arguments.add(new NameValuePair("name", name));
         arguments.add(new NameValuePair("response", response));
 
         String createResponse = server.request(arguments);

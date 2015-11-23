@@ -1279,9 +1279,15 @@ public class VmInstance implements Serializable {
         VmInstance vmInstance = new VmInstance();
         vmInstance.setSyncFlag(false);
         try {
+            String application = JsonUtil.getStringValue(jsonObject, "displayname");
+            String[] ownerApp = application.split("app-");
+            String owner = ownerApp[0];
+            String applicationList = ownerApp[1];
             vmInstance.setName(JsonUtil.getStringValue(jsonObject, "name"));
             vmInstance.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
             vmInstance.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(jsonObject, "domainid")));
+            vmInstance.setInstanceOwnerId(convertUtil.getUserIdByAccount(owner,
+                    convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid"))));
             vmInstance.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
             vmInstance.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
             vmInstance.setHostId(convertUtil.getHostId(JsonUtil.getStringValue(jsonObject, "hostid")));
@@ -1305,8 +1311,10 @@ public class VmInstance implements Serializable {
             vmInstance.setIpAddress(JsonUtil.getStringValue(nicArray.getJSONObject(0), "ipaddress"));
             vmInstance.setNetworkId(
                     convertUtil.getNetworkId(JsonUtil.getStringValue(nicArray.getJSONObject(0), "networkid")));
-            vmInstance.setInstanceOwnerId(convertUtil.getOwnerId(JsonUtil.getStringValue(jsonObject, "account"),
-                    convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid"))));
+            vmInstance.setDepartmentId(
+                    convertUtil.getDepartmentByUsernameAndDomain(JsonUtil.getStringValue(jsonObject, "account"),
+                            convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid"))));
+            vmInstance.setProjectId(convertUtil.getProjectId(JsonUtil.getStringValue(jsonObject, "projectid")));
         } catch (Exception e) {
             e.printStackTrace();
         }

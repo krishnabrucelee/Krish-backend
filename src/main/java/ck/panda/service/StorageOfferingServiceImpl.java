@@ -235,8 +235,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
      */
     private void createStorage(StorageOffering storage, Errors errors) throws Exception {
         config.setServer(1L);
-        String storageOfferings = csStorageService.createStorageOffering(storage.getName(),
-                storage.getDescription(), JSON, optional(storage));
+        String storageOfferings = csStorageService.createStorageOffering(JSON, optional(storage));
         LOGGER.info("storage offer create response " + storageOfferings);
         JSONObject storageOfferingsResponse = new JSONObject(storageOfferings).getJSONObject("creatediskofferingresponse")
                 .getJSONObject("diskoffering");

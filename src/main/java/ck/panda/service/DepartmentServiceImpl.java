@@ -15,11 +15,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Domain;
 import ck.panda.domain.repository.jpa.DepartmentReposiory;
+import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackAccountService;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.ConvertUtil;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -57,6 +60,14 @@ public class DepartmentServiceImpl implements DepartmentService {
     /** Reference of the convertutil. */
     @Autowired
     private ConvertUtil convertUtil;
+
+    /** Autowired TokenDetails */
+    @Autowired
+    TokenDetails tokenDetails;
+
+    /** Domain repository reference. */
+    @Autowired
+    private DomainRepository domainRepository;
 
     @Override
     public Department save(Department department) throws Exception {
@@ -150,7 +161,11 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Department> findAll() throws Exception {
-        return (List<Department>) departmentRepo.findAll();
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if(!domain.getName().equals("ROOT")) {
+            return (List<Department>) departmentRepo.findByDomainAndIsActive(domain.getId(), true);
+        }
+        return (List<Department>) departmentRepo.findAllByIsActive(true);
     }
 
     /**
@@ -161,6 +176,10 @@ public class DepartmentServiceImpl implements DepartmentService {
      * @return list of departments.
      */
     public Page<Department> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if(!domain.getName().equals("ROOT")) {
+            return departmentRepo.findByDomainAndIsActive(domain.getId(), true, pagingAndSorting.toPageRequest());
+        }
         return departmentRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
     }
 

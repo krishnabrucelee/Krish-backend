@@ -2,6 +2,7 @@ package ck.panda.domain.repository.jpa;
 
 import java.util.List;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -76,5 +77,16 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, L
      */
     @Query(value = "select project from Project project where project.isActive =:isActive AND project.departmentId=:id)")
     List<Project> findByDepartmentAndIsActive(@Param("id") Long departmentId, @Param("isActive") Boolean isActive);
+
+    /**
+     * find all the project with active status.
+     *
+     * @param pageable pagination information.
+     * @param isActive true/false.
+     * @param status of project.
+     * @return list of project.
+     */
+    @Query(value = "select project from Project project where project.isActive IS :isactive and project.domainId = :domain and project.status = :status ")
+    Page<Project> findAllProjectByDomain(@Param("domain") Long id, Pageable pageable,@Param("isactive") Boolean isActive,@Param("status") Status enabled);
 }
 

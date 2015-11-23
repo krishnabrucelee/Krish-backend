@@ -96,10 +96,22 @@ public class DepartmentController extends CRUDController<Department> implements 
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected List<Department> getSearch() throws Exception {
-        return departmentService.findAllByIsActive(true);
+    protected List<Department> getDepartmentList() throws Exception {
+        return departmentService.findAll();
     }
 
+    /**
+     * Find the list of active departments.
+     *
+     * @return projects project list.
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "search", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<Department> getDepartmentListByDomain(@RequestParam("dept") Long id) throws Exception {
+        return departmentService.findByDomainAndIsActive(id, true);
+    }
 
     /**
      * Get the department by Domain.

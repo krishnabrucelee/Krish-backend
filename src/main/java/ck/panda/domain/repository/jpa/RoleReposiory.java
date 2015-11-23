@@ -2,6 +2,7 @@ package ck.panda.domain.repository.jpa;
 
 import java.util.List;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -40,4 +41,13 @@ public interface RoleReposiory extends PagingAndSortingRepository<Role, Long> {
      */
     @Query(value = "SELECT role FROM Role AS role WHERE role.department=:department AND role.isActive IS TRUE")
     List<Role> getRolesByDepartment(@Param("department") Department department);
+
+    /**
+     * Method to find list of roles by department.
+     *
+     * @param department - department entity
+     * @return List of roles
+     */
+    @Query(value = "SELECT role FROM Role AS role WHERE role.department=:department AND role.isActive IS :isActive")
+    Page<Role> findByDepartmentAndIsActive(@Param("department") Department department,@Param("isActive")  Boolean isActive, Pageable pageable);
 }
