@@ -137,7 +137,6 @@ public class VmInstance implements Serializable {
     private Domain domain;
 
     /** Instance domain id. */
-    @NotNull
     @Column(name = "domain_id")
     private Long domainId;
 
@@ -147,7 +146,6 @@ public class VmInstance implements Serializable {
     private Zone zone;
 
     /** Instance zone id. */
-    @NotNull
     @Column(name = "zone_id")
     private Long zoneId;
 
@@ -1279,14 +1277,11 @@ public class VmInstance implements Serializable {
         VmInstance vmInstance = new VmInstance();
         vmInstance.setSyncFlag(false);
         try {
-            String application = JsonUtil.getStringValue(jsonObject, "displayname");
-            String[] ownerApp = application.split("app-");
-            String owner = ownerApp[0];
-            String applicationList = ownerApp[1];
+            String owner = JsonUtil.getStringValue(jsonObject, "displayname");
             vmInstance.setName(JsonUtil.getStringValue(jsonObject, "name"));
             vmInstance.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
             vmInstance.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(jsonObject, "domainid")));
-            vmInstance.setInstanceOwnerId(convertUtil.getUserIdByAccount(owner,
+            vmInstance.setInstanceOwnerId(convertUtil.getUserByName(owner,
                     convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid"))));
             vmInstance.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
             vmInstance.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));

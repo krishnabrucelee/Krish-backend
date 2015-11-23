@@ -166,6 +166,10 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<Project> findAll() throws Exception {
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if(domain != null && !domain.getName().equals("ROOT")) {
+            return (List<Project>) projectRepository.findbyDomain(domain.getId());
+        }
         return (List<Project>) projectRepository.findAll();
     }
 
@@ -228,7 +232,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Page<Project> findAllByActive(Boolean isActive, PagingAndSorting pagingAndSorting) throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if(!domain.getName().equals("ROOT")) {
+        if(domain != null && !domain.getName().equals("ROOT")) {
             return projectRepository.findAllProjectByDomain(domain.getId(), pagingAndSorting.toPageRequest(), isActive, Project.Status.ENABLED);
         }
         return projectRepository.findAllByActive(pagingAndSorting.toPageRequest(), isActive, Project.Status.ENABLED);

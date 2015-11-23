@@ -75,7 +75,7 @@ public class DomainServiceImpl implements DomainService {
   public List<Domain> findAll() throws Exception {
       Domain domain = domainRepo.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
       List<Domain> domains = new ArrayList<Domain>();
-      if(!domain.getName().equals("ROOT")) {
+      if(domain != null && !domain.getName().equals("ROOT")) {
           domains.add(domain);
           return domains;
       }

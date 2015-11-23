@@ -91,7 +91,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public Page<Application> findAll(PagingAndSorting pagingAndSorting) throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if(!domain.getName().equals("ROOT")) {
+        if(domain != null && !domain.getName().equals("ROOT")) {
             return applicationRepo.findAllByDomainIsActive(domain.getId(), true, pagingAndSorting.toPageRequest());
         }
         return applicationRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
@@ -100,7 +100,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public List<Application> findAll() throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if(!domain.getName().equals("ROOT")) {
+        if(domain != null && !domain.getName().equals("ROOT")) {
             return applicationRepo.findAllByDomain(domain.getId(), true);
         }
         return (List<Application>) applicationRepo.findAllByIsActive(true);
@@ -109,7 +109,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public Page<Application> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if(!domain.getName().equals("ROOT")) {
+        if(domain != null && !domain.getName().equals("ROOT")) {
             return applicationRepo.findAllByDomain(domain.getId(), pagingAndSorting.toPageRequest());
         }
         return applicationRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);

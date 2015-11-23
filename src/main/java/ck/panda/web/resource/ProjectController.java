@@ -102,7 +102,7 @@ public class ProjectController extends CRUDController<Project>implements ApiCont
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<Project> getActiveProjects() throws Exception {
-        return projectService.findAllByActive(true);
+        return projectService.findAll();
     }
 
     /**

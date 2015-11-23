@@ -162,7 +162,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public List<Department> findAll() throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if(!domain.getName().equals("ROOT")) {
+        if(domain != null && !domain.getName().equals("ROOT")) {
             return (List<Department>) departmentRepo.findByDomainAndIsActive(domain.getId(), true);
         }
         return (List<Department>) departmentRepo.findAllByIsActive(true);
@@ -177,7 +177,7 @@ public class DepartmentServiceImpl implements DepartmentService {
      */
     public Page<Department> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if(!domain.getName().equals("ROOT")) {
+        if(domain != null && !domain.getName().equals("ROOT")) {
             return departmentRepo.findByDomainAndIsActive(domain.getId(), true, pagingAndSorting.toPageRequest());
         }
         return departmentRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);

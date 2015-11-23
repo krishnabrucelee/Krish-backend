@@ -535,7 +535,13 @@ public class User {
         user.setFirstName(JsonUtil.getStringValue(jsonObject, "firstname"));
         user.setLastName(JsonUtil.getStringValue(jsonObject, "lastname"));
         user.setEmail(JsonUtil.getStringValue(jsonObject, "email"));
-        user.setType(JsonUtil.getIntegerValue(jsonObject, "accounttype") == 0 ? User.Type.USER : User.Type.DOMAIN_ADMIN);
+        if(JsonUtil.getIntegerValue(jsonObject, "accounttype") == 0) {
+            user.setType(Type.USER);
+        } else if(JsonUtil.getIntegerValue(jsonObject, "accounttype") == 1) {
+            user.setType(Type.ROOT_ADMIN);
+        } else {
+            user.setType(Type.DOMAIN_ADMIN);
+        }
         user.setDomain(convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid")));
         user.setDepartment(convertUtil.getDepartment(JsonUtil.getStringValue(jsonObject, "accountid")));
         user.setAccountId(convertUtil.getAccountIdByUsernameAndDomain(JsonUtil.getStringValue(jsonObject, "account"),

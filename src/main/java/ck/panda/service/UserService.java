@@ -95,4 +95,12 @@ public interface UserService extends CRUDService<User> {
       * @throws Exception if error occurs.
       */
      List<User> findAllUserByDomain() throws Exception;
+
+     /**
+      * Find all the user by domain.
+      *
+      * @return list of user.
+      * @throws Exception if error occurs.
+      */
+    User findByNameAndDomain(String owner, Domain domain) throws Exception;
 }

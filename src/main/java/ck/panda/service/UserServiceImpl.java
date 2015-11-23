@@ -216,6 +216,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User findByNameAndDomain(String query, Domain domain) throws Exception {
+        return userRepository.findAllByActiveAndName(query, domain);
+    }
+
+    @Override
     public List<User> findByDepartment(Long departmentId) throws Exception {
         Department department = departmentService.find(departmentId);
         return userRepository.findByDepartment(department);
@@ -272,10 +277,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<User> findAllUserByDomain(PagingAndSorting pagingAndSorting) throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if (domain.getName().equals("ROOT")) {
-            return userRepository.findAll(pagingAndSorting.toPageRequest());
+        if (domain != null && !domain.getName().equals("ROOT")) {
+            return userRepository.findAllUserByDomain(pagingAndSorting.toPageRequest(), domain);
         }
-        return userRepository.findAllUserByDomain(pagingAndSorting.toPageRequest(), domain);
+        return userRepository.findAll(pagingAndSorting.toPageRequest());
     }
 
     @Override

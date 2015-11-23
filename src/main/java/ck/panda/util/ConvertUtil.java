@@ -575,4 +575,19 @@ public class ConvertUtil {
         }
     }
 
+    /**
+     * Get the username.
+     *
+     * @param owner of username.
+     * @param domain domain object..
+     * @return osCategory id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getUserByName(String owner, Domain domain)  throws Exception {
+        if (userService.findByNameAndDomain(owner, domain) != null) {
+            return userService.findByNameAndDomain(owner, domain).getId();
+        }
+        return null;
+    }
+
 }

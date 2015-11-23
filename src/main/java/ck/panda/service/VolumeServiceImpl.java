@@ -57,7 +57,7 @@ public class VolumeServiceImpl implements VolumeService {
     @Override
     public Volume save(Volume volume) throws Exception {
         if (volume.getIsSyncFlag()) {
-
+            this.validateVolumeUniqueness(volume);
             Errors errors = validator.rejectIfNullEntity("volumes", volume);
             errors = validator.validateEntity(volume, errors);
 
@@ -181,6 +181,7 @@ public class VolumeServiceImpl implements VolumeService {
                 if (jobresult.getString("jobstatus").equals("0")) {
                     volume.setStatus(Status.valueOf(EventTypes.Allocated));
                 }
+                volume.setIsActive(true);
                 volume.setDiskSize(volume.getDiskSize());
                 volume.setStorageOfferingId(volume.getStorageOffering().getId());
                 volume.setZoneId(volume.getZone().getId());
@@ -201,6 +202,24 @@ public class VolumeServiceImpl implements VolumeService {
     private Errors validateEvent(Errors errors, String errmessage) throws Exception {
         errors.addGlobalError(errmessage);
         return errors;
+    }
+
+    /**
+     * Validate the Volume.
+     *
+     * @param volume reference of the Volume.
+     * @throws Exception error occurs
+     */
+    private void validateVolumeUniqueness(Volume volume) throws Exception {
+        Errors errors = validator.rejectIfNullEntity("volumes", volume);
+        errors = validator.validateEntity(volume, errors);
+        Volume validateVolume = volumeRepo.findByNameAndIsActive(volume.getName(), true);
+        if (validateVolume != null && volume.getId() != validateVolume.getId()) {
+            errors.addFieldError("name", "volume.already.exist");
+        }
+        if (errors.hasErrors()) {
+            throw new ApplicationException(errors);
+        }
     }
 
     @Override

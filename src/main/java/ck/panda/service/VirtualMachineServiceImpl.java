@@ -11,6 +11,7 @@ import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
+import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.NetworkRepository;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.util.AppValidator;
@@ -18,6 +19,7 @@ import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackIsoService;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.ConvertUtil;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -77,6 +79,14 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Autowired
     private CloudStackConfigurationService cloudConfigService;
 
+    /** Token details connector. */
+    @Autowired
+    private TokenDetails tokenDetails;
+
+    /** Domain repository connector. */
+    @Autowired
+    private DomainRepository domainRepository;
+
     @Override
     public VmInstance save(VmInstance vminstance) throws Exception {
         LOGGER.debug("instance sync ", vminstance.getSyncFlag());
@@ -102,13 +112,14 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 optional.put("displayvm", "true");
                 optional.put("keyboard", "us");
                 optional.put("name", vminstance.getName());
-                optional.put("displayname", vminstance.getInstanceOwner().getUserName() +"app-"+vminstance.getApplicationList().toString());
+                optional.put("displayname", vminstance.getInstanceOwner().getUserName() +"app-"+vminstance.getApplicationList().get(0).getType().toString());
                 if(vminstance.getProjectId() != null){
                     optional.put("projectid", vminstance.getProject().getUuid());
                 }
                 if(vminstance.getStorageOfferingId() != null){
                     optional.put("diskofferingid", vminstance.getStorageOffering().getUuid());
                 }
+                optional.put("domainid", domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid"))).getUuid());
                 optional.put("account",vminstance.getDepartment().getUserName());
                 String csResponse = cloudStackInstanceService.deployVirtualMachine(
                         vminstance.getComputeOffering().getUuid(), vminstance.getTemplate().getUuid(),
@@ -263,7 +274,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         case EventTypes.EVENT_VM_RESTORE:
             try {
                 String instanceResponse = cloudStackInstanceService.restoreVirtualMachine(vminstance.getUuid(), "json");
-                JSONObject instance = new JSONObject(instanceResponse).getJSONObject("restorevmresponse");
+                JSONObject instance = new JSONObject(instanceResponse).getJSONObject("recovervirtualmachineresponse");
                 if (instance.has("jobid")) {
                     String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"),
                             "json");

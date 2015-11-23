@@ -33,4 +33,14 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
     @Query(value = "select volume from Volume volume where volume.uuid = :uuid")
     Volume findByUUID(@Param("uuid") String uuid);
 
+
+    /**
+     * Get the volume based on the name.
+     *
+     * @param name of the volume
+     * @param isActive of the volume
+     * @return volume
+     */
+    @Query(value = "select volume from Volume volume where volume.isActive =:isActive AND volume.name =:name")
+    Volume findByNameAndIsActive(@Param("name") String name, @Param("isActive")  Boolean isActive);
 }

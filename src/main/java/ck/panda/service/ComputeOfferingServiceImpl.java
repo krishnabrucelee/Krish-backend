@@ -85,6 +85,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     @Override
     public ComputeOffering update(ComputeOffering compute) throws Exception {
         if (compute.getIsSyncFlag()) {
+        this.validateComputeOffering(compute);
         Errors errors = validator.rejectIfNullEntity("compute", compute);
         errors = validator.validateEntity(compute, errors);
 
