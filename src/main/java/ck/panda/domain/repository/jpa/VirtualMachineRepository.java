@@ -1,5 +1,7 @@
 package ck.panda.domain.repository.jpa;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -29,6 +31,14 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
     * @param department department object.
     * @return instance.
     */
-   @Query(value = "select vm from VmInstance vm where vm.name=:name AND vm.department=:department)")
+   @Query(value = "select vm from VmInstance vm where vm.name=:name AND vm.department=:department")
    VmInstance findByNameAndDepartment(@Param("name") String name, @Param("department") Department department);
+
+   /**
+    * @param id of the domain
+    * @param pageable page request
+    * @return instance list
+    */
+   @Query(value = "select vm from VmInstance vm where vm.domainId=:id")
+   Page<VmInstance> findAllByDomainIsActive(@Param("id") Long id, Pageable pageable);
 }

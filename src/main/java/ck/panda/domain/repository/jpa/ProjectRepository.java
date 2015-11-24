@@ -69,6 +69,15 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, L
     Project findByUuidAndIsActive(@Param("uuid") String uuid, @Param("isActive") Boolean isActive);
 
     /**
+     * Find all the project using Uuid.
+     *
+     * @param uuid of the project.
+     * @return Project.
+     */
+    @Query(value = "select project from Project project where  project.uuid =:uuid")
+    Project findByUuid(@Param("uuid") String uuid);
+
+    /**
      * Find the department  from Project.
      *
      * @param departmentId department id.
@@ -88,5 +97,6 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, L
      */
     @Query(value = "select project from Project project where project.isActive IS :isactive and project.domainId = :domain and project.status = :status ")
     Page<Project> findAllProjectByDomain(@Param("domain") Long id, Pageable pageable,@Param("isactive") Boolean isActive,@Param("status") Status enabled);
+
 }
 

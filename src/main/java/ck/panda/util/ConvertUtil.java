@@ -218,7 +218,10 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Long getNetworkOfferingId(String uuid) throws Exception {
+    	if (networkOfferingService.findByUUID(uuid) != null){
         return networkOfferingService.findByUUID(uuid).getId();
+        }
+    	return null;
     }
 
     /**
@@ -229,7 +232,10 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Long getOsTypeId(String uuid) throws Exception {
+    	if (osTypeService.findByUUID(uuid) != null){
         return osTypeService.findByUUID(uuid).getId();
+    	}
+    	return null;
     }
 
     /**
@@ -300,8 +306,8 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Long getProjectId(String uuid) throws Exception {
-        if(projectService.findByUuidAndIsActive(uuid, true) != null){
-        return projectService.findByUuidAndIsActive(uuid, true).getId();
+        if(projectService.findByUuid(uuid) != null){
+        return projectService.findByUuid(uuid).getId();
         }
         return null;
     }
@@ -314,7 +320,10 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Long getPodId(String uuid) throws Exception {
+    	if (podService.findByUUID(uuid) != null){
         return podService.findByUUID(uuid).getId();
+    	}
+    	return null;
     }
 
     /**
@@ -325,7 +334,10 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Long getVolumeId(String uuid) throws Exception {
+    	if (volumeService.findByUUID(uuid) != null){
         return volumeService.findByUUID(uuid).getId();
+    	}
+    	return null;
     }
 
     /**
@@ -496,7 +508,6 @@ public class ConvertUtil {
             return null;
         }
     }
-
 
     /**
      * Get User id.

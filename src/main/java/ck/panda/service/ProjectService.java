@@ -3,6 +3,8 @@ package ck.panda.service;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Project;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -60,6 +62,15 @@ public interface ProjectService extends CRUDService<Project> {
     Project findByUuidAndIsActive(String uuid, Boolean isActive) throws Exception;
 
     /**
+     * Find by Uuid.
+     *
+     * @param uuid of the project.
+     * @return project.
+     * @throws Exception if error occurs.
+     */
+    Project findByUuid(String uuid) throws Exception;
+
+    /**
      * Find all the projects from cloud stack server.
      *
      * @return list of active project.
@@ -76,5 +87,13 @@ public interface ProjectService extends CRUDService<Project> {
      * @throws Exception if error occurs.
      */
     List<Project> findByDepartmentAndIsActive(Long id, Boolean isActive) throws Exception;
+
+    /**
+     * Find the projects based on the isActive status.
+     *
+     * @param isActive projects status Active/Inactive
+     * @return project.
+     */
+    List<Project> findByAll() throws Exception;
 
 }

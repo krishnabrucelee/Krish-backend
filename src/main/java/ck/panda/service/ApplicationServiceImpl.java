@@ -124,7 +124,11 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public List<Application> findAllByIsActive(Boolean isActive) throws Exception {
-        return applicationRepo.findAllByIsActive(true);
+    	Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if(domain != null && !domain.getName().equals("ROOT")) {
+            return applicationRepo.findAllByIsActiveAndDomain(domain.getId(), true);
+        }
+    	return applicationRepo.findAllByIsActive(true);
     }
 
 }

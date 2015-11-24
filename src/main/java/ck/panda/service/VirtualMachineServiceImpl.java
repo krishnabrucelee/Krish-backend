@@ -9,6 +9,7 @@ import javax.crypto.spec.SecretKeySpec;
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.domain.repository.jpa.DomainRepository;
@@ -112,7 +113,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 optional.put("displayvm", "true");
                 optional.put("keyboard", "us");
                 optional.put("name", vminstance.getName());
-                optional.put("displayname", vminstance.getInstanceOwner().getUserName() +"app-"+vminstance.getApplicationList().get(0).getType().toString());
+                optional.put("displayname", vminstance.getInstanceOwner().getUserName());
                 if(vminstance.getProjectId() != null){
                     optional.put("projectid", vminstance.getProject().getUuid());
                 }
@@ -562,6 +563,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     @Override
     public Page<VmInstance> findAll(PagingAndSorting pagingAndSorting) throws Exception {
+    	Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if(domain != null && !domain.getName().equals("ROOT")) {
+            return virtualmachinerepository.findAllByDomainIsActive(domain.getId(), pagingAndSorting.toPageRequest());
+        }
         return virtualmachinerepository.findAll(pagingAndSorting.toPageRequest());
     }
 

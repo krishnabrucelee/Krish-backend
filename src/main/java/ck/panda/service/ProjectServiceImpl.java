@@ -166,6 +166,11 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<Project> findAll() throws Exception {
+        return (List<Project>) projectRepository.findAll();
+    }
+
+    @Override
+    public List<Project> findByAll() throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if(domain != null && !domain.getName().equals("ROOT")) {
             return (List<Project>) projectRepository.findbyDomain(domain.getId());
@@ -274,6 +279,11 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Project findByUuidAndIsActive(String uuid, Boolean isActive) throws Exception {
         return projectRepository.findByUuidAndIsActive(uuid, isActive);
+    }
+
+    @Override
+    public Project findByUuid(String uuid) throws Exception {
+        return projectRepository.findByUuid(uuid);
     }
 
     @Override

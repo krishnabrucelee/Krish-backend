@@ -161,6 +161,11 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Department> findAll() throws Exception {
+        return (List<Department>) departmentRepo.findAllByIsActive(true);
+    }
+
+    @Override
+    public List<Department> findByAll() throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if(domain != null && !domain.getName().equals("ROOT")) {
             return (List<Department>) departmentRepo.findByDomainAndIsActive(domain.getId(), true);

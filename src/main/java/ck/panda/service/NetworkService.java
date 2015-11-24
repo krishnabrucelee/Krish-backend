@@ -29,4 +29,13 @@ public interface NetworkService extends CRUDService<Network> {
     * @throws Exception unhandled errors.
     */
    Network findByUUID(String uuid) throws Exception;
+
+   /**
+    * To get list of networks from department.
+    *
+    * @param department department.
+    * @return network list from server.
+    * @throws Exception unhandled errors.
+    */
+   List<Network> findByDepartment(String department) throws Exception;
 }

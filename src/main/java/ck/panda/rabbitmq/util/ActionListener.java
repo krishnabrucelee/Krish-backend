@@ -58,7 +58,7 @@ public class ActionListener implements MessageListener {
      */
     public void handleActionEvent(ResponseEvent eventObject) throws Exception {
         syncService.init(cloudStackServer);
-        Thread.sleep(2000);
+        Thread.sleep(5000);
         switch (eventObject.getEventStart()) {
         case EventTypes.EVENT_VM:
             LOGGER.debug("VM Sync", eventObject.getEntityuuid() + "===" + eventObject.getId());

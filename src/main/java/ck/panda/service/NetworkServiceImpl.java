@@ -132,6 +132,8 @@ public class NetworkServiceImpl implements NetworkService {
 
     }
 
+
+
     @Override
     public List<Network> findAllFromCSServerByDomain() throws Exception {
 
@@ -176,5 +178,10 @@ public class NetworkServiceImpl implements NetworkService {
 
         return optional;
     }
+
+	@Override
+	public List<Network> findByDepartment(String department) throws Exception {
+		return networkRepo.findByDepartment(department);
+	}
 
 }

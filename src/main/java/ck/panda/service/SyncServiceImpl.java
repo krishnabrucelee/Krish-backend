@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -801,7 +800,10 @@ public class SyncServiceImpl implements SyncService {
             } else {
                 if(user.getIsActive() !=  true){
                     userService.softDelete(user);
+                } else{
+                	userService.delete(user);
                 }
+
                 // 3.2 If not found, delete it from app db
                 // TODO clarify the business requirement, since it has impact in
                 // the application if it is used
@@ -1142,6 +1144,10 @@ public class SyncServiceImpl implements SyncService {
                 instance.setIsoName(csVm.getIsoName());
                 instance.setIpAddress(csVm.getIpAddress());
                 instance.setNetworkId(csVm.getNetworkId());
+                instance.setDepartmentId(csVm.getDepartmentId());
+                instance.setProjectId(csVm.getProjectId());
+                instance.setInstanceOwnerId(csVm.getInstanceOwnerId());
+
                 LOGGER.debug("sync VM for ASYNC");
                 // VNC password set.
                 if (csVm.getPassword() != null) {

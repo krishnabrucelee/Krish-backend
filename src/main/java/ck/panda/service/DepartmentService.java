@@ -78,4 +78,12 @@ public interface DepartmentService  extends CRUDService<Department>  {
      */
     Department findByUsername(String name, Boolean isActive);
 
+    /**
+     * Find the departments based on the isActive status.
+     *
+     * @param isActive department status Active/Inactive
+     * @return department.
+     */
+    List<Department> findByAll() throws Exception;
+
 }
