@@ -18,6 +18,7 @@ import ck.panda.domain.entity.Template.Status;
 import ck.panda.domain.entity.Template.Type;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.HypervisorRepository;
+import ck.panda.domain.repository.jpa.OsCategoryRepository;
 import ck.panda.domain.repository.jpa.OsTypeRepository;
 import ck.panda.domain.repository.jpa.TemplateRepository;
 import ck.panda.domain.repository.jpa.ZoneRepository;
@@ -58,6 +59,10 @@ public class TemplateServiceImpl implements TemplateService {
     /** Os type repository reference. */
     @Autowired
     private OsTypeRepository osTypeRepository;
+
+    /** Os category repository reference. */
+    @Autowired
+    private OsCategoryRepository osCategoryRepository;
 
     /** Zone repository reference. */
     @Autowired
@@ -147,6 +152,12 @@ public class TemplateServiceImpl implements TemplateService {
                 Template template = Template.convert(templateListJSON.getJSONObject(i));
                 OsType osType = osTypeRepository.findByUUID(template.getTransOsType());
                 template.setOsType(osType);
+                template.setOsCategory(osCategoryRepository.findOne(osType.getOsCategoryId()));
+                if(osType.getDescription().contains("32")) {
+                	template.setArchitecture("32");
+                } else if(osType.getDescription().contains("64")) {
+                	template.setArchitecture("64");
+                }
                 template.setDisplayText(osType.getDescription());
                 Zone zone = zoneRepo.findByUUID(template.getTransZone());
                 template.setZone(zone);
@@ -169,7 +180,11 @@ public class TemplateServiceImpl implements TemplateService {
     	if(template.getArchitecture() == null) {
     		template.setArchitecture("ALL");
     	}
-        return templateRepository.findByFilters(template.getOsCategory(), template.getArchitecture());
+    	if(template.getOsCategory() == null ) {
+    		return (List<Template>) templateRepository.findAll();
+    	} else  {
+            return templateRepository.findByFilters(template.getOsCategory(), template.getArchitecture());
+    	}
     }
 
     /**
