@@ -71,9 +71,14 @@ public class Network implements Serializable {
     @Column(name = "zone_id")
     private Long zoneId;
 
-     /** Name of the account. */
-    @Column(name = "account")
-    private String account;
+    /** Department Object for the Network. */
+    @JoinColumn(name = "department_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Department department;
+
+    /** id for the Department. */
+    @Column(name = "department_id")
+    private Long departmentId;
 
     /** NetworkOffering Object for the Network Offer. */
     @ManyToOne
@@ -551,24 +556,42 @@ public class Network implements Serializable {
     }
 
     /**
-     * Get the account name.
+     * Get the Department name.
      *
-     * @return the account
-     */
-    public String getAccount() {
-        return account;
-    }
+	 * @return the department
+	 */
+	public Department getDepartment() {
+		return department;
+	}
 
-    /**
-     * Set the account name.
-     *
-     * @param account the account to set
-     */
-    public void setAccount(String account) {
-        this.account = account;
-    }
+	/**
+	 * Set the Department name.
+	 *
+	 * @param department the department to set
+	 */
+	public void setDepartment(Department department) {
+		this.department = department;
+	}
 
-    /** Convert JSONObject to domain entity.
+	/**
+	 * Get the department Id.
+	 *
+	 * @return the departmentId
+	 */
+	public Long getDepartmentId() {
+		return departmentId;
+	}
+
+	/**
+	 * Set the Department Id.
+	 *
+	 * @param departmentId the departmentId to set
+	 */
+	public void setDepartmentId(Long departmentId) {
+		this.departmentId = departmentId;
+	}
+
+	/** Convert JSONObject to domain entity.
      *
      * @param convertUtil Utilities
      * @param jsonObject Object
@@ -588,7 +611,8 @@ public class Network implements Serializable {
            network.setcIDR(JsonUtil.getStringValue(jsonObject, "cidr"));
            network.setDisplayText(JsonUtil.getStringValue(jsonObject, "displaytext"));
            network.setGateway(JsonUtil.getStringValue(jsonObject, "gateway"));
-           network.setAccount(JsonUtil.getStringValue(jsonObject, "account"));
+           network.setDepartmentId(convertUtil.getDepartmentByUsername(JsonUtil.getStringValue(jsonObject, "account")).getId());
+
            network.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
        } catch (Exception ex) {
            ex.printStackTrace();
