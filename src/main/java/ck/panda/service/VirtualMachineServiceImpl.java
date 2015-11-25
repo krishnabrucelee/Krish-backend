@@ -120,7 +120,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 if(vminstance.getStorageOfferingId() != null){
                     optional.put("diskofferingid", vminstance.getStorageOffering().getUuid());
                 }
-                optional.put("domainid", domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid"))).getUuid());
+                optional.put("domainid", domainRepository.findOne(vminstance.getDepartment().getDomainId()).getUuid());
                 optional.put("account",vminstance.getDepartment().getUserName());
                 String csResponse = cloudStackInstanceService.deployVirtualMachine(
                         vminstance.getComputeOffering().getUuid(), vminstance.getTemplate().getUuid(),
