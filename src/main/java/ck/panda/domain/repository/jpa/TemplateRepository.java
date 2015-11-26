@@ -19,20 +19,23 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
     /**
      * Get the template without system type.
      *
-     * @param type of template
-     * @return user and routing template list
+     * @param architecture of the template
+     * @param type of the template
+     * @param status of the template
+     * @return list of filtered template
      */
-    @Query(value = "select template from Template template where (template.architecture =:architecture OR 'ALL' =:architecture) and template.type != :type and template.status = :status")
+    @Query(value = "select template from Template template where (template.architecture =:architecture OR 'ALL' =:architecture) and template.type <>:type and template.status = :status")
     List<Template> findByTemplate(@Param("architecture") String architecture, @Param("type") Type type, @Param("status") Status status);
 
     /**
      * Get the template without system type.
      *
      * @param type of template
+     * @param pageable of template
      * @return user and routing template list
      */
-    @Query(value = "select template from Template template where template.type != :type")
-    Page<Template> findAllWithoutSystem(@Param("type") Type type, Pageable pageable);
+    @Query(value = "select template from Template template where template.type <>:type")
+    Page<Template> findAllByType(@Param("type") Type type, Pageable pageable);
 
     /**
      * Get the template based on the uuid.
@@ -44,14 +47,15 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
     Template findByUUID(@Param("uuid") String uuid);
 
     /**
-     * Get the template based on the osCategory,architecture and osVersion.
+     * Get the template based on the osCategory,architecture and type.
      *
      * @param osCategory of the template
      * @param architecture of the template
-     * @param osVersion of the template
+     * @param type of the template
+     * @param status of the template
      * @return template
      */
-    @Query(value = "select t from Template t where (t.osCategory=:osCategory OR 'ALL'=:osCategory) AND (t.architecture =:architecture OR 'ALL' =:architecture) and t.type != :type and t.status = :status")
-    List<Template> findByFilters(@Param("osCategory") OsCategory osCategory, @Param("architecture") String architecture, @Param("type") Type type, @Param("status") Status status);
+    @Query(value = "select t from Template t where (t.osCategory=:osCategory OR 'ALL'=:osCategory) AND (t.architecture =:architecture OR 'ALL' =:architecture) and t.type <>:type and t.status = :status")
+    List<Template> findAllByOsCategoryAndArchitectureAndType(@Param("osCategory") OsCategory osCategory, @Param("architecture") String architecture, @Param("type") Type type, @Param("status") Status status);
 
 }

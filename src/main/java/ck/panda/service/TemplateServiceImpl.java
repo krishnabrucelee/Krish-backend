@@ -129,7 +129,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public Page<Template> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return templateRepository.findAllWithoutSystem(Type.SYSTEM, pagingAndSorting.toPageRequest());
+        return templateRepository.findAllByType(Type.SYSTEM, pagingAndSorting.toPageRequest());
     }
 
     @Override
@@ -183,7 +183,7 @@ public class TemplateServiceImpl implements TemplateService {
     	if(template.getOsCategory() == null ) {
     		return (List<Template>) templateRepository.findByTemplate(template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
     	} else  {
-            return templateRepository.findByFilters(template.getOsCategory(), template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
+            return templateRepository.findAllByOsCategoryAndArchitectureAndType(template.getOsCategory(), template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
     	}
     }
 
