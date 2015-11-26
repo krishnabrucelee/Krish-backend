@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.entity.OsType;
@@ -130,7 +129,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public Page<Template> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return templateRepository.findAll(pagingAndSorting.toPageRequest());
+        return templateRepository.findAllByType(Type.SYSTEM, pagingAndSorting.toPageRequest());
     }
 
     @Override
@@ -158,6 +157,7 @@ public class TemplateServiceImpl implements TemplateService {
                 } else if(osType.getDescription().contains("64")) {
                 	template.setArchitecture("64");
                 }
+
                 template.setDisplayText(osType.getDescription());
                 Zone zone = zoneRepo.findByUUID(template.getTransZone());
                 template.setZone(zone);
@@ -171,7 +171,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public List<Template> findByTemplate() throws Exception {
-        return templateRepository.findByTemplate(Type.SYSTEM);
+        return templateRepository.findByTemplate("ALL", Type.SYSTEM, Status.ACTIVE);
     }
 
 
@@ -181,9 +181,9 @@ public class TemplateServiceImpl implements TemplateService {
     		template.setArchitecture("ALL");
     	}
     	if(template.getOsCategory() == null ) {
-    		return (List<Template>) templateRepository.findAll();
+    		return (List<Template>) templateRepository.findByTemplate(template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
     	} else  {
-            return templateRepository.findByFilters(template.getOsCategory(), template.getArchitecture());
+            return templateRepository.findAllByOsCategoryAndArchitectureAndType(template.getOsCategory(), template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
     	}
     }
 

@@ -1,11 +1,14 @@
 package ck.panda.domain.repository.jpa;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.Template;
+import ck.panda.domain.entity.Template.Status;
 import ck.panda.domain.entity.Template.Type;
 
 /**
@@ -16,11 +19,23 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
     /**
      * Get the template without system type.
      *
+     * @param architecture of the template
+     * @param type of the template
+     * @param status of the template
+     * @return list of filtered template
+     */
+    @Query(value = "select template from Template template where (template.architecture =:architecture OR 'ALL' =:architecture) and template.type <>:type and template.status = :status")
+    List<Template> findByTemplate(@Param("architecture") String architecture, @Param("type") Type type, @Param("status") Status status);
+
+    /**
+     * Get the template without system type.
+     *
      * @param type of template
+     * @param pageable of template
      * @return user and routing template list
      */
-    @Query(value = "select template from Template template where template.type != :type")
-    List<Template> findByTemplate(@Param("type") Type type);
+    @Query(value = "select template from Template template where template.type <>:type")
+    Page<Template> findAllByType(@Param("type") Type type, Pageable pageable);
 
     /**
      * Get the template based on the uuid.
@@ -32,14 +47,15 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
     Template findByUUID(@Param("uuid") String uuid);
 
     /**
-     * Get the template based on the osCategory,architecture and osVersion.
+     * Get the template based on the osCategory,architecture and type.
      *
      * @param osCategory of the template
      * @param architecture of the template
-     * @param osVersion of the template
+     * @param type of the template
+     * @param status of the template
      * @return template
      */
-    @Query(value = "select t from Template t where (t.osCategory=:osCategory OR 'ALL'=:osCategory) AND (t.architecture =:architecture OR 'ALL' =:architecture)")
-    List<Template> findByFilters(@Param("osCategory") OsCategory osCategory, @Param("architecture") String architecture);
+    @Query(value = "select t from Template t where (t.osCategory=:osCategory OR 'ALL'=:osCategory) AND (t.architecture =:architecture OR 'ALL' =:architecture) and t.type <>:type and t.status = :status")
+    List<Template> findAllByOsCategoryAndArchitectureAndType(@Param("osCategory") OsCategory osCategory, @Param("architecture") String architecture, @Param("type") Type type, @Param("status") Status status);
 
 }
