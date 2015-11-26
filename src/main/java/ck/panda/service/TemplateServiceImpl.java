@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.entity.OsType;
@@ -18,6 +17,7 @@ import ck.panda.domain.entity.Template.Status;
 import ck.panda.domain.entity.Template.Type;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.HypervisorRepository;
+import ck.panda.domain.repository.jpa.OsCategoryRepository;
 import ck.panda.domain.repository.jpa.OsTypeRepository;
 import ck.panda.domain.repository.jpa.TemplateRepository;
 import ck.panda.domain.repository.jpa.ZoneRepository;
@@ -58,6 +58,10 @@ public class TemplateServiceImpl implements TemplateService {
     /** Os type repository reference. */
     @Autowired
     private OsTypeRepository osTypeRepository;
+
+    /** Os category repository reference. */
+    @Autowired
+    private OsCategoryRepository osCategoryRepository;
 
     /** Zone repository reference. */
     @Autowired
@@ -125,7 +129,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public Page<Template> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return templateRepository.findAll(pagingAndSorting.toPageRequest());
+        return templateRepository.findAllWithoutSystem(Type.SYSTEM, pagingAndSorting.toPageRequest());
     }
 
     @Override
@@ -147,6 +151,13 @@ public class TemplateServiceImpl implements TemplateService {
                 Template template = Template.convert(templateListJSON.getJSONObject(i));
                 OsType osType = osTypeRepository.findByUUID(template.getTransOsType());
                 template.setOsType(osType);
+                template.setOsCategory(osCategoryRepository.findOne(osType.getOsCategoryId()));
+                if(osType.getDescription().contains("32")) {
+                	template.setArchitecture("32");
+                } else if(osType.getDescription().contains("64")) {
+                	template.setArchitecture("64");
+                }
+
                 template.setDisplayText(osType.getDescription());
                 Zone zone = zoneRepo.findByUUID(template.getTransZone());
                 template.setZone(zone);
@@ -160,7 +171,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public List<Template> findByTemplate() throws Exception {
-        return templateRepository.findByTemplate(Type.SYSTEM);
+        return templateRepository.findByTemplate("ALL", Type.SYSTEM, Status.ACTIVE);
     }
 
 
@@ -169,7 +180,11 @@ public class TemplateServiceImpl implements TemplateService {
     	if(template.getArchitecture() == null) {
     		template.setArchitecture("ALL");
     	}
-        return templateRepository.findByFilters(template.getOsCategory(), template.getArchitecture());
+    	if(template.getOsCategory() == null ) {
+    		return (List<Template>) templateRepository.findByTemplate(template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
+    	} else  {
+            return templateRepository.findByFilters(template.getOsCategory(), template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
+    	}
     }
 
     /**
