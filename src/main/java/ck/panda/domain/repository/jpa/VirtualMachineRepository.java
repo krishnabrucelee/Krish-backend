@@ -1,5 +1,7 @@
 package ck.panda.domain.repository.jpa;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -49,10 +51,20 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
    /**
     * Get the list of VMs by status.
     *
-    * @param id of the domain
+    * @param status of the status of VM.
     * @param pageable page request
     * @return instance list
     */
    @Query(value = "select vm from VmInstance vm where vm.status <> :status")
    Page<VmInstance> findAllByIsActive(@Param("status") Status status, Pageable pageable);
+
+   /**
+    * Get the list of VMs by status.
+    *
+    * @param status of the status of VM.
+    * @param pageable page request
+    * @return instance list
+    */
+   @Query(value = "select vm from VmInstance vm where vm.status <> :status")
+   List<VmInstance> findAllByIsActive(@Param("status") Status status);
 }

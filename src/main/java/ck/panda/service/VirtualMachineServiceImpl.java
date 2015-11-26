@@ -572,7 +572,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     @Override
     public List<VmInstance> findAll() throws Exception {
-        return (List<VmInstance>) virtualmachinerepository.findAll();
+        return (List<VmInstance>) virtualmachinerepository.findAllByIsActive(Status.Expunging);
     }
 
     @Override
