@@ -565,9 +565,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     public Page<VmInstance> findAll(PagingAndSorting pagingAndSorting) throws Exception {
     	Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if(domain != null && !domain.getName().equals("ROOT")) {
-            return virtualmachinerepository.findAllByDomainIsActive(domain.getId(), pagingAndSorting.toPageRequest());
+            return virtualmachinerepository.findAllByDomainIsActive(domain.getId(), Status.Expunging, pagingAndSorting.toPageRequest());
         }
-        return virtualmachinerepository.findAll(pagingAndSorting.toPageRequest());
+        return virtualmachinerepository.findAllByIsActive(Status.Expunging, pagingAndSorting.toPageRequest());
     }
 
     @Override
