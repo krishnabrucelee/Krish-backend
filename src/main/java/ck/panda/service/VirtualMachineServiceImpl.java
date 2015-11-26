@@ -165,7 +165,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     @Override
     public void delete(VmInstance vminstance) throws Exception {
-        virtualmachinerepository.delete(vminstance);
+    	vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_EXPUNGING));
+        vminstance.setIsRemoved(true);
+        virtualmachinerepository.save(vminstance);
     }
 
     /**
@@ -604,8 +606,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
      * @throws Exception unhandled exceptions.
      */
     private Errors validateName(Errors errors, String name, Department department, Long id) throws Exception {
-        if ((virtualmachinerepository.findByNameAndDepartment(name, department)) != null) {
-            errors.addGlobalError("Instance name already exist");
+        if ((virtualmachinerepository.findByNameAndDepartment(name, department, Status.Expunging)) != null) {
+            errors.addGlobalError("Instance name already exist in" +department.getUserName() +" department");
         }
         return errors;
     }

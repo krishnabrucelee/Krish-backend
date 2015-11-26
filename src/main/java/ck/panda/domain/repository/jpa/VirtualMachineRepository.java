@@ -31,11 +31,12 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
     * Find vm instance by name and department.
     *
     * @param name instance name.
+    * @param status of the status of VM.
     * @param department department object.
     * @return instance.
     */
-   @Query(value = "select vm from VmInstance vm where vm.name=:name AND vm.department=:department")
-   VmInstance findByNameAndDepartment(@Param("name") String name, @Param("department") Department department);
+   @Query(value = "select vm from VmInstance vm where vm.name=:name AND vm.department=:department AND vm.status <> :status")
+   VmInstance findByNameAndDepartment(@Param("name") String name, @Param("department") Department department, @Param("status") Status status);
 
    /**
     * Get the list of VMs by domain and status.
@@ -45,7 +46,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
     * @param pageable page request
     * @return instance list
     */
-   @Query(value = "select vm from VmInstance vm where vm.domainId=:id AND vm.status =:status")
+   @Query(value = "select vm from VmInstance vm where vm.domainId=:id AND vm.status <>:status")
    Page<VmInstance> findAllByDomainIsActive(@Param("id") Long id, @Param("status") Status status, Pageable pageable);
 
    /**
