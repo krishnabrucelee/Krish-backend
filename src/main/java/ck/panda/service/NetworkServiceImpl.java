@@ -10,7 +10,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Network;
+import ck.panda.domain.repository.jpa.DepartmentReposiory;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.NetworkOfferingRepository;
 import ck.panda.domain.repository.jpa.NetworkRepository;
@@ -37,6 +40,10 @@ public class NetworkServiceImpl implements NetworkService {
     /** Domain repository reference. */
     @Autowired
     private DomainRepository domainRepository;
+
+    /** Department repository reference. */
+    @Autowired
+    private DepartmentReposiory departmentRepository;
 
     /** Zone repository reference. */
     @Autowired
@@ -88,7 +95,8 @@ public class NetworkServiceImpl implements NetworkService {
                     network.setZoneId(zoneRepository.findByUUID(createComputeResponseJSON.getString("zoneid")).getId());
                     network.setNetworkOfferingId(networkofferingRepo.findByUUID(createComputeResponseJSON.getString("networkofferingid")).getId());
                     network.setStatus(network.getStatus().valueOf(createComputeResponseJSON.getString("state")));
-                    network.setAccount(createComputeResponseJSON.getString("account"));
+                    network.setDepartment(entity.getDepartmentByUsername(createComputeResponseJSON.getString("account")));
+                    network.setDepartmentId(entity.getDepartmentByUsername(createComputeResponseJSON.getString("account")).getId());
                     network.setGateway(createComputeResponseJSON.getString("gateway"));
             return networkRepo.save(network);
         }
@@ -175,13 +183,16 @@ public class NetworkServiceImpl implements NetworkService {
         HashMap<String, String> optional = new HashMap<String, String>();
 
         optional.put("networkofferingid", network.getNetworkOffering().getUuid().toString());
+        optional.put("account", network.getDepartment().getUserName());
+        optional.put("domainid", network.getDepartment().getDomain().getUuid());
 
         return optional;
     }
 
 	@Override
-	public List<Network> findByDepartment(String department) throws Exception {
-		return networkRepo.findByDepartment(department);
+	public List<Network> findByDepartment(Long department) throws Exception {
+		Department deptNetwork = departmentRepository.findOne(department);
+		return networkRepo.findByDepartment(deptNetwork);
 	}
 
 }

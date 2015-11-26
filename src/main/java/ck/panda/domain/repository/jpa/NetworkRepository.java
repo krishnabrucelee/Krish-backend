@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+
+import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Network;
 
 /**
@@ -25,6 +27,6 @@ public interface NetworkRepository extends PagingAndSortingRepository<Network, L
      * @param department department name.
      * @return network list.
      */
-    @Query(value = "select net from Network net where net.account=:department ")
-   	List<Network> findByDepartment(@Param("department") String department);
+    @Query(value = "select net from Network net where net.department=:department ")
+   	List<Network> findByDepartment(@Param("department") Department department);
 }
