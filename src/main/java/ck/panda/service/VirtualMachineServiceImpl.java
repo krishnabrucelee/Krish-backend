@@ -298,7 +298,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             break;
         case EventTypes.EVENT_VM_DESTROY:
             try {
-                String instanceResponse = cloudStackInstanceService.destroyVirtualMachine(vminstance.getUuid(), "json");
+                String instanceResponse = cloudStackInstanceService.destroyVirtualMachine(vminstance.getUuid(), "json", optional);
                 JSONObject instance = new JSONObject(instanceResponse).getJSONObject("destroyvirtualmachineresponse");
                 if (instance.has("jobid")) {
                     String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"),
@@ -324,7 +324,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         case EventTypes.EVENT_VM_EXPUNGE:
             try {
                 optional.put("expunge", "true");
-                String instanceResponse = cloudStackInstanceService.destroyVirtualMachine(vminstance.getUuid(), "json");
+                String instanceResponse = cloudStackInstanceService.destroyVirtualMachine(vminstance.getUuid(), "json", optional);
                 JSONObject instance = new JSONObject(instanceResponse).getJSONObject("destroyvirtualmachineresponse");
                 if (instance.has("jobid")) {
                     String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"),

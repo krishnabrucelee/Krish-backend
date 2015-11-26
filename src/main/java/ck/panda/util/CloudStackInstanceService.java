@@ -53,8 +53,8 @@ public class CloudStackInstanceService {
      * @return json response.
      * @throws Exception cloud stack connector exception.
      */
-    public String destroyVirtualMachine(String virtualMachineId, String response) throws Exception {
-        LinkedList<NameValuePair> arguments = server.getDefaultQuery("destroyVirtualMachine", null);
+    public String destroyVirtualMachine(String virtualMachineId, String response, HashMap<String, String> optional) throws Exception {
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("destroyVirtualMachine", optional);
         arguments.add(new NameValuePair("id", virtualMachineId));
         arguments.add(new NameValuePair("response", response));
         return server.request(arguments);
