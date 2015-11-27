@@ -219,8 +219,9 @@ public class TemplateServiceImpl implements TemplateService {
                 }
                 template.setDisplayText(template.getDescription());
             }
-        } catch (Exception e) {
+        } catch (ApplicationException e) {
             LOGGER.error("ERROR AT TEMPLATE CREATION", e);
+            throw new ApplicationException(e.getErrors());
         }
     }
 

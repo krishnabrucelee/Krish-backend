@@ -277,7 +277,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         case EventTypes.EVENT_VM_RESTORE:
             try {
                 String instanceResponse = cloudStackInstanceService.restoreVirtualMachine(vminstance.getUuid(), "json");
-                JSONObject instance = new JSONObject(instanceResponse).getJSONObject("recovervirtualmachineresponse");
+                JSONObject instance = new JSONObject(instanceResponse).getJSONObject("restorevmresponse");
                 if (instance.has("jobid")) {
                     String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"),
                             "json");
@@ -353,21 +353,16 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         case EventTypes.EVENT_VM_CREATE:
             try {
                 String instanceResponse = cloudStackInstanceService.recoverVirtualMachine(vminstance.getUuid(), "json");
-                JSONObject instance = new JSONObject(instanceResponse).getJSONObject("restorevmresponse");
-                if (instance.has("jobid")) {
-                    String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"),
-                            "json");
-                    JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
-                    if (jobresult.getString("jobstatus").equals("2")) {
-                        vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                        errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                JSONObject instance = new JSONObject(instanceResponse).getJSONObject("recovervirtualmachineresponse");
+                if (instance.has("errorcode")) {
+                        errors =  validator.sendGlobalError(instance.getString("errortext"));
                         if (errors.hasErrors()) {
-                            throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
+                            throw new BadCredentialsException(instance.getString("errortext"));
                         }
-                        vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
-                    } else {
-                        vminstance.setEventMessage("Re-installed");
-                    }
+                        vminstance.setEventMessage(instance.getString("errortext"));
+                } else{
+                	vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_CREATE));
+                    vminstance.setEventMessage("VM Recover");
                 }
             } catch (BadCredentialsException e) {
                 LOGGER.error("ERROR AT VM RECOVER", e);

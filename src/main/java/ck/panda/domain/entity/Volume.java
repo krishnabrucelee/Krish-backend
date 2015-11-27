@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
@@ -28,6 +29,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
@@ -38,6 +40,7 @@ import ck.panda.util.JsonValidator;
  *
  */
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "ck_volume")
 public class Volume {
 
@@ -116,6 +119,10 @@ public class Volume {
     @Column(name = "instance_id")
     private Long vmInstanceId;
 
+    /** Check volume available or not. */
+    @Column(name = "is_removed")
+    private Boolean isRemoved;
+
     /** Created by user. */
     @CreatedBy
     @JoinColumn(name = "created_by", referencedColumnName = "id")
@@ -173,7 +180,15 @@ public class Volume {
         /** Volume will be in a Expunged State. */
         Expunged,
         /** Volume will be in a Ready State. */
-        Ready
+        Ready,
+        /** Volume will be in a UploadAbandoned State. */
+        UploadAbandoned,
+        /** Volume will be in a UploadError State. */
+        UploadError,
+        /** Volume will be in a Abandoned State. */
+        Abandoned,
+        /** Volume will be in a Downloaded State. */
+        Downloaded
     }
 
     /**
@@ -556,7 +571,25 @@ public class Volume {
         this.vmInstanceId = vmInstanceId;
     }
 
-    /**
+	/**
+	 * Get the is removed of the Volume.
+
+	 * @return the isRemoved of Volume.
+	 */
+	public Boolean getIsRemoved() {
+		return isRemoved;
+	}
+
+	/**
+	 * Set the is removed of the Volume.
+	 *
+	 * @param isRemoved the isRemoved to set
+	 */
+	public void setIsRemoved(Boolean isRemoved) {
+		this.isRemoved = isRemoved;
+	}
+
+	/**
      * Convert JSONObject to Volume entity.
      *
      * @param object json object
@@ -574,7 +607,7 @@ public class Volume {
             volume.diskSize = object.getLong("size");
             volume.setVolumeType(volume.getVolumeType().valueOf(JsonValidator.jsonStringValidation(object, "type")));
             volume.setStatus(volume.getStatus().valueOf(JsonValidator.jsonStringValidation(object, "state")));
-         //   volume.setCreatedDateTime(volume.getCreatedDateTime().);
+            volume.setCreatedDateTime(JsonUtil.convertToZonedDateTime(object.getString("created")));
             if (object.has("diskofferingid")) {
             volume.setStorageOfferingId(convertUtil.getStorageOfferId(JsonUtil.getStringValue(object, "diskofferingid")));
             }

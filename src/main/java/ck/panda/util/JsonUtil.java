@@ -1,7 +1,9 @@
 package ck.panda.util;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 
 import org.json.JSONObject;
 
@@ -54,20 +56,25 @@ public abstract class JsonUtil {
     /**
      * Converting date time validation.
      *
-     * @param object json object.
-     * @param key key value
+     * @param dateTime date Time object.
      * @return date time.
      * @throws Exception error.
      */
-    public static ZonedDateTime jsonZonedDateTimeValidation(JSONObject object, String key) throws Exception {
-        if (object.has(key)) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-            ZonedDateTime dateTime = ZonedDateTime.parse(key, formatter);
-            return dateTime;
-        } else {
+    public static ZonedDateTime convertToZonedDateTime(String dateTime) {
+        if (dateTime == null) {
             return null;
         }
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+        java.util.Date date = null;
+		try {
+			date = format.parse(dateTime);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		final ZoneId systemDefault = ZoneId.systemDefault();
+		return ZonedDateTime.ofInstant(date.toInstant(), systemDefault);
     }
+
 
 //    /**
 //     * @param object JSON array
