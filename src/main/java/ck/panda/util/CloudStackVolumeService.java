@@ -163,6 +163,19 @@ public class CloudStackVolumeService {
         return  responseDocument;
     }
 
+    /**
+     * Resize a disk volume from a virtual machine
+     *
+     * @param optional
+     * @return
+     * @throws Exception
+     */
+    public String resizeVolume(String response, HashMap<String, String> optional) throws Exception {
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("resizeVolume", optional);
+        String resizeResponse = server.request(arguments);
 
+        return resizeResponse;
+
+    }
 
 }

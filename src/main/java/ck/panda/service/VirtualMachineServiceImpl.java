@@ -277,7 +277,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         case EventTypes.EVENT_VM_RESTORE:
             try {
                 String instanceResponse = cloudStackInstanceService.restoreVirtualMachine(vminstance.getUuid(), "json");
-                JSONObject instance = new JSONObject(instanceResponse).getJSONObject("recovervirtualmachineresponse");
+                JSONObject instance = new JSONObject(instanceResponse).getJSONObject("restorevmresponse");
                 if (instance.has("jobid")) {
                     String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"),
                             "json");
