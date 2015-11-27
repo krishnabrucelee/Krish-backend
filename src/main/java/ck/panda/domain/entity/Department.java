@@ -514,7 +514,7 @@ public class Department implements Serializable {
      /** Define user type. */
     public enum AccountType {
        /** User status make department as user type. */
-    	 USER,
+         USER,
          ROOT_ADMIN,
          DOMAIN_ADMIN;
     }
