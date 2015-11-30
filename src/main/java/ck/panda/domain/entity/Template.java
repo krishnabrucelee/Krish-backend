@@ -28,6 +28,8 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+
+import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonValidator;
 
 /**
@@ -240,7 +242,15 @@ public class Template implements Serializable {
     @Column(name = "display_text")
     private String displayText;
 
-    /**
+    /** Display text of the template. */
+    @Column(name = "department_id", insertable = false, updatable = false)
+    private Department department;
+
+    /** Display text of the template. */
+    @Column(name = "department_id")
+    private Long departmentId;
+
+	/**
      * Get the id.
      * @return id
      */
@@ -881,6 +891,38 @@ public class Template implements Serializable {
     }
 
     /**
+	 * Get the Template.java of the Template.java
+
+	 * @return the department of Template.java
+	 */
+	public Department getDepartment() {
+		return department;
+	}
+
+	/**
+	 * @param department the department to set
+	 */
+	public void setDepartment(Department department) {
+		this.department = department;
+	}
+
+	/**
+	 * Get the Template.java of the Template.java
+
+	 * @return the departmentId of Template.java
+	 */
+	public Long getDepartmentId() {
+		return departmentId;
+	}
+
+	/**
+	 * @param departmentId the departmentId to set
+	 */
+	public void setDepartmentId(Long departmentId) {
+		this.departmentId = departmentId;
+	}
+
+    /**
      * Get the Transient type.
      * @return transZone
      */
@@ -1010,7 +1052,7 @@ public class Template implements Serializable {
      * @throws JSONException handles json exception.
      */
     @SuppressWarnings("static-access")
-    public static Template convert(JSONObject object) throws JSONException {
+    public static Template convert(JSONObject object, ConvertUtil util) throws JSONException {
         Template template = new Template();
         template.setSyncFlag(false);
         try {
@@ -1025,6 +1067,7 @@ public class Template implements Serializable {
             template.transOsType = JsonValidator.jsonStringValidation(object, "ostypeid");
             template.transZone = JsonValidator.jsonStringValidation(object, "zoneid");
             template.transHypervisor = JsonValidator.jsonStringValidation(object, "hypervisor");
+            template.setDepartmentId(null);
             template.setFormat(template.getFormat().valueOf(JsonValidator.jsonStringValidation(object, "format")));
             template.setType(template.getType().valueOf(JsonValidator.jsonStringValidation(object, "templatetype")));
             if (JsonValidator.jsonBooleanValidation(object, "isready")) {

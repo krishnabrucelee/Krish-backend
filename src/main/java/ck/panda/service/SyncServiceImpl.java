@@ -1248,12 +1248,11 @@ public class SyncServiceImpl implements SyncService {
             // in a hash using uuid
             if (csVolumeMap.containsKey(volume.getUuid())) {
                 Volume csvolume = csVolumeMap.get(volume.getUuid());
-
-                csvolume.setName(csvolume.getName());
-                csvolume.setStorageOfferingId(csvolume.getStorageOfferingId());
-                csvolume.setZoneId(csvolume.getZoneId());
-                csvolume.setVmInstanceId(csvolume.getVmInstanceId());
-                csvolume.setVolumeType(csvolume.getVolumeType());
+                volume.setName(csvolume.getName());
+                volume.setStorageOfferingId(csvolume.getStorageOfferingId());
+                volume.setZoneId(csvolume.getZoneId());
+                volume.setVmInstanceId(csvolume.getVmInstanceId());
+                volume.setVolumeType(csvolume.getVolumeType());
 
                 // 3.2 If found, update the osType object in app db
                 volumeService.update(volume);

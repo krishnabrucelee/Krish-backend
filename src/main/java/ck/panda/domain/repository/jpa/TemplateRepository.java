@@ -6,10 +6,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+
+import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.Template.Status;
 import ck.panda.domain.entity.Template.Type;
+import ck.panda.domain.entity.User;
 
 /**
  * JPA repository for Template entity.
@@ -24,7 +27,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param status of the template
      * @return list of filtered template
      */
-    @Query(value = "select template from Template template where (template.architecture =:architecture OR 'ALL' =:architecture) and template.type <>:type and template.status = :status")
+    @Query(value = "select template from Template template where (template.architecture =:architecture OR 'ALL' =:architecture) and template.type <>:type and template.status = :status and template.share IS TRUE")
     List<Template> findByTemplate(@Param("architecture") String architecture, @Param("type") Type type, @Param("status") Status status);
 
     /**

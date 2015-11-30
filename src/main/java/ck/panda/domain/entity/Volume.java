@@ -609,10 +609,14 @@ public class Volume {
             volume.setStatus(volume.getStatus().valueOf(JsonValidator.jsonStringValidation(object, "state")));
             volume.setCreatedDateTime(JsonUtil.convertToZonedDateTime(object.getString("created")));
             if (object.has("diskofferingid")) {
-            volume.setStorageOfferingId(convertUtil.getStorageOfferId(JsonUtil.getStringValue(object, "diskofferingid")));
+                volume.setStorageOfferingId(convertUtil.getStorageOfferId(JsonUtil.getStringValue(object, "diskofferingid")));
             }
             volume.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(object, "zoneid")));
-            volume.setVmInstanceId(convertUtil.getVmInstanceId(JsonUtil.getStringValue(object, "virtualmachineid")));
+            if (object.has("virtualmachineid")) {
+                volume.setVmInstanceId(convertUtil.getVmInstanceId(JsonUtil.getStringValue(object, "virtualmachineid")));
+            } else {
+            	volume.setVmInstanceId(null);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
