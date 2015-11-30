@@ -800,7 +800,7 @@ public class SyncServiceImpl implements SyncService {
                 if(user.getIsActive() !=  true){
                     userService.softDelete(user);
                 } else{
-                	userService.delete(user);
+                    userService.delete(user);
                 }
 
                 // 3.2 If not found, delete it from app db
@@ -1250,9 +1250,10 @@ public class SyncServiceImpl implements SyncService {
                 Volume csvolume = csVolumeMap.get(volume.getUuid());
 
                 csvolume.setName(csvolume.getName());
-                // csvolume.setStorageOfferingId(csvolume.getStorageOfferingId());
-                // csvolume.setZoneId(csvolume.getZoneId());
-                // csOsType.setOsCategoryUuid(csOsType.getOsCategoryUuid());
+                csvolume.setStorageOfferingId(csvolume.getStorageOfferingId());
+                csvolume.setZoneId(csvolume.getZoneId());
+                csvolume.setVmInstanceId(csvolume.getVmInstanceId());
+                csvolume.setVolumeType(csvolume.getVolumeType());
 
                 // 3.2 If found, update the osType object in app db
                 volumeService.update(volume);
@@ -1529,6 +1530,7 @@ public class SyncServiceImpl implements SyncService {
                 }
                 // 3.2 If found, update the vm object in app db
                 virtualMachineService.update(instance);
+                syncVolume();
             }
         }
     }
