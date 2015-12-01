@@ -343,31 +343,31 @@ public class SyncServiceImpl implements SyncService {
         }
 
         try {
-            // 19. Sync Volume entity
-            this.syncVolume();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch Volume", e);
-        }
-
-        try {
-            // 20. Sync Templates entity
+            // 19. Sync Templates entity
                this.syncTemplates();
         } catch (Exception e) {
                LOGGER.error("ERROR AT synch Templates", e);
         }
 
         try{
-            // 21. Sync ResourceLimit entity
+            // 20. Sync ResourceLimit entity
             this.syncResourceLimit();
         }catch(Exception e){
             LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
         }
 
         try {
-            // 22. Sync Instance entity
+            // 21. Sync Instance entity
               this.syncInstances();
         } catch (Exception e) {
               LOGGER.error("ERROR AT synch Instance", e);
+        }
+
+        try {
+            // 22. Sync Volume entity
+            this.syncVolume();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Volume", e);
         }
 
         try {
@@ -376,7 +376,6 @@ public class SyncServiceImpl implements SyncService {
           } catch (Exception e) {
               LOGGER.error("ERROR AT synch vm snapshots", e);
           }
-
 
         try {
             // 24. Sync Snapshot entity
@@ -801,7 +800,7 @@ public class SyncServiceImpl implements SyncService {
                 if(user.getIsActive() !=  true){
                     userService.softDelete(user);
                 } else{
-                	userService.delete(user);
+                    userService.delete(user);
                 }
 
                 // 3.2 If not found, delete it from app db
@@ -1249,11 +1248,11 @@ public class SyncServiceImpl implements SyncService {
             // in a hash using uuid
             if (csVolumeMap.containsKey(volume.getUuid())) {
                 Volume csvolume = csVolumeMap.get(volume.getUuid());
-
-                csvolume.setName(csvolume.getName());
-                // csvolume.setStorageOfferingId(csvolume.getStorageOfferingId());
-                // csvolume.setZoneId(csvolume.getZoneId());
-                // csOsType.setOsCategoryUuid(csOsType.getOsCategoryUuid());
+                volume.setName(csvolume.getName());
+                volume.setStorageOfferingId(csvolume.getStorageOfferingId());
+                volume.setZoneId(csvolume.getZoneId());
+                volume.setVmInstanceId(csvolume.getVmInstanceId());
+                volume.setVolumeType(csvolume.getVolumeType());
 
                 // 3.2 If found, update the osType object in app db
                 volumeService.update(volume);
@@ -1530,6 +1529,7 @@ public class SyncServiceImpl implements SyncService {
                 }
                 // 3.2 If found, update the vm object in app db
                 virtualMachineService.update(instance);
+                syncVolume();
             }
         }
     }

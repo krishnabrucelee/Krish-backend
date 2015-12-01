@@ -119,4 +119,19 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     protected Volume detachVolume(@RequestBody Volume volume, @PathVariable(PATH_ID) Long id) throws Exception {
         return volumeService.detachVolume(volume);
     }
+
+    /**
+     * Resize volume from created volume.
+     *
+     * @param volume Volume
+     * @param id Id
+     * @return Resize Volume
+     * @throws Exception exception
+     */
+    @RequestMapping(value = "resize/{id}", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected Volume resizeVolume(@RequestBody Volume volume, @PathVariable(PATH_ID) Long id) throws Exception {
+        return volumeService.resizeVolume(volume);
+    }
 }

@@ -186,6 +186,7 @@ public class VolumeServiceImpl implements VolumeService {
                 volume.setStorageOfferingId(volume.getStorageOffering().getId());
                 volume.setZoneId(volume.getZone().getId());
                 volume.setVolumeType(Volume.VolumeType.DATADISK);
+                volume.setCreatedDateTime(volume.getCreatedDateTime());
             }
 
         }
@@ -239,11 +240,15 @@ public class VolumeServiceImpl implements VolumeService {
             errors = this.validateEvent(errors, jobId.getString("errortext"));
             throw new ApplicationException(errors);
         } else {
-            volume.setUuid((String) jobId.get("jobid"));
+//            volume.setUuid((String) jobId.get("jobid"));
             volume.setVmInstanceId(volume.getVmInstance().getId());
             if (jobId.has("jobid")) {
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+
+                if (jobresult.has("volume")) {
+                	volume.setUuid((String) jobresult.get("id"));
+                }
                 if (jobresult.getString("jobstatus").equals("0")) {
                        volume.setStatus(Status.Ready);
                 }
@@ -259,7 +264,8 @@ public class VolumeServiceImpl implements VolumeService {
         errors = validator.validateEntity(volume, errors);
         config.setServer(1L);
         HashMap<String, String> optional = new HashMap<String, String>();
-        optional.put("virtualmachineid", volume.getVmInstance().getUuid());
+        optional.put("id", volume.getUuid());
+        //optional.put("virtualmachineid", volume.getVmInstance().getUuid());
         String volumeS = csVolumeService.detachVolume("json",  optional);
         JSONObject jobId = new JSONObject(volumeS).getJSONObject("detachvolumeresponse");
 
@@ -267,11 +273,14 @@ public class VolumeServiceImpl implements VolumeService {
             errors = this.validateEvent(errors, jobId.getString("errortext"));
             throw new ApplicationException(errors);
         } else {
-            volume.setUuid((String) jobId.get("jobid"));
+//            volume.setUuid((String) jobId.get("jobid"));
             volume.setVmInstanceId(null);
             if (jobId.has("jobid")) {
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+                if (jobresult.has("volume")) {
+                	volume.setUuid((String) jobresult.get("id"));
+                }
                 if (jobresult.getString("jobstatus").equals("0")) {
                        volume.setStatus(Status.Destroy);
                 }
@@ -280,5 +289,35 @@ public class VolumeServiceImpl implements VolumeService {
         }
         return volume;
     }
+
+	@Override
+	public Volume resizeVolume(Volume volume) throws Exception {
+		Errors errors = validator.rejectIfNullEntity("volumes", volume);
+        errors = validator.validateEntity(volume, errors);
+        config.setServer(1L);
+        String volumeS = csVolumeService.resizeVolume("json", optional(volume));
+        JSONObject jobId = new JSONObject(volumeS).getJSONObject("attachvolumeresponse");
+
+        if (jobId.has("errorcode")) {
+            errors = this.validateEvent(errors, jobId.getString("errortext"));
+            throw new ApplicationException(errors);
+        } else {
+//            volume.setUuid((String) jobId.get("jobid"));
+            volume.setVmInstanceId(volume.getVmInstance().getId());
+            if (jobId.has("jobid")) {
+                String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
+                JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+
+                if (jobresult.has("volume")) {
+                	volume.setUuid((String) jobresult.get("id"));
+                }
+                if (jobresult.getString("jobstatus").equals("0")) {
+                       volume.setStatus(Status.Ready);
+                }
+            }
+            volumeRepo.save(volume);
+        }
+        return volume;
+	}
 
 }

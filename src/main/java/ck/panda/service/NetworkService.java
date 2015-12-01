@@ -3,6 +3,8 @@ package ck.panda.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Network;
 import ck.panda.util.domain.CRUDService;
 
@@ -37,5 +39,5 @@ public interface NetworkService extends CRUDService<Network> {
     * @return network list from server.
     * @throws Exception unhandled errors.
     */
-   List<Network> findByDepartment(String department) throws Exception;
+   List<Network> findByDepartment(Long department) throws Exception;
 }

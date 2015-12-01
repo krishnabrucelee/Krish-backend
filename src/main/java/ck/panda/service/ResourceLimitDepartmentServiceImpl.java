@@ -255,7 +255,7 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
                     resourceLimit.getDepartmentId(), true);
             Long totalCount = resourceLimit.getMax() + count;
             //if(step1 < step2) {
-            if (domainLimit.getMax() < totalCount) {
+            if (domainLimit.getMax() != -1 || domainLimit.getMax() < totalCount) {
                 errors.addFieldError(resourceLimit.getResourceType().toString(), resourceLimit.getResourceType().toString() + " Resource limit exceed");
 
             }

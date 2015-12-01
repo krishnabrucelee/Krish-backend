@@ -165,7 +165,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     @Override
     public void delete(VmInstance vminstance) throws Exception {
-        virtualmachinerepository.delete(vminstance);
+    	vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_EXPUNGING));
+        vminstance.setIsRemoved(true);
+        virtualmachinerepository.save(vminstance);
     }
 
     /**
@@ -275,7 +277,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         case EventTypes.EVENT_VM_RESTORE:
             try {
                 String instanceResponse = cloudStackInstanceService.restoreVirtualMachine(vminstance.getUuid(), "json");
-                JSONObject instance = new JSONObject(instanceResponse).getJSONObject("recovervirtualmachineresponse");
+                JSONObject instance = new JSONObject(instanceResponse).getJSONObject("restorevmresponse");
                 if (instance.has("jobid")) {
                     String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"),
                             "json");
@@ -298,7 +300,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             break;
         case EventTypes.EVENT_VM_DESTROY:
             try {
-                String instanceResponse = cloudStackInstanceService.destroyVirtualMachine(vminstance.getUuid(), "json");
+                String instanceResponse = cloudStackInstanceService.destroyVirtualMachine(vminstance.getUuid(), "json", optional);
                 JSONObject instance = new JSONObject(instanceResponse).getJSONObject("destroyvirtualmachineresponse");
                 if (instance.has("jobid")) {
                     String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"),
@@ -324,8 +326,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         case EventTypes.EVENT_VM_EXPUNGE:
             try {
                 optional.put("expunge", "true");
-                String instanceResponse = cloudStackInstanceService.destroyVirtualMachine(vminstance.getUuid(), "json");
-                JSONObject instance = new JSONObject(instanceResponse).getJSONObject("restorevmresponse");
+                String instanceResponse = cloudStackInstanceService.destroyVirtualMachine(vminstance.getUuid(), "json", optional);
+                JSONObject instance = new JSONObject(instanceResponse).getJSONObject("destroyvirtualmachineresponse");
                 if (instance.has("jobid")) {
                     String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"),
                             "json");
@@ -351,21 +353,16 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         case EventTypes.EVENT_VM_CREATE:
             try {
                 String instanceResponse = cloudStackInstanceService.recoverVirtualMachine(vminstance.getUuid(), "json");
-                JSONObject instance = new JSONObject(instanceResponse).getJSONObject("restorevmresponse");
-                if (instance.has("jobid")) {
-                    String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"),
-                            "json");
-                    JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
-                    if (jobresult.getString("jobstatus").equals("2")) {
-                        vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                        errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                JSONObject instance = new JSONObject(instanceResponse).getJSONObject("recovervirtualmachineresponse");
+                if (instance.has("errorcode")) {
+                        errors =  validator.sendGlobalError(instance.getString("errortext"));
                         if (errors.hasErrors()) {
-                            throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
+                            throw new BadCredentialsException(instance.getString("errortext"));
                         }
-                        vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
-                    } else {
-                        vminstance.setEventMessage("Re-installed");
-                    }
+                        vminstance.setEventMessage(instance.getString("errortext"));
+                } else{
+                	vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_CREATE));
+                    vminstance.setEventMessage("VM Recover");
                 }
             } catch (BadCredentialsException e) {
                 LOGGER.error("ERROR AT VM RECOVER", e);
@@ -565,14 +562,14 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     public Page<VmInstance> findAll(PagingAndSorting pagingAndSorting) throws Exception {
     	Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if(domain != null && !domain.getName().equals("ROOT")) {
-            return virtualmachinerepository.findAllByDomainIsActive(domain.getId(), pagingAndSorting.toPageRequest());
+            return virtualmachinerepository.findAllByDomainIsActive(domain.getId(), Status.Expunging, pagingAndSorting.toPageRequest());
         }
-        return virtualmachinerepository.findAll(pagingAndSorting.toPageRequest());
+        return virtualmachinerepository.findAllByIsActive(Status.Expunging, pagingAndSorting.toPageRequest());
     }
 
     @Override
     public List<VmInstance> findAll() throws Exception {
-        return (List<VmInstance>) virtualmachinerepository.findAll();
+        return (List<VmInstance>) virtualmachinerepository.findAllByIsActive(Status.Expunging);
     }
 
     @Override
@@ -604,8 +601,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
      * @throws Exception unhandled exceptions.
      */
     private Errors validateName(Errors errors, String name, Department department, Long id) throws Exception {
-        if ((virtualmachinerepository.findByNameAndDepartment(name, department)) != null) {
-            errors.addGlobalError("Instance name already exist");
+        if ((virtualmachinerepository.findByNameAndDepartment(name, department, Status.Expunging)) != null) {
+            errors.addGlobalError("Instance name already exist in" +department.getUserName() +" department");
         }
         return errors;
     }

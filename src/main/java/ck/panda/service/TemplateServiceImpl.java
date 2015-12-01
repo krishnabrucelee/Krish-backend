@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.entity.OsType;
@@ -17,13 +16,18 @@ import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.Template.Status;
 import ck.panda.domain.entity.Template.Type;
 import ck.panda.domain.entity.Zone;
+import ck.panda.domain.repository.jpa.DepartmentReposiory;
 import ck.panda.domain.repository.jpa.HypervisorRepository;
+import ck.panda.domain.repository.jpa.OsCategoryRepository;
 import ck.panda.domain.repository.jpa.OsTypeRepository;
 import ck.panda.domain.repository.jpa.TemplateRepository;
+import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.domain.repository.jpa.ZoneRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackTemplateService;
 import ck.panda.util.ConfigUtil;
+import ck.panda.util.ConvertUtil;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -47,6 +51,10 @@ public class TemplateServiceImpl implements TemplateService {
     @Autowired
     private TemplateRepository templateRepository;
 
+    /** Convert entity repository reference. */
+    @Autowired
+    private ConvertUtil entity;
+
     /** Cloud stack template service. */
     @Autowired
     private CloudStackTemplateService cloudStackTemplateService;
@@ -59,9 +67,21 @@ public class TemplateServiceImpl implements TemplateService {
     @Autowired
     private OsTypeRepository osTypeRepository;
 
+    /** Os category repository reference. */
+    @Autowired
+    private OsCategoryRepository osCategoryRepository;
+
     /** Zone repository reference. */
     @Autowired
     private ZoneRepository zoneRepo;
+
+    /** Token details repository reference. */
+    @Autowired
+    private TokenDetails tokenDetails;
+
+    /** Department repository reference. */
+    @Autowired
+    private DepartmentReposiory departmentReposiory;
 
     /** Hypervisor repository reference. */
     @Autowired
@@ -125,7 +145,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public Page<Template> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return templateRepository.findAll(pagingAndSorting.toPageRequest());
+        return templateRepository.findAllByType(Type.SYSTEM, pagingAndSorting.toPageRequest());
     }
 
     @Override
@@ -144,9 +164,16 @@ public class TemplateServiceImpl implements TemplateService {
         if (responseObject.has("template")) {
             templateListJSON = responseObject.getJSONArray("template");
             for (int i = 0, size = templateListJSON.length(); i < size; i++) {
-                Template template = Template.convert(templateListJSON.getJSONObject(i));
+                Template template = Template.convert(templateListJSON.getJSONObject(i), entity);
                 OsType osType = osTypeRepository.findByUUID(template.getTransOsType());
                 template.setOsType(osType);
+                template.setOsCategory(osCategoryRepository.findOne(osType.getOsCategoryId()));
+                if(osType.getDescription().contains("32")) {
+                	template.setArchitecture("32");
+                } else if(osType.getDescription().contains("64")) {
+                	template.setArchitecture("64");
+                }
+
                 template.setDisplayText(osType.getDescription());
                 Zone zone = zoneRepo.findByUUID(template.getTransZone());
                 template.setZone(zone);
@@ -160,7 +187,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public List<Template> findByTemplate() throws Exception {
-        return templateRepository.findByTemplate(Type.SYSTEM);
+        return templateRepository.findByTemplate("ALL", Type.SYSTEM, Status.ACTIVE);
     }
 
 
@@ -169,7 +196,11 @@ public class TemplateServiceImpl implements TemplateService {
     	if(template.getArchitecture() == null) {
     		template.setArchitecture("ALL");
     	}
-        return templateRepository.findByFilters(template.getOsCategory(), template.getArchitecture());
+    	if(template.getOsCategory() == null ) {
+    		return (List<Template>) templateRepository.findByTemplate(template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
+    	} else  {
+            return templateRepository.findAllByOsCategoryAndArchitectureAndType(template.getOsCategory(), template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
+    	}
     }
 
     /**
@@ -203,9 +234,10 @@ public class TemplateServiceImpl implements TemplateService {
                     template.setType(Type.valueOf(jsonobject.getString("templatetype")));
                 }
                 template.setDisplayText(template.getDescription());
-            }
-        } catch (Exception e) {
+             }
+        } catch (ApplicationException e) {
             LOGGER.error("ERROR AT TEMPLATE CREATION", e);
+            throw new ApplicationException(e.getErrors());
         }
     }
 
