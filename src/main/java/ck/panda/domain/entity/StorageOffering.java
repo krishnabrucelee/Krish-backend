@@ -1,5 +1,6 @@
 package ck.panda.domain.entity;
 
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,6 @@ import javax.persistence.Version;
 import javax.validation.constraints.Size;
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
@@ -195,14 +195,14 @@ public class StorageOffering {
     @Column(name = "created_date_time")
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    private DateTime createdDateTime;
+    private ZonedDateTime createdDateTime;
 
     /** Last updated date and time. */
     @LastModifiedDate
     @Column(name = "updated_date_time")
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    private DateTime updatedDateTime;
+    private ZonedDateTime updatedDateTime;
 
     /** An active attribute is to check whether the role is active or not. */
     @Column(name = "is_active", columnDefinition = "tinyint default 1")
@@ -665,7 +665,7 @@ public class StorageOffering {
      *
      * @return the createdDateTime of the storage offering
      */
-    public DateTime getCreatedDateTime() {
+    public ZonedDateTime getCreatedDateTime() {
         return createdDateTime;
     }
 
@@ -674,7 +674,7 @@ public class StorageOffering {
      *
      * @param createdDateTime the created date time to set
      */
-    public void setCreatedDateTime(DateTime createdDateTime) {
+    public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
     }
 
@@ -683,7 +683,7 @@ public class StorageOffering {
      *
      * @return the updatedDateTime of the storage offering
      */
-    public DateTime getUpdatedDateTime() {
+    public ZonedDateTime getUpdatedDateTime() {
         return updatedDateTime;
     }
 
@@ -692,7 +692,7 @@ public class StorageOffering {
      *
      * @param updatedDateTime the updated date time to set
      */
-    public void setUpdatedDateTime(DateTime updatedDateTime) {
+    public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
 
@@ -771,6 +771,7 @@ public class StorageOffering {
         if (object.has("tags")) {
             storageOffering.storageTags = object.getString("tags");
         }
+        storageOffering.setCreatedDateTime(JsonUtil.convertToZonedDateTime(object.getString("created")));
         storageOffering.setIsSyncFlag(false);
 
         return storageOffering;
