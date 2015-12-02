@@ -27,7 +27,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -124,6 +123,14 @@ public class ResourceLimitProject {
     @Column(name = "is_active", columnDefinition = "tinyint default 1")
     @Type(type = "org.hibernate.type.NumericBooleanType")
     private Boolean isActive;
+
+    /** Transient domain of the user. */
+    @Transient
+    private String transProjectId;
+
+    /** Transient resource type of the resource limit domain. */
+    @Transient
+    private Integer transResourceType;
 
     /**
      * isSyncFlag field is not to be serialized,
@@ -495,8 +502,35 @@ public class ResourceLimitProject {
         this.uniqueSeperator = uniqueSeperator;
     }
 
-
     /**
+	 * @return the transProjectId
+	 */
+	public String getTransProjectId() {
+		return transProjectId;
+	}
+
+	/**
+	 * @param transProjectId the transProjectId to set
+	 */
+	public void setTransProjectId(String transProjectId) {
+		this.transProjectId = transProjectId;
+	}
+
+	/**
+	 * @return the transResourceType
+	 */
+	public Integer getTransResourceType() {
+		return transResourceType;
+	}
+
+	/**
+	 * @param transResourceType the transResourceType to set
+	 */
+	public void setTransResourceType(Integer transResourceType) {
+		this.transResourceType = transResourceType;
+	}
+
+	/**
      * Convert JSONObject to ResourceLimit entity.
      *
      * @param object json object
@@ -505,15 +539,15 @@ public class ResourceLimitProject {
      * @throws JSONException unhandled json errors
      */
     @SuppressWarnings("static-access")
-    public static ResourceLimitProject convert(JSONObject jsonObject, ConvertUtil convertUtil) throws JSONException {
+    public static ResourceLimitProject convert(JSONObject jsonObject) throws JSONException {
         ResourceLimitProject resource = new ResourceLimitProject();
         resource.setIsSyncFlag(false);
         try {
             resource.setIsActive(true);
             resource.setResourceType(ResourceType.values()[(JsonUtil.getIntegerValue(jsonObject, "resourcetype"))]);
-            resource.setProjectId(convertUtil.getProject(JsonUtil.getStringValue(jsonObject, "projectid")).getId());
+            resource.setTransProjectId(JsonUtil.getStringValue(jsonObject, "projectid"));
             resource.setMax(resource.getMax().valueOf(JsonUtil.getIntegerValue(jsonObject, "max")));
-            resource.setUniqueSeperator(convertUtil.getProject(JsonUtil.getStringValue(jsonObject, "projectid")).getId()+"-"+ResourceType.values()[(JsonUtil.getIntegerValue(jsonObject, "resourcetype"))]);
+            resource.setTransResourceType(JsonUtil.getIntegerValue(jsonObject, "resourcetype"));
         } catch (Exception e) {
             e.printStackTrace();
         }

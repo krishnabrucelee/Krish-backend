@@ -12,6 +12,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import org.hibernate.annotations.Type;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
@@ -19,7 +21,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -64,6 +65,15 @@ public class Cluster {
     @Column(name = "pod_id")
     private Long podId;
 
+    /** Transient zone of the cluster. */
+    @Transient
+    private String transZone;
+
+    /** Transient pod of the cluster. */
+    @Transient
+    private String transPod;
+
+
     /** Zone Object for the pod. */
     @JoinColumn(name = "zone_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
@@ -98,6 +108,10 @@ public class Cluster {
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
+
+    /** IsActive attribute to verify Active or Inactive. */
+    @Column(name = "is_active")
+    private Boolean isActive;
 
     /**
      * Get id
@@ -329,22 +343,66 @@ public class Cluster {
         this.updatedDateTime = updatedDateTime;
     }
 
+
     /**
+	 * @return the transZone
+	 */
+	public String getTransZone() {
+		return transZone;
+	}
+
+	/**
+	 * @param transZone the transZone to set
+	 */
+	public void setTransZone(String transZone) {
+		this.transZone = transZone;
+	}
+
+	/**
+	 * @return the transPod
+	 */
+	public String getTransPod() {
+		return transPod;
+	}
+
+	/**
+	 * @param transPod the transPod to set
+	 */
+	public void setTransPod(String transPod) {
+		this.transPod = transPod;
+	}
+
+	/**
+	 * @return the isActive
+	 */
+	public Boolean getIsActive() {
+		return isActive;
+	}
+
+	/**
+	 * @param isActive the isActive to set
+	 */
+	public void setIsActive(Boolean isActive) {
+		this.isActive = isActive;
+	}
+
+	/**
      * Convert JSONObject into pod object.
      *
      * @param jsonObject JSON object.
      * @param convertUtil convert Entity object from UUID.
      * @return pod object.
      */
-    public static Cluster convert(JSONObject jsonObject, ConvertUtil convertUtil) {
+    public static Cluster convert(JSONObject jsonObject) {
         Cluster cluster = new Cluster();
         try {
             cluster.setName(JsonUtil.getStringValue(jsonObject, "name"));
             cluster.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            cluster.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
-            cluster.setPodId(convertUtil.getPodId(JsonUtil.getStringValue(jsonObject, "podid")));
+            cluster.setTransZone(JsonUtil.getStringValue(jsonObject, "zoneid"));
+            cluster.setTransPod(JsonUtil.getStringValue(jsonObject, "podid"));
             cluster.setHypervisorType(JsonUtil.getStringValue(jsonObject, "hypervisortype"));
             cluster.setClusterType(JsonUtil.getStringValue(jsonObject, "clustertype"));
+            cluster.setIsActive(true);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

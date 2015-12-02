@@ -23,7 +23,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -138,6 +137,22 @@ public class Network implements Serializable {
     @Column(name = "updated_date_time")
     private DateTime updatedDateTime;
 
+    /** Transient domain of the account. */
+    @Transient
+    private String transDomainId;
+
+    /** Transient zone of the network.*/
+    @Transient
+    private String transZoneId;
+
+    /** Transient department of the network.*/
+    @Transient
+    private String transDepartmentId;
+
+    /** Transient network offering of the network.*/
+    @Transient
+    private String transNetworkOfferingId;
+
     /**
      * Enum type for Network Type.
      *
@@ -154,10 +169,15 @@ public class Network implements Serializable {
      *
      */
     public enum Status {
+
         /**  Network will be in a Enabled State. */
         Implemented,
-        /**  Network will be in a Disabled State. */
-        Allocated
+
+        /**  Network will be in a Allocated State. */
+        Allocated,
+
+        /**  Network will be in a destroyed State. */
+        Destroy
     }
 
     /** Set syncFlag. */
@@ -591,6 +611,62 @@ public class Network implements Serializable {
 		this.departmentId = departmentId;
 	}
 
+	/**
+	 * @return the transDomainId
+	 */
+	public String getTransDomainId() {
+		return transDomainId;
+	}
+
+	/**
+	 * @param transDomainId the transDomainId to set
+	 */
+	public void setTransDomainId(String transDomainId) {
+		this.transDomainId = transDomainId;
+	}
+
+	/**
+	 * @return the transZoneId
+	 */
+	public String getTransZoneId() {
+		return transZoneId;
+	}
+
+	/**
+	 * @param transZoneId the transZoneId to set
+	 */
+	public void setTransZoneId(String transZoneId) {
+		this.transZoneId = transZoneId;
+	}
+
+	/**
+	 * @return the transDepartmentId
+	 */
+	public String getTransDepartmentId() {
+		return transDepartmentId;
+	}
+
+	/**
+	 * @param transDepartmentId the transDepartmentId to set
+	 */
+	public void setTransDepartmentId(String transDepartmentId) {
+		this.transDepartmentId = transDepartmentId;
+	}
+
+	/**
+	 * @return the transNetworkOfferingId
+	 */
+	public String getTransNetworkOfferingId() {
+		return transNetworkOfferingId;
+	}
+
+	/**
+	 * @param transNetworkOfferingId the transNetworkOfferingId to set
+	 */
+	public void setTransNetworkOfferingId(String transNetworkOfferingId) {
+		this.transNetworkOfferingId = transNetworkOfferingId;
+	}
+
 	/** Convert JSONObject to domain entity.
      *
      * @param convertUtil Utilities
@@ -598,22 +674,22 @@ public class Network implements Serializable {
      * @return domain entity object.
      * @throws JSONException handles json exception.
      */
-   public static Network convert(JSONObject jsonObject, ConvertUtil convertUtil) throws JSONException {
+   public static Network convert(JSONObject jsonObject) throws JSONException {
        Network network = new Network();
        network.setSyncFlag(false);
        try {
            network.setName(JsonUtil.getStringValue(jsonObject, "name"));
            network.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-           network.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
-           network.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(jsonObject, "domainid")));
+           network.setTransZoneId((JsonUtil.getStringValue(jsonObject, "zoneid")));
+           network.setTransDomainId((JsonUtil.getStringValue(jsonObject, "domainid")));;
            network.setNetworkType(NetworkType.valueOf(JsonUtil.getStringValue(jsonObject, "type")));
-           network.setNetworkOfferingId(convertUtil.getNetworkOfferingId(JsonUtil.getStringValue(jsonObject, "networkofferingid")));
+           network.setTransNetworkOfferingId(JsonUtil.getStringValue(jsonObject, "networkofferingid"));
            network.setcIDR(JsonUtil.getStringValue(jsonObject, "cidr"));
            network.setDisplayText(JsonUtil.getStringValue(jsonObject, "displaytext"));
            network.setGateway(JsonUtil.getStringValue(jsonObject, "gateway"));
-           network.setDepartmentId(convertUtil.getDepartmentByUsername(JsonUtil.getStringValue(jsonObject, "account")).getId());
-
+           network.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, "account"));
            network.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
+           network.setIsActive(true);
        } catch (Exception ex) {
            ex.printStackTrace();
 

@@ -28,9 +28,6 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import ck.panda.util.ConvertUtil;
-import ck.panda.util.JsonUtil;
-
 /**
  * Storage Offerings, defined by administrator. provide a choice of disk size
  * and IOPS (Quality of Service) for primary data storage
@@ -736,7 +733,7 @@ public class StorageOffering {
      * @return Storage Offering entity objects
      * @throws JSONException unhandled json errors
      */
-    public static StorageOffering convert(JSONObject object, ConvertUtil convertUtil) throws JSONException {
+    public static StorageOffering convert(JSONObject object) throws JSONException {
         StorageOffering storageOffering = new StorageOffering();
         storageOffering.uuid = object.getString("id");
         storageOffering.name = object.getString("name");

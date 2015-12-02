@@ -28,6 +28,8 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import ck.panda.util.JsonUtil;
+
 
 /**
  * Accounts are grouped by domains. Domains usually contain multiple accounts
@@ -353,10 +355,10 @@ public class Domain {
      */
     public enum Status {
         /** Enabled status is used to list domain through out the application. */
-        ENABLED,
+        ACTIVE,
 
         /** Deleted status make domain as soft deleted and it will not list on the applicaiton. */
-        DELETED
+        INACTIVE
     }
 
   /**
@@ -364,13 +366,13 @@ public class Domain {
    *
    * @param object json object
    * @return domain entity object.
-   * @throws JSONException handles json exception.
+ * @throws Exception
    */
-  public static Domain convert(JSONObject object) throws JSONException {
+  public static Domain convert(JSONObject jsonObject) throws Exception {
       Domain domain = new Domain();
-      domain.uuid = object.has("id") ? object.get("id").toString() : "";
-      domain.name = object.has("name") ? object.get("name").toString() : "";
-
+      domain.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
+      domain.setName(JsonUtil.getStringValue(jsonObject, "name"));
+      domain.setIsActive(true);
       return domain;
   }
 

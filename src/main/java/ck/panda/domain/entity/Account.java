@@ -29,7 +29,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -138,7 +137,11 @@ public class Account implements Serializable {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
 
-    /**
+    /** Transient domain of the account. */
+    @Transient
+    private String transDomainId;
+
+	/**
      * Default constructor.
      */
     public Account() {
@@ -511,6 +514,20 @@ public class Account implements Serializable {
         this.syncFlag = syncFlag;
     }
 
+    /**
+	 * @return the transDomainId
+	 */
+	public String getTransDomainId() {
+		return transDomainId;
+	}
+
+	/**
+	 * @param transDomainId the transDomainId to set
+	 */
+	public void setTransDomainId(String transDomainId) {
+		this.transDomainId = transDomainId;
+	}
+
      /** Define user type. */
     public enum AccountType {
        /** User status make department as user type. */
@@ -538,7 +555,7 @@ public class Account implements Serializable {
      * @return account object.
      * @throws error occurs.
      */
-    public static Account convert(JSONObject jsonObject, ConvertUtil convertUtil) throws JSONException {
+    public static Account convert(JSONObject jsonObject) throws JSONException {
         Account account = new Account();
         account.setSyncFlag(false);
         try {
@@ -549,7 +566,7 @@ public class Account implements Serializable {
             account.setLastName(JsonUtil.getStringValue(userObject, "lastname"));
             account.setUserName(JsonUtil.getStringValue(userObject, "username"));
             account.setType(AccountType.values()[(JsonUtil.getIntegerValue(userObject, "accounttype"))]);
-            account.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(jsonObject, "domainid")));
+            account.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
             account.setEmail(JsonUtil.getStringValue(userObject, "email"));
             account.setPassword("l3tm3in");
             account.setIsActive(true);

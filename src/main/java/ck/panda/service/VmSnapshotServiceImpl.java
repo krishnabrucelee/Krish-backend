@@ -20,7 +20,6 @@ import ck.panda.domain.repository.jpa.VmSnapshotRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.CloudStackSnapshotService;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -42,9 +41,9 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
     @Autowired
     private VmSnapshotRepository vmSnapshotRepository;
 
-    /** Convert entity repository reference. */
+    /** Reference of the convert entity service. */
     @Autowired
-    private ConvertUtil entity;
+    private ConvertEntityService convertEntityService;
 
     /** Virtual Machine service reference. */
     @Autowired
@@ -223,7 +222,13 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                 // 2.1 Call convert by passing JSONObject to vm snapshot entity
                 // and Add
                 // the converted vm snapshot entity to list
-                vmsnapshotList.add(VmSnapshot.convert(vmSnapshotListJSON.getJSONObject(i), entity));
+              VmSnapshot vmSnapshot = VmSnapshot.convert(vmSnapshotListJSON.getJSONObject(i));
+              vmSnapshot.setVmId(convertEntityService.getVmInstanceId(vmSnapshot.getTransvmInstanceId()));
+              vmSnapshot.setDomainId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getDomainId());
+              vmSnapshot.setOwnerId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getInstanceOwnerId());
+              vmSnapshot.setZoneId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getZoneId());
+
+              vmsnapshotList.add(vmSnapshot);
             }
         }
         return vmsnapshotList;

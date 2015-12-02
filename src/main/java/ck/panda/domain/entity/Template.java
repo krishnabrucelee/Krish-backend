@@ -28,8 +28,6 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
-
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonValidator;
 
 /**
@@ -249,6 +247,10 @@ public class Template implements Serializable {
     /** Display text of the template. */
     @Column(name = "department_id")
     private Long departmentId;
+
+    /** IsActive attribute to verify Active or Inactive. */
+    @Column(name = "is_active")
+    private Boolean isActive;
 
 	/**
      * Get the id.
@@ -970,7 +972,24 @@ public class Template implements Serializable {
         this.transHypervisor = transHypervisor;
     }
 
-    /** RootDiskController enum type used to list the static root disk controller values. */
+
+    /**
+	 * @return the isActive
+	 */
+	public Boolean getIsActive() {
+		return isActive;
+	}
+
+	/**
+	 * @param isActive the isActive to set
+	 */
+	public void setIsActive(Boolean isActive) {
+		this.isActive = isActive;
+	}
+
+
+
+	/** RootDiskController enum type used to list the static root disk controller values. */
     public enum RootDiskController {
         /** Root disk controller type as SCSI. */
         SCSI,
@@ -1052,7 +1071,7 @@ public class Template implements Serializable {
      * @throws JSONException handles json exception.
      */
     @SuppressWarnings("static-access")
-    public static Template convert(JSONObject object, ConvertUtil util) throws JSONException {
+    public static Template convert(JSONObject object) throws JSONException {
         Template template = new Template();
         template.setSyncFlag(false);
         try {

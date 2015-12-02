@@ -20,7 +20,6 @@ import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 
 /** User entity. */
@@ -48,10 +47,14 @@ public class User {
     @JoinColumn(name = "department_id", referencedColumnName = "id")
     private Department department;
 
-    /** User domain. */
+    /** Domain of the user. */
+    @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
-    @JoinColumn(name = "domain_id", referencedColumnName = "id")
     private Domain domain;
+
+    /** Domain id of the user. */
+    @Column(name = "domain_id")
+    private Long domainId;
 
     /** User role. */
     @ManyToOne
@@ -123,6 +126,18 @@ public class User {
     @JoinColumn(name = "updated_user_id", referencedColumnName = "id")
     @OneToOne(cascade = {CascadeType.ALL })
     private User updatedBy;
+
+    /** Transient domain of the user. */
+    @Transient
+    private String transDomainId;
+
+    /** Transient account of the user. */
+    @Transient
+    private String transAccount;
+
+    /** Transient department of the user. */
+    @Transient
+    private String transDepartment;
 
     /** Set syncFlag. */
     @Transient
@@ -520,13 +535,69 @@ public class User {
     }
 
     /**
+	 * @return the transDomainId
+	 */
+	public String getTransDomainId() {
+		return transDomainId;
+	}
+
+	/**
+	 * @param transDomainId the transDomainId to set
+	 */
+	public void setTransDomainId(String transDomainId) {
+		this.transDomainId = transDomainId;
+	}
+
+	/**
+	 * @return the transAccount
+	 */
+	public String getTransAccount() {
+		return transAccount;
+	}
+
+	/**
+	 * @param transAccount the transAccount to set
+	 */
+	public void setTransAccount(String transAccount) {
+		this.transAccount = transAccount;
+	}
+
+	/**
+	 * @return the transDepartment
+	 */
+	public String getTransDepartment() {
+		return transDepartment;
+	}
+
+	/**
+	 * @param transDepartment the transDepartment to set
+	 */
+	public void setTransDepartment(String transDepartment) {
+		this.transDepartment = transDepartment;
+	}
+
+	/**
+	 * @return the domainId
+	 */
+	public Long getDomainId() {
+		return domainId;
+	}
+
+	/**
+	 * @param domainId the domainId to set
+	 */
+	public void setDomainId(Long domainId) {
+		this.domainId = domainId;
+	}
+
+	/**
      * Convert JSONObject into user object.
      *
      * @param object JSON object.
      * @return user object.
      * @throws Exception
      */
-    public static User convert(JSONObject jsonObject, ConvertUtil convertUtil) throws Exception {
+    public static User convert(JSONObject jsonObject) throws Exception {
 
         User user = new User();
         user.setSyncFlag(false);
@@ -542,10 +613,9 @@ public class User {
         } else {
             user.setType(Type.DOMAIN_ADMIN);
         }
-        user.setDomain(convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid")));
-        user.setDepartment(convertUtil.getDepartment(JsonUtil.getStringValue(jsonObject, "accountid")));
-        user.setAccountId(convertUtil.getAccountIdByUsernameAndDomain(JsonUtil.getStringValue(jsonObject, "account"),
-                    convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid"))));
+        user.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
+        user.setTransDepartment(JsonUtil.getStringValue(jsonObject, "accountid"));
+        user.setTransAccount(JsonUtil.getStringValue(jsonObject, "account"));
         user.setIsActive(true);
         return user;
     }

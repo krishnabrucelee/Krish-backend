@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Network;
+import ck.panda.domain.entity.User;
 import ck.panda.util.domain.CRUDService;
 
 /**
@@ -40,4 +41,13 @@ public interface NetworkService extends CRUDService<Network> {
     * @throws Exception unhandled errors.
     */
    List<Network> findByDepartment(Long department) throws Exception;
+
+   /**
+    * Method to soft delete network.
+    *
+    * @param network object.
+    * @return network.
+    * @throws Exception if error occurs.
+    */
+   Network softDelete(Network network) throws Exception;
 }

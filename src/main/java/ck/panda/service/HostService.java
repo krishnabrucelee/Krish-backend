@@ -29,4 +29,13 @@ public interface HostService extends CRUDService<Host> {
      * @throws Exception unhandled errors.
      */
     Host findByUUID(String uuid) throws Exception;
+
+    /**
+     * Soft delete for host
+     *
+     * @param host object
+     * @return host
+     * @throws Exception unhandled errors.
+     */
+	Host softDelete(Host host) throws Exception;
 }

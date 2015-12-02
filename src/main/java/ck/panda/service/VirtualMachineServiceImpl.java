@@ -19,7 +19,6 @@ import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackIsoService;
 import ck.panda.util.CloudStackServer;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
@@ -30,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
@@ -52,9 +50,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Autowired
     private VirtualMachineRepository virtualmachinerepository;
 
-    /** Convert entity repository reference. */
+    /** Reference of the convert entity service. */
     @Autowired
-    private ConvertUtil entity;
+    private ConvertEntityService convertEntityService;
 
     /** Network repository reference. */
     @Autowired
@@ -622,7 +620,24 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             for (int i = 0, size = vmListJSON.length(); i < size; i++) {
                 // 2.1 Call convert by passing JSONObject to vm entity and Add
                 // the converted vm entity to list
-                vmList.add(VmInstance.convert(vmListJSON.getJSONObject(i), entity));
+              VmInstance vmInstance = VmInstance.convert(vmListJSON.getJSONObject(i));
+              vmInstance.setDomainId(convertEntityService.getDomainId(vmInstance.getTransDomainId()));
+              vmInstance.setZoneId(convertEntityService.getZoneId(vmInstance.getTransZoneId()));
+              vmInstance.setNetworkId(convertEntityService.getNetworkId(vmInstance.getTransNetworkId()));
+              vmInstance.setProjectId(convertEntityService.getProjectId(vmInstance.getTransProjectId()));
+              vmInstance.setHostId(convertEntityService.getHostId(vmInstance.getTransHostId()));
+              vmInstance.setInstanceOwnerId(convertEntityService.getUserByName(vmInstance.getTransDisplayName(),
+            		  convertEntityService.getDomain(vmInstance.getTransDomainId())));
+              vmInstance.setDepartmentId(
+            		  convertEntityService.getDepartmentByUsernameAndDomain(vmInstance.getTransDepartmentId(),
+            				  convertEntityService.getDomain(vmInstance.getTransDomainId())));
+              vmInstance.setComputeOfferingId(convertEntityService.getComputeOfferId(vmInstance.getTransComputeOfferingId()));
+              if (vmInstance.getHostId() != null) {
+                  vmInstance.setPodId(convertEntityService
+                          .getPodIdByHost(convertEntityService.getHostId(vmInstance.getTransHostId())));
+              }
+
+                vmList.add(vmInstance);
             }
         }
         return vmList;

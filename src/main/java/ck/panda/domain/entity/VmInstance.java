@@ -16,7 +16,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.json.JSONArray;
@@ -28,7 +27,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -311,6 +309,47 @@ public class VmInstance implements Serializable {
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
+
+    /** Transient domain of the instance. */
+    @Transient
+    private String transDomainId;
+
+    /** Transient zone of the instance. */
+    @Transient
+    private String transZoneId;
+
+    /** Transient host of the instance. */
+    @Transient
+    private String transHostId;
+
+    /** Transient host of the instance. */
+    @Transient
+    private String transComputeOfferingId;
+
+    /** Transient host of the instance. */
+    @Transient
+    private String transProjectId;
+
+    /** Transient network of the instance. */
+    @Transient
+    private String transNetworkId;
+
+    /** Transient template of the instance. */
+    @Transient
+    private String transTemplateId;
+
+    /** Transient iso of the instance. */
+    @Transient
+    private String transIsoId;
+
+    /** Transient name of the instance. */
+    @Transient
+    private String transDisplayName;
+
+    /** Transient department id of the instance. */
+    @Transient
+    private String transDepartmentId;
+
 
     /**
      * Get sync status.
@@ -1250,7 +1289,148 @@ public class VmInstance implements Serializable {
         this.event = event;
     }
 
-    @Override
+
+    /**
+	 * @return the transDomainId
+	 */
+	public String getTransDomainId() {
+		return transDomainId;
+	}
+
+	/**
+	 * @param transDomainId the transDomainId to set
+	 */
+	public void setTransDomainId(String transDomainId) {
+		this.transDomainId = transDomainId;
+	}
+
+	/**
+	 * @return the transZoneId
+	 */
+	public String getTransZoneId() {
+		return transZoneId;
+	}
+
+	/**
+	 * @param transZoneId the transZoneId to set
+	 */
+	public void setTransZoneId(String transZoneId) {
+		this.transZoneId = transZoneId;
+	}
+
+	/**
+	 * @return the transHostId
+	 */
+	public String getTransHostId() {
+		return transHostId;
+	}
+
+	/**
+	 * @param transHostId the transHostId to set
+	 */
+	public void setTransHostId(String transHostId) {
+		this.transHostId = transHostId;
+	}
+
+	/**
+	 * @return the transComputeOfferingId
+	 */
+	public String getTransComputeOfferingId() {
+		return transComputeOfferingId;
+	}
+
+	/**
+	 * @param transComputeOfferingId the transComputeOfferingId to set
+	 */
+	public void setTransComputeOfferingId(String transComputeOfferingId) {
+		this.transComputeOfferingId = transComputeOfferingId;
+	}
+
+	/**
+	 * @return the transProjectId
+	 */
+	public String getTransProjectId() {
+		return transProjectId;
+	}
+
+	/**
+	 * @param transProjectId the transProjectId to set
+	 */
+	public void setTransProjectId(String transProjectId) {
+		this.transProjectId = transProjectId;
+	}
+
+	/**
+	 * @return the transNetworkId
+	 */
+	public String getTransNetworkId() {
+		return transNetworkId;
+	}
+
+	/**
+	 * @param transNetworkId the transNetworkId to set
+	 */
+	public void setTransNetworkId(String transNetworkId) {
+		this.transNetworkId = transNetworkId;
+	}
+
+	/**
+	 * @return the transIsoId
+	 */
+	public String getTransIsoId() {
+		return transIsoId;
+	}
+
+	/**
+	 * @param transIsoId the transIsoId to set
+	 */
+	public void setTransIsoId(String transIsoId) {
+		this.transIsoId = transIsoId;
+	}
+
+	/**
+	 * @return the transTemplateId
+	 */
+	public String getTransTemplateId() {
+		return transTemplateId;
+	}
+
+	/**
+	 * @param transTemplateId the transTemplateId to set
+	 */
+	public void setTransTemplateId(String transTemplateId) {
+		this.transTemplateId = transTemplateId;
+	}
+
+	/**
+	 * @return the transDepartmentId
+	 */
+	public String getTransDepartmentId() {
+		return transDepartmentId;
+	}
+
+	/**
+	 * @param transDepartmentId the transDepartmentId to set
+	 */
+	public void setTransDepartmentId(String transDepartmentId) {
+		this.transDepartmentId = transDepartmentId;
+	}
+
+	/**
+	 * @return the transDisplayName
+	 */
+	public String getTransDisplayName() {
+		return transDisplayName;
+	}
+
+	/**
+	 * @param transDisplayName the transDisplayName to set
+	 */
+	public void setTransDisplayName(String transDisplayName) {
+		this.transDisplayName = transDisplayName;
+	}
+
+	@Override
     public String toString() {
         return "VmInstance [Id=" + id + ", name=" + name + ", uuid=" + uuid + ", vncPassword=" + vncPassword
                 + ", instanceOwner=" + instanceOwner + ", instanceOwnerId=" + instanceOwnerId + ", application="
@@ -1273,26 +1453,21 @@ public class VmInstance implements Serializable {
      * @param convertUtil convert Entity object from UUID.
      * @return vm object.
      */
-    public static VmInstance convert(JSONObject jsonObject, ConvertUtil convertUtil) {
+    public static VmInstance convert(JSONObject jsonObject) {
         VmInstance vmInstance = new VmInstance();
         vmInstance.setSyncFlag(false);
         try {
             String owner = JsonUtil.getStringValue(jsonObject, "displayname");
             vmInstance.setName(JsonUtil.getStringValue(jsonObject, "name"));
             vmInstance.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            vmInstance.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(jsonObject, "domainid")));
-            vmInstance.setInstanceOwnerId(convertUtil.getUserByName(owner,
-                    convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid"))));
+            vmInstance.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
             vmInstance.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
-            vmInstance.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
-            vmInstance.setHostId(convertUtil.getHostId(JsonUtil.getStringValue(jsonObject, "hostid")));
-            if (vmInstance.getHostId() != null) {
-                vmInstance.setPodId(convertUtil
-                        .getPodIdByHost(convertUtil.getHostId(JsonUtil.getStringValue(jsonObject, "hostid"))));
-            }
-            vmInstance.setTemplateId(convertUtil.getTemplateId(JsonUtil.getStringValue(jsonObject, "templateid")));
-            vmInstance.setComputeOfferingId(
-                    convertUtil.getComputeOfferId(JsonUtil.getStringValue(jsonObject, "serviceofferingid")));
+            vmInstance.setTransZoneId(JsonUtil.getStringValue(jsonObject, "zoneid"));
+            vmInstance.setTransHostId(JsonUtil.getStringValue(jsonObject, "hostid"));
+            vmInstance.setTransDisplayName(JsonUtil.getStringValue(jsonObject, "displayname"));
+            vmInstance.setTransHostId(JsonUtil.getStringValue(jsonObject, "hostid"));
+            vmInstance.setTransTemplateId(JsonUtil.getStringValue(jsonObject, "templateid"));
+            vmInstance.setTransComputeOfferingId(JsonUtil.getStringValue(jsonObject, "serviceofferingid"));
             vmInstance.setCpuCore(JsonUtil.getIntegerValue(jsonObject, "cpunumber"));
             vmInstance.setCpuSpeed(JsonUtil.getIntegerValue(jsonObject, "cpuspeed"));
             vmInstance.setMemory(JsonUtil.getIntegerValue(jsonObject, "memory"));
@@ -1301,15 +1476,12 @@ public class VmInstance implements Serializable {
             vmInstance.setPassword(JsonUtil.getStringValue(jsonObject, "password"));
             vmInstance.setIso(JsonUtil.getStringValue(jsonObject, "isoid"));
             vmInstance.setIsoName(JsonUtil.getStringValue(jsonObject, "isoname"));
-            vmInstance.setIsoId(convertUtil.getIso(JsonUtil.getStringValue(jsonObject, "isoid")));
+            vmInstance.setTransIsoId(JsonUtil.getStringValue(jsonObject, "isoid"));
             JSONArray nicArray = jsonObject.getJSONArray("nic");
             vmInstance.setIpAddress(JsonUtil.getStringValue(nicArray.getJSONObject(0), "ipaddress"));
-            vmInstance.setNetworkId(
-                    convertUtil.getNetworkId(JsonUtil.getStringValue(nicArray.getJSONObject(0), "networkid")));
-            vmInstance.setDepartmentId(
-                    convertUtil.getDepartmentByUsernameAndDomain(JsonUtil.getStringValue(jsonObject, "account"),
-                            convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid"))));
-            vmInstance.setProjectId(convertUtil.getProjectId(JsonUtil.getStringValue(jsonObject, "projectid")));
+            vmInstance.setTransNetworkId(JsonUtil.getStringValue(nicArray.getJSONObject(0), "networkid"));
+            vmInstance.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, "account"));
+            vmInstance.setTransProjectId(JsonUtil.getStringValue(jsonObject, "projectid"));
         } catch (Exception e) {
             e.printStackTrace();
         }

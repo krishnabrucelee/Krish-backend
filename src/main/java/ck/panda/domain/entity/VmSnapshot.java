@@ -26,7 +26,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -174,6 +173,26 @@ public class VmSnapshot implements Serializable {
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
+
+    /** Transient network of the instance. */
+    @Transient
+    private String transvmInstanceId;
+
+    /** Transient network of the instance. */
+    @Transient
+    private String transZoneId;
+
+    /** Transient owner of the instance. */
+    @Transient
+    private String transOwnerId;
+
+    /** Transient domain of the instance. */
+    @Transient
+    private String transDomainId;
+
+    /** Transient name of the instance. */
+    @Transient
+    private String transDisplayName;
 
     /**
      * Get the sync status.
@@ -626,7 +645,78 @@ public class VmSnapshot implements Serializable {
         this.snapshotMemory = snapshotMemory;
     }
 
-    @Override
+
+    /**
+	 * @return the transvmInstanceId
+	 */
+	public String getTransvmInstanceId() {
+		return transvmInstanceId;
+	}
+
+	/**
+	 * @param transvmInstanceId the transvmInstanceId to set
+	 */
+	public void setTransvmInstanceId(String transvmInstanceId) {
+		this.transvmInstanceId = transvmInstanceId;
+	}
+
+	/**
+	 * @return the transZoneId
+	 */
+	public String getTransZoneId() {
+		return transZoneId;
+	}
+
+	/**
+	 * @param transZoneId the transZoneId to set
+	 */
+	public void setTransZoneId(String transZoneId) {
+		this.transZoneId = transZoneId;
+	}
+
+	/**
+	 * @return the transDisplayName
+	 */
+	public String getTransDisplayName() {
+		return transDisplayName;
+	}
+
+	/**
+	 * @param transDisplayName the transDisplayName to set
+	 */
+	public void setTransDisplayName(String transDisplayName) {
+		this.transDisplayName = transDisplayName;
+	}
+
+	/**
+	 * @return the transDomainId
+	 */
+	public String getTransDomainId() {
+		return transDomainId;
+	}
+
+	/**
+	 * @param transDomainId the transDomainId to set
+	 */
+	public void setTransDomainId(String transDomainId) {
+		this.transDomainId = transDomainId;
+	}
+
+	/**
+	 * @return the transOwnerId
+	 */
+	public String getTransOwnerId() {
+		return transOwnerId;
+	}
+
+	/**
+	 * @param transOwnerId the transOwnerId to set
+	 */
+	public void setTransOwnerId(String transOwnerId) {
+		this.transOwnerId = transOwnerId;
+	}
+
+	@Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("VmSnapshot [id=");
@@ -682,22 +772,23 @@ public class VmSnapshot implements Serializable {
      * @param convertUtil convert Entity object from UUID.
      * @return vm snapshot object.
      */
-    public static VmSnapshot convert(JSONObject jsonObject, ConvertUtil convertUtil) {
+    public static VmSnapshot convert(JSONObject jsonObject) {
         VmSnapshot vmSnapshot = new VmSnapshot();
         vmSnapshot.setSyncFlag(false);
         try {
+        	String owner = JsonUtil.getStringValue(jsonObject, "displayname");
             vmSnapshot.setIsRemoved(false);
             vmSnapshot.setName(JsonUtil.getStringValue(jsonObject, "displayname"));
             vmSnapshot.setDescription(JsonUtil.getStringValue(jsonObject, "description"));
             vmSnapshot.setParent(JsonUtil.getStringValue(jsonObject, "parent"));
             vmSnapshot.setIsCurrent(JsonUtil.getBooleanValue(jsonObject, "current"));
             vmSnapshot.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            vmSnapshot.setVmId(convertUtil.getVmId(JsonUtil.getStringValue(jsonObject, "virtualmachineid")));
-            vmSnapshot.setDomainId(convertUtil.getVm(JsonUtil.getStringValue(jsonObject, "virtualmachineid")).getDomainId());
+            vmSnapshot.setTransDomainId(JsonUtil.getStringValue(jsonObject, "virtualmachineid"));
+            vmSnapshot.setTransvmInstanceId(JsonUtil.getStringValue(jsonObject, "virtualmachineid"));
             vmSnapshot.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
             vmSnapshot.setType(SnapshotType.valueOf(JsonUtil.getStringValue(jsonObject, "type")));
-            vmSnapshot.setZoneId(convertUtil.getVm(JsonUtil.getStringValue(jsonObject, "virtualmachineid")).getZoneId());
-            vmSnapshot.setOwnerId(convertUtil.getVm(JsonUtil.getStringValue(jsonObject, "virtualmachineid")).getInstanceOwnerId());
+            vmSnapshot.setTransZoneId(JsonUtil.getStringValue(jsonObject, "virtualmachineid"));
+            vmSnapshot.setTransOwnerId(JsonUtil.getStringValue(jsonObject, "virtualmachineid"));
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -12,6 +12,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.json.JSONException;
@@ -23,7 +25,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
-import ck.panda.util.ConvertUtil;
+
+import ck.panda.domain.entity.Network.Status;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -64,6 +67,18 @@ public class Host {
     @Column(name = "pod_id")
     private Long podId;
 
+    /** Transient pod of the host.*/
+    @Transient
+    private String transPodId;
+
+    /** Transient zone of the host.*/
+    @Transient
+    private String transZoneId;
+
+    /** Transient cluster of the host.*/
+    @Transient
+    private String transClusterId;
+
     /** Zone Object for the pod. */
     @JoinColumn(name = "zone_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
@@ -84,7 +99,11 @@ public class Host {
 
     /** State of the host. */
     @Column(name = "state")
-    private String state;
+    private Status status;
+
+    /** IsActive attribute to verify Active or Inactive. */
+    @Column(name = "is_active")
+    private Boolean isActive;
 
     /** Created by user. */
     @CreatedBy
@@ -112,6 +131,18 @@ public class Host {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
 
+    /**
+     * Enum type for  Host Status.
+     *
+     */
+    public enum Status {
+
+        /**  Host will be in a Enabled State. */
+        ENABLED,
+
+        /**  Host will be in a Disabled State. */
+        DISABLED,
+    }
     /**
      * Get id.
      *
@@ -271,24 +302,6 @@ public class Host {
     }
 
     /**
-     * Get the state.
-     *
-     * @return the state
-     */
-    public String getState() {
-        return state;
-    }
-
-    /**
-     * Set the state.
-     *
-     * @param state  to set
-     */
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    /**
      * Get createdBy.
      *
      * @return the createdBy
@@ -358,7 +371,77 @@ public class Host {
         this.updatedDateTime = updatedDateTime;
     }
 
-     /**
+   /**
+	 * @return the transPodId
+	 */
+	public String getTransPodId() {
+		return transPodId;
+	}
+
+	/**
+	 * @param transPodId the transPodId to set
+	 */
+	public void setTransPodId(String transPodId) {
+		this.transPodId = transPodId;
+	}
+
+	/**
+	 * @return the transZoneId
+	 */
+	public String getTransZoneId() {
+		return transZoneId;
+	}
+
+	/**
+	 * @param transZoneId the transZoneId to set
+	 */
+	public void setTransZoneId(String transZoneId) {
+		this.transZoneId = transZoneId;
+	}
+
+	/**
+	 * @return the transClusterId
+	 */
+	public String getTransClusterId() {
+		return transClusterId;
+	}
+
+	/**
+	 * @param transClusterId the transClusterId to set
+	 */
+	public void setTransClusterId(String transClusterId) {
+		this.transClusterId = transClusterId;
+	}
+
+	/**
+	 * @return the status
+	 */
+	public Status getStatus() {
+		return status;
+	}
+
+	/**
+	 * @param status the status to set
+	 */
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+
+	/**
+	 * @return the isActive
+	 */
+	public Boolean getIsActive() {
+		return isActive;
+	}
+
+	/**
+	 * @param isActive the isActive to set
+	 */
+	public void setIsActive(Boolean isActive) {
+		this.isActive = isActive;
+	}
+
+	/**
        * Convert JSONObject to domain entity.
        *
        * @param jsonObject json object
@@ -366,15 +449,15 @@ public class Host {
        * @return domain entity object.
        * @throws JSONException handles json exception.
        */
-      public static Host convert(JSONObject jsonObject, ConvertUtil convertUtil) throws JSONException {
+      public static Host convert(JSONObject jsonObject) throws JSONException {
           Host host = new Host();
           try {
               host.setName(JsonUtil.getStringValue(jsonObject, "name"));
               host.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-              host.setClusterId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
-              host.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
-              host.setPodId(convertUtil.getPodId(JsonUtil.getStringValue(jsonObject, "podid")));
-
+              host.setTransPodId((JsonUtil.getStringValue(jsonObject, "podid")));
+              host.setTransClusterId((JsonUtil.getStringValue(jsonObject, "clusterid")));
+              host.setTransZoneId((JsonUtil.getStringValue(jsonObject, "zoneid")));
+              host.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
           } catch (Exception ex) {
               ex.printStackTrace();
           }

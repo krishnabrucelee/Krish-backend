@@ -32,5 +32,14 @@ public interface DomainService extends CRUDService<Domain> {
      */
     Domain findbyUUID(String uuid) throws Exception;
 
+    /**
+     * Soft delete for domain.
+     *
+     * @param domain object
+     * @return domain
+     * @throws Exception unhandled errors.
+     */
+	Domain softDelete(Domain domain) throws Exception;
+
 }
 

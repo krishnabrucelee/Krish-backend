@@ -4,7 +4,6 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,6 +12,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import org.hibernate.annotations.Type;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
@@ -20,7 +20,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
-import ck.panda.util.ConvertUtil;
+
+import ck.panda.domain.entity.Host.Status;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -67,6 +68,10 @@ public class Pod {
     @Column(name = "zone_id")
     private Long zoneId;
 
+    /** Transient zone of the pod.*/
+    @Transient
+    private String transZoneId;
+
     /** Created by user. */
     @CreatedBy
     @JoinColumn(name = "created_user_id", referencedColumnName = "id")
@@ -92,6 +97,27 @@ public class Pod {
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
+
+    /** State of the host. */
+    @Column(name = "state")
+    private Status status;
+
+    /** IsActive attribute to verify Active or Inactive. */
+    @Column(name = "is_active")
+    private Boolean isActive;
+
+    /**
+     * Enum type for  pod Status.
+     *
+     */
+    public enum Status {
+
+        /**  Pod will be in a Enabled State. */
+        ENABLED,
+
+        /**  Pod will be in a Disabled State. */
+        DISABLED,
+    }
 
     /**
      * @return the id
@@ -288,20 +314,64 @@ public class Pod {
     }
 
      /**
+	 * @return the transZoneId
+	 */
+	public String getTransZoneId() {
+		return transZoneId;
+	}
+
+	/**
+	 * @param transZoneId the transZoneId to set
+	 */
+	public void setTransZoneId(String transZoneId) {
+		this.transZoneId = transZoneId;
+	}
+
+	/**
+	 * @return the status
+	 */
+	public Status getStatus() {
+		return status;
+	}
+
+	/**
+	 * @param status the status to set
+	 */
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+
+	/**
+	 * @return the isActive
+	 */
+	public Boolean getIsActive() {
+		return isActive;
+	}
+
+	/**
+	 * @param isActive the isActive to set
+	 */
+	public void setIsActive(Boolean isActive) {
+		this.isActive = isActive;
+	}
+
+	/**
      * Convert JSONObject into pod object.
      *
      * @param jsonObject JSON object.
      * @param convertUtil convert Entity object from UUID.
      * @return pod object.
      */
-    public static Pod convert(JSONObject jsonObject, ConvertUtil convertUtil) {
+    public static Pod convert(JSONObject jsonObject) {
         Pod pod = new Pod();
         try {
             pod.setName(JsonUtil.getStringValue(jsonObject, "name"));
             pod.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            pod.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
+            pod.setTransZoneId((JsonUtil.getStringValue(jsonObject, "zoneid")));
             pod.setNetmask(JsonUtil.getStringValue(jsonObject, "netmask"));
             pod.setGateway(JsonUtil.getStringValue(jsonObject, "gateway"));
+            pod.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
+            pod.setIsActive(true);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

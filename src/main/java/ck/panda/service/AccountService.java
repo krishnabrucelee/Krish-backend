@@ -90,5 +90,14 @@ public interface AccountService  extends CRUDService<Account>  {
      */
     Account findByNameAndDomainAndIsActiveAndUserType(String userName, Domain domain, Boolean isActive);
 
+    /**
+     * Soft delete for account.
+     *
+     * @param account object
+     * @return account
+     * @throws Exception unhandled errors.
+     */
+	Account softDelete(Account account) throws Exception;
+
 
 }

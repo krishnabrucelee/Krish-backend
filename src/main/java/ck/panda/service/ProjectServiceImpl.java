@@ -13,13 +13,13 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.Pod;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.ProjectRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackProjectService;
 import ck.panda.util.CloudStackServer;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
@@ -55,9 +55,9 @@ public class ProjectServiceImpl implements ProjectService {
     @Autowired
     private CloudStackConfigurationService cloudConfigService;
 
-    /** Convert entity repository reference. */
+    /** Reference of the convert entity service. */
     @Autowired
-    private ConvertUtil entity;
+    private ConvertEntityService convertEntityService;
 
     /** Autowired TokenDetails */
     @Autowired
@@ -270,7 +270,15 @@ public class ProjectServiceImpl implements ProjectService {
                 // 2.1 Call convert by passing JSONObject to Project entity
                 // and Add
                 // the converted Project entity to list
-                projectList.add(Project.convert(projectListJSON.getJSONObject(i), entity));
+                Project project = Project.convert(projectListJSON.getJSONObject(i));
+                project.setDomainId(convertEntityService.getDomainId(project.getTransDomainId()));
+                project.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomain(project.getTransAccount(),
+                		convertEntityService.getDomain(project.getTransDomainId())));
+                project.setIsActive(convertEntityService.getState(project.getTransState()));
+                project.setStatus((Project.Status)convertEntityService.getStatus(project.getTransState()));
+                project.setProjectOwnerId(convertEntityService.getUserIdByAccount(project.getTransAccount(), convertEntityService.getDomain(project.getTransDomainId())));
+                projectList.add(project);
+
             }
         }
         return projectList;
@@ -290,5 +298,4 @@ public class ProjectServiceImpl implements ProjectService {
     public List<Project> findByDepartmentAndIsActive(Long id, Boolean isActive) throws Exception {
         return projectRepository.findByDepartmentAndIsActive(id, true);
     }
-
 }

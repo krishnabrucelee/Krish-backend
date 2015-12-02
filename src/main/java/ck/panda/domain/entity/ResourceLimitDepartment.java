@@ -27,7 +27,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -123,6 +122,14 @@ public class ResourceLimitDepartment {
      */
     @Transient
     private Boolean isSyncFlag;
+
+    /** Transient domain of the user. */
+    @Transient
+    private String transDomainId;
+
+    /** Transient department of the user. */
+    @Transient
+    private String transDepartment;
 
     /** Enum type for Resource Limit. */
     public enum ResourceType {
@@ -451,6 +458,34 @@ public class ResourceLimitDepartment {
     }
 
     /**
+	 * @return the transDomainId
+	 */
+	public String getTransDomainId() {
+		return transDomainId;
+	}
+
+	/**
+	 * @param transDomainId the transDomainId to set
+	 */
+	public void setTransDomainId(String transDomainId) {
+		this.transDomainId = transDomainId;
+	}
+
+	/**
+	 * @return the transDepartment
+	 */
+	public String getTransDepartment() {
+		return transDepartment;
+	}
+
+	/**
+	 * @param transDepartment the transDepartment to set
+	 */
+	public void setTransDepartment(String transDepartment) {
+		this.transDepartment = transDepartment;
+	}
+
+	/**
      * Convert JSONObject to ResourceLimit entity.
      *
      * @param object json object
@@ -459,15 +494,15 @@ public class ResourceLimitDepartment {
      * @throws JSONException unhandled json errors
      */
     @SuppressWarnings("static-access")
-    public static ResourceLimitDepartment convert(JSONObject object, ConvertUtil convertUtil) throws JSONException {
+    public static ResourceLimitDepartment convert(JSONObject object) throws JSONException {
         ResourceLimitDepartment resource = new ResourceLimitDepartment();
         resource.setIsSyncFlag(false);
         try {
             resource.setResourceType(ResourceType.values()[(JsonUtil.getIntegerValue(object, "resourcetype"))]);
-            resource.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(object, "domainid")));
-            resource.setDepartmentId(convertUtil.getDepartmentByUsername(JsonUtil.getStringValue(object, "account")).getId());
             resource.setMax(resource.getMax().valueOf(JsonUtil.getIntegerValue(object, "max")));
             resource.setUniqueSeperator(resource.getDepartmentId()+"-"+resource.getResourceType());
+            resource.setTransDomainId(JsonUtil.getStringValue(object, "domainid"));
+            resource.setTransDepartment(JsonUtil.getStringValue(object, "account"));
             resource.setIsActive(true);
         } catch (Exception e) {
             e.printStackTrace();

@@ -19,7 +19,6 @@ import ck.panda.domain.repository.jpa.ResourceLimitDepartmentRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackResourceLimitService;
 import ck.panda.util.ConfigUtil;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -54,9 +53,9 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
     @Autowired
     private DomainService domainService;
 
-    /** Convert entity repository reference. */
+    /** Reference of the convert entity service. */
     @Autowired
-    private ConvertUtil entity;
+    private ConvertEntityService convertEntityService;
 
     /** Message source attribute. */
     @Autowired
@@ -186,7 +185,10 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
                 // entity
                 // and Add
                 // the converted Resource limit entity to list
-                resourceList.add(ResourceLimitDepartment.convert(resourceListJSON.getJSONObject(i), entity));
+                ResourceLimitDepartment resource = ResourceLimitDepartment.convert(resourceListJSON.getJSONObject(i));
+                resource.setDomainId(convertEntityService.getDomainId(resource.getTransDomainId()));
+                resource.setDepartmentId(convertEntityService.getDepartmentByUsername(resource.getTransDepartment()));
+                resourceList.add(resource);
             }
         }
         return resourceList;

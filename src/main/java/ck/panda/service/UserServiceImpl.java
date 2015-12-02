@@ -21,7 +21,6 @@ import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
@@ -55,9 +54,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private ConfigUtil configServer;
 
-    /** Convert entity repository reference. */
+    /** Reference of the convert entity service. */
     @Autowired
-    private ConvertUtil entity;
+    private ConvertEntityService convertEntityService;
 
     /** Inject domain service business logic. */
     @Autowired
@@ -203,7 +202,10 @@ public class UserServiceImpl implements UserService {
                 // 2.1 Call convert by passing JSONObject to User entity and Add
                 // the converted User entity to list
 
-                User user = User.convert(userListJSON.getJSONObject(i), entity);
+                User user = User.convert(userListJSON.getJSONObject(i));
+                user.setAccountId(convertEntityService.getAccountIdByUsernameAndDomain(user.getTransAccount(),convertEntityService.getDomain(user.getTransDomainId())));
+                user.setDepartment(convertEntityService.getDepartment(user.getTransDepartment()));
+                user.setDomainId(convertEntityService.getDomainId(user.getTransDomainId()));
                 userList.add(user);
             }
         }

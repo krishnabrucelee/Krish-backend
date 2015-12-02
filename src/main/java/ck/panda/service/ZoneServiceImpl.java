@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.ZoneRepository;
 import ck.panda.util.CloudStackZoneService;
@@ -101,5 +102,12 @@ public class ZoneServiceImpl implements ZoneService {
     public Zone findByUUID(String uuid) throws Exception {
        return zoneRepo.findByUUID(uuid);
     }
+
+	@Override
+	public Zone softDelete(Zone zone) throws Exception {
+		    zone.setIsActive(false);
+		    zone.setStatus(Zone.Status.DISABLED);
+	      return zoneRepo.save(zone);
+	}
 
 }
