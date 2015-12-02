@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.Application;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
@@ -173,9 +175,13 @@ public class ProjectServiceImpl implements ProjectService {
     public List<Project> findByAll() throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if(domain != null && !domain.getName().equals("ROOT")) {
-            return (List<Project>) projectRepository.findbyDomain(domain.getId());
-        }
-        return (List<Project>) projectRepository.findAll();
+			if (Long.valueOf(tokenDetails.getTokenDetails("departmentid")) == 1000L) {
+				return (List<Project>) projectRepository.findAll();
+			} else {
+				return (List<Project>) projectRepository.findbyDomain(domain.getId());
+			}
+		}
+		return (List<Project>) projectRepository.findAll();
     }
 
     /**

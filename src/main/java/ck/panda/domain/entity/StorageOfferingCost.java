@@ -1,7 +1,10 @@
 package ck.panda.domain.entity;
 
+import java.time.ZonedDateTime;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
@@ -12,11 +15,11 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 import org.hibernate.annotations.Type;
-import org.joda.time.DateTime;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.domain.entity.StorageOffering.Status;
 
@@ -25,6 +28,7 @@ import ck.panda.domain.entity.StorageOffering.Status;
  *
  */
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "ck_storage_offering_cost")
 public class StorageOfferingCost {
 
@@ -95,14 +99,14 @@ public class StorageOfferingCost {
     @Column(name = "created_date_time")
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    private DateTime createdDateTime;
+    private ZonedDateTime createdDateTime;
 
     /** Last updated date and time. */
     @LastModifiedDate
     @Column(name = "updated_date_time")
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    private DateTime updatedDateTime;
+    private ZonedDateTime updatedDateTime;
 
     /** An active attribute is to check whether the role is active or not. */
     @Column(name = "is_active", columnDefinition = "tinyint default 1")
@@ -294,7 +298,7 @@ public class StorageOfferingCost {
      *
      * @return the createdDateTime of the storage offering cost
      */
-    public DateTime getCreatedDateTime() {
+    public ZonedDateTime getCreatedDateTime() {
         return createdDateTime;
     }
 
@@ -303,7 +307,7 @@ public class StorageOfferingCost {
      *
      * @param createdDateTime the created date time to set
      */
-    public void setCreatedDateTime(DateTime createdDateTime) {
+    public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
     }
 
@@ -312,7 +316,7 @@ public class StorageOfferingCost {
      *
      * @return the updatedDateTime of the storage offering cost
      */
-    public DateTime getUpdatedDateTime() {
+    public ZonedDateTime getUpdatedDateTime() {
         return updatedDateTime;
     }
 
@@ -321,7 +325,7 @@ public class StorageOfferingCost {
      *
      * @param updatedDateTime the updated date time to set
      */
-    public void setUpdatedDateTime(DateTime updatedDateTime) {
+    public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
 
