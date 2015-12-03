@@ -129,6 +129,7 @@ public class VolumeServiceImpl implements VolumeService {
         if (volume.getDiskMinIops() != null) {
             optional.put("miniops", volume.getDiskMinIops().toString());
         }
+
         return optional;
     }
 
@@ -182,8 +183,12 @@ public class VolumeServiceImpl implements VolumeService {
                     volume.setStatus(Status.valueOf(EventTypes.Allocated));
                 }
                 volume.setIsActive(true);
-                volume.setDiskSize(volume.getDiskSize());
                 volume.setStorageOfferingId(volume.getStorageOffering().getId());
+                if (volume.getDiskSize() != null) {
+                    volume.setDiskSize(volume.getDiskSize());
+                } else {
+                    volume.setDiskSize(volume.getStorageOffering().getDiskSize());
+                }
                 volume.setZoneId(volume.getZone().getId());
                 volume.setVolumeType(Volume.VolumeType.DATADISK);
                 volume.setCreatedDateTime(volume.getCreatedDateTime());
@@ -247,7 +252,7 @@ public class VolumeServiceImpl implements VolumeService {
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
 
                 if (jobresult.has("volume")) {
-                	volume.setUuid((String) jobresult.get("id"));
+                    volume.setUuid((String) jobresult.get("id"));
                 }
                 if (jobresult.getString("jobstatus").equals("0")) {
                        volume.setStatus(Status.Ready);
@@ -279,7 +284,7 @@ public class VolumeServiceImpl implements VolumeService {
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
                 if (jobresult.has("volume")) {
-                	volume.setUuid((String) jobresult.get("id"));
+                    volume.setUuid((String) jobresult.get("id"));
                 }
                 if (jobresult.getString("jobstatus").equals("0")) {
                        volume.setStatus(Status.Destroy);
@@ -290,9 +295,9 @@ public class VolumeServiceImpl implements VolumeService {
         return volume;
     }
 
-	@Override
-	public Volume resizeVolume(Volume volume) throws Exception {
-		Errors errors = validator.rejectIfNullEntity("volumes", volume);
+    @Override
+    public Volume resizeVolume(Volume volume) throws Exception {
+        Errors errors = validator.rejectIfNullEntity("volumes", volume);
         errors = validator.validateEntity(volume, errors);
         config.setServer(1L);
         String volumeS = csVolumeService.resizeVolume("json", optional(volume));
@@ -309,7 +314,7 @@ public class VolumeServiceImpl implements VolumeService {
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
 
                 if (jobresult.has("volume")) {
-                	volume.setUuid((String) jobresult.get("id"));
+                    volume.setUuid((String) jobresult.get("id"));
                 }
                 if (jobresult.getString("jobstatus").equals("0")) {
                        volume.setStatus(Status.Ready);
@@ -318,6 +323,79 @@ public class VolumeServiceImpl implements VolumeService {
             volumeRepo.save(volume);
         }
         return volume;
-	}
+    }
+
+    @Override
+    public Volume uploadVolume(Volume volume) throws Exception {
+        Errors errors = validator.rejectIfNullEntity("volumes", volume);
+        errors = validator.validateEntity(volume, errors);
+        if (errors.hasErrors()) {
+            throw new ApplicationException(errors);
+        } else {
+            config.setServer(1L);
+            HashMap<String, String> optional = new HashMap<String, String>();
+
+            if (volume.getStorageOffering() != null) {
+                optional.put("diskofferingid", volume.getStorageOffering().getUuid());
+            }
+            if (volume.getChecksum() != null) {
+                optional.put("checksum", volume.getChecksum().toString());
+            }
+            String volumeS = csVolumeService.uploadVolume(volume.getName(), volume.getFormat().name(),
+                    volume.getZone().getUuid(), volume.getUrl(), "json", optional);
+            JSONObject jobId = new JSONObject(volumeS).getJSONObject("uploadvolumeresponse");
+
+            if (jobId.has("errorcode")) {
+                errors = this.validateEvent(errors, jobId.getString("errortext"));
+                throw new ApplicationException(errors);
+            } else {
+                if (jobId.has("jobid")) {
+                    String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
+
+                    JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+                    if (jobresult.getString("jobstatus").equals("2")) {
+                        volume.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
+
+                    }
+                    if (jobresult.getString("jobstatus").equals("1")) {
+                        volume.setStatus(Status.valueOf(EventTypes.UploadNotStarted));
+                        volume.setEventMessage("Volume Not started");
+                        setValue(volume);
+                    }
+                    if (jobresult.getString("jobstatus").equals("0")) {
+                        volume.setStatus(Status.valueOf(EventTypes.Uploaded));
+                        volume.setEventMessage("Volume Uploaded");
+                        setValue(volume);
+                    }
+                }
+                volumeRepo.save(volume);
+            }
+            return volume;
+        }
+    }
+
+    /**
+     * To set response values from cloud stack.
+     *
+     * @param volume volume response.
+     */
+    private void setValue(Volume volume) {
+        volume.setVolumeType(Volume.VolumeType.DATADISK);
+        volume.setIsActive(true);
+        volume.setUuid(volume.getUuid());
+        volume.setFormat(volume.getFormat());
+        volume.setUrl(volume.getUrl());
+        if (volume.getStorageOffering() != null) {
+            volume.setStorageOfferingId(volume.getStorageOffering().getId());
+            volume.setDiskSize(volume.getStorageOffering().getDiskSize());
+        }
+        if (volume.getDiskSize() != null) {
+            volume.setDiskSize(volume.getDiskSize());
+        }
+        volume.setZoneId(volume.getZone().getId());
+        if (volume.getChecksum() != null) {
+            volume.setChecksum(volume.getChecksum());
+        }
+    }
 
 }

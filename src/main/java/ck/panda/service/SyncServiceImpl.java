@@ -1253,7 +1253,16 @@ public class SyncServiceImpl implements SyncService {
                 volume.setZoneId(csvolume.getZoneId());
                 volume.setVmInstanceId(csvolume.getVmInstanceId());
                 volume.setVolumeType(csvolume.getVolumeType());
-
+                if(volume.getDiskSize() !=null) {
+                	volume.setDiskSize(csvolume.getDiskSize());
+                } else {
+                    volume.setDiskSize(csvolume.getStorageOffering().getDiskSize());
+                }
+                volume.setIsActive(true);
+                volume.setChecksum(csvolume.getChecksum());
+                volume.setStatus(csvolume.getStatus());
+                volume.setCreatedDateTime(csvolume.getCreatedDateTime());
+                volume.setUpdatedDateTime(csvolume.getUpdatedDateTime());
                 // 3.2 If found, update the osType object in app db
                 volumeService.update(volume);
 
@@ -1261,7 +1270,6 @@ public class SyncServiceImpl implements SyncService {
                 // osType which is not added in the app
                 csVolumeMap.remove(volume.getUuid());
             } else {
-                volume.setIsSyncFlag(false);
                 volumeService.delete(volume);
                 // 3.2 If not found, delete it from app db
                 // TODO clarify the business requirement, since it has impact in

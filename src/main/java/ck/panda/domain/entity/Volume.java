@@ -105,6 +105,23 @@ public class Volume {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    /** Format attribute to verify status of the volume. */
+    @Column(name = "format")
+    @Enumerated(EnumType.STRING)
+    private Format format;
+
+    /** URL of the volume. */
+    @Column(name = "url")
+    private String url;
+
+    /** MD5 checksum for the volume. */
+    @Column(name = "checksum")
+    private String checksum;
+
+    /** Volume event message. */
+    @Column(name = "event_message")
+    private String eventMessage;
+
     /** Version attribute to handle optimistic locking. */
     @Version
     @Column(name = "version")
@@ -154,7 +171,6 @@ public class Volume {
     @Type(type = "org.hibernate.type.NumericBooleanType")
     private Boolean isActive;
 
-
     /**
      * isSyncFlag field is not to be serialized,
      * whereas JPA's @Transient annotation is used to indicate
@@ -181,6 +197,10 @@ public class Volume {
         Expunged,
         /** Volume will be in a Ready State. */
         Ready,
+        /** Volume will be in a UploadNotStarted State. */
+        UploadNotStarted,
+        /** The volume upload operation is in progress or in short the volume is on secondary storage. */
+        UploadOp,
         /** Volume will be in a UploadAbandoned State. */
         UploadAbandoned,
         /** Volume will be in a UploadError State. */
@@ -188,7 +208,21 @@ public class Volume {
         /** Volume will be in a Abandoned State. */
         Abandoned,
         /** Volume will be in a Downloaded State. */
-        Downloaded
+        Uploaded
+    }
+
+    /** Format enum type used to list the static format values. */
+    public enum Format {
+        /** Hypervisor format type as RAW. */
+        RAW,
+        /** Hypervisor format type as VHD. */
+        VHD,
+        /** Hypervisor format type as VHDX. */
+        VHDX,
+        /** Hypervisor format type as OVA. */
+        OVA,
+        /** Hypervisor format type as QCOW2. */
+        QCOW2
     }
 
     /**
@@ -391,6 +425,78 @@ public class Volume {
     }
 
     /**
+     * Get the format of the Volume.
+
+     * @return the format of Volume.
+     */
+    public Format getFormat() {
+        return format;
+    }
+
+    /**
+     * Set the format of the Volume.
+     *
+     * @param format the format to set
+     */
+    public void setFormat(Format format) {
+        this.format = format;
+    }
+
+    /**
+     * Get the url of the Volume.
+
+     * @return the url of Volume.
+     */
+    public String getUrl() {
+        return url;
+    }
+
+    /**
+     * Set the url of the Volume.
+     *
+     * @param url the url to set
+     */
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    /**
+     * Get the checksum of the Volume.
+
+     * @return the checksum of Volume.
+     */
+    public String getChecksum() {
+        return checksum;
+    }
+
+    /**
+     * Set the checksum of the Volume.
+     *
+     * @param checksum the checksum to set
+     */
+    public void setChecksum(String checksum) {
+        this.checksum = checksum;
+    }
+
+    /**
+     * Get the eventMessage of the Volume.
+
+     * @return the eventMessage of Volume.
+     */
+    public String getEventMessage() {
+        return eventMessage;
+    }
+
+    /**
+     * Set the eventMessage of the Volume.
+     *
+     * @param eventMessage the eventMessage to set
+     */
+    public void setEventMessage(String eventMessage) {
+        this.eventMessage = eventMessage;
+    }
+
+    /**
      * Get the status of the Volume.
      *
      * @return the status of the Volume
@@ -571,25 +677,25 @@ public class Volume {
         this.vmInstanceId = vmInstanceId;
     }
 
-	/**
-	 * Get the is removed of the Volume.
+    /**
+     * Get the is removed of the Volume.
 
-	 * @return the isRemoved of Volume.
-	 */
-	public Boolean getIsRemoved() {
-		return isRemoved;
-	}
+     * @return the isRemoved of Volume.
+     */
+    public Boolean getIsRemoved() {
+        return isRemoved;
+    }
 
-	/**
-	 * Set the is removed of the Volume.
-	 *
-	 * @param isRemoved the isRemoved to set
-	 */
-	public void setIsRemoved(Boolean isRemoved) {
-		this.isRemoved = isRemoved;
-	}
+    /**
+     * Set the is removed of the Volume.
+     *
+     * @param isRemoved the isRemoved to set
+     */
+    public void setIsRemoved(Boolean isRemoved) {
+        this.isRemoved = isRemoved;
+    }
 
-	/**
+    /**
      * Convert JSONObject to Volume entity.
      *
      * @param object json object
@@ -604,7 +710,7 @@ public class Volume {
         try {
             volume.uuid = JsonValidator.jsonStringValidation(object, "id");
             volume.name = JsonValidator.jsonStringValidation(object, "name");
-            volume.diskSize = object.getLong("size");
+            volume.setDiskSize(object.getLong("size"));
             volume.setVolumeType(volume.getVolumeType().valueOf(JsonValidator.jsonStringValidation(object, "type")));
             volume.setStatus(volume.getStatus().valueOf(JsonValidator.jsonStringValidation(object, "state")));
             volume.setCreatedDateTime(JsonUtil.convertToZonedDateTime(object.getString("created")));
@@ -615,7 +721,7 @@ public class Volume {
             if (object.has("virtualmachineid")) {
                 volume.setVmInstanceId(convertUtil.getVmInstanceId(JsonUtil.getStringValue(object, "virtualmachineid")));
             } else {
-            	volume.setVmInstanceId(null);
+                volume.setVmInstanceId(null);
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -180,11 +180,23 @@ public class EventTypes {
     /** State of resources. */
     public static final String RESOURCE_STATE = "new-state";
 
-    /** State of resources. */
+    /** State of Volume. */
     public static final String Allocated = "Allocated";
 
-    /** State of resources. */
+    /** State of Volume. */
     public static final String Ready = "Ready";
+
+    /** State of Volume. */
+    public static final String Abandoned = "Abandoned";
+
+    /** State of Volume. */
+    public static final String UploadNotStarted = "UploadNotStarted";
+
+    /** State of Volume. */
+    public static final String UploadOp = "UploadOp";
+
+    /** State of Volume. */
+    public static final String Uploaded = "Uploaded";
 
     /** State of snapshot. */
     public static final String EVENT_CREATE = "Creating";

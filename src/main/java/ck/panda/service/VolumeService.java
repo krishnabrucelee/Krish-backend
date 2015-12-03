@@ -59,4 +59,13 @@ public interface VolumeService extends CRUDService<Volume> {
     * @throws Exception Exception
     */
    Volume resizeVolume(Volume volume) throws Exception;
+
+   /**
+    * Upload volume from Url.
+    *
+    * @param volume volume
+    * @return volume
+    * @throws Exception Exception
+    */
+   Volume uploadVolume(Volume volume) throws Exception;
 }
