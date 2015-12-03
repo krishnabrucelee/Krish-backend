@@ -309,67 +309,80 @@ public class Iso {
     }
 
     /**
-	 * @return the transDomainId
-	 */
-	public String getTransDomainId() {
-		return transDomainId;
-	}
+     * Get Transient Domain Id.
+     *
+    * @return the transDomainId
+    */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
 
-	/**
-	 * @param transDomainId the transDomainId to set
-	 */
-	public void setTransDomainId(String transDomainId) {
-		this.transDomainId = transDomainId;
-	}
+    /**
+    * Set the transient domain Id.
+    *
+    * @param transDomainId to set
+    */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
 
 
-	/**
-	 * @return the transOsTypeId
-	 */
-	public String getTransOsTypeId() {
-		return transOsTypeId;
-	}
+    /**
+    * Get the TransOs Type Id.
+    *
+    * @return the transOsTypeId
+    */
+    public String getTransOsTypeId() {
+        return transOsTypeId;
+    }
 
-	/**
-	 * @param transOsTypeId the transOsTypeId to set
-	 */
-	public void setTransOsTypeId(String transOsTypeId) {
-		this.transOsTypeId = transOsTypeId;
-	}
+    /**
+    * Set the transOsTypeId.
+    *
+    * @param transOsTypeId  to set
+    */
+    public void setTransOsTypeId(String transOsTypeId) {
+        this.transOsTypeId = transOsTypeId;
+    }
 
-	/**
-	 * @return the isActive
-	 */
-	public Boolean getIsActive() {
-		return isActive;
-	}
+    /**
+    * @return the isActive
+    */
+    public Boolean getIsActive() {
+        return isActive;
+    }
 
-	/**
-	 * @param isActive the isActive to set
-	 */
-	public void setIsActive(Boolean isActive) {
-		this.isActive = isActive;
-	}
+    /**
+    * Set the isActive .
+    *
+    * @param isActive to set
+    */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
 
-	/**
-	 * @return the isRemoved
-	 */
-	public Boolean getIsRemoved() {
-		return isRemoved;
-	}
+    /**
+    * Get is Removed.
+    *
+    * @return the isRemoved
+    */
+    public Boolean getIsRemoved() {
+        return isRemoved;
+    }
 
-	/**
-	 * @param isRemoved the isRemoved to set
-	 */
-	public void setIsRemoved(Boolean isRemoved) {
-		this.isRemoved = isRemoved;
-	}
+    /**
+    * Set the isRemoved.
+    *
+    * @param isRemoved  to set
+    */
+    public void setIsRemoved(Boolean isRemoved) {
+        this.isRemoved = isRemoved;
+    }
 
-	/**
+    /**
      * Convert JSONObject to domain entity.
      *
      * @param jsonObject json object
-     * @param convertUtil convert Entity object from UUID.
      * @return domain entity object.
      * @throws JSONException handles json exception.
      */

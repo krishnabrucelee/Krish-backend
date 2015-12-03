@@ -514,27 +514,36 @@ public class Department implements Serializable {
         this.syncFlag = syncFlag;
     }
 
-     /**
-	 * @return the transDomainId
-	 */
-	public String getTransDomainId() {
-		return transDomainId;
-	}
+    /**
+     * Get transient Domain Id.
+     *
+     * @return the transDomainId
+     */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
 
-	/**
-	 * @param transDomainId the transDomainId to set
-	 */
-	public void setTransDomainId(String transDomainId) {
-		this.transDomainId = transDomainId;
-	}
+    /**
+     * Set the transDomainId .
+     *
+     * @param transDomainId to set
+     */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
 
 
-	/** Define user type. */
+    /** Define user type. */
     public enum AccountType {
+
        /** User status make department as user type. */
-    	 USER,
-         ROOT_ADMIN,
-         DOMAIN_ADMIN;
+        USER,
+
+       /** Root admin status make department as Root Admin type. */
+        ROOT_ADMIN,
+
+       /** Domain admin status make department as Domain Admin type. */
+        DOMAIN_ADMIN;
     }
 
     /**
@@ -549,12 +558,11 @@ public class Department implements Serializable {
     }
 
     /**
-     * Convert JSONObject into user object.
+     * Convert JSONObject into Department object.
      *
      * @param jsonObject json object from cloud stack.
-     * @param convertUtil to convert the string uuid and get the app id.
      * @return user object.
-     * @throws error occurs.
+     * @throws JSONException error occurs.
      */
     public static Department convert(JSONObject jsonObject) throws JSONException {
         Department department = new Department();
@@ -562,14 +570,14 @@ public class Department implements Serializable {
         try {
             department.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
             JSONArray userList = jsonObject.getJSONArray("user");
-            if(userList.length() > 0) {
-	            JSONObject userObject = userList.getJSONObject(0);
-	            department.setFirstName(JsonUtil.getStringValue(userObject, "firstname"));
-	            department.setLastName(JsonUtil.getStringValue(userObject, "lastname"));
-	            department.setUserName(JsonUtil.getStringValue(userObject, "username"));
-	            department.setType(AccountType.values()[(JsonUtil.getIntegerValue(userObject, "accounttype"))]);
-	            department.setEmail(JsonUtil.getStringValue(userObject, "email"));
-	            department.setStatus(Status.valueOf(JsonUtil.getStringValue(userObject, "state").toUpperCase()));
+            if (userList.length() > 0) {
+                JSONObject userObject = userList.getJSONObject(0);
+                department.setFirstName(JsonUtil.getStringValue(userObject, "firstname"));
+                department.setLastName(JsonUtil.getStringValue(userObject, "lastname"));
+                department.setUserName(JsonUtil.getStringValue(userObject, "username"));
+                department.setType(AccountType.values()[(JsonUtil.getIntegerValue(userObject, "accounttype"))]);
+                department.setEmail(JsonUtil.getStringValue(userObject, "email"));
+                department.setStatus(Status.valueOf(JsonUtil.getStringValue(userObject, "state").toUpperCase()));
             }
             department.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
             department.setPassword("l3tm3in");

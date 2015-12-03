@@ -454,45 +454,52 @@ public class ResourceLimitDepartment {
     /**
      * Get the unique Separator for the Resource limit.
      *
-     * @param unique Separator for the Resource limit.
+     * @param uniqueSeparator for the Resource limit.
      */
     public void setUniqueSeperator(String uniqueSeperator) {
         this.uniqueSeperator = uniqueSeperator;
     }
 
     /**
-	 * @return the transDomainId
-	 */
-	public String getTransDomainId() {
-		return transDomainId;
-	}
+     * Get the transient domain id.
+     *
+     * @return the transDomainId
+     */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
 
-	/**
-	 * @param transDomainId the transDomainId to set
-	 */
-	public void setTransDomainId(String transDomainId) {
-		this.transDomainId = transDomainId;
-	}
+    /**
+     * Set the transient domain id..
+     *
+     * @param transDomainId to set
+     */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
 
-	/**
-	 * @return the transDepartment
-	 */
-	public String getTransDepartment() {
-		return transDepartment;
-	}
+    /**
+    * Get transient department.
+    *
+    * @return the transDepartment
+    */
+    public String getTransDepartment() {
+        return transDepartment;
+    }
 
-	/**
-	 * @param transDepartment the transDepartment to set
-	 */
-	public void setTransDepartment(String transDepartment) {
-		this.transDepartment = transDepartment;
-	}
+    /**
+    * Set the transient Department.
+    *
+    * @param transDepartment  to set
+    */
+    public void setTransDepartment(String transDepartment) {
+        this.transDepartment = transDepartment;
+    }
 
-	/**
+    /**
      * Convert JSONObject to ResourceLimit entity.
      *
      * @param object json object
-     * @param convertUtil util class for converting json
      * @return ResourceLimit entity objects
      * @throws JSONException unhandled json errors
      */
@@ -503,7 +510,7 @@ public class ResourceLimitDepartment {
         try {
             resource.setResourceType(ResourceType.values()[(JsonUtil.getIntegerValue(object, "resourcetype"))]);
             resource.setMax(resource.getMax().valueOf(JsonUtil.getIntegerValue(object, "max")));
-            resource.setUniqueSeperator(resource.getDepartmentId()+"-"+resource.getResourceType());
+            resource.setUniqueSeperator(resource.getDepartmentId() + "-" + resource.getResourceType());
             resource.setTransDomainId(JsonUtil.getStringValue(object, "domainid"));
             resource.setTransDepartment(JsonUtil.getStringValue(object, "account"));
             resource.setIsActive(true);

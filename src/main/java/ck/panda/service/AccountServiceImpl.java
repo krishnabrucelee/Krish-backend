@@ -13,10 +13,8 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Account;
 import ck.panda.domain.entity.Account.AccountType;
 import ck.panda.domain.entity.Domain;
-import ck.panda.domain.entity.Pod;
 import ck.panda.domain.repository.jpa.AccountRepository;
 import ck.panda.util.CloudStackAccountService;
-import ck.panda.util.JsonUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
@@ -144,10 +142,10 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-   	public Account softDelete(Account account) throws Exception {
-    	account.setIsActive(false);
-    	account.setStatus(Account.Status.DELETED);
-   	      return accountRepo.save(account);
-   	}
+    public Account softDelete(Account account) throws Exception {
+        account.setIsActive(false);
+        account.setStatus(Account.Status.DELETED);
+            return accountRepo.save(account);
+    }
 
 }

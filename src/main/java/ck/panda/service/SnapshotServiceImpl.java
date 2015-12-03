@@ -82,7 +82,7 @@ public class SnapshotServiceImpl implements SnapshotService {
     /**
      * Validate the Snapshot.
      *
-     * @param department reference of the Snapshot.
+     * @param snapshot reference of the Snapshot.
      * @throws Exception error occurs
      */
     private void validateSnapshot(Snapshot snapshot) throws Exception {

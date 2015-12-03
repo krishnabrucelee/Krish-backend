@@ -255,22 +255,27 @@ public class OsType implements Serializable {
 
 
     /**
-	 * @return the transOsCategoryId
-	 */
-	public String getTransOsCategoryId() {
-		return transOsCategoryId;
-	}
+     * Get transient OsCategory id.
+     *
+     * @return the transOsCategoryId
+     */
+    public String getTransOsCategoryId() {
+        return transOsCategoryId;
+    }
 
-	/**
-	 * @param transOsCategoryId the transOsCategoryId to set
-	 */
-	public void setTransOsCategoryId(String transOsCategoryId) {
-		this.transOsCategoryId = transOsCategoryId;
-	}
+    /**
+    * Set transient OsCategory id.
+    *
+    * @param transOsCategoryId to set
+    */
+    public void setTransOsCategoryId(String transOsCategoryId) {
+        this.transOsCategoryId = transOsCategoryId;
+    }
 
-	/**
+    /**
+    * Convert JSONObject to os type entity.
+    *
      * @param jsonObject to set
-     * @param convertUtil to set
      * @return OS type
      * @throws JSONException raise if error
      */

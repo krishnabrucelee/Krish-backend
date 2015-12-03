@@ -17,7 +17,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.validation.constraints.Size;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
 import org.json.JSONException;
@@ -27,7 +26,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
-import ck.panda.util.JsonValidator;
+import ck.panda.util.JsonUtil;
 
 /**
  *  A service offering is a set of virtual hardware features such as CPU core count and speed, memory, and disk size.
@@ -58,12 +57,10 @@ public class ComputeOffering implements Serializable {
     private String name;
 
     /** The number of CPU cores needed. */
-    // @Size(min = 1, max = 200)
     @Column(name = "number_of_cores")
     private Integer numberOfCores;
 
     /** The clock rate of CPU speed in MHz. */
-    //@Size(min = 500, max = 3000)
     @Column(name = "clock_speed")
     private Integer clockSpeed;
 
@@ -94,7 +91,6 @@ public class ComputeOffering implements Serializable {
     private Boolean isSyncFlag;
 
     /** The CPU memory in Mebi Bytes Per Second. */
-    //@Size(min = 32)
     @Column(name = "memory")
     private Integer memory;
 
@@ -111,7 +107,6 @@ public class ComputeOffering implements Serializable {
     private Integer diskIopsReadRate;
 
     /** Network data transfer rate in megabits per second allowed. */
-    //@Size(min = 1)
     @Column(name = "network_rate")
     private Integer networkRate;
 
@@ -249,6 +244,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get UUID.
+     *
      * @return the uuid
      */
     public String getUuid() {
@@ -256,6 +253,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get name.
+     *
      * @return the name
      */
     public String getName() {
@@ -263,6 +262,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get number of cores.
+     *
      * @return the numberOfCores
      */
     public Integer getNumberOfCores() {
@@ -270,6 +271,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get the clock speed.
+     *
      * @return the clockSpeed
      */
     public Integer getClockSpeed() {
@@ -277,6 +280,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get the display text.
+     *
      * @return the displayText
      */
     public String getDisplayText() {
@@ -284,6 +289,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get the host tags.
+     *
      * @return the hostTags
      */
     public String getHostTags() {
@@ -291,6 +298,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get the cpu capacity.
+     *
      * @return the cpuCapacity
      */
     public Boolean getCpuCapacity() {
@@ -298,6 +307,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get memory.
+     *
      * @return the memory
      */
     public Integer getMemory() {
@@ -305,6 +316,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get Disk bytes read rate.
+     *
      * @return the diskBytesReadRate
      */
     public Integer getDiskBytesReadRate() {
@@ -312,6 +325,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get Disk bytes write rate.
+     *
      * @return the diskBytesWriteRate
      */
     public Integer getDiskBytesWriteRate() {
@@ -319,6 +334,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get Disk iops read rate.
+     *
      * @return the diskIopsReadRate
      */
     public Integer getDiskIopsReadRate() {
@@ -326,6 +343,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get network rate.
+     *
      * @return the networkRate
      */
     public Integer getNetworkRate() {
@@ -333,6 +352,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get isHigh Availabilty Enabled.
+     *
      * @return the isHighAvailabilityEnabled
      */
     public Boolean getIsHighAvailabilityEnabled() {
@@ -340,6 +361,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get Disk iops write rate.
+     *
      * @return the diskIopsWriteRate
      */
     public Integer getDiskIopsWriteRate() {
@@ -347,6 +370,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get created user.
+     *
      * @return the createdBy
      */
     public User getCreatedBy() {
@@ -354,6 +379,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get updated user.
+     *
      * @return the updatedBy
      */
     public User getUpdatedBy() {
@@ -361,119 +388,153 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
-     * @param id the id to set
+     * Set the id.
+     *
+     * @param id to set
      */
     public void setId(Long id) {
         this.id = id;
     }
 
     /**
-     * @param uuid the uuid to set
+     * Set the uuid.
+     *
+     * @param uuid  to set
      */
     public void setUuid(String uuid) {
         this.uuid = uuid;
     }
 
     /**
-     * @param name the name to set
+     * Set the name.
+     *
+     * @param name  to set
      */
     public void setName(String name) {
         this.name = name;
     }
 
     /**
-     * @param numberOfCores the numberOfCores to set
+     * Set the numberOfCores.
+     *
+     * @param numberOfCores  to set
      */
     public void setNumberOfCores(Integer numberOfCores) {
         this.numberOfCores = numberOfCores;
     }
 
     /**
-     * @param clockSpeed the clockSpeed to set
+     * Set the clockSpeed.
+     *
+     * @param clockSpeed  to set
      */
     public void setClockSpeed(Integer clockSpeed) {
         this.clockSpeed = clockSpeed;
     }
 
     /**
-     * @param displayText the displayText to set
+     * Set the displayText.
+     *
+     * @param displayText  to set
      */
     public void setDisplayText(String displayText) {
         this.displayText = displayText;
     }
 
     /**
-     * @param hostTags the hostTags to set
+     * Set the hostTags.
+     *
+     * @param hostTags  to set
      */
     public void setHostTags(String hostTags) {
         this.hostTags = hostTags;
     }
 
     /**
-     * @param cpuCapacity the cpuCapacity to set
+     * Set the cpuCapacity.
+     *
+     * @param cpuCapacity to set
      */
     public void setCpuCapacity(Boolean cpuCapacity) {
         this.cpuCapacity = cpuCapacity;
     }
 
     /**
-     * @param memory the memory to set
+     * Set the memory .
+     *
+     * @param memory to set
      */
     public void setMemory(Integer memory) {
         this.memory = memory;
     }
 
     /**
-     * @param diskBytesReadRate the diskBytesReadRate to set
+     * Set the diskBytesReadRate.
+     *
+     * @param diskBytesReadRate  to set
      */
     public void setDiskBytesReadRate(Integer diskBytesReadRate) {
         this.diskBytesReadRate = diskBytesReadRate;
     }
 
     /**
-     * @param diskBytesWriteRate the diskBytesWriteRate to set
+     * Set the diskBytesWriteRate.
+     *
+     * @param diskBytesWriteRate  to set
      */
     public void setDiskBytesWriteRate(Integer diskBytesWriteRate) {
         this.diskBytesWriteRate = diskBytesWriteRate;
     }
 
     /**
-     * @param diskIopsReadRate the diskIopsReadRate to set
+     * Set the diskIopsReadRate .
+     *
+     * @param diskIopsReadRate to set
      */
     public void setDiskIopsReadRate(Integer diskIopsReadRate) {
         this.diskIopsReadRate = diskIopsReadRate;
     }
 
     /**
-     * @param networkRate the networkRate to set
+     * Set the networkRate.
+     *
+     * @param networkRate to set
      */
     public void setNetworkRate(Integer networkRate) {
         this.networkRate = networkRate;
     }
 
     /**
-     * @param isHighAvailabilityEnabled the isHighAvailabilityEnabled to set
+     * Set the isHighAvailabilityEnabled .
+     *
+     * @param isHighAvailabilityEnabled to set
      */
     public void setIsHighAvailabilityEnabled(Boolean isHighAvailabilityEnabled) {
         this.isHighAvailabilityEnabled = isHighAvailabilityEnabled;
     }
 
     /**
-     * @param diskIopsWriteRate the diskIopsWriteRate to set
+     * Set the diskIopsWriteRate.
+     *
+     * @param diskIopsWriteRate  to set
      */
     public void setDiskIopsWriteRate(Integer diskIopsWriteRate) {
         this.diskIopsWriteRate = diskIopsWriteRate;
     }
 
     /**
-     * @param createdBy the createdBy to set
+     * Set the createdBy .
+     *
+     * @param createdBy to set
      */
     public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
     }
 
     /**
-     * @param updatedBy the updatedBy to set
+     * Set the updatedBy .
+     *
+     * @param updatedBy to set
      */
     public void setUpdatedBy(User updatedBy) {
         this.updatedBy = updatedBy;
@@ -487,6 +548,8 @@ public class ComputeOffering implements Serializable {
     }
 
    /**
+     * Get domain id.
+     *
      * @return the domainId
      */
     public Long getDomainId() {
@@ -494,20 +557,26 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
-     * @param isPublic the isPublic to set
+     * Set the isPublic.
+     *
+     * @param isPublic  to set
      */
     public void setIsPublic(Boolean isPublic) {
         this.isPublic = isPublic;
     }
 
     /**
-     * @param domainId the domainId to set
+     * Set the domainId.
+     *
+     * @param domainId  to set
      */
     public void setDomainId(Long domainId) {
         this.domainId = domainId;
     }
 
     /**
+     * Get the version.
+     *
      * @return the version
      */
     public Long getVersion() {
@@ -515,7 +584,9 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
-     * @param version the version to set
+     * Set the version .
+     *
+     * @param version to set
      */
     public void setVersion(Long version) {
         this.version = version;
@@ -523,6 +594,8 @@ public class ComputeOffering implements Serializable {
 
 
     /**
+     * Get disk io.
+     *
      * @return the diskIo
      */
     public DiskIo getDiskIo() {
@@ -530,13 +603,17 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
-     * @param diskIo the diskIo to set
+     * Set the diskIo.
+     *
+     * @param diskIo  to set
      */
     public void setDiskIo(DiskIo diskIo) {
         this.diskIo = diskIo;
     }
 
     /**
+     * Get created date time.
+     *
      * @return the createdDateTime
      */
     public DateTime getCreatedDateTime() {
@@ -544,6 +621,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get last modified time.
+     *
      * @return the lastModifiedDateTime
      */
     public DateTime getLastModifiedDateTime() {
@@ -551,20 +630,26 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
-     * @param createdDateTime the createdDateTime to set
+     * Set the createdDateTime .
+     *
+     * @param createdDateTime to set
      */
     public void setCreatedDateTime(DateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
     }
 
     /**
-     * @param lastModifiedDateTime the lastModifiedDateTime to set
+     * Set the lastModifiedDateTime.
+     *
+     * @param lastModifiedDateTime  to set
      */
     public void setLastModifiedDateTime(DateTime lastModifiedDateTime) {
         this.lastModifiedDateTime = lastModifiedDateTime;
     }
 
     /**
+     * Set the status.
+     *
      * @return the status
      */
     public Boolean getStatus() {
@@ -572,13 +657,17 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
-     * @param status the status to set
+     * Get the status .
+     *
+     * @param status to set
      */
     public void setStatus(Boolean status) {
         this.status = status;
     }
 
     /**
+     * Get the storage tags.
+     *
      * @return the storageTags
      */
     public String getStorageTags() {
@@ -586,6 +675,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get qos type.
+     *
      * @return the qosType
      */
     public QosType getQosType() {
@@ -593,6 +684,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get min iops.
+     *
      * @return the minIops
      */
     public Integer getMinIops() {
@@ -600,6 +693,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get max iops.
+     *
      * @return the maxIops
      */
     public Integer getMaxIops() {
@@ -607,6 +702,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get isActive.
+     *
      * @return the isActive
      */
     public Boolean getIsActive() {
@@ -614,41 +711,53 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
-     * @param storageTags the storageTags to set
+     * Set the storageTags.
+     *
+     * @param storageTags  to set
      */
     public void setStorageTags(String storageTags) {
         this.storageTags = storageTags;
     }
 
     /**
-     * @param qosType the qosType to set
+     * Set the qosType.
+     *
+     * @param qosType  to set
      */
     public void setQosType(QosType qosType) {
         this.qosType = qosType;
     }
 
     /**
-     * @param minIops the minIops to set
+     * Set the minIops.
+     *
+     * @param minIops  to set
      */
     public void setMinIops(Integer minIops) {
         this.minIops = minIops;
     }
 
     /**
-     * @param maxIops the maxIops to set
+     * Set the maxIops.
+     *
+     * @param maxIops  to set
      */
     public void setMaxIops(Integer maxIops) {
         this.maxIops = maxIops;
     }
 
     /**
-     * @param isActive the isActive to set
+     * Set the isActive.
+     *
+     * @param isActive  to set
      */
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
     }
 
     /**
+     * Get iscustom.
+     *
      * @return the isCustom
      */
     public Boolean getCustomized() {
@@ -656,6 +765,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get the customized iops.
+     *
      * @return the customizedIops
      */
     public Boolean getCustomizedIops() {
@@ -663,14 +774,18 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
-     * @param customizedIops the customizedIops to set
+     * Set the customizedIops.
+     *
+     * @param customizedIops  to set
      */
     public void setCustomizedIops(Boolean customizedIops) {
         this.customizedIops = customizedIops;
     }
 
     /**
-     * @param customized the customized to set
+     * Set the customized.
+     *
+     * @param customized  to set
      */
     public void setCustomized(Boolean customized) {
         this.customized = customized;
@@ -695,6 +810,8 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
+     * Get Domain.
+     *
      * @return the domain
      */
     public Domain getDomain() {
@@ -702,13 +819,17 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
-     * @param domain the domain to set
+     * Set the domain .
+     *
+     * @param domain to set
      */
     public void setDomain(Domain domain) {
         this.domain = domain;
     }
 
     /**
+     * Ge storage type.
+     *
      * @return the storageType
      */
     public StorageType getStorageType() {
@@ -716,7 +837,9 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
-     * @param storageType the storageType to set
+     * Set the storageType.
+     *
+     * @param storageType  to set
      */
     public void setStorageType(StorageType storageType) {
         this.storageType = storageType;
@@ -732,7 +855,9 @@ public class ComputeOffering implements Serializable {
     }
 
     /**
-     * @param computeCost the computeCost to set
+     * Set the computeCost .
+     *
+     * @param computeCost to set
      */
     public void setComputeCost(List<ComputeOfferingCost> computeCost) {
         this.computeCost = computeCost;
@@ -749,15 +874,15 @@ public class ComputeOffering implements Serializable {
         ComputeOffering compute = new ComputeOffering();
         compute.setIsSyncFlag(false);
         try {
-        compute.uuid =  JsonValidator.jsonStringValidation(object, "id");
-        compute.name =  JsonValidator.jsonStringValidation(object, "name");
-        compute.displayText = JsonValidator.jsonStringValidation(object, "displaytext");
-        compute.memory = JsonValidator.jsonIntegerValidation(object, "memory");
-        compute.clockSpeed = JsonValidator.jsonIntegerValidation(object, "cpuspeed");
-        compute.customized = JsonValidator.jsonBooleanValidation(object, "iscustomized");
-        compute.customizedIops = JsonValidator.jsonBooleanValidation(object, "iscustomizediops");
-        compute.numberOfCores = JsonValidator.jsonIntegerValidation(object, "cpunumber");
-        compute.setStorageType(compute.getStorageType().valueOf(object.has("storagetype") ? object.get("storagetype").toString() : ""));
+        compute.setUuid(JsonUtil.getStringValue(object, "id"));
+        compute.setDisplayText(JsonUtil.getStringValue(object, "displaytext"));
+        compute.setName(JsonUtil.getStringValue(object, "name"));
+        compute.setMemory(JsonUtil.getIntegerValue(object, "memory"));
+        compute.setClockSpeed(JsonUtil.getIntegerValue(object, "cpuspeed"));
+        compute.setCustomized(JsonUtil.getBooleanValue(object, "iscustomized"));
+        compute.setCustomizedIops(JsonUtil.getBooleanValue(object, "iscustomizediops"));
+        compute.setNumberOfCores(JsonUtil.getIntegerValue(object, "cpunumber"));
+        compute.setStorageType(StorageType.valueOf(JsonUtil.getStringValue(object, "storagetype")));
         compute.setIsActive(true);
 
         } catch (Exception ex) {

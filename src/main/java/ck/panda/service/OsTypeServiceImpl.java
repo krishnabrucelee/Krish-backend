@@ -22,8 +22,8 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 @Service
 public class OsTypeServiceImpl implements OsTypeService {
 
-	/** Logger attribute. */
-	 private static final Logger LOGGER = LoggerFactory.getLogger(OsTypeServiceImpl.class);
+    /** Logger attribute. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(OsTypeServiceImpl.class);
 
     /** OS type repository reference. */
     @Autowired
@@ -44,13 +44,13 @@ public class OsTypeServiceImpl implements OsTypeService {
 
     @Override
     public OsType save(OsType ostype) throws Exception {
-    	 LOGGER.debug(ostype.getUuid());
+        LOGGER.debug(ostype.getUuid());
         return ostyperepository.save(ostype);
     }
 
     @Override
     public OsType update(OsType ostype) throws Exception {
-    	LOGGER.debug(ostype.getUuid());
+        LOGGER.debug(ostype.getUuid());
         return ostyperepository.save(ostype);
     }
 
@@ -91,8 +91,8 @@ public class OsTypeServiceImpl implements OsTypeService {
                 // 2.1 Call convert by passing JSONObject to ostype entity and
                 // Add
                 // the converted ostype entity to list
-            	OsType ostype = OsType.convert(osTypeListJSON.getJSONObject(i));
-            	ostype.setOsCategoryId(convertEntityService.getOsCategory(ostype.getTransOsCategoryId()).getId());
+                OsType ostype = OsType.convert(osTypeListJSON.getJSONObject(i));
+                ostype.setOsCategoryId(convertEntityService.getOsCategory(ostype.getTransOsCategoryId()).getId());
                 osTypeList.add(ostype);
             }
         }

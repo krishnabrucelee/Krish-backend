@@ -3,8 +3,6 @@ package ck.panda.service;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Project;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -91,7 +89,7 @@ public interface ProjectService extends CRUDService<Project> {
     /**
      * Find the projects based on the isActive status.
      *
-     * @param isActive projects status Active/Inactive
+     * @throws Exception if error occurs.
      * @return project.
      */
     List<Project> findByAll() throws Exception;

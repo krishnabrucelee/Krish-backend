@@ -12,7 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Network;
-import ck.panda.domain.entity.User;
 import ck.panda.domain.repository.jpa.DepartmentReposiory;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.NetworkOfferingRepository;
@@ -140,8 +139,8 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public Network softDelete(Network network) throws Exception {
-    	network.setIsActive(false);
-    	network.setStatus(Network.Status.Destroy);
+        network.setIsActive(false);
+        network.setStatus(Network.Status.Destroy);
         return networkRepo.save(network);
     }
 
@@ -164,12 +163,12 @@ public class NetworkServiceImpl implements NetworkService {
                 // 2.1 Call convert by passing JSONObject to Domain entity and
                 // Add
                 // the converted Domain entity to list
-            	Network network = Network.convert(networkListJSON.getJSONObject(i));
-            	network.setDomainId(convertEntityService.getDomainId(network.getTransDomainId()));
-            	network.setZoneId(convertEntityService.getZoneId(network.getTransZoneId()));
-            	network.setNetworkOfferingId(convertEntityService.getNetworkOfferingId(network.getTransNetworkOfferingId()));
+                Network network = Network.convert(networkListJSON.getJSONObject(i));
+                network.setDomainId(convertEntityService.getDomainId(network.getTransDomainId()));
+                network.setZoneId(convertEntityService.getZoneId(network.getTransZoneId()));
+                network.setNetworkOfferingId(convertEntityService.getNetworkOfferingId(network.getTransNetworkOfferingId()));
                 network.setDepartmentId(convertEntityService.getDepartmentByUsername(network.getTransDepartmentId()));
-            	networkList.add(network);
+                networkList.add(network);
             }
         }
         return networkList;
@@ -198,10 +197,10 @@ public class NetworkServiceImpl implements NetworkService {
         return optional;
     }
 
-	@Override
-	public List<Network> findByDepartment(Long department) throws Exception {
-		Department deptNetwork = departmentRepository.findOne(department);
-		return networkRepo.findByDepartment(deptNetwork);
-	}
+    @Override
+    public List<Network> findByDepartment(Long department) throws Exception {
+        Department deptNetwork = departmentRepository.findOne(department);
+        return networkRepo.findByDepartment(deptNetwork);
+    }
 
 }

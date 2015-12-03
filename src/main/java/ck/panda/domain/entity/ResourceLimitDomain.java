@@ -1,6 +1,4 @@
-/**
- *
- */
+
 package ck.panda.domain.entity;
 
 import java.time.ZonedDateTime;
@@ -408,7 +406,7 @@ public class ResourceLimitDomain {
     /**
      * Get the unique Separator for the Resource limit.
      *
-     * @param unique Separator for the Resource limit.
+     * @param uniqueSeparator for the Resource limit.
      */
     public void setUniqueSeperator(String uniqueSeperator) {
         this.uniqueSeperator = uniqueSeperator;
@@ -416,38 +414,37 @@ public class ResourceLimitDomain {
 
 
     /**
-	 * @return the transDomainId
-	 */
-	public String getTransDomainId() {
-		return transDomainId;
-	}
+    * @return the transDomainId
+    */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
 
-	/**
-	 * @param transDomainId the transDomainId to set
-	 */
-	public void setTransDomainId(String transDomainId) {
-		this.transDomainId = transDomainId;
-	}
+    /**
+    * @param transDomainId the transDomainId to set
+    */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
 
-	/**
-	 * @return the transResourceType
-	 */
-	public Integer getTransResourceType() {
-		return transResourceType;
-	}
+    /**
+    * @return the transResourceType
+    */
+    public Integer getTransResourceType() {
+        return transResourceType;
+    }
 
-	/**
-	 * @param transResourceType the transResourceType to set
-	 */
-	public void setTransResourceType(Integer transResourceType) {
-		this.transResourceType = transResourceType;
-	}
+    /**
+    * @param transResourceType the transResourceType to set
+    */
+    public void setTransResourceType(Integer transResourceType) {
+        this.transResourceType = transResourceType;
+    }
 
-	/**
+    /**
      * Convert JSONObject to ResourceLimit entity.
      *
      * @param object json object
-     * @param convertUtil util class for converting json
      * @return ResourceLimit entity objects
      * @throws JSONException unhandled json errors
      */

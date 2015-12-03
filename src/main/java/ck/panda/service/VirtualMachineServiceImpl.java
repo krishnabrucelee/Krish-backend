@@ -163,7 +163,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     @Override
     public void delete(VmInstance vminstance) throws Exception {
-    	vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_EXPUNGING));
+        vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_EXPUNGING));
         vminstance.setIsRemoved(true);
         virtualmachinerepository.save(vminstance);
     }
@@ -359,7 +359,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         }
                         vminstance.setEventMessage(instance.getString("errortext"));
                 } else{
-                	vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_CREATE));
+                    vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_CREATE));
                     vminstance.setEventMessage("VM Recover");
                 }
             } catch (BadCredentialsException e) {
@@ -558,8 +558,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     @Override
     public Page<VmInstance> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-    	Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if(domain != null && !domain.getName().equals("ROOT")) {
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if (domain != null && !domain.getName().equals("ROOT")) {
             return virtualmachinerepository.findAllByDomainIsActive(domain.getId(), Status.Expunging, pagingAndSorting.toPageRequest());
         }
         return virtualmachinerepository.findAllByIsActive(Status.Expunging, pagingAndSorting.toPageRequest());
@@ -600,7 +600,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
      */
     private Errors validateName(Errors errors, String name, Department department, Long id) throws Exception {
         if ((virtualmachinerepository.findByNameAndDepartment(name, department, Status.Expunging)) != null) {
-            errors.addGlobalError("Instance name already exist in" +department.getUserName() +" department");
+            errors.addGlobalError("Instance name already exist in" + department.getUserName() +" department");
         }
         return errors;
     }
@@ -627,10 +627,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
               vmInstance.setProjectId(convertEntityService.getProjectId(vmInstance.getTransProjectId()));
               vmInstance.setHostId(convertEntityService.getHostId(vmInstance.getTransHostId()));
               vmInstance.setInstanceOwnerId(convertEntityService.getUserByName(vmInstance.getTransDisplayName(),
-            		  convertEntityService.getDomain(vmInstance.getTransDomainId())));
+                    convertEntityService.getDomain(vmInstance.getTransDomainId())));
               vmInstance.setDepartmentId(
-            		  convertEntityService.getDepartmentByUsernameAndDomain(vmInstance.getTransDepartmentId(),
-            				  convertEntityService.getDomain(vmInstance.getTransDomainId())));
+                    convertEntityService.getDepartmentByUsernameAndDomain(vmInstance.getTransDepartmentId(),
+                            convertEntityService.getDomain(vmInstance.getTransDomainId())));
               vmInstance.setComputeOfferingId(convertEntityService.getComputeOfferId(vmInstance.getTransComputeOfferingId()));
               if (vmInstance.getHostId() != null) {
                   vmInstance.setPodId(convertEntityService

@@ -10,8 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.Account;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.repository.jpa.StorageOfferingRepository;
 import ck.panda.util.AppValidator;
@@ -306,9 +304,9 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     }
 
     @Override
-   	public StorageOffering softDelete(StorageOffering storage) throws Exception {
-    	storage.setIsActive(false);
-    	storage.setStatus(StorageOffering.Status.DISABLED);
-   	      return storageOfferingRepo.save(storage);
-   	}
+    public StorageOffering softDelete(StorageOffering storage) throws Exception {
+        storage.setIsActive(false);
+        storage.setStatus(StorageOffering.Status.DISABLED);
+        return storageOfferingRepo.save(storage);
+    }
 }

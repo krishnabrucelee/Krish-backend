@@ -81,7 +81,7 @@ public interface DepartmentService  extends CRUDService<Department>  {
     /**
      * Find the departments based on the isActive status.
      *
-     * @param isActive department status Active/Inactive
+     * @throws Exception error occurs.
      * @return department.
      */
     List<Department> findByAll() throws Exception;

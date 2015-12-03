@@ -31,11 +31,11 @@ public interface IsoService extends CRUDService<Iso> {
     Iso findbyUUID(String uuid) throws Exception;
 
     /**
-     * Soft delete for iso
+     * Soft delete for iso.
      *
      * @param iso object
      * @return iso
      * @throws Exception unhandled errors.
      */
-	Iso softDelete(Iso iso) throws Exception;
+    Iso softDelete(Iso iso) throws Exception;
 }

@@ -13,20 +13,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
-
-import ck.panda.domain.entity.Network.Status;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -39,9 +34,6 @@ import ck.panda.util.JsonUtil;
 @Table(name = "ck_host")
 @SuppressWarnings("serial")
 public class Host {
-
-    /** Logger attribute. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Snapshot.class);
 
     /** Unique ID of the Domain. */
     @Id
@@ -372,80 +364,99 @@ public class Host {
     }
 
    /**
-	 * @return the transPodId
-	 */
-	public String getTransPodId() {
-		return transPodId;
-	}
+    * Get the transient pod id.
+    *
+    * @return the transPodId
+    */
+    public String getTransPodId() {
+        return transPodId;
+    }
 
-	/**
-	 * @param transPodId the transPodId to set
-	 */
-	public void setTransPodId(String transPodId) {
-		this.transPodId = transPodId;
-	}
+    /**
+     * Set the transient Pod Id.
+     *
+     * @param transPodId  to set
+     */
+    public void setTransPodId(String transPodId) {
+        this.transPodId = transPodId;
+    }
 
-	/**
-	 * @return the transZoneId
-	 */
-	public String getTransZoneId() {
-		return transZoneId;
-	}
+    /**
+     * Get transient Zone id.
+     *
+     * @return the transZoneId
+     */
+    public String getTransZoneId() {
+        return transZoneId;
+    }
 
-	/**
-	 * @param transZoneId the transZoneId to set
-	 */
-	public void setTransZoneId(String transZoneId) {
-		this.transZoneId = transZoneId;
-	}
+    /**
+     * Set the transZoneId.
+     *
+     * @param transZoneId  to set
+     */
+    public void setTransZoneId(String transZoneId) {
+        this.transZoneId = transZoneId;
+    }
 
-	/**
-	 * @return the transClusterId
-	 */
-	public String getTransClusterId() {
-		return transClusterId;
-	}
+    /**
+     * Get Transient Cluster Id.
+     *
+     * @return the transClusterId
+     */
+    public String getTransClusterId() {
+        return transClusterId;
+    }
 
-	/**
-	 * @param transClusterId the transClusterId to set
-	 */
-	public void setTransClusterId(String transClusterId) {
-		this.transClusterId = transClusterId;
-	}
+    /**
+     * Set the transClusterId .
+     *
+     * @param transClusterId to set
+     */
+    public void setTransClusterId(String transClusterId) {
+        this.transClusterId = transClusterId;
+    }
 
-	/**
-	 * @return the status
-	 */
-	public Status getStatus() {
-		return status;
-	}
+    /**
+     * Get Status.
+     *
+     * @return the status
+     */
+    public Status getStatus() {
+        return status;
+    }
 
-	/**
-	 * @param status the status to set
-	 */
-	public void setStatus(Status status) {
-		this.status = status;
-	}
+    /**
+     *  Set the status.
+     *
+     * @param status to set
+     */
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 
-	/**
-	 * @return the isActive
-	 */
-	public Boolean getIsActive() {
-		return isActive;
-	}
+    /**
+     * Get isActive.
+     *
+     * @return the isActive
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
 
-	/**
-	 * @param isActive the isActive to set
-	 */
-	public void setIsActive(Boolean isActive) {
-		this.isActive = isActive;
-	}
+    /**
+     * Set  the isActive.
+     *
+     * @param isActive to set
+     */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
 
-	/**
+    /**
        * Convert JSONObject to domain entity.
        *
        * @param jsonObject json object
-       * @param convertUtil convert Entity object from UUID.
        * @return domain entity object.
        * @throws JSONException handles json exception.
        */

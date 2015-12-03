@@ -114,7 +114,7 @@ public class Cluster {
     private Boolean isActive;
 
     /**
-     * Get id
+     * Get id.
      *
      * @return the id
      */
@@ -123,7 +123,7 @@ public class Cluster {
     }
 
     /**
-     * Set the id
+     * Set the id.
      *
      * @param id  to set
      */
@@ -132,7 +132,7 @@ public class Cluster {
     }
 
     /**
-     * Get Uuid
+     * Get Uuid.
      *
      * @return the uuid
      */
@@ -141,7 +141,7 @@ public class Cluster {
     }
 
     /**
-     * Set the uuid
+     * Set the uuid.
      *
      * @param uuid  to set
      */
@@ -150,7 +150,7 @@ public class Cluster {
     }
 
     /**
-     * Get name
+     * Get name.
      *
      * @return the name
      */
@@ -159,7 +159,7 @@ public class Cluster {
     }
 
     /**
-     * Set the name
+     * Set the name.
      *
      * @param name  to set
      */
@@ -168,7 +168,7 @@ public class Cluster {
     }
 
     /**
-     * Get the ClusterType
+     * Get the ClusterType.
      *
      * @return the clusterType
      */
@@ -177,14 +177,16 @@ public class Cluster {
     }
 
     /**
-     * @param clusterType the clusterType to set
+     * Set  the clusterType.
+     *
+     * @param clusterType to set
      */
     public void setClusterType(String clusterType) {
         this.clusterType = clusterType;
     }
 
     /**
-     * Get the hypervisor type
+     * Get the hypervisor type.
      *
      * @return the hypervisorType
      */
@@ -193,7 +195,7 @@ public class Cluster {
     }
 
     /**
-     * Set the hypervisorType
+     * Set the hypervisorType.
      *
      * @param hypervisorType  to set
      */
@@ -202,7 +204,7 @@ public class Cluster {
     }
 
     /**
-     * Get pod
+     * Get pod.
      *
      * @return the pod
      */
@@ -211,7 +213,7 @@ public class Cluster {
     }
 
     /**
-     * Set the pod
+     * Set the pod.
      *
      * @param pod  to set
      */
@@ -220,14 +222,16 @@ public class Cluster {
     }
 
     /**
-     * @return the podId
+     * Get the pod id.
+     *
+     * @return the podId.
      */
     public Long getPodId() {
         return podId;
     }
 
     /**
-     * Set the podId
+     * Set the podId.
      *
      * @param podId to set
      */
@@ -236,7 +240,7 @@ public class Cluster {
     }
 
     /**
-     * Get the zone
+     * Get the zone.
      *
      * @return the zone
      */
@@ -245,7 +249,7 @@ public class Cluster {
     }
 
     /**
-     * Set the zone
+     * Set the zone.
      *
      * @param zone to set
      */
@@ -254,7 +258,7 @@ public class Cluster {
     }
 
     /**
-     * Get zoneId
+     * Get zoneId.
      *
      * @return the zoneId
      */
@@ -263,7 +267,7 @@ public class Cluster {
     }
 
     /**
-     * Set the zoneId
+     * Set the zoneId.
      *
      * @param zoneId  to set
      */
@@ -272,7 +276,7 @@ public class Cluster {
     }
 
     /**
-     * Get CreatedBy
+     * Get Created user.
      *
      * @return the createdBy
      */
@@ -281,7 +285,7 @@ public class Cluster {
     }
 
     /**
-     * Set the createdBy
+     * Set the created user.
      *
      * @param createdBy  to set
      */
@@ -290,7 +294,7 @@ public class Cluster {
     }
 
     /**
-     * Get updatedBy
+     * Get updated user.
      *
      * @return the updatedBy
      */
@@ -299,7 +303,7 @@ public class Cluster {
     }
 
     /**
-     * Set the updatedBy
+     * Set the updated user.
      *
      * @param updatedBy  to set
      */
@@ -308,7 +312,7 @@ public class Cluster {
     }
 
     /**
-     * Get createdDateTime
+     * Get createdDateTime.
      *
      * @return the createdDateTime
      */
@@ -317,7 +321,7 @@ public class Cluster {
     }
 
     /**
-     * Set the createdDateTime
+     * Set the createdDateTime.
      *
      * @param createdDateTime to set
      */
@@ -326,7 +330,7 @@ public class Cluster {
     }
 
     /**
-     * Get the updatedDatetime
+     * Get the updatedDatetime.
      *
      * @return the updatedDateTime
      */
@@ -335,7 +339,7 @@ public class Cluster {
     }
 
     /**
-     * Set the updatedDateTime
+     * Set the updatedDateTime.
      *
      * @param updatedDateTime  to set
      */
@@ -345,52 +349,63 @@ public class Cluster {
 
 
     /**
-	 * @return the transZone
-	 */
-	public String getTransZone() {
-		return transZone;
-	}
+     * Get the transient zone.
+     *
+    * @return the transZone
+    */
+    public String getTransZone() {
+        return transZone;
+    }
 
-	/**
-	 * @param transZone the transZone to set
-	 */
-	public void setTransZone(String transZone) {
-		this.transZone = transZone;
-	}
+    /**
+    * Set the transient Zone.
+    *
+    * @param transZone to set
+    */
+    public void setTransZone(String transZone) {
+        this.transZone = transZone;
+    }
 
-	/**
-	 * @return the transPod
-	 */
-	public String getTransPod() {
-		return transPod;
-	}
+    /**
+    * Get the transient pod.
+    *
+    * @return the transPod
+    */
+    public String getTransPod() {
+        return transPod;
+    }
 
-	/**
-	 * @param transPod the transPod to set
-	 */
-	public void setTransPod(String transPod) {
-		this.transPod = transPod;
-	}
+    /**
+    * Set the transient pod.
+    *
+    * @param transPod to set
+    */
+    public void setTransPod(String transPod) {
+        this.transPod = transPod;
+    }
 
-	/**
-	 * @return the isActive
-	 */
-	public Boolean getIsActive() {
-		return isActive;
-	}
+    /**
+     * Get isActive.
+     *
+     * @return the isActive
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
 
-	/**
-	 * @param isActive the isActive to set
-	 */
-	public void setIsActive(Boolean isActive) {
-		this.isActive = isActive;
-	}
+    /**
+     * Set the isActive.
+     *
+     * @param isActive  to set
+     */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
 
-	/**
+    /**
      * Convert JSONObject into pod object.
      *
      * @param jsonObject JSON object.
-     * @param convertUtil convert Entity object from UUID.
      * @return pod object.
      */
     public static Cluster convert(JSONObject jsonObject) {

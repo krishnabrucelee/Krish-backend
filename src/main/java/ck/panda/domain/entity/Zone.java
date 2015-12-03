@@ -296,9 +296,9 @@ public class Zone implements Serializable {
     /**
      * Convert JSONObject to domain entity.
      *
-     * @param object json object
+     * @param jsonObject json object
      * @return zone object
-     * @throws Exception
+     * @throws Exception error occurs.
      */
     public static Zone convert(JSONObject jsonObject) throws Exception {
         Zone zone = new Zone();

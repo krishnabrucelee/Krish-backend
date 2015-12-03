@@ -578,96 +578,96 @@ public class Network implements Serializable {
     /**
      * Get the Department name.
      *
-	 * @return the department
-	 */
-	public Department getDepartment() {
-		return department;
-	}
+    * @return the department
+    */
+    public Department getDepartment() {
+        return department;
+    }
 
-	/**
-	 * Set the Department name.
-	 *
-	 * @param department the department to set
-	 */
-	public void setDepartment(Department department) {
-		this.department = department;
-	}
+    /**
+    * Set the Department name.
+    *
+    * @param department the department to set
+    */
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
 
-	/**
-	 * Get the department Id.
-	 *
-	 * @return the departmentId
-	 */
-	public Long getDepartmentId() {
-		return departmentId;
-	}
+    /**
+    * Get the department Id.
+    *
+    * @return the departmentId
+    */
+    public Long getDepartmentId() {
+        return departmentId;
+    }
 
-	/**
-	 * Set the Department Id.
-	 *
-	 * @param departmentId the departmentId to set
-	 */
-	public void setDepartmentId(Long departmentId) {
-		this.departmentId = departmentId;
-	}
+    /**
+    * Set the Department Id.
+    *
+    * @param departmentId the departmentId to set
+    */
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
+    }
 
-	/**
-	 * @return the transDomainId
-	 */
-	public String getTransDomainId() {
-		return transDomainId;
-	}
+    /**
+    * @return the transDomainId
+    */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
 
-	/**
-	 * @param transDomainId the transDomainId to set
-	 */
-	public void setTransDomainId(String transDomainId) {
-		this.transDomainId = transDomainId;
-	}
+    /**
+    * @param transDomainId the transDomainId to set
+    */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
 
-	/**
-	 * @return the transZoneId
-	 */
-	public String getTransZoneId() {
-		return transZoneId;
-	}
+    /**
+    * @return the transZoneId
+    */
+    public String getTransZoneId() {
+        return transZoneId;
+    }
 
-	/**
-	 * @param transZoneId the transZoneId to set
-	 */
-	public void setTransZoneId(String transZoneId) {
-		this.transZoneId = transZoneId;
-	}
+    /**
+    * @param transZoneId the transZoneId to set
+    */
+    public void setTransZoneId(String transZoneId) {
+        this.transZoneId = transZoneId;
+    }
 
-	/**
-	 * @return the transDepartmentId
-	 */
-	public String getTransDepartmentId() {
-		return transDepartmentId;
-	}
+    /**
+    * @return the transDepartmentId
+    */
+    public String getTransDepartmentId() {
+        return transDepartmentId;
+    }
 
-	/**
-	 * @param transDepartmentId the transDepartmentId to set
-	 */
-	public void setTransDepartmentId(String transDepartmentId) {
-		this.transDepartmentId = transDepartmentId;
-	}
+    /**
+    * @param transDepartmentId the transDepartmentId to set
+    */
+    public void setTransDepartmentId(String transDepartmentId) {
+        this.transDepartmentId = transDepartmentId;
+    }
 
-	/**
-	 * @return the transNetworkOfferingId
-	 */
-	public String getTransNetworkOfferingId() {
-		return transNetworkOfferingId;
-	}
+    /**
+    * @return the transNetworkOfferingId
+    */
+    public String getTransNetworkOfferingId() {
+        return transNetworkOfferingId;
+    }
 
-	/**
-	 * @param transNetworkOfferingId the transNetworkOfferingId to set
-	 */
-	public void setTransNetworkOfferingId(String transNetworkOfferingId) {
-		this.transNetworkOfferingId = transNetworkOfferingId;
-	}
+    /**
+    * @param transNetworkOfferingId the transNetworkOfferingId to set
+    */
+    public void setTransNetworkOfferingId(String transNetworkOfferingId) {
+        this.transNetworkOfferingId = transNetworkOfferingId;
+    }
 
-	/** Convert JSONObject to domain entity.
+    /** Convert JSONObject to domain entity.
      *
      * @param convertUtil Utilities
      * @param jsonObject Object
@@ -681,7 +681,7 @@ public class Network implements Serializable {
            network.setName(JsonUtil.getStringValue(jsonObject, "name"));
            network.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
            network.setTransZoneId((JsonUtil.getStringValue(jsonObject, "zoneid")));
-           network.setTransDomainId((JsonUtil.getStringValue(jsonObject, "domainid")));;
+           network.setTransDomainId((JsonUtil.getStringValue(jsonObject, "domainid")));
            network.setNetworkType(NetworkType.valueOf(JsonUtil.getStringValue(jsonObject, "type")));
            network.setTransNetworkOfferingId(JsonUtil.getStringValue(jsonObject, "networkofferingid"));
            network.setcIDR(JsonUtil.getStringValue(jsonObject, "cidr"));

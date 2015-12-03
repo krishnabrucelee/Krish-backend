@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Pod;
-import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.PodRepository;
 import ck.panda.util.CloudStackPodService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -107,9 +106,9 @@ public class PodServiceImpl implements PodService {
     }
 
     @Override
-	public Pod softDelete(Pod pod) throws Exception {
-    	    pod.setIsActive(false);
-    	    pod.setStatus(Pod.Status.DISABLED);
-	      return podRepo.save(pod);
-	}
+    public Pod softDelete(Pod pod) throws Exception {
+        pod.setIsActive(false);
+        pod.setStatus(Pod.Status.DISABLED);
+        return podRepo.save(pod);
+    }
 }

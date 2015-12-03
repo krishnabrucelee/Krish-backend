@@ -30,6 +30,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import ck.panda.util.JsonUtil;
+
 /**
  * Storage Offerings, defined by administrator. provide a choice of disk size
  * and IOPS (Quality of Service) for primary data storage

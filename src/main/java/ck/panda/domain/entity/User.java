@@ -535,67 +535,83 @@ public class User {
     }
 
     /**
-	 * @return the transDomainId
-	 */
-	public String getTransDomainId() {
-		return transDomainId;
-	}
+     * Get the transient domain id.
+     *
+     * @return the transDomainId
+     */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
 
-	/**
-	 * @param transDomainId the transDomainId to set
-	 */
-	public void setTransDomainId(String transDomainId) {
-		this.transDomainId = transDomainId;
-	}
+    /**
+     * Set the transient domain id.
+     *
+     * @param transDomainId to set
+     */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
 
-	/**
-	 * @return the transAccount
-	 */
-	public String getTransAccount() {
-		return transAccount;
-	}
+    /**
+    * Get the transient account.
+    *
+    * @return the transAccount
+    */
+    public String getTransAccount() {
+        return transAccount;
+    }
 
-	/**
-	 * @param transAccount the transAccount to set
-	 */
-	public void setTransAccount(String transAccount) {
-		this.transAccount = transAccount;
-	}
+    /**
+    * Set  the transAccount .
+    *
+    * @param transAccountto set
+    */
+    public void setTransAccount(String transAccount) {
+        this.transAccount = transAccount;
+    }
 
-	/**
-	 * @return the transDepartment
-	 */
-	public String getTransDepartment() {
-		return transDepartment;
-	}
+    /**
+    * Get the transient Department.
+    *
+    * @return the transDepartment
+    */
+    public String getTransDepartment() {
+        return transDepartment;
+    }
 
-	/**
-	 * @param transDepartment the transDepartment to set
-	 */
-	public void setTransDepartment(String transDepartment) {
-		this.transDepartment = transDepartment;
-	}
+    /**
+    * Set the transDepartment.
+    *
+    * @param transDepartment  to set
+    */
+    public void setTransDepartment(String transDepartment) {
+        this.transDepartment = transDepartment;
+    }
 
-	/**
-	 * @return the domainId
-	 */
-	public Long getDomainId() {
-		return domainId;
-	}
+    /**
+    * Get the domain Id.
+    *
+    * @return the domainId
+    */
+    public Long getDomainId() {
+        return domainId;
+    }
 
-	/**
-	 * @param domainId the domainId to set
-	 */
-	public void setDomainId(Long domainId) {
-		this.domainId = domainId;
-	}
+    /**
+    * Set the domainId .
+    *
+    * @param domainId to set
+    */
+    public void setDomainId(Long domainId) {
+        this.domainId = domainId;
+    }
 
-	/**
+    /**
      * Convert JSONObject into user object.
      *
-     * @param object JSON object.
+     * @param jsonObject JSON object.
      * @return user object.
-     * @throws Exception
+     * @throws Exception error occurs.
      */
     public static User convert(JSONObject jsonObject) throws Exception {
 
@@ -606,9 +622,9 @@ public class User {
         user.setFirstName(JsonUtil.getStringValue(jsonObject, "firstname"));
         user.setLastName(JsonUtil.getStringValue(jsonObject, "lastname"));
         user.setEmail(JsonUtil.getStringValue(jsonObject, "email"));
-        if(JsonUtil.getIntegerValue(jsonObject, "accounttype") == 0) {
+        if (JsonUtil.getIntegerValue(jsonObject, "accounttype") == 0) {
             user.setType(Type.USER);
-        } else if(JsonUtil.getIntegerValue(jsonObject, "accounttype") == 1) {
+        } else if (JsonUtil.getIntegerValue(jsonObject, "accounttype") == 1) {
             user.setType(Type.ROOT_ADMIN);
         } else {
             user.setType(Type.DOMAIN_ADMIN);

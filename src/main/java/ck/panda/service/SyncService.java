@@ -3,7 +3,6 @@ package ck.panda.service;
 import org.springframework.stereotype.Service;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.error.exception.ApplicationException;
-import org.json.JSONObject;
 
 /**
  * Synchronization of zone,domain, region , template with cloudStack. *
@@ -162,13 +161,13 @@ public interface SyncService {
   /**
    * Sync with CloudStack server ResourceLimit list.
    *
-   * @param Object response json object.
    * @throws Exception cloudstack unhandled errors
    */
   void syncResourceLimit() throws ApplicationException, Exception;
 
   /**
    * Sync with Cloud Server Account.
+   * @param domainId
    * @throws ApplicationException unhandled application errors.
    * @throws Exception cloudstack unhandled errors.
    */

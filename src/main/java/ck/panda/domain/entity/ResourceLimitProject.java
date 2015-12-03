@@ -1,6 +1,3 @@
-/**
- *
- */
 package ck.panda.domain.entity;
 
 import java.time.ZonedDateTime;
@@ -499,45 +496,52 @@ public class ResourceLimitProject {
     /**
      * Get the unique Separator for the Resource limit.
      *
-     * @param unique Separator for the Resource limit.
+     * @param uniqueSeparator for the Resource limit.
      */
     public void setUniqueSeperator(String uniqueSeperator) {
         this.uniqueSeperator = uniqueSeperator;
     }
 
     /**
-	 * @return the transProjectId
-	 */
-	public String getTransProjectId() {
-		return transProjectId;
-	}
+     * Get Transient Project Id.
+     *
+    * @return the transProjectId
+    */
+    public String getTransProjectId() {
+        return transProjectId;
+    }
 
-	/**
-	 * @param transProjectId the transProjectId to set
-	 */
-	public void setTransProjectId(String transProjectId) {
-		this.transProjectId = transProjectId;
-	}
+    /**
+    * Set the Transient Project Id.
+    *
+    * @param transProjectId the transProjectId to set
+    */
+    public void setTransProjectId(String transProjectId) {
+        this.transProjectId = transProjectId;
+    }
 
-	/**
-	 * @return the transResourceType
-	 */
-	public Integer getTransResourceType() {
-		return transResourceType;
-	}
+    /**
+    * Get the transient Resource Type.
+    *
+    * @return the transResourceType
+    */
+    public Integer getTransResourceType() {
+        return transResourceType;
+    }
 
-	/**
-	 * @param transResourceType the transResourceType to set
-	 */
-	public void setTransResourceType(Integer transResourceType) {
-		this.transResourceType = transResourceType;
-	}
+    /**
+    * Set the transResourceType.
+    *
+    * @param transResourceType  to set
+    */
+    public void setTransResourceType(Integer transResourceType) {
+        this.transResourceType = transResourceType;
+    }
 
-	/**
+    /**
      * Convert JSONObject to ResourceLimit entity.
      *
-     * @param object json object
-     * @param convertUtil util class for converting json
+     * @param jsonObject json object
      * @return ResourceLimit entity objects
      * @throws JSONException unhandled json errors
      */

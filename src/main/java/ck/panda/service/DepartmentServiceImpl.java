@@ -21,7 +21,6 @@ import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackAccountService;
 import ck.panda.util.ConfigUtil;
-import ck.panda.util.JsonUtil;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
@@ -61,9 +60,9 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Autowired
     private ConvertEntityService convertEntityService;
 
-    /** Autowired TokenDetails */
+    /** Autowired TokenDetails. */
     @Autowired
-    TokenDetails tokenDetails;
+    private TokenDetails tokenDetails;
 
     /** Domain repository reference. */
     @Autowired
@@ -167,7 +166,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public List<Department> findByAll() throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if(domain != null && !domain.getName().equals("ROOT")) {
+        if (domain != null && !domain.getName().equals("ROOT")) {
             return (List<Department>) departmentRepo.findByDomainAndIsActive(domain.getId(), true);
         }
         return (List<Department>) departmentRepo.findAllByIsActive(true);
@@ -182,7 +181,7 @@ public class DepartmentServiceImpl implements DepartmentService {
      */
     public Page<Department> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if(domain != null && !domain.getName().equals("ROOT")) {
+        if (domain != null && !domain.getName().equals("ROOT")) {
             return departmentRepo.findByDomainAndIsActive(domain.getId(), true, pagingAndSorting.toPageRequest());
         }
         return departmentRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);

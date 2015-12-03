@@ -585,71 +585,82 @@ public class Volume {
         this.vmInstanceId = vmInstanceId;
     }
 
-	/**
-	 * Get the is removed of the Volume.
+    /**
+    * Get the is removed of the Volume.
 
-	 * @return the isRemoved of Volume.
-	 */
-	public Boolean getIsRemoved() {
-		return isRemoved;
-	}
+    * @return the isRemoved of Volume.
+    */
+    public Boolean getIsRemoved() {
+        return isRemoved;
+    }
 
-	/**
-	 * Set the is removed of the Volume.
-	 *
-	 * @param isRemoved the isRemoved to set
-	 */
-	public void setIsRemoved(Boolean isRemoved) {
-		this.isRemoved = isRemoved;
-	}
+    /**
+    * Set the is removed of the Volume.
+    *
+    * @param isRemoved the isRemoved to set
+    */
+    public void setIsRemoved(Boolean isRemoved) {
+        this.isRemoved = isRemoved;
+    }
 
-	/**
-	 * @return the transvmInstanceId
-	 */
-	public String getTransvmInstanceId() {
-		return transvmInstanceId;
-	}
+    /**
+     * Get the Transient VM Instance Id.
+     *
+    * @return the transvmInstanceId
+    */
+    public String getTransvmInstanceId() {
+        return transvmInstanceId;
+    }
 
-	/**
-	 * @param transvmInstanceId the transvmInstanceId to set
-	 */
-	public void setTransvmInstanceId(String transvmInstanceId) {
-		this.transvmInstanceId = transvmInstanceId;
-	}
+    /**
+     * Set the transvmInstanceId .
+     *
+     * @param transvmInstanceId to set
+     */
+    public void setTransvmInstanceId(String transvmInstanceId) {
+        this.transvmInstanceId = transvmInstanceId;
+    }
 
-	/**
-	 * @return the transZoneId
-	 */
-	public String getTransZoneId() {
-		return transZoneId;
-	}
+    /**
+     * Get the transZoneId.
+     *
+     * @return the transZoneId
+     */
+    public String getTransZoneId() {
+        return transZoneId;
+    }
 
-	/**
-	 * @param transZoneId the transZoneId to set
-	 */
-	public void setTransZoneId(String transZoneId) {
-		this.transZoneId = transZoneId;
-	}
+    /**
+     * Get the transZoneId.
+     *
+     * @param transZoneId  to set
+     */
+    public void setTransZoneId(String transZoneId) {
+        this.transZoneId = transZoneId;
+    }
 
-	/**
-	 * @return the transStorageOfferingId
-	 */
-	public String getTransStorageOfferingId() {
-		return transStorageOfferingId;
-	}
+    /**
+     * Get transStorageOfferingId.
+     *
+     * @return the transStorageOfferingId
+     */
+    public String getTransStorageOfferingId() {
+        return transStorageOfferingId;
+    }
 
-	/**
-	 * @param transStorageOfferingId the transStorageOfferingId to set
-	 */
-	public void setTransStorageOfferingId(String transStorageOfferingId) {
-		this.transStorageOfferingId = transStorageOfferingId;
-	}
+    /**
+     * Set the transStorageOfferingId.
+     *
+     * @param transStorageOfferingId  to set
+     */
+    public void setTransStorageOfferingId(String transStorageOfferingId) {
+        this.transStorageOfferingId = transStorageOfferingId;
+    }
 
-	/**
+    /**
      * Convert JSONObject to Volume entity.
      *
      * @param object json object
-     * @param convertUtil util class for converting json
      * @return Volume entity objects
      * @throws JSONException unhandled json errors
      */
@@ -670,7 +681,7 @@ public class Volume {
            /* if (object.has("virtualmachineid")) {
                 volume.setVmInstanceId(convertUtil.getVmInstanceId(JsonUtil.getStringValue(object, "virtualmachineid")));
             } else {
-            	volume.setVmInstanceId(null);
+                volume.setVmInstanceId(null);
             }*/
         } catch (Exception e) {
             e.printStackTrace();

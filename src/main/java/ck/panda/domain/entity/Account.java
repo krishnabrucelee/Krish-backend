@@ -141,7 +141,7 @@ public class Account implements Serializable {
     @Transient
     private String transDomainId;
 
-	/**
+    /**
      * Default constructor.
      */
     public Account() {
@@ -515,25 +515,35 @@ public class Account implements Serializable {
     }
 
     /**
-	 * @return the transDomainId
-	 */
-	public String getTransDomainId() {
-		return transDomainId;
-	}
+     * Get the transient DomainId.
+     *
+    * @return the transDomainId
+    */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
 
-	/**
-	 * @param transDomainId the transDomainId to set
-	 */
-	public void setTransDomainId(String transDomainId) {
-		this.transDomainId = transDomainId;
-	}
+    /**
+    * Set the transDomainId.
+    *
+    * @param transDomainId  to set
+    */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
 
      /** Define user type. */
     public enum AccountType {
+
        /** User status make department as user type. */
          USER,
+
+       /** Root admin status make department as Root Admin type. */
          ROOT_ADMIN,
+
+       /** Domain admin status make department as Domain Admin type. */
          DOMAIN_ADMIN;
+
     }
 
     /**
@@ -551,9 +561,8 @@ public class Account implements Serializable {
      * Convert JSONObject into user object.
      *
      * @param jsonObject json object from cloud stack.
-     * @param convertUtil to convert the string uuid and get the app id.
      * @return account object.
-     * @throws error occurs.
+     * @throws JSONException error occurs.
      */
     public static Account convert(JSONObject jsonObject) throws JSONException {
         Account account = new Account();

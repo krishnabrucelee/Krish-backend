@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Host;
-import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.HostRepository;
 import ck.panda.util.CloudStackHostService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -106,10 +105,10 @@ public class HostServiceImpl implements HostService {
         return hostRepo.findByUUID(uuid);
     }
 
-	@Override
-	public Host softDelete(Host host) throws Exception {
-		     host.setIsActive(false);
-		     host.setStatus(Host.Status.DISABLED);
-	      return hostRepo.save(host);
-	}
+    @Override
+    public Host softDelete(Host host) throws Exception {
+            host.setIsActive(false);
+            host.setStatus(Host.Status.DISABLED);
+            return hostRepo.save(host);
+    }
   }

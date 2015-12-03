@@ -501,52 +501,59 @@ public class Snapshot {
     }
 
     /**
-	 * @return the transDomainId
-	 */
-	public String getTransDomainId() {
-		return transDomainId;
-	}
+     * Get the transient domain id.
+     *
+     * @return the transDomainId
+     */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
 
-	/**
-	 * @param transDomainId the transDomainId to set
-	 */
-	public void setTransDomainId(String transDomainId) {
-		this.transDomainId = transDomainId;
-	}
+    /**
+     * Set the transient domain id..
+     *
+     * @param transDomainId to set
+     */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
 
-	/**
-	 * @return the transZoneId
-	 */
-	public String getTransZoneId() {
-		return transZoneId;
-	}
+    /**
+    * Get the transient zone id.
+    *
+    * @return the transZoneId
+    */
+    public String getTransZoneId() {
+        return transZoneId;
+    }
 
-	/**
-	 * @param transZoneId the transZoneId to set
-	 */
-	public void setTransZoneId(String transZoneId) {
-		this.transZoneId = transZoneId;
-	}
+    /**
+    * Set the transient zone id.
+    *
+    * @param transZoneId the transZoneId to set
+    */
+    public void setTransZoneId(String transZoneId) {
+        this.transZoneId = transZoneId;
+    }
 
-	/**
-	 * @return the transVolumeId
-	 */
-	public String getTransVolumeId() {
-		return transVolumeId;
-	}
+    /**
+    * @return the transVolumeId
+    */
+    public String getTransVolumeId() {
+        return transVolumeId;
+    }
 
-	/**
-	 * @param transVolumeId the transVolumeId to set
-	 */
-	public void setTransVolumeId(String transVolumeId) {
-		this.transVolumeId = transVolumeId;
-	}
+    /**
+    * @param transVolumeId the transVolumeId to set
+    */
+    public void setTransVolumeId(String transVolumeId) {
+        this.transVolumeId = transVolumeId;
+    }
 
-	/**
+    /**
      * Convert JSONObject to domain entity.
      *
      * @param jsonObject json object
-     * @param convertUtil convert Entity object from UUID.
      * @return domain entity object.
      * @throws JSONException handles json exception.
      */

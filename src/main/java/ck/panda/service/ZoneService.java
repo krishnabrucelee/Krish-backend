@@ -3,8 +3,6 @@ package ck.panda.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Zone;
 import ck.panda.util.domain.CRUDService;
 
@@ -39,6 +37,6 @@ public interface ZoneService extends CRUDService<Zone> {
      * @return zone
      * @throws Exception unhandled errors.
      */
-	Zone softDelete(Zone zone) throws Exception;
+    Zone softDelete(Zone zone) throws Exception;
 
 }

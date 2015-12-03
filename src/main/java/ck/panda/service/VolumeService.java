@@ -61,7 +61,7 @@ public interface VolumeService extends CRUDService<Volume> {
    Volume resizeVolume(Volume volume) throws Exception;
 
    /**
-    * SOft delete for volume
+    * SOft delete for volume.
     *
     * @param volume object
     * @return volume

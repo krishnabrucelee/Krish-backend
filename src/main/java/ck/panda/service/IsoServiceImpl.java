@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Iso;
-import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.IsoRepository;
 import ck.panda.util.CloudStackIsoService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -82,11 +81,11 @@ public class IsoServiceImpl implements IsoService {
     }
 
     @Override
-	public Iso softDelete(Iso iso) throws Exception {
-    	iso.setIsActive(false);
-    	iso.setIsRemoved(true);
-	      return isoRepo.save(iso);
-	}
+    public Iso softDelete(Iso iso) throws Exception {
+        iso.setIsActive(false);
+        iso.setIsRemoved(true);
+        return isoRepo.save(iso);
+    }
 
     @Override
     public List<Iso> findAllFromCSServer() throws Exception {

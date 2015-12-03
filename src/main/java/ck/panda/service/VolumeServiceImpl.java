@@ -251,7 +251,7 @@ public class VolumeServiceImpl implements VolumeService {
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
 
                 if (jobresult.has("volume")) {
-                	volume.setUuid((String) jobresult.get("id"));
+                    volume.setUuid((String) jobresult.get("id"));
                 }
                 if (jobresult.getString("jobstatus").equals("0")) {
                        volume.setStatus(Status.Ready);
@@ -283,7 +283,7 @@ public class VolumeServiceImpl implements VolumeService {
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
                 if (jobresult.has("volume")) {
-                	volume.setUuid((String) jobresult.get("id"));
+                    volume.setUuid((String) jobresult.get("id"));
                 }
                 if (jobresult.getString("jobstatus").equals("0")) {
                        volume.setStatus(Status.Destroy);
@@ -294,9 +294,9 @@ public class VolumeServiceImpl implements VolumeService {
         return volume;
     }
 
-	@Override
-	public Volume resizeVolume(Volume volume) throws Exception {
-		Errors errors = validator.rejectIfNullEntity("volumes", volume);
+    @Override
+    public Volume resizeVolume(Volume volume) throws Exception {
+        Errors errors = validator.rejectIfNullEntity("volumes", volume);
         errors = validator.validateEntity(volume, errors);
         config.setServer(1L);
         String volumeS = csVolumeService.resizeVolume("json", optional(volume));
@@ -313,7 +313,7 @@ public class VolumeServiceImpl implements VolumeService {
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
 
                 if (jobresult.has("volume")) {
-                	volume.setUuid((String) jobresult.get("id"));
+                    volume.setUuid((String) jobresult.get("id"));
                 }
                 if (jobresult.getString("jobstatus").equals("0")) {
                        volume.setStatus(Status.Ready);
@@ -322,13 +322,13 @@ public class VolumeServiceImpl implements VolumeService {
             volumeRepo.save(volume);
         }
         return volume;
-	}
+    }
 
-	 @Override
-	    public Volume softDelete(Volume volume) throws Exception {
-		 volume.setIsActive(false);
-		 volume.setStatus(Volume.Status.Destroy);
-	        return volumeRepo.save(volume);
-	    }
+    @Override
+        public Volume softDelete(Volume volume) throws Exception {
+             volume.setIsActive(false);
+             volume.setStatus(Volume.Status.Destroy);
+             return volumeRepo.save(volume);
+        }
 
 }

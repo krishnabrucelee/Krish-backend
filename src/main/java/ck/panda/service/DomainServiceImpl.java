@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Domain;
-import ck.panda.domain.entity.User;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.util.CloudStackDomainService;
 import ck.panda.util.TokenDetails;
@@ -35,7 +34,7 @@ public class DomainServiceImpl implements DomainService {
   @Autowired
   private CloudStackDomainService domainService;
 
-  /** Autowired TokenDetails */
+  /** Autowired TokenDetails. */
   @Autowired
   private TokenDetails tokenDetails;
 
@@ -84,8 +83,8 @@ public class DomainServiceImpl implements DomainService {
 
   @Override
   public Domain softDelete(Domain domain) throws Exception {
-	  domain.setIsActive(false);
-	  domain.setStatus(Domain.Status.INACTIVE);
+    domain.setIsActive(false);
+    domain.setStatus(Domain.Status.INACTIVE);
       return domainRepo.save(domain);
   }
 

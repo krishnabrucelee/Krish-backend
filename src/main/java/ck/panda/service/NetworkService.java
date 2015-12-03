@@ -1,12 +1,8 @@
 package ck.panda.service;
 
 import java.util.List;
-
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Network;
-import ck.panda.domain.entity.User;
 import ck.panda.util.domain.CRUDService;
 
 /**

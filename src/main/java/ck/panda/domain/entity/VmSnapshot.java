@@ -645,78 +645,77 @@ public class VmSnapshot implements Serializable {
         this.snapshotMemory = snapshotMemory;
     }
 
+    /**
+    * @return the transvmInstanceId
+    */
+    public String getTransvmInstanceId() {
+        return transvmInstanceId;
+    }
 
     /**
-	 * @return the transvmInstanceId
-	 */
-	public String getTransvmInstanceId() {
-		return transvmInstanceId;
-	}
+    * @param transvmInstanceId the transvmInstanceId to set
+    */
+    public void setTransvmInstanceId(String transvmInstanceId) {
+        this.transvmInstanceId = transvmInstanceId;
+    }
 
-	/**
-	 * @param transvmInstanceId the transvmInstanceId to set
-	 */
-	public void setTransvmInstanceId(String transvmInstanceId) {
-		this.transvmInstanceId = transvmInstanceId;
-	}
+    /**
+    * @return the transZoneId
+    */
+    public String getTransZoneId() {
+        return transZoneId;
+    }
 
-	/**
-	 * @return the transZoneId
-	 */
-	public String getTransZoneId() {
-		return transZoneId;
-	}
+    /**
+    * @param transZoneId the transZoneId to set
+    */
+    public void setTransZoneId(String transZoneId) {
+        this.transZoneId = transZoneId;
+    }
 
-	/**
-	 * @param transZoneId the transZoneId to set
-	 */
-	public void setTransZoneId(String transZoneId) {
-		this.transZoneId = transZoneId;
-	}
+    /**
+    * @return the transDisplayName
+    */
+    public String getTransDisplayName() {
+        return transDisplayName;
+    }
 
-	/**
-	 * @return the transDisplayName
-	 */
-	public String getTransDisplayName() {
-		return transDisplayName;
-	}
+    /**
+    * @param transDisplayName the transDisplayName to set
+    */
+    public void setTransDisplayName(String transDisplayName) {
+        this.transDisplayName = transDisplayName;
+    }
 
-	/**
-	 * @param transDisplayName the transDisplayName to set
-	 */
-	public void setTransDisplayName(String transDisplayName) {
-		this.transDisplayName = transDisplayName;
-	}
+    /**
+    * @return the transDomainId
+    */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
 
-	/**
-	 * @return the transDomainId
-	 */
-	public String getTransDomainId() {
-		return transDomainId;
-	}
+    /**
+    * @param transDomainId the transDomainId to set
+    */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
 
-	/**
-	 * @param transDomainId the transDomainId to set
-	 */
-	public void setTransDomainId(String transDomainId) {
-		this.transDomainId = transDomainId;
-	}
+    /**
+    * @return the transOwnerId
+    */
+    public String getTransOwnerId() {
+        return transOwnerId;
+    }
 
-	/**
-	 * @return the transOwnerId
-	 */
-	public String getTransOwnerId() {
-		return transOwnerId;
-	}
+    /**
+    * @param transOwnerId the transOwnerId to set
+    */
+    public void setTransOwnerId(String transOwnerId) {
+        this.transOwnerId = transOwnerId;
+    }
 
-	/**
-	 * @param transOwnerId the transOwnerId to set
-	 */
-	public void setTransOwnerId(String transOwnerId) {
-		this.transOwnerId = transOwnerId;
-	}
-
-	@Override
+    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("VmSnapshot [id=");
@@ -769,14 +768,13 @@ public class VmSnapshot implements Serializable {
      * Convert JSONObject into vm snapshot object.
      *
      * @param jsonObject JSON object.
-     * @param convertUtil convert Entity object from UUID.
      * @return vm snapshot object.
      */
     public static VmSnapshot convert(JSONObject jsonObject) {
         VmSnapshot vmSnapshot = new VmSnapshot();
         vmSnapshot.setSyncFlag(false);
         try {
-        	String owner = JsonUtil.getStringValue(jsonObject, "displayname");
+            String owner = JsonUtil.getStringValue(jsonObject, "displayname");
             vmSnapshot.setIsRemoved(false);
             vmSnapshot.setName(JsonUtil.getStringValue(jsonObject, "displayname"));
             vmSnapshot.setDescription(JsonUtil.getStringValue(jsonObject, "description"));

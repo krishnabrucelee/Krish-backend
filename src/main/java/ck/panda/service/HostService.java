@@ -31,11 +31,11 @@ public interface HostService extends CRUDService<Host> {
     Host findByUUID(String uuid) throws Exception;
 
     /**
-     * Soft delete for host
+     * Soft delete for host.
      *
      * @param host object
      * @return host
      * @throws Exception unhandled errors.
      */
-	Host softDelete(Host host) throws Exception;
+    Host softDelete(Host host) throws Exception;
 }

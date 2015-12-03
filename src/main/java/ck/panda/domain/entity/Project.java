@@ -5,7 +5,6 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -34,9 +33,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import ck.panda.util.JsonUtil;
-import ck.panda.util.JsonValidator;
 
 /**
  * Projects are used to organize people and resources. CloudStack users within a single domain can group
@@ -165,7 +162,7 @@ public class Project implements Serializable {
     @Transient
     private String transState;
 
-	/**
+    /**
      * Get the id.
      *
      * @return the id.
@@ -509,55 +506,66 @@ public class Project implements Serializable {
     }
 
     /**
-	 * @return the transDomainId
-	 */
-	public String getTransDomainId() {
-		return transDomainId;
-	}
+     * Get the transient domain id.
+     *
+     * @return the transDomainId
+     */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
 
-	/**
-	 * @param transDomainId the transDomainId to set
-	 */
-	public void setTransDomainId(String transDomainId) {
-		this.transDomainId = transDomainId;
-	}
+    /**
+     * Set the transient domain id..
+     *
+     * @param transDomainId to set
+     */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
 
-	/**
-	 * @return the transAccount
-	 */
-	public String getTransAccount() {
-		return transAccount;
-	}
+    /**
+     * Get the transient account.
+     *
+     * @return the transAccount
+     */
+    public String getTransAccount() {
+        return transAccount;
+    }
 
-	/**
-	 * @param transAccount the transAccount to set
-	 */
-	public void setTransAccount(String transAccount) {
-		this.transAccount = transAccount;
-	}
+    /**
+    * Set the transient Account.
+    *
+    * @param transAccount  to set
+    */
+    public void setTransAccount(String transAccount) {
+        this.transAccount = transAccount;
+    }
 
-	/**
-	 * @return the transState
-	 */
-	public String getTransState() {
-		return transState;
-	}
+    /**
+     * Get the transient state.
+     *
+     * @return the transState
+     */
+    public String getTransState() {
+        return transState;
+    }
 
-	/**
-	 * @param transState the transState to set
-	 */
-	public void setTransState(String transState) {
-		this.transState = transState;
-	}
+    /**
+     * Set the transient State.
+     *
+     * @param transState  to set
+     */
+    public void setTransState(String transState) {
+        this.transState = transState;
+    }
 
     /**
      * Convert JSONObject to project entity.
      *
-     * @param object json object
+     * @param jsonObject json object
      * @return project entity object.
      * @throws JSONException handles json exception.
      */
-    @SuppressWarnings("static-access")
     public static Project convert(JSONObject jsonObject) throws JSONException {
         Project project = new Project();
         project.setSyncFlag(false);

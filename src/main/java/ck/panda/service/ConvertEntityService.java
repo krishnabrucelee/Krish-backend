@@ -7,9 +7,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-
 import ck.panda.domain.entity.Account;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
@@ -17,26 +15,6 @@ import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
-import ck.panda.service.AccountService;
-import ck.panda.service.ComputeOfferingService;
-import ck.panda.service.DepartmentService;
-import ck.panda.service.DomainService;
-import ck.panda.service.HostService;
-import ck.panda.service.HypervisorService;
-import ck.panda.service.IsoService;
-import ck.panda.service.NetworkOfferingService;
-import ck.panda.service.NetworkService;
-import ck.panda.service.OsCategoryService;
-import ck.panda.service.OsTypeService;
-import ck.panda.service.PodService;
-import ck.panda.service.ProjectService;
-import ck.panda.service.RegionService;
-import ck.panda.service.StorageOfferingService;
-import ck.panda.service.TemplateService;
-import ck.panda.service.UserService;
-import ck.panda.service.VirtualMachineService;
-import ck.panda.service.VolumeService;
-import ck.panda.service.ZoneService;
 
 /**
  * Convert Util used to get entity object from CS server's resource uuid.
@@ -50,14 +28,6 @@ public class ConvertEntityService {
     /** RegionSerivce for listing Regions. */
     @Autowired
     private ZoneService zoneService;
-
-    /** RegionSerivce for listing Regions. */
-    @Autowired
-    private RegionService regionService;
-
-    /** RegionSerivce for listing Regions. */
-    @Autowired
-    private HypervisorService hypervisorService;
 
     /** IsoSerivce for listing Iso. */
     @Autowired
@@ -224,10 +194,10 @@ public class ConvertEntityService {
      * @throws Exception unhandled exception.
      */
     public Long getNetworkOfferingId(String uuid) throws Exception {
-    	if (networkOfferingService.findByUUID(uuid) != null){
+        if (networkOfferingService.findByUUID(uuid) != null) {
         return networkOfferingService.findByUUID(uuid).getId();
         }
-    	return null;
+        return null;
     }
 
     /**
@@ -238,10 +208,10 @@ public class ConvertEntityService {
      * @throws Exception unhandled exception.
      */
     public Long getOsTypeId(String uuid) throws Exception {
-    	if (osTypeService.findByUUID(uuid) != null){
+        if (osTypeService.findByUUID(uuid) != null) {
         return osTypeService.findByUUID(uuid).getId();
-    	}
-    	return null;
+        }
+        return null;
     }
 
     /**
@@ -312,7 +282,7 @@ public class ConvertEntityService {
      * @throws Exception unhandled exception.
      */
     public Long getProjectId(String uuid) throws Exception {
-        if(projectService.findByUuid(uuid) != null){
+        if (projectService.findByUuid(uuid) != null) {
         return projectService.findByUuid(uuid).getId();
         }
         return null;
@@ -326,10 +296,10 @@ public class ConvertEntityService {
      * @throws Exception unhandled exception.
      */
     public Long getPodId(String uuid) throws Exception {
-    	if (podService.findByUUID(uuid) != null){
+        if (podService.findByUUID(uuid) != null) {
         return podService.findByUUID(uuid).getId();
-    	}
-    	return null;
+        }
+        return null;
     }
 
     /**
@@ -340,10 +310,10 @@ public class ConvertEntityService {
      * @throws Exception unhandled exception.
      */
     public Long getVolumeId(String uuid) throws Exception {
-    	if (volumeService.findByUUID(uuid) != null){
+        if (volumeService.findByUUID(uuid) != null) {
         return volumeService.findByUUID(uuid).getId();
-    	}
-    	return null;
+        }
+        return null;
     }
 
     /**
@@ -539,7 +509,7 @@ public class ConvertEntityService {
      * @throws Exception unhandled exception.
      */
     public Boolean getState(String state) throws Exception {
-        if(state.equalsIgnoreCase("Active")){
+        if (state.equalsIgnoreCase("Active")) {
             return true;
         }
         return false;
@@ -553,12 +523,18 @@ public class ConvertEntityService {
      * @throws Exception unhandled exception.
      */
     public Enum getStatus(String status) throws Exception {
-        if(status.equalsIgnoreCase("Active")){
+        if (status.equalsIgnoreCase("Active")) {
             return Project.Status.ENABLED;
         }
         return Project.Status.DELETED;
     }
 
+    /**
+     * Get secret key for generating token.
+     *
+     * @return original key.
+     * @throws UnsupportedEncodingException unhandled errors.
+     */
     public SecretKey getSecretKey() throws UnsupportedEncodingException {
         String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
         byte[] decodedKey = Base64.getDecoder().decode(strEncoded);

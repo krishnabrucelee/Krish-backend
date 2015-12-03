@@ -39,7 +39,7 @@ public interface DomainService extends CRUDService<Domain> {
      * @return domain
      * @throws Exception unhandled errors.
      */
-	Domain softDelete(Domain domain) throws Exception;
+    Domain softDelete(Domain domain) throws Exception;
 
 }
 

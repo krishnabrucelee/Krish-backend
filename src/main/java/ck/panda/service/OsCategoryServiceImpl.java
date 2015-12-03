@@ -22,8 +22,8 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 @Service
 public class OsCategoryServiceImpl implements OsCategoryService {
 
-	/** Logger attribute. */
-	 private static final Logger LOGGER = LoggerFactory.getLogger(OsCategoryServiceImpl.class);
+    /** Logger attribute. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(OsCategoryServiceImpl.class);
 
     /** OS category repository reference. */
     @Autowired
@@ -35,13 +35,13 @@ public class OsCategoryServiceImpl implements OsCategoryService {
 
     @Override
     public OsCategory save(OsCategory oscategory) throws Exception {
-    	 LOGGER.debug(oscategory.getUuid());
+        LOGGER.debug(oscategory.getUuid());
         return osCategoryRepo.save(oscategory);
     }
 
     @Override
     public OsCategory update(OsCategory oscategory) throws Exception {
-   	    LOGGER.debug(oscategory.getUuid());
+        LOGGER.debug(oscategory.getUuid());
         return osCategoryRepo.save(oscategory);
     }
 

@@ -91,8 +91,8 @@ public class ClusterServiceImpl implements ClusterService {
                 // 2.1 Call convert by passing JSONObject to cluster entity and
                 // Add
                 // the converted cluster entity to list
-            	 Cluster cluster = Cluster.convert(clusterListJSON.getJSONObject(i));
-            	 cluster.setZoneId(convertEntityService.getZoneId(cluster.getTransZone()));
+                Cluster cluster = Cluster.convert(clusterListJSON.getJSONObject(i));
+                cluster.setZoneId(convertEntityService.getZoneId(cluster.getTransZone()));
                  cluster.setPodId(convertEntityService.getPodId(cluster.getTransPod()));
                  clusterList.add(cluster);
             }

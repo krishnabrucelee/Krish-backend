@@ -20,8 +20,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
-
-import ck.panda.domain.entity.Host.Status;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -134,7 +132,7 @@ public class Pod {
     }
 
     /**
-     * Get the uuid
+     * Get the uuid.
      *
      * @return the uuid
      */
@@ -143,7 +141,7 @@ public class Pod {
     }
 
     /**
-     * Set the uuid
+     * Set the uuid.
      *
      * @param uuid  to set
      */
@@ -152,7 +150,7 @@ public class Pod {
     }
 
     /**
-     * Get name
+     * Get name.
      *
      * @return the name
      */
@@ -161,7 +159,7 @@ public class Pod {
     }
 
     /**
-     * Set the name
+     * Set the name.
      *
      * @param name to set
      */
@@ -170,7 +168,7 @@ public class Pod {
     }
 
     /**
-     * Get Gateway
+     * Get Gateway.
      *
      * @return the gateway
      */
@@ -179,7 +177,7 @@ public class Pod {
     }
 
     /**
-     * Set the gateway
+     * Set the gateway.
      *
      * @param gateway to set
      */
@@ -188,7 +186,7 @@ public class Pod {
     }
 
     /**
-     * Get netmask
+     * Get netmask.
      *
      * @return the netmask
      */
@@ -197,7 +195,7 @@ public class Pod {
     }
 
     /**
-     * Set the netmask
+     * Set the netmask.
      *
      * @param netmask  to set
      */
@@ -206,7 +204,7 @@ public class Pod {
     }
 
     /**
-     * Get the zone
+     * Get the zone.
      *
      * @return the zone
      */
@@ -215,7 +213,7 @@ public class Pod {
     }
 
     /**
-     * Set the zone
+     * Set the zone.
      *
      * @param zone to set
      */
@@ -224,7 +222,7 @@ public class Pod {
     }
 
     /**
-     * Get ZoneId
+     * Get ZoneId.
      *
      * @return the zoneId
      */
@@ -233,7 +231,7 @@ public class Pod {
     }
 
     /**
-     * Set the zoneId
+     * Set the zoneId.
      *
      * @param zoneId  to set
      */
@@ -242,7 +240,7 @@ public class Pod {
     }
 
     /**
-     * Get createdBy
+     * Get createdBy.
      *
      * @return the createdBy
      */
@@ -251,7 +249,7 @@ public class Pod {
     }
 
     /**
-     * Set the createdBy
+     * Set the createdBy.
      *
      * @param createdBy  to set
      */
@@ -260,7 +258,7 @@ public class Pod {
     }
 
     /**
-     * Get UpdatedBy
+     * Get UpdatedBy.
      *
      * @return the updatedBy
      */
@@ -269,7 +267,7 @@ public class Pod {
     }
 
     /**
-     * Set the updatedBy
+     * Set the updatedBy.
      *
      * @param updatedBy  to set
      */
@@ -278,7 +276,7 @@ public class Pod {
     }
 
     /**
-     * Get the createdDatetime
+     * Get the createdDatetime.
      *
      * @return the createdDateTime
      */
@@ -287,7 +285,7 @@ public class Pod {
     }
 
     /**
-     * Set the createdDateTime
+     * Set the createdDateTime.
      *
      * @param createdDateTime  to set
      */
@@ -296,7 +294,7 @@ public class Pod {
     }
 
     /**
-     * Get the updatedDatetime
+     * Get the updatedDatetime.
      *
      * @return the updatedDateTime
      */
@@ -305,7 +303,7 @@ public class Pod {
     }
 
     /**
-     * Set the updatedDateTime
+     * Set the updatedDateTime.
      *
      * @param updatedDateTime to set
      */
@@ -314,52 +312,63 @@ public class Pod {
     }
 
      /**
-	 * @return the transZoneId
-	 */
-	public String getTransZoneId() {
-		return transZoneId;
-	}
+      * Get the transient zone id.
+      *
+      * @return the transZoneId
+      */
+    public String getTransZoneId() {
+        return transZoneId;
+    }
 
-	/**
-	 * @param transZoneId the transZoneId to set
-	 */
-	public void setTransZoneId(String transZoneId) {
-		this.transZoneId = transZoneId;
-	}
+    /**
+     * Set the transient zone id.
+     *
+     * @param transZoneId to set
+     */
+    public void setTransZoneId(String transZoneId) {
+        this.transZoneId = transZoneId;
+    }
 
-	/**
-	 * @return the status
-	 */
-	public Status getStatus() {
-		return status;
-	}
+    /**
+     * Get the status.
+     *
+     * @return the status
+     */
+    public Status getStatus() {
+        return status;
+    }
 
-	/**
-	 * @param status the status to set
-	 */
-	public void setStatus(Status status) {
-		this.status = status;
-	}
+    /**
+     *  Set the status.
+     *
+     * @param status the status to set
+     */
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 
-	/**
-	 * @return the isActive
-	 */
-	public Boolean getIsActive() {
-		return isActive;
-	}
+    /**
+     * Get isActive.
+     *
+     * @return the isActive
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
 
-	/**
-	 * @param isActive the isActive to set
-	 */
-	public void setIsActive(Boolean isActive) {
-		this.isActive = isActive;
-	}
+    /**
+     * Set is Active.
+     *
+     * @param isActive the isActive to set
+     */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
 
-	/**
+    /**
      * Convert JSONObject into pod object.
      *
      * @param jsonObject JSON object.
-     * @param convertUtil convert Entity object from UUID.
      * @return pod object.
      */
     public static Pod convert(JSONObject jsonObject) {

@@ -1289,148 +1289,187 @@ public class VmInstance implements Serializable {
         this.event = event;
     }
 
+    /**
+     * Get the transient domain id.
+     *
+     * @return the transDomainId
+     */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
 
     /**
-	 * @return the transDomainId
-	 */
-	public String getTransDomainId() {
-		return transDomainId;
-	}
+     * Set the transient domain id..
+     *
+     * @param transDomainId to set
+     */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
 
-	/**
-	 * @param transDomainId the transDomainId to set
-	 */
-	public void setTransDomainId(String transDomainId) {
-		this.transDomainId = transDomainId;
-	}
+    /**
+    * Get transient zone id.
+    *
+    * @return the transZoneId
+    */
+    public String getTransZoneId() {
+        return transZoneId;
+    }
 
-	/**
-	 * @return the transZoneId
-	 */
-	public String getTransZoneId() {
-		return transZoneId;
-	}
+    /**
+    * Set the transZoneId.
+    *
+    * @param transZoneId  to set
+    */
+    public void setTransZoneId(String transZoneId) {
+        this.transZoneId = transZoneId;
+    }
 
-	/**
-	 * @param transZoneId the transZoneId to set
-	 */
-	public void setTransZoneId(String transZoneId) {
-		this.transZoneId = transZoneId;
-	}
+    /**
+    * Get the transHostId.
+    *
+    * @return the transHostId
+    */
+    public String getTransHostId() {
+        return transHostId;
+    }
 
-	/**
-	 * @return the transHostId
-	 */
-	public String getTransHostId() {
-		return transHostId;
-	}
+    /**
+    * Set the transHostId.
+    *
+    * @param transHostId  to set
+    */
+    public void setTransHostId(String transHostId) {
+        this.transHostId = transHostId;
+    }
 
-	/**
-	 * @param transHostId the transHostId to set
-	 */
-	public void setTransHostId(String transHostId) {
-		this.transHostId = transHostId;
-	}
+    /**
+     * Get the transComputeOfferingId.
+     *
+     * @return the transComputeOfferingId
+     */
+    public String getTransComputeOfferingId() {
+        return transComputeOfferingId;
+    }
 
-	/**
-	 * @return the transComputeOfferingId
-	 */
-	public String getTransComputeOfferingId() {
-		return transComputeOfferingId;
-	}
+    /**
+     * Set the transComputeOfferingId .
+     *
+     * @param transComputeOfferingId to set
+     */
+    public void setTransComputeOfferingId(String transComputeOfferingId) {
+        this.transComputeOfferingId = transComputeOfferingId;
+    }
 
-	/**
-	 * @param transComputeOfferingId the transComputeOfferingId to set
-	 */
-	public void setTransComputeOfferingId(String transComputeOfferingId) {
-		this.transComputeOfferingId = transComputeOfferingId;
-	}
+    /**
+     * Get the transProjectId.
+     *
+     * @return the transProjectId
+     */
+    public String getTransProjectId() {
+        return transProjectId;
+    }
 
-	/**
-	 * @return the transProjectId
-	 */
-	public String getTransProjectId() {
-		return transProjectId;
-	}
+    /**
+     * Set the transProjectId.
+     *
+     * @param transProjectId  to set
+     */
+    public void setTransProjectId(String transProjectId) {
+        this.transProjectId = transProjectId;
+    }
 
-	/**
-	 * @param transProjectId the transProjectId to set
-	 */
-	public void setTransProjectId(String transProjectId) {
-		this.transProjectId = transProjectId;
-	}
+    /**
+     * Get the transNetworkId.
+     *
+     * @return the transNetworkId
+     */
+    public String getTransNetworkId() {
+        return transNetworkId;
+    }
 
-	/**
-	 * @return the transNetworkId
-	 */
-	public String getTransNetworkId() {
-		return transNetworkId;
-	}
+    /**
+     * Set the transNetworkId.
+     *
+     * @param transNetworkId  to set
+     */
+    public void setTransNetworkId(String transNetworkId) {
+        this.transNetworkId = transNetworkId;
+    }
 
-	/**
-	 * @param transNetworkId the transNetworkId to set
-	 */
-	public void setTransNetworkId(String transNetworkId) {
-		this.transNetworkId = transNetworkId;
-	}
+    /**
+     * Get the transIsoId.
+     *
+     * @return the transIsoId
+     */
+    public String getTransIsoId() {
+        return transIsoId;
+    }
 
-	/**
-	 * @return the transIsoId
-	 */
-	public String getTransIsoId() {
-		return transIsoId;
-	}
+    /**
+     * Set the transIsoId.
+     *
+     * @param transIsoId the transIsoId to set
+     */
+    public void setTransIsoId(String transIsoId) {
+        this.transIsoId = transIsoId;
+    }
 
-	/**
-	 * @param transIsoId the transIsoId to set
-	 */
-	public void setTransIsoId(String transIsoId) {
-		this.transIsoId = transIsoId;
-	}
+    /**
+     * Get  the transTemplateId.
+     *
+     * @return the transTemplateId
+     */
+    public String getTransTemplateId() {
+        return transTemplateId;
+    }
 
-	/**
-	 * @return the transTemplateId
-	 */
-	public String getTransTemplateId() {
-		return transTemplateId;
-	}
+    /**
+     * Get the transTemplateId.
+     *
+     * @param transTemplateId  to set
+     */
+    public void setTransTemplateId(String transTemplateId) {
+        this.transTemplateId = transTemplateId;
+    }
 
-	/**
-	 * @param transTemplateId the transTemplateId to set
-	 */
-	public void setTransTemplateId(String transTemplateId) {
-		this.transTemplateId = transTemplateId;
-	}
+    /**
+     * Get the transDepartmentId.
+     *
+     * @return the transDepartmentId
+     */
+    public String getTransDepartmentId() {
+        return transDepartmentId;
+    }
 
-	/**
-	 * @return the transDepartmentId
-	 */
-	public String getTransDepartmentId() {
-		return transDepartmentId;
-	}
+    /**
+     * Get the transDepartmentId.
+     *
+     * @param transDepartmentId  to set
+     */
+    public void setTransDepartmentId(String transDepartmentId) {
+        this.transDepartmentId = transDepartmentId;
+    }
 
-	/**
-	 * @param transDepartmentId the transDepartmentId to set
-	 */
-	public void setTransDepartmentId(String transDepartmentId) {
-		this.transDepartmentId = transDepartmentId;
-	}
+    /**
+     * Get the transDisplayName.
+     *
+     * @return the transDisplayName
+     */
+    public String getTransDisplayName() {
+        return transDisplayName;
+    }
 
-	/**
-	 * @return the transDisplayName
-	 */
-	public String getTransDisplayName() {
-		return transDisplayName;
-	}
+    /**
+     * Set the transDisplayName .
+     *
+     * @param transDisplayName to set
+     */
+    public void setTransDisplayName(String transDisplayName) {
+        this.transDisplayName = transDisplayName;
+    }
 
-	/**
-	 * @param transDisplayName the transDisplayName to set
-	 */
-	public void setTransDisplayName(String transDisplayName) {
-		this.transDisplayName = transDisplayName;
-	}
-
-	@Override
+    @Override
     public String toString() {
         return "VmInstance [Id=" + id + ", name=" + name + ", uuid=" + uuid + ", vncPassword=" + vncPassword
                 + ", instanceOwner=" + instanceOwner + ", instanceOwnerId=" + instanceOwnerId + ", application="
@@ -1450,7 +1489,6 @@ public class VmInstance implements Serializable {
      * Convert JSONObject into vm object.
      *
      * @param jsonObject JSON object.
-     * @param convertUtil convert Entity object from UUID.
      * @return vm object.
      */
     public static VmInstance convert(JSONObject jsonObject) {

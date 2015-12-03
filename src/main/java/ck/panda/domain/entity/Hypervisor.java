@@ -13,13 +13,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.joda.time.DateTime;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
+
+import ck.panda.util.JsonUtil;
 
 /**
  * A hypervisor is also known as a Virtual Machine Manager (VMM) and its sole purpose is to allow multiple “machines”
@@ -200,12 +201,11 @@ public class Hypervisor implements Serializable {
      *
      * @param object json object
      * @return hypervisor entity objects
-     * @throws JSONException unhandled json errors
+     * @throws Exception unhandled errors.
      */
-    public static Hypervisor convert(JSONObject object) throws JSONException {
+    public static Hypervisor convert(JSONObject object) throws Exception {
         Hypervisor hypervisor = new Hypervisor();
-        hypervisor.name = object.has("name") ? object.get("name").toString() : "";
-
+        hypervisor.setName(JsonUtil.getStringValue(object, "name"));
         return hypervisor;
     }
 
