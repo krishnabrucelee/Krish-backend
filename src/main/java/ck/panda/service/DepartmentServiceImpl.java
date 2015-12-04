@@ -154,6 +154,10 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    public List<Department>findDomain(Long id)throws Exception {
+       return  departmentRepo.findByDomain(id);
+    }
+    @Override
     public Page<Department> findAll(PagingAndSorting pagingAndSorting) throws Exception {
         return departmentRepo.findAll(pagingAndSorting.toPageRequest());
     }

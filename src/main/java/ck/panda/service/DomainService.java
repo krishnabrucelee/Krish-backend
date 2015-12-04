@@ -2,10 +2,13 @@ package ck.panda.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Domain;
 import ck.panda.util.domain.CRUDService;
+import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
  * Service class for Domain.
@@ -40,6 +43,15 @@ public interface DomainService extends CRUDService<Domain> {
      * @throws Exception unhandled errors.
      */
     Domain softDelete(Domain domain) throws Exception;
+
+    /**
+     * Paging and Sorting for displaying more number of elements in list.
+     *
+     * @param pagingAndSorting sortable method.
+     * @return sorted values.
+     * @throws Exception unhandled errors.
+     */
+    Page<Domain> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
 
 }
 

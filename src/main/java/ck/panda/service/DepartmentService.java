@@ -86,4 +86,6 @@ public interface DepartmentService  extends CRUDService<Department>  {
      */
     List<Department> findByAll() throws Exception;
 
+    List<Department> findDomain(Long id) throws Exception;
+
 }

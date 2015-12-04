@@ -370,6 +370,7 @@ public class SyncServiceImpl implements SyncService {
         // 3. Iterate application domain list
         LOGGER.debug("Total rows updated : " + (appDomainList.size()));
         for (Domain domain : appDomainList) {
+            domain.setSyncFlag(false);
             // 3.1 Find the corresponding CS server domain object by finding it
             // in a hash using uuid
             if (csDomainMap.containsKey(domain.getUuid())) {
