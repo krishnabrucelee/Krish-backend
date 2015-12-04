@@ -47,4 +47,13 @@ public interface TemplateService extends CRUDService<Template> {
      */
     Template findByUUID(String uuid);
 
+    /**
+     * Soft delete for template
+     *
+     * @param template object
+     * @return template
+     * @throws Exception unhandled errors.
+     */
+	Template softDelete(Template template) throws Exception;
+
 }

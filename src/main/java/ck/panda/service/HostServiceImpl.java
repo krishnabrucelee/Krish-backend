@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Host;
 import ck.panda.domain.repository.jpa.HostRepository;
 import ck.panda.util.CloudStackHostService;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
@@ -30,9 +29,9 @@ public class HostServiceImpl implements HostService {
   @Autowired
   private HostRepository hostRepo;
 
-  /** Convert entity repository reference. */
+  /** Reference of the convert entity service. */
   @Autowired
-  private ConvertUtil entity;
+  private ConvertEntityService convertEntityService;
 
   /** CloudStack Host service for getting host connectivity with cloudstack. */
   @Autowired
@@ -91,7 +90,11 @@ public class HostServiceImpl implements HostService {
             for (int i = 0, size = hostListJSON.length(); i < size; i++) {
                 // 2.1 Call convert by passing JSONObject to host entity and Add
                 // the converted host entity to list
-                hostList.add(Host.convert(hostListJSON.getJSONObject(i), entity));
+                Host host = Host.convert(hostListJSON.getJSONObject(i));
+                host.setPodId(convertEntityService.getPodId(host.getTransPodId()));
+                host.setClusterId(convertEntityService.getClusterId(host.getTransClusterId()));
+                host.setZoneId(convertEntityService.getZoneId(host.getTransZoneId()));
+                hostList.add(host);
             }
         }
         return hostList;
@@ -102,5 +105,10 @@ public class HostServiceImpl implements HostService {
         return hostRepo.findByUUID(uuid);
     }
 
-
+    @Override
+    public Host softDelete(Host host) throws Exception {
+            host.setIsActive(false);
+            host.setStatus(Host.Status.DISABLED);
+            return hostRepo.save(host);
+    }
   }

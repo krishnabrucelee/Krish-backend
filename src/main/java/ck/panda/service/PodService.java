@@ -28,4 +28,13 @@ public interface PodService extends CRUDService<Pod> {
      * @throws Exception unhandled errors.
      */
     Pod findByUUID(String uuid) throws Exception;
+
+    /**
+     * Soft delete for pod.
+     *
+     * @param pod object
+     * @return pod.
+     * @throws Exception unhandled errors.
+     */
+    Pod softDelete(Pod pod) throws Exception;
 }

@@ -25,6 +25,8 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 
+import ck.panda.util.JsonUtil;
+
 /**
  * A zone is the second largest organizational unit within a CloudStack
  * deployment. A zone typically corresponds to a single datacenter, although it
@@ -294,15 +296,15 @@ public class Zone implements Serializable {
     /**
      * Convert JSONObject to domain entity.
      *
-     * @param object json object
+     * @param jsonObject json object
      * @return zone object
-     * @throws JSONException unhandled json errors.
+     * @throws Exception error occurs.
      */
-    public static Zone convert(JSONObject object) throws JSONException {
+    public static Zone convert(JSONObject jsonObject) throws Exception {
         Zone zone = new Zone();
-        zone.uuid = object.has("id") ? object.get("id").toString() : "";
-        zone.name = object.has("name") ? object.get("name").toString() : "";
-
+        zone.setName(JsonUtil.getStringValue(jsonObject, "name"));
+        zone.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
+        zone.setIsActive(true);
         return zone;
     }
 

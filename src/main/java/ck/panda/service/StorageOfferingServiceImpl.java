@@ -15,7 +15,6 @@ import ck.panda.domain.repository.jpa.StorageOfferingRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackStorageOfferingService;
 import ck.panda.util.ConfigUtil;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -45,10 +44,6 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     /** Cloud stack configuration utility class. */
     @Autowired
     private ConfigUtil config;
-
-    /** Conversation  utility class. */
-    @Autowired
-    private ConvertUtil convertUtil;
 
     /** Json response for storage offering. */
     private static final String JSON = "json";
@@ -220,7 +215,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
                 // entity
                 // and Add
                 // the converted StorageOffering entity to list
-                storageOfferingList.add(StorageOffering.convert(storageOfferingListJSON.getJSONObject(i), convertUtil));
+                storageOfferingList.add(StorageOffering.convert(storageOfferingListJSON.getJSONObject(i)));
             }
         }
         return storageOfferingList;
@@ -306,5 +301,12 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
             tags = "ALL";
         }
         return storageOfferingRepo.findAllByTags(tags);
+    }
+
+    @Override
+    public StorageOffering softDelete(StorageOffering storage) throws Exception {
+        storage.setIsActive(false);
+        storage.setStatus(StorageOffering.Status.DISABLED);
+        return storageOfferingRepo.save(storage);
     }
 }

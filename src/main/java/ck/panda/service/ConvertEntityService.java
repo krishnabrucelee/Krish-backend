@@ -1,4 +1,4 @@
-package ck.panda.util;
+package ck.panda.service;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
@@ -7,7 +7,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Account;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
@@ -15,32 +15,12 @@ import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
-import ck.panda.service.AccountService;
-import ck.panda.service.ComputeOfferingService;
-import ck.panda.service.DepartmentService;
-import ck.panda.service.DomainService;
-import ck.panda.service.HostService;
-import ck.panda.service.HypervisorService;
-import ck.panda.service.IsoService;
-import ck.panda.service.NetworkOfferingService;
-import ck.panda.service.NetworkService;
-import ck.panda.service.OsCategoryService;
-import ck.panda.service.OsTypeService;
-import ck.panda.service.PodService;
-import ck.panda.service.ProjectService;
-import ck.panda.service.RegionService;
-import ck.panda.service.StorageOfferingService;
-import ck.panda.service.TemplateService;
-import ck.panda.service.UserService;
-import ck.panda.service.VirtualMachineService;
-import ck.panda.service.VolumeService;
-import ck.panda.service.ZoneService;
 
 /**
  * Convert Util used to get entity object from CS server's resource uuid.
  */
-@Component
-public class ConvertUtil {
+@Service
+public class ConvertEntityService {
     /** Domain Service for listing domains. */
     @Autowired
     private DomainService domainService;
@@ -48,14 +28,6 @@ public class ConvertUtil {
     /** RegionSerivce for listing Regions. */
     @Autowired
     private ZoneService zoneService;
-
-    /** RegionSerivce for listing Regions. */
-    @Autowired
-    private RegionService regionService;
-
-    /** RegionSerivce for listing Regions. */
-    @Autowired
-    private HypervisorService hypervisorService;
 
     /** IsoSerivce for listing Iso. */
     @Autowired
@@ -117,6 +89,10 @@ public class ConvertUtil {
     /** Pod service for listing pods. */
     @Autowired
     private PodService podService;
+
+    /** Cluster service for listing clusters. */
+    @Autowired
+    private ClusterService clusterService;
 
     /** volume servcie for listing volumes. */
     @Autowired
@@ -218,10 +194,10 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Long getNetworkOfferingId(String uuid) throws Exception {
-    	if (networkOfferingService.findByUUID(uuid) != null){
+        if (networkOfferingService.findByUUID(uuid) != null) {
         return networkOfferingService.findByUUID(uuid).getId();
         }
-    	return null;
+        return null;
     }
 
     /**
@@ -232,10 +208,10 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Long getOsTypeId(String uuid) throws Exception {
-    	if (osTypeService.findByUUID(uuid) != null){
+        if (osTypeService.findByUUID(uuid) != null) {
         return osTypeService.findByUUID(uuid).getId();
-    	}
-    	return null;
+        }
+        return null;
     }
 
     /**
@@ -306,7 +282,7 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Long getProjectId(String uuid) throws Exception {
-        if(projectService.findByUuid(uuid) != null){
+        if (projectService.findByUuid(uuid) != null) {
         return projectService.findByUuid(uuid).getId();
         }
         return null;
@@ -320,10 +296,10 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Long getPodId(String uuid) throws Exception {
-    	if (podService.findByUUID(uuid) != null){
+        if (podService.findByUUID(uuid) != null) {
         return podService.findByUUID(uuid).getId();
-    	}
-    	return null;
+        }
+        return null;
     }
 
     /**
@@ -334,10 +310,10 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Long getVolumeId(String uuid) throws Exception {
-    	if (volumeService.findByUUID(uuid) != null){
+        if (volumeService.findByUUID(uuid) != null) {
         return volumeService.findByUUID(uuid).getId();
-    	}
-    	return null;
+        }
+        return null;
     }
 
     /**
@@ -451,9 +427,9 @@ public class ConvertUtil {
      * @return domain id.
      * @throws Exception unhandled exception.
      */
-    public Department getDepartmentByUsername(String name) throws Exception {
+    public Long getDepartmentByUsername(String name) throws Exception {
         if (departmentService.findByUsername(name, true) != null) {
-            return departmentService.findByUsername(name, true);
+            return departmentService.findByUsername(name, true).getId();
         } else {
             return null;
         }
@@ -533,7 +509,7 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Boolean getState(String state) throws Exception {
-        if(state.equalsIgnoreCase("Active")){
+        if (state.equalsIgnoreCase("Active")) {
             return true;
         }
         return false;
@@ -547,12 +523,18 @@ public class ConvertUtil {
      * @throws Exception unhandled exception.
      */
     public Enum getStatus(String status) throws Exception {
-        if(status.equalsIgnoreCase("Active")){
+        if (status.equalsIgnoreCase("Active")) {
             return Project.Status.ENABLED;
         }
         return Project.Status.DELETED;
     }
 
+    /**
+     * Get secret key for generating token.
+     *
+     * @return original key.
+     * @throws UnsupportedEncodingException unhandled errors.
+     */
     public SecretKey getSecretKey() throws UnsupportedEncodingException {
         String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
         byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
@@ -581,6 +563,21 @@ public class ConvertUtil {
     public Long getIso(String uuid) throws Exception {
         if (isoService.findbyUUID(uuid) != null) {
             return isoService.findbyUUID(uuid).getId();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get the Iso.
+     *
+     * @param uuid of Iso.
+     * @return Iso id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getClusterId(String uuid) throws Exception {
+        if (clusterService.findByUUID(uuid) != null) {
+            return clusterService.findByUUID(uuid).getId();
         } else {
             return null;
         }

@@ -21,7 +21,6 @@ import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackAccountService;
 import ck.panda.util.ConfigUtil;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
@@ -57,13 +56,13 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
 
-    /** Reference of the convertutil. */
+    /** Reference of the convert entity service. */
     @Autowired
-    private ConvertUtil convertUtil;
+    private ConvertEntityService convertEntityService;
 
-    /** Autowired TokenDetails */
+    /** Autowired TokenDetails. */
     @Autowired
-    TokenDetails tokenDetails;
+    private TokenDetails tokenDetails;
 
     /** Domain repository reference. */
     @Autowired
@@ -155,6 +154,10 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    public List<Department>findDomain(Long id)throws Exception {
+       return  departmentRepo.findByDomain(id);
+    }
+    @Override
     public Page<Department> findAll(PagingAndSorting pagingAndSorting) throws Exception {
         return departmentRepo.findAll(pagingAndSorting.toPageRequest());
     }
@@ -167,7 +170,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public List<Department> findByAll() throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if(domain != null && !domain.getName().equals("ROOT")) {
+        if (domain != null && !domain.getName().equals("ROOT")) {
             return (List<Department>) departmentRepo.findByDomainAndIsActive(domain.getId(), true);
         }
         return (List<Department>) departmentRepo.findAllByIsActive(true);
@@ -182,7 +185,7 @@ public class DepartmentServiceImpl implements DepartmentService {
      */
     public Page<Department> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if(domain != null && !domain.getName().equals("ROOT")) {
+        if (domain != null && !domain.getName().equals("ROOT")) {
             return departmentRepo.findByDomainAndIsActive(domain.getId(), true, pagingAndSorting.toPageRequest());
         }
         return departmentRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
@@ -224,7 +227,8 @@ public class DepartmentServiceImpl implements DepartmentService {
                 // 2.1 Call convert by passing JSONObject to Department entity
                 // and
                 // Add the converted Department entity to list
-                Department department = Department.convert(userListJSON.getJSONObject(i), convertUtil);
+                Department department = Department.convert(userListJSON.getJSONObject(i));
+                department.setDomainId(convertEntityService.getDomainId(department.getTransDomainId()));
                 if (department.getType() == Department.AccountType.USER) {
                     departmentList.add(department);
                 }

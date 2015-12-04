@@ -29,7 +29,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -137,6 +136,10 @@ public class Department implements Serializable {
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
+
+    /** Transient domain of the account. */
+    @Transient
+    private String transDomainId;
 
     /**
      * Default constructor.
@@ -511,12 +514,36 @@ public class Department implements Serializable {
         this.syncFlag = syncFlag;
     }
 
-     /** Define user type. */
+    /**
+     * Get transient Domain Id.
+     *
+     * @return the transDomainId
+     */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
+
+    /**
+     * Set the transDomainId .
+     *
+     * @param transDomainId to set
+     */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
+
+
+    /** Define user type. */
     public enum AccountType {
+
        /** User status make department as user type. */
-         USER,
-         ROOT_ADMIN,
-         DOMAIN_ADMIN;
+        USER,
+
+       /** Root admin status make department as Root Admin type. */
+        ROOT_ADMIN,
+
+       /** Domain admin status make department as Domain Admin type. */
+        DOMAIN_ADMIN;
     }
 
     /**
@@ -531,29 +558,30 @@ public class Department implements Serializable {
     }
 
     /**
-     * Convert JSONObject into user object.
+     * Convert JSONObject into Department object.
      *
      * @param jsonObject json object from cloud stack.
-     * @param convertUtil to convert the string uuid and get the app id.
      * @return user object.
-     * @throws error occurs.
+     * @throws JSONException error occurs.
      */
-    public static Department convert(JSONObject jsonObject, ConvertUtil convertUtil) throws JSONException {
+    public static Department convert(JSONObject jsonObject) throws JSONException {
         Department department = new Department();
         department.setSyncFlag(false);
         try {
             department.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
             JSONArray userList = jsonObject.getJSONArray("user");
-            JSONObject userObject = userList.getJSONObject(0);
-            department.setFirstName(JsonUtil.getStringValue(userObject, "firstname"));
-            department.setLastName(JsonUtil.getStringValue(userObject, "lastname"));
-            department.setUserName(JsonUtil.getStringValue(userObject, "username"));
-            department.setType(AccountType.values()[(JsonUtil.getIntegerValue(userObject, "accounttype"))]);
-            department.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(jsonObject, "domainid")));
-            department.setEmail(JsonUtil.getStringValue(userObject, "email"));
+            if (userList.length() > 0) {
+                JSONObject userObject = userList.getJSONObject(0);
+                department.setFirstName(JsonUtil.getStringValue(userObject, "firstname"));
+                department.setLastName(JsonUtil.getStringValue(userObject, "lastname"));
+                department.setUserName(JsonUtil.getStringValue(userObject, "username"));
+                department.setType(AccountType.values()[(JsonUtil.getIntegerValue(userObject, "accounttype"))]);
+                department.setEmail(JsonUtil.getStringValue(userObject, "email"));
+                department.setStatus(Status.valueOf(JsonUtil.getStringValue(userObject, "state").toUpperCase()));
+            }
+            department.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
             department.setPassword("l3tm3in");
             department.setIsActive(true);
-            department.setStatus(Status.valueOf(JsonUtil.getStringValue(userObject, "state").toUpperCase()));
         } catch (Exception ex) {
             ex.printStackTrace();
         }

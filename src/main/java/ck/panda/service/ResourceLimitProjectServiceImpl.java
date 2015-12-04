@@ -16,11 +16,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitProject;
+import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
 import ck.panda.domain.repository.jpa.ResourceLimitProjectRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackResourceLimitService;
 import ck.panda.util.ConfigUtil;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -47,9 +47,9 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
     @Autowired
     private CloudStackResourceLimitService csResourceLimitService;
 
-    /** Convert entity repository reference. */
+    /** Reference of the convert entity service. */
     @Autowired
-    private ConvertUtil entity;
+    private ConvertEntityService convertEntityService;
 
     /** Cloud stack configuration utility class. */
     @Autowired
@@ -177,7 +177,10 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
             // 2.1 Call convert by passing JSONObject to StorageOffering entity
             // and Add
             // the converted Resource limit entity to list
-            resourceList.add(ResourceLimitProject.convert(resourceListJSON.getJSONObject(i), entity));
+        	ResourceLimitProject resource = ResourceLimitProject.convert(resourceListJSON.getJSONObject(i));
+            resource.setProjectId(convertEntityService.getProject(resource.getTransProjectId()).getId());
+            resource.setUniqueSeperator(resource.getTransProjectId()+"-"+ResourceType.values()[(resource.getTransResourceType())]);
+        	resourceList.add(resource);
         }
         return resourceList;
     }

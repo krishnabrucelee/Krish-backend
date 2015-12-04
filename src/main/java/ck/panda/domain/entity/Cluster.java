@@ -12,6 +12,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import org.hibernate.annotations.Type;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
@@ -19,7 +21,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -64,6 +65,15 @@ public class Cluster {
     @Column(name = "pod_id")
     private Long podId;
 
+    /** Transient zone of the cluster. */
+    @Transient
+    private String transZone;
+
+    /** Transient pod of the cluster. */
+    @Transient
+    private String transPod;
+
+
     /** Zone Object for the pod. */
     @JoinColumn(name = "zone_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
@@ -99,8 +109,12 @@ public class Cluster {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
 
+    /** IsActive attribute to verify Active or Inactive. */
+    @Column(name = "is_active")
+    private Boolean isActive;
+
     /**
-     * Get id
+     * Get id.
      *
      * @return the id
      */
@@ -109,7 +123,7 @@ public class Cluster {
     }
 
     /**
-     * Set the id
+     * Set the id.
      *
      * @param id  to set
      */
@@ -118,7 +132,7 @@ public class Cluster {
     }
 
     /**
-     * Get Uuid
+     * Get Uuid.
      *
      * @return the uuid
      */
@@ -127,7 +141,7 @@ public class Cluster {
     }
 
     /**
-     * Set the uuid
+     * Set the uuid.
      *
      * @param uuid  to set
      */
@@ -136,7 +150,7 @@ public class Cluster {
     }
 
     /**
-     * Get name
+     * Get name.
      *
      * @return the name
      */
@@ -145,7 +159,7 @@ public class Cluster {
     }
 
     /**
-     * Set the name
+     * Set the name.
      *
      * @param name  to set
      */
@@ -154,7 +168,7 @@ public class Cluster {
     }
 
     /**
-     * Get the ClusterType
+     * Get the ClusterType.
      *
      * @return the clusterType
      */
@@ -163,14 +177,16 @@ public class Cluster {
     }
 
     /**
-     * @param clusterType the clusterType to set
+     * Set  the clusterType.
+     *
+     * @param clusterType to set
      */
     public void setClusterType(String clusterType) {
         this.clusterType = clusterType;
     }
 
     /**
-     * Get the hypervisor type
+     * Get the hypervisor type.
      *
      * @return the hypervisorType
      */
@@ -179,7 +195,7 @@ public class Cluster {
     }
 
     /**
-     * Set the hypervisorType
+     * Set the hypervisorType.
      *
      * @param hypervisorType  to set
      */
@@ -188,7 +204,7 @@ public class Cluster {
     }
 
     /**
-     * Get pod
+     * Get pod.
      *
      * @return the pod
      */
@@ -197,7 +213,7 @@ public class Cluster {
     }
 
     /**
-     * Set the pod
+     * Set the pod.
      *
      * @param pod  to set
      */
@@ -206,14 +222,16 @@ public class Cluster {
     }
 
     /**
-     * @return the podId
+     * Get the pod id.
+     *
+     * @return the podId.
      */
     public Long getPodId() {
         return podId;
     }
 
     /**
-     * Set the podId
+     * Set the podId.
      *
      * @param podId to set
      */
@@ -222,7 +240,7 @@ public class Cluster {
     }
 
     /**
-     * Get the zone
+     * Get the zone.
      *
      * @return the zone
      */
@@ -231,7 +249,7 @@ public class Cluster {
     }
 
     /**
-     * Set the zone
+     * Set the zone.
      *
      * @param zone to set
      */
@@ -240,7 +258,7 @@ public class Cluster {
     }
 
     /**
-     * Get zoneId
+     * Get zoneId.
      *
      * @return the zoneId
      */
@@ -249,7 +267,7 @@ public class Cluster {
     }
 
     /**
-     * Set the zoneId
+     * Set the zoneId.
      *
      * @param zoneId  to set
      */
@@ -258,7 +276,7 @@ public class Cluster {
     }
 
     /**
-     * Get CreatedBy
+     * Get Created user.
      *
      * @return the createdBy
      */
@@ -267,7 +285,7 @@ public class Cluster {
     }
 
     /**
-     * Set the createdBy
+     * Set the created user.
      *
      * @param createdBy  to set
      */
@@ -276,7 +294,7 @@ public class Cluster {
     }
 
     /**
-     * Get updatedBy
+     * Get updated user.
      *
      * @return the updatedBy
      */
@@ -285,7 +303,7 @@ public class Cluster {
     }
 
     /**
-     * Set the updatedBy
+     * Set the updated user.
      *
      * @param updatedBy  to set
      */
@@ -294,7 +312,7 @@ public class Cluster {
     }
 
     /**
-     * Get createdDateTime
+     * Get createdDateTime.
      *
      * @return the createdDateTime
      */
@@ -303,7 +321,7 @@ public class Cluster {
     }
 
     /**
-     * Set the createdDateTime
+     * Set the createdDateTime.
      *
      * @param createdDateTime to set
      */
@@ -312,7 +330,7 @@ public class Cluster {
     }
 
     /**
-     * Get the updatedDatetime
+     * Get the updatedDatetime.
      *
      * @return the updatedDateTime
      */
@@ -321,7 +339,7 @@ public class Cluster {
     }
 
     /**
-     * Set the updatedDateTime
+     * Set the updatedDateTime.
      *
      * @param updatedDateTime  to set
      */
@@ -329,22 +347,77 @@ public class Cluster {
         this.updatedDateTime = updatedDateTime;
     }
 
+
+    /**
+     * Get the transient zone.
+     *
+    * @return the transZone
+    */
+    public String getTransZone() {
+        return transZone;
+    }
+
+    /**
+    * Set the transient Zone.
+    *
+    * @param transZone to set
+    */
+    public void setTransZone(String transZone) {
+        this.transZone = transZone;
+    }
+
+    /**
+    * Get the transient pod.
+    *
+    * @return the transPod
+    */
+    public String getTransPod() {
+        return transPod;
+    }
+
+    /**
+    * Set the transient pod.
+    *
+    * @param transPod to set
+    */
+    public void setTransPod(String transPod) {
+        this.transPod = transPod;
+    }
+
+    /**
+     * Get isActive.
+     *
+     * @return the isActive
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    /**
+     * Set the isActive.
+     *
+     * @param isActive  to set
+     */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
     /**
      * Convert JSONObject into pod object.
      *
      * @param jsonObject JSON object.
-     * @param convertUtil convert Entity object from UUID.
      * @return pod object.
      */
-    public static Cluster convert(JSONObject jsonObject, ConvertUtil convertUtil) {
+    public static Cluster convert(JSONObject jsonObject) {
         Cluster cluster = new Cluster();
         try {
             cluster.setName(JsonUtil.getStringValue(jsonObject, "name"));
             cluster.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            cluster.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
-            cluster.setPodId(convertUtil.getPodId(JsonUtil.getStringValue(jsonObject, "podid")));
+            cluster.setTransZone(JsonUtil.getStringValue(jsonObject, "zoneid"));
+            cluster.setTransPod(JsonUtil.getStringValue(jsonObject, "podid"));
             cluster.setHypervisorType(JsonUtil.getStringValue(jsonObject, "hypervisortype"));
             cluster.setClusterType(JsonUtil.getStringValue(jsonObject, "clustertype"));
+            cluster.setIsActive(true);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

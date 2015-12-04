@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.entity.OsType;
+import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.Template.Status;
 import ck.panda.domain.entity.Template.Type;
@@ -21,12 +22,10 @@ import ck.panda.domain.repository.jpa.HypervisorRepository;
 import ck.panda.domain.repository.jpa.OsCategoryRepository;
 import ck.panda.domain.repository.jpa.OsTypeRepository;
 import ck.panda.domain.repository.jpa.TemplateRepository;
-import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.domain.repository.jpa.ZoneRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackTemplateService;
 import ck.panda.util.ConfigUtil;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
@@ -50,10 +49,6 @@ public class TemplateServiceImpl implements TemplateService {
     /** Template repository reference. */
     @Autowired
     private TemplateRepository templateRepository;
-
-    /** Convert entity repository reference. */
-    @Autowired
-    private ConvertUtil entity;
 
     /** Cloud stack template service. */
     @Autowired
@@ -164,7 +159,7 @@ public class TemplateServiceImpl implements TemplateService {
         if (responseObject.has("template")) {
             templateListJSON = responseObject.getJSONArray("template");
             for (int i = 0, size = templateListJSON.length(); i < size; i++) {
-                Template template = Template.convert(templateListJSON.getJSONObject(i), entity);
+                Template template = Template.convert(templateListJSON.getJSONObject(i));
                 OsType osType = osTypeRepository.findByUUID(template.getTransOsType());
                 template.setOsType(osType);
                 template.setOsCategory(osCategoryRepository.findOne(osType.getOsCategoryId()));
@@ -360,4 +355,11 @@ public class TemplateServiceImpl implements TemplateService {
     public Template findByUUID(String uuid) {
         return templateRepository.findByUUID(uuid);
     }
+
+    @Override
+   	public Template softDelete(Template template) throws Exception {
+    	template.setIsActive(false);
+    	template.setStatus(Template.Status.INACTIVE);
+   	      return templateRepository.save(template);
+   	}
 }

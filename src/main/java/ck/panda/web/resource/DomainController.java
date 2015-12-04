@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
+import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.service.DomainService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -41,6 +42,7 @@ public class DomainController extends CRUDController<Domain> implements ApiContr
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new domain.", response = Domain.class)
     @Override
     public Domain create(@RequestBody Domain domain) throws Exception {
+        domain.setSyncFlag(true);
         return domainService.save(domain);
     }
 
@@ -53,6 +55,7 @@ public class DomainController extends CRUDController<Domain> implements ApiContr
     @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing Domain.", response = Domain.class)
     @Override
     public Domain update(@RequestBody Domain domain, @PathVariable(PATH_ID) Long id) throws Exception {
+        domain.setSyncFlag(true);
         return domainService.update(domain);
     }
 
@@ -60,7 +63,7 @@ public class DomainController extends CRUDController<Domain> implements ApiContr
     public List<Domain> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Domain.class);
-        Page<Domain> pageResponse = domainService.findAll(page);
+        Page<Domain> pageResponse = domainService.findAllByActive(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
@@ -78,4 +81,18 @@ public class DomainController extends CRUDController<Domain> implements ApiContr
           return domainService.findAll();
       }
 
+      /**
+       * Delete the Domain.
+       *
+       * @param domain id reference of the domain.
+       * @param id domain id.
+       * @throws Exception error occurs.
+       */
+      @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Domain.")
+      @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
+      @ResponseStatus(HttpStatus.NO_CONTENT)
+      public void softDelete(@RequestBody Domain domain, @PathVariable(PATH_ID) Long id) throws Exception {
+          /** Doing Soft delete from the department table. */
+        domainService.softDelete(domain);
+      }
 }

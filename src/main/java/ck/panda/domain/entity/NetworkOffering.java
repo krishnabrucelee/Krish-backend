@@ -369,6 +369,7 @@ public class NetworkOffering implements Serializable {
             networkOffering.trafficType = JsonValidator.jsonStringValidation(object, "traffictype");
             networkOffering.guestIpType = JsonValidator.jsonStringValidation(object, "guestiptype");
             networkOffering.displayText = JsonValidator.jsonStringValidation(object, "displaytext");
+            networkOffering.setIsActive(true);
         } catch (Exception e) {
             e.printStackTrace();
         }

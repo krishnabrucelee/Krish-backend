@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.repository.jpa.DepartmentReposiory;
@@ -21,7 +20,6 @@ import ck.panda.domain.repository.jpa.ZoneRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackNetworkService;
 import ck.panda.util.ConfigUtil;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -53,9 +51,9 @@ public class NetworkServiceImpl implements NetworkService {
     @Autowired
     private NetworkOfferingRepository networkofferingRepo;
 
-    /** Convert entity repository reference. */
+    /** Reference of the convert entity service. */
     @Autowired
-    private ConvertUtil entity;
+    private ConvertEntityService convertEntityService;
 
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkServiceImpl.class);
@@ -95,8 +93,7 @@ public class NetworkServiceImpl implements NetworkService {
                     network.setZoneId(zoneRepository.findByUUID(createComputeResponseJSON.getString("zoneid")).getId());
                     network.setNetworkOfferingId(networkofferingRepo.findByUUID(createComputeResponseJSON.getString("networkofferingid")).getId());
                     network.setStatus(network.getStatus().valueOf(createComputeResponseJSON.getString("state")));
-                    network.setDepartment(entity.getDepartmentByUsername(createComputeResponseJSON.getString("account")));
-                    network.setDepartmentId(entity.getDepartmentByUsername(createComputeResponseJSON.getString("account")).getId());
+                    network.setDepartmentId(convertEntityService.getDepartmentByUsername(createComputeResponseJSON.getString("account")));
                     network.setGateway(createComputeResponseJSON.getString("gateway"));
             return networkRepo.save(network);
         }
@@ -140,6 +137,12 @@ public class NetworkServiceImpl implements NetworkService {
 
     }
 
+    @Override
+    public Network softDelete(Network network) throws Exception {
+        network.setIsActive(false);
+        network.setStatus(Network.Status.Destroy);
+        return networkRepo.save(network);
+    }
 
 
     @Override
@@ -160,7 +163,12 @@ public class NetworkServiceImpl implements NetworkService {
                 // 2.1 Call convert by passing JSONObject to Domain entity and
                 // Add
                 // the converted Domain entity to list
-                networkList.add(Network.convert(networkListJSON.getJSONObject(i), entity));
+                Network network = Network.convert(networkListJSON.getJSONObject(i));
+                network.setDomainId(convertEntityService.getDomainId(network.getTransDomainId()));
+                network.setZoneId(convertEntityService.getZoneId(network.getTransZoneId()));
+                network.setNetworkOfferingId(convertEntityService.getNetworkOfferingId(network.getTransNetworkOfferingId()));
+                network.setDepartmentId(convertEntityService.getDepartmentByUsername(network.getTransDepartmentId()));
+                networkList.add(network);
             }
         }
         return networkList;
@@ -189,10 +197,10 @@ public class NetworkServiceImpl implements NetworkService {
         return optional;
     }
 
-	@Override
-	public List<Network> findByDepartment(Long department) throws Exception {
-		Department deptNetwork = departmentRepository.findOne(department);
-		return networkRepo.findByDepartment(deptNetwork);
-	}
+    @Override
+    public List<Network> findByDepartment(Long department) throws Exception {
+        Department deptNetwork = departmentRepository.findOne(department);
+        return networkRepo.findByDepartment(deptNetwork);
+    }
 
 }

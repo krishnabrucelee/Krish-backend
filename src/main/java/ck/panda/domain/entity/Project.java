@@ -5,7 +5,6 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -34,10 +33,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
-
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
-import ck.panda.util.JsonValidator;
 
 /**
  * Projects are used to organize people and resources. CloudStack users within a single domain can group
@@ -153,6 +149,18 @@ public class Project implements Serializable {
     /** Transient value . */
     @Transient
     private Boolean syncFlag;
+
+    /** Transient domain of the account. */
+    @Transient
+    private String transDomainId;
+
+    /** Transient domain of the account. */
+    @Transient
+    private String transAccount;
+
+    /** Transient domain of the account. */
+    @Transient
+    private String transState;
 
     /**
      * Get the id.
@@ -483,7 +491,6 @@ public class Project implements Serializable {
         return ToStringBuilder.reflectionToString(this);
     }
 
-
     /**
      * @return the syncFlag
      */
@@ -499,26 +506,76 @@ public class Project implements Serializable {
     }
 
     /**
+     * Get the transient domain id.
+     *
+     * @return the transDomainId
+     */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
+
+    /**
+     * Set the transient domain id..
+     *
+     * @param transDomainId to set
+     */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
+
+    /**
+     * Get the transient account.
+     *
+     * @return the transAccount
+     */
+    public String getTransAccount() {
+        return transAccount;
+    }
+
+    /**
+    * Set the transient Account.
+    *
+    * @param transAccount  to set
+    */
+    public void setTransAccount(String transAccount) {
+        this.transAccount = transAccount;
+    }
+
+    /**
+     * Get the transient state.
+     *
+     * @return the transState
+     */
+    public String getTransState() {
+        return transState;
+    }
+
+    /**
+     * Set the transient State.
+     *
+     * @param transState  to set
+     */
+    public void setTransState(String transState) {
+        this.transState = transState;
+    }
+
+    /**
      * Convert JSONObject to project entity.
      *
-     * @param object json object
+     * @param jsonObject json object
      * @return project entity object.
      * @throws JSONException handles json exception.
      */
-    @SuppressWarnings("static-access")
-    public static Project convert(JSONObject jsonObject, ConvertUtil convertUtil ) throws JSONException {
+    public static Project convert(JSONObject jsonObject) throws JSONException {
         Project project = new Project();
         project.setSyncFlag(false);
         try {
             project.setName(JsonUtil.getStringValue(jsonObject, "name"));
             project.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            project.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(jsonObject, "domainid")));
-            project.setDepartmentId(convertUtil.getDepartmentByUsernameAndDomain(JsonUtil.getStringValue(jsonObject, "account"),
-                    convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid"))));
-            project.setIsActive(convertUtil.getState(JsonUtil.getStringValue(jsonObject, "state")));
-            project.setStatus((Project.Status)convertUtil.getStatus(JsonUtil.getStringValue(jsonObject, "state")));
+            project.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
+            project.setTransAccount(JsonUtil.getStringValue(jsonObject, "account"));
+            project.setTransState(JsonUtil.getStringValue(jsonObject, "state"));
             project.setDescription(JsonUtil.getStringValue(jsonObject, "displaytext"));
-            project.setProjectOwnerId(convertUtil.getUserIdByAccount(JsonUtil.getStringValue(jsonObject, "account"), convertUtil.getDomain(JsonUtil.getStringValue(jsonObject, "domainid"))));
         } catch (Exception e) {
             e.printStackTrace();
         }

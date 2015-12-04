@@ -22,12 +22,9 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.DomainUsage;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
-import ck.panda.domain.entity.Invoice;
 import ck.panda.domain.repository.mongo.DomainUsageRepository;
 import ck.panda.util.AppValidator;
-import ck.panda.util.CloudStackUsageService;
 import ck.panda.util.ConfigUtil;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
@@ -68,14 +65,6 @@ public class DomainUsageServiceImpl implements DomainUsageService {
     /** object(server) created for CloudStackServer. */
     @Autowired
     private ConfigUtil configServer;
-
-    @Autowired
-    private ConvertUtil convertUtil;
-
-    /** CloudStack Domain service for connectivity with cloudstack. */
-    @Autowired
-    private CloudStackUsageService csAccountUsageService;
-
     @Override
     public DomainUsage save(DomainUsage domainUsage) throws Exception {
         return usageRepo.save(domainUsage);

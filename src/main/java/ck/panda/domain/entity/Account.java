@@ -29,7 +29,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -137,6 +136,10 @@ public class Account implements Serializable {
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
+
+    /** Transient domain of the account. */
+    @Transient
+    private String transDomainId;
 
     /**
      * Default constructor.
@@ -511,12 +514,36 @@ public class Account implements Serializable {
         this.syncFlag = syncFlag;
     }
 
+    /**
+     * Get the transient DomainId.
+     *
+    * @return the transDomainId
+    */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
+
+    /**
+    * Set the transDomainId.
+    *
+    * @param transDomainId  to set
+    */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
+
      /** Define user type. */
     public enum AccountType {
+
        /** User status make department as user type. */
          USER,
+
+       /** Root admin status make department as Root Admin type. */
          ROOT_ADMIN,
+
+       /** Domain admin status make department as Domain Admin type. */
          DOMAIN_ADMIN;
+
     }
 
     /**
@@ -534,11 +561,10 @@ public class Account implements Serializable {
      * Convert JSONObject into user object.
      *
      * @param jsonObject json object from cloud stack.
-     * @param convertUtil to convert the string uuid and get the app id.
      * @return account object.
-     * @throws error occurs.
+     * @throws JSONException error occurs.
      */
-    public static Account convert(JSONObject jsonObject, ConvertUtil convertUtil) throws JSONException {
+    public static Account convert(JSONObject jsonObject) throws JSONException {
         Account account = new Account();
         account.setSyncFlag(false);
         try {
@@ -549,7 +575,7 @@ public class Account implements Serializable {
             account.setLastName(JsonUtil.getStringValue(userObject, "lastname"));
             account.setUserName(JsonUtil.getStringValue(userObject, "username"));
             account.setType(AccountType.values()[(JsonUtil.getIntegerValue(userObject, "accounttype"))]);
-            account.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(jsonObject, "domainid")));
+            account.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
             account.setEmail(JsonUtil.getStringValue(userObject, "email"));
             account.setPassword("l3tm3in");
             account.setIsActive(true);

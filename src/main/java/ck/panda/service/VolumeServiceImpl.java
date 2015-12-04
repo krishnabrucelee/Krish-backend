@@ -14,13 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.EventTypes;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.Status;
 import ck.panda.domain.repository.jpa.VolumeRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackVolumeService;
 import ck.panda.util.ConfigUtil;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -50,9 +50,9 @@ public class VolumeServiceImpl implements VolumeService {
     @Autowired
     private ConfigUtil config;
 
-    /** Convert entity repository reference. */
+    /** Reference of the convert entity service. */
     @Autowired
-    private ConvertUtil entity;
+    private ConvertEntityService convertEntityService;
 
     @Override
     public Volume save(Volume volume) throws Exception {
@@ -149,7 +149,11 @@ public class VolumeServiceImpl implements VolumeService {
             // 2.1 Call convert by passing JSONObject to Volume entity
             // and Add
             // the converted Volume entity to list
-            volumeList.add(Volume.convert(volumeListJSON.getJSONObject(i), entity));
+            Volume volume = Volume.convert(volumeListJSON.getJSONObject(i));
+            volume.setZoneId(convertEntityService.getZoneId(volume.getTransvmInstanceId()));
+            volume.setStorageOfferingId(convertEntityService.getStorageOfferId(volume.getTransStorageOfferingId()));
+            volume.setVmInstanceId(convertEntityService.getVmInstanceId(volume.getTransvmInstanceId()));
+            volumeList.add(volume);
         }
         }
         return volumeList;
@@ -247,7 +251,7 @@ public class VolumeServiceImpl implements VolumeService {
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
 
                 if (jobresult.has("volume")) {
-                	volume.setUuid((String) jobresult.get("id"));
+                    volume.setUuid((String) jobresult.get("id"));
                 }
                 if (jobresult.getString("jobstatus").equals("0")) {
                        volume.setStatus(Status.Ready);
@@ -279,7 +283,7 @@ public class VolumeServiceImpl implements VolumeService {
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
                 if (jobresult.has("volume")) {
-                	volume.setUuid((String) jobresult.get("id"));
+                    volume.setUuid((String) jobresult.get("id"));
                 }
                 if (jobresult.getString("jobstatus").equals("0")) {
                        volume.setStatus(Status.Destroy);
@@ -290,9 +294,9 @@ public class VolumeServiceImpl implements VolumeService {
         return volume;
     }
 
-	@Override
-	public Volume resizeVolume(Volume volume) throws Exception {
-		Errors errors = validator.rejectIfNullEntity("volumes", volume);
+    @Override
+    public Volume resizeVolume(Volume volume) throws Exception {
+        Errors errors = validator.rejectIfNullEntity("volumes", volume);
         errors = validator.validateEntity(volume, errors);
         config.setServer(1L);
         String volumeS = csVolumeService.resizeVolume("json", optional(volume));
@@ -309,7 +313,7 @@ public class VolumeServiceImpl implements VolumeService {
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
 
                 if (jobresult.has("volume")) {
-                	volume.setUuid((String) jobresult.get("id"));
+                    volume.setUuid((String) jobresult.get("id"));
                 }
                 if (jobresult.getString("jobstatus").equals("0")) {
                        volume.setStatus(Status.Ready);
@@ -318,6 +322,13 @@ public class VolumeServiceImpl implements VolumeService {
             volumeRepo.save(volume);
         }
         return volume;
-	}
+    }
+
+    @Override
+        public Volume softDelete(Volume volume) throws Exception {
+             volume.setIsActive(false);
+             volume.setStatus(Volume.Status.Destroy);
+             return volumeRepo.save(volume);
+        }
 
 }
