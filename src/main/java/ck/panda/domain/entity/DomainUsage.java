@@ -1,7 +1,9 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.time.ZonedDateTime;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -25,6 +27,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 
 /**
  * Usage contains a list of service from cloud stack like Instance, Volume, Snapshot etc., and its Usage.
@@ -36,23 +39,22 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Table(name = "ck_usage")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
-public class AccountUsage implements Serializable {
+public class DomainUsage implements Serializable {
 
     /** Id of the Usage. */
     @Id
-    @GeneratedValue
     @Column(name = "id")
-    private Long id;
+    private String id;
 
 
-    /** User which the usage record belongs to. */
-    @JoinColumn(name = "user_id", referencedColumnName = "id", updatable = false, insertable = false)
+    /** Account which the usage record belongs to. */
+    @JoinColumn(name = "account_id", referencedColumnName = "id", updatable = false, insertable = false)
     @ManyToOne
-    private User user;
+    private Account account;
 
     @NotNull
-    @Column(name = "user_id")
-    private Long userId;
+    @Column(name = "account_id")
+    private Long accountId;
 
     @JoinColumn(name = "domain_id", referencedColumnName = "id", updatable = false, insertable = false)
     @ManyToOne
@@ -86,7 +88,7 @@ public class AccountUsage implements Serializable {
 
     /** Reference id of a virtual machine. */
     @Column(name = "vm_instance_id")
-    private Long vmInstanceId;
+    private String vmInstanceId;
 
     /** Name of the virtual machine. */
     @Column(name = "vm_name")
@@ -96,17 +98,22 @@ public class AccountUsage implements Serializable {
     @Column(name = "raw_usage")
     private Double rawUsage;
 
+
+    /** Usage hours of the service*/
+    @Column(name = "hours")
+    private Double hours;
+
     /** Reference id of service offering. */
     @Column(name = "offering_id")
-    private Long offeringId;
+    private String offeringId;
 
     /** Reference id of template. */
     @Column(name = "template_id")
-    private Long templateId;
+    private String templateId;
 
     /**  The ID of the the Usage type service */
     @Column(name = "usage_id")
-    private Long usageId;
+    private String usageId;
 
     /** Type of the service Device type, Hypervisor, etc. */
     @Column(name = "type")
@@ -118,19 +125,17 @@ public class AccountUsage implements Serializable {
 
     /** Reference id of the network. */
     @Column(name = "network_id")
-    private Long networkId;
+    private String networkId;
 
     /** Start date of the usage. */
+    @DateTimeFormat(iso = ISO.DATE_TIME)
     @Column(name = "start_date")
-    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    private ZonedDateTime startDate;
+    private Date startDate;
 
     /** End date of the usage. */
+    @DateTimeFormat(iso = ISO.DATE_TIME)
     @Column(name = "end_date")
-    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    private ZonedDateTime endDate;
+    private Date endDate;
 
     @Column(name = "virtual_size")
     private Long virtualSize;
@@ -188,7 +193,7 @@ public class AccountUsage implements Serializable {
     /**
      * Default constructor.
      */
-    public AccountUsage() {
+    public DomainUsage() {
         super();
     }
 
@@ -197,7 +202,7 @@ public class AccountUsage implements Serializable {
      *
      * @param name to set
      */
-    public AccountUsage(String name) {
+    public DomainUsage(String name) {
         super();
     }
 
@@ -206,7 +211,7 @@ public class AccountUsage implements Serializable {
      *
      * @return id
      */
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
@@ -215,9 +220,10 @@ public class AccountUsage implements Serializable {
      *
      * @param id the Long to set
      */
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
+
 
 
     /**
@@ -237,17 +243,17 @@ public class AccountUsage implements Serializable {
 
 
     /**
-     * @return the userId
+     * @return the accountId
      */
-    public Long getUserId() {
-        return userId;
+    public Long getAccountId() {
+        return accountId;
     }
 
     /**
-     * @param userId the userId to set
+     * @param accountId the accountId to set
      */
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setAccountId(Long accountId) {
+        this.accountId = accountId;
     }
 
     /**
@@ -281,15 +287,15 @@ public class AccountUsage implements Serializable {
     /**
      * @return the user
      */
-    public User getUser() {
-        return user;
+    public Account getUser() {
+        return account;
     }
 
     /**
      * @param user the user to set
      */
-    public void setUser(User user) {
-        this.user = user;
+    public void setUser(Account account) {
+        this.account = account;
     }
 
     /**
@@ -351,14 +357,14 @@ public class AccountUsage implements Serializable {
     /**
      * @return the vmInstanceId
      */
-    public Long getVmInstanceId() {
+    public String getVmInstanceId() {
         return vmInstanceId;
     }
 
     /**
      * @param vmInstanceId the vmInstanceId to set
      */
-    public void setVmInstanceId(Long vmInstanceId) {
+    public void setVmInstanceId(String vmInstanceId) {
         this.vmInstanceId = vmInstanceId;
     }
 
@@ -390,45 +396,75 @@ public class AccountUsage implements Serializable {
         this.rawUsage = rawUsage;
     }
 
+
+
+    /**
+     * @return the account
+     */
+    public Account getAccount() {
+        return account;
+    }
+
+    /**
+     * @param account the account to set
+     */
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    /**
+     * @return the hours
+     */
+    public Double getHours() {
+        return hours;
+    }
+
+    /**
+     * @param hours the hours to set
+     */
+    public void setHours(Double hours) {
+        this.hours = hours;
+    }
+
     /**
      * @return the offeringId
      */
-    public Long getOfferingId() {
+    public String getOfferingId() {
         return offeringId;
     }
 
     /**
      * @param offeringId the offeringId to set
      */
-    public void setOfferingId(Long offeringId) {
+    public void setOfferingId(String offeringId) {
         this.offeringId = offeringId;
     }
 
     /**
      * @return the templateId
      */
-    public Long getTemplateId() {
+    public String getTemplateId() {
         return templateId;
     }
 
     /**
      * @param templateId the templateId to set
      */
-    public void setTemplateId(Long templateId) {
+    public void setTemplateId(String templateId) {
         this.templateId = templateId;
     }
 
     /**
      * @return the usageId
      */
-    public Long getUsageId() {
+    public String getUsageId() {
         return usageId;
     }
 
     /**
      * @param usageId the usageId to set
      */
-    public void setUsageId(Long usageId) {
+    public void setUsageId(String usageId) {
         this.usageId = usageId;
     }
 
@@ -463,42 +499,42 @@ public class AccountUsage implements Serializable {
     /**
      * @return the networkId
      */
-    public Long getNetworkId() {
+    public String getNetworkId() {
         return networkId;
     }
 
     /**
      * @param networkId the networkId to set
      */
-    public void setNetworkId(Long networkId) {
+    public void setNetworkId(String networkId) {
         this.networkId = networkId;
     }
 
     /**
      * @return the startDate
      */
-    public ZonedDateTime getStartDate() {
+    public Date getStartDate() {
         return startDate;
     }
 
     /**
      * @param startDate the startDate to set
      */
-    public void setStartDate(ZonedDateTime startDate) {
+    public void setStartDate(Date startDate) {
         this.startDate = startDate;
     }
 
     /**
      * @return the endDate
      */
-    public ZonedDateTime getEndDate() {
+    public Date getEndDate() {
         return endDate;
     }
 
     /**
      * @param endDate the endDate to set
      */
-    public void setEndDate(ZonedDateTime endDate) {
+    public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
 
@@ -705,6 +741,8 @@ public class AccountUsage implements Serializable {
      * Reference https://cwiki.apache.org/confluence/display/CLOUDSTACK/Usage+and+Usage+Events
      */
     public enum UsageType {
+        NOT_AVAILABLE,//0
+
         /** Running VM usage mapping Id 1. */
         RUNNING_VM,
 
@@ -732,16 +770,19 @@ public class AccountUsage implements Serializable {
         /** IP_ADDRESS usage mapping Id 9. */
         SNAPSHOT,
 
-        /** LOAD_BALANCER_POLICY usage mapping Id 10. */
+        /** Security Group usage */
+        SECURITY_GROUP,
+
+        /** LOAD_BALANCER_POLICY usage mapping Id 11. */
         LOAD_BALANCER_POLICY,
 
-        /** PORT_FORWARDING_RULE usage mapping Id 11. */
+        /** PORT_FORWARDING_RULE usage mapping Id 12. */
         PORT_FORWARDING_RULE,
 
-        /** NETWORK_OFFERING usage mapping Id 12. */
+        /** NETWORK_OFFERING usage mapping Id 13. */
         NETWORK_OFFERING,
 
-        /** VPN_USERS usage mapping Id 13. */
+        /** VPN_USERS usage mapping Id 14. */
         VPN_USERS,
     }
 

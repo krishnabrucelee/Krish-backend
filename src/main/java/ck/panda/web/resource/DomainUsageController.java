@@ -9,22 +9,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
-import ck.panda.domain.entity.AccountUsage;
+import ck.panda.domain.entity.DomainUsage;
 import ck.panda.domain.entity.Department;
-import ck.panda.service.AccountUsageService;
+import ck.panda.service.DomainUsageService;
 import ck.panda.service.DepartmentService;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
 
-public class AccountUsageController extends CRUDController<AccountUsage> implements ApiController {
+@RestController
+@RequestMapping("/api/usage")
+public class DomainUsageController extends CRUDController<DomainUsage> implements ApiController {
 
     @Autowired
-    private AccountUsageService accountUsageService;
+    private DomainUsageService domainUsageService;
 
 
     /**
-     * Get the account details and update with the cloud stack database.
+     * Get the domain details and update with the cloud stack database.
      *
      * @return projects project list.
      * @throws Exception error occurs.
@@ -32,8 +35,8 @@ public class AccountUsageController extends CRUDController<AccountUsage> impleme
     @RequestMapping(value = "updateUsage", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected List<AccountUsage> updateAccountUsage() throws Exception {
-        return accountUsageService.updateUsageAccount();
+    protected void updateDomainUsage() throws Exception {
+        domainUsageService.updateDomainUsage();
 
     }
 }
