@@ -180,7 +180,7 @@ public class VolumeServiceImpl implements VolumeService {
 
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
                 if (jobresult.getString("jobstatus").equals("0")) {
-                    volume.setStatus(Status.valueOf(EventTypes.Allocated));
+                    volume.setStatus(Status.valueOf(EventTypes.ALLOCATED));
                 }
                 volume.setIsActive(true);
                 volume.setStorageOfferingId(volume.getStorageOffering().getId());
@@ -192,6 +192,8 @@ public class VolumeServiceImpl implements VolumeService {
                 volume.setZoneId(volume.getZone().getId());
                 volume.setVolumeType(Volume.VolumeType.DATADISK);
                 volume.setCreatedDateTime(volume.getCreatedDateTime());
+                volume.setDiskMaxIops(volume.getDiskMaxIops());
+                volume.setDiskMinIops(volume.getDiskMinIops());
             }
 
         }
@@ -301,7 +303,7 @@ public class VolumeServiceImpl implements VolumeService {
         errors = validator.validateEntity(volume, errors);
         config.setServer(1L);
         String volumeS = csVolumeService.resizeVolume("json", optional(volume));
-        JSONObject jobId = new JSONObject(volumeS).getJSONObject("attachvolumeresponse");
+        JSONObject jobId = new JSONObject(volumeS).getJSONObject("resizevolumeresponse");
 
         if (jobId.has("errorcode")) {
             errors = this.validateEvent(errors, jobId.getString("errortext"));
@@ -313,6 +315,9 @@ public class VolumeServiceImpl implements VolumeService {
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
 
+                if (jobresult.getString("jobstatus").equals("2")) {
+                    volume.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
+                }
                 if (jobresult.has("volume")) {
                     volume.setUuid((String) jobresult.get("id"));
                 }
@@ -358,7 +363,7 @@ public class VolumeServiceImpl implements VolumeService {
 
                     }
                     if (jobresult.getString("jobstatus").equals("1")) {
-                        volume.setStatus(Status.valueOf(EventTypes.UPLOADNOTSTARTED));
+                        volume.setStatus(Status.valueOf(EventTypes.UPLOAD_NOT_STARTED));
                         volume.setEventMessage("Volume Not started");
                         setValue(volume);
                     }

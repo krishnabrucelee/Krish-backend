@@ -198,13 +198,13 @@ public class Volume {
         /** Volume will be in a Ready State. */
         READY,
         /** Volume will be in a UploadNotStarted State. */
-        UPLOADNOTSTARTED,
+        UPLOAD_NOT_STARTED,
         /** The volume upload operation is in progress or in short the volume is on secondary storage. */
-        UPLOADOP,
+        UPLOAD_OP,
         /** Volume will be in a UploadAbandoned State. */
-        UPLOADABANDONED,
+        UPLOAD_ABANDONED,
         /** Volume will be in a UploadError State. */
-        UPLOADERROR,
+        UPLOAD_ERROR,
         /** Volume will be in a Abandoned State. */
         ABANDONED,
         /** Volume will be in a Downloaded State. */
@@ -712,7 +712,7 @@ public class Volume {
             volume.name = JsonValidator.jsonStringValidation(object, "name");
             volume.setDiskSize(object.getLong("size"));
             volume.setVolumeType(volume.getVolumeType().valueOf(JsonValidator.jsonStringValidation(object, "type")));
-            volume.setStatus(volume.getStatus().valueOf(JsonValidator.jsonStringValidation(object, "state")));
+            volume.setStatus(volume.getStatus().valueOf(JsonValidator.jsonStringValidation(object, "state").toUpperCase()));
             volume.setCreatedDateTime(JsonUtil.convertToZonedDateTime(object.getString("created")));
             if (object.has("diskofferingid")) {
                 volume.setStorageOfferingId(convertUtil.getStorageOfferId(JsonUtil.getStringValue(object, "diskofferingid")));

@@ -733,7 +733,23 @@ public class SyncServiceImpl implements SyncService {
             if (csStorageOfferingMap.containsKey(storageOffering.getUuid())) {
                 StorageOffering csStorageOffering = csStorageOfferingMap.get(storageOffering.getUuid());
 
-                csStorageOffering.setDescription(csStorageOffering.getDescription());
+                storageOffering.setDescription(csStorageOffering.getDescription());
+                storageOffering.setDiskBytesReadRate(csStorageOffering.getDiskBytesReadRate());
+                storageOffering.setDiskBytesWriteRate(csStorageOffering.getDiskBytesWriteRate());
+                storageOffering.setDiskIopsReadRate(csStorageOffering.getDiskIopsReadRate());
+                storageOffering.setDiskIopsWriteRate(csStorageOffering.getDiskIopsWriteRate());
+                storageOffering.setDiskMaxIops(csStorageOffering.getDiskMaxIops());
+                storageOffering.setDiskMinIops(csStorageOffering.getDiskMinIops());
+                storageOffering.setDiskSize(csStorageOffering.getDiskSize());
+                storageOffering.setIsCustomDisk(csStorageOffering.getIsCustomDisk());
+                storageOffering.setIsCustomizedIops(csStorageOffering.getIsCustomizedIops());
+                storageOffering.setIsPublic(csStorageOffering.getIsPublic());
+                storageOffering.setName(csStorageOffering.getName());
+                storageOffering.setQosType(csStorageOffering.getQosType());
+                storageOffering.setStorageTags(csStorageOffering.getStorageTags());
+                storageOffering.setStorageType(csStorageOffering.getStorageType());
+                storageOffering.setDomain(csStorageOffering.getDomain());
+
                 // csOsType.setOsCategoryUuid(csOsType.getOsCategoryUuid());
 
                 // 3.2 If found, update the osType object in app db
@@ -1254,13 +1270,15 @@ public class SyncServiceImpl implements SyncService {
                 volume.setVmInstanceId(csvolume.getVmInstanceId());
                 volume.setVolumeType(csvolume.getVolumeType());
                 if(volume.getDiskSize() !=null) {
-                	volume.setDiskSize(csvolume.getDiskSize());
+                    volume.setDiskSize(csvolume.getDiskSize());
                 } else {
                     volume.setDiskSize(csvolume.getStorageOffering().getDiskSize());
                 }
                 volume.setIsActive(true);
                 volume.setChecksum(csvolume.getChecksum());
                 volume.setStatus(csvolume.getStatus());
+                volume.setDiskMaxIops(volume.getDiskMaxIops());
+                volume.setDiskMinIops(volume.getDiskMinIops());
                 volume.setCreatedDateTime(csvolume.getCreatedDateTime());
                 volume.setUpdatedDateTime(csvolume.getUpdatedDateTime());
                 // 3.2 If found, update the osType object in app db
