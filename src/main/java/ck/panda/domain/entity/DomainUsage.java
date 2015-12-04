@@ -32,7 +32,7 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
 /**
  * Usage contains a list of service from cloud stack like Instance, Volume, Snapshot etc., and its Usage.
  * And it stores the hourly based usage.
- * @author Assistanz
+ * @author Jamseer N <jamseer@assistanz.com>
  *
  */
 @Entity
@@ -52,23 +52,27 @@ public class DomainUsage implements Serializable {
     @ManyToOne
     private Account account;
 
+    /** Account id of the usage */
     @NotNull
     @Column(name = "account_id")
     private Long accountId;
 
+    /** Domain of the usage */
     @JoinColumn(name = "domain_id", referencedColumnName = "id", updatable = false, insertable = false)
     @ManyToOne
     private Domain domain;
 
+    /** Domain id of the usage */
     @NotNull
     @Column(name = "domain_id")
     private Long domainId;
 
-
+    /** Zone of the domain usage. */
     @JoinColumn(name = "zone_id", referencedColumnName = "id", updatable = false, insertable = false)
     @ManyToOne
     private Zone zone;
 
+    /** Zone id of the domain usage. */
     @NotNull
     @Column(name = "zone_id")
     private Long zoneId;
@@ -137,15 +141,19 @@ public class DomainUsage implements Serializable {
     @Column(name = "end_date")
     private Date endDate;
 
+    /** Usage virtual size */
     @Column(name = "virtual_size")
     private Long virtualSize;
 
+    /** Usage CPU speed */
     @Column(name = "cpu_speed")
     private Integer cpuSpeed;
 
+    /** Usage CPU Cores */
     @Column(name = "cpu_cores")
     private Integer cpuCores;
 
+    /** Usage memeory */
     @Column(name = "memory")
     private Integer memory;
 
@@ -224,9 +232,9 @@ public class DomainUsage implements Serializable {
         this.id = id;
     }
 
-
-
     /**
+     * Get the zone.
+     *
      * @return the zone
      */
     public Zone getZone() {
@@ -234,6 +242,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the zone.
+     *
      * @param zone the zone to set
      */
     public void setZone(Zone zone) {
@@ -241,8 +251,9 @@ public class DomainUsage implements Serializable {
     }
 
 
-
     /**
+     * Get the account id.
+     *
      * @return the accountId
      */
     public Long getAccountId() {
@@ -250,6 +261,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the account id.
+     *
      * @param accountId the accountId to set
      */
     public void setAccountId(Long accountId) {
@@ -257,6 +270,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the domain id.
+     *
      * @return the domainId
      */
     public Long getDomainId() {
@@ -264,6 +279,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the domain id.
+     *
      * @param domainId the domainId to set
      */
     public void setDomainId(Long domainId) {
@@ -271,6 +288,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the zone id.
+     *
      * @return the zoneId
      */
     public Long getZoneId() {
@@ -278,6 +297,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the zone id.
+     *
      * @param zoneId the zoneId to set
      */
     public void setZoneId(Long zoneId) {
@@ -285,6 +306,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the account.
+     *
      * @return the user
      */
     public Account getUser() {
@@ -292,6 +315,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the account.
+     *
      * @param user the user to set
      */
     public void setUser(Account account) {
@@ -299,6 +324,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the domain.
+     *
      * @return the domain
      */
     public Domain getDomain() {
@@ -306,6 +333,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the account.
+     *
      * @param domain the domain to set
      */
     public void setDomain(Domain domain) {
@@ -313,6 +342,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the usage description.
+     *
      * @return the description
      */
     public String getDescription() {
@@ -320,6 +351,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the usage description.
+     *
      * @param description the description to set
      */
     public void setDescription(String description) {
@@ -327,6 +360,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the usage display.
+     *
      * @return the usageDisplay
      */
     public String getUsageDisplay() {
@@ -334,6 +369,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the usage display.
+     *
      * @param usageDisplay the usageDisplay to set
      */
     public void setUsageDisplay(String usageDisplay) {
@@ -341,6 +378,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the usage type.
+     *
      * @return the usageType
      */
     public UsageType getUsageType() {
@@ -348,6 +387,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the usage type.
+     *
      * @param usageType the usageType to set
      */
     public void setUsageType(UsageType usageType) {
@@ -355,6 +396,7 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the vm instance id.
      * @return the vmInstanceId
      */
     public String getVmInstanceId() {
@@ -362,6 +404,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the vm instance id.
+     *
      * @param vmInstanceId the vmInstanceId to set
      */
     public void setVmInstanceId(String vmInstanceId) {
@@ -369,6 +413,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the name of the vm.
+     *
      * @return the vmName
      */
     public String getVmName() {
@@ -376,6 +422,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the name of the vm.
+     *
      * @param vmName the vmName to set
      */
     public void setVmName(String vmName) {
@@ -383,6 +431,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the raw usage.
+     *
      * @return the rawUsage
      */
     public Double getRawUsage() {
@@ -390,6 +440,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the raw usage.
+     *
      * @param rawUsage the rawUsage to set
      */
     public void setRawUsage(Double rawUsage) {
@@ -399,6 +451,8 @@ public class DomainUsage implements Serializable {
 
 
     /**
+     * Get the account.
+     *
      * @return the account
      */
     public Account getAccount() {
@@ -406,6 +460,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the account.
+     *
      * @param account the account to set
      */
     public void setAccount(Account account) {
@@ -413,6 +469,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the hours.
+     *
      * @return the hours
      */
     public Double getHours() {
@@ -420,6 +478,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the hours.
+     *
      * @param hours the hours to set
      */
     public void setHours(Double hours) {
@@ -427,6 +487,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the offering id.
+     *
      * @return the offeringId
      */
     public String getOfferingId() {
@@ -434,6 +496,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the offering id.
+     *
      * @param offeringId the offeringId to set
      */
     public void setOfferingId(String offeringId) {
@@ -441,6 +505,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the template id.
+     *
      * @return the templateId
      */
     public String getTemplateId() {
@@ -448,6 +514,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the template id.
+     *
      * @param templateId the templateId to set
      */
     public void setTemplateId(String templateId) {
@@ -455,6 +523,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the usage id.
+     *
      * @return the usageId
      */
     public String getUsageId() {
@@ -462,6 +532,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the usage id.
+     *
      * @param usageId the usageId to set
      */
     public void setUsageId(String usageId) {
@@ -469,6 +541,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the usage type.
+     *
      * @return the type
      */
     public String getType() {
@@ -476,6 +550,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the usage type.
+     *
      * @param type the type to set
      */
     public void setType(String type) {
@@ -483,6 +559,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the size of the usage.
+     *
      * @return the size
      */
     public Long getSize() {
@@ -490,6 +568,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the size of the usage.
+     *
      * @param size the size to set
      */
     public void setSize(Long size) {
@@ -497,6 +577,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the network id.
+     *
      * @return the networkId
      */
     public String getNetworkId() {
@@ -504,6 +586,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the network id.
+     *
      * @param networkId the networkId to set
      */
     public void setNetworkId(String networkId) {
@@ -511,6 +595,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the usage start date.
+     *
      * @return the startDate
      */
     public Date getStartDate() {
@@ -518,6 +604,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the usage start date.
+     *
      * @param startDate the startDate to set
      */
     public void setStartDate(Date startDate) {
@@ -525,6 +613,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the usage end date.
+     *
      * @return the endDate
      */
     public Date getEndDate() {
@@ -532,6 +622,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the usage end date.
+     *
      * @param endDate the endDate to set
      */
     public void setEndDate(Date endDate) {
@@ -539,6 +631,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the virtual size.
+     *
      * @return the virtualSize
      */
     public Long getVirtualSize() {
@@ -546,6 +640,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the virtual size.
+     *
      * @param virtualSize the virtualSize to set
      */
     public void setVirtualSize(Long virtualSize) {
@@ -553,6 +649,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the CPU speed.
+     *
      * @return the cpuSpeed
      */
     public Integer getCpuSpeed() {
@@ -560,6 +658,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the CPU speed.
+     *
      * @param cpuSpeed the cpuSpeed to set
      */
     public void setCpuSpeed(Integer cpuSpeed) {
@@ -567,6 +667,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the CPU Cores.
+     *
      * @return the cpuCores
      */
     public Integer getCpuCores() {
@@ -574,6 +676,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the CPU Cores.
+     *
      * @param cpuCores the cpuCores to set
      */
     public void setCpuCores(Integer cpuCores) {
@@ -581,6 +685,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Get the usage memory.
+     *
      * @return the memory
      */
     public Integer getMemory() {
@@ -588,6 +694,8 @@ public class DomainUsage implements Serializable {
     }
 
     /**
+     * Set the usage memory.
+     *
      * @param memory the memory to set
      */
     public void setMemory(Integer memory) {
@@ -613,7 +721,7 @@ public class DomainUsage implements Serializable {
     }
 
     /**
-     * Get the createdBy.
+     * Get the created user.
      *
      * @return createdBy
      */
@@ -622,7 +730,7 @@ public class DomainUsage implements Serializable {
     }
 
     /**
-     * Set the createdBy.
+     * Set the created user.
      *
      * @param createdBy the User to set
      */
@@ -631,7 +739,7 @@ public class DomainUsage implements Serializable {
     }
 
     /**
-     * Get the updatedBy.
+     * Get the updated user.
      *
      * @return updatedBy
      */
@@ -640,7 +748,7 @@ public class DomainUsage implements Serializable {
     }
 
     /**
-     * Set the updatedBy.
+     * Set the updated user.
      *
      * @param updatedBy the User to set
      */
@@ -649,7 +757,7 @@ public class DomainUsage implements Serializable {
     }
 
     /**
-     * Get the createdDateTime.
+     * Get the created date.
      *
      * @return createdDateTime
      */
@@ -658,7 +766,7 @@ public class DomainUsage implements Serializable {
     }
 
     /**
-     * Set the createdDateTime.
+     * Set the created date.
      *
      * @param createdDateTime the DateTime to set
      */
@@ -667,7 +775,7 @@ public class DomainUsage implements Serializable {
     }
 
     /**
-     * Get the updatedDateTime.
+     * Get the updated date.
      *
      * @return updatedDateTime
      */

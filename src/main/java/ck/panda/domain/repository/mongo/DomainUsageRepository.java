@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.DomainUsage;
 
 /**
- * JPA repository for GuestNetwork entity.
+ * JPA repository for DomainUsage entity.
  */
 public interface DomainUsageRepository extends MongoRepository<DomainUsage, String> {
 
