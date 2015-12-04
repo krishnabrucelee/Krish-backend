@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Iso;
 import ck.panda.domain.repository.jpa.IsoRepository;
 import ck.panda.util.CloudStackIsoService;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
@@ -30,9 +29,9 @@ public class IsoServiceImpl implements IsoService {
     @Autowired
     private IsoRepository isoRepo;
 
-    /** Convert entity repository reference. */
+    /** Reference of the convert entity service. */
     @Autowired
-    private ConvertUtil entity;
+    private ConvertEntityService convertEntityService;
 
     /** CloudStack Domain service for connectivity with cloudstack. */
     @Autowired
@@ -82,6 +81,13 @@ public class IsoServiceImpl implements IsoService {
     }
 
     @Override
+    public Iso softDelete(Iso iso) throws Exception {
+        iso.setIsActive(false);
+        iso.setIsRemoved(true);
+        return isoRepo.save(iso);
+    }
+
+    @Override
     public List<Iso> findAllFromCSServer() throws Exception {
         List<Iso> isoList = new ArrayList<Iso>();
         HashMap<String, String> isoMap = new HashMap<String, String>();
@@ -97,7 +103,10 @@ public class IsoServiceImpl implements IsoService {
             for (int i = 0, size = isoListJSON.length(); i < size; i++) {
                 // 2.1 Call convert by passing JSONObject to iso entity and Add
                 // the converted Domain entity to list
-                isoList.add(Iso.convert(isoListJSON.getJSONObject(i), entity));
+             Iso iso = Iso.convert(isoListJSON.getJSONObject(i));
+             iso.setDomainId(convertEntityService.getDomainId(iso.getTransDomainId()));
+             iso.setOsTypeId(convertEntityService.getOsTypeId(iso.getTransOsTypeId()));
+                isoList.add(iso);
             }
         }
         return isoList;

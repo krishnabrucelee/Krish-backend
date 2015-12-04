@@ -47,4 +47,13 @@ public interface StorageOfferingService extends CRUDService<StorageOffering> {
       */
       List<StorageOffering> findAllByTags(String tags);
 
+      /**
+       * Soft delete for storage offering
+       *
+       * @param storage object
+       * @return storage
+       * @throws Exception unhandled errors.
+       */
+	  StorageOffering softDelete(StorageOffering storage) throws Exception;
+
 }

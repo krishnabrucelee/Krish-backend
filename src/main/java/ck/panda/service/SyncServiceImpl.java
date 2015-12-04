@@ -40,8 +40,6 @@ import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Zone;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackServer;
-import ck.panda.util.ConvertUtil;
-import ck.panda.util.TokenDetails;
 import ck.panda.util.error.exception.ApplicationException;
 
 /**
@@ -180,10 +178,6 @@ public class SyncServiceImpl implements SyncService {
     @Autowired
     private CloudStackServer server;
 
-    /** Convert entity repository reference. */
-    @Autowired
-    private ConvertUtil entity;
-
     /** CloudStack configuration . */
     @Autowired
     private CloudStackConfigurationService cloudConfigService;
@@ -191,9 +185,6 @@ public class SyncServiceImpl implements SyncService {
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
-
-    @Autowired
-    private TokenDetails tokenDetails;
 
     @Override
     public void init(CloudStackServer server) throws Exception {
@@ -218,165 +209,138 @@ public class SyncServiceImpl implements SyncService {
          } catch (Exception e) {
              LOGGER.error("ERROR AT synch Region", e);
          }
-
          try {
              // 2. Sync Zone entity
              this.syncZone();
          } catch (Exception e) {
              LOGGER.error("ERROR AT synch Zone", e);
          }
-
         try {
             // 3. Sync Domain entity
             this.syncDomain();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Domaim", e);
         }
-
         try {
             // 4. Sync Pod entity
             this.syncPod();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Pod", e);
         }
-
         try {
             // 5. Sync Cluster entity
             this.syncCluster();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch cluster", e);
         }
-
         try {
             // 6. Sync Host entity
             this.syncHost();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Host", e);
         }
-
         try {
             // 7. Sync Hypervisor entity
             this.syncHypervisor();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Hypervisor", e);
         }
-
-
         try {
             // 8. Sync Department entity
             this.syncDepartment();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Department", e);
         }
-
         try {
             // 9. Sync Account entity
             this.syncAccount();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Account", e);
         }
-
         try {
             // 10. Sync User entity
                this.syncUser();
         } catch (Exception e) {
                LOGGER.error("ERROR AT synch User", e);
         }
-
-
-        try{
+        try {
             // 11. Sync Project entity
             this.syncProject();
-        } catch(Exception e){
+        } catch (Exception e) {
             LOGGER.error("ERROR AT sync Project", e);
         }
-
         try {
             // 12. Sync OSCategory entity
             this.syncOsCategory();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch OS Category", e);
         }
-
-
         try {
             // 13. Sync OSType entity
             this.syncOsTypes();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch OS Types", e);
         }
-
-
         try {
             // 14. Sync Network offering entity
                this.syncNetworkOffering();
         } catch (Exception e) {
                LOGGER.error("ERROR AT synch NetworkOffering", e);
         }
-
         try {
             // 15. Sync Compute Offering entity
             this.syncComputeOffering();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Compute Offering", e);
         }
-
         try {
             // 16. Sync Storage offering entity
             this.syncStorageOffering();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Storage Offering", e);
         }
-
         try {
             // 17. Sync Iso entity
             this.syncIso();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Iso", e);
         }
-
         try {
             // 18. Sync Network entity
             this.syncNetwork();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Network ", e);
         }
-
         try {
             // 19. Sync Templates entity
                this.syncTemplates();
         } catch (Exception e) {
                LOGGER.error("ERROR AT synch Templates", e);
         }
-
-        try{
+        try {
             // 20. Sync ResourceLimit entity
             this.syncResourceLimit();
-        }catch(Exception e){
+        } catch (Exception e) {
             LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
         }
-
         try {
             // 21. Sync Instance entity
               this.syncInstances();
         } catch (Exception e) {
               LOGGER.error("ERROR AT synch Instance", e);
         }
-
         try {
             // 22. Sync Volume entity
             this.syncVolume();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Volume", e);
         }
-
         try {
             // 23. Sync VmSnapshot entity
               this.syncVmSnapshots();
-          } catch (Exception e) {
+        } catch (Exception e) {
               LOGGER.error("ERROR AT synch vm snapshots", e);
-          }
-
+        }
         try {
             // 24. Sync Snapshot entity
             this.syncSnapshot();
@@ -404,8 +368,9 @@ public class SyncServiceImpl implements SyncService {
         List<Domain> appDomainList = domainService.findAll();
 
         // 3. Iterate application domain list
-        LOGGER.debug("Total rows updated : " + String.valueOf(appDomainList.size()));
+        LOGGER.debug("Total rows updated : " + (appDomainList.size()));
         for (Domain domain : appDomainList) {
+            domain.setSyncFlag(false);
             // 3.1 Find the corresponding CS server domain object by finding it
             // in a hash using uuid
             if (csDomainMap.containsKey(domain.getUuid())) {
@@ -420,11 +385,9 @@ public class SyncServiceImpl implements SyncService {
                 // domain which is not added in the app
                 csDomainMap.remove(domain.getUuid());
             } else {
-                domainService.delete(domain);
-                // 3.2 If not found, delete it from app db
-                // TODO clarify the business requirement, since it has impact in
-                // the application if it is used
-                // TODO clarify is this a soft or hard delete
+                if (domain.getIsActive()) {
+                    domainService.softDelete(domain);
+                 }
             }
         }
         // 4. Get the remaining list of cs server hash domain object, then
@@ -433,10 +396,8 @@ public class SyncServiceImpl implements SyncService {
         for (String key : csDomainMap.keySet()) {
             LOGGER.debug("Syncservice domain uuid:");
             domainService.save(csDomainMap.get(key));
-
+        LOGGER.debug("Total rows added", (csDomainMap.size()));
         }
-        LOGGER.debug("Total rows added", String.valueOf(csDomainMap.size()));
-
     }
 
     /**
@@ -459,7 +420,7 @@ public class SyncServiceImpl implements SyncService {
 
         // 3. Iterate application zone list
         for (Zone zone : appZoneList) {
-            LOGGER.debug("Total rows updated : " + String.valueOf(appZoneList.size()));
+            LOGGER.debug("Total rows updated : " + (appZoneList.size()));
             // 3.1 Find the corresponding CS server zone object by finding it in
             // a hash using uuid
             if (csZoneMap.containsKey(zone.getUuid())) {
@@ -474,11 +435,9 @@ public class SyncServiceImpl implements SyncService {
                 // zone which is not added in the app
                 csZoneMap.remove(zone.getUuid());
             } else {
-                zoneService.delete(zone);
-                // 3.2 If not found, delete it from app db
-                // TODO clarify the business requirement, since it has impact in
-                // the application if it is used
-                // TODO clarify is this a soft or hard delete
+                if(zone.getIsActive() != false){
+                    zoneService.softDelete(zone);
+                 }
             }
         }
         // 4. Get the remaining list of cs server hash zone object, then iterate
@@ -488,7 +447,7 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.debug("Syncservice zone uuid:");
             zoneService.save(csZoneMap.get(key));
         }
-        LOGGER.debug("Total rows added : " + String.valueOf(csZoneMap.size()));
+        LOGGER.debug("Total rows added : " + (csZoneMap.size()));
     }
 
     /**
@@ -511,7 +470,7 @@ public class SyncServiceImpl implements SyncService {
 
         // 3. Iterate application region list
         for (Region region : appRegionList) {
-            LOGGER.debug("Total rows updated : " + String.valueOf(appRegionList.size()));
+            LOGGER.debug("Total rows updated : " + (appRegionList.size()));
             // 3.1 Find the corresponding CS server region object by finding it
             // in a hash using uuid
             if (csRegionMap.containsKey(region.getName())) {
@@ -528,10 +487,6 @@ public class SyncServiceImpl implements SyncService {
                 csRegionMap.remove(region.getName());
             } else {
                 regionService.delete(region);
-                // 3.2 If not found, delete it from app db
-                // TODO clarify the business requirement, since it has impact in
-                // the application if it is used
-                // TODO clarify is this a soft or hard delete
             }
         }
         // 4. Get the remaining list of cs server hash region object, then
@@ -541,7 +496,7 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.debug("Syncservice region name:");
             regionService.save(csRegionMap.get(key));
         }
-        LOGGER.debug("Total rows added : " + String.valueOf(csRegionMap.size()));
+        LOGGER.debug("Total rows added : " + (csRegionMap.size()));
 
     }
 
@@ -566,7 +521,7 @@ public class SyncServiceImpl implements SyncService {
 
         // 3. Iterate application hypervisor list
         for (Hypervisor hypervisor : appHypervisorList) {
-            LOGGER.debug("Total rows updated : " + String.valueOf(appHypervisorList.size()));
+            LOGGER.debug("Total rows updated : " + (appHypervisorList.size()));
             // 3.1 Find the corresponding CS server hypervisor object by finding
             // it in a hash using uuid
             if (csHypervisorMap.containsKey(hypervisor.getName())) {
@@ -581,10 +536,6 @@ public class SyncServiceImpl implements SyncService {
                 csHypervisorMap.remove(hypervisor.getName());
             } else {
                 hypervisorService.delete(hypervisor);
-                // 3.2 If not found, delete it from app db
-                // TODO clarify the business requirement, since it has impact in
-                // the application if it is used
-                // TODO clarify is this a soft or hard delete
             }
         }
         // 4. Get the remaining list of cs server hash hypervisor object, then
@@ -594,7 +545,7 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.debug("Syncservice hypervisor uuid :");
             hypervisorService.save(csHypervisorMap.get(key));
         }
-        LOGGER.debug("Total rows added : " + String.valueOf(csHypervisorMap.size()));
+        LOGGER.debug("Total rows added : " + (csHypervisorMap.size()));
 
     }
 
@@ -619,7 +570,7 @@ public class SyncServiceImpl implements SyncService {
 
         // 3. Iterate application oscategory list
         for (OsCategory osCategory : appOsCategoryList) {
-            LOGGER.debug("Total rows updated : " + String.valueOf(appOsCategoryList.size()));
+            LOGGER.debug("Total rows updated : " + (appOsCategoryList.size()));
             // 3.1 Find the corresponding CS server oscategory object by finding
             // it in a hash using uuid
             if (csOsCategoryMap.containsKey(osCategory.getUuid())) {
@@ -634,10 +585,7 @@ public class SyncServiceImpl implements SyncService {
                 csOsCategoryMap.remove(osCategory.getUuid());
             } else {
                 osCategoryService.delete(osCategory);
-                // 3.2 If not found, delete it from app db
-                // TODO clarify the business requirement, since it has impact in
-                // the application if it is used
-                // TODO clarify is this a soft or hard delete
+
             }
         }
         // 4. Get the remaining list of cs server hash oscategory object, then
@@ -647,7 +595,7 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.debug("Syncservice os category uuid:");
             osCategoryService.save(csOsCategoryMap.get(key));
         }
-        LOGGER.debug("Total rows added : " + String.valueOf(csOsCategoryMap.size()));
+        LOGGER.debug("Total rows added : " + (csOsCategoryMap.size()));
 
     }
 
@@ -671,12 +619,11 @@ public class SyncServiceImpl implements SyncService {
 
         // 3. Iterate application osType list
         for (OsType osType : appOsTypeList) {
-            LOGGER.debug("Total rows updated : " + String.valueOf(appOsTypeList.size()));
+            LOGGER.debug("Total rows updated : " + (appOsTypeList.size()));
             // 3.1 Find the corresponding CS server osType object by finding it
             // in a hash using uuid
             if (csOsTypeMap.containsKey(osType.getUuid())) {
                 OsType csOsType = csOsTypeMap.get(osType.getUuid());
-
                 csOsType.setDescription(csOsType.getDescription());
                 csOsType.setOsCategoryId(csOsType.getOsCategoryId());
 
@@ -688,10 +635,6 @@ public class SyncServiceImpl implements SyncService {
                 csOsTypeMap.remove(osType.getUuid());
             } else {
                 osTypeService.delete(osType);
-                // 3.2 If not found, delete it from app db
-                // TODO clarify the business requirement, since it has impact in
-                // the application if it is used
-                // TODO clarify is this a soft or hard delete
             }
         }
         // 4. Get the remaining list of cs server hash osType object, then
@@ -701,7 +644,7 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.debug("Syncservice osType uuid :");
             osTypeService.save(csOsTypeMap.get(key));
         }
-        LOGGER.debug("Total rows added : " + String.valueOf(csOsTypeMap.size()));
+        LOGGER.debug("Total rows added : " + (csOsTypeMap.size()));
 
     }
 
@@ -726,7 +669,7 @@ public class SyncServiceImpl implements SyncService {
 
         // 3. Iterate application osType list
         for (StorageOffering storageOffering : appstorageServiceList) {
-            LOGGER.debug("Total rows updated : " + String.valueOf(appstorageServiceList.size()));
+            LOGGER.debug("Total rows updated : " + (appstorageServiceList.size()));
             storageOffering.setIsSyncFlag(false);
             // 3.1 Find the corresponding CS server osType object by finding it
             // in a hash using uuid
@@ -759,11 +702,9 @@ public class SyncServiceImpl implements SyncService {
                 // osType which is not added in the app
                 csStorageOfferingMap.remove(storageOffering.getUuid());
             } else {
-                storageService.delete(storageOffering);
-                // 3.2 If not found, delete it from app db
-                // TODO clarify the business requirement, since it has impact in
-                // the application if it is used
-                // TODO clarify is this a soft or hard delete
+                if (storageOffering.getIsActive()) {
+                    storageService.softDelete(storageOffering);
+                  }
             }
         }
         // 4. Get the remaining list of cs server hash osType object, then
@@ -773,7 +714,7 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.debug("Syncservice storage offering uuid:");
             storageService.save(csStorageOfferingMap.get(key));
         }
-        LOGGER.debug("Total rows added : " + String.valueOf(csStorageOfferingMap.size()));
+        LOGGER.debug("Total rows added : " + (csStorageOfferingMap.size()));
 
     }
 
@@ -797,7 +738,7 @@ public class SyncServiceImpl implements SyncService {
 
         // 3. Iterate application user list
         for (User user : appUserList) {
-            LOGGER.debug("Total rows updated : " + String.valueOf(appUserList.size()));
+            LOGGER.debug("Total rows updated : " + (appUserList.size()));
             user.setSyncFlag(false);
             // 3.1 Find the corresponding CS server user object by finding it in
             // a hash using uuid
@@ -805,7 +746,9 @@ public class SyncServiceImpl implements SyncService {
                 User csUser = csUserMap.get(user.getUuid());
 
                 user.setFirstName(csUser.getFirstName());
-
+                user.setLastName(csUser.getLastName());
+                user.setEmail(csUser.getEmail());
+                user.setUserName(csUser.getUserName());
                 // 3.2 If found, update the user object in app db
                 userService.update(user);
 
@@ -813,10 +756,8 @@ public class SyncServiceImpl implements SyncService {
                 // user which is not added in the app
                 csUserMap.remove(user.getUuid());
             } else {
-                if(user.getIsActive() !=  true){
+                if (user.getIsActive()) {
                     userService.softDelete(user);
-                } else{
-                    userService.delete(user);
                 }
 
                 // 3.2 If not found, delete it from app db
@@ -833,7 +774,7 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.debug("Syncservice user uuid:");
             userService.save(csUserMap.get(key));
         }
-        LOGGER.debug("Total rows added : " + String.valueOf(csUserMap.size()));
+        LOGGER.debug("Total rows added : " + (csUserMap.size()));
 
     }
 
@@ -858,7 +799,7 @@ public class SyncServiceImpl implements SyncService {
 
         // 3. Iterate application networkOffering list
         for (NetworkOffering networkOffering : appNetworkOfferingList) {
-            LOGGER.debug("Total rows updated : " + String.valueOf(appNetworkOfferingList.size()));
+            LOGGER.debug("Total rows updated : " + (appNetworkOfferingList.size()));
             // 3.1 Find the corresponding CS server networkOfferingService
             // object by finding it in a hash using uuid
             if (csNetworkOfferingMap.containsKey(networkOffering.getUuid())) {
@@ -909,7 +850,7 @@ public class SyncServiceImpl implements SyncService {
 
         // 3. Iterate application network list
         for (Network network : appNetworkList) {
-            LOGGER.debug("Total rows updated : " + String.valueOf(appNetworkList.size()));
+            LOGGER.debug("Total rows updated : " + (appNetworkList.size()));
             network.setSyncFlag(false);
             // 3.1 Find the corresponding CS server network object by finding it
             // in a hash using uuid
@@ -928,11 +869,9 @@ public class SyncServiceImpl implements SyncService {
                 // network which is not added in the app
                 csNetworkMap.remove(network.getUuid());
             } else {
-                networkService.delete(network);
-                // 3.2 If not found, delete it from app db
-                // TODO clarify the business requirement, since it has impact in
-                // the application if it is used
-                // TODO clarify is this a soft or hard delete
+                if (network.getIsActive()) {
+                    networkService.softDelete(network);
+                }
             }
         }
         // 4. Get the remaining list of cs server hash network object, then
@@ -942,7 +881,7 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.debug("Syncservice network uuid:");
             networkService.save(csNetworkMap.get(key));
         }
-        LOGGER.debug("Total rows added : " + String.valueOf(csNetworkMap.size()));
+        LOGGER.debug("Total rows added : " + (csNetworkMap.size()));
 
     }
 
@@ -967,7 +906,7 @@ public class SyncServiceImpl implements SyncService {
 
         // 3. Iterate application compute offering list
         for (ComputeOffering computeOffering : appComputeList) {
-            LOGGER.debug("Total rows updated : " + String.valueOf(appComputeList.size()));
+            LOGGER.debug("Total rows updated : " + (appComputeList.size()));
             computeOffering.setIsSyncFlag(false);
             // 3.1 Find the corresponding CS server compute offering object by
             // finding it in a hash using uuid
@@ -984,12 +923,9 @@ public class SyncServiceImpl implements SyncService {
                 // compute offering which is not added in the app
                 csComputeOfferingMap.remove(computeOffering.getUuid());
             } else {
-
-                computeService.delete(computeOffering);
-                // 3.2 If not found, delete it from app db
-                // TODO clarify the business requirement, since it has impact in
-                // the application if it is used
-                // TODO clarify is this a soft or hard delete
+                if (computeOffering.getIsActive()) {
+                    computeService.softDelete(computeOffering);
+                }
             }
         }
         // 4. Get the remaining list of cs server hash domain object, then
@@ -999,7 +935,7 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.debug("Syncservice compute offering uuid:");
             computeService.save(csComputeOfferingMap.get(key));
         }
-        LOGGER.debug("Total rows added : " + String.valueOf(csComputeOfferingMap.size()));
+        LOGGER.debug("Total rows added : " + (csComputeOfferingMap.size()));
     }
 
     /**
@@ -1022,7 +958,7 @@ public class SyncServiceImpl implements SyncService {
 
         // 3. Iterate application template list
         for (Template template : appTemplateList) {
-            LOGGER.debug("Total rows updated : " + String.valueOf(appTemplateList.size()));
+            LOGGER.debug("Total rows updated : " + (appTemplateList.size()));
             // 3.1 Find the corresponding CS server template object by finding
             // it in a hash using uuid
             if (csTemplateMap.containsKey(template.getUuid())) {
@@ -1052,11 +988,9 @@ public class SyncServiceImpl implements SyncService {
                 csTemplateMap.remove(template.getUuid());
             } else {
                 template.setSyncFlag(false);
-                templateService.delete(template);
-                // 3.2 If not found, delete it from app db
-                // TODO clarify the business requirement, since it has impact in
-                // the application if it is used
-                // TODO clarify is this a soft or hard delete
+                if (template.getIsActive()) {
+                    templateService.softDelete(template);
+                }
             }
         }
         // 4. Get the remaining list of cs server hash template object, then
@@ -1065,7 +999,7 @@ public class SyncServiceImpl implements SyncService {
         for (String key : csTemplateMap.keySet()) {
             templateService.save(csTemplateMap.get(key));
         }
-        LOGGER.debug("Total rows added : " + String.valueOf(csTemplateMap.size()));
+        LOGGER.debug("Total rows added : " + (csTemplateMap.size()));
 
     }
 
@@ -1096,7 +1030,9 @@ public class SyncServiceImpl implements SyncService {
                 Department csUser = csUserMap.get(department.getUuid());
 
                 department.setFirstName(csUser.getFirstName());
-
+                department.setLastName(csUser.getLastName());
+                department.setEmail(csUser.getEmail());
+                department.setUserName(csUser.getUserName());
                 // 3.2 If found, update the user object in app db
                 departmentService.update(department);
 
@@ -1104,11 +1040,9 @@ public class SyncServiceImpl implements SyncService {
                 // user which is not added in the app
                 csUserMap.remove(department.getUuid());
             } else {
-                departmentService.delete(department);
-                // 3.2 If not found, delete it from app db
-                // TODO clarify the business requirement, since it has impact in
-                // the application if it is used
-                // TODO clarify is this a soft or hard delete
+                if (department.getIsActive()) {
+                    departmentService.softDelete(department);
+                 }
             }
 
         }
@@ -1224,11 +1158,11 @@ public class SyncServiceImpl implements SyncService {
                 // host which is not added in the app
                 csHostMap.remove(host.getUuid());
             } else {
+                if (host.getIsActive()) {
+                    hostService.softDelete(host);
+                 } else {
                 hostService.delete(host);
-                // 3.2 If not found, delete it from app db
-                // TODO clarify the business requirement, since it has impact in
-                // the application if it is used
-                // TODO clarify is this a soft or hard delete
+                 }
             }
 
         }
@@ -1270,9 +1204,9 @@ public class SyncServiceImpl implements SyncService {
                 volume.setVmInstanceId(csvolume.getVmInstanceId());
                 volume.setVolumeType(csvolume.getVolumeType());
                 if(volume.getDiskSize() !=null) {
-                    volume.setDiskSize(csvolume.getDiskSize());
+                    volume.setDiskSize(volume.getDiskSize());
                 } else {
-                    volume.setDiskSize(csvolume.getStorageOffering().getDiskSize());
+                    volume.setDiskSize(volume.getStorageOffering().getDiskSize());
                 }
                 volume.setIsActive(true);
                 volume.setChecksum(csvolume.getChecksum());
@@ -1288,11 +1222,11 @@ public class SyncServiceImpl implements SyncService {
                 // osType which is not added in the app
                 csVolumeMap.remove(volume.getUuid());
             } else {
-                volumeService.delete(volume);
-                // 3.2 If not found, delete it from app db
-                // TODO clarify the business requirement, since it has impact in
-                // the application if it is used
-                // TODO clarify is this a soft or hard delete
+                if (volume.getIsActive()) {
+                volumeService.softDelete(volume);
+                 } else {
+                   volumeService.delete(volume);
+                 }
             }
         }
         // 4. Get the remaining list of cs server hash osType object, then
@@ -1338,11 +1272,11 @@ public class SyncServiceImpl implements SyncService {
                 // snapshot which is not added in the app
                 csSnapshotMap.remove(snapshot.getUuid());
             } else {
+                if (snapshot.getIsActive()) {
+                    snapshotService.softDelete(snapshot);
+                 } else {
                 snapshotService.delete(snapshot);
-                // 3.2 If not found, delete it from app db
-                // TODO clarify the business requirement, since it has impact in
-                // the application if it is used
-                // TODO clarify is this a soft or hard delete
+                 }
             }
 
         }
@@ -1379,7 +1313,8 @@ public class SyncServiceImpl implements SyncService {
                 Pod csUser = csPodMap.get(pod.getUuid());
 
                 pod.setName(csUser.getName());
-
+                pod.setGateway(csUser.getGateway());
+                pod.setNetmask(csUser.getNetmask());
                 // 3.2 If found, update the pod object in app db
                 podService.update(pod);
 
@@ -1387,11 +1322,11 @@ public class SyncServiceImpl implements SyncService {
                 // host which is not added in the app
                 csPodMap.remove(pod.getUuid());
             } else {
+                if (pod.getIsActive()) {
+                    podService.softDelete(pod);
+                 } else{
                 podService.delete(pod);
-                // 3.2 If not found, delete it from app db
-                // TODO clarify the business requirement, since it has impact in
-                // the application if it is used
-                // TODO clarify is this a soft or hard delete
+                 }
             }
 
         }
@@ -1519,7 +1454,7 @@ public class SyncServiceImpl implements SyncService {
         JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse")
                 .getJSONObject("jobresult");
         if (jobresult.has("virtualmachine")) {
-            VmInstance vmInstance = VmInstance.convert(jobresult.getJSONObject("virtualmachine"), entity);
+            VmInstance vmInstance = VmInstance.convert(jobresult.getJSONObject("virtualmachine"));
             VmInstance instance = virtualMachineService.findByUUID(vmInstance.getUuid());
             instance.setSyncFlag(false);
             // 3.1 Find the corresponding CS server vm object by finding it in a
@@ -1591,7 +1526,7 @@ public class SyncServiceImpl implements SyncService {
         List<ResourceLimitDomain> appResourceList = resourceDomainService.findAll();
 
         // 3. Iterate Domain resource list
-        LOGGER.debug("Total rows updated : " + String.valueOf(appResourceList.size()));
+        LOGGER.debug("Total rows updated : " + (appResourceList.size()));
         for (ResourceLimitDomain resource : appResourceList) {
             resource.setIsSyncFlag(false);
             String resourceLimit = resource.getDomainId() + "-" + resource.getResourceType();
@@ -1611,11 +1546,7 @@ public class SyncServiceImpl implements SyncService {
             } else {
                 // resource.setIsSyncFlag(false);
                   resourceDomainService.update(resource);
-                // resourceDomainService.delete(resource);
-                // 3.2 If not found, delete it from app db
-                // TODO clarify the business requirement, since it has impact in
-                // the application if it is used
-                // TODO clarify is this a soft or hard delete
+
             }
         }
         // 4. Get the remaining list of cs server hash resource object, then
@@ -1626,7 +1557,7 @@ public class SyncServiceImpl implements SyncService {
             resourceDomainService.save(csResourceMap.get(key));
 
         }
-        LOGGER.debug("Total rows added", String.valueOf(csResourceMap.size()));
+        LOGGER.debug("Total rows added", (csResourceMap.size()));
 
     }
 
@@ -1643,7 +1574,7 @@ public class SyncServiceImpl implements SyncService {
         List<ResourceLimitDepartment> appResourceList = resourceDepartmentService.findAll();
 
         // 3. Iterate application resource list
-        LOGGER.debug("Total rows updated : " + String.valueOf(appResourceList.size()));
+        LOGGER.debug("Total rows updated : " + (appResourceList.size()));
         for (ResourceLimitDepartment resource : appResourceList) {
             resource.setIsSyncFlag(false);
             String resourceLimit = resource.getDepartmentId() + "-" + resource.getResourceType();
@@ -1661,11 +1592,7 @@ public class SyncServiceImpl implements SyncService {
             } else {
                 resource.setIsSyncFlag(false);
                 resourceDepartmentService.update(resource);
-                // resourceDepartmentService.delete(resource);
-                // 3.2 If not found, delete it from app db
-                // TODO clarify the business requirement, since it has impact in
-                // the application if it is used
-                // TODO clarify is this a soft or hard delete
+
             }
         }
         // 4. Get the remaining list of cs server hash resource object, then
@@ -1676,7 +1603,7 @@ public class SyncServiceImpl implements SyncService {
             resourceDepartmentService.save(csResourceMap.get(key));
 
         }
-        LOGGER.debug("Total rows added", String.valueOf(csResourceMap.size()));
+        LOGGER.debug("Total rows added", (csResourceMap.size()));
 
     }
 
@@ -1692,7 +1619,7 @@ public class SyncServiceImpl implements SyncService {
         List<ResourceLimitProject> appResourceList = resourceProjectService.findAll();
 
         // 3. Iterate application resource list
-        LOGGER.debug("Total rows updated : " + String.valueOf(appResourceList.size()));
+        LOGGER.debug("Total rows updated : " + (appResourceList.size()));
         for (ResourceLimitProject resource : appResourceList) {
             resource.setIsSyncFlag(false);
             String resourceLimit = resource.getProjectId() + "-" + resource.getResourceType();
@@ -1711,10 +1638,6 @@ public class SyncServiceImpl implements SyncService {
                 csResourceMap.remove(resourceLimit);
             } else {
                 resourceProjectService.update(resource);
-                // 3.2 If not found, delete it from app db
-                // TODO clarify the business requirement, since it has impact in
-                // the application if it is used
-                // TODO clarify is this a soft or hard delete
             }
         }
         // 4. Get the remaining list of cs server hash resource object, then
@@ -1725,7 +1648,7 @@ public class SyncServiceImpl implements SyncService {
             resourceProjectService.save(csResourceMap.get(key));
 
         }
-        LOGGER.debug("Total rows added", String.valueOf(csResourceMap.size()));
+        LOGGER.debug("Total rows added", (csResourceMap.size()));
 
     }
 
@@ -1762,11 +1685,9 @@ public class SyncServiceImpl implements SyncService {
                 // host which is not added in the app
                 csIsoMap.remove(iso.getUuid());
             } else {
-                isoService.delete(iso);
-                // 3.2 If not found, delete it from app db
-                // TODO clarify the business requirement, since it has impact in
-                // the application if it is used
-                // TODO clarify is this a soft or hard delete
+                if (iso.getIsActive()) {
+                    isoService.softDelete(iso);
+                }
             }
 
         }
@@ -1791,7 +1712,7 @@ public class SyncServiceImpl implements SyncService {
         // 3. Iterate application networkOffering list
         for (Project project : appProjectList) {
             project.setSyncFlag(false);
-            LOGGER.debug("Total rows updated : " + String.valueOf(appProjectList.size()));
+            LOGGER.debug("Total rows updated : " + (appProjectList.size()));
             // 3.1 Find the corresponding CS server projectService object by
             // finding it in a hash using uuid
             if (csProjectMap.containsKey(project.getUuid())) {
@@ -1806,11 +1727,9 @@ public class SyncServiceImpl implements SyncService {
                 // project which is not added in the app
                 csProjectMap.remove(project.getUuid());
             } else {
-                projectService.delete(project);
-                // 3.2 If not found, delete it from app db
-                // TODO clarify the business requirement, since it has impact in
-                // the application if it is used
-                // TODO clarify is this a soft or hard delete
+                if (project.getIsActive()) {
+                projectService.softDelete(project);
+                }
             }
         }
         // 4. Get the remaining list of cs server hash NetworkOffering object,
@@ -1847,7 +1766,9 @@ public class SyncServiceImpl implements SyncService {
                 Account csUser = csAccountMap.get(account.getUuid());
 
                 account.setFirstName(csUser.getFirstName());
-
+                account.setLastName(csUser.getLastName());
+                account.setEmail(csUser.getEmail());
+                account.setUserName(csUser.getUserName());
                 // 3.2 If found, update the account object in app db
                 accountService.update(account);
 
@@ -1855,11 +1776,9 @@ public class SyncServiceImpl implements SyncService {
                 // user which is not added in the app
                 csAccountMap.remove(account.getUuid());
             } else {
-                accountService.delete(account);
-                // 3.2 If not found, delete it from app db
-                // TODO clarify the business requirement, since it has impact in
-                // the application if it is used
-                // TODO clarify is this a soft or hard delete
+                if (account.getIsActive()) {
+                    accountService.softDelete(account);
+                 }
             }
 
         }

@@ -14,12 +14,13 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 import javax.validation.constraints.Size;
 import org.joda.time.DateTime;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+
+import ck.panda.util.JsonUtil;
 
 /**
  * OS category purpose is to create which category of operation system you want when creating the template.
@@ -207,13 +208,12 @@ public class OsCategory implements Serializable {
      *
      * @param object json object.
      * @return oscategory entity object
-     * @throws JSONException unhandled json errors.
+     * @throws Exception error occurs.
      */
-    public static OsCategory convert(JSONObject object) throws JSONException {
+    public static OsCategory convert(JSONObject object) throws Exception {
         OsCategory osCategory = new OsCategory();
-        osCategory.uuid = object.has("id") ? object.get("id").toString() : "";
-        osCategory.name = object.has("name") ? object.get("name").toString() : "";
-
+        osCategory.setUuid(JsonUtil.getStringValue(object, "id"));
+        osCategory.setName(JsonUtil.getStringValue(object, "name"));
         return osCategory;
     }
 

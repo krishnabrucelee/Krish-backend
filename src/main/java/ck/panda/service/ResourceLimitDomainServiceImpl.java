@@ -14,14 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitDomain;
+import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
 import ck.panda.domain.repository.jpa.ResourceLimitDomainRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackResourceLimitService;
 import ck.panda.util.ConfigUtil;
-import ck.panda.util.ConvertUtil;
+import ck.panda.util.JsonUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -56,9 +56,9 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
     @Autowired
     private CloudStackResourceLimitService csResourceLimitService;
 
-    /** Convert entity repository reference. */
+    /** Reference of the convert entity service. */
     @Autowired
-    private ConvertUtil entity;
+    private ConvertEntityService convertEntityService;
 
     /** Message source attribute. */
     @Autowired
@@ -167,7 +167,10 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
             // 2.1 Call convert by passing JSONObject to StorageOffering entity
             // and Add
             // the converted Resource limit entity to list
-            resourceList.add(ResourceLimitDomain.convert(resourceListJSON.getJSONObject(i), entity));
+            ResourceLimitDomain resource = ResourceLimitDomain.convert(resourceListJSON.getJSONObject(i));
+            resource.setDomainId(convertEntityService.getDomainId(resource.getTransDomainId()));
+            resource.setUniqueSeperator(resource.getTransDomainId()+"-"+ResourceType.values()[(resource.getTransResourceType())]);
+            resourceList.add(resource);
         }
         return resourceList;
     }

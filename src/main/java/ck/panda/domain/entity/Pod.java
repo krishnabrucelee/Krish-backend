@@ -4,7 +4,6 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,6 +12,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import org.hibernate.annotations.Type;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
@@ -20,7 +20,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -67,6 +66,10 @@ public class Pod {
     @Column(name = "zone_id")
     private Long zoneId;
 
+    /** Transient zone of the pod.*/
+    @Transient
+    private String transZoneId;
+
     /** Created by user. */
     @CreatedBy
     @JoinColumn(name = "created_user_id", referencedColumnName = "id")
@@ -93,6 +96,27 @@ public class Pod {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
 
+    /** State of the host. */
+    @Column(name = "state")
+    private Status status;
+
+    /** IsActive attribute to verify Active or Inactive. */
+    @Column(name = "is_active")
+    private Boolean isActive;
+
+    /**
+     * Enum type for  pod Status.
+     *
+     */
+    public enum Status {
+
+        /**  Pod will be in a Enabled State. */
+        ENABLED,
+
+        /**  Pod will be in a Disabled State. */
+        DISABLED,
+    }
+
     /**
      * @return the id
      */
@@ -108,7 +132,7 @@ public class Pod {
     }
 
     /**
-     * Get the uuid
+     * Get the uuid.
      *
      * @return the uuid
      */
@@ -117,7 +141,7 @@ public class Pod {
     }
 
     /**
-     * Set the uuid
+     * Set the uuid.
      *
      * @param uuid  to set
      */
@@ -126,7 +150,7 @@ public class Pod {
     }
 
     /**
-     * Get name
+     * Get name.
      *
      * @return the name
      */
@@ -135,7 +159,7 @@ public class Pod {
     }
 
     /**
-     * Set the name
+     * Set the name.
      *
      * @param name to set
      */
@@ -144,7 +168,7 @@ public class Pod {
     }
 
     /**
-     * Get Gateway
+     * Get Gateway.
      *
      * @return the gateway
      */
@@ -153,7 +177,7 @@ public class Pod {
     }
 
     /**
-     * Set the gateway
+     * Set the gateway.
      *
      * @param gateway to set
      */
@@ -162,7 +186,7 @@ public class Pod {
     }
 
     /**
-     * Get netmask
+     * Get netmask.
      *
      * @return the netmask
      */
@@ -171,7 +195,7 @@ public class Pod {
     }
 
     /**
-     * Set the netmask
+     * Set the netmask.
      *
      * @param netmask  to set
      */
@@ -180,7 +204,7 @@ public class Pod {
     }
 
     /**
-     * Get the zone
+     * Get the zone.
      *
      * @return the zone
      */
@@ -189,7 +213,7 @@ public class Pod {
     }
 
     /**
-     * Set the zone
+     * Set the zone.
      *
      * @param zone to set
      */
@@ -198,7 +222,7 @@ public class Pod {
     }
 
     /**
-     * Get ZoneId
+     * Get ZoneId.
      *
      * @return the zoneId
      */
@@ -207,7 +231,7 @@ public class Pod {
     }
 
     /**
-     * Set the zoneId
+     * Set the zoneId.
      *
      * @param zoneId  to set
      */
@@ -216,7 +240,7 @@ public class Pod {
     }
 
     /**
-     * Get createdBy
+     * Get createdBy.
      *
      * @return the createdBy
      */
@@ -225,7 +249,7 @@ public class Pod {
     }
 
     /**
-     * Set the createdBy
+     * Set the createdBy.
      *
      * @param createdBy  to set
      */
@@ -234,7 +258,7 @@ public class Pod {
     }
 
     /**
-     * Get UpdatedBy
+     * Get UpdatedBy.
      *
      * @return the updatedBy
      */
@@ -243,7 +267,7 @@ public class Pod {
     }
 
     /**
-     * Set the updatedBy
+     * Set the updatedBy.
      *
      * @param updatedBy  to set
      */
@@ -252,7 +276,7 @@ public class Pod {
     }
 
     /**
-     * Get the createdDatetime
+     * Get the createdDatetime.
      *
      * @return the createdDateTime
      */
@@ -261,7 +285,7 @@ public class Pod {
     }
 
     /**
-     * Set the createdDateTime
+     * Set the createdDateTime.
      *
      * @param createdDateTime  to set
      */
@@ -270,7 +294,7 @@ public class Pod {
     }
 
     /**
-     * Get the updatedDatetime
+     * Get the updatedDatetime.
      *
      * @return the updatedDateTime
      */
@@ -279,7 +303,7 @@ public class Pod {
     }
 
     /**
-     * Set the updatedDateTime
+     * Set the updatedDateTime.
      *
      * @param updatedDateTime to set
      */
@@ -288,20 +312,75 @@ public class Pod {
     }
 
      /**
+      * Get the transient zone id.
+      *
+      * @return the transZoneId
+      */
+    public String getTransZoneId() {
+        return transZoneId;
+    }
+
+    /**
+     * Set the transient zone id.
+     *
+     * @param transZoneId to set
+     */
+    public void setTransZoneId(String transZoneId) {
+        this.transZoneId = transZoneId;
+    }
+
+    /**
+     * Get the status.
+     *
+     * @return the status
+     */
+    public Status getStatus() {
+        return status;
+    }
+
+    /**
+     *  Set the status.
+     *
+     * @param status the status to set
+     */
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    /**
+     * Get isActive.
+     *
+     * @return the isActive
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    /**
+     * Set is Active.
+     *
+     * @param isActive the isActive to set
+     */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    /**
      * Convert JSONObject into pod object.
      *
      * @param jsonObject JSON object.
-     * @param convertUtil convert Entity object from UUID.
      * @return pod object.
      */
-    public static Pod convert(JSONObject jsonObject, ConvertUtil convertUtil) {
+    public static Pod convert(JSONObject jsonObject) {
         Pod pod = new Pod();
         try {
             pod.setName(JsonUtil.getStringValue(jsonObject, "name"));
             pod.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            pod.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
+            pod.setTransZoneId((JsonUtil.getStringValue(jsonObject, "zoneid")));
             pod.setNetmask(JsonUtil.getStringValue(jsonObject, "netmask"));
             pod.setGateway(JsonUtil.getStringValue(jsonObject, "gateway"));
+            pod.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
+            pod.setIsActive(true);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

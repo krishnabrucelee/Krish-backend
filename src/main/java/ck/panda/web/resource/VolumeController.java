@@ -74,6 +74,7 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
         Page<Volume> pageResponse = volumeService.findAll(page);
         System.out.println(pageResponse);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+
         return pageResponse.getContent();
     }
 

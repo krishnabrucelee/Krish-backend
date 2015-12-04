@@ -10,15 +10,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.Snapshot.Status;
 import ck.panda.domain.repository.jpa.SnapshotRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackSnapshotService;
 import ck.panda.util.ConfigUtil;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -41,9 +38,9 @@ public class SnapshotServiceImpl implements SnapshotService {
     @Autowired
     private AppValidator validator;
 
-    /** Convert entity repository reference. */
+    /** Reference of the convert entity service. */
     @Autowired
-    private ConvertUtil convertUtil;
+    private ConvertEntityService convertEntityService;
 
     /** object(server) created for CloudStackServer. */
     @Autowired
@@ -85,7 +82,7 @@ public class SnapshotServiceImpl implements SnapshotService {
     /**
      * Validate the Snapshot.
      *
-     * @param department reference of the Snapshot.
+     * @param snapshot reference of the Snapshot.
      * @throws Exception error occurs
      */
     private void validateSnapshot(Snapshot snapshot) throws Exception {
@@ -161,7 +158,11 @@ public class SnapshotServiceImpl implements SnapshotService {
                 // 2.1 Call convert by passing JSONObject to Domain entity and
                 // Add
                 // the converted snapshot entity to list
-                snapshotList.add(Snapshot.convert(snapshotListJSON.getJSONObject(i), convertUtil));
+                Snapshot snapshot = Snapshot.convert(snapshotListJSON.getJSONObject(i));
+                snapshot.setDomainId(convertEntityService.getDomainId(snapshot.getTransDomainId()));
+                snapshot.setZoneId(convertEntityService.getZoneId(snapshot.getTransZoneId()));
+                snapshot.setVolumeId(convertEntityService.getVolumeId(snapshot.getTransVolumeId()));
+                snapshotList.add(snapshot);
             }
         }
         return snapshotList;

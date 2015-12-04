@@ -4,7 +4,6 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,6 +12,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.json.JSONException;
@@ -24,7 +24,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -96,6 +95,22 @@ public class Iso {
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
+
+    /** Transient domain of the iso. */
+    @Transient
+    private String transDomainId;
+
+    /** Transient os type of the iso. */
+    @Transient
+    private String transOsTypeId;
+
+    /** IsActive attribute to verify Active or Inactive. */
+    @Column(name = "is_active")
+    private Boolean isActive;
+
+    /** IsRemoved attribute to verify removed or not. */
+    @Column(name = "is_removed")
+    private Boolean isRemoved;
 
     /**
      * @return the id
@@ -294,21 +309,92 @@ public class Iso {
     }
 
     /**
+     * Get Transient Domain Id.
+     *
+    * @return the transDomainId
+    */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
+
+    /**
+    * Set the transient domain Id.
+    *
+    * @param transDomainId to set
+    */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
+
+
+    /**
+    * Get the TransOs Type Id.
+    *
+    * @return the transOsTypeId
+    */
+    public String getTransOsTypeId() {
+        return transOsTypeId;
+    }
+
+    /**
+    * Set the transOsTypeId.
+    *
+    * @param transOsTypeId  to set
+    */
+    public void setTransOsTypeId(String transOsTypeId) {
+        this.transOsTypeId = transOsTypeId;
+    }
+
+    /**
+    * @return the isActive
+    */
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    /**
+    * Set the isActive .
+    *
+    * @param isActive to set
+    */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    /**
+    * Get is Removed.
+    *
+    * @return the isRemoved
+    */
+    public Boolean getIsRemoved() {
+        return isRemoved;
+    }
+
+    /**
+    * Set the isRemoved.
+    *
+    * @param isRemoved  to set
+    */
+    public void setIsRemoved(Boolean isRemoved) {
+        this.isRemoved = isRemoved;
+    }
+
+    /**
      * Convert JSONObject to domain entity.
      *
      * @param jsonObject json object
-     * @param convertUtil convert Entity object from UUID.
      * @return domain entity object.
      * @throws JSONException handles json exception.
      */
-    public static Iso convert(JSONObject jsonObject, ConvertUtil convertUtil) throws JSONException {
+    public static Iso convert(JSONObject jsonObject) throws JSONException {
         Iso iso = new Iso();
 
         try {
             iso.setName(JsonUtil.getStringValue(jsonObject, "name"));
             iso.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            iso.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(jsonObject, "domainid")));
-            iso.setOsTypeId(convertUtil.getOsTypeId(JsonUtil.getStringValue(jsonObject,"ostypeid")));
+            iso.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
+            iso.setTransOsTypeId(JsonUtil.getStringValue(jsonObject, "ostypeid"));
+            iso.setIsActive(true);
         } catch (Exception ex) {
             LOGGER.error("Iso-convert", ex);
         }

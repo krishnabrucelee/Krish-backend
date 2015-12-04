@@ -31,7 +31,6 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 import ck.panda.util.JsonValidator;
 
@@ -171,6 +170,21 @@ public class Volume {
     @Type(type = "org.hibernate.type.NumericBooleanType")
     private Boolean isActive;
 
+    /** Transient network of the instance. */
+    @Transient
+    private String transvmInstanceId;
+
+    /** Transient network of the instance. */
+    @Transient
+    private String transZoneId;
+
+    /** Transient network of the instance. */
+    @Transient
+    private String transStorageOfferingId;
+
+    /** Transient domain of the instance. */
+    @Transient
+    private String transDomainId;
     /**
      * isSyncFlag field is not to be serialized,
      * whereas JPA's @Transient annotation is used to indicate
@@ -696,15 +710,68 @@ public class Volume {
     }
 
     /**
+     * Get the Transient VM Instance Id.
+     *
+    * @return the transvmInstanceId
+    */
+    public String getTransvmInstanceId() {
+        return transvmInstanceId;
+    }
+
+    /**
+     * Set the transvmInstanceId .
+     *
+     * @param transvmInstanceId to set
+     */
+    public void setTransvmInstanceId(String transvmInstanceId) {
+        this.transvmInstanceId = transvmInstanceId;
+    }
+
+    /**
+     * Get the transZoneId.
+     *
+     * @return the transZoneId
+     */
+    public String getTransZoneId() {
+        return transZoneId;
+    }
+
+    /**
+     * Get the transZoneId.
+     *
+     * @param transZoneId  to set
+     */
+    public void setTransZoneId(String transZoneId) {
+        this.transZoneId = transZoneId;
+    }
+
+    /**
+     * Get transStorageOfferingId.
+     *
+     * @return the transStorageOfferingId
+     */
+    public String getTransStorageOfferingId() {
+        return transStorageOfferingId;
+    }
+
+    /**
+     * Set the transStorageOfferingId.
+     *
+     * @param transStorageOfferingId  to set
+     */
+    public void setTransStorageOfferingId(String transStorageOfferingId) {
+        this.transStorageOfferingId = transStorageOfferingId;
+    }
+
+    /**
      * Convert JSONObject to Volume entity.
      *
      * @param object json object
-     * @param convertUtil util class for converting json
      * @return Volume entity objects
      * @throws JSONException unhandled json errors
      */
     @SuppressWarnings("static-access")
-    public static Volume convert(JSONObject object, ConvertUtil convertUtil) throws JSONException {
+    public static Volume convert(JSONObject object) throws JSONException {
         Volume volume = new Volume();
         volume.setIsSyncFlag(false);
         try {
@@ -714,15 +781,14 @@ public class Volume {
             volume.setVolumeType(volume.getVolumeType().valueOf(JsonValidator.jsonStringValidation(object, "type")));
             volume.setStatus(volume.getStatus().valueOf(JsonValidator.jsonStringValidation(object, "state").toUpperCase()));
             volume.setCreatedDateTime(JsonUtil.convertToZonedDateTime(object.getString("created")));
-            if (object.has("diskofferingid")) {
-                volume.setStorageOfferingId(convertUtil.getStorageOfferId(JsonUtil.getStringValue(object, "diskofferingid")));
-            }
-            volume.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(object, "zoneid")));
-            if (object.has("virtualmachineid")) {
+            volume.setTransStorageOfferingId((JsonUtil.getStringValue(object, "diskofferingid")));
+            volume.setTransZoneId((JsonUtil.getStringValue(object, "zoneid")));
+            volume.setTransvmInstanceId((JsonUtil.getStringValue(object, "virtualmachineid")));
+           /* if (object.has("virtualmachineid")) {
                 volume.setVmInstanceId(convertUtil.getVmInstanceId(JsonUtil.getStringValue(object, "virtualmachineid")));
             } else {
                 volume.setVmInstanceId(null);
-            }
+            }*/
         } catch (Exception e) {
             e.printStackTrace();
         }

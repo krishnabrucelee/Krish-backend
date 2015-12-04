@@ -25,9 +25,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
-
-import ck.panda.service.SnapshotServiceImpl;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 import ck.panda.util.JsonValidator;
 
@@ -137,6 +134,17 @@ public class Snapshot {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
 
+    /** Transient domain of the snapshot.*/
+    @Transient
+    private String transDomainId;
+
+    /** Transient zone of the snapshot.*/
+    @Transient
+    private String transZoneId;
+
+    /** Transient volume of the snapshot.*/
+    @Transient
+    private String transVolumeId;
 
     /** Status for snapshot. */
     public enum Status {
@@ -493,14 +501,63 @@ public class Snapshot {
     }
 
     /**
+     * Get the transient domain id.
+     *
+     * @return the transDomainId
+     */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
+
+    /**
+     * Set the transient domain id..
+     *
+     * @param transDomainId to set
+     */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
+
+    /**
+    * Get the transient zone id.
+    *
+    * @return the transZoneId
+    */
+    public String getTransZoneId() {
+        return transZoneId;
+    }
+
+    /**
+    * Set the transient zone id.
+    *
+    * @param transZoneId the transZoneId to set
+    */
+    public void setTransZoneId(String transZoneId) {
+        this.transZoneId = transZoneId;
+    }
+
+    /**
+    * @return the transVolumeId
+    */
+    public String getTransVolumeId() {
+        return transVolumeId;
+    }
+
+    /**
+    * @param transVolumeId the transVolumeId to set
+    */
+    public void setTransVolumeId(String transVolumeId) {
+        this.transVolumeId = transVolumeId;
+    }
+
+    /**
      * Convert JSONObject to domain entity.
      *
      * @param jsonObject json object
-     * @param convertUtil convert Entity object from UUID.
      * @return domain entity object.
      * @throws JSONException handles json exception.
      */
-    public static Snapshot convert(JSONObject jsonObject, ConvertUtil convertUtil) throws JSONException {
+    public static Snapshot convert(JSONObject jsonObject) throws JSONException {
         Snapshot snapshot = new Snapshot();
         snapshot.setSyncFlag(false);
 
@@ -508,9 +565,9 @@ public class Snapshot {
             snapshot.setName(JsonUtil.getStringValue(jsonObject, "name"));
             snapshot.setIsActive(true);
             snapshot.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            snapshot.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(jsonObject, "domainid")));
-            snapshot.setZoneId(convertUtil.getZoneId(JsonUtil.getStringValue(jsonObject, "zoneid")));
-            snapshot.setVolumeId(convertUtil.getVolumeId(JsonUtil.getStringValue(jsonObject, "volumeid")));
+            snapshot.setTransZoneId(JsonUtil.getStringValue(jsonObject, "zoneid"));
+            snapshot.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
+            snapshot.setTransVolumeId(JsonUtil.getStringValue(jsonObject, "volumeid"));
             snapshot.setSnapshotType(JsonUtil.getStringValue(jsonObject,"snapshottype"));
             snapshot.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state").toUpperCase()));
             snapshot.account = JsonValidator.jsonStringValidation(jsonObject, "account");

@@ -15,7 +15,6 @@ import ck.panda.domain.entity.Account.AccountType;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.repository.jpa.AccountRepository;
 import ck.panda.util.CloudStackAccountService;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
@@ -35,9 +34,9 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     private CloudStackAccountService csAccountService;
 
-    /** Reference of the convertutil. */
+    /** Reference of the convert entity service. */
     @Autowired
-    private ConvertUtil convertUtil;
+    private ConvertEntityService convertEntityService;
 
     @Override
     public Account save(Account account) throws Exception {
@@ -106,7 +105,8 @@ public class AccountServiceImpl implements AccountService {
                 // 2.1 Call convert by passing JSONObject to Department entity
                 // and
                 // Add the converted Department entity to list
-                Account account = Account.convert(accountListJSON.getJSONObject(i), convertUtil);
+                Account account = Account.convert(accountListJSON.getJSONObject(i));
+                account.setDomainId(convertEntityService.getDomainId(account.getTransDomainId()));
                 accountList.add(account);
 
             }
@@ -141,5 +141,11 @@ public class AccountServiceImpl implements AccountService {
         return null;
     }
 
+    @Override
+    public Account softDelete(Account account) throws Exception {
+        account.setIsActive(false);
+        account.setStatus(Account.Status.DELETED);
+            return accountRepo.save(account);
+    }
 
 }

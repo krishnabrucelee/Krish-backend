@@ -3,7 +3,6 @@ package ck.panda.service;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -11,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.ZoneRepository;
 import ck.panda.util.CloudStackZoneService;
@@ -100,6 +98,13 @@ public class ZoneServiceImpl implements ZoneService {
     @Override
     public Zone findByUUID(String uuid) throws Exception {
        return zoneRepo.findByUUID(uuid);
+    }
+
+    @Override
+    public Zone softDelete(Zone zone) throws Exception {
+            zone.setIsActive(false);
+            zone.setStatus(Zone.Status.DISABLED);
+        return zoneRepo.save(zone);
     }
 
 }

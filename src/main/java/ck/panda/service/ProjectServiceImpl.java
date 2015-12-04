@@ -10,8 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.Application;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
@@ -21,7 +19,6 @@ import ck.panda.domain.repository.jpa.ProjectRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackProjectService;
 import ck.panda.util.CloudStackServer;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
@@ -57,13 +54,13 @@ public class ProjectServiceImpl implements ProjectService {
     @Autowired
     private CloudStackConfigurationService cloudConfigService;
 
-    /** Convert entity repository reference. */
+    /** Reference of the convert entity service. */
     @Autowired
-    private ConvertUtil entity;
+    private ConvertEntityService convertEntityService;
 
-    /** Autowired TokenDetails */
+    /** Autowired TokenDetails. */
     @Autowired
-    TokenDetails tokenDetails;
+    private TokenDetails tokenDetails;
 
     /** Domain repository reference. */
     @Autowired
@@ -174,14 +171,14 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public List<Project> findByAll() throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if(domain != null && !domain.getName().equals("ROOT")) {
-			if (Long.valueOf(tokenDetails.getTokenDetails("departmentid")) == 1000L) {
-				return (List<Project>) projectRepository.findAll();
-			} else {
-				return (List<Project>) projectRepository.findbyDomain(domain.getId());
-			}
-		}
-		return (List<Project>) projectRepository.findAll();
+        if (domain != null && !domain.getName().equals("ROOT")) {
+            if (Long.valueOf(tokenDetails.getTokenDetails("departmentid")) == 1000L) {
+                return (List<Project>) projectRepository.findAll();
+            } else {
+                return (List<Project>) projectRepository.findbyDomain(domain.getId());
+            }
+        }
+        return (List<Project>) projectRepository.findAll();
     }
 
     /**
@@ -243,7 +240,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Page<Project> findAllByActive(Boolean isActive, PagingAndSorting pagingAndSorting) throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if(domain != null && !domain.getName().equals("ROOT")) {
+        if (domain != null && !domain.getName().equals("ROOT")) {
             return projectRepository.findAllProjectByDomain(domain.getId(), pagingAndSorting.toPageRequest(), isActive, Project.Status.ENABLED);
         }
         return projectRepository.findAllByActive(pagingAndSorting.toPageRequest(), isActive, Project.Status.ENABLED);
@@ -276,7 +273,15 @@ public class ProjectServiceImpl implements ProjectService {
                 // 2.1 Call convert by passing JSONObject to Project entity
                 // and Add
                 // the converted Project entity to list
-                projectList.add(Project.convert(projectListJSON.getJSONObject(i), entity));
+                Project project = Project.convert(projectListJSON.getJSONObject(i));
+                project.setDomainId(convertEntityService.getDomainId(project.getTransDomainId()));
+                project.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomain(project.getTransAccount(),
+                        convertEntityService.getDomain(project.getTransDomainId())));
+                project.setIsActive(convertEntityService.getState(project.getTransState()));
+                project.setStatus((Project.Status)convertEntityService.getStatus(project.getTransState()));
+                project.setProjectOwnerId(convertEntityService.getUserIdByAccount(project.getTransAccount(), convertEntityService.getDomain(project.getTransDomainId())));
+                projectList.add(project);
+
             }
         }
         return projectList;
@@ -296,5 +301,4 @@ public class ProjectServiceImpl implements ProjectService {
     public List<Project> findByDepartmentAndIsActive(Long id, Boolean isActive) throws Exception {
         return projectRepository.findByDepartmentAndIsActive(id, true);
     }
-
 }

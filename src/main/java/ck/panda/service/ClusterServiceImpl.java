@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Cluster;
 import ck.panda.domain.repository.jpa.ClusterRepository;
 import ck.panda.util.CloudStackClusterService;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
@@ -34,9 +33,9 @@ public class ClusterServiceImpl implements ClusterService {
     @Autowired
     private CloudStackClusterService clusterService;
 
-    /** Convert entity repository reference. */
+    /** Reference of the convert entity service. */
     @Autowired
-    private ConvertUtil entity;
+    private ConvertEntityService convertEntityService;
 
     @Override
     public Cluster save(Cluster cluster) throws Exception {
@@ -92,7 +91,10 @@ public class ClusterServiceImpl implements ClusterService {
                 // 2.1 Call convert by passing JSONObject to cluster entity and
                 // Add
                 // the converted cluster entity to list
-                clusterList.add(Cluster.convert(clusterListJSON.getJSONObject(i), entity));
+                Cluster cluster = Cluster.convert(clusterListJSON.getJSONObject(i));
+                cluster.setZoneId(convertEntityService.getZoneId(cluster.getTransZone()));
+                 cluster.setPodId(convertEntityService.getPodId(cluster.getTransPod()));
+                 clusterList.add(cluster);
             }
         }
         return clusterList;

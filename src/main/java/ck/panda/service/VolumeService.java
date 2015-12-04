@@ -68,4 +68,14 @@ public interface VolumeService extends CRUDService<Volume> {
     * @throws Exception Exception
     */
    Volume uploadVolume(Volume volume) throws Exception;
+  
+   /**
+    * SOft delete for volume.
+    *
+    * @param volume object
+    * @return volume
+    * @throws Exception unhandled errors.
+    */
+   Volume softDelete(Volume volume) throws Exception;
+
 }

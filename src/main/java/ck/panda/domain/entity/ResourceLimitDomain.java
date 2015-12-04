@@ -1,6 +1,4 @@
-/**
- *
- */
+
 package ck.panda.domain.entity;
 
 import java.time.ZonedDateTime;
@@ -29,7 +27,6 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -117,6 +114,14 @@ public class ResourceLimitDomain {
     /** unique separator for each domain with resource type.*/
     @Transient
     private String uniqueSeperator;
+
+    /** Transient domain of the user. */
+    @Transient
+    private String transDomainId;
+
+    /** Transient resource type of the resource limit domain. */
+    @Transient
+    private Integer transResourceType;
 
     /** Enum type for Resource Limit. */
     public enum ResourceType {
@@ -389,7 +394,6 @@ public class ResourceLimitDomain {
         this.isSyncFlag = isSyncFlag;
     }
 
-
     /**
      * Set the unique separator for the Resource limit.
      *
@@ -402,30 +406,59 @@ public class ResourceLimitDomain {
     /**
      * Get the unique Separator for the Resource limit.
      *
-     * @param unique Separator for the Resource limit.
+     * @param uniqueSeparator for the Resource limit.
      */
     public void setUniqueSeperator(String uniqueSeperator) {
         this.uniqueSeperator = uniqueSeperator;
+    }
+
+
+    /**
+    * @return the transDomainId
+    */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
+
+    /**
+    * @param transDomainId the transDomainId to set
+    */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
+
+    /**
+    * @return the transResourceType
+    */
+    public Integer getTransResourceType() {
+        return transResourceType;
+    }
+
+    /**
+    * @param transResourceType the transResourceType to set
+    */
+    public void setTransResourceType(Integer transResourceType) {
+        this.transResourceType = transResourceType;
     }
 
     /**
      * Convert JSONObject to ResourceLimit entity.
      *
      * @param object json object
-     * @param convertUtil util class for converting json
      * @return ResourceLimit entity objects
      * @throws JSONException unhandled json errors
      */
     @SuppressWarnings("static-access")
-    public static ResourceLimitDomain convert(JSONObject object, ConvertUtil convertUtil) throws JSONException {
+    public static ResourceLimitDomain convert(JSONObject object) throws JSONException {
         ResourceLimitDomain resource = new ResourceLimitDomain();
         resource.setIsSyncFlag(false);
         try {
             resource.setResourceType(ResourceType.values()[(JsonUtil.getIntegerValue(object, "resourcetype"))]);
-            resource.setDomainId(convertUtil.getDomainId(JsonUtil.getStringValue(object, "domainid")));
+            resource.setTransDomainId((JsonUtil.getStringValue(object, "domainid")));
             resource.setMax(resource.getMax().valueOf(JsonUtil.getIntegerValue(object, "max")));
+            resource.setTransResourceType(JsonUtil.getIntegerValue(object, "resourcetype"));
             resource.setIsActive(true);
-            resource.setUniqueSeperator(convertUtil.getDomainId(JsonUtil.getStringValue(object, "domainid"))+"-"+ResourceType.values()[(JsonUtil.getIntegerValue(object, "resourcetype"))]);
+
         } catch (Exception e) {
             e.printStackTrace();
         }

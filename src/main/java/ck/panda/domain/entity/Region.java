@@ -5,7 +5,6 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -17,8 +16,6 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.joda.time.DateTime;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -26,6 +23,8 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import ck.panda.util.JsonUtil;
 
 /**
  * A region is the largest available organizational unit within a CloudStack
@@ -311,13 +310,12 @@ public class Region implements Serializable {
      *
      * @param object json object
      * @return region entity object
-     * @throws JSONException unhandled json errors.
+     * @throws Exception error occurs.
      */
-    public static Region convert(JSONObject object) throws JSONException {
+    public static Region convert(JSONObject object) throws Exception {
         Region region = new Region();
-        region.uuid = object.has("id") ? object.get("id").toString() : "";
-        region.name = object.has("name") ? object.get("name").toString() : "";
-
+        region.setUuid(JsonUtil.getStringValue(object, "id"));
+        region.setName(JsonUtil.getStringValue(object, "name"));
         return region;
     }
 

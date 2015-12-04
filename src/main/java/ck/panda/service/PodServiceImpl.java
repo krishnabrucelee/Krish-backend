@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Pod;
 import ck.panda.domain.repository.jpa.PodRepository;
 import ck.panda.util.CloudStackPodService;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
@@ -34,10 +33,9 @@ public class PodServiceImpl implements PodService {
     @Autowired
     private CloudStackPodService podService;
 
-    /** Convert entity repository reference. */
+    /** Reference of the convert entity service. */
     @Autowired
-    private ConvertUtil entity;
-
+    private ConvertEntityService convertEntityService;
 
     @Override
     public Pod save(Pod pod) throws Exception {
@@ -94,7 +92,9 @@ public class PodServiceImpl implements PodService {
                 // 2.1 Call convert by passing JSONObject to Domain entity and
                 // Add
                 // the converted pod entity to list
-                podList.add(Pod.convert(podListJSON.getJSONObject(i), entity));
+               Pod pod = Pod.convert(podListJSON.getJSONObject(i));
+               pod.setZoneId(convertEntityService.getZoneId(pod.getTransZoneId()));
+               podList.add(pod);
             }
         }
         return podList;
@@ -105,4 +105,10 @@ public class PodServiceImpl implements PodService {
         return podRepo.findByUUID(uuid);
     }
 
+    @Override
+    public Pod softDelete(Pod pod) throws Exception {
+        pod.setIsActive(false);
+        pod.setStatus(Pod.Status.DISABLED);
+        return podRepo.save(pod);
+    }
 }

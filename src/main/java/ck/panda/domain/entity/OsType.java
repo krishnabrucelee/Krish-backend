@@ -12,6 +12,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.Version;
 import org.joda.time.DateTime;
 import org.json.JSONException;
@@ -22,7 +23,6 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -88,6 +88,10 @@ public class OsType implements Serializable {
     @LastModifiedDate
     @Column(name = "updated_date_time")
     private DateTime updatedDateTime;
+
+    /** Transient oscategory of the ostype.*/
+    @Transient
+    private String transOsCategoryId;
 
     /**
      * Get the id.
@@ -249,18 +253,38 @@ public class OsType implements Serializable {
         this.updatedDateTime = updatedDateTime;
     }
 
+
     /**
+     * Get transient OsCategory id.
+     *
+     * @return the transOsCategoryId
+     */
+    public String getTransOsCategoryId() {
+        return transOsCategoryId;
+    }
+
+    /**
+    * Set transient OsCategory id.
+    *
+    * @param transOsCategoryId to set
+    */
+    public void setTransOsCategoryId(String transOsCategoryId) {
+        this.transOsCategoryId = transOsCategoryId;
+    }
+
+    /**
+    * Convert JSONObject to os type entity.
+    *
      * @param jsonObject to set
-     * @param convertUtil to set
      * @return OS type
      * @throws JSONException raise if error
      */
-    public static OsType convert(JSONObject jsonObject, ConvertUtil convertUtil) throws JSONException {
+    public static OsType convert(JSONObject jsonObject) throws JSONException {
         OsType osType = new OsType();
         try {
             osType.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
             osType.setDescription(JsonUtil.getStringValue(jsonObject, "description"));
-            osType.setOsCategoryId(convertUtil.getOsCategory(JsonUtil.getStringValue(jsonObject, "oscategoryid")).getId());
+            osType.setTransOsCategoryId(JsonUtil.getStringValue(jsonObject, "oscategoryid"));
         } catch (Exception ex) {
             LOGGER.error("OSType-convert", ex);
         }
