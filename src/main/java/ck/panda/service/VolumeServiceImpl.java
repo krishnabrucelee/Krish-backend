@@ -255,7 +255,7 @@ public class VolumeServiceImpl implements VolumeService {
                     volume.setUuid((String) jobresult.get("id"));
                 }
                 if (jobresult.getString("jobstatus").equals("0")) {
-                       volume.setStatus(Status.Ready);
+                       volume.setStatus(Status.READY);
                 }
             }
             volumeRepo.save(volume);
@@ -287,7 +287,7 @@ public class VolumeServiceImpl implements VolumeService {
                     volume.setUuid((String) jobresult.get("id"));
                 }
                 if (jobresult.getString("jobstatus").equals("0")) {
-                       volume.setStatus(Status.Destroy);
+                       volume.setStatus(Status.DESTROY);
                 }
             }
             volumeRepo.save(volume);
@@ -317,7 +317,7 @@ public class VolumeServiceImpl implements VolumeService {
                     volume.setUuid((String) jobresult.get("id"));
                 }
                 if (jobresult.getString("jobstatus").equals("0")) {
-                       volume.setStatus(Status.Ready);
+                       volume.setStatus(Status.READY);
                 }
             }
             volumeRepo.save(volume);
@@ -358,12 +358,12 @@ public class VolumeServiceImpl implements VolumeService {
 
                     }
                     if (jobresult.getString("jobstatus").equals("1")) {
-                        volume.setStatus(Status.valueOf(EventTypes.UploadNotStarted));
+                        volume.setStatus(Status.valueOf(EventTypes.UPLOADNOTSTARTED));
                         volume.setEventMessage("Volume Not started");
                         setValue(volume);
                     }
                     if (jobresult.getString("jobstatus").equals("0")) {
-                        volume.setStatus(Status.valueOf(EventTypes.Uploaded));
+                        volume.setStatus(Status.valueOf(EventTypes.UPLOADED));
                         volume.setEventMessage("Volume Uploaded");
                         setValue(volume);
                     }

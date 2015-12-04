@@ -184,19 +184,19 @@ public class EventTypes {
     public static final String Allocated = "Allocated";
 
     /** State of Volume. */
-    public static final String Ready = "Ready";
+    public static final String READY = "Ready";
 
     /** State of Volume. */
-    public static final String Abandoned = "Abandoned";
+    public static final String ABANDONED = "Abandoned";
 
     /** State of Volume. */
-    public static final String UploadNotStarted = "UploadNotStarted";
+    public static final String UPLOADNOTSTARTED = "UploadNotStarted";
 
     /** State of Volume. */
-    public static final String UploadOp = "UploadOp";
+    public static final String UPLOADOP = "UploadOp";
 
     /** State of Volume. */
-    public static final String Uploaded = "Uploaded";
+    public static final String UPLOADED = "Uploaded";
 
     /** State of snapshot. */
     public static final String EVENT_CREATE = "Creating";

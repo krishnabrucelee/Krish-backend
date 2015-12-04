@@ -190,25 +190,25 @@ public class Volume {
     /** Enum type for disk Status. */
     public enum Status {
         /** Volume will be in a Allocated State. */
-        Allocated,
+        ALLOCATED,
         /** Volume will be in a Destroy State. */
-        Destroy,
+        DESTROY,
         /** Volume will be in a Expunged State. */
-        Expunged,
+        EXPUNGED,
         /** Volume will be in a Ready State. */
-        Ready,
+        READY,
         /** Volume will be in a UploadNotStarted State. */
-        UploadNotStarted,
+        UPLOADNOTSTARTED,
         /** The volume upload operation is in progress or in short the volume is on secondary storage. */
-        UploadOp,
+        UPLOADOP,
         /** Volume will be in a UploadAbandoned State. */
-        UploadAbandoned,
+        UPLOADABANDONED,
         /** Volume will be in a UploadError State. */
-        UploadError,
+        UPLOADERROR,
         /** Volume will be in a Abandoned State. */
-        Abandoned,
+        ABANDONED,
         /** Volume will be in a Downloaded State. */
-        Uploaded
+        UPLOADED
     }
 
     /** Format enum type used to list the static format values. */
