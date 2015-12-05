@@ -54,7 +54,7 @@ public class Domain {
 
     /** Company name Abbreviation for the Domain. */
     @Column(name = "company_name_abb")
-    private String companyNameAbb;
+    private String companyNameAbbreviation;
 
     /** Portal user name for the Domain. */
     @Column(name = "portal_user_name")
@@ -405,90 +405,116 @@ public class Domain {
     }
 
     /**
-    * @return the companyNameAbb
-    */
-    public String getCompanyNameAbb() {
-        return companyNameAbb;
+     * Get companyNameAbbreviation.
+     *
+     * @return the companyNameAbbreviation
+     */
+    public String getCompanyNameAbbreviation() {
+        return companyNameAbbreviation;
     }
 
     /**
-    * @param companyNameAbb the companyNameAbb to set
-    */
-    public void setCompanyNameAbb(String companyNameAbb) {
-        this.companyNameAbb = companyNameAbb;
+     * Set companyNameAbbreviation.
+     *
+     * @param companyNameAbb to set
+     */
+    public void setCompanyNameAbbreviation(String companyNameAbbreviation) {
+        this.companyNameAbbreviation = companyNameAbbreviation;
     }
 
     /**
-    * @return the portalUserName
-    */
+     * Get  portalUserName
+     *
+     * @return the portalUserName
+     */
     public String getPortalUserName() {
         return portalUserName;
     }
 
     /**
-    * @param portalUserName the portalUserName to set
-    */
+     * Set the portalUserName.
+     *
+     * @param portalUserName  to set
+     */
     public void setPortalUserName(String portalUserName) {
         this.portalUserName = portalUserName;
     }
 
     /**
-    * @return the password
-    */
+     * Get the password.
+     *
+     * @return the password
+     */
     public String getPassword() {
         return password;
     }
 
     /**
-    * @param password the password to set
-    */
+     * Set the password
+     *
+     * @param password  to set
+     */
     public void setPassword(String password) {
         this.password = password;
     }
 
     /**
-    * @return the confirmPassword
-    */
+     * Get the confirm password.
+     *
+     * @return the confirmPassword
+     */
     public String getConfirmPassword() {
         return confirmPassword;
     }
 
     /**
-    * @param confirmPassword the confirmPassword to set
-    */
+     * Set Get the confirm password..
+     *
+     * @param confirmPassword to set
+     */
     public void setConfirmPassword(String confirmPassword) {
         this.confirmPassword = confirmPassword;
     }
 
     /**
-    * @return the cityHeadquarter
-    */
+     * Get cityHeadquarter.
+     *
+     * @return the cityHeadquarter
+     */
     public String getCityHeadquarter() {
         return cityHeadquarter;
     }
 
     /**
-    * @param cityHeadquarter the cityHeadquarter to set
-    */
+     * Set the cityHeadquarter.
+     *
+     * @param cityHeadquarter to set
+     */
     public void setCityHeadquarter(String cityHeadquarter) {
         this.cityHeadquarter = cityHeadquarter;
     }
 
     /**
-    * @return the companyAddress
-    */
+     * Get the companyAddress.
+     *
+     * @return the companyAddress
+     */
     public String getCompanyAddress() {
         return companyAddress;
     }
 
     /**
-    * @param companyAddress the companyAddress to set
-    */
+     * Set the companyAddress.
+     *
+     * @param companyAddress to set
+     */
     public void setCompanyAddress(String companyAddress) {
         this.companyAddress = companyAddress;
     }
 
     /**
+     * Get  primaryFirstName.
+     *
     * @return the primaryFirstName
     */
     public String getPrimaryFirstName() {
@@ -496,78 +522,100 @@ public class Domain {
     }
 
     /**
-    * @param primaryFirstName the primaryFirstName to set
-    */
+     * Set the primaryFirstName.
+     *
+     * @param primaryFirstName  to set
+     */
     public void setPrimaryFirstName(String primaryFirstName) {
         this.primaryFirstName = primaryFirstName;
     }
 
     /**
-    * @return the lastName
-    */
+     * Get the lastName
+     *
+     * @return the lastName
+     */
     public String getLastName() {
         return lastName;
     }
 
     /**
-    * @param lastName the lastName to set
-    */
+     * Set the lastName .
+     *
+     * @param lastName to set
+     */
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
 
     /**
-    * @return the email
-    */
+     * Get the email
+     *
+     * @return the email
+     */
     public String getEmail() {
         return email;
     }
 
     /**
-    * @param email the email to set
-    */
+     * Set the email
+     *
+     * @param email  to set
+     */
     public void setEmail(String email) {
         this.email = email;
     }
 
     /**
-    * @return the phone
-    */
+     * Get the phone.
+     *
+     * @return the phone
+     */
     public String getPhone() {
         return phone;
     }
 
     /**
-    * @param phone the phone to set
-    */
+     * Set the phone.
+     *
+     * @param phone  to set
+     */
     public void setPhone(String phone) {
         this.phone = phone;
     }
 
     /**
-    * @return the secondaryContact
-    */
+     * Get the secondaryContact.
+     *
+     * @return the secondaryContact
+     */
     public String getSecondaryContact() {
         return secondaryContact;
     }
 
     /**
-    * @param secondaryContact the secondaryContact to set
-    */
+     * Set the secondaryContact.
+     *
+     * @param secondaryContact  to set
+     */
     public void setSecondaryContact(String secondaryContact) {
         this.secondaryContact = secondaryContact;
     }
 
     /**
-    * @return the syncFlag
-    */
+     * Get the syncFlag
+     *
+     * @return the syncFlag
+     */
     public Boolean getSyncFlag() {
         return syncFlag;
     }
 
     /**
-    * @param syncFlag the syncFlag to set
-    */
+     * Set the syncFlag.
+     *
+     * @param syncFlag  to set
+     */
     public void setSyncFlag(Boolean syncFlag) {
         this.syncFlag = syncFlag;
     }
