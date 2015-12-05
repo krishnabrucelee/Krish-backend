@@ -74,6 +74,7 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
         Page<Volume> pageResponse = volumeService.findAll(page);
         System.out.println(pageResponse);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+
         return pageResponse.getContent();
     }
 
@@ -133,5 +134,19 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     @ResponseBody
     protected Volume resizeVolume(@RequestBody Volume volume, @PathVariable(PATH_ID) Long id) throws Exception {
         return volumeService.resizeVolume(volume);
+    }
+
+    /**
+     * Upload volume from URL.
+     *
+     * @param volume Volume
+     * @return Upload Volume
+     * @throws Exception exception
+     */
+    @RequestMapping(value = "upload", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected Volume uploadVolume(@RequestBody Volume volume) throws Exception {
+        return volumeService.uploadVolume(volume);
     }
 }

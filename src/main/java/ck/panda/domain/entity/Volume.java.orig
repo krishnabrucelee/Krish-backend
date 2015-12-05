@@ -170,6 +170,8 @@ public class Volume {
     @Type(type = "org.hibernate.type.NumericBooleanType")
     private Boolean isActive;
 
+<<<<<<< HEAD
+=======
     /** Transient network of the instance. */
     @Transient
     private String transvmInstanceId;
@@ -185,6 +187,8 @@ public class Volume {
     /** Transient domain of the instance. */
     @Transient
     private String transDomainId;
+
+>>>>>>> ea800312423622458f244df70f06dfa4b16c9528
     /**
      * isSyncFlag field is not to be serialized,
      * whereas JPA's @Transient annotation is used to indicate
@@ -692,24 +696,40 @@ public class Volume {
     }
 
     /**
+<<<<<<< HEAD
      * Get the is removed of the Volume.
 
      * @return the isRemoved of Volume.
      */
+=======
+    * Get the is removed of the Volume.
+
+    * @return the isRemoved of Volume.
+    */
+>>>>>>> ea800312423622458f244df70f06dfa4b16c9528
     public Boolean getIsRemoved() {
         return isRemoved;
     }
 
     /**
+<<<<<<< HEAD
      * Set the is removed of the Volume.
      *
      * @param isRemoved the isRemoved to set
      */
+=======
+    * Set the is removed of the Volume.
+    *
+    * @param isRemoved the isRemoved to set
+    */
+>>>>>>> ea800312423622458f244df70f06dfa4b16c9528
     public void setIsRemoved(Boolean isRemoved) {
         this.isRemoved = isRemoved;
     }
 
     /**
+<<<<<<< HEAD
+=======
      * Get the Transient VM Instance Id.
      *
     * @return the transvmInstanceId
@@ -764,6 +784,7 @@ public class Volume {
     }
 
     /**
+>>>>>>> ea800312423622458f244df70f06dfa4b16c9528
      * Convert JSONObject to Volume entity.
      *
      * @param object json object
@@ -788,7 +809,11 @@ public class Volume {
                 volume.setVmInstanceId(convertUtil.getVmInstanceId(JsonUtil.getStringValue(object, "virtualmachineid")));
             } else {
                 volume.setVmInstanceId(null);
+<<<<<<< HEAD
+            }
+=======
             }*/
+>>>>>>> ea800312423622458f244df70f06dfa4b16c9528
         } catch (Exception e) {
             e.printStackTrace();
         }

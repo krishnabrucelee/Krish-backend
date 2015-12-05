@@ -164,11 +164,12 @@ public class CloudStackVolumeService {
     }
 
     /**
-     * Resize a disk volume from a virtual machine
+     * Resize a disk volume from a virtual machine.
      *
-     * @param optional
-     * @return
-     * @throws Exception
+     * @param optional optional values.
+     * @param response json response
+     * @return resize response
+     * @throws Exception error
      */
     public String resizeVolume(String response, HashMap<String, String> optional) throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("resizeVolume", optional);
@@ -176,6 +177,35 @@ public class CloudStackVolumeService {
 
         return resizeResponse;
 
+    }
+
+    /**
+     * Uploads the Volume.
+     *
+     * @param name The name of the disk volume
+     * @param url The url path of the volume
+     * @param format The format of the volume
+     * @param zoneId The zone for the volume to upload it
+     * @param optional optional values
+     * @param response json response
+     * @return uploadResponse uploaded volume response
+     * @throws Exception error
+     */
+    public String uploadVolume(String name, String format, String zoneId,
+            String url, String response, HashMap<String, String> optional)
+            throws Exception {
+
+        LinkedList<NameValuePair> arguments
+                = server.getDefaultQuery("uploadVolume", optional);
+        arguments.add(new NameValuePair("name", name));
+        arguments.add(new NameValuePair("url", url));
+        arguments.add(new NameValuePair("format", format));
+        arguments.add(new NameValuePair("zoneId", zoneId));
+        arguments.add(new NameValuePair("response", response));
+
+        String uploadResponse = server.request(arguments);
+
+        return uploadResponse;
     }
 
 }

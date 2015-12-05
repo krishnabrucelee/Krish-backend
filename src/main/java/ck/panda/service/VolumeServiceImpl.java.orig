@@ -293,7 +293,7 @@ public class VolumeServiceImpl implements VolumeService {
                     volume.setUuid((String) jobresult.get("id"));
                 }
                 if (jobresult.getString("jobstatus").equals("0")) {
-                       volume.setStatus(Status.READY);
+                       volume.setStatus(Status.DESTROY);
                 }
             }
             volumeRepo.save(volume);
@@ -335,13 +335,7 @@ public class VolumeServiceImpl implements VolumeService {
     }
 
     @Override
-    public Volume softDelete(Volume volume) throws Exception {
-        volume.setIsActive(false);
-        volume.setStatus(Volume.Status.DESTROY);
-        return volumeRepo.save(volume);
-    }
-
-    @Override
+<<<<<<< HEAD
     public Volume uploadVolume(Volume volume) throws Exception {
         Errors errors = validator.rejectIfNullEntity("volumes", volume);
         errors = validator.validateEntity(volume, errors);
@@ -413,5 +407,12 @@ public class VolumeServiceImpl implements VolumeService {
             volume.setChecksum(volume.getChecksum());
         }
     }
+=======
+        public Volume softDelete(Volume volume) throws Exception {
+             volume.setIsActive(false);
+             volume.setStatus(Volume.Status.Destroy);
+             return volumeRepo.save(volume);
+        }
+>>>>>>> ea800312423622458f244df70f06dfa4b16c9528
 
 }
