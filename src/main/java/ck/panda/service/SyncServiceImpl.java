@@ -60,7 +60,7 @@ import ck.panda.util.error.exception.ApplicationException;
  * it.
  *
  */
-@PropertySource(value="classpath:permission.properties")
+@PropertySource(value = "classpath:permission.properties")
 @Service
 public class SyncServiceImpl implements SyncService {
 
@@ -1844,74 +1844,102 @@ public class SyncServiceImpl implements SyncService {
         }
     }
 
-    /** Get instance. */
+    /** Get instance.
+     * @return instance
+     */
     String getInstance() {
-    	return this.instance;
+        return this.instance;
     }
 
-    /** Get storage. */
+    /** Get storage.
+     * @return storage
+     */
     String getStorage() {
-    	return this.storage;
+        return this.storage;
     }
 
-    /** Get network. */
+    /** Get network.
+     * @return network
+     */
     String getNetwork() {
-    	return this.network;
+        return this.network;
     }
 
-    /** Get sshkey. */
+    /** Get sshkey.
+     * @return sshkey
+     */
     String getSSHkey() {
-    	return this.sshkey;
+        return this.sshkey;
     }
 
-    /** Get quatoLimit. */
+    /** Get quatoLimit.
+     * @return quatoLimit
+     */
     String getQuatoLimit() {
-    	return this.quatoLimit;
+        return this.quatoLimit;
     }
 
-    /** Get vpc. */
+    /** Get vpc.
+     * @return vpc
+     */
     String getVPC() {
-    	return this.vpc;
+        return this.vpc;
     }
 
-    /** Get template. */
+    /** Get template.
+     * @return template
+     */
     String getTemplate() {
-    	return this.template;
+        return this.template;
     }
 
-    /** Get application. */
+    /** Get application.
+     * @return application
+     */
     String getApplication() {
-    	return this.application;
+        return this.application;
     }
 
-    /** Get additionalServive. */
+    /** Get additionalServive.
+     * @return additionalServive
+     */
     String getAdditionalServive() {
-    	return this.additionalServive;
+        return this.additionalServive;
     }
 
-    /** Get project. */
+    /** Get project.
+     * @return project
+     */
     String getProject() {
-    	return this.project;
+        return this.project;
     }
 
-    /** Get department. */
+    /** Get department.
+     * @return department
+     */
     String getDepartment() {
-    	return this.department;
+        return this.department;
     }
 
-    /** Get roles. */
+    /** Get roles.
+     * @return roles
+     */
     String getRoles() {
-    	return this.roles;
+        return this.roles;
     }
 
-    /** Get user. */
+    /** Get user.
+     * @return user
+     */
     String getUser() {
-    	return this.user;
+        return this.user;
     }
 
-    /** Get report. */
+    /** Get report.
+     * @return report
+     */
     String getReport() {
-    	return this.report;
+        return this.report;
     }
 
     /**
@@ -1921,47 +1949,46 @@ public class SyncServiceImpl implements SyncService {
      * @param existPermissionList list existing permission list
      */
     void createRole(List<Department> departmnetList, List<Permission> existPermissionList) {
-    	try {
-    		if (existPermissionList.size() == 0) {
-    			List<Permission> newPermissionList = PermissionUtil.createPermissions(getInstance(),getStorage(),getNetwork(),getSSHkey(),getQuatoLimit(),getVPC(),getTemplate(),getAdditionalServive(),getProject(),getApplication(),getDepartment(),getRoles(),getUser(),getReport());
-    			for (Permission permission : newPermissionList) {
-    				permissionService.save(permission);
-    			}
-    			for (Department department : departmnetList) {
-    				Role role = roleService.findByName("FULL_PERMISSION", department);
-    				if (role == null) {
-    					Role newRole = new Role();
-    					newRole.setName("FULL_PERMISSION");
-    					newRole.setDepartment(department);
-    					newRole.setDescription("Allow full permission");
-    					newRole.setStatus(Role.Status.ENABLED);
-    					newRole.setPermissionList(newPermissionList);
-    					roleService.save(newRole);
-    				}
-    			}
-    		} else {
-    			List<Permission> newList = PermissionUtil.updatePermissions(getInstance(),getStorage(),getNetwork(),getSSHkey(),getQuatoLimit(),getVPC(),getTemplate(),getAdditionalServive(),getProject(),getApplication(),getDepartment(),getRoles(),getUser(),getReport());
+        try {
+            if (existPermissionList.size() == 0) {
+                List<Permission> newPermissionList = PermissionUtil.createPermissions(getInstance(),getStorage(),getNetwork(),getSSHkey(),getQuatoLimit(),getVPC(),getTemplate(),getAdditionalServive(),getProject(),getApplication(),getDepartment(),getRoles(),getUser(),getReport());
+                for (Permission permission : newPermissionList) {
+                    permissionService.save(permission);
+                }
+                for (Department department : departmnetList) {
+                    Role role = roleService.findByName("FULL_PERMISSION", department);
+                    if (role == null) {
+                        Role newRole = new Role();
+                        newRole.setName("FULL_PERMISSION");
+                        newRole.setDepartment(department);
+                        newRole.setDescription("Allow full permission");
+                        newRole.setStatus(Role.Status.ENABLED);
+                        newRole.setPermissionList(newPermissionList);
+                        roleService.save(newRole);
+                    }
+                }
+            } else {
+                List<Permission> newList = PermissionUtil.updatePermissions(getInstance(),getStorage(),getNetwork(),getSSHkey(),getQuatoLimit(),getVPC(),getTemplate(),getAdditionalServive(),getProject(),getApplication(),getDepartment(),getRoles(),getUser(),getReport());
 
-    			newList.removeAll(existPermissionList);
-    			for (Permission permission : newList) {
-    				permissionService.save(permission);
-    			}
-    			for (Department department : departmnetList) {
-    				Role role = roleService.findByName("FULL_PERMISSION", department);
-    				if (role != null) {
-    					role.setName("FULL_PERMISSION");
-    					role.setDepartment(department);
-    					role.setDescription("Allow full permission");
-    					role.setStatus(Role.Status.ENABLED);
-    					role.setPermissionList(permissionService.findAll());
-    					roleService.update(role);
-    				}
-    			}
-    		}
-
-    	} catch (Exception e) {
-    		LOGGER.debug("createRole" + e);
-    	}
+                newList.removeAll(existPermissionList);
+                for (Permission permission : newList) {
+                    permissionService.save(permission);
+                }
+                for (Department department : departmnetList) {
+                    Role role = roleService.findByName("FULL_PERMISSION", department);
+                    if (role != null) {
+                        role.setName("FULL_PERMISSION");
+                        role.setDepartment(department);
+                        role.setDescription("Allow full permission");
+                        role.setStatus(Role.Status.ENABLED);
+                        role.setPermissionList(permissionService.findAll());
+                        roleService.update(role);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.debug("createRole" + e);
+        }
     }
 
 }

@@ -20,7 +20,7 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public Permission save(Permission permission) throws Exception {
-    	return permissionRepository.save(permission);
+        return permissionRepository.save(permission);
     }
 
     @Override
@@ -53,11 +53,6 @@ public class PermissionServiceImpl implements PermissionService {
        return (List<Permission>) permissionRepository.findAll();
     }
 
-    /**
-     * List the permission.
-     * @return list of permission.
-     * @throws Exception error occurs.
-     */
     @Override
     public List<Permission> getPermissionList() throws Exception {
        return permissionRepository.getPermissionList();
