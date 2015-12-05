@@ -19,8 +19,8 @@ public class PermissionServiceImpl implements PermissionService {
     private PermissionRepository permissionRepository;
 
     @Override
-    public Permission save(Permission t) throws Exception {
-       return null;
+    public Permission save(Permission permission) throws Exception {
+    	return permissionRepository.save(permission);
     }
 
     @Override
@@ -50,7 +50,7 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public List<Permission> findAll() throws Exception {
-       return null;
+       return (List<Permission>) permissionRepository.findAll();
     }
 
     /**
@@ -62,8 +62,5 @@ public class PermissionServiceImpl implements PermissionService {
     public List<Permission> getPermissionList() throws Exception {
        return permissionRepository.getPermissionList();
     }
-
-
-
 
 }
