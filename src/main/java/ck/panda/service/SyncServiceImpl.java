@@ -1,5 +1,6 @@
 package ck.panda.service;
 
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -10,12 +11,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
+import ck.panda.constants.PermissionUtil;
 import ck.panda.domain.entity.Account;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Cluster;
 import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Host;
 import ck.panda.domain.entity.Hypervisor;
@@ -24,12 +28,14 @@ import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.OsType;
+import ck.panda.domain.entity.Permission;
 import ck.panda.domain.entity.Pod;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.Region;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.ResourceLimitProject;
+import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
@@ -54,6 +60,7 @@ import ck.panda.util.error.exception.ApplicationException;
  * it.
  *
  */
+@PropertySource(value = "classpath:permission.properties")
 @Service
 public class SyncServiceImpl implements SyncService {
 
@@ -185,6 +192,70 @@ public class SyncServiceImpl implements SyncService {
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
+
+    /** Autowired permission service. */
+    @Autowired
+    private PermissionService permissionService;
+
+    /** Autowired roleService. */
+    @Autowired
+    private RoleService roleService;
+
+    /** Permission instance properties. */
+    @Value(value = "${permission.instance}")
+    private String instance;
+
+    /** Permission storage properties. */
+    @Value(value = "${permission.storage}")
+    private String storage;
+
+    /** Permission network properties. */
+    @Value(value = "${permission.network}")
+    private String network;
+
+    /** Permission sshkey properties. */
+    @Value(value = "${permission.sshkey}")
+    private String sshkey;
+
+    /** Permission quatoLimit properties. */
+    @Value(value = "${permission.quatolimit}")
+    private String quatoLimit;
+
+    /** Permission vpc properties. */
+    @Value(value = "${permission.vpc}")
+    private String vpc;
+
+    /** Permission template properties. */
+    @Value(value = "${permission.template}")
+    private String template;
+
+    /** Permission additionalServive properties. */
+    @Value(value = "${permission.additionalservive}")
+    private String additionalServive;
+
+    /** Permission project properties. */
+    @Value(value = "${permission.project}")
+    private String project;
+
+    /** Permission application properties. */
+    @Value(value = "${permission.application}")
+    private String application;
+
+    /** Permission department properties. */
+    @Value(value = "${permission.department}")
+    private String department;
+
+    /** Permission roles properties. */
+    @Value(value = "${permission.roles}")
+    private String roles;
+
+    /** Permission user properties. */
+    @Value(value = "${permission.user}")
+    private String user;
+
+    /** Permission report properties. */
+    @Value(value = "${permission.report}")
+    private String report;
 
     @Override
     public void init(CloudStackServer server) throws Exception {
@@ -1052,6 +1123,15 @@ public class SyncServiceImpl implements SyncService {
         for (String key : csUserMap.keySet()) {
             departmentService.save(csUserMap.get(key));
         }
+        // Create default roles and permissions
+        List<Permission> existPermissionList = new ArrayList<Permission>();
+        List<Department> departmentList = new ArrayList<Department>();
+        existPermissionList = permissionService.findAll();
+        List<AccountType> types = new ArrayList<AccountType>();
+        types.add(AccountType.ROOT_ADMIN);
+        types.add(AccountType.DOMAIN_ADMIN);
+        departmentList = departmentService.findDepartmentsByAccountTypesAndActive(types, true);
+        createRole(departmentList, existPermissionList);
     }
 
     /**
@@ -1789,4 +1869,54 @@ public class SyncServiceImpl implements SyncService {
             accountService.save(csAccountMap.get(key));
         }
     }
+
+    /**
+     * Create default roles and permissions.
+     *
+     * @param departmnetList department list by Root and domain admin
+     * @param existPermissionList list existing permission list
+     */
+    void createRole(List<Department> departmnetList, List<Permission> existPermissionList) {
+        try {
+            if (existPermissionList.size() == 0) {
+                List<Permission> newPermissionList = PermissionUtil.createPermissions(instance, storage, network, sshkey, quatoLimit, vpc, template, additionalServive, project, application, department, roles, user, report);
+                for (Permission permission : newPermissionList) {
+                    permissionService.save(permission);
+                }
+                for (Department department : departmnetList) {
+                    Role role = roleService.findByName("FULL_PERMISSION", department);
+                    if (role == null) {
+                        Role newRole = new Role();
+                        newRole.setName("FULL_PERMISSION");
+                        newRole.setDepartment(department);
+                        newRole.setDescription("Allow full permission");
+                        newRole.setStatus(Role.Status.ENABLED);
+                        newRole.setPermissionList(newPermissionList);
+                        roleService.save(newRole);
+                    }
+                }
+            } else {
+                List<Permission> newList = PermissionUtil.updatePermissions(instance, storage, network, sshkey, quatoLimit, vpc, template, additionalServive, project, application, department, roles, user, report);
+
+                newList.removeAll(existPermissionList);
+                for (Permission permission : newList) {
+                    permissionService.save(permission);
+                }
+                for (Department department : departmnetList) {
+                    Role role = roleService.findByName("FULL_PERMISSION", department);
+                    if (role != null) {
+                        role.setName("FULL_PERMISSION");
+                        role.setDepartment(department);
+                        role.setDescription("Allow full permission");
+                        role.setStatus(Role.Status.ENABLED);
+                        role.setPermissionList(permissionService.findAll());
+                        roleService.update(role);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.debug("createRole" + e);
+        }
+    }
+
 }

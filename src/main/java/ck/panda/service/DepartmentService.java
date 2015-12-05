@@ -1,11 +1,12 @@
 package ck.panda.service;
 
-import ck.panda.domain.entity.Department;
-import ck.panda.util.domain.CRUDService;
-import ck.panda.util.domain.vo.PagingAndSorting;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Department.AccountType;
+import ck.panda.util.domain.CRUDService;
+import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
  * Service class for Department.
@@ -86,6 +87,23 @@ public interface DepartmentService  extends CRUDService<Department>  {
      */
     List<Department> findByAll() throws Exception;
 
+    /**
+     * Find the departments based on the isActive status.
+     *
+     * @param id for domain.
+     * @throws Exception error occur
+     * @return departments.
+     */
     List<Department> findDomain(Long id) throws Exception;
+
+    /**
+     * Find the departments based on the isActive status.
+     *
+     * @param types for each department.
+     * @param isActive department status Active/Inactive
+     * @throws Exception error occur
+     * @return departments.
+     */
+    List<Department> findDepartmentsByAccountTypesAndActive(List<AccountType> types, Boolean isActive) throws Exception;
 
 }

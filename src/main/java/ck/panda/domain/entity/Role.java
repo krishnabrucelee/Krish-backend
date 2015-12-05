@@ -2,6 +2,7 @@ package ck.panda.domain.entity;
 
 import java.io.Serializable;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -57,7 +58,7 @@ public class Role implements Serializable {
     private String description;
 
     /** Permission list of the role. */
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     private List<Permission> permissionList;
 
     /** Version attribute to handle optimistic locking. */
@@ -119,7 +120,7 @@ public class Role implements Serializable {
     /**
      * Default constructor.
      */
-    protected Role() {
+    public Role() {
         super();
     }
 

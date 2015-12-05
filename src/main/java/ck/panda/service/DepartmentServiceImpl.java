@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.repository.jpa.DepartmentReposiory;
 import ck.panda.domain.repository.jpa.DomainRepository;
@@ -252,5 +253,9 @@ public class DepartmentServiceImpl implements DepartmentService {
         return (Department) departmentRepo.findByUsername(name, isActive);
     }
 
+    @Override
+    public List<Department> findDepartmentsByAccountTypesAndActive(List<AccountType> types, Boolean isActive) throws Exception {
+        return (List<Department>) departmentRepo.findDepartmentsByAccountTypesAndActive(types, isActive);
+    }
 
 }
