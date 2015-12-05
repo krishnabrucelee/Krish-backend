@@ -1870,104 +1870,6 @@ public class SyncServiceImpl implements SyncService {
         }
     }
 
-    /** Get instance.
-     * @return instance
-     */
-    String getInstance() {
-        return this.instance;
-    }
-
-    /** Get storage.
-     * @return storage
-     */
-    String getStorage() {
-        return this.storage;
-    }
-
-    /** Get network.
-     * @return network
-     */
-    String getNetwork() {
-        return this.network;
-    }
-
-    /** Get sshkey.
-     * @return sshkey
-     */
-    String getSSHkey() {
-        return this.sshkey;
-    }
-
-    /** Get quatoLimit.
-     * @return quatoLimit
-     */
-    String getQuatoLimit() {
-        return this.quatoLimit;
-    }
-
-    /** Get vpc.
-     * @return vpc
-     */
-    String getVPC() {
-        return this.vpc;
-    }
-
-    /** Get template.
-     * @return template
-     */
-    String getTemplate() {
-        return this.template;
-    }
-
-    /** Get application.
-     * @return application
-     */
-    String getApplication() {
-        return this.application;
-    }
-
-    /** Get additionalServive.
-     * @return additionalServive
-     */
-    String getAdditionalServive() {
-        return this.additionalServive;
-    }
-
-    /** Get project.
-     * @return project
-     */
-    String getProject() {
-        return this.project;
-    }
-
-    /** Get department.
-     * @return department
-     */
-    String getDepartment() {
-        return this.department;
-    }
-
-    /** Get roles.
-     * @return roles
-     */
-    String getRoles() {
-        return this.roles;
-    }
-
-    /** Get user.
-     * @return user
-     */
-    String getUser() {
-        return this.user;
-    }
-
-    /** Get report.
-     * @return report
-     */
-    String getReport() {
-        return this.report;
-    }
-
     /**
      * Create default roles and permissions.
      *
@@ -1977,7 +1879,7 @@ public class SyncServiceImpl implements SyncService {
     void createRole(List<Department> departmnetList, List<Permission> existPermissionList) {
         try {
             if (existPermissionList.size() == 0) {
-                List<Permission> newPermissionList = PermissionUtil.createPermissions(getInstance(),getStorage(),getNetwork(),getSSHkey(),getQuatoLimit(),getVPC(),getTemplate(),getAdditionalServive(),getProject(),getApplication(),getDepartment(),getRoles(),getUser(),getReport());
+                List<Permission> newPermissionList = PermissionUtil.createPermissions(instance, storage, network, sshkey, quatoLimit, vpc, template, additionalServive, project, application, department, roles, user, report);
                 for (Permission permission : newPermissionList) {
                     permissionService.save(permission);
                 }
@@ -1994,7 +1896,7 @@ public class SyncServiceImpl implements SyncService {
                     }
                 }
             } else {
-                List<Permission> newList = PermissionUtil.updatePermissions(getInstance(),getStorage(),getNetwork(),getSSHkey(),getQuatoLimit(),getVPC(),getTemplate(),getAdditionalServive(),getProject(),getApplication(),getDepartment(),getRoles(),getUser(),getReport());
+                List<Permission> newList = PermissionUtil.updatePermissions(instance, storage, network, sshkey, quatoLimit, vpc, template, additionalServive, project, application, department, roles, user, report);
 
                 newList.removeAll(existPermissionList);
                 for (Permission permission : newList) {

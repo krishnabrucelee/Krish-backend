@@ -369,44 +369,44 @@ public class Permission implements Serializable {
     }
 
     @Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((action == null) ? 0 : action.hashCode());
-		result = prime * result + ((description == null) ? 0 : description.hashCode());
-		result = prime * result + ((module == null) ? 0 : module.hashCode());
-		return result;
-	}
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((action == null) ? 0 : action.hashCode());
+        result = prime * result + ((description == null) ? 0 : description.hashCode());
+        result = prime * result + ((module == null) ? 0 : module.hashCode());
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (!(obj instanceof Permission)) {
-			return false;
-		}
-		Permission other = (Permission) obj;
-		if (action == null) {
-			if (other.action != null) {
-				return false;
-			}
-		} else if (!action.equals(other.action)) {
-			return false;
-		}
-		if (description == null) {
-			if (other.description != null) {
-				return false;
-			}
-		} else if (!description.equals(other.description)) {
-			return false;
-		}
-		if (module != other.module) {
-			return false;
-		}
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+           return true;
+        }
+        if (obj == null) {
+           return false;
+        }
+        if (!(obj instanceof Permission)) {
+            return false;
+        }
+        Permission other = (Permission) obj;
+        if (action == null) {
+            if (other.action != null) {
+                return false;
+            }
+        } else if (!action.equals(other.action)) {
+            return false;
+        }
+        if (description == null) {
+            if (other.description != null) {
+               return false;
+            }
+        } else if (!description.equals(other.description)) {
+            return false;
+        }
+        if (module != other.module) {
+            return false;
+        }
+        return true;
+    }
 }
