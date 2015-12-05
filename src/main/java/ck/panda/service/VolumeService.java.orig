@@ -61,6 +61,7 @@ public interface VolumeService extends CRUDService<Volume> {
    Volume resizeVolume(Volume volume) throws Exception;
 
    /**
+<<<<<<< HEAD
     * Upload volume from Url.
     *
     * @param volume volume
@@ -68,8 +69,7 @@ public interface VolumeService extends CRUDService<Volume> {
     * @throws Exception Exception
     */
    Volume uploadVolume(Volume volume) throws Exception;
-  
-   /**
+=======
     * SOft delete for volume.
     *
     * @param volume object
@@ -77,5 +77,5 @@ public interface VolumeService extends CRUDService<Volume> {
     * @throws Exception unhandled errors.
     */
    Volume softDelete(Volume volume) throws Exception;
-
+>>>>>>> ea800312423622458f244df70f06dfa4b16c9528
 }

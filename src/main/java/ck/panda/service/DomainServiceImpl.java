@@ -14,14 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
-
-import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
-import ck.panda.domain.entity.Snapshot;
-import ck.panda.domain.entity.Snapshot.Status;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackAccountService;
@@ -204,18 +199,16 @@ public class DomainServiceImpl implements DomainService {
         List<Department> departmentedit =  deptService.findDomain(domain.getId());
         System.out.println(departmentedit);
         if(departmentedit.size() != 0 ){
-            errors.addGlobalError("Cannot delete domain");
+            errors.addGlobalError("Cannot delete domain. Please make sure all users and sub domains have been removed from the domain before deleting");
+        }
+        if (errors.hasErrors()) {
+            throw new ApplicationException(errors);
         }
         else {
             domain.setIsActive(false);
              domain.setStatus(Domain.Status.INACTIVE);
              String deleteResponse = domainService.deleteDomain(domain.getUuid(), "json");
            JSONObject deleteJobId = new JSONObject(deleteResponse).getJSONObject("deletedomainresponse");
-         /*  if (deleteJobId.has("jobid")) {
-            String deleteDomain = domainService.queryAsyncJobResult(deleteJobId.getString("jobid"), "json");
-            JSONObject jobresult = new JSONObject(deleteDomain).getJSONObject("queryasyncjobresultresponse");
-            if(jobresult.getString("jobstatus").equals("0")){*
-             }*/
         }
             return domainRepo.save(domain);
     }
@@ -240,8 +233,8 @@ public class DomainServiceImpl implements DomainService {
     /**
     * Validate the compute.
     *
-    * @param compute
-    *            reference of the compute offering.
+    * @param domain object
+    *            reference of the domain.
     * @throws Exception
     *             error occurs
     */
