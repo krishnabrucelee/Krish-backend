@@ -23,11 +23,7 @@ import ck.panda.domain.repository.jpa.ZoneRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackNetworkService;
 import ck.panda.util.ConfigUtil;
-<<<<<<< Updated upstream
-=======
-import ck.panda.util.ConvertUtil;
 import ck.panda.util.TokenDetails;
->>>>>>> Stashed changes
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -59,10 +55,6 @@ public class NetworkServiceImpl implements NetworkService {
     /** NetworkOffering repository reference. */
     @Autowired
     private NetworkOfferingRepository networkofferingRepo;
-
-    /** Reference of the convert entity service. */
-    @Autowired
-    private ConvertEntityService convertEntityService;
 
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkServiceImpl.class);
@@ -99,21 +91,6 @@ public class NetworkServiceImpl implements NetworkService {
         } else {
             config.setServer(1L);
 
-<<<<<<< Updated upstream
-            String networkOfferings = csNetwork.createNetwork(network.getDisplayText(),network.getName(), network.getZone().getUuid(),"json",optional(network));
-                    JSONObject createComputeResponseJSON = new JSONObject(networkOfferings).getJSONObject("createnetworkresponse")
-                        .getJSONObject("network");
-                    network.setUuid(createComputeResponseJSON.getString("id"));
-                    network.setNetworkType(network.getNetworkType().valueOf(createComputeResponseJSON.getString("type")));
-                    network.setDisplayText(createComputeResponseJSON.getString("displaytext"));
-                    network.setcIDR(createComputeResponseJSON.getString("cidr"));
-                    network.setDomainId(domainRepository.findByUUID(createComputeResponseJSON.getString("domainid")).getId());
-                    network.setZoneId(zoneRepository.findByUUID(createComputeResponseJSON.getString("zoneid")).getId());
-                    network.setNetworkOfferingId(networkofferingRepo.findByUUID(createComputeResponseJSON.getString("networkofferingid")).getId());
-                    network.setStatus(network.getStatus().valueOf(createComputeResponseJSON.getString("state")));
-                    network.setDepartmentId(convertEntityService.getDepartmentByUsername(createComputeResponseJSON.getString("account")));
-                    network.setGateway(createComputeResponseJSON.getString("gateway"));
-=======
             String networkOfferings = csNetwork.createNetwork(network.getZone().getUuid(),"json",optional(network));
                     JSONObject createNetworkResponseJSON = new JSONObject(networkOfferings).getJSONObject("createnetworkresponse");
 
@@ -143,7 +120,6 @@ public class NetworkServiceImpl implements NetworkService {
                     User user = userRepository.findOne(Long.parseLong(token));
                     network.setCreatedBy(user);
                     network.setIsActive(true);
->>>>>>> Stashed changes
             return networkRepo.save(network);
         }
      } else {
@@ -244,17 +220,6 @@ public class NetworkServiceImpl implements NetworkService {
         return (List<Network>) networkRepo.findAll();
     }
 
-<<<<<<< Updated upstream
-    @Override
-    public Network softDelete(Network network) throws Exception {
-        network.setIsActive(false);
-        network.setStatus(Network.Status.Destroy);
-        return networkRepo.save(network);
-    }
-
-
-=======
->>>>>>> Stashed changes
     @Override
     public List<Network> findAllFromCSServerByDomain() throws Exception {
 
@@ -273,12 +238,7 @@ public class NetworkServiceImpl implements NetworkService {
                 // 2.1 Call convert by passing JSONObject to Domain entity and
                 // Add
                 // the converted Domain entity to list
-                Network network = Network.convert(networkListJSON.getJSONObject(i));
-                network.setDomainId(convertEntityService.getDomainId(network.getTransDomainId()));
-                network.setZoneId(convertEntityService.getZoneId(network.getTransZoneId()));
-                network.setNetworkOfferingId(convertEntityService.getNetworkOfferingId(network.getTransNetworkOfferingId()));
-                network.setDepartmentId(convertEntityService.getDepartmentByUsername(network.getTransDepartmentId()));
-                networkList.add(network);
+                networkList.add(Network.convert(networkListJSON.getJSONObject(i), entity));
             }
         }
         return networkList;

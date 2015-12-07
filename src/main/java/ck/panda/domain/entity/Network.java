@@ -25,13 +25,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
-<<<<<<< Updated upstream
-=======
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
-
-import ck.panda.util.ConvertUtil;
->>>>>>> Stashed changes
 import ck.panda.util.JsonUtil;
 
 /**
@@ -184,15 +179,13 @@ public class Network implements Serializable {
         Shared,
         /**  Network type be Isolated. */
         Isolated,
-
-    }
+   }
 
     /**
      * Enum type for  Network Status.
      *
      */
     public enum Status {
-<<<<<<< Updated upstream
 
         /**  Network will be in a Enabled State. */
         Implemented,
@@ -202,14 +195,7 @@ public class Network implements Serializable {
 
         /**  Network will be in a destroyed State. */
         Destroy
-=======
-        /**  Network will be in a Implemented State. */
-        Implemented,
-        /**  Network will be in a Allocated State. */
-        Allocated,
-
->>>>>>> Stashed changes
-    }
+     }
 
     /** Set syncFlag. */
     @Transient
@@ -609,122 +595,96 @@ public class Network implements Serializable {
     /**
      * Get the Department name.
      *
-<<<<<<< Updated upstream
-    * @return the department
-    */
-=======
      * @return the department
      */
->>>>>>> Stashed changes
     public Department getDepartment() {
         return department;
     }
 
-    /**
-<<<<<<< Updated upstream
+   /**
     * Set the Department name.
     *
     * @param department the department to set
     */
-=======
-     * Set the Department name.
-     *
-     * @param department the department to set
-     */
->>>>>>> Stashed changes
+
     public void setDepartment(Department department) {
         this.department = department;
     }
 
-    /**
-<<<<<<< Updated upstream
+   /**
     * Get the department Id.
     *
     * @return the departmentId
     */
-=======
-     * Get the department Id.
-     *
-     * @return the departmentId
-     */
->>>>>>> Stashed changes
+
     public Long getDepartmentId() {
         return departmentId;
     }
 
-    /**
-<<<<<<< Updated upstream
+   /**
     * Set the Department Id.
     *
     * @param departmentId the departmentId to set
     */
-=======
-     * Set the Department Id.
-     *
-     * @param departmentId the departmentId to set
-     */
->>>>>>> Stashed changes
     public void setDepartmentId(Long departmentId) {
         this.departmentId = departmentId;
     }
 
-<<<<<<< Updated upstream
-    /**
+   /**
     * @return the transDomainId
     */
     public String getTransDomainId() {
         return transDomainId;
     }
 
-    /**
+   /**
     * @param transDomainId the transDomainId to set
     */
     public void setTransDomainId(String transDomainId) {
         this.transDomainId = transDomainId;
     }
 
-    /**
+   /**
     * @return the transZoneId
     */
     public String getTransZoneId() {
         return transZoneId;
     }
 
-    /**
+   /**
     * @param transZoneId the transZoneId to set
     */
     public void setTransZoneId(String transZoneId) {
         this.transZoneId = transZoneId;
     }
 
-    /**
+   /**
     * @return the transDepartmentId
     */
     public String getTransDepartmentId() {
         return transDepartmentId;
     }
 
-    /**
+   /**
     * @param transDepartmentId the transDepartmentId to set
     */
     public void setTransDepartmentId(String transDepartmentId) {
         this.transDepartmentId = transDepartmentId;
     }
 
-    /**
+   /**
     * @return the transNetworkOfferingId
     */
     public String getTransNetworkOfferingId() {
         return transNetworkOfferingId;
     }
 
-    /**
+   /**
     * @param transNetworkOfferingId the transNetworkOfferingId to set
     */
     public void setTransNetworkOfferingId(String transNetworkOfferingId) {
         this.transNetworkOfferingId = transNetworkOfferingId;
-=======
-
+    }
 
     /**
      * Get the Netmask of the Network.
@@ -760,7 +720,6 @@ public class Network implements Serializable {
      */
     public void setNetworkDomain(String networkDomain) {
         this.networkDomain = networkDomain;
->>>>>>> Stashed changes
     }
 
     /** Convert JSONObject to domain entity.
@@ -783,11 +742,8 @@ public class Network implements Serializable {
            network.setcIDR(JsonUtil.getStringValue(jsonObject, "cidr"));
            network.setDisplayText(JsonUtil.getStringValue(jsonObject, "displaytext"));
            network.setGateway(JsonUtil.getStringValue(jsonObject, "gateway"));
-<<<<<<< Updated upstream
            network.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, "account"));
-=======
            network.setIsActive(true);
->>>>>>> Stashed changes
            network.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
            network.setIsActive(true);
        } catch (Exception ex) {
