@@ -40,9 +40,7 @@ public class CloudStackNetworkOfferingService {
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("listNetworkOfferings", optional);
         arguments.add(new NameValuePair("response", response));
-
         String responseDocument = server.request(arguments);
-
         return responseDocument;
     }
 

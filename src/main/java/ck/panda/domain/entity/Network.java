@@ -1,11 +1,13 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
@@ -15,7 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import org.joda.time.DateTime;
+import org.hibernate.annotations.Type;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
@@ -23,6 +25,13 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
+<<<<<<< Updated upstream
+=======
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import ck.panda.util.ConvertUtil;
+>>>>>>> Stashed changes
 import ck.panda.util.JsonUtil;
 
 /**
@@ -31,6 +40,7 @@ import ck.panda.util.JsonUtil;
  */
 @Entity
 @Table(name = "ck_network")
+@EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class Network implements Serializable {
 
@@ -101,6 +111,14 @@ public class Network implements Serializable {
     @Column(name = "gateway")
     private String gateway;
 
+    /** Netmask of the Network. */
+    @Column(name = "netmask", nullable = true)
+    private String netMask;
+
+    /** Network Domain for the Network. */
+    @Column(name = "network_domain", nullable = true)
+    private String networkDomain;
+
     /** IsActive attribute to verify Active or Inactive. */
     @Column(name = "is_active")
     private Boolean isActive;
@@ -130,12 +148,16 @@ public class Network implements Serializable {
     /** Created date and time. */
     @CreatedDate
     @Column(name = "created_date_time")
-    private DateTime createdDateTime;
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime createdDateTime;
 
     /** Last modified date and time. */
     @LastModifiedDate
     @Column(name = "updated_date_time")
-    private DateTime updatedDateTime;
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime updatedDateTime;
 
     /** Transient domain of the account. */
     @Transient
@@ -161,7 +183,8 @@ public class Network implements Serializable {
         /**  Network type be Shared. */
         Shared,
         /**  Network type be Isolated. */
-        Isolated
+        Isolated,
+
     }
 
     /**
@@ -169,6 +192,7 @@ public class Network implements Serializable {
      *
      */
     public enum Status {
+<<<<<<< Updated upstream
 
         /**  Network will be in a Enabled State. */
         Implemented,
@@ -178,6 +202,13 @@ public class Network implements Serializable {
 
         /**  Network will be in a destroyed State. */
         Destroy
+=======
+        /**  Network will be in a Implemented State. */
+        Implemented,
+        /**  Network will be in a Allocated State. */
+        Allocated,
+
+>>>>>>> Stashed changes
     }
 
     /** Set syncFlag. */
@@ -324,7 +355,7 @@ public class Network implements Serializable {
      *
      * @return the DateTime
      */
-    public DateTime getCreatedDateTime() {
+    public ZonedDateTime getCreatedDateTime() {
         return createdDateTime;
     }
 
@@ -333,7 +364,7 @@ public class Network implements Serializable {
      *
      * @return the DateTime
      */
-    public DateTime getUpdatedDateTime() {
+    public ZonedDateTime getUpdatedDateTime() {
         return updatedDateTime;
     }
 
@@ -487,7 +518,7 @@ public class Network implements Serializable {
      * @param createdDateTime
      * Network createdDateTime to set
      */
-    public void setCreatedDateTime(DateTime createdDateTime) {
+    public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
     }
 
@@ -497,7 +528,7 @@ public class Network implements Serializable {
      * @param updatedDateTime
      * Network updatedDateTime to set
      */
-    public void setUpdatedDateTime(DateTime updatedDateTime) {
+    public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
 
@@ -578,39 +609,66 @@ public class Network implements Serializable {
     /**
      * Get the Department name.
      *
+<<<<<<< Updated upstream
     * @return the department
     */
+=======
+     * @return the department
+     */
+>>>>>>> Stashed changes
     public Department getDepartment() {
         return department;
     }
 
     /**
+<<<<<<< Updated upstream
     * Set the Department name.
     *
     * @param department the department to set
     */
+=======
+     * Set the Department name.
+     *
+     * @param department the department to set
+     */
+>>>>>>> Stashed changes
     public void setDepartment(Department department) {
         this.department = department;
     }
 
     /**
+<<<<<<< Updated upstream
     * Get the department Id.
     *
     * @return the departmentId
     */
+=======
+     * Get the department Id.
+     *
+     * @return the departmentId
+     */
+>>>>>>> Stashed changes
     public Long getDepartmentId() {
         return departmentId;
     }
 
     /**
+<<<<<<< Updated upstream
     * Set the Department Id.
     *
     * @param departmentId the departmentId to set
     */
+=======
+     * Set the Department Id.
+     *
+     * @param departmentId the departmentId to set
+     */
+>>>>>>> Stashed changes
     public void setDepartmentId(Long departmentId) {
         this.departmentId = departmentId;
     }
 
+<<<<<<< Updated upstream
     /**
     * @return the transDomainId
     */
@@ -665,6 +723,44 @@ public class Network implements Serializable {
     */
     public void setTransNetworkOfferingId(String transNetworkOfferingId) {
         this.transNetworkOfferingId = transNetworkOfferingId;
+=======
+
+
+    /**
+     * Get the Netmask of the Network.
+     *
+     * @return the netMask
+     */
+    public String getNetMask() {
+        return netMask;
+    }
+
+    /**
+     * Get the Netmask to the Network.
+     *
+     * @param netMask the netMask to set
+     */
+    public void setNetMask(String netMask) {
+        this.netMask = netMask;
+    }
+
+    /**
+     * Get the Network Domain of the Network.
+     *
+     * @return the networkDomain
+     */
+    public String getNetworkDomain() {
+        return networkDomain;
+    }
+
+    /**
+     * Set the Network Domain to the Network.
+     *
+     * @param networkDomain the networkDomain to set
+     */
+    public void setNetworkDomain(String networkDomain) {
+        this.networkDomain = networkDomain;
+>>>>>>> Stashed changes
     }
 
     /** Convert JSONObject to domain entity.
@@ -687,7 +783,11 @@ public class Network implements Serializable {
            network.setcIDR(JsonUtil.getStringValue(jsonObject, "cidr"));
            network.setDisplayText(JsonUtil.getStringValue(jsonObject, "displaytext"));
            network.setGateway(JsonUtil.getStringValue(jsonObject, "gateway"));
+<<<<<<< Updated upstream
            network.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, "account"));
+=======
+           network.setIsActive(true);
+>>>>>>> Stashed changes
            network.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
            network.setIsActive(true);
        } catch (Exception ex) {

@@ -29,5 +29,12 @@ public interface NetworkOfferingService extends CRUDService<NetworkOffering> {
      */
     NetworkOffering findByUUID(String uuid) throws Exception;
 
+    /**
+     * To get list of Isolated network offering from cloudstack server.
+     *
+     * @return isolated network offering list from server
+     * @throws Exception unhandled errors.
+     */
+    List<NetworkOffering> findIsolated() throws Exception;
 
 }
