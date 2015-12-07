@@ -63,6 +63,24 @@ public class Volume {
     @Column(name = "volume_type", nullable = false)
     private VolumeType volumeType;
 
+    /** Domain of the Volume. */
+    @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Domain domain;
+
+    /** Domain id of the Volume. */
+    @Column(name = "domain_id")
+    private Long domainId;
+
+    /** Department of the Volume. */
+    @JoinColumn(name = "department_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Department department;
+
+    /** Department id of the Volume. */
+    @Column(name = "department_id")
+    private Long departmentId;
+
     /**
      * The Zone ID, this disk offering belongs to. Ignore this information as it
      * is not currently applicable.
@@ -139,6 +157,10 @@ public class Volume {
     @Column(name = "is_removed")
     private Boolean isRemoved;
 
+    /** Check volume Shrink ok or not. */
+    @Column(name = "is_shrink")
+    private Boolean isShrink;
+
     /** Created by user. */
     @CreatedBy
     @JoinColumn(name = "created_by", referencedColumnName = "id")
@@ -182,9 +204,14 @@ public class Volume {
     @Transient
     private String transStorageOfferingId;
 
-    /** Transient domain of the instance. */
+    /** Transient network of the Domain. */
     @Transient
     private String transDomainId;
+
+    /** Transient network of the Department. */
+    @Transient
+    private String transDepartmentName;
+
     /**
      * isSyncFlag field is not to be serialized,
      * whereas JPA's @Transient annotation is used to indicate
@@ -293,7 +320,6 @@ public class Volume {
         this.name = name;
     }
 
-
     /**
      * Get the volumeType of the Volume.
      *
@@ -310,6 +336,78 @@ public class Volume {
      */
     public void setVolumeType(VolumeType volumeType) {
         this.volumeType = volumeType;
+    }
+
+    /**
+     * Get the domain of the Volume.
+
+     * @return the domain of Volume.
+     */
+    public Domain getDomain() {
+        return domain;
+    }
+
+    /**
+     * Set the domain of the Volume.
+     *
+     * @param domain the domain to set
+     */
+    public void setDomain(Domain domain) {
+        this.domain = domain;
+    }
+
+    /**
+     * Get the domainId of the Volume.
+
+     * @return the domainId of Volume.
+     */
+    public Long getDomainId() {
+        return domainId;
+    }
+
+    /**
+     * Set the domainId of the Volume.
+     *
+     * @param domainId the domainId to set
+     */
+    public void setDomainId(Long domainId) {
+        this.domainId = domainId;
+    }
+
+    /**
+     * Get the department of the Volume.
+
+     * @return the department of Volume.
+     */
+    public Department getDepartment() {
+        return department;
+    }
+
+    /**
+     * Set the department of the Volume.
+     *
+     * @param department the department to set
+     */
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
+
+    /**
+     * Get the departmentId of the Volume.
+
+     * @return the departmentId of Volume.
+     */
+    public Long getDepartmentId() {
+        return departmentId;
+    }
+
+    /**
+     * Set the departmentId of the Volume.
+     *
+     * @param departmentId the departmentId to set
+     */
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
     }
 
     /**
@@ -710,6 +808,24 @@ public class Volume {
     }
 
     /**
+     * Get the is Shrink of the Volume.
+
+     * @return the isShrink of Volume.
+     */
+    public Boolean getIsShrink() {
+        return isShrink;
+    }
+
+    /**
+     * Set the is Shrink of the Volume.
+     *
+     * @param isShrink the isShrink to set
+     */
+    public void setIsShrink(Boolean isShrink) {
+        this.isShrink = isShrink;
+    }
+
+    /**
      * Get the Transient VM Instance Id.
      *
     * @return the transvmInstanceId
@@ -764,6 +880,42 @@ public class Volume {
     }
 
     /**
+     * Get the transDomainId of the Volume.
+
+     * @return the transDomainId of Volume.
+     */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
+
+    /**
+     * Set the transDomainId of the Volume.
+     *
+     * @param transDomainId the transDomainId to set
+     */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
+
+    /**
+     * Get the transDepartmentName of the Volume.
+
+     * @return the transDepartmentName of Volume.
+     */
+    public String getTransDepartmentName() {
+        return transDepartmentName;
+    }
+
+    /**
+     * Set the transDepartmentName of the Volume.
+     *
+     * @param transDepartmentName the transDepartmentName to set
+     */
+    public void setTransDepartmentName(String transDepartmentName) {
+        this.transDepartmentName = transDepartmentName;
+    }
+
+    /**
      * Convert JSONObject to Volume entity.
      *
      * @param object json object
@@ -778,12 +930,15 @@ public class Volume {
             volume.uuid = JsonValidator.jsonStringValidation(object, "id");
             volume.name = JsonValidator.jsonStringValidation(object, "name");
             volume.setDiskSize(object.getLong("size"));
+            volume.setIsActive(true);
             volume.setVolumeType(volume.getVolumeType().valueOf(JsonValidator.jsonStringValidation(object, "type")));
             volume.setStatus(volume.getStatus().valueOf(JsonValidator.jsonStringValidation(object, "state").toUpperCase()));
             volume.setCreatedDateTime(JsonUtil.convertToZonedDateTime(object.getString("created")));
             volume.setTransStorageOfferingId((JsonUtil.getStringValue(object, "diskofferingid")));
             volume.setTransZoneId((JsonUtil.getStringValue(object, "zoneid")));
             volume.setTransvmInstanceId((JsonUtil.getStringValue(object, "virtualmachineid")));
+            volume.setTransDomainId((JsonUtil.getStringValue(object, "domainid")));
+            volume.setTransDepartmentName((JsonUtil.getStringValue(object, "account")));
            /* if (object.has("virtualmachineid")) {
                 volume.setVmInstanceId(convertUtil.getVmInstanceId(JsonUtil.getStringValue(object, "virtualmachineid")));
             } else {

@@ -4,9 +4,12 @@
 package ck.panda.service;
 
 import java.util.List;
+
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Volume;
 import ck.panda.util.domain.CRUDService;
+import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
  * Volume service.
@@ -68,7 +71,7 @@ public interface VolumeService extends CRUDService<Volume> {
     * @throws Exception Exception
     */
    Volume uploadVolume(Volume volume) throws Exception;
-  
+
    /**
     * SOft delete for volume.
     *
@@ -77,5 +80,15 @@ public interface VolumeService extends CRUDService<Volume> {
     * @throws Exception unhandled errors.
     */
    Volume softDelete(Volume volume) throws Exception;
+
+   /**
+    * Find all the Volumes with active status.
+    *
+    * @param page pagination and sorting values.
+    * @return list of volumes with pagination.
+    * @throws Exception error occurs
+    */
+   Page<Volume> findAllByActive(PagingAndSorting page) throws Exception;
+
 
 }

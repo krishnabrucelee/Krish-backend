@@ -60,10 +60,19 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
         return volumeService.update(volume);
     }
 
+    /**
+     * Soft delete for volume.
+     *
+     * @param volume volume
+     * @param id volume id
+     * @throws Exception error
+     */
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Volume.")
-    @Override
-    public void delete(@PathVariable(PATH_ID) Long id) throws Exception {
-        volumeService.delete(id);
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void softDelete(@RequestBody Volume volume, @PathVariable(PATH_ID) Long id) throws Exception {
+        /** Doing Soft delete from the department table. */
+        volumeService.softDelete(volume);
     }
 
 
@@ -71,7 +80,7 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     public List<Volume> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Volume.class);
-        Page<Volume> pageResponse = volumeService.findAll(page);
+        Page<Volume> pageResponse = volumeService.findAllByActive(page);
         System.out.println(pageResponse);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
 
@@ -149,4 +158,5 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     protected Volume uploadVolume(@RequestBody Volume volume) throws Exception {
         return volumeService.uploadVolume(volume);
     }
+
 }
