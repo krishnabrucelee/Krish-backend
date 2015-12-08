@@ -148,7 +148,11 @@ public class NetworkServiceImpl implements NetworkService {
                     optional.put("displaytext", network.getDisplayText());
                 }
                 if (network.getcIDR() != null && network.getcIDR().trim() != "") {
+                    Network networkcidr = networkRepo.findOne(network.getId());
+                    if(network.getcIDR().equals(networkcidr.getcIDR())){
+                    } else {
                     optional.put("guestvmcidr", network.getcIDR());
+                    }
                 }
                 if (network.getNetworkOffering() != null) {
                     optional.put("networkofferingid", network.getNetworkOffering().getUuid());
@@ -169,19 +173,21 @@ public class NetworkServiceImpl implements NetworkService {
                     network.setIsActive(true);
                     network.setName(network.getName());
                     network.setDisplayText(network.getDisplayText());
-                    network.setcIDR(network.getcIDR());
                     network.setNetworkOfferingId(network.getNetworkOfferingId());
                     network.setGateway(network.getGateway());
+                    network.setcIDR(network.getcIDR());
                     network.setNetMask(network.getNetMask());
                     network.setNetworkDomain(network.getNetworkDomain());
                     } else {
                          JSONObject jobresponse = jobresults.getJSONObject("jobresult");
                         if (jobresults.getString("jobstatus").equals("2")) {
+                            //networkRepo.save(network);
                             if (jobresponse.has("errorcode")) {
                              errors = this.validateEvent(errors, jobresponse.getString("errortext"));
                             throw new ApplicationException(errors);
                             }
                         }
+
                     }
                 }
             }
@@ -324,6 +330,9 @@ public class NetworkServiceImpl implements NetworkService {
         if (network.getNetworkOffering() != null) {
             optional.put("networkofferingid", network.getNetworkOffering().getUuid());
             }
+//        if (network.getcIDR() != null) {
+//            optional.put("changecidr", network.getcIDR());
+//            }
         if (network.getDepartment() != null) {
             optional.put("account", network.getDepartment().getUserName());
         } else {
