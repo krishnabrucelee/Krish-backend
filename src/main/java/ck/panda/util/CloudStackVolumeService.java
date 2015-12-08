@@ -124,20 +124,17 @@ public class CloudStackVolumeService {
      * Attaches a disk volume to a virtual machine.
      *
      * @param diskVolumeId The ID of the disk volume
-     * @param virtualMachineId The ID of the virtual machine
      * @param optional optional
      * @param response response
      * @return response
      * @throws Exception Exception
      */
-    public String attachVolume(String diskVolumeId,
-            String virtualMachineId,String response, HashMap<String, String> optional)
+    public String attachVolume(String diskVolumeId, String response, HashMap<String, String> optional)
             throws Exception {
 
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("attachVolume", optional);
         arguments.add(new NameValuePair("id", diskVolumeId));
-        arguments.add(new NameValuePair("virtualmachineid", virtualMachineId));
         arguments.add(new NameValuePair("response", response));
 
         String responseDocument = server.request(arguments);

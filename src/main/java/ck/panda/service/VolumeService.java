@@ -90,5 +90,21 @@ public interface VolumeService extends CRUDService<Volume> {
     */
    Page<Volume> findAllByActive(PagingAndSorting page) throws Exception;
 
+   /**
+    * list by instance attached to volume.
+    *
+    * @param volume Volume
+    * @return volume Volumes from instance.
+    * @throws Exception exception
+    */
+   List<Volume> findByInstanceAndIsActive(Long volume)throws Exception;
+
+   /**
+    * list by volumes by its volume type.
+    *
+    * @return Upload Volume
+    * @throws Exception exception
+    */
+   List<Volume> findByVolumeTypeAndIsActive()throws Exception;
 
 }

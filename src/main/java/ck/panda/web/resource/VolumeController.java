@@ -75,7 +75,6 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
         volumeService.softDelete(volume);
     }
 
-
     @Override
     public List<Volume> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -159,4 +158,31 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
         return volumeService.uploadVolume(volume);
     }
 
+    /**
+     * list by instance attached to volume.
+     *
+     * @param instanceId Volume
+     * @return volume Volume by instances
+     * @throws Exception exception
+     */
+    @RequestMapping(value = "listbyinstances", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Volume> listByInstance(@RequestParam("instanceid") Long instanceId) throws Exception {
+        System.out.println(instanceId);
+        return volumeService.findByInstanceAndIsActive(instanceId);
+    }
+
+    /**
+     * list all Volumes for instance.
+     *
+     * @return Volume service
+     * @throws Exception error
+     */
+    @RequestMapping(value = "listbyvolumetype", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<Volume> listbyvolumetype() throws Exception {
+        return volumeService.findByVolumeTypeAndIsActive();
+    }
 }

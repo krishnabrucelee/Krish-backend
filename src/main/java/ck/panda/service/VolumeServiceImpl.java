@@ -15,10 +15,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.Status;
 import ck.panda.domain.repository.jpa.DepartmentReposiory;
 import ck.panda.domain.repository.jpa.DomainRepository;
+import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.domain.repository.jpa.VolumeRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackVolumeService;
@@ -68,6 +70,10 @@ public class VolumeServiceImpl implements VolumeService {
     /** Autowired TokenDetails. */
     @Autowired
     private TokenDetails tokenDetails;
+
+    /** Autowired TokenDetails. */
+    @Autowired
+    private VirtualMachineRepository virtualMachineRepo;
 
     @Override
     public Volume save(Volume volume) throws Exception {
@@ -130,6 +136,24 @@ public class VolumeServiceImpl implements VolumeService {
     @Override
     public List<Volume> findAll() throws Exception {
         return (List<Volume>) volumeRepo.findAll();
+    }
+
+    @Override
+    public List<Volume> findByInstanceAndIsActive(Long volume) throws Exception {
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if (domain != null && !domain.getName().equals("ROOT")) {
+        return volumeRepo.findByInstanceAndDomainIsActive(domain.getId(), volume, true);
+        }
+        return volumeRepo.findByInstanceAndIsActive(volume, true);
+    }
+
+    @Override
+    public List<Volume> findByVolumeTypeAndIsActive() throws Exception {
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if (domain != null && !domain.getName().equals("ROOT")) {
+        return volumeRepo.findByVolumeTypeAndIsActive(domain.getId(), Volume.VolumeType.DATADISK, true);
+        }
+        return volumeRepo.findByVolumeTypeAndIsActive(Volume.VolumeType.DATADISK, true);
     }
 
     /**
@@ -284,7 +308,14 @@ public class VolumeServiceImpl implements VolumeService {
         Errors errors = validator.rejectIfNullEntity("volumes", volume);
         errors = validator.validateEntity(volume, errors);
         config.setServer(1L);
-        String volumeS = csVolumeService.attachVolume(volume.getUuid(), volume.getVmInstance().getUuid(),"json", optional(volume));
+        HashMap<String, String> optional = new HashMap<String, String>();
+        if (volume.getVmInstanceId() != null) {
+        VmInstance instance = virtualMachineRepo.findOne(volume.getVmInstanceId());
+        optional.put("virtualmachineid", instance.getUuid());
+        } else {
+            optional.put("virtualmachineid", volume.getVmInstance().getUuid());
+        }
+        String volumeS = csVolumeService.attachVolume(volume.getUuid(), "json", optional);
         JSONObject jobId = new JSONObject(volumeS).getJSONObject("attachvolumeresponse");
 
         if (jobId.has("errorcode")) {
@@ -292,13 +323,18 @@ public class VolumeServiceImpl implements VolumeService {
             throw new ApplicationException(errors);
         } else {
 //            volume.setUuid((String) jobId.get("jobid"));
-            volume.setVmInstanceId(volume.getVmInstance().getId());
+            if (volume.getVmInstanceId() != null) {
+                volume.setVmInstanceId(volume.getVmInstanceId());
+            } else {
+                volume.setVmInstanceId(volume.getVmInstance().getId());
+            }
             if (jobId.has("jobid")) {
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
 
                 if (jobresult.has("volume")) {
                     volume.setUuid((String) jobresult.get("id"));
+                    volume.setVmInstanceId(volume.getVmInstance().getId());
                 }
                 if (jobresult.getString("jobstatus").equals("0")) {
                        volume.setStatus(Status.READY);
@@ -370,7 +406,7 @@ public class VolumeServiceImpl implements VolumeService {
             if (jobId.has("jobid")) {
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
-                Thread.sleep(2000);
+                Thread.sleep(5000);
                 if (jobresult.getString("jobstatus").equals("2")) {
                     volume.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                 }
@@ -379,6 +415,7 @@ public class VolumeServiceImpl implements VolumeService {
                 }
                 if (jobresult.getString("jobstatus").equals("0")) {
                     volume.setStatus(Status.READY);
+                    volume.setDiskSize(jobresult.getLong("size"));
                 }
             }
             volumeRepo.save(volume);

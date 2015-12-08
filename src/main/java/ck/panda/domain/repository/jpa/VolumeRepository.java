@@ -3,12 +3,15 @@
  */
 package ck.panda.domain.repository.jpa;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.Volume;
+import ck.panda.domain.entity.Volume.VolumeType;
 
 /**
  * Jpa Repository for Volume entity.
@@ -54,7 +57,7 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      * @param pageable page
      * @return volume.
      */
-    @Query(value = "select volume from Volume volume where volume.isActive =:isActive AND volume.domainId=:domainId)")
+    @Query(value = "select volume from Volume volume where volume.isActive =:isActive AND volume.domainId=:domainId")
     Page<Volume> findByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, Pageable pageable);
 
     /**
@@ -66,5 +69,47 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      */
     @Query(value = "select volume from Volume volume where volume.isActive =:isActive")
     Page<Volume> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find the Volume by instance Id and IsActive.
+     *
+     * @param domainId for each domain.
+     * @param isActive get the volume list based on active/inactive status.
+     * @param vmInstanceId Instance id
+     * @return volume.
+     */
+    @Query(value = "select volume from Volume volume where volume.isActive =:isActive AND volume.vmInstanceId=:vmInstanceId AND volume.domainId=:domainId")
+    List<Volume> findByInstanceAndDomainIsActive(@Param("domainId") Long domainId, @Param("vmInstanceId") Long vmInstanceId, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find the Volume by instance Id and IsActive.
+     *
+     * @param vmInstanceId instance for each domain.
+     * @param isActive get the volume list based on active/inactive status.
+     * @return volume.
+     */
+    @Query(value = "select volume from Volume volume where volume.isActive =:isActive AND volume.vmInstanceId=:vmInstanceId")
+    List<Volume> findByInstanceAndIsActive(@Param("vmInstanceId") Long vmInstanceId, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find the Volume by volume Type and IsActive.
+     *
+     * @param domainId for each domain.
+     * @param isActive get the volume list based on active/inactive status.
+     * @param volumeType volume Type
+     * @return volume.
+     */
+    @Query(value = "select volume from Volume volume where volume.isActive =:isActive AND volume.volumeType=:volumeType AND volume.domainId=:domainId")
+    List<Volume> findByVolumeTypeAndIsActive(@Param("domainId") Long domainId, @Param("volumeType") VolumeType volumeType, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find the Volume by volume Type and IsActive.
+     *
+     * @param volumeType for each domain.
+     * @param isActive get the volume list based on active/inactive status.
+     * @return volume.
+     */
+    @Query(value = "select volume from Volume volume where volume.isActive =:isActive AND volume.volumeType=:volumeType")
+    List<Volume> findByVolumeTypeAndIsActive(@Param("volumeType") VolumeType volumeType, @Param("isActive") Boolean isActive);
 
 }
