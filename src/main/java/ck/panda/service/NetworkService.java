@@ -32,7 +32,7 @@ public interface NetworkService extends CRUDService<Network> {
      * @return network list from server.
      * @throws Exception unhandled errors.
      */
-    List<Network> findByDepartment(Long department) throws Exception;
+    List<Network> findByDepartmentAndNetworkIsActive(Long department, Boolean isActive) throws Exception;
 
     /**
      * Soft delete for Network.

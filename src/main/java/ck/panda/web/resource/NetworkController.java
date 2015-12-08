@@ -58,7 +58,6 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
         return networkService.update(network);
     }
 
-
     /**
      * Delete the Network.
      *
@@ -75,7 +74,6 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
          network.setSyncFlag(true);
          networkService.softDelete(network);
     }
-
 
     @Override
     public List<Network> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
@@ -96,10 +94,7 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
       @ResponseStatus(HttpStatus.OK)
       @ResponseBody
       protected List<Network> findByDepartment(@RequestParam Long dept) throws Exception {
-          return networkService.findByDepartment(dept);
+          return networkService.findByDepartmentAndNetworkIsActive(dept, true);
       }
-
-
-
 
 }

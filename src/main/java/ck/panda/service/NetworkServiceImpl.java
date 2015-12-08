@@ -79,6 +79,10 @@ public class NetworkServiceImpl implements NetworkService {
     @Autowired
     private UserRepository userRepository;
 
+    /** Token Detail Utilities. */
+    @Autowired
+    private ConvertEntityService convertEntityService;
+
     @Override
     public Network save(Network network) throws Exception {
 
@@ -109,9 +113,9 @@ public class NetworkServiceImpl implements NetworkService {
                     network.setNetworkOfferingId(networkofferingRepo.findByUUID(networkResponse.getString("networkofferingid")).getId());
                     network.setStatus(network.getStatus().valueOf(networkResponse.getString("state")));
                     if (network.getDepartment() != null) {
-                        network.setDepartmentId(entity.getDepartmentByUsername(networkResponse.getString("account")));
+                        network.setDepartmentId(convertEntityService.getDepartmentByUsername(networkResponse.getString("account")));
                     } else {
-                        network.setDepartmentId(entity.getDepartmentByUsername(tokenDetails.getTokenDetails("username")));
+                        network.setDepartmentId(convertEntityService.getDepartmentByUsername(tokenDetails.getTokenDetails("username")));
                     }
                     network.setGateway(networkResponse.getString("gateway"));
                     network.setNetMask(networkResponse.getString("netmask"));
@@ -167,6 +171,8 @@ public class NetworkServiceImpl implements NetworkService {
                     network.setDisplayText(network.getDisplayText());
                     network.setcIDR(network.getcIDR());
                     network.setNetworkOfferingId(network.getNetworkOfferingId());
+                    network.setGateway(network.getGateway());
+                    network.setNetMask(network.getNetMask());
                     network.setNetworkDomain(network.getNetworkDomain());
                     } else {
                          JSONObject jobresponse = jobresults.getJSONObject("jobresult");
@@ -196,11 +202,32 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public Network softDelete(Network network) throws Exception {
+          Errors errors = validator.rejectIfNullEntity("networks", network);
+          errors = validator.validateEntity(network, errors);
         network.setIsActive(false);
         if (network.getSyncFlag()) {
             // set server for finding value in configuration
             csNetwork.setServer(config.setServer(1L));
-            csNetwork.deleteNetwork(network.getUuid(), "json");
+           String deleteNetworkResponse = csNetwork.deleteNetwork(network.getUuid(), "json");
+            JSONObject jobId = new JSONObject(deleteNetworkResponse).getJSONObject("deletenetworkresponse");
+            Thread.sleep(5000);
+            if (jobId.has("jobid")) {
+                String jobResponse = csNetwork.networkJobResult(jobId.getString("jobid"), "json");
+                Thread.sleep(2000);
+                JSONObject jobresults = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+                  if (jobresults.getString("jobstatus").equals("1")) {
+                    networkRepo.save(network);
+                }
+                else {
+                    JSONObject jobresponse = jobresults.getJSONObject("jobresult");
+                   if (jobresults.getString("jobstatus").equals("2")) {
+                       if (jobresponse.has("errorcode")) {
+                        errors = this.validateEvent(errors, jobresponse.getString("errortext"));
+                       throw new ApplicationException(errors);
+                       }
+                   }
+                 }
+            }
         }
         return networkRepo.save(network);
     }
@@ -238,8 +265,12 @@ public class NetworkServiceImpl implements NetworkService {
                 // 2.1 Call convert by passing JSONObject to Domain entity and
                 // Add
                 // the converted Domain entity to list
-                networkList.add(Network.convert(networkListJSON.getJSONObject(i), entity));
-            }
+                 Network network = Network.convert(networkListJSON.getJSONObject(i));
+                 network.setDomainId(convertEntityService.getDomainId(network.getTransDomainId()));
+                 network.setZoneId(convertEntityService.getZoneId(network.getTransZoneId()));
+                 network.setNetworkOfferingId(convertEntityService.getNetworkOfferingId(network.getTransNetworkOfferingId()));
+                 network.setDepartmentId(convertEntityService.getDepartmentByUsername(network.getTransDepartmentId()));
+                 networkList.add(network);            }
         }
         return networkList;
     }
@@ -305,9 +336,9 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public List<Network> findByDepartment(Long department) throws Exception {
+    public List<Network> findByDepartmentAndNetworkIsActive(Long department, Boolean isActive) throws Exception {
         Department deptNetwork = departmentRepository.findOne(department);
-        return networkRepo.findByDepartment(deptNetwork);
+        return networkRepo.findByDepartmentAndNetworkIsActive(deptNetwork, true);
     }
 
     /**

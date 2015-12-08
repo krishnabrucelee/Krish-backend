@@ -28,8 +28,8 @@ public interface NetworkRepository extends PagingAndSortingRepository<Network, L
      * @param department department name.
      * @return network list.
      */
-    @Query(value = "select net from Network net where net.department=:department ")
-       List<Network> findByDepartment(@Param("department") Department department);
+    @Query(value = "select net from Network net where net.department=:department AND net.isActive =:isActive ")
+       List<Network> findByDepartmentAndNetworkIsActive(@Param("department") Department department, @Param("isActive") Boolean isActive);
 
     /**
      * Find all the active or inactive snapshots with pagination.
