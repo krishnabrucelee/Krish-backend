@@ -99,4 +99,16 @@ public class UserController extends CRUDController<User> implements ApiControlle
    	protected List<User> findAllUserByDomain() throws Exception {
    		return userService.findAllUserByDomain();
    	}
+
+    /**
+     * list all root admin.
+     * @return user
+     * @throws Exception
+     */
+    @RequestMapping(value = "listbyrootadmin",method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+   	@ResponseStatus(HttpStatus.OK)
+   	@ResponseBody
+   	protected List<User> findAllRootAdminUser() throws Exception {
+   		return userService.findAllRootAdminUser();
+   	}
 }

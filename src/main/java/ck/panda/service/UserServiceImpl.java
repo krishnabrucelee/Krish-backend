@@ -16,6 +16,7 @@ import com.google.common.base.Optional;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.User.Type;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.util.AppValidator;
@@ -289,6 +290,11 @@ public class UserServiceImpl implements UserService {
     public List<User> findAllUserByDomain() throws Exception {
     	Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         return userRepository.findAllUserByDomain(domain);
+    }
+
+    @Override
+    public List<User> findAllRootAdminUser() throws Exception {
+        return userRepository.findAllRootAdminUser(Type.ROOT_ADMIN);
     }
 
 }

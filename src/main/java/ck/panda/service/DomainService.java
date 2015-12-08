@@ -4,8 +4,6 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Domain;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -52,6 +50,14 @@ public interface DomainService extends CRUDService<Domain> {
      * @throws Exception unhandled errors.
      */
     Page<Domain> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
+
+    /**
+     * To get list of domains.
+     *
+     * @return domain list
+     * @throws Exception unhandled errors.
+     */
+    List<Domain> findAllDomain() throws Exception;
 
 }
 

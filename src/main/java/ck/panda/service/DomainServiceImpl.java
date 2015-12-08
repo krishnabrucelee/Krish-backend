@@ -1,7 +1,6 @@
 package ck.panda.service;
 
 import java.util.List;
-
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.ArrayList;
@@ -56,6 +55,10 @@ public class DomainServiceImpl implements DomainService {
     /** Autowired TokenDetails. */
     @Autowired
     private TokenDetails tokenDetails;
+
+    /** Domain repository reference. */
+    @Autowired
+    private DomainRepository domainRepository;
 
     @Autowired
     /** Department service.*/
@@ -178,13 +181,24 @@ public class DomainServiceImpl implements DomainService {
     }
 
     @Override
+    public List<Domain> findAllDomain() throws Exception {
+        return (List<Domain>) domainRepo.findAll();
+    }
+
+    @Override
     public Page<Domain> findAll(PagingAndSorting pagingAndSorting) throws Exception {
         return domainRepo.findAll(pagingAndSorting.toPageRequest());
     }
 
     @Override
     public List<Domain> findAll() throws Exception {
-        return (List<Domain>) domainRepo.findAll();
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if (domain != null && domain.getName().equals("ROOT")) {
+            return (List<Domain>) domainRepo.findAll();
+        }
+        List<Domain> domains = new ArrayList<Domain>();
+        domains.add(deptService.find(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getDomain());
+        return domains;
     }
 
     @Override
@@ -198,7 +212,7 @@ public class DomainServiceImpl implements DomainService {
         domainService.setServer(configServer.setServer(1L));
         List<Department> departmentedit =  deptService.findDomain(domain.getId());
         System.out.println(departmentedit);
-        if(departmentedit.size() != 0 ){
+        if (departmentedit.size() != 0) {
             errors.addGlobalError("Cannot delete domain. Please make sure all users and sub domains have been removed from the domain before deleting");
         }
         if (errors.hasErrors()) {

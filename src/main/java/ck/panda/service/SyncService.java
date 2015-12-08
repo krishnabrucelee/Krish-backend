@@ -194,4 +194,11 @@ public interface SyncService {
    */
   void syncProject() throws ApplicationException, Exception;
 
+  /**
+   * Sync with Cloud Server Account.
+   * @throws ApplicationException unhandled application errors.
+   * @throws Exception cloudstack unhandled errors.
+   */
+  void syncSSHKey() throws ApplicationException, Exception;
+
 }

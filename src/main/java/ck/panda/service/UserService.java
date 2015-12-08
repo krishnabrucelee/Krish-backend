@@ -103,4 +103,12 @@ public interface UserService extends CRUDService<User> {
       * @throws Exception if error occurs.
       */
     User findByNameAndDomain(String owner, Domain domain) throws Exception;
+
+    /**
+     * Find all root admin.
+     *
+     * @return list of root admin.
+     * @throws Exception if error occurs.
+     */
+    List<User> findAllRootAdminUser() throws Exception;
 }

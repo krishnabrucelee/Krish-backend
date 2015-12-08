@@ -2,6 +2,9 @@ package ck.panda.domain.entity;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -10,34 +13,42 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.Size;
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+import ck.panda.util.JsonUtil;
 
+/**
+ * SSH Keys are used for authentication,In addition to the username and password authentication.
+ * with SSH Key, an instance can be created and also multiple instances can be managed.
+ */
 @Entity
 @Table(name = "ck_sshkey")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class SSHKey implements Serializable {
 
-	/** Status enum type used to list the status values. */
+    /** Status enum type used to list the status values. */
     public enum Status {
-        /** SSHKey status as Enabled. */
+        /** SSH Key status as Enabled. */
         ENABLED,
-        /** SSHKey status as Disabled. */
+        /** SSH Key status as Disabled. */
         DISABLED
     }
 
-    /** Id of the sshkey. */
+    /** Id of the SSH key. */
     @Id
     @GeneratedValue
     @Column(name = "id")
@@ -54,14 +65,35 @@ public class SSHKey implements Serializable {
     private String fingerPrint;
 
     /** Private key. */
-    @Column(name = "private_key")
+    @Transient
     private String privatekey;
+
+    /** public Key. */
+    @Transient
+    private String publicKey;
+
+    /** Domain of the SSH Key. */
+    @Transient
+    private Domain domain;
+
+    /** Department of the SSH Key. */
+    @ManyToOne
+    @JoinColumn(name = "department_id", referencedColumnName = "id", updatable = false, insertable = false)
+    private Department department;
+
+    /** Department id of the SSH key. */
+    @Column(name = "department_id")
+    private Long departmentId;
 
     /** Update status when delete an entity. */
     @Column(name = "is_active")
     private Boolean isActive;
 
-    /** SSHKey current state. */
+    /** Temporary variable. */
+    @Transient
+    private Boolean isSyncFlag;
+
+    /** SSH Key current state. */
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private Status status;
@@ -75,13 +107,17 @@ public class SSHKey implements Serializable {
     @CreatedBy
     @JoinColumn(name = "created_by", referencedColumnName = "id")
     @OneToOne
-    private User createdBy;
+    private SSHKey createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
     @JoinColumn(name = "updated_by", referencedColumnName = "id")
     @OneToOne
-    private User updatedBy;
+    private SSHKey updatedBy;
+
+    /** Transient department of the user. */
+    @Transient
+    private String transDepartment;
 
     /** Created date and time. */
     @CreatedDate
@@ -103,7 +139,7 @@ public class SSHKey implements Serializable {
     }
 
     /**
-     * Get the id of the sshkey.
+     * Get the id of the SSH key.
      *
      * @return id
      */
@@ -112,7 +148,7 @@ public class SSHKey implements Serializable {
     }
 
     /**
-     * Set the id of the sshkey.
+     * Set the id of the SSH key.
      *
      * @param id to set
      */
@@ -138,44 +174,119 @@ public class SSHKey implements Serializable {
         this.name = name;
     }
 
-
     /**
      * Get the fingerprint of the public key.
      *
      * @return fingerPrint
      */
     public String getFingerPrint() {
-		return fingerPrint;
-	}
+        return fingerPrint;
+    }
 
-	/**
-	 * Set the fingerprint of the public key.
-	 *
-	 * @param fingerPrint
-	 */
-	public void setFingerPrint(String fingerPrint) {
-		this.fingerPrint = fingerPrint;
-	}
+    /**
+     * Set the fingerprint of the public key.
+     *
+     * @param fingerPrint to set
+     */
+    public void setFingerPrint(String fingerPrint) {
+        this.fingerPrint = fingerPrint;
+    }
 
-	/**
-	 * Get the private key.
-	 *
-	 * @return privateKey
-	 */
-	public String getPrivatekey() {
-		return privatekey;
-	}
+    /**
+     * Get the private key.
+     *
+     * @return privateKey
+     */
+    public String getPrivatekey() {
+        return privatekey;
+    }
 
-	/**
-	 * Set the private key.
-	 *
-	 * @param privatekey
-	 */
-	public void setPrivatekey(String privatekey) {
-		this.privatekey = privatekey;
-	}
+    /**
+     * Set the private key.
+     *
+     * @param privatekey to set
+     */
+    public void setPrivatekey(String privatekey) {
+        this.privatekey = privatekey;
+    }
 
-	/**
+    /**
+     * Get the public key.
+     *
+     * @return publicKey
+     */
+    public String getPublickey() {
+        return publicKey;
+    }
+
+    /**
+     * Set the public key.
+     *
+     * @param publickey to set
+     */
+    public void setPublickey(String publickey) {
+        this.publicKey = publickey;
+    }
+
+    /**
+     * Get the domain.
+     *
+     * @return domain
+     */
+    public Domain getDomain() {
+        return domain;
+    }
+
+    /**
+     * Set the domain.
+     *
+     * @param domain to set
+     */
+    public void setDomain(Domain domain) {
+        this.domain = domain;
+    }
+
+
+
+    /**
+     * Get the department.
+     *
+     * @return department
+     */
+    public Department getDepartment() {
+        return department;
+    }
+
+    /**
+     * Set the department.
+     *
+     * @param department to set
+     *
+     */
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
+
+    /**
+     * Get the department id.
+     *
+     * @return the departmentId
+     */
+    public Long getDepartmentId() {
+        return departmentId;
+    }
+
+    /**
+     * Set the department id.
+     *
+     * @param departmentId to set
+     *
+     */
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
+    }
+
+    /**
      * Get the active status.
      *
      * @return isActive
@@ -188,9 +299,28 @@ public class SSHKey implements Serializable {
      * Set the active status.
      *
      * @param isActive to set
+     *
      */
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
+    }
+
+    /**
+     * Get the Sync Flag.
+     *
+     * @return the isSyncFlag.
+     */
+    public Boolean getIsSyncFlag() {
+        return isSyncFlag;
+    }
+
+    /**
+     * Set the Sync Flag.
+     *
+     * @param isSyncFlag - the isSyncFlag to set.
+     */
+    public void setIsSyncFlag(Boolean isSyncFlag) {
+        this.isSyncFlag = isSyncFlag;
     }
 
     /**
@@ -206,6 +336,7 @@ public class SSHKey implements Serializable {
      * Set the status of the application.
      *
      * @param status to set
+     *
      */
     public void setStatus(Status status) {
         this.status = status;
@@ -234,7 +365,7 @@ public class SSHKey implements Serializable {
      *
      * @return createdBy
      */
-    public User getCreatedBy() {
+    public SSHKey getCreatedBy() {
         return createdBy;
     }
 
@@ -243,7 +374,7 @@ public class SSHKey implements Serializable {
      *
      * @param createdBy to set
      */
-    public void setCreatedBy(User createdBy) {
+    public void setCreatedBy(SSHKey createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -252,7 +383,7 @@ public class SSHKey implements Serializable {
      *
      * @return updatedBy
      */
-    public User getUpdatedBy() {
+    public SSHKey getUpdatedBy() {
         return updatedBy;
     }
 
@@ -261,8 +392,26 @@ public class SSHKey implements Serializable {
      *
      * @param updatedBy to set
      */
-    public void setUpdatedBy(User updatedBy) {
+    public void setUpdatedBy(SSHKey updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    /**
+     * Get the transient Department.
+     *
+     * @return the transDepartment
+     */
+    public String getTransDepartment() {
+        return transDepartment;
+    }
+
+    /**
+     * Set the transDepartment.
+     *
+     * @param transDepartment to set
+     */
+    public void setTransDepartment(String transDepartment) {
+        this.transDepartment = transDepartment;
     }
 
     /**
@@ -296,9 +445,42 @@ public class SSHKey implements Serializable {
      * Set the updated date time.
      *
      * @param updatedDateTime to set
+     *
      */
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
+    }
+
+    /**
+     * Convert JSONObject into user object.
+     *
+     * @param jsonObject JSON object.
+     * @return user object.
+     * @throws Exception error occurs.
+     */
+    public static SSHKey convert(JSONObject jsonObject) throws Exception {
+        SSHKey sshkey = new SSHKey();
+        sshkey.setIsSyncFlag(false);
+        sshkey.setName(JsonUtil.getStringValue(jsonObject, "name"));
+        sshkey.setFingerPrint(JsonUtil.getStringValue(jsonObject, "fingerPrint"));
+        sshkey.setTransDepartment(JsonUtil.getStringValue(jsonObject, "account"));
+        sshkey.setIsActive(true);
+        return sshkey;
+    }
+
+    /**
+     * Mapping entity object into list.
+     *
+     * @param sshkeyList list of SSH keys.
+     * @return SSh key map
+     */
+    public static Map<String, SSHKey> convert(List<SSHKey> sshkeyList) {
+        Map<String, SSHKey> sshkeyMap = new HashMap<String, SSHKey>();
+
+        for (SSHKey sshkey : sshkeyList) {
+            sshkeyMap.put(sshkey.getName(), sshkey);
+        }
+        return sshkeyMap;
     }
 
 }
