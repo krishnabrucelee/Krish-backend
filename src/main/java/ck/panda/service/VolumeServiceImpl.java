@@ -14,13 +14,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.EventTypes;
-import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.Status;
+import ck.panda.domain.repository.jpa.DepartmentReposiory;
+import ck.panda.domain.repository.jpa.DomainRepository;
+import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.domain.repository.jpa.VolumeRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackVolumeService;
 import ck.panda.util.ConfigUtil;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -54,13 +59,28 @@ public class VolumeServiceImpl implements VolumeService {
     @Autowired
     private ConvertEntityService convertEntityService;
 
+    /** Domain repository reference. */
+    @Autowired
+    private DomainRepository domainRepository;
+
+    /** Department repository reference. */
+    @Autowired
+    private DepartmentReposiory departmentRepository;
+
+    /** Autowired TokenDetails. */
+    @Autowired
+    private TokenDetails tokenDetails;
+
+    /** Autowired TokenDetails. */
+    @Autowired
+    private VirtualMachineRepository virtualMachineRepo;
+
     @Override
     public Volume save(Volume volume) throws Exception {
         if (volume.getIsSyncFlag()) {
             this.validateVolumeUniqueness(volume);
             Errors errors = validator.rejectIfNullEntity("volumes", volume);
             errors = validator.validateEntity(volume, errors);
-
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
@@ -105,8 +125,35 @@ public class VolumeServiceImpl implements VolumeService {
     }
 
     @Override
+    public Page<Volume> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if (domain != null && !domain.getName().equals("ROOT")) {
+            return volumeRepo.findByDomainAndIsActive(domain.getId(), true, pagingAndSorting.toPageRequest());
+        }
+        return volumeRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
+    }
+
+    @Override
     public List<Volume> findAll() throws Exception {
         return (List<Volume>) volumeRepo.findAll();
+    }
+
+    @Override
+    public List<Volume> findByInstanceAndIsActive(Long volume) throws Exception {
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if (domain != null && !domain.getName().equals("ROOT")) {
+        return volumeRepo.findByInstanceAndDomainIsActive(domain.getId(), volume, true);
+        }
+        return volumeRepo.findByInstanceAndIsActive(volume, true);
+    }
+
+    @Override
+    public List<Volume> findByVolumeTypeAndIsActive() throws Exception {
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if (domain != null && !domain.getName().equals("ROOT")) {
+        return volumeRepo.findByVolumeTypeAndIsActive(domain.getId(), Volume.VolumeType.DATADISK, true);
+        }
+        return volumeRepo.findByVolumeTypeAndIsActive(Volume.VolumeType.DATADISK, true);
     }
 
     /**
@@ -114,12 +161,22 @@ public class VolumeServiceImpl implements VolumeService {
      *
      * @param volume optional storage offering values
      * @return optional values
+     * @throws Exception error
      */
-    public HashMap<String, String> optional(Volume volume) {
+    public HashMap<String, String> optional(Volume volume) throws Exception {
         HashMap<String, String> optional = new HashMap<String, String>();
 
         if (volume.getDiskSize() != null) {
             optional.put("size", volume.getDiskSize().toString());
+        }
+
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if (domain != null && !domain.getName().equals("ROOT")) {
+            optional.put("domainid", departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getDomain().getUuid());
+            optional.put("account", departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
+        } else {
+            optional.put("domainid", tokenDetails.getTokenDetails("domainid"));
+//            optional.put("account", departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
         }
 
         if (volume.getDiskMaxIops() != null) {
@@ -151,7 +208,9 @@ public class VolumeServiceImpl implements VolumeService {
             // and Add
             // the converted Volume entity to list
             Volume volume = Volume.convert(volumeListJSON.getJSONObject(i));
-            volume.setZoneId(convertEntityService.getZoneId(volume.getTransvmInstanceId()));
+            volume.setZoneId(convertEntityService.getZoneId(volume.getTransZoneId()));
+            volume.setDomainId(convertEntityService.getDomainId(volume.getTransDomainId()));
+            volume.setDepartmentId(departmentRepository.findByUsername(volume.getTransDepartmentName(), true).getId());
             volume.setStorageOfferingId(convertEntityService.getStorageOfferId(volume.getTransStorageOfferingId()));
             volume.setVmInstanceId(convertEntityService.getVmInstanceId(volume.getTransvmInstanceId()));
             volumeList.add(volume);
@@ -194,6 +253,11 @@ public class VolumeServiceImpl implements VolumeService {
                     volume.setDiskSize(volume.getStorageOffering().getDiskSize());
                 }
                 volume.setZoneId(volume.getZone().getId());
+                volume.setDomainId(Long.parseLong(tokenDetails.getTokenDetails("domainid")));
+                Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+                if (domain != null && !domain.getName().equals("ROOT")) {
+                volume.setDepartmentId(Long.parseLong(tokenDetails.getTokenDetails("departmentid")));
+                }
                 volume.setVolumeType(Volume.VolumeType.DATADISK);
                 volume.setCreatedDateTime(volume.getCreatedDateTime());
                 volume.setDiskMaxIops(volume.getDiskMaxIops());
@@ -225,7 +289,7 @@ public class VolumeServiceImpl implements VolumeService {
     private void validateVolumeUniqueness(Volume volume) throws Exception {
         Errors errors = validator.rejectIfNullEntity("volumes", volume);
         errors = validator.validateEntity(volume, errors);
-        Volume validateVolume = volumeRepo.findByNameAndIsActive(volume.getName(), true);
+        Volume validateVolume = volumeRepo.findByNameAndIsActive(volume.getName(), Long.parseLong(tokenDetails.getTokenDetails("domainid")), Long.parseLong(tokenDetails.getTokenDetails("departmentid")), true);
         if (validateVolume != null && volume.getId() != validateVolume.getId()) {
             errors.addFieldError("name", "volume.already.exist");
         }
@@ -244,7 +308,14 @@ public class VolumeServiceImpl implements VolumeService {
         Errors errors = validator.rejectIfNullEntity("volumes", volume);
         errors = validator.validateEntity(volume, errors);
         config.setServer(1L);
-        String volumeS = csVolumeService.attachVolume(volume.getUuid(), volume.getVmInstance().getUuid(),"json", optional(volume));
+        HashMap<String, String> optional = new HashMap<String, String>();
+        if (volume.getVmInstanceId() != null) {
+        VmInstance instance = virtualMachineRepo.findOne(volume.getVmInstanceId());
+        optional.put("virtualmachineid", instance.getUuid());
+        } else {
+            optional.put("virtualmachineid", volume.getVmInstance().getUuid());
+        }
+        String volumeS = csVolumeService.attachVolume(volume.getUuid(), "json", optional);
         JSONObject jobId = new JSONObject(volumeS).getJSONObject("attachvolumeresponse");
 
         if (jobId.has("errorcode")) {
@@ -252,13 +323,18 @@ public class VolumeServiceImpl implements VolumeService {
             throw new ApplicationException(errors);
         } else {
 //            volume.setUuid((String) jobId.get("jobid"));
-            volume.setVmInstanceId(volume.getVmInstance().getId());
+            if (volume.getVmInstanceId() != null) {
+                volume.setVmInstanceId(volume.getVmInstanceId());
+            } else {
+                volume.setVmInstanceId(volume.getVmInstance().getId());
+            }
             if (jobId.has("jobid")) {
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
 
                 if (jobresult.has("volume")) {
                     volume.setUuid((String) jobresult.get("id"));
+                    volume.setVmInstanceId(volume.getVmInstance().getId());
                 }
                 if (jobresult.getString("jobstatus").equals("0")) {
                        volume.setStatus(Status.READY);
@@ -306,19 +382,31 @@ public class VolumeServiceImpl implements VolumeService {
         Errors errors = validator.rejectIfNullEntity("volumes", volume);
         errors = validator.validateEntity(volume, errors);
         config.setServer(1L);
-        String volumeS = csVolumeService.resizeVolume("json", optional(volume));
+        HashMap<String, String> optional = new HashMap<String, String>();
+        if (volume.getDiskSize() != null) {
+            optional.put("size", volume.getDiskSize().toString());
+        }
+        if (volume.getDiskMaxIops() != null) {
+            optional.put("maxiops", volume.getDiskMaxIops().toString());
+        }
+        if (volume.getDiskMinIops() != null) {
+            optional.put("miniops", volume.getDiskMinIops().toString());
+        }
+        if (volume.getIsShrink() != null) {
+            optional.put("shrinkok", volume.getIsShrink().toString());
+        }
+        String volumeS = csVolumeService.resizeVolume(volume.getUuid(), volume.getStorageOffering().getUuid(), "json",
+                optional);
         JSONObject jobId = new JSONObject(volumeS).getJSONObject("resizevolumeresponse");
 
         if (jobId.has("errorcode")) {
             errors = this.validateEvent(errors, jobId.getString("errortext"));
             throw new ApplicationException(errors);
         } else {
-//            volume.setUuid((String) jobId.get("jobid"));
-            volume.setVmInstanceId(volume.getVmInstance().getId());
             if (jobId.has("jobid")) {
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
-
+                Thread.sleep(5000);
                 if (jobresult.getString("jobstatus").equals("2")) {
                     volume.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                 }
@@ -326,7 +414,8 @@ public class VolumeServiceImpl implements VolumeService {
                     volume.setUuid((String) jobresult.get("id"));
                 }
                 if (jobresult.getString("jobstatus").equals("0")) {
-                       volume.setStatus(Status.READY);
+                    volume.setStatus(Status.READY);
+                    volume.setDiskSize(jobresult.getLong("size"));
                 }
             }
             volumeRepo.save(volume);
@@ -338,11 +427,15 @@ public class VolumeServiceImpl implements VolumeService {
     public Volume softDelete(Volume volume) throws Exception {
         volume.setIsActive(false);
         volume.setStatus(Volume.Status.DESTROY);
+        // set server for finding value in configuration
+        csVolumeService.setServer(config.setServer(1L));
+        csVolumeService.deleteVolume(volume.getUuid(), "json");
         return volumeRepo.save(volume);
     }
 
     @Override
     public Volume uploadVolume(Volume volume) throws Exception {
+        this.validateVolumeUniqueness(volume);
         Errors errors = validator.rejectIfNullEntity("volumes", volume);
         errors = validator.validateEntity(volume, errors);
         if (errors.hasErrors()) {
@@ -351,6 +444,14 @@ public class VolumeServiceImpl implements VolumeService {
             config.setServer(1L);
             HashMap<String, String> optional = new HashMap<String, String>();
 
+            Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+            if (domain != null && !domain.getName().equals("ROOT")) {
+                optional.put("domainid", departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getDomain().getUuid());
+                optional.put("account", departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
+            } else {
+                optional.put("domainid", tokenDetails.getTokenDetails("domainid"));
+//                optional.put("account", departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("domainid"))).getUserName());
+            }
             if (volume.getStorageOffering() != null) {
                 optional.put("diskofferingid", volume.getStorageOffering().getUuid());
             }
@@ -394,8 +495,9 @@ public class VolumeServiceImpl implements VolumeService {
      * To set response values from cloud stack.
      *
      * @param volume volume response.
+     * @throws Exception error
      */
-    private void setValue(Volume volume) {
+    private void setValue(Volume volume) throws Exception {
         volume.setVolumeType(Volume.VolumeType.DATADISK);
         volume.setIsActive(true);
         volume.setUuid(volume.getUuid());
@@ -409,6 +511,11 @@ public class VolumeServiceImpl implements VolumeService {
             volume.setDiskSize(volume.getDiskSize());
         }
         volume.setZoneId(volume.getZone().getId());
+        volume.setDomainId(Long.parseLong(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if (domain != null && !domain.getName().equals("ROOT")) {
+            volume.setDepartmentId(Long.parseLong(tokenDetails.getTokenDetails("departmentid")));
+        }
         if (volume.getChecksum() != null) {
             volume.setChecksum(volume.getChecksum());
         }

@@ -230,9 +230,9 @@ public class DepartmentServiceImpl implements DepartmentService {
                 // Add the converted Department entity to list
                 Department department = Department.convert(userListJSON.getJSONObject(i));
                 department.setDomainId(convertEntityService.getDomainId(department.getTransDomainId()));
-                if (department.getType() == Department.AccountType.USER) {
+                //if (department.getType() == Department.AccountType.USER) {
                     departmentList.add(department);
-                }
+                //}
             }
         }
         return departmentList;

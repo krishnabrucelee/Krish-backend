@@ -1281,6 +1281,8 @@ public class SyncServiceImpl implements SyncService {
                 volume.setName(csvolume.getName());
                 volume.setStorageOfferingId(csvolume.getStorageOfferingId());
                 volume.setZoneId(csvolume.getZoneId());
+                volume.setDomainId(csvolume.getDomainId());
+                volume.setDepartmentId(csvolume.getDepartmentId());
                 volume.setVmInstanceId(csvolume.getVmInstanceId());
                 volume.setVolumeType(csvolume.getVolumeType());
                 if(volume.getDiskSize() !=null) {
@@ -1291,8 +1293,8 @@ public class SyncServiceImpl implements SyncService {
                 volume.setIsActive(true);
                 volume.setChecksum(csvolume.getChecksum());
                 volume.setStatus(csvolume.getStatus());
-                volume.setDiskMaxIops(volume.getDiskMaxIops());
-                volume.setDiskMinIops(volume.getDiskMinIops());
+                volume.setDiskMaxIops(csvolume.getDiskMaxIops());
+                volume.setDiskMinIops(csvolume.getDiskMinIops());
                 volume.setCreatedDateTime(csvolume.getCreatedDateTime());
                 volume.setUpdatedDateTime(csvolume.getUpdatedDateTime());
                 // 3.2 If found, update the osType object in app db
@@ -1304,8 +1306,6 @@ public class SyncServiceImpl implements SyncService {
             } else {
                 if (volume.getIsActive()) {
                 volumeService.softDelete(volume);
-                 } else {
-                   volumeService.delete(volume);
                  }
             }
         }
