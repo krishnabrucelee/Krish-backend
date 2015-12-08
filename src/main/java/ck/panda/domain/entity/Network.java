@@ -593,7 +593,7 @@ public class Network implements Serializable {
     }
 
     /**
-     * Get the Department name.
+     * Get the Department object.
      *
      * @return the department
      */
@@ -602,7 +602,7 @@ public class Network implements Serializable {
     }
 
    /**
-    * Set the Department name.
+    * Set the Department object.
     *
     * @param department the department to set
     */
@@ -631,6 +631,8 @@ public class Network implements Serializable {
     }
 
    /**
+    * Get the domain Id.
+    *
     * @return the transDomainId
     */
     public String getTransDomainId() {
@@ -638,6 +640,8 @@ public class Network implements Serializable {
     }
 
    /**
+    * Set the domain Id.
+    *
     * @param transDomainId the transDomainId to set
     */
     public void setTransDomainId(String transDomainId) {
@@ -645,6 +649,8 @@ public class Network implements Serializable {
     }
 
    /**
+    * Get the Zone Id.
+    *
     * @return the transZoneId
     */
     public String getTransZoneId() {
@@ -652,6 +658,8 @@ public class Network implements Serializable {
     }
 
    /**
+    * Set the Zone Id.
+    *
     * @param transZoneId the transZoneId to set
     */
     public void setTransZoneId(String transZoneId) {
@@ -659,6 +667,8 @@ public class Network implements Serializable {
     }
 
    /**
+    * Get the Department Id.
+    *
     * @return the transDepartmentId
     */
     public String getTransDepartmentId() {
@@ -666,6 +676,8 @@ public class Network implements Serializable {
     }
 
    /**
+    * Set the department Id.
+    *
     * @param transDepartmentId the transDepartmentId to set
     */
     public void setTransDepartmentId(String transDepartmentId) {
@@ -673,6 +685,8 @@ public class Network implements Serializable {
     }
 
    /**
+    * Get the NetworkOffering Id.
+    *
     * @return the transNetworkOfferingId
     */
     public String getTransNetworkOfferingId() {
@@ -680,6 +694,8 @@ public class Network implements Serializable {
     }
 
    /**
+    * Set the NetworkOffering Id.
+    *
     * @param transNetworkOfferingId the transNetworkOfferingId to set
     */
     public void setTransNetworkOfferingId(String transNetworkOfferingId) {

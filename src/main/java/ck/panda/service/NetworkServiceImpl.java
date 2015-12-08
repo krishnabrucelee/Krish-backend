@@ -337,8 +337,7 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public List<Network> findByDepartmentAndNetworkIsActive(Long department, Boolean isActive) throws Exception {
-        Department deptNetwork = departmentRepository.findOne(department);
-        return networkRepo.findByDepartmentAndNetworkIsActive(deptNetwork, true);
+        return networkRepo.findByDepartmentAndNetworkIsActive(departmentRepository.findOne(department), true);
     }
 
     /**
