@@ -54,20 +54,32 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
     @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing Network.", response = Network.class)
     @Override
     public Network update(@RequestBody Network network, @PathVariable(PATH_ID) Long id) throws Exception {
+        network.setSyncFlag(true);
         return networkService.update(network);
     }
 
+    /**
+     * Delete the Network.
+     *
+     * @param network reference of the Network.
+     * @param id Network id.
+     * @throws Exception error occurs.
+     */
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Network.")
-    @Override
-    public void delete(@PathVariable(PATH_ID) Long id) throws Exception {
-        networkService.delete(id);
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void softDelete(@RequestBody Network network, @PathVariable(PATH_ID) Long id) throws Exception {
+        /** Doing Soft delete from the Network table. */
+         network = networkService.find(id);
+         network.setSyncFlag(true);
+         networkService.softDelete(network);
     }
 
     @Override
     public List<Network> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Network.class);
-        Page<Network> pageResponse = networkService.findAll(page);
+        Page<Network> pageResponse = networkService.findAllByActive(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
@@ -75,12 +87,14 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
     /**
      * list all network for instance.
      * @return projects
+     * @param deptartment department
      * @throws Exception Exception
      */
       @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
       @ResponseStatus(HttpStatus.OK)
       @ResponseBody
-      protected List<Network> findByDepartment(@RequestParam Long dept) throws Exception {
-          return networkService.findByDepartment(dept);
+      protected List<Network> findByDepartment(@RequestParam Long deptartment) throws Exception {
+          return networkService.findByDepartmentAndNetworkIsActive(deptartment, true);
       }
+
 }

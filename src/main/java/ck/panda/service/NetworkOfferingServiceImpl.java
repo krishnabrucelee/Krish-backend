@@ -75,9 +75,7 @@ public class NetworkOfferingServiceImpl implements NetworkOfferingService {
 
     @Override
     public Page<NetworkOffering> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-
         return networkRepo.findAllByIsolated(pagingAndSorting.toPageRequest());
-
     }
 
     @Override
@@ -114,5 +112,9 @@ public class NetworkOfferingServiceImpl implements NetworkOfferingService {
        return networkRepo.findByUUID(uuid);
     }
 
+    @Override
+    public List<NetworkOffering> findIsolated() throws Exception {
+        return networkRepo.findIsolated();
+    }
 
 }

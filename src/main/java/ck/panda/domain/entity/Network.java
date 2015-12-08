@@ -1,11 +1,13 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
@@ -15,7 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import org.joda.time.DateTime;
+import org.hibernate.annotations.Type;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
@@ -23,6 +25,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -31,6 +35,7 @@ import ck.panda.util.JsonUtil;
  */
 @Entity
 @Table(name = "ck_network")
+@EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class Network implements Serializable {
 
@@ -101,6 +106,14 @@ public class Network implements Serializable {
     @Column(name = "gateway")
     private String gateway;
 
+    /** Netmask of the Network. */
+    @Column(name = "netmask", nullable = true)
+    private String netMask;
+
+    /** Network Domain for the Network. */
+    @Column(name = "network_domain", nullable = true)
+    private String networkDomain;
+
     /** IsActive attribute to verify Active or Inactive. */
     @Column(name = "is_active")
     private Boolean isActive;
@@ -130,12 +143,16 @@ public class Network implements Serializable {
     /** Created date and time. */
     @CreatedDate
     @Column(name = "created_date_time")
-    private DateTime createdDateTime;
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime createdDateTime;
 
     /** Last modified date and time. */
     @LastModifiedDate
     @Column(name = "updated_date_time")
-    private DateTime updatedDateTime;
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime updatedDateTime;
 
     /** Transient domain of the account. */
     @Transient
@@ -161,8 +178,8 @@ public class Network implements Serializable {
         /**  Network type be Shared. */
         Shared,
         /**  Network type be Isolated. */
-        Isolated
-    }
+        Isolated,
+   }
 
     /**
      * Enum type for  Network Status.
@@ -178,7 +195,7 @@ public class Network implements Serializable {
 
         /**  Network will be in a destroyed State. */
         Destroy
-    }
+     }
 
     /** Set syncFlag. */
     @Transient
@@ -324,7 +341,7 @@ public class Network implements Serializable {
      *
      * @return the DateTime
      */
-    public DateTime getCreatedDateTime() {
+    public ZonedDateTime getCreatedDateTime() {
         return createdDateTime;
     }
 
@@ -333,7 +350,7 @@ public class Network implements Serializable {
      *
      * @return the DateTime
      */
-    public DateTime getUpdatedDateTime() {
+    public ZonedDateTime getUpdatedDateTime() {
         return updatedDateTime;
     }
 
@@ -487,7 +504,7 @@ public class Network implements Serializable {
      * @param createdDateTime
      * Network createdDateTime to set
      */
-    public void setCreatedDateTime(DateTime createdDateTime) {
+    public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
     }
 
@@ -497,7 +514,7 @@ public class Network implements Serializable {
      * @param updatedDateTime
      * Network updatedDateTime to set
      */
-    public void setUpdatedDateTime(DateTime updatedDateTime) {
+    public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
 
@@ -576,33 +593,35 @@ public class Network implements Serializable {
     }
 
     /**
-     * Get the Department name.
+     * Get the Department object.
      *
-    * @return the department
-    */
+     * @return the department
+     */
     public Department getDepartment() {
         return department;
     }
 
-    /**
-    * Set the Department name.
+   /**
+    * Set the Department object.
     *
     * @param department the department to set
     */
+
     public void setDepartment(Department department) {
         this.department = department;
     }
 
-    /**
+   /**
     * Get the department Id.
     *
     * @return the departmentId
     */
+
     public Long getDepartmentId() {
         return departmentId;
     }
 
-    /**
+   /**
     * Set the Department Id.
     *
     * @param departmentId the departmentId to set
@@ -611,60 +630,112 @@ public class Network implements Serializable {
         this.departmentId = departmentId;
     }
 
-    /**
+   /**
+    * Get the domain Id.
+    *
     * @return the transDomainId
     */
     public String getTransDomainId() {
         return transDomainId;
     }
 
-    /**
+   /**
+    * Set the domain Id.
+    *
     * @param transDomainId the transDomainId to set
     */
     public void setTransDomainId(String transDomainId) {
         this.transDomainId = transDomainId;
     }
 
-    /**
+   /**
+    * Get the Zone Id.
+    *
     * @return the transZoneId
     */
     public String getTransZoneId() {
         return transZoneId;
     }
 
-    /**
+   /**
+    * Set the Zone Id.
+    *
     * @param transZoneId the transZoneId to set
     */
     public void setTransZoneId(String transZoneId) {
         this.transZoneId = transZoneId;
     }
 
-    /**
+   /**
+    * Get the Department Id.
+    *
     * @return the transDepartmentId
     */
     public String getTransDepartmentId() {
         return transDepartmentId;
     }
 
-    /**
+   /**
+    * Set the department Id.
+    *
     * @param transDepartmentId the transDepartmentId to set
     */
     public void setTransDepartmentId(String transDepartmentId) {
         this.transDepartmentId = transDepartmentId;
     }
 
-    /**
+   /**
+    * Get the NetworkOffering Id.
+    *
     * @return the transNetworkOfferingId
     */
     public String getTransNetworkOfferingId() {
         return transNetworkOfferingId;
     }
 
-    /**
+   /**
+    * Set the NetworkOffering Id.
+    *
     * @param transNetworkOfferingId the transNetworkOfferingId to set
     */
     public void setTransNetworkOfferingId(String transNetworkOfferingId) {
         this.transNetworkOfferingId = transNetworkOfferingId;
+    }
+
+    /**
+     * Get the Netmask of the Network.
+     *
+     * @return the netMask
+     */
+    public String getNetMask() {
+        return netMask;
+    }
+
+    /**
+     * Get the Netmask to the Network.
+     *
+     * @param netMask the netMask to set
+     */
+    public void setNetMask(String netMask) {
+        this.netMask = netMask;
+    }
+
+    /**
+     * Get the Network Domain of the Network.
+     *
+     * @return the networkDomain
+     */
+    public String getNetworkDomain() {
+        return networkDomain;
+    }
+
+    /**
+     * Set the Network Domain to the Network.
+     *
+     * @param networkDomain the networkDomain to set
+     */
+    public void setNetworkDomain(String networkDomain) {
+        this.networkDomain = networkDomain;
     }
 
     /** Convert JSONObject to domain entity.

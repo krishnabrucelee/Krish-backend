@@ -72,8 +72,8 @@ public class NetworkOfferingController extends CRUDController<NetworkOffering> i
     }
 
     /**
-     * list all projects for instance.
-     * @return projects
+     * list all Networks Offerings.
+     * @return NetworkOffering
      * @throws Exception Exception
      */
       @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -82,4 +82,16 @@ public class NetworkOfferingController extends CRUDController<NetworkOffering> i
       protected List<NetworkOffering> getSearch() throws Exception {
           return networkOffer.findAll();
       }
+
+      /**
+       * list all isolated Networks Offerings.
+       * @return isolated Network Offerings
+       * @throws Exception Exception
+       */
+        @RequestMapping(value = "isolated", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+        @ResponseStatus(HttpStatus.OK)
+        @ResponseBody
+        protected List<NetworkOffering> getIsolated() throws Exception {
+            return networkOffer.findIsolated();
+        }
 }
