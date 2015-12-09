@@ -36,6 +36,7 @@ import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.Role;
+import ck.panda.domain.entity.SSHKey;
 import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
@@ -181,6 +182,10 @@ public class SyncServiceImpl implements SyncService {
     @Autowired
     private ResourceLimitProjectService resourceProjectService;
 
+    /** SSH Key Service for listing ssh keys. */
+    @Autowired
+    private SSHKeyService sshKeyService;
+
     /** CloudStack connector. */
     @Autowired
     private CloudStackServer server;
@@ -265,7 +270,7 @@ public class SyncServiceImpl implements SyncService {
     }
 
     /**
-     * Sync call for synchronization list of Region, domain, region. template,
+     * Sync call for synchronization list of Region, domain, SSH key, region. template,
      * hypervisor
      *
      * @throws Exception
@@ -418,6 +423,13 @@ public class SyncServiceImpl implements SyncService {
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Snapshot", e);
         }
+
+        try {
+            // 25. Sync SSHKey entity
+            this.syncSSHKey();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch SSH Key", e);
+        }
     }
 
     /**
@@ -436,7 +448,7 @@ public class SyncServiceImpl implements SyncService {
         HashMap<String, Domain> csDomainMap = (HashMap<String, Domain>) Domain.convert(csDomainList);
 
         // 2. Get all the domain objects from application
-        List<Domain> appDomainList = domainService.findAll();
+        List<Domain> appDomainList = domainService.findAllDomain();
 
         // 3. Iterate application domain list
         LOGGER.debug("Total rows updated : " + (appDomainList.size()));
@@ -1868,6 +1880,48 @@ public class SyncServiceImpl implements SyncService {
         for (String key : csAccountMap.keySet()) {
             accountService.save(csAccountMap.get(key));
         }
+    }
+
+    @Override
+    public void syncSSHKey() throws ApplicationException, Exception {
+
+        // 1. Get all the region objects from CS server as hash
+        List<SSHKey> csSSHKeyList = sshKeyService.findAllFromCSServer();
+        HashMap<String, SSHKey> csSSHkeyMap = (HashMap<String, SSHKey>) SSHKey.convert(csSSHKeyList);
+
+        // 2. Get all the region objects from application
+        List<SSHKey> appSSHKeyList = sshKeyService.findAll();
+
+        // 3. Iterate application region list
+        for (SSHKey sshKey : appSSHKeyList) {
+            sshKey.setIsSyncFlag(false);
+            LOGGER.debug("Total rows updated : " + (appSSHKeyList.size()));
+            // 3.1 Find the corresponding CS server region object by finding it
+            // in a hash using uuid
+            if (csSSHkeyMap.containsKey(sshKey.getName())) {
+                SSHKey csSSHKey = csSSHkeyMap.get(sshKey.getName());
+
+                sshKey.setName(csSSHKey.getName());
+
+                // 3.2 If found, update the region object in app db
+                sshKeyService.update(sshKey);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // region which is not added in the app
+                csSSHkeyMap.remove(sshKey.getName());
+            } else {
+                sshKeyService.delete(sshKey);
+            }
+        }
+        // 4. Get the remaining list of cs server hash region object, then
+        // iterate and
+        // add it to app db
+        for (String key : csSSHkeyMap.keySet()) {
+            LOGGER.debug("Syncservice region name:");
+            sshKeyService.save(csSSHkeyMap.get(key));
+        }
+        LOGGER.debug("Total rows added : " + (csSSHkeyMap.size()));
+
     }
 
     /**

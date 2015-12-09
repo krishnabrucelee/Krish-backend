@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.entity.OsType;
 import ck.panda.domain.entity.StorageOffering;
@@ -18,6 +19,7 @@ import ck.panda.domain.entity.Template.Status;
 import ck.panda.domain.entity.Template.Type;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.DepartmentReposiory;
+import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.HypervisorRepository;
 import ck.panda.domain.repository.jpa.OsCategoryRepository;
 import ck.panda.domain.repository.jpa.OsTypeRepository;
@@ -77,6 +79,10 @@ public class TemplateServiceImpl implements TemplateService {
     /** Department repository reference. */
     @Autowired
     private DepartmentReposiory departmentReposiory;
+
+    /** Domain repository reference. */
+    @Autowired
+    private DomainRepository domainRepository;
 
     /** Hypervisor repository reference. */
     @Autowired
@@ -182,19 +188,30 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public List<Template> findByTemplate() throws Exception {
+    	Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+    	if(domain != null && domain.getName().equals("ROOT")) {
+    		return (List<Template>) templateRepository.findByTemplateAndFeature("ALL", Type.SYSTEM, Status.ACTIVE);
+    	}
         return templateRepository.findByTemplate("ALL", Type.SYSTEM, Status.ACTIVE);
     }
 
 
     @Override
     public List<Template> findByFilters(Template template) throws Exception {
-    	if(template.getArchitecture() == null) {
+		Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if(template.getArchitecture() == null) {
     		template.setArchitecture("ALL");
     	}
     	if(template.getOsCategory() == null ) {
+    		if(domain != null && domain.getName().equals("ROOT")) {
+            	return (List<Template>) templateRepository.findByTemplateAndFeature(template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
+            }
     		return (List<Template>) templateRepository.findByTemplate(template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
     	} else  {
-            return templateRepository.findAllByOsCategoryAndArchitectureAndType(template.getOsCategory(), template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
+    		if(domain != null && domain.getName().equals("ROOT")) {
+    			return templateRepository.findAllByOsCategoryAndArchitectureAndType(template.getOsCategory(), template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
+    		}
+    		return templateRepository.findAllByOsCategoryAndArchitectureAndTypeAndStatus(template.getOsCategory(), template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
     	}
     }
 
