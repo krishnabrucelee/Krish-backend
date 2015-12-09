@@ -2,6 +2,7 @@ package ck.panda.service;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
-import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Role;
-import ck.panda.domain.repository.jpa.DepartmentReposiory;
 import ck.panda.domain.repository.jpa.RoleReposiory;
 import ck.panda.util.AppValidator;
 import ck.panda.util.TokenDetails;
@@ -129,6 +128,11 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public List<Role> getRolesByDepartment(Department department) throws Exception {
         return (List<Role>) roleRepo.getRolesByDepartment(department);
+    }
+    
+    @Override
+    public Page<Role> findAllRolesWithoutFullPermissionAndActive(PagingAndSorting pagingAndSorting) throws Exception {
+    	return roleRepo.findAllRolesWithoutFullPermissionAndActive(pagingAndSorting.toPageRequest());
     }
 
 }

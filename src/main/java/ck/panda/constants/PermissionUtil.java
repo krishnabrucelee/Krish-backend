@@ -44,7 +44,8 @@ public final class PermissionUtil {
     public static List<Permission> createPermissions(String instance, String storage, String network, String sshkey, String quotaLimit,
 			String vpc, String temp, String addService, String project, String application, String dept, String roles, String user, String report) {
         List<String> stringList = new ArrayList<String>();
-        Map<Module,List<String>> moduleActionMap = new HashMap<Module,List<String>>();
+        Map<Module, List<String>> moduleActionMap =
+        		new HashMap<Module, List<String>>();
         List<Module> moduleList = new ArrayList<Module>();
         stringList.add(instance);
         stringList.add(storage);
@@ -69,20 +70,22 @@ public final class PermissionUtil {
                 actionList.add(action);
             }
             moduleList.add(Module.valueOf(stringArray[0]));
-            moduleActionMap.put(Module.valueOf(stringArray[0]),actionList);
+            moduleActionMap.put(Module.valueOf(stringArray[0]), actionList);
         }
 
         List<Permission> permissionList = new ArrayList<Permission>();
-        Map<Module,String> moduleDesc = new HashMap<Module,String>();
-        Map<String,Module> moduleAction = new HashMap<String,Module>();
+        Map<Module, String> moduleDesc = new HashMap<Module, String>();
+        Map<String, Module> moduleAction = new HashMap<String, Module>();
         moduleAction = PermissionUtil.prepareActionsModule(moduleActionMap);
         moduleDesc = PermissionUtil.prepareModuleDesc(Permission.Module.values(), moduleDesc);
 
         Iterator<Entry<String, Module>> it = moduleAction.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry actionsModuleEntry = (Map.Entry)it.next();
+            Map.Entry actionsModuleEntry = (Map.Entry) it.next();
             Permission permission = new Permission();
-            permission.setAction(actionsModuleEntry.getKey().toString());
+            String[] action_keys = actionsModuleEntry.getKey().toString().split(",");
+            permission.setAction(action_keys[0]);
+            permission.setActionKey(action_keys[1].toUpperCase());
             permission.setModule((Module) actionsModuleEntry.getValue());
             permission.setDescription(moduleDesc.get(actionsModuleEntry.getValue()));
             permission.setIsActive(true);
@@ -154,7 +157,18 @@ public final class PermissionUtil {
         for (Map.Entry<Module, List<String>> entry : moduleAction.entrySet()) {
             tempAction = entry.getValue();
             for (String action : tempAction) {
-                actionsModule.put(action, entry.getKey());
+
+                String[] formKeyArray = action.split(" ");
+                String tempStr = "";
+                for (int i=0 ;i< formKeyArray.length;i++) {
+                	if(i != formKeyArray.length-1) {
+                		tempStr += formKeyArray[i].concat("_");
+                		}
+                	else {
+                		tempStr += formKeyArray[i];
+                	}
+				}
+                actionsModule.put(action.concat(",").concat(tempStr), entry.getKey());
             }
         }
         return actionsModule;

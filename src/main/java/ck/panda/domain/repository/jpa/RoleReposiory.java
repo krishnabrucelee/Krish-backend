@@ -39,7 +39,7 @@ public interface RoleReposiory extends PagingAndSortingRepository<Role, Long> {
      * @param department - department entity
      * @return List of roles
      */
-    @Query(value = "SELECT role FROM Role AS role WHERE role.department=:department AND role.isActive IS TRUE")
+    @Query(value = "SELECT role FROM Role AS role WHERE role.department=:department AND role.isActive IS TRUE AND role.name != 'FULL_PERMISSION'")
     List<Role> getRolesByDepartment(@Param("department") Department department);
 
     /**
@@ -50,4 +50,13 @@ public interface RoleReposiory extends PagingAndSortingRepository<Role, Long> {
      */
     @Query(value = "SELECT role FROM Role AS role WHERE role.department=:department AND role.isActive IS :isActive")
     Page<Role> findByDepartmentAndIsActive(@Param("department") Department department,@Param("isActive")  Boolean isActive, Pageable pageable);
+    
+    /**
+     * find all the roles without full permission.
+     *
+     * @param pageable pagination information.
+     * @return list of user.
+     */
+    @Query(value = "SELECT role FROM Role AS role WHERE role.isActive IS TRUE AND role.name != 'FULL_PERMISSION'")
+    Page<Role> findAllRolesWithoutFullPermissionAndActive(Pageable pageable);
 }

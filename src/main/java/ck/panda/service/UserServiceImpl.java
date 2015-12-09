@@ -296,5 +296,18 @@ public class UserServiceImpl implements UserService {
     public List<User> findAllRootAdminUser() throws Exception {
         return userRepository.findAllRootAdminUser(Type.ROOT_ADMIN);
     }
+    
+    @Override
+    public List<User> findUsersByTypesAndActive(List<Type> types, Boolean isActive) throws Exception {
+        return (List<User>) userRepository.findUsersByTypesAndActive(types, isActive);
+    }
+    
+    @Override
+    public List<User> assignUserRoles(List<User> users) throws Exception {
+    	for (User user : users) {
+    		userRepository.save(user);
+		}
+    	return users;
+    }
 
 }

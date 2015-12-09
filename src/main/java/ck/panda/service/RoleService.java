@@ -1,10 +1,12 @@
 package ck.panda.service;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Role;
 import ck.panda.util.domain.CRUDService;
+import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
  * Service class for Role.
@@ -32,4 +34,13 @@ public interface RoleService  extends CRUDService<Role> {
      * @throws Exception - if error occurs
      */
     List<Role> getRolesByDepartment(Department department) throws Exception;
+    
+    /**
+     * find all the roles without full permission.
+     *
+     * @param pagingAndSorting paging and sorting information.
+     * @return list of user.
+     * @throws Exception if error occurs.
+     */
+    Page<Role> findAllRolesWithoutFullPermissionAndActive(PagingAndSorting pagingAndSorting) throws Exception;
 }

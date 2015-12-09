@@ -42,6 +42,11 @@ public class Permission implements Serializable {
     @NotEmpty
     @Column(name = "action", nullable = false)
     private String action;
+    
+    /** Action key of the Permission. */
+    @NotEmpty
+    @Column(name = "action_key", nullable = false)
+    private String actionKey;
 
     /** Description of the Permission. */
     @Column(name = "description")
@@ -136,15 +141,33 @@ public class Permission implements Serializable {
     public void setAction(String action) {
        this.action = action;
     }
-
+    
     /**
-     * Get the description of the permission.
-     *
-     * @return the description
-     */
-    public String getDescription() {
-       return description;
-    }
+     * Get the actionKeyof the permission.
+     * 
+	 * @return the actionKey
+	 */
+	public String getActionKey() {
+		return actionKey;
+	}
+
+	/**
+	 * Set  the actionKey of the permission.
+	 * 
+	 * @param actionKey the actionKey to set
+	 */
+	public void setActionKey(String actionKey) {
+	    this.actionKey = actionKey;
+	}
+
+	/**
+	 * Get the description of the permission.
+	 *
+	 * @return the description
+	 */
+	public String getDescription() {
+	    return description;
+	}
 
     /**
      * Set the description of the permission.
