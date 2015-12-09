@@ -61,15 +61,17 @@ public class CloudStackVolumeService {
      * Deletes a detached disk volume.
      *
      * @param diskVolumeId The ID of the disk volume
+     * @param response json
      * @return delete response
      * @throws Exception error
      */
-    public String deleteVolume(String diskVolumeId)
+    public String deleteVolume(String diskVolumeId, String response)
             throws Exception {
 
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("deleteVolume", null);
         arguments.add(new NameValuePair("id", diskVolumeId));
+        arguments.add(new NameValuePair("response", response));
 
         String deleteResponse = server.request(arguments);
 
@@ -122,20 +124,17 @@ public class CloudStackVolumeService {
      * Attaches a disk volume to a virtual machine.
      *
      * @param diskVolumeId The ID of the disk volume
-     * @param virtualMachineId The ID of the virtual machine
      * @param optional optional
      * @param response response
      * @return response
      * @throws Exception Exception
      */
-    public String attachVolume(String diskVolumeId,
-            String virtualMachineId,String response, HashMap<String, String> optional)
+    public String attachVolume(String diskVolumeId, String response, HashMap<String, String> optional)
             throws Exception {
 
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("attachVolume", optional);
         arguments.add(new NameValuePair("id", diskVolumeId));
-        arguments.add(new NameValuePair("virtualmachineid", virtualMachineId));
         arguments.add(new NameValuePair("response", response));
 
         String responseDocument = server.request(arguments);
@@ -166,13 +165,19 @@ public class CloudStackVolumeService {
     /**
      * Resize a disk volume from a virtual machine.
      *
-     * @param optional optional values.
+     * @param optional optional values
+     * @param volumeId volume id
+     * @param diskOfferingId disk offering id
      * @param response json response
      * @return resize response
      * @throws Exception error
      */
-    public String resizeVolume(String response, HashMap<String, String> optional) throws Exception {
+    public String resizeVolume(String volumeId, String diskOfferingId, String response,
+            HashMap<String, String> optional) throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("resizeVolume", optional);
+        arguments.add(new NameValuePair("id", volumeId));
+        arguments.add(new NameValuePair("diskofferingid", diskOfferingId));
+        arguments.add(new NameValuePair("response", response));
         String resizeResponse = server.request(arguments);
 
         return resizeResponse;
