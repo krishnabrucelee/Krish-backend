@@ -93,7 +93,7 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
       @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
       @ResponseStatus(HttpStatus.OK)
       @ResponseBody
-      protected List<Network> findByDepartment(@RequestParam Long deptartment) throws Exception {
+      protected List<Network> findByDepartment(@RequestParam("dept") Long deptartment) throws Exception {
           return networkService.findByDepartmentAndNetworkIsActive(deptartment, true);
       }
 
