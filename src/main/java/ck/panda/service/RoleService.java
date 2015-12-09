@@ -36,7 +36,7 @@ public interface RoleService  extends CRUDService<Role> {
     List<Role> getRolesByDepartment(Department department) throws Exception;
     
     /**
-     * find all the roles without full permission.
+     * Find all the roles without full permission.
      *
      * @param pagingAndSorting paging and sorting information.
      * @return list of user.

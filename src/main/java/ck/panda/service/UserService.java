@@ -123,6 +123,7 @@ public interface UserService extends CRUDService<User> {
     List<User> findUsersByTypesAndActive(List<Type> types, Boolean isActive) throws Exception;
     
     /**
+     * Assign user to role.
      * 
      * @param users List of users
      * @return users
