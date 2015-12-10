@@ -111,7 +111,6 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 optional.put("displayvm", "true");
                 optional.put("keyboard", "us");
                 optional.put("name", vminstance.getName());
-                optional.put("displayname", vminstance.getInstanceOwner().getUserName());
                 if(vminstance.getProjectId() != null){
                     optional.put("projectid", vminstance.getProject().getUuid());
                 }
@@ -157,6 +156,12 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
+            CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
+            server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
+            cloudStackInstanceService.setServer(server);
+            HashMap<String, String> optional = new HashMap<String, String>();
+            optional.put("displayName", vminstance.getTransDisplayName());
+            cloudStackInstanceService.updateVirtualMachine(vminstance.getUuid(), optional);
             return virtualmachinerepository.save(vminstance);
         }
     }
