@@ -81,4 +81,16 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
     @Query(value = "select t from Template t where (t.osCategory=:osCategory OR 'ALL'=:osCategory) AND (t.architecture =:architecture OR 'ALL' =:architecture) and t.type <>:type and t.status = :status and t.share IS TRUE")
     List<Template> findAllByOsCategoryAndArchitectureAndTypeAndStatus(@Param("osCategory") OsCategory osCategory, @Param("architecture") String architecture, @Param("type") Type type, @Param("status") Status status);
 
+    /**
+     * Get the template based on the osCategory,architecture and type.
+     *
+     * @param osCategory of the template
+     * @param architecture of the template
+     * @param type of the template
+     * @param status of the template
+     * @return template
+     */
+    @Query(value = "select DISTINCT t from Template t where t.type <>:type AND t.status = :status AND t.osCategory LIKE :osCategory")
+    List<Template> findByOsCategoryFilters(@Param("type")Type type, @Param("status") Status status, @Param("osCategory") OsCategory osCategory);
+
 }
