@@ -177,6 +177,9 @@ public class NetworkServiceImpl implements NetworkService {
                     network.setGateway(network.getGateway());
                     network.setcIDR(network.getcIDR());
                     network.setNetMask(network.getNetMask());
+                    String token = tokenDetails.getTokenDetails("id");
+                    User user = userRepository.findOne(Long.parseLong(token));
+                    network.setUpdatedBy(user);
                     network.setNetworkDomain(network.getNetworkDomain());
                     } else {
                          JSONObject jobresponse = jobresults.getJSONObject("jobresult");
