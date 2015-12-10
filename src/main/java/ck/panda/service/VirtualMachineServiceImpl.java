@@ -111,7 +111,6 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 optional.put("displayvm", "true");
                 optional.put("keyboard", "us");
                 optional.put("name", vminstance.getName());
-                optional.put("displayname", vminstance.getInstanceOwner().getUserName());
                 if(vminstance.getProjectId() != null){
                     optional.put("projectid", vminstance.getProject().getUuid());
                 }
