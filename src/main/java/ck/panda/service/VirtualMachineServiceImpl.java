@@ -11,6 +11,7 @@ import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.NetworkRepository;
@@ -19,6 +20,7 @@ import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackIsoService;
 import ck.panda.util.CloudStackServer;
+import ck.panda.util.ConfigUtil;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
@@ -57,6 +59,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     /** Network repository reference. */
     @Autowired
     private NetworkRepository networkRepo;
+
+    /** Cloud stack configuration utility class. */
+    @Autowired
+    private ConfigUtil config;
 
     /** CloudStack connector reference for instance. */
     @Autowired
@@ -112,10 +118,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 optional.put("keyboard", "us");
                 optional.put("name", vminstance.getName());
                 optional.put("displayname", vminstance.getInstanceOwner().getUserName());
-                if(vminstance.getProjectId() != null){
+                if (vminstance.getProjectId() != null) {
                     optional.put("projectid", vminstance.getProject().getUuid());
                 }
-                if(vminstance.getStorageOfferingId() != null){
+                if (vminstance.getStorageOfferingId() != null) {
                     optional.put("diskofferingid", vminstance.getStorageOffering().getUuid());
                 }
                 optional.put("domainid", domainRepository.findOne(vminstance.getDepartment().getDomainId()).getUuid());
@@ -575,6 +581,42 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         return virtualmachinerepository.findByUUID(uuid);
     }
 
+    @Override
+    public VmInstance upgradeDowngradeVM(VmInstance vminstance) throws Exception {
+        Errors errors = validator.rejectIfNullEntity("vminstance", vminstance);
+        errors = validator.validateEntity(vminstance, errors);
+        config.setServer(1L);
+        HashMap<String, String> optional = new HashMap<String, String>();
+        String volumeS = cloudStackInstanceService.scaleVirtualMachine(vminstance.getUuid(), vminstance.getComputeOffering().getUuid(),"json",optional);
+        JSONObject jobId = new JSONObject(volumeS).getJSONObject("scalevirtualmachineresponse");
+
+        if (jobId.has("errorcode")) {
+            errors = this.validateEvent(errors, jobId.getString("errortext"));
+            throw new ApplicationException(errors);
+        } else {
+//            volume.setUuid((String) jobId.get("jobid"));
+            if (jobId.has("jobid")) {
+                String jobResponse = cloudStackInstanceService.queryAsyncJobResult(jobId.getString("jobid"), "json");
+                JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+                if (jobresult.has("vminstance")) {
+                    vminstance.setUuid((String) jobresult.get("id"));
+                }
+                if (jobresult.getString("jobstatus").equals("2")) {
+                    vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
+                }
+                if (jobresult.getString("jobstatus").equals("0")) {
+                    vminstance.setComputeOfferingId(vminstance.getComputeOffering().getId());
+                }
+                if (jobresult.getString("jobstatus").equals("1")) {
+                    vminstance.setComputeOfferingId(vminstance.getComputeOffering().getId());
+
+                }
+                virtualmachinerepository.save(vminstance);
+            }
+        }
+        return vminstance;
+    }
+
     /**
      * Check the virtual machine CS error handling.
      *
@@ -600,7 +642,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
      */
     private Errors validateName(Errors errors, String name, Department department, Long id) throws Exception {
         if ((virtualmachinerepository.findByNameAndDepartment(name, department, Status.Expunging)) != null) {
-            errors.addGlobalError("Instance name already exist in" + department.getUserName() +" department");
+            errors.addGlobalError("Instance name already exist in" + department.getUserName() + " department");
         }
         return errors;
     }

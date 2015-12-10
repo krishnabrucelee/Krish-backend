@@ -426,6 +426,7 @@ public class VolumeServiceImpl implements VolumeService {
                 }
                 if (jobresult.getString("jobstatus").equals("0")) {
                     volume.setStatus(Status.READY);
+                    volume.setDiskSize(jobresult.getLong("size"));
                 }
             }
         }
@@ -445,7 +446,7 @@ public class VolumeServiceImpl implements VolumeService {
     }
 
     @Override
-    public Volume uploadVolume(Volume volume) throws Exception {
+	public Volume uploadVolume(Volume volume) throws Exception {
         this.validateVolumeUniqueness(volume);
         Errors errors = validator.rejectIfNullEntity("volumes", volume);
         errors = validator.validateEntity(volume, errors);

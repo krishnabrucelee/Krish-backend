@@ -48,6 +48,13 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      */
     VmInstance vmEventHandleWithVM(VmInstance vmInstance, String event) throws Exception;
 
-
+    /**
+     * Upgrade/Downgrade VM offerings for created instance.
+     *
+     * @param vminstance Virtual machine
+     * @return instance
+     * @throws Exception if error occurs
+     */
+    VmInstance upgradeDowngradeVM(VmInstance vminstance) throws Exception;
 
 }

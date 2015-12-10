@@ -148,4 +148,18 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
         return "{\"success\":" + "\"http://192.168.1.221/console/?token=" + token + "\"}";
     }
 
+    /**
+     * Upgrade/Downgrade VM from created instance.
+     *
+     * @param vminstance instance name.
+     * @return list of instances
+     * @throws Exception if error occurs.
+     */
+    @RequestMapping(value = "/resize", method = RequestMethod.PUT, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected VmInstance upgradeDowngradeVM(@RequestBody VmInstance vminstance) throws Exception {
+        return virtualmachineservice.upgradeDowngradeVM(vminstance);
+    }
+
 }

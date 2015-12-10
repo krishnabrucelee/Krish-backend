@@ -147,10 +147,27 @@ public class CloudStackInstanceService {
      * @return json response.
      * @throws Exception unhandled exceptions.
      */
-    public String changeServiceForVirtualMachine(String virtualMachineId, String serviceOfferingId) throws Exception {
-        LinkedList<NameValuePair> arguments = server.getDefaultQuery("changeServiceForVirtualMachine", null);
+    public String changeServiceForVirtualMachine(String virtualMachineId, String serviceOfferingId, String response, HashMap<String, String> optional) throws Exception {
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("changeServiceForVirtualMachine", optional);
         arguments.add(new NameValuePair("id", virtualMachineId));
-        arguments.add(new NameValuePair("response", "json"));
+        arguments.add(new NameValuePair("response", response));
+        arguments.add(new NameValuePair("serviceofferingid", serviceOfferingId));
+        return server.request(arguments);
+    }
+
+    /**
+     * Changes the service offering for a virtual machine. The virtual machine must be in a "Stopped" state
+     * for this command to take effect.
+     *
+     * @param virtualMachineId The ID of the virtual machine
+     * @param serviceOfferingId the service offering ID to apply to the virtual machine
+     * @return json response.
+     * @throws Exception unhandled exceptions.
+     */
+    public String scaleVirtualMachine(String virtualMachineId, String serviceOfferingId, String response, HashMap<String, String> optional) throws Exception {
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("scaleVirtualMachine", optional);
+        arguments.add(new NameValuePair("id", virtualMachineId));
+        arguments.add(new NameValuePair("response", response));
         arguments.add(new NameValuePair("serviceofferingid", serviceOfferingId));
         return server.request(arguments);
     }
