@@ -15,6 +15,7 @@ import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.NetworkRepository;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
+import ck.panda.domain.repository.jpa.ZoneRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackIsoService;
@@ -57,6 +58,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     /** Network repository reference. */
     @Autowired
     private NetworkRepository networkRepo;
+
+    /** Zone repository reference. */
+    @Autowired
+    private ZoneRepository zoneRepository;
 
     /** CloudStack connector reference for instance. */
     @Autowired
@@ -102,6 +107,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 if (networkRepo.findByUUID(vminstance.getNetworkUuid()) != null) {
                     vminstance.setNetworkId(networkRepo.findByUUID(vminstance.getNetworkUuid()).getId());
                 }
+                vminstance.setZone(zoneRepository.findOne(vminstance.getZoneId()));
                 CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
                 server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
                 cloudStackInstanceService.setServer(server);
