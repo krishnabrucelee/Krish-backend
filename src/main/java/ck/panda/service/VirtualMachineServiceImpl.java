@@ -565,6 +565,16 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         return virtualmachinerepository.findAllByIsActive(Status.Expunging, pagingAndSorting.toPageRequest());
     }
 
+
+    @Override
+    public Page<VmInstance> findAllByStatus(PagingAndSorting pagingAndSorting, String status) throws Exception {
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if (domain != null && !domain.getName().equals("ROOT")) {
+            Page<VmInstance> allInstanceList =  virtualmachinerepository.findAllByDomainIsActive(domain.getId(), Status.valueOf(status), pagingAndSorting.toPageRequest());
+        }
+        return virtualmachinerepository.findAllByStatus(Status.valueOf(status), pagingAndSorting.toPageRequest());
+    }
+
     @Override
     public List<VmInstance> findAll() throws Exception {
         return (List<VmInstance>) virtualmachinerepository.findAllByIsActive(Status.Expunging);
@@ -631,6 +641,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
               vmInstance.setDepartmentId(
                     convertEntityService.getDepartmentByUsernameAndDomain(vmInstance.getTransDepartmentId(),
                             convertEntityService.getDomain(vmInstance.getTransDomainId())));
+              vmInstance.setTemplateId(convertEntityService.getTemplateId(vmInstance.getTransTemplateId()));
               vmInstance.setComputeOfferingId(convertEntityService.getComputeOfferId(vmInstance.getTransComputeOfferingId()));
               if (vmInstance.getHostId() != null) {
                   vmInstance.setPodId(convertEntityService
@@ -641,6 +652,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             }
         }
         return vmList;
+    }
+
+    public Integer findCountByStatus(Status status) {
+        return virtualmachinerepository.findCountByStatus(status);
     }
 
 }
