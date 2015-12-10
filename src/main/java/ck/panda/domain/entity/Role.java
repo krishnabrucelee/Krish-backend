@@ -58,7 +58,7 @@ public class Role implements Serializable {
     private String description;
 
     /** Permission list of the role. */
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany
     private List<Permission> permissionList;
 
     /** Version attribute to handle optimistic locking. */
