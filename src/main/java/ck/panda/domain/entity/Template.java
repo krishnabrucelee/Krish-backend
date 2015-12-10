@@ -1,12 +1,14 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
@@ -20,14 +22,16 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonValidator;
 
 /**
@@ -39,6 +43,7 @@ import ck.panda.util.JsonValidator;
  */
 @Entity
 @Table(name = "ck_template")
+@EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class Template implements Serializable {
 
@@ -65,7 +70,7 @@ public class Template implements Serializable {
     /** Type of the template. */
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
-    private Type type;
+    private TemplateType type;
 
     /** Description of the template. */
     @NotEmpty
@@ -225,12 +230,15 @@ public class Template implements Serializable {
     /** Created date and time. */
     @CreatedDate
     @Column(name = "created_date_time")
-    private DateTime createdDateTime;
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime createdDateTime;
 
-    /** Last updated date and time. */
     @LastModifiedDate
     @Column(name = "updated_date_time")
-    private DateTime updatedDateTime;
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime updatedDateTime;
 
     /** Share of the template. */
     @Transient
@@ -320,7 +328,7 @@ public class Template implements Serializable {
      * Get the type.
      * @return type
      */
-    public Type getType() {
+    public TemplateType getType() {
         return type;
     }
 
@@ -328,7 +336,7 @@ public class Template implements Serializable {
      * Set the type.
      * @param type - the String to set
      */
-    public void setType(Type type) {
+    public void setType(TemplateType type) {
         this.type = type;
     }
 
@@ -832,7 +840,7 @@ public class Template implements Serializable {
      * Get the created date time.
      * @return the createdDateTime
      */
-    public DateTime getCreatedDateTime() {
+    public ZonedDateTime getCreatedDateTime() {
         return createdDateTime;
     }
 
@@ -840,7 +848,7 @@ public class Template implements Serializable {
      * Set the created date time.
      * @param createdDateTime - the DateTime to set
      */
-    public void setCreatedDateTime(DateTime createdDateTime) {
+    public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
     }
 
@@ -848,7 +856,7 @@ public class Template implements Serializable {
      * Get the updated date time.
      * @return updatedDateTime
      */
-    public DateTime getUpdatedDateTime() {
+    public ZonedDateTime getUpdatedDateTime() {
         return updatedDateTime;
     }
 
@@ -856,7 +864,7 @@ public class Template implements Serializable {
      * Set the updated date time.
      * @param updatedDateTime - the DateTime to set
      */
-    public void setUpdatedDateTime(DateTime updatedDateTime) {
+    public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
 
@@ -1042,7 +1050,7 @@ public class Template implements Serializable {
     }
 
     /** TemplateType enum type used to list the static template type values. */
-    public enum Type {
+    public enum TemplateType {
         /** Template type as SYSTEM. */
         SYSTEM,
         /** Template type as BUILTIN. */

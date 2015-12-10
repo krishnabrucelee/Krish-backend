@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Network.Status;
 import ck.panda.domain.entity.User;
@@ -115,7 +114,7 @@ public class NetworkServiceImpl implements NetworkService {
                     if (network.getDepartment() != null) {
                         network.setDepartmentId(convertEntityService.getDepartmentByUsername(networkResponse.getString("account")));
                     } else {
-                        network.setDepartmentId(convertEntityService.getDepartmentByUsername(tokenDetails.getTokenDetails("username")));
+                        network.setDepartmentId(convertEntityService.getDepartmentByUsername(departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName()));
                     }
                     network.setGateway(networkResponse.getString("gateway"));
                     network.setNetMask(networkResponse.getString("netmask"));
@@ -339,7 +338,7 @@ public class NetworkServiceImpl implements NetworkService {
         if (network.getDepartment() != null) {
             optional.put("account", network.getDepartment().getUserName());
         } else {
-            optional.put("account", tokenDetails.getTokenDetails("username"));
+            optional.put("account", departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
         }
         if (network.getDomainId() == null) {
             optional.put("domainid", domainRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("domainid"))).getUuid());
@@ -362,7 +361,11 @@ public class NetworkServiceImpl implements NetworkService {
      * @return list of compute offerings.
      */
     public Page<Network> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
-        return networkRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
+    	if(tokenDetails.getTokenDetails("domainname").equals("/")) {
+    		return networkRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
+    	} else {
+    		return networkRepo.findByDomainIsActive(pagingAndSorting.toPageRequest(), true, Long.parseLong(tokenDetails.getTokenDetails("domainid")));
+    	}
     }
 
     /**

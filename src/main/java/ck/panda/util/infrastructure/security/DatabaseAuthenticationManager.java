@@ -13,7 +13,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 import com.google.common.base.Optional;
+import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.repository.jpa.DepartmentReposiory;
+import ck.panda.domain.repository.jpa.RoleReposiory;
 import ck.panda.service.UserService;
 import ck.panda.util.CloudStackAuthenticationService;
 import ck.panda.util.ConfigUtil;
@@ -52,6 +56,14 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
     @Autowired
     private CloudStackAuthenticationService cloudStackAuthenticationService;
 
+    /** Role repository reference. */
+    @Autowired
+    private RoleReposiory roleReposiory;
+
+    /** Department repository reference. */
+    @Autowired
+    private DepartmentReposiory departmentReposiory;
+
     /** Admin username. */
     @Value("${backend.admin.username}")
     private String backendAdminUsername;
@@ -87,40 +99,44 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
      * @return authentication token value
      * @throws AuthenticationException raise if error
      */
-    public AuthenticationWithToken authValidation(Optional<String> username, Optional<String> password, Optional<String> domain, AuthenticationWithToken resultOfAuthentication) throws AuthenticationException {
-
+    public AuthenticationWithToken authValidation(Optional<String> username, Optional<String> password, Optional<String> domain,
+            AuthenticationWithToken resultOfAuthentication) throws AuthenticationException {
         User user = null;
-        if (domain.get().equals("BACKEND_ADMIN")) {
-            if (username.get().equals(backendAdminUsername) && password.get().equals(backendAdminPassword)) {
-                resultOfAuthentication = externalServiceAuthenticator.authenticate(backendAdminUsername, backendAdminRole);
-                String newToken = null;
-                try {
-                    newToken = tokenService.generateNewToken(user);
-                } catch (Exception e) {
-                    LOGGER.error("Error to generating token :" + e);
+        try {
+            user = userService.findByUser(username.get(), password.get(), "/");
+            if (user == null && domain.get().equals("BACKEND_ADMIN")) {
+                if (username.get().equals(backendAdminUsername) && password.get().equals(backendAdminPassword)) {
+                    resultOfAuthentication = externalServiceAuthenticator.authenticate(backendAdminUsername, backendAdminRole, null, null);
+                    String newToken = null;
+                    try {
+                        newToken = tokenService.generateNewToken(user, "ROOT");
+                    } catch (Exception e) {
+                        LOGGER.error("Error to generating token :" + e);
+                    }
+                    resultOfAuthentication.setToken(newToken);
+                    tokenService.store(newToken, resultOfAuthentication);
+                } else {
+                    throw new BadCredentialsException("Invalid login credentials");
                 }
-                resultOfAuthentication.setToken(newToken);
-                tokenService.store(newToken, resultOfAuthentication);
             } else {
-                throw new BadCredentialsException("Invalid Login Credentials");
-            }
-        } else {
-            try {
                 Boolean authResponse = csLoginAuthentication(username.get(), password.get(), domain.get());
                 if (authResponse) {
-                    user = userService.findByUser(username, password, domain);
                     if (user == null) {
-                        throw new BadCredentialsException("Invalid Login Credentials");
+                        user = userService.findByUser(username.get(), password.get(), domain.get());
+                    }
+                    if (user == null) {
+                        throw new BadCredentialsException("Invalid login credentials");
                     } else if (user != null && !user.getIsActive()) {
-                        throw new BadCredentialsException("Account is Inactive. Please Contact Admin");
+                        throw new BadCredentialsException("Account is inactive. Please contact admin");
+                    } else if (user != null && user.getRole() == null) {
+                        throw new BadCredentialsException("Contact administrator to get the access permission granted");
                     } else {
-                        if (user.getRole() != null) {
-                            backendAdminRole = user.getRole().getName();
-                        }
-                        resultOfAuthentication = externalServiceAuthenticator.authenticate(username.get(), backendAdminRole);
+                        Department department = departmentReposiory.findOne(user.getDepartment().getId());
+                        Role role = roleReposiory.findUniqueness(user.getRole().getName(), department);
+                        resultOfAuthentication = externalServiceAuthenticator.authenticate(username.get(), user.getRole().getName(), role, user);
                         String newToken = null;
                         try {
-                            newToken = tokenService.generateNewToken(user);
+                            newToken = tokenService.generateNewToken(user, domain.get());
                         } catch (Exception e) {
                             LOGGER.error("Error to generating token :" + e);
                         }
@@ -128,12 +144,14 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
                         tokenService.store(newToken, resultOfAuthentication);
                     }
                 } else {
-                    throw new BadCredentialsException("Invalid Login Credentials");
+                    throw new BadCredentialsException("Invalid login credentials");
                 }
-            } catch (Exception e) {
-                LOGGER.error("Invalid Login Credentials : " + e);
-                throw new BadCredentialsException(e.getMessage());
             }
+        } catch (BadCredentialsException e) {
+            LOGGER.error("Invalid login credentials : " + e);
+            throw new BadCredentialsException(e.getMessage());
+        } catch (Exception e) {
+            throw new BadCredentialsException(e.getMessage());
         }
         return resultOfAuthentication;
     }

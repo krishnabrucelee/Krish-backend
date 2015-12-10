@@ -11,15 +11,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.OsType;
-import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.Template.Status;
-import ck.panda.domain.entity.Template.Type;
+import ck.panda.domain.entity.Template.TemplateType;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.DepartmentReposiory;
 import ck.panda.domain.repository.jpa.DomainRepository;
@@ -92,7 +92,9 @@ public class TemplateServiceImpl implements TemplateService {
     private HypervisorRepository hypervisorRepository;
 
     @Override
+    @PreAuthorize("hasPermission(#template.getSyncFlag(), 'REGISTER_TEMPLATE')")
     public Template save(Template template) throws Exception {
+    	template.setIsActive(true);
         if (template.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity("template", template);
             errors = validator.validateEntity(template, errors);
@@ -129,10 +131,13 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public void delete(Template template) throws Exception {
-        templateRepository.delete(template);
+    	template.setIsActive(false);
+    	template.setStatus(Template.Status.INACTIVE);
+   	    templateRepository.save(template);
     }
 
     @Override
+    @PreAuthorize("hasPermission(null, 'DELETE_MY_TEMPLATE')")
     public void delete(Long id) throws Exception {
         csDeleteTemplate(id);
         templateRepository.delete(id);
@@ -149,7 +154,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public Page<Template> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return templateRepository.findAllByType(Type.SYSTEM, pagingAndSorting.toPageRequest());
+        return templateRepository.findAllByType(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), true);
     }
 
     @Override
@@ -193,9 +198,9 @@ public class TemplateServiceImpl implements TemplateService {
     public List<Template> findByTemplate() throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if(domain != null && domain.getName().equals("ROOT")) {
-            return (List<Template>) templateRepository.findByTemplateAndFeature("ALL", Type.SYSTEM, Status.ACTIVE);
+    		return (List<Template>) templateRepository.findByTemplateAndFeature("ALL", TemplateType.SYSTEM, Status.ACTIVE, true);
         }
-        return templateRepository.findByTemplate("ALL", Type.SYSTEM, Status.ACTIVE);
+        return templateRepository.findByTemplate("ALL", TemplateType.SYSTEM, Status.ACTIVE, true);
     }
 
 
@@ -207,14 +212,14 @@ public class TemplateServiceImpl implements TemplateService {
         }
         if(template.getOsCategory() == null ) {
             if(domain != null && domain.getName().equals("ROOT")) {
-                return (List<Template>) templateRepository.findByTemplateAndFeature(template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
+            	return (List<Template>) templateRepository.findByTemplateAndFeature(template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true);
             }
-            return (List<Template>) templateRepository.findByTemplate(template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
+    		return (List<Template>) templateRepository.findByTemplate(template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true);
         } else  {
             if(domain != null && domain.getName().equals("ROOT")) {
-                return templateRepository.findAllByOsCategoryAndArchitectureAndType(template.getOsCategory(), template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
+    			return templateRepository.findAllByOsCategoryAndArchitectureAndType(template.getOsCategory(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true);
             }
-            return templateRepository.findAllByOsCategoryAndArchitectureAndTypeAndStatus(template.getOsCategory(), template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
+    		return templateRepository.findAllByOsCategoryAndArchitectureAndTypeAndStatus(template.getOsCategory(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true);
         }
     }
 
@@ -246,7 +251,7 @@ public class TemplateServiceImpl implements TemplateService {
                     } else {
                         template.setStatus(Status.valueOf("ACTIVE"));
                     }
-                    template.setType(Type.valueOf(jsonobject.getString("templatetype")));
+                    template.setType(TemplateType.valueOf(jsonobject.getString("templatetype")));
                 }
                 template.setDisplayText(template.getDescription());
              }
@@ -298,16 +303,16 @@ public class TemplateServiceImpl implements TemplateService {
      */
     public Errors customValidateEntity(Template template, Errors errors, Boolean validstatus) throws Exception {
 
-        if (template.getArchitecture().isEmpty()) {
+        if (template.getArchitecture() == null || template.getArchitecture().isEmpty()) {
             errors.addFieldError("architecture", "template.architecture");
         }
-        if (template.getOsVersion().isEmpty()) {
+        if (template.getOsVersion() == null || template.getOsVersion().isEmpty()) {
             errors.addFieldError("osVersion", "template.osversion.error");
         }
         if (template.getUrl() == null && validstatus) {
             errors.addFieldError("url", "template.url.error");
         }
-        if (template.getDetailedDescription().isEmpty()) {
+        if (template.getDetailedDescription() == null || template.getDetailedDescription().isEmpty()) {
             errors.addFieldError("detailedDescription", "template.detaileddescription");
         }
         if (template.getTemplateCost() == null) {
@@ -373,14 +378,16 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public Template findByUUID(String uuid) {
-        return templateRepository.findByUUID(uuid);
+        return templateRepository.findByUUID(uuid, true);
     }
 
     @Override
+    @PreAuthorize("hasPermission(null, 'DELETE_MY_TEMPLATE')")
        public Template softDelete(Template template) throws Exception {
+    	csDeleteTemplate(template.getId());
         template.setIsActive(false);
         template.setStatus(Template.Status.INACTIVE);
-             return templateRepository.save(template);
+   	    return templateRepository.save(template);
        }
 
 }
