@@ -33,10 +33,10 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         Optional<String> token = (Optional) authentication.getPrincipal();
         if (!token.isPresent() || token.get().isEmpty()) {
-            throw new BadCredentialsException("Invalid token or token expired");
+            throw new BadCredentialsException("INVALID_TOKEN");
         }
         if (!tokenService.contains(token.get())) {
-            throw new BadCredentialsException("Invalid token or token expired");
+            throw new BadCredentialsException("INVALID_TOKEN");
         }
         try {
             authentication = tokenService.retrieve(token.get(), authentication, tokenService, externalServiceAuthenticator);

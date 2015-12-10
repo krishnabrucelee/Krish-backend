@@ -58,7 +58,7 @@ public interface UserService extends CRUDService<User> {
      * @return user details
      * @throws Exception raise if error
      */
-     User findByUser(Optional<String> userName, Optional<String> password, Optional<String> domainName) throws Exception;
+    User findByUser(String userName, String password, String domainName) throws Exception;
 
 
      /**

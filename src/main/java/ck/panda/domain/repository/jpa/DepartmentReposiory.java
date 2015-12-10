@@ -35,8 +35,8 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
      * @param isActive get the department list based on active/inactive status.
      * @return list of departments.
      */
-    @Query(value = "select dpt from Department dpt where dpt.isActive =:isActive")
-    Page<Department> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
+    @Query(value = "select dpt from Department dpt where dpt.isActive =:isActive AND dpt.type=:type")
+    Page<Department> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive, @Param("type") AccountType type);
 
     /**
      * Find all the department with active status.
@@ -44,8 +44,8 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
      * @param isActive get the department list based on active/inactive status.
      * @return list of departments.
      */
-    @Query(value = "select dpt from Department dpt where dpt.isActive =:isActive")
-    List<Department> findAllByIsActive(@Param("isActive") Boolean isActive);
+    @Query(value = "select dpt from Department dpt where dpt.isActive =:isActive AND dpt.type=:type")
+    List<Department> findAllByIsActive(@Param("isActive") Boolean isActive, @Param("type") AccountType type);
 
     /**
      * Find the department by uuid.
@@ -54,7 +54,7 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
      * @param isActive get the department list based on active/inactive status.
      * @return Department.
      */
-    @Query(value = "select dpt from Department dpt where dpt.isActive =:isActive AND dpt.uuid=:uuid)")
+    @Query(value = "select dpt from Department dpt where dpt.isActive =:isActive AND dpt.uuid=:uuid")
     Department findByUuidAndIsActive(@Param("uuid") String uuid, @Param("isActive") Boolean isActive);
 
     /**
@@ -62,7 +62,7 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
      * @param id domain id
      * @return department list
      */
-    @Query(value = "select dpt from Department dpt where dpt.domainId=:domainId)")
+    @Query(value = "select dpt from Department dpt where dpt.domainId=:domainId")
     List<Department> findByDomain(@Param("domainId") Long id);
 
     /**
@@ -72,8 +72,8 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
      * @param isActive get the department list based on active/inactive status.
      * @return Department.
      */
-    @Query(value = "select dpt from Department dpt where dpt.isActive =:isActive AND dpt.domainId=:domainId)")
-    List<Department> findByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive);
+    @Query(value = "select dpt from Department dpt where dpt.isActive =:isActive AND dpt.domainId=:domainId AND dpt.type=:type")
+    List<Department> findByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, @Param("type") AccountType type);
 
     /**
      * Find the department by username and isActive.
@@ -82,7 +82,7 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
      * @param isActive get the department list based on active/inactive status.
      * @return Department.
      */
-    @Query(value = "select dpt from Department dpt where dpt.isActive =:isActive AND dpt.userName=:userName)")
+    @Query(value = "select dpt from Department dpt where dpt.isActive =:isActive AND dpt.userName=:userName")
     Department findByUsername(@Param("userName")String userName, @Param("isActive") Boolean isActive);
 
     /**
@@ -93,8 +93,8 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
      * @param pageable for pagination.
      * @return Department.
      */
-    @Query(value = "select dpt from Department dpt where dpt.isActive =:isActive AND dpt.domainId=:domainId)")
-    Page<Department> findByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, Pageable pageable);
+    @Query(value = "select dpt from Department dpt where dpt.isActive =:isActive AND dpt.domainId=:domainId AND dpt.type=:type")
+    Page<Department> findByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, Pageable pageable, @Param("type") AccountType type);
 
     /**
      * Find the department list by account types and isActive.
