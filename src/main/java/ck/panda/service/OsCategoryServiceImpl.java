@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.Template.Status;
-import ck.panda.domain.entity.Template.Type;
+import ck.panda.domain.entity.Template.TemplateType;
 import ck.panda.domain.repository.jpa.OsCategoryRepository;
 import ck.panda.domain.repository.jpa.TemplateRepository;
 import ck.panda.util.CloudStackOSService;
@@ -89,7 +89,7 @@ public class OsCategoryServiceImpl implements OsCategoryService {
         List<OsCategory> osList = new ArrayList<OsCategory>();
         if(!osCategory.isEmpty()) {
             for(OsCategory os:osCategory) {
-         List<Template> templates = templateRepository.findByOsCategoryFilters(Type.SYSTEM, Status.ACTIVE, os);
+         List<Template> templates = templateRepository.findByOsCategoryFilters(TemplateType.SYSTEM, Status.ACTIVE, os);
          if(templates.size() > 0){
              osList.add(os);
          }
