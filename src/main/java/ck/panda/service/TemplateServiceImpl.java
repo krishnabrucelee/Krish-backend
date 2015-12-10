@@ -3,6 +3,8 @@ package ck.panda.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -13,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Hypervisor;
+import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.OsType;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.Template.Status;
@@ -175,9 +178,9 @@ public class TemplateServiceImpl implements TemplateService {
                 template.setOsType(osType);
                 template.setOsCategory(osCategoryRepository.findOne(osType.getOsCategoryId()));
                 if(osType.getDescription().contains("32")) {
-                	template.setArchitecture("32");
+                    template.setArchitecture("32");
                 } else if(osType.getDescription().contains("64")) {
-                	template.setArchitecture("64");
+                    template.setArchitecture("64");
                 }
 
                 template.setDisplayText(osType.getDescription());
@@ -193,31 +196,31 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public List<Template> findByTemplate() throws Exception {
-    	Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-    	if(domain != null && domain.getName().equals("ROOT")) {
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if(domain != null && domain.getName().equals("ROOT")) {
     		return (List<Template>) templateRepository.findByTemplateAndFeature("ALL", TemplateType.SYSTEM, Status.ACTIVE, true);
-    	}
+        }
         return templateRepository.findByTemplate("ALL", TemplateType.SYSTEM, Status.ACTIVE, true);
     }
 
 
     @Override
     public List<Template> findByFilters(Template template) throws Exception {
-		Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if(template.getArchitecture() == null) {
-    		template.setArchitecture("ALL");
-    	}
-    	if(template.getOsCategory() == null ) {
-    		if(domain != null && domain.getName().equals("ROOT")) {
+            template.setArchitecture("ALL");
+        }
+        if(template.getOsCategory() == null ) {
+            if(domain != null && domain.getName().equals("ROOT")) {
             	return (List<Template>) templateRepository.findByTemplateAndFeature(template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true);
             }
     		return (List<Template>) templateRepository.findByTemplate(template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true);
-    	} else  {
-    		if(domain != null && domain.getName().equals("ROOT")) {
+        } else  {
+            if(domain != null && domain.getName().equals("ROOT")) {
     			return templateRepository.findAllByOsCategoryAndArchitectureAndType(template.getOsCategory(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true);
-    		}
+            }
     		return templateRepository.findAllByOsCategoryAndArchitectureAndTypeAndStatus(template.getOsCategory(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true);
-    	}
+        }
     }
 
     /**
@@ -380,10 +383,11 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     @PreAuthorize("hasPermission(null, 'DELETE_MY_TEMPLATE')")
-   	public Template softDelete(Template template) throws Exception {
+       public Template softDelete(Template template) throws Exception {
     	csDeleteTemplate(template.getId());
-    	template.setIsActive(false);
-    	template.setStatus(Template.Status.INACTIVE);
+        template.setIsActive(false);
+        template.setStatus(Template.Status.INACTIVE);
    	    return templateRepository.save(template);
-   	}
+       }
+
 }
