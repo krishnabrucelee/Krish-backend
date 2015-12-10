@@ -54,6 +54,6 @@ public interface TemplateService extends CRUDService<Template> {
      * @return template
      * @throws Exception unhandled errors.
      */
-	Template softDelete(Template template) throws Exception;
+    Template softDelete(Template template) throws Exception;
 
 }

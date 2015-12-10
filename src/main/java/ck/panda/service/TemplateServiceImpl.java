@@ -3,6 +3,8 @@ package ck.panda.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -12,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Hypervisor;
+import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.OsType;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
@@ -170,9 +173,9 @@ public class TemplateServiceImpl implements TemplateService {
                 template.setOsType(osType);
                 template.setOsCategory(osCategoryRepository.findOne(osType.getOsCategoryId()));
                 if(osType.getDescription().contains("32")) {
-                	template.setArchitecture("32");
+                    template.setArchitecture("32");
                 } else if(osType.getDescription().contains("64")) {
-                	template.setArchitecture("64");
+                    template.setArchitecture("64");
                 }
 
                 template.setDisplayText(osType.getDescription());
@@ -188,31 +191,31 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public List<Template> findByTemplate() throws Exception {
-    	Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-    	if(domain != null && domain.getName().equals("ROOT")) {
-    		return (List<Template>) templateRepository.findByTemplateAndFeature("ALL", Type.SYSTEM, Status.ACTIVE);
-    	}
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if(domain != null && domain.getName().equals("ROOT")) {
+            return (List<Template>) templateRepository.findByTemplateAndFeature("ALL", Type.SYSTEM, Status.ACTIVE);
+        }
         return templateRepository.findByTemplate("ALL", Type.SYSTEM, Status.ACTIVE);
     }
 
 
     @Override
     public List<Template> findByFilters(Template template) throws Exception {
-		Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if(template.getArchitecture() == null) {
-    		template.setArchitecture("ALL");
-    	}
-    	if(template.getOsCategory() == null ) {
-    		if(domain != null && domain.getName().equals("ROOT")) {
-            	return (List<Template>) templateRepository.findByTemplateAndFeature(template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
+            template.setArchitecture("ALL");
+        }
+        if(template.getOsCategory() == null ) {
+            if(domain != null && domain.getName().equals("ROOT")) {
+                return (List<Template>) templateRepository.findByTemplateAndFeature(template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
             }
-    		return (List<Template>) templateRepository.findByTemplate(template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
-    	} else  {
-    		if(domain != null && domain.getName().equals("ROOT")) {
-    			return templateRepository.findAllByOsCategoryAndArchitectureAndType(template.getOsCategory(), template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
-    		}
-    		return templateRepository.findAllByOsCategoryAndArchitectureAndTypeAndStatus(template.getOsCategory(), template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
-    	}
+            return (List<Template>) templateRepository.findByTemplate(template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
+        } else  {
+            if(domain != null && domain.getName().equals("ROOT")) {
+                return templateRepository.findAllByOsCategoryAndArchitectureAndType(template.getOsCategory(), template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
+            }
+            return templateRepository.findAllByOsCategoryAndArchitectureAndTypeAndStatus(template.getOsCategory(), template.getArchitecture(), Type.SYSTEM, Status.ACTIVE);
+        }
     }
 
     /**
@@ -374,9 +377,10 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-   	public Template softDelete(Template template) throws Exception {
-    	template.setIsActive(false);
-    	template.setStatus(Template.Status.INACTIVE);
-   	      return templateRepository.save(template);
-   	}
+       public Template softDelete(Template template) throws Exception {
+        template.setIsActive(false);
+        template.setStatus(Template.Status.INACTIVE);
+             return templateRepository.save(template);
+       }
+
 }
