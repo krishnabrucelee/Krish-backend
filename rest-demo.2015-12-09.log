@@ -1,0 +1,934 @@
+12:15:43.048 [restartedMain] INFO  ck.panda.ApplicationConfig - Starting ApplicationConfig on e1.assistanz.local with PID 6735 (/home/Assistanz/repository/ck/pandaproject/target/classes started by Assistanz in /home/Assistanz/repository/ck/pandaproject) 
+12:15:43.056 [restartedMain] DEBUG ck.panda.ApplicationConfig - Running with Spring Boot v1.3.0.M4, Spring v4.2.0.RELEASE 
+12:16:13.953 [restartedMain] INFO  ck.panda.ApplicationConfig - Started ApplicationConfig in 31.753 seconds (JVM running for 33.781) 
+12:16:18.971 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user Optional.of(admin) by x-auth-username method 
+12:16:18.973 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user Optional.of(admin) by x-auth-username method 
+12:16:19.597 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:16:19.597 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:16:33.078 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:16:33.079 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:16:33.080 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:16:35.278 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:16:35.279 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:16:35.279 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:16:36.461 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:16:36.463 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:16:36.463 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:16:36.562 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:16:36.565 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:16:36.567 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:16:43.712 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:16:43.712 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:16:43.712 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:16:43.727 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:16:43.728 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:16:43.728 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:19:54.618 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:19:54.620 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:19:54.620 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:19:54.634 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:19:54.641 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:19:54.641 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:20:00.530 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:20:00.531 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:20:00.531 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:20:00.551 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:20:00.552 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:20:00.552 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:20:17.704 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:20:17.704 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:20:17.705 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:20:17.720 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:20:17.720 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:20:17.720 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:20:39.174 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:20:39.175 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:20:39.175 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:20:39.195 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:20:39.196 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:20:39.196 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:21:01.661 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:21:01.662 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:21:01.662 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:21:01.675 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:21:01.680 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:21:01.680 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:22:52.401 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:22:52.402 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:22:52.403 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:22:52.412 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:22:52.413 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:22:52.413 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:23:25.632 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:23:25.633 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:23:25.633 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:23:25.644 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:23:25.646 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:23:25.646 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:24:06.106 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:24:06.108 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:24:06.108 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:24:06.135 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:24:06.136 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:24:06.136 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:30:25.907 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:30:25.909 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:30:25.909 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:30:25.918 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:30:25.919 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:30:25.919 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:30:45.733 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:30:45.734 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:30:45.734 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:30:45.758 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:30:45.758 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:30:45.758 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:30:48.302 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:30:48.302 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:30:48.302 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:30:50.252 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:30:50.253 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:30:50.253 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:30:52.830 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:30:52.831 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:30:52.831 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:30:52.916 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:30:52.916 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:30:52.916 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:30:57.857 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:30:57.858 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:30:57.858 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:30:59.083 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:30:59.084 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:30:59.084 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:30:59.095 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:30:59.096 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:30:59.096 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:31:40.364 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:31:40.365 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:31:40.365 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:31:40.377 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:31:40.379 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:31:40.379 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:32:04.337 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:32:04.342 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:32:04.342 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:32:04.354 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:32:04.356 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:32:04.356 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:32:30.177 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:32:30.177 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:32:30.177 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:32:30.200 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:32:30.200 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:32:30.200 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:32:54.694 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:32:54.694 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:32:54.694 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:32:54.718 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:32:54.719 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:32:54.719 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:33:24.489 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:33:24.490 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:33:24.490 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:33:24.512 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:33:24.515 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:33:24.515 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:34:03.184 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:34:03.185 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:34:03.186 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:34:03.197 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:34:03.198 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:34:03.198 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:36:44.865 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:36:44.866 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:36:44.866 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:36:44.889 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:36:44.890 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:36:44.890 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:38:57.884 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:38:57.885 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:38:57.885 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:38:57.902 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:38:57.903 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:38:57.903 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:41:22.180 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:41:22.182 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:41:22.182 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:41:22.198 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:41:22.199 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:41:22.199 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:41:47.723 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:41:47.723 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:41:47.724 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:41:47.733 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:41:47.734 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:41:47.734 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:42:30.185 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:42:30.186 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:42:30.187 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:42:30.196 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:42:30.199 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:42:30.199 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:46:37.891 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:46:37.893 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:46:37.893 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:46:37.918 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:46:37.924 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:46:37.924 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:46:38.022 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:46:38.023 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:46:38.023 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:47:14.881 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:47:14.882 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:47:14.882 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:47:14.900 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:47:14.902 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:47:14.902 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+12:47:14.915 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+12:47:14.915 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+12:47:14.915 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:45:27.730 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:45:27.793 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:45:27.793 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:45:27.826 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:45:27.828 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:45:27.828 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:45:27.828 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:45:27.828 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:45:27.828 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:45:50.027 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:45:50.027 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:45:50.027 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:45:50.045 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:45:50.045 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:45:50.046 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:45:50.046 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:45:50.078 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:45:50.079 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:55:07.545 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:55:07.546 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:55:07.547 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:55:07.554 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:55:07.554 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:55:07.555 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:55:07.555 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:55:07.555 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:55:07.555 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:56:21.003 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:56:21.005 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:56:21.005 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:56:21.012 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:56:21.013 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:56:21.013 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:56:21.025 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:56:21.026 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:56:21.026 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:56:22.414 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:56:22.414 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:56:22.414 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:56:22.431 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:56:22.431 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:56:22.431 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:56:22.433 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:56:22.433 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:56:22.433 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:56:41.460 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:56:41.460 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:56:41.460 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:56:41.480 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:56:41.480 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:56:41.481 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:56:41.493 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:56:41.494 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:56:41.494 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:57:25.169 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:57:25.170 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:57:25.170 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:57:25.178 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:57:25.179 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:57:25.179 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:57:25.203 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:57:25.204 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:57:25.204 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:59:41.845 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:59:41.846 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:59:41.847 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:59:41.863 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:59:41.864 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:59:41.864 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+14:59:41.865 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+14:59:41.866 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+14:59:41.866 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:00:32.604 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:00:32.607 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:00:32.607 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:00:32.620 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:00:32.621 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:00:32.621 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:00:32.622 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:00:32.622 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:00:32.622 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:01:04.044 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:01:04.045 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:01:04.045 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:01:04.055 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:01:04.057 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:01:04.057 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:01:04.057 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:01:04.058 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:01:04.058 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:01:35.689 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:01:35.689 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:01:35.689 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:01:35.705 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:01:35.705 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:01:35.706 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:01:35.706 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:01:35.706 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:01:35.707 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:02:00.706 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:02:00.708 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:02:00.708 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:02:00.731 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:02:00.731 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:02:00.731 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:02:00.732 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:02:00.732 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:02:00.732 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:02:56.527 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:02:56.528 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:02:56.528 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:02:56.545 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:02:56.545 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:02:56.545 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:02:56.546 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:02:56.546 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:02:56.546 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:03:03.831 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:03:03.831 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:03:03.832 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:03:03.839 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:03:03.840 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:03:03.841 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:03:03.849 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:03:03.850 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:03:03.850 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:03:19.429 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:03:19.430 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:03:19.430 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:03:19.441 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:03:19.441 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:03:19.441 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:03:19.442 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:03:19.443 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:03:19.443 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:03:50.690 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:03:50.690 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:03:50.690 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:03:50.701 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:03:50.702 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:03:50.702 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:03:50.702 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:03:50.702 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:03:50.702 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:04:28.947 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:04:28.948 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:04:28.948 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:04:28.957 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:04:28.958 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:04:28.958 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:04:28.958 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:04:28.959 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:04:28.959 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:05:34.027 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:05:34.028 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:05:34.028 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:05:34.045 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:05:34.045 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:05:34.047 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:05:34.047 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:05:34.048 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:05:34.048 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:05:45.918 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:05:45.919 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:05:45.919 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:05:45.934 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:05:45.934 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:05:45.934 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:05:45.935 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:05:45.936 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:05:45.936 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:08:18.336 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:08:18.341 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:08:18.341 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:08:18.348 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:08:18.350 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:08:18.350 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:08:18.353 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:08:18.353 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:08:18.354 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:08:20.849 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:08:20.849 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:08:20.849 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:08:20.923 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:08:20.923 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:08:20.924 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:08:20.925 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:08:20.925 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:08:20.926 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:08:33.466 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:08:33.467 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:08:33.467 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:08:35.169 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:08:35.170 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:08:35.170 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:08:36.973 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:08:36.973 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:08:36.974 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:08:36.990 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:08:36.991 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:08:36.991 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:08:36.995 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:08:36.996 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:08:36.996 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:09:10.894 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:09:10.895 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:09:10.895 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:09:12.325 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:09:12.326 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:09:12.326 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:09:13.539 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:09:13.539 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:09:13.539 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:09:13.558 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:09:13.558 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:09:13.558 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:09:13.568 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:09:13.569 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:09:13.569 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:09:38.158 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:09:38.158 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:09:38.158 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:09:38.169 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:09:38.170 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:09:38.170 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:09:38.171 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:09:38.171 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:09:38.172 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:09:40.305 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:09:40.305 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:09:40.305 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:09:42.800 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:09:42.800 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:09:42.800 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:09:42.809 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:09:42.809 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:09:42.809 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:09:42.810 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:09:42.810 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:09:42.810 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:09:46.571 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:09:46.571 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:09:46.571 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:56:49.974 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:56:49.977 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:56:49.977 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:56:49.997 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:56:49.998 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:56:49.999 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:56:49.999 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:56:55.507 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:56:55.508 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:56:55.508 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:56:55.516 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:56:55.516 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:56:55.516 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:56:55.516 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:56:55.517 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:56:55.517 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:58:17.199 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:58:17.200 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:58:17.200 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:58:17.212 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:58:17.212 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:58:17.219 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:58:17.219 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:58:17.220 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:58:17.220 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:59:28.462 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:59:28.463 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:59:28.463 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:59:37.638 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:59:37.638 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:59:37.638 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:59:42.712 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:59:42.713 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:59:42.713 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:59:42.727 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:59:42.727 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:59:42.727 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+15:59:42.728 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+15:59:42.729 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+15:59:42.729 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:08:34.682 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:08:34.683 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:08:34.683 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:08:34.694 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:08:34.694 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:08:34.697 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:08:34.697 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:08:34.697 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:08:34.697 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:09:16.464 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:09:16.466 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:09:16.466 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:09:16.476 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:09:16.477 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:09:16.477 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:09:16.478 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:09:16.479 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:09:16.479 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:11:23.511 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:11:23.512 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:11:23.512 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:11:23.530 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:11:23.534 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:11:23.535 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:11:23.535 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:11:23.536 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:11:23.536 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:11:28.306 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:11:28.307 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:11:28.307 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:11:29.607 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:11:29.608 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:11:29.608 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:11:29.615 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:11:29.616 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:11:29.616 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:11:31.161 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:11:31.161 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:11:31.161 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:11:34.241 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:11:34.241 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:11:34.241 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:11:34.905 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:11:34.906 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:11:34.906 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:11:36.097 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:11:36.098 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:11:36.098 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:11:36.099 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:11:36.102 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:11:36.102 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:11:37.734 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:11:37.734 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:11:37.734 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:11:38.636 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:11:38.637 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:11:38.637 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:11:39.226 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:11:39.226 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:11:39.226 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:11:39.242 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:11:39.242 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:11:39.242 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:11:39.242 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:11:39.242 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:11:39.242 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:16:06.880 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:16:06.881 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:16:06.881 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:16:06.900 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:16:06.901 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:16:06.901 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:16:06.901 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:16:06.901 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:16:06.901 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:21:43.744 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:21:43.752 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:21:43.752 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:24:46.767 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:24:46.788 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:24:46.789 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:24:51.184 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:25:04.241 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:25:06.092 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:25:06.106 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:25:06.114 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsvq7u4mg2KFuIeW20k6sEM) 
+16:25:58.898 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user Optional.of(admin) by x-auth-username method 
+16:25:58.899 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:26:00.801 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:26:00.802 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:26:00.802 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:26:01.579 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:26:01.580 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:26:01.580 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:26:02.169 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:26:02.170 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:26:02.170 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:26:02.178 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:26:02.178 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:26:02.178 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:26:02.180 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:26:02.180 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:26:02.180 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:26:03.273 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:26:03.273 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:26:03.274 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:28:09.225 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:28:09.226 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:28:09.226 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:29:04.084 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:29:04.085 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:29:04.086 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:29:27.181 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:29:27.182 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:29:27.182 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:29:58.443 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:29:58.443 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:29:58.443 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:30:27.074 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:30:27.077 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:30:27.077 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:30:31.727 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:30:31.728 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:30:31.728 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:30:58.004 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:30:58.005 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:30:58.005 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:30:58.023 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:30:58.024 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:30:58.024 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:30:58.024 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:30:58.025 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:30:58.025 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:32:02.935 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:32:02.936 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:32:02.936 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:32:02.948 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:32:02.949 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:32:02.949 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:32:02.951 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:32:02.951 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:32:02.951 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:32:19.959 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:32:19.959 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:32:19.959 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:32:19.973 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:32:19.973 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:32:19.973 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:32:19.974 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:32:19.974 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:32:19.974 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:32:34.167 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:32:34.167 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:32:34.167 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:32:34.184 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:32:34.184 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:32:34.185 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:32:34.185 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:32:34.185 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:32:34.185 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:32:40.819 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:32:40.820 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:32:40.820 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:32:40.835 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:32:40.836 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:32:40.836 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:32:40.844 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:32:40.844 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:32:40.844 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:33:30.895 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:33:30.896 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:33:30.896 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:33:30.915 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:33:30.915 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:33:30.916 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:33:30.917 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:33:30.920 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:33:30.920 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:33:56.164 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:33:56.164 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:33:56.164 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:33:56.392 [http-nio-8080-exec-7] DEBUG c.p.service.BillableItemServiceImpl - Billabel item created 
+16:33:56.535 [http-nio-8080-exec-7] INFO  c.p.u.a.CurrentTimeDateTimeService - Returning current date and time: 2015-12-09T16:33:56.535+05:30[Asia/Kolkata] 
+16:36:31.256 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:36:31.257 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:36:31.257 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:36:31.281 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:36:31.282 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:36:31.282 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:36:31.283 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:36:31.283 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:36:31.283 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:36:34.274 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAsjorNjzBVz7V6/iKStYa6H) 
+16:36:34.274 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:36:34.275 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:36:34.277 [http-nio-8080-exec-5] DEBUG c.p.service.BillableItemServiceImpl - Billabel item created 
+16:36:34.279 [http-nio-8080-exec-5] INFO  c.p.u.a.CurrentTimeDateTimeService - Returning current date and time: 2015-12-09T16:36:34.279+05:30[Asia/Kolkata] 
+16:39:01.907 [restartedMain] INFO  ck.panda.ApplicationConfig - Starting ApplicationConfig on e1.assistanz.local with PID 6735 (/home/Assistanz/repository/ck/pandaproject/target/classes started by Assistanz in /home/Assistanz/repository/ck/pandaproject) 
+16:39:01.907 [restartedMain] DEBUG ck.panda.ApplicationConfig - Running with Spring Boot v1.3.0.M4, Spring v4.2.0.RELEASE 
+16:40:29.719 [restartedMain] INFO  ck.panda.ApplicationConfig - Starting ApplicationConfig on e1.assistanz.local with PID 6735 (/home/Assistanz/repository/ck/pandaproject/target/classes started by Assistanz in /home/Assistanz/repository/ck/pandaproject) 
+16:40:29.719 [restartedMain] DEBUG ck.panda.ApplicationConfig - Running with Spring Boot v1.3.0.M4, Spring v4.2.0.RELEASE 
+16:41:42.087 [restartedMain] INFO  ck.panda.ApplicationConfig - Starting ApplicationConfig on e1.assistanz.local with PID 14504 (/home/Assistanz/repository/ck/pandaproject/target/classes started by Assistanz in /home/Assistanz/repository/ck/pandaproject) 
+16:41:42.088 [restartedMain] DEBUG ck.panda.ApplicationConfig - Running with Spring Boot v1.3.0.M4, Spring v4.2.0.RELEASE 
+16:44:32.396 [restartedMain] INFO  ck.panda.ApplicationConfig - Starting ApplicationConfig on e1.assistanz.local with PID 14621 (/home/Assistanz/repository/ck/pandaproject/target/classes started by Assistanz in /home/Assistanz/repository/ck/pandaproject) 
+16:44:32.397 [restartedMain] DEBUG ck.panda.ApplicationConfig - Running with Spring Boot v1.3.0.M4, Spring v4.2.0.RELEASE 
+16:44:55.212 [restartedMain] INFO  ck.panda.ApplicationConfig - Started ApplicationConfig in 23.081 seconds (JVM running for 24.141) 
+16:44:59.349 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user Optional.of(admin) by x-auth-username method 
+16:45:00.157 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:45:05.519 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAvSrxi8LmHJ+EcMzEAxUrB5) 
+16:45:05.529 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:45:05.530 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:45:06.341 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAvSrxi8LmHJ+EcMzEAxUrB5) 
+16:45:06.343 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:45:06.343 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:45:09.429 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAvSrxi8LmHJ+EcMzEAxUrB5) 
+16:45:09.436 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:45:09.441 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:45:09.539 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAvSrxi8LmHJ+EcMzEAxUrB5) 
+16:45:09.540 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:45:09.540 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:45:11.523 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAvSrxi8LmHJ+EcMzEAxUrB5) 
+16:45:11.524 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:45:11.524 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:45:11.533 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAvSrxi8LmHJ+EcMzEAxUrB5) 
+16:45:11.535 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:45:11.535 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:45:21.459 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAvSrxi8LmHJ+EcMzEAxUrB5) 
+16:45:21.460 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:45:21.460 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:45:21.473 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAvSrxi8LmHJ+EcMzEAxUrB5) 
+16:45:21.475 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:45:21.475 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:46:06.674 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAvSrxi8LmHJ+EcMzEAxUrB5) 
+16:46:06.686 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:46:06.686 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:46:06.700 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAvSrxi8LmHJ+EcMzEAxUrB5) 
+16:46:06.702 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:46:06.702 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:46:19.671 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAvSrxi8LmHJ+EcMzEAxUrB5) 
+16:46:19.672 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+16:46:19.672 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+16:47:39.790 [restartedMain] INFO  ck.panda.ApplicationConfig - Starting ApplicationConfig on e1.assistanz.local with PID 14764 (/home/Assistanz/repository/ck/pandaproject/target/classes started by Assistanz in /home/Assistanz/repository/ck/pandaproject) 
+16:47:39.790 [restartedMain] DEBUG ck.panda.ApplicationConfig - Running with Spring Boot v1.3.0.M4, Spring v4.2.0.RELEASE 
+16:49:38.524 [restartedMain] INFO  ck.panda.ApplicationConfig - Started ApplicationConfig in 119.001 seconds (JVM running for 119.854) 
+18:12:37.303 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user Optional.of(admin) by x-auth-username method 
+18:12:37.819 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:12:41.947 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:12:41.950 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:12:41.950 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:12:44.261 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:12:44.262 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:12:44.262 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:12:44.838 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:12:44.839 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:12:44.839 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:12:44.911 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:12:44.912 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:12:44.912 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:12:44.920 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:12:44.928 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:12:44.928 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:12:46.154 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:12:46.155 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:12:46.155 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:12:46.175 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:12:46.176 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:12:46.176 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:12:46.178 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:12:46.180 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:12:46.180 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:12:50.164 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:12:50.164 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:12:50.164 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:12:50.180 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:12:50.180 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:12:50.181 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:12:50.181 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:12:50.182 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:12:50.182 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:12:55.748 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:12:55.749 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:12:55.749 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:12:58.384 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:12:58.385 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:12:58.385 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:12:59.885 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:12:59.886 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:12:59.886 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:12:59.973 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:12:59.974 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:12:59.974 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:01.355 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:01.356 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:01.357 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:01.367 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:01.368 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:01.368 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:11.366 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:11.367 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:11.367 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:11.521 [http-nio-8080-exec-7] INFO  c.p.u.a.CurrentTimeDateTimeService - Returning current date and time: 2015-12-09T18:13:11.521+05:30[Asia/Kolkata] 
+18:13:11.775 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:11.775 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:11.775 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:11.784 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:11.785 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:11.785 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:13.674 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:13.674 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:13.674 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:14.714 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:14.714 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:14.714 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:15.798 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:15.799 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:15.799 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:15.810 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:15.811 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:15.811 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:15.817 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:15.817 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:15.817 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:21.837 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:21.837 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:21.837 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:21.849 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:21.850 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:21.850 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:21.850 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:26.161 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:26.161 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:26.162 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:26.168 [http-nio-8080-exec-8] DEBUG c.p.service.BillableItemServiceImpl - Billabel item created 
+18:13:26.172 [http-nio-8080-exec-8] INFO  c.p.u.a.CurrentTimeDateTimeService - Returning current date and time: 2015-12-09T18:13:26.172+05:30[Asia/Kolkata] 
+18:13:26.218 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:26.219 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:26.219 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:30.534 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:30.534 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:30.534 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:30.542 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:30.543 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:30.543 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:30.549 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:30.549 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:30.549 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:33.295 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:33.296 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:33.296 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:33.312 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:33.312 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:33.313 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:33.315 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:33.316 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:33.316 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:48.499 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:48.500 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:48.500 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:48.512 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:48.513 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:48.513 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:13:48.515 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:13:48.515 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:13:48.515 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:14:47.984 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:14:47.985 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:14:47.985 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:14:48.013 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:14:48.014 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:14:48.014 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:14:48.029 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:14:48.029 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:14:48.029 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:15:06.633 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:15:06.635 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:15:06.635 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:15:06.654 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:15:06.654 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:15:06.656 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:15:06.656 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:15:25.553 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:15:25.554 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:15:25.554 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:15:26.756 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:15:26.757 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:15:26.757 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:15:28.644 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:15:28.644 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:15:28.645 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:15:28.660 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:15:28.661 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:15:28.661 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:15:28.669 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:15:28.670 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:15:28.670 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:15:30.045 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:15:30.045 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:15:30.045 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:15:30.071 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:15:30.071 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:15:30.072 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:15:30.072 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:15:30.072 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:15:30.072 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:15:40.626 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:15:40.626 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:15:40.627 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:15:40.629 [http-nio-8080-exec-10] DEBUG c.p.service.BillableItemServiceImpl - Billabel item created 
+18:15:40.630 [http-nio-8080-exec-10] INFO  c.p.u.a.CurrentTimeDateTimeService - Returning current date and time: 2015-12-09T18:15:40.630+05:30[Asia/Kolkata] 
+18:15:40.726 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:15:40.726 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:15:40.727 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:17:23.656 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:17:23.657 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:17:23.658 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:17:23.678 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:17:23.680 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:17:23.680 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:17:23.682 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:17:23.682 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:17:23.682 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:20:50.827 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:20:50.829 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:20:50.829 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:20:50.835 [http-nio-8080-exec-6] DEBUG c.p.service.BillableItemServiceImpl - Billabel item created 
+18:20:50.837 [http-nio-8080-exec-6] INFO  c.p.u.a.CurrentTimeDateTimeService - Returning current date and time: 2015-12-09T18:20:50.837+05:30[Asia/Kolkata] 
+18:20:50.884 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:20:50.885 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:20:50.886 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:21:53.609 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:21:53.610 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:21:53.610 [http-nio-8080-exec-8] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:21:53.634 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:21:53.634 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:21:53.635 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:21:53.636 [http-nio-8080-exec-5] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:21:53.636 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:21:53.636 [http-nio-8080-exec-2] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:22:12.068 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:22:12.069 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:22:12.069 [http-nio-8080-exec-10] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:22:12.073 [http-nio-8080-exec-10] DEBUG c.p.service.BillableItemServiceImpl - Billabel item created 
+18:22:12.074 [http-nio-8080-exec-10] INFO  c.p.u.a.CurrentTimeDateTimeService - Returning current date and time: 2015-12-09T18:22:12.074+05:30[Asia/Kolkata] 
+18:22:12.151 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:22:12.152 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:22:12.152 [http-nio-8080-exec-4] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:22:14.550 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:22:14.551 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:22:14.551 [http-nio-8080-exec-7] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:22:15.853 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:22:15.854 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:22:15.854 [http-nio-8080-exec-1] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:22:16.544 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:22:16.545 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:22:16.545 [http-nio-8080-exec-9] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:22:16.558 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:22:16.559 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:22:16.559 [http-nio-8080-exec-6] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
+18:22:16.561 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - Trying to authenticate user by x-auth-token method. Token: Optional.of(959jsbgnqd2MWBxLugtYQU8OD9i045yE0r5T81ZyaAuoAqjuwqik1CFYoV8cpWfG) 
+18:22:16.561 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - User successfully authenticated 
+18:22:16.561 [http-nio-8080-exec-3] DEBUG c.p.u.i.s.AuthenticationFilter - AuthenticationFilter is passing request down the filter chain 
