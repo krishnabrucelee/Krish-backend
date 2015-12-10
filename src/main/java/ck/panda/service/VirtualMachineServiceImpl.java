@@ -64,11 +64,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     /** Zone repository reference. */
     @Autowired
     private ZoneRepository zoneRepository;
-    
+
     /** Cloud stack configuration utility class. */
     @Autowired
     private ConfigUtil config;
-    
+
     /** CloudStack connector reference for instance. */
     @Autowired
     private CloudStackInstanceService cloudStackInstanceService;
@@ -108,7 +108,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 throw new ApplicationException(errors);
             } else {
                 HashMap<String, String> optional = new HashMap<String, String>();
-                optional.put("displayvm", vminstance.getName());
+                optional.put("displayname", vminstance.getName());
                 optional.put("name", vminstance.getName());
                 if (networkRepo.findByUUID(vminstance.getNetworkUuid()) != null) {
                     vminstance.setNetworkId(networkRepo.findByUUID(vminstance.getNetworkUuid()).getId());
@@ -402,9 +402,13 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         Errors errors = null;
         switch (event) {
         case EventTypes.EVENT_VM_MIGRATE:
-            try {
-                if (vminstance.getStatus().equals(Status.Running)) {
-                    optional.put("hostid", vmInstance.getHostUuid());
+			try {
+				if (vminstance.getStatus().equals(Status.Running)) {
+					errors = validator.sendGlobalError("No Hosts are available for Migration");
+					if (errors.hasErrors()) {
+						throw new BadCredentialsException("No Hosts are available for Migration");
+					}
+					optional.put("hostid", vmInstance.getHostUuid());
                     String instanceResponse = cloudStackInstanceService.migrateVirtualMachine(vmInstance.getUuid(),
                             optional);
                     JSONObject instance = new JSONObject(instanceResponse)
