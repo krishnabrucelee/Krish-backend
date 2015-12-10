@@ -157,6 +157,12 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
+            CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
+            server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
+            cloudStackInstanceService.setServer(server);
+            HashMap<String, String> optional = new HashMap<String, String>();
+            optional.put("displayName", vminstance.getTransDisplayName());
+            cloudStackInstanceService.updateVirtualMachine(vminstance.getUuid(), optional);
             return virtualmachinerepository.save(vminstance);
         }
     }
