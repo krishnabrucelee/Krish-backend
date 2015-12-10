@@ -4,6 +4,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.binary.Base64;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.service.VirtualMachineService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -81,6 +83,41 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
         Page<VmInstance> pageResponse = virtualmachineservice.findAll(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
+    }
+
+    @RequestMapping(value = "listByStatus", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<VmInstance>  listVmByStatus(@RequestParam String sortBy, @RequestParam String status, @RequestHeader(value = RANGE) String range,
+            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
+                    throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, VmInstance.class);
+        Page<VmInstance> pageResponse = virtualmachineservice.findAll(page);
+        if(!status.equals("Expunging")) {
+            pageResponse = virtualmachineservice.findAllByStatus(page, status);
+        }
+        return pageResponse.getContent();
+
+    }
+
+
+    /**
+     * Get the vm counts for stopped, running and total count.
+     *
+     * @param request
+     * @param response
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "vmCounts", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public String getVmCounts(HttpServletRequest request, HttpServletResponse response)
+                    throws Exception {
+        Integer vmCount = virtualmachineservice.findAll().size();
+        Integer runningVmCount = virtualmachineservice.findCountByStatus(Status.Running);
+        Integer stoppedVmCount = virtualmachineservice.findCountByStatus(Status.Stopped);
+        return "{\"runningVmCount\":" + runningVmCount + ",\"stoppedVmCount\":" + stoppedVmCount + ",\"totalCount\":"+ vmCount + "}";
     }
 
     /**

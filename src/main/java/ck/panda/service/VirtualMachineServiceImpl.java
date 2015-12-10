@@ -117,7 +117,6 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 optional.put("displayvm", "true");
                 optional.put("keyboard", "us");
                 optional.put("name", vminstance.getName());
-                optional.put("displayname", vminstance.getInstanceOwner().getUserName());
                 if (vminstance.getProjectId() != null) {
                     optional.put("projectid", vminstance.getProject().getUuid());
                 }
@@ -163,6 +162,12 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
+            CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
+            server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
+            cloudStackInstanceService.setServer(server);
+            HashMap<String, String> optional = new HashMap<String, String>();
+            optional.put("displayName", vminstance.getTransDisplayName());
+            cloudStackInstanceService.updateVirtualMachine(vminstance.getUuid(), optional);
             return virtualmachinerepository.save(vminstance);
         }
     }
@@ -571,6 +576,16 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         return virtualmachinerepository.findAllByIsActive(Status.Expunging, pagingAndSorting.toPageRequest());
     }
 
+
+    @Override
+    public Page<VmInstance> findAllByStatus(PagingAndSorting pagingAndSorting, String status) throws Exception {
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if (domain != null && !domain.getName().equals("ROOT")) {
+            Page<VmInstance> allInstanceList =  virtualmachinerepository.findAllByDomainIsActive(domain.getId(), Status.valueOf(status), pagingAndSorting.toPageRequest());
+        }
+        return virtualmachinerepository.findAllByStatus(Status.valueOf(status), pagingAndSorting.toPageRequest());
+    }
+
     @Override
     public List<VmInstance> findAll() throws Exception {
         return (List<VmInstance>) virtualmachinerepository.findAllByIsActive(Status.Expunging);
@@ -673,6 +688,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
               vmInstance.setDepartmentId(
                     convertEntityService.getDepartmentByUsernameAndDomain(vmInstance.getTransDepartmentId(),
                             convertEntityService.getDomain(vmInstance.getTransDomainId())));
+              vmInstance.setTemplateId(convertEntityService.getTemplateId(vmInstance.getTransTemplateId()));
               vmInstance.setComputeOfferingId(convertEntityService.getComputeOfferId(vmInstance.getTransComputeOfferingId()));
               if (vmInstance.getHostId() != null) {
                   vmInstance.setPodId(convertEntityService
@@ -683,6 +699,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             }
         }
         return vmList;
+    }
+
+    public Integer findCountByStatus(Status status) {
+        return virtualmachinerepository.findCountByStatus(status);
     }
 
 }

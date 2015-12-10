@@ -13,6 +13,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.infrastructure.externalwebservice.SomeExternalServiceAuthenticator;
 import ck.panda.util.infrastructure.security.AuthenticationFilter;
 import ck.panda.util.infrastructure.security.DatabaseAuthenticationManager;
@@ -39,6 +41,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private DatabaseAuthenticationManager databaseAuthenticationManager;
 
+    /** Autowired TokenDetails. */
+    @Autowired
+    private TokenDetails userTokenDetails;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
@@ -49,10 +55,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                   antMatchers(actuatorEndpoints()).hasRole(backendAdminRole).
                   anyRequest().authenticated().
                 and().
+                  formLogin().
+                  loginPage("/login").
+                  permitAll().
+                and().
+                  logout().
+                  logoutRequestMatcher(new AntPathRequestMatcher("/logout")).
+                  logoutSuccessUrl("/login?out=1").
+                  deleteCookies("JSESSIONID" ).
+                  invalidateHttpSession(true).
+                and().
                   anonymous().disable().
                   exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint());
 
-        http.addFilterBefore(new AuthenticationFilter(databaseAuthenticationManager), BasicAuthenticationFilter.class);
+        http.addFilterBefore(new AuthenticationFilter(databaseAuthenticationManager, userTokenDetails), BasicAuthenticationFilter.class);
     }
 
     /** Actuator management endpoints.

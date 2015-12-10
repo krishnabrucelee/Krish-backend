@@ -68,4 +68,24 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
     */
    @Query(value = "select vm from VmInstance vm where vm.status <> :status")
    List<VmInstance> findAllByIsActive(@Param("status") Status status);
+
+
+   /**
+    * Get the list of VMs by status.
+    *
+    * @param status of the status of VM.
+    * @param pageable page request
+    * @return instance list
+    */
+   @Query(value = "select vm from VmInstance vm where vm.status = :status")
+   Page<VmInstance> findAllByStatus(@Param("status") Status status, Pageable pageable);
+
+   /**
+    * Get the instance count by status.
+    *
+    * @param status instnace status.
+    * @return Instance count.
+    */
+   @Query(value = "select COUNT(vm.id) from VmInstance vm where vm.status = :status")
+   Integer findCountByStatus(@Param("status") Status status);
 }

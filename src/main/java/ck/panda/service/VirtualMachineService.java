@@ -1,9 +1,13 @@
 package ck.panda.service;
 
 import java.util.List;
+
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.util.domain.CRUDService;
+import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
  * Service class for Virtual Machine. This service provides basic CRUD and essential api's for Virtual Machine
@@ -56,5 +60,23 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * @throws Exception if error occurs
      */
     VmInstance upgradeDowngradeVM(VmInstance vminstance) throws Exception;
+    
+    /**
+     * Find all the instance based on the given status for paginated list.
+     *
+     * @param pagingAndSorting
+     * @param status
+     * @return
+     * @throws Exception
+     */
+    Page<VmInstance> findAllByStatus(PagingAndSorting pagingAndSorting, String status) throws Exception;
+
+    /**
+     * Get the count of the instance based on the status.
+     *
+     * @param status
+     * @return
+     */
+    Integer findCountByStatus(Status status);
 
 }

@@ -165,16 +165,16 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Department> findAll() throws Exception {
-        return (List<Department>) departmentRepo.findAllByIsActive(true);
+        return (List<Department>) departmentRepo.findAllByIsActive(true, AccountType.USER);
     }
 
     @Override
     public List<Department> findByAll() throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && !domain.getName().equals("ROOT")) {
-            return (List<Department>) departmentRepo.findByDomainAndIsActive(domain.getId(), true);
+            return (List<Department>) departmentRepo.findByDomainAndIsActive(domain.getId(), true, AccountType.USER);
         }
-        return (List<Department>) departmentRepo.findAllByIsActive(true);
+        return (List<Department>) departmentRepo.findAllByIsActive(true, AccountType.USER);
     }
 
     /**
@@ -187,9 +187,9 @@ public class DepartmentServiceImpl implements DepartmentService {
     public Page<Department> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && !domain.getName().equals("ROOT")) {
-            return departmentRepo.findByDomainAndIsActive(domain.getId(), true, pagingAndSorting.toPageRequest());
+            return departmentRepo.findByDomainAndIsActive(domain.getId(), true, pagingAndSorting.toPageRequest(), AccountType.USER);
         }
-        return departmentRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
+        return departmentRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true, AccountType.USER);
     }
 
     @Override
@@ -208,7 +208,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         //Step1: Get all the account details
 
         //Step2: Get the usage response for each account from cloudstack
-        return departmentRepo.findAllByIsActive(true);
+        return departmentRepo.findAllByIsActive(true, AccountType.USER);
     }
 
     @Override
@@ -230,9 +230,10 @@ public class DepartmentServiceImpl implements DepartmentService {
                 // Add the converted Department entity to list
                 Department department = Department.convert(userListJSON.getJSONObject(i));
                 department.setDomainId(convertEntityService.getDomainId(department.getTransDomainId()));
-                //if (department.getType() == Department.AccountType.USER) {
-                    departmentList.add(department);
-                //}
+//              TODO : Need to get root admin account for role permission so you need to check the department where our you use.
+//              if (department.getType() == Department.AccountType.USER) {
+                departmentList.add(department);
+//              }
             }
         }
         return departmentList;
@@ -245,7 +246,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Department> findByDomainAndIsActive(Long domainId, Boolean isActive) {
-        return departmentRepo.findByDomainAndIsActive(domainId, isActive);
+        return departmentRepo.findByDomainAndIsActive(domainId, isActive, AccountType.USER);
     }
 
     @Override
