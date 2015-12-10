@@ -91,6 +91,6 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @return template
      */
     @Query(value = "select DISTINCT t from Template t where t.type <>:type AND t.status = :status AND t.osCategory LIKE :osCategory")
-    List<Template> findByOsCategoryFilters(@Param("type")Type type, @Param("status") Status status, @Param("osCategory") OsCategory osCategory);
+    List<Template> findByOsCategoryFilters(@Param("type") TemplateType type, @Param("status") Status status, @Param("osCategory") OsCategory osCategory);
 
 }
