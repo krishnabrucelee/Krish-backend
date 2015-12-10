@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-
 import ck.panda.service.EncryptionUtil;
 
 /**
@@ -49,6 +48,12 @@ public class TokenDetails {
             break;
         case "rolename":
             responseString = splitToken[4];
+            break;
+        case "domainname":
+            responseString = splitToken[5];
+            break;
+        case "usertype":
+            responseString = splitToken[6];
             break;
         default:
             responseString = "";

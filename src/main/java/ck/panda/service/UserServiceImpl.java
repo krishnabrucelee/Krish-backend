@@ -100,6 +100,7 @@ public class UserServiceImpl implements UserService {
             JSONObject userRes = createUserResponseJSON.getJSONObject("user");
             user.setUuid((String) userRes.get("id"));
             user.setPassword(encryptedPassword);
+            user.setDomainId(user.getDomain().getId());
             return userRepository.save(user);
         }
         } else {
@@ -235,17 +236,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findByUser(Optional<String> userName, Optional<String> password, Optional<String> domainName) throws Exception {
-        String domain = domainName.get().trim();
+    public User findByUser(String userName, String password, String domainName) throws Exception {
+        String domain = domainName.trim();
         if (domain.equals("/")) {
             domain = "ROOT";
         }
-        User user = userRepository.findByUser(userName.get().trim(), domainRepository.findByName(domain));
-        if (user != null) {
+        User user = userRepository.findByUser(userName.trim(), domainRepository.findByName(domain));
+        if (user != null && password != null) {
             String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
             byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
             SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-            String encryptedPassword = new String(EncryptionUtil.encrypt(password.get(), originalKey));
+            String encryptedPassword = new String(EncryptionUtil.encrypt(password, originalKey));
             user.setPassword(encryptedPassword);
             userRepository.save(user);
         }
@@ -296,12 +297,12 @@ public class UserServiceImpl implements UserService {
     public List<User> findAllRootAdminUser() throws Exception {
         return userRepository.findAllRootAdminUser(Type.ROOT_ADMIN);
     }
-    
+
     @Override
     public List<User> findUsersByTypesAndActive(List<Type> types, Boolean isActive) throws Exception {
         return (List<User>) userRepository.findUsersByTypesAndActive(types, isActive);
     }
-    
+
     @Override
     public List<User> assignUserRoles(List<User> users) throws Exception {
     	for (User user : users) {

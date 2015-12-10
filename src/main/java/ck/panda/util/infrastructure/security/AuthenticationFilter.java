@@ -3,6 +3,8 @@ package ck.panda.util.infrastructure.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import ck.panda.domain.entity.RolePrincipal;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.web.ApiController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,12 +44,16 @@ public class AuthenticationFilter extends GenericFilterBean {
     /** Authentication manager attribute. */
     private DatabaseAuthenticationManager databaseAuthenticationManager;
 
+    /** TokenDetails attribute. */
+    private TokenDetails userTokenDetails;
+
     /**
      * Parameterized constructor.
      * @param databaseAuthenticationManager to set
      */
-    public AuthenticationFilter(DatabaseAuthenticationManager databaseAuthenticationManager) {
+    public AuthenticationFilter(DatabaseAuthenticationManager databaseAuthenticationManager, TokenDetails userTokenDetails) {
         this.databaseAuthenticationManager = databaseAuthenticationManager;
+        this.userTokenDetails = userTokenDetails;
     }
 
     @Override
@@ -147,10 +153,19 @@ public class AuthenticationFilter extends GenericFilterBean {
         Authentication resultOfAuthentication = tryToAuthenticateWithUsernameAndPassword(username, password, domain);
         SecurityContextHolder.getContext().setAuthentication(resultOfAuthentication);
         httpResponse.setStatus(HttpServletResponse.SC_OK);
-        TokenResponse tokenResponse = new TokenResponse(resultOfAuthentication.getDetails().toString());
-        String tokenJsonResponse = new ObjectMapper().writeValueAsString(tokenResponse);
         httpResponse.addHeader("Content-Type", "application/json");
-        httpResponse.getWriter().print(tokenJsonResponse);
+        try {
+            if(userTokenDetails.getTokenDetails("domainname").equals("ROOT")) {
+                TokenResponse tokenResponse = new TokenResponse(resultOfAuthentication.getDetails().toString());
+                String tokenJsonResponse = new ObjectMapper().writeValueAsString(tokenResponse);
+                httpResponse.getWriter().print(tokenJsonResponse);
+            } else {
+                RolePrincipal rolePrincipal = (RolePrincipal) resultOfAuthentication.getPrincipal();
+                httpResponse.getWriter().print(rolePrincipal);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**

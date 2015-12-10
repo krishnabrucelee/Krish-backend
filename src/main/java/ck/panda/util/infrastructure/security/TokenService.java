@@ -7,11 +7,14 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import ck.panda.domain.entity.User;
 import ck.panda.service.EncryptionUtil;
+import ck.panda.service.UserService;
 import ck.panda.util.DateConvertUtil;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -30,7 +33,7 @@ public class TokenService {
     private static final Cache REST_API_AUTH_TOKEN = CacheManager.getInstance().getCache("restApiAuthTokenCache");
 
     /** Scheduler time constant. */
-    public static final Long HALF_AN_HOUR_IN_MILLISECONDS = (long) (30 * 60 * 1000);
+    public static final int HALF_AN_HOUR_IN_MILLISECONDS = 4 * 60 * 60 * 1000;
 
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
@@ -56,18 +59,36 @@ public class TokenService {
     @Value("${backend.admin.role}")
     private String backendAdminRole;
 
+    /** Admin type. */
+    @Value("${backend.admin.type}")
+    private String backendAdminType;
+
+    /** User service reference. */
+    @Autowired
+    private UserService userService;
+
+    /**
+     * Evict expire tokens.
+     */
+    @Scheduled(fixedRate = HALF_AN_HOUR_IN_MILLISECONDS)
+    public void evictExpiredTokens() {
+        LOGGER.info("Evicting expired tokens");
+        REST_API_AUTH_TOKEN.evictExpiredElements();
+    }
+
     /**
      * @param user token.
+     * @param domainName name of the domain
      * @return token
      * @throws Exception raise if error
      */
-    public String generateNewToken(User user) throws Exception {
+    public String generateNewToken(User user, String domainName) throws Exception {
         String encryptedToken = null;
         try {
             String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
             byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
             SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-            encryptedToken = new String(EncryptionUtil.encrypt(createTokenDetails(user).toString(), originalKey));
+            encryptedToken = new String(EncryptionUtil.encrypt(createTokenDetails(user, domainName).toString(), originalKey));
         } catch (UnsupportedEncodingException e) {
             LOGGER.error("ERROR AT TOKEN GENERATION", e);
         }
@@ -103,54 +124,39 @@ public class TokenService {
      * @throws Exception raise if error
      */
     public Authentication retrieve(String token, Authentication authentication, TokenService tokenService, ExternalServiceAuthenticator externalServiceAuthenticator) throws Exception {
-        AuthenticationWithToken resultOfAuthentication = null;
-        HashMap<Integer,String> tokenDetails = getTokenDetails(token, "@@");
-        Long timeDifference = DateConvertUtil.getTimestamp() - HALF_AN_HOUR_IN_MILLISECONDS;
-        if (Long.parseLong(tokenDetails.get(5)) < timeDifference) {
-            throw new BadCredentialsException("Your Session has Expired. Please Log in Again");
-        } else {
-            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
-            byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
-            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-            token = new String(EncryptionUtil.encrypt(updationTokenTimeout(tokenDetails).toString(), originalKey));
+    	AuthenticationWithToken resultOfAuthentication = null;
+        HashMap<Integer, String> tokenDetails = getTokenDetails(token, "@@");
+        if (tokenDetails.get(5).equals("ROOT")) {
+            User user = userService.findByUser(tokenDetails.get(1), null, "/");
+            if (user != null) {
+                token = tokenService.generateNewToken(user, "/");
+                tokenDetails = getTokenDetails(token, "@@");
+                resultOfAuthentication = externalServiceAuthenticator.authenticate(tokenDetails.get(1), tokenDetails.get(4), null, null);
+                resultOfAuthentication.setToken(token);
+                tokenService.store(token, resultOfAuthentication);
+                SecurityContextHolder.getContext().setAuthentication(resultOfAuthentication);
+                return resultOfAuthentication;
+            }
         }
-        resultOfAuthentication = externalServiceAuthenticator.authenticate(tokenDetails.get(1), tokenDetails.get(4));
-        resultOfAuthentication.setToken(token);
-        tokenService.store(token, resultOfAuthentication);
-        return resultOfAuthentication;
+        return (Authentication) REST_API_AUTH_TOKEN.get(token).getObjectValue();
     }
 
     /**
      * @param user details for token generation
+     * @param domainName name of the domain
      * @return user details
      */
-    public StringBuilder createTokenDetails(User user) {
+    public StringBuilder createTokenDetails(User user, String domainName) {
         StringBuilder stringBuilder = null;
         try {
             stringBuilder = new StringBuilder();
             stringBuilder.append(user == null ? backendAdminUserid : user.getId()).append("@@");
             stringBuilder.append(user == null ? backendAdminUsername : user.getUserName()).append("@@");
             stringBuilder.append(user == null ? backendAdminDomainId : user.getDomain().getId()).append("@@");
-            stringBuilder.append(user == null ? backendAdminDepartmentId : user.getDepartment() == null ? backendAdminDepartmentId : user.getDepartment().getId()).append("@@");
-            stringBuilder.append(user == null ? backendAdminRole : user.getRole() == null ? backendAdminRole : user.getRole().getName()).append("@@");
-            stringBuilder.append(DateConvertUtil.getTimestamp());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return stringBuilder;
-    }
-
-    /**
-     * @param tokenDetails for token generation
-     * @return user details
-     */
-    public StringBuilder updationTokenTimeout(HashMap<Integer,String> tokenDetails) {
-        StringBuilder stringBuilder = null;
-        try {
-            stringBuilder = new StringBuilder();
-            for (int i = 0; i <= 4; i++) {
-                stringBuilder.append(tokenDetails.get(i)).append("@@");
-            }
+            stringBuilder.append(user == null ? backendAdminDepartmentId : user.getDepartment().getId()).append("@@");
+            stringBuilder.append(user == null ? backendAdminRole : user.getRole().getName()).append("@@");
+            stringBuilder.append(domainName).append("@@");
+            stringBuilder.append(user == null ? backendAdminType : user.getType()).append("@@");
             stringBuilder.append(DateConvertUtil.getTimestamp());
         } catch (Exception e) {
             e.printStackTrace();
@@ -178,4 +184,5 @@ public class TokenService {
         }
         return returnToken;
     }
+
 }

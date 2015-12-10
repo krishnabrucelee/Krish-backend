@@ -7,6 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -58,7 +59,7 @@ public class Role implements Serializable {
     private String description;
 
     /** Permission list of the role. */
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<Permission> permissionList;
 
     /** Version attribute to handle optimistic locking. */
