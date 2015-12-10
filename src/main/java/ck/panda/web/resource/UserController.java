@@ -99,4 +99,46 @@ public class UserController extends CRUDController<User> implements ApiControlle
    	protected List<User> findAllUserByDomain() throws Exception {
    		return userService.findAllUserByDomain();
    	}
+
+    /**
+     * list all root admin.
+     * @return user
+     * @throws Exception
+     */
+    @RequestMapping(value = "listbyrootadmin",method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+   	@ResponseStatus(HttpStatus.OK)
+   	@ResponseBody
+   	protected List<User> findAllRootAdminUser() throws Exception {
+   		return userService.findAllRootAdminUser();
+   	}
+    
+    /**
+     * Method to find list of users by department.
+     *
+     * @param id - department id
+     * @return list of users
+     * @throws Exception - if error occurs
+     */
+    @RequestMapping(value = "/department/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<User> getUsersByDepartment(@PathVariable(PATH_ID) Long id) throws Exception {
+        return userService.findByDepartment(id);
+    }
+    
+    /**
+     * Assign role for users.
+     *
+     * @param resourceLimits resource limit
+     * @return resource limit
+     * @throws Exception error
+     */
+    @RequestMapping(value = "/assignRole", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE }, consumes = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public List<User> assignUserRoles(@RequestBody List<User> users) throws Exception {
+    	return userService.assignUserRoles(users);
+    	
+    }
 }

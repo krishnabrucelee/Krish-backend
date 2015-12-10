@@ -22,6 +22,7 @@ import ck.panda.domain.repository.jpa.DepartmentReposiory;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.domain.repository.jpa.VolumeRepository;
+import ck.panda.rabbitmq.util.QueryAsynchronousJobResult;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackVolumeService;
 import ck.panda.util.ConfigUtil;
@@ -74,6 +75,14 @@ public class VolumeServiceImpl implements VolumeService {
     /** Autowired TokenDetails. */
     @Autowired
     private VirtualMachineRepository virtualMachineRepo;
+
+    /** Autowired queryAsynchronousJobResult. */
+    @Autowired
+    private QueryAsynchronousJobResult queryAsynchronousJobResult;
+
+    /** Autowired queryAsynchronousJobResult. */
+    @Autowired
+    private SyncService syncService;
 
     @Override
     public Volume save(Volume volume) throws Exception {
@@ -329,6 +338,7 @@ public class VolumeServiceImpl implements VolumeService {
                 volume.setVmInstanceId(volume.getVmInstance().getId());
             }
             if (jobId.has("jobid")) {
+                Thread.sleep(10000);
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
 
@@ -340,8 +350,8 @@ public class VolumeServiceImpl implements VolumeService {
                        volume.setStatus(Status.READY);
                 }
             }
-            volumeRepo.save(volume);
         }
+        queryAsynchronousJobResult.callAsync(volume);
         return volume;
     }
 
@@ -363,6 +373,7 @@ public class VolumeServiceImpl implements VolumeService {
 //            volume.setUuid((String) jobId.get("jobid"));
             volume.setVmInstanceId(null);
             if (jobId.has("jobid")) {
+                Thread.sleep(10000);
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
                 if (jobresult.has("volume")) {
@@ -372,8 +383,8 @@ public class VolumeServiceImpl implements VolumeService {
                        volume.setStatus(Status.READY);
                 }
             }
-            volumeRepo.save(volume);
         }
+        queryAsynchronousJobResult.callAsync(volume);
         return volume;
     }
 
@@ -404,9 +415,9 @@ public class VolumeServiceImpl implements VolumeService {
             throw new ApplicationException(errors);
         } else {
             if (jobId.has("jobid")) {
+                Thread.sleep(10000);
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
-                Thread.sleep(5000);
                 if (jobresult.getString("jobstatus").equals("2")) {
                     volume.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                 }
@@ -415,11 +426,10 @@ public class VolumeServiceImpl implements VolumeService {
                 }
                 if (jobresult.getString("jobstatus").equals("0")) {
                     volume.setStatus(Status.READY);
-                    volume.setDiskSize(jobresult.getLong("size"));
                 }
             }
-            volumeRepo.save(volume);
         }
+        queryAsynchronousJobResult.callAsync(volume);
         return volume;
     }
 
@@ -431,6 +441,7 @@ public class VolumeServiceImpl implements VolumeService {
         csVolumeService.setServer(config.setServer(1L));
         csVolumeService.deleteVolume(volume.getUuid(), "json");
         return volumeRepo.save(volume);
+
     }
 
     @Override
@@ -467,27 +478,24 @@ public class VolumeServiceImpl implements VolumeService {
                 throw new ApplicationException(errors);
             } else {
                 if (jobId.has("jobid")) {
+                    Thread.sleep(10000);
                     String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
 
                     JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
                         volume.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
-
                     }
                     if (jobresult.getString("jobstatus").equals("1")) {
-                        volume.setStatus(Status.valueOf(EventTypes.UPLOAD_NOT_STARTED));
-                        volume.setEventMessage("Volume Not started");
                         setValue(volume);
+                        volumeRepo.save(volume);
                     }
                     if (jobresult.getString("jobstatus").equals("0")) {
-                        volume.setStatus(Status.valueOf(EventTypes.UPLOADED));
-                        volume.setEventMessage("Volume Uploaded");
                         setValue(volume);
                     }
                 }
-                volumeRepo.save(volume);
+                queryAsynchronousJobResult.callAsync(volume);
+                return volume;
             }
-            return volume;
         }
     }
 

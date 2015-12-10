@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.User.Type;
 
 /** JPA repository for user CRUD operations. */
 public interface UserRepository extends PagingAndSortingRepository<User, Long> {
@@ -87,4 +88,24 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      */
     @Query(value = "select user from User user where user.domain =:domain and user.userName =:userName ")
     User findAllByActiveAndName(@Param("userName") String userName, @Param("domain") Domain domain);
+
+    /**
+     * find all the root admin.
+     *
+     * @param domain domain object.
+     * @return list of user.
+     */
+    @Query(value = "select user from User user where user.type =:type ")
+    List<User> findAllRootAdminUser(@Param("type") Type type);
+    
+    /**
+     * Find the user list by account types and isActive.
+     *
+     * @param types for each user.
+     * @param isActive get the user list based on active/inactive status.
+     * @return user list.
+     */
+    @Query(value = "select user from User user where user.isActive =:isActive AND user.type in (:types)")
+    List<User> findUsersByTypesAndActive(@Param("types") List<Type> types, @Param("isActive") Boolean isActive);
+
 }

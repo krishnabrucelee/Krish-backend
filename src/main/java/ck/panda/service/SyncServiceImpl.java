@@ -36,10 +36,12 @@ import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.Role;
+import ck.panda.domain.entity.SSHKey;
 import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.User.Type;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
@@ -181,6 +183,10 @@ public class SyncServiceImpl implements SyncService {
     @Autowired
     private ResourceLimitProjectService resourceProjectService;
 
+    /** SSH Key Service for listing ssh keys. */
+    @Autowired
+    private SSHKeyService sshKeyService;
+
     /** CloudStack connector. */
     @Autowired
     private CloudStackServer server;
@@ -265,7 +271,7 @@ public class SyncServiceImpl implements SyncService {
     }
 
     /**
-     * Sync call for synchronization list of Region, domain, region. template,
+     * Sync call for synchronization list of Region, domain, SSH key, region. template,
      * hypervisor
      *
      * @throws Exception
@@ -418,6 +424,20 @@ public class SyncServiceImpl implements SyncService {
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Snapshot", e);
         }
+
+        try {
+            // 25. Sync SSHKey entity
+            this.syncSSHKey();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch SSH Key", e);
+        }
+        
+        try {
+            // 26. Sync for update role in user entity
+            this.syncUpdateUserRole();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT Sync for update role in user entity", e);
+        }
     }
 
     /**
@@ -436,7 +456,7 @@ public class SyncServiceImpl implements SyncService {
         HashMap<String, Domain> csDomainMap = (HashMap<String, Domain>) Domain.convert(csDomainList);
 
         // 2. Get all the domain objects from application
-        List<Domain> appDomainList = domainService.findAll();
+        List<Domain> appDomainList = domainService.findAllDomain();
 
         // 3. Iterate application domain list
         LOGGER.debug("Total rows updated : " + (appDomainList.size()));
@@ -1870,6 +1890,48 @@ public class SyncServiceImpl implements SyncService {
         }
     }
 
+    @Override
+    public void syncSSHKey() throws ApplicationException, Exception {
+
+        // 1. Get all the region objects from CS server as hash
+        List<SSHKey> csSSHKeyList = sshKeyService.findAllFromCSServer();
+        HashMap<String, SSHKey> csSSHkeyMap = (HashMap<String, SSHKey>) SSHKey.convert(csSSHKeyList);
+
+        // 2. Get all the region objects from application
+        List<SSHKey> appSSHKeyList = sshKeyService.findAll();
+
+        // 3. Iterate application region list
+        for (SSHKey sshKey : appSSHKeyList) {
+            sshKey.setIsSyncFlag(false);
+            LOGGER.debug("Total rows updated : " + (appSSHKeyList.size()));
+            // 3.1 Find the corresponding CS server region object by finding it
+            // in a hash using uuid
+            if (csSSHkeyMap.containsKey(sshKey.getName())) {
+                SSHKey csSSHKey = csSSHkeyMap.get(sshKey.getName());
+
+                sshKey.setName(csSSHKey.getName());
+
+                // 3.2 If found, update the region object in app db
+                sshKeyService.update(sshKey);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // region which is not added in the app
+                csSSHkeyMap.remove(sshKey.getName());
+            } else {
+                sshKeyService.delete(sshKey);
+            }
+        }
+        // 4. Get the remaining list of cs server hash region object, then
+        // iterate and
+        // add it to app db
+        for (String key : csSSHkeyMap.keySet()) {
+            LOGGER.debug("Syncservice region name:");
+            sshKeyService.save(csSSHkeyMap.get(key));
+        }
+        LOGGER.debug("Total rows added : " + (csSSHkeyMap.size()));
+
+    }
+
     /**
      * Create default roles and permissions.
      *
@@ -1894,6 +1956,14 @@ public class SyncServiceImpl implements SyncService {
                         newRole.setPermissionList(newPermissionList);
                         roleService.save(newRole);
                     }
+                    else if (role != null) {
+                        role.setName("FULL_PERMISSION");
+                        role.setDepartment(department);
+                        role.setDescription("Allow full permission");
+                        role.setStatus(Role.Status.ENABLED);
+                        role.setPermissionList(permissionService.findAll());
+                        roleService.update(role);
+                    }
                 }
             } else {
                 List<Permission> newList = PermissionUtil.updatePermissions(instance, storage, network, sshkey, quatoLimit, vpc, template, additionalServive, project, application, department, roles, user, report);
@@ -1912,11 +1982,39 @@ public class SyncServiceImpl implements SyncService {
                         role.setPermissionList(permissionService.findAll());
                         roleService.update(role);
                     }
+                    else if (role == null) {
+                        Role newRole = new Role();
+                        newRole.setName("FULL_PERMISSION");
+                        newRole.setDepartment(department);
+                        newRole.setDescription("Allow full permission");
+                        newRole.setStatus(Role.Status.ENABLED);
+                        newRole.setPermissionList(permissionService.findAll());
+                        roleService.save(newRole);
+                    }
                 }
             }
         } catch (Exception e) {
             LOGGER.debug("createRole" + e);
         }
     }
+    
+    /**
+     * Update user role.
+     */
+    void syncUpdateUserRole() {
+    	List<Type> types = new ArrayList<Type>();
+        types.add(Type.ROOT_ADMIN);
+        types.add(Type.DOMAIN_ADMIN);
+        try {
+			List<User> userList = userService.findUsersByTypesAndActive(types, true);
+			for (User user : userList) {
+				Role role = roleService.findByName("FULL_PERMISSION", user.getDepartment());
+				user.setRole(role);
+				userService.update(user);
+			}
+		} catch (Exception e) {
+			LOGGER.debug("syncUpdateUserRole" + e);
+		}
+	}
 
 }
