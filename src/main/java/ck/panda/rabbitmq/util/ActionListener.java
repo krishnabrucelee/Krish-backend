@@ -136,7 +136,6 @@ public class ActionListener implements MessageListener {
             break;
         case EventTypes.EVENT_VOLUME:
             LOGGER.debug("Volume sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
-            Thread.sleep(5000);
             syncService.syncVolume();
             break;
         case EventTypes.EVENT_TEMPLATE:
