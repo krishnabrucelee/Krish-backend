@@ -95,4 +95,5 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     public List<Template> findByFilters(@RequestBody Template template) throws Exception {
         return templateService.findByFilters(template);
     }
+
 }
