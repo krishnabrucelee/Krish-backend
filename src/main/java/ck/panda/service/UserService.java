@@ -1,13 +1,13 @@
 package ck.panda.service;
 
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import com.google.common.base.Optional;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.User.Type;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
@@ -111,4 +111,23 @@ public interface UserService extends CRUDService<User> {
      * @throws Exception if error occurs.
      */
     List<User> findAllRootAdminUser() throws Exception;
+    
+    /**
+     * Find the users based on the isActive status.
+     *
+     * @param types for each user.
+     * @param isActive user status Active/Inactive
+     * @throws Exception error occur
+     * @return users.
+     */
+    List<User> findUsersByTypesAndActive(List<Type> types, Boolean isActive) throws Exception;
+    
+    /**
+     * Assign user to role.
+     * 
+     * @param users List of users
+     * @return users
+     * @throws Exception
+     */
+    public List<User> assignUserRoles(List<User> users) throws Exception;
 }

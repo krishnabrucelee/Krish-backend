@@ -41,6 +41,7 @@ import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.User.Type;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
@@ -429,6 +430,13 @@ public class SyncServiceImpl implements SyncService {
             this.syncSSHKey();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch SSH Key", e);
+        }
+        
+        try {
+            // 26. Sync for update role in user entity
+            this.syncUpdateUserRole();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT Sync for update role in user entity", e);
         }
     }
 
@@ -1948,6 +1956,14 @@ public class SyncServiceImpl implements SyncService {
                         newRole.setPermissionList(newPermissionList);
                         roleService.save(newRole);
                     }
+                    else if (role != null) {
+                        role.setName("FULL_PERMISSION");
+                        role.setDepartment(department);
+                        role.setDescription("Allow full permission");
+                        role.setStatus(Role.Status.ENABLED);
+                        role.setPermissionList(permissionService.findAll());
+                        roleService.update(role);
+                    }
                 }
             } else {
                 List<Permission> newList = PermissionUtil.updatePermissions(instance, storage, network, sshkey, quatoLimit, vpc, template, additionalServive, project, application, department, roles, user, report);
@@ -1966,11 +1982,39 @@ public class SyncServiceImpl implements SyncService {
                         role.setPermissionList(permissionService.findAll());
                         roleService.update(role);
                     }
+                    else if (role == null) {
+                        Role newRole = new Role();
+                        newRole.setName("FULL_PERMISSION");
+                        newRole.setDepartment(department);
+                        newRole.setDescription("Allow full permission");
+                        newRole.setStatus(Role.Status.ENABLED);
+                        newRole.setPermissionList(permissionService.findAll());
+                        roleService.save(newRole);
+                    }
                 }
             }
         } catch (Exception e) {
             LOGGER.debug("createRole" + e);
         }
     }
+    
+    /**
+     * Update user role.
+     */
+    void syncUpdateUserRole() {
+    	List<Type> types = new ArrayList<Type>();
+        types.add(Type.ROOT_ADMIN);
+        types.add(Type.DOMAIN_ADMIN);
+        try {
+			List<User> userList = userService.findUsersByTypesAndActive(types, true);
+			for (User user : userList) {
+				Role role = roleService.findByName("FULL_PERMISSION", user.getDepartment());
+				user.setRole(role);
+				userService.update(user);
+			}
+		} catch (Exception e) {
+			LOGGER.debug("syncUpdateUserRole" + e);
+		}
+	}
 
 }

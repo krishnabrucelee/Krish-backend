@@ -76,7 +76,7 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
     public List<Role> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Role.class);
-        Page<Role> pageResponse = roleService.findAll(page);
+        Page<Role> pageResponse = roleService.findAllRolesWithoutFullPermissionAndActive(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
