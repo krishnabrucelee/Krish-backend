@@ -92,8 +92,7 @@ public class NetworkServiceImpl implements NetworkService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-            config.setServer(1L);
-
+            config.setUserServer();
             String networkOfferings = csNetwork.createNetwork(network.getZone().getUuid(),"json",optional(network));
                     JSONObject createNetworkResponseJSON = new JSONObject(networkOfferings).getJSONObject("createnetworkresponse");
 
@@ -159,7 +158,7 @@ public class NetworkServiceImpl implements NetworkService {
                 if (network.getNetworkDomain() != null && network.getNetworkDomain().trim() != "") {
                     optional.put("networkdomain", network.getNetworkDomain());
                 }
-                csNetwork.setServer(config.setServer(1L));
+                config.setUserServer();
                 String updateNetworkResponse = csNetwork.updateNetwork(network.getUuid(), optional, "json");
                 JSONObject jobId = new JSONObject(updateNetworkResponse).getJSONObject("updatenetworkresponse");
                 Thread.sleep(5000);
@@ -212,7 +211,7 @@ public class NetworkServiceImpl implements NetworkService {
         network.setIsActive(false);
         if (network.getSyncFlag()) {
             // set server for finding value in configuration
-            csNetwork.setServer(config.setServer(1L));
+            config.setUserServer();
            String deleteNetworkResponse = csNetwork.deleteNetwork(network.getUuid(), "json");
             JSONObject jobId = new JSONObject(deleteNetworkResponse).getJSONObject("deletenetworkresponse");
             Thread.sleep(5000);

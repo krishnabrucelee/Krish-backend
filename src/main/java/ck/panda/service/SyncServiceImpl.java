@@ -42,6 +42,7 @@ import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.Type;
+import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
@@ -80,6 +81,10 @@ public class SyncServiceImpl implements SyncService {
     /** Virtual machine Service for listing vms. */
     @Autowired
     private VirtualMachineService virtualMachineService;
+
+    /** Virtual Machine repository reference. */
+    @Autowired
+    private VirtualMachineRepository virtualmachinerepository;
 
     /** RegionSerivce for listing Regions. */
     @Autowired
@@ -1213,7 +1218,13 @@ public class SyncServiceImpl implements SyncService {
                     instance.setVncPassword(encryptedPassword);
                 }
                 // 3.2 If found, update the vm object in app db
-                virtualMachineService.update(instance);
+                //virtualMachineService.update(instance);
+
+                HashMap<String, String> optional = new HashMap<String, String>();
+                optional.put("displayName", instance.getTransDisplayName());
+                cloudStackInstanceService.updateVirtualMachine(instance.getUuid(), optional);
+                virtualmachinerepository.save(instance);
+
                 // 3.3 Remove once updated, so that we can have the list of cs
                 // vm which is not added in the
                 // app

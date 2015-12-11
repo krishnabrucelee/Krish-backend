@@ -10,11 +10,13 @@ import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.NetworkRepository;
+import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.domain.repository.jpa.ZoneRepository;
 import ck.panda.util.AppValidator;
@@ -114,11 +116,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     vminstance.setNetworkId(networkRepo.findByUUID(vminstance.getNetworkUuid()).getId());
                 }
                 vminstance.setZone(zoneRepository.findOne(vminstance.getZoneId()));
-                CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
-                server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
-                cloudStackInstanceService.setServer(server);
-                LOGGER.debug("Cloud stack connectivity at VM", cloudConfig.getApiKey());
-                LOGGER.debug("Cloud stack connectivity at VM", vminstance.getNetworkUuid());
+                config.setUserServer();
+                 LOGGER.debug("Cloud stack connectivity at VM", vminstance.getNetworkUuid());
                 optional.put("networkids", vminstance.getNetworkUuid());
                 optional.put("displayvm", "true");
                 optional.put("keyboard", "us");
@@ -168,9 +167,6 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-            CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
-            server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
-            cloudStackInstanceService.setServer(server);
             HashMap<String, String> optional = new HashMap<String, String>();
             optional.put("displayName", vminstance.getTransDisplayName());
             cloudStackInstanceService.updateVirtualMachine(vminstance.getUuid(), optional);
@@ -194,9 +190,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
      */
     public VmInstance getCSConnector(String vmId) throws Exception {
         // instantiate Cloud Stack connector for an instance service.
-        CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
-        server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
-        cloudStackInstanceService.setServer(server);
+        config.setUserServer();
         csIso.setServer(server);
         VmInstance vminstance = virtualmachinerepository.findByUUID(vmId);
         return vminstance;
@@ -610,7 +604,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     public VmInstance upgradeDowngradeVM(VmInstance vminstance) throws Exception {
         Errors errors = validator.rejectIfNullEntity("vminstance", vminstance);
         errors = validator.validateEntity(vminstance, errors);
-        config.setServer(1L);
+        config.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
         String volumeS = cloudStackInstanceService.scaleVirtualMachine(vminstance.getUuid(), vminstance.getComputeOffering().getUuid(),"json",optional);
         JSONObject jobId = new JSONObject(volumeS).getJSONObject("scalevirtualmachineresponse");

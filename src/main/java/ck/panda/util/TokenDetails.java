@@ -55,6 +55,12 @@ public class TokenDetails {
         case "usertype":
             responseString = splitToken[6];
             break;
+        case "apikey":
+            responseString = splitToken[7];
+            break;
+        case "secretkey":
+            responseString = splitToken[8];
+            break;
         default:
             responseString = "";
         }
