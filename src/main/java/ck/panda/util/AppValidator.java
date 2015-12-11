@@ -152,6 +152,7 @@ public class AppValidator {
 
         if (roleService.findByName(name, department) != null) {
             errors.addFieldError("name", "role.name.unique.error");
+            errors.addGlobalError("role.name.unique.error");
         }
         return errors;
     }

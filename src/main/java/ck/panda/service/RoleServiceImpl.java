@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Role;
+import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Role.Status;
 import ck.panda.domain.repository.jpa.RoleReposiory;
 import ck.panda.util.AppValidator;
@@ -59,7 +60,7 @@ public class RoleServiceImpl implements RoleService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-        	role.setStatus(Status.ENABLED);
+            role.setStatus(Status.ENABLED);
             return roleRepo.save(role);
         }
     }
@@ -68,6 +69,7 @@ public class RoleServiceImpl implements RoleService {
     public Role update(Role role) throws Exception {
         Errors errors = validator.rejectIfNullEntity("role", role);
         errors = validator.validateEntity(role, errors);
+        errors = validator.validateName(errors, role.getName(), role.getDepartment());
 
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
@@ -76,6 +78,12 @@ public class RoleServiceImpl implements RoleService {
         }
     }
 
+    @Override
+    public Role softDelete(Role role) throws Exception {
+        role.setIsActive(false);
+        role.setStatus(Status.DISABLED);
+        return roleRepo.save(role);
+    }
     @Override
     public void delete(Role role) throws Exception {
         roleRepo.delete(role);
@@ -134,7 +142,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Page<Role> findAllRolesWithoutFullPermissionAndActive(PagingAndSorting pagingAndSorting) throws Exception {
-    	return roleRepo.findAllRolesWithoutFullPermissionAndActive(pagingAndSorting.toPageRequest());
+        return roleRepo.findAllRolesWithoutFullPermissionAndActive(pagingAndSorting.toPageRequest());
     }
 
 }

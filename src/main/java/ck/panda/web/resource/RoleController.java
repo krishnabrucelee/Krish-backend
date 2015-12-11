@@ -22,6 +22,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Role;
+import ck.panda.domain.entity.Volume;
 import ck.panda.service.DepartmentService;
 import ck.panda.service.RoleService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -37,7 +38,7 @@ import ck.panda.util.web.CRUDController;
 @Api(value = "Roles", description = "Operations with roles", produces = "application/json")
 public class RoleController extends CRUDController<Role> implements ApiController {
 
-	/** Logger attribute. */
+    /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(RoleController.class);
 
     /** Service reference to Role. */
@@ -66,11 +67,21 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
         return roleService.update(role);
     }
 
-    @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Role.")
-    @Override
-    public void delete(@PathVariable(PATH_ID) Long id) throws Exception {
-        roleService.delete(id);
+    /**
+     * Soft delete for role.
+     *
+     * @param role role
+     * @param id role id
+     * @throws Exception error
+     */
+    @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing role.")
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void softDelete(@RequestBody Role role, @PathVariable(PATH_ID) Long id) throws Exception {
+        /** Doing Soft delete from the department table. */
+        roleService.softDelete(role);
     }
+
 
     @Override
     public List<Role> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
