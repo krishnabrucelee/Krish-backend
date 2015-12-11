@@ -34,7 +34,7 @@ public interface RoleService  extends CRUDService<Role> {
      * @throws Exception - if error occurs
      */
     List<Role> getRolesByDepartment(Department department) throws Exception;
-    
+
     /**
      * Find all the roles without full permission.
      *
@@ -43,4 +43,6 @@ public interface RoleService  extends CRUDService<Role> {
      * @throws Exception if error occurs.
      */
     Page<Role> findAllRolesWithoutFullPermissionAndActive(PagingAndSorting pagingAndSorting) throws Exception;
+
+    Role softDelete(Role role) throws Exception;
 }
