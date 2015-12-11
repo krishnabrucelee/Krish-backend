@@ -151,8 +151,8 @@ public class AppValidator {
     public Errors validateName(Errors errors, String name, Department department) throws Exception {
 
         if (roleService.findByName(name, department) != null) {
-            errors.addFieldError("name", "role.name.unique.error");
-            errors.addGlobalError("role.name.unique.error");
+//            errors.addFieldError("name", "role.name.unique.error");
+            errors.addGlobalError("Role Name already exists in department");
         }
         return errors;
     }
