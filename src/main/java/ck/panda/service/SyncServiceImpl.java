@@ -431,7 +431,7 @@ public class SyncServiceImpl implements SyncService {
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch SSH Key", e);
         }
-        
+
         try {
             // 26. Sync for update role in user entity
             this.syncUpdateUserRole();
@@ -1193,9 +1193,15 @@ public class SyncServiceImpl implements SyncService {
                 instance.setIsoName(csVm.getIsoName());
                 instance.setIpAddress(csVm.getIpAddress());
                 instance.setNetworkId(csVm.getNetworkId());
+                if(csVm.getDepartmentId() != null){
                 instance.setDepartmentId(csVm.getDepartmentId());
+                }
+                if(csVm.getProjectId() != null){
                 instance.setProjectId(csVm.getProjectId());
+                }
+                if(csVm.getInstanceOwnerId() != null){
                 instance.setInstanceOwnerId(csVm.getInstanceOwnerId());
+                }
 
                 LOGGER.debug("sync VM for ASYNC");
                 // VNC password set.
@@ -1997,7 +2003,7 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.debug("createRole" + e);
         }
     }
-    
+
     /**
      * Update user role.
      */

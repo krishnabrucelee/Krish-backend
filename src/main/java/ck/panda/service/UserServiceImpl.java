@@ -158,9 +158,9 @@ public class UserServiceImpl implements UserService {
         if (user.getSyncFlag() == true) {
             configServer.setServer(1L);
             csUserService.deleteUser(user.getId().toString(), "json");
-            userRepository.delete(user);
+            this.softDelete(user);
         } else {
-                userRepository.delete(user);
+            this.softDelete(user);
         }
     }
 
@@ -169,7 +169,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findOne(id);
         configServer.setServer(1L);
         csUserService.deleteUser(user.getUuid(), "json");
-        userRepository.delete(id);
+        this.softDelete(user);
     }
 
     @Override
