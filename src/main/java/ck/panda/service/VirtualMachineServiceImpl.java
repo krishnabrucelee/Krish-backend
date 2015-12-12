@@ -7,18 +7,15 @@ import java.util.List;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import ck.panda.constants.EventTypes;
-import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
-import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
-import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.NetworkRepository;
-import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.domain.repository.jpa.ZoneRepository;
+import ck.panda.domain.repository.jpa.VolumeRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackIsoService;
@@ -87,6 +84,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Autowired
     private CloudStackIsoService csIso;
 
+    /** Volume entity. */
+    @Autowired
+    private VolumeRepository volumeRepo;
+
     /** CloudStack configuration . */
     @Autowired
     private CloudStackConfigurationService cloudConfigService;
@@ -103,6 +104,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     public VmInstance save(VmInstance vminstance) throws Exception {
         LOGGER.debug("instance sync ", vminstance.getSyncFlag());
         if (vminstance.getSyncFlag()) {
+
             Errors errors = validator.rejectIfNullEntity("vminstance", vminstance);
             errors = validator.validateEntity(vminstance, errors);
             errors = this.validateName(errors, vminstance.getName(), vminstance.getDepartment(), 0L);
@@ -371,7 +373,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                             throw new BadCredentialsException(instance.getString("errortext"));
                         }
                         vminstance.setEventMessage(instance.getString("errortext"));
-                } else{
+                } else {
                     vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_CREATE));
                     vminstance.setEventMessage("VM Recover");
                 }
@@ -398,13 +400,13 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         Errors errors = null;
         switch (event) {
         case EventTypes.EVENT_VM_MIGRATE:
-			try {
-				if (vminstance.getStatus().equals(Status.Running)) {
-					errors = validator.sendGlobalError("No Hosts are available for Migration");
-					if (errors.hasErrors()) {
-						throw new BadCredentialsException("No Hosts are available for Migration");
-					}
-					optional.put("hostid", vmInstance.getHostUuid());
+            try {
+                if (vminstance.getStatus().equals(Status.Running)) {
+                    errors = validator.sendGlobalError("No Hosts are available for Migration");
+                    if (errors.hasErrors()) {
+                        throw new BadCredentialsException("No Hosts are available for Migration");
+                    }
+                    optional.put("hostid", vmInstance.getHostUuid());
                     String instanceResponse = cloudStackInstanceService.migrateVirtualMachine(vmInstance.getUuid(),
                             optional);
                     JSONObject instance = new JSONObject(instanceResponse)
@@ -630,7 +632,6 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 }
                 if (jobresult.getString("jobstatus").equals("1")) {
                     vminstance.setComputeOfferingId(vminstance.getComputeOffering().getId());
-
                 }
                 virtualmachinerepository.save(vminstance);
             }

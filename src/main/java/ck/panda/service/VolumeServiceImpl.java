@@ -156,6 +156,8 @@ public class VolumeServiceImpl implements VolumeService {
         return volumeRepo.findByInstanceAndIsActive(volume, true);
     }
 
+
+
     @Override
     public List<Volume> findByVolumeTypeAndIsActive() throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
@@ -163,6 +165,11 @@ public class VolumeServiceImpl implements VolumeService {
         return volumeRepo.findByVolumeTypeAndIsActive(domain.getId(), Volume.VolumeType.DATADISK, true);
         }
         return volumeRepo.findByVolumeTypeAndIsActive(Volume.VolumeType.DATADISK, true);
+    }
+
+    @Override
+    public List<Volume> findByInstanceAndVolumeTypeAndIsActive(Long volume) throws Exception {
+        return volumeRepo.findByInstanceAndVolumeTypeAndIsActive(volume, Volume.VolumeType.ROOT, true);
     }
 
     /**
@@ -446,7 +453,7 @@ public class VolumeServiceImpl implements VolumeService {
     }
 
     @Override
-	public Volume uploadVolume(Volume volume) throws Exception {
+    public Volume uploadVolume(Volume volume) throws Exception {
         this.validateVolumeUniqueness(volume);
         Errors errors = validator.rejectIfNullEntity("volumes", volume);
         errors = validator.validateEntity(volume, errors);
