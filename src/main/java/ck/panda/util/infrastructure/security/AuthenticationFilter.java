@@ -212,11 +212,13 @@ public class AuthenticationFilter extends GenericFilterBean {
      */
     private Authentication tryToAuthenticate(Authentication requestAuthentication, HttpServletRequest httpRequest) {
         Authentication responseAuthentication = databaseAuthenticationManager.authenticate(requestAuthentication);
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         if (responseAuthentication == null || !responseAuthentication.isAuthenticated()) {
+        	LOGGER.debug("User authentication failed : " + httpRequest.getServletPath()
+            + " : " + dateFormat.format(new Date()));
             throw new InternalAuthenticationServiceException("Unable to authenticate Domain User for provided credentials");
         }
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        LOGGER.debug("User successfully authenticated : " + httpRequest.getServletPath()
+        LOGGER.debug("User authentication success : " + httpRequest.getServletPath()
         + " : " + dateFormat.format(new Date()));
         return responseAuthentication;
     }
