@@ -88,8 +88,20 @@ public class Domain {
     private String phone;
 
     /** Secondary Contact for the Domain. */
-    @Column(name = "secondary_contact")
-    private String secondaryContact;
+    @Column(name = "secondary_contact_name")
+    private String secondaryContactName;
+
+    /** Secondary Contact for the Domain. */
+    @Column(name = "secondary_contact_last_name")
+    private String secondaryContactLastName;
+
+    /** Secondary Contact for the Domain. */
+    @Column(name = "secondary_contact_email")
+    private String secondaryContactEmail;
+
+    /** Secondary Contact for the Domain. */
+    @Column(name = "secondary_contact_phone")
+    private String secondaryContactPhone;
 
     /** Domain owner for the account. */
     @Column(name = "domain_owner")
@@ -585,24 +597,6 @@ public class Domain {
     }
 
     /**
-     * Get the secondaryContact.
-     *
-     * @return the secondaryContact
-     */
-    public String getSecondaryContact() {
-        return secondaryContact;
-    }
-
-    /**
-     * Set the secondaryContact.
-     *
-     * @param secondaryContact  to set
-     */
-    public void setSecondaryContact(String secondaryContact) {
-        this.secondaryContact = secondaryContact;
-    }
-
-    /**
      * Get the syncFlag
      *
      * @return the syncFlag
@@ -619,6 +613,80 @@ public class Domain {
     public void setSyncFlag(Boolean syncFlag) {
         this.syncFlag = syncFlag;
     }
+
+
+    /**
+     * Get secondaryContactName.
+     *
+     * @return the secondaryContactName
+     */
+    public String getSecondaryContactName() {
+        return secondaryContactName;
+    }
+
+    /**
+     * Set the secondaryContactName
+     *
+     * @param secondaryContactName to set
+     */
+    public void setSecondaryContactName(String secondaryContactName) {
+        this.secondaryContactName = secondaryContactName;
+    }
+
+    /**
+     * Get secondaryContactLastName.
+     *
+     * @return the secondaryContactLastName
+     */
+    public String getSecondaryContactLastName() {
+        return secondaryContactLastName;
+    }
+
+    /**
+     * Set secondaryContactLastName.
+     *
+     * @param secondaryContactLastName the secondaryContactLastName to set
+     */
+    public void setSecondaryContactLastName(String secondaryContactLastName) {
+        this.secondaryContactLastName = secondaryContactLastName;
+    }
+
+    /**
+     * Get secondaryContactEmail
+     *
+     * @return the secondaryContactEmail
+     */
+    public String getSecondaryContactEmail() {
+        return secondaryContactEmail;
+    }
+
+    /**
+     * Set the secondaryContactEmail.
+     *
+     * @param secondaryContactEmail  to set
+     */
+    public void setSecondaryContactEmail(String secondaryContactEmail) {
+        this.secondaryContactEmail = secondaryContactEmail;
+    }
+
+    /**
+     * Set the secondaryContactPhone.
+     *
+     * @return the secondaryContactPhone
+     */
+    public String getSecondaryContactPhone() {
+        return secondaryContactPhone;
+    }
+
+    /**
+     * Set the secondaryContactPhone.
+     *
+     * @param secondaryContactPhone  to set
+     */
+    public void setSecondaryContactPhone(String secondaryContactPhone) {
+        this.secondaryContactPhone = secondaryContactPhone;
+    }
+
 
     /**
      * Enumeration status for Domain.
