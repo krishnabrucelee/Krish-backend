@@ -25,6 +25,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Authentication filter.
@@ -70,13 +73,13 @@ public class AuthenticationFilter extends GenericFilterBean {
         try {
             if (postToAuthenticate(httpRequest, resourcePath)) {
                 LOGGER.debug("Trying to authenticate user {} by x-auth-username method", username);
-                processUsernamePasswordAuthentication(httpResponse, username, password, domain);
+                processUsernamePasswordAuthentication(httpRequest, httpResponse, username, password, domain);
                 return;
             }
 
             if (token.isPresent()) {
                 LOGGER.debug("Trying to authenticate user by x-auth-token method. Token: {}", token);
-                processTokenAuthentication(token);
+                processTokenAuthentication(token, httpRequest);
             }
 
             LOGGER.debug("AuthenticationFilter is passing request down the filter chain");
@@ -149,8 +152,9 @@ public class AuthenticationFilter extends GenericFilterBean {
      * @param domain to set
      * @throws IOException if any error occurs
      */
-    private void processUsernamePasswordAuthentication(HttpServletResponse httpResponse, Optional<String> username, Optional<String> password, Optional<String> domain) throws IOException {
-        Authentication resultOfAuthentication = tryToAuthenticateWithUsernameAndPassword(username, password, domain);
+    private void processUsernamePasswordAuthentication(HttpServletRequest httpRequest, HttpServletResponse httpResponse,
+    		Optional<String> username, Optional<String> password, Optional<String> domain) throws IOException {
+        Authentication resultOfAuthentication = tryToAuthenticateWithUsernameAndPassword(httpRequest, username, password, domain);
         SecurityContextHolder.getContext().setAuthentication(resultOfAuthentication);
         httpResponse.setStatus(HttpServletResponse.SC_OK);
         httpResponse.addHeader("Content-Type", "application/json");
@@ -175,18 +179,19 @@ public class AuthenticationFilter extends GenericFilterBean {
      * @param domain to set
      * @return Authentication
      */
-    private Authentication tryToAuthenticateWithUsernameAndPassword(Optional<String> username, Optional<String> password, Optional<String> domain) {
+    private Authentication tryToAuthenticateWithUsernameAndPassword(HttpServletRequest httpRequest, Optional<String> username,
+    		Optional<String> password, Optional<String> domain) {
         UsernamePasswordAuthenticationToken requestAuthentication = new UsernamePasswordAuthenticationToken(username, password);
         requestAuthentication.setDetails(domain);
-        return tryToAuthenticate(requestAuthentication);
+        return tryToAuthenticate(requestAuthentication, httpRequest);
     }
 
     /**
      * Process token authentication.
      * @param token to set
      */
-    private void processTokenAuthentication(Optional<String> token) {
-        Authentication resultOfAuthentication = tryToAuthenticateWithToken(token);
+    private void processTokenAuthentication(Optional<String> token, HttpServletRequest httpRequest) {
+        Authentication resultOfAuthentication = tryToAuthenticateWithToken(token, httpRequest);
         SecurityContextHolder.getContext().setAuthentication(resultOfAuthentication);
     }
 
@@ -195,9 +200,9 @@ public class AuthenticationFilter extends GenericFilterBean {
      * @param token to set
      * @return Authentication
      */
-    private Authentication tryToAuthenticateWithToken(Optional<String> token) {
+    private Authentication tryToAuthenticateWithToken(Optional<String> token, HttpServletRequest httpRequest) {
         PreAuthenticatedAuthenticationToken requestAuthentication = new PreAuthenticatedAuthenticationToken(token, null);
-        return tryToAuthenticate(requestAuthentication);
+        return tryToAuthenticate(requestAuthentication, httpRequest);
     }
 
     /**
@@ -205,12 +210,16 @@ public class AuthenticationFilter extends GenericFilterBean {
      * @param requestAuthentication to set
      * @return Authentication
      */
-    private Authentication tryToAuthenticate(Authentication requestAuthentication) {
+    private Authentication tryToAuthenticate(Authentication requestAuthentication, HttpServletRequest httpRequest) {
         Authentication responseAuthentication = databaseAuthenticationManager.authenticate(requestAuthentication);
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         if (responseAuthentication == null || !responseAuthentication.isAuthenticated()) {
+        	LOGGER.debug("User authentication failed : " + httpRequest.getServletPath()
+            + " : " + dateFormat.format(new Date()));
             throw new InternalAuthenticationServiceException("Unable to authenticate Domain User for provided credentials");
         }
-        LOGGER.debug("User successfully authenticated");
+        LOGGER.debug("User authentication success : " + httpRequest.getServletPath()
+        + " : " + dateFormat.format(new Date()));
         return responseAuthentication;
     }
 }
