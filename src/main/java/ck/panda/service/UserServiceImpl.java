@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import com.google.common.base.Optional;
 import ck.panda.domain.entity.Department;
@@ -72,6 +73,7 @@ public class UserServiceImpl implements UserService {
     private String secretKey;
 
     @Override
+    @PreAuthorize("hasPermission(#user.getSyncFlag(), 'CREATE_USER')")
     public User save(User user) throws Exception {
 
         if (user.getSyncFlag()) {
@@ -125,6 +127,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#user.getSyncFlag(), 'EDIT_USER')")
     public User update(User user) throws Exception {
         if (user.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity("user", user);
@@ -154,6 +157,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#user.getSyncFlag(), 'DELETE_USER')")
     public void delete(User user) throws Exception {
         if (user.getSyncFlag() == true) {
             configServer.setServer(1L);
@@ -165,6 +169,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(null, 'DELETE_USER')")
     public void delete(Long id) throws Exception {
         User user = userRepository.findOne(id);
         configServer.setServer(1L);
