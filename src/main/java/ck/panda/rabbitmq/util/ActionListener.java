@@ -83,7 +83,7 @@ public class ActionListener implements MessageListener {
                     || eventObject.getEvent().equals(EventTypes.EVENT_USER_LOGOUT)) {
                 LOGGER.debug("Account sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
             } else {
-                syncService.syncUser();
+                syncService.syncDepartment();
             }
             break;
         case EventTypes.EVENT_DISK:

@@ -760,6 +760,10 @@ public class Network implements Serializable {
            network.setGateway(JsonUtil.getStringValue(jsonObject, "gateway"));
            network.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, "account"));
            network.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
+           network.setNetMask(JsonUtil.getStringValue(jsonObject, "netmask"));
+           network.setNetworkDomain(JsonUtil.getStringValue(jsonObject, "networkdomain"));
+
+
            network.setIsActive(true);
        } catch (Exception ex) {
            ex.printStackTrace();

@@ -64,6 +64,10 @@ public class DomainServiceImpl implements DomainService {
     /** Department service.*/
     private CloudStackAccountService departmentService;
 
+    /** Reference of the convert entity service. */
+    @Autowired
+    private ConvertEntityService convertEntityService;
+
     @Autowired
     private DepartmentService deptService;
 
@@ -120,6 +124,7 @@ public class DomainServiceImpl implements DomainService {
         department.setLastName(persistedDomain.getLastName());
         department.setUserName(persistedDomain.getName());
         department.setEmail(persistedDomain.getEmail());
+        department.setDomainId(convertEntityService.getDomainId(persistedDomain.getUuid()));
         department.setPassword(encryptedPassword);
         department.setType(Department.AccountType.DOMAIN_ADMIN);
         department.setIsActive(true);
