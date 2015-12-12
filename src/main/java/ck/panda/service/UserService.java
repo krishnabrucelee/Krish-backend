@@ -80,6 +80,16 @@ public interface UserService extends CRUDService<User> {
      List<User> findByAccountId(Long accountId) throws Exception;
 
      /**
+      * Find user by uuid Id and status.
+      *
+      * @param uuid of the user.
+      * @param isActive status of the user.
+      * @return account.
+      * @throws Exception if error occurs.
+      */
+     User findByUuIdAndIsActive(String uuid, Boolean isActive) throws Exception;
+
+     /**
       * Find all the user by domain.
       *
       * @param pagingAndSorting paging and sorting information.
@@ -111,7 +121,7 @@ public interface UserService extends CRUDService<User> {
      * @throws Exception if error occurs.
      */
     List<User> findAllRootAdminUser() throws Exception;
-    
+
     /**
      * Find the users based on the isActive status.
      *
@@ -121,10 +131,10 @@ public interface UserService extends CRUDService<User> {
      * @return users.
      */
     List<User> findUsersByTypesAndActive(List<Type> types, Boolean isActive) throws Exception;
-    
+
     /**
      * Assign user to role.
-     * 
+     *
      * @param users List of users
      * @return users
      * @throws Exception

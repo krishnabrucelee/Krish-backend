@@ -289,7 +289,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> findAllUserByDomain() throws Exception {
-    	Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         return userRepository.findAllUserByDomain(domain);
     }
 
@@ -305,10 +305,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> assignUserRoles(List<User> users) throws Exception {
-    	for (User user : users) {
-    		userRepository.save(user);
-		}
-    	return users;
+        for (User user : users) {
+            userRepository.save(user);
+        }
+        return users;
+    }
+
+
+    @Override
+    public User findByUuIdAndIsActive(String uuid, Boolean isActive) throws Exception {
+        return userRepository.findByUuIdAndIsActive(uuid, isActive);
     }
 
 }
