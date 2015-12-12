@@ -4,9 +4,11 @@ package ck.panda.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import ck.panda.domain.entity.CloudStackConfiguration;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.repository.jpa.CloudStackConfigurationRepository;
 import ck.panda.service.DepartmentServiceImpl;
 import ck.panda.util.error.exception.EntityNotFoundException;
@@ -30,6 +32,13 @@ public class ConfigUtil {
     @Autowired
     private CloudStackServer server;
 
+    @Autowired
+    private TokenDetails tokenDetails;
+
+    /** URL that connects with cloudstack. */
+    @Value(value = "${cloudstack.url}")
+    private String apiURL;
+
     /**
      * To find the apikey, secret key and url from our db.
      * @param id table id
@@ -43,6 +52,11 @@ public class ConfigUtil {
         } else {
             server.setServer(config.getApiURL(), config.getSecretKey(), config.getApiKey());
         }
+        return server;
+    }
+
+    public CloudStackServer setUserServer() throws NumberFormatException, Exception {
+        server.setServer(apiURL ,tokenDetails.getTokenDetails("secretkey"), tokenDetails.getTokenDetails("apikey"));
         return server;
     }
 }

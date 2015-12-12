@@ -19,6 +19,7 @@ import ck.panda.domain.repository.jpa.ProjectRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackProjectService;
 import ck.panda.util.CloudStackServer;
+import ck.panda.util.ConfigUtil;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
@@ -62,6 +63,10 @@ public class ProjectServiceImpl implements ProjectService {
     @Autowired
     private TokenDetails tokenDetails;
 
+    /** Configuration Utilities. */
+    @Autowired
+    private ConfigUtil config;
+
     /** Domain repository reference. */
     @Autowired
     private DomainRepository domainRepository;
@@ -79,10 +84,7 @@ public class ProjectServiceImpl implements ProjectService {
             HashMap<String, String> optional = new HashMap<String, String>();
             optional.put("domainid", project.getDepartment().getDomain().getUuid());
             optional.put("account", project.getDepartment().getUserName());
-            CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
-            server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
-            cloudStackProjectService.setServer(server);
-            LOGGER.debug("Cloud stack connectivity at VM", cloudConfig.getApiKey());
+            config.setUserServer();
             LOGGER.debug("Cloud stack connectivity at domain", project.getDepartment().getDomain().getUuid());
             String csResponse = cloudStackProjectService.createProject("json", project.getName(),
                     project.getDescription(), optional);
@@ -118,9 +120,7 @@ public class ProjectServiceImpl implements ProjectService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
-                server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
-                cloudStackProjectService.setServer(server);
+                config.setUserServer();
                 HashMap<String, String> optional = new HashMap<String, String>();
                 optional.put("domainid", project.getDepartment().getDomain().getUuid());
                 optional.put("account", project.getDepartment().getUserName());
@@ -218,9 +218,7 @@ public class ProjectServiceImpl implements ProjectService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-            CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
-            server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
-            cloudStackProjectService.setServer(server);
+            config.setUserServer();
             HashMap<String, String> optional = new HashMap<String, String>();
             optional.put("domainid", project.getDepartment().getDomain().getUuid());
             optional.put("account", project.getDepartment().getUserName());

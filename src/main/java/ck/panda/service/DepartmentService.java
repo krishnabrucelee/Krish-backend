@@ -106,4 +106,12 @@ public interface DepartmentService  extends CRUDService<Department>  {
      */
     List<Department> findDepartmentsByAccountTypesAndActive(List<AccountType> types, Boolean isActive) throws Exception;
 
+    /**
+     * Find all the departments for sync.
+     *
+     * @throws Exception error occurs.
+     * @return department.
+     */
+    List<Department> findAllBySync() throws Exception;
+
 }
