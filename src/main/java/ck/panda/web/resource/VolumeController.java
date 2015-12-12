@@ -174,6 +174,20 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     }
 
     /**
+     * list by instance attached to volume.
+     *
+     * @param instanceId Volume
+     * @return volume Volume by instances
+     * @throws Exception exception
+     */
+    @RequestMapping(value = "listbyinstancesandvolumetype", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Volume> listByInstanceAndVolumeType(@RequestParam("instanceid") Long instanceId) throws Exception {
+        return volumeService.findByInstanceAndVolumeTypeAndIsActive(instanceId);
+    }
+
+    /**
      * list all Volumes for instance.
      *
      * @return Volume service
