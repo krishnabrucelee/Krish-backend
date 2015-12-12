@@ -17,10 +17,13 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.repository.jpa.DepartmentReposiory;
 import ck.panda.domain.repository.jpa.DomainRepository;
+import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackAccountService;
+import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -69,31 +72,45 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Autowired
     private DomainRepository domainRepository;
 
+    /** Autowired CloudStackUserService object. */
+    @Autowired
+    private CloudStackUserService csUserService;
+
+    /** User repository reference. */
+    @Autowired
+    private UserService userService;
+
     @Override
     public Department save(Department department) throws Exception {
 
         if (department.getSyncFlag()) {
+
+            //Check the user is not a root and admin and set the domain value from login detail
+            System.out.println(String.valueOf(tokenDetails.getTokenDetails("usertype")));
+            if(!String.valueOf(tokenDetails.getTokenDetails("usertype")).equals("ROOT_ADMIN")) {
+                Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+                department.setDomain(domain);
+            }
             // Validate department
             this.validateDepartment(department);
 
-            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
-            byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
-            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-            String encryptedPassword = new String(EncryptionUtil.encrypt(department.getPassword(), originalKey));
-            department.setPassword(encryptedPassword);
+
             department.setDomainId(department.getDomain().getId());
             department.setIsActive(true);
             department.setStatus(Department.Status.ENABLED);
             department.setType(Department.AccountType.USER);
             csAccountService.setServer(configServer.setServer(1L));
+
             HashMap<String, String> accountMap = new HashMap<String, String>();
             accountMap.put("domainid", String.valueOf(department.getDomain().getUuid()));
             String createAccountResponse = csAccountService.createAccount(
-                    String.valueOf(department.getType().ordinal()), department.getEmail(), department.getFirstName(),
-                    department.getLastName(), department.getUserName(), department.getPassword(), "json", accountMap);
+                    String.valueOf(department.getType().ordinal()), "test@test.com", "first",
+                    "last", department.getUserName(), "test", "json", accountMap);
 
             JSONObject createAccountResponseJSON = new JSONObject(createAccountResponse)
                     .getJSONObject("createaccountresponse").getJSONObject("account");
+            JSONObject userObj = createAccountResponseJSON.getJSONArray("user").getJSONObject(0);
+            csUserService.deleteUser(userObj.getString("id"), "json");
             department.setUuid((String) createAccountResponseJSON.get("id"));
         }
         return departmentRepo.save(department);

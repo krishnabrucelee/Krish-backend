@@ -97,7 +97,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      */
     @Query(value = "select user from User user where user.type =:type ")
     List<User> findAllRootAdminUser(@Param("type") Type type);
-    
+
     /**
      * Find the user list by account types and isActive.
      *
@@ -107,5 +107,17 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      */
     @Query(value = "select user from User user where user.isActive =:isActive AND user.type in (:types)")
     List<User> findUsersByTypesAndActive(@Param("types") List<Type> types, @Param("isActive") Boolean isActive);
+
+
+    /**
+     * Find the user by given uuid and the status.
+     *
+     * @param uuId of the user.
+     * @param isActive status of the user.
+     * @return user.
+     */
+    @Query(value = "select user from User user where user.uuid =:uuId AND user.isActive =:isActive")
+    User findByUuIdAndIsActive(@Param("uuId") String uuId, @Param("isActive") Boolean isActive);
+
 
 }
