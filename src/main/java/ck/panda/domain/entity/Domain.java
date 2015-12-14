@@ -11,7 +11,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -24,6 +23,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
+
 import ck.panda.util.JsonUtil;
 
 
@@ -60,11 +60,8 @@ public class Domain {
     @Column(name = "portal_user_name")
     private String portalUserName;
 
-    @Transient
+    @Column(name = "password")
     private String password;
-
-    @Transient
-    private String confirmPassword;
 
     /** City of Headquarters for the Domain. */
     @Column(name = "city_headquarter")
@@ -74,17 +71,17 @@ public class Domain {
     @Column(name = "company_address")
     private String companyAddress;
 
-    @Transient
+    @Column(name = "company_primary_firstname")
     private String primaryFirstName;
 
-    @Transient
+    @Column(name = "company_primary_lastname")
     private String lastName;
 
-    @Transient
+    @Column(name = "company_primary_email")
     private String email;
 
     /** Phone for the Domain. */
-    @Column(name = "phone")
+    @Column(name = "company_primary_phone")
     private String phone;
 
     /** Secondary Contact for the Domain. */
@@ -103,23 +100,6 @@ public class Domain {
     @Column(name = "secondary_contact_phone")
     private String secondaryContactPhone;
 
-    /** Domain owner for the account. */
-    @Column(name = "domain_owner")
-    private String domainOwner;
-
-    /** HOD of the domain. */
-    @JoinColumn(name = "hod_id", referencedColumnName = "Id", updatable = false, insertable = false)
-    @OneToOne
-    private Department hod;
-
-    /** HOD id of the domain. */
-    @Column(name = "hod_id")
-    private Long hodId;
-
-    /** Whether Domain child is present. */
-    @Column(name = "is_child")
-    private Boolean isChild;
-
     /** Check whether Domain is in active state or in active state. */
     @Column(name = "is_active")
     private Boolean isActive;
@@ -128,7 +108,6 @@ public class Domain {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private Status status;
-
 
     /** Version attribute to handle optimistic locking. */
     @Version
@@ -219,71 +198,6 @@ public class Domain {
      */
     public void setName(String name) {
         this.name = name;
-    }
-
-    /**
-     * Get Domain Owner of the Domain.
-     *
-     * @return the domainOwner
-     */
-    public String getDomainOwner() {
-        return domainOwner;
-    }
-
-    /**
-     * Set Domain Owner of the Domain.
-     *
-     * @param domainOwner the domainOwner to set
-     */
-    public void setDomainOwner(String domainOwner) {
-        this.domainOwner = domainOwner;
-    }
-
-
-    /**
-    * @return the hod
-    */
-    public Department getHod() {
-        return hod;
-    }
-
-    /**
-    * @param hod the hod to set
-    */
-    public void setHod(Department hod) {
-        this.hod = hod;
-    }
-
-    /**
-    * @return the hodId
-    */
-    public Long getHodId() {
-        return hodId;
-    }
-
-    /**
-    * @param hodId the hodId to set
-    */
-    public void setHodId(Long hodId) {
-        this.hodId = hodId;
-    }
-
-    /**
-     * Get is child state of the Domain.
-     *
-     * @return the isChild
-     */
-    public Boolean getIsChild() {
-        return isChild;
-    }
-
-    /**
-     * Set is child state of the Domain.
-     *
-     * @param isChild the isChild to set
-     */
-    public void setIsChild(Boolean isChild) {
-        this.isChild = isChild;
     }
 
     /**
@@ -468,24 +382,6 @@ public class Domain {
      */
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    /**
-     * Get the confirm password.
-     *
-     * @return the confirmPassword
-     */
-    public String getConfirmPassword() {
-        return confirmPassword;
-    }
-
-    /**
-     * Set Get the confirm password..
-     *
-     * @param confirmPassword to set
-     */
-    public void setConfirmPassword(String confirmPassword) {
-        this.confirmPassword = confirmPassword;
     }
 
     /**

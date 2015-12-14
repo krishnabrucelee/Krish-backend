@@ -210,7 +210,6 @@ public class UserServiceImpl implements UserService {
                 // the converted User entity to list
 
                 User user = User.convert(userListJSON.getJSONObject(i));
-                user.setAccountId(convertEntityService.getAccountIdByUsernameAndDomain(user.getTransAccount(),convertEntityService.getDomain(user.getTransDomainId())));
                 user.setDepartment(convertEntityService.getDepartment(user.getTransDepartment()));
                 user.setDomainId(convertEntityService.getDomainId(user.getTransDomainId()));
                 userList.add(user);
@@ -263,11 +262,6 @@ public class UserServiceImpl implements UserService {
         user.setIsActive(false);
         user.setStatus(User.Status.DELETED);
         return userRepository.save(user);
-    }
-
-    @Override
-    public List<User> findByAccountId(Long accountId) throws Exception {
-        return userRepository.findByAccountId(accountId);
     }
 
     /**

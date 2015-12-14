@@ -1,5 +1,5 @@
 /**
- *
+ * Resource limit allication for each project will manage in this service.
  */
 package ck.panda.service;
 
@@ -111,10 +111,6 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
     @Override
     public ResourceLimitProject find(Long id) throws Exception {
         ResourceLimitProject resourceLimit = resourceLimitProjectRepo.findOne(id);
-
-        LOGGER.debug("Sample Debug Message");
-        LOGGER.trace("Sample Trace Message");
-
         if (resourceLimit == null) {
             throw new EntityNotFoundException("ResourceLimit.not.found");
         }
@@ -140,18 +136,6 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
     public HashMap<String, String> optional(ResourceLimitProject resource) {
         HashMap<String, String> optional = new HashMap<String, String>();
 
-        if (resource.getDomainId() != null) {
-            optional.put("domainid", resource.getDomain().getUuid().toString());
-        }
-
-        if (resource.getDomain() != null) {
-            optional.put("domain", resource.getDomain().getName());
-        }
-
-        if (resource.getDepartment() != null) {
-            optional.put("account", resource.getDepartment().getUserName());
-        }
-
         if (resource.getProject() != null) {
             optional.put("projectid", resource.getProject().getUuid());
         }
@@ -170,17 +154,15 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
         String response = csResourceLimitService.listResourceLimits("json", resourceMap);
         JSONArray resourceListJSON = new JSONObject(response).getJSONObject("listresourcelimitsresponse")
                 .getJSONArray("resourcelimit");
-
         // 2. Iterate the json list, convert the single json entity to
         // Resource limit
         for (int i = 0, size = resourceListJSON.length(); i < size; i++) {
             // 2.1 Call convert by passing JSONObject to StorageOffering entity
-            // and Add
-            // the converted Resource limit entity to list
-        	ResourceLimitProject resource = ResourceLimitProject.convert(resourceListJSON.getJSONObject(i));
+            // and Add the converted Resource limit entity to list
+            ResourceLimitProject resource = ResourceLimitProject.convert(resourceListJSON.getJSONObject(i));
             resource.setProjectId(convertEntityService.getProject(resource.getTransProjectId()).getId());
             resource.setUniqueSeperator(resource.getTransProjectId()+"-"+ResourceType.values()[(resource.getTransResourceType())]);
-        	resourceList.add(resource);
+            resourceList.add(resource);
         }
         return resourceList;
     }
@@ -199,9 +181,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
         JSONObject resourceLimitsResponse = new JSONObject(resourceLimits).getJSONObject("updateresourcelimitresponse")
                 .getJSONObject("resourcelimit");
         if (resourceLimitsResponse.has("errorcode")) {
-            // errors = this.validateEvent(errors,
-            // resourceLimitsResponse.getString("errortext"));
-            LOGGER.debug("=========== +" + "============= ERROR IN RESOURCE PROJECT");
+            LOGGER.debug("============= ERROR IN RESOURCE PROJECT =============");
         } else {
             resource.setDomainId(resource.getDomain().getId());
             resource.setResourceType(resource.getResourceType());

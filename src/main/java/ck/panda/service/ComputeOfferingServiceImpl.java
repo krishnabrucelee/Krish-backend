@@ -297,5 +297,11 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
         return (ComputeOffering) computeRepo.findName(name);
     }
 
+
+	@Override
+	public List<ComputeOffering> findByIsActive(Boolean isActive) throws Exception {
+		return computeRepo.findByIsActive(true);
+	}
+
   }
 

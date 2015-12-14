@@ -52,15 +52,6 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     User findByUser(@Param("userName") String userName, @Param("domain") Domain domain);
 
     /**
-     * Find the user from account.
-     *
-     * @param accountId of the user.
-     * @return user.
-     */
-    @Query(value = "select user from User user where user.accountId =:accountId")
-    List<User> findByAccountId(@Param("accountId") Long accountId);
-
-    /**
      * find all the user by domain.
      *
      * @param pageable pagination information.
