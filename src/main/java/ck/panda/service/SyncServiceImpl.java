@@ -49,6 +49,7 @@ import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Zone;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackServer;
+import ck.panda.util.JsonUtil;
 import ck.panda.util.error.exception.ApplicationException;
 
 /**
@@ -1174,6 +1175,12 @@ public class SyncServiceImpl implements SyncService {
                 instance.setCpuSpeed(csVm.getCpuSpeed());
                 instance.setMemory(csVm.getMemory());
                 instance.setCpuUsage(csVm.getCpuUsage());
+                instance.setDiskIoRead(csVm.getDiskIoRead());
+                instance.setDiskIoWrite(csVm.getDiskIoWrite());
+                instance.setDiskKbsRead(csVm.getDiskKbsRead());
+                instance.setDiskKbsWrite(csVm.getDiskKbsWrite());
+                instance.setNetworkKbsRead(csVm.getNetworkKbsRead());
+                instance.setNetworkKbsWrite(csVm.getNetworkKbsWrite());
                 instance.setPasswordEnabled(csVm.getPasswordEnabled());
                 instance.setPassword(csVm.getPassword());
                 instance.setIso(csVm.getIso());
