@@ -133,7 +133,7 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     }
 
     /**
-     * get instance with latest state update.
+     * Get instance with latest state update.
      *
      * @param vm vm uuid.
      * @param event vm event type.
