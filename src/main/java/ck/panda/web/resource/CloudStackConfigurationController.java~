@@ -83,7 +83,7 @@ public class CloudStackConfigurationController extends CRUDController<CloudStack
      * @return configuration values.
      * @throws Exception unhandled errors.
      */
-      @RequestMapping(value = "configlist", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+      @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
       @ResponseStatus(HttpStatus.OK)
       @ResponseBody
       protected List<CloudStackConfiguration> getSearch() throws Exception {
