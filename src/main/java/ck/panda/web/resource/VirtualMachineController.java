@@ -149,7 +149,7 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     }
 
     /**
-     * get instance with latest state update.
+     * Get instance with latest state update.
      *
      * @param vminstance vm object.
      * @throws Exception if error occurs.
