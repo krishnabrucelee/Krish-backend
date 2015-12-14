@@ -51,4 +51,12 @@ public interface SSHKeyService extends CRUDService<SSHKey> {
      */
     List<SSHKey> findAllByIsActive(Boolean isActive) throws Exception;
 
+    /**
+     * Find all the SSH Keys for sync.
+     *
+     * @return list of SSH Keys with active status
+     * @throws Exception error occurs.
+     */
+    List<SSHKey> findAllBySync() throws Exception;
+
 }

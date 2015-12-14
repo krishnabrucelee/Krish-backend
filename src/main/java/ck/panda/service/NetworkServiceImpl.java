@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Network.Status;
@@ -83,6 +84,7 @@ public class NetworkServiceImpl implements NetworkService {
     private ConvertEntityService convertEntityService;
 
     @Override
+    @PreAuthorize("hasPermission(#network.getSyncFlag(), 'ADD_ISOLATED_NETWORK')")
     public Network save(Network network) throws Exception {
 
         if (network.getSyncFlag()) {
@@ -92,8 +94,7 @@ public class NetworkServiceImpl implements NetworkService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-            config.setServer(1L);
-
+            config.setUserServer();
             String networkOfferings = csNetwork.createNetwork(network.getZone().getUuid(),"json",optional(network));
                     JSONObject createNetworkResponseJSON = new JSONObject(networkOfferings).getJSONObject("createnetworkresponse");
 
@@ -117,8 +118,7 @@ public class NetworkServiceImpl implements NetworkService {
                         network.setDepartmentId(convertEntityService.getDepartmentByUsername(departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName()));
                     }
                     network.setGateway(networkResponse.getString("gateway"));
-                    network.setNetMask(networkResponse.getString("netmask"));
-                    network.setNetworkDomain(networkResponse.getString("networkdomain"));
+
                     String token = tokenDetails.getTokenDetails("id");
                     User user = userRepository.findOne(Long.parseLong(token));
                     network.setCreatedBy(user);
@@ -159,7 +159,7 @@ public class NetworkServiceImpl implements NetworkService {
                 if (network.getNetworkDomain() != null && network.getNetworkDomain().trim() != "") {
                     optional.put("networkdomain", network.getNetworkDomain());
                 }
-                csNetwork.setServer(config.setServer(1L));
+                config.setUserServer();
                 String updateNetworkResponse = csNetwork.updateNetwork(network.getUuid(), optional, "json");
                 JSONObject jobId = new JSONObject(updateNetworkResponse).getJSONObject("updatenetworkresponse");
                 Thread.sleep(5000);
@@ -206,13 +206,14 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#network.getSyncFlag(), 'DELETE_NETWORK')")
     public Network softDelete(Network network) throws Exception {
           Errors errors = validator.rejectIfNullEntity("networks", network);
           errors = validator.validateEntity(network, errors);
         network.setIsActive(false);
         if (network.getSyncFlag()) {
             // set server for finding value in configuration
-            csNetwork.setServer(config.setServer(1L));
+            config.setUserServer();
            String deleteNetworkResponse = csNetwork.deleteNetwork(network.getUuid(), "json");
             JSONObject jobId = new JSONObject(deleteNetworkResponse).getJSONObject("deletenetworkresponse");
             Thread.sleep(5000);
@@ -358,11 +359,11 @@ public class NetworkServiceImpl implements NetworkService {
      * @return list of compute offerings.
      */
     public Page<Network> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
-    	if(tokenDetails.getTokenDetails("domainname").equals("/")) {
-    		return networkRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
-    	} else {
-    		return networkRepo.findByDomainIsActive(pagingAndSorting.toPageRequest(), true, Long.parseLong(tokenDetails.getTokenDetails("domainid")));
-    	}
+        if(tokenDetails.getTokenDetails("domainname").equals("/")) {
+            return networkRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
+        } else {
+            return networkRepo.findByDomainIsActive(pagingAndSorting.toPageRequest(), true, Long.parseLong(tokenDetails.getTokenDetails("domainid")));
+        }
     }
 
     /**

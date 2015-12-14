@@ -143,7 +143,15 @@ public class User {
     @Transient
     private Boolean syncFlag;
 
-    /** Define user type. */
+    /** API key of the user. */
+    @Transient
+    private String apiKey;
+
+    /** API key of the user. */
+    @Transient
+    private String secretKey;
+
+	/** Define user type. */
     public enum Type {
        /** Define type constant. */
         USER,
@@ -605,6 +613,42 @@ public class User {
     public void setDomainId(Long domainId) {
         this.domainId = domainId;
     }
+
+    /**
+     * Get the API Key.
+     *
+     * @return the apiKey
+     */
+    public String getApiKey() {
+		return apiKey;
+	}
+
+    /**
+     * Set the API Key.
+     *
+     * @param apiKey to set
+     */
+	public void setApiKey(String apiKey) {
+		this.apiKey = apiKey;
+	}
+
+	/**
+     * Get the secret key.
+     *
+     * @return the secretKey
+     */
+	public String getSecretKey() {
+		return secretKey;
+	}
+
+	/**
+     * Set the secret key .
+     *
+     * @param secretKey to set
+     */
+	public void setSecretKey(String secretKey) {
+		this.secretKey = secretKey;
+	}
 
     /**
      * Convert JSONObject into user object.

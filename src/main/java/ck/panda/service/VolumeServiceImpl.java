@@ -156,6 +156,8 @@ public class VolumeServiceImpl implements VolumeService {
         return volumeRepo.findByInstanceAndIsActive(volume, true);
     }
 
+
+
     @Override
     public List<Volume> findByVolumeTypeAndIsActive() throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
@@ -163,6 +165,11 @@ public class VolumeServiceImpl implements VolumeService {
         return volumeRepo.findByVolumeTypeAndIsActive(domain.getId(), Volume.VolumeType.DATADISK, true);
         }
         return volumeRepo.findByVolumeTypeAndIsActive(Volume.VolumeType.DATADISK, true);
+    }
+
+    @Override
+    public List<Volume> findByInstanceAndVolumeTypeAndIsActive(Long volume) throws Exception {
+        return volumeRepo.findByInstanceAndVolumeTypeAndIsActive(volume, Volume.VolumeType.ROOT, true);
     }
 
     /**
@@ -236,7 +243,7 @@ public class VolumeServiceImpl implements VolumeService {
      * @throws Exception error
      */
     private void createVolume(Volume volume, Errors errors) throws Exception {
-        config.setServer(1L);
+        config.setUserServer();
         String volumeS = csVolumeService.createVolume(volume.getName(), volume.getStorageOffering().getUuid(),
                 volume.getZone().getUuid(), "json", optional(volume));
         LOGGER.info("Volume create response " + volumeS);
@@ -316,7 +323,7 @@ public class VolumeServiceImpl implements VolumeService {
     public Volume attachVolume(Volume volume) throws Exception {
         Errors errors = validator.rejectIfNullEntity("volumes", volume);
         errors = validator.validateEntity(volume, errors);
-        config.setServer(1L);
+        config.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
         if (volume.getVmInstanceId() != null) {
         VmInstance instance = virtualMachineRepo.findOne(volume.getVmInstanceId());
@@ -359,7 +366,7 @@ public class VolumeServiceImpl implements VolumeService {
     public Volume detachVolume(Volume volume) throws Exception {
         Errors errors = validator.rejectIfNullEntity("volumes", volume);
         errors = validator.validateEntity(volume, errors);
-        config.setServer(1L);
+        config.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
         optional.put("id", volume.getUuid());
         //optional.put("virtualmachineid", volume.getVmInstance().getUuid());
@@ -392,7 +399,7 @@ public class VolumeServiceImpl implements VolumeService {
     public Volume resizeVolume(Volume volume) throws Exception {
         Errors errors = validator.rejectIfNullEntity("volumes", volume);
         errors = validator.validateEntity(volume, errors);
-        config.setServer(1L);
+        config.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
         if (volume.getDiskSize() != null) {
             optional.put("size", volume.getDiskSize().toString());
@@ -439,21 +446,21 @@ public class VolumeServiceImpl implements VolumeService {
         volume.setIsActive(false);
         volume.setStatus(Volume.Status.DESTROY);
         // set server for finding value in configuration
-        csVolumeService.setServer(config.setServer(1L));
+        config.setUserServer();
         csVolumeService.deleteVolume(volume.getUuid(), "json");
         return volumeRepo.save(volume);
 
     }
 
     @Override
-	public Volume uploadVolume(Volume volume) throws Exception {
+    public Volume uploadVolume(Volume volume) throws Exception {
         this.validateVolumeUniqueness(volume);
         Errors errors = validator.rejectIfNullEntity("volumes", volume);
         errors = validator.validateEntity(volume, errors);
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-            config.setServer(1L);
+            config.setUserServer();
             HashMap<String, String> optional = new HashMap<String, String>();
 
             Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));

@@ -277,4 +277,8 @@ public class DepartmentServiceImpl implements DepartmentService {
         return (List<Department>) departmentRepo.findDepartmentsByAccountTypesAndActive(types, isActive);
     }
 
+    public List<Department> findAllBySync() throws Exception {
+        return (List<Department>) departmentRepo.findAll();
+    }
+
 }

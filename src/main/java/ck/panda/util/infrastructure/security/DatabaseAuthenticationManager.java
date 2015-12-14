@@ -1,6 +1,8 @@
 package ck.panda.util.infrastructure.security;
 
 import java.util.HashMap;
+
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +22,7 @@ import ck.panda.domain.repository.jpa.DepartmentReposiory;
 import ck.panda.domain.repository.jpa.RoleReposiory;
 import ck.panda.service.UserService;
 import ck.panda.util.CloudStackAuthenticationService;
+import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
 
 /**
@@ -52,9 +55,13 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
     @Autowired
     private ConfigUtil configUtil;
 
-    /** Cloud stack template service. */
+    /** Cloud stack authentication service. */
     @Autowired
     private CloudStackAuthenticationService cloudStackAuthenticationService;
+
+    /** Cloud stack user service. */
+    @Autowired
+    private CloudStackUserService cloudStackUserService;
 
     /** Role repository reference. */
     @Autowired
@@ -131,17 +138,22 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
                     } else if (user != null && user.getRole() == null) {
                         throw new BadCredentialsException("Contact administrator to get the access permission granted");
                     } else {
-                        Department department = departmentReposiory.findOne(user.getDepartment().getId());
-                        Role role = roleReposiory.findUniqueness(user.getRole().getName(), department);
-                        resultOfAuthentication = externalServiceAuthenticator.authenticate(username.get(), user.getRole().getName(), role, user);
-                        String newToken = null;
-                        try {
-                            newToken = tokenService.generateNewToken(user, domain.get());
-                        } catch (Exception e) {
-                            LOGGER.error("Error to generating token :" + e);
-                        }
-                        resultOfAuthentication.setToken(newToken);
-                        tokenService.store(newToken, resultOfAuthentication);
+                    	Boolean authKeyResponse = apiSecretKeyGeneration(user);
+                    	if(authKeyResponse) {
+                            Department department = departmentReposiory.findOne(user.getDepartment().getId());
+                            Role role = roleReposiory.findUniqueness(user.getRole().getName(), department);
+                            resultOfAuthentication = externalServiceAuthenticator.authenticate(username.get(), user.getRole().getName(), role, user);
+                            String newToken = null;
+                            try {
+                                newToken = tokenService.generateNewToken(user, domain.get());
+                            } catch (Exception e) {
+                                LOGGER.error("Error to generating token :" + e);
+                            }
+                            resultOfAuthentication.setToken(newToken);
+                            tokenService.store(newToken, resultOfAuthentication);
+                    	} else {
+                    		throw new BadCredentialsException("Problem for getting API and Secret key");
+                    	}
                     }
                 } else {
                     throw new BadCredentialsException("Invalid login credentials");
@@ -179,6 +191,34 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
             return false;
         } else {
             return true;
+        }
+    }
+
+    private Boolean apiSecretKeyGeneration(User user) throws Exception {
+        configUtil.setServer(1L);
+        HashMap<String, String> optional = new HashMap<String, String>();
+    	optional.put("id", user.getUuid());
+        String listUserByIdResponse = cloudStackUserService.listUsers(optional, "json");
+        JSONObject listUsersResponse = new JSONObject(listUserByIdResponse).getJSONObject("listusersresponse");
+        if (listUsersResponse.has("errorcode")) {
+        	return false;
+        } else {
+        	JSONArray userJsonobject = (JSONArray) listUsersResponse.get("user");
+        	if(userJsonobject.getJSONObject(0).has("apikey")) {
+        		user.setApiKey(userJsonobject.getJSONObject(0).get("apikey").toString());
+        		user.setSecretKey(userJsonobject.getJSONObject(0).get("secretkey").toString());
+            	return true;
+        	} else {
+        		String keyValueResponse = cloudStackUserService.registerUserKeys(user.getUuid(), "json");
+        		JSONObject keyValue = new JSONObject(keyValueResponse).getJSONObject("registeruserkeysresponse");
+        		if (keyValue.has("errorcode")) {
+                	return false;
+                } else {
+                	user.setApiKey(keyValue.getJSONObject("userkeys").getString("apikey"));
+            		user.setSecretKey(keyValue.getJSONObject("userkeys").getString("secretkey"));
+                	return true;
+                }
+        	}
         }
     }
 }

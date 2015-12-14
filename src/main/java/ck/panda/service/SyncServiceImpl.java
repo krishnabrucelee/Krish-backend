@@ -42,6 +42,7 @@ import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.Type;
+import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
@@ -80,6 +81,10 @@ public class SyncServiceImpl implements SyncService {
     /** Virtual machine Service for listing vms. */
     @Autowired
     private VirtualMachineService virtualMachineService;
+
+    /** Virtual Machine repository reference. */
+    @Autowired
+    private VirtualMachineRepository virtualmachinerepository;
 
     /** RegionSerivce for listing Regions. */
     @Autowired
@@ -476,9 +481,7 @@ public class SyncServiceImpl implements SyncService {
                 // domain which is not added in the app
                 csDomainMap.remove(domain.getUuid());
             } else {
-                if (domain.getIsActive()) {
-                    domainService.softDelete(domain);
-                 }
+                domainService.softDelete(domain);
             }
         }
         // 4. Get the remaining list of cs server hash domain object, then
@@ -793,9 +796,7 @@ public class SyncServiceImpl implements SyncService {
                 // osType which is not added in the app
                 csStorageOfferingMap.remove(storageOffering.getUuid());
             } else {
-                if (storageOffering.getIsActive()) {
-                    storageService.softDelete(storageOffering);
-                  }
+                storageService.softDelete(storageOffering);
             }
         }
         // 4. Get the remaining list of cs server hash osType object, then
@@ -847,9 +848,7 @@ public class SyncServiceImpl implements SyncService {
                 // user which is not added in the app
                 csUserMap.remove(user.getUuid());
             } else {
-                if (user.getIsActive()) {
-                    userService.softDelete(user);
-                }
+                userService.softDelete(user);
 
                 // 3.2 If not found, delete it from app db
                 // TODO clarify the business requirement, since it has impact in
@@ -960,9 +959,7 @@ public class SyncServiceImpl implements SyncService {
                 // network which is not added in the app
                 csNetworkMap.remove(network.getUuid());
             } else {
-                if (network.getIsActive()) {
-                    networkService.softDelete(network);
-                }
+                networkService.softDelete(network);
             }
         }
         // 4. Get the remaining list of cs server hash network object, then
@@ -1014,9 +1011,7 @@ public class SyncServiceImpl implements SyncService {
                 // compute offering which is not added in the app
                 csComputeOfferingMap.remove(computeOffering.getUuid());
             } else {
-                if (computeOffering.getIsActive()) {
-                    computeService.softDelete(computeOffering);
-                }
+                computeService.softDelete(computeOffering);
             }
         }
         // 4. Get the remaining list of cs server hash domain object, then
@@ -1079,9 +1074,7 @@ public class SyncServiceImpl implements SyncService {
                 csTemplateMap.remove(template.getUuid());
             } else {
                 template.setSyncFlag(false);
-                if (template.getIsActive()) {
-                    templateService.softDelete(template);
-                }
+                templateService.softDelete(template);
             }
         }
         // 4. Get the remaining list of cs server hash template object, then
@@ -1110,7 +1103,7 @@ public class SyncServiceImpl implements SyncService {
         HashMap<String, Department> csUserMap = (HashMap<String, Department>) Department.convert(csAccountService);
 
         // 2. Get all the user objects from application
-        List<Department> appUserList = departmentService.findAll();
+        List<Department> appUserList = departmentService.findAllBySync();
 
         // 3. Iterate application user list
         for (Department department : appUserList) {
@@ -1131,9 +1124,7 @@ public class SyncServiceImpl implements SyncService {
                 // user which is not added in the app
                 csUserMap.remove(department.getUuid());
             } else {
-                if (department.getIsActive()) {
-                    departmentService.softDelete(department);
-                 }
+                departmentService.softDelete(department);
             }
 
         }
@@ -1213,7 +1204,13 @@ public class SyncServiceImpl implements SyncService {
                     instance.setVncPassword(encryptedPassword);
                 }
                 // 3.2 If found, update the vm object in app db
-                virtualMachineService.update(instance);
+                //virtualMachineService.update(instance);
+
+                HashMap<String, String> optional = new HashMap<String, String>();
+                optional.put("displayName", instance.getTransDisplayName());
+                cloudStackInstanceService.updateVirtualMachine(instance.getUuid(), optional);
+                virtualmachinerepository.save(instance);
+
                 // 3.3 Remove once updated, so that we can have the list of cs
                 // vm which is not added in the
                 // app
@@ -1264,11 +1261,7 @@ public class SyncServiceImpl implements SyncService {
                 // host which is not added in the app
                 csHostMap.remove(host.getUuid());
             } else {
-                if (host.getIsActive()) {
-                    hostService.softDelete(host);
-                 } else {
-                hostService.delete(host);
-                 }
+                hostService.softDelete(host);
             }
 
         }
@@ -1330,9 +1323,7 @@ public class SyncServiceImpl implements SyncService {
                 // osType which is not added in the app
                 csVolumeMap.remove(volume.getUuid());
             } else {
-                if (volume.getIsActive()) {
                 volumeService.softDelete(volume);
-                 }
             }
         }
         // 4. Get the remaining list of cs server hash osType object, then
@@ -1378,11 +1369,7 @@ public class SyncServiceImpl implements SyncService {
                 // snapshot which is not added in the app
                 csSnapshotMap.remove(snapshot.getUuid());
             } else {
-                if (snapshot.getIsActive()) {
-                    snapshotService.softDelete(snapshot);
-                 } else {
-                snapshotService.delete(snapshot);
-                 }
+                snapshotService.softDelete(snapshot);
             }
 
         }
@@ -1428,11 +1415,7 @@ public class SyncServiceImpl implements SyncService {
                 // host which is not added in the app
                 csPodMap.remove(pod.getUuid());
             } else {
-                if (pod.getIsActive()) {
-                    podService.softDelete(pod);
-                 } else{
-                podService.delete(pod);
-                 }
+                podService.softDelete(pod);
             }
 
         }
@@ -1791,9 +1774,7 @@ public class SyncServiceImpl implements SyncService {
                 // host which is not added in the app
                 csIsoMap.remove(iso.getUuid());
             } else {
-                if (iso.getIsActive()) {
-                    isoService.softDelete(iso);
-                }
+                isoService.softDelete(iso);
             }
 
         }
@@ -1833,9 +1814,7 @@ public class SyncServiceImpl implements SyncService {
                 // project which is not added in the app
                 csProjectMap.remove(project.getUuid());
             } else {
-                if (project.getIsActive()) {
                 projectService.softDelete(project);
-                }
             }
         }
         // 4. Get the remaining list of cs server hash NetworkOffering object,
@@ -1882,9 +1861,7 @@ public class SyncServiceImpl implements SyncService {
                 // user which is not added in the app
                 csAccountMap.remove(account.getUuid());
             } else {
-                if (account.getIsActive()) {
-                    accountService.softDelete(account);
-                 }
+                accountService.softDelete(account);
             }
 
         }
@@ -1904,7 +1881,7 @@ public class SyncServiceImpl implements SyncService {
         HashMap<String, SSHKey> csSSHkeyMap = (HashMap<String, SSHKey>) SSHKey.convert(csSSHKeyList);
 
         // 2. Get all the region objects from application
-        List<SSHKey> appSSHKeyList = sshKeyService.findAll();
+        List<SSHKey> appSSHKeyList = sshKeyService.findAllBySync();
 
         // 3. Iterate application region list
         for (SSHKey sshKey : appSSHKeyList) {

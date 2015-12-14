@@ -107,13 +107,13 @@ public class SSHKey implements Serializable {
     @CreatedBy
     @JoinColumn(name = "created_by", referencedColumnName = "id")
     @OneToOne
-    private SSHKey createdBy;
+    private User createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
     @JoinColumn(name = "updated_by", referencedColumnName = "id")
     @OneToOne
-    private SSHKey updatedBy;
+    private User updatedBy;
 
     /** Transient department of the user. */
     @Transient
@@ -365,7 +365,7 @@ public class SSHKey implements Serializable {
      *
      * @return createdBy
      */
-    public SSHKey getCreatedBy() {
+    public User getCreatedBy() {
         return createdBy;
     }
 
@@ -374,7 +374,7 @@ public class SSHKey implements Serializable {
      *
      * @param createdBy to set
      */
-    public void setCreatedBy(SSHKey createdBy) {
+    public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -383,7 +383,7 @@ public class SSHKey implements Serializable {
      *
      * @return updatedBy
      */
-    public SSHKey getUpdatedBy() {
+    public User getUpdatedBy() {
         return updatedBy;
     }
 
@@ -392,7 +392,7 @@ public class SSHKey implements Serializable {
      *
      * @param updatedBy to set
      */
-    public void setUpdatedBy(SSHKey updatedBy) {
+    public void setUpdatedBy(User updatedBy) {
         this.updatedBy = updatedBy;
     }
 

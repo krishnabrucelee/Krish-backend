@@ -55,10 +55,9 @@ public class UserController extends CRUDController<User> implements ApiControlle
         return userService.update(user);
     }
 
-    @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing User.")
-    @Override
-    public void delete(@PathVariable(PATH_ID) Long id) throws Exception {
-        userService.delete(id);
+    @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing User.")    
+    public void softDelete(@RequestBody User user, @PathVariable(PATH_ID) Long id) throws Exception {
+        userService.softDelete(user); 
     }
     @Override
     public List<User> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,

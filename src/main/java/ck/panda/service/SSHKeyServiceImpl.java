@@ -220,5 +220,9 @@ public class SSHKeyServiceImpl implements SSHKeyService {
        errors.addGlobalError(errmessage);
        return errors;
     }
+
+    public List<SSHKey> findAllBySync() throws Exception {
+        return (List<SSHKey>) sshkeyRepo.findAll();
+    }
 }
 

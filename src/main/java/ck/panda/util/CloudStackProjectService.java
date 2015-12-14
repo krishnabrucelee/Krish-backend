@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class CloudStackProjectService {
+
     /** Cloudstack server for connectivity. */
     @Autowired
     private CloudStackServer server;

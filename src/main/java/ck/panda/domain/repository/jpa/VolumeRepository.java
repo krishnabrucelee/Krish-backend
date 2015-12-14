@@ -4,7 +4,6 @@
 package ck.panda.domain.repository.jpa;
 
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -111,5 +110,17 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      */
     @Query(value = "select volume from Volume volume where volume.isActive =:isActive AND volume.volumeType=:volumeType")
     List<Volume> findByVolumeTypeAndIsActive(@Param("volumeType") VolumeType volumeType, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find the Volume by volume Type and IsActive.
+     *
+     * @param vmInstanceId instance for each domain.
+     * @param volumeType for each domain.
+     * @param isActive get the volume list based on active/inactive status.
+     * @return volume.
+     */
+    @Query(value = "select volume from Volume volume where volume.isActive =:isActive AND volume.volumeType=:volumeType AND volume.vmInstanceId=:vmInstanceId")
+    List<Volume> findByInstanceAndVolumeTypeAndIsActive(@Param("vmInstanceId") Long vmInstanceId, @Param("volumeType") VolumeType volumeType, @Param("isActive") Boolean isActive);
+
 
 }

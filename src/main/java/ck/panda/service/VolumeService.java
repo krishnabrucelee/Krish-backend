@@ -4,7 +4,6 @@
 package ck.panda.service;
 
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Volume;
@@ -13,6 +12,14 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
  * Volume service.
+ */
+/**
+ * @author Assistanz
+ *
+ */
+/**
+ * @author Assistanz
+ *
  */
 @Service
 public interface VolumeService extends CRUDService<Volume> {
@@ -97,7 +104,7 @@ public interface VolumeService extends CRUDService<Volume> {
     * @return volume Volumes from instance.
     * @throws Exception exception
     */
-   List<Volume> findByInstanceAndIsActive(Long volume)throws Exception;
+   List<Volume> findByInstanceAndIsActive(Long volume) throws Exception;
 
    /**
     * list by volumes by its volume type.
@@ -105,6 +112,16 @@ public interface VolumeService extends CRUDService<Volume> {
     * @return Upload Volume
     * @throws Exception exception
     */
-   List<Volume> findByVolumeTypeAndIsActive()throws Exception;
+   List<Volume> findByVolumeTypeAndIsActive() throws Exception;
+
+
+   /**
+    * List the volume with its instanceId, volume type and active status.
+    *
+    * @param volume Volume
+    * @return volume list
+    * @throws Exception if error occurs
+    */
+   List<Volume> findByInstanceAndVolumeTypeAndIsActive(Long volume) throws Exception;
 
 }

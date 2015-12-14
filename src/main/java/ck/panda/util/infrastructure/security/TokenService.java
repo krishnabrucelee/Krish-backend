@@ -63,6 +63,14 @@ public class TokenService {
     @Value("${backend.admin.type}")
     private String backendAdminType;
 
+    /** API key. */
+    @Value("${backend.admin.userapikey}")
+    private String userApiKey;
+
+    /** Secret key. */
+    @Value("${backend.admin.usersecretkey}")
+    private String userSecretKey;
+
     /** User service reference. */
     @Autowired
     private UserService userService;
@@ -129,6 +137,8 @@ public class TokenService {
         if (tokenDetails.get(5).equals("ROOT")) {
             User user = userService.findByUser(tokenDetails.get(1), null, "/");
             if (user != null) {
+            	user.setApiKey(tokenDetails.get(7));
+            	user.setApiKey(tokenDetails.get(8));
                 token = tokenService.generateNewToken(user, "/");
                 tokenDetails = getTokenDetails(token, "@@");
                 resultOfAuthentication = externalServiceAuthenticator.authenticate(tokenDetails.get(1), tokenDetails.get(4), null, null);
@@ -157,6 +167,8 @@ public class TokenService {
             stringBuilder.append(user == null ? backendAdminRole : user.getRole().getName()).append("@@");
             stringBuilder.append(domainName).append("@@");
             stringBuilder.append(user == null ? backendAdminType : user.getType()).append("@@");
+            stringBuilder.append(user == null ? userApiKey : user.getApiKey()).append("@@");
+            stringBuilder.append(user == null ? userSecretKey : user.getSecretKey()).append("@@");
             stringBuilder.append(DateConvertUtil.getTimestamp());
         } catch (Exception e) {
             e.printStackTrace();
