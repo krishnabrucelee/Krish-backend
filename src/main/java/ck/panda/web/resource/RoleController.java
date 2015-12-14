@@ -52,6 +52,7 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Role.", response = Role.class)
     @Override
     public Role create(@RequestBody Role role) throws Exception {
+    	role.setSyncFlag(true);
         return roleService.save(role);
     }
 
@@ -64,6 +65,7 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
     @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing Role.", response = Role.class)
     @Override
     public Role update(@RequestBody Role role, @PathVariable(PATH_ID) Long id) throws Exception {
+    	role.setSyncFlag(true);
         return roleService.update(role);
     }
 
@@ -79,6 +81,7 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDelete(@RequestBody Role role, @PathVariable(PATH_ID) Long id) throws Exception {
         /** Doing Soft delete from the department table. */
+    	role.setSyncFlag(true);
         roleService.softDelete(role);
     }
 
