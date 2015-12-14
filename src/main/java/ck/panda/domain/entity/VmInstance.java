@@ -279,27 +279,27 @@ public class VmInstance implements Serializable {
     @Column(name = "instance_usage")
     private String cpuUsage;
 
-    /** The network kbs read. */
+    /** The network read in kbs. */
     @Column(name = "network_kbs_read")
     private Integer networkKbsRead;
 
-    /** The network kbs write. */
+    /** The network write in kbs. */
     @Column(name = "network_kbs_write")
     private Integer networkKbsWrite;
 
-    /** The disk kbs read. */
+    /** The disk read in bytes. */
     @Column(name = "disk_kbs_read")
     private Integer diskKbsRead;
 
-    /** The disk kbs write. */
+    /** The disk write in bytes. */
     @Column(name = "disk_kbs_write")
     private Integer diskKbsWrite;
 
-    /** The disk io read. */
+    /** The disk read input/output. */
     @Column(name = "disk_io_read")
     private Integer diskIoRead;
 
-    /** The disk io write. */
+    /** The disk write input/output. */
     @Column(name = "disk_io_write")
     private Integer diskIoWrite;
 
