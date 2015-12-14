@@ -49,6 +49,14 @@ public class VmInstance implements Serializable {
     @Column(name = "name", nullable = false)
     private String name;
 
+    /** Display name of the instance. */
+    @Column(name = "display_name", nullable = false)
+    private String displayName;
+
+    /** Internal name of the instance. */
+    @Column(name = "instance_internal_name")
+    private String instanceInternalName;
+
     /** cloudstack's instance uuid. */
     @Column(name = "uuid")
     private String uuid;
@@ -372,7 +380,6 @@ public class VmInstance implements Serializable {
     /** Transient department id of the instance. */
     @Transient
     private String transDepartmentId;
-
 
     /**
      * Get sync status.
@@ -1600,7 +1607,43 @@ public class VmInstance implements Serializable {
         this.transDisplayName = transDisplayName;
     }
 
-    @Override
+    /**
+     * Get the instance's internal name.
+     *
+     * @return the instanceInternalName
+     */
+    public String getInstanceInternalName() {
+		return instanceInternalName;
+	}
+
+    /**
+     * Set the instance's internal name .
+     *
+     * @param instanceInternalName to set
+     */
+	public void setInstanceInternalName(String instanceInternalName) {
+		this.instanceInternalName = instanceInternalName;
+	}
+
+	 /**
+     * Get the instance's display name.
+     *
+     * @return the displayName.
+     */
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	 /**
+     * Set the instance's display name .
+     *
+     * @param displayName to set.
+     */
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	@Override
     public String toString() {
         return "VmInstance [Id=" + id + ", name=" + name + ", uuid=" + uuid + ", vncPassword=" + vncPassword
                 + ", instanceOwner=" + instanceOwner + ", instanceOwnerId=" + instanceOwnerId + ", application="
@@ -1626,7 +1669,6 @@ public class VmInstance implements Serializable {
         VmInstance vmInstance = new VmInstance();
         vmInstance.setSyncFlag(false);
         try {
-            String owner = JsonUtil.getStringValue(jsonObject, "displayname");
             vmInstance.setName(JsonUtil.getStringValue(jsonObject, "name"));
             vmInstance.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
             vmInstance.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
@@ -1652,11 +1694,13 @@ public class VmInstance implements Serializable {
             vmInstance.setIso(JsonUtil.getStringValue(jsonObject, "isoid"));
             vmInstance.setIsoName(JsonUtil.getStringValue(jsonObject, "isoname"));
             vmInstance.setTransIsoId(JsonUtil.getStringValue(jsonObject, "isoid"));
+            vmInstance.setDisplayName(JsonUtil.getStringValue(jsonObject, "displayname"));
             JSONArray nicArray = jsonObject.getJSONArray("nic");
             vmInstance.setIpAddress(JsonUtil.getStringValue(nicArray.getJSONObject(0), "ipaddress"));
             vmInstance.setTransNetworkId(JsonUtil.getStringValue(nicArray.getJSONObject(0), "networkid"));
             vmInstance.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, "account"));
             vmInstance.setTransProjectId(JsonUtil.getStringValue(jsonObject, "projectid"));
+            vmInstance.setInstanceInternalName(JsonUtil.getStringValue(jsonObject, "instancename"));
         } catch (Exception e) {
             e.printStackTrace();
         }

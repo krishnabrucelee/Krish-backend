@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -38,6 +39,9 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     @Autowired
     private VirtualMachineService virtualmachineservice;
 
+    @Value(value = "${console.proxy}")
+    private String consoleProxy;
+
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Virtual Machine.", response = VmInstance.class)
     @Override
     public VmInstance create(@RequestBody VmInstance vminstance) throws Exception {
@@ -54,21 +58,18 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing Virtual Machine.", response = VmInstance.class)
     @Override
     public VmInstance read(@PathVariable(PATH_ID) Long id) throws Exception {
-        System.out.println("In real read ");
         return virtualmachineservice.find(id);
     }
 
     @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing Virtual Machine.", response = VmInstance.class)
     @Override
     public VmInstance update(@RequestBody VmInstance vminstance, @PathVariable(PATH_ID) Long id) throws Exception {
-        System.out.println("In real update");
         return virtualmachineservice.update(vminstance);
     }
 
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Virtual Machine.")
     @Override
     public void delete(@PathVariable(PATH_ID) Long id) throws Exception {
-        System.out.println("In real long");
         virtualmachineservice.delete(id);
     }
 
@@ -76,10 +77,8 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     public List<VmInstance> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
-
-        System.out.println("In real long");
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, VmInstance.class);
-        Page<VmInstance> pageResponse = virtualmachineservice.findAll(page);
+        Page<VmInstance> pageResponse =  virtualmachineservice.findAll(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
@@ -174,14 +173,13 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public String getVNC(@RequestBody VmInstance vminstance) throws Exception {
-        System.out.println(" in side console ");
         String token = null;
-        String host = "192.168.1.221"; // test the host's IP address
-        String instance = "i-2-8-VM"; // test virtual machine instance name
-        String display = "sibin1"; // Novnc display
+        String host = consoleProxy; // test the host's IP address
+        String instance = vminstance.getInstanceInternalName(); // test virtual machine instance name
+        String display = vminstance.getDisplayName(); // Novnc display
         String str = host + "|" + instance + "|" + display;
         token = Base64.encodeBase64String(str.getBytes());
-        return "{\"success\":" + "\"http://192.168.1.221/console/?token=" + token + "\"}";
+        return "{\"success\":" + "\""+consoleProxy+"/console/?token=" + token + "\"}";
     }
 
     /**

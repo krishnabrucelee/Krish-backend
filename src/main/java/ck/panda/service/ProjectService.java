@@ -87,6 +87,16 @@ public interface ProjectService extends CRUDService<Project> {
     List<Project> findByDepartmentAndIsActive(Long id, Boolean isActive) throws Exception;
 
     /**
+     * Find all the projects with user.
+     *
+     * @param id department id .
+     * @param isActive department status Active/Inactive
+     * @return list of departments in project.
+     * @throws Exception if error occurs.
+     */
+    List<Project> findByUserAndIsActive(Long id, Boolean isActive) throws Exception;
+
+    /**
      * Find the projects based on the isActive status.
      *
      * @throws Exception if error occurs.
