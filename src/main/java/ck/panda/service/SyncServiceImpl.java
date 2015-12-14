@@ -1112,10 +1112,6 @@ public class SyncServiceImpl implements SyncService {
             // a hash using uuid
             if (csUserMap.containsKey(department.getUuid())) {
                 Department csUser = csUserMap.get(department.getUuid());
-
-                department.setFirstName(csUser.getFirstName());
-                department.setLastName(csUser.getLastName());
-                department.setEmail(csUser.getEmail());
                 department.setUserName(csUser.getUserName());
                 // 3.2 If found, update the user object in app db
                 departmentService.update(department);
@@ -1985,19 +1981,19 @@ public class SyncServiceImpl implements SyncService {
      * Update user role.
      */
     void syncUpdateUserRole() {
-    	List<Type> types = new ArrayList<Type>();
+        List<Type> types = new ArrayList<Type>();
         types.add(Type.ROOT_ADMIN);
         types.add(Type.DOMAIN_ADMIN);
         try {
-			List<User> userList = userService.findUsersByTypesAndActive(types, true);
-			for (User user : userList) {
-				Role role = roleService.findByName("FULL_PERMISSION", user.getDepartment());
-				user.setRole(role);
-				userService.update(user);
-			}
-		} catch (Exception e) {
-			LOGGER.debug("syncUpdateUserRole" + e);
-		}
-	}
+            List<User> userList = userService.findUsersByTypesAndActive(types, true);
+            for (User user : userList) {
+                Role role = roleService.findByName("FULL_PERMISSION", user.getDepartment());
+                user.setRole(role);
+                userService.update(user);
+            }
+        } catch (Exception e) {
+            LOGGER.debug("syncUpdateUserRole" + e);
+        }
+    }
 
 }
