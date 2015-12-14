@@ -1,5 +1,7 @@
 package ck.panda.domain.repository.jpa;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -33,11 +35,20 @@ public interface ComputeOfferingRepository extends PagingAndSortingRepository<Co
     Page<ComputeOffering> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
 
     /**
-     * Find by name of the offering
+     * Find by name of the offering.
      *
-     * @param name of compute offering
+     * @param name of compute offering.
      * @return compute offering.
      */
     @Query(value = "select compute from ComputeOffering compute where compute.name =:name")
     ComputeOffering findName(@Param("name") String name);
+    
+    /**
+     * Find by is Active in Compute Offering.
+     * 
+     * @param isActive offer.	
+     * @return compute offering.
+     */
+    @Query(value = "select compute from ComputeOffering compute where compute.isActive =:isActive")
+    List<ComputeOffering> findByIsActive(@Param("isActive") Boolean isActive);
 }
