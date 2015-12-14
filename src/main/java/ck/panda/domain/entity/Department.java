@@ -69,29 +69,13 @@ public class Department implements Serializable {
     @Column(name = "description")
     private String description;
 
-    /** First name of the user. */
-    @Column(name = "first_name")
-    private String firstName;
-
-    /** Last name of the user.  */
-    @Column(name = "last_name")
-    private String lastName;
-
     /** User name of the account. */
     @Column(name = "user_name")
     private String userName;
 
-    /** Password of the account. */
-    @Column(name = "password")
-    private String password;
-
     /** Set syncFlag. */
     @Transient
     private Boolean syncFlag;
-
-    /** Email of the user. */
-    @Column(name = "email")
-    private String email;
 
     /** User type of the user. */
     @Column(name = "account_type")
@@ -357,25 +341,6 @@ public class Department implements Serializable {
         this.status = status;
     }
 
-
-    /**
-     * Get the email.
-     *
-     * @return the email
-     */
-    public String getEmail() {
-        return email;
-    }
-
-    /**
-     * Set the email.
-     *
-     * @param email the email to set
-     */
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     /**
      * Get the department account type.
      *
@@ -410,60 +375,6 @@ public class Department implements Serializable {
      */
     public void setUserName(String userName) {
         this.userName = userName;
-    }
-
-    /**
-     * Get the department password.
-     *
-     * @return the password
-     */
-    public String getPassword() {
-        return password;
-    }
-
-    /**
-     * Set the department account password.
-     *
-     * @param password the password to set
-     */
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    /**
-     * Get the department firstname.
-     *
-     * @return the firstName
-     */
-    public String getFirstName() {
-        return firstName;
-    }
-
-    /**
-     * Set the department firstname.
-     *
-     * @param firstName the firstName to set
-     */
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    /**
-     * Get the lastname.
-     *
-     * @return the lastName
-     */
-    public String getLastName() {
-        return lastName;
-    }
-
-    /**
-     * Set the lastname.
-     *
-     * @param lastName the lastName to set
-     */
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
     }
 
     /**
@@ -569,18 +480,9 @@ public class Department implements Serializable {
         department.setSyncFlag(false);
         try {
             department.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            JSONArray userList = jsonObject.getJSONArray("user");
-            if (userList.length() > 0) {
-                JSONObject userObject = userList.getJSONObject(0);
-                department.setFirstName(JsonUtil.getStringValue(userObject, "firstname"));
-                department.setLastName(JsonUtil.getStringValue(userObject, "lastname"));
-                department.setUserName(JsonUtil.getStringValue(userObject, "username"));
-                department.setType(AccountType.values()[(JsonUtil.getIntegerValue(userObject, "accounttype"))]);
-                department.setEmail(JsonUtil.getStringValue(userObject, "email"));
-                department.setStatus(Status.valueOf(JsonUtil.getStringValue(userObject, "state").toUpperCase()));
-            }
+            department.setUserName(JsonUtil.getStringValue(jsonObject, "name"));
+            department.setType(AccountType.values()[JsonUtil.getIntegerValue(jsonObject, "accounttype")]);
             department.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
-            department.setPassword("l3tm3in");
             department.setIsActive(true);
         } catch (Exception ex) {
             ex.printStackTrace();

@@ -182,7 +182,8 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
         String display = "sibin1"; // Novnc display
         String str = host + "|" + instance + "|" + display;
         token = Base64.encodeBase64String(str.getBytes());
-        return "{\"success\":" + "\"http://192.168.1.221/console/?token=" + token + "\"}";
+        //return "{\"success\":" + "\"http://192.168.1.221/console/?token=" + token + "\"}";
+        return "{\"success\":" + "\"http://192.168.1.152/console/host=192.168.1.163&instance="+ vminstance.getName() + "\"}";
     }
 
     /**

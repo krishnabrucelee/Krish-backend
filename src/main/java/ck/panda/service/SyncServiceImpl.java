@@ -2008,19 +2008,19 @@ public class SyncServiceImpl implements SyncService {
      * Update user role.
      */
     void syncUpdateUserRole() {
-    	List<Type> types = new ArrayList<Type>();
+        List<Type> types = new ArrayList<Type>();
         types.add(Type.ROOT_ADMIN);
         types.add(Type.DOMAIN_ADMIN);
         try {
-			List<User> userList = userService.findUsersByTypesAndActive(types, true);
-			for (User user : userList) {
-				Role role = roleService.findByName("FULL_PERMISSION", user.getDepartment());
-				user.setRole(role);
-				userService.update(user);
-			}
-		} catch (Exception e) {
-			LOGGER.debug("syncUpdateUserRole" + e);
-		}
-	}
+            List<User> userList = userService.findUsersByTypesAndActive(types, true);
+            for (User user : userList) {
+                Role role = roleService.findByName("FULL_PERMISSION", user.getDepartment());
+                user.setRole(role);
+                userService.update(user);
+            }
+        } catch (Exception e) {
+            LOGGER.debug("syncUpdateUserRole" + e);
+        }
+    }
 
 }

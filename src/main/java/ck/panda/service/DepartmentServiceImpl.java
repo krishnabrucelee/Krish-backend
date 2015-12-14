@@ -234,6 +234,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         HashMap<String, String> departmentMap = new HashMap<String, String>();
         //departmentMap.put("domainid", domainUuid);
          departmentMap.put("listall", "true");
+
         // 1. Get the list of accounts from CS server using CS connector
         String response = csAccountService.listAccounts("json", departmentMap);
         JSONArray userListJSON = null;
