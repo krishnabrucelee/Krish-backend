@@ -494,9 +494,9 @@ public class ConvertEntityService {
      * @throws Exception unhandled exception.
      */
     public Long getUserIdByAccount(String name, Domain domain) throws Exception {
-        List<User> user = userService.findByAccountId(getAccountIdByUsernameAndDomain(name,domain));
-        if (user.size() != 0) {
-           return user.get(0).getId();
+        User user = userService.findByUserNameAndDomain(name, domain);
+        if(user != null){
+        	return user.getId();
         }
         return null;
     }
