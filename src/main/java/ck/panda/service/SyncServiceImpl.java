@@ -1112,10 +1112,6 @@ public class SyncServiceImpl implements SyncService {
             // a hash using uuid
             if (csUserMap.containsKey(department.getUuid())) {
                 Department csUser = csUserMap.get(department.getUuid());
-
-                department.setFirstName(csUser.getFirstName());
-                department.setLastName(csUser.getLastName());
-                department.setEmail(csUser.getEmail());
                 department.setUserName(csUser.getUserName());
                 // 3.2 If found, update the user object in app db
                 departmentService.update(department);
