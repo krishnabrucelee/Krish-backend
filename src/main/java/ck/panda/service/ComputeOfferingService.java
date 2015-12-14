@@ -55,5 +55,14 @@ public interface ComputeOfferingService  extends CRUDService<ComputeOffering>  {
      * @return compute offering.
      */
     ComputeOffering findByName(String name);
+    
+    /**
+     * Find compute offering by isActive status.
+     * 
+     * @param isActive offer	
+     * @return compute offer	
+     * @throws Exception unhandled errors.
+     */
+    List<ComputeOffering> findByIsActive(Boolean isActive) throws Exception;
 }
 

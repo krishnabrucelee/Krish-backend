@@ -20,8 +20,6 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.ComputeOffering;
-import ck.panda.domain.entity.Department;
-import ck.panda.domain.entity.Snapshot;
 import ck.panda.service.ComputeOfferingService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -88,7 +86,7 @@ public class ComputeOfferingController extends CRUDController<ComputeOffering> i
       @ResponseStatus(HttpStatus.OK)
       @ResponseBody
       protected List<ComputeOffering> getSearch() throws Exception {
-          return computeService.findAll();
+          return computeService.findByIsActive(true);
       }
 
     @Override
