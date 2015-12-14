@@ -81,15 +81,6 @@ public class User {
     @ManyToMany
     private List<Project> projectList;
 
-    /** Account of the user. */
-    @ManyToOne
-    @JoinColumn(name = "account_id", referencedColumnName = "id", insertable = false, updatable = false)
-    private Account account;
-
-    /** Account Id of the user. */
-    @Column(name = "account_id")
-    private Long accountId;
-
     /** User uuid. */
     @Column(name = "uuid")
     private String uuid;
@@ -513,35 +504,7 @@ public class User {
     public void setSyncFlag(Boolean syncFlag) {
     this.syncFlag = syncFlag;
     }
-
-    /**
-     * @return the account
-     */
-    public Account getAccount() {
-        return account;
-    }
-
-    /**
-     * @param account the account to set
-     */
-    public void setAccount(Account account) {
-        this.account = account;
-    }
-
-    /**
-     * @return the accountId
-     */
-    public Long getAccountId() {
-        return accountId;
-    }
-
-    /**
-     * @param accountId the accountId to set
-     */
-    public void setAccountId(Long accountId) {
-        this.accountId = accountId;
-    }
-
+  
     /**
      * Get the transient domain id.
      *
@@ -675,7 +638,6 @@ public class User {
         }
         user.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
         user.setTransDepartment(JsonUtil.getStringValue(jsonObject, "accountid"));
-        user.setTransAccount(JsonUtil.getStringValue(jsonObject, "account"));
         user.setIsActive(true);
         return user;
     }
