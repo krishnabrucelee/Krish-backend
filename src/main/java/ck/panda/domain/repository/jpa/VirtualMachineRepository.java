@@ -10,6 +10,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Project;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
 
@@ -50,6 +52,51 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
    Page<VmInstance> findAllByDomainIsActive(@Param("id") Long id, @Param("status") Status status, Pageable pageable);
 
    /**
+    * Get the list of VMs by domain and status.
+    *
+    * @param id of the domain
+    * @param status of the domain
+    * @param pageable page request
+    * @return instance list
+    */
+   @Query(value = "select vm from VmInstance vm where vm.domainId=:id AND vm.status =:status")
+   Page<VmInstance> findAllByDomainIsActiveAndStatus(@Param("id") Long id, @Param("status") Status status, Pageable pageable);
+
+
+   /**
+    * Get the list of VMs by domain and status.
+    *
+    * @param id of the domain
+    * @param status of the domain
+    * @param pageable page request
+    * @return instance list
+    */
+   @Query(value = "select vm from VmInstance vm where vm.domainId=:id AND vm.status =:status")
+   List<VmInstance> findAllByDomainIsActiveAndStatus(@Param("id") Long id, @Param("status") Status status);
+
+   /**
+    * Get the list of VMs by domain and status.
+    *
+    * @param id of the domain
+    * @param status of the domain
+    * @param pageable page request
+    * @return instance list
+    */
+   @Query(value = "select vm from VmInstance vm where vm.domainId=:id AND vm.status <>:status")
+   List<VmInstance> findAllByDomainIsActive(@Param("id") Long id, @Param("status") Status status);
+
+   /**
+    * Get the list of VMs by domain and status.
+    *
+    * @param id of the domain
+    * @param status of the domain
+    * @param pageable page request
+    * @return instance list
+    */
+   @Query(value = "select vm from VmInstance vm where vm.domainId=:id AND vm.status <>:status")
+   List<VmInstance> findAllByDomain(@Param("id") Long id, @Param("status") Status status);
+
+   /**
     * Get the list of VMs by status.
     *
     * @param status of the status of VM.
@@ -79,6 +126,103 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
     */
    @Query(value = "select vm from VmInstance vm where vm.status = :status")
    Page<VmInstance> findAllByStatus(@Param("status") Status status, Pageable pageable);
+
+   /**
+    * Get the list of VMs by status and user.
+    *
+    * @param status of the status of VM.
+    * @param pageable page request.
+    * @param user belongs to VM.
+    * @param project belongs to VM.
+    * @return instance list
+    */
+   @Query(value = "select vm from VmInstance vm where vm.status = :status and vm.instanceOwner = :user")
+   Page<VmInstance> findAllByUserIsActive(@Param("status") Status status, Pageable pageable, @Param("user") User instanceOwner);
+
+   /**
+    * Get the list of VMs by status and user.
+    *
+    * @param status of the status of VM.
+    * @param pageable page request.
+    * @param user belongs to VM.
+    * @param project belongs to VM.
+    * @return instance list
+    */
+   @Query(value = "select vm from VmInstance vm where vm.status <> :status and vm.instanceOwner = :user")
+   Page<VmInstance> findAllByUserIsActiveAndStatus(@Param("status") Status status, Pageable pageable, @Param("user") User instanceOwner);
+
+   /**
+    * Get the list of VMs by status and user.
+    *
+    * @param status of the status of VM.
+    * @param pageable page request.
+    * @param user belongs to VM.
+    * @param project belongs to VM.
+    * @return instance list
+    */
+   @Query(value = "select vm from VmInstance vm where vm.status = :status and vm.instanceOwner = :user")
+   List<VmInstance> findAllByUserIsActive(@Param("status") Status status, @Param("user") User instanceOwner);
+
+   /**
+    * Get the list of VMs by status and user.
+    *
+    * @param status of the status of VM.
+    * @param pageable page request.
+    * @param user belongs to VM.
+    * @param project belongs to VM.
+    * @return instance list
+    */
+   @Query(value = "select vm from VmInstance vm where vm.status<>:status and vm.instanceOwner = :user")
+   List<VmInstance> findAllByUserIsActiveAndStatus(@Param("status") Status status, @Param("user") User instanceOwner);
+
+
+   /**
+    * Get the list of VMs by status and user.
+    *
+    * @param status of the status of VM.
+    * @param pageable page request.
+    * @param user belongs to VM.
+    * @param project belongs to VM.
+    * @return instance list
+    */
+   @Query(value = "select vm from VmInstance vm where vm.status <> :status and vm.instanceOwner = :user")
+   List<VmInstance> findAllByUser(@Param("status") Status status, @Param("user") User instanceOwner);
+
+   /**
+    * Get the list of VMs by status and user.
+    *
+    * @param status of the status of VM.
+    * @param pageable page request.
+    * @param user belongs to VM.
+    * @param project belongs to VM.
+    * @return instance list
+    */
+   @Query(value = "select vm from VmInstance vm where vm.status = :status and vm.instanceOwner = :user or vm.project = :project")
+   List<VmInstance> findAllByUserAndProjectIsActive(@Param("status") Status status, @Param("user") User instanceOwner, @Param("project") Project project);
+
+   /**
+    * Get the list of VMs by status and user.
+    *
+    * @param status of the status of VM.
+    * @param pageable page request.
+    * @param user belongs to VM.
+    * @param project belongs to VM.
+    * @return instance list
+    */
+   @Query(value = "select vm from VmInstance vm where vm.status <>:status and vm.instanceOwner = :user or vm.project = :project")
+   List<VmInstance> findAllByUserAndProjectIsActiveAndStatus(@Param("status") Status status, @Param("user") User instanceOwner, @Param("project") Project project);
+
+   /**
+    * Get the list of VMs by status and user.
+    *
+    * @param status of the status of VM.
+    * @param pageable page request.
+    * @param user belongs to VM.
+    * @param project belongs to VM.
+    * @return instance list
+    */
+   @Query(value = "select vm from VmInstance vm where vm.status <> :status and vm.instanceOwner = :user or vm.project = :project")
+   List<VmInstance> findAllByUserAndProject(@Param("status") Status status, @Param("user") User instanceOwner, @Param("project") Project project);
 
    /**
     * Get the instance count by status.

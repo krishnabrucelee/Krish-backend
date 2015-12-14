@@ -1156,7 +1156,7 @@ public class SyncServiceImpl implements SyncService {
         List<VmInstance> csInstanceService = virtualMachineService.findAllFromCSServer();
         HashMap<String, VmInstance> vmMap = (HashMap<String, VmInstance>) VmInstance.convert(csInstanceService);
         // 2. Get all the vm objects from application
-        List<VmInstance> appVmList = virtualMachineService.findAll();
+        List<VmInstance> appVmList = (List<VmInstance>) virtualmachinerepository.findAll();
         // 3. Iterate application user list
         for (VmInstance instance : appVmList) {
             instance.setSyncFlag(false);

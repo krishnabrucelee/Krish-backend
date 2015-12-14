@@ -299,4 +299,9 @@ public class ProjectServiceImpl implements ProjectService {
     public List<Project> findByDepartmentAndIsActive(Long id, Boolean isActive) throws Exception {
         return projectRepository.findByDepartmentAndIsActive(id, true);
     }
+
+	@Override
+	public List<Project> findByUserAndIsActive(Long id, Boolean isActive) throws Exception {
+		return projectRepository.findByUserAndIsActive(id, isActive);
+	}
 }
