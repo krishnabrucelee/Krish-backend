@@ -253,7 +253,7 @@ public class TemplateServiceImpl implements TemplateService {
                     }
                     template.setType(TemplateType.valueOf(jsonobject.getString("templatetype")));
                 }
-                template.setDisplayText(template.getDescription());
+                template.setDisplayText(template.getOsType().getDescription());
              }
         } catch (ApplicationException e) {
             LOGGER.error("ERROR AT TEMPLATE CREATION", e);

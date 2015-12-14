@@ -12,6 +12,7 @@ import ck.panda.util.CloudStackServer;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
+import ck.panda.util.error.exception.EntityNotFoundException;
 
 /**
  * CloudStackConfiguration service implementation.
@@ -27,11 +28,7 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
     @Autowired
     private CloudStackServer server;
 
-    /** domain service reference. */
-    @Autowired
-    private DomainService domainservice;
-
-    /** ComputeOfferings repository . */
+    /** CloudStackConfiguration Repository . */
     @Autowired
     private CloudStackConfigurationRepository configRepo;
 
@@ -78,7 +75,12 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
 
     @Override
     public CloudStackConfiguration find(Long id) throws Exception {
-        return configRepo.findOne(id);
+    	CloudStackConfiguration config = configRepo.findOne(id);
+          if (config == null) {
+              throw new EntityNotFoundException("config.not.found");
+          }
+          return config;
+        
     }
 
     @Override
@@ -88,13 +90,7 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
 
     @Override
     public List<CloudStackConfiguration> findAll() throws Exception {
-        return null;
+        return (List<CloudStackConfiguration>) configRepo.findAll();
     }
 
-    // TODO for validation
-    // @Override
-    // public CloudStackConfiguration findByKeys(String apiKey) {
-    // return configRepo.findByKeys(apiKey);
-    // }
-
-}
+   }
