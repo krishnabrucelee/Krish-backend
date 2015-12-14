@@ -1940,6 +1940,7 @@ public class SyncServiceImpl implements SyncService {
                         newRole.setDescription("Allow full permission");
                         newRole.setStatus(Role.Status.ENABLED);
                         newRole.setPermissionList(newPermissionList);
+                        newRole.setSyncFlag(false);
                         roleService.save(newRole);
                     }
                     else if (role != null) {
@@ -1948,6 +1949,7 @@ public class SyncServiceImpl implements SyncService {
                         role.setDescription("Allow full permission");
                         role.setStatus(Role.Status.ENABLED);
                         role.setPermissionList(permissionService.findAll());
+                        role.setSyncFlag(false);
                         roleService.update(role);
                     }
                 }
@@ -1966,6 +1968,7 @@ public class SyncServiceImpl implements SyncService {
                         role.setDescription("Allow full permission");
                         role.setStatus(Role.Status.ENABLED);
                         role.setPermissionList(permissionService.findAll());
+                        role.setSyncFlag(false);
                         roleService.update(role);
                     }
                     else if (role == null) {
@@ -1975,6 +1978,7 @@ public class SyncServiceImpl implements SyncService {
                         newRole.setDescription("Allow full permission");
                         newRole.setStatus(Role.Status.ENABLED);
                         newRole.setPermissionList(permissionService.findAll());
+                        newRole.setSyncFlag(false);
                         roleService.save(newRole);
                     }
                 }

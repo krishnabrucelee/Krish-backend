@@ -16,6 +16,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.Size;
 import org.hibernate.annotations.Type;
@@ -98,6 +99,10 @@ public class Role implements Serializable {
     @Column(name = "is_active", columnDefinition = "tinyint default 1")
     @Type(type = "org.hibernate.type.NumericBooleanType")
     private Boolean isActive;
+
+    /** Share of the template. */
+    @Transient
+    private Boolean syncFlag;
 
     /**
      * To set the default value while creating tables in database.
@@ -349,5 +354,21 @@ public class Role implements Serializable {
      */
     public void setIsActive(Boolean isActive) {
        this.isActive = isActive;
+    }
+
+    /**
+     * Get the sync flag for temporary usage.
+     * @return syncFlag
+     */
+    public Boolean getSyncFlag() {
+        return syncFlag;
+    }
+
+    /**
+     * Set the sync flag for temporary usage.
+     * @param syncFlag - the Boolean to set
+     */
+    public void setSyncFlag(Boolean syncFlag) {
+        this.syncFlag = syncFlag;
     }
 }

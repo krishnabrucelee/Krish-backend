@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Role;
@@ -51,6 +52,7 @@ public class RoleServiceImpl implements RoleService {
     TokenDetails tokenDetails;
 
     @Override
+    @PreAuthorize("hasPermission(#role.getSyncFlag(), 'CREATE_ROLE')")
     public Role save(Role role) throws Exception {
         LOGGER.debug("Sample Debug Message");
         Errors errors = validator.rejectIfNullEntity("role", role);
@@ -66,6 +68,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#role.getSyncFlag(), 'EDIT_ROLE')")
     public Role update(Role role) throws Exception {
         Errors errors = validator.rejectIfNullEntity("role", role);
         errors = validator.validateEntity(role, errors);
@@ -79,6 +82,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#role.getSyncFlag(), 'DELETE_ROLE')")
     public Role softDelete(Role role) throws Exception {
         role.setIsActive(false);
         role.setStatus(Status.DISABLED);
