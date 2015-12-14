@@ -279,6 +279,30 @@ public class VmInstance implements Serializable {
     @Column(name = "instance_usage")
     private String cpuUsage;
 
+    /** The network read in kbs. */
+    @Column(name = "network_kbs_read")
+    private Integer networkKbsRead;
+
+    /** The network write in kbs. */
+    @Column(name = "network_kbs_write")
+    private Integer networkKbsWrite;
+
+    /** The disk read in bytes. */
+    @Column(name = "disk_kbs_read")
+    private Integer diskKbsRead;
+
+    /** The disk write in bytes. */
+    @Column(name = "disk_kbs_write")
+    private Integer diskKbsWrite;
+
+    /** The disk read input/output. */
+    @Column(name = "disk_io_read")
+    private Integer diskIoRead;
+
+    /** The disk write input/output. */
+    @Column(name = "disk_io_write")
+    private Integer diskIoWrite;
+
     /** Version attribute to handle optimistic locking. */
     @Version
     @Column(name = "version")
@@ -755,6 +779,114 @@ public class VmInstance implements Serializable {
      */
     public Host getHost() {
         return host;
+    }
+
+    /**
+     * Get the networkKbsRead of the VmInstance.
+
+     * @return the networkKbsRead of VmInstance.
+     */
+    public Integer getNetworkKbsRead() {
+        return networkKbsRead;
+    }
+
+    /**
+     * Set the networkKbsRead of the VmInstance.
+     *
+     * @param networkKbsRead the networkKbsRead to set
+     */
+    public void setNetworkKbsRead(Integer networkKbsRead) {
+        this.networkKbsRead = networkKbsRead;
+    }
+
+    /**
+     * Get the networkKbsWrite of the VmInstance.
+
+     * @return the networkKbsWrite of VmInstance.
+     */
+    public Integer getNetworkKbsWrite() {
+        return networkKbsWrite;
+    }
+
+    /**
+     * Set the networkKbsWrite of the VmInstance.
+     *
+     * @param networkKbsWrite the networkKbsWrite to set
+     */
+    public void setNetworkKbsWrite(Integer networkKbsWrite) {
+        this.networkKbsWrite = networkKbsWrite;
+    }
+
+    /**
+     * Get the diskKbsRead of the VmInstance.
+
+     * @return the diskKbsRead of VmInstance.
+     */
+    public Integer getDiskKbsRead() {
+        return diskKbsRead;
+    }
+
+    /**
+     * Set the diskKbsRead of the VmInstance.
+     *
+     * @param diskKbsRead the diskKbsRead to set
+     */
+    public void setDiskKbsRead(Integer diskKbsRead) {
+        this.diskKbsRead = diskKbsRead;
+    }
+
+    /**
+     * Get the diskKbsWrite of the VmInstance.
+
+     * @return the diskKbsWrite of VmInstance.
+     */
+    public Integer getDiskKbsWrite() {
+        return diskKbsWrite;
+    }
+
+    /**
+     * Set the diskKbsWrite of the VmInstance.
+     *
+     * @param diskKbsWrite the diskKbsWrite to set
+     */
+    public void setDiskKbsWrite(Integer diskKbsWrite) {
+        this.diskKbsWrite = diskKbsWrite;
+    }
+
+    /**
+     * Get the diskIoRead of the VmInstance.
+
+     * @return the diskIoRead of VmInstance.
+     */
+    public Integer getDiskIoRead() {
+        return diskIoRead;
+    }
+
+    /**
+     * Set the diskIoRead of the VmInstance.
+     *
+     * @param diskIoRead the diskIoRead to set
+     */
+    public void setDiskIoRead(Integer diskIoRead) {
+        this.diskIoRead = diskIoRead;
+    }
+
+    /**
+     * Get the diskIoWrite of the VmInstance.
+
+     * @return the diskIoWrite of VmInstance.
+     */
+    public Integer getDiskIoWrite() {
+        return diskIoWrite;
+    }
+
+    /**
+     * Set the diskIoWrite of the VmInstance.
+     *
+     * @param diskIoWrite the diskIoWrite to set
+     */
+    public void setDiskIoWrite(Integer diskIoWrite) {
+        this.diskIoWrite = diskIoWrite;
     }
 
     /**
@@ -1509,6 +1641,12 @@ public class VmInstance implements Serializable {
             vmInstance.setCpuSpeed(JsonUtil.getIntegerValue(jsonObject, "cpuspeed"));
             vmInstance.setMemory(JsonUtil.getIntegerValue(jsonObject, "memory"));
             vmInstance.setCpuUsage(JsonUtil.getStringValue(jsonObject, "cpuused"));
+            vmInstance.setDiskIoRead(JsonUtil.getIntegerValue(jsonObject, "diskioread"));
+            vmInstance.setDiskIoWrite(JsonUtil.getIntegerValue(jsonObject, "diskiowrite"));
+            vmInstance.setDiskKbsRead(JsonUtil.getIntegerValue(jsonObject, "diskkbsread"));
+            vmInstance.setDiskKbsWrite(JsonUtil.getIntegerValue(jsonObject, "diskkbswrite"));
+            vmInstance.setNetworkKbsRead(JsonUtil.getIntegerValue(jsonObject, "networkkbsread"));
+            vmInstance.setNetworkKbsWrite(JsonUtil.getIntegerValue(jsonObject, "networkkbswrite"));
             vmInstance.setPasswordEnabled(JsonUtil.getBooleanValue(jsonObject, "passwordenabled"));
             vmInstance.setPassword(JsonUtil.getStringValue(jsonObject, "password"));
             vmInstance.setIso(JsonUtil.getStringValue(jsonObject, "isoid"));
