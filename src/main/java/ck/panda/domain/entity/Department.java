@@ -19,7 +19,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.hibernate.annotations.Type;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
@@ -442,7 +441,6 @@ public class Department implements Serializable {
     public void setTransDomainId(String transDomainId) {
         this.transDomainId = transDomainId;
     }
-
 
     /** Define user type. */
     public enum AccountType {
