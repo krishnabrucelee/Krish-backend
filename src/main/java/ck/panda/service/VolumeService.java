@@ -5,7 +5,11 @@ package ck.panda.service;
 
 import java.util.List;
 import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -123,5 +127,15 @@ public interface VolumeService extends CRUDService<Volume> {
     * @throws Exception if error occurs
     */
    List<Volume> findByInstanceAndVolumeTypeAndIsActive(Long volume) throws Exception;
+   
+   /**
+    * Find all vmInstance from department.
+    *
+    * @param departmentId department id.
+    * @param isActive get the department list based on active/inactive status.
+    * @return vmInstance list.
+    */
+   @Query(value = "select vm from VmInstance vm where vm.departmentId=:id ")
+   List<Volume> findByDepartment(@Param("id") Long departmentId);
 
 }

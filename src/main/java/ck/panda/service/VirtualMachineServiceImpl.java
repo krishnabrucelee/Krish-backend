@@ -844,4 +844,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 			return virtualmachinerepository.save(vminstance);
 		}
 	}
+	
+	 @Override
+	    public List<VmInstance> findByDepartment(Long id) throws Exception {
+	        return virtualmachinerepository.findByDepartment(id);
+	    }
 }

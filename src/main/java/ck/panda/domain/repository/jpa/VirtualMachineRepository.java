@@ -232,4 +232,14 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
     */
    @Query(value = "select COUNT(vm.id) from VmInstance vm where vm.status = :status")
    Integer findCountByStatus(@Param("status") Status status);
+   
+   /**
+    * Find all vmInstance from department.
+    *
+    * @param departmentId department id.
+    * @param isActive get the department list based on active/inactive status.
+    * @return vmInstance list.
+    */
+   @Query(value = "select vm from VmInstance vm where vm.departmentId=:id ")
+   List<VmInstance> findByDepartment(@Param("id") Long departmentId);
 }

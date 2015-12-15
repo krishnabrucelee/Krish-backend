@@ -1,6 +1,3 @@
-/**
- *
- */
 package ck.panda.service;
 
 import java.util.ArrayList;
@@ -537,4 +534,8 @@ public class VolumeServiceImpl implements VolumeService {
         }
     }
 
+	@Override
+	public List<Volume> findByDepartment(Long departmentId) {
+		return volumeRepo.findByDepartment(departmentId);
+	}
 }
