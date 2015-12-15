@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Network;
+import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.Network.Status;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.repository.jpa.DepartmentReposiory;
@@ -83,6 +84,10 @@ public class NetworkServiceImpl implements NetworkService {
     @Autowired
     private ConvertEntityService convertEntityService;
 
+    /** Project service reference. */
+    @Autowired
+    private ProjectService projectService;
+
     @Override
     @PreAuthorize("hasPermission(#network.getSyncFlag(), 'ADD_ISOLATED_NETWORK')")
     public Network save(Network network) throws Exception {
@@ -112,10 +117,15 @@ public class NetworkServiceImpl implements NetworkService {
                     network.setZoneId(zoneRepository.findByUUID(networkResponse.getString("zoneid")).getId());
                     network.setNetworkOfferingId(networkofferingRepo.findByUUID(networkResponse.getString("networkofferingid")).getId());
                     network.setStatus(network.getStatus().valueOf(networkResponse.getString("state")));
-                    if (network.getDepartment() != null) {
-                        network.setDepartmentId(convertEntityService.getDepartmentByUsername(networkResponse.getString("account")));
+                    if (network.getProject() != null) {
+                    	network.setProjectId(convertEntityService.getProjectId(networkResponse.getString("projectid")));
+                    	network.setDepartmentId(null);
                     } else {
-                        network.setDepartmentId(convertEntityService.getDepartmentByUsername(departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName()));
+                    	if (network.getDepartment() != null) {
+                            network.setDepartmentId(convertEntityService.getDepartmentByUsername(networkResponse.getString("account")));
+                        } else {
+                            network.setDepartmentId(convertEntityService.getDepartmentByUsername(departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName()));
+                        }
                     }
                     network.setGateway(networkResponse.getString("gateway"));
 
@@ -257,28 +267,37 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public List<Network> findAllFromCSServerByDomain() throws Exception {
 
-        List<Network> networkList = new ArrayList<Network>();
-        HashMap<String, String> networkMap = new HashMap<String, String>();
-        networkMap.put("listall", "true");
-        // 1. Get the list of domains from CS server using CS connector
-        String response = csNetwork.listNetworks("json", networkMap);
-        JSONArray networkListJSON = null;
-        JSONObject responseObject = new JSONObject(response).getJSONObject("listnetworksresponse");
-        if (responseObject.has("network")) {
-            networkListJSON = responseObject.getJSONArray("network");
-            // 2. Iterate the json list, convert the single json entity to
-            // domain
-            for (int i = 0, size = networkListJSON.length(); i < size; i++) {
-                // 2.1 Call convert by passing JSONObject to Domain entity and
-                // Add
-                // the converted Domain entity to list
-                 Network network = Network.convert(networkListJSON.getJSONObject(i));
-                 network.setDomainId(convertEntityService.getDomainId(network.getTransDomainId()));
-                 network.setZoneId(convertEntityService.getZoneId(network.getTransZoneId()));
-                 network.setNetworkOfferingId(convertEntityService.getNetworkOfferingId(network.getTransNetworkOfferingId()));
-                 network.setDepartmentId(convertEntityService.getDepartmentByUsername(network.getTransDepartmentId()));
-                 networkList.add(network);            }
-        }
+    	List<Project> project = projectService.findAllByActive(true);
+    	List<Network> networkList = new ArrayList<Network>();
+    	for (int j = 0; j <= project.size(); j++) {
+            HashMap<String, String> networkMap = new HashMap<String, String>();
+            if(j == project.size()) {
+                networkMap.put("listall", "true");
+            } else {
+            	networkMap.put("projectid", project.get(j).getUuid());
+            }
+            // 1. Get the list of domains from CS server using CS connector
+            String response = csNetwork.listNetworks("json", networkMap);
+            JSONArray networkListJSON = null;
+            JSONObject responseObject = new JSONObject(response).getJSONObject("listnetworksresponse");
+            if (responseObject.has("network")) {
+                networkListJSON = responseObject.getJSONArray("network");
+                // 2. Iterate the json list, convert the single json entity to
+                // domain
+                for (int i = 0, size = networkListJSON.length(); i < size; i++) {
+                    // 2.1 Call convert by passing JSONObject to Domain entity and
+                    // Add
+                    // the converted Domain entity to list
+                    Network network = Network.convert(networkListJSON.getJSONObject(i));
+                    network.setDomainId(convertEntityService.getDomainId(network.getTransDomainId()));
+                    network.setZoneId(convertEntityService.getZoneId(network.getTransZoneId()));
+                    network.setNetworkOfferingId(convertEntityService.getNetworkOfferingId(network.getTransNetworkOfferingId()));
+                    network.setDepartmentId(convertEntityService.getDepartmentByUsername(network.getTransDepartmentId()));
+                    network.setProjectId(convertEntityService.getProjectId(network.getTransProjectId()));
+                    networkList.add(network);
+                }
+            }
+    	}
         return networkList;
     }
 
@@ -312,36 +331,42 @@ public class NetworkServiceImpl implements NetworkService {
         HashMap<String, String> optional = new HashMap<String, String>();
         if (network.getNetMask() != null && network.getNetMask().trim() != "") {
             optional.put("netmask", network.getNetMask());
-            }
+        }
         if (network.getGateway() != null && network.getGateway().trim() != "") {
-             optional.put("gateway", network.getGateway());
-             }
+            optional.put("gateway", network.getGateway());
+        }
         if (network.getNetworkDomain() != null && network.getNetworkDomain().trim() != "") {
             optional.put("networkdomain", network.getNetworkDomain());
-            }
+        }
         if (network.getDomainId() != null) {
            optional.put("domainid", network.getDomain().getUuid());
-            }
+        } else {
+            optional.put("domainid", domainRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("domainid"))).getUuid());
+        }
         if (network.getName() != null && network.getName().trim() != "") {
             optional.put("name", network.getName());
-            }
+        }
         if (network.getDisplayText() != null && network.getDisplayText().trim() != "") {
             optional.put("displaytext", network.getDisplayText());
-            }
+        }
         if (network.getNetworkOffering() != null) {
             optional.put("networkofferingid", network.getNetworkOffering().getUuid());
-            }
+        }
 //        if (network.getcIDR() != null) {
 //            optional.put("changecidr", network.getcIDR());
 //            }
-        if (network.getDepartment() != null) {
-            optional.put("account", network.getDepartment().getUserName());
+
+        if (network.getProject() != null) {
+            optional.put("projectid", network.getProject().getUuid());
         } else {
-            optional.put("account", departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
+            if (network.getDepartment() != null) {
+                optional.put("account", network.getDepartment().getUserName());
+            } else {
+                optional.put("account", departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
+            }
         }
-        if (network.getDomainId() == null) {
-            optional.put("domainid", domainRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("domainid"))).getUuid());
-        }
+
+
         return optional;
     }
 

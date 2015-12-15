@@ -75,6 +75,15 @@ public class Network implements Serializable {
     @Column(name = "zone_id")
     private Long zoneId;
 
+    /** Network project id. */
+    @JoinColumn(name = "project_id", referencedColumnName = "id", updatable = false, insertable = false)
+    @ManyToOne
+    private Project project;
+
+    /** Network project id. */
+    @Column(name = "project_id")
+    private Long projectId;
+
     /** Department Object for the Network. */
     @JoinColumn(name = "department_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
@@ -170,6 +179,10 @@ public class Network implements Serializable {
     @Transient
     private String transNetworkOfferingId;
 
+    /** Transient host of the instance. */
+    @Transient
+    private String transProjectId;
+
     /**
      * Enum type for Network Type.
      *
@@ -253,6 +266,42 @@ public class Network implements Serializable {
      */
     public void setZoneId(Long zoneId) {
         this.zoneId = zoneId;
+    }
+
+    /**
+     * get network project.
+     *
+     * @return the project.
+     */
+    public Project getProject() {
+        return project;
+    }
+
+    /**
+     * set network project.
+     *
+     * @param project to set.
+     */
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    /**
+     * get network project id.
+     *
+     * @return the projectId.
+     */
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    /**
+     * set network project id.
+     *
+     * @param projectId the project id to set.
+     */
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
     }
 
     /**
@@ -703,6 +752,24 @@ public class Network implements Serializable {
     }
 
     /**
+     * Get the transProjectId.
+     *
+     * @return the transProjectId
+     */
+    public String getTransProjectId() {
+        return transProjectId;
+    }
+
+    /**
+     * Set the transProjectId.
+     *
+     * @param transProjectId  to set
+     */
+    public void setTransProjectId(String transProjectId) {
+        this.transProjectId = transProjectId;
+    }
+
+    /**
      * Get the Netmask of the Network.
      *
      * @return the netMask
@@ -762,7 +829,7 @@ public class Network implements Serializable {
            network.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
            network.setNetMask(JsonUtil.getStringValue(jsonObject, "netmask"));
            network.setNetworkDomain(JsonUtil.getStringValue(jsonObject, "networkdomain"));
-
+           network.setTransProjectId(JsonUtil.getStringValue(jsonObject, "projectid"));
 
            network.setIsActive(true);
        } catch (Exception ex) {
