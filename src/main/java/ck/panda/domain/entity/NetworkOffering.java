@@ -43,6 +43,10 @@ public class NetworkOffering implements Serializable {
     /** Unique id for the Network Offering. */
     @Column(name = "uuid")
     private String uuid;
+    
+    /** Availability of the Network Offering. */
+    @Column(name = "availability")
+    private String availability;
 
     /** Name of the Network Offering. */
     @Column(name = "name", nullable = false)
@@ -353,8 +357,27 @@ public class NetworkOffering implements Serializable {
     public void setTrafficType(String trafficType) {
       this.trafficType = trafficType;
     }
-
+    
     /**
+     * Get the Network Offer availability.
+     *
+     * @return the availability
+     */
+    public String getAvailability() {
+		return availability;
+	}
+    
+    /**
+     * Set the Network Offer availability.
+     *
+     * @param availability
+     * the availability to set
+     */
+	public void setAvailability(String availability) {
+		this.availability = availability;
+	}
+
+	/**
      * Convert JSONObject to network offering entity.
      *
      * @param object json object
@@ -369,6 +392,7 @@ public class NetworkOffering implements Serializable {
             networkOffering.trafficType = JsonValidator.jsonStringValidation(object, "traffictype");
             networkOffering.guestIpType = JsonValidator.jsonStringValidation(object, "guestiptype");
             networkOffering.displayText = JsonValidator.jsonStringValidation(object, "displaytext");
+            networkOffering.availability= JsonValidator.jsonStringValidation(object, "availability");
             networkOffering.setIsActive(true);
         } catch (Exception e) {
             e.printStackTrace();
