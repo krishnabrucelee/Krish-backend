@@ -64,7 +64,7 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing Virtual Machine.", response = VmInstance.class)
     @Override
     public VmInstance update(@RequestBody VmInstance vminstance, @PathVariable(PATH_ID) Long id) throws Exception {
-        return virtualmachineservice.update(vminstance);
+        return virtualmachineservice.updateDisplayName(vminstance);
     }
 
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Virtual Machine.")
