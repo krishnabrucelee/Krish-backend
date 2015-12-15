@@ -78,14 +78,24 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, L
     Project findByUuid(@Param("uuid") String uuid);
 
     /**
-     * Find the department  from Project.
+     * Find all Projects from department.
      *
      * @param departmentId department id.
      * @param isActive get the department list based on active/inactive status.
-     * @return Department.
+     * @return Project list.
      */
     @Query(value = "select project from Project project where project.isActive =:isActive AND project.departmentId=:id)")
     List<Project> findByDepartmentAndIsActive(@Param("id") Long departmentId, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find all projects from user.
+     *
+     * @param userId department id.
+     * @param isActive get the department list based on active/inactive status.
+     * @return Project list.
+     */
+    @Query(value = "select project from Project project join project.userList users where project.isActive =:isActive AND (project.projectOwnerId =:id OR users.id = :id)")
+    List<Project> findByUserAndIsActive(@Param("id") Long userId, @Param("isActive") Boolean isActive);
 
     /**
      * find all the project with active status.

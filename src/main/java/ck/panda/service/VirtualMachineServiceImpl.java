@@ -3,15 +3,18 @@ package ck.panda.service;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
+import ck.panda.domain.entity.User.Type;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.NetworkRepository;
 import ck.panda.domain.repository.jpa.UserRepository;
@@ -33,7 +36,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
@@ -101,6 +109,14 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     /** Domain repository connector. */
     @Autowired
     private DomainRepository domainRepository;
+
+    /** User service reference for instance. */
+    @Autowired
+    private UserService userService;
+
+    /** Project service reference for instance. */
+    @Autowired
+    private ProjectService projectService;
 
     @Override
     public VmInstance save(VmInstance vminstance) throws Exception {
@@ -579,25 +595,96 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     @Override
     public Page<VmInstance> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if (domain != null && !domain.getName().equals("ROOT")) {
-            return virtualmachinerepository.findAllByDomainIsActive(domain.getId(), Status.Expunging, pagingAndSorting.toPageRequest());
-        }
+    	User user = userService.find(Long.valueOf(tokenDetails.getTokenDetails("id")));
+		if (user != null && !user.getType().equals(Type.ROOT_ADMIN)) {
+			if (user.getType().equals(Type.DOMAIN_ADMIN)) {
+				Page<VmInstance> allInstanceList = virtualmachinerepository.findAllByDomainIsActive(user.getDomainId(),
+						Status.Expunging , pagingAndSorting.toPageRequest());
+				return allInstanceList;
+			} else {
+				if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
+					List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
+					for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
+						List<VmInstance> allInstanceTempList = virtualmachinerepository
+								.findAllByUserAndProjectIsActiveAndStatus(Status.Expunging, user, project);
+						allInstanceList.addAll(allInstanceTempList);
+					}
+					Page<VmInstance> allInstanceLists = new PageImpl<VmInstance>(allInstanceList,
+							pagingAndSorting.toPageRequest(), pagingAndSorting.getPageSize());
+					return (Page<VmInstance>) allInstanceLists;
+				} else {
+					Page<VmInstance> allInstanceLists = virtualmachinerepository
+							.findAllByUserIsActiveAndStatus(Status.Expunging, pagingAndSorting.toPageRequest(), user);
+					return (Page<VmInstance>) allInstanceLists;
+				}
+
+			}
+		}
         return virtualmachinerepository.findAllByIsActive(Status.Expunging, pagingAndSorting.toPageRequest());
     }
 
 
     @Override
     public Page<VmInstance> findAllByStatus(PagingAndSorting pagingAndSorting, String status) throws Exception {
-        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if (domain != null && !domain.getName().equals("ROOT")) {
-            Page<VmInstance> allInstanceList =  virtualmachinerepository.findAllByDomainIsActive(domain.getId(), Status.valueOf(status), pagingAndSorting.toPageRequest());
-        }
+		User user = userService.find(Long.valueOf(tokenDetails.getTokenDetails("id")));
+		if (user != null && !user.getType().equals(Type.ROOT_ADMIN)) {
+			if (user.getType().equals(Type.DOMAIN_ADMIN)) {
+				Page<VmInstance> allInstanceList = virtualmachinerepository.findAllByDomainIsActiveAndStatus(user.getDomainId(),
+						Status.valueOf(status), pagingAndSorting.toPageRequest());
+				return allInstanceList;
+			} else {
+				if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
+					List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
+					for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
+						List<VmInstance> allInstanceTempList = virtualmachinerepository
+								.findAllByUserAndProjectIsActive(Status.valueOf(status), user, project);
+						allInstanceList.addAll(allInstanceTempList);
+					}
+					Page<VmInstance> allInstanceLists = new PageImpl<VmInstance>(allInstanceList,
+							pagingAndSorting.toPageRequest(), pagingAndSorting.getPageSize());
+					return (Page<VmInstance>) allInstanceLists;
+				} else {
+					Page<VmInstance> allInstanceLists = virtualmachinerepository
+							.findAllByUserIsActive(Status.valueOf(status), pagingAndSorting.toPageRequest(), user);
+					return (Page<VmInstance>) allInstanceLists;
+				}
+
+			}
+		}
         return virtualmachinerepository.findAllByStatus(Status.valueOf(status), pagingAndSorting.toPageRequest());
     }
 
     @Override
     public List<VmInstance> findAll() throws Exception {
+    	try {
+			User user = userService.find(Long.valueOf(tokenDetails.getTokenDetails("id")));
+
+			if (user != null && !user.getType().equals(Type.ROOT_ADMIN)) {
+				if (user.getType().equals(Type.DOMAIN_ADMIN)) {
+					List<VmInstance> allInstanceList = virtualmachinerepository
+							.findAllByDomain(user.getDomainId(),Status.Expunging );
+					return allInstanceList;
+				} else {
+					if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
+						List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
+						for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
+							List<VmInstance> allInstanceTempList = virtualmachinerepository
+									.findAllByUserAndProject(Status.Expunging, user, project);
+							allInstanceList.addAll(allInstanceTempList);
+						}
+						return allInstanceList;
+					} else {
+						List<VmInstance> allInstanceLists = virtualmachinerepository.findAllByUser(Status.Expunging,
+								user);
+						return allInstanceLists;
+					}
+				}
+			}
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
         return (List<VmInstance>) virtualmachinerepository.findAllByIsActive(Status.Expunging);
     }
 
@@ -710,8 +797,37 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         return vmList;
     }
 
-    public Integer findCountByStatus(Status status) {
-        return virtualmachinerepository.findCountByStatus(status);
-    }
+	public Integer findCountByStatus(Status status) {
+		try {
+			User user = userService.find(Long.valueOf(tokenDetails.getTokenDetails("id")));
 
+			if (user != null && !user.getType().equals(Type.ROOT_ADMIN)) {
+				if (user.getType().equals(Type.DOMAIN_ADMIN)) {
+					List<VmInstance> allInstanceList = virtualmachinerepository.findAllByDomainIsActiveAndStatus(user.getDomainId(),
+							status);
+					return allInstanceList.size();
+				} else {
+					if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
+						List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
+						for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
+							List<VmInstance> allInstanceTempList = virtualmachinerepository
+									.findAllByUserAndProjectIsActive(status, user, project);
+							allInstanceList.addAll(allInstanceTempList);
+						}
+						return allInstanceList.size();
+					} else {
+						List<VmInstance> allInstanceLists = virtualmachinerepository.findAllByUserIsActive(status,
+								user);
+						return allInstanceLists.size();
+					}
+				}
+			}
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return virtualmachinerepository.findCountByStatus(status);
+
+	}
 }
