@@ -143,11 +143,10 @@ public class DomainServiceImpl implements DomainService {
         department.setDomain(persistedDomain);
         department.setUserName(persistedDomain.getPortalUserName());
         department.setDescription("HOD for this company "+ persistedDomain.getName());    
-        department.setDomainId(convertEntityService.getDomainId(persistedDomain.getUuid()));
         department.setType(Department.AccountType.DOMAIN_ADMIN);
         department.setIsActive(true);
         optional.put("domainid", String.valueOf(persistedDomain.getUuid()));
-        String accountresponse = departmentService.createAccount(String.valueOf(department.getType().ordinal()),persistedDomain.getEmail(), persistedDomain.getPrimaryFirstName(), persistedDomain.getLastName(), department.getUserName(), password, "json", optional);
+        String accountresponse = departmentService.createAccount(String.valueOf(department.getType().ordinal()),persistedDomain.getEmail(), persistedDomain.getPrimaryFirstName(), persistedDomain.getLastName(), department.getUserName(), persistedDomain.getPassword(), "json", optional);
         JSONObject createAccountResponseJSON = new JSONObject(accountresponse)
                 .getJSONObject("createaccountresponse");
         if (createAccountResponseJSON.has("errorcode")) {
@@ -165,7 +164,7 @@ public class DomainServiceImpl implements DomainService {
         User updatedUser = userService.save(user);
         this.syncUpdateUserRole(updatedUser);
         optional.clear();
-        optional.put("password",persistedDomain.getPassword());
+        optional.put("password",password);
         String userresponse = csUserService.updateUser(user.getUuid(), optional, "json");
         JSONObject updateUserJSON = new JSONObject(userresponse)
                 .getJSONObject("updateuserresponse");

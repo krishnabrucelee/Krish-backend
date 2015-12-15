@@ -60,7 +60,7 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * @throws Exception if error occurs
      */
     VmInstance upgradeDowngradeVM(VmInstance vminstance) throws Exception;
-    
+
     /**
      * Find all the instance based on the given status for paginated list.
      *
@@ -78,5 +78,13 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * @return
      */
     Integer findCountByStatus(Status status);
+
+    /**
+     * Get the count of the instance based on the status.
+     *
+     * @param status
+     * @return
+     */
+    VmInstance updateDisplayName(VmInstance vminstance) throws Exception;
 
 }
