@@ -189,9 +189,6 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-            HashMap<String, String> optional = new HashMap<String, String>();
-            optional.put("displayName", vminstance.getTransDisplayName());
-            cloudStackInstanceService.updateVirtualMachine(vminstance.getUuid(), optional);
             return virtualmachinerepository.save(vminstance);
         }
     }
@@ -829,5 +826,22 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 		}
 		return virtualmachinerepository.findCountByStatus(status);
 
+	}
+
+	@Override
+	public VmInstance updateDisplayName(VmInstance vminstance) throws Exception {
+		Errors errors = validator.rejectIfNullEntity("vminstance", vminstance);
+		errors = validator.validateEntity(vminstance, errors);
+		if (errors.hasErrors()) {
+			throw new ApplicationException(errors);
+		} else {
+			if(vminstance.getTransDisplayName() != null && !vminstance.getTransDisplayName().trim().equalsIgnoreCase("")) {
+			HashMap<String, String> optional = new HashMap<String, String>();
+			optional.put("displayName", vminstance.getTransDisplayName());
+			cloudStackInstanceService.updateVirtualMachine(vminstance.getUuid(), optional);
+			vminstance.setDisplayName(vminstance.getTransDisplayName());
+			}
+			return virtualmachinerepository.save(vminstance);
+		}
 	}
 }
