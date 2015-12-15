@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Department.AccountType;
@@ -81,6 +82,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     private UserService userService;
 
     @Override
+    @PreAuthorize("hasPermission(#department.getSyncFlag(), 'ADD_DEPARTMENT')")
     public Department save(Department department) throws Exception {
 
         if (department.getSyncFlag()) {
@@ -136,6 +138,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#department.getSyncFlag(), 'EDIT_DEPARTMENT')")
     public Department update(Department department) throws Exception {
         if (department.getSyncFlag()) {
             // Validate department
@@ -210,6 +213,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#department.getSyncFlag(), 'DELETE_DEPARTMENT')")
     public Department softDelete(Department department) throws Exception {
         department.setIsActive(false);
         department.setStatus(Department.Status.DELETED);
