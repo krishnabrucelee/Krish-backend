@@ -68,11 +68,13 @@ public class CloudStackAccountService {
      * @param accountId Account id
      * @return
      */
-    public String deleteAccount(String accountId) throws Exception {
+    public String deleteAccount(String accountId, String response) throws Exception {
 
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("deleteAccount", null);
         arguments.add(new NameValuePair("id", accountId));
+        arguments.add(new NameValuePair("response",response));
+
         String responseDocument = server.request(arguments);
         return responseDocument;
 

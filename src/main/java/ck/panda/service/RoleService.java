@@ -44,5 +44,22 @@ public interface RoleService  extends CRUDService<Role> {
      */
     Page<Role> findAllRolesWithoutFullPermissionAndActive(PagingAndSorting pagingAndSorting) throws Exception;
 
+    /**
+     * Soft delete method for role.
+     * 
+     * @param role name.
+     * @return role.
+     * @throws Exception unhandled errors.
+     */
     Role softDelete(Role role) throws Exception;
+
+
+   /**
+     * Find role by Department.
+     * 
+     * @param id of the department.
+     * @return id.
+     * @throws Exception unhandled errors.
+     */
+	List<Role> findByDepartment(Department department) throws Exception;
 }

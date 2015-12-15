@@ -33,7 +33,7 @@ public interface NetworkOfferingRepository extends PagingAndSortingRepository<Ne
      * Find NetworkOffering by the guestTpType is Isolated without Pagination.
      * @return guestIpType
      */
-    @Query(value = "select networkOffer from NetworkOffering networkOffer where networkOffer.guestIpType = 'Isolated'")
+    @Query(value = "select networkOffer from NetworkOffering networkOffer where networkOffer.guestIpType = 'Isolated' AND networkOffer.availability = 'Required'" )
     List<NetworkOffering> findIsolated();
 
 }
