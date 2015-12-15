@@ -57,6 +57,8 @@ public class CloudStackHostService {
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("listHosts", optional);
         arguments.add(new NameValuePair("response",response));
+        arguments.add(new NameValuePair("listAll", "true"));
+        arguments.add(new NameValuePair("type", "routing"));
         String responseDocument = server.request(arguments);
         return responseDocument;
     }

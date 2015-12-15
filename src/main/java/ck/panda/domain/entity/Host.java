@@ -80,6 +80,10 @@ public class Host {
     @Column(name = "zone_id")
     private Long zoneId;
 
+    /** IP address of the Host. */
+    @Column(name = "host_ipaddress")
+    private String hostIpaddress;
+
     /** Zone Object for the pod. */
     @JoinColumn(name = "zone_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
@@ -128,6 +132,9 @@ public class Host {
      *
      */
     public enum Status {
+
+    	/**  Host will be in a Enabled State. */
+        Up,
 
         /**  Host will be in a Enabled State. */
         ENABLED,
@@ -454,39 +461,60 @@ public class Host {
     }
 
     /**
-       * Convert JSONObject to domain entity.
-       *
-       * @param jsonObject json object
-       * @return domain entity object.
-       * @throws JSONException handles json exception.
-       */
-      public static Host convert(JSONObject jsonObject) throws JSONException {
-          Host host = new Host();
-          try {
-              host.setName(JsonUtil.getStringValue(jsonObject, "name"));
-              host.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-              host.setTransPodId((JsonUtil.getStringValue(jsonObject, "podid")));
-              host.setTransClusterId((JsonUtil.getStringValue(jsonObject, "clusterid")));
-              host.setTransZoneId((JsonUtil.getStringValue(jsonObject, "zoneid")));
-              host.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
-          } catch (Exception ex) {
-              ex.printStackTrace();
-          }
-        return host;
-      }
+     * Get ipaddress of host.
+     *
+     * @return the ipAddress.
+     */
+	public String getHostIpaddress() {
+		return hostIpaddress;
+	}
 
-      /**
-       * Mapping entity object into list.
-       *
-       * @param hostList list of hosts.
-       * @return host map
-       */
-      public static Map<String, Host> convert(List<Host> hostList) {
-          Map<String, Host> hostMap = new HashMap<String, Host>();
 
-          for (Host host : hostList) {
-              hostMap.put(host.getUuid(), host);
-          }
-          return hostMap;
-      }
+    /**
+     * Set the ipaddress for host.
+     *
+     * @param ipAddress to set
+     */
+	public void setHostIpaddress(String hostIpaddress) {
+		this.hostIpaddress = hostIpaddress;
+	}
+
+	/**
+	 * Convert JSONObject to domain entity.
+	 *
+	 * @param jsonObject json object
+	 * @return domain entity object.
+	 * @throws JSONException handles json exception.
+	 */
+	public static Host convert(JSONObject jsonObject) throws JSONException {
+		Host host = new Host();
+		try {
+			host.setName(JsonUtil.getStringValue(jsonObject, "name"));
+			host.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
+			host.setTransPodId((JsonUtil.getStringValue(jsonObject, "podid")));
+			host.setTransClusterId((JsonUtil.getStringValue(jsonObject, "clusterid")));
+			host.setTransZoneId((JsonUtil.getStringValue(jsonObject, "zoneid")));
+			host.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
+			host.setHostIpaddress(JsonUtil.getStringValue(jsonObject, "ipaddress"));
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		return host;
+	}
+
+	/**
+	 * Mapping entity object into list.
+	 *
+	 * @param hostList
+	 *            list of hosts.
+	 * @return host map
+	 */
+	public static Map<String, Host> convert(List<Host> hostList) {
+		Map<String, Host> hostMap = new HashMap<String, Host>();
+
+		for (Host host : hostList) {
+			hostMap.put(host.getUuid(), host);
+		}
+		return hostMap;
+	}
 }

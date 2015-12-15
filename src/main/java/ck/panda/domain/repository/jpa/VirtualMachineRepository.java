@@ -197,7 +197,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
     * @param project belongs to VM.
     * @return instance list
     */
-   @Query(value = "select vm from VmInstance vm where vm.status = :status and vm.instanceOwner = :user or vm.project = :project")
+   @Query(value = "select vm from VmInstance vm where vm.status = :status and (vm.instanceOwner = :user or vm.project = :project)")
    List<VmInstance> findAllByUserAndProjectIsActive(@Param("status") Status status, @Param("user") User instanceOwner, @Param("project") Project project);
 
    /**
@@ -209,7 +209,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
     * @param project belongs to VM.
     * @return instance list
     */
-   @Query(value = "select vm from VmInstance vm where vm.status <>:status and vm.instanceOwner = :user or vm.project = :project")
+   @Query(value = "select vm from VmInstance vm where vm.status <>:status and (vm.instanceOwner = :user or vm.project = :project)")
    List<VmInstance> findAllByUserAndProjectIsActiveAndStatus(@Param("status") Status status, @Param("user") User instanceOwner, @Param("project") Project project);
 
    /**
@@ -221,7 +221,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
     * @param project belongs to VM.
     * @return instance list
     */
-   @Query(value = "select vm from VmInstance vm where vm.status <> :status and vm.instanceOwner = :user or vm.project = :project")
+   @Query(value = "select vm from VmInstance vm where vm.status <> :status and (vm.instanceOwner = :user or vm.project = :project)")
    List<VmInstance> findAllByUserAndProject(@Param("status") Status status, @Param("user") User instanceOwner, @Param("project") Project project);
 
    /**
