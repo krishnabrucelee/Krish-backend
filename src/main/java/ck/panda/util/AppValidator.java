@@ -152,7 +152,7 @@ public class AppValidator {
 
         if (roleService.findByName(name, department) != null) {
 //            errors.addFieldError("name", "role.name.unique.error");
-            errors.addGlobalError("Role Name already exists in department");
+            errors.addGlobalError("role.name.unique.error");
         }
         return errors;
     }

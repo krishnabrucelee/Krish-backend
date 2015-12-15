@@ -406,7 +406,7 @@ public class ResourceLimitDomain {
     /**
      * Get the unique Separator for the Resource limit.
      *
-     * @param uniqueSeparator for the Resource limit.
+     * @param uniqueSeperator for the Resource limit.
      */
     public void setUniqueSeperator(String uniqueSeperator) {
         this.uniqueSeperator = uniqueSeperator;

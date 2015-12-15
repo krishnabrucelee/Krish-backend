@@ -4,9 +4,6 @@
 package ck.panda.domain.entity;
 
 import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -21,15 +18,12 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 import org.hibernate.annotations.Type;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
-import ck.panda.util.JsonUtil;
 
 /**
  * Resource limit department entity.
@@ -454,7 +448,7 @@ public class ResourceLimitDepartment {
     /**
      * Get the unique Separator for the Resource limit.
      *
-     * @param uniqueSeparator for the Resource limit.
+     * @param uniqueSeperator for the Resource limit.
      */
     public void setUniqueSeperator(String uniqueSeperator) {
         this.uniqueSeperator = uniqueSeperator;
@@ -494,46 +488,6 @@ public class ResourceLimitDepartment {
     */
     public void setTransDepartment(String transDepartment) {
         this.transDepartment = transDepartment;
-    }
-
-    /**
-     * Convert JSONObject to ResourceLimit entity.
-     *
-     * @param object json object
-     * @return ResourceLimit entity objects
-     * @throws JSONException unhandled json errors
-     */
-    @SuppressWarnings("static-access")
-    public static ResourceLimitDepartment convert(JSONObject object) throws JSONException {
-        ResourceLimitDepartment resource = new ResourceLimitDepartment();
-        resource.setIsSyncFlag(false);
-        try {
-            resource.setResourceType(ResourceType.values()[(JsonUtil.getIntegerValue(object, "resourcetype"))]);
-            resource.setMax(resource.getMax().valueOf(JsonUtil.getIntegerValue(object, "max")));
-            resource.setUniqueSeperator(resource.getDepartmentId() + "-" + resource.getResourceType());
-            resource.setTransDomainId(JsonUtil.getStringValue(object, "domainid"));
-            resource.setTransDepartment(JsonUtil.getStringValue(object, "account"));
-            resource.setIsActive(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return resource;
-    }
-
-    /**
-     * Mapping ResourceLimit entity object in list.
-     *
-     * @param resourceList lists of resource limits
-     * @return resourceMap mapped values.
-     */
-    public static Map<String, ResourceLimitDepartment> convert(List<ResourceLimitDepartment> resourceList) {
-        Map<String, ResourceLimitDepartment> resourceMap = new HashMap<String, ResourceLimitDepartment>();
-
-        for (ResourceLimitDepartment resource : resourceList) {
-            resourceMap.put(resource.getUniqueSeperator(), resource);
-        }
-        return resourceMap;
     }
 
 }

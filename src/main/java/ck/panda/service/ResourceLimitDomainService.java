@@ -15,7 +15,7 @@ import ck.panda.util.domain.CRUDService;
 @Service
 public interface ResourceLimitDomainService extends CRUDService<ResourceLimitDomain> {
 
-    /**
+   /**
     * To get list of Volume from cloudstack server.
     *
     * @param domainId domain id.
@@ -27,31 +27,38 @@ public interface ResourceLimitDomainService extends CRUDService<ResourceLimitDom
    /**
     * Create the quota limit for Domain.
     *
-       * @param resourceLimits resource limits
-       * @return created resource limits
-       * @throws Exception error.
+    * @param resourceLimits resource limits
+    * @return created resource limits
+    * @throws Exception error.
     */
    List<ResourceLimitDomain> createResourceLimits(List<ResourceLimitDomain> resourceLimits) throws Exception;
 
    /**
     * Find all resource limits by domain id.
     *
-       * @param id domain id.
-       * @param isActive true/false
-       * @return domain
-       * @throws Exception error
+    * @param id domain id.
+    * @param isActive true/false
+    * @return domain
+    * @throws Exception error
     */
    List<ResourceLimitDomain> findAllByDomainIdAndIsActive(Long id, Boolean isActive) throws Exception;
 
    /**
     * Find all resource type by domain id.
     *
-       * @param id domain
-       * @param isActive true/false
-       * @param resourceType resource type.
-       * @return domain resource count.
-       * @throws Exception error
+    * @param id domain
+    * @param isActive true/false
+    * @param resourceType resource type.
+    * @return domain resource count.
+    * @throws Exception error
     */
    ResourceLimitDomain findByDomainAndResourceType(Long id, ResourceLimitDomain.ResourceType resourceType, Boolean isActive) throws Exception;
+
+   /**
+    * Delete Resource Limit By Domain.
+    *
+    * @param domainId domain id.
+    */
+   void deleteResourceLimitByDomain(Long domainId);
 
 }

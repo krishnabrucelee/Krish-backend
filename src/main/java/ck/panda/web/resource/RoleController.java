@@ -22,7 +22,6 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Role;
-import ck.panda.domain.entity.Volume;
 import ck.panda.service.DepartmentService;
 import ck.panda.service.RoleService;
 import ck.panda.util.domain.vo.PagingAndSorting;

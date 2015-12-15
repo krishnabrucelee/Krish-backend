@@ -18,15 +18,12 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 import org.hibernate.annotations.Type;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
-import ck.panda.util.JsonUtil;
 
 /**
  * Resource limit Project entity.
@@ -496,7 +493,7 @@ public class ResourceLimitProject {
     /**
      * Get the unique Separator for the Resource limit.
      *
-     * @param uniqueSeparator for the Resource limit.
+     * @param uniqueSeperator for the Resource limit.
      */
     public void setUniqueSeperator(String uniqueSeperator) {
         this.uniqueSeperator = uniqueSeperator;
@@ -536,30 +533,6 @@ public class ResourceLimitProject {
     */
     public void setTransResourceType(Integer transResourceType) {
         this.transResourceType = transResourceType;
-    }
-
-    /**
-     * Convert JSONObject to ResourceLimit entity.
-     *
-     * @param jsonObject json object
-     * @return ResourceLimit entity objects
-     * @throws JSONException unhandled json errors
-     */
-    @SuppressWarnings("static-access")
-    public static ResourceLimitProject convert(JSONObject jsonObject) throws JSONException {
-        ResourceLimitProject resource = new ResourceLimitProject();
-        resource.setIsSyncFlag(false);
-        try {
-            resource.setIsActive(true);
-            resource.setResourceType(ResourceType.values()[(JsonUtil.getIntegerValue(jsonObject, "resourcetype"))]);
-            resource.setTransProjectId(JsonUtil.getStringValue(jsonObject, "projectid"));
-            resource.setMax(resource.getMax().valueOf(JsonUtil.getIntegerValue(jsonObject, "max")));
-            resource.setTransResourceType(JsonUtil.getIntegerValue(jsonObject, "resourcetype"));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return resource;
     }
 
     /**

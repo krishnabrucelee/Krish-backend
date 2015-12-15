@@ -15,16 +15,6 @@ import ck.panda.util.domain.CRUDService;
 @Service
 public interface ResourceLimitDepartmentService extends CRUDService<ResourceLimitDepartment> {
 
-       /**
-       * To get list of Volume from cloudstack server.
-       *
-       * @param domainId domain id.
-       * @param department department name.
-       * @return ResourceLimit list from server
-       * @throws Exception unhandled errors.
-       */
-      List<ResourceLimitDepartment> findAllFromCSServerDepartment(Long domainId, String department) throws Exception;
-
       /**
        * Create the quota limit for Department.
        *
@@ -51,6 +41,7 @@ public interface ResourceLimitDepartmentService extends CRUDService<ResourceLimi
        * @param domainId domain id.
        * @param isActive true/false
        * @param resourceType resource type.
+       * @param departmentId department id.
        * @return department resource count.
        * @throws Exception error
        */

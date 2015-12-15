@@ -61,6 +61,7 @@ public class ResourceLimitDomainController extends CRUDController<ResourceLimitD
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public List<ResourceLimitDomain> createResourceLimits(@RequestBody List<ResourceLimitDomain> resourceLimits) throws Exception {
+        resourceLimits.get(0).setIsSyncFlag(true);
         return resourceLimitDomainService.createResourceLimits(resourceLimits);
     }
 

@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitDomain;
@@ -21,7 +22,6 @@ import ck.panda.domain.repository.jpa.ResourceLimitDomainRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackResourceLimitService;
 import ck.panda.util.ConfigUtil;
-import ck.panda.util.JsonUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -74,7 +74,6 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
              if (errors.hasErrors()) {
                  throw new ApplicationException(errors);
              } else {
-                 //createVolume(resource, errors);
                  return resourceLimitDomainRepo.save(resource);
              }
          } else {
@@ -91,7 +90,6 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
              if (errors.hasErrors()) {
                  throw new ApplicationException(errors);
              } else {
-                 //updateResource(resource, errors);
                  return resourceLimitDomainRepo.save(resource);
              }
          } else {
@@ -169,33 +167,42 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
             // the converted Resource limit entity to list
             ResourceLimitDomain resource = ResourceLimitDomain.convert(resourceListJSON.getJSONObject(i));
             resource.setDomainId(convertEntityService.getDomainId(resource.getTransDomainId()));
-            resource.setUniqueSeperator(resource.getTransDomainId()+"-"+ResourceType.values()[(resource.getTransResourceType())]);
+            resource.setUniqueSeperator(resource.getTransDomainId() + "-" + ResourceType.values()[(resource.getTransResourceType())]);
             resourceList.add(resource);
         }
         return resourceList;
     }
 
     @Override
+    @PreAuthorize("hasPermission(#resourceLimits.get(0).getIsSyncFlag(), 'DOMAIN_QUOTA')")
     public List<ResourceLimitDomain> createResourceLimits(List<ResourceLimitDomain> resourceLimits) throws Exception {
-
-        Errors errors = this.validateResourceLimit(resourceLimits);
-        if (errors.hasErrors()) {
-            throw new ApplicationException(errors);
-        } else {
-            this.deleteResourceLimitByDomain(resourceLimits.get(0).getDomain().getId());
-            for (ResourceLimitDomain resource : resourceLimits) {
-                updateResourceDomain(resource);
-                resource.setIsActive(true);
-                resource.setDomainId(resource.getDomain().getId());
-                resourceLimitDomainRepo.save(resource);
+        if (resourceLimits.get(0).getIsSyncFlag()) {
+            Errors errors = this.validateResourceLimit(resourceLimits);
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
+            } else {
+                this.deleteResourceLimitByDomain(resourceLimits.get(0).getDomain().getId());
+                for (ResourceLimitDomain resource : resourceLimits) {
+                    updateResourceDomain(resource);
+                    resource.setIsActive(true);
+                    resource.setDomainId(resource.getDomain().getId());
+                    resourceLimitDomainRepo.save(resource);
+                }
             }
+            return (List<ResourceLimitDomain>) resourceLimitDomainRepo.findAll();
+        } else {
+            return (List<ResourceLimitDomain>) resourceLimitDomainRepo.findAll();
         }
-        return (List<ResourceLimitDomain>) resourceLimitDomainRepo.findAll();
     }
 
-    private void deleteResourceLimitByDomain(Long domainId) {
+    /**
+     * Delete Resource limit.
+     *
+     * @param domainId domain id.
+     */
+    public void deleteResourceLimitByDomain(Long domainId) {
         List<ResourceLimitDomain> resourceLimits = resourceLimitDomainRepo.findAllByDomainIdAndIsActive(domainId, true);
-        for(ResourceLimitDomain resource: resourceLimits) {
+        for (ResourceLimitDomain resource: resourceLimits) {
             resourceLimitDomainRepo.delete(resource);
         }
     }
@@ -213,7 +220,7 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
         for (ResourceLimitDomain resourceLimit : resourceLimits) {
             Long departmentResourceCount = resourceLimitDepartmentService.findByResourceCountByDepartmentAndResourceType(resourceLimit.getDomainId(), ResourceLimitDepartment.ResourceType.valueOf(resourceLimit.getResourceType().name()), 0L, true);
             if (resourceLimit.getMax() < departmentResourceCount) {
-                errors.addFieldError(resourceLimit.getResourceType().toString(), departmentResourceCount + " " + resourceLimit.getResourceType().toString() + " already allocated to departments of this domain");
+                errors.addFieldError(resourceLimit.getResourceType().toString(), departmentResourceCount + " " + resourceLimit.getResourceType().toString() + " already.allocated.to.departments.of.this.domain");
             }
         }
         return errors;
