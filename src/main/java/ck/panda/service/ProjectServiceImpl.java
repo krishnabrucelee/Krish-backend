@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
@@ -77,6 +78,7 @@ public class ProjectServiceImpl implements ProjectService {
     private UserRepository userRepository;
 
     @Override
+    @PreAuthorize("hasPermission(#project.getSyncFlag(), 'CREATE_PROJECT')")
     public Project save(Project project) throws Exception {
     	List<User> users = new ArrayList<User>();
         if (project.getSyncFlag()) {
@@ -119,6 +121,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#project.getSyncFlag(), 'EDIT_PROJECT')")
     public Project update(Project project) throws Exception {
         if (project.getSyncFlag()) {
         	List<User> users = new ArrayList<User>();
@@ -223,6 +226,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#project.getSyncFlag(), 'DELETE_PROJECT')")
     public Project softDelete(Project project) throws Exception {
         Errors errors = validator.rejectIfNullEntity("project", project);
         // Validation

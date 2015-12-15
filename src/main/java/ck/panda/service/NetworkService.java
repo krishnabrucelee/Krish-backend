@@ -52,4 +52,13 @@ public interface NetworkService extends CRUDService<Network> {
      * @throws Exception unhandled errors.
      */
     Page<Network> findAllByActive(PagingAndSorting page) throws Exception;
+
+    /**
+     * To get list of networks from project.
+     *
+     * @param projectId project id.
+     * @return network list from server.
+     * @throws Exception unhandled errors.
+     */
+    List<Network> findByProjectAndNetworkIsActive(Long projectId, Boolean isActive) throws Exception;
 }

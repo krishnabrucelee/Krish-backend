@@ -73,6 +73,7 @@ public class ProjectController extends CRUDController<Project>implements ApiCont
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDelete(@RequestBody Project project, @PathVariable(PATH_ID) Long id) throws Exception {
+    	project.setSyncFlag(true);
         projectService.softDelete(project);
     }
 

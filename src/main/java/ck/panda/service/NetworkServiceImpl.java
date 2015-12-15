@@ -375,6 +375,11 @@ public class NetworkServiceImpl implements NetworkService {
         return networkRepo.findByDepartmentAndNetworkIsActive(departmentRepository.findOne(department), true);
     }
 
+    @Override
+    public List<Network> findByProjectAndNetworkIsActive(Long projectId, Boolean isActive) throws Exception {
+        return networkRepo.findByProjectAndNetworkIsActive(projectId, true);
+    }
+
     /**
      * Find all the compute offering with pagination.
      *
