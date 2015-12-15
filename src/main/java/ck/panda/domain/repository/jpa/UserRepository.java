@@ -29,7 +29,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @param domain domain of the user
      * @return user
      */
-    @Query(value = "select user from User user where user.userName=:userName AND user.domain=:domain)")
+    @Query(value = "select user from User user where user.userName=:userName AND user.domain=:domain")
     User findByUserNameAndDomain(@Param("userName") String userName, @Param("domain") Domain domain);
 
     /**

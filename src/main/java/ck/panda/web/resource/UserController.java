@@ -55,8 +55,10 @@ public class UserController extends CRUDController<User> implements ApiControlle
         return userService.update(user);
     }
 
-    @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing User.")    
-    public void softDelete(@RequestBody User user, @PathVariable(PATH_ID) Long id) throws Exception {
+    @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing user.")
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.NO_CONTENT)   
+    public void softDelete(@RequestBody User user) throws Exception {
         userService.softDelete(user); 
     }
     @Override
