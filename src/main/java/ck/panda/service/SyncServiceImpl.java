@@ -1254,9 +1254,8 @@ public class SyncServiceImpl implements SyncService {
             // a hash using uuid
             if (csHostMap.containsKey(host.getUuid())) {
                 Host csUser = csHostMap.get(host.getUuid());
-
                 host.setName(csUser.getName());
-
+                host.setHostIpaddress(csUser.getHostIpaddress());
                 // 3.2 If found, update the user object in app db
                 hostService.update(host);
 

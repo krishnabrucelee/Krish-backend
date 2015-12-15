@@ -5,6 +5,8 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import ck.panda.constants.EventTypes;
@@ -131,6 +133,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             } else {
                 HashMap<String, String> optional = new HashMap<String, String>();
                 optional.put("displayname", vminstance.getName());
+                vminstance.setDisplayName(vminstance.getName());
                 optional.put("name", vminstance.getName());
                 if (networkRepo.findByUUID(vminstance.getNetworkUuid()) != null) {
                     vminstance.setNetworkId(networkRepo.findByUUID(vminstance.getNetworkUuid()).getId());
@@ -606,7 +609,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 								.findAllByUserAndProjectIsActiveAndStatus(Status.Expunging, user, project);
 						allInstanceList.addAll(allInstanceTempList);
 					}
-					Page<VmInstance> allInstanceLists = new PageImpl<VmInstance>(allInstanceList,
+					List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
+					Page<VmInstance> allInstanceLists = new PageImpl<VmInstance>(instances,
 							pagingAndSorting.toPageRequest(), pagingAndSorting.getPageSize());
 					return (Page<VmInstance>) allInstanceLists;
 				} else {
@@ -637,7 +641,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 								.findAllByUserAndProjectIsActive(Status.valueOf(status), user, project);
 						allInstanceList.addAll(allInstanceTempList);
 					}
-					Page<VmInstance> allInstanceLists = new PageImpl<VmInstance>(allInstanceList,
+					List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
+					Page<VmInstance> allInstanceLists = new PageImpl<VmInstance>(instances,
 							pagingAndSorting.toPageRequest(), pagingAndSorting.getPageSize());
 					return (Page<VmInstance>) allInstanceLists;
 				} else {
@@ -669,7 +674,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 									.findAllByUserAndProject(Status.Expunging, user, project);
 							allInstanceList.addAll(allInstanceTempList);
 						}
-						return allInstanceList;
+						List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
+						return instances;
 					} else {
 						List<VmInstance> allInstanceLists = virtualmachinerepository.findAllByUser(Status.Expunging,
 								user);
@@ -811,7 +817,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 									.findAllByUserAndProjectIsActive(status, user, project);
 							allInstanceList.addAll(allInstanceTempList);
 						}
-						return allInstanceList.size();
+						List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
+						return instances.size();
 					} else {
 						List<VmInstance> allInstanceLists = virtualmachinerepository.findAllByUserIsActive(status,
 								user);

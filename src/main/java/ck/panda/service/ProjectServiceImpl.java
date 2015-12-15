@@ -13,8 +13,10 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Project;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.ProjectRepository;
+import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackProjectService;
 import ck.panda.util.CloudStackServer;
@@ -70,8 +72,13 @@ public class ProjectServiceImpl implements ProjectService {
     @Autowired
     private DomainRepository domainRepository;
 
+    /** User repository reference. */
+    @Autowired
+    private UserRepository userRepository;
+
     @Override
     public Project save(Project project) throws Exception {
+    	List<User> users = new ArrayList<User>();
         if (project.getSyncFlag()) {
         Errors errors = validator.rejectIfNullEntity("project", project);
         errors = validator.validateEntity(project, errors);
@@ -94,6 +101,8 @@ public class ProjectServiceImpl implements ProjectService {
             } else {
                 LOGGER.debug("Project UUID", csProject.getString("id"));
                 project.setUuid(csProject.getString("id"));
+                users.add(userRepository.findOne(project.getProjectOwnerId()));
+                project.setUserList(users);
                 String instancePro = cloudStackProjectService.queryAsyncJobResult(csProject.getString("jobid"), "json");
                 JSONObject resProject = new JSONObject(instancePro).getJSONObject("queryasyncjobresultresponse");
                 if (resProject.getString("jobstatus").equals("2")) {
@@ -112,6 +121,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Project update(Project project) throws Exception {
         if (project.getSyncFlag()) {
+        	List<User> users = new ArrayList<User>();
             Errors errors = validator.rejectIfNullEntity("project", project);
             errors = validator.validateEntity(project, errors);
             errors = this.validateByName(errors, project.getName(), project.getDepartment(), project.getId());
@@ -130,6 +140,8 @@ public class ProjectServiceImpl implements ProjectService {
                     errors = this.validateEvent(errors, csProject.getString("errortext"));
                     throw new ApplicationException(errors);
                 }
+                users.add(userRepository.findOne(project.getProjectOwnerId()));
+                project.setUserList(users);
             }
 
         }

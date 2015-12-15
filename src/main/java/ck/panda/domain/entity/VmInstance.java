@@ -50,7 +50,7 @@ public class VmInstance implements Serializable {
     private String name;
 
     /** Display name of the instance. */
-    @Column(name = "display_name", nullable = false)
+    @Column(name = "display_name")
     private String displayName;
 
     /** Internal name of the instance. */
