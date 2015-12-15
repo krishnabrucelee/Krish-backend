@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.StorageOffering;
+import ck.panda.domain.entity.Volume;
 import ck.panda.domain.repository.jpa.StorageOfferingRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackStorageOfferingService;
@@ -54,7 +55,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     @Override
     public StorageOffering save(StorageOffering storage) throws Exception {
         if (storage.getIsSyncFlag()) {
-
+            this.validateVolumeUniqueness(storage);
             Errors errors = validator.rejectIfNullEntity("storageOffering", storage);
             errors = validator.validateEntity(storage, errors);
 
@@ -301,6 +302,24 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
             tags = "ALL";
         }
         return storageOfferingRepo.findAllByTags(tags);
+    }
+
+    /**
+     * Validate the StorageOffering.
+     *
+     * @param volume reference of the Volume.
+     * @throws Exception error occurs
+     */
+    private void validateVolumeUniqueness(StorageOffering storage) throws Exception {
+        Errors errors = validator.rejectIfNullEntity("storageOffering", storage);
+        errors = validator.validateEntity(storage, errors);
+        StorageOffering validateStorage = storageOfferingRepo.findByNameAndIsActive(storage.getName(), true);
+        if (validateStorage != null && storage.getId() != validateStorage.getId()) {
+            errors.addGlobalError("Storage.offering.already.exist");
+        }
+        if (errors.hasErrors()) {
+            throw new ApplicationException(errors);
+        }
     }
 
     @Override

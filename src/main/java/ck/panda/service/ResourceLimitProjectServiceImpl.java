@@ -3,20 +3,18 @@
  */
 package ck.panda.service;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitProject;
-import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
 import ck.panda.domain.repository.jpa.ResourceLimitProjectRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackResourceLimitService;
@@ -47,10 +45,6 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
     @Autowired
     private CloudStackResourceLimitService csResourceLimitService;
 
-    /** Reference of the convert entity service. */
-    @Autowired
-    private ConvertEntityService convertEntityService;
-
     /** Cloud stack configuration utility class. */
     @Autowired
     private ConfigUtil config;
@@ -73,7 +67,6 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                // createVolume(resource, errors);
                 return resourceLimitProjectRepo.save(resource);
             }
         } else {
@@ -90,7 +83,6 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                // updateResource(resource, errors);
                 return resourceLimitProjectRepo.save(resource);
             }
         } else {
@@ -145,27 +137,6 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
         }
         return optional;
     }
-    @Override
-    public List<ResourceLimitProject> findAllFromCSServerProject(String projectId) throws Exception {
-        List<ResourceLimitProject> resourceList = new ArrayList<ResourceLimitProject>();
-        HashMap<String, String> resourceMap = new HashMap<String, String>();
-        resourceMap.put("projectid", projectId);
-        // 1. Get the list of ResourceLimit from CS server using CS connector
-        String response = csResourceLimitService.listResourceLimits("json", resourceMap);
-        JSONArray resourceListJSON = new JSONObject(response).getJSONObject("listresourcelimitsresponse")
-                .getJSONArray("resourcelimit");
-        // 2. Iterate the json list, convert the single json entity to
-        // Resource limit
-        for (int i = 0, size = resourceListJSON.length(); i < size; i++) {
-            // 2.1 Call convert by passing JSONObject to StorageOffering entity
-            // and Add the converted Resource limit entity to list
-            ResourceLimitProject resource = ResourceLimitProject.convert(resourceListJSON.getJSONObject(i));
-            resource.setProjectId(convertEntityService.getProject(resource.getTransProjectId()).getId());
-            resource.setUniqueSeperator(resource.getTransProjectId()+"-"+ResourceType.values()[(resource.getTransResourceType())]);
-            resourceList.add(resource);
-        }
-        return resourceList;
-    }
 
     /**
      * updating resource limits for project.
@@ -190,6 +161,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
     }
 
     @Override
+    @PreAuthorize("hasPermission(null, 'PROJECT_QUOTA_EDIT')")
     public List<ResourceLimitProject> createResourceLimits(List<ResourceLimitProject> resourceLimits) throws Exception {
 
         Errors errors = this.validateResourceLimit(resourceLimits);
@@ -213,7 +185,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
      */
     private void deleteResourceLimitByProject(Long projectId) {
         List<ResourceLimitProject> resourceLimits = resourceLimitProjectRepo.findAllByProjectIdAndIsActive(projectId, true);
-        for(ResourceLimitProject resource: resourceLimits) {
+        for (ResourceLimitProject resource: resourceLimits) {
             resourceLimitProjectRepo.delete(resource);
         }
     }
@@ -238,9 +210,13 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
                     resourceLimit.getResourceType(), resourceLimit.getProjectId(), true);
             Long totalCount = resourceLimit.getMax() + count;
             // if(step1 < step2)
-            if (projectLimit.getMax() < totalCount) {
-                errors.addFieldError(resourceLimit.getResourceType().toString(),
-                        resourceLimit.getResourceType().toString() + "Resource limit exceed");
+            if (projectLimit != null) {
+                if (projectLimit.getMax() < totalCount) {
+                errors.addFieldError(resourceLimit.getResourceType().toString(), totalCount + " "
+                       + resourceLimit.getResourceType().toString() + "resource.limit.exceed");
+                }
+            } else {
+                errors.addGlobalError("update.department.quota.first");
             }
         }
         return errors;

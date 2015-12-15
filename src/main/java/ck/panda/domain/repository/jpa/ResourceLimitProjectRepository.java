@@ -38,6 +38,7 @@ public interface ResourceLimitProjectRepository extends PagingAndSortingReposito
      * @param departmentId department id.
      * @param isActive true/false
      * @param resourceType resource type
+     * @param projectId project id.
      * @return resource count of project.
      */
     @Query(value = "select coalesce(sum(resource.max),0) from ResourceLimitProject resource where resource.isActive =:isActive AND resource.departmentId =:departmentId AND resource.resourceType =:resourceType AND resource.projectId !=:projectId")

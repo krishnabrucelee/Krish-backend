@@ -94,7 +94,7 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     @PreAuthorize("hasPermission(#template.getSyncFlag(), 'REGISTER_TEMPLATE')")
     public Template save(Template template) throws Exception {
-    	template.setIsActive(true);
+        template.setIsActive(true);
         if (template.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity("template", template);
             errors = validator.validateEntity(template, errors);
@@ -131,9 +131,9 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public void delete(Template template) throws Exception {
-    	template.setIsActive(false);
-    	template.setStatus(Template.Status.INACTIVE);
-   	    templateRepository.save(template);
+        template.setIsActive(false);
+        template.setStatus(Template.Status.INACTIVE);
+           templateRepository.save(template);
     }
 
     @Override
@@ -198,7 +198,7 @@ public class TemplateServiceImpl implements TemplateService {
     public List<Template> findByTemplate() throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if(domain != null && domain.getName().equals("ROOT")) {
-    		return (List<Template>) templateRepository.findByTemplateAndFeature("ALL", TemplateType.SYSTEM, Status.ACTIVE, true);
+            return (List<Template>) templateRepository.findByTemplateAndFeature("ALL", TemplateType.SYSTEM, Status.ACTIVE, true);
         }
         return templateRepository.findByTemplate("ALL", TemplateType.SYSTEM, Status.ACTIVE, true);
     }
@@ -212,14 +212,14 @@ public class TemplateServiceImpl implements TemplateService {
         }
         if(template.getOsCategory() == null ) {
             if(domain != null && domain.getName().equals("ROOT")) {
-            	return (List<Template>) templateRepository.findByTemplateAndFeature(template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true);
+                return (List<Template>) templateRepository.findByTemplateAndFeature(template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true);
             }
-    		return (List<Template>) templateRepository.findByTemplate(template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true);
+            return (List<Template>) templateRepository.findByTemplate(template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true);
         } else  {
             if(domain != null && domain.getName().equals("ROOT")) {
-    			return templateRepository.findAllByOsCategoryAndArchitectureAndType(template.getOsCategory(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true);
+                return templateRepository.findAllByOsCategoryAndArchitectureAndType(template.getOsCategory(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true);
             }
-    		return templateRepository.findAllByOsCategoryAndArchitectureAndTypeAndStatus(template.getOsCategory(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true);
+            return templateRepository.findAllByOsCategoryAndArchitectureAndTypeAndStatus(template.getOsCategory(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true);
         }
     }
 
@@ -384,10 +384,10 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     @PreAuthorize("hasPermission(null, 'DELETE_MY_TEMPLATE')")
        public Template softDelete(Template template) throws Exception {
-    	csDeleteTemplate(template.getId());
+        csDeleteTemplate(template.getId());
         template.setIsActive(false);
         template.setStatus(Template.Status.INACTIVE);
-   	    return templateRepository.save(template);
+           return templateRepository.save(template);
        }
 
 }

@@ -1307,12 +1307,15 @@ public class SyncServiceImpl implements SyncService {
                 volume.setDepartmentId(csvolume.getDepartmentId());
                 volume.setVmInstanceId(csvolume.getVmInstanceId());
                 volume.setVolumeType(csvolume.getVolumeType());
+                volume.setIsActive(true);
                 if(volume.getDiskSize() !=null) {
                     volume.setDiskSize(volume.getDiskSize());
                 } else {
                     volume.setDiskSize(volume.getStorageOffering().getDiskSize());
                 }
-                volume.setIsActive(true);
+                if(volume.getProjectId() !=null) {
+                    volume.setProjectId(volume.getProjectId());
+                }
                 volume.setChecksum(csvolume.getChecksum());
                 volume.setStatus(csvolume.getStatus());
                 volume.setDiskMaxIops(csvolume.getDiskMaxIops());
@@ -1591,158 +1594,42 @@ public class SyncServiceImpl implements SyncService {
     public void syncResourceLimit() throws ApplicationException, Exception {
         List<Domain> domains = domainService.findAll();
         for (Domain domain : domains) {
-            syncResourceLimitDomain(domain.getUuid());
+            syncResourceLimitDomain(domain);
         }
-
-        List<Department> departments = departmentService.findAllByIsActive(true);
-        for (Department department : departments) {
-            syncResourceLimitDepartment(department.getDomainId(), department.getUserName());
-        }
-
-        List<Project> projects = projectService.findAllByActive(true);
-        for (Project project : projects) {
-            syncResourceLimitProject(project.getUuid());
-        }
-
     }
 
     @Override
-    public void syncResourceLimitDomain(String domainId) throws ApplicationException, Exception {
-
+    public void syncResourceLimitDomain(Domain domain) throws ApplicationException, Exception {
         // 1. Get all the ResourceLimit objects from CS server as hash
-        List<ResourceLimitDomain> csResourceList = resourceDomainService.findAllFromCSServerDomain(domainId);
+        List<ResourceLimitDomain> csResourceList = resourceDomainService.findAllFromCSServerDomain(domain.getUuid());
         HashMap<String, ResourceLimitDomain> csResourceMap = (HashMap<String, ResourceLimitDomain>) ResourceLimitDomain
                 .convert(csResourceList);
 
         // 2. Get all the resource objects from application
-        List<ResourceLimitDomain> appResourceList = resourceDomainService.findAll();
+        List<ResourceLimitDomain> appResourceList = resourceDomainService.findAllByDomainIdAndIsActive(domain.getId(),
+                true);
 
         // 3. Iterate Domain resource list
         LOGGER.debug("Total rows updated : " + (appResourceList.size()));
+        int i = 0;
         for (ResourceLimitDomain resource : appResourceList) {
-            resource.setIsSyncFlag(false);
-            String resourceLimit = resource.getDomainId() + "-" + resource.getResourceType();
-            // 3.1 Find the corresponding CS server resource object by finding
-            // it in a hash using uuid
-            if (csResourceMap.containsKey(resourceLimit)) {
-                ResourceLimitDomain csResource = csResourceMap.get(resourceLimit);
-                resource.setIsActive(true);
-                // resource.setName(csResource.getName());
-
-                // 3.2 If found, update the resource object in app db
-                resourceDomainService.update(resource);
-
-                // 3.3 Remove once updated, so that we can have the list of cs
-                // resource which is not added in the app
-                csResourceMap.remove(resourceLimit);
-            } else {
-                // resource.setIsSyncFlag(false);
-                  resourceDomainService.update(resource);
-
+            i++;
+            LOGGER.debug("NEW DOMAIN ID " + resource.getDomainId());
+            if (i == 1) {
+                resourceDomainService.deleteResourceLimitByDomain(resource.getDomainId());
             }
+            resource.setIsSyncFlag(false);
+            csResourceMap.remove(resource.getDomainId());
         }
         // 4. Get the remaining list of cs server hash resource object, then
         // iterate and
         // add it to app db
         for (String key : csResourceMap.keySet()) {
-            LOGGER.debug("Syncservice resource Domain id:");
             resourceDomainService.save(csResourceMap.get(key));
-
         }
         LOGGER.debug("Total rows added", (csResourceMap.size()));
-
     }
 
-    @Override
-    public void syncResourceLimitDepartment(Long domainId, String department) throws ApplicationException, Exception {
-
-        // 1. Get all the ResourceLimit objects from CS server as hash
-        List<ResourceLimitDepartment> csResourceList = resourceDepartmentService.findAllFromCSServerDepartment(domainId,
-                department);
-        HashMap<String, ResourceLimitDepartment> csResourceMap = (HashMap<String, ResourceLimitDepartment>) ResourceLimitDepartment
-                .convert(csResourceList);
-
-        // 2. Get all the resource objects from application
-        List<ResourceLimitDepartment> appResourceList = resourceDepartmentService.findAll();
-
-        // 3. Iterate application resource list
-        LOGGER.debug("Total rows updated : " + (appResourceList.size()));
-        for (ResourceLimitDepartment resource : appResourceList) {
-            resource.setIsSyncFlag(false);
-            String resourceLimit = resource.getDepartmentId() + "-" + resource.getResourceType();
-            // 3.1 Find the corresponding CS server resource object by finding
-            // it in a hash using uuid
-            if (csResourceMap.containsKey(resourceLimit)) {
-                ResourceLimitDepartment csResource = csResourceMap.get(resourceLimit);
-                resource.setIsActive(true);
-                // 3.2 If found, update the resource object in app db
-                resourceDepartmentService.update(resource);
-
-                // 3.3 Remove once updated, so that we can have the list of cs
-                // resource which is not added in the app
-                csResourceMap.remove(resourceLimit);
-            } else {
-                resource.setIsSyncFlag(false);
-                resourceDepartmentService.update(resource);
-
-            }
-        }
-        // 4. Get the remaining list of cs server hash resource object, then
-        // iterate and
-        // add it to app db
-        for (String key : csResourceMap.keySet()) {
-            LOGGER.debug("Syncservice resource Department id:");
-            resourceDepartmentService.save(csResourceMap.get(key));
-
-        }
-        LOGGER.debug("Total rows added", (csResourceMap.size()));
-
-    }
-
-    @Override
-    public void syncResourceLimitProject(String projectId) throws ApplicationException, Exception {
-
-        // 1. Get all the ResourceLimit objects from CS server as hash
-        List<ResourceLimitProject> csResourceList = resourceProjectService.findAllFromCSServerProject(projectId);
-               HashMap<String, ResourceLimitProject> csResourceMap = (HashMap<String, ResourceLimitProject>) ResourceLimitProject
-                .convert(csResourceList);
-
-        // 2. Get all the resource objects from application
-        List<ResourceLimitProject> appResourceList = resourceProjectService.findAll();
-
-        // 3. Iterate application resource list
-        LOGGER.debug("Total rows updated : " + (appResourceList.size()));
-        for (ResourceLimitProject resource : appResourceList) {
-            resource.setIsSyncFlag(false);
-            String resourceLimit = resource.getProjectId() + "-" + resource.getResourceType();
-            // 3.1 Find the corresponding CS server resource object by finding
-            // it in a hash using uuid
-            if (csResourceMap.containsKey(resourceLimit)) {
-                ResourceLimitProject csResource = csResourceMap.get(resourceLimit);
-                resource.setIsActive(true);
-                // resource.setName(csResource.getName());
-
-                // 3.2 If found, update the resource object in app db
-                resourceProjectService.update(resource);
-
-                // 3.3 Remove once updated, so that we can have the list of cs
-                // resource which is not added in the app
-                csResourceMap.remove(resourceLimit);
-            } else {
-                resourceProjectService.update(resource);
-            }
-        }
-        // 4. Get the remaining list of cs server hash resource object, then
-        // iterate and
-        // add it to app db
-        for (String key : csResourceMap.keySet()) {
-            LOGGER.debug("Syncservice resource Domain id:");
-            resourceProjectService.save(csResourceMap.get(key));
-
-        }
-        LOGGER.debug("Total rows added", (csResourceMap.size()));
-
-    }
 
     /**
      * Sync with Cloud Server Iso.

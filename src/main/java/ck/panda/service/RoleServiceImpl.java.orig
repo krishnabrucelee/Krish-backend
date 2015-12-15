@@ -12,7 +12,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Role;
+<<<<<<< Updated upstream
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.Volume;
+=======
+>>>>>>> Stashed changes
 import ck.panda.domain.entity.Role.Status;
 import ck.panda.domain.repository.jpa.RoleReposiory;
 import ck.panda.util.AppValidator;
