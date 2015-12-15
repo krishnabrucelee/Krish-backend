@@ -1187,6 +1187,11 @@ public class SyncServiceImpl implements SyncService {
                 instance.setIsoName(csVm.getIsoName());
                 instance.setIpAddress(csVm.getIpAddress());
                 instance.setNetworkId(csVm.getNetworkId());
+                instance.setInstanceInternalName(csVm.getInstanceInternalName());
+                if(csVm.getVolumeId() != null){
+                instance.setVolumeId(csVm.getVolumeId());
+                }
+                instance.setDisplayName(csVm.getDisplayName());
                 if(csVm.getDepartmentId() != null){
                 instance.setDepartmentId(csVm.getDepartmentId());
                 }

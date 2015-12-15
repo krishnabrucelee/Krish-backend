@@ -25,8 +25,10 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
+import ck.panda.service.SyncService;
 import ck.panda.service.VirtualMachineService;
 import ck.panda.service.VirtualMachineServiceImpl;
+import ck.panda.util.CloudStackServer;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -41,6 +43,13 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     /** Service reference to Virtual Machine. */
     @Autowired
     private VirtualMachineService virtualmachineservice;
+
+    /** Cloud stack server service. */
+    private CloudStackServer cloudStackServer;
+
+    /** Service reference to syncService. */
+    @Autowired
+    private SyncService syncService;
 
     @Value(value = "${console.proxy}")
     private String consoleProxy;
@@ -179,14 +188,17 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public String getVNC(@RequestBody VmInstance vminstance) throws Exception {
+    	syncService.init(cloudStackServer);
+    	syncService.syncInstances();
         String token = null;
-        String host = vminstance.getHost().getHostIpaddress(); // VM's the host's IP address
-        String instance = vminstance.getInstanceInternalName(); // virtual machine instance name
-        String display = vminstance.getDisplayName(); // Novnc display
+        VmInstance persistInstance = virtualmachineservice.find(vminstance.getId());
+        String host = persistInstance.getHost().getHostIpaddress(); // VM's the host's IP address
+        String instance = persistInstance.getInstanceInternalName(); // virtual machine instance name
+        String display = persistInstance.getDisplayName(); // Novnc display
         String str = host + "|" + instance + "|" + display;
         token = Base64.encodeBase64String(str.getBytes());
         LOGGER.debug("VNC Token"+ token);
-        return "{\"success\":" + "\""+consoleProxy+"/console/?host=" + host + "&instance="+instance+"\"}";
+        return "{\"success\":" + "\""+consoleProxy+"/console/?token="+ token +"\"}";
     }
 
     /**

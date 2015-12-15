@@ -625,4 +625,9 @@ public class VolumeServiceImpl implements VolumeService {
 	public List<Volume> findByDepartment(Long departmentId) {
 		return volumeRepo.findByDepartment(departmentId);
 	}
+
+	@Override
+	public Volume findByInstanceAndVolumeType(Long volume) throws Exception {
+		return volumeRepo.findByInstanceAndVolumeType(volume, Volume.VolumeType.ROOT, true);
+	}
 }

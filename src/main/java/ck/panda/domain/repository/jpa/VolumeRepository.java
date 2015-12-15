@@ -125,6 +125,18 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
     List<Volume> findByInstanceAndVolumeTypeAndIsActive(@Param("vmInstanceId") Long vmInstanceId, @Param("volumeType") VolumeType volumeType, @Param("isActive") Boolean isActive);
 
     /**
+     * Find the Volume by volume Type and IsActive.
+     *
+     * @param vmInstanceId instance for each domain.
+     * @param volumeType for each domain.
+     * @param isActive get the volume list based on active/inactive status.
+     * @return volume.
+     */
+    @Query(value = "select volume from Volume volume where volume.isActive =:isActive AND volume.volumeType=:volumeType AND volume.vmInstanceId=:vmInstanceId")
+    Volume findByInstanceAndVolumeType(@Param("vmInstanceId") Long vmInstanceId, @Param("volumeType") VolumeType volumeType, @Param("isActive") Boolean isActive);
+
+
+    /**
      * Find all department from volume..
      *
      * @param departmentId department id.

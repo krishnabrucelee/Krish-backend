@@ -127,7 +127,16 @@ public interface VolumeService extends CRUDService<Volume> {
     * @throws Exception if error occurs
     */
    List<Volume> findByInstanceAndVolumeTypeAndIsActive(Long volume) throws Exception;
-   
+
+   /**
+    * Volume with its instanceId, volume type and active status.
+    *
+    * @param volume Volume
+    * @return volume list
+    * @throws Exception if error occurs
+    */
+   Volume findByInstanceAndVolumeType(Long volume) throws Exception;
+
    /**
     * Find all vmInstance from department.
     *

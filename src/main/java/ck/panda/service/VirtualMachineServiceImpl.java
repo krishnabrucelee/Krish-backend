@@ -3,15 +3,12 @@ package ck.panda.service;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.Department;
-import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
@@ -19,7 +16,6 @@ import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.domain.entity.User.Type;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.NetworkRepository;
-import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.domain.repository.jpa.ZoneRepository;
 import ck.panda.domain.repository.jpa.VolumeRepository;
@@ -38,12 +34,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
@@ -71,6 +63,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     /** Network repository reference. */
     @Autowired
     private NetworkRepository networkRepo;
+
+    /** Network repository reference. */
+    @Autowired
+    private VolumeService volumeService;
 
     /** Zone repository reference. */
     @Autowired
@@ -763,40 +759,54 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     @Override
     public List<VmInstance> findAllFromCSServer() throws Exception {
-        List<VmInstance> vmList = new ArrayList<VmInstance>();
-        HashMap<String, String> vmMap = new HashMap<String, String>();
-        vmMap.put("listall", "true");
-        // 1. Get the list of vms from CS server using CS connector
-        String response = cloudStackInstanceService.listVirtualMachines("json", vmMap);
-        JSONArray vmListJSON = null;
-        JSONObject responseObject = new JSONObject(response).getJSONObject("listvirtualmachinesresponse");
-        if (responseObject.has("virtualmachine")) {
-            vmListJSON = responseObject.getJSONArray("virtualmachine");
-            // 2. Iterate the json list, convert the single json entity to vm.
-            for (int i = 0, size = vmListJSON.length(); i < size; i++) {
-                // 2.1 Call convert by passing JSONObject to vm entity and Add
-                // the converted vm entity to list
-              VmInstance vmInstance = VmInstance.convert(vmListJSON.getJSONObject(i));
-              vmInstance.setDomainId(convertEntityService.getDomainId(vmInstance.getTransDomainId()));
-              vmInstance.setZoneId(convertEntityService.getZoneId(vmInstance.getTransZoneId()));
-              vmInstance.setNetworkId(convertEntityService.getNetworkId(vmInstance.getTransNetworkId()));
-              vmInstance.setProjectId(convertEntityService.getProjectId(vmInstance.getTransProjectId()));
-              vmInstance.setHostId(convertEntityService.getHostId(vmInstance.getTransHostId()));
-              vmInstance.setInstanceOwnerId(convertEntityService.getUserByName(vmInstance.getTransDisplayName(),
-                    convertEntityService.getDomain(vmInstance.getTransDomainId())));
-              vmInstance.setDepartmentId(
-                    convertEntityService.getDepartmentByUsernameAndDomain(vmInstance.getTransDepartmentId(),
-                            convertEntityService.getDomain(vmInstance.getTransDomainId())));
-              vmInstance.setTemplateId(convertEntityService.getTemplateId(vmInstance.getTransTemplateId()));
-              vmInstance.setComputeOfferingId(convertEntityService.getComputeOfferId(vmInstance.getTransComputeOfferingId()));
-              if (vmInstance.getHostId() != null) {
-                  vmInstance.setPodId(convertEntityService
-                          .getPodIdByHost(convertEntityService.getHostId(vmInstance.getTransHostId())));
-              }
+		List<Project> project = projectService.findAllByActive(true);
+		List<VmInstance> vmList = new ArrayList<VmInstance>();
+		for (int j = 0; j <= project.size(); j++) {
+			HashMap<String, String> vmMap = new HashMap<String, String>();
+			vmMap.put("listall", "true");
+			if (j == project.size()) {
+				vmMap.put("listall", "true");
+			} else {
+				vmMap.put("projectid", project.get(j).getUuid());
+			}
+			// 1. Get the list of vms from CS server using CS connector
+			String response = cloudStackInstanceService.listVirtualMachines("json", vmMap);
+			JSONArray vmListJSON = null;
+			JSONObject responseObject = new JSONObject(response).getJSONObject("listvirtualmachinesresponse");
+			if (responseObject.has("virtualmachine")) {
+				vmListJSON = responseObject.getJSONArray("virtualmachine");
+				// 2. Iterate the json list, convert the single json entity to
+				// vm.
+				for (int i = 0, size = vmListJSON.length(); i < size; i++) {
+					// 2.1 Call convert by passing JSONObject to vm entity and
+					// Add
+					// the converted vm entity to list
+					VmInstance vmInstance = VmInstance.convert(vmListJSON.getJSONObject(i));
+					if (volumeService.findByInstanceAndVolumeType(vmInstance.getId()) != null) {
+						vmInstance.setVolumeId(volumeService.findByInstanceAndVolumeType(vmInstance.getId()).getId());
+					}
+					vmInstance.setDomainId(convertEntityService.getDomainId(vmInstance.getTransDomainId()));
+					vmInstance.setZoneId(convertEntityService.getZoneId(vmInstance.getTransZoneId()));
+					vmInstance.setNetworkId(convertEntityService.getNetworkId(vmInstance.getTransNetworkId()));
+					vmInstance.setProjectId(convertEntityService.getProjectId(vmInstance.getTransProjectId()));
+					vmInstance.setHostId(convertEntityService.getHostId(vmInstance.getTransHostId()));
+					vmInstance.setInstanceOwnerId(convertEntityService.getUserByName(vmInstance.getTransDisplayName(),
+							convertEntityService.getDomain(vmInstance.getTransDomainId())));
+					vmInstance.setDepartmentId(
+							convertEntityService.getDepartmentByUsernameAndDomain(vmInstance.getTransDepartmentId(),
+									convertEntityService.getDomain(vmInstance.getTransDomainId())));
+					vmInstance.setTemplateId(convertEntityService.getTemplateId(vmInstance.getTransTemplateId()));
+					vmInstance.setComputeOfferingId(
+							convertEntityService.getComputeOfferId(vmInstance.getTransComputeOfferingId()));
+					if (vmInstance.getHostId() != null) {
+						vmInstance.setPodId(convertEntityService
+								.getPodIdByHost(convertEntityService.getHostId(vmInstance.getTransHostId())));
+					}
 
-                vmList.add(vmInstance);
-            }
-        }
+					vmList.add(vmInstance);
+				}
+			}
+		}
         return vmList;
     }
 
@@ -851,7 +861,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 			return virtualmachinerepository.save(vminstance);
 		}
 	}
-	
+
 	 @Override
 	    public List<VmInstance> findByDepartment(Long id) throws Exception {
 	        return virtualmachinerepository.findByDepartment(id);
