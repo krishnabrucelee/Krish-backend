@@ -132,6 +132,7 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#network.getSyncFlag(), 'EDIT_NETWORK')")
     public Network update(Network network) throws Exception {
          if (network.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity("networks", network);
