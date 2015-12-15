@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
@@ -60,6 +61,7 @@ public class SSHKeyServiceImpl implements SSHKeyService {
     private DomainRepository domainRepository;
 
     @Override
+    @PreAuthorize("hasPermission(#sshkey.getIsSyncFlag(), 'CREATE_SSH_KEY')")
     public SSHKey save(SSHKey sshkey) throws Exception {
         if (sshkey.getIsSyncFlag()) {
             this.validateSSHKey(sshkey);
@@ -159,6 +161,7 @@ public class SSHKeyServiceImpl implements SSHKeyService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#sshkey.getIsSyncFlag(), 'DELETE_SSH_KEY')")
     public SSHKey softDelete(SSHKey sshkey) throws Exception {
         sshkey.setIsActive(false);
         sshkey.setStatus(SSHKey.Status.DISABLED);
@@ -221,6 +224,7 @@ public class SSHKeyServiceImpl implements SSHKeyService {
        return errors;
     }
 
+    @Override
     public List<SSHKey> findAllBySync() throws Exception {
         return (List<SSHKey>) sshkeyRepo.findAll();
     }

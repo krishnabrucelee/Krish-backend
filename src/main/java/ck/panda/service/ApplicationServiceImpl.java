@@ -3,6 +3,7 @@ package ck.panda.service;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Application;
 import ck.panda.domain.entity.Application.Status;
@@ -37,6 +38,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private DomainRepository domainRepository;
 
     @Override
+    @PreAuthorize("hasPermission(null, 'CREATE_APPLICATION_TYPE')")
     public Application save(Application application) throws Exception {
         this.validateApplication(application);
         application.setDomainId(application.getDomain().getId());
@@ -64,6 +66,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(null, 'EDIT_APPLICATION_TYPE')")
     public Application update(Application application) throws Exception {
         this.validateApplication(application);
         return applicationRepo.save(application);
@@ -124,6 +127,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(null, 'DELETE_APPLICATION_TYPE')")
     public Application softDelete(Application application) throws Exception {
         application.setIsActive(false);
         application.setStatus(Status.DISABLED);
