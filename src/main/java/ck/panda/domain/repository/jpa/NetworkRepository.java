@@ -9,6 +9,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Network;
+import ck.panda.domain.entity.Project;
 
 /**
  * JPA repository for Network entity.
@@ -29,7 +30,15 @@ public interface NetworkRepository extends PagingAndSortingRepository<Network, L
      * @return network list.
      */
     @Query(value = "select net from Network net where net.department=:department AND net.isActive =:isActive ")
-       List<Network> findByDepartmentAndNetworkIsActive(@Param("department") Department department, @Param("isActive") Boolean isActive);
+    List<Network> findByDepartmentAndNetworkIsActive(@Param("department") Department department, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find Network list by department.
+     * @param department department name.
+     * @return network list.
+     */
+    @Query(value = "select net from Network net where net.projectId=:projectId AND net.isActive =:isActive ")
+    List<Network> findByProjectAndNetworkIsActive(@Param("projectId") Long projectId, @Param("isActive") Boolean isActive);
 
     /**
      * Find all the active or inactive snapshots with pagination.

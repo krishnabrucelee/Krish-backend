@@ -75,6 +75,7 @@ public class DepartmentController extends CRUDController<Department> implements 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDelete(@RequestBody Department department, @PathVariable(PATH_ID) Long id) throws Exception {
         /** Doing Soft delete from the department table. */
+        department.setSyncFlag(true);
         departmentService.softDelete(department);
     }
 

@@ -97,4 +97,17 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
           return networkService.findByDepartmentAndNetworkIsActive(deptartment, true);
       }
 
+     /**
+      * list all project related network for instance.
+      * @return networks
+      * @param projectId project id
+      * @throws Exception Exception
+      */
+       @RequestMapping(value = "listall", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+       @ResponseStatus(HttpStatus.OK)
+       @ResponseBody
+       protected List<Network> findByProject(@RequestParam("projectId") Long projectId) throws Exception {
+           return networkService.findByProjectAndNetworkIsActive(projectId, true);
+       }
+
 }
