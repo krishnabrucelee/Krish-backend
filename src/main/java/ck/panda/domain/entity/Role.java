@@ -2,7 +2,6 @@ package ck.panda.domain.entity;
 
 import java.io.Serializable;
 import java.util.List;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -54,6 +53,7 @@ public class Role implements Serializable {
     @ManyToOne
     @JoinColumn(name = "department_id", referencedColumnName = "id")
     private Department department;
+   
 
     /** Description of the Role. */
     @Column(name = "description")
@@ -371,4 +371,7 @@ public class Role implements Serializable {
     public void setSyncFlag(Boolean syncFlag) {
         this.syncFlag = syncFlag;
     }
+
+	
+    
 }

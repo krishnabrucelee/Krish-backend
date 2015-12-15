@@ -9,6 +9,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Role;
+import ck.panda.domain.entity.VmInstance;
 
 /**
  * Jpa Repository for Role entity.
@@ -59,4 +60,13 @@ public interface RoleReposiory extends PagingAndSortingRepository<Role, Long> {
      */
     @Query(value = "SELECT role FROM Role AS role WHERE role.isActive IS TRUE AND role.name != 'FULL_PERMISSION'")
     Page<Role> findAllRolesWithoutFullPermissionAndActive(Pageable pageable);
+    
+  /**
+     * Find all roles from department.
+     *
+     * @param departmentId department id.
+     * @return vmInstance list.
+     */
+    @Query(value = "select role from Role role where role.department=:department ")
+    List<Role> findByDepartment(@Param("department") Department department);
 }

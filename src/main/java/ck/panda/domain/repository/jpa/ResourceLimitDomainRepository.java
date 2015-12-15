@@ -51,8 +51,9 @@ public interface ResourceLimitDomainRepository extends PagingAndSortingRepositor
     /**
      * Delete all the resource limits based on the domain.
      *
-     * @param domainId
-     * @return
+     * @param domainId domain id.
+     * @param isActive true/false
+     * @return domain resource type
      */
     @Query(value = "delete from ResourceLimitDomain resource where resource.isActive =:isActive AND resource.domainId =:domainId")
     ResourceLimitDomain deleteByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive);

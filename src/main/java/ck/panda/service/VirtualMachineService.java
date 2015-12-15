@@ -86,5 +86,15 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * @return
      */
     VmInstance updateDisplayName(VmInstance vminstance) throws Exception;
+    
+    /**
+     * Find vm Instance associated with department.
+     * 
+     * @param id of the department.		
+     * @param isActive department.	
+     * @return 
+     * @throws Exception unhandled errors.
+     */
+	List<VmInstance> findByDepartment(Long id) throws Exception;
 
 }

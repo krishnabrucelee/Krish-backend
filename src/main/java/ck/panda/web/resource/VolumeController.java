@@ -111,6 +111,7 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected Volume attachVolume(@RequestBody Volume volume, @PathVariable(PATH_ID) Long id) throws Exception {
+        volume.setIsSyncFlag(true);
         return volumeService.attachVolume(volume);
     }
 
@@ -126,6 +127,7 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected Volume detachVolume(@RequestBody Volume volume, @PathVariable(PATH_ID) Long id) throws Exception {
+        volume.setIsSyncFlag(true);
         return volumeService.detachVolume(volume);
     }
 
@@ -141,6 +143,7 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected Volume resizeVolume(@RequestBody Volume volume, @PathVariable(PATH_ID) Long id) throws Exception {
+        volume.setIsSyncFlag(true);
         return volumeService.resizeVolume(volume);
     }
 
@@ -155,6 +158,7 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected Volume uploadVolume(@RequestBody Volume volume) throws Exception {
+        volume.setIsSyncFlag(true);
         return volumeService.uploadVolume(volume);
     }
 

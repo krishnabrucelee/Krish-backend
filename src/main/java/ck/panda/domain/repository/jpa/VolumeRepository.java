@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+
+import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.VolumeType;
 
@@ -122,5 +124,13 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
     @Query(value = "select volume from Volume volume where volume.isActive =:isActive AND volume.volumeType=:volumeType AND volume.vmInstanceId=:vmInstanceId")
     List<Volume> findByInstanceAndVolumeTypeAndIsActive(@Param("vmInstanceId") Long vmInstanceId, @Param("volumeType") VolumeType volumeType, @Param("isActive") Boolean isActive);
 
+    /**
+     * Find all department from volume..
+     *
+     * @param departmentId department id.
+     * @return department list.
+     */
+    @Query(value = "select volume from Volume volume where volume.departmentId=:id ")
+    List<Volume> findByDepartment(@Param("id") Long departmentId);
 
 }

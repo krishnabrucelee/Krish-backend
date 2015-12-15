@@ -37,6 +37,7 @@ public interface ResourceLimitDepartmentRepository extends PagingAndSortingRepos
      * Find by resource count by domain and resourceType.
      *
      * @param domainId domain id.
+     * @param departmentId department id.
      * @param isActive true/false.
      * @param resourceType resource type.
      * @return resource count.

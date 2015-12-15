@@ -15,15 +15,6 @@ import ck.panda.util.domain.CRUDService;
 @Service
 public interface ResourceLimitProjectService extends CRUDService<ResourceLimitProject> {
 
-      /**
-      * To get list of Volume from cloudstack server.
-      *
-      * @param projectId project id.
-      * @return ResourceLimit list from server
-      * @throws Exception unhandled errors.
-      */
-     List<ResourceLimitProject> findAllFromCSServerProject(String projectId) throws Exception;
-
      /**
       * Create the quota limit for Project.
       *

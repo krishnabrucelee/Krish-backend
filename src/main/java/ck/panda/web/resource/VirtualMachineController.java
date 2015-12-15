@@ -4,6 +4,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -24,6 +26,7 @@ import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.service.VirtualMachineService;
+import ck.panda.service.VirtualMachineServiceImpl;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -41,6 +44,9 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
 
     @Value(value = "${console.proxy}")
     private String consoleProxy;
+
+    /** Logger attribute. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(VirtualMachineController.class);
 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Virtual Machine.", response = VmInstance.class)
     @Override
@@ -174,12 +180,13 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     @ResponseBody
     public String getVNC(@RequestBody VmInstance vminstance) throws Exception {
         String token = null;
-        String host = consoleProxy; // test the host's IP address
-        String instance = vminstance.getInstanceInternalName(); // test virtual machine instance name
+        String host = vminstance.getHost().getHostIpaddress(); // VM's the host's IP address
+        String instance = vminstance.getInstanceInternalName(); // virtual machine instance name
         String display = vminstance.getDisplayName(); // Novnc display
         String str = host + "|" + instance + "|" + display;
         token = Base64.encodeBase64String(str.getBytes());
-        return "{\"success\":" + "\""+consoleProxy+"/console/?token=" + token + "\"}";
+        LOGGER.debug("VNC Token"+ token);
+        return "{\"success\":" + "\""+consoleProxy+"/console/?host=" + host + "&instance="+instance+"\"}";
     }
 
     /**

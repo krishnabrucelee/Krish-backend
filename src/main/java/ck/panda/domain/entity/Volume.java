@@ -81,6 +81,15 @@ public class Volume {
     @Column(name = "department_id")
     private Long departmentId;
 
+    /** Project of the Volume. */
+    @JoinColumn(name = "project_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Project project;
+
+    /** Project id of the Volume. */
+    @Column(name = "project_id")
+    private Long projectId;
+
     /**
      * The Zone ID, this disk offering belongs to. Ignore this information as it
      * is not currently applicable.
@@ -211,6 +220,10 @@ public class Volume {
     /** Transient network of the Department. */
     @Transient
     private String transDepartmentName;
+
+    /** Transient project of the volume. */
+    @Transient
+    private String transProjectId;
 
     /**
      * isSyncFlag field is not to be serialized,
@@ -408,6 +421,42 @@ public class Volume {
      */
     public void setDepartmentId(Long departmentId) {
         this.departmentId = departmentId;
+    }
+
+    /**
+     * Get the project of the Volume.
+
+     * @return the project of Volume.
+     */
+    public Project getProject() {
+        return project;
+    }
+
+    /**
+     * Set the project of the Volume.
+     *
+     * @param project the project to set
+     */
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    /**
+     * Get the projectId of the Volume.
+
+     * @return the projectId of Volume.
+     */
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    /**
+     * Set the projectId of the Volume.
+     *
+     * @param projectId the projectId to set
+     */
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
     }
 
     /**
@@ -916,6 +965,24 @@ public class Volume {
     }
 
     /**
+     * Get the transProjectId of the Volume.
+
+     * @return the transProjectId of Volume.
+     */
+    public String getTransProjectId() {
+        return transProjectId;
+    }
+
+    /**
+     * Set the transProjectId of the Volume.
+     *
+     * @param transProjectId the transProjectId to set
+     */
+    public void setTransProjectId(String transProjectId) {
+        this.transProjectId = transProjectId;
+    }
+
+    /**
      * Convert JSONObject to Volume entity.
      *
      * @param object json object
@@ -939,6 +1006,7 @@ public class Volume {
             volume.setTransvmInstanceId((JsonUtil.getStringValue(object, "virtualmachineid")));
             volume.setTransDomainId((JsonUtil.getStringValue(object, "domainid")));
             volume.setTransDepartmentName((JsonUtil.getStringValue(object, "account")));
+            volume.setTransProjectId(JsonUtil.getStringValue(object, "projectid"));
            /* if (object.has("virtualmachineid")) {
                 volume.setVmInstanceId(convertUtil.getVmInstanceId(JsonUtil.getStringValue(object, "virtualmachineid")));
             } else {

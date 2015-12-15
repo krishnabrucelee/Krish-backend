@@ -18,7 +18,11 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.Project;
+import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.Volume;
 import ck.panda.domain.repository.jpa.DepartmentReposiory;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.UserRepository;
@@ -72,7 +76,24 @@ public class DepartmentServiceImpl implements DepartmentService {
     /** Domain repository reference. */
     @Autowired
     private DomainRepository domainRepository;
+    
+    /** Project service reference. */
+    @Autowired
+    private ProjectService projectService;
+    
+    /** Virtual Machine service reference. */
+    @Autowired
+    private VirtualMachineService vmService;
+    
+    /** Role Service reference. */
+    @Autowired
+    private RoleService roleService;
 
+    
+    /** Volume Service reference. */
+    @Autowired
+    private VolumeService volumeService;
+    
     /** Autowired CloudStackUserService object. */
     @Autowired
     private CloudStackUserService csUserService;
@@ -215,11 +236,36 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     @PreAuthorize("hasPermission(#department.getSyncFlag(), 'DELETE_DEPARTMENT')")
     public Department softDelete(Department department) throws Exception {
-        department.setIsActive(false);
-        department.setStatus(Department.Status.DELETED);
-        // set server for finding value in configuration
+    	Errors errors = validator.rejectIfNullEntity("department", department);
+        errors = validator.validateEntity(department, errors);
         csAccountService.setServer(configServer.setServer(1L));
-        csAccountService.deleteAccount(department.getUuid());
+        List<Project> projectResponse =  projectService.findByDepartmentAndIsActive(department.getId(), true);
+        List<VmInstance> vmResponse  =  vmService.findByDepartment(department.getId());
+        List<Role> roleResponse = roleService.findByDepartment(department);
+        List<Volume> volumeResponse = volumeService.findByDepartment(department.getId());
+        if (projectResponse.size() != 0  || vmResponse.size() != 0 || roleResponse.size()!= 0 || volumeResponse.size() != 0 ) {
+         errors.addGlobalError( "You have the following resources in your account : project :" + projectResponse.size() +
+            		"vmInstance :" +vmResponse.size()+ 
+            		"volume :" +vmResponse.size()+ 
+            		"vmInstance :" +vmResponse.size() +
+            		"Kindly delete associated resources and try again");
+            		
+        }
+        if (errors.hasErrors()) {
+            throw new ApplicationException(errors);
+        }
+        else {
+        	
+        	 department.setIsActive(false);
+             department.setStatus(Department.Status.DELETED);
+             String departmentResponse = csAccountService.deleteAccount(department.getUuid(), "json");
+             JSONObject jobId = new JSONObject(departmentResponse).getJSONObject("deleteaccountresponse");
+             if (jobId.has("jobid")) {
+            	 String jobResponse = csAccountService.accountJobResult(jobId.getString("jobid"), "json");
+            	 JSONObject jobresults = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+            }  
+        }
+       
         return departmentRepo.save(department);
     }
 

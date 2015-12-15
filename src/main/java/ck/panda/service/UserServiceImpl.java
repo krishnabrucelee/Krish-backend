@@ -120,7 +120,8 @@ public class UserServiceImpl implements UserService {
      * @throws Exception
      */
     private Errors validateName(Errors errors, String name, Domain domain) throws Exception {
-        if (userRepository.findByUserNameAndDomain(name, domain) != null) {
+    	User user = userRepository.findByUserNameAndDomain(name, domain);
+        if (user != null && user.getStatus() != User.Status.DELETED) {
             errors.addFieldError("username", "user.already.exist.for.same.domain");
         }
         return errors;
@@ -132,6 +133,7 @@ public class UserServiceImpl implements UserService {
         if (user.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity("user", user);
             errors = validator.validateEntity(user, errors);
+            errors = this.validateName(errors, user.getUserName(), user.getDomain());
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
@@ -261,6 +263,10 @@ public class UserServiceImpl implements UserService {
     public User softDelete(User user) throws Exception {
         user.setIsActive(false);
         user.setStatus(User.Status.DELETED);
+        
+        // set server for finding value in configuration
+        csUserService.setServer(configServer.setServer(1L));
+        csUserService.deleteUser((user.getUuid()), "json");
         return userRepository.save(user);
     }
 

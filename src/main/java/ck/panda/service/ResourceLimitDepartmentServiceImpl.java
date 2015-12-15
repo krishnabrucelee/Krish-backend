@@ -1,15 +1,14 @@
 package ck.panda.service;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ck.panda.domain.entity.ResourceLimitDepartment;
@@ -49,14 +48,6 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
     @Autowired
     private CloudStackResourceLimitService csResourceLimitService;
 
-    /** List the domains in cloudstack server. */
-    @Autowired
-    private DomainService domainService;
-
-    /** Reference of the convert entity service. */
-    @Autowired
-    private ConvertEntityService convertEntityService;
-
     /** Message source attribute. */
     @Autowired
     private MessageSource messageSource;
@@ -71,37 +62,27 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
 
     @Override
     public ResourceLimitDepartment save(ResourceLimitDepartment resource) throws Exception {
-         if (resource.getIsSyncFlag()) {
+        Errors errors = validator.rejectIfNullEntity("resourcelimits", resource);
+        errors = validator.validateEntity(resource, errors);
 
-             Errors errors = validator.rejectIfNullEntity("resourcelimits", resource);
-             errors = validator.validateEntity(resource, errors);
+        if (errors.hasErrors()) {
+            throw new ApplicationException(errors);
+        } else {
+            return resourceLimitDepartmentRepo.save(resource);
+        }
 
-             if (errors.hasErrors()) {
-                 throw new ApplicationException(errors);
-             } else {
-                 //createVolume(resource, errors);
-                 return resourceLimitDepartmentRepo.save(resource);
-             }
-         } else {
-             return resourceLimitDepartmentRepo.save(resource);
-         }
     }
 
     @Override
     public ResourceLimitDepartment update(ResourceLimitDepartment resource) throws Exception {
-         if (resource.getIsSyncFlag()) {
-             Errors errors = validator.rejectIfNullEntity("resourcelimits", resource);
-             errors = validator.validateEntity(resource, errors);
+        Errors errors = validator.rejectIfNullEntity("resourcelimits", resource);
+        errors = validator.validateEntity(resource, errors);
 
-             if (errors.hasErrors()) {
-                 throw new ApplicationException(errors);
-             } else {
-                 //updateResource(resource, errors);
-                 return resourceLimitDepartmentRepo.save(resource);
-             }
-         } else {
-             return resourceLimitDepartmentRepo.save(resource);
-         }
+        if (errors.hasErrors()) {
+            throw new ApplicationException(errors);
+        } else {
+            return resourceLimitDepartmentRepo.save(resource);
+        }
     }
 
     @Override
@@ -165,37 +146,8 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
     }
 
     @Override
-    public List<ResourceLimitDepartment> findAllFromCSServerDepartment(Long domainId, String department)
-            throws Exception {
-        List<ResourceLimitDepartment> resourceList = new ArrayList<ResourceLimitDepartment>();
-        HashMap<String, String> resourceMap = new HashMap<String, String>();
-        resourceMap.put("domainid", domainService.find(domainId).getUuid());
-        resourceMap.put("account", department);
-
-        // 1. Get the list of ResourceLimit from CS server using CS connector
-        String response = csResourceLimitService.listResourceLimits("json", resourceMap);
-        JSONArray resourceListJSON = null;
-        JSONObject responseObject = new JSONObject(response).getJSONObject("listresourcelimitsresponse");
-        if (responseObject.has("resourcelimit")) {
-            resourceListJSON = responseObject.getJSONArray("resourcelimit");
-            // 2. Iterate the json list, convert the single json entity to
-            // Resource limit
-            for (int i = 0, size = resourceListJSON.length(); i < size; i++) {
-                // 2.1 Call convert by passing JSONObject to StorageOffering
-                // entity
-                // and Add
-                // the converted Resource limit entity to list
-                ResourceLimitDepartment resource = ResourceLimitDepartment.convert(resourceListJSON.getJSONObject(i));
-                resource.setDomainId(convertEntityService.getDomainId(resource.getTransDomainId()));
-                resource.setDepartmentId(convertEntityService.getDepartmentByUsername(resource.getTransDepartment()));
-                resourceList.add(resource);
-            }
-        }
-        return resourceList;
-    }
-
-    @Override
     @Transactional
+    @PreAuthorize("hasPermission(null, 'DEPARTMENT_QUOTA_EDIT')")
     public List<ResourceLimitDepartment> createResourceLimits(List<ResourceLimitDepartment> resourceLimits)
             throws Exception {
         Errors errors = this.validateResourceLimit(resourceLimits);
@@ -212,9 +164,14 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
         return (List<ResourceLimitDepartment>) resourceLimitDepartmentRepo.findAll();
     }
 
+    /**
+     * Delete Resource limit.
+     *
+     * @param departmentId department id.
+     */
     private void deleteResourceLimitByDepartment(Long departmentId) {
         List<ResourceLimitDepartment> resourceLimits = resourceLimitDepartmentRepo.findAllByDepartmentIdAndIsActive(departmentId, true);
-        for(ResourceLimitDepartment resource: resourceLimits) {
+        for (ResourceLimitDepartment resource: resourceLimits) {
             resourceLimitDepartmentRepo.delete(resource);
         }
     }
@@ -257,9 +214,14 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
                     resourceLimit.getDepartmentId(), true);
             Long totalCount = resourceLimit.getMax() + count;
             //if(step1 < step2) {
-            if (domainLimit.getMax() != -1 && domainLimit.getMax() < totalCount) {
-                errors.addFieldError(resourceLimit.getResourceType().toString(), resourceLimit.getResourceType().toString() + " Resource limit exceed");
+            if (domainLimit != null) {
+                if (domainLimit.getMax() != -1 && domainLimit.getMax() < totalCount) {
+                    errors.addFieldError(resourceLimit.getResourceType().toString(), totalCount + " "
+                           + resourceLimit.getResourceType().toString() + "resource.limit.exceed");
 
+                }
+            } else {
+                errors.addGlobalError("update.domain.quota.first");
             }
             // Comparing with project
             Long projectResourceCount = resourceLimitProjectService.findByResourceCountByProjectAndResourceType(resourceLimit.getDepartmentId(), ResourceLimitProject.ResourceType.valueOf(resourceLimit.getResourceType().name()), 0L, true);
