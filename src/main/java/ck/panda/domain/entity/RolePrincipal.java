@@ -27,6 +27,9 @@ public class RolePrincipal {
     /** User domain name attributes. */
     private String domainname;
 
+    /** User department id attributes. */
+    private Long departmentid;
+
     /**
      * Default constructor.
      */
@@ -41,11 +44,12 @@ public class RolePrincipal {
      * @param type to set
      * @param domainname to set
      */
-    public RolePrincipal(String username, Role role, Type type, String domainname) {
+    public RolePrincipal(String username, Role role, Type type, String domainname, Long departmentid) {
         this.username = username;
         this.role = role;
         this.type = type;
         this.domainname = domainname;
+        this.departmentid = departmentid;
     }
 
     @Override
@@ -57,6 +61,7 @@ public class RolePrincipal {
             jsonObject.put("userName", username);
             jsonObject.put("type", type);
             jsonObject.put("domainName", domainname);
+            jsonObject.put("departmentId", departmentid);
             JSONArray jsonArray = new JSONArray();
             Map<String, Object> hashList = new HashMap<String, Object>();
             for (int i = 0; i < role.getPermissionList().size(); i++) {
