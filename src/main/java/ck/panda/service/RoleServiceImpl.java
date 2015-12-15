@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Role;
+import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Role.Status;
 import ck.panda.domain.repository.jpa.RoleReposiory;
@@ -149,4 +150,8 @@ public class RoleServiceImpl implements RoleService {
         return roleRepo.findAllRolesWithoutFullPermissionAndActive(pagingAndSorting.toPageRequest());
     }
 
+    @Override
+    public List<Role> findByDepartment(Department department) throws Exception {
+        return roleRepo.findByDepartment(department);
+    }
 }
