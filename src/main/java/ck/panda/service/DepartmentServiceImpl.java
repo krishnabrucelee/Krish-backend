@@ -240,11 +240,12 @@ public class DepartmentServiceImpl implements DepartmentService {
         List<Role> roleResponse = roleService.findByDepartment(department);
         List<Volume> volumeResponse = volumeService.findByDepartment(department.getId());
         if (projectResponse.size() != 0  || vmResponse.size() != 0 || roleResponse.size()!= 0 || volumeResponse.size() != 0 ) {
-            errors.addGlobalError("You have project :" + projectResponse.size() +  
-            		"You have vmInstance :" +vmResponse.size()+ 
-            		"You have volume :" +vmResponse.size()+ 
-            		"You have vmInstance :" +vmResponse.size() +
-            		"Kindly delete associated resources and try again");
+           String message = "You have project :" + projectResponse.size() + "\n";  
+           message += "You have vmInstance :" +vmResponse.size() + "\n";   
+           message += "You have volume :" +vmResponse.size() + "\n";  
+           message += "You have vmInstance :" +vmResponse.size() + "\n";  
+           message += "Kindly delete associated resources and try again";
+           errors.addGlobalError(message);
         }
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
