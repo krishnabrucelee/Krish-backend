@@ -122,9 +122,9 @@ public class NetworkServiceImpl implements NetworkService {
                     	network.setDepartmentId(null);
                     } else {
                     	if (network.getDepartment() != null) {
-                            network.setDepartmentId(convertEntityService.getDepartmentByUsername(networkResponse.getString("account")));
+                            network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(network.getDepartment().getUserName(), domainRepository.findOne(network.getDomainId())));
                         } else {
-                            network.setDepartmentId(convertEntityService.getDepartmentByUsername(departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName()));
+                            network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName(), domainRepository.findOne(network.getDomainId())));
                         }
                     }
                     network.setGateway(networkResponse.getString("gateway"));
@@ -292,7 +292,7 @@ public class NetworkServiceImpl implements NetworkService {
                     network.setDomainId(convertEntityService.getDomainId(network.getTransDomainId()));
                     network.setZoneId(convertEntityService.getZoneId(network.getTransZoneId()));
                     network.setNetworkOfferingId(convertEntityService.getNetworkOfferingId(network.getTransNetworkOfferingId()));
-                    network.setDepartmentId(convertEntityService.getDepartmentByUsername(network.getTransDepartmentId()));
+                    network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(network.getTransDepartmentId(), domainRepository.findOne(network.getDomainId())));
                     network.setProjectId(convertEntityService.getProjectId(network.getTransProjectId()));
                     networkList.add(network);
                 }
