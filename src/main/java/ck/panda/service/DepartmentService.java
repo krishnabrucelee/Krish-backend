@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -78,6 +79,15 @@ public interface DepartmentService  extends CRUDService<Department>  {
      * @return department.
      */
     Department findByUsername(String name, Boolean isActive);
+
+    /**
+     * Find the departments user name and domain and isActive status.
+     *
+     * @param name department name.
+     * @param isActive department status Active/Inactive
+     * @return department.
+     */
+    Department findByUsernameAndDomain(String name, Domain domain, Boolean isActive);
 
     /**
      * Find the departments based on the isActive status.

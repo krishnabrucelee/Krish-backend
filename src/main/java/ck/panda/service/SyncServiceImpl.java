@@ -43,6 +43,7 @@ import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.Type;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
+import ck.panda.domain.repository.jpa.VolumeRepository;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
@@ -82,6 +83,10 @@ public class SyncServiceImpl implements SyncService {
     /** Virtual machine Service for listing vms. */
     @Autowired
     private VirtualMachineService virtualMachineService;
+
+    /** VolumeRepository repository reference. */
+    @Autowired
+    private VolumeRepository volumeRepo;
 
     /** Virtual Machine repository reference. */
     @Autowired
@@ -1188,8 +1193,8 @@ public class SyncServiceImpl implements SyncService {
                 instance.setIpAddress(csVm.getIpAddress());
                 instance.setNetworkId(csVm.getNetworkId());
                 instance.setInstanceInternalName(csVm.getInstanceInternalName());
-                if(csVm.getVolumeId() != null){
-                instance.setVolumeId(csVm.getVolumeId());
+                if(csVm.getVolumeSize() != null){
+                instance.setVolumeSize(csVm.getVolumeSize());
                 }
                 instance.setDisplayName(csVm.getDisplayName());
                 if(csVm.getDepartmentId() != null){
@@ -1201,7 +1206,6 @@ public class SyncServiceImpl implements SyncService {
                 if(csVm.getInstanceOwnerId() != null){
                 instance.setInstanceOwnerId(csVm.getInstanceOwnerId());
                 }
-
                 LOGGER.debug("sync VM for ASYNC");
                 // VNC password set.
                 if (csVm.getPassword() != null) {
@@ -1328,7 +1332,9 @@ public class SyncServiceImpl implements SyncService {
                 // osType which is not added in the app
                 csVolumeMap.remove(volume.getUuid());
             } else {
-                volumeService.softDelete(volume);
+                volume.setIsActive(false);
+                volume.setStatus(Volume.Status.DESTROY);
+                volumeRepo.save(volume);
             }
         }
         // 4. Get the remaining list of cs server hash osType object, then

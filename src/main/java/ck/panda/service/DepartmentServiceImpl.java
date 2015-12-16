@@ -76,24 +76,24 @@ public class DepartmentServiceImpl implements DepartmentService {
     /** Domain repository reference. */
     @Autowired
     private DomainRepository domainRepository;
-    
+
     /** Project service reference. */
     @Autowired
     private ProjectService projectService;
-    
+
     /** Virtual Machine service reference. */
     @Autowired
     private VirtualMachineService vmService;
-    
+
     /** Role Service reference. */
     @Autowired
     private RoleService roleService;
 
-    
+
     /** Volume Service reference. */
     @Autowired
     private VolumeService volumeService;
-    
+
     /** Autowired CloudStackUserService object. */
     @Autowired
     private CloudStackUserService csUserService;
@@ -236,7 +236,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     @PreAuthorize("hasPermission(#department.getSyncFlag(), 'DELETE_DEPARTMENT')")
     public Department softDelete(Department department) throws Exception {
-    	Errors errors = validator.rejectIfNullEntity("department", department);
+        Errors errors = validator.rejectIfNullEntity("department", department);
         errors = validator.validateEntity(department, errors);
         csAccountService.setServer(configServer.setServer(1L));
         List<Project> projectResponse =  projectService.findByDepartmentAndIsActive(department.getId(), true);
@@ -245,27 +245,27 @@ public class DepartmentServiceImpl implements DepartmentService {
         List<Volume> volumeResponse = volumeService.findByDepartment(department.getId());
         if (projectResponse.size() != 0  || vmResponse.size() != 0 || roleResponse.size()!= 0 || volumeResponse.size() != 0 ) {
          errors.addGlobalError( "You have the following resources in your account : project :" + projectResponse.size() +
-            		"vmInstance :" +vmResponse.size()+ 
-            		"volume :" +vmResponse.size()+ 
-            		"vmInstance :" +vmResponse.size() +
-            		"Kindly delete associated resources and try again");
-            		
+                    "vmInstance :" +vmResponse.size()+
+                    "volume :" +vmResponse.size()+
+                    "vmInstance :" +vmResponse.size() +
+                    "Kindly delete associated resources and try again");
+
         }
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         }
         else {
-        	
-        	 department.setIsActive(false);
+
+             department.setIsActive(false);
              department.setStatus(Department.Status.DELETED);
              String departmentResponse = csAccountService.deleteAccount(department.getUuid(), "json");
              JSONObject jobId = new JSONObject(departmentResponse).getJSONObject("deleteaccountresponse");
              if (jobId.has("jobid")) {
-            	 String jobResponse = csAccountService.accountJobResult(jobId.getString("jobid"), "json");
-            	 JSONObject jobresults = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
-            }  
+                 String jobResponse = csAccountService.accountJobResult(jobId.getString("jobid"), "json");
+                 JSONObject jobresults = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+            }
         }
-       
+
         return departmentRepo.save(department);
     }
 
@@ -320,6 +320,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public Department findByUsername(String name, Boolean isActive) {
         return (Department) departmentRepo.findByUsername(name, isActive);
+    }
+
+    @Override
+    public Department findByUsernameAndDomain(String name, Domain domain, Boolean isActive) {
+        return (Department) departmentRepo.findByUsernameAndDomain(name, domain, isActive);
     }
 
     @Override

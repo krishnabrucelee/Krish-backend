@@ -46,6 +46,10 @@ public class VolumeServiceImpl implements VolumeService {
     @Autowired
     private VolumeRepository volumeRepo;
 
+    /**Domain Repository repository reference. */
+    @Autowired
+    private DomainRepository domainRepo;
+
     /** Lists types of Volumes in cloudstack server. */
     @Autowired
     private CloudStackVolumeService csVolumeService;
@@ -304,7 +308,9 @@ public class VolumeServiceImpl implements VolumeService {
                         volume.setProjectId(convertEntityService.getProjectId(volume.getTransProjectId()));
                         volume.setDepartmentId(projectService.find(volume.getProjectId()).getDepartmentId());
                     } else {
-                    volume.setDepartmentId(convertEntityService.getDepartmentByUsername(volume.getTransDepartmentId()));
+//                        departmentRepository.findByUuidAndIsActive(volume.getTransDepartmentId(), true);
+                        Domain domain = domainRepo.findOne(volume.getDomainId());
+                    volume.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(volume.getTransDepartmentId(), domain));
                     }
                     volumeList.add(volume);
                 }
@@ -536,6 +542,7 @@ public class VolumeServiceImpl implements VolumeService {
         // set server for finding value in configuration
         config.setUserServer();
         csVolumeService.deleteVolume(volume.getUuid(), "json");
+        Thread.sleep(2000);
         return volumeRepo.save(volume);
     }
 
