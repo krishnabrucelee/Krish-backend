@@ -58,8 +58,8 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @param domain domain object.
      * @return list of user.
      */
-    @Query(value = "select user from User user where user.domain =:domain ")
-    Page<User> findAllUserByDomain(Pageable pageable, @Param("domain") Domain domain);
+    @Query(value = "select user from User user where user.domain =:domain AND user.isActive =:isActive")
+    Page<User> findAllUserByDomain(Pageable pageable, @Param("domain") Domain domain, @Param("isActive") Boolean isActive);
 
     /**
      * find all the user by domain.
