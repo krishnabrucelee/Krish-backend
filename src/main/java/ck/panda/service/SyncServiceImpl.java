@@ -1212,12 +1212,7 @@ public class SyncServiceImpl implements SyncService {
                     instance.setVncPassword(encryptedPassword);
                 }
                 // 3.2 If found, update the vm object in app db
-                //virtualMachineService.update(instance);
-
-                HashMap<String, String> optional = new HashMap<String, String>();
-                optional.put("displayName", instance.getTransDisplayName());
-                cloudStackInstanceService.updateVirtualMachine(instance.getUuid(), optional);
-                virtualmachinerepository.save(instance);
+                virtualMachineService.update(instance);
 
                 // 3.3 Remove once updated, so that we can have the list of cs
                 // vm which is not added in the
