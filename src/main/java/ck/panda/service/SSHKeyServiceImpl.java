@@ -89,7 +89,7 @@ public class SSHKeyServiceImpl implements SSHKeyService {
         sshkey.setFingerPrint((String) sshkeypair.get("fingerprint"));
         sshkey.setPrivatekey((String) sshkeypair.get("privatekey"));
         sshkey.setIsActive(true);
-        sshkey.setDepartmentId(convertEntity.getDepartmentByUsername(sshkeypair.getString("account")));
+        sshkey.setDepartmentId(convertEntity.getDepartmentByUsernameAndDomains(sshkeypair.getString("account"), domain));
         }
         return sshkeyRepo.save(sshkey);
     }
