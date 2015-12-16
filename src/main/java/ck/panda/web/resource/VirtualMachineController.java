@@ -110,6 +110,7 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
         if(!status.equals("Expunging")) {
             pageResponse = virtualmachineservice.findAllByStatus(page, status);
         }
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
 
     }

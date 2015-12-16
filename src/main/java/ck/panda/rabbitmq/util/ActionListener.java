@@ -149,6 +149,10 @@ public class ActionListener implements MessageListener {
         case EventTypes.EVENT_VNC:
             LOGGER.debug("VNC sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
             break;
+        case EventTypes.EVENT_PROJECT:
+            LOGGER.debug("VNC sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            syncService.syncProject();
+            break;
         case EventTypes.EVENT_VPC:
             LOGGER.debug("VPC sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
             break;
