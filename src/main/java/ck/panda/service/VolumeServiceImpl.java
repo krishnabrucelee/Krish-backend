@@ -118,7 +118,7 @@ public class VolumeServiceImpl implements VolumeService {
                 throw new ApplicationException(errors);
             } else {
                 attach(volume, errors);
-                return volumeRepo.save(volume);
+                return volume;
             }
         } else {
             return volumeRepo.save(volume);
@@ -135,7 +135,7 @@ public class VolumeServiceImpl implements VolumeService {
                 throw new ApplicationException(errors);
             } else {
                 detach(volume, errors);
-                return volumeRepo.save(volume);
+                return volume;
             }
         } else {
             return volumeRepo.save(volume);
@@ -151,7 +151,7 @@ public class VolumeServiceImpl implements VolumeService {
                 throw new ApplicationException(errors);
             } else {
                 resize(volume, errors);
-                return volumeRepo.save(volume);
+                return volume;
             }
         } else {
             return volumeRepo.save(volume);
@@ -628,8 +628,8 @@ public class VolumeServiceImpl implements VolumeService {
         return volumeRepo.findByDepartment(departmentId);
     }
 
-	@Override
-	public Volume findByInstanceAndVolumeType(Long volume) throws Exception {
-		return volumeRepo.findByInstanceAndVolumeType(volume, Volume.VolumeType.ROOT, true);
-	}
+    @Override
+    public Volume findByInstanceAndVolumeType(Long volume) throws Exception {
+        return volumeRepo.findByInstanceAndVolumeType(volume, Volume.VolumeType.ROOT, true);
+    }
 }
