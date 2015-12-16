@@ -52,11 +52,11 @@ public class DomainServiceImpl implements DomainService {
     /** object(server) created for CloudStackServer. */
     @Autowired
     private ConfigUtil configServer;
-    
+
     /** Autowired CloudStackUserService object. */
     @Autowired
     private CloudStackUserService csUserService;
-    
+
     /** Autowired permission service. */
     @Autowired
     private PermissionService permissionService;
@@ -80,15 +80,15 @@ public class DomainServiceImpl implements DomainService {
     /** Reference of the convert entity service. */
     @Autowired
     private ConvertEntityService convertEntityService;
-    
+
     /** Reference of the department entity service. */
     @Autowired
     private DepartmentService deptService;
-    
+
     /** Reference of the User entity service. */
     @Autowired
     private UserService userService;
-    
+
     /** Autowired roleService. */
     @Autowired
     private RoleService roleService;
@@ -142,7 +142,7 @@ public class DomainServiceImpl implements DomainService {
         Department department = new Department();
         department.setDomain(persistedDomain);
         department.setUserName(persistedDomain.getPortalUserName());
-        department.setDescription("HOD for this company "+ persistedDomain.getName());    
+        department.setDescription("HOD for this company "+ persistedDomain.getName());
         department.setType(Department.AccountType.DOMAIN_ADMIN);
         department.setIsActive(true);
         optional.put("domainid", String.valueOf(persistedDomain.getUuid()));
@@ -171,14 +171,14 @@ public class DomainServiceImpl implements DomainService {
         LOGGER.debug("Department created : "+ department.getUserName());
         return department;
     }
-    
+
     /**
      * Update user role.
      */
     void syncUpdateUserRole(User userObj) {
     	List<Type> types = new ArrayList<Type>();
         types.add(Type.DOMAIN_ADMIN);
-        try { 
+        try {
 			Role newRole = new Role();
 			newRole.setName("FULL_PERMISSION");
 			newRole.setDepartment(userObj.getDepartment());
@@ -186,7 +186,7 @@ public class DomainServiceImpl implements DomainService {
 			newRole.setStatus(Role.Status.ENABLED);
 			newRole.setPermissionList(permissionService.findAll());
 			Role updatedRole = roleService.save(newRole);
-			userObj.setRole(updatedRole);
+			userObj.setRoleId(updatedRole.getId());
 			userService.update(userObj);
 		} catch (Exception e) {
 			LOGGER.debug("syncUpdateUserRole" + e);
@@ -280,7 +280,7 @@ public class DomainServiceImpl implements DomainService {
         }
             return domainRepo.save(domain);
     }
-    
+
     @Override
     public List<Domain> findAllFromCSServer() throws Exception {
         List<Domain> domainList = new ArrayList<Domain>();
