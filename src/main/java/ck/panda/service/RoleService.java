@@ -56,10 +56,10 @@ public interface RoleService  extends CRUDService<Role> {
 
    /**
      * Find role by Department.
-     * 
+     *
      * @param id of the department.
      * @return id.
      * @throws Exception unhandled errors.
      */
-	List<Role> findByDepartment(Department department) throws Exception;
+    List<Role> findByDepartment(Department department) throws Exception;
 }

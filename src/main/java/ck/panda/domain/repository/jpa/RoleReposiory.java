@@ -29,6 +29,7 @@ public interface RoleReposiory extends PagingAndSortingRepository<Role, Long> {
      *
      * @param name - name of the role
      * @param department - department name
+     * @param isActive
      * @return role name
      */
     @Query(value = "SELECT role FROM Role AS role WHERE role.name=:name AND role.department=:department AND role.isActive IS TRUE")
@@ -51,7 +52,7 @@ public interface RoleReposiory extends PagingAndSortingRepository<Role, Long> {
      */
     @Query(value = "SELECT role FROM Role AS role WHERE role.department=:department AND role.isActive IS :isActive")
     Page<Role> findByDepartmentAndIsActive(@Param("department") Department department,@Param("isActive")  Boolean isActive, Pageable pageable);
-    
+
     /**
      * find all the roles without full permission.
      *
@@ -60,7 +61,7 @@ public interface RoleReposiory extends PagingAndSortingRepository<Role, Long> {
      */
     @Query(value = "SELECT role FROM Role AS role WHERE role.isActive IS TRUE AND role.name != 'FULL_PERMISSION'")
     Page<Role> findAllRolesWithoutFullPermissionAndActive(Pageable pageable);
-    
+
   /**
      * Find all roles from department.
      *
@@ -69,4 +70,16 @@ public interface RoleReposiory extends PagingAndSortingRepository<Role, Long> {
      */
     @Query(value = "select role from Role role where role.department=:department ")
     List<Role> findByDepartment(@Param("department") Department department);
+
+    /**
+     * Method to find name uniqueness from department in adding Roles.
+     *
+     * @param name - name of the role
+     * @param department - department name
+     * @param isActive
+     * @return role name
+     */
+    @Query(value = "SELECT role FROM Role AS role WHERE role.name=:name AND role.department=:department AND role.isActive IS TRUE")
+    Role findUpdateUniqueness(String name, Department department);
+
 }

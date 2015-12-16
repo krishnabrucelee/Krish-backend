@@ -48,12 +48,13 @@ public class RoleServiceImpl implements RoleService {
         LOGGER.debug("Sample Debug Message");
         Errors errors = validator.rejectIfNullEntity("role", role);
         errors = validator.validateEntity(role, errors);
-        errors = validator.validateName(errors, role.getName(), role.getDepartment());
+        validateName(errors, role.getName(), role.getDepartment());
 
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
             role.setStatus(Status.ENABLED);
+            role.setDepartmentId(role.getDepartment().getId());
             return roleRepo.save(role);
         }
     }
@@ -63,11 +64,13 @@ public class RoleServiceImpl implements RoleService {
     public Role update(Role role) throws Exception {
         Errors errors = validator.rejectIfNullEntity("role", role);
         errors = validator.validateEntity(role, errors);
-        errors = validator.validateName(errors, role.getName(), role.getDepartment());
-
+        if(role.getDepartmentId() != role.getDepartment().getId()){
+             validateName(errors, role.getName(), role.getDepartment());
+        }
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
+            role.setDepartmentId(role.getDepartment().getId());
             return roleRepo.save(role);
         }
     }
@@ -144,4 +147,23 @@ public class RoleServiceImpl implements RoleService {
     public List<Role> findByDepartment(Department department) throws Exception {
         return roleRepo.findByDepartment(department);
     }
+
+    /**
+     * Validates the name and department field for roles.
+     *
+     * @param errors an error object
+     * @param name which is to be validated.
+     * @param department which is to be validated.
+     * @return error is present,else new error object is returned.
+     * @throws Exception if error is present.
+     */
+    public Errors validateName(Errors errors, String name, Department department) throws Exception {
+
+        if (findByName(name, department) != null) {
+//            errors.addFieldError("name", "role.name.unique.error");
+            errors.addGlobalError("role.name.unique.error");
+        }
+        return errors;
+    }
+
 }
