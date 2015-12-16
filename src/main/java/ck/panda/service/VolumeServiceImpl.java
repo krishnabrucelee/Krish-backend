@@ -169,7 +169,7 @@ public class VolumeServiceImpl implements VolumeService {
                 throw new ApplicationException(errors);
             } else {
                 upload(volume, errors);
-                return volumeRepo.save(volume);
+                return volume;
             }
         } else {
             return volumeRepo.save(volume);
