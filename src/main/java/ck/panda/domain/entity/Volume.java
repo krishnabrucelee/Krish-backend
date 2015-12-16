@@ -219,7 +219,7 @@ public class Volume {
 
     /** Transient network of the Department. */
     @Transient
-    private String transDepartmentName;
+    private String transDepartmentId;
 
     /** Transient project of the volume. */
     @Transient
@@ -947,21 +947,21 @@ public class Volume {
     }
 
     /**
-     * Get the transDepartmentName of the Volume.
+     * Get the transDepartmentId of the Volume.
 
-     * @return the transDepartmentName of Volume.
+     * @return the transDepartmentId of Volume.
      */
-    public String getTransDepartmentName() {
-        return transDepartmentName;
+    public String getTransDepartmentId() {
+        return transDepartmentId;
     }
 
     /**
-     * Set the transDepartmentName of the Volume.
+     * Set the transDepartmentId of the Volume.
      *
-     * @param transDepartmentName the transDepartmentName to set
+     * @param transDepartmentId the transDepartmentName to set
      */
-    public void setTransDepartmentName(String transDepartmentName) {
-        this.transDepartmentName = transDepartmentName;
+    public void setTransDepartmentId(String transDepartmentId) {
+        this.transDepartmentId = transDepartmentId;
     }
 
     /**
@@ -1005,7 +1005,7 @@ public class Volume {
             volume.setTransZoneId((JsonUtil.getStringValue(object, "zoneid")));
             volume.setTransvmInstanceId((JsonUtil.getStringValue(object, "virtualmachineid")));
             volume.setTransDomainId((JsonUtil.getStringValue(object, "domainid")));
-            volume.setTransDepartmentName((JsonUtil.getStringValue(object, "account")));
+            volume.setTransDepartmentId((JsonUtil.getStringValue(object, "account")));
             volume.setTransProjectId(JsonUtil.getStringValue(object, "projectid"));
            /* if (object.has("virtualmachineid")) {
                 volume.setVmInstanceId(convertUtil.getVmInstanceId(JsonUtil.getStringValue(object, "virtualmachineid")));

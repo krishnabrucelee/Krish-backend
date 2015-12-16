@@ -23,6 +23,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Volume;
+import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.service.VolumeService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -217,4 +218,22 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     protected List<Volume> listbyvolumetype() throws Exception {
         return volumeService.findByVolumeTypeAndIsActive();
     }
+
+//    /**
+//     * Get the volume counts for attched, detached and total count.
+//     *
+//     * @param request
+//     * @param response
+//     * @return
+//     * @throws Exception
+//     */
+//    @RequestMapping(value = "volumeCounts", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+//    @ResponseStatus(HttpStatus.OK)
+//    @ResponseBody
+//    public String getVolumeCounts(HttpServletRequest request, HttpServletResponse response)
+//                    throws Exception {
+//        Integer attachedCount = volumeService.findCountByStatus();
+//        Integer detachedCount = volumeService.findCountByStatus();
+//        return "{\"runningVmCount\":" + runningVmCount + ",\"stoppedVmCount\":" + stoppedVmCount + ",\"totalCount\":"+ vmCount + "}";
+//    }
 }
