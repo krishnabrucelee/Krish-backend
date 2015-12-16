@@ -883,6 +883,7 @@ public class ComputeOffering implements Serializable {
         compute.setCustomizedIops(JsonUtil.getBooleanValue(object, "iscustomizediops"));
         compute.setNumberOfCores(JsonUtil.getIntegerValue(object, "cpunumber"));
         compute.setStorageType(StorageType.valueOf(JsonUtil.getStringValue(object, "storagetype")));
+        compute.setIsHighAvailabilityEnabled(JsonUtil.getBooleanValue(object,"offerha"));
         compute.setIsActive(true);
 
         } catch (Exception ex) {
