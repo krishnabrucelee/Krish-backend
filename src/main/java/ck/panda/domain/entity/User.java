@@ -58,8 +58,12 @@ public class User {
 
     /** User role. */
     @ManyToOne
-    @JoinColumn(name = "role_id", referencedColumnName = "id")
+    @JoinColumn(name = "role_id", referencedColumnName = "id", updatable = false, insertable = false)
     private Role role;
+
+    /** Role id of the user. */
+    @Column(name = "role_id")
+    private Long roleId;
 
     /** Email of the user. */
     @Column(name = "email")
@@ -142,7 +146,7 @@ public class User {
     @Transient
     private String secretKey;
 
-	/** Define user type. */
+    /** Define user type. */
     public enum Type {
        /** Define type constant. */
         USER,
@@ -504,7 +508,7 @@ public class User {
     public void setSyncFlag(Boolean syncFlag) {
     this.syncFlag = syncFlag;
     }
-  
+
     /**
      * Get the transient domain id.
      *
@@ -614,6 +618,20 @@ public class User {
 	}
 
     /**
+	 * @return the roleId
+	 */
+	public Long getRoleId() {
+		return roleId;
+	}
+
+	/**
+	 * @param roleId the roleId to set
+	 */
+	public void setRoleId(Long roleId) {
+		this.roleId = roleId;
+	}
+
+	/**
      * Convert JSONObject into user object.
      *
      * @param jsonObject JSON object.
