@@ -140,24 +140,6 @@ public class AppValidator {
     }
 
     /**
-     * Validates the name and department field for roles.
-     *
-     * @param errors an error object
-     * @param name which is to be validated.
-     * @param department which is to be validated.
-     * @return error is present,else new error object is returned.
-     * @throws Exception if error is present.
-     */
-    public Errors validateName(Errors errors, String name, Department department) throws Exception {
-
-        if (roleService.findByName(name, department) != null) {
-//            errors.addFieldError("name", "role.name.unique.error");
-            errors.addGlobalError("role.name.unique.error");
-        }
-        return errors;
-    }
-
-    /**
      * send global error from CS server.
      *
      * @param message error message.

@@ -49,11 +49,15 @@ public class Role implements Serializable {
     @Column(name = "name", nullable = false)
     private String name;
 
-    /** Roles Department. */
+    /** Department of the Role. */
+    @JoinColumn(name = "department_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
-    @JoinColumn(name = "department_id", referencedColumnName = "id")
     private Department department;
-   
+
+    /** Department id of the Role. */
+    @Column(name = "department_id")
+    private Long departmentId;
+
 
     /** Description of the Role. */
     @Column(name = "description")
@@ -192,6 +196,24 @@ public class Role implements Serializable {
      */
     public void setDepartment(Department department) {
        this.department = department;
+    }
+
+    /**
+     * Get the departmentId of the Role.
+
+     * @return the departmentId of Role.
+     */
+    public Long getDepartmentId() {
+        return departmentId;
+    }
+
+    /**
+     * Set the departmentId of the Role.
+     *
+     * @param departmentId the departmentId to set
+     */
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
     }
 
     /**
@@ -372,6 +394,6 @@ public class Role implements Serializable {
         this.syncFlag = syncFlag;
     }
 
-	
-    
+
+
 }
