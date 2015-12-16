@@ -147,7 +147,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 if (vminstance.getProjectId() != null) {
                     optional.put("projectid", vminstance.getProject().getUuid());
                 } else {
-                	optional.put("account",vminstance.getDepartment().getUserName());
+                    optional.put("account",vminstance.getDepartment().getUserName());
                     optional.put("domainid", domainRepository.findOne(vminstance.getDepartment().getDomainId()).getUuid());
                 }
                 if (vminstance.getStorageOfferingId() != null) {
@@ -593,99 +593,99 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     @Override
     public Page<VmInstance> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-    	User user = userService.find(Long.valueOf(tokenDetails.getTokenDetails("id")));
-		if (user != null && !user.getType().equals(Type.ROOT_ADMIN)) {
-			if (user.getType().equals(Type.DOMAIN_ADMIN)) {
-				Page<VmInstance> allInstanceList = virtualmachinerepository.findAllByDomainIsActive(user.getDomainId(),
-						Status.Expunging , pagingAndSorting.toPageRequest());
-				return allInstanceList;
-			} else {
-				if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
-					List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
-					for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
-						List<VmInstance> allInstanceTempList = virtualmachinerepository
-								.findAllByUserAndProjectIsActiveAndStatus(Status.Expunging, user, project);
-						allInstanceList.addAll(allInstanceTempList);
-					}
-					List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
-					Page<VmInstance> allInstanceLists = new PageImpl<VmInstance>(instances,
-							pagingAndSorting.toPageRequest(), pagingAndSorting.getPageSize());
-					return (Page<VmInstance>) allInstanceLists;
-				} else {
-					Page<VmInstance> allInstanceLists = virtualmachinerepository
-							.findAllByUserIsActiveAndStatus(Status.Expunging, pagingAndSorting.toPageRequest(), user);
-					return (Page<VmInstance>) allInstanceLists;
-				}
+        User user = userService.find(Long.valueOf(tokenDetails.getTokenDetails("id")));
+        if (user != null && !user.getType().equals(Type.ROOT_ADMIN)) {
+            if (user.getType().equals(Type.DOMAIN_ADMIN)) {
+                Page<VmInstance> allInstanceList = virtualmachinerepository.findAllByDomainIsActive(user.getDomainId(),
+                        Status.Expunging , pagingAndSorting.toPageRequest());
+                return allInstanceList;
+            } else {
+                if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
+                    List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
+                    for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
+                        List<VmInstance> allInstanceTempList = virtualmachinerepository
+                                .findAllByUserAndProjectIsActiveAndStatus(Status.Expunging, user, project);
+                        allInstanceList.addAll(allInstanceTempList);
+                    }
+                    List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
+                    Page<VmInstance> allInstanceLists = new PageImpl<VmInstance>(instances,
+                            pagingAndSorting.toPageRequest(), pagingAndSorting.getPageSize());
+                    return (Page<VmInstance>) allInstanceLists;
+                } else {
+                    Page<VmInstance> allInstanceLists = virtualmachinerepository
+                            .findAllByUserIsActiveAndStatus(Status.Expunging, pagingAndSorting.toPageRequest(), user);
+                    return (Page<VmInstance>) allInstanceLists;
+                }
 
-			}
-		}
+            }
+        }
         return virtualmachinerepository.findAllByIsActive(Status.Expunging, pagingAndSorting.toPageRequest());
     }
 
 
     @Override
     public Page<VmInstance> findAllByStatus(PagingAndSorting pagingAndSorting, String status) throws Exception {
-		User user = userService.find(Long.valueOf(tokenDetails.getTokenDetails("id")));
-		if (user != null && !user.getType().equals(Type.ROOT_ADMIN)) {
-			if (user.getType().equals(Type.DOMAIN_ADMIN)) {
-				Page<VmInstance> allInstanceList = virtualmachinerepository.findAllByDomainIsActiveAndStatus(user.getDomainId(),
-						Status.valueOf(status), pagingAndSorting.toPageRequest());
-				return allInstanceList;
-			} else {
-				if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
-					List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
-					for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
-						List<VmInstance> allInstanceTempList = virtualmachinerepository
-								.findAllByUserAndProjectIsActive(Status.valueOf(status), user, project);
-						allInstanceList.addAll(allInstanceTempList);
-					}
-					List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
-					Page<VmInstance> allInstanceLists = new PageImpl<VmInstance>(instances,
-							pagingAndSorting.toPageRequest(), pagingAndSorting.getPageSize());
-					return (Page<VmInstance>) allInstanceLists;
-				} else {
-					Page<VmInstance> allInstanceLists = virtualmachinerepository
-							.findAllByUserIsActive(Status.valueOf(status), pagingAndSorting.toPageRequest(), user);
-					return (Page<VmInstance>) allInstanceLists;
-				}
+        User user = userService.find(Long.valueOf(tokenDetails.getTokenDetails("id")));
+        if (user != null && !user.getType().equals(Type.ROOT_ADMIN)) {
+            if (user.getType().equals(Type.DOMAIN_ADMIN)) {
+                Page<VmInstance> allInstanceList = virtualmachinerepository.findAllByDomainIsActiveAndStatus(user.getDomainId(),
+                        Status.valueOf(status), pagingAndSorting.toPageRequest());
+                return allInstanceList;
+            } else {
+                if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
+                    List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
+                    for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
+                        List<VmInstance> allInstanceTempList = virtualmachinerepository
+                                .findAllByUserAndProjectIsActive(Status.valueOf(status), user, project);
+                        allInstanceList.addAll(allInstanceTempList);
+                    }
+                    List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
+                    Page<VmInstance> allInstanceLists = new PageImpl<VmInstance>(instances,
+                            pagingAndSorting.toPageRequest(), pagingAndSorting.getPageSize());
+                    return (Page<VmInstance>) allInstanceLists;
+                } else {
+                    Page<VmInstance> allInstanceLists = virtualmachinerepository
+                            .findAllByUserIsActive(Status.valueOf(status), pagingAndSorting.toPageRequest(), user);
+                    return (Page<VmInstance>) allInstanceLists;
+                }
 
-			}
-		}
+            }
+        }
         return virtualmachinerepository.findAllByStatus(Status.valueOf(status), pagingAndSorting.toPageRequest());
     }
 
     @Override
     public List<VmInstance> findAll() throws Exception {
-    	try {
-			User user = userService.find(Long.valueOf(tokenDetails.getTokenDetails("id")));
+        try {
+            User user = userService.find(Long.valueOf(tokenDetails.getTokenDetails("id")));
 
-			if (user != null && !user.getType().equals(Type.ROOT_ADMIN)) {
-				if (user.getType().equals(Type.DOMAIN_ADMIN)) {
-					List<VmInstance> allInstanceList = virtualmachinerepository
-							.findAllByDomain(user.getDomainId(),Status.Expunging );
-					return allInstanceList;
-				} else {
-					if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
-						List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
-						for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
-							List<VmInstance> allInstanceTempList = virtualmachinerepository
-									.findAllByUserAndProject(Status.Expunging, user, project);
-							allInstanceList.addAll(allInstanceTempList);
-						}
-						List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
-						return instances;
-					} else {
-						List<VmInstance> allInstanceLists = virtualmachinerepository.findAllByUser(Status.Expunging,
-								user);
-						return allInstanceLists;
-					}
-				}
-			}
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+            if (user != null && !user.getType().equals(Type.ROOT_ADMIN)) {
+                if (user.getType().equals(Type.DOMAIN_ADMIN)) {
+                    List<VmInstance> allInstanceList = virtualmachinerepository
+                            .findAllByDomain(user.getDomainId(),Status.Expunging );
+                    return allInstanceList;
+                } else {
+                    if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
+                        List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
+                        for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
+                            List<VmInstance> allInstanceTempList = virtualmachinerepository
+                                    .findAllByUserAndProject(Status.Expunging, user, project);
+                            allInstanceList.addAll(allInstanceTempList);
+                        }
+                        List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
+                        return instances;
+                    } else {
+                        List<VmInstance> allInstanceLists = virtualmachinerepository.findAllByUser(Status.Expunging,
+                                user);
+                        return allInstanceLists;
+                    }
+                }
+            }
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return (List<VmInstance>) virtualmachinerepository.findAllByIsActive(Status.Expunging);
     }
 
@@ -762,111 +762,115 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     @Override
     public List<VmInstance> findAllFromCSServer() throws Exception {
-		List<Project> project = projectService.findAllByActive(true);
-		List<VmInstance> vmList = new ArrayList<VmInstance>();
-		for (int j = 0; j <= project.size(); j++) {
-			HashMap<String, String> vmMap = new HashMap<String, String>();
-			vmMap.put("listall", "true");
-			if (j == project.size()) {
-				vmMap.put("listall", "true");
-			} else {
-				vmMap.put("projectid", project.get(j).getUuid());
-			}
-			// 1. Get the list of vms from CS server using CS connector
-			String response = cloudStackInstanceService.listVirtualMachines("json", vmMap);
-			JSONArray vmListJSON = null;
-			JSONObject responseObject = new JSONObject(response).getJSONObject("listvirtualmachinesresponse");
-			if (responseObject.has("virtualmachine")) {
-				vmListJSON = responseObject.getJSONArray("virtualmachine");
-				// 2. Iterate the json list, convert the single json entity to
-				// vm.
-				for (int i = 0, size = vmListJSON.length(); i < size; i++) {
-					// 2.1 Call convert by passing JSONObject to vm entity and
-					// Add
-					// the converted vm entity to list
-					VmInstance vmInstance = VmInstance.convert(vmListJSON.getJSONObject(i));
-					if (volumeService.findByInstanceAndVolumeType(vmInstance.getId()) != null) {
-						vmInstance.setVolumeId(volumeService.findByInstanceAndVolumeType(vmInstance.getId()).getDiskSize());
-					}
-					vmInstance.setDomainId(convertEntityService.getDomainId(vmInstance.getTransDomainId()));
-					vmInstance.setZoneId(convertEntityService.getZoneId(vmInstance.getTransZoneId()));
-					vmInstance.setNetworkId(convertEntityService.getNetworkId(vmInstance.getTransNetworkId()));
-					vmInstance.setProjectId(convertEntityService.getProjectId(vmInstance.getTransProjectId()));
-					vmInstance.setHostId(convertEntityService.getHostId(vmInstance.getTransHostId()));
-					vmInstance.setInstanceOwnerId(convertEntityService.getUserByName(vmInstance.getTransDisplayName(),
-							convertEntityService.getDomain(vmInstance.getTransDomainId())));
-					vmInstance.setDepartmentId(
-							convertEntityService.getDepartmentByUsernameAndDomain(vmInstance.getTransDepartmentId(),
-									convertEntityService.getDomain(vmInstance.getTransDomainId())));
-					vmInstance.setTemplateId(convertEntityService.getTemplateId(vmInstance.getTransTemplateId()));
-					vmInstance.setComputeOfferingId(
-							convertEntityService.getComputeOfferId(vmInstance.getTransComputeOfferingId()));
-					if (vmInstance.getHostId() != null) {
-						vmInstance.setPodId(convertEntityService
-								.getPodIdByHost(convertEntityService.getHostId(vmInstance.getTransHostId())));
-					}
+        List<Project> project = projectService.findAllByActive(true);
+        List<VmInstance> vmList = new ArrayList<VmInstance>();
+        for (int j = 0; j <= project.size(); j++) {
+            HashMap<String, String> vmMap = new HashMap<String, String>();
+            vmMap.put("listall", "true");
+            if (j == project.size()) {
+                vmMap.put("listall", "true");
+            } else {
+                vmMap.put("projectid", project.get(j).getUuid());
+            }
+            // 1. Get the list of vms from CS server using CS connector
+            String response = cloudStackInstanceService.listVirtualMachines("json", vmMap);
+            JSONArray vmListJSON = null;
+            JSONObject responseObject = new JSONObject(response).getJSONObject("listvirtualmachinesresponse");
+            if (responseObject.has("virtualmachine")) {
+                vmListJSON = responseObject.getJSONArray("virtualmachine");
+                // 2. Iterate the json list, convert the single json entity to
+                // vm.
+                for (int i = 0, size = vmListJSON.length(); i < size; i++) {
+                    // 2.1 Call convert by passing JSONObject to vm entity and
+                    // Add
+                    // the converted vm entity to list
+                    VmInstance vmInstance = VmInstance.convert(vmListJSON.getJSONObject(i));
+                    VmInstance persistInstance = findByUUID(vmInstance.getUuid());
+                    if (persistInstance != null) {
+                        if (volumeService.findByInstanceAndVolumeType(persistInstance.getId()) != null) {
+                            vmInstance.setVolumeSize(
+                                    volumeService.findByInstanceAndVolumeType(persistInstance.getId()).getDiskSize());
+                        }
+                    }
+                    vmInstance.setDomainId(convertEntityService.getDomainId(vmInstance.getTransDomainId()));
+                    vmInstance.setZoneId(convertEntityService.getZoneId(vmInstance.getTransZoneId()));
+                    vmInstance.setNetworkId(convertEntityService.getNetworkId(vmInstance.getTransNetworkId()));
+                    vmInstance.setProjectId(convertEntityService.getProjectId(vmInstance.getTransProjectId()));
+                    vmInstance.setHostId(convertEntityService.getHostId(vmInstance.getTransHostId()));
+                    vmInstance.setInstanceOwnerId(convertEntityService.getUserByName(vmInstance.getTransDisplayName(),
+                            convertEntityService.getDomain(vmInstance.getTransDomainId())));
+                    vmInstance.setDepartmentId(
+                            convertEntityService.getDepartmentByUsernameAndDomain(vmInstance.getTransDepartmentId(),
+                                    convertEntityService.getDomain(vmInstance.getTransDomainId())));
+                    vmInstance.setTemplateId(convertEntityService.getTemplateId(vmInstance.getTransTemplateId()));
+                    vmInstance.setComputeOfferingId(
+                            convertEntityService.getComputeOfferId(vmInstance.getTransComputeOfferingId()));
+                    if (vmInstance.getHostId() != null) {
+                        vmInstance.setPodId(convertEntityService
+                                .getPodIdByHost(convertEntityService.getHostId(vmInstance.getTransHostId())));
+                    }
 
-					vmList.add(vmInstance);
-				}
-			}
-		}
+                    vmList.add(vmInstance);
+                }
+            }
+        }
         return vmList;
     }
 
-	public Integer findCountByStatus(Status status) {
-		try {
-			User user = userService.find(Long.valueOf(tokenDetails.getTokenDetails("id")));
+    public Integer findCountByStatus(Status status) {
+        try {
+            User user = userService.find(Long.valueOf(tokenDetails.getTokenDetails("id")));
 
-			if (user != null && !user.getType().equals(Type.ROOT_ADMIN)) {
-				if (user.getType().equals(Type.DOMAIN_ADMIN)) {
-					List<VmInstance> allInstanceList = virtualmachinerepository.findAllByDomainIsActiveAndStatus(user.getDomainId(),
-							status);
-					return allInstanceList.size();
-				} else {
-					if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
-						List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
-						for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
-							List<VmInstance> allInstanceTempList = virtualmachinerepository
-									.findAllByUserAndProjectIsActive(status, user, project);
-							allInstanceList.addAll(allInstanceTempList);
-						}
-						List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
-						return instances.size();
-					} else {
-						List<VmInstance> allInstanceLists = virtualmachinerepository.findAllByUserIsActive(status,
-								user);
-						return allInstanceLists.size();
-					}
-				}
-			}
-		} catch (NumberFormatException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return virtualmachinerepository.findCountByStatus(status);
+            if (user != null && !user.getType().equals(Type.ROOT_ADMIN)) {
+                if (user.getType().equals(Type.DOMAIN_ADMIN)) {
+                    List<VmInstance> allInstanceList = virtualmachinerepository.findAllByDomainIsActiveAndStatus(user.getDomainId(),
+                            status);
+                    return allInstanceList.size();
+                } else {
+                    if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
+                        List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
+                        for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
+                            List<VmInstance> allInstanceTempList = virtualmachinerepository
+                                    .findAllByUserAndProjectIsActive(status, user, project);
+                            allInstanceList.addAll(allInstanceTempList);
+                        }
+                        List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
+                        return instances.size();
+                    } else {
+                        List<VmInstance> allInstanceLists = virtualmachinerepository.findAllByUserIsActive(status,
+                                user);
+                        return allInstanceLists.size();
+                    }
+                }
+            }
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return virtualmachinerepository.findCountByStatus(status);
 
-	}
+    }
 
-	@Override
-	public VmInstance updateDisplayName(VmInstance vminstance) throws Exception {
-		Errors errors = validator.rejectIfNullEntity("vminstance", vminstance);
-		errors = validator.validateEntity(vminstance, errors);
-		if (errors.hasErrors()) {
-			throw new ApplicationException(errors);
-		} else {
-			if(vminstance.getTransDisplayName() != null && !vminstance.getTransDisplayName().trim().equalsIgnoreCase("")) {
-			HashMap<String, String> optional = new HashMap<String, String>();
-			optional.put("displayName", vminstance.getTransDisplayName());
-			cloudStackInstanceService.updateVirtualMachine(vminstance.getUuid(), optional);
-			vminstance.setDisplayName(vminstance.getTransDisplayName());
-			}
-			return virtualmachinerepository.save(vminstance);
-		}
-	}
+    @Override
+    public VmInstance updateDisplayName(VmInstance vminstance) throws Exception {
+        Errors errors = validator.rejectIfNullEntity("vminstance", vminstance);
+        errors = validator.validateEntity(vminstance, errors);
+        if (errors.hasErrors()) {
+            throw new ApplicationException(errors);
+        } else {
+            if(vminstance.getTransDisplayName() != null && !vminstance.getTransDisplayName().trim().equalsIgnoreCase("")) {
+            HashMap<String, String> optional = new HashMap<String, String>();
+            optional.put("displayName", vminstance.getTransDisplayName());
+            cloudStackInstanceService.updateVirtualMachine(vminstance.getUuid(), optional);
+            vminstance.setDisplayName(vminstance.getTransDisplayName());
+            }
+            return virtualmachinerepository.save(vminstance);
+        }
+    }
 
-	 @Override
-	    public List<VmInstance> findByDepartment(Long id) throws Exception {
-	        return virtualmachinerepository.findByDepartment(id);
-	    }
+     @Override
+        public List<VmInstance> findByDepartment(Long id) throws Exception {
+            return virtualmachinerepository.findByDepartment(id);
+        }
 }

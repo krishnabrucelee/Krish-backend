@@ -436,6 +436,21 @@ public class ConvertEntityService {
     }
 
     /**
+     * Get department id.
+     *
+     * @param name of the department.
+     * @return domain id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getDepartmentByUsernameAndDomains(String name, Domain domain) throws Exception {
+        if (departmentService.findByUsernameAndDomain(name, domain, true) != null) {
+            return departmentService.findByUsernameAndDomain(name, domain, true).getId();
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Get domain id.
      *
      * @param domain object for account.
@@ -496,7 +511,7 @@ public class ConvertEntityService {
     public Long getUserIdByAccount(String name, Domain domain) throws Exception {
         User user = userService.findByUserNameAndDomain(name, domain);
         if(user != null){
-        	return user.getId();
+            return user.getId();
         }
         return null;
     }
