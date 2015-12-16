@@ -45,6 +45,7 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     private VirtualMachineService virtualmachineservice;
 
     /** Cloud stack server service. */
+    @Autowired
     private CloudStackServer cloudStackServer;
 
     /** Service reference to syncService. */

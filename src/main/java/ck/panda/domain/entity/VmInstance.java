@@ -130,11 +130,6 @@ public class VmInstance implements Serializable {
 	private Long departmentId;
 
 	/** Instance Root-Volume id. */
-	@JoinColumn(name = "volume_id", referencedColumnName = "id", updatable = false, insertable = false)
-	@ManyToOne
-	private Volume volume;
-
-	/** Instance Root-Volume id. */
 	@Column(name = "volume_id")
 	private Long volumeId;
 
@@ -242,11 +237,6 @@ public class VmInstance implements Serializable {
 	/** Instance host id. */
 	@Column(name = "host_id")
 	private Long hostId;
-
-	/** Instance pod. */
-	@JoinColumn(name = "pod_id", referencedColumnName = "Id", updatable = false, insertable = false)
-	@OneToOne
-	private Pod pod;
 
 	/** Instance pod id. */
 	@Column(name = "pod_id")
@@ -942,25 +932,6 @@ public class VmInstance implements Serializable {
 	 */
 	public void setHost(Host host) {
 		this.host = host;
-	}
-
-	/**
-	 * Get the host.
-	 *
-	 * @return the pod
-	 */
-	public Pod getPod() {
-		return pod;
-	}
-
-	/**
-	 * Set the host.
-	 *
-	 * @param pod
-	 *            the pod to set
-	 */
-	public void setPod(Pod pod) {
-		this.pod = pod;
 	}
 
 	/**
@@ -1722,24 +1693,6 @@ public class VmInstance implements Serializable {
 	 */
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
-	}
-
-	/**
-	 * Get the instance's volume.
-	 *
-	 * @return the volume.
-	 */
-	public Volume getVolume() {
-		return volume;
-	}
-
-	/**
-	 * Set the instance's volume .
-	 *
-	 * @param volume to set.
-	 */
-	public void setVolume(Volume volume) {
-		this.volume = volume;
 	}
 
 	/**

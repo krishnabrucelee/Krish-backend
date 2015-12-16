@@ -783,7 +783,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 					// the converted vm entity to list
 					VmInstance vmInstance = VmInstance.convert(vmListJSON.getJSONObject(i));
 					if (volumeService.findByInstanceAndVolumeType(vmInstance.getId()) != null) {
-						vmInstance.setVolumeId(volumeService.findByInstanceAndVolumeType(vmInstance.getId()).getId());
+						vmInstance.setVolumeId(volumeService.findByInstanceAndVolumeType(vmInstance.getId()).getDiskSize());
 					}
 					vmInstance.setDomainId(convertEntityService.getDomainId(vmInstance.getTransDomainId()));
 					vmInstance.setZoneId(convertEntityService.getZoneId(vmInstance.getTransZoneId()));
