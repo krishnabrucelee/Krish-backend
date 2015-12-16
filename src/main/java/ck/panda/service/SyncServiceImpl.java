@@ -1885,7 +1885,7 @@ public class SyncServiceImpl implements SyncService {
             List<User> userList = userService.findUsersByTypesAndActive(types, true);
             for (User user : userList) {
                 Role role = roleService.findByName("FULL_PERMISSION", user.getDepartment());
-                user.setRole(role);
+                user.setRoleId(role.getId());
                 userService.update(user);
             }
         } catch (Exception e) {

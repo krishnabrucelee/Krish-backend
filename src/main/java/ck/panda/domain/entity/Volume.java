@@ -261,8 +261,10 @@ public class Volume {
         UPLOAD_ERROR,
         /** Volume will be in a Abandoned State. */
         ABANDONED,
-        /** Volume will be in a Downloaded State. */
-        UPLOADED
+        /** Volume will be in a Uploaded State. */
+        UPLOADED,
+        /** Volume will be in a Upload State. */
+        UPLOAD
     }
 
     /** Format enum type used to list the static format values. */
