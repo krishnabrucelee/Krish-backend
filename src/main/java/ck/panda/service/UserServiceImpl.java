@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import com.google.common.base.Optional;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
@@ -287,7 +286,7 @@ public class UserServiceImpl implements UserService {
     public Page<User> findAllUserByDomain(PagingAndSorting pagingAndSorting) throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && !domain.getName().equals("ROOT")) {
-            return userRepository.findAllUserByDomain(pagingAndSorting.toPageRequest(), domain);
+            return userRepository.findAllUserByDomain(pagingAndSorting.toPageRequest(), domain, true);
         }
         return userRepository.findAll(pagingAndSorting.toPageRequest());
     }
@@ -315,7 +314,6 @@ public class UserServiceImpl implements UserService {
         }
         return users;
     }
-
 
     @Override
     public User findByUuIdAndIsActive(String uuid, Boolean isActive) throws Exception {
