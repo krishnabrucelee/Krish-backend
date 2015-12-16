@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
@@ -117,6 +118,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     private ProjectService projectService;
 
     @Override
+    @PreAuthorize("hasPermission(#vminstance.getSyncFlag(), 'CREATE_VM')")
     public VmInstance save(VmInstance vminstance) throws Exception {
         LOGGER.debug("instance sync ", vminstance.getSyncFlag());
         if (vminstance.getSyncFlag()) {
@@ -693,6 +695,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(null, 'UPGRADE_VM')")
     public VmInstance upgradeDowngradeVM(VmInstance vminstance) throws Exception {
         Errors errors = validator.rejectIfNullEntity("vminstance", vminstance);
         errors = validator.validateEntity(vminstance, errors);
