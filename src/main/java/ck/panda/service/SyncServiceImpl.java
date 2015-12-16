@@ -1313,12 +1313,12 @@ public class SyncServiceImpl implements SyncService {
                 volume.setVolumeType(csvolume.getVolumeType());
                 volume.setIsActive(true);
                 if(volume.getDiskSize() !=null) {
-                    volume.setDiskSize(volume.getDiskSize());
+                    volume.setDiskSize(csvolume.getDiskSize());
                 } else {
-                    volume.setDiskSize(volume.getStorageOffering().getDiskSize());
+                    volume.setDiskSize(csvolume.getStorageOffering().getDiskSize());
                 }
                 if(volume.getProjectId() !=null) {
-                    volume.setProjectId(volume.getProjectId());
+                    volume.setProjectId(csvolume.getProjectId());
                 }
                 volume.setChecksum(csvolume.getChecksum());
                 volume.setStatus(csvolume.getStatus());
@@ -1889,7 +1889,7 @@ public class SyncServiceImpl implements SyncService {
         try {
             List<User> userList = userService.findUsersByTypesAndActive(types, true);
             for (User user : userList) {
-            	Role role = roleService.findByName("FULL_PERMISSION", user.getDepartment());
+                Role role = roleService.findByName("FULL_PERMISSION", user.getDepartment());
                 user.setRole(role);
                 userService.update(user);
             }

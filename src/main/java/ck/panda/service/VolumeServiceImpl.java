@@ -300,10 +300,12 @@ public class VolumeServiceImpl implements VolumeService {
                     volume.setStorageOfferingId(
                             convertEntityService.getStorageOfferId(volume.getTransStorageOfferingId()));
                     volume.setVmInstanceId(convertEntityService.getVmInstanceId(volume.getTransvmInstanceId()));
-                    volume.setDepartmentId(
-                            departmentRepository.findByUsername(volume.getTransDepartmentName(), true).getId());
-                    volume.setProjectId(convertEntityService.getProjectId(volume.getTransProjectId()));
-
+                    if (volume.getTransProjectId() != null) {
+                        volume.setProjectId(convertEntityService.getProjectId(volume.getTransProjectId()));
+                        volume.setDepartmentId(projectService.find(volume.getProjectId()).getDepartmentId());
+                    } else {
+                    volume.setDepartmentId(convertEntityService.getDepartmentByUsername(volume.getTransDepartmentId()));
+                    }
                     volumeList.add(volume);
                 }
             }
@@ -621,10 +623,10 @@ public class VolumeServiceImpl implements VolumeService {
         }
     }
 
-	@Override
-	public List<Volume> findByDepartment(Long departmentId) {
-		return volumeRepo.findByDepartment(departmentId);
-	}
+    @Override
+    public List<Volume> findByDepartment(Long departmentId) {
+        return volumeRepo.findByDepartment(departmentId);
+    }
 
 	@Override
 	public Volume findByInstanceAndVolumeType(Long volume) throws Exception {
