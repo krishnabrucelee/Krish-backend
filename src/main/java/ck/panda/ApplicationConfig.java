@@ -1,5 +1,6 @@
 package ck.panda;
 
+import java.io.IOException;
 import java.util.Locale;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
