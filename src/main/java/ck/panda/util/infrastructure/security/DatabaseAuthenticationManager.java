@@ -83,6 +83,11 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
     @Value("${backend.admin.role}")
     private String backendAdminRole;
 
+
+    /** Build Version. */
+    @Value("${app.buildversion}")
+    private String buildNumber;
+
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         Optional<String> username = (Optional) authentication.getPrincipal();
@@ -113,7 +118,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
             user = userService.findByUser(username.get(), password.get(), "/");
             if (user == null && domain.get().equals("BACKEND_ADMIN")) {
                 if (username.get().equals(backendAdminUsername) && password.get().equals(backendAdminPassword)) {
-                    resultOfAuthentication = externalServiceAuthenticator.authenticate(backendAdminUsername, backendAdminRole, null, null);
+                    resultOfAuthentication = externalServiceAuthenticator.authenticate(backendAdminUsername, backendAdminRole, null, null, buildNumber);
                     String newToken = null;
                     try {
                         newToken = tokenService.generateNewToken(user, "ROOT");
@@ -138,11 +143,11 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
                     } else if (user != null && user.getRole() == null) {
                         throw new BadCredentialsException("Contact administrator to get the access permission granted");
                     } else {
-                    	Boolean authKeyResponse = apiSecretKeyGeneration(user);
-                    	if(authKeyResponse) {
+                        Boolean authKeyResponse = apiSecretKeyGeneration(user);
+                        if(authKeyResponse) {
                             Department department = departmentReposiory.findOne(user.getDepartment().getId());
                             Role role = roleReposiory.findUniqueness(user.getRole().getName(), department);
-                            resultOfAuthentication = externalServiceAuthenticator.authenticate(username.get(), user.getRole().getName(), role, user);
+                            resultOfAuthentication = externalServiceAuthenticator.authenticate(username.get(), user.getRole().getName(), role, user, buildNumber);
                             String newToken = null;
                             try {
                                 newToken = tokenService.generateNewToken(user, domain.get());
@@ -151,9 +156,9 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
                             }
                             resultOfAuthentication.setToken(newToken);
                             tokenService.store(newToken, resultOfAuthentication);
-                    	} else {
-                    		throw new BadCredentialsException("Problem for getting API and Secret key");
-                    	}
+                        } else {
+                            throw new BadCredentialsException("Problem for getting API and Secret key");
+                        }
                     }
                 } else {
                     throw new BadCredentialsException("Invalid login credentials");
@@ -197,28 +202,28 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
     private Boolean apiSecretKeyGeneration(User user) throws Exception {
         configUtil.setServer(1L);
         HashMap<String, String> optional = new HashMap<String, String>();
-    	optional.put("id", user.getUuid());
+        optional.put("id", user.getUuid());
         String listUserByIdResponse = cloudStackUserService.listUsers(optional, "json");
         JSONObject listUsersResponse = new JSONObject(listUserByIdResponse).getJSONObject("listusersresponse");
         if (listUsersResponse.has("errorcode")) {
-        	return false;
+            return false;
         } else {
-        	JSONArray userJsonobject = (JSONArray) listUsersResponse.get("user");
-        	if(userJsonobject.getJSONObject(0).has("apikey")) {
-        		user.setApiKey(userJsonobject.getJSONObject(0).get("apikey").toString());
-        		user.setSecretKey(userJsonobject.getJSONObject(0).get("secretkey").toString());
-            	return true;
-        	} else {
-        		String keyValueResponse = cloudStackUserService.registerUserKeys(user.getUuid(), "json");
-        		JSONObject keyValue = new JSONObject(keyValueResponse).getJSONObject("registeruserkeysresponse");
-        		if (keyValue.has("errorcode")) {
-                	return false;
+            JSONArray userJsonobject = (JSONArray) listUsersResponse.get("user");
+            if(userJsonobject.getJSONObject(0).has("apikey")) {
+                user.setApiKey(userJsonobject.getJSONObject(0).get("apikey").toString());
+                user.setSecretKey(userJsonobject.getJSONObject(0).get("secretkey").toString());
+                return true;
+            } else {
+                String keyValueResponse = cloudStackUserService.registerUserKeys(user.getUuid(), "json");
+                JSONObject keyValue = new JSONObject(keyValueResponse).getJSONObject("registeruserkeysresponse");
+                if (keyValue.has("errorcode")) {
+                    return false;
                 } else {
-                	user.setApiKey(keyValue.getJSONObject("userkeys").getString("apikey"));
-            		user.setSecretKey(keyValue.getJSONObject("userkeys").getString("secretkey"));
-                	return true;
+                    user.setApiKey(keyValue.getJSONObject("userkeys").getString("apikey"));
+                    user.setSecretKey(keyValue.getJSONObject("userkeys").getString("secretkey"));
+                    return true;
                 }
-        	}
+            }
         }
     }
 }

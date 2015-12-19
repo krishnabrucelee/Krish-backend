@@ -62,6 +62,9 @@ console:
 
 ---
 
+app:
+    buildversion: ${APP_BUILD_NUMBER}
+
 
 logging:
     level:

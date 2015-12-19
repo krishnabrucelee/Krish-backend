@@ -17,5 +17,5 @@ public interface ExternalServiceAuthenticator {
      * @param user to set
      * @return token
      */
-    AuthenticationWithToken authenticate(String username, String rolename, Role role, User user);
+    AuthenticationWithToken authenticate(String username, String rolename, Role role, User user, String buildNumber);
 }
