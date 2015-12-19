@@ -71,7 +71,7 @@ logging:
 ---
 
 server:
-    port: 8181
+    port: 8080
     session-timeout: 60
 
 ---
@@ -124,4 +124,3 @@ pagination:
 aes:
     salt:
         secretKey: DA97AA70B21ADCCA89708EFC05C7E2F2
-
