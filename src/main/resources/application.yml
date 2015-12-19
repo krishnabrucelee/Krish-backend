@@ -62,6 +62,9 @@ console:
 
 ---
 
+app:
+    buildversion: ${APP_BUILD_NUMBER}
+
 
 logging:
     level:
@@ -71,7 +74,7 @@ logging:
 ---
 
 server:
-    port: 8181
+    port: 8080
     session-timeout: 60
 
 ---

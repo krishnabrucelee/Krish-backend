@@ -15,7 +15,7 @@ import ck.panda.util.infrastructure.security.ExternalServiceAuthenticator;
 public class SomeExternalServiceAuthenticator implements ExternalServiceAuthenticator {
 
     @Override
-    public AuthenticationWithToken authenticate(String username, String rolename, Role role, User user) {
+    public AuthenticationWithToken authenticate(String username, String rolename, Role role, User user, String buildVersion) {
         ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
 
         // Do all authentication mechanisms required by external web service protocol and validated response.
@@ -31,7 +31,7 @@ public class SomeExternalServiceAuthenticator implements ExternalServiceAuthenti
             authenticatedExternalWebService = new AuthenticatedExternalWebService(username, null,
                 AuthorityUtils.commaSeparatedStringToAuthorityList(rolename));
         } else {
-            authenticatedExternalWebService = new AuthenticatedExternalWebService(new RolePrincipal(username, role, user.getType(), user.getDomain().getName(), user.getDepartment().getId()), null,
+            authenticatedExternalWebService = new AuthenticatedExternalWebService(new RolePrincipal(username, role, user.getType(), user.getDomain().getName(), user.getDepartment().getId(), buildVersion), null,
                 AuthorityUtils.commaSeparatedStringToAuthorityList(rolename));
         }
         authenticatedExternalWebService.setExternalWebService(externalWebService);

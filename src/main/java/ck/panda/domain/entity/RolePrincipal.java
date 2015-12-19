@@ -5,6 +5,7 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import ck.panda.domain.entity.User.Type;
@@ -30,6 +31,10 @@ public class RolePrincipal {
     /** User department id attributes. */
     private Long departmentid;
 
+    /** Build Version number */
+    private String buildVersion;
+
+
     /**
      * Default constructor.
      */
@@ -44,12 +49,13 @@ public class RolePrincipal {
      * @param type to set
      * @param domainname to set
      */
-    public RolePrincipal(String username, Role role, Type type, String domainname, Long departmentid) {
+    public RolePrincipal(String username, Role role, Type type, String domainname, Long departmentid, String buildVersion) {
         this.username = username;
         this.role = role;
         this.type = type;
         this.domainname = domainname;
         this.departmentid = departmentid;
+        this.buildVersion = buildVersion;
     }
 
     @Override
@@ -62,6 +68,7 @@ public class RolePrincipal {
             jsonObject.put("type", type);
             jsonObject.put("domainName", domainname);
             jsonObject.put("departmentId", departmentid);
+            jsonObject.put("buildNumber", buildVersion);
             JSONArray jsonArray = new JSONArray();
             Map<String, Object> hashList = new HashMap<String, Object>();
             for (int i = 0; i < role.getPermissionList().size(); i++) {

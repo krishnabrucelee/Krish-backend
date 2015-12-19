@@ -75,6 +75,10 @@ public class TokenService {
     @Autowired
     private UserService userService;
 
+    /** Build Version. */
+    @Value("${app.buildversion}")
+    private String buildNumber;
+
     /**
      * Evict expire tokens.
      */
@@ -132,16 +136,16 @@ public class TokenService {
      * @throws Exception raise if error
      */
     public Authentication retrieve(String token, Authentication authentication, TokenService tokenService, ExternalServiceAuthenticator externalServiceAuthenticator) throws Exception {
-    	AuthenticationWithToken resultOfAuthentication = null;
+        AuthenticationWithToken resultOfAuthentication = null;
         HashMap<Integer, String> tokenDetails = getTokenDetails(token, "@@");
         if (tokenDetails.get(5).equals("ROOT")) {
             User user = userService.findByUser(tokenDetails.get(1), null, "/");
             if (user != null) {
-            	user.setApiKey(tokenDetails.get(7));
-            	user.setApiKey(tokenDetails.get(8));
+                user.setApiKey(tokenDetails.get(7));
+                user.setApiKey(tokenDetails.get(8));
                 token = tokenService.generateNewToken(user, "/");
                 tokenDetails = getTokenDetails(token, "@@");
-                resultOfAuthentication = externalServiceAuthenticator.authenticate(tokenDetails.get(1), tokenDetails.get(4), null, null);
+                resultOfAuthentication = externalServiceAuthenticator.authenticate(tokenDetails.get(1), tokenDetails.get(4), null, null, buildNumber);
                 resultOfAuthentication.setToken(token);
                 tokenService.store(token, resultOfAuthentication);
                 SecurityContextHolder.getContext().setAuthentication(resultOfAuthentication);
