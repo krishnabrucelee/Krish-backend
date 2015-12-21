@@ -301,7 +301,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
         if (tags.equals("") || tags == null) {
             tags = "ALL";
         }
-        return storageOfferingRepo.findAllByTags(tags);
+        return storageOfferingRepo.findAllByTags(tags, true);
     }
 
     /**
