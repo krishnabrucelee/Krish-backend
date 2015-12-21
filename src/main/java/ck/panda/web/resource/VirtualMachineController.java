@@ -219,28 +219,28 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     }
 
     /**
-     * Get the department by Domain.
+     * Get the project.
      *
-     * @param id department id.
-     * @return department
+     * @param projectId project id.
+     * @return project
      * @throws Exception error occurs.
      */
     @RequestMapping(value = "/volume/project/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
-    public List<VmInstance> findByProjectAndStatus(@PathVariable(PATH_ID) Long id) throws Exception {
-       return virtualmachineservice.findByProjectAndStatus(id);
+    public List<VmInstance> findByProjectAndStatus(@PathVariable(PATH_ID) Long projectId) throws Exception {
+       return virtualmachineservice.findByProjectAndStatus(projectId, Status.Running, Status.Stopped);
     }
 
     /**
-     * Get the department by Domain.
+     * Get the department.
      *
-     * @param id department id.
+     * @param derpartmentId department id.
      * @return department
      * @throws Exception error occurs.
      */
     @RequestMapping(value = "/volume/department/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
-    public List<VmInstance> findByDepartmentAndStatus(@PathVariable(PATH_ID) Long id) throws Exception {
-       return virtualmachineservice.findByDepartmentAndStatus(id);
+    public List<VmInstance> findByDepartmentAndStatus(@PathVariable(PATH_ID) Long derpartmentId) throws Exception {
+       return virtualmachineservice.findByDepartmentAndStatus(derpartmentId, Status.Running, Status.Stopped);
     }
 }

@@ -84,29 +84,10 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
     /**
      * Get the count of the instance based on the status.
      *
-     * @param status
-     * @return
+     * @param vminstance instance to display
+     * @return instance
      */
     VmInstance updateDisplayName(VmInstance vminstance) throws Exception;
-
-    /**
-     * Find vm Instance associated with department.
-     *
-     * @param id of the department.
-     * @param isActive department.
-     * @return
-     * @throws Exception unhandled errors.
-     */
-    List<VmInstance> findByDepartment(Long id) throws Exception;
-
-    /**
-     * Find vm Instance associated with project.
-     *
-     * @param id of the project.
-     * @return project
-     * @throws Exception unhandled errors.
-     */
-    List<VmInstance> findByProjectAndStatus(Long id) throws Exception;
 
     /**
      * Find vm Instance associated with department.
@@ -115,6 +96,28 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * @return department
      * @throws Exception unhandled errors.
      */
-    List<VmInstance> findByDepartmentAndStatus(Long id) throws Exception;
+    List<VmInstance> findByDepartment(Long deaprtmentId) throws Exception;
+
+    /**
+     * Find vm Instance associated with project.
+     *
+     * @param projectId of the project.
+     * @param stopped instance stopped state
+     * @param running instance running state
+     * @return project
+     * @throws Exception unhandled errors.
+     */
+    List<VmInstance> findByProjectAndStatus(Long projectId, Status running, Status stopped) throws Exception;
+
+    /**
+     * Find vm Instance associated with department.
+     *
+     * @param departmentId of the department.
+     * @param stopped instance stopped state
+     * @param running instance running state
+     * @return department
+     * @throws Exception unhandled errors.
+     */
+    List<VmInstance> findByDepartmentAndStatus(Long departmentId, Status running, Status stopped) throws Exception;
 
 }

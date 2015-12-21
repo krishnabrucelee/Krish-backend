@@ -875,13 +875,13 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         }
 
     @Override
-    public List<VmInstance> findByProjectAndStatus(Long id) throws Exception {
-        return virtualmachinerepository.findByProjectAndStatus(id, Status.Running, Status.Stopped);
+    public List<VmInstance> findByProjectAndStatus(Long projectId, Status running, Status stopped) throws Exception {
+        return virtualmachinerepository.findByProjectAndStatus(projectId, running, stopped);
 
     }
 
     @Override
-    public List<VmInstance> findByDepartmentAndStatus(Long id) throws Exception {
-        return virtualmachinerepository.findByDepartmentAndStatus(id, Status.Running, Status.Stopped);
+    public List<VmInstance> findByDepartmentAndStatus(Long departmentId, Status running, Status stopped) throws Exception {
+        return virtualmachinerepository.findByDepartmentAndStatus(departmentId, running, stopped);
     }
 }

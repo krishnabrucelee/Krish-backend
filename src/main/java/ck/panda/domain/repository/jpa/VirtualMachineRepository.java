@@ -248,7 +248,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
     *
     * @param projectId project id.
     * @param status get the department list based on active/inactive status.
-    * @return vmInstance list.
+    * @return project list.
     */
    @Query(value = "select vm from VmInstance vm where vm.projectId=:projectId and (vm.status = :statusReady or vm.status = :statusStopped)")
    List<VmInstance> findByProjectAndStatus(@Param("projectId") Long projectId, @Param("statusReady") VmInstance.Status ready, @Param("statusStopped") VmInstance.Status stopped);
@@ -258,7 +258,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
     *
     * @param departmentId department id.
     * @param status get the department list based on active/inactive status.
-    * @return vmInstance list.
+    * @return department list.
     */
    @Query(value = "select vm from VmInstance vm where vm.departmentId=:departmentId and (vm.status = :statusReady or vm.status = :statusStopped)")
    List<VmInstance> findByDepartmentAndStatus(@Param("departmentId") Long departmentId, @Param("statusReady") VmInstance.Status ready, @Param("statusStopped") VmInstance.Status stopped);
