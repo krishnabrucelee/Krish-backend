@@ -30,8 +30,8 @@ spring:
         username: ${RABBITMQ_USERNAME}
         password: ${RABBITMQ_PASSWORD}
         exchange:
-            name: cloudstack-events
-            #name: =cloudstack-instance
+            name: ${RABBITMQ_EXCHANGE}
+
 
 
     # CS server Routing key

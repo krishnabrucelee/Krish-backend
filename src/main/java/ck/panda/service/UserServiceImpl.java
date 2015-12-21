@@ -74,7 +74,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @PreAuthorize("hasPermission(#user.getSyncFlag(), 'CREATE_USER')")
     public User save(User user) throws Exception {
-
         if (user.getSyncFlag()) {
         Errors errors = validator.rejectIfNullEntity("user", user);
         errors = validator.validateEntity(user, errors);
@@ -262,7 +261,7 @@ public class UserServiceImpl implements UserService {
     public User softDelete(User user) throws Exception {
         user.setIsActive(false);
         user.setStatus(User.Status.DELETED);
-        
+
         // set server for finding value in configuration
         csUserService.setServer(configServer.setServer(1L));
         csUserService.deleteUser((user.getUuid()), "json");
