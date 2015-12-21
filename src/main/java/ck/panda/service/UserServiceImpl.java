@@ -82,6 +82,7 @@ public class UserServiceImpl implements UserService {
             throw new ApplicationException(errors);
         } else {
             user.setType(User.Type.USER);
+            user.setRoleId(user.getRole().getId());
             String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
             byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
             SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
