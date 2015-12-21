@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.util.domain.CRUDService;
@@ -86,15 +88,33 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * @return
      */
     VmInstance updateDisplayName(VmInstance vminstance) throws Exception;
-    
+
     /**
      * Find vm Instance associated with department.
-     * 
-     * @param id of the department.		
-     * @param isActive department.	
-     * @return 
+     *
+     * @param id of the department.
+     * @param isActive department.
+     * @return
      * @throws Exception unhandled errors.
      */
-	List<VmInstance> findByDepartment(Long id) throws Exception;
+    List<VmInstance> findByDepartment(Long id) throws Exception;
+
+    /**
+     * Find vm Instance associated with project.
+     *
+     * @param id of the project.
+     * @return project
+     * @throws Exception unhandled errors.
+     */
+    List<VmInstance> findByProjectAndStatus(Long id) throws Exception;
+
+    /**
+     * Find vm Instance associated with department.
+     *
+     * @param id of the department.
+     * @return department
+     * @throws Exception unhandled errors.
+     */
+    List<VmInstance> findByDepartmentAndStatus(Long id) throws Exception;
 
 }

@@ -800,7 +800,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     vmInstance.setInstanceOwnerId(convertEntityService.getUserByName(vmInstance.getTransDisplayName(),
                             convertEntityService.getDomain(vmInstance.getTransDomainId())));
                     vmInstance.setDepartmentId(
-                            convertEntityService.getDepartmentByUsernameAndDomain(vmInstance.getTransDepartmentId(),
+                            convertEntityService.getDepartmentByUsernameAndDomains(vmInstance.getTransDepartmentId(),
                                     convertEntityService.getDomain(vmInstance.getTransDomainId())));
                     vmInstance.setTemplateId(convertEntityService.getTemplateId(vmInstance.getTransTemplateId()));
                     vmInstance.setComputeOfferingId(
@@ -873,4 +873,15 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         public List<VmInstance> findByDepartment(Long id) throws Exception {
             return virtualmachinerepository.findByDepartment(id);
         }
+
+    @Override
+    public List<VmInstance> findByProjectAndStatus(Long id) throws Exception {
+        return virtualmachinerepository.findByProjectAndStatus(id, Status.Running, Status.Stopped);
+
+    }
+
+    @Override
+    public List<VmInstance> findByDepartmentAndStatus(Long id) throws Exception {
+        return virtualmachinerepository.findByDepartmentAndStatus(id, Status.Running, Status.Stopped);
+    }
 }

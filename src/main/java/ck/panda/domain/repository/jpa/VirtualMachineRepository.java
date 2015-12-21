@@ -139,7 +139,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
    @Query(value = "select vm from VmInstance vm where vm.status = :status and vm.instanceOwner = :user")
    Page<VmInstance> findAllByUserIsActive(@Param("status") Status status, Pageable pageable, @Param("user") User instanceOwner);
 
-   /**
+   /**VmInstance.
     * Get the list of VMs by status and user.
     *
     * @param status of the status of VM.
@@ -232,7 +232,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
     */
    @Query(value = "select COUNT(vm.id) from VmInstance vm where vm.status = :status")
    Integer findCountByStatus(@Param("status") Status status);
-   
+
    /**
     * Find all vmInstance from department.
     *
@@ -242,4 +242,24 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
     */
    @Query(value = "select vm from VmInstance vm where vm.departmentId=:id ")
    List<VmInstance> findByDepartment(@Param("id") Long departmentId);
+
+   /**
+    * Find all vmInstance from project.
+    *
+    * @param projectId project id.
+    * @param status get the department list based on active/inactive status.
+    * @return vmInstance list.
+    */
+   @Query(value = "select vm from VmInstance vm where vm.projectId=:projectId and (vm.status = :statusReady or vm.status = :statusStopped)")
+   List<VmInstance> findByProjectAndStatus(@Param("projectId") Long projectId, @Param("statusReady") VmInstance.Status ready, @Param("statusStopped") VmInstance.Status stopped);
+
+   /**
+    * Find all vmInstance from department.
+    *
+    * @param departmentId department id.
+    * @param status get the department list based on active/inactive status.
+    * @return vmInstance list.
+    */
+   @Query(value = "select vm from VmInstance vm where vm.departmentId=:departmentId and (vm.status = :statusReady or vm.status = :statusStopped)")
+   List<VmInstance> findByDepartmentAndStatus(@Param("departmentId") Long departmentId, @Param("statusReady") VmInstance.Status ready, @Param("statusStopped") VmInstance.Status stopped);
 }

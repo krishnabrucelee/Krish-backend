@@ -218,18 +218,29 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
         return virtualmachineservice.upgradeDowngradeVM(vminstance);
     }
 
-//    /**
-//     * Get the department by Domain.
-//     *
-//     * @param id department id.
-//     * @return department
-//     * @throws Exception error occurs.
-//     */
-//    @RequestMapping(value = "/volume/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-//    @ResponseStatus(HttpStatus.OK)
-//    public List<Project> findByDepartmentAndIsActive(@PathVariable(PATH_ID) Long id) throws Exception {
-//
-//       return null;
-//              // virtualmachineservice.findByDepartmentAndIsActive(id, true);
-//    }
+    /**
+     * Get the department by Domain.
+     *
+     * @param id department id.
+     * @return department
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/volume/project/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public List<VmInstance> findByProjectAndStatus(@PathVariable(PATH_ID) Long id) throws Exception {
+       return virtualmachineservice.findByProjectAndStatus(id);
+    }
+
+    /**
+     * Get the department by Domain.
+     *
+     * @param id department id.
+     * @return department
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/volume/department/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public List<VmInstance> findByDepartmentAndStatus(@PathVariable(PATH_ID) Long id) throws Exception {
+       return virtualmachineservice.findByDepartmentAndStatus(id);
+    }
 }
