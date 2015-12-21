@@ -51,9 +51,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private AccountService accountService;
 
-    /** Autowired configutill object. */
+    /** Cloud stack configuration utility class. */
     @Autowired
-    private ConfigUtil configServer;
+    private ConfigUtil config;
 
     /** Reference of the convert entity service. */
     @Autowired
@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService {
             SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
             String encryptedPassword = new String(EncryptionUtil.encrypt(user.getPassword(), originalKey));
             user.setIsActive(true);
-            csUserService.setServer(configServer.setServer(1L));
+            config.setUserServer();
             HashMap<String, String> userMap = new HashMap<String, String>();
             userMap.put("domainid", user.getDomain().getUuid());
             String cloudResponse = csUserService.createUser(user.getDepartment().getUserName(),
@@ -135,7 +135,7 @@ public class UserServiceImpl implements UserService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-              configServer.setServer(1L);
+              config.setUserServer();
               HashMap<String, String> optional = new HashMap<String, String>();
               optional.put("domainid", user.getDomain().getUuid());
               optional.put("username", user.getUserName());
@@ -160,7 +160,7 @@ public class UserServiceImpl implements UserService {
     @PreAuthorize("hasPermission(#user.getSyncFlag(), 'DELETE_USER')")
     public void delete(User user) throws Exception {
         if (user.getSyncFlag() == true) {
-            configServer.setServer(1L);
+            config.setUserServer();
             csUserService.deleteUser(user.getId().toString(), "json");
             this.softDelete(user);
         } else {
@@ -172,7 +172,7 @@ public class UserServiceImpl implements UserService {
     @PreAuthorize("hasPermission(null, 'DELETE_USER')")
     public void delete(Long id) throws Exception {
         User user = userRepository.findOne(id);
-        configServer.setServer(1L);
+        config.setUserServer();
         csUserService.deleteUser(user.getUuid(), "json");
         this.softDelete(user);
     }
@@ -263,7 +263,7 @@ public class UserServiceImpl implements UserService {
         user.setStatus(User.Status.DELETED);
 
         // set server for finding value in configuration
-        csUserService.setServer(configServer.setServer(1L));
+        config.setUserServer();
         csUserService.deleteUser((user.getUuid()), "json");
         return userRepository.save(user);
     }
