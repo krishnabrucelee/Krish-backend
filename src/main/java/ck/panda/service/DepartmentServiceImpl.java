@@ -89,6 +89,9 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Autowired
     private RoleService roleService;
 
+    /** Cloud stack configuration utility class. */
+    @Autowired
+    private ConfigUtil config;
 
     /** Volume Service reference. */
     @Autowired
@@ -122,8 +125,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             department.setIsActive(true);
             department.setStatus(Department.Status.ENABLED);
             department.setType(Department.AccountType.USER);
-            csAccountService.setServer(configServer.setServer(1L));
-
+            config.setUserServer();
             HashMap<String, String> accountMap = new HashMap<String, String>();
             accountMap.put("domainid", String.valueOf(department.getDomain().getUuid()));
             String createAccountResponse = csAccountService.createAccount(
@@ -167,7 +169,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
             Department departmentedit = departmentRepo.findOne(department.getId());
             department.setDomainId(department.getDomain().getId());
-            csAccountService.setServer(configServer.setServer(1L));
+            config.setUserServer();
             HashMap<String, String> accountMap = new HashMap<String, String>();
             accountMap.put("domainid", department.getDomain().getUuid());
             accountMap.put("account", departmentedit.getUserName());
@@ -238,7 +240,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     public Department softDelete(Department department) throws Exception {
         Errors errors = validator.rejectIfNullEntity("department", department);
         errors = validator.validateEntity(department, errors);
-        csAccountService.setServer(configServer.setServer(1L));
+        config.setUserServer();
         List<Project> projectResponse =  projectService.findByDepartmentAndIsActive(department.getId(), true);
         List<VmInstance> vmResponse  =  vmService.findByDepartment(department.getId());
         List<Role> roleResponse = roleService.findByDepartment(department);
@@ -334,6 +336,11 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     public List<Department> findAllBySync() throws Exception {
         return (List<Department>) departmentRepo.findAll();
+    }
+    
+    @Override
+    public List<Department> findDepartmentsByDomainAndAccountTypesAndActive(Long domainId, List<AccountType> types, Boolean isActive) throws Exception {
+        return (List<Department>) departmentRepo.findDepartmentsByDomainAndAccountTypesAndActive(domainId, types, isActive);
     }
 
 }

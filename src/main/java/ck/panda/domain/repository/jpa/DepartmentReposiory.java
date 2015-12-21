@@ -115,4 +115,15 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
      */
     @Query(value = "select dpt from Department dpt where dpt.isActive =:isActive AND dpt.type in (:types)")
     List<Department> findDepartmentsByAccountTypesAndActive(@Param("types") List<AccountType> types, @Param("isActive") Boolean isActive);
+    
+    /**
+     * Find the department list by domainid and account types and isActive.
+     *
+     * @param domain for each department.
+     * @param types for each department.
+     * @param isActive get the department list based on active/inactive status.
+     * @return Department list.
+     */
+    @Query(value = "select dpt from Department dpt where dpt.domainId =:domainId AND dpt.isActive =:isActive AND dpt.type in (:types)")
+    List<Department> findDepartmentsByDomainAndAccountTypesAndActive(@Param("domainId") Long domainId, @Param("types") List<AccountType> types, @Param("isActive") Boolean isActive);
 }

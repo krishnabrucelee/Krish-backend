@@ -140,7 +140,7 @@ public class DomainServiceImpl implements DomainService {
         errors = validator.validateEntity(persistedDomain, errors);
         HashMap<String,String> optional = new HashMap<String, String>();
         Department department = new Department();
-        department.setDomain(persistedDomain);
+        department.setDomainId(persistedDomain.getId());
         department.setUserName(persistedDomain.getPortalUserName());
         department.setDescription("HOD for this company "+ persistedDomain.getName());
         department.setType(Department.AccountType.DOMAIN_ADMIN);
