@@ -100,6 +100,10 @@ public class Host {
     /** IsActive attribute to verify Active or Inactive. */
     @Column(name = "is_active")
     private Boolean isActive;
+    
+    /** High availability of the Host. */
+    @Column(name = "host_ha")
+    private String hostHighAvailability;
 
     /** Created by user. */
     @CreatedBy
@@ -478,6 +482,24 @@ public class Host {
 	public void setHostIpaddress(String hostIpaddress) {
 		this.hostIpaddress = hostIpaddress;
 	}
+	
+	/**
+	 * Get HostHighAvailability.
+	 * 
+	 * @return the HostHighAvailability.
+	 */
+	public String getHostHighAvailability() {
+		return hostHighAvailability;
+	}
+
+	/**
+	 * Set the HostHighAvailability.
+	 * 
+	 * @param hostHighAvailability to set.
+	 */
+	public void setHostHighAvailability(String hostHighAvailability) {
+		this.hostHighAvailability = hostHighAvailability;
+	}
 
 	/**
 	 * Convert JSONObject to domain entity.
@@ -496,6 +518,7 @@ public class Host {
 			host.setTransZoneId((JsonUtil.getStringValue(jsonObject, "zoneid")));
 			host.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
 			host.setHostIpaddress(JsonUtil.getStringValue(jsonObject, "ipaddress"));
+			host.setHostHighAvailability(JsonUtil.getStringValue(jsonObject,"hahost"));
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
