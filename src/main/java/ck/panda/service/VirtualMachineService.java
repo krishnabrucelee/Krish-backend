@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.util.domain.CRUDService;
@@ -82,19 +84,39 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
     /**
      * Get the count of the instance based on the status.
      *
-     * @param status
-     * @return
-     */
-    VmInstance updateDisplayName(VmInstance vminstance) throws Exception;
-    
-    /**
-     * Find vm Instance associated with department.
-     * 
-     * @param id of the department.		
-     * @param isActive department.	
-     * @return 
+     * @param vminstance instance to display
+     * @return instance
      * @throws Exception unhandled errors.
      */
-	List<VmInstance> findByDepartment(Long id) throws Exception;
+    VmInstance updateDisplayName(VmInstance vminstance) throws Exception;
+
+    /**
+     * Find vm Instance associated with department.
+     *
+     * @param deaprtmentId of the department.
+     * @return department
+     * @throws Exception unhandled errors.
+     */
+    List<VmInstance> findByDepartment(Long deaprtmentId) throws Exception;
+
+    /**
+     * Find vm Instance associated with project.
+     *
+     * @param projectId of the project.
+     * @param statusCode status of instance
+     * @return project
+     * @throws Exception unhandled errors.
+     */
+    List<VmInstance> findByProjectAndStatus(Long projectId, List<Status> statusCode) throws Exception;
+
+    /**
+     * Find vm Instance associated with department.
+     *
+     * @param departmentId of the department.
+     * @param statusCode status of instance
+     * @return department
+     * @throws Exception unhandled errors.
+     */
+    List<VmInstance> findByDepartmentAndStatus(Long departmentId, List<Status> statusCode) throws Exception;
 
 }
