@@ -81,6 +81,10 @@ public class Template implements Serializable {
     @Column(name = "url")
     private String url;
 
+    /** Size of the template. */
+    @Column(name = "size")
+    private Long size;
+
     /** Reference URL of the template. */
     @Column(name = "reference_url")
     private String referenceUrl;
@@ -980,8 +984,21 @@ public class Template implements Serializable {
         this.transHypervisor = transHypervisor;
     }
 
+    /**
+	 * @return the size
+	 */
+    public Long getSize() {
+		return size;
+	}
 
     /**
+	 * @param size the size to set
+	 */
+	public void setSize(Long size) {
+		this.size = size;
+	}
+
+	/**
 	 * @return the isActive
 	 */
 	public Boolean getIsActive() {

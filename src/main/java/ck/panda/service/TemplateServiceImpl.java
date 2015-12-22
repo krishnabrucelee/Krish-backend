@@ -235,7 +235,12 @@ public class TemplateServiceImpl implements TemplateService {
 			for (int i = 0; i < templateArray.length(); i++) {
 				JSONObject jsonobject = templateArray.getJSONObject(i);
 				if (jsonobject.getBoolean("isready")) {
-					allTemplate.add(template);
+						if (template.getSize() == null) {
+							Template persistTemplate = templateRepository.findOne(template.getId());
+							persistTemplate.setSize(jsonobject.getLong("size"));
+							templateRepository.save(persistTemplate);
+						}
+						allTemplate.add(template);
 				} else {
 					LOGGER.debug("Not yet complete");
 				}
