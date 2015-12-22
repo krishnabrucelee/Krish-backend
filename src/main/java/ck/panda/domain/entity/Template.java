@@ -976,22 +976,27 @@ public class Template implements Serializable {
         return transHypervisor;
     }
 
-    /**
-     * Set the Transient hypervisor.
-     * @param transHypervisor - the String to set
-     */
-    public void setTransHypervisor(String transHypervisor) {
-        this.transHypervisor = transHypervisor;
-    }
+	/**
+	 * Set the Transient hypervisor.
+	 *
+	 * @param transHypervisor the String to set
+	 */
+	public void setTransHypervisor(String transHypervisor) {
+		this.transHypervisor = transHypervisor;
+	}
 
-    /**
+	/**
+	 * Get template size.
+	 *
 	 * @return the size
 	 */
-    public Long getSize() {
+	public Long getSize() {
 		return size;
 	}
 
-    /**
+	/**
+	 * Set template size.
+	 *
 	 * @param size the size to set
 	 */
 	public void setSize(Long size) {
