@@ -1,5 +1,6 @@
 package ck.panda.web.resource;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -228,7 +229,10 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     @RequestMapping(value = "/volume/project/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     public List<VmInstance> findByProjectAndStatus(@PathVariable(PATH_ID) Long projectId) throws Exception {
-       return virtualmachineservice.findByProjectAndStatus(projectId, Status.Running, Status.Stopped);
+        List<VmInstance.Status> statusCode = new ArrayList<VmInstance.Status>();
+        statusCode.add(Status.Running);
+        statusCode.add(Status.Stopped);
+       return virtualmachineservice.findByProjectAndStatus(projectId, statusCode);
     }
 
     /**
@@ -241,6 +245,9 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     @RequestMapping(value = "/volume/department/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     public List<VmInstance> findByDepartmentAndStatus(@PathVariable(PATH_ID) Long derpartmentId) throws Exception {
-       return virtualmachineservice.findByDepartmentAndStatus(derpartmentId, Status.Running, Status.Stopped);
+        List<VmInstance.Status> statusCode = new ArrayList<VmInstance.Status>();
+        statusCode.add(Status.Running);
+        statusCode.add(Status.Stopped);
+        return virtualmachineservice.findByDepartmentAndStatus(derpartmentId, statusCode);
     }
 }

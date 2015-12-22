@@ -247,19 +247,19 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
     * Find all vmInstance from project.
     *
     * @param projectId project id.
-    * @param status get the department list based on active/inactive status.
+    * @param statusCode get the project list based on status.
     * @return project list.
     */
-   @Query(value = "select vm from VmInstance vm where vm.projectId=:projectId and (vm.status = :statusReady or vm.status = :statusStopped)")
-   List<VmInstance> findByProjectAndStatus(@Param("projectId") Long projectId, @Param("statusReady") VmInstance.Status ready, @Param("statusStopped") VmInstance.Status stopped);
+   @Query(value = "select vm from VmInstance vm where vm.projectId=:projectId and vm.status in :statusCode")
+   List<VmInstance> findByProjectAndStatus(@Param("projectId") Long projectId, @Param("statusCode") List<Status> statusCode);
 
    /**
     * Find all vmInstance from department.
     *
     * @param departmentId department id.
-    * @param status get the department list based on active/inactive status.
+    * @param statusCode get the department list based on status.
     * @return department list.
     */
-   @Query(value = "select vm from VmInstance vm where vm.departmentId=:departmentId and (vm.status = :statusReady or vm.status = :statusStopped)")
-   List<VmInstance> findByDepartmentAndStatus(@Param("departmentId") Long departmentId, @Param("statusReady") VmInstance.Status ready, @Param("statusStopped") VmInstance.Status stopped);
+   @Query(value = "select vm from VmInstance vm where vm.departmentId=:departmentId and vm.status in :statusCode")
+   List<VmInstance> findByDepartmentAndStatus(@Param("departmentId") Long departmentId, @Param("statusCode") List<Status> statusCode);
 }

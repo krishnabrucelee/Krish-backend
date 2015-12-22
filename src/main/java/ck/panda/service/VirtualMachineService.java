@@ -86,13 +86,14 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      *
      * @param vminstance instance to display
      * @return instance
+     * @throws Exception unhandled errors.
      */
     VmInstance updateDisplayName(VmInstance vminstance) throws Exception;
 
     /**
      * Find vm Instance associated with department.
      *
-     * @param id of the department.
+     * @param deaprtmentId of the department.
      * @return department
      * @throws Exception unhandled errors.
      */
@@ -102,22 +103,20 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * Find vm Instance associated with project.
      *
      * @param projectId of the project.
-     * @param stopped instance stopped state
-     * @param running instance running state
+     * @param statusCode status of instance
      * @return project
      * @throws Exception unhandled errors.
      */
-    List<VmInstance> findByProjectAndStatus(Long projectId, Status running, Status stopped) throws Exception;
+    List<VmInstance> findByProjectAndStatus(Long projectId, List<Status> statusCode) throws Exception;
 
     /**
      * Find vm Instance associated with department.
      *
      * @param departmentId of the department.
-     * @param stopped instance stopped state
-     * @param running instance running state
+     * @param statusCode status of instance
      * @return department
      * @throws Exception unhandled errors.
      */
-    List<VmInstance> findByDepartmentAndStatus(Long departmentId, Status running, Status stopped) throws Exception;
+    List<VmInstance> findByDepartmentAndStatus(Long departmentId, List<Status> statusCode) throws Exception;
 
 }
