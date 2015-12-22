@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import ck.panda.constants.EventTypes;
+import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
@@ -22,6 +23,7 @@ import ck.panda.domain.repository.jpa.VolumeRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackIsoService;
+import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.TokenDetails;
@@ -81,6 +83,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Autowired
     private CloudStackInstanceService cloudStackInstanceService;
 
+    /** CloudStack connector reference for resource capacity. */
+    @Autowired
+    private CloudStackResourceCapacity cloudStackResourceCapacity;
+
     /** CloudStack connector. */
     @Autowired
     private CloudStackServer server;
@@ -129,53 +135,61 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                HashMap<String, String> optional = new HashMap<String, String>();
-                optional.put("displayname", vminstance.getName());
-                vminstance.setDisplayName(vminstance.getName());
-                optional.put("name", vminstance.getName());
-                if (networkRepo.findByUUID(vminstance.getNetworkUuid()) != null) {
-                    vminstance.setNetworkId(networkRepo.findByUUID(vminstance.getNetworkUuid()).getId());
-                }
-                vminstance.setZone(zoneRepository.findOne(vminstance.getZoneId()));
-                config.setUserServer();
-                 LOGGER.debug("Cloud stack connectivity at VM", vminstance.getNetworkUuid());
-                optional.put("networkids", vminstance.getNetworkUuid());
-                optional.put("displayvm", "true");
-                optional.put("displayname", vminstance.getName());
-                optional.put("keyboard", "us");
-                optional.put("name", vminstance.getName());
-                if (vminstance.getProjectId() != null) {
-                    optional.put("projectid", vminstance.getProject().getUuid());
-                } else {
-                    optional.put("account",vminstance.getDepartment().getUserName());
-                    optional.put("domainid", domainRepository.findOne(vminstance.getDepartment().getDomainId()).getUuid());
-                }
-                if (vminstance.getStorageOfferingId() != null) {
-                    optional.put("diskofferingid", vminstance.getStorageOffering().getUuid());
-                }
-                String csResponse = cloudStackInstanceService.deployVirtualMachine(
-                        vminstance.getComputeOffering().getUuid(), vminstance.getTemplate().getUuid(),
-                        vminstance.getZone().getUuid(), "json", optional);
-                JSONObject csInstance = new JSONObject(csResponse).getJSONObject("deployvirtualmachineresponse");
-                if (csInstance.has("errorcode")) {
-                    errors = this.validateEvent(errors, csInstance.getString("errortext"));
+                String isAvailable = isResourceAvailable(vminstance);
+                if (isAvailable != null) {
+                    errors = validator.sendGlobalError(isAvailable);
                     throw new ApplicationException(errors);
                 } else {
-                    LOGGER.debug("VM UUID", csInstance.getString("id"));
-                    vminstance.setUuid(csInstance.getString("id"));
-                    String instanceResponse = cloudStackInstanceService
-                            .queryAsyncJobResult(csInstance.getString("jobid"), "json");
-                    JSONObject instance = new JSONObject(instanceResponse).getJSONObject("queryasyncjobresultresponse");
-                    if (instance.getString("jobstatus").equals("2")) {
-                        vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                        vminstance.setEventMessage(csInstance.getJSONObject("jobresult").getString("errortext"));
+                    HashMap<String, String> optional = new HashMap<String, String>();
+                    optional.put("displayname", vminstance.getName());
+                    vminstance.setDisplayName(vminstance.getName());
+                    optional.put("name", vminstance.getName());
+                    if (networkRepo.findByUUID(vminstance.getNetworkUuid()) != null) {
+                        vminstance.setNetworkId(networkRepo.findByUUID(vminstance.getNetworkUuid()).getId());
+                    }
+                    vminstance.setZone(zoneRepository.findOne(vminstance.getZoneId()));
+                    config.setUserServer();
+                    LOGGER.debug("Cloud stack connectivity at VM", vminstance.getNetworkUuid());
+                    optional.put("networkids", vminstance.getNetworkUuid());
+                    optional.put("displayvm", "true");
+                    optional.put("displayname", vminstance.getName());
+                    optional.put("keyboard", "us");
+                    optional.put("name", vminstance.getName());
+                    if (vminstance.getProjectId() != null) {
+                        optional.put("projectid", vminstance.getProject().getUuid());
                     } else {
-                        vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_CREATE));
-                        vminstance.setEventMessage("Started creating VM on Server");
+                        optional.put("account", vminstance.getDepartment().getUserName());
+                        optional.put("domainid",
+                                domainRepository.findOne(vminstance.getDepartment().getDomainId()).getUuid());
+                    }
+                    if (vminstance.getStorageOfferingId() != null) {
+                        optional.put("diskofferingid", vminstance.getStorageOffering().getUuid());
+                    }
+                    String csResponse = cloudStackInstanceService.deployVirtualMachine(
+                            vminstance.getComputeOffering().getUuid(), vminstance.getTemplate().getUuid(),
+                            vminstance.getZone().getUuid(), "json", optional);
+                    JSONObject csInstance = new JSONObject(csResponse).getJSONObject("deployvirtualmachineresponse");
+                    if (csInstance.has("errorcode")) {
+                        errors = this.validateEvent(errors, csInstance.getString("errortext"));
+                        throw new ApplicationException(errors);
+                    } else {
+                        LOGGER.debug("VM UUID", csInstance.getString("id"));
+                        vminstance.setUuid(csInstance.getString("id"));
+                        String instanceResponse = cloudStackInstanceService
+                                .queryAsyncJobResult(csInstance.getString("jobid"), "json");
+                        JSONObject instance = new JSONObject(instanceResponse)
+                                .getJSONObject("queryasyncjobresultresponse");
+                        if (instance.getString("jobstatus").equals("2")) {
+                            vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
+                            vminstance.setEventMessage(csInstance.getJSONObject("jobresult").getString("errortext"));
+                        } else {
+                            vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_CREATE));
+                            vminstance.setEventMessage("Started creating VM on Server");
+                        }
                     }
                 }
+                return virtualmachinerepository.save(vminstance);
             }
-            return virtualmachinerepository.save(vminstance);
         } else {
 
             return virtualmachinerepository.save(vminstance);
@@ -859,20 +873,21 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-            if(vminstance.getTransDisplayName() != null && !vminstance.getTransDisplayName().trim().equalsIgnoreCase("")) {
-            HashMap<String, String> optional = new HashMap<String, String>();
-            optional.put("displayName", vminstance.getTransDisplayName());
-            cloudStackInstanceService.updateVirtualMachine(vminstance.getUuid(), optional);
-            vminstance.setDisplayName(vminstance.getTransDisplayName());
+            if (vminstance.getTransDisplayName() != null
+                    && !vminstance.getTransDisplayName().trim().equalsIgnoreCase("")) {
+                HashMap<String, String> optional = new HashMap<String, String>();
+                optional.put("displayName", vminstance.getTransDisplayName());
+                cloudStackInstanceService.updateVirtualMachine(vminstance.getUuid(), optional);
+                vminstance.setDisplayName(vminstance.getTransDisplayName());
             }
             return virtualmachinerepository.save(vminstance);
         }
     }
 
-     @Override
-        public List<VmInstance> findByDepartment(Long id) throws Exception {
-            return virtualmachinerepository.findByDepartment(id);
-        }
+    @Override
+    public List<VmInstance> findByDepartment(Long id) throws Exception {
+        return virtualmachinerepository.findByDepartment(id);
+    }
 
     @Override
     public List<VmInstance> findByProjectAndStatus(Long projectId, List<Status> statusCode) throws Exception {
@@ -884,4 +899,150 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     public List<VmInstance> findByDepartmentAndStatus(Long departmentId, List<Status> statusCode) throws Exception {
         return virtualmachinerepository.findByDepartmentAndStatus(departmentId, statusCode);
     }
+
+    /**
+     * Check resouce capacity to create new VM.
+     *
+     * @param vm vm instance.
+     * @return error message.
+     * @throws Exception unhandled errors.
+     */
+    public String isResourceAvailable(VmInstance vm) throws Exception {
+        CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
+        this.server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
+        Long memory = 0L, cpu = 0L, primaryStorage = 0L, ip = 0L, secondaryStorage = 0L, tempCount = 0L;
+        String errMessage = null;
+        HashMap<String, String> optional = new HashMap<String, String>();
+        optional.put("zoneid", zoneRepository.findOne(vm.getZoneId()).getUuid());
+        String csResponse = cloudStackResourceCapacity.listCapacity(optional, "json");
+        JSONArray capacityArrayJSON = null;
+        JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("listcapacityresponse");
+        if (csCapacity.has("capacity")) {
+            capacityArrayJSON = csCapacity.getJSONArray("capacity");
+            for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
+                String type = capacityArrayJSON.getJSONObject(i).getString("type");
+                Long tempTotalCapacity = Long.valueOf(capacityArrayJSON.getJSONObject(i).getString("capacitytotal"));
+                Long tempCapacityUsed = Long.valueOf(capacityArrayJSON.getJSONObject(i).getString("capacityused"));
+                switch (type) {
+                case "0":
+                    tempCount = updateResourceCount(vm, "9");
+                    memory = tempTotalCapacity - tempCapacityUsed;
+                    if (memory < Long.valueOf(vm.getComputeOffering().getMemory().toString())) {
+                        if (vm.getProjectId() != null) {
+                            errMessage = "Maximum number of resources of type 'memory' for project "
+                                    + vm.getProject().getName() + " has been exceeded.";
+                        } else {
+                            errMessage = "Maximum number of resources of type 'memory' for current domain "
+                                    + domainRepository.findOne(vm.getDepartment().getDomainId()).getName()
+                                    + " has been exceeded.";
+                        }
+                    }
+                    break;
+                case "1":
+                    tempCount = updateResourceCount(vm, "8");
+                    cpu = tempTotalCapacity - tempCapacityUsed;
+                    if (Long.valueOf(vm.getComputeOffering().getClockSpeed().toString()) > cpu) {
+                        if (vm.getProjectId() != null) {
+                            errMessage = "Maximum number of resources of type 'cpu' for project "
+                                    + vm.getProject().getName() + " has been exceeded.";
+                        } else {
+                            errMessage = "Maximum number of resources of type 'cpu' for current domain "
+                                    + domainRepository.findOne(vm.getDepartment().getDomainId()).getName()
+                                    + " has been exceeded.";
+                        }
+                    }
+                    break;
+                case "2":
+                    tempCount = updateResourceCount(vm, "11");
+                    secondaryStorage = tempTotalCapacity - tempCapacityUsed;
+                    if (secondaryStorage < tempCount) {
+                        if (vm.getProjectId() != null) {
+                            errMessage = "Maximum number of resources of type 'seconday storage' for project "
+                                    + vm.getProject().getName() + " has been exceeded.";
+                        } else {
+                            errMessage = "Maximum number of resources of type 'seconday storage' for current domain "
+                                    + domainRepository.findOne(vm.getDepartment().getDomainId()).getName()
+                                    + " has been exceeded.";
+                        }
+                    }
+                    break;
+                case "3":
+                    tempCount = updateResourceCount(vm, "10");
+                    primaryStorage = tempTotalCapacity - tempCapacityUsed;
+                    if (primaryStorage < vm.getTemplate().getSize()) {
+                        if (vm.getProjectId() != null) {
+                            errMessage = "Maximum number of resources of type 'primary storage' for project "
+                                    + vm.getProject().getName() + " has been exceeded.";
+                        } else {
+                            errMessage = "Maximum number of resources of type 'primary storage' for current domain "
+                                    + domainRepository.findOne(vm.getDepartment().getDomainId()).getName()
+                                    + " has been exceeded.";
+                        }
+                    }
+                    break;
+                case "4":
+                    tempCount = updateResourceCount(vm, "1");
+                    ip = tempTotalCapacity - tempCapacityUsed;
+                    optional.clear();
+                    optional.put("associatedNetworkId", vm.getNetworkUuid());
+                    optional.put("listall", "true");
+                    String csIpResponse = cloudStackResourceCapacity.listPublicIpAddress(optional, "json");
+                    JSONObject csIpCapacity = new JSONObject(csIpResponse)
+                            .getJSONObject("listpublicipaddressesresponse");
+                    if (csIpCapacity.has("count")) {
+                        LOGGER.debug("Already Ip address acquired ", type);
+                    } else {
+                        if (ip < 1) {
+                            if (vm.getProjectId() != null) {
+                                errMessage = "Maximum number of resources of type 'public IP addresses' for project "
+                                        + vm.getProject().getName() + " has been exceeded.";
+                            } else {
+                                errMessage = "Maximum number of resources of type 'public IP addresses' for current domain "
+                                        + domainRepository.findOne(vm.getDepartment().getDomainId()).getName()
+                                        + " has been exceeded.";
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    LOGGER.debug("No Resource ", type);
+                }
+            }
+
+        }
+        return errMessage;
+    }
+
+    /**
+     * Check resouce count to create new VM.
+     *
+     * @param vm vm instance.
+     * @param type resource type.
+     * @return resouce count.
+     * @throws Exception unhandled errors.
+     */
+    public Long updateResourceCount(VmInstance vm, String type) throws Exception {
+        CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
+        this.server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
+        HashMap<String, String> optional = new HashMap<String, String>();
+        if (vm.getProjectId() != null) {
+            optional.put("projectid", vm.getProject().getUuid());
+        } else {
+            optional.put("domainid", domainRepository.findOne(vm.getDepartment().getDomainId()).getUuid());
+        }
+        optional.put("resourcetype", type);
+        String csResponse = cloudStackResourceCapacity.updateResourceCount(optional, "json");
+        JSONArray capacityArrayJSON = null;
+        JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
+        if (csCapacity.has("resourcecount")) {
+            capacityArrayJSON = csCapacity.getJSONArray("resourcecount");
+            for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
+                String resource = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
+                return Long.valueOf(resource);
+
+            }
+        }
+        return 0L;
+    }
+
 }
