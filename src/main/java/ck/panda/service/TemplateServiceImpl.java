@@ -197,8 +197,9 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     public List<Template> findByTemplate() throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if(domain != null && domain.getName().equals("ROOT")) {
-            return csPrepareTemplate((List<Template>) templateRepository.findByTemplateAndFeature("ALL", TemplateType.SYSTEM, Status.ACTIVE, true));
+        if (domain != null && domain.getName().equals("ROOT")) {
+            return csPrepareTemplate((List<Template>) templateRepository.findByTemplateAndFeature("ALL",
+                    TemplateType.SYSTEM, Status.ACTIVE, true));
         }
         return csPrepareTemplate(templateRepository.findByTemplate("ALL", TemplateType.SYSTEM, Status.ACTIVE, true));
     }
@@ -206,50 +207,55 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     public List<Template> findByFilters(Template template) throws Exception {
         Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if(template.getArchitecture() == null) {
+        if (template.getArchitecture() == null) {
             template.setArchitecture("ALL");
         }
-        if(template.getOsCategory() == null ) {
-            if(domain != null && domain.getName().equals("ROOT")) {
-                return csPrepareTemplate( (List<Template>) templateRepository.findByTemplateAndFeature(template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true) );
+        if (template.getOsCategory() == null) {
+            if (domain != null && domain.getName().equals("ROOT")) {
+                return csPrepareTemplate((List<Template>) templateRepository.findByTemplateAndFeature(
+                        template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true));
             }
-            return (List<Template>) templateRepository.findByTemplate(template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true);
-        } else  {
-            if(domain != null && domain.getName().equals("ROOT")) {
-            	return csPrepareTemplate(templateRepository.findAllByOsCategoryAndArchitectureAndType(template.getOsCategory(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true));
+            return (List<Template>) templateRepository.findByTemplate(template.getArchitecture(), TemplateType.SYSTEM,
+                    Status.ACTIVE, true);
+        } else {
+            if (domain != null && domain.getName().equals("ROOT")) {
+                return csPrepareTemplate(
+                        templateRepository.findAllByOsCategoryAndArchitectureAndType(template.getOsCategory(),
+                                template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true));
 
             }
-            return csPrepareTemplate(templateRepository.findAllByOsCategoryAndArchitectureAndTypeAndStatus(template.getOsCategory(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true));
+            return csPrepareTemplate(templateRepository.findAllByOsCategoryAndArchitectureAndTypeAndStatus(
+                    template.getOsCategory(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true));
         }
     }
 
     public List<Template> csPrepareTemplate(List<Template> templates) throws Exception {
-		configUtil.setServer(1L);
-		List<Template> allTemplate = new ArrayList<Template>();
-		for(Template template:templates){
-		String resp = cloudStackTemplateService.prepareTemplate(template.getUuid(), template.getZone().getUuid(),
-				"json");
-		try {
-			JSONObject templateJSON = new JSONObject(resp).getJSONObject("preparetemplateresponse");
-			JSONArray templateArray = (JSONArray) templateJSON.get("template");
-			for (int i = 0; i < templateArray.length(); i++) {
-				JSONObject jsonobject = templateArray.getJSONObject(i);
-				if (jsonobject.getBoolean("isready")) {
-						if (template.getSize() == null) {
-							Template persistTemplate = templateRepository.findOne(template.getId());
-							persistTemplate.setSize(jsonobject.getLong("size"));
-							templateRepository.save(persistTemplate);
-						}
-						allTemplate.add(template);
-				} else {
-					LOGGER.debug("Not yet complete");
-				}
-			}
-		} catch (Exception e) {
-			LOGGER.error("ERROR AT TEMPLATE CREATION", e);
-		}
-		}
-		return allTemplate;
+        configUtil.setServer(1L);
+        List<Template> allTemplate = new ArrayList<Template>();
+        for (Template template : templates) {
+            String resp = cloudStackTemplateService.prepareTemplate(template.getUuid(), template.getZone().getUuid(),
+                    "json");
+            try {
+                JSONObject templateJSON = new JSONObject(resp).getJSONObject("preparetemplateresponse");
+                JSONArray templateArray = (JSONArray) templateJSON.get("template");
+                for (int i = 0; i < templateArray.length(); i++) {
+                    JSONObject jsonobject = templateArray.getJSONObject(i);
+                    if (jsonobject.getBoolean("isready")) {
+                        if (template.getSize() == null) {
+                            Template persistTemplate = templateRepository.findOne(template.getId());
+                            persistTemplate.setSize(jsonobject.getLong("size"));
+                            templateRepository.save(persistTemplate);
+                        }
+                        allTemplate.add(template);
+                    } else {
+                        LOGGER.debug("Not yet complete");
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.error("ERROR AT TEMPLATE CREATION", e);
+            }
+        }
+        return allTemplate;
     }
 
     /**

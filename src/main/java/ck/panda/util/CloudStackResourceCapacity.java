@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * CloudStack resource capacity service for cloudStack connectivity with the Cloud Stack
- * server.
+ * CloudStack resource capacity service for cloudStack connectivity with the
+ * Cloud Stack server.
  *
  */
 @Service
@@ -41,7 +41,6 @@ public class CloudStackResourceCapacity {
         String responseDocument = server.request(arguments);
         return responseDocument;
     }
-
 
     /**
      * Update resource count.
@@ -87,6 +86,5 @@ public class CloudStackResourceCapacity {
         String responseDocument = server.request(arguments);
         return responseDocument;
     }
-
 
 }

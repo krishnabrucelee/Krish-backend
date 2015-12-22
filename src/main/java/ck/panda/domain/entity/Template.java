@@ -238,6 +238,7 @@ public class Template implements Serializable {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime createdDateTime;
 
+    /** modified date and time. */
     @LastModifiedDate
     @Column(name = "updated_date_time")
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
@@ -264,8 +265,9 @@ public class Template implements Serializable {
     @Column(name = "is_active")
     private Boolean isActive;
 
-	/**
+    /**
      * Get the id.
+     *
      * @return id
      */
     public Long getId() {
@@ -274,6 +276,7 @@ public class Template implements Serializable {
 
     /**
      * Set the id.
+     *
      * @param id - the Long to set
      */
     public void setId(Long id) {
@@ -282,6 +285,7 @@ public class Template implements Serializable {
 
     /**
      * Get the uuid.
+     *
      * @return uuid
      */
     public String getUuid() {
@@ -290,6 +294,7 @@ public class Template implements Serializable {
 
     /**
      * Set the uuid.
+     *
      * @param uuid - the String to set
      */
     public void setUuid(String uuid) {
@@ -298,6 +303,7 @@ public class Template implements Serializable {
 
     /**
      * Get the unique name.
+     *
      * @return uniqueName
      */
     public String getUniqueName() {
@@ -306,6 +312,7 @@ public class Template implements Serializable {
 
     /**
      * Set the unique name.
+     *
      * @param uniqueName - the String to set
      */
     public void setUniqueName(String uniqueName) {
@@ -314,6 +321,7 @@ public class Template implements Serializable {
 
     /**
      * Get the name.
+     *
      * @return name
      */
     public String getName() {
@@ -322,6 +330,7 @@ public class Template implements Serializable {
 
     /**
      * Set the name.
+     *
      * @param name - the String to set
      */
     public void setName(String name) {
@@ -330,6 +339,7 @@ public class Template implements Serializable {
 
     /**
      * Get the type.
+     *
      * @return type
      */
     public TemplateType getType() {
@@ -338,6 +348,7 @@ public class Template implements Serializable {
 
     /**
      * Set the type.
+     *
      * @param type - the String to set
      */
     public void setType(TemplateType type) {
@@ -346,6 +357,7 @@ public class Template implements Serializable {
 
     /**
      * Get the description.
+     *
      * @return description
      */
     public String getDescription() {
@@ -354,6 +366,7 @@ public class Template implements Serializable {
 
     /**
      * Set the description.
+     *
      * @param description - the String to set
      */
     public void setDescription(String description) {
@@ -362,6 +375,7 @@ public class Template implements Serializable {
 
     /**
      * Get the url.
+     *
      * @return url
      */
     public String getUrl() {
@@ -370,6 +384,7 @@ public class Template implements Serializable {
 
     /**
      * Set the url.
+     *
      * @param url - the String to set
      */
     public void setUrl(String url) {
@@ -378,6 +393,7 @@ public class Template implements Serializable {
 
     /**
      * Get the reference URL.
+     *
      * @return referenceUrl
      */
     public String getReferenceUrl() {
@@ -386,6 +402,7 @@ public class Template implements Serializable {
 
     /**
      * Set the reference URL.
+     *
      * @param referenceUrl - the String to set
      */
     public void setReferenceUrl(String referenceUrl) {
@@ -394,6 +411,7 @@ public class Template implements Serializable {
 
     /**
      * Get the zone.
+     *
      * @return zone
      */
     public Zone getZone() {
@@ -402,6 +420,7 @@ public class Template implements Serializable {
 
     /**
      * Set the zone.
+     *
      * @param zone - the Zone entity to set
      */
     public void setZone(Zone zone) {
@@ -410,6 +429,7 @@ public class Template implements Serializable {
 
     /**
      * Get the hypervisor type.
+     *
      * @return hypervisor
      */
     public Hypervisor getHypervisor() {
@@ -418,6 +438,7 @@ public class Template implements Serializable {
 
     /**
      * Set the hypervisor type.
+     *
      * @param hypervisor - the Hypervisor entity to set
      */
     public void setHypervisor(Hypervisor hypervisor) {
@@ -426,6 +447,7 @@ public class Template implements Serializable {
 
     /**
      * Get the original XS version.
+     *
      * @return xsVersion
      */
     public Boolean getXsVersion() {
@@ -434,6 +456,7 @@ public class Template implements Serializable {
 
     /**
      * Set the original XS version.
+     *
      * @param xsVersion - the Boolean to set
      */
     public void setXsVersion(Boolean xsVersion) {
@@ -442,6 +465,7 @@ public class Template implements Serializable {
 
     /**
      * Get the root disk controller.
+     *
      * @return rootDiskController
      */
     public RootDiskController getRootDiskController() {
@@ -450,6 +474,7 @@ public class Template implements Serializable {
 
     /**
      * Set the root disk controller.
+     *
      * @param rootDiskController - the RootDiskController enum to set
      */
     public void setRootDiskController(RootDiskController rootDiskController) {
@@ -458,6 +483,7 @@ public class Template implements Serializable {
 
     /**
      * Get the NIC adapter.
+     *
      * @return nicAdapter
      */
     public NicAdapter getNicAdapter() {
@@ -466,6 +492,7 @@ public class Template implements Serializable {
 
     /**
      * Set the NIC adapter.
+     *
      * @param nicAdapter - the NicAdapter enum to set
      */
     public void setNicAdapter(NicAdapter nicAdapter) {
@@ -474,6 +501,7 @@ public class Template implements Serializable {
 
     /**
      * Get the keyboard type.
+     *
      * @return keyboardType
      */
     public KeyboardType getKeyboardType() {
@@ -482,6 +510,7 @@ public class Template implements Serializable {
 
     /**
      * Set the keyboard type.
+     *
      * @param keyboardType - the KeyboardType enum to set
      */
     public void setKeyboardType(KeyboardType keyboardType) {
@@ -490,6 +519,7 @@ public class Template implements Serializable {
 
     /**
      * Get the format.
+     *
      * @return format
      */
     public Format getFormat() {
@@ -498,6 +528,7 @@ public class Template implements Serializable {
 
     /**
      * Set the format.
+     *
      * @param format - the Format enum to set
      */
     public void setFormat(Format format) {
@@ -506,6 +537,7 @@ public class Template implements Serializable {
 
     /**
      * Get the OS category.
+     *
      * @return osCategory
      */
     public OsCategory getOsCategory() {
@@ -514,6 +546,7 @@ public class Template implements Serializable {
 
     /**
      * Set the OS category.
+     *
      * @param osCategory - the osCategory entity to set
      */
     public void setOsCategory(OsCategory osCategory) {
@@ -522,6 +555,7 @@ public class Template implements Serializable {
 
     /**
      * Get the OS type.
+     *
      * @return osType
      */
     public OsType getOsType() {
@@ -530,6 +564,7 @@ public class Template implements Serializable {
 
     /**
      * Set the OS type.
+     *
      * @param osType - the osType entity to set
      */
     public void setOsType(OsType osType) {
@@ -538,6 +573,7 @@ public class Template implements Serializable {
 
     /**
      * Get the OS version.
+     *
      * @return osVersion
      */
     public String getOsVersion() {
@@ -546,6 +582,7 @@ public class Template implements Serializable {
 
     /**
      * Set the OS version.
+     *
      * @param osVersion - the String to set
      */
     public void setOsVersion(String osVersion) {
@@ -554,6 +591,7 @@ public class Template implements Serializable {
 
     /**
      * Get the templateCost.
+     *
      * @return templateCost
      */
     public List<TemplateCost> getTemplateCost() {
@@ -562,6 +600,7 @@ public class Template implements Serializable {
 
     /**
      * Set the templateCost.
+     *
      * @param templateCost - the Template cost to set
      */
     public void setTemplateCost(List<TemplateCost> templateCost) {
@@ -570,6 +609,7 @@ public class Template implements Serializable {
 
     /**
      * Get the minimum core.
+     *
      * @return minimumCore
      */
     public Integer getMinimumCore() {
@@ -578,6 +618,7 @@ public class Template implements Serializable {
 
     /**
      * Set the minimum core.
+     *
      * @param minimumCore - the Integer to set
      */
     public void setMinimumCore(Integer minimumCore) {
@@ -586,6 +627,7 @@ public class Template implements Serializable {
 
     /**
      * Get the minimum memory.
+     *
      * @return minimumMemory
      */
     public Integer getMinimumMemory() {
@@ -594,6 +636,7 @@ public class Template implements Serializable {
 
     /**
      * Set the minimum memory.
+     *
      * @param minimumMemory - the Integer to set
      */
     public void setMinimumMemory(Integer minimumMemory) {
@@ -602,6 +645,7 @@ public class Template implements Serializable {
 
     /**
      * Get the architecture.
+     *
      * @return architecture
      */
     public String getArchitecture() {
@@ -610,6 +654,7 @@ public class Template implements Serializable {
 
     /**
      * Set the architecture.
+     *
      * @param architecture - the String to set
      */
     public void setArchitecture(String architecture) {
@@ -618,6 +663,7 @@ public class Template implements Serializable {
 
     /**
      * Get the extractable.
+     *
      * @return extractable
      */
     public Boolean getExtractable() {
@@ -626,6 +672,7 @@ public class Template implements Serializable {
 
     /**
      * Set the extractable.
+     *
      * @param extractable - the Boolean to set
      */
     public void setExtractable(Boolean extractable) {
@@ -634,6 +681,7 @@ public class Template implements Serializable {
 
     /**
      * Get the featured.
+     *
      * @return featured
      */
     public Boolean getFeatured() {
@@ -642,6 +690,7 @@ public class Template implements Serializable {
 
     /**
      * Set the featured.
+     *
      * @param featured - the Boolean to set
      */
     public void setFeatured(Boolean featured) {
@@ -650,6 +699,7 @@ public class Template implements Serializable {
 
     /**
      * Get the routing.
+     *
      * @return routing
      */
     public Boolean getRouting() {
@@ -658,6 +708,7 @@ public class Template implements Serializable {
 
     /**
      * Set the routing.
+     *
      * @param routing - the Boolean to set
      */
     public void setRouting(Boolean routing) {
@@ -666,6 +717,7 @@ public class Template implements Serializable {
 
     /**
      * Get the password enabled.
+     *
      * @return passwordEnabled
      */
     public Boolean getPasswordEnabled() {
@@ -674,6 +726,7 @@ public class Template implements Serializable {
 
     /**
      * Set the password enabled.
+     *
      * @param passwordEnabled - the Boolean to set
      */
     public void setPasswordEnabled(Boolean passwordEnabled) {
@@ -682,6 +735,7 @@ public class Template implements Serializable {
 
     /**
      * Get the one time chargeable.
+     *
      * @return oneTimeChargeable
      */
     public Boolean getOneTimeChargeable() {
@@ -690,6 +744,7 @@ public class Template implements Serializable {
 
     /**
      * Set the one time chargeable.
+     *
      * @param oneTimeChargeable - the Boolean to set
      */
     public void setOneTimeChargeable(Boolean oneTimeChargeable) {
@@ -698,6 +753,7 @@ public class Template implements Serializable {
 
     /**
      * Get the dynamically scalable.
+     *
      * @return dynamicallyScalable
      */
     public Boolean getDynamicallyScalable() {
@@ -706,6 +762,7 @@ public class Template implements Serializable {
 
     /**
      * Set the dynamically scalable.
+     *
      * @param dynamicallyScalable - the Boolean to set
      */
     public void setDynamicallyScalable(Boolean dynamicallyScalable) {
@@ -714,6 +771,7 @@ public class Template implements Serializable {
 
     /**
      * Get the HVM.
+     *
      * @return hvm
      */
     public Boolean getHvm() {
@@ -722,6 +780,7 @@ public class Template implements Serializable {
 
     /**
      * Set the HVM.
+     *
      * @param hvm - the Boolean to set
      */
     public void setHvm(Boolean hvm) {
@@ -730,6 +789,7 @@ public class Template implements Serializable {
 
     /**
      * Get the share.
+     *
      * @return share
      */
     public Boolean getShare() {
@@ -738,6 +798,7 @@ public class Template implements Serializable {
 
     /**
      * Set the share.
+     *
      * @param share - the Boolean to set
      */
     public void setShare(Boolean share) {
@@ -746,6 +807,7 @@ public class Template implements Serializable {
 
     /**
      * Get the detailed description.
+     *
      * @return detailedDescription
      */
     public String getDetailedDescription() {
@@ -754,6 +816,7 @@ public class Template implements Serializable {
 
     /**
      * Set the detailed description.
+     *
      * @param detailedDescription - the String to set
      */
     public void setDetailedDescription(String detailedDescription) {
@@ -762,6 +825,7 @@ public class Template implements Serializable {
 
     /**
      * Get the status.
+     *
      * @return status
      */
     public Status getStatus() {
@@ -770,6 +834,7 @@ public class Template implements Serializable {
 
     /**
      * Set the status.
+     *
      * @param status - the String to set
      */
     public void setStatus(Status status) {
@@ -778,6 +843,7 @@ public class Template implements Serializable {
 
     /**
      * Get the update count.
+     *
      * @return updateCount
      */
     public Integer getUpdateCount() {
@@ -786,6 +852,7 @@ public class Template implements Serializable {
 
     /**
      * Set the update count.
+     *
      * @param updateCount - the Integer to set
      */
     public void setUpdateCount(Integer updateCount) {
@@ -794,6 +861,7 @@ public class Template implements Serializable {
 
     /**
      * Get the version.
+     *
      * @return version
      */
     public Long getVersion() {
@@ -802,6 +870,7 @@ public class Template implements Serializable {
 
     /**
      * Set the version.
+     *
      * @param version - the Long to set
      */
     public void setVersion(Long version) {
@@ -810,6 +879,7 @@ public class Template implements Serializable {
 
     /**
      * Get the created by.
+     *
      * @return createdBy
      */
     public User getCreatedBy() {
@@ -818,6 +888,7 @@ public class Template implements Serializable {
 
     /**
      * Set the created by.
+     *
      * @param createdBy - the User entity to set
      */
     public void setCreatedBy(User createdBy) {
@@ -826,6 +897,7 @@ public class Template implements Serializable {
 
     /**
      * Get the updated by.
+     *
      * @return updatedBy
      */
     public User getUpdatedBy() {
@@ -834,6 +906,7 @@ public class Template implements Serializable {
 
     /**
      * Set the updated by.
+     *
      * @param updatedBy - the User entity to set
      */
     public void setUpdatedBy(User updatedBy) {
@@ -842,6 +915,7 @@ public class Template implements Serializable {
 
     /**
      * Get the created date time.
+     *
      * @return the createdDateTime
      */
     public ZonedDateTime getCreatedDateTime() {
@@ -850,6 +924,7 @@ public class Template implements Serializable {
 
     /**
      * Set the created date time.
+     *
      * @param createdDateTime - the DateTime to set
      */
     public void setCreatedDateTime(ZonedDateTime createdDateTime) {
@@ -858,6 +933,7 @@ public class Template implements Serializable {
 
     /**
      * Get the updated date time.
+     *
      * @return updatedDateTime
      */
     public ZonedDateTime getUpdatedDateTime() {
@@ -866,6 +942,7 @@ public class Template implements Serializable {
 
     /**
      * Set the updated date time.
+     *
      * @param updatedDateTime - the DateTime to set
      */
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
@@ -874,6 +951,7 @@ public class Template implements Serializable {
 
     /**
      * Get the sync flag for temporary usage.
+     *
      * @return syncFlag
      */
     public Boolean getSyncFlag() {
@@ -882,6 +960,7 @@ public class Template implements Serializable {
 
     /**
      * Set the sync flag for temporary usage.
+     *
      * @param syncFlag - the Boolean to set
      */
     public void setSyncFlag(Boolean syncFlag) {
@@ -890,6 +969,7 @@ public class Template implements Serializable {
 
     /**
      * Get the display text.
+     *
      * @return displayText
      */
     public String getDisplayText() {
@@ -898,6 +978,7 @@ public class Template implements Serializable {
 
     /**
      * Set the display text.
+     *
      * @param displayText - the String to set
      */
     public void setDisplayText(String displayText) {
@@ -905,39 +986,40 @@ public class Template implements Serializable {
     }
 
     /**
-	 * Get the Template.java of the Template.java
+     * Get the Template.java of the Template.java
+     *
+     * @return the department of Template.java
+     */
+    public Department getDepartment() {
+        return department;
+    }
 
-	 * @return the department of Template.java
-	 */
-	public Department getDepartment() {
-		return department;
-	}
+    /**
+     * @param department the department to set
+     */
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
 
-	/**
-	 * @param department the department to set
-	 */
-	public void setDepartment(Department department) {
-		this.department = department;
-	}
+    /**
+     * Get the Template.java of the Template.java
+     *
+     * @return the departmentId of Template.java
+     */
+    public Long getDepartmentId() {
+        return departmentId;
+    }
 
-	/**
-	 * Get the Template.java of the Template.java
-
-	 * @return the departmentId of Template.java
-	 */
-	public Long getDepartmentId() {
-		return departmentId;
-	}
-
-	/**
-	 * @param departmentId the departmentId to set
-	 */
-	public void setDepartmentId(Long departmentId) {
-		this.departmentId = departmentId;
-	}
+    /**
+     * @param departmentId the departmentId to set
+     */
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
+    }
 
     /**
      * Get the Transient type.
+     *
      * @return transZone
      */
     public String getTransZone() {
@@ -946,6 +1028,7 @@ public class Template implements Serializable {
 
     /**
      * Set the Transient type.
+     *
      * @param transZone - the String to set
      */
     public void setTransZone(String transZone) {
@@ -954,6 +1037,7 @@ public class Template implements Serializable {
 
     /**
      * Get the Transient OS type.
+     *
      * @return transOsType
      */
     public String getTransOsType() {
@@ -962,6 +1046,7 @@ public class Template implements Serializable {
 
     /**
      * Set the Transient OS type.
+     *
      * @param transOsType - the String to set
      */
     public void setTransOsType(String transOsType) {
@@ -970,127 +1055,128 @@ public class Template implements Serializable {
 
     /**
      * Get the Transient hypervisor.
+     *
      * @return transHypervisor
      */
     public String getTransHypervisor() {
         return transHypervisor;
     }
 
-	/**
-	 * Set the Transient hypervisor.
-	 *
-	 * @param transHypervisor the String to set
-	 */
-	public void setTransHypervisor(String transHypervisor) {
-		this.transHypervisor = transHypervisor;
-	}
+    /**
+     * Set the Transient hypervisor.
+     *
+     * @param transHypervisor the String to set
+     */
+    public void setTransHypervisor(String transHypervisor) {
+        this.transHypervisor = transHypervisor;
+    }
 
-	/**
-	 * Get template size.
-	 *
-	 * @return the size
-	 */
-	public Long getSize() {
-		return size;
-	}
+    /**
+     * Get template size.
+     *
+     * @return the size
+     */
+    public Long getSize() {
+        return size;
+    }
 
-	/**
-	 * Set template size.
-	 *
-	 * @param size the size to set
-	 */
-	public void setSize(Long size) {
-		this.size = size;
-	}
+    /**
+     * Set template size.
+     *
+     * @param size the size to set
+     */
+    public void setSize(Long size) {
+        this.size = size;
+    }
 
-	/**
-	 * @return the isActive
-	 */
-	public Boolean getIsActive() {
-		return isActive;
-	}
+    /**
+     * @return the isActive
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
 
-	/**
-	 * @param isActive the isActive to set
-	 */
-	public void setIsActive(Boolean isActive) {
-		this.isActive = isActive;
-	}
+    /**
+     * @param isActive the isActive to set
+     */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
 
-
-
-	/** RootDiskController enum type used to list the static root disk controller values. */
+    /**
+     * RootDiskController enum type used to list the static root disk controller
+     * values.
+     */
     public enum RootDiskController {
-        /** Root disk controller type as SCSI. */
-        SCSI,
-        /** Root disk controller type as IDE. */
-        IDE
+    /** Root disk controller type as SCSI. */
+    SCSI, /** Root disk controller type as IDE. */
+    IDE
     }
 
     /** NicAdapter enum type used to list the static NIC adapter values. */
     public enum NicAdapter {
-        /** NIC adapter type as E1000. */
-        E1000,
-        /** NIC adapter type as PCNET32. */
-        PCNET32,
-        /** NIC adapter type as VMXNET2. */
-        VMXNET2,
-        /** NIC adapter type as VMXNET3. */
-        VMXNET3
+    /** NIC adapter type as E1000. */
+    E1000,
+    /** NIC adapter type as PCNET32. */
+    PCNET32,
+    /** NIC adapter type as VMXNET2. */
+    VMXNET2,
+    /** NIC adapter type as VMXNET3. */
+    VMXNET3
     }
 
     /** KeyboardType enum type used to list the static Keyboard type values. */
     public enum KeyboardType {
-        /** Keyboard type as US. */
-        US_KEYBOARD,
-        /** Keyboard type as UK. */
-        UK_KEYBOARD,
-        /** Keyboard type as Japanese. */
-        JAPANESE_KEYBOARD,
-        /** Keyboard type as simplified chinese. */
-        SIMPLIFIED_CHINESE
+    /** Keyboard type as US. */
+    US_KEYBOARD,
+    /** Keyboard type as UK. */
+    UK_KEYBOARD,
+    /** Keyboard type as Japanese. */
+    JAPANESE_KEYBOARD,
+    /** Keyboard type as simplified chinese. */
+    SIMPLIFIED_CHINESE
     }
 
     /** Format enum type used to list the static format values. */
     public enum Format {
-        /** Hypervisor format type as VHD. */
-        VHD,
-        /** Hypervisor format type as VHDX. */
-        VHDX,
-        /** Hypervisor format type as QCOW2. */
-        QCOW2,
-        /** Hypervisor format type as RAW. */
-        RAW,
-        /** Hypervisor format type as VMDK. */
-        VMDK,
-        /** Hypervisor format type as OVA. */
-        OVA,
-        /** Hypervisor format type as BAREMETAL. */
-        BAREMETAL,
-        /** Hypervisor format type as TAR. */
-        TAR
+    /** Hypervisor format type as VHD. */
+    VHD,
+    /** Hypervisor format type as VHDX. */
+    VHDX,
+    /** Hypervisor format type as QCOW2. */
+    QCOW2,
+    /** Hypervisor format type as RAW. */
+    RAW,
+    /** Hypervisor format type as VMDK. */
+    VMDK,
+    /** Hypervisor format type as OVA. */
+    OVA,
+    /** Hypervisor format type as BAREMETAL. */
+    BAREMETAL,
+    /** Hypervisor format type as TAR. */
+    TAR
     }
 
     /** TemplateType enum type used to list the static template type values. */
     public enum TemplateType {
-        /** Template type as SYSTEM. */
-        SYSTEM,
-        /** Template type as BUILTIN. */
-        BUILTIN,
-        /** Template type as PERHOST. */
-        PERHOST,
-        /** Template type as USER. */
-        USER,
-        /** Template type as ROUTING. */
-        ROUTING
+    /** Template type as SYSTEM. */
+    SYSTEM,
+    /** Template type as BUILTIN. */
+    BUILTIN,
+    /** Template type as PERHOST. */
+    PERHOST,
+    /** Template type as USER. */
+    USER,
+    /** Template type as ROUTING. */
+    ROUTING
     }
 
     /** Status enum type used to list the status values. */
     public enum Status {
-        /** Template status as ACTIVE. */
-        ACTIVE,
-        /** Template status as INACTIVE. */
-        INACTIVE
+    /** Template status as ACTIVE. */
+    ACTIVE,
+    /** Template status as INACTIVE. */
+    INACTIVE
     }
 
     /**
