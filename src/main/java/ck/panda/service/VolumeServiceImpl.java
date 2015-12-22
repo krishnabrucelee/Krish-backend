@@ -250,15 +250,6 @@ public class VolumeServiceImpl implements VolumeService {
             optional.put("size", volume.getDiskSize().toString());
         }
 
-//        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-//        if (domain != null && !domain.getName().equals("ROOT")) {
-//            optional.put("domainid", departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getDomain().getUuid());
-//            optional.put("account", departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
-//        } else {
-//            optional.put("domainid", tokenDetails.getTokenDetails("domainid"));
-////            optional.put("account", departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
-//        }
-
         if (volume.getDiskMaxIops() != null) {
             optional.put("maxiops", volume.getDiskMaxIops().toString());
         }
@@ -270,8 +261,13 @@ public class VolumeServiceImpl implements VolumeService {
         if (volume.getProject() != null) {
             optional.put("projectid", volume.getProject().getUuid());
         } else {
-            optional.put("account",volume.getDepartment().getUserName());
-            optional.put("domainid", domainRepository.findOne(volume.getDepartment().getDomainId()).getUuid());
+            Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+            if (domain != null && !domain.getName().equals("ROOT")) {
+                optional.put("domainid", departmentRepository
+                        .findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getDomain().getUuid());
+                optional.put("account", departmentRepository
+                        .findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
+            }
         }
 
         return optional;
