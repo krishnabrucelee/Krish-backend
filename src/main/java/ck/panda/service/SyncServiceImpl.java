@@ -1346,7 +1346,7 @@ public class SyncServiceImpl implements SyncService {
             volumeService.save(csVolumeMap.get(key));
         }
 
-      //Update instance disk size from volume
+        //Update instance disk size from volume
         List<Volume> listVolume = volumeService.findAll();
         for (int j = 0; j < listVolume.size(); j++) {
             if (listVolume.get(j).getVolumeType() == VolumeType.ROOT) {
