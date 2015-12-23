@@ -19,7 +19,7 @@ import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Domain.Status;
 import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.User;
-import ck.panda.domain.entity.User.Type;
+import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackAccountService;
@@ -176,8 +176,8 @@ public class DomainServiceImpl implements DomainService {
      * Update user role.
      */
     void syncUpdateUserRole(User userObj) {
-    	List<Type> types = new ArrayList<Type>();
-        types.add(Type.DOMAIN_ADMIN);
+    	List<UserType> types = new ArrayList<UserType>();
+        types.add(UserType.DOMAIN_ADMIN);
         try {
 			Role newRole = new Role();
 			newRole.setName("FULL_PERMISSION");
