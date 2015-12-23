@@ -30,9 +30,7 @@ spring:
         username: ${RABBITMQ_USERNAME}
         password: ${RABBITMQ_PASSWORD}
         exchange:
-            name: ${RABBITMQ_EXCHANGE}
-
-
+        	name: ${RABBITMQ_EXCHANGE}
 
     # CS server Routing key
         server:
