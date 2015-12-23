@@ -47,6 +47,7 @@ import ck.panda.domain.repository.jpa.VolumeRepository;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
+import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.domain.entity.Zone;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackServer;
@@ -1343,6 +1344,16 @@ public class SyncServiceImpl implements SyncService {
         for (String key : csVolumeMap.keySet()) {
 
             volumeService.save(csVolumeMap.get(key));
+        }
+
+        //Update instance disk size from volume
+        List<Volume> listVolume = volumeService.findAll();
+        for (int j = 0; j < listVolume.size(); j++) {
+            if (listVolume.get(j).getVolumeType() == VolumeType.ROOT) {
+                VmInstance vmInstance = virtualMachineService.find(listVolume.get(j).getVmInstanceId());
+                vmInstance.setVolumeSize(listVolume.get(j).getDiskSize());
+                virtualMachineService.update(vmInstance);
+            }
         }
     }
 
