@@ -301,9 +301,9 @@ public class DepartmentServiceImpl implements DepartmentService {
                 Department department = Department.convert(userListJSON.getJSONObject(i));
                 department.setDomainId(convertEntityService.getDomainId(department.getTransDomainId()));
 //              TODO : Need to get root admin account for role permission so you need to check the department where our you use.
-//              if (department.getType() == Department.AccountType.USER) {
-                departmentList.add(department);
-//              }
+                if (!department.getUserName().equalsIgnoreCase("baremetal-system-account")) {
+                    departmentList.add(department);
+                }
             }
         }
         return departmentList;
@@ -337,7 +337,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     public List<Department> findAllBySync() throws Exception {
         return (List<Department>) departmentRepo.findAll();
     }
-    
+
     @Override
     public List<Department> findDepartmentsByDomainAndAccountTypesAndActive(Long domainId, List<AccountType> types, Boolean isActive) throws Exception {
         return (List<Department>) departmentRepo.findDepartmentsByDomainAndAccountTypesAndActive(domainId, types, isActive);

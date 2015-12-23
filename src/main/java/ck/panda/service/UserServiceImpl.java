@@ -213,7 +213,9 @@ public class UserServiceImpl implements UserService {
                 User user = User.convert(userListJSON.getJSONObject(i));
                 user.setDepartment(convertEntityService.getDepartment(user.getTransDepartment()));
                 user.setDomainId(convertEntityService.getDomainId(user.getTransDomainId()));
-                userList.add(user);
+                if (!user.getUserName().equalsIgnoreCase("baremetal-system-account")) {
+                    userList.add(user);
+                }
             }
         }
         return userList;
