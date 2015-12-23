@@ -17,6 +17,7 @@ import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.Status;
+import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.domain.repository.jpa.DepartmentReposiory;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
@@ -250,15 +251,6 @@ public class VolumeServiceImpl implements VolumeService {
             optional.put("size", volume.getDiskSize().toString());
         }
 
-//        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-//        if (domain != null && !domain.getName().equals("ROOT")) {
-//            optional.put("domainid", departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getDomain().getUuid());
-//            optional.put("account", departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
-//        } else {
-//            optional.put("domainid", tokenDetails.getTokenDetails("domainid"));
-////            optional.put("account", departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
-//        }
-
         if (volume.getDiskMaxIops() != null) {
             optional.put("maxiops", volume.getDiskMaxIops().toString());
         }
@@ -269,11 +261,18 @@ public class VolumeServiceImpl implements VolumeService {
 
         if (volume.getProject() != null) {
             optional.put("projectid", volume.getProject().getUuid());
+        } else if(volume.getDepartment() != null) {
+             optional.put("account",volume.getDepartment().getUserName());
+             optional.put("domainid", domainRepository.findOne(volume.getDepartment().getDomainId()).getUuid());
         } else {
-            optional.put("account",volume.getDepartment().getUserName());
-            optional.put("domainid", domainRepository.findOne(volume.getDepartment().getDomainId()).getUuid());
+            Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+            if (domain != null && !domain.getName().equals("ROOT")) {
+                optional.put("domainid", departmentRepository
+                        .findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getDomain().getUuid());
+                optional.put("account", departmentRepository
+                        .findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
+            }
         }
-
         return optional;
     }
 
@@ -642,5 +641,15 @@ public class VolumeServiceImpl implements VolumeService {
     @Override
     public Volume findByInstanceAndVolumeType(Long volume) throws Exception {
         return volumeRepo.findByInstanceAndVolumeType(volume, Volume.VolumeType.ROOT, true);
+    }
+
+    @Override
+    public List<Volume> findByProjectAndVolumeType(Long projectId, List<VolumeType> volumeType) {
+        return volumeRepo.findByProjectAndVolumeType(projectId, volumeType);
+    }
+
+    @Override
+    public List<Volume> findByDepartmentAndVolumeType(Long departmentId, List<VolumeType> volumeType) {
+        return volumeRepo.findByDepartmentAndVolumeType(departmentId, volumeType);
     }
 }

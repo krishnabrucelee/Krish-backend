@@ -19,6 +19,7 @@ import ck.panda.rabbitmq.util.AlertEventListener;
 import ck.panda.rabbitmq.util.AsynchronousJobListener;
 import ck.panda.rabbitmq.util.ResourceStateListener;
 import ck.panda.rabbitmq.util.UsageEventListener;
+import ck.panda.service.AsynchronousJobService;
 import ck.panda.service.SyncService;
 import ck.panda.service.VirtualMachineService;
 import ck.panda.util.CloudStackServer;
@@ -262,9 +263,10 @@ public class RabbitConfig {
      */
     @Bean
     MessageListenerAdapter asynchJobListenerAdapter() {
-        SyncService syncService = applicationContext.getBean(SyncService.class);
+    	SyncService syncService = applicationContext.getBean(SyncService.class);
+    	AsynchronousJobService asynchService = applicationContext.getBean(AsynchronousJobService.class);
         CloudStackServer cloudStackServer = applicationContext.getBean(CloudStackServer.class);
-        return new MessageListenerAdapter(new AsynchronousJobListener(syncService, cloudStackServer));
+        return new MessageListenerAdapter(new AsynchronousJobListener(syncService, asynchService, cloudStackServer));
     }
 
     /**

@@ -41,12 +41,13 @@ import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
-import ck.panda.domain.entity.User.Type;
+import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.domain.repository.jpa.VolumeRepository;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
+import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.domain.entity.Zone;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackServer;
@@ -1344,6 +1345,16 @@ public class SyncServiceImpl implements SyncService {
 
             volumeService.save(csVolumeMap.get(key));
         }
+
+        //Update instance disk size from volume
+        List<Volume> listVolume = volumeService.findAll();
+        for (int j = 0; j < listVolume.size(); j++) {
+            if (listVolume.get(j).getVolumeType() == VolumeType.ROOT) {
+                VmInstance vmInstance = virtualMachineService.find(listVolume.get(j).getVmInstanceId());
+                vmInstance.setVolumeSize(listVolume.get(j).getDiskSize());
+                virtualMachineService.update(vmInstance);
+            }
+        }
     }
 
     /**
@@ -1884,9 +1895,9 @@ public class SyncServiceImpl implements SyncService {
      * Update user role.
      */
     void syncUpdateUserRole() {
-        List<Type> types = new ArrayList<Type>();
-        types.add(Type.ROOT_ADMIN);
-        types.add(Type.DOMAIN_ADMIN);
+        List<UserType> types = new ArrayList<UserType>();
+        types.add(UserType.ROOT_ADMIN);
+        types.add(UserType.DOMAIN_ADMIN);
         try {
             List<User> userList = userService.findUsersByTypesAndActive(types, true);
             for (User user : userList) {

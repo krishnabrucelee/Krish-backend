@@ -4,10 +4,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ck.panda.constants.EventTypes;
 import ck.panda.service.SyncService;
 import ck.panda.util.CloudStackServer;
+import ck.panda.util.infrastructure.AuthenticatedExternalWebService;
+import ck.panda.util.infrastructure.externalwebservice.ExternalWebServiceStub;
 
 /**
  * Action event listener will listen and update resource data to our App DB when an event handled directly in
@@ -58,6 +63,11 @@ public class ActionListener implements MessageListener {
      */
     public void handleActionEvent(ResponseEvent eventObject) throws Exception {
         syncService.init(cloudStackServer);
+        ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
+        AuthenticatedExternalWebService authenticatedExternalWebService = new AuthenticatedExternalWebService("admin", null,
+                AuthorityUtils.commaSeparatedStringToAuthorityList("BACKEND_ADMIN"));
+        authenticatedExternalWebService.setExternalWebService(externalWebService);
+        SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);
         Thread.sleep(5000);
         switch (eventObject.getEventStart()) {
         case EventTypes.EVENT_VM:
@@ -112,7 +122,9 @@ public class ActionListener implements MessageListener {
                 syncService.syncNetworkOffering();
             } else {
                 LOGGER.debug("Network sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
-                syncService.syncNetwork();
+                if (eventObject.getEvent().contains("NETWORK.CREATE")) {
+                    syncService.syncNetwork();
+                }
             }
             break;
         case EventTypes.EVENT_PHYSICAL:
