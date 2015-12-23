@@ -131,4 +131,18 @@ public class ProjectController extends CRUDController<Project>implements ApiCont
     public List<Project> findByDepartmentAndIsActive(@PathVariable(PATH_ID) Long id) throws Exception {
        return projectService.findByDepartmentAndIsActive(id, true);
     }
+
+
+    /**
+     * Get the project by department.
+     *
+     * @param id user id.
+     * @return project
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/user/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public List<Project> findByUserAndIsActive(@PathVariable(PATH_ID) Long id) throws Exception {
+       return projectService.findByUserAndIsActive(id, true);
+    }
 }

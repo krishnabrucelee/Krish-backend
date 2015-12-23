@@ -1,5 +1,6 @@
 package ck.panda.web.resource;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,6 +21,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.service.DepartmentService;
 import ck.panda.service.DomainService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -111,7 +113,10 @@ public class DepartmentController extends CRUDController<Department> implements 
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<Department> getDepartmentListByDomain(@RequestParam("dept") Long id) throws Exception {
-        return departmentService.findByDomainAndIsActive(id, true);
+    	List<AccountType> types = new ArrayList<AccountType>();
+    	types.add(Department.AccountType.DOMAIN_ADMIN);
+    	types.add(Department.AccountType.USER);
+        return departmentService.findDepartmentsByDomainAndAccountTypesAndActive(id, types, true);
     }
 
     /**

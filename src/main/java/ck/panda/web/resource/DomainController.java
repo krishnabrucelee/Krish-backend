@@ -1,10 +1,9 @@
 package ck.panda.web.resource;
 
+import java.util.ArrayList;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -22,7 +21,9 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.service.DomainService;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -39,6 +40,14 @@ public class DomainController extends CRUDController<Domain> implements ApiContr
     /** Service reference to Domain. */
     @Autowired
     private DomainService domainService;
+    
+    /** Inject domain service business logic. */
+    @Autowired
+    private DomainRepository domainRepository;
+    
+    /** Autowired TokenDetails */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new domain.", response = Domain.class)
     @Override
@@ -79,6 +88,12 @@ public class DomainController extends CRUDController<Domain> implements ApiContr
       @ResponseStatus(HttpStatus.OK)
       @ResponseBody
       protected List<Domain> getSearch() throws Exception {
+    	  Domain domain = domainService.find(Long.parseLong(tokenDetails.getTokenDetails("domainid")));
+          if (domain != null && !domain.getName().equals("ROOT")) {
+        	  List<Domain> domainList = new ArrayList<Domain>();
+        	  domainList.add(domain);
+              return domainList;
+          }
           return domainService.findAll();
       }
 

@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
+import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.service.SyncService;
@@ -190,8 +191,8 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public String getVNC(@RequestBody VmInstance vminstance) throws Exception {
-    	syncService.init(cloudStackServer);
-    	syncService.syncInstances();
+        syncService.init(cloudStackServer);
+        syncService.syncInstances();
         String token = null;
         VmInstance persistInstance = virtualmachineservice.find(vminstance.getId());
         String host = persistInstance.getHost().getHostIpaddress(); // VM's the host's IP address
@@ -217,4 +218,18 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
         return virtualmachineservice.upgradeDowngradeVM(vminstance);
     }
 
+//    /**
+//     * Get the department by Domain.
+//     *
+//     * @param id department id.
+//     * @return department
+//     * @throws Exception error occurs.
+//     */
+//    @RequestMapping(value = "/volume/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+//    @ResponseStatus(HttpStatus.OK)
+//    public List<Project> findByDepartmentAndIsActive(@PathVariable(PATH_ID) Long id) throws Exception {
+//
+//       return null;
+//              // virtualmachineservice.findByDepartmentAndIsActive(id, true);
+//    }
 }

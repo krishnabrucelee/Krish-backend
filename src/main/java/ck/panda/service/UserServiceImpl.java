@@ -51,9 +51,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private AccountService accountService;
 
-    /** Autowired configutill object. */
+    /** Cloud stack configuration utility class. */
     @Autowired
-    private ConfigUtil configServer;
+    private ConfigUtil config;
 
     /** Reference of the convert entity service. */
     @Autowired
@@ -74,7 +74,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @PreAuthorize("hasPermission(#user.getSyncFlag(), 'CREATE_USER')")
     public User save(User user) throws Exception {
-
         if (user.getSyncFlag()) {
         Errors errors = validator.rejectIfNullEntity("user", user);
         errors = validator.validateEntity(user, errors);
@@ -83,12 +82,13 @@ public class UserServiceImpl implements UserService {
             throw new ApplicationException(errors);
         } else {
             user.setType(User.Type.USER);
+            user.setRoleId(user.getRole().getId());
             String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
             byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
             SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
             String encryptedPassword = new String(EncryptionUtil.encrypt(user.getPassword(), originalKey));
             user.setIsActive(true);
-            csUserService.setServer(configServer.setServer(1L));
+            config.setUserServer();
             HashMap<String, String> userMap = new HashMap<String, String>();
             userMap.put("domainid", user.getDomain().getUuid());
             String cloudResponse = csUserService.createUser(user.getDepartment().getUserName(),
@@ -136,7 +136,7 @@ public class UserServiceImpl implements UserService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-              configServer.setServer(1L);
+              config.setUserServer();
               HashMap<String, String> optional = new HashMap<String, String>();
               optional.put("domainid", user.getDomain().getUuid());
               optional.put("username", user.getUserName());
@@ -161,7 +161,7 @@ public class UserServiceImpl implements UserService {
     @PreAuthorize("hasPermission(#user.getSyncFlag(), 'DELETE_USER')")
     public void delete(User user) throws Exception {
         if (user.getSyncFlag() == true) {
-            configServer.setServer(1L);
+            config.setUserServer();
             csUserService.deleteUser(user.getId().toString(), "json");
             this.softDelete(user);
         } else {
@@ -173,7 +173,7 @@ public class UserServiceImpl implements UserService {
     @PreAuthorize("hasPermission(null, 'DELETE_USER')")
     public void delete(Long id) throws Exception {
         User user = userRepository.findOne(id);
-        configServer.setServer(1L);
+        config.setUserServer();
         csUserService.deleteUser(user.getUuid(), "json");
         this.softDelete(user);
     }
@@ -262,9 +262,9 @@ public class UserServiceImpl implements UserService {
     public User softDelete(User user) throws Exception {
         user.setIsActive(false);
         user.setStatus(User.Status.DELETED);
-        
+
         // set server for finding value in configuration
-        csUserService.setServer(configServer.setServer(1L));
+        config.setUserServer();
         csUserService.deleteUser((user.getUuid()), "json");
         return userRepository.save(user);
     }
