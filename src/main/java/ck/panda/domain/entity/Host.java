@@ -130,6 +130,10 @@ public class Host {
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
+    
+    /** Hypervisor of the host. */
+    @Column(name = "hypervisor")
+    private String hypervisor;
 
     /**
      * Enum type for  Host Status.
@@ -138,13 +142,13 @@ public class Host {
     public enum Status {
 
     	/**  Host will be in a Enabled State. */
-        Up,
+        UP,
+        
+        /**  Host will be in a Alert State. */
+        ALERT,
 
-        /**  Host will be in a Enabled State. */
-        ENABLED,
-
-        /**  Host will be in a Disabled State. */
-        DISABLED,
+        /**  Host will be get disconnected. */
+        DISCONNECTED,
     }
     /**
      * Get id.
@@ -502,6 +506,24 @@ public class Host {
 	}
 
 	/**
+	 * Get Hypervisor name
+	 * 
+	 * @return hypertvisor
+	 */
+	public String getHypervisor() {
+		return hypervisor;
+	}
+
+	/**
+	 * Set the hypervisor
+	 * 
+	 * @param hypervisor name to set
+	 */
+	public void setHypervisor(String hypervisor) {
+		this.hypervisor = hypervisor;
+	}
+
+	/**
 	 * Convert JSONObject to domain entity.
 	 *
 	 * @param jsonObject json object
@@ -516,9 +538,10 @@ public class Host {
 			host.setTransPodId((JsonUtil.getStringValue(jsonObject, "podid")));
 			host.setTransClusterId((JsonUtil.getStringValue(jsonObject, "clusterid")));
 			host.setTransZoneId((JsonUtil.getStringValue(jsonObject, "zoneid")));
-			host.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
+			host.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state").toUpperCase()));
 			host.setHostIpaddress(JsonUtil.getStringValue(jsonObject, "ipaddress"));
 			host.setHostHighAvailability(JsonUtil.getStringValue(jsonObject,"hahost"));
+			host.setHypervisor(JsonUtil.getStringValue(jsonObject,"hypervisor"));
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}

@@ -26,6 +26,7 @@ import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.entity.Iso;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
+import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.OsType;
 import ck.panda.domain.entity.Permission;
@@ -146,6 +147,10 @@ public class SyncServiceImpl implements SyncService {
     /** Account service for listing users. */
     @Autowired
     private AccountService accountService;
+    
+    /** Nic service for listing nic. */
+    @Autowired
+    private NicService nicService;
 
     /** For listing users in cloudstack server. */
     @Autowired
@@ -424,7 +429,7 @@ public class SyncServiceImpl implements SyncService {
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Volume", e);
         }
-        try {
+       try {
             // 23. Sync VmSnapshot entity
               this.syncVmSnapshots();
         } catch (Exception e) {
@@ -435,17 +440,24 @@ public class SyncServiceImpl implements SyncService {
             this.syncSnapshot();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Snapshot", e);
+        }      
+        try{ 
+            // 25. Sync Nic entity
+            this.syncNic();
+            LOGGER.debug("nic");
+        }catch (Exception e) {
+            LOGGER.error("ERROR AT synch Nic", e);
         }
 
         try {
-            // 25. Sync SSHKey entity
+            // 26. Sync SSHKey entity
             this.syncSSHKey();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch SSH Key", e);
         }
 
         try {
-            // 26. Sync for update role in user entity
+            // 27. Sync for update role in user entity
             this.syncUpdateUserRole();
         } catch (Exception e) {
             LOGGER.error("ERROR AT Sync for update role in user entity", e);
@@ -1821,6 +1833,46 @@ public class SyncServiceImpl implements SyncService {
 
     }
 
+    @Override
+    public void syncNic() throws ApplicationException, Exception {
+
+        // 1. Get all the nic objects from CS server as hash
+       List<Nic> csNicList = nicService.findAllFromCSServer();
+        HashMap<String, Nic> csNicMap = (HashMap<String, Nic>) Nic.convert(csNicList);
+
+        // 2. Get all the nic objects from application
+        List<Nic> appnicList = nicService.findAll();
+
+        // 3. Iterate application nic list
+        for (Nic nic : appnicList) {
+            nic.setSyncFlag(false);
+            LOGGER.debug("Total rows updated : " + (appnicList.size()));
+            // 3.1 Find the corresponding CS server ntService object by
+            // finding it in a hash using uuid
+            if (csNicMap.containsKey(nic.getUuid())) {
+                Nic csNic = csNicMap.get(nic.getUuid());
+
+                nic.setUuid(csNic.getUuid());
+
+                // 3.2 If found, update the nic object in app db
+                nicService.update(nic);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // nic which is not added in the app
+                csNicMap.remove(nic.getUuid());
+            } else {
+            	nicService.softDelete(nic);
+            }
+        }
+        // 4. Get the remaining list of cs server hash NetworkOffering object,
+        // then iterate and
+        // add it to app db
+        for (String key : csNicMap.keySet()) {
+            LOGGER.debug("Syncservice Nic uuid:");
+            nicService.save(csNicMap.get(key));
+        }
+    }
+    
     /**
      * Create default roles and permissions.
      *

@@ -140,6 +140,9 @@ public class EventTypes {
 
     /** Zones. */
     public static final String EVENT_ZONE = "ZONE.";
+    
+    /** Nic. */
+    public static final String EVENT_NIC = "NIC.";
 
     /** Physical Network Events. */
     public static final String EVENT_PHYSICAL = "PHYSICAL.";
