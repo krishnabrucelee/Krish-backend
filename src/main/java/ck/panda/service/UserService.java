@@ -6,7 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
-import ck.panda.domain.entity.User.Type;
+import ck.panda.domain.entity.User.UserType;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
@@ -120,7 +120,7 @@ public interface UserService extends CRUDService<User> {
      * @throws Exception error occur
      * @return users.
      */
-    List<User> findUsersByTypesAndActive(List<Type> types, Boolean isActive) throws Exception;
+    List<User> findUsersByTypesAndActive(List<UserType> types, Boolean isActive) throws Exception;
 
     /**
      * Assign user to role.

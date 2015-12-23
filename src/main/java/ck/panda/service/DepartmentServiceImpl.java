@@ -1,11 +1,8 @@
 package ck.panda.service;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -20,12 +17,10 @@ import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.Role;
-import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.repository.jpa.DepartmentReposiory;
 import ck.panda.domain.repository.jpa.DomainRepository;
-import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackAccountService;
 import ck.panda.util.CloudStackUserService;
@@ -125,7 +120,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             department.setIsActive(true);
             department.setStatus(Department.Status.ENABLED);
             department.setType(Department.AccountType.USER);
-            config.setUserServer();
+            config.setServer(1L);
             HashMap<String, String> accountMap = new HashMap<String, String>();
             accountMap.put("domainid", String.valueOf(department.getDomain().getUuid()));
             String createAccountResponse = csAccountService.createAccount(
@@ -169,7 +164,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
             Department departmentedit = departmentRepo.findOne(department.getId());
             department.setDomainId(department.getDomain().getId());
-            config.setUserServer();
+            config.setServer(1L);
             HashMap<String, String> accountMap = new HashMap<String, String>();
             accountMap.put("domainid", department.getDomain().getUuid());
             accountMap.put("account", departmentedit.getUserName());
@@ -240,7 +235,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     public Department softDelete(Department department) throws Exception {
         Errors errors = validator.rejectIfNullEntity("department", department);
         errors = validator.validateEntity(department, errors);
-        config.setUserServer();
+        config.setServer(1L);
         List<Project> projectResponse =  projectService.findByDepartmentAndIsActive(department.getId(), true);
         List<VmInstance> vmResponse  =  vmService.findByDepartment(department.getId());
         List<Role> roleResponse = roleService.findByDepartment(department);

@@ -1,11 +1,12 @@
 package ck.panda.domain.entity;
 
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -16,15 +17,20 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
-import org.joda.time.DateTime;
+import org.hibernate.annotations.Type;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonUtil;
 
 /** User entity. */
 @Entity
 @Table(name = "ck_users")
+@EntityListeners(AuditingEntityListener.class)
 public class User {
 
     /** Id of the user. */
@@ -71,7 +77,7 @@ public class User {
 
     /** User type of the user. */
     @Column(name = "type")
-    private Type type;
+    private UserType type;
 
     /** First name of the user.  */
     @Column(name = "first_name")
@@ -103,23 +109,29 @@ public class User {
     private Long version;
 
     /** Created date and time. */
+    @CreatedDate
     @Column(name = "created_date_time")
-    private DateTime createdDateTime;
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime createdDateTime;
 
     /** Last modified date and time. */
+    @LastModifiedDate
     @Column(name = "updated_date_time")
-    private DateTime updatedDateTime;
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime updatedDateTime;
 
     /** Created by user. */
     @CreatedBy
-    @JoinColumn(name = "created_user_id", referencedColumnName = "id")
-    @OneToOne(cascade = {CascadeType.ALL })
+    @JoinColumn(name = "created_by", referencedColumnName = "id")
+    @OneToOne
     private User createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @JoinColumn(name = "updated_user_id", referencedColumnName = "id")
-    @OneToOne(cascade = {CascadeType.ALL })
+    @JoinColumn(name = "updated_by", referencedColumnName = "id")
+    @OneToOne
     private User updatedBy;
 
     /** Transient domain of the user. */
@@ -147,7 +159,7 @@ public class User {
     private String secretKey;
 
     /** Define user type. */
-    public enum Type {
+    public enum UserType {
        /** Define type constant. */
         USER,
         ROOT_ADMIN,
@@ -157,6 +169,7 @@ public class User {
     /** Define status. */
     public enum Status {
        /** Define status constant. */
+    	ACTIVE,
         DELETED,
         BLOCKED;
     }
@@ -284,7 +297,7 @@ public class User {
      *
      * @return the type.
      */
-    public Type getType() {
+    public UserType getType() {
         return type;
     }
 
@@ -293,7 +306,7 @@ public class User {
      *
      * @param type to set.
      */
-    public void setType(Type type) {
+    public void setType(UserType type) {
         this.type = type;
     }
 
@@ -422,36 +435,36 @@ public class User {
     /**
      * Get the created date time.
      *
-     * @return the createdDateTime.
+     * @return the createdDateTime
      */
-    public DateTime getCreatedDateTime() {
+    public ZonedDateTime getCreatedDateTime() {
         return createdDateTime;
     }
 
     /**
      * Set the created date time.
      *
-     * @param createdDateTime to set.
+     * @param createdDateTime - the DateTime to set
      */
-    public void setCreatedDateTime(DateTime createdDateTime) {
+    public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
     }
 
     /**
      * Get the updated date time.
      *
-     * @return the updatedDateTime.
+     * @return updatedDateTime
      */
-    public DateTime getUpdatedDateTime() {
+    public ZonedDateTime getUpdatedDateTime() {
         return updatedDateTime;
     }
 
     /**
      * Set the updated date time.
      *
-     * @param updatedDateTime to set.
+     * @param updatedDateTime - the DateTime to set
      */
-    public void setUpdatedDateTime(DateTime updatedDateTime) {
+    public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
 
@@ -648,11 +661,11 @@ public class User {
         user.setLastName(JsonUtil.getStringValue(jsonObject, "lastname"));
         user.setEmail(JsonUtil.getStringValue(jsonObject, "email"));
         if (JsonUtil.getIntegerValue(jsonObject, "accounttype") == 0) {
-            user.setType(Type.USER);
+            user.setType(UserType.USER);
         } else if (JsonUtil.getIntegerValue(jsonObject, "accounttype") == 1) {
-            user.setType(Type.ROOT_ADMIN);
+            user.setType(UserType.ROOT_ADMIN);
         } else {
-            user.setType(Type.DOMAIN_ADMIN);
+            user.setType(UserType.DOMAIN_ADMIN);
         }
         user.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
         user.setTransDepartment(JsonUtil.getStringValue(jsonObject, "accountid"));

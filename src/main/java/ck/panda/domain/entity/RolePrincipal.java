@@ -8,7 +8,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import ck.panda.domain.entity.User.Type;
+import ck.panda.domain.entity.User.UserType;
 
 /**
  * Role permission for login user.
@@ -23,7 +23,7 @@ public class RolePrincipal {
     private Role role;
 
     /** User type attributes. */
-    private Type type;
+    private UserType type;
 
     /** User domain name attributes. */
     private String domainname;
@@ -49,7 +49,7 @@ public class RolePrincipal {
      * @param type to set
      * @param domainname to set
      */
-    public RolePrincipal(String username, Role role, Type type, String domainname, Long departmentid, String buildVersion) {
+    public RolePrincipal(String username, Role role, UserType type, String domainname, Long departmentid, String buildVersion) {
         this.username = username;
         this.role = role;
         this.type = type;
