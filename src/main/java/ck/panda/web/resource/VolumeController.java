@@ -3,6 +3,7 @@
  */
 package ck.panda.web.resource;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,7 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
+import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
+import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.service.VolumeService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -219,6 +222,35 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
         return volumeService.findByVolumeTypeAndIsActive();
     }
 
+    /**
+     * Get the project based volumes.
+     *
+     * @param projectId project id.
+     * @return project
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/instance/project/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public List<Volume> findByProjectAndStatus(@PathVariable(PATH_ID) Long projectId) throws Exception {
+        List<Volume.VolumeType> volumeType = new ArrayList<Volume.VolumeType>();
+        volumeType.add(VolumeType.DATADISK);
+       return volumeService.findByProjectAndVolumeType(projectId, volumeType);
+    }
+
+    /**
+     * Get the department based volumes.
+     *
+     * @param departmentId department id.
+     * @return department
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/instance/department/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public List<Volume> findByDepartmentAndStatus(@PathVariable(PATH_ID) Long departmentId) throws Exception {
+        List<Volume.VolumeType> volumeType = new ArrayList<Volume.VolumeType>();
+        volumeType.add(VolumeType.DATADISK);
+        return volumeService.findByDepartmentAndVolumeType(departmentId, volumeType);
+    }
 //    /**
 //     * Get the volume counts for attched, detached and total count.
 //     *
