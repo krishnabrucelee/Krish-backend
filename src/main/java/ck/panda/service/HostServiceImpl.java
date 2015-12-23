@@ -108,7 +108,7 @@ public class HostServiceImpl implements HostService {
     @Override
     public Host softDelete(Host host) throws Exception {
             host.setIsActive(false);
-            host.setStatus(Host.Status.DISABLED);
+            host.setStatus(Host.Status.DISCONNECTED);
             return hostRepo.save(host);
     }
   }
