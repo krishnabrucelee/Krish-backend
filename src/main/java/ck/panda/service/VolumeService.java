@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
+import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
@@ -146,5 +147,23 @@ public interface VolumeService extends CRUDService<Volume> {
     */
    @Query(value = "select vm from VmInstance vm where vm.departmentId=:id ")
    List<Volume> findByDepartment(@Param("id") Long departmentId);
+
+   /**
+    * Get the volumes based on project.
+    *
+    * @param projectId project id.
+    * @param volumeType volume type.
+    * @return project
+    */
+   List<Volume> findByProjectAndVolumeType(Long projectId, List<VolumeType> volumeType);
+
+   /**
+    * Get the volumes based on department.
+    *
+    * @param departmentId department id.
+    * @return department
+    * @throws Exception error occurs.
+    */
+   List<Volume> findByDepartmentAndVolumeType(Long departmentId, List<VolumeType> volumeType);
 
 }
