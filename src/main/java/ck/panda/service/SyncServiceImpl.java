@@ -41,7 +41,7 @@ import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
-import ck.panda.domain.entity.User.Type;
+import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.domain.repository.jpa.VolumeRepository;
 import ck.panda.domain.entity.VmInstance;
@@ -1895,9 +1895,9 @@ public class SyncServiceImpl implements SyncService {
      * Update user role.
      */
     void syncUpdateUserRole() {
-        List<Type> types = new ArrayList<Type>();
-        types.add(Type.ROOT_ADMIN);
-        types.add(Type.DOMAIN_ADMIN);
+        List<UserType> types = new ArrayList<UserType>();
+        types.add(UserType.ROOT_ADMIN);
+        types.add(UserType.DOMAIN_ADMIN);
         try {
             List<User> userList = userService.findUsersByTypesAndActive(types, true);
             for (User user : userList) {

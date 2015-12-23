@@ -16,7 +16,8 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
-import ck.panda.domain.entity.User.Type;
+import ck.panda.domain.entity.User.Status;
+import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.util.AppValidator;
@@ -81,14 +82,15 @@ public class UserServiceImpl implements UserService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-            user.setType(User.Type.USER);
+            user.setType(User.UserType.USER);
+            user.setStatus(Status.ACTIVE);
             user.setRoleId(user.getRole().getId());
             String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
             byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
             SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
             String encryptedPassword = new String(EncryptionUtil.encrypt(user.getPassword(), originalKey));
             user.setIsActive(true);
-            config.setUserServer();
+            config.setServer(1L);
             HashMap<String, String> userMap = new HashMap<String, String>();
             userMap.put("domainid", user.getDomain().getUuid());
             String cloudResponse = csUserService.createUser(user.getDepartment().getUserName(),
@@ -105,6 +107,7 @@ public class UserServiceImpl implements UserService {
             return userRepository.save(user);
         }
         } else {
+        	user.setStatus(Status.ACTIVE);
             return userRepository.save(user);
         }
     }
@@ -136,7 +139,7 @@ public class UserServiceImpl implements UserService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-              config.setUserServer();
+              config.setServer(1L);
               HashMap<String, String> optional = new HashMap<String, String>();
               optional.put("domainid", user.getDomain().getUuid());
               optional.put("username", user.getUserName());
@@ -153,6 +156,7 @@ public class UserServiceImpl implements UserService {
               return userRepository.save(user);
           }
         } else {
+        	user.setStatus(Status.ACTIVE);
             return userRepository.save(user);
         }
     }
@@ -161,7 +165,7 @@ public class UserServiceImpl implements UserService {
     @PreAuthorize("hasPermission(#user.getSyncFlag(), 'DELETE_USER')")
     public void delete(User user) throws Exception {
         if (user.getSyncFlag() == true) {
-            config.setUserServer();
+            config.setServer(1L);
             csUserService.deleteUser(user.getId().toString(), "json");
             this.softDelete(user);
         } else {
@@ -173,7 +177,7 @@ public class UserServiceImpl implements UserService {
     @PreAuthorize("hasPermission(null, 'DELETE_USER')")
     public void delete(Long id) throws Exception {
         User user = userRepository.findOne(id);
-        config.setUserServer();
+        config.setServer(1L);
         csUserService.deleteUser(user.getUuid(), "json");
         this.softDelete(user);
     }
@@ -299,11 +303,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> findAllRootAdminUser() throws Exception {
-        return userRepository.findAllRootAdminUser(Type.ROOT_ADMIN);
+        return userRepository.findAllRootAdminUser(UserType.ROOT_ADMIN);
     }
 
     @Override
-    public List<User> findUsersByTypesAndActive(List<Type> types, Boolean isActive) throws Exception {
+    public List<User> findUsersByTypesAndActive(List<UserType> types, Boolean isActive) throws Exception {
         return (List<User>) userRepository.findUsersByTypesAndActive(types, isActive);
     }
 
