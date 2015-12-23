@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.json.JSONArray;
@@ -11,10 +12,12 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.Status;
 import ck.panda.domain.entity.User.UserType;
@@ -238,6 +241,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> findByDepartment(Long departmentId) throws Exception {
         Department department = departmentService.find(departmentId);
+        User user = userRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("id")));
+        if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
+            if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
+                return userRepository.findByDepartment(department);
+            } else {
+                List<User> users = new ArrayList<User>();
+                users.add(user);
+                return users;
+            }
+        }
         return userRepository.findByDepartment(department);
     }
 
