@@ -223,11 +223,11 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     }
 
     /**
-     * Get the project based volumes.
+     * Get the volumes based on project.
      *
      * @param projectId project id.
+     * @param volumeType volume type.
      * @return project
-     * @throws Exception error occurs.
      */
     @RequestMapping(value = "/instance/project/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
@@ -238,7 +238,7 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     }
 
     /**
-     * Get the department based volumes.
+     * Get the volumes based on department.
      *
      * @param departmentId department id.
      * @return department

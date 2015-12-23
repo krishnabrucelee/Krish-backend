@@ -146,7 +146,7 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
     List<Volume> findByDepartment(@Param("id") Long departmentId);
 
     /**
-     * Get the project based volumes.
+     * Get the volumes based on project.
      *
      * @param projectId project id.
      * @param volumeType volume type.
@@ -156,11 +156,11 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
     List<Volume> findByProjectAndVolumeType(@Param("projectId") Long projectId, @Param("volumeType") List<VolumeType> volumeType);
 
     /**
-     * Get the department based volumes.
+     * Get the volumes based on department.
      *
      * @param departmentId department id.
-     * @param volumeType volume type.
      * @return department
+     * @throws Exception error occurs.
      */
     @Query(value = "select volume from Volume volume where volume.departmentId=:departmentId and volume.volumeType in :volumeType")
     List<Volume> findByDepartmentAndVolumeType(@Param("departmentId") Long departmentId, @Param("volumeType") List<VolumeType> volumeType);
