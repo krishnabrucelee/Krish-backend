@@ -1270,9 +1270,10 @@ public class SyncServiceImpl implements SyncService {
             // 3.1 Find the corresponding CS server host object by finding it in
             // a hash using uuid
             if (csHostMap.containsKey(host.getUuid())) {
-                Host csUser = csHostMap.get(host.getUuid());
-                host.setName(csUser.getName());
-                host.setHostIpaddress(csUser.getHostIpaddress());
+                Host csHost = csHostMap.get(host.getUuid());
+                host.setName(csHost.getName());
+                host.setHostIpaddress(csHost.getHostIpaddress());
+                host.setStatus(csHost.getStatus());
                 // 3.2 If found, update the user object in app db
                 hostService.update(host);
 

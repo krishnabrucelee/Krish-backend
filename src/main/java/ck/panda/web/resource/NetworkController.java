@@ -34,80 +34,124 @@ import ck.panda.util.web.CRUDController;
 @Api(value = "Network", description = "Operations with Networks", produces = "application/json")
 public class NetworkController extends CRUDController<Network> implements ApiController {
 
-    /** Service reference to Network. */
-    @Autowired
-    private NetworkService networkService;
+	/** Service reference to Network. */
+	@Autowired
+	private NetworkService networkService;
 
-    @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Network.", response = Network.class)
-    @Override
-    public Network create(@RequestBody Network network) throws Exception {
-        network.setSyncFlag(true);
-        return networkService.save(network);
-    }
+	@ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Network.", response = Network.class)
+	@Override
+	public Network create(@RequestBody Network network) throws Exception {
+		network.setSyncFlag(true);
+		return networkService.save(network);
+	}
 
-    @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing Network.", response = Network.class)
-    @Override
-    public Network read(@PathVariable(PATH_ID) Long id) throws Exception {
-        return networkService.find(id);
-    }
+	@ApiOperation(value = SW_METHOD_READ, notes = "Read an existing Network.", response = Network.class)
+	@Override
+	public Network read(@PathVariable(PATH_ID) Long id) throws Exception {
+		return networkService.find(id);
+	}
 
-    @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing Network.", response = Network.class)
-    @Override
-    public Network update(@RequestBody Network network, @PathVariable(PATH_ID) Long id) throws Exception {
-        network.setSyncFlag(true);
-        return networkService.update(network);
-    }
+	@ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing Network.", response = Network.class)
+	@Override
+	public Network update(@RequestBody Network network, @PathVariable(PATH_ID) Long id) throws Exception {
+		network.setSyncFlag(true);
+		return networkService.update(network);
+	}
 
-    /**
-     * Delete the Network.
-     *
-     * @param network reference of the Network.
-     * @param id Network id.
-     * @throws Exception error occurs.
-     */
-    @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Network.")
-    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void softDelete(@RequestBody Network network, @PathVariable(PATH_ID) Long id) throws Exception {
-        /** Doing Soft delete from the Network table. */
-         network = networkService.find(id);
-         network.setSyncFlag(true);
-         networkService.softDelete(network);
-    }
+	/**
+	 * Delete the Network.
+	 *
+	 * @param network
+	 *            reference of the Network.
+	 * @param id
+	 *            Network id.
+	 * @throws Exception
+	 *             error occurs.
+	 */
+	@ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Network.")
+	@RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void softDelete(@RequestBody Network network, @PathVariable(PATH_ID) Long id) throws Exception {
+		/** Doing Soft delete from the Network table. */
+		network = networkService.find(id);
+		network.setSyncFlag(true);
+		networkService.softDelete(network);
+	}
 
-    @Override
-    public List<Network> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Network.class);
-        Page<Network> pageResponse = networkService.findAllByActive(page);
-        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
-        return pageResponse.getContent();
-    }
+	@Override
+	public List<Network> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
+			@RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
+					throws Exception {
+		PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Network.class);
+		Page<Network> pageResponse = networkService.findAllByActive(page);
+		response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+		return pageResponse.getContent();
+	}
 
-    /**
-     * list all network for instance.
-     * @return projects
-     * @param deptartment department
-     * @throws Exception Exception
-     */
-      @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-      @ResponseStatus(HttpStatus.OK)
-      @ResponseBody
-      protected List<Network> findByDepartment(@RequestParam("dept") Long deptartment) throws Exception {
-          return networkService.findByDepartmentAndNetworkIsActive(deptartment, true);
-      }
+	/**
+	 * list all network for instance.
+	 * 
+	 * @return projects
+	 * @param deptartment
+	 *            department
+	 * @throws Exception
+	 *             Exception
+	 */
+	@RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	protected List<Network> findByDepartment(@RequestParam("dept") Long deptartment) throws Exception {
+		return networkService.findByDepartmentAndNetworkIsActive(deptartment, true);
+	}
 
-     /**
-      * list all project related network for instance.
-      * @return networks
-      * @param projectId project id
-      * @throws Exception Exception
-      */
-       @RequestMapping(value = "listall", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-       @ResponseStatus(HttpStatus.OK)
-       @ResponseBody
-       protected List<Network> findByProject(@RequestParam("projectId") Long projectId) throws Exception {
-           return networkService.findByProjectAndNetworkIsActive(projectId, true);
-       }
+	/**
+	 * list all project related network for instance.
+	 * 
+	 * @return networks
+	 * @param projectId
+	 *            project id
+	 * @throws Exception
+	 *             Exception
+	 */
+	@RequestMapping(value = "listall", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	protected List<Network> findByProject(@RequestParam("projectId") Long projectId) throws Exception {
+		return networkService.findByProjectAndNetworkIsActive(projectId, true);
+	}
+
+	/**
+	 * List all network for instance.
+	 * 
+	 * @return department
+	 * @param deptartment
+	 *            associated with network
+	 * @throws Exception
+	 *             Exception
+	 */
+	@RequestMapping(value = "/list/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	protected List<Network> findByDepartmentAndNetwork(@PathVariable(PATH_ID) Long deptartment) throws Exception {
+		return networkService.findByDepartmentAndNetworkIsActive(deptartment, true);
+	}
+
+	/**
+	 * List all project related network for instance.
+	 * 
+	 * @return networks
+	 * @param projectId
+	 *            project id
+	 * @throws Exception
+	 *             Exception
+	 */
+	@RequestMapping(value = "/listall/{id}", method = RequestMethod.GET, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	protected List<Network> findByProjectAndNetwork(@PathVariable(PATH_ID) Long projectId) throws Exception {
+		return networkService.findByProjectAndNetworkIsActive(projectId, true);
+	}
 
 }

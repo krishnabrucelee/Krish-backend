@@ -278,12 +278,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#user.getSyncFlag(), 'DELETE_USER')")
     public User softDelete(User user) throws Exception {
         user.setIsActive(false);
         user.setStatus(User.Status.DELETED);
 
         // set server for finding value in configuration
-        config.setUserServer();
+        config.setServer(1L);
         csUserService.deleteUser((user.getUuid()), "json");
         return userRepository.save(user);
     }
