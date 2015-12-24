@@ -77,7 +77,7 @@ public class IsoServiceImpl implements IsoService {
 
     @Override
     public Iso findbyUUID(String uuid) throws Exception {
-        return isoRepo.findByUUID(uuid);
+        return isoRepo.findByUUID(uuid, true);
     }
 
     @Override
