@@ -332,7 +332,7 @@ public class CloudStackInstanceService {
      * @return json response.
      * @throws Exception unhandled exception.
      */
-    public String addNicToVirtualMachine(String networkId, String virtualMachineId, HashMap<String, String> optional)
+    public String addNicToVirtualMachine(String networkId, String virtualMachineId, HashMap<String, String> optional, String response)
             throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("addNicToVirtualMachine", optional);
         arguments.add(new NameValuePair("networkid", networkId));
@@ -350,7 +350,7 @@ public class CloudStackInstanceService {
      * @return json response.
      * @throws Exception unhandled exception.
      */
-    public String removeNicFromVirtualMachine(String nicId, String virtualMachineId, HashMap<String, String> optional)
+    public String removeNicFromVirtualMachine(String nicId, String virtualMachineId, HashMap<String, String> optional, String response)
             throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("removeNicFromVirtualMachine", optional);
         arguments.add(new NameValuePair("nicid", nicId));
@@ -368,7 +368,7 @@ public class CloudStackInstanceService {
      * @return json response.
      * @throws Exception unhandled exception.
      */
-    public String updateDefaultNicForVirtualMachine(String nicId, String virtualMachineId,
+    public String updateDefaultNicForVirtualMachine(String nicId, String virtualMachineId,String response,
             HashMap<String, String> optional) throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("updateDefaultNicForVirtualMachine", optional);
         arguments.add(new NameValuePair("nicid", nicId));

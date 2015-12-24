@@ -189,4 +189,12 @@ public interface SyncService {
    */
   void syncSSHKey() throws ApplicationException, Exception;
 
+  /**
+   * 
+   * Sync with Cloud Server Account.
+   * @throws ApplicationException
+   * @throws Exception
+   */
+  void syncNic() throws ApplicationException, Exception;
+
 }

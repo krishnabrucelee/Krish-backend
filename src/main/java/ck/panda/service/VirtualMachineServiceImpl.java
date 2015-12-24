@@ -14,7 +14,7 @@ import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
-import ck.panda.domain.entity.User.Type;
+import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.NetworkRepository;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
@@ -608,8 +608,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Override
     public Page<VmInstance> findAll(PagingAndSorting pagingAndSorting) throws Exception {
         User user = userService.find(Long.valueOf(tokenDetails.getTokenDetails("id")));
-        if (user != null && !user.getType().equals(Type.ROOT_ADMIN)) {
-            if (user.getType().equals(Type.DOMAIN_ADMIN)) {
+        if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
+            if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
                 Page<VmInstance> allInstanceList = virtualmachinerepository.findAllByDomainIsActive(user.getDomainId(),
                         Status.Expunging , pagingAndSorting.toPageRequest());
                 return allInstanceList;
@@ -640,8 +640,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Override
     public Page<VmInstance> findAllByStatus(PagingAndSorting pagingAndSorting, String status) throws Exception {
         User user = userService.find(Long.valueOf(tokenDetails.getTokenDetails("id")));
-        if (user != null && !user.getType().equals(Type.ROOT_ADMIN)) {
-            if (user.getType().equals(Type.DOMAIN_ADMIN)) {
+        if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
+            if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
                 Page<VmInstance> allInstanceList = virtualmachinerepository.findAllByDomainIsActiveAndStatus(user.getDomainId(),
                         Status.valueOf(status), pagingAndSorting.toPageRequest());
                 return allInstanceList;
@@ -673,8 +673,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         try {
             User user = userService.find(Long.valueOf(tokenDetails.getTokenDetails("id")));
 
-            if (user != null && !user.getType().equals(Type.ROOT_ADMIN)) {
-                if (user.getType().equals(Type.DOMAIN_ADMIN)) {
+            if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
+                if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
                     List<VmInstance> allInstanceList = virtualmachinerepository
                             .findAllByDomain(user.getDomainId(),Status.Expunging );
                     return allInstanceList;
@@ -835,8 +835,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         try {
             User user = userService.find(Long.valueOf(tokenDetails.getTokenDetails("id")));
 
-            if (user != null && !user.getType().equals(Type.ROOT_ADMIN)) {
-                if (user.getType().equals(Type.DOMAIN_ADMIN)) {
+            if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
+                if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
                     List<VmInstance> allInstanceList = virtualmachinerepository.findAllByDomainIsActiveAndStatus(user.getDomainId(),
                             status);
                     return allInstanceList.size();
