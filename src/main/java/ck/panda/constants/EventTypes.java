@@ -125,6 +125,9 @@ public class EventTypes {
 
     /** ISO. */
     public static final String EVENT_ISO = "ISO.";
+    
+    /** HOST. */
+    public static final String EVENT_HOST = "HOST.";
 
     /** Service Offerings. */
     public static final String EVENT_SERVICE = "SERVICE.";

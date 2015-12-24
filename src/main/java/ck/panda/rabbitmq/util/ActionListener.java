@@ -132,6 +132,9 @@ public class ActionListener implements MessageListener {
         case EventTypes.EVENT_POD:
             LOGGER.debug("POD sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
             break;
+        case EventTypes.EVENT_HOST:
+            LOGGER.debug("Host sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            break;
         case EventTypes.EVENT_PROXY:
             LOGGER.debug("Proxy sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
             break;
