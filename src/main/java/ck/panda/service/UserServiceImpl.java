@@ -146,16 +146,7 @@ public class UserServiceImpl implements UserService {
               HashMap<String, String> optional = new HashMap<String, String>();
               optional.put("domainid", user.getDomain().getUuid());
               optional.put("username", user.getUserName());
-              optional.put("email", user.getEmail());
-              optional.put("firstname", user.getFirstName());
-              optional.put("lastname", user.getLastName());
-              optional.put("password", user.getPassword());
               csUserService.updateUser(user.getUuid(), optional,"json");
-              String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
-              byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
-              SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-              String encryptedPassword = new String(EncryptionUtil.encrypt(user.getPassword(), originalKey));
-              user.setPassword(encryptedPassword);
               return userRepository.save(user);
           }
         } else {
