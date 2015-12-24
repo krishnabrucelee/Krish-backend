@@ -243,8 +243,8 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (projectResponse.size() != 0  || vmResponse.size() != 0 || roleResponse.size()!= 0 || volumeResponse.size() != 0 ) {
          errors.addGlobalError( "You have the following resources in your account : project :" + projectResponse.size() +
                     "vmInstance :" +vmResponse.size()+
-                    "volume :" +vmResponse.size()+
-                    "vmInstance :" +vmResponse.size() +
+                    "role :" +roleResponse.size()+
+                    "volume :" +volumeResponse.size() +
                     "Kindly delete associated resources and try again");
 
         }

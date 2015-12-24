@@ -111,6 +111,18 @@ public class Iso {
     /** IsRemoved attribute to verify removed or not. */
     @Column(name = "is_removed")
     private Boolean isRemoved;
+    
+    /** Is Iso ready to boot. */
+    @Column(name = "is_ready")
+    private Boolean isReady;
+    
+    /** IsBootable Iso or not. */
+    @Column(name = "is_bootable")
+    private Boolean isBootable;
+    
+    /** Is Public Iso or not. */
+    @Column(name = "is_public")
+    private Boolean isPublic;
 
     /**
      * @return the id
@@ -380,6 +392,60 @@ public class Iso {
     }
 
     /**
+     * Get Is Ready to boot.
+     * 
+     * @return response.
+     */
+    public Boolean getIsReady() {
+		return isReady;
+	}
+
+    /**
+     * Set is Ready to boot.
+     * 
+     * @param isReady to set.
+     */
+	public void setIsReady(Boolean isReady) {
+		this.isReady = isReady;
+	}
+	
+	 /**
+     * Get Is Bootable iso.
+     * 
+     * @return iso.
+     */
+	public Boolean getIsBootable() {
+		return isBootable;
+	}
+
+	 /**
+     * Set Is Bootable iso.
+     * 
+     * @return bootable iso status.
+     */
+	public void setIsBootable(Boolean isBootable) {
+		this.isBootable = isBootable;
+	}
+
+	/**
+	 * Get is Public.
+	 * 
+	 * @return isPublic.
+	 */
+	public Boolean getIsPublic() {
+		return isPublic;
+	}
+
+	/**
+	 * Set is Public
+	 * 
+	 * @param isPublic iso to set.
+	 */
+	public void setIsPublic(Boolean isPublic) {
+		this.isPublic = isPublic;
+	}
+
+	/**
      * Convert JSONObject to domain entity.
      *
      * @param jsonObject json object
@@ -394,6 +460,9 @@ public class Iso {
             iso.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
             iso.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
             iso.setTransOsTypeId(JsonUtil.getStringValue(jsonObject, "ostypeid"));
+            iso.setIsBootable(JsonUtil.getBooleanValue(jsonObject, "bootable"));
+            iso.setIsPublic(JsonUtil.getBooleanValue(jsonObject,"ispublic"));
+            iso.setIsReady(JsonUtil.getBooleanValue(jsonObject,"isready"));
             iso.setIsActive(true);
         } catch (Exception ex) {
             LOGGER.error("Iso-convert", ex);
