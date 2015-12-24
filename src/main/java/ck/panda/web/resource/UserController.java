@@ -57,9 +57,9 @@ public class UserController extends CRUDController<User> implements ApiControlle
 
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing user.")
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
-    @ResponseStatus(HttpStatus.NO_CONTENT)   
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDelete(@RequestBody User user) throws Exception {
-        userService.softDelete(user); 
+        userService.softDelete(user);
     }
     @Override
     public List<User> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
@@ -90,6 +90,20 @@ public class UserController extends CRUDController<User> implements ApiControlle
    	}
 
     /**
+     * list all user for instance along with department.
+     * @param deptId department id.
+     * @return user
+     * @throws Exception
+     */
+    @RequestMapping(value = "departmentusers", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<User> findAllByDepartmentwithLoggedUser(@RequestParam("dept") Long deptId) throws Exception {
+        return userService.findByDepartmentWithLoggedUser(deptId);
+    }
+
+    /**
      * list all user for instance.
      * @return user
      * @throws Exception
@@ -112,7 +126,7 @@ public class UserController extends CRUDController<User> implements ApiControlle
    	protected List<User> findAllRootAdminUser() throws Exception {
    		return userService.findAllRootAdminUser();
    	}
-    
+
     /**
      * Method to find list of users by department.
      *
@@ -126,7 +140,7 @@ public class UserController extends CRUDController<User> implements ApiControlle
     public List<User> getUsersByDepartment(@PathVariable(PATH_ID) Long id) throws Exception {
         return userService.findByDepartment(id);
     }
-    
+
     /**
      * Assign role for users.
      *
@@ -140,6 +154,6 @@ public class UserController extends CRUDController<User> implements ApiControlle
     @ResponseBody
     public List<User> assignUserRoles(@RequestBody List<User> users) throws Exception {
     	return userService.assignUserRoles(users);
-    	
+
     }
 }
