@@ -241,14 +241,20 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> findByDepartment(Long departmentId) throws Exception {
         Department department = departmentService.find(departmentId);
+        return userRepository.findByDepartment(department);
+    }
+
+    @Override
+    public List<User> findByDepartmentWithLoggedUser(Long departmentId) throws Exception {
+        Department department = departmentService.find(departmentId);
         User user = userRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("id")));
         if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
             if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
                 return userRepository.findByDepartment(department);
             } else {
-                List<User> users = new ArrayList<User>();
-                users.add(user);
-                return users;
+            List<User> users = new ArrayList<User>();
+            users.add(user);
+            return users;
             }
         }
         return userRepository.findByDepartment(department);
