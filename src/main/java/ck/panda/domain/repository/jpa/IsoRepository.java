@@ -18,7 +18,7 @@ public interface IsoRepository extends PagingAndSortingRepository<Iso, Long> {
      * @param uuid of iso.
      * @return iso object.
      */
-    @Query(value = "select iso from Iso iso where iso.uuid = :uuid")
-    Iso findByUUID(@Param("uuid") String uuid);
+    @Query(value = "select iso from Iso iso where iso.uuid = :uuid and iso.isBootable = :bootable")
+    Iso findByUUID(@Param("uuid") String uuid, @Param("bootable") Boolean bootable);
 
 }
