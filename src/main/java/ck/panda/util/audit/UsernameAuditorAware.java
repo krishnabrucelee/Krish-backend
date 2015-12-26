@@ -14,7 +14,7 @@ import ck.panda.util.TokenDetails;
  * This component returns the user entity of the authenticated user.
  *
  */
-public class UsernameAuditorAware implements AuditorAware<User> {
+public class UsernameAuditorAware implements AuditorAware<Long> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UsernameAuditorAware.class);
 
@@ -27,7 +27,7 @@ public class UsernameAuditorAware implements AuditorAware<User> {
     private TokenDetails tokenDetails;
 
     @Override
-    public User getCurrentAuditor() {
+    public Long getCurrentAuditor() {
         LOGGER.debug("Getting the username of authenticated user.");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -37,15 +37,21 @@ public class UsernameAuditorAware implements AuditorAware<User> {
         }
 
         User user = null;
-		try {
-			if (!tokenDetails.getTokenDetails("domainname").equals("ROOT")) {
-			    user = userRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("id")));
-			}
-		} catch (NumberFormatException e) {
-			LOGGER.debug("NUMBER FORMAT EXCEPTION" + e.getMessage());
-		} catch (Exception e) {
-			LOGGER.debug(e.getMessage());
-		}
-        return user;
+        try {
+            if (!tokenDetails.getTokenDetails("domainname").equals("ROOT")) {
+                user = userRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("id")));
+            }
+        } catch (NumberFormatException e) {
+            LOGGER.debug("NUMBER FORMAT EXCEPTION" + e.getMessage());
+        } catch (Exception e) {
+            LOGGER.debug(e.getMessage());
+        }
+
+        // Now returning the user id instead of user object.
+        Long userId = null;
+        if(user != null) {
+            userId = user.getId();
+        }
+        return userId;
     }
 }

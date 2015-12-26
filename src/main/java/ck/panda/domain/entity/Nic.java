@@ -22,7 +22,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonUtil;
 
 /**
- * 
+ *
  * A Network Interface Card must be installed in a Virtual Machine so that it can be connected to a Network.
  *
  */
@@ -82,22 +82,20 @@ public class Nic {
     /** Is Default nic for a Vm Instance .*/
     @Column(name = "is_default")
     private Boolean isDefault;
-  
+
     /** Temporary variable. */
     @Transient
     private Boolean syncFlag;
 
     /** Created by user. */
     @CreatedBy
-    @JoinColumn(name = "created_user_id", referencedColumnName = "id")
-    @OneToOne
-    private User createdBy;
+    @Column(name = "created_user_id")
+    private Long createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @JoinColumn(name = "updated_user_id", referencedColumnName = "id")
-    @OneToOne
-    private User updatedBy;
+    @Column(name = "updated_user_id")
+    private Long updatedBy;
 
     /** Created date and time. */
     @CreatedDate
@@ -112,11 +110,11 @@ public class Nic {
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
-    
+
     /** Transient network of the instance. */
     @Transient
     private String transvmInstanceId;
-    
+
     /** Transient network of the instance. */
     @Transient
     private String transNetworkId;
@@ -196,7 +194,7 @@ public class Nic {
     /**
      * Get Network for vm Instance.
      *
-     * @return the Network. 
+     * @return the Network.
      */
     public Network getNetwork() {
         return network;
@@ -204,7 +202,7 @@ public class Nic {
 
     /**
      * Set the the network.
-     * 
+     *
      * @param network  to set
      */
     public void setNetwork(Network network) {
@@ -214,7 +212,7 @@ public class Nic {
     /**
      * Get Network Id for vm Instance.
      *
-     * @return the networkId. 
+     * @return the networkId.
      */
     public Long getNetworkId() {
         return networkId;
@@ -222,7 +220,7 @@ public class Nic {
 
     /**
      * Set the the network Id.
-     * 
+     *
      * @param networkId  to set.
      */
     public void setNetworkId(Long networkId) {
@@ -234,7 +232,7 @@ public class Nic {
      *
      * @return the createdBy of the Nic
      */
-    public User getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
@@ -243,7 +241,7 @@ public class Nic {
      *
      * @param createdBy the created by to set
      */
-    public void setCreatedBy(User createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -252,7 +250,7 @@ public class Nic {
      *
      * @return the updatedBy of the Nic
      */
-    public User getUpdatedBy() {
+    public Long getUpdatedBy() {
         return updatedBy;
     }
 
@@ -261,7 +259,7 @@ public class Nic {
      *
      * @param updatedBy the updated by to set
      */
-    public void setUpdatedBy(User updatedBy) {
+    public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
     }
 
@@ -321,34 +319,34 @@ public class Nic {
 
     /**
      * Get syncFlag.
-     * 
-	 * @return the syncFlag
-	 */
-	public Boolean getSyncFlag() {
-		return syncFlag;
-	}
+     *
+     * @return the syncFlag
+     */
+    public Boolean getSyncFlag() {
+        return syncFlag;
+    }
 
-	/**
-	 * Set  the syncFlag.
-	 * 
-	 * @param syncFlag to set
-	 */
-	public void setSyncFlag(Boolean syncFlag) {
-		this.syncFlag = syncFlag;
-	}
+    /**
+     * Set  the syncFlag.
+     *
+     * @param syncFlag to set
+     */
+    public void setSyncFlag(Boolean syncFlag) {
+        this.syncFlag = syncFlag;
+    }
 
-	/**
-	 * Get the ipAddress of a Network.
- 	 * 
-	 * @return the ipAddress
-	 */
+    /**
+     * Get the ipAddress of a Network.
+      *
+     * @return the ipAddress
+     */
     public String getIpAddress() {
         return ipAddress;
     }
 
     /**
      * Set the ipAddress.
-     * 
+     *
      * @param ipAddress  to set
      */
     public void setIpAddress(String ipAddress) {
@@ -357,7 +355,7 @@ public class Nic {
 
     /**
      * Get the netMask.
-     * 
+     *
      * @return the netMask
      */
     public String getNetMask() {
@@ -366,7 +364,7 @@ public class Nic {
 
     /**
      * Set the netMask .
-     * 
+     *
      * @param netMask to set
      */
     public void setNetMask(String netMask) {
@@ -375,7 +373,7 @@ public class Nic {
 
     /**
      * Get the gateway.
-     * 
+     *
      * @return the gateway
      */
     public String getGateway() {
@@ -384,7 +382,7 @@ public class Nic {
 
     /**
      * Set the gateway.
-     * 
+     *
      * @param gateway  to set
      */
     public void setGateway(String gateway) {
@@ -393,7 +391,7 @@ public class Nic {
 
     /**
      * Get isDefault.
-     * 
+     *
     * @return the isDefault
     */
     public Boolean getIsDefault() {
@@ -402,13 +400,13 @@ public class Nic {
 
     /**
      * Set the isDefault.
-     * 
+     *
      * @param isDefault  to set
      */
     public void setIsDefault(Boolean isDefault) {
         this.isDefault = isDefault;
     }
-    
+
     /**
      * Get the Transient VM Instance Id.
      *
@@ -426,7 +424,7 @@ public class Nic {
     public void setTransvmInstanceId(String transvmInstanceId) {
         this.transvmInstanceId = transvmInstanceId;
     }
-    
+
     /**
      * Get the Transient Network Id.
      *
@@ -444,26 +442,26 @@ public class Nic {
     public void setTransNetworkId(String transNetworkId) {
         this.transNetworkId = transNetworkId;
     }
-   
-	/**
-	 * Get the name of the network.
-	 * 
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
 
-	/**
-	 * Set the name .
-	 * 
-	 * @param name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * Get the name of the network.
+     *
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
+    /**
+     * Set the name .
+     *
+     * @param name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
      * Convert JSONObject to nic entity.
      *
      * @param jsonObject json object
@@ -494,7 +492,7 @@ public class Nic {
         Map<String, Nic> nicMap = new HashMap<String, Nic>();
 
         for (Nic nic : nicList) {
-        	nicMap.put(nic.getUuid(), nic);
+            nicMap.put(nic.getUuid(), nic);
         }
 
         return nicMap;

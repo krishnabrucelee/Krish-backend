@@ -92,15 +92,13 @@ public class ResourceLimitProject {
 
     /** Created by user. */
     @CreatedBy
-    @JoinColumn(name = "created_by", referencedColumnName = "id")
-    @OneToOne
-    private User createdBy;
+    @Column(name = "created_by")
+    private Long createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @JoinColumn(name = "updated_by", referencedColumnName = "id")
-    @OneToOne
-    private User updatedBy;
+    @Column(name = "updated_by")
+    private Long updatedBy;
 
     /** Created date and time. */
     @CreatedDate
@@ -378,7 +376,7 @@ public class ResourceLimitProject {
      *
      * @return the createdBy of the Resource limit.
      */
-    public User getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
@@ -387,7 +385,7 @@ public class ResourceLimitProject {
      *
      * @param createdBy the created by to set
      */
-    public void setCreatedBy(User createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -396,7 +394,7 @@ public class ResourceLimitProject {
      *
      * @return the updatedBy of the Resource limit.
      */
-    public User getUpdatedBy() {
+    public Long getUpdatedBy() {
         return updatedBy;
     }
 
@@ -405,7 +403,7 @@ public class ResourceLimitProject {
      *
      * @param updatedBy the updated by to set
      */
-    public void setUpdatedBy(User updatedBy) {
+    public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
     }
 

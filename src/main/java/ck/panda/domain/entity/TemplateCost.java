@@ -41,15 +41,13 @@ public class TemplateCost implements Serializable {
 
     /** Created by user. */
     @CreatedBy
-    @JoinColumn(name = "created_by", referencedColumnName = "id")
-    @OneToOne
-    private User createdBy;
+    @Column(name = "created_by")
+    private Long createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @JoinColumn(name = "updated_by", referencedColumnName = "id")
-    @OneToOne
-    private User updatedBy;
+    @Column(name = "updated_by")
+    private Long updatedBy;
 
     /** Created date and time. */
     @CreatedDate
@@ -113,7 +111,7 @@ public class TemplateCost implements Serializable {
      * Get the created by.
      * @return createdBy
      */
-    public User getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
@@ -121,7 +119,7 @@ public class TemplateCost implements Serializable {
      * Set the created by.
      * @param createdBy - the User entity to set
      */
-    public void setCreatedBy(User createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -129,7 +127,7 @@ public class TemplateCost implements Serializable {
      * Get the updated by.
      * @return updatedBy
      */
-    public User getUpdatedBy() {
+    public Long getUpdatedBy() {
         return updatedBy;
     }
 
@@ -137,7 +135,7 @@ public class TemplateCost implements Serializable {
      * Set the updated by.
      * @param updatedBy - the User entity to set
      */
-    public void setUpdatedBy(User updatedBy) {
+    public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
     }
 

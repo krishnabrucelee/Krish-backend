@@ -221,15 +221,13 @@ public class Template implements Serializable {
 
     /** Created by user. */
     @CreatedBy
-    @JoinColumn(name = "created_by", referencedColumnName = "id")
-    @OneToOne
-    private User createdBy;
+    @Column(name = "created_by")
+    private Long createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @JoinColumn(name = "updated_by", referencedColumnName = "id")
-    @OneToOne
-    private User updatedBy;
+    @Column(name = "updated_by")
+    private Long updatedBy;
 
     /** Created date and time. */
     @CreatedDate
@@ -882,7 +880,7 @@ public class Template implements Serializable {
      *
      * @return createdBy
      */
-    public User getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
@@ -891,7 +889,7 @@ public class Template implements Serializable {
      *
      * @param createdBy - the User entity to set
      */
-    public void setCreatedBy(User createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -900,7 +898,7 @@ public class Template implements Serializable {
      *
      * @return updatedBy
      */
-    public User getUpdatedBy() {
+    public Long getUpdatedBy() {
         return updatedBy;
     }
 
@@ -909,7 +907,7 @@ public class Template implements Serializable {
      *
      * @param updatedBy - the User entity to set
      */
-    public void setUpdatedBy(User updatedBy) {
+    public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
     }
 
@@ -1103,10 +1101,9 @@ public class Template implements Serializable {
         this.isActive = isActive;
     }
 
-    /**
-     * RootDiskController enum type used to list the static root disk controller
-     * values.
-     */
+
+
+    /** RootDiskController enum type used to list the static root disk controller values. */
     public enum RootDiskController {
     /** Root disk controller type as SCSI. */
     SCSI, /** Root disk controller type as IDE. */

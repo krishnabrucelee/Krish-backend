@@ -72,7 +72,7 @@ public class DepartmentBuilder {
      * @return CreatedBy
      */
     public DepartmentBuilder createdBy(User createdBy) {
-        department.setCreatedBy(createdBy);
+        department.setCreatedBy(createdBy.getId());
         return this;
     }
 
@@ -81,7 +81,7 @@ public class DepartmentBuilder {
      * @return UpdatedBy
      */
     public DepartmentBuilder updatedBy(User updatedBy) {
-        department.setUpdatedBy(updatedBy);
+        department.setUpdatedBy(updatedBy.getId());
         return this;
     }
 
