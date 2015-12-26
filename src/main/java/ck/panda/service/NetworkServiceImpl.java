@@ -118,10 +118,10 @@ public class NetworkServiceImpl implements NetworkService {
                     network.setNetworkOfferingId(networkofferingRepo.findByUUID(networkResponse.getString("networkofferingid")).getId());
                     network.setStatus(network.getStatus().valueOf(networkResponse.getString("state")));
                     if (network.getProject() != null) {
-                    	network.setProjectId(convertEntityService.getProjectId(networkResponse.getString("projectid")));
-                    	network.setDepartmentId(null);
+                        network.setProjectId(convertEntityService.getProjectId(networkResponse.getString("projectid")));
+                        network.setDepartmentId(null);
                     } else {
-                    	if (network.getDepartment() != null) {
+                        if (network.getDepartment() != null) {
                             network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(network.getDepartment().getUserName(), domainRepository.findOne(network.getDomainId())));
                         } else {
                             network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName(), domainRepository.findOne(network.getDomainId())));
@@ -131,7 +131,7 @@ public class NetworkServiceImpl implements NetworkService {
 
                     String token = tokenDetails.getTokenDetails("id");
                     User user = userRepository.findOne(Long.parseLong(token));
-                    network.setCreatedBy(user);
+                    network.setCreatedBy(user.getId());
                     network.setIsActive(true);
             return networkRepo.save(network);
         }
@@ -267,14 +267,14 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public List<Network> findAllFromCSServerByDomain() throws Exception {
 
-    	List<Project> project = projectService.findAllByActive(true);
-    	List<Network> networkList = new ArrayList<Network>();
-    	for (int j = 0; j <= project.size(); j++) {
+        List<Project> project = projectService.findAllByActive(true);
+        List<Network> networkList = new ArrayList<Network>();
+        for (int j = 0; j <= project.size(); j++) {
             HashMap<String, String> networkMap = new HashMap<String, String>();
             if(j == project.size()) {
                 networkMap.put("listall", "true");
             } else {
-            	networkMap.put("projectid", project.get(j).getUuid());
+                networkMap.put("projectid", project.get(j).getUuid());
             }
             // 1. Get the list of domains from CS server using CS connector
             String response = csNetwork.listNetworks("json", networkMap);
@@ -297,7 +297,7 @@ public class NetworkServiceImpl implements NetworkService {
                     networkList.add(network);
                 }
             }
-    	}
+        }
         return networkList;
     }
 

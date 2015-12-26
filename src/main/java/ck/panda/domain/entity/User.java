@@ -124,15 +124,13 @@ public class User {
 
     /** Created by user. */
     @CreatedBy
-    @JoinColumn(name = "created_by", referencedColumnName = "id")
-    @OneToOne
-    private User createdBy;
+    @Column(name = "created_by")
+    private Long createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @JoinColumn(name = "updated_by", referencedColumnName = "id")
-    @OneToOne
-    private User updatedBy;
+    @Column(name = "updated_by")
+    private Long updatedBy;
 
     /** Transient domain of the user. */
     @Transient
@@ -169,7 +167,7 @@ public class User {
     /** Define status. */
     public enum Status {
        /** Define status constant. */
-    	ACTIVE,
+        ACTIVE,
         DELETED,
         BLOCKED;
     }
@@ -473,7 +471,7 @@ public class User {
      *
      * @return the createdBy.
      */
-    public User getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
@@ -482,7 +480,7 @@ public class User {
      *
      * @param createdBy to set.
      */
-    public void setCreatedBy(User createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -491,7 +489,7 @@ public class User {
      *
      * @return the updatedBy.
      */
-    public User getUpdatedBy() {
+    public Long getUpdatedBy() {
         return updatedBy;
     }
 
@@ -500,7 +498,7 @@ public class User {
      *
      * @param updatedBy to set.
      */
-    public void setUpdatedBy(User updatedBy) {
+    public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
     }
 
@@ -600,51 +598,51 @@ public class User {
      * @return the apiKey
      */
     public String getApiKey() {
-		return apiKey;
-	}
+        return apiKey;
+    }
 
     /**
      * Set the API Key.
      *
      * @param apiKey to set
      */
-	public void setApiKey(String apiKey) {
-		this.apiKey = apiKey;
-	}
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
 
-	/**
+    /**
      * Get the secret key.
      *
      * @return the secretKey
      */
-	public String getSecretKey() {
-		return secretKey;
-	}
+    public String getSecretKey() {
+        return secretKey;
+    }
 
-	/**
+    /**
      * Set the secret key .
      *
      * @param secretKey to set
      */
-	public void setSecretKey(String secretKey) {
-		this.secretKey = secretKey;
-	}
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
+    }
 
     /**
-	 * @return the roleId
-	 */
-	public Long getRoleId() {
-		return roleId;
-	}
+     * @return the roleId
+     */
+    public Long getRoleId() {
+        return roleId;
+    }
 
-	/**
-	 * @param roleId the roleId to set
-	 */
-	public void setRoleId(Long roleId) {
-		this.roleId = roleId;
-	}
+    /**
+     * @param roleId the roleId to set
+     */
+    public void setRoleId(Long roleId) {
+        this.roleId = roleId;
+    }
 
-	/**
+    /**
      * Convert JSONObject into user object.
      *
      * @param jsonObject JSON object.

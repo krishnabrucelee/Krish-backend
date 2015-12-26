@@ -123,15 +123,13 @@ public class Project implements Serializable {
 
     /** Created by user. */
     @CreatedBy
-    @JoinColumn(name = "created_by", referencedColumnName = "id")
-    @OneToOne
-    private User createdBy;
+    @Column(name = "created_by")
+    private Long createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @JoinColumn(name = "updated_by", referencedColumnName = "id")
-    @OneToOne
-    private User updatedBy;
+    @Column(name = "updated_by")
+    private Long updatedBy;
 
     /** Created date and time. */
     @CreatedDate
@@ -330,7 +328,7 @@ public class Project implements Serializable {
      *
      * @return the created user.
      */
-    public User getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
@@ -339,7 +337,7 @@ public class Project implements Serializable {
      *
      * @param createdBy created user to set.
      */
-    public void setCreatedBy(User createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -348,7 +346,7 @@ public class Project implements Serializable {
      *
      * @return the updated user.
      */
-    public User getUpdatedBy() {
+    public Long getUpdatedBy() {
         return updatedBy;
     }
 
@@ -357,7 +355,7 @@ public class Project implements Serializable {
      *
      * @param updatedBy updated user to set.
      */
-    public void setUpdatedBy(User updatedBy) {
+    public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
     }
 

@@ -6,3 +6,4 @@
 .gitignore.swp
 target/
 /bin/
+application.sh

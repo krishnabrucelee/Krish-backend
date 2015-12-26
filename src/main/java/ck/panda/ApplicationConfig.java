@@ -72,7 +72,7 @@ public class ApplicationConfig extends WebMvcConfigurerAdapter {
     }
 
     @Bean
-    AuditorAware<User> auditorProvider() {
+    AuditorAware<Long> auditorProvider() {
         return new UsernameAuditorAware();
     }
 

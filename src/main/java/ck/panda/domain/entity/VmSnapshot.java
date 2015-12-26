@@ -150,15 +150,13 @@ public class VmSnapshot implements Serializable {
 
     /** Created by user. */
     @CreatedBy
-    @JoinColumn(name = "created_user_id", referencedColumnName = "id")
-    @OneToOne
-    private User createdBy;
+    @Column(name = "created_user_id")
+    private Long createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @JoinColumn(name = "updated_user_id", referencedColumnName = "id")
-    @OneToOne
-    private User updatedBy;
+    @Column(name = "updated_user_id")
+    private Long updatedBy;
 
     /** Created date and time. */
     @CreatedDate
@@ -451,7 +449,7 @@ public class VmSnapshot implements Serializable {
      *
      * @return the createdBy.
      */
-    public User getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
@@ -460,7 +458,7 @@ public class VmSnapshot implements Serializable {
      *
      * @param createdBy to set.
      */
-    public void setCreatedBy(User createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -469,7 +467,7 @@ public class VmSnapshot implements Serializable {
      *
      * @return the updated user.
      */
-    public User getUpdatedBy() {
+    public Long getUpdatedBy() {
         return updatedBy;
     }
 
@@ -478,7 +476,7 @@ public class VmSnapshot implements Serializable {
      *
      * @param updatedBy to set.
      */
-    public void setUpdatedBy(User updatedBy) {
+    public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
     }
 

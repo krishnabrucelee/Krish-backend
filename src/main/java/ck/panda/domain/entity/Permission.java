@@ -42,7 +42,7 @@ public class Permission implements Serializable {
     @NotEmpty
     @Column(name = "action", nullable = false)
     private String action;
-    
+
     /** Action key of the Permission. */
     @NotEmpty
     @Column(name = "action_key", nullable = false)
@@ -75,15 +75,13 @@ public class Permission implements Serializable {
 
     /** Created by user. */
     @CreatedBy
-    @JoinColumn(name = "created_by", referencedColumnName = "id")
-    @OneToOne
-    private User createdBy;
+    @Column(name = "created_by")
+    private Long createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @JoinColumn(name = "updated_by", referencedColumnName = "id")
-    @OneToOne
-    private User updatedBy;
+    @Column(name = "updated_by")
+    private Long updatedBy;
 
     /** Created date and time. */
     @CreatedDate
@@ -141,33 +139,33 @@ public class Permission implements Serializable {
     public void setAction(String action) {
        this.action = action;
     }
-    
+
     /**
      * Get the actionKeyof the permission.
-     * 
-	 * @return the actionKey
-	 */
-	public String getActionKey() {
-		return actionKey;
-	}
+     *
+     * @return the actionKey
+     */
+    public String getActionKey() {
+        return actionKey;
+    }
 
-	/**
-	 * Set  the actionKey of the permission.
-	 * 
-	 * @param actionKey the actionKey to set
-	 */
-	public void setActionKey(String actionKey) {
-	    this.actionKey = actionKey;
-	}
+    /**
+     * Set  the actionKey of the permission.
+     *
+     * @param actionKey the actionKey to set
+     */
+    public void setActionKey(String actionKey) {
+        this.actionKey = actionKey;
+    }
 
-	/**
-	 * Get the description of the permission.
-	 *
-	 * @return the description
-	 */
-	public String getDescription() {
-	    return description;
-	}
+    /**
+     * Get the description of the permission.
+     *
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
+    }
 
     /**
      * Set the description of the permission.
@@ -273,7 +271,7 @@ public class Permission implements Serializable {
      *
      * @return the createdBy
      */
-    public User getCreatedBy() {
+    public Long getCreatedBy() {
        return createdBy;
     }
 
@@ -282,7 +280,7 @@ public class Permission implements Serializable {
      *
      * @param createdBy the createdBy to set
      */
-    public void setCreatedBy(User createdBy) {
+    public void setCreatedBy(Long createdBy) {
        this.createdBy = createdBy;
     }
 
@@ -291,7 +289,7 @@ public class Permission implements Serializable {
      *
      * @return the updatedBy
      */
-    public User getUpdatedBy() {
+    public Long getUpdatedBy() {
        return updatedBy;
     }
 
@@ -300,7 +298,7 @@ public class Permission implements Serializable {
      *
      * @param updatedBy the updatedBy to set
      */
-    public void setUpdatedBy(User updatedBy) {
+    public void setUpdatedBy(Long updatedBy) {
        this.updatedBy = updatedBy;
     }
 
