@@ -1039,4 +1039,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         return 0L;
     }
 
+	@Override
+	public VmInstance findById(Long id) {
+		return virtualmachinerepository.findById(id);
+	}
+
 }

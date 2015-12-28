@@ -11,6 +11,7 @@ import ck.panda.domain.entity.Account;
 import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.StorageOffering;
@@ -285,6 +286,30 @@ public class ConvertEntityService {
     public Domain getDomain(String uuid) throws Exception {
         return domainService.findbyUUID(uuid);
     }
+    
+    /**
+     * Get Network object.
+     *
+     * @param id of network
+     * @return network.
+     * @throws Exception unhandled exception.
+     */
+    public Network getNetworkById(Long Id) throws Exception {
+        return networkService.findById(Id);
+    }
+    
+    /**
+     * Get Vm Instance object.
+     *
+     * @param id of vm instance
+     * @return network.
+     * @throws Exception unhandled exception.
+     */
+    public VmInstance getVmInstanceById(Long id) throws Exception {
+        return virtualMachineService.findById(id);
+    }
+
+    
 
     /**
      * Get owner id.
