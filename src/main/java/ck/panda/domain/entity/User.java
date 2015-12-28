@@ -12,7 +12,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -50,8 +49,12 @@ public class User {
 
     /** Department of the user. */
     @ManyToOne
-    @JoinColumn(name = "department_id", referencedColumnName = "id")
+    @JoinColumn(name = "department_id", referencedColumnName = "id", updatable = false, insertable = false)
     private Department department;
+    
+    /** Department id of the user. */
+    @Column(name = "department_id")
+    private Long departmentId;
 
     /** Domain of the user. */
     @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
@@ -124,12 +127,12 @@ public class User {
 
     /** Created by user. */
     @CreatedBy
-    @Column(name = "created_by")
+    @Column(name = "created_user_id")
     private Long createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @Column(name = "updated_by")
+    @Column(name = "updated_user_id")
     private Long updatedBy;
 
     /** Transient domain of the user. */
@@ -239,8 +242,22 @@ public class User {
     public void setDepartment(Department department) {
         this.department = department;
     }
-
+    
     /**
+	 * @return the departmentId
+	 */
+	public Long getDepartmentId() {
+		return departmentId;
+	}
+
+	/**
+	 * @param departmentId the departmentId to set
+	 */
+	public void setDepartmentId(Long departmentId) {
+		this.departmentId = departmentId;
+	}
+
+	/**
      * @return the domain
      */
     public Domain getDomain() {

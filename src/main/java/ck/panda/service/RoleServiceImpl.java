@@ -2,7 +2,6 @@ package ck.panda.service;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Role;
-import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Role.Status;
 import ck.panda.domain.repository.jpa.RoleReposiory;
 import ck.panda.util.AppValidator;
@@ -164,6 +162,11 @@ public class RoleServiceImpl implements RoleService {
             errors.addGlobalError("role.name.unique.error");
         }
         return errors;
+    }
+    
+    @Override
+    public Role findByNameAndDepartmentIdAndActive(String name, Long departmentId) throws Exception {
+        return roleRepo.findByNameAndDepartmentIdAndActive(name, departmentId);
     }
 
 }

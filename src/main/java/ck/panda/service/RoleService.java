@@ -62,4 +62,14 @@ public interface RoleService  extends CRUDService<Role> {
      * @throws Exception unhandled errors.
      */
     List<Role> findByDepartment(Department department) throws Exception;
+    
+    /**
+     * Method to find role by name and department id and active.
+     *
+     * @param name - name of the role
+     * @param department - department id
+     * @return role
+     * @throws Exception - if error occurs
+     */
+    Role findByNameAndDepartmentIdAndActive(String name, Long departmentId) throws Exception;
 }
