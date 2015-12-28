@@ -69,14 +69,6 @@ public class ProjectServiceImpl implements ProjectService {
     @Autowired
     private ConfigUtil config;
 
-    /** Domain repository reference. */
-    @Autowired
-    private DomainRepository domainRepository;
-
-    /** User repository reference. */
-    @Autowired
-    private UserRepository userRepository;
-
     @Override
     @PreAuthorize("hasPermission(#project.getSyncFlag(), 'CREATE_PROJECT')")
     public Project save(Project project) throws Exception {
@@ -90,10 +82,9 @@ public class ProjectServiceImpl implements ProjectService {
             throw new ApplicationException(errors);
         } else {
             HashMap<String, String> optional = new HashMap<String, String>();
-            optional.put("domainid", project.getDepartment().getDomain().getUuid());
-            optional.put("account", project.getDepartment().getUserName());
+            optional.put("domainid", convertEntityService.getDomainById(project.getDomainId()).getUuid());
+            optional.put("account", convertEntityService.getDepartmentById(project.getDepartmentId()).getUserName());
             config.setUserServer();
-            LOGGER.debug("Cloud stack connectivity at domain", project.getDepartment().getDomain().getUuid());
             String csResponse = cloudStackProjectService.createProject("json", project.getName(),
                     project.getDescription(), optional);
             JSONObject csProject = new JSONObject(csResponse).getJSONObject("createprojectresponse");
@@ -103,7 +94,7 @@ public class ProjectServiceImpl implements ProjectService {
             } else {
                 LOGGER.debug("Project UUID", csProject.getString("id"));
                 project.setUuid(csProject.getString("id"));
-                users.add(userRepository.findOne(project.getProjectOwnerId()));
+                users.add(convertEntityService.getOwnerById(project.getProjectOwnerId()));
                 project.setUserList(users);
                 String instancePro = cloudStackProjectService.queryAsyncJobResult(csProject.getString("jobid"), "json");
                 JSONObject resProject = new JSONObject(instancePro).getJSONObject("queryasyncjobresultresponse");
@@ -143,7 +134,9 @@ public class ProjectServiceImpl implements ProjectService {
                     errors = this.validateEvent(errors, csProject.getString("errortext"));
                     throw new ApplicationException(errors);
                 }
-                users.add(userRepository.findOne(project.getProjectOwnerId()));
+                if(project.getProjectOwnerId() != null){
+                users.add(convertEntityService.getOwnerById(project.getProjectOwnerId()));
+                }
                 if (project.getUserList().size() > 0) {
                     for (User user : project.getUserList()) {
                         if (project.getProjectOwnerId() != user.getId()) {
@@ -191,7 +184,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<Project> findByAll() throws Exception {
-        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = convertEntityService.getDomainById(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && !domain.getName().equals("ROOT")) {
             if (Long.valueOf(tokenDetails.getTokenDetails("departmentid")) == 1000L) {
                 return (List<Project>) projectRepository.findAll();
@@ -259,7 +252,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Page<Project> findAllByActive(Boolean isActive, PagingAndSorting pagingAndSorting) throws Exception {
-        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = convertEntityService.getDomainById(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && !domain.getName().equals("ROOT")) {
             return projectRepository.findAllProjectByDomain(domain.getId(), pagingAndSorting.toPageRequest(), isActive, Project.Status.ENABLED);
         }
@@ -295,11 +288,10 @@ public class ProjectServiceImpl implements ProjectService {
                 // the converted Project entity to list
                 Project project = Project.convert(projectListJSON.getJSONObject(i));
                 project.setDomainId(convertEntityService.getDomainId(project.getTransDomainId()));
-                project.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomain(project.getTransAccount(),
+                project.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(project.getTransAccount(),
                         convertEntityService.getDomain(project.getTransDomainId())));
                 project.setIsActive(convertEntityService.getState(project.getTransState()));
                 project.setStatus((Project.Status)convertEntityService.getStatus(project.getTransState()));
-                project.setProjectOwnerId(convertEntityService.getUserIdByAccount(project.getTransAccount(), convertEntityService.getDomain(project.getTransDomainId())));
                 projectList.add(project);
 
             }

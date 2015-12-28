@@ -28,6 +28,9 @@ public class RolePrincipal {
     /** User domain name attributes. */
     private String domainname;
 
+    /** User domain id attributes. */
+    private Long domainId;
+
     /** User department id attributes. */
     private Long departmentid;
 
@@ -49,13 +52,14 @@ public class RolePrincipal {
      * @param type to set
      * @param domainname to set
      */
-    public RolePrincipal(String username, Role role, UserType type, String domainname, Long departmentid, String buildVersion) {
+    public RolePrincipal(String username, Role role, UserType type, String domainname, Long domainId, Long departmentid, String buildVersion) {
         this.username = username;
         this.role = role;
         this.type = type;
         this.domainname = domainname;
         this.departmentid = departmentid;
         this.buildVersion = buildVersion;
+        this.domainId = domainId;
     }
 
     @Override
@@ -67,6 +71,7 @@ public class RolePrincipal {
             jsonObject.put("userName", username);
             jsonObject.put("type", type);
             jsonObject.put("domainName", domainname);
+            jsonObject.put("domainId", domainId);
             jsonObject.put("departmentId", departmentid);
             jsonObject.put("buildNumber", buildVersion);
             JSONArray jsonArray = new JSONArray();

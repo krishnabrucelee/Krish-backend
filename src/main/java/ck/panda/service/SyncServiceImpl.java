@@ -147,7 +147,7 @@ public class SyncServiceImpl implements SyncService {
     /** Account service for listing users. */
     @Autowired
     private AccountService accountService;
-    
+
     /** Nic service for listing nic. */
     @Autowired
     private NicService nicService;
@@ -440,8 +440,8 @@ public class SyncServiceImpl implements SyncService {
             this.syncSnapshot();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Snapshot", e);
-        }      
-        try{ 
+        }
+        try{
             // 25. Sync Nic entity
             this.syncNic();
             LOGGER.debug("nic");
@@ -1722,9 +1722,12 @@ public class SyncServiceImpl implements SyncService {
             // 3.1 Find the corresponding CS server projectService object by
             // finding it in a hash using uuid
             if (csProjectMap.containsKey(project.getUuid())) {
-                Project csNetworkOffering = csProjectMap.get(project.getUuid());
+                Project csProject = csProjectMap.get(project.getUuid());
 
-                project.setName(csNetworkOffering.getName());
+                project.setName(csProject.getName());
+                project.setDepartmentId(csProject.getDepartmentId());
+                project.setStatus(csProject.getStatus());
+                project.setDomainId(csProject.getDomainId());
 
                 // 3.2 If found, update the project object in app db
                 projectService.update(project);
@@ -1873,7 +1876,7 @@ public class SyncServiceImpl implements SyncService {
             nicService.save(csNicMap.get(key));
         }
     }
-    
+
     /**
      * Create default roles and permissions.
      *
