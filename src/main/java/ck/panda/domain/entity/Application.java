@@ -84,12 +84,12 @@ public class Application implements Serializable {
 
     /** Created by user. */
     @CreatedBy
-    @Column(name = "created_by")
+    @Column(name = "created_user_id")
     private Long createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @Column(name = "updated_by")
+    @Column(name = "upated_user_id")
     private Long updatedBy;
 
     /** Created date and time. */

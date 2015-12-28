@@ -24,8 +24,8 @@ public interface ApplicationRepository extends PagingAndSortingRepository<Applic
      * @param status of the application.
      * @return application type.
      */
-    @Query(value = "select app from Application app where app.type=:type AND  app.domain =:domain AND app.isActive =:isActive and app.status = :status")
-    Application findByTypeAndDomainAndIsActive(@Param("type") String type, @Param("domain") Domain domain, @Param("isActive")  Boolean isActive, @Param("status") Status status);
+    @Query(value = "select app from Application app where app.type=:type AND  app.domainId =:domainId AND app.isActive =:isActive and app.status = :status")
+    Application findByTypeAndDomainAndIsActive(@Param("type") String type, @Param("domainId") Long domainId, @Param("isActive")  Boolean isActive, @Param("status") Status status);
 
     /**
      * Find all the active or inactive applications with pagination.
