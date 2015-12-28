@@ -95,11 +95,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     public Page<Application> findAll(PagingAndSorting pagingAndSorting) throws Exception {
         Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && !domain.getName().equals("ROOT")) {
-            if (Long.valueOf(tokenDetails.getTokenDetails("departmentid")) == 1000L) {
-                return applicationRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
-            } else {
-                return applicationRepo.findAllByDomainIsActive(domain.getId(), true, pagingAndSorting.toPageRequest());
-            }
+            return applicationRepo.findAllByDomainIsActive(domain.getId(), true, pagingAndSorting.toPageRequest());
         }
         return applicationRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
     }
@@ -108,11 +104,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     public List<Application> findAll() throws Exception {
         Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && !domain.getName().equals("ROOT")) {
-            if (Long.valueOf(tokenDetails.getTokenDetails("departmentid")) == 1000L) {
-                return (List<Application>) applicationRepo.findAllByIsActive(true);
-            } else {
-                return applicationRepo.findAllByDomainIsActive(domain.getId(), true);
-            }
+            return applicationRepo.findAllByDomainIsActive(domain.getId(), true);
         }
         return (List<Application>) applicationRepo.findAllByIsActive(true);
     }

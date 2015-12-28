@@ -11,7 +11,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 import javax.validation.constraints.Size;
@@ -89,7 +88,7 @@ public class Application implements Serializable {
 
     /** Last updated by user. */
     @LastModifiedBy
-    @Column(name = "upated_user_id")
+    @Column(name = "updated_user_id")
     private Long updatedBy;
 
     /** Created date and time. */
