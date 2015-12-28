@@ -30,10 +30,6 @@ public class AppValidator {
     @Autowired
     private MessageSource messageSource;
 
-    /** Role Service attribute. */
-    @Autowired
-    private RoleService roleService;
-
     /**
      * Validates the given entity.
      *

@@ -2,14 +2,12 @@ package ck.panda.domain.repository.jpa;
 
 import java.util.List;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Role;
-import ck.panda.domain.entity.VmInstance;
 
 /**
  * Jpa Repository for Role entity.
@@ -81,5 +79,16 @@ public interface RoleReposiory extends PagingAndSortingRepository<Role, Long> {
      */
     @Query(value = "SELECT role FROM Role AS role WHERE role.name=:name AND role.department=:department AND role.isActive IS TRUE")
     Role findUpdateUniqueness(String name, Department department);
-
+    
+    /**
+     * Method to find role by name and department id and active.
+     *
+     * @param name - name of the role
+     * @param departmentId - department id
+     * @param isActive - true
+     * @return role
+     */
+    @Query(value = "SELECT role FROM Role AS role WHERE role.name=:name AND role.departmentId=:departmentId AND role.isActive=:isActive")
+    Role findByNameAndDepartmentIdAndIsActive(@Param("name") String name, @Param("departmentId") Long departmentId, @Param("isActive") Boolean isActive);
+    
 }

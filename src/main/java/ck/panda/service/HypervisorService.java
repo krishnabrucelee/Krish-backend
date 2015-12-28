@@ -1,7 +1,6 @@
 package ck.panda.service;
 
 import java.util.List;
-
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Hypervisor;
 import ck.panda.util.domain.CRUDService;
@@ -20,4 +19,12 @@ public interface HypervisorService extends CRUDService<Hypervisor> {
      * @throws Exception unhandled errors.
      */
     List<Hypervisor> findAllFromCSServer() throws Exception;
+
+    /**
+     * To get the hypervisor from name.
+     *
+     * @return name hypervisor name
+     * @throws Exception unhandled errors.
+     */
+    Hypervisor findByName(String name) throws Exception;
 }

@@ -1077,11 +1077,11 @@ public class SyncServiceImpl implements SyncService {
                 csTemplate.setPasswordEnabled(csTemplate.getPasswordEnabled());
                 csTemplate.setFormat(csTemplate.getFormat());
                 csTemplate.setFeatured(csTemplate.getFeatured());
-                csTemplate.setOsType(csTemplate.getOsType());
-                csTemplate.setZone(csTemplate.getZone());
+                csTemplate.setOsTypeId(csTemplate.getOsType().getId());
+                csTemplate.setZoneId(csTemplate.getZone().getId());
                 csTemplate.setStatus(csTemplate.getStatus());
                 csTemplate.setType(csTemplate.getType());
-                csTemplate.setHypervisor(csTemplate.getHypervisor());
+                csTemplate.setHypervisorId(csTemplate.getHypervisor().getId());
                 csTemplate.setExtractable(csTemplate.getExtractable());
                 csTemplate.setDynamicallyScalable(csTemplate.getDynamicallyScalable());
 
@@ -1957,7 +1957,7 @@ public class SyncServiceImpl implements SyncService {
         try {
             List<User> userList = userService.findUsersByTypesAndActive(types, true);
             for (User user : userList) {
-                Role role = roleService.findByName("FULL_PERMISSION", user.getDepartment());
+                Role role = roleService.findByNameAndDepartmentIdAndIsActive("FULL_PERMISSION",user.getDepartmentId(),true);
                 user.setRoleId(role.getId());
                 userService.update(user);
             }

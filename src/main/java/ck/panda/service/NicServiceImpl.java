@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.Snapshot;
@@ -81,10 +82,10 @@ public class NicServiceImpl implements NicService {
         if (nic.getSyncFlag()) {
         Errors errors = validator.rejectIfNullEntity("nic", nic);
           errors = validator.validateEntity(nic, errors);
-          System.out.println(nic.getVmInstance().getUuid());
           configServer.setUserServer();
+          Network network = convertEntityService.getNetworkById(nic.getNetworkId());
            HashMap<String,String> optional = new HashMap<String, String>();
-           String createNicResponse = cloudStackInstanceService.addNicToVirtualMachine(nic.getNetwork().getUuid(),nic.getVmInstance().getUuid(),optional,"json");
+           String createNicResponse = cloudStackInstanceService.addNicToVirtualMachine(network.getUuid(),nic.getVmInstance().getUuid(),optional,"json");
            JSONObject addNicResponse = new JSONObject(createNicResponse).getJSONObject("addnictovirtualmachineresponse");
            if (addNicResponse.has("jobid")) {
         	   Thread.sleep(5000);
@@ -151,7 +152,8 @@ public class NicServiceImpl implements NicService {
          errors = validator.validateEntity(nic, errors);
          configServer.setUserServer();
          HashMap<String,String> optional = new HashMap<String, String>();
-         String updateNicResponse = cloudStackInstanceService.updateDefaultNicForVirtualMachine(nic.getUuid(), nic.getVmInstance().getUuid(),"json", optional);
+         VmInstance instance = vmService.findById(nic.getVmInstanceId()); 
+         String updateNicResponse = cloudStackInstanceService.updateDefaultNicForVirtualMachine(nic.getUuid(),instance.getUuid(),"json", optional);
          JSONObject defaultNicResponse = new JSONObject(updateNicResponse).getJSONObject("updatedefaultnicforvirtualmachineresponse");
          Thread.sleep(6000);
          if (defaultNicResponse.has("jobid")) {
@@ -220,7 +222,8 @@ public class NicServiceImpl implements NicService {
         Errors errors = validator.rejectIfNullEntity("nic", nic);
         HashMap<String,String> optional = new HashMap<String, String>();
         configServer.setUserServer();
-        String removeNicResponse = cloudStackInstanceService.removeNicFromVirtualMachine(nic.getUuid(), nic.getVmInstance().getUuid(),optional, "json");
+        VmInstance instance = vmService.findById(nic.getVmInstanceId()); 
+        String removeNicResponse = cloudStackInstanceService.removeNicFromVirtualMachine(nic.getUuid(), instance.getUuid(),optional, "json");
         JSONObject deleteNicResponse = new JSONObject(removeNicResponse).getJSONObject("removenicfromvirtualmachineresponse");
         if(deleteNicResponse.has("jobid")) {
            String jobResponse = cloudStackInstanceService.queryAsyncJobResult(deleteNicResponse.getString("jobid"), "json");

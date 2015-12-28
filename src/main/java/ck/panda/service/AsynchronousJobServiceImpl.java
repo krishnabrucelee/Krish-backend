@@ -5,19 +5,24 @@ import java.util.HashMap;
 import java.util.List;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Network;
+import ck.panda.domain.entity.NetworkOffering;
+import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
-import ck.panda.domain.repository.jpa.VolumeRepository;
+import ck.panda.rabbitmq.util.ResponseEvent;
 import ck.panda.util.CloudStackInstanceService;
+import ck.panda.util.CloudStackNetworkOfferingService;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.error.exception.ApplicationException;
 
@@ -25,27 +30,12 @@ import ck.panda.util.error.exception.ApplicationException;
  * Synchronization of all the asynchronous data from the cloudStack.
  *
  */
+@PropertySource(value = "classpath:permission.properties")
 @Service
 public class AsynchronousJobServiceImpl implements AsynchronousJobService {
 
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(SyncServiceImpl.class);
-
-    /** Virtual machine Service for listing vms. */
-    @Autowired
-    private VirtualMachineService virtualMachineService;
-
-    /** VolumeRepository repository reference. */
-    @Autowired
-    private VolumeRepository volumeRepo;
-
-    /** NetworkOfferingService for listing network offers in cloudstack server. */
-    @Autowired
-    private NetworkService networkService;
-
-    /** Volume Service for listing volumes. */
-    @Autowired
-    private VolumeService volumeService;
 
     /** CloudStack connector. */
     @Autowired
@@ -55,16 +45,40 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     @Autowired
     private CloudStackConfigurationService cloudConfigService;
 
-    /** Secret key value is append. */
-    @Value(value = "${aes.salt.secretKey}")
-    private String secretKey;
+    /** Virtual machine Service for listing vms. */
+    @Autowired
+    private VirtualMachineService virtualMachineService;
+
+    /** NetworkOfferingService for listing network offers in cloudstack server. */
+    @Autowired
+    private NetworkService networkService;
+
+    /** Volume Service for listing volumes. */
+    @Autowired
+    private VolumeService volumeService;
 
     /** CloudStack connector reference for instance. */
     @Autowired
     private CloudStackInstanceService cloudStackInstanceService;
 
+    /** Template Service for listing templates. */
+    @Autowired
+    private TemplateService templateService;
+
+    /** NetworkOfferingService for listing network offers in cloudstack server. */
+    @Autowired
+    private NetworkOfferingService networkOfferingService;
+
+    /** CloudStack Network Offering service for connectivity with cloudstack. */
+    @Autowired
+    private CloudStackNetworkOfferingService csNetworkOfferingService;
+
+    /** Secret key value is append. */
+    @Value(value = "${aes.salt.secretKey}")
+    private String secretKey;
+
     /**
-     * Sync status of Asynchronous resource with Cloud Server.
+     * Sync with CloudStack server list via Asynchronous Job.
      *
      * @param Object response object.
      * @throws ApplicationException unhandled application errors.
@@ -78,35 +92,72 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         String eventObjectResult = cloudStackInstanceService.queryAsyncJobResult(eventObject.getString("jobId"), "json");
         JSONObject jobresult = new JSONObject(eventObjectResult).getJSONObject("queryasyncjobresultresponse")
                 .getJSONObject("jobresult");
+
         String commandText = null;
         if (eventObject.getString("commandEventType").contains(".")) {
             commandText = eventObject.getString("commandEventType").substring(0, eventObject.getString("commandEventType").indexOf('.', 0)) + ".";
         } else {
             commandText = eventObject.getString("commandEventType");
         }
-
         switch (commandText) {
-        case EventTypes.EVENT_VM:
-            LOGGER.debug("VM Sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
-            syncvirtualmachine(jobresult, eventObject.getString("commandEventType"));
-            break;
-        case EventTypes.EVENT_NETWORK:
-            if (!eventObject.getString("commandEventType").contains("OFFERING")) {
-                LOGGER.debug("Network sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
-                syncNetwork(jobresult, eventObject.getString("commandEventType"), eventObject);
-            }
-            break;
-        default:
-            LOGGER.debug("No sync required", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+            case EventTypes.EVENT_VM:
+                LOGGER.debug("VM Sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+                syncvirtualmachine(jobresult);
+                break;
+            case EventTypes.EVENT_NETWORK:
+                if (!eventObject.getString("commandEventType").contains("OFFERING")) {
+                    LOGGER.debug("Network sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+                    asyncNetwork(jobresult, eventObject.getString("commandEventType"), eventObject);
+                }
+                break;
+            case EventTypes.EVENT_TEMPLATE:
+                LOGGER.debug("templates sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+                asyncTemplates(eventObject.getString("commandEventType"), eventObject);
+                break;
+            default:
+                LOGGER.debug("No sync required", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
         }
     }
 
     /**
-     * @param jobresult job result
-     * @param commandEventType type of action
+     * Sync with CloudStack server Network offering.
+     *
+     * @param uuid network offering response event
+     * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors
      */
-    public void syncvirtualmachine(JSONObject jobresult, String commandEventType) throws Exception {
+    @Override
+    public void asyncNetworkOffering(ResponseEvent eventObject) throws ApplicationException, Exception {
+
+    	if (eventObject.getEvent().equals("NETWORK.OFFERING.EDIT")) {
+            HashMap<String, String> networkOfferingMap = new HashMap<String, String>();
+            networkOfferingMap.put("id", eventObject.getEntityuuid());
+            String response = csNetworkOfferingService.listNetworkOfferings("json", networkOfferingMap);
+            JSONArray networkOfferingListJSON = null;
+            JSONObject responseObject = new JSONObject(response).getJSONObject("listnetworkofferingsresponse");
+            if (responseObject.has("networkoffering")) {
+                networkOfferingListJSON = responseObject.getJSONArray("networkoffering");
+                NetworkOffering csNetworkOffering = NetworkOffering.convert(networkOfferingListJSON.getJSONObject(0));
+                NetworkOffering networkOffering = networkOfferingService.findByUUID(eventObject.getEntityuuid());
+                networkOffering.setName(csNetworkOffering.getName());
+                networkOffering.setDisplayText(csNetworkOffering.getDisplayText());
+                networkOffering.setAvailability(csNetworkOffering.getAvailability());
+                networkOfferingService.update(networkOffering);
+            }
+        }
+        if (eventObject.getEvent().equals("NETWORK.OFFERING.DELETE")) {
+        	NetworkOffering networkOffering = networkOfferingService.findByUUID(eventObject.getEntityuuid());
+        	networkOfferingService.delete(networkOffering);
+        }
+    }
+
+    /**
+     * Sync with CloudStack server virtual machine.
+     *
+     * @param jobresult job result
+     * @throws Exception cloudstack unhandled errors
+     */
+    public void syncvirtualmachine(JSONObject jobresult) throws Exception {
 
         if (jobresult.has("virtualmachine")) {
             VmInstance vmInstance = VmInstance.convert(jobresult.getJSONObject("virtualmachine"));
@@ -145,13 +196,13 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 }
                 // 3.2 If found, update the vm object in app db
                 virtualMachineService.update(instance);
-                syncVolume();
+                asyncVolume();
             }
         }
     }
 
     /**
-     * Sync with CloudStack server Network.
+     * Sync with CloudStack server Network from Asynchronous Job.
      *
      * @param jobresult job result
      * @param commandEventType action type
@@ -159,7 +210,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      * @throws ApplicationException unhandled application errors
      * @throws Exception cloudstack unhandled errors
      */
-    public void syncNetwork(JSONObject jobresult, String commandEventType, JSONObject eventObject) throws ApplicationException, Exception {
+    public void asyncNetwork(JSONObject jobresult, String commandEventType, JSONObject eventObject) throws ApplicationException, Exception {
 
         if (commandEventType.equals("NETWORK.UPDATE")) {
             Network csNetwork = Network.convert(jobresult.getJSONObject("network"));
@@ -183,12 +234,31 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     }
 
     /**
+     * Sync with CloudStack server Network from Asynchronous Job.
+     *
+     * @param jobresult job result
+     * @param commandEventType action type
+     * @param eventObject network event object
+     * @throws ApplicationException unhandled application errors
+     * @throws Exception cloudstack unhandled errors
+     */
+    public void asyncTemplates(String commandEventType, JSONObject eventObject) throws ApplicationException, Exception {
+
+        if (commandEventType.equals("TEMPLATE.DELETE")) {
+            JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
+            Template template = templateService.findByUUID(json.getString("id"));
+            template.setSyncFlag(false);
+            templateService.softDelete(template);
+        }
+    }
+
+    /**
      * Sync with Cloud Server Volume.
      *
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    public void syncVolume() throws ApplicationException, Exception {
+    public void asyncVolume() throws ApplicationException, Exception {
 
         // 1. Get all the StorageOffering objects from CS server as hash
         List<Volume> volumeList = volumeService.findAllFromCSServer();
@@ -235,7 +305,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             } else {
                 volume.setIsActive(false);
                 volume.setStatus(Volume.Status.DESTROY);
-                volumeRepo.save(volume);
+                volumeService.save(volume);
             }
         }
         // 4. Get the remaining list of cs server hash osType object, then
