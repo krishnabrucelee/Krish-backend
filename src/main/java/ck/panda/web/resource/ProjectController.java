@@ -40,11 +40,6 @@ public class ProjectController extends CRUDController<Project>implements ApiCont
     @Override
     public Project create(@RequestBody Project project) throws Exception {
         project.setSyncFlag(true);
-        if (project.getDomain() != null) {
-            project.setDomainId(project.getDomain().getId());
-        }
-        project.setDepartmentId(project.getDepartment().getId());
-        project.setProjectOwnerId(project.getProjectOwner().getId());
         return projectService.save(project);
     }
 

@@ -126,6 +126,17 @@ public class ConvertEntityService {
     }
 
     /**
+     * Get domain by id.
+     *
+     * @param id of domain.
+     * @return domain.
+     * @throws Exception unhandled exception.
+     */
+    public Domain getDomainById(Long id) throws Exception {
+        return domainService.find(id);
+    }
+
+    /**
      * Get zone id.
      *
      * @param uuid uuid of zone.
@@ -242,6 +253,17 @@ public class ConvertEntityService {
     }
 
     /**
+     * Get owner by id.
+     *
+     * @param id of account/user.
+     * @return user.
+     * @throws Exception unhandled exception.
+     */
+    public User getOwnerById(Long id) throws Exception {
+        return userService.find(id);
+    }
+
+    /**
      * Get department object.
      *
      * @param uuid uuid of department.
@@ -250,6 +272,17 @@ public class ConvertEntityService {
      */
     public Department getDepartment(String uuid) throws Exception {
         return departmentService.findByUuidAndIsActive(uuid, true);
+    }
+
+    /**
+     * Get department object.
+     *
+     * @param uuid uuid of department.
+     * @return department.
+     * @throws Exception unhandled exception.
+     */
+    public Department getDepartmentById(Long id) throws Exception {
+        return departmentService.find(id);
     }
 
     /**
@@ -272,6 +305,17 @@ public class ConvertEntityService {
      */
     public Project getProject(String uuid) throws Exception {
         return projectService.findByUuidAndIsActive(uuid, true);
+    }
+
+    /**
+     * Get Project object by id.
+     *
+     * @param id of project.
+     * @return project.
+     * @throws Exception unhandled exception.
+     */
+    public Project getProjectById(Long id) throws Exception {
+        return projectService.find(id);
     }
 
     /**
