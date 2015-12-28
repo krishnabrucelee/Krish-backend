@@ -536,7 +536,7 @@ public class Host {
             host.setTransPodId((JsonUtil.getStringValue(jsonObject, "podid")));
             host.setTransClusterId((JsonUtil.getStringValue(jsonObject, "clusterid")));
             host.setTransZoneId((JsonUtil.getStringValue(jsonObject, "zoneid")));
-            host.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
+            host.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state").toUpperCase()));
             host.setHostIpaddress(JsonUtil.getStringValue(jsonObject, "ipaddress"));
             host.setHostHighAvailability(JsonUtil.getStringValue(jsonObject,"hahost"));
             host.setHypervisor(JsonUtil.getStringValue(jsonObject,"hypervisor"));

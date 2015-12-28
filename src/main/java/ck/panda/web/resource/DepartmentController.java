@@ -113,8 +113,8 @@ public class DepartmentController extends CRUDController<Department> implements 
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<Department> getDepartmentListByDomain(@RequestParam("dept") Long id) throws Exception {
-    	List<AccountType> types = new ArrayList<AccountType>();
-    	types.add(Department.AccountType.USER);
+        List<AccountType> types = new ArrayList<AccountType>();
+        types.add(Department.AccountType.USER);
         return departmentService.findDepartmentsByDomainAndAccountTypesAndActive(id, types, true);
     }
 
