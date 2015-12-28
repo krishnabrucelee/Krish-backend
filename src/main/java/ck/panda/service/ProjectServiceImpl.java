@@ -144,6 +144,13 @@ public class ProjectServiceImpl implements ProjectService {
                     throw new ApplicationException(errors);
                 }
                 users.add(userRepository.findOne(project.getProjectOwnerId()));
+                if (project.getUserList().size() > 0) {
+                    for (User user : project.getUserList()) {
+                        if (project.getProjectOwnerId() != user.getId()) {
+                            users.add(user);
+                        }
+                    }
+                }
                 project.setUserList(users);
             }
 

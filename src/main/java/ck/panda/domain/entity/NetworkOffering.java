@@ -43,7 +43,7 @@ public class NetworkOffering implements Serializable {
     /** Unique id for the Network Offering. */
     @Column(name = "uuid")
     private String uuid;
-    
+
     /** Availability of the Network Offering. */
     @Column(name = "availability")
     private String availability;
@@ -80,15 +80,13 @@ public class NetworkOffering implements Serializable {
 
     /** Created by user. */
     @CreatedBy
-    @JoinColumn(name = "created_by", referencedColumnName = "id")
-    @OneToOne
-    private User createdBy;
+    @Column(name = "created_by")
+    private Long createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @JoinColumn(name = "updated_by", referencedColumnName = "id")
-    @OneToOne
-    private User updatedBy;
+    @Column(name = "updated_by")
+    private Long updatedBy;
 
     /** Created date and time. */
     @CreatedDate
@@ -170,7 +168,7 @@ public class NetworkOffering implements Serializable {
      *
      * @return the createdBy
      */
-    public User getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
@@ -179,7 +177,7 @@ public class NetworkOffering implements Serializable {
      *
      * @return the updatedBy
      */
-    public User getUpdatedBy() {
+    public Long getUpdatedBy() {
         return updatedBy;
     }
 
@@ -305,7 +303,7 @@ public class NetworkOffering implements Serializable {
      * @param createdBy
      * the createdBy to set
      */
-    public void setCreatedBy(User createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -315,7 +313,7 @@ public class NetworkOffering implements Serializable {
      * @param updatedBy
      * the updatedBy to set
      */
-    public void setUpdatedBy(User updatedBy) {
+    public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
     }
 
@@ -357,27 +355,27 @@ public class NetworkOffering implements Serializable {
     public void setTrafficType(String trafficType) {
       this.trafficType = trafficType;
     }
-    
+
     /**
      * Get the Network Offer availability.
      *
      * @return the availability
      */
     public String getAvailability() {
-		return availability;
-	}
-    
+        return availability;
+    }
+
     /**
      * Set the Network Offer availability.
      *
      * @param availability
      * the availability to set
      */
-	public void setAvailability(String availability) {
-		this.availability = availability;
-	}
+    public void setAvailability(String availability) {
+        this.availability = availability;
+    }
 
-	/**
+    /**
      * Convert JSONObject to network offering entity.
      *
      * @param object json object

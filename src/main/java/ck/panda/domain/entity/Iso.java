@@ -72,15 +72,13 @@ public class Iso {
 
     /** Created by user. */
     @CreatedBy
-    @JoinColumn(name = "created_user_id", referencedColumnName = "id")
-    @OneToOne
-    private User createdBy;
+    @Column(name = "created_user_id")
+    private Long createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @JoinColumn(name = "updated_user_id", referencedColumnName = "id")
-    @OneToOne
-    private User updatedBy;
+    @Column(name = "updated_user_id")
+    private Long updatedBy;
 
     /** Created date and time. */
     @CreatedDate
@@ -111,6 +109,18 @@ public class Iso {
     /** IsRemoved attribute to verify removed or not. */
     @Column(name = "is_removed")
     private Boolean isRemoved;
+
+    /** Is Iso ready to boot. */
+    @Column(name = "is_ready")
+    private Boolean isReady;
+
+    /** IsBootable Iso or not. */
+    @Column(name = "is_bootable")
+    private Boolean isBootable;
+
+    /** Is Public Iso or not. */
+    @Column(name = "is_public")
+    private Boolean isPublic;
 
     /**
      * @return the id
@@ -241,7 +251,7 @@ public class Iso {
      *
      * @return the createdBy
      */
-    public User getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
@@ -250,7 +260,7 @@ public class Iso {
      *
      * @param createdBy to set
      */
-    public void setCreatedBy(User createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -259,7 +269,7 @@ public class Iso {
      *
      * @return the updatedBy
      */
-    public User getUpdatedBy() {
+    public Long getUpdatedBy() {
         return updatedBy;
     }
 
@@ -268,7 +278,7 @@ public class Iso {
      *
      * @param updatedBy to set
      */
-    public void setUpdatedBy(User updatedBy) {
+    public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
     }
 
@@ -380,6 +390,60 @@ public class Iso {
     }
 
     /**
+     * Get Is Ready to boot.
+     *
+     * @return response.
+     */
+    public Boolean getIsReady() {
+        return isReady;
+    }
+
+    /**
+     * Set is Ready to boot.
+     *
+     * @param isReady to set.
+     */
+    public void setIsReady(Boolean isReady) {
+        this.isReady = isReady;
+    }
+
+     /**
+     * Get Is Bootable iso.
+     *
+     * @return iso.
+     */
+    public Boolean getIsBootable() {
+        return isBootable;
+    }
+
+     /**
+     * Set Is Bootable iso.
+     *
+     * @return bootable iso status.
+     */
+    public void setIsBootable(Boolean isBootable) {
+        this.isBootable = isBootable;
+    }
+
+    /**
+     * Get is Public.
+     *
+     * @return isPublic.
+     */
+    public Boolean getIsPublic() {
+        return isPublic;
+    }
+
+    /**
+     * Set is Public
+     *
+     * @param isPublic iso to set.
+     */
+    public void setIsPublic(Boolean isPublic) {
+        this.isPublic = isPublic;
+    }
+
+    /**
      * Convert JSONObject to domain entity.
      *
      * @param jsonObject json object
@@ -394,6 +458,9 @@ public class Iso {
             iso.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
             iso.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
             iso.setTransOsTypeId(JsonUtil.getStringValue(jsonObject, "ostypeid"));
+            iso.setIsBootable(JsonUtil.getBooleanValue(jsonObject, "bootable"));
+            iso.setIsPublic(JsonUtil.getBooleanValue(jsonObject,"ispublic"));
+            iso.setIsReady(JsonUtil.getBooleanValue(jsonObject,"isready"));
             iso.setIsActive(true);
         } catch (Exception ex) {
             LOGGER.error("Iso-convert", ex);

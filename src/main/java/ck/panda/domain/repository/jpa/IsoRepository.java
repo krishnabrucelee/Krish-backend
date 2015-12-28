@@ -1,5 +1,6 @@
 package ck.panda.domain.repository.jpa;
 
+import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -18,7 +19,16 @@ public interface IsoRepository extends PagingAndSortingRepository<Iso, Long> {
      * @param uuid of iso.
      * @return iso object.
      */
-    @Query(value = "select iso from Iso iso where iso.uuid = :uuid")
-    Iso findByUUID(@Param("uuid") String uuid);
+    @Query(value = "select iso from Iso iso where iso.uuid = :uuid and iso.isBootable = :bootable")
+    Iso findByUUID(@Param("uuid") String uuid, @Param("bootable") Boolean bootable);
+
+    /**
+     * Find all iso by bootable.
+     *
+     * @param bootable bootable iso.
+     * @return list of iso objects.
+     */
+    @Query(value = "select iso from Iso iso where iso.isBootable = :bootable")
+    List<Iso> findByBootable( @Param("bootable") Boolean bootable);
 
 }

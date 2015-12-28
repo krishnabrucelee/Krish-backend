@@ -71,16 +71,14 @@ public class Region implements Serializable {
     private Long version;
 
     /** Created by user. */
-    @JoinColumn(name = "created_by", referencedColumnName = "id")
+    @Column(name = "created_by")
     @CreatedBy
-    @OneToOne
-    private User createdBy;
+    private Long createdBy;
 
     /** Last updated by user. */
-    @JoinColumn(name = "updated_by", referencedColumnName = "id")
+    @Column(name = "updated_by")
     @LastModifiedBy
-    @OneToOne
-    private User updatedBy;
+    private Long updatedBy;
 
     /** Created date and time. */
     @Column(name = "created_date_time")
@@ -238,7 +236,7 @@ public class Region implements Serializable {
      *
      * @return createdBy
      */
-    public User getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
@@ -247,7 +245,7 @@ public class Region implements Serializable {
      *
      * @param createdBy - the createdBy to set
      */
-    public void setCreatedBy(User createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -256,7 +254,7 @@ public class Region implements Serializable {
      *
      * @return updatedBy
      */
-    public User getUpdatedBy() {
+    public Long getUpdatedBy() {
         return updatedBy;
     }
 
@@ -265,7 +263,7 @@ public class Region implements Serializable {
      *
      * @param updatedBy - the updatedBy to set
      */
-    public void setUpdatedBy(User updatedBy) {
+    public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
     }
 

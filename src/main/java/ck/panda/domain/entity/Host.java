@@ -100,22 +100,20 @@ public class Host {
     /** IsActive attribute to verify Active or Inactive. */
     @Column(name = "is_active")
     private Boolean isActive;
-    
+
     /** High availability of the Host. */
     @Column(name = "host_ha")
     private String hostHighAvailability;
 
     /** Created by user. */
     @CreatedBy
-    @JoinColumn(name = "created_user_id", referencedColumnName = "id")
-    @OneToOne
-    private User createdBy;
+    @Column(name = "created_user_id")
+    private Long createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @JoinColumn(name = "updated_user_id", referencedColumnName = "id")
-    @OneToOne
-    private User updatedBy;
+    @Column(name = "updated_user_id")
+    private Long updatedBy;
 
     /** Created date and time. */
     @CreatedDate
@@ -130,7 +128,7 @@ public class Host {
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
-    
+
     /** Hypervisor of the host. */
     @Column(name = "hypervisor")
     private String hypervisor;
@@ -141,9 +139,9 @@ public class Host {
      */
     public enum Status {
 
-    	/**  Host will be in a Enabled State. */
+        /**  Host will be in a Enabled State. */
         UP,
-        
+
         /**  Host will be in a Alert State. */
         ALERT,
 
@@ -313,7 +311,7 @@ public class Host {
      *
      * @return the createdBy
      */
-    public User getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
@@ -322,14 +320,14 @@ public class Host {
      *
      * @param createdBy  to set
      */
-    public void setCreatedBy(User createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
     /**
      * @return the updatedBy
      */
-    public User getUpdatedBy() {
+    public Long getUpdatedBy() {
         return updatedBy;
     }
 
@@ -338,7 +336,7 @@ public class Host {
      *
      * @param updatedBy to set
      */
-    public void setUpdatedBy(User updatedBy) {
+    public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
     }
 
@@ -473,9 +471,9 @@ public class Host {
      *
      * @return the ipAddress.
      */
-	public String getHostIpaddress() {
-		return hostIpaddress;
-	}
+    public String getHostIpaddress() {
+        return hostIpaddress;
+    }
 
 
     /**
@@ -483,84 +481,84 @@ public class Host {
      *
      * @param ipAddress to set
      */
-	public void setHostIpaddress(String hostIpaddress) {
-		this.hostIpaddress = hostIpaddress;
-	}
-	
-	/**
-	 * Get HostHighAvailability.
-	 * 
-	 * @return the HostHighAvailability.
-	 */
-	public String getHostHighAvailability() {
-		return hostHighAvailability;
-	}
+    public void setHostIpaddress(String hostIpaddress) {
+        this.hostIpaddress = hostIpaddress;
+    }
 
-	/**
-	 * Set the HostHighAvailability.
-	 * 
-	 * @param hostHighAvailability to set.
-	 */
-	public void setHostHighAvailability(String hostHighAvailability) {
-		this.hostHighAvailability = hostHighAvailability;
-	}
+    /**
+     * Get HostHighAvailability.
+     *
+     * @return the HostHighAvailability.
+     */
+    public String getHostHighAvailability() {
+        return hostHighAvailability;
+    }
 
-	/**
-	 * Get Hypervisor name
-	 * 
-	 * @return hypertvisor
-	 */
-	public String getHypervisor() {
-		return hypervisor;
-	}
+    /**
+     * Set the HostHighAvailability.
+     *
+     * @param hostHighAvailability to set.
+     */
+    public void setHostHighAvailability(String hostHighAvailability) {
+        this.hostHighAvailability = hostHighAvailability;
+    }
 
-	/**
-	 * Set the hypervisor
-	 * 
-	 * @param hypervisor name to set
-	 */
-	public void setHypervisor(String hypervisor) {
-		this.hypervisor = hypervisor;
-	}
+    /**
+     * Get Hypervisor name
+     *
+     * @return hypertvisor
+     */
+    public String getHypervisor() {
+        return hypervisor;
+    }
 
-	/**
-	 * Convert JSONObject to domain entity.
-	 *
-	 * @param jsonObject json object
-	 * @return domain entity object.
-	 * @throws JSONException handles json exception.
-	 */
-	public static Host convert(JSONObject jsonObject) throws JSONException {
-		Host host = new Host();
-		try {
-			host.setName(JsonUtil.getStringValue(jsonObject, "name"));
-			host.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-			host.setTransPodId((JsonUtil.getStringValue(jsonObject, "podid")));
-			host.setTransClusterId((JsonUtil.getStringValue(jsonObject, "clusterid")));
-			host.setTransZoneId((JsonUtil.getStringValue(jsonObject, "zoneid")));
-			host.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state").toUpperCase()));
-			host.setHostIpaddress(JsonUtil.getStringValue(jsonObject, "ipaddress"));
-			host.setHostHighAvailability(JsonUtil.getStringValue(jsonObject,"hahost"));
-			host.setHypervisor(JsonUtil.getStringValue(jsonObject,"hypervisor"));
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		return host;
-	}
+    /**
+     * Set the hypervisor
+     *
+     * @param hypervisor name to set
+     */
+    public void setHypervisor(String hypervisor) {
+        this.hypervisor = hypervisor;
+    }
 
-	/**
-	 * Mapping entity object into list.
-	 *
-	 * @param hostList
-	 *            list of hosts.
-	 * @return host map
-	 */
-	public static Map<String, Host> convert(List<Host> hostList) {
-		Map<String, Host> hostMap = new HashMap<String, Host>();
+    /**
+     * Convert JSONObject to domain entity.
+     *
+     * @param jsonObject json object
+     * @return domain entity object.
+     * @throws JSONException handles json exception.
+     */
+    public static Host convert(JSONObject jsonObject) throws JSONException {
+        Host host = new Host();
+        try {
+            host.setName(JsonUtil.getStringValue(jsonObject, "name"));
+            host.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
+            host.setTransPodId((JsonUtil.getStringValue(jsonObject, "podid")));
+            host.setTransClusterId((JsonUtil.getStringValue(jsonObject, "clusterid")));
+            host.setTransZoneId((JsonUtil.getStringValue(jsonObject, "zoneid")));
+            host.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
+            host.setHostIpaddress(JsonUtil.getStringValue(jsonObject, "ipaddress"));
+            host.setHostHighAvailability(JsonUtil.getStringValue(jsonObject,"hahost"));
+            host.setHypervisor(JsonUtil.getStringValue(jsonObject,"hypervisor"));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return host;
+    }
 
-		for (Host host : hostList) {
-			hostMap.put(host.getUuid(), host);
-		}
-		return hostMap;
-	}
+    /**
+     * Mapping entity object into list.
+     *
+     * @param hostList
+     *            list of hosts.
+     * @return host map
+     */
+    public static Map<String, Host> convert(List<Host> hostList) {
+        Map<String, Host> hostMap = new HashMap<String, Host>();
+
+        for (Host host : hostList) {
+            hostMap.put(host.getUuid(), host);
+        }
+        return hostMap;
+    }
 }

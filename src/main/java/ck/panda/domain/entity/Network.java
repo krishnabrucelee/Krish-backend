@@ -139,15 +139,13 @@ public class Network implements Serializable {
 
     /** Created by user. */
     @CreatedBy
-    @JoinColumn(name = "created_by", referencedColumnName = "id")
-    @OneToOne
-    private User createdBy;
+    @Column(name = "created_by")
+    private Long createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @JoinColumn(name = "updated_by", referencedColumnName = "id")
-    @OneToOne
-    private User updatedBy;
+    @Column(name = "updated_by")
+    private Long updatedBy;
 
     /** Created date and time. */
     @CreatedDate
@@ -381,7 +379,7 @@ public class Network implements Serializable {
      *
      * @return the createdBy
      */
-    public User getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
@@ -390,7 +388,7 @@ public class Network implements Serializable {
      *
      * @return the updatedBy
      */
-    public User getUpdatedBy() {
+    public Long getUpdatedBy() {
         return updatedBy;
     }
 
@@ -542,7 +540,7 @@ public class Network implements Serializable {
      * @param createdBy
      * Network createdBy to set
      */
-    public void setCreatedBy(User createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -552,7 +550,7 @@ public class Network implements Serializable {
      * @param updatedBy
      *  Network updatedBy to set
      */
-    public void setUpdatedBy(User updatedBy) {
+    public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
     }
 

@@ -85,15 +85,13 @@ public class Cluster {
 
     /** Created by user. */
     @CreatedBy
-    @JoinColumn(name = "created_user_id", referencedColumnName = "id")
-    @OneToOne
-    private User createdBy;
+    @Column(name = "created_user_id")
+    private Long createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @JoinColumn(name = "updated_user_id", referencedColumnName = "id")
-    @OneToOne
-    private User updatedBy;
+    @Column(name = "updated_user_id")
+    private Long updatedBy;
 
     /** Created date and time. */
     @CreatedDate
@@ -280,7 +278,7 @@ public class Cluster {
      *
      * @return the createdBy
      */
-    public User getCreatedBy() {
+    public Long getCreatedBy() {
         return createdBy;
     }
 
@@ -289,7 +287,7 @@ public class Cluster {
      *
      * @param createdBy  to set
      */
-    public void setCreatedBy(User createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -298,7 +296,7 @@ public class Cluster {
      *
      * @return the updatedBy
      */
-    public User getUpdatedBy() {
+    public Long getUpdatedBy() {
         return updatedBy;
     }
 
@@ -307,7 +305,7 @@ public class Cluster {
      *
      * @param updatedBy  to set
      */
-    public void setUpdatedBy(User updatedBy) {
+    public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
     }
 

@@ -72,12 +72,12 @@ public class IsoServiceImpl implements IsoService {
 
     @Override
     public List<Iso> findAll() throws Exception {
-        return (List<Iso>) isoRepo.findAll();
+        return (List<Iso>) isoRepo.findByBootable(true);
     }
 
     @Override
     public Iso findbyUUID(String uuid) throws Exception {
-        return isoRepo.findByUUID(uuid);
+        return isoRepo.findByUUID(uuid, true);
     }
 
     @Override

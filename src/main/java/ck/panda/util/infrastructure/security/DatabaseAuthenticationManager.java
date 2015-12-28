@@ -133,7 +133,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
             } else {
                 Boolean authResponse = csLoginAuthentication(username.get(), password.get(), domain.get());
                 if (authResponse) {
-                    if (user == null) {
+                    if (!domain.get().equals("BACKEND_ADMIN")) {
                         user = userService.findByUser(username.get(), password.get(), domain.get());
                     }
                     if (user == null) {
