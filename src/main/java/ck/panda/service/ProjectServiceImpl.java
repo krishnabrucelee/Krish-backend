@@ -118,15 +118,15 @@ public class ProjectServiceImpl implements ProjectService {
         	List<User> users = new ArrayList<User>();
             Errors errors = validator.rejectIfNullEntity("project", project);
             errors = validator.validateEntity(project, errors);
-            errors = this.validateByName(errors, project.getName(), project.getDepartment(), project.getId());
+            errors = this.validateByName(errors, project.getName(),  convertEntityService.getDepartmentById(project.getDepartmentId()), project.getId());
             // Validation
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
                 config.setUserServer();
                 HashMap<String, String> optional = new HashMap<String, String>();
-                optional.put("domainid", project.getDepartment().getDomain().getUuid());
-                optional.put("account", project.getDepartment().getUserName());
+                optional.put("domainid", convertEntityService.getDomainById(project.getDomainId()).getUuid());
+                optional.put("account",  convertEntityService.getDepartmentById(project.getDepartmentId()).getUserName());
                 String csResponse = cloudStackProjectService.updateProject(project.getUuid(), project.getDescription(),
                         "json", optional);
                 JSONObject csProject = new JSONObject(csResponse).getJSONObject("updateprojectresponse");
