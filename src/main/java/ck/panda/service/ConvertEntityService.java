@@ -2,19 +2,22 @@ package ck.panda.service;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
-import java.util.List;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Account;
+import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.Project;
+import ck.panda.domain.entity.StorageOffering;
+import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.Zone;
 
 /**
  * Convert Util used to get entity object from CS server's resource uuid.
@@ -62,7 +65,6 @@ public class ConvertEntityService {
      */
     @Autowired
     private AccountService accountService;
-
 
     /**
      * NetworkOfferingService for listing network offers in cloudstack server.
@@ -153,6 +155,17 @@ public class ConvertEntityService {
     }
 
     /**
+     * Get zone by id.
+     *
+     * @param id of zone.
+     * @return zone.
+     * @throws Exception unhandled exception.
+     */
+    public Zone getZoneById(Long id) throws Exception {
+        return zoneService.find(id);
+    }
+
+    /**
      * Get template id.
      *
      * @param uuid uuid of template.
@@ -165,6 +178,17 @@ public class ConvertEntityService {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Get template by id.
+     *
+     * @param id of template.
+     * @return template.
+     * @throws Exception unhandled exception.
+     */
+    public Template getTemplateById(Long id) throws Exception {
+        return templateService.find(id);
     }
 
     /**
@@ -183,6 +207,17 @@ public class ConvertEntityService {
     }
 
     /**
+     * Get compute offer by id.
+     *
+     * @param id of service offering.
+     * @return computer offer .
+     * @throws Exception unhandled exception.
+     */
+    public ComputeOffering getComputeOfferById(Long id) throws Exception {
+        return computeService.find(id);
+    }
+
+    /**
      * Get the network id.
      *
      * @param uuid uuid of nic network.
@@ -190,6 +225,21 @@ public class ConvertEntityService {
      * @throws Exception unhandled exception.
      */
     public Long getNetworkId(String uuid) throws Exception {
+        if (networkService.findByUUID(uuid) != null) {
+            return networkService.findByUUID(uuid).getId();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get the network id.
+     *
+     * @param uuid uuid of nic network.
+     * @return netwotk id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getNetworkByUuid(String uuid) throws Exception {
         if (networkService.findByUUID(uuid) != null) {
             return networkService.findByUUID(uuid).getId();
         } else {
@@ -402,6 +452,17 @@ public class ConvertEntityService {
             return storageService.findUuid(uuid).getId();
         }
         return null;
+    }
+
+    /**
+     * Get Storage object by id.
+     *
+     * @param id of storage offer.
+     * @return storage.
+     * @throws Exception unhandled exception.
+     */
+    public StorageOffering getStorageOfferById(Long id) throws Exception {
+        return storageService.find(id);
     }
 
     /**
