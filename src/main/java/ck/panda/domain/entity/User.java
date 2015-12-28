@@ -230,42 +230,54 @@ public class User {
     }
 
     /**
-     * @return the department
+     * Get the department.
+     * 
+     * @return the department.
      */
     public Department getDepartment() {
         return department;
     }
 
     /**
-     * @param department the department to set
+     * Set the department.
+     * 
+     * @param department the department to set.
      */
     public void setDepartment(Department department) {
         this.department = department;
     }
     
     /**
-	 * @return the departmentId
-	 */
-	public Long getDepartmentId() {
-		return departmentId;
-	}
+     * Get the departmentId.
+     * 
+     * @return the departmentId.
+     */
+    public Long getDepartmentId() {
+        return departmentId;
+    }
+
+    /**
+     * Set the departmentId.
+     * 
+     * @param departmentId the departmentId to set.
+     */
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
+    }
 
 	/**
-	 * @param departmentId the departmentId to set
-	 */
-	public void setDepartmentId(Long departmentId) {
-		this.departmentId = departmentId;
-	}
-
-	/**
-     * @return the domain
+	 * Get the domain.
+	 * 
+     * @return the domain.
      */
     public Domain getDomain() {
         return domain;
     }
 
     /**
-     * @param domain the domain to set
+     * Set the domain.
+     * 
+     * @param domain the domain to set.
      */
     public void setDomain(Domain domain) {
         this.domain = domain;
@@ -362,6 +374,8 @@ public class User {
     }
 
     /**
+     * Get the projectList.
+     * 
      * @return the projectList
      */
     public List<Project> getProjectList() {
@@ -369,6 +383,8 @@ public class User {
     }
 
     /**
+     * Set the projectList.
+     * 
      * @param projectList the projectList to set
      */
     public void setProjectList(List<Project> projectList) {
@@ -646,6 +662,8 @@ public class User {
     }
 
     /**
+     * Get the roleId.
+     * 
      * @return the roleId
      */
     public Long getRoleId() {
@@ -653,6 +671,8 @@ public class User {
     }
 
     /**
+     * Set the roleId.
+     * 
      * @param roleId the roleId to set
      */
     public void setRoleId(Long roleId) {

@@ -68,8 +68,9 @@ public interface RoleService  extends CRUDService<Role> {
      *
      * @param name - name of the role
      * @param department - department id
+     * @param isActive - true
      * @return role
      * @throws Exception - if error occurs
      */
-    Role findByNameAndDepartmentIdAndActive(String name, Long departmentId) throws Exception;
+    Role findByNameAndDepartmentIdAndIsActive(String name, Long departmentId, Boolean isActive) throws Exception;
 }
