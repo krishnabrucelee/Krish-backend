@@ -286,7 +286,7 @@ public class ConvertEntityService {
     public Domain getDomain(String uuid) throws Exception {
         return domainService.findbyUUID(uuid);
     }
-    
+
     /**
      * Get Network object.
      *
@@ -297,7 +297,7 @@ public class ConvertEntityService {
     public Network getNetworkById(Long Id) throws Exception {
         return networkService.findById(Id);
     }
-    
+
     /**
      * Get Vm Instance object.
      *
@@ -309,7 +309,7 @@ public class ConvertEntityService {
         return virtualMachineService.findById(id);
     }
 
-    
+
 
     /**
      * Get owner id.
@@ -764,7 +764,7 @@ public class ConvertEntityService {
      * @return Zone.
      * @throws Exception unhandled exception.
      */
-    public String getZoneById(Long zoneId) throws Exception {
+    public String getZoneUuidById(Long zoneId) throws Exception {
         if (zoneService.find(zoneId) != null) {
             return zoneService.find(zoneId).getUuid();
         } else {
@@ -779,7 +779,7 @@ public class ConvertEntityService {
      * @return Project.
      * @throws Exception unhandled exception.
      */
-    public String getProjectById(Long projectId) throws Exception {
+    public String getProjectUuidById(Long projectId) throws Exception {
         if (projectService.find(projectId) != null) {
             return projectService.find(projectId).getUuid();
         }
