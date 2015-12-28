@@ -17,10 +17,10 @@ import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.Role;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.repository.jpa.DepartmentReposiory;
-import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackAccountService;
 import ck.panda.util.CloudStackUserService;
@@ -70,7 +70,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     /** Domain repository reference. */
     @Autowired
-    private DomainRepository domainRepository;
+    private DomainService domainService;
 
     /** Project service reference. */
     @Autowired
@@ -107,22 +107,21 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (department.getSyncFlag()) {
 
             //Check the user is not a root and admin and set the domain value from login detail
-            System.out.println(String.valueOf(tokenDetails.getTokenDetails("usertype")));
+
             if(!String.valueOf(tokenDetails.getTokenDetails("usertype")).equals("ROOT_ADMIN")) {
-                Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-                department.setDomain(domain);
+                department.setDomainId(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
             }
+
             // Validate department
             this.validateDepartment(department);
-
-
-            department.setDomainId(department.getDomain().getId());
+            Domain domain = domainService.find(department.getDomainId());
+            department.setDomainId(department.getDomainId());
             department.setIsActive(true);
             department.setStatus(Department.Status.ENABLED);
             department.setType(Department.AccountType.USER);
             config.setServer(1L);
             HashMap<String, String> accountMap = new HashMap<String, String>();
-            accountMap.put("domainid", String.valueOf(department.getDomain().getUuid()));
+            accountMap.put("domainid", String.valueOf(domain.getUuid()));
             String createAccountResponse = csAccountService.createAccount(
                     String.valueOf(department.getType().ordinal()), "test@test.com", "first",
                     "last", department.getUserName(), "test", "json", accountMap);
@@ -132,6 +131,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             JSONObject userObj = createAccountResponseJSON.getJSONArray("user").getJSONObject(0);
             csUserService.deleteUser(userObj.getString("id"), "json");
             department.setUuid((String) createAccountResponseJSON.get("id"));
+            LOGGER.debug("Department created successfully" + department.getUserName());
         }
         return departmentRepo.save(department);
     }
@@ -145,7 +145,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     private void validateDepartment(Department department) throws Exception {
         Errors errors = validator.rejectIfNullEntity("department", department);
         errors = validator.validateEntity(department, errors);
-        Department dep = departmentRepo.findByNameAndDomainAndIsActive(department.getUserName(), department.getDomain(),
+        Department dep = departmentRepo.findByNameAndDomainAndIsActive(department.getUserName(), department.getDomainId(),
                 true);
         if (dep != null && department.getId() != dep.getId()) {
             errors.addFieldError("userName", "department.already.exist.for.same.domain");
@@ -161,14 +161,16 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (department.getSyncFlag()) {
             // Validate department
             this.validateDepartment(department);
+            Domain domain = domainService.find(department.getDomainId());
 
             Department departmentedit = departmentRepo.findOne(department.getId());
-            department.setDomainId(department.getDomain().getId());
+            department.setDomainId(department.getDomainId());
             config.setServer(1L);
             HashMap<String, String> accountMap = new HashMap<String, String>();
-            accountMap.put("domainid", department.getDomain().getUuid());
+            accountMap.put("domainid", domain.getUuid());
             accountMap.put("account", departmentedit.getUserName());
             csAccountService.updateAccount(department.getUserName(), accountMap);
+            LOGGER.debug("Department updated successfully" + department.getUserName());
         }
         return departmentRepo.save(department);
     }
@@ -208,7 +210,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Department> findByAll() throws Exception {
-        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && !domain.getName().equals("ROOT")) {
             return (List<Department>) departmentRepo.findByDomainAndIsActive(domain.getId(), true, AccountType.USER);
         }
@@ -223,7 +225,7 @@ public class DepartmentServiceImpl implements DepartmentService {
      * @return list of departments.
      */
     public Page<Department> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
-        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && !domain.getName().equals("ROOT")) {
             return departmentRepo.findByDomainAndIsActive(domain.getId(), true, pagingAndSorting.toPageRequest(), AccountType.USER);
         }
@@ -240,11 +242,13 @@ public class DepartmentServiceImpl implements DepartmentService {
         List<VmInstance> vmResponse  =  vmService.findByDepartment(department.getId());
         List<Role> roleResponse = roleService.findByDepartment(department);
         List<Volume> volumeResponse = volumeService.findByDepartment(department.getId());
+        List<User> userResponse = userService.findByDepartment(department.getId());
         if (projectResponse.size() != 0  || vmResponse.size() != 0 || roleResponse.size()!= 0 || volumeResponse.size() != 0 ) {
          errors.addGlobalError( "You have the following resources in your account : project :" + projectResponse.size() +
                     "vmInstance :" +vmResponse.size()+
                     "role :" +roleResponse.size()+
                     "volume :" +volumeResponse.size() +
+                    "user :" + userResponse.size() +
                     "Kindly delete associated resources and try again");
 
         }
@@ -261,6 +265,7 @@ public class DepartmentServiceImpl implements DepartmentService {
                  String jobResponse = csAccountService.accountJobResult(jobId.getString("jobid"), "json");
                  JSONObject jobresults = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
             }
+             LOGGER.debug("Department deleted successfully" + department.getUserName());
         }
 
         return departmentRepo.save(department);
