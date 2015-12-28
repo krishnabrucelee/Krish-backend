@@ -29,6 +29,15 @@ public interface ZoneService extends CRUDService<Zone> {
      * @throws Exception unhandled errors.
      */
     Zone findByUUID(String uuid) throws Exception;
+    
+    /**
+     * To get zone from cloudstack server.
+     *
+     * @param id id of zone.
+     * @return zone from server
+     * @throws Exception unhandled errors.
+     */
+    Zone findById(Long id) throws Exception;
 
     /**
      * Soft delete for zone.

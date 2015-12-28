@@ -12,6 +12,7 @@ import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Network;
+import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.StorageOffering;
@@ -154,7 +155,7 @@ public class ConvertEntityService {
         }
 
     }
-
+    
     /**
      * Get zone by id.
      *
@@ -260,6 +261,17 @@ public class ConvertEntityService {
         return networkOfferingService.findByUUID(uuid).getId();
         }
         return null;
+    }
+    
+    /**
+     * Get NetworkOffering object.
+     *
+     * @param uuid uuid of NetworkOffering
+     * @return NetworkOffering.
+     * @throws Exception unhandled exception.
+     */
+    public NetworkOffering getNetworkOfferingById(Long id) throws Exception {
+        return networkOfferingService.findById(id);
     }
 
     /**
