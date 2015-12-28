@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import ck.panda.service.AsynchronousJobService;
@@ -28,17 +27,15 @@ public class AsynchronousJobListener implements MessageListener {
     private SyncService syncService;
 
     /** Asynchronous service. */
-    private AsynchronousJobService asynchService;
+    private AsynchronousJobService asyncService;
 
     /** Cloud stack server service. */
     private CloudStackServer cloudStackServer;
 
     /** Admin username. */
-    @Value("${backend.admin.username}")
     private String backendAdminUsername;
 
     /** Admin role. */
-    @Value("${backend.admin.role}")
     private String backendAdminRole;
 
     /**
@@ -48,10 +45,13 @@ public class AsynchronousJobListener implements MessageListener {
      * @param asynchService asynchronous Service object.
      * @param cloudStackServer cloudStackServer object.
      */
-    public AsynchronousJobListener(SyncService syncService, AsynchronousJobService asynchService, CloudStackServer cloudStackServer) {
+    public AsynchronousJobListener(SyncService syncService, AsynchronousJobService asyncService, CloudStackServer cloudStackServer,
+    		String backendAdminUsername, String backendAdminRole) {
         this.syncService = syncService;
-        this.asynchService = asynchService;
+        this.asyncService = asyncService;
         this.cloudStackServer = cloudStackServer;
+        this.backendAdminUsername = backendAdminUsername;
+        this.backendAdminRole = backendAdminRole;
     }
 
     @Override
@@ -76,11 +76,11 @@ public class AsynchronousJobListener implements MessageListener {
             if (eventObject.getString("status").equalsIgnoreCase("SUCCEEDED")) {
                 syncService.init(cloudStackServer);
                 ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
-                AuthenticatedExternalWebService authenticatedExternalWebService = new AuthenticatedExternalWebService("admin", null,
-                        AuthorityUtils.commaSeparatedStringToAuthorityList("BACKEND_ADMIN"));
+                AuthenticatedExternalWebService authenticatedExternalWebService = new AuthenticatedExternalWebService(backendAdminUsername, null,
+                        AuthorityUtils.commaSeparatedStringToAuthorityList(backendAdminRole));
                 authenticatedExternalWebService.setExternalWebService(externalWebService);
                 SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);
-                asynchService.syncResourceStatus(eventObject);
+                asyncService.syncResourceStatus(eventObject);
             }
         }
     }

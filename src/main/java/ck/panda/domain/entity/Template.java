@@ -16,7 +16,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -89,21 +88,27 @@ public class Template implements Serializable {
     @Column(name = "reference_url")
     private String referenceUrl;
 
-    /** Zone type id. */
-    @NotNull
+    /** Zone object. */
     @ManyToOne
-    @JoinColumn(name = "zone_id", referencedColumnName = "id")
+    @JoinColumn(name = "zone_id", referencedColumnName = "id", updatable = false, insertable = false)
     private Zone zone;
+
+    /** Zone type id. */
+    @Column(name = "zone_id")
+    private Long zoneId;
 
     /** Transient zone of the template. */
     @Transient
     private String transZone;
 
-    /** Hypervisor type id. */
-    @NotNull
+    /** Hypervisor object. */
     @ManyToOne
-    @JoinColumn(name = "hypervisor_type_id", referencedColumnName = "id")
+    @JoinColumn(name = "hypervisor_type_id", referencedColumnName = "id", updatable = false, insertable = false)
     private Hypervisor hypervisor;
+
+    /** Hypervisor type id. */
+    @Column(name = "hypervisor_type_id")
+    private Long hypervisorId;
 
     /** Transient hypervisor of the template. */
     @Transient
@@ -134,18 +139,25 @@ public class Template implements Serializable {
     @Enumerated(EnumType.STRING)
     private Format format;
 
-    /** OS category id. */
+    /** OS category object. */
     @ManyToOne
-    @JoinColumn(name = "os_category", referencedColumnName = "id")
+    @JoinColumn(name = "os_category", referencedColumnName = "id", updatable = false, insertable = false)
     private OsCategory osCategory;
 
-    /** OS type id. */
-    @NotNull
+    /** Os category type id. */
+    @Column(name = "os_category")
+    private Long osCategoryId;
+
+    /** OS type object. */
     @ManyToOne
-    @JoinColumn(name = "os_type", referencedColumnName = "id")
+    @JoinColumn(name = "os_type", referencedColumnName = "id", updatable = false, insertable = false)
     private OsType osType;
 
-    /** Transient OS type of the template. */
+    /** OS type type id. */
+    @Column(name = "os_type")
+    private Long osTypeId;
+
+	/** Transient OS type of the template. */
     @Transient
     private String transOsType;
 
@@ -221,12 +233,12 @@ public class Template implements Serializable {
 
     /** Created by user. */
     @CreatedBy
-    @Column(name = "created_by")
+    @Column(name = "created_user_id")
     private Long createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @Column(name = "updated_by")
+    @Column(name = "updated_user_id")
     private Long updatedBy;
 
     /** Created date and time. */
@@ -426,6 +438,24 @@ public class Template implements Serializable {
     }
 
     /**
+     * Get the zone id.
+     *
+     * @return zoneId
+     */
+    public Long getZoneId() {
+		return zoneId;
+	}
+
+    /**
+     * Set the zone id.
+     *
+     * @param zoneId - the Zone id to set
+     */
+	public void setZoneId(Long zoneId) {
+		this.zoneId = zoneId;
+	}
+
+    /**
      * Get the hypervisor type.
      *
      * @return hypervisor
@@ -442,6 +472,24 @@ public class Template implements Serializable {
     public void setHypervisor(Hypervisor hypervisor) {
         this.hypervisor = hypervisor;
     }
+
+    /**
+     * Get the hypervisor type id.
+     *
+     * @return hypervisorId
+     */
+    public Long getHypervisorId() {
+		return hypervisorId;
+	}
+
+    /**
+     * Set the hypervisor type id.
+     *
+     * @param hypervisorId - the Hypervisor id to set
+     */
+	public void setHypervisorId(Long hypervisorId) {
+		this.hypervisorId = hypervisorId;
+	}
 
     /**
      * Get the original XS version.
@@ -552,6 +600,24 @@ public class Template implements Serializable {
     }
 
     /**
+     * Get the OS category id.
+     *
+     * @return osCategoryId
+     */
+    public Long getOsCategoryId() {
+		return osCategoryId;
+	}
+
+    /**
+     * Set the OS category id.
+     *
+     * @param osCategoryId - the osCategory id to set
+     */
+	public void setOsCategoryId(Long osCategoryId) {
+		this.osCategoryId = osCategoryId;
+	}
+
+    /**
      * Get the OS type.
      *
      * @return osType
@@ -568,6 +634,24 @@ public class Template implements Serializable {
     public void setOsType(OsType osType) {
         this.osType = osType;
     }
+
+    /**
+     * Get the OS type id.
+     *
+     * @return osTypeId
+     */
+    public Long getOsTypeId() {
+		return osTypeId;
+	}
+
+    /**
+     * Set the OS type id.
+     *
+     * @param osTypeId - the osType id to set
+     */
+	public void setOsTypeId(Long osTypeId) {
+		this.osTypeId = osTypeId;
+	}
 
     /**
      * Get the OS version.

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.json.JSONArray;
@@ -12,12 +11,10 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
-import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.Status;
 import ck.panda.domain.entity.User.UserType;
@@ -209,7 +206,7 @@ public class UserServiceImpl implements UserService {
                 // the converted User entity to list
 
                 User user = User.convert(userListJSON.getJSONObject(i));
-                user.setDepartment(convertEntityService.getDepartment(user.getTransDepartment()));
+                user.setDepartmentId((convertEntityService.getDepartment(user.getTransDepartment()).getId()));
                 user.setDomainId(convertEntityService.getDomainId(user.getTransDomainId()));
                 if (!user.getUserName().equalsIgnoreCase("baremetal-system-account")) {
                     userList.add(user);

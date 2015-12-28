@@ -414,4 +414,9 @@ public class NetworkServiceImpl implements NetworkService {
             throw new ApplicationException(errors);
         }
     }
+
+	@Override
+	public Network findById(Long Id) throws Exception {
+		return networkRepo.findById(Id);
+	}
 }

@@ -25,7 +25,16 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * @return instance.
      */
     VmInstance findByUUID(String uuid);
-
+    
+    /**
+     * Find vm instance by id.
+     *
+     * @param uuid instance id.
+     * @return instance.
+     */
+    VmInstance findById(Long id);
+    
+   
     /**
      * VM related events are handled.
      *

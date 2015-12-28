@@ -63,12 +63,6 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Virtual Machine.", response = VmInstance.class)
     @Override
     public VmInstance create(@RequestBody VmInstance vminstance) throws Exception {
-        if (vminstance.getProject() != null) {
-            vminstance.setProjectId(vminstance.getProject().getId());
-        }
-        vminstance.setInstanceOwnerId(vminstance.getInstanceOwner().getId());
-        vminstance.setDomainId(vminstance.getDomain().getId());
-        vminstance.setDepartmentId(vminstance.getDepartment().getId());
         vminstance.setSyncFlag(true);
         return virtualmachineservice.save(vminstance);
     }

@@ -85,5 +85,10 @@ public class HypervisorServiceImpl implements HypervisorService {
         return hypervisorList;
     }
 
+	@Override
+	public Hypervisor findByName(String name) throws Exception {
+		return findByName(name);
+	}
+
 }
 

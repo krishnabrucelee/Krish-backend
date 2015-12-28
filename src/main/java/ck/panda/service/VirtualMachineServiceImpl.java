@@ -15,11 +15,7 @@ import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.domain.entity.User.UserType;
-import ck.panda.domain.repository.jpa.DomainRepository;
-import ck.panda.domain.repository.jpa.NetworkRepository;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
-import ck.panda.domain.repository.jpa.ZoneRepository;
-import ck.panda.domain.repository.jpa.VolumeRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackIsoService;
@@ -43,8 +39,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
 /**
- * Virtual Machine creation, update, start, reboot, stop all operations are
- * handled by this controller.
+ * Virtual Machine creation, update, start, reboot, stop all operations are handled by this controller.
  */
 @Service
 public class VirtualMachineServiceImpl implements VirtualMachineService {
@@ -65,15 +60,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     /** Network repository reference. */
     @Autowired
-    private NetworkRepository networkRepo;
-
-    /** Network repository reference. */
-    @Autowired
     private VolumeService volumeService;
 
-    /** Zone repository reference. */
+    /** Project service for listing projects. */
     @Autowired
-    private ZoneRepository zoneRepository;
+    private ProjectService projectService;
 
     /** Cloud stack configuration utility class. */
     @Autowired
@@ -99,10 +90,6 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Autowired
     private CloudStackIsoService csIso;
 
-    /** Volume entity. */
-    @Autowired
-    private VolumeRepository volumeRepo;
-
     /** CloudStack configuration . */
     @Autowired
     private CloudStackConfigurationService cloudConfigService;
@@ -110,18 +97,6 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     /** Token details connector. */
     @Autowired
     private TokenDetails tokenDetails;
-
-    /** Domain repository connector. */
-    @Autowired
-    private DomainRepository domainRepository;
-
-    /** User service reference for instance. */
-    @Autowired
-    private UserService userService;
-
-    /** Project service reference for instance. */
-    @Autowired
-    private ProjectService projectService;
 
     @Override
     @PreAuthorize("hasPermission(#vminstance.getSyncFlag(), 'CREATE_VM')")
@@ -144,10 +119,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     optional.put("displayname", vminstance.getName());
                     vminstance.setDisplayName(vminstance.getName());
                     optional.put("name", vminstance.getName());
-                    if (networkRepo.findByUUID(vminstance.getNetworkUuid()) != null) {
-                        vminstance.setNetworkId(networkRepo.findByUUID(vminstance.getNetworkUuid()).getId());
-                    }
-                    vminstance.setZone(zoneRepository.findOne(vminstance.getZoneId()));
+                    vminstance.setNetworkId(convertEntityService.getNetworkByUuid(vminstance.getNetworkUuid()));
                     config.setUserServer();
                     LOGGER.debug("Cloud stack connectivity at VM", vminstance.getNetworkUuid());
                     optional.put("networkids", vminstance.getNetworkUuid());
@@ -156,18 +128,22 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     optional.put("keyboard", "us");
                     optional.put("name", vminstance.getName());
                     if (vminstance.getProjectId() != null) {
-                        optional.put("projectid", vminstance.getProject().getUuid());
+                        optional.put("projectid",
+                                convertEntityService.getProjectById(vminstance.getProjectId()).getUuid());
                     } else {
-                        optional.put("account", vminstance.getDepartment().getUserName());
+                        optional.put("account",
+                                convertEntityService.getDepartmentById(vminstance.getDepartmentId()).getUserName());
                         optional.put("domainid",
-                                domainRepository.findOne(vminstance.getDepartment().getDomainId()).getUuid());
+                                convertEntityService.getDomainById(vminstance.getDomainId()).getUuid());
                     }
                     if (vminstance.getStorageOfferingId() != null) {
-                        optional.put("diskofferingid", vminstance.getStorageOffering().getUuid());
+                        optional.put("diskofferingid",
+                                convertEntityService.getStorageOfferById(vminstance.getStorageOfferingId()).getUuid());
                     }
                     String csResponse = cloudStackInstanceService.deployVirtualMachine(
-                            vminstance.getComputeOffering().getUuid(), vminstance.getTemplate().getUuid(),
-                            vminstance.getZone().getUuid(), "json", optional);
+                            convertEntityService.getComputeOfferById(vminstance.getComputeOfferingId()).getUuid(),
+                            convertEntityService.getTemplateById(vminstance.getTemplateId()).getUuid(),
+                            convertEntityService.getZoneById(vminstance.getZoneId()).getUuid(), "json", optional);
                     JSONObject csInstance = new JSONObject(csResponse).getJSONObject("deployvirtualmachineresponse");
                     if (csInstance.has("errorcode")) {
                         errors = this.validateEvent(errors, csInstance.getString("errortext"));
@@ -191,9 +167,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 return virtualmachinerepository.save(vminstance);
             }
         } else {
-
             return virtualmachinerepository.save(vminstance);
-
         }
     }
 
@@ -251,9 +225,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                        errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        errors = validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
                         if (errors.hasErrors()) {
-                            throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
+                            throw new BadCredentialsException(
+                                    jobresult.getJSONObject("jobresult").getString("errortext"));
                         }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
@@ -277,9 +252,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                        errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        errors = validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
                         if (errors.hasErrors()) {
-                            throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
+                            throw new BadCredentialsException(
+                                    jobresult.getJSONObject("jobresult").getString("errortext"));
                         }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
@@ -302,9 +278,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                        errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        errors = validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
                         if (errors.hasErrors()) {
-                            throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
+                            throw new BadCredentialsException(
+                                    jobresult.getJSONObject("jobresult").getString("errortext"));
                         }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
@@ -327,9 +304,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                        errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        errors = validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
                         if (errors.hasErrors()) {
-                            throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
+                            throw new BadCredentialsException(
+                                    jobresult.getJSONObject("jobresult").getString("errortext"));
                         }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
@@ -343,7 +321,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             break;
         case EventTypes.EVENT_VM_DESTROY:
             try {
-                String instanceResponse = cloudStackInstanceService.destroyVirtualMachine(vminstance.getUuid(), "json", optional);
+                String instanceResponse = cloudStackInstanceService.destroyVirtualMachine(vminstance.getUuid(), "json",
+                        optional);
                 JSONObject instance = new JSONObject(instanceResponse).getJSONObject("destroyvirtualmachineresponse");
                 if (instance.has("jobid")) {
                     String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"),
@@ -351,9 +330,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                        errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        errors = validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
                         if (errors.hasErrors()) {
-                            throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
+                            throw new BadCredentialsException(
+                                    jobresult.getJSONObject("jobresult").getString("errortext"));
                         }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
@@ -369,7 +349,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         case EventTypes.EVENT_VM_EXPUNGE:
             try {
                 optional.put("expunge", "true");
-                String instanceResponse = cloudStackInstanceService.destroyVirtualMachine(vminstance.getUuid(), "json", optional);
+                String instanceResponse = cloudStackInstanceService.destroyVirtualMachine(vminstance.getUuid(), "json",
+                        optional);
                 JSONObject instance = new JSONObject(instanceResponse).getJSONObject("destroyvirtualmachineresponse");
                 if (instance.has("jobid")) {
                     String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"),
@@ -377,9 +358,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
                         vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                        errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        errors = validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
                         if (errors.hasErrors()) {
-                            throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
+                            throw new BadCredentialsException(
+                                    jobresult.getJSONObject("jobresult").getString("errortext"));
                         }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
@@ -398,11 +380,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 String instanceResponse = cloudStackInstanceService.recoverVirtualMachine(vminstance.getUuid(), "json");
                 JSONObject instance = new JSONObject(instanceResponse).getJSONObject("recovervirtualmachineresponse");
                 if (instance.has("errorcode")) {
-                        errors =  validator.sendGlobalError(instance.getString("errortext"));
-                        if (errors.hasErrors()) {
-                            throw new BadCredentialsException(instance.getString("errortext"));
-                        }
-                        vminstance.setEventMessage(instance.getString("errortext"));
+                    errors = validator.sendGlobalError(instance.getString("errortext"));
+                    if (errors.hasErrors()) {
+                        throw new BadCredentialsException(instance.getString("errortext"));
+                    }
+                    vminstance.setEventMessage(instance.getString("errortext"));
                 } else {
                     vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_CREATE));
                     vminstance.setEventMessage("VM Recover");
@@ -446,9 +428,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                                 "json");
                         JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                         if (jobresult.getString("jobstatus").equals("2")) {
-                            errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                            errors = validator
+                                    .sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
                             if (errors.hasErrors()) {
-                                throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
+                                throw new BadCredentialsException(
+                                        jobresult.getJSONObject("jobresult").getString("errortext"));
                             }
                             vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                         } else {
@@ -458,7 +442,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 } else {
                     errors.addGlobalError("Your instance must be Running before attempting to change its current host");
                     if (errors.hasErrors()) {
-                        throw new BadCredentialsException("Your instance must be Running before attempting to change its current host");
+                        throw new BadCredentialsException(
+                                "Your instance must be Running before attempting to change its current host");
                     }
                 }
             } catch (BadCredentialsException e) {
@@ -475,9 +460,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                             "json");
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
-                        errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        errors = validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
                         if (errors.hasErrors()) {
-                            throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
+                            throw new BadCredentialsException(
+                                    jobresult.getJSONObject("jobresult").getString("errortext"));
                         }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else if (jobresult.getString("jobstatus").equals("1")) {
@@ -502,7 +488,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                             "json");
                     JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
-                        errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        errors = validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
                         if (errors.hasErrors()) {
                             throw new ApplicationException(errors);
                         }
@@ -521,23 +507,21 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         case EventTypes.EVENT_VM_RESETPASSWORD:
             try {
                 if (vmInstance.getPassword().equalsIgnoreCase("show")) {
-                    String instanceResponse = cloudStackInstanceService
-                            .getVMPassword(vmInstance.getUuid());
+                    String instanceResponse = cloudStackInstanceService.getVMPassword(vmInstance.getUuid());
                     System.out.println(instanceResponse);
-                    JSONObject instance = new JSONObject(instanceResponse)
-                            .getJSONObject("getvmpasswordresponse");
+                    JSONObject instance = new JSONObject(instanceResponse).getJSONObject("getvmpasswordresponse");
                     String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
                     byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
                     SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
                     if (vminstance.getVncPassword() != null) {
-                    String encryptedPassword = new String(
-                            EncryptionUtil.decrypt(vminstance.getVncPassword(), originalKey));
-                    errors =  validator.sendGlobalError("Your instance current password is " + encryptedPassword);
-                    if (errors.hasErrors()) {
-                        throw new BadCredentialsException("Your instance current password is " + encryptedPassword);
-                    }
+                        String encryptedPassword = new String(
+                                EncryptionUtil.decrypt(vminstance.getVncPassword(), originalKey));
+                        errors = validator.sendGlobalError("Your instance current password is " + encryptedPassword);
+                        if (errors.hasErrors()) {
+                            throw new BadCredentialsException("Your instance current password is " + encryptedPassword);
+                        }
                     } else {
-                        errors =  validator.sendGlobalError("No password are currently assigned for VM");
+                        errors = validator.sendGlobalError("No password are currently assigned for VM");
                         if (errors.hasErrors()) {
                             throw new BadCredentialsException("No password are currently assigned for VM");
                         }
@@ -554,9 +538,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                             JSONObject jobresult = new JSONObject(instances)
                                     .getJSONObject("queryasyncjobresultresponse");
                             if (jobresult.getString("jobstatus").equals("2")) {
-                                errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                                errors = validator
+                                        .sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
                                 if (errors.hasErrors()) {
-                                    throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
+                                    throw new BadCredentialsException(
+                                            jobresult.getJSONObject("jobresult").getString("errortext"));
                                 }
                                 vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                             } else if (jobresult.getString("jobstatus").equals("1")) {
@@ -568,7 +554,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                                                 .getJSONObject("virtualmachine").getString("password"), originalKey));
                                 vminstance.setVncPassword(encryptedPassword);
                                 virtualmachinerepository.save(vminstance);
-                                errors =  validator.sendGlobalError(jobresult.getJSONObject("jobresult")
+                                errors = validator.sendGlobalError(jobresult.getJSONObject("jobresult")
                                         .getJSONObject("virtualmachine").getString("password"));
                                 if (errors.hasErrors()) {
                                     throw new BadCredentialsException(jobresult.getJSONObject("jobresult")
@@ -580,7 +566,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         errors = validator.sendGlobalError(
                                 "Your instance must be stopped before attempting to change its current password");
                         if (errors.hasErrors()) {
-                            throw new BadCredentialsException("Your instance must be stopped before attempting to change its current password");
+                            throw new BadCredentialsException(
+                                    "Your instance must be stopped before attempting to change its current password");
                         }
                     }
                 }
@@ -607,11 +594,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     @Override
     public Page<VmInstance> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        User user = userService.find(Long.valueOf(tokenDetails.getTokenDetails("id")));
+        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
         if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
             if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
                 Page<VmInstance> allInstanceList = virtualmachinerepository.findAllByDomainIsActive(user.getDomainId(),
-                        Status.Expunging , pagingAndSorting.toPageRequest());
+                        Status.Expunging, pagingAndSorting.toPageRequest());
                 return allInstanceList;
             } else {
                 if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
@@ -636,14 +623,13 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         return virtualmachinerepository.findAllByIsActive(Status.Expunging, pagingAndSorting.toPageRequest());
     }
 
-
     @Override
     public Page<VmInstance> findAllByStatus(PagingAndSorting pagingAndSorting, String status) throws Exception {
-        User user = userService.find(Long.valueOf(tokenDetails.getTokenDetails("id")));
+        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
         if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
             if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
-                Page<VmInstance> allInstanceList = virtualmachinerepository.findAllByDomainIsActiveAndStatus(user.getDomainId(),
-                        Status.valueOf(status), pagingAndSorting.toPageRequest());
+                Page<VmInstance> allInstanceList = virtualmachinerepository.findAllByDomainIsActiveAndStatus(
+                        user.getDomainId(), Status.valueOf(status), pagingAndSorting.toPageRequest());
                 return allInstanceList;
             } else {
                 if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
@@ -671,12 +657,12 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Override
     public List<VmInstance> findAll() throws Exception {
         try {
-            User user = userService.find(Long.valueOf(tokenDetails.getTokenDetails("id")));
+            User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
 
             if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
                 if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
-                    List<VmInstance> allInstanceList = virtualmachinerepository
-                            .findAllByDomain(user.getDomainId(),Status.Expunging );
+                    List<VmInstance> allInstanceList = virtualmachinerepository.findAllByDomain(user.getDomainId(),
+                            Status.Expunging);
                     return allInstanceList;
                 } else {
                     if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
@@ -715,14 +701,15 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         errors = validator.validateEntity(vminstance, errors);
         config.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
-        String volumeS = cloudStackInstanceService.scaleVirtualMachine(vminstance.getUuid(), vminstance.getComputeOffering().getUuid(),"json",optional);
+        String volumeS = cloudStackInstanceService.scaleVirtualMachine(vminstance.getUuid(),
+                vminstance.getComputeOffering().getUuid(), "json", optional);
         JSONObject jobId = new JSONObject(volumeS).getJSONObject("scalevirtualmachineresponse");
 
         if (jobId.has("errorcode")) {
             errors = this.validateEvent(errors, jobId.getString("errortext"));
             throw new ApplicationException(errors);
         } else {
-//            volume.setUuid((String) jobId.get("jobid"));
+            // volume.setUuid((String) jobId.get("jobid"));
             if (jobId.has("jobid")) {
                 String jobResponse = cloudStackInstanceService.queryAsyncJobResult(jobId.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
@@ -833,12 +820,12 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     public Integer findCountByStatus(Status status) {
         try {
-            User user = userService.find(Long.valueOf(tokenDetails.getTokenDetails("id")));
+            User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
 
             if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
                 if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
-                    List<VmInstance> allInstanceList = virtualmachinerepository.findAllByDomainIsActiveAndStatus(user.getDomainId(),
-                            status);
+                    List<VmInstance> allInstanceList = virtualmachinerepository
+                            .findAllByDomainIsActiveAndStatus(user.getDomainId(), status);
                     return allInstanceList.size();
                 } else {
                     if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
@@ -913,7 +900,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         Long memory = 0L, cpu = 0L, primaryStorage = 0L, ip = 0L, secondaryStorage = 0L, tempCount = 0L;
         String errMessage = null;
         HashMap<String, String> optional = new HashMap<String, String>();
-        optional.put("zoneid", zoneRepository.findOne(vm.getZoneId()).getUuid());
+        optional.put("zoneid", convertEntityService.getZoneById(vm.getZoneId()).getUuid());
         String csResponse = cloudStackResourceCapacity.listCapacity(optional, "json");
         JSONArray capacityArrayJSON = null;
         JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("listcapacityresponse");
@@ -927,13 +914,15 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 case "0":
                     tempCount = updateResourceCount(vm, "9");
                     memory = tempTotalCapacity - tempCapacityUsed;
-                    if (memory < Long.valueOf(vm.getComputeOffering().getMemory().toString())) {
+                    if (memory < Long.valueOf(convertEntityService.getComputeOfferById(vm.getComputeOfferingId())
+                            .getMemory().toString())) {
                         if (vm.getProjectId() != null) {
                             errMessage = "Maximum number of resources of type 'memory' for project "
-                                    + vm.getProject().getName() + " has been exceeded.";
+                                    + convertEntityService.getProjectById(vm.getProjectId()).getName()
+                                    + " has been exceeded.";
                         } else {
                             errMessage = "Maximum number of resources of type 'memory' for current domain "
-                                    + domainRepository.findOne(vm.getDepartment().getDomainId()).getName()
+                                    + convertEntityService.getDomainById(vm.getDomainId()).getName()
                                     + " has been exceeded.";
                         }
                     }
@@ -941,13 +930,15 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 case "1":
                     tempCount = updateResourceCount(vm, "8");
                     cpu = tempTotalCapacity - tempCapacityUsed;
-                    if (Long.valueOf(vm.getComputeOffering().getClockSpeed().toString()) > cpu) {
+                    if (Long.valueOf(convertEntityService.getComputeOfferById(vm.getComputeOfferingId()).getClockSpeed()
+                            .toString()) > cpu) {
                         if (vm.getProjectId() != null) {
                             errMessage = "Maximum number of resources of type 'cpu' for project "
-                                    + vm.getProject().getName() + " has been exceeded.";
+                                    + convertEntityService.getProjectById(vm.getProjectId()).getName()
+                                    + " has been exceeded.";
                         } else {
                             errMessage = "Maximum number of resources of type 'cpu' for current domain "
-                                    + domainRepository.findOne(vm.getDepartment().getDomainId()).getName()
+                                    + convertEntityService.getDomainById(vm.getDomainId()).getName()
                                     + " has been exceeded.";
                         }
                     }
@@ -958,10 +949,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     if (secondaryStorage < tempCount) {
                         if (vm.getProjectId() != null) {
                             errMessage = "Maximum number of resources of type 'seconday storage' for project "
-                                    + vm.getProject().getName() + " has been exceeded.";
+                                    + convertEntityService.getProjectById(vm.getProjectId()).getName()
+                                    + " has been exceeded.";
                         } else {
                             errMessage = "Maximum number of resources of type 'seconday storage' for current domain "
-                                    + domainRepository.findOne(vm.getDepartment().getDomainId()).getName()
+                                    + convertEntityService.getDomainById(vm.getDomainId()).getName()
                                     + " has been exceeded.";
                         }
                     }
@@ -969,13 +961,14 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 case "3":
                     tempCount = updateResourceCount(vm, "10");
                     primaryStorage = tempTotalCapacity - tempCapacityUsed;
-                    if (primaryStorage < vm.getTemplate().getSize()) {
+                    if (primaryStorage < convertEntityService.getTemplateById(vm.getTemplateId()).getSize()) {
                         if (vm.getProjectId() != null) {
                             errMessage = "Maximum number of resources of type 'primary storage' for project "
-                                    + vm.getProject().getName() + " has been exceeded.";
+                                    + convertEntityService.getProjectById(vm.getProjectId()).getName()
+                                    + " has been exceeded.";
                         } else {
                             errMessage = "Maximum number of resources of type 'primary storage' for current domain "
-                                    + domainRepository.findOne(vm.getDepartment().getDomainId()).getName()
+                                    + convertEntityService.getDomainById(vm.getDomainId()).getName()
                                     + " has been exceeded.";
                         }
                     }
@@ -995,10 +988,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         if (ip < 1) {
                             if (vm.getProjectId() != null) {
                                 errMessage = "Maximum number of resources of type 'public IP addresses' for project "
-                                        + vm.getProject().getName() + " has been exceeded.";
+                                        + convertEntityService.getProjectById(vm.getProjectId()).getName()
+                                        + " has been exceeded.";
                             } else {
                                 errMessage = "Maximum number of resources of type 'public IP addresses' for current domain "
-                                        + domainRepository.findOne(vm.getDepartment().getDomainId()).getName()
+                                        + convertEntityService.getDomainById(vm.getDomainId()).getName()
                                         + " has been exceeded.";
                             }
                         }
@@ -1026,9 +1020,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         this.server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
         HashMap<String, String> optional = new HashMap<String, String>();
         if (vm.getProjectId() != null) {
-            optional.put("projectid", vm.getProject().getUuid());
+            optional.put("projectid", convertEntityService.getProjectById(vm.getProjectId()).getUuid());
         } else {
-            optional.put("domainid", domainRepository.findOne(vm.getDepartment().getDomainId()).getUuid());
+            optional.put("domainid", convertEntityService.getDomainById(vm.getDomainId()).getUuid());
         }
         optional.put("resourcetype", type);
         String csResponse = cloudStackResourceCapacity.updateResourceCount(optional, "json");
@@ -1044,5 +1038,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         }
         return 0L;
     }
+
+	@Override
+	public VmInstance findById(Long id) {
+		return virtualmachinerepository.findById(id);
+	}
 
 }
