@@ -17,6 +17,7 @@ import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.Role;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.repository.jpa.DepartmentReposiory;
@@ -240,11 +241,13 @@ public class DepartmentServiceImpl implements DepartmentService {
         List<VmInstance> vmResponse  =  vmService.findByDepartment(department.getId());
         List<Role> roleResponse = roleService.findByDepartment(department);
         List<Volume> volumeResponse = volumeService.findByDepartment(department.getId());
+        List<User> userResponse = userService.findByDepartment(department.getId());
         if (projectResponse.size() != 0  || vmResponse.size() != 0 || roleResponse.size()!= 0 || volumeResponse.size() != 0 ) {
          errors.addGlobalError( "You have the following resources in your account : project :" + projectResponse.size() +
                     "vmInstance :" +vmResponse.size()+
                     "role :" +roleResponse.size()+
                     "volume :" +volumeResponse.size() +
+                    "user :" + userResponse.size() +
                     "Kindly delete associated resources and try again");
 
         }
