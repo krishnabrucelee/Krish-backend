@@ -18,11 +18,7 @@ import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.Template.Status;
 import ck.panda.domain.entity.Template.TemplateType;
 import ck.panda.domain.entity.Zone;
-import ck.panda.domain.repository.jpa.DomainRepository;
-import ck.panda.domain.repository.jpa.HypervisorRepository;
-import ck.panda.domain.repository.jpa.OsTypeRepository;
 import ck.panda.domain.repository.jpa.TemplateRepository;
-import ck.panda.domain.repository.jpa.ZoneRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackTemplateService;
 import ck.panda.util.ConfigUtil;
@@ -60,11 +56,11 @@ public class TemplateServiceImpl implements TemplateService {
 
     /** Os type repository reference. */
     @Autowired
-    private OsTypeRepository osTypeRepository;
+    private OsTypeService osTypeService;
 
     /** Zone repository reference. */
     @Autowired
-    private ZoneRepository zoneRepo;
+    private ZoneService zoneService;
 
     /** Token details repository reference. */
     @Autowired
@@ -72,11 +68,11 @@ public class TemplateServiceImpl implements TemplateService {
 
     /** Domain repository reference. */
     @Autowired
-    private DomainRepository domainRepository;
+    private DomainService domainService;
 
     /** Hypervisor repository reference. */
     @Autowired
-    private HypervisorRepository hypervisorRepository;
+    private HypervisorService hypervisorService;
 
     @Override
     @PreAuthorize("hasPermission(#template.getSyncFlag(), 'REGISTER_TEMPLATE')")
@@ -161,7 +157,7 @@ public class TemplateServiceImpl implements TemplateService {
             templateListJSON = responseObject.getJSONArray("template");
             for (int i = 0, size = templateListJSON.length(); i < size; i++) {
                 Template template = Template.convert(templateListJSON.getJSONObject(i));
-                OsType osType = osTypeRepository.findByUUID(template.getTransOsType());
+                OsType osType = osTypeService.findByUUID(template.getTransOsType());
                 template.setOsTypeId(osType.getId());
                 template.setOsCategoryId(osType.getOsCategoryId());
                 if(osType.getDescription().contains("32")) {
@@ -171,9 +167,9 @@ public class TemplateServiceImpl implements TemplateService {
                 }
 
                 template.setDisplayText(osType.getDescription());
-                Zone zone = zoneRepo.findByUUID(template.getTransZone());
+                Zone zone = zoneService.findByUUID(template.getTransZone());
                 template.setZoneId(zone.getId());
-                Hypervisor hypervisor = hypervisorRepository.findByName(template.getTransHypervisor());
+                Hypervisor hypervisor = hypervisorService.findByName(template.getTransHypervisor());
                 template.setHypervisorId(hypervisor.getId());
                 templateList.add(template);
             }
@@ -183,7 +179,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public List<Template> findByTemplate() throws Exception {
-        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = domainService.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && domain.getName().equals("ROOT")) {
             return csPrepareTemplate((List<Template>) templateRepository.findByTemplateAndFeature("ALL",
                     TemplateType.SYSTEM, Status.ACTIVE, true));
@@ -193,7 +189,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public List<Template> findByFilters(Template template) throws Exception {
-        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = domainService.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (template.getArchitecture() == null) {
             template.setArchitecture("ALL");
         }
@@ -406,10 +402,10 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     @PreAuthorize("hasPermission(#template.getSyncFlag(), 'DELETE_MY_TEMPLATE')")
     public Template softDelete(Template template) throws Exception {
-    	if(template.getSyncFlag()) {
+        if(template.getSyncFlag()) {
             csDeleteTemplate(template.getId());
-    	}
-    	template.setIsActive(false);
+        }
+        template.setIsActive(false);
         template.setStatus(Template.Status.INACTIVE);
         return templateRepository.save(template);
     }

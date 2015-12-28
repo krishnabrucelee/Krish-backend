@@ -58,8 +58,8 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Template.")
     @Override
     public void delete(@PathVariable(PATH_ID) Long id) throws Exception {
-    	Template template = templateService.find(id);
-    	template.setSyncFlag(true);
+        Template template = templateService.find(id);
+        template.setSyncFlag(true);
         templateService.softDelete(template);
     }
 
