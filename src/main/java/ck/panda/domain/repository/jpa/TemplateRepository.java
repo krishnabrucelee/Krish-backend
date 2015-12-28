@@ -66,8 +66,8 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param status of the template
      * @return template
      */
-    @Query(value = "select t from Template t where (t.osCategory=:osCategory OR 'ALL'=:osCategory) AND (t.architecture =:architecture OR 'ALL' =:architecture) and t.type <>:type and t.status = :status AND (t.share IS TRUE OR t.featured IS TRUE) AND t.isActive =:isActive")
-    List<Template> findAllByOsCategoryAndArchitectureAndType(@Param("osCategory") OsCategory osCategory, @Param("architecture") String architecture, @Param("type") TemplateType type, @Param("status") Status status, @Param("isActive") Boolean isActive);
+    @Query(value = "select t from Template t where t.osCategoryId=:osCategoryId AND (t.architecture =:architecture OR 'ALL' =:architecture) and t.type <>:type and t.status = :status AND (t.share IS TRUE OR t.featured IS TRUE) AND t.isActive =:isActive")
+    List<Template> findAllByOsCategoryAndArchitectureAndType(@Param("osCategoryId") Long osCategoryId, @Param("architecture") String architecture, @Param("type") TemplateType type, @Param("status") Status status, @Param("isActive") Boolean isActive);
 
     /**
      * Get the template based on the osCategory,architecture and type.
@@ -78,8 +78,8 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param status of the template
      * @return template
      */
-    @Query(value = "select t from Template t where (t.osCategory=:osCategory OR 'ALL'=:osCategory) AND (t.architecture =:architecture OR 'ALL' =:architecture) and t.type <>:type and t.status = :status and t.share IS TRUE AND t.isActive =:isActive")
-    List<Template> findAllByOsCategoryAndArchitectureAndTypeAndStatus(@Param("osCategory") OsCategory osCategory, @Param("architecture") String architecture, @Param("type") TemplateType type, @Param("status") Status status, @Param("isActive") Boolean isActive);
+    @Query(value = "select t from Template t where t.osCategoryId=:osCategoryId AND (t.architecture =:architecture OR 'ALL' =:architecture) and t.type <>:type and t.status = :status and t.share IS TRUE AND t.isActive =:isActive")
+    List<Template> findAllByOsCategoryAndArchitectureAndTypeAndStatus(@Param("osCategoryId") Long osCategoryId, @Param("architecture") String architecture, @Param("type") TemplateType type, @Param("status") Status status, @Param("isActive") Boolean isActive);
 
     /**
      * Get the template based on the osCategory,architecture and type.

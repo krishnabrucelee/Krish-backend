@@ -32,7 +32,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Autowired
     private TokenDetails tokenDetails;
 
-    /** Domain repository reference. */
+    /** Domain service reference. */
     @Autowired
     private DomainService domainService;
 

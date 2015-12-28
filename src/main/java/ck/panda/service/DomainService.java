@@ -1,7 +1,6 @@
 package ck.panda.service;
 
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Domain;
@@ -58,6 +57,14 @@ public interface DomainService extends CRUDService<Domain> {
      * @throws Exception unhandled errors.
      */
     List<Domain> findAllDomain() throws Exception;
+
+    /**
+     * To get the domain from id.
+     *
+     * @return domainid id of the domain
+     * @throws Exception unhandled errors.
+     */
+    Domain findOne(Long domainid) throws Exception;
 
 }
 

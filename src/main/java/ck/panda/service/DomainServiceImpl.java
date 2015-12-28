@@ -299,6 +299,11 @@ public class DomainServiceImpl implements DomainService {
         return domainList;
     }
 
+    @Override
+	public Domain findOne(Long domainid) throws Exception {
+		return domainRepo.findOne(domainid);
+	}
+
     /**
     * Validate the compute.
     *
@@ -344,4 +349,5 @@ public class DomainServiceImpl implements DomainService {
     public Page<Domain> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
         return domainRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
     }
+
 }
