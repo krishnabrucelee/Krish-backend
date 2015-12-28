@@ -88,7 +88,7 @@ public interface RoleReposiory extends PagingAndSortingRepository<Role, Long> {
      * @param isActive - true
      * @return role
      */
-    @Query(value = "SELECT role FROM Role AS role WHERE role.name=:name AND role.departmentId=:departmentId AND role.isActive:=isActive")
+    @Query(value = "SELECT role FROM Role AS role WHERE role.name=:name AND role.departmentId=:departmentId AND role.isActive=:isActive")
     Role findByNameAndDepartmentIdAndIsActive(@Param("name") String name, @Param("departmentId") Long departmentId, @Param("isActive") Boolean isActive);
     
 }
