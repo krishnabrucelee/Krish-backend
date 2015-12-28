@@ -568,6 +568,7 @@ public class Account implements Serializable {
         try {
             account.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
             JSONArray userList = jsonObject.getJSONArray("user");
+            if(userList.length() > 0){
             JSONObject userObject = userList.getJSONObject(0);
             account.setFirstName(JsonUtil.getStringValue(userObject, "firstname"));
             account.setLastName(JsonUtil.getStringValue(userObject, "lastname"));
@@ -578,6 +579,7 @@ public class Account implements Serializable {
             account.setPassword("l3tm3in");
             account.setIsActive(true);
             account.setStatus(Status.valueOf(JsonUtil.getStringValue(userObject, "state").toUpperCase()));
+            }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
