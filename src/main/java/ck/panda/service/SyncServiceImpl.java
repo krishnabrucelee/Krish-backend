@@ -1957,7 +1957,7 @@ public class SyncServiceImpl implements SyncService {
         try {
             List<User> userList = userService.findUsersByTypesAndActive(types, true);
             for (User user : userList) {
-                Role role = roleService.findByName("FULL_PERMISSION", user.getDepartment());
+                Role role = roleService.findByNameAndDepartmentIdAndIsActive("FULL_PERMISSION",user.getDepartmentId(),true);
                 user.setRoleId(role.getId());
                 userService.update(user);
             }
