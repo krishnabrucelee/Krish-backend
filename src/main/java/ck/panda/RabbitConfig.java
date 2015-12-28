@@ -91,6 +91,14 @@ public class RabbitConfig {
     @Value(value = "${spring.rabbit.server.resource.queue}")
     private String csResourceQueueName;
 
+    /** Admin username. */
+    @Value("${backend.admin.username}")
+    private String backendAdminUsername;
+
+    /** Admin role. */
+    @Value("${backend.admin.role}")
+    private String backendAdminRole;
+
     /** Application context reference. */
     @Autowired
     private ApplicationContext applicationContext;
@@ -251,8 +259,10 @@ public class RabbitConfig {
     @Bean
     MessageListenerAdapter actionListenerAdapter() {
         SyncService syncService = applicationContext.getBean(SyncService.class);
+        AsynchronousJobService asyncService = applicationContext.getBean(AsynchronousJobService.class);
         CloudStackServer cloudStackServer = applicationContext.getBean(CloudStackServer.class);
-        return new MessageListenerAdapter(new ActionListener(syncService, cloudStackServer));
+        return new MessageListenerAdapter(new ActionListener(syncService, asyncService, cloudStackServer,
+        		backendAdminUsername, backendAdminRole));
     }
 
     /**
@@ -264,9 +274,10 @@ public class RabbitConfig {
     @Bean
     MessageListenerAdapter asynchJobListenerAdapter() {
     	SyncService syncService = applicationContext.getBean(SyncService.class);
-    	AsynchronousJobService asynchService = applicationContext.getBean(AsynchronousJobService.class);
+    	AsynchronousJobService asyncService = applicationContext.getBean(AsynchronousJobService.class);
         CloudStackServer cloudStackServer = applicationContext.getBean(CloudStackServer.class);
-        return new MessageListenerAdapter(new AsynchronousJobListener(syncService, asynchService, cloudStackServer));
+        return new MessageListenerAdapter(new AsynchronousJobListener(syncService, asyncService, cloudStackServer,
+        		backendAdminUsername, backendAdminRole));
     }
 
     /**

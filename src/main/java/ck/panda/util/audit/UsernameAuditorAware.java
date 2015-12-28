@@ -51,6 +51,8 @@ public class UsernameAuditorAware implements AuditorAware<Long> {
         Long userId = null;
         if(user != null) {
             userId = user.getId();
+        } else {
+        	userId = 0L;
         }
         return userId;
     }
