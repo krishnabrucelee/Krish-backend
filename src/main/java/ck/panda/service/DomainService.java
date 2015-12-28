@@ -58,13 +58,5 @@ public interface DomainService extends CRUDService<Domain> {
      */
     List<Domain> findAllDomain() throws Exception;
 
-    /**
-     * To get the domain from id.
-     *
-     * @return domainid id of the domain
-     * @throws Exception unhandled errors.
-     */
-    Domain findOne(Long domainid) throws Exception;
-
 }
 

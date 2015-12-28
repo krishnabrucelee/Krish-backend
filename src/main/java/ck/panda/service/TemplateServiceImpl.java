@@ -179,7 +179,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public List<Template> findByTemplate() throws Exception {
-        Domain domain = domainService.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && domain.getName().equals("ROOT")) {
             return csPrepareTemplate((List<Template>) templateRepository.findByTemplateAndFeature("ALL",
                     TemplateType.SYSTEM, Status.ACTIVE, true));
@@ -189,7 +189,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public List<Template> findByFilters(Template template) throws Exception {
-        Domain domain = domainService.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (template.getArchitecture() == null) {
             template.setArchitecture("ALL");
         }
