@@ -18,4 +18,13 @@ public interface ZoneRepository extends PagingAndSortingRepository<Zone, Long> {
      */
     @Query(value = "select zone from Zone zone where zone.uuid = :uuid")
     Zone findByUUID(@Param("uuid") String uuid);
+    
+    /**
+     * Get the zone based on the id.
+     *
+     * @param id of the zone
+     * @return zone
+     */
+    @Query(value = "select zone from Zone zone where zone.id = :id")
+    Zone findById(@Param("id") Long id);
 }

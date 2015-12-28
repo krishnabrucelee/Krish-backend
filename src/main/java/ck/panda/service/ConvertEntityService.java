@@ -11,10 +11,12 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Account;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.Zone;
 
 /**
  * Convert Util used to get entity object from CS server's resource uuid.
@@ -151,6 +153,17 @@ public class ConvertEntityService {
         }
 
     }
+    
+    /**
+     * Get zone by id.
+     *
+     * @param id of zone.
+     * @return zone.
+     * @throws Exception unhandled exception.
+     */
+    public Zone getZoneById(Long id) throws Exception {
+        return zoneService.findById(id);
+    }
 
     /**
      * Get template id.
@@ -209,6 +222,17 @@ public class ConvertEntityService {
         return networkOfferingService.findByUUID(uuid).getId();
         }
         return null;
+    }
+    
+    /**
+     * Get NetworkOffering object.
+     *
+     * @param uuid uuid of NetworkOffering
+     * @return NetworkOffering.
+     * @throws Exception unhandled exception.
+     */
+    public NetworkOffering getNetworkOfferingById(Long id) throws Exception {
+        return networkOfferingService.findById(id);
     }
 
     /**

@@ -30,6 +30,15 @@ public interface NetworkOfferingService extends CRUDService<NetworkOffering> {
     NetworkOffering findByUUID(String uuid) throws Exception;
 
     /**
+     * To get zone from cloudstack server.
+     *
+     * @param uuid uuid of zone.
+     * @return zone from server
+     * @throws Exception unhandled errors.
+     */
+    NetworkOffering findById(Long id) throws Exception;
+    
+    /**
      * To get list of Isolated network offering from cloudstack server.
      *
      * @return isolated network offering list from server

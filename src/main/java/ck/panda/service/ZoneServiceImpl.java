@@ -107,4 +107,9 @@ public class ZoneServiceImpl implements ZoneService {
         return zoneRepo.save(zone);
     }
 
+	@Override
+	public Zone findById(Long id) throws Exception {
+		return zoneRepo.findById(id);
+	}
+
 }

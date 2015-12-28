@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.Network.Status;
+import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.DepartmentReposiory;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.NetworkOfferingRepository;
@@ -41,22 +43,6 @@ public class NetworkServiceImpl implements NetworkService {
     @Autowired
     private NetworkRepository networkRepo;
 
-    /** Domain repository reference. */
-    @Autowired
-    private DomainRepository domainRepository;
-
-    /** Department repository reference. */
-    @Autowired
-    private DepartmentReposiory departmentRepository;
-
-    /** Zone repository reference. */
-    @Autowired
-    private ZoneRepository zoneRepository;
-
-    /** NetworkOffering repository reference. */
-    @Autowired
-    private NetworkOfferingRepository networkofferingRepo;
-
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkServiceImpl.class);
 
@@ -78,16 +64,28 @@ public class NetworkServiceImpl implements NetworkService {
 
     /** Token Detail Utilities. */
     @Autowired
-    private UserRepository userRepository;
-
-    /** Token Detail Utilities. */
-    @Autowired
     private ConvertEntityService convertEntityService;
 
     /** Project service reference. */
     @Autowired
     private ProjectService projectService;
+    
+    /** Zone service reference. */
+    @Autowired
+    private ZoneService zoneService;
 
+    /** NetworkOffering service reference. */
+    @Autowired
+    private NetworkOfferingService networkOfferingService;
+    
+    /** Domain service reference. */
+    @Autowired
+    private DomainService domainService;
+    
+    /** Department service reference. */
+    @Autowired
+    private DepartmentService departmentService;
+    
     @Override
     @PreAuthorize("hasPermission(#network.getSyncFlag(), 'ADD_ISOLATED_NETWORK')")
     public Network save(Network network) throws Exception {
@@ -100,7 +98,8 @@ public class NetworkServiceImpl implements NetworkService {
             throw new ApplicationException(errors);
         } else {
             config.setUserServer();
-            String networkOfferings = csNetwork.createNetwork(network.getZone().getUuid(),"json",optional(network));
+           Zone zoneObject = convertEntityService.getZoneById(network.getZoneId());
+            String networkOfferings = csNetwork.createNetwork(zoneObject.getUuid(),"json",optional(network));
                     JSONObject createNetworkResponseJSON = new JSONObject(networkOfferings).getJSONObject("createnetworkresponse");
 
                     if (createNetworkResponseJSON.has("errorcode")) {
@@ -113,25 +112,22 @@ public class NetworkServiceImpl implements NetworkService {
                     network.setNetworkType(network.getNetworkType().valueOf(networkResponse.getString("type")));
                     network.setDisplayText(networkResponse.getString("displaytext"));
                     network.setcIDR(networkResponse.getString("cidr"));
-                    network.setDomainId(domainRepository.findByUUID(networkResponse.getString("domainid")).getId());
-                    network.setZoneId(zoneRepository.findByUUID(networkResponse.getString("zoneid")).getId());
-                    network.setNetworkOfferingId(networkofferingRepo.findByUUID(networkResponse.getString("networkofferingid")).getId());
+                    network.setDomainId(domainService.findbyUUID(networkResponse.getString("domainid")).getId());
+                    network.setZoneId(zoneService.findByUUID(networkResponse.getString("zoneid")).getId());
+                    network.setNetworkOfferingId(networkOfferingService.findByUUID(networkResponse.getString("networkofferingid")).getId());
                     network.setStatus(network.getStatus().valueOf(networkResponse.getString("state")));
                     if (network.getProject() != null) {
                         network.setProjectId(convertEntityService.getProjectId(networkResponse.getString("projectid")));
                         network.setDepartmentId(null);
                     } else {
-                        if (network.getDepartment() != null) {
-                            network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(network.getDepartment().getUserName(), domainRepository.findOne(network.getDomainId())));
+                        if (network.getDepartmentId() != null) {
+                            network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(departmentService.find(network.getDepartmentId()).getUserName(), domainService.find(network.getDomainId())));
                         } else {
-                            network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName(), domainRepository.findOne(network.getDomainId())));
+                            network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(departmentService.find(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName(), domainService.find(network.getDomainId())));
                         }
                     }
                     network.setGateway(networkResponse.getString("gateway"));
-
-                    String token = tokenDetails.getTokenDetails("id");
-                    User user = userRepository.findOne(Long.parseLong(token));
-                    network.setCreatedBy(user.getId());
+                    
                     network.setIsActive(true);
             return networkRepo.save(network);
         }
@@ -164,8 +160,9 @@ public class NetworkServiceImpl implements NetworkService {
                     optional.put("guestvmcidr", network.getcIDR());
                     }
                 }
-                if (network.getNetworkOffering() != null) {
-                    optional.put("networkofferingid", network.getNetworkOffering().getUuid());
+                if (network.getNetworkOfferingId() != null) {
+                    NetworkOffering networkOffer = convertEntityService.getNetworkOfferingById(network.getNetworkOfferingId()); 
+                    optional.put("networkofferingid", networkOffer.getUuid());
                 }
                 if (network.getNetworkDomain() != null && network.getNetworkDomain().trim() != "") {
                     optional.put("networkdomain", network.getNetworkDomain());
@@ -292,7 +289,7 @@ public class NetworkServiceImpl implements NetworkService {
                     network.setDomainId(convertEntityService.getDomainId(network.getTransDomainId()));
                     network.setZoneId(convertEntityService.getZoneId(network.getTransZoneId()));
                     network.setNetworkOfferingId(convertEntityService.getNetworkOfferingId(network.getTransNetworkOfferingId()));
-                    network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(network.getTransDepartmentId(), domainRepository.findOne(network.getDomainId())));
+                    network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(network.getTransDepartmentId(), domainService.find(network.getDomainId())));
                     network.setProjectId(convertEntityService.getProjectId(network.getTransProjectId()));
                     networkList.add(network);
                 }
@@ -339,9 +336,9 @@ public class NetworkServiceImpl implements NetworkService {
             optional.put("networkdomain", network.getNetworkDomain());
         }
         if (network.getDomainId() != null) {
-           optional.put("domainid", network.getDomain().getUuid());
+        	optional.put("domainid",convertEntityService.getDomainById(network.getDomainId()).getUuid());
         } else {
-            optional.put("domainid", domainRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("domainid"))).getUuid());
+            optional.put("domainid", domainService.find(Long.parseLong(tokenDetails.getTokenDetails("domainid"))).getUuid());
         }
         if (network.getName() != null && network.getName().trim() != "") {
             optional.put("name", network.getName());
@@ -349,20 +346,17 @@ public class NetworkServiceImpl implements NetworkService {
         if (network.getDisplayText() != null && network.getDisplayText().trim() != "") {
             optional.put("displaytext", network.getDisplayText());
         }
-        if (network.getNetworkOffering() != null) {
-            optional.put("networkofferingid", network.getNetworkOffering().getUuid());
+        if (network.getNetworkOfferingId() != null) {
+            optional.put("networkofferingid", convertEntityService.getNetworkOfferingById(network.getNetworkOfferingId()).getUuid());
         }
-//        if (network.getcIDR() != null) {
-//            optional.put("changecidr", network.getcIDR());
-//            }
+        if (network.getProjectId() != null) {
+        	optional.put("projectid",convertEntityService.getProjectById(network.getProjectId()).getUuid());
 
-        if (network.getProject() != null) {
-            optional.put("projectid", network.getProject().getUuid());
         } else {
-            if (network.getDepartment() != null) {
-                optional.put("account", network.getDepartment().getUserName());
+            if (network.getDepartmentId() != null) {
+                optional.put("account", departmentService.find(network.getDepartmentId()).getUserName());
             } else {
-                optional.put("account", departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
+                optional.put("account", departmentService.find(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
             }
         }
 
@@ -372,7 +366,7 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public List<Network> findByDepartmentAndNetworkIsActive(Long department, Boolean isActive) throws Exception {
-        return networkRepo.findByDepartmentAndNetworkIsActive(departmentRepository.findOne(department), true);
+        return networkRepo.findByDepartmentAndNetworkIsActive(department, true);
     }
 
     @Override
