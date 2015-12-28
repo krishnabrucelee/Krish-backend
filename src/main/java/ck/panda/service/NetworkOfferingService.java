@@ -21,19 +21,19 @@ public interface NetworkOfferingService extends CRUDService<NetworkOffering> {
     List<NetworkOffering> findAllFromCSServer() throws Exception;
 
     /**
-     * To get zone from cloudstack server.
+     * To get network offering from cloudstack server.
      *
-     * @param uuid uuid of zone.
-     * @return zone from server
+     * @param uuid uuid of network offering.
+     * @return network offering from server
      * @throws Exception unhandled errors.
      */
     NetworkOffering findByUUID(String uuid) throws Exception;
 
     /**
-     * To get zone from cloudstack server.
+     * To get network offering from cloudstack server.
      *
-     * @param uuid uuid of zone.
-     * @return zone from server
+     * @param d id of network offering.
+     * @return network offering from server
      * @throws Exception unhandled errors.
      */
     NetworkOffering findById(Long id) throws Exception;
