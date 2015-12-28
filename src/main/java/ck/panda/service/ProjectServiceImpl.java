@@ -9,12 +9,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.ProjectRepository;
 import ck.panda.domain.repository.jpa.UserRepository;
@@ -254,7 +257,19 @@ public class ProjectServiceImpl implements ProjectService {
     public Page<Project> findAllByActive(Boolean isActive, PagingAndSorting pagingAndSorting) throws Exception {
         Domain domain = convertEntityService.getDomainById(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && !domain.getName().equals("ROOT")) {
-            return projectRepository.findAllProjectByDomain(domain.getId(), pagingAndSorting.toPageRequest(), isActive, Project.Status.ENABLED);
+            User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
+            if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
+                if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
+                    return projectRepository.findAllProjectByDomain(domain.getId(), pagingAndSorting.toPageRequest(),
+                            isActive, Project.Status.ENABLED);
+                } else {
+                    List<Project> projects = new ArrayList<Project>();
+                    projects = projectRepository.findByUserAndIsActive(user.getId(), isActive);
+                    Page<Project> allProjectLists = new PageImpl<Project>(projects, pagingAndSorting.toPageRequest(),
+                            pagingAndSorting.getPageSize());
+                    return allProjectLists;
+                }
+            }
         }
         return projectRepository.findAllByActive(pagingAndSorting.toPageRequest(), isActive, Project.Status.ENABLED);
     }
