@@ -743,4 +743,62 @@ public class ConvertEntityService {
         return null;
     }
 
+    /**
+     * Get Storage Offering By Id.
+     *
+     * @param storageOfferingId storageOffering Id.
+     * @return storageOffering.
+     * @throws Exception unhandled exception.
+     */
+    public String getStorageOfferingById(Long storageOfferingId) throws Exception {
+        if (storageService.find(storageOfferingId) != null) {
+            return storageService.find(storageOfferingId).getUuid();
+        }
+        return null;
+    }
+
+    /**
+     * Get Zone By Id.
+     *
+     * @param ZoneId Zone Id.
+     * @return Zone.
+     * @throws Exception unhandled exception.
+     */
+    public String getZoneById(Long zoneId) throws Exception {
+        if (zoneService.find(zoneId) != null) {
+            return zoneService.find(zoneId).getUuid();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get Project By Id.
+     *
+     * @param ProjectId Project Id.
+     * @return Project.
+     * @throws Exception unhandled exception.
+     */
+    public String getProjectById(Long projectId) throws Exception {
+        if (projectService.find(projectId) != null) {
+            return projectService.find(projectId).getUuid();
+        }
+        return null;
+    }
+
+    /**
+     * Get Department By Id.
+     *
+     * @param DepartmentId Department Id.
+     * @return Department.
+     * @throws Exception unhandled exception.
+     */
+    public String getDepartmentUsernameById(Long departmentId) throws Exception {
+        if (departmentService.find(departmentId) != null) {
+            return departmentService.find(departmentId).getUuid();
+        } else {
+            return null;
+        }
+    }
+
 }

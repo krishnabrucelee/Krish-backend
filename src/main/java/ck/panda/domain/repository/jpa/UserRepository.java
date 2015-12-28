@@ -110,5 +110,15 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     @Query(value = "select user from User user where user.uuid =:uuId AND user.isActive =:isActive")
     User findByUuIdAndIsActive(@Param("uuId") String uuId, @Param("isActive") Boolean isActive);
 
+    /**
+     * Find user role whether assigned or not.
+     *
+     * @param roleId role id
+     * @param isActive user status Active/Inactive
+     * @return users
+     */
+    @Query(value = "select user from User user where user.roleId =:roleId AND user.isActive =:isActive")
+    List<User> findByRole(@Param("roleId") Long roleId, @Param("isActive") Boolean isActive);
+
 
 }
