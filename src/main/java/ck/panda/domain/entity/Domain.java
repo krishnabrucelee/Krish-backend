@@ -605,6 +605,7 @@ public class Domain {
       domain.setSyncFlag(false);
       domain.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
       domain.setName(JsonUtil.getStringValue(jsonObject, "name"));
+      domain.setCompanyNameAbbreviation(JsonUtil.getStringValue(jsonObject, "name"));
       domain.setIsActive(true);
       return domain;
   }
