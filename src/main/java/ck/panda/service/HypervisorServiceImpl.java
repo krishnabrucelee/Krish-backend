@@ -87,7 +87,7 @@ public class HypervisorServiceImpl implements HypervisorService {
 
 	@Override
 	public Hypervisor findByName(String name) throws Exception {
-		return findByName(name);
+		return hypervisorRepo.findByName(name);
 	}
 
 }

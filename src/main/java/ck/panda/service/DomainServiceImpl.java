@@ -299,11 +299,6 @@ public class DomainServiceImpl implements DomainService {
         return domainList;
     }
 
-    @Override
-	public Domain findOne(Long domainid) throws Exception {
-		return domainRepo.findOne(domainid);
-	}
-
     /**
     * Validate the compute.
     *
