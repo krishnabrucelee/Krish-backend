@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,6 +40,14 @@ public class RoleServiceImpl implements RoleService {
     /** Department repository reference. */
     @Autowired
     private DepartmentService departmentService;
+
+    /** Department repository reference. */
+    @Autowired
+    private UserService userService;
+
+    /** Message source attribute. */
+    @Autowired
+    private MessageSource messageSource;
 
     @Override
     @PreAuthorize("hasPermission(#role.getSyncFlag(), 'CREATE_ROLE')")
@@ -76,9 +85,15 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @PreAuthorize("hasPermission(#role.getSyncFlag(), 'DELETE_ROLE')")
     public Role softDelete(Role role) throws Exception {
-        role.setIsActive(false);
-        role.setStatus(Status.DISABLED);
-        return roleRepo.save(role);
+        Errors errors = new Errors(messageSource);
+        if(userService.findByRole(role.getId(), true).size() > 0)  {
+            errors.addGlobalError("role.assigned.to.user.cannot.be.deleted");
+            throw new ApplicationException(errors);
+        } else {
+            role.setIsActive(false);
+            role.setStatus(Status.DISABLED);
+            return roleRepo.save(role);
+        }
     }
     @Override
     public void delete(Role role) throws Exception {

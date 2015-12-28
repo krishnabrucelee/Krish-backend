@@ -107,7 +107,7 @@ public class UserServiceImpl implements UserService {
             return userRepository.save(user);
         }
         } else {
-        	user.setStatus(Status.ACTIVE);
+            user.setStatus(Status.ACTIVE);
             return userRepository.save(user);
         }
     }
@@ -122,7 +122,7 @@ public class UserServiceImpl implements UserService {
      * @throws Exception
      */
     private Errors validateName(Errors errors, String name, Domain domain) throws Exception {
-    	User user = userRepository.findByUserNameAndDomain(name, domain);
+        User user = userRepository.findByUserNameAndDomain(name, domain);
         if (user != null && user.getStatus() != User.Status.DELETED) {
             errors.addFieldError("username", "user.already.exist.for.same.domain");
         }
@@ -147,7 +147,7 @@ public class UserServiceImpl implements UserService {
               return userRepository.save(user);
           }
         } else {
-        	user.setStatus(Status.ACTIVE);
+            user.setStatus(Status.ACTIVE);
             return userRepository.save(user);
         }
     }
@@ -332,6 +332,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findByUuIdAndIsActive(String uuid, Boolean isActive) throws Exception {
         return userRepository.findByUuIdAndIsActive(uuid, isActive);
+    }
+
+    @Override
+    public List<User> findByRole(Long roleId, Boolean isActive) throws Exception {
+        return userRepository.findByRole(roleId, isActive);
     }
 
 }
