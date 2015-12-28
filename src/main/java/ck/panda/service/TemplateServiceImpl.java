@@ -3,8 +3,6 @@ package ck.panda.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -15,19 +13,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Hypervisor;
-import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.OsType;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.Template.Status;
 import ck.panda.domain.entity.Template.TemplateType;
 import ck.panda.domain.entity.Zone;
-import ck.panda.domain.repository.jpa.DepartmentReposiory;
-import ck.panda.domain.repository.jpa.DomainRepository;
-import ck.panda.domain.repository.jpa.HypervisorRepository;
-import ck.panda.domain.repository.jpa.OsCategoryRepository;
-import ck.panda.domain.repository.jpa.OsTypeRepository;
 import ck.panda.domain.repository.jpa.TemplateRepository;
-import ck.panda.domain.repository.jpa.ZoneRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackTemplateService;
 import ck.panda.util.ConfigUtil;
@@ -65,31 +56,23 @@ public class TemplateServiceImpl implements TemplateService {
 
     /** Os type repository reference. */
     @Autowired
-    private OsTypeRepository osTypeRepository;
-
-    /** Os category repository reference. */
-    @Autowired
-    private OsCategoryRepository osCategoryRepository;
+    private OsTypeService osTypeService;
 
     /** Zone repository reference. */
     @Autowired
-    private ZoneRepository zoneRepo;
+    private ZoneService zoneService;
 
     /** Token details repository reference. */
     @Autowired
     private TokenDetails tokenDetails;
 
-    /** Department repository reference. */
-    @Autowired
-    private DepartmentReposiory departmentReposiory;
-
     /** Domain repository reference. */
     @Autowired
-    private DomainRepository domainRepository;
+    private DomainService domainService;
 
     /** Hypervisor repository reference. */
     @Autowired
-    private HypervisorRepository hypervisorRepository;
+    private HypervisorService hypervisorService;
 
     @Override
     @PreAuthorize("hasPermission(#template.getSyncFlag(), 'REGISTER_TEMPLATE')")
@@ -174,9 +157,9 @@ public class TemplateServiceImpl implements TemplateService {
             templateListJSON = responseObject.getJSONArray("template");
             for (int i = 0, size = templateListJSON.length(); i < size; i++) {
                 Template template = Template.convert(templateListJSON.getJSONObject(i));
-                OsType osType = osTypeRepository.findByUUID(template.getTransOsType());
-                template.setOsType(osType);
-                template.setOsCategory(osCategoryRepository.findOne(osType.getOsCategoryId()));
+                OsType osType = osTypeService.findByUUID(template.getTransOsType());
+                template.setOsTypeId(osType.getId());
+                template.setOsCategoryId(osType.getOsCategoryId());
                 if(osType.getDescription().contains("32")) {
                     template.setArchitecture("32");
                 } else if(osType.getDescription().contains("64")) {
@@ -184,10 +167,10 @@ public class TemplateServiceImpl implements TemplateService {
                 }
 
                 template.setDisplayText(osType.getDescription());
-                Zone zone = zoneRepo.findByUUID(template.getTransZone());
-                template.setZone(zone);
-                Hypervisor hypervisor = hypervisorRepository.findByName(template.getTransHypervisor());
-                template.setHypervisor(hypervisor);
+                Zone zone = zoneService.findByUUID(template.getTransZone());
+                template.setZoneId(zone.getId());
+                Hypervisor hypervisor = hypervisorService.findByName(template.getTransHypervisor());
+                template.setHypervisorId(hypervisor.getId());
                 templateList.add(template);
             }
         }
@@ -196,7 +179,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public List<Template> findByTemplate() throws Exception {
-        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = domainService.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && domain.getName().equals("ROOT")) {
             return csPrepareTemplate((List<Template>) templateRepository.findByTemplateAndFeature("ALL",
                     TemplateType.SYSTEM, Status.ACTIVE, true));
@@ -206,7 +189,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public List<Template> findByFilters(Template template) throws Exception {
-        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = domainService.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (template.getArchitecture() == null) {
             template.setArchitecture("ALL");
         }
@@ -220,12 +203,12 @@ public class TemplateServiceImpl implements TemplateService {
         } else {
             if (domain != null && domain.getName().equals("ROOT")) {
                 return csPrepareTemplate(
-                        templateRepository.findAllByOsCategoryAndArchitectureAndType(template.getOsCategory(),
+                        templateRepository.findAllByOsCategoryAndArchitectureAndType(template.getOsCategory().getId(),
                                 template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true));
 
             }
             return csPrepareTemplate(templateRepository.findAllByOsCategoryAndArchitectureAndTypeAndStatus(
-                    template.getOsCategory(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true));
+                    template.getOsCategory().getId(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true));
         }
     }
 
@@ -359,7 +342,7 @@ public class TemplateServiceImpl implements TemplateService {
         if (template.getMinimumCore() == null) {
             errors.addFieldError("minimumCore", "template.minimumcore.error");
         }
-        if (template.getOsCategory() == null) {
+        if (template.getOsCategoryId() == null) {
             errors.addFieldError("osCategory", "template.oscategory.error");
         }
         if (errors.hasErrors()) {
@@ -417,12 +400,14 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    @PreAuthorize("hasPermission(null, 'DELETE_MY_TEMPLATE')")
-       public Template softDelete(Template template) throws Exception {
-        csDeleteTemplate(template.getId());
+    @PreAuthorize("hasPermission(#template.getSyncFlag(), 'DELETE_MY_TEMPLATE')")
+    public Template softDelete(Template template) throws Exception {
+        if(template.getSyncFlag()) {
+            csDeleteTemplate(template.getId());
+        }
         template.setIsActive(false);
         template.setStatus(Template.Status.INACTIVE);
-           return templateRepository.save(template);
-       }
+        return templateRepository.save(template);
+    }
 
 }
