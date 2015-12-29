@@ -28,6 +28,14 @@ public interface NetworkOfferingRepository extends PagingAndSortingRepository<Ne
      */
     @Query(value = "select net from NetworkOffering net where net.uuid LIKE :uuid ")
     NetworkOffering findByUUID(@Param("uuid") String uuid);
+    
+    /**
+     * Find Network by id.
+     * @param id Network id.
+     * @return id
+     */
+    @Query(value = "select net from NetworkOffering net where net.id LIKE :id ")
+    NetworkOffering findById(@Param("id") Long id);
 
     /**
      * Find NetworkOffering by the guestTpType is Isolated without Pagination.

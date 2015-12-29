@@ -117,4 +117,9 @@ public class NetworkOfferingServiceImpl implements NetworkOfferingService {
         return networkRepo.findIsolated();
     }
 
+	@Override
+	public NetworkOffering findById(Long id) throws Exception {
+		return networkRepo.findById(id);
+	}
+
 }

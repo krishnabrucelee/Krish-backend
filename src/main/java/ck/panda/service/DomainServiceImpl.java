@@ -69,10 +69,6 @@ public class DomainServiceImpl implements DomainService {
     @Autowired
     private TokenDetails tokenDetails;
 
-    /** Domain repository reference. */
-    @Autowired
-    private DomainRepository domainRepository;
-
     @Autowired
     /** Department service.*/
     private CloudStackAccountService departmentService;
@@ -116,14 +112,42 @@ public class DomainServiceImpl implements DomainService {
                 errors = this.validateEvent(errors, createDomainResponseJSON.getString("errortext"));
                 throw new ApplicationException(errors);
             }
+            String cityHeadquarter = domain.getCityHeadquarter();
+            String companyAddress = domain.getCompanyAddress();
+            String email = domain.getEmail();
+            String lastName = domain.getLastName();
+            String password = domain.getPassword();
+            String phone = domain.getPhone();
+            String portalUserName = domain.getPortalUserName();
+            String primaryFirstName = domain.getPrimaryFirstName();
+            String secondaryContactEmail = domain.getSecondaryContactEmail();
+            String secondaryContactName = domain.getSecondaryContactName();
+            String secondaryContactLastName = domain.getSecondaryContactLastName();
+            String secondaryContactPhone = domain.getSecondaryContactPhone();
+
             JSONObject createDomain = createDomainResponseJSON.getJSONObject("domain");
-            domain.setUuid((String) createDomain.get("id"));
+            if(domainRepo.findByUUID(createDomain.getString("id")) != null) {
+            	domain = domainRepo.findByUUID(createDomain.getString("id"));
+            }
+            domain.setUuid(createDomain.getString("id"));
             domain.setIsActive(true);
             domain.setStatus(Status.ACTIVE);
+            domain.setCityHeadquarter(cityHeadquarter);
+            domain.setCompanyAddress(companyAddress);
+            domain.setEmail(email);
+            domain.setLastName(lastName);
+            domain.setPassword(password);
+            domain.setPhone(phone);
+            domain.setPortalUserName(portalUserName);
+            domain.setPrimaryFirstName(primaryFirstName);
+            domain.setSecondaryContactEmail(secondaryContactEmail);
+            domain.setSecondaryContactName(secondaryContactName);
+            domain.setSecondaryContactLastName(secondaryContactLastName);
+            domain.setSecondaryContactPhone(secondaryContactPhone);
+
             String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
             byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
             SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-            String password = domain.getPassword();
             String encryptedPassword = new String(EncryptionUtil.encrypt(password, originalKey));
             domain.setPassword(encryptedPassword);
             persistedDomain = domainRepo.save(domain);
@@ -158,7 +182,7 @@ public class DomainServiceImpl implements DomainService {
         department.setSyncFlag(false);
         department = deptService.save(department);
         User user = User.convert(createDomain.getJSONArray("user").getJSONObject(0));
-        user.setDepartment(convertEntityService.getDepartment(user.getTransDepartment()));
+        user.setDepartmentId(convertEntityService.getDepartmentId(user.getTransDepartment()));
         user.setDomainId(convertEntityService.getDomainId(user.getTransDomainId()));
         user.setPassword(persistedDomain.getPassword());
         User updatedUser = userService.save(user);
@@ -179,18 +203,18 @@ public class DomainServiceImpl implements DomainService {
     	List<UserType> types = new ArrayList<UserType>();
         types.add(UserType.DOMAIN_ADMIN);
         try {
-			Role newRole = new Role();
-			newRole.setName("FULL_PERMISSION");
-			newRole.setDepartment(userObj.getDepartment());
-			newRole.setDescription("Allow full permission");
-			newRole.setStatus(Role.Status.ENABLED);
-			newRole.setPermissionList(permissionService.findAll());
-			Role updatedRole = roleService.save(newRole);
-			userObj.setRoleId(updatedRole.getId());
-			userService.update(userObj);
-		} catch (Exception e) {
-			LOGGER.debug("syncUpdateUserRole" + e);
-		}
+            Role newRole = new Role();
+            newRole.setName("FULL_PERMISSION");
+            newRole.setDepartmentId(userObj.getDepartmentId());
+            newRole.setDescription("Allow full permission");
+            newRole.setStatus(Role.Status.ENABLED);
+            newRole.setPermissionList(permissionService.findAll());
+            Role updatedRole = roleService.save(newRole);
+            userObj.setRoleId(updatedRole.getId());
+            userService.update(userObj);
+        } catch (Exception e) {
+            LOGGER.debug("syncUpdateUserRole" + e);
+        }
 	}
 
     @Override
@@ -246,7 +270,7 @@ public class DomainServiceImpl implements DomainService {
 
     @Override
     public List<Domain> findAll() throws Exception {
-        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = domainRepo.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && domain.getName().equals("ROOT")) {
             return (List<Domain>) domainRepo.findAll();
         }
@@ -344,4 +368,5 @@ public class DomainServiceImpl implements DomainService {
     public Page<Domain> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
         return domainRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
     }
+
 }

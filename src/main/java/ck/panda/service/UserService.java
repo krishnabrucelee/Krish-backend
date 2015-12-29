@@ -139,4 +139,14 @@ public interface UserService extends CRUDService<User> {
      * @throws Exception
      */
     public List<User> assignUserRoles(List<User> users) throws Exception;
+
+    /**
+     * Find user role whether assigned or not.
+     *
+     * @param roleId role id
+     * @param isActive user status Active/Inactive
+     * @return users
+     * @throws Exception errors
+     */
+    List<User> findByRole(Long roleId, Boolean isActive) throws Exception;
 }

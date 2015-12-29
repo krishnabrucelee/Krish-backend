@@ -377,7 +377,7 @@ public class Pod {
             pod.setTransZoneId((JsonUtil.getStringValue(jsonObject, "zoneid")));
             pod.setNetmask(JsonUtil.getStringValue(jsonObject, "netmask"));
             pod.setGateway(JsonUtil.getStringValue(jsonObject, "gateway"));
-            pod.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
+            pod.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state").toUpperCase()));
             pod.setIsActive(true);
         } catch (Exception ex) {
             ex.printStackTrace();

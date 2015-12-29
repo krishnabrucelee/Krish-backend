@@ -23,14 +23,22 @@ public interface NetworkRepository extends PagingAndSortingRepository<Network, L
      */
     @Query(value = "select net from Network net where net.uuid LIKE :uuid ")
     Network findByUUID(@Param("uuid") String uuid);
+    
+    /**
+     * Find Network by id.
+     * @param id Network id.
+     * @return id
+     */
+    @Query(value = "select net from Network net where net.id LIKE :id ")
+    Network findById(@Param("id") Long Id);
 
     /**
      * Find Network list by department.
      * @param department department name.
      * @return network list.
      */
-    @Query(value = "select net from Network net where net.department=:department AND net.isActive =:isActive ")
-    List<Network> findByDepartmentAndNetworkIsActive(@Param("department") Department department, @Param("isActive") Boolean isActive);
+    @Query(value = "select net from Network net where net.departmentId=:departmentId AND net.isActive =:isActive ")
+    List<Network> findByDepartmentAndNetworkIsActive(@Param("departmentId") Long departmentId, @Param("isActive") Boolean isActive);
 
     /**
      * Find Network list by department.

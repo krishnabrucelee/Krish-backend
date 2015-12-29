@@ -1,25 +1,25 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import org.joda.time.DateTime;
+import org.hibernate.annotations.Type;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
-
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -30,6 +30,7 @@ import ck.panda.util.JsonUtil;
  */
 @Entity
 @Table(name = "ck_hypervisor")
+@EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class Hypervisor implements Serializable {
 
@@ -50,23 +51,27 @@ public class Hypervisor implements Serializable {
 
     /** Created by user. */
     @CreatedBy
-    @Column(name = "created_by")
+    @Column(name = "created_user_id")
     private Long createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @Column(name = "updated_by")
+    @Column(name = "updated_user_id")
     private Long updatedBy;
 
     /** Created date and time. */
     @CreatedDate
     @Column(name = "created_date_time")
-    private DateTime createdDateTime;
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime createdDateTime;
 
-    /** Last updated date and time. */
+    /** modified date and time. */
     @LastModifiedDate
     @Column(name = "updated_date_time")
-    private DateTime updatedDateTime;
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime updatedDateTime;
 
     /**
      * Get the id.
@@ -123,74 +128,74 @@ public class Hypervisor implements Serializable {
     }
 
     /**
-     * Get the createdBy.
+     * Get the created by.
      *
-     * @return the createdBy.
+     * @return createdBy
      */
     public Long getCreatedBy() {
         return createdBy;
     }
 
     /**
-     * Set the createdBy.
+     * Set the created by.
      *
-     * @param createdBy - the createdBy to set.
+     * @param createdBy - the User entity to set
      */
     public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
     /**
-     * Get the updatedBy.
+     * Get the updated by.
      *
-     * @return the updatedBy.
+     * @return updatedBy
      */
     public Long getUpdatedBy() {
         return updatedBy;
     }
 
     /**
-     * Set the updatedBy.
+     * Set the updated by.
      *
-     * @param updatedBy - the updatedBy to set.
+     * @param updatedBy - the User entity to set
      */
     public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
     }
 
     /**
-     * Get the createdDateTime.
+     * Get the created date time.
      *
-     * @return the createdDateTime.
+     * @return the createdDateTime
      */
-    public DateTime getCreatedDateTime() {
+    public ZonedDateTime getCreatedDateTime() {
         return createdDateTime;
     }
 
     /**
-     * Set the createdDateTime.
+     * Set the created date time.
      *
-     * @param createdDateTime - the createdDateTime to set.
+     * @param createdDateTime - the DateTime to set
      */
-    public void setCreatedDateTime(DateTime createdDateTime) {
+    public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
     }
 
     /**
-     * Get the updatedDateTime.
+     * Get the updated date time.
      *
-     * @return the updatedDateTime.
+     * @return updatedDateTime
      */
-    public DateTime getUpdatedDateTime() {
+    public ZonedDateTime getUpdatedDateTime() {
         return updatedDateTime;
     }
 
     /**
-     * Set the updatedDateTime.
+     * Set the updated date time.
      *
-     * @param updatedDateTime - the updatedDateTime to set.
+     * @param updatedDateTime - the DateTime to set
      */
-    public void setUpdatedDateTime(DateTime updatedDateTime) {
+    public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
 

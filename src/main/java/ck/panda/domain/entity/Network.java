@@ -180,6 +180,15 @@ public class Network implements Serializable {
     /** Transient host of the instance. */
     @Transient
     private String transProjectId;
+    
+    /** Instance id. */
+    @JoinColumn(name = "instance_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private VmInstance vmInstance;
+
+    /** Instance id for Network. */
+    @Column(name = "instance_id")
+    private Long vmInstanceId;
 
     /**
      * Enum type for Network Type.
@@ -801,6 +810,42 @@ public class Network implements Serializable {
      */
     public void setNetworkDomain(String networkDomain) {
         this.networkDomain = networkDomain;
+    }
+    
+    /**
+     * Get the instance.
+     *
+     * @return the vminstance
+     */
+    public VmInstance getVmInstance() {
+        return vmInstance;
+    }
+
+    /**
+     * Set the vminstance.
+     *
+     * @param vmInstance to set
+     */
+    public void setVmInstance(VmInstance vmInstance) {
+        this.vmInstance = vmInstance;
+    }
+
+    /**
+     * Get instance Id.
+     *
+     * @return the vmInstanceId
+     */
+    public Long getVmInstanceId() {
+        return vmInstanceId;
+    }
+
+    /**
+     * Set the vmInstanceId .
+     *
+     * @param vmInstanceId to set
+     */
+    public void setVmInstanceId(Long vmInstanceId) {
+        this.vmInstanceId = vmInstanceId;
     }
 
     /** Convert JSONObject to domain entity.

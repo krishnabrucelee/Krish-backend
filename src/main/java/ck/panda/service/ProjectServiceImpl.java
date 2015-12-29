@@ -9,12 +9,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.ProjectRepository;
 import ck.panda.domain.repository.jpa.UserRepository;
@@ -69,14 +72,6 @@ public class ProjectServiceImpl implements ProjectService {
     @Autowired
     private ConfigUtil config;
 
-    /** Domain repository reference. */
-    @Autowired
-    private DomainRepository domainRepository;
-
-    /** User repository reference. */
-    @Autowired
-    private UserRepository userRepository;
-
     @Override
     @PreAuthorize("hasPermission(#project.getSyncFlag(), 'CREATE_PROJECT')")
     public Project save(Project project) throws Exception {
@@ -90,10 +85,9 @@ public class ProjectServiceImpl implements ProjectService {
             throw new ApplicationException(errors);
         } else {
             HashMap<String, String> optional = new HashMap<String, String>();
-            optional.put("domainid", project.getDepartment().getDomain().getUuid());
-            optional.put("account", project.getDepartment().getUserName());
+            optional.put("domainid", convertEntityService.getDomainById(project.getDomainId()).getUuid());
+            optional.put("account", convertEntityService.getDepartmentById(project.getDepartmentId()).getUserName());
             config.setUserServer();
-            LOGGER.debug("Cloud stack connectivity at domain", project.getDepartment().getDomain().getUuid());
             String csResponse = cloudStackProjectService.createProject("json", project.getName(),
                     project.getDescription(), optional);
             JSONObject csProject = new JSONObject(csResponse).getJSONObject("createprojectresponse");
@@ -103,7 +97,7 @@ public class ProjectServiceImpl implements ProjectService {
             } else {
                 LOGGER.debug("Project UUID", csProject.getString("id"));
                 project.setUuid(csProject.getString("id"));
-                users.add(userRepository.findOne(project.getProjectOwnerId()));
+                users.add(convertEntityService.getOwnerById(project.getProjectOwnerId()));
                 project.setUserList(users);
                 String instancePro = cloudStackProjectService.queryAsyncJobResult(csProject.getString("jobid"), "json");
                 JSONObject resProject = new JSONObject(instancePro).getJSONObject("queryasyncjobresultresponse");
@@ -127,15 +121,15 @@ public class ProjectServiceImpl implements ProjectService {
         	List<User> users = new ArrayList<User>();
             Errors errors = validator.rejectIfNullEntity("project", project);
             errors = validator.validateEntity(project, errors);
-            errors = this.validateByName(errors, project.getName(), project.getDepartment(), project.getId());
+            errors = this.validateByName(errors, project.getName(),  convertEntityService.getDepartmentById(project.getDepartmentId()), project.getId());
             // Validation
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
                 config.setUserServer();
                 HashMap<String, String> optional = new HashMap<String, String>();
-                optional.put("domainid", project.getDepartment().getDomain().getUuid());
-                optional.put("account", project.getDepartment().getUserName());
+                optional.put("domainid", convertEntityService.getDomainById(project.getDomainId()).getUuid());
+                optional.put("account",  convertEntityService.getDepartmentById(project.getDepartmentId()).getUserName());
                 String csResponse = cloudStackProjectService.updateProject(project.getUuid(), project.getDescription(),
                         "json", optional);
                 JSONObject csProject = new JSONObject(csResponse).getJSONObject("updateprojectresponse");
@@ -143,7 +137,9 @@ public class ProjectServiceImpl implements ProjectService {
                     errors = this.validateEvent(errors, csProject.getString("errortext"));
                     throw new ApplicationException(errors);
                 }
-                users.add(userRepository.findOne(project.getProjectOwnerId()));
+                if(project.getProjectOwnerId() != null){
+                users.add(convertEntityService.getOwnerById(project.getProjectOwnerId()));
+                }
                 if (project.getUserList().size() > 0) {
                     for (User user : project.getUserList()) {
                         if (project.getProjectOwnerId() != user.getId()) {
@@ -191,7 +187,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<Project> findByAll() throws Exception {
-        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = convertEntityService.getDomainById(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && !domain.getName().equals("ROOT")) {
             if (Long.valueOf(tokenDetails.getTokenDetails("departmentid")) == 1000L) {
                 return (List<Project>) projectRepository.findAll();
@@ -259,9 +255,21 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Page<Project> findAllByActive(Boolean isActive, PagingAndSorting pagingAndSorting) throws Exception {
-        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = convertEntityService.getDomainById(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && !domain.getName().equals("ROOT")) {
-            return projectRepository.findAllProjectByDomain(domain.getId(), pagingAndSorting.toPageRequest(), isActive, Project.Status.ENABLED);
+            User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
+            if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
+                if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
+                    return projectRepository.findAllProjectByDomain(domain.getId(), pagingAndSorting.toPageRequest(),
+                            isActive, Project.Status.ENABLED);
+                } else {
+                    List<Project> projects = new ArrayList<Project>();
+                    projects = projectRepository.findByUserAndIsActive(user.getId(), isActive);
+                    Page<Project> allProjectLists = new PageImpl<Project>(projects, pagingAndSorting.toPageRequest(),
+                            pagingAndSorting.getPageSize());
+                    return allProjectLists;
+                }
+            }
         }
         return projectRepository.findAllByActive(pagingAndSorting.toPageRequest(), isActive, Project.Status.ENABLED);
     }
@@ -295,11 +303,10 @@ public class ProjectServiceImpl implements ProjectService {
                 // the converted Project entity to list
                 Project project = Project.convert(projectListJSON.getJSONObject(i));
                 project.setDomainId(convertEntityService.getDomainId(project.getTransDomainId()));
-                project.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomain(project.getTransAccount(),
+                project.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(project.getTransAccount(),
                         convertEntityService.getDomain(project.getTransDomainId())));
                 project.setIsActive(convertEntityService.getState(project.getTransState()));
                 project.setStatus((Project.Status)convertEntityService.getStatus(project.getTransState()));
-                project.setProjectOwnerId(convertEntityService.getUserIdByAccount(project.getTransAccount(), convertEntityService.getDomain(project.getTransDomainId())));
                 projectList.add(project);
 
             }

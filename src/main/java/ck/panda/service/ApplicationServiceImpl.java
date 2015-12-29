@@ -9,7 +9,6 @@ import ck.panda.domain.entity.Application;
 import ck.panda.domain.entity.Application.Status;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.repository.jpa.ApplicationRepository;
-import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -33,15 +32,16 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Autowired
     private TokenDetails tokenDetails;
 
-    /** Domain repository reference. */
+    /** Domain service reference. */
     @Autowired
-    private DomainRepository domainRepository;
+    private DomainService domainService;
 
     @Override
     @PreAuthorize("hasPermission(null, 'CREATE_APPLICATION_TYPE')")
     public Application save(Application application) throws Exception {
         this.validateApplication(application);
-        application.setDomainId(application.getDomain().getId());
+        application.setDomainId(application.getDomainId());
+        application.setStatus(Application.Status.ENABLED);
         application.setIsActive(true);
         return applicationRepo.save(application);
     }
@@ -55,7 +55,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private void validateApplication(Application application) throws Exception {
         Errors errors = validator.rejectIfNullEntity("application", application);
         errors = validator.validateEntity(application, errors);
-        Application app = applicationRepo.findByTypeAndDomainAndIsActive(application.getType(), application.getDomain(), true,
+        Application app = applicationRepo.findByTypeAndDomainAndIsActive(application.getType(), application.getDomainId(), true,
                 Status.ENABLED);
         if (app != null && application.getId() != app.getId()) {
             errors.addFieldError("type", "application.already.exist.for.same.domain");
@@ -93,33 +93,25 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public Page<Application> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && !domain.getName().equals("ROOT")) {
-            if (Long.valueOf(tokenDetails.getTokenDetails("departmentid")) == 1000L) {
-                return applicationRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
-            } else {
-                return applicationRepo.findAllByDomainIsActive(domain.getId(), true, pagingAndSorting.toPageRequest());
-            }
+            return applicationRepo.findAllByDomainIsActive(domain.getId(), true, pagingAndSorting.toPageRequest());
         }
         return applicationRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
     }
 
     @Override
     public List<Application> findAll() throws Exception {
-        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && !domain.getName().equals("ROOT")) {
-            if (Long.valueOf(tokenDetails.getTokenDetails("departmentid")) == 1000L) {
-                return (List<Application>) applicationRepo.findAllByIsActive(true);
-            } else {
-                return applicationRepo.findAllByDomainIsActive(domain.getId(), true);
-            }
+            return applicationRepo.findAllByDomainIsActive(domain.getId(), true);
         }
         return (List<Application>) applicationRepo.findAllByIsActive(true);
     }
 
     @Override
     public Page<Application> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
-        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && !domain.getName().equals("ROOT")) {
             return applicationRepo.findAllByDomainIsActiveAndStatus(domain.getId(), pagingAndSorting.toPageRequest(), true, Status.ENABLED);
         }
@@ -136,7 +128,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public List<Application> findAllByIsActive(Boolean isActive) throws Exception {
-        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && !domain.getName().equals("ROOT")) {
             return applicationRepo.findAllByIsActiveAndDomainAndStatus(domain.getId(), true, Status.ENABLED);
         }

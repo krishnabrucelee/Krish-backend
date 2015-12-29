@@ -147,7 +147,7 @@ public class SyncServiceImpl implements SyncService {
     /** Account service for listing users. */
     @Autowired
     private AccountService accountService;
-    
+
     /** Nic service for listing nic. */
     @Autowired
     private NicService nicService;
@@ -440,8 +440,8 @@ public class SyncServiceImpl implements SyncService {
             this.syncSnapshot();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Snapshot", e);
-        }      
-        try{ 
+        }
+        try{
             // 25. Sync Nic entity
             this.syncNic();
             LOGGER.debug("nic");
@@ -1077,11 +1077,11 @@ public class SyncServiceImpl implements SyncService {
                 csTemplate.setPasswordEnabled(csTemplate.getPasswordEnabled());
                 csTemplate.setFormat(csTemplate.getFormat());
                 csTemplate.setFeatured(csTemplate.getFeatured());
-                csTemplate.setOsType(csTemplate.getOsType());
-                csTemplate.setZone(csTemplate.getZone());
+                csTemplate.setOsTypeId(csTemplate.getOsType().getId());
+                csTemplate.setZoneId(csTemplate.getZone().getId());
                 csTemplate.setStatus(csTemplate.getStatus());
                 csTemplate.setType(csTemplate.getType());
-                csTemplate.setHypervisor(csTemplate.getHypervisor());
+                csTemplate.setHypervisorId(csTemplate.getHypervisor().getId());
                 csTemplate.setExtractable(csTemplate.getExtractable());
                 csTemplate.setDynamicallyScalable(csTemplate.getDynamicallyScalable());
 
@@ -1722,9 +1722,12 @@ public class SyncServiceImpl implements SyncService {
             // 3.1 Find the corresponding CS server projectService object by
             // finding it in a hash using uuid
             if (csProjectMap.containsKey(project.getUuid())) {
-                Project csNetworkOffering = csProjectMap.get(project.getUuid());
+                Project csProject = csProjectMap.get(project.getUuid());
 
-                project.setName(csNetworkOffering.getName());
+                project.setName(csProject.getName());
+                project.setDepartmentId(csProject.getDepartmentId());
+                project.setStatus(csProject.getStatus());
+                project.setDomainId(csProject.getDomainId());
 
                 // 3.2 If found, update the project object in app db
                 projectService.update(project);
@@ -1873,7 +1876,7 @@ public class SyncServiceImpl implements SyncService {
             nicService.save(csNicMap.get(key));
         }
     }
-    
+
     /**
      * Create default roles and permissions.
      *
@@ -1892,7 +1895,7 @@ public class SyncServiceImpl implements SyncService {
                     if (role == null) {
                         Role newRole = new Role();
                         newRole.setName("FULL_PERMISSION");
-                        newRole.setDepartment(department);
+                        newRole.setDepartmentId(department.getId());
                         newRole.setDescription("Allow full permission");
                         newRole.setStatus(Role.Status.ENABLED);
                         newRole.setPermissionList(newPermissionList);
@@ -1901,7 +1904,7 @@ public class SyncServiceImpl implements SyncService {
                     }
                     else if (role != null) {
                         role.setName("FULL_PERMISSION");
-                        role.setDepartment(department);
+                        role.setDepartmentId(department.getId());
                         role.setDescription("Allow full permission");
                         role.setStatus(Role.Status.ENABLED);
                         role.setPermissionList(permissionService.findAll());
@@ -1920,7 +1923,7 @@ public class SyncServiceImpl implements SyncService {
                     Role role = roleService.findByName("FULL_PERMISSION", department);
                     if (role != null) {
                         role.setName("FULL_PERMISSION");
-                        role.setDepartment(department);
+                        role.setDepartmentId(department.getId());
                         role.setDescription("Allow full permission");
                         role.setStatus(Role.Status.ENABLED);
                         role.setPermissionList(permissionService.findAll());
@@ -1930,7 +1933,7 @@ public class SyncServiceImpl implements SyncService {
                     else if (role == null) {
                         Role newRole = new Role();
                         newRole.setName("FULL_PERMISSION");
-                        newRole.setDepartment(department);
+                        newRole.setDepartmentId(department.getId());
                         newRole.setDescription("Allow full permission");
                         newRole.setStatus(Role.Status.ENABLED);
                         newRole.setPermissionList(permissionService.findAll());
@@ -1954,7 +1957,7 @@ public class SyncServiceImpl implements SyncService {
         try {
             List<User> userList = userService.findUsersByTypesAndActive(types, true);
             for (User user : userList) {
-                Role role = roleService.findByName("FULL_PERMISSION", user.getDepartment());
+                Role role = roleService.findByNameAndDepartmentIdAndIsActive("FULL_PERMISSION",user.getDepartmentId(),true);
                 user.setRoleId(role.getId());
                 userService.update(user);
             }

@@ -12,7 +12,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -50,8 +49,12 @@ public class User {
 
     /** Department of the user. */
     @ManyToOne
-    @JoinColumn(name = "department_id", referencedColumnName = "id")
+    @JoinColumn(name = "department_id", referencedColumnName = "id", updatable = false, insertable = false)
     private Department department;
+    
+    /** Department id of the user. */
+    @Column(name = "department_id")
+    private Long departmentId;
 
     /** Domain of the user. */
     @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
@@ -124,12 +127,12 @@ public class User {
 
     /** Created by user. */
     @CreatedBy
-    @Column(name = "created_by")
+    @Column(name = "created_user_id")
     private Long createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @Column(name = "updated_by")
+    @Column(name = "updated_user_id")
     private Long updatedBy;
 
     /** Transient domain of the user. */
@@ -227,28 +230,54 @@ public class User {
     }
 
     /**
-     * @return the department
+     * Get the department.
+     * 
+     * @return the department.
      */
     public Department getDepartment() {
         return department;
     }
 
     /**
-     * @param department the department to set
+     * Set the department.
+     * 
+     * @param department the department to set.
      */
     public void setDepartment(Department department) {
         this.department = department;
     }
+    
+    /**
+     * Get the departmentId.
+     * 
+     * @return the departmentId.
+     */
+    public Long getDepartmentId() {
+        return departmentId;
+    }
 
     /**
-     * @return the domain
+     * Set the departmentId.
+     * 
+     * @param departmentId the departmentId to set.
+     */
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
+    }
+
+	/**
+	 * Get the domain.
+	 * 
+     * @return the domain.
      */
     public Domain getDomain() {
         return domain;
     }
 
     /**
-     * @param domain the domain to set
+     * Set the domain.
+     * 
+     * @param domain the domain to set.
      */
     public void setDomain(Domain domain) {
         this.domain = domain;
@@ -345,6 +374,8 @@ public class User {
     }
 
     /**
+     * Get the projectList.
+     * 
      * @return the projectList
      */
     public List<Project> getProjectList() {
@@ -352,6 +383,8 @@ public class User {
     }
 
     /**
+     * Set the projectList.
+     * 
      * @param projectList the projectList to set
      */
     public void setProjectList(List<Project> projectList) {
@@ -629,6 +662,8 @@ public class User {
     }
 
     /**
+     * Get the roleId.
+     * 
      * @return the roleId
      */
     public Long getRoleId() {
@@ -636,6 +671,8 @@ public class User {
     }
 
     /**
+     * Set the roleId.
+     * 
      * @param roleId the roleId to set
      */
     public void setRoleId(Long roleId) {

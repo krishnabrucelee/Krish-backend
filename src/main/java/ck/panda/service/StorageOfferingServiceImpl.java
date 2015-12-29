@@ -233,18 +233,17 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
         config.setServer(1L);
         String storageOfferings = csStorageService.createStorageOffering(JSON, optional(storage));
         LOGGER.info("storage offer create response " + storageOfferings);
-        JSONObject storageOfferingsResponse = new JSONObject(storageOfferings).getJSONObject("creatediskofferingresponse")
-                .getJSONObject("diskoffering");
+        JSONObject storageOfferingsResponse = new JSONObject(storageOfferings).getJSONObject("creatediskofferingresponse");
         if (storageOfferingsResponse.has("errorcode")) {
             errors = this.validateEvent(errors, storageOfferingsResponse.getString("errortext"));
             throw new ApplicationException(errors);
         } else {
-            storage.setUuid((String) storageOfferingsResponse.get("id"));
+            storage.setUuid(storageOfferingsResponse.getJSONObject("diskoffering").getString("id"));
 
-            if (storageOfferingsResponse.get("disksize").equals(0)) {
+            if (storageOfferingsResponse.getJSONObject("diskoffering").get("disksize").equals(0)) {
                 storage.setDiskSize(0L);
             }
-            if (storageOfferingsResponse.get("iscustomized").equals(false)) {
+            if (storageOfferingsResponse.getJSONObject("diskoffering").get("iscustomized").equals(false)) {
                 storage.setIsCustomDisk(false);
             }
         }
