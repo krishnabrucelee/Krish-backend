@@ -48,7 +48,7 @@ public class ActionListener implements MessageListener {
      * @param cloudStackServer cloudStackServer object.
      */
     public ActionListener(SyncService syncService, AsynchronousJobService asyncService, CloudStackServer cloudStackServer,
-    		String backendAdminUsername, String backendAdminRole) {
+            String backendAdminUsername, String backendAdminRole) {
         this.syncService = syncService;
         this.asyncService = asyncService;
         this.cloudStackServer = cloudStackServer;
@@ -103,12 +103,7 @@ public class ActionListener implements MessageListener {
                 break;
             case EventTypes.EVENT_ACCOUNT:
                 LOGGER.debug("Account sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
-                if (!eventObject.getEvent().equals(EventTypes.EVENT_USER_LOGIN)
-                    || eventObject.getEvent().equals(EventTypes.EVENT_USER_LOGOUT)) {
-                    LOGGER.debug("Account sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
-                } else {
-                    syncService.syncDepartment();
-                }
+                syncService.syncDepartment();
                 break;
             case EventTypes.EVENT_DISK:
                 LOGGER.debug("Storage offer sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
@@ -134,7 +129,7 @@ public class ActionListener implements MessageListener {
                 if (eventObject.getEvent().contains("OFFERING")) {
                     LOGGER.debug("Network Offering sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
                     if(eventObject.getEvent().contains("EDIT") || eventObject.getEvent().contains("DELETE")) {
-                    	asyncService.asyncNetworkOffering(eventObject);
+                        asyncService.asyncNetworkOffering(eventObject);
                     } else {
                         syncService.syncNetworkOffering();
                     }
@@ -174,10 +169,10 @@ public class ActionListener implements MessageListener {
                 syncService.syncNic();
                 break;
             case EventTypes.EVENT_TEMPLATE:
-            	if (!eventObject.getEvent().contains("TEMPLATE.DELETE")) {
+                if (!eventObject.getEvent().contains("TEMPLATE.DELETE")) {
                     LOGGER.debug("templates sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
                     syncService.syncTemplates();
-            	}
+                }
                 break;
             case EventTypes.EVENT_VM_SNAPSHOT:
                 LOGGER.debug("VM snapshot sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
