@@ -74,10 +74,10 @@ public class RoleServiceImpl implements RoleService {
     public Role update(Role role) throws Exception {
         Errors errors = validator.rejectIfNullEntity("role", role);
         errors = validator.validateEntity(role, errors);
-        Role roleUnique = roleRepo.findUniqueness(role.getName(), role.getDepartmentId());
-        if (roleUnique != null && role.getId() != roleUnique.getId()) {
-            errors.addGlobalError("role.name.unique.error");
-        }
+//        Role roleUnique = roleRepo.findUniqueness(role.getName(), role.getDepartmentId());
+//        if (roleUnique != null && role.getId() != roleUnique.getId()) {
+//            errors.addGlobalError("role.name.unique.error");
+//        }
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
@@ -122,7 +122,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-  public Page<Role> findAll(PagingAndSorting pagingAndSorting) throws Exception {
+    public Page<Role> findAll(PagingAndSorting pagingAndSorting) throws Exception {
         Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && !domain.getName().equals("ROOT")) {
             return roleRepo.findByDomainAndIsActive(domain.getId(), true, pagingAndSorting.toPageRequest());
@@ -168,7 +168,6 @@ public class RoleServiceImpl implements RoleService {
     public Errors validateName(Errors errors, String name, Long departmentId) throws Exception {
 
         if (findByName(name, departmentId) != null) {
-//            errors.addFieldError("name", "role.name.unique.error");
             errors.addGlobalError("role.name.unique.error");
         }
         return errors;
