@@ -282,11 +282,11 @@ public class SyncServiceImpl implements SyncService {
     /** Permission report properties. */
     @Value(value = "${permission.report}")
     private String report;
-    
+
     /** Validator attribute. */
     @Autowired
     private AppValidator validator;
-    
+
     /** Message source attribute. */
     @Autowired
     private MessageSource messageSource;
@@ -316,7 +316,7 @@ public class SyncServiceImpl implements SyncService {
 			   errors.addGlobalError("Either of URL or API key or Secret key is wrong. please provide correct values and proceed ");
                if (errors.hasErrors()) {
                    throw new ApplicationException(errors);
-               }   
+               }
          }
          try {
              // 2. Sync Zone entity
@@ -1345,6 +1345,7 @@ public class SyncServiceImpl implements SyncService {
      */
     public void syncVolume() throws ApplicationException, Exception {
 
+    	Thread.sleep(5000);
         // 1. Get all the StorageOffering objects from CS server as hash
         List<Volume> volumeList = volumeService.findAllFromCSServer();
         HashMap<String, Volume> csVolumeMap = (HashMap<String, Volume>) Volume.convert(volumeList);
