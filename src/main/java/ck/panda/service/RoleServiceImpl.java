@@ -1,13 +1,11 @@
 package ck.panda.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
@@ -39,10 +37,6 @@ public class RoleServiceImpl implements RoleService {
     @Autowired
     private RoleReposiory roleRepo;
 
-    /** Department repository reference. */
-    @Autowired
-    private DepartmentService departmentService;
-
     /** Domain Service reference. */
     @Autowired
     private DomainService domainService;
@@ -65,14 +59,12 @@ public class RoleServiceImpl implements RoleService {
         LOGGER.debug("Sample Debug Message");
         Errors errors = validator.rejectIfNullEntity("role", role);
         errors = validator.validateEntity(role, errors);
-        validateName(errors, role.getName(), role.getDepartment());
+        validateName(errors, role.getName(), role.getDepartmentId());
 
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
             role.setStatus(Status.ENABLED);
-            role.setDepartmentId(role.getDepartment().getId());
-            role.setDomainId(role.getDepartment().getDomainId());
             return roleRepo.save(role);
         }
     }
@@ -82,13 +74,13 @@ public class RoleServiceImpl implements RoleService {
     public Role update(Role role) throws Exception {
         Errors errors = validator.rejectIfNullEntity("role", role);
         errors = validator.validateEntity(role, errors);
-        if(role.getDepartmentId() != role.getDepartment().getId()){
-             validateName(errors, role.getName(), role.getDepartment());
+        Role roleUnique = roleRepo.findUniqueness(role.getName(), role.getDepartmentId());
+        if (roleUnique != null && role.getId() != roleUnique.getId()) {
+            errors.addGlobalError("role.name.unique.error");
         }
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-            role.setDepartmentId(role.getDepartment().getId());
             return roleRepo.save(role);
         }
     }
@@ -145,8 +137,8 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public Role findByName(String name, Department department) throws Exception {
-        return roleRepo.findUniqueness(name, department);
+    public Role findByName(String name, Long departmentId) throws Exception {
+        return roleRepo.findUniqueness(name, departmentId);
     }
 
     @Override
@@ -173,9 +165,9 @@ public class RoleServiceImpl implements RoleService {
      * @return error is present,else new error object is returned.
      * @throws Exception if error is present.
      */
-    public Errors validateName(Errors errors, String name, Department department) throws Exception {
+    public Errors validateName(Errors errors, String name, Long departmentId) throws Exception {
 
-        if (findByName(name, department) != null) {
+        if (findByName(name, departmentId) != null) {
 //            errors.addFieldError("name", "role.name.unique.error");
             errors.addGlobalError("role.name.unique.error");
         }

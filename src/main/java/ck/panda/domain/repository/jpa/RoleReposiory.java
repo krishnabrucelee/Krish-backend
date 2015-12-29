@@ -32,8 +32,8 @@ public interface RoleReposiory extends PagingAndSortingRepository<Role, Long> {
      * @param isActive
      * @return role name
      */
-    @Query(value = "SELECT role FROM Role AS role WHERE role.name=:name AND role.department=:department AND role.isActive IS TRUE")
-    Role findUniqueness(@Param("name") String name, @Param("department") Department department);
+    @Query(value = "SELECT role FROM Role AS role WHERE role.name=:name AND role.departmentId=:departmentId AND role.isActive IS TRUE")
+    Role findUniqueness(@Param("name") String name, @Param("departmentId") Long departmentId);
 
     /**
      * Method to find list of roles by department.
@@ -70,17 +70,6 @@ public interface RoleReposiory extends PagingAndSortingRepository<Role, Long> {
      */
     @Query(value = "select role from Role role where role.department=:department ")
     List<Role> findByDepartment(@Param("department") Department department);
-
-    /**
-     * Method to find name uniqueness from department in adding Roles.
-     *
-     * @param name - name of the role
-     * @param department - department name
-     * @param isActive
-     * @return role name
-     */
-    @Query(value = "SELECT role FROM Role AS role WHERE role.name=:name AND role.department=:department AND role.isActive IS TRUE")
-    Role findUpdateUniqueness(String name, Department department);
 
     /**
      * Method to find role by name and department id and active.
