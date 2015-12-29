@@ -50,7 +50,7 @@ public class Role implements Serializable {
     private String name;
 
     /** Domain of the role. */
-    @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @JoinColumn(name = "domain_id", referencedColumnName = "id", updatable = false, insertable = false)
     @ManyToOne
     private Domain domain;
 
@@ -59,7 +59,7 @@ public class Role implements Serializable {
     private Long domainId;
 
     /** Department of the Role. */
-    @JoinColumn(name = "department_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @JoinColumn(name = "department_id", referencedColumnName = "id", updatable = false, insertable = false)
     @ManyToOne
     private Department department;
 
