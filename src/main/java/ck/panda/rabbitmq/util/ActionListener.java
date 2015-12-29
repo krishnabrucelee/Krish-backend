@@ -82,7 +82,7 @@ public class ActionListener implements MessageListener {
                 AuthorityUtils.commaSeparatedStringToAuthorityList(backendAdminRole));
         authenticatedExternalWebService.setExternalWebService(externalWebService);
         SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);
-        //Thread.sleep(5000);
+        Thread.sleep(5000);
         switch (eventObject.getEventStart()) {
             case EventTypes.EVENT_VM:
                 LOGGER.debug("VM Sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
