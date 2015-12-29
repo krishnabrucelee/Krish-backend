@@ -189,7 +189,7 @@ public class Role implements Serializable {
 
     /**
      * Get the domain of the Role.
-
+     *
      * @return the domain of Role.
      */
     public Domain getDomain() {
@@ -207,7 +207,7 @@ public class Role implements Serializable {
 
     /**
      * Get the domainId of the Role.
-
+     *
      * @return the domainId of Role.
      */
     public Long getDomainId() {
@@ -423,6 +423,7 @@ public class Role implements Serializable {
 
     /**
      * Get the sync flag for temporary usage.
+     *
      * @return syncFlag
      */
     public Boolean getSyncFlag() {
@@ -431,6 +432,7 @@ public class Role implements Serializable {
 
     /**
      * Set the sync flag for temporary usage.
+     *
      * @param syncFlag - the Boolean to set
      */
     public void setSyncFlag(Boolean syncFlag) {
