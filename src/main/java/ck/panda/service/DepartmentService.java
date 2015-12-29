@@ -123,10 +123,10 @@ public interface DepartmentService  extends CRUDService<Department>  {
      * @return department.
      */
     List<Department> findAllBySync() throws Exception;
-    
+
     /**
      * Find the departments based on the isActive status.
-     * 
+     *
      * @param domainId for each department.
      * @param types for each department.
      * @param isActive department status Active/Inactive
@@ -134,5 +134,14 @@ public interface DepartmentService  extends CRUDService<Department>  {
      * @return departments.
      */
     List<Department> findDepartmentsByDomainAndAccountTypesAndActive(Long domainId, List<AccountType> types, Boolean isActive) throws Exception;
+
+    /**
+     * Find department by uuid.
+     *
+     * @param uuid uuid of department.
+     * @return department object.
+     * @throws Exception unhandled errors.
+     */
+    Department findbyUUID(String uuid) throws Exception;
 
 }
