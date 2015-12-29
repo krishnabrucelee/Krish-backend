@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.PermissionUtil;
@@ -50,9 +51,11 @@ import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.domain.entity.Zone;
+import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.JsonUtil;
+import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 
 /**
@@ -279,6 +282,14 @@ public class SyncServiceImpl implements SyncService {
     /** Permission report properties. */
     @Value(value = "${permission.report}")
     private String report;
+    
+    /** Validator attribute. */
+    @Autowired
+    private AppValidator validator;
+    
+    /** Message source attribute. */
+    @Autowired
+    private MessageSource messageSource;
 
     @Override
     public void init(CloudStackServer server) throws Exception {
@@ -301,7 +312,11 @@ public class SyncServiceImpl implements SyncService {
              // 1. Sync Region entity
              this.syncRegion();
          } catch (Exception e) {
-             LOGGER.error("ERROR AT synch Region", e);
+        	   Errors errors = new  Errors(messageSource);
+			   errors.addGlobalError("Either of URL or API key or Secret key is wrong. please provide correct values and proceed ");
+               if (errors.hasErrors()) {
+                   throw new ApplicationException(errors);
+               }   
          }
          try {
              // 2. Sync Zone entity
