@@ -146,7 +146,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
                         Boolean authKeyResponse = apiSecretKeyGeneration(user);
                         if(authKeyResponse) {
                             Department department = departmentReposiory.findOne(user.getDepartment().getId());
-                            Role role = roleReposiory.findUniqueness(user.getRole().getName(), department);
+                            Role role = roleReposiory.findUniqueness(user.getRole().getName(), department.getId());
                             resultOfAuthentication = externalServiceAuthenticator.authenticate(username.get(), user.getRole().getName(), role, user, buildNumber);
                             String newToken = null;
                             try {

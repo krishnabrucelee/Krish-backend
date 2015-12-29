@@ -1881,7 +1881,7 @@ public class SyncServiceImpl implements SyncService {
                 // nic which is not added in the app
                 csNicMap.remove(nic.getUuid());
             } else {
-            	nicService.softDelete(nic);
+                nicService.softDelete(nic);
             }
         }
         // 4. Get the remaining list of cs server hash NetworkOffering object,
@@ -1907,7 +1907,7 @@ public class SyncServiceImpl implements SyncService {
                     permissionService.save(permission);
                 }
                 for (Department department : departmnetList) {
-                    Role role = roleService.findByName("FULL_PERMISSION", department);
+                    Role role = roleService.findByName("FULL_PERMISSION", department.getId());
                     if (role == null) {
                         Role newRole = new Role();
                         newRole.setName("FULL_PERMISSION");
@@ -1936,7 +1936,7 @@ public class SyncServiceImpl implements SyncService {
                     permissionService.save(permission);
                 }
                 for (Department department : departmnetList) {
-                    Role role = roleService.findByName("FULL_PERMISSION", department);
+                    Role role = roleService.findByName("FULL_PERMISSION", department.getId());
                     if (role != null) {
                         role.setName("FULL_PERMISSION");
                         role.setDepartmentId(department.getId());

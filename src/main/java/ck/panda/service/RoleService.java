@@ -20,11 +20,11 @@ public interface RoleService  extends CRUDService<Role> {
      * Method to find name uniqueness from department in adding Roles.
      *
      * @param name - name of the role
-     * @param department - department name
+     * @param departmentId - department id
      * @return role name
      * @throws Exception - if error occurs
      */
-    Role findByName(String name, Department department) throws Exception;
+    Role findByName(String name, Long departmentId) throws Exception;
 
     /**
      * Method to find list of roles by department.
@@ -62,7 +62,7 @@ public interface RoleService  extends CRUDService<Role> {
      * @throws Exception unhandled errors.
      */
     List<Role> findByDepartment(Department department) throws Exception;
-    
+
     /**
      * Method to find role by name and department id and active.
      *
