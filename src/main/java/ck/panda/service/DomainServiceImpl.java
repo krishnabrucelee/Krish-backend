@@ -204,7 +204,7 @@ public class DomainServiceImpl implements DomainService {
                throw new ApplicationException(errors);
            } else {
             HashMap<String, String> domainMap = new HashMap<String, String>();
-            domainMap.put("name", domain.getName());
+            domainMap.put("name", domain.getCompanyNameAbbreviation());
             String updateDomainResponse = domainService.updateDomain(domain.getUuid(), "json", domainMap);
             JSONObject updateDomainResponseJSON = new JSONObject( updateDomainResponse).getJSONObject("updatedomainresponse");
             if (updateDomainResponseJSON.has("errorcode")) {
