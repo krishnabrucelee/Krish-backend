@@ -49,6 +49,15 @@ public class Role implements Serializable {
     @Column(name = "name", nullable = false)
     private String name;
 
+    /** Domain of the role. */
+    @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Domain domain;
+
+    /** Domain id of the role. */
+    @Column(name = "domain_id")
+    private Long domainId;
+
     /** Department of the Role. */
     @JoinColumn(name = "department_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
@@ -176,6 +185,42 @@ public class Role implements Serializable {
      */
     public void setName(String name) {
        this.name = name;
+    }
+
+    /**
+     * Get the domain of the Role.
+
+     * @return the domain of Role.
+     */
+    public Domain getDomain() {
+        return domain;
+    }
+
+    /**
+     * Set the domain of the Role.
+     *
+     * @param domain the domain to set
+     */
+    public void setDomain(Domain domain) {
+        this.domain = domain;
+    }
+
+    /**
+     * Get the domainId of the Role.
+
+     * @return the domainId of Role.
+     */
+    public Long getDomainId() {
+        return domainId;
+    }
+
+    /**
+     * Set the domainId of the Role.
+     *
+     * @param domainId the domainId to set
+     */
+    public void setDomainId(Long domainId) {
+        this.domainId = domainId;
     }
 
     /**

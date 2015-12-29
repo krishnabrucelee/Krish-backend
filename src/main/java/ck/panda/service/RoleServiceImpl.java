@@ -11,10 +11,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.Role.Status;
 import ck.panda.domain.repository.jpa.RoleReposiory;
 import ck.panda.util.AppValidator;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -41,6 +43,10 @@ public class RoleServiceImpl implements RoleService {
     @Autowired
     private DepartmentService departmentService;
 
+    /** Domain Service reference. */
+    @Autowired
+    private DomainService domainService;
+
     /** Department repository reference. */
     @Autowired
     private UserService userService;
@@ -48,6 +54,10 @@ public class RoleServiceImpl implements RoleService {
     /** Message source attribute. */
     @Autowired
     private MessageSource messageSource;
+
+    /** Autowired TokenDetails. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     @Override
     @PreAuthorize("hasPermission(#role.getSyncFlag(), 'CREATE_ROLE')")
@@ -62,6 +72,7 @@ public class RoleServiceImpl implements RoleService {
         } else {
             role.setStatus(Status.ENABLED);
             role.setDepartmentId(role.getDepartment().getId());
+            role.setDomainId(role.getDepartment().getDomainId());
             return roleRepo.save(role);
         }
     }
@@ -119,21 +130,13 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public Page<Role> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        List<Department> departments = departmentService.findAll();
-        if (departments.size() > 0) {
-            List<Role> roles = new ArrayList<Role>();
-            if (!departments.get(0).getDomain().getName().equals("ROOT")) {
-                for (Department department : departments) {
-                    for (Role role : roleRepo.getRolesByDepartment(department)) {
-                        roles.add(role);
-                    }
-                }
-                Page<Role> roleList = new PageImpl<Role>(roles, pagingAndSorting.toPageRequest(), roles.size());
-                return roleList;
-            }
+  public Page<Role> findAll(PagingAndSorting pagingAndSorting) throws Exception {
+        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if (domain != null && !domain.getName().equals("ROOT")) {
+            return roleRepo.findByDomainAndIsActive(domain.getId(), true, pagingAndSorting.toPageRequest());
+        }else {
+            return findAllRolesWithoutFullPermissionAndActive(pagingAndSorting);
         }
-        return roleRepo.findAllByActive(pagingAndSorting.toPageRequest());
     }
 
     @Override
@@ -178,7 +181,7 @@ public class RoleServiceImpl implements RoleService {
         }
         return errors;
     }
-    
+
     @Override
     public Role findByNameAndDepartmentIdAndIsActive(String name, Long departmentId, Boolean isActive) throws Exception {
         return roleRepo.findByNameAndDepartmentIdAndIsActive(name, departmentId, isActive);
