@@ -1895,7 +1895,7 @@ public class SyncServiceImpl implements SyncService {
                     if (role == null) {
                         Role newRole = new Role();
                         newRole.setName("FULL_PERMISSION");
-                        newRole.setDepartment(department);
+                        newRole.setDepartmentId(department.getId());
                         newRole.setDescription("Allow full permission");
                         newRole.setStatus(Role.Status.ENABLED);
                         newRole.setPermissionList(newPermissionList);
@@ -1904,7 +1904,7 @@ public class SyncServiceImpl implements SyncService {
                     }
                     else if (role != null) {
                         role.setName("FULL_PERMISSION");
-                        role.setDepartment(department);
+                        role.setDepartmentId(department.getId());
                         role.setDescription("Allow full permission");
                         role.setStatus(Role.Status.ENABLED);
                         role.setPermissionList(permissionService.findAll());
@@ -1923,7 +1923,7 @@ public class SyncServiceImpl implements SyncService {
                     Role role = roleService.findByName("FULL_PERMISSION", department);
                     if (role != null) {
                         role.setName("FULL_PERMISSION");
-                        role.setDepartment(department);
+                        role.setDepartmentId(department.getId());
                         role.setDescription("Allow full permission");
                         role.setStatus(Role.Status.ENABLED);
                         role.setPermissionList(permissionService.findAll());
@@ -1933,7 +1933,7 @@ public class SyncServiceImpl implements SyncService {
                     else if (role == null) {
                         Role newRole = new Role();
                         newRole.setName("FULL_PERMISSION");
-                        newRole.setDepartment(department);
+                        newRole.setDepartmentId(department.getId());
                         newRole.setDescription("Allow full permission");
                         newRole.setStatus(Role.Status.ENABLED);
                         newRole.setPermissionList(permissionService.findAll());
