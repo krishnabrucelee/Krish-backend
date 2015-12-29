@@ -244,12 +244,12 @@ public class DepartmentServiceImpl implements DepartmentService {
         List<Volume> volumeResponse = volumeService.findByDepartment(department.getId());
         List<User> userResponse = userService.findByDepartment(department.getId());
         if (projectResponse.size() != 0  || vmResponse.size() != 0 || roleResponse.size()!= 0 || volumeResponse.size() != 0 ) {
-         errors.addGlobalError( "You have the following resources in your account : project :" + projectResponse.size() +
-                    "vmInstance :" +vmResponse.size()+
-                    "role :" +roleResponse.size()+
-                    "volume :" +volumeResponse.size() +
-                    "user :" + userResponse.size() +
-                    "Kindly delete associated resources and try again");
+         errors.addGlobalError( "You have following resources for this department: <br><ul><li>Project : " + projectResponse.size() +
+                    "</li><li>Instance : " +vmResponse.size()+
+                    "</li><li>Role : " +roleResponse.size()+
+                    "</li><li>Volume : " +volumeResponse.size() +
+                    "</li><li>User : " + userResponse.size() +
+                    "</li></ul><br>Kindly delete associated resources and try again");
 
         }
         if (errors.hasErrors()) {

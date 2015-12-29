@@ -88,12 +88,7 @@ public class ActionListener implements MessageListener {
             break;
         case EventTypes.EVENT_ACCOUNT:
             LOGGER.debug("Account sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
-            if (!eventObject.getEvent().equals(EventTypes.EVENT_USER_LOGIN)
-                    || eventObject.getEvent().equals(EventTypes.EVENT_USER_LOGOUT)) {
-                LOGGER.debug("Account sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
-            } else {
-                syncService.syncDepartment();
-            }
+            syncService.syncDepartment();
             break;
         case EventTypes.EVENT_DISK:
             LOGGER.debug("Storage offer sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
