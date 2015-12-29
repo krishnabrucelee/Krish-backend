@@ -203,18 +203,18 @@ public class DomainServiceImpl implements DomainService {
     	List<UserType> types = new ArrayList<UserType>();
         types.add(UserType.DOMAIN_ADMIN);
         try {
-			Role newRole = new Role();
-			newRole.setName("FULL_PERMISSION");
-			newRole.setDepartmentId(userObj.getDepartmentId());
-			newRole.setDescription("Allow full permission");
-			newRole.setStatus(Role.Status.ENABLED);
-			newRole.setPermissionList(permissionService.findAll());
-			Role updatedRole = roleService.save(newRole);
-			userObj.setRoleId(updatedRole.getId());
-			userService.update(userObj);
-		} catch (Exception e) {
-			LOGGER.debug("syncUpdateUserRole" + e);
-		}
+            Role newRole = new Role();
+            newRole.setName("FULL_PERMISSION");
+            newRole.setDepartmentId(userObj.getDepartmentId());
+            newRole.setDescription("Allow full permission");
+            newRole.setStatus(Role.Status.ENABLED);
+            newRole.setPermissionList(permissionService.findAll());
+            Role updatedRole = roleService.save(newRole);
+            userObj.setRoleId(updatedRole.getId());
+            userService.update(userObj);
+        } catch (Exception e) {
+            LOGGER.debug("syncUpdateUserRole" + e);
+        }
 	}
 
     @Override

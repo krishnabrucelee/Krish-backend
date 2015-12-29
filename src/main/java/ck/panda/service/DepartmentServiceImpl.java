@@ -343,9 +343,9 @@ public class DepartmentServiceImpl implements DepartmentService {
         return (List<Department>) departmentRepo.findDepartmentsByDomainAndAccountTypesAndActive(domainId, types, isActive);
     }
 
-	@Override
-	public Department findbyUUID(String uuid) throws Exception {
-		return departmentRepo.findByUuidAndIsActive(uuid, true);
-	}
+    @Override
+    public Department findbyUUID(String uuid) throws Exception {
+        return departmentRepo.findByUuidAndIsActive(uuid, true);
+    }
 
 }
