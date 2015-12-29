@@ -85,10 +85,10 @@ public class RegionServiceImpl implements RegionService {
         // 1. Get the list of Zones from CS server using CS connector
         String response = regionService.listRegions("json", regionMap);
         JSONObject responseObject = new JSONObject(response).getJSONObject("listregionsresponse");
-       if (responseObject.has("errorcode")) {
-         errors = this.validateEvent(errors, responseObject.getString("errortext"));
-         throw new ApplicationException(errors);
-       }
+        if (responseObject.has("errorcode")) {
+        	errors = this.validateEvent(errors, responseObject.getString("errortext"));
+            throw new ApplicationException(errors);
+        }
         if (responseObject.has("region")) {
             regionListJSON = responseObject.getJSONArray("region");
 
@@ -103,15 +103,15 @@ public class RegionServiceImpl implements RegionService {
     }
     
     /**
-     * Check the domain CS error handling.
+     * Validate Region Cs error handling.
      *
      * @param errors error creating status.
      * @param errmessage error message.
      * @return errors.
      * @throws Exception if error occurs.
      */
-    private Errors validateEvent(Errors errors, String errmessage) throws Exception {
-       errors.addGlobalError(errmessage);
+    private Errors validateEvent(Errors errors, String errormessage) throws Exception {
+       errors.addGlobalError(errormessage);
        return errors;
     }
 }
