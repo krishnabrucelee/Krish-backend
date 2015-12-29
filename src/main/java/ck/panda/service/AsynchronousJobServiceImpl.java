@@ -305,7 +305,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      */
     public void asyncVolume() throws ApplicationException, Exception {
 
-    	Thread.sleep(5000);
         // 1. Get all the StorageOffering objects from CS server as hash
         List<Volume> volumeList = volumeService.findAllFromCSServer();
         HashMap<String, Volume> csVolumeMap = (HashMap<String, Volume>) Volume.convert(volumeList);

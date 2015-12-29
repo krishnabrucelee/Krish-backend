@@ -34,9 +34,7 @@ import ck.panda.domain.entity.Permission;
 import ck.panda.domain.entity.Pod;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.Region;
-import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitDomain;
-import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.SSHKey;
 import ck.panda.domain.entity.Snapshot;
@@ -54,7 +52,6 @@ import ck.panda.domain.entity.Zone;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackServer;
-import ck.panda.util.JsonUtil;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 
@@ -1345,7 +1342,6 @@ public class SyncServiceImpl implements SyncService {
      */
     public void syncVolume() throws ApplicationException, Exception {
 
-    	Thread.sleep(5000);
         // 1. Get all the StorageOffering objects from CS server as hash
         List<Volume> volumeList = volumeService.findAllFromCSServer();
         HashMap<String, Volume> csVolumeMap = (HashMap<String, Volume>) Volume.convert(volumeList);
