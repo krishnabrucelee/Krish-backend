@@ -1199,16 +1199,34 @@ public class SyncServiceImpl implements SyncService {
             if (vmMap.containsKey(instance.getUuid())) {
                 VmInstance csVm = vmMap.get(instance.getUuid());
                 instance.setName(csVm.getName());
-                instance.setCpuCore(csVm.getCpuCore());
-                instance.setDomainId(csVm.getDomainId());
+                if (csVm.getCpuCore() != null) {
+                    instance.setCpuCore(csVm.getCpuCore());
+                }
+                if (csVm.getDomainId() != null) {
+                    instance.setDomainId(csVm.getDomainId());
+                }
                 instance.setStatus(csVm.getStatus());
+                if (csVm.getZoneId() != null) {
                 instance.setZoneId(csVm.getZoneId());
-                instance.setHostId(csVm.getHostId());
-                instance.setPodId(csVm.getPodId());
-                instance.setComputeOfferingId(csVm.getComputeOfferingId());
-                instance.setCpuSpeed(csVm.getCpuSpeed());
-                instance.setMemory(csVm.getMemory());
-                instance.setCpuUsage(csVm.getCpuUsage());
+                }
+                if (csVm.getHostId() != null) {
+                    instance.setHostId(csVm.getHostId());
+                }
+                if (csVm.getPodId() != null) {
+                    instance.setPodId(csVm.getPodId());
+                }
+                if (csVm.getComputeOfferingId() != null) {
+                    instance.setComputeOfferingId(csVm.getComputeOfferingId());
+                }
+                if (csVm.getCpuSpeed() != null) {
+                    instance.setCpuSpeed(csVm.getCpuSpeed());
+                }
+                if (csVm.getMemory() != null) {
+                    instance.setMemory(csVm.getMemory());
+                }
+                if (csVm.getCpuUsage() != null) {
+                    instance.setCpuUsage(csVm.getCpuUsage());
+                }
                 instance.setDiskIoRead(csVm.getDiskIoRead());
                 instance.setDiskIoWrite(csVm.getDiskIoWrite());
                 instance.setDiskKbsRead(csVm.getDiskKbsRead());
@@ -1216,24 +1234,32 @@ public class SyncServiceImpl implements SyncService {
                 instance.setNetworkKbsRead(csVm.getNetworkKbsRead());
                 instance.setNetworkKbsWrite(csVm.getNetworkKbsWrite());
                 instance.setPasswordEnabled(csVm.getPasswordEnabled());
-                instance.setPassword(csVm.getPassword());
+                if (csVm.getPassword() != null) {
+                    instance.setPassword(csVm.getPassword());
+                }
                 instance.setIso(csVm.getIso());
                 instance.setIsoName(csVm.getIsoName());
-                instance.setIpAddress(csVm.getIpAddress());
-                instance.setNetworkId(csVm.getNetworkId());
+                if (csVm.getIpAddress() != null) {
+                    instance.setIpAddress(csVm.getIpAddress());
+                }
+                if (csVm.getNetworkId() != null) {
+                    instance.setNetworkId(csVm.getNetworkId());
+                }
+                if (csVm.getInstanceInternalName() != null) {
                 instance.setInstanceInternalName(csVm.getInstanceInternalName());
-                if(csVm.getVolumeSize() != null){
-                instance.setVolumeSize(csVm.getVolumeSize());
+                }
+                if (csVm.getVolumeSize() != null) {
+                    instance.setVolumeSize(csVm.getVolumeSize());
                 }
                 instance.setDisplayName(csVm.getDisplayName());
-                if(csVm.getDepartmentId() != null){
-                instance.setDepartmentId(csVm.getDepartmentId());
+                if (csVm.getDepartmentId() != null) {
+                    instance.setDepartmentId(csVm.getDepartmentId());
                 }
-                if(csVm.getProjectId() != null){
-                instance.setProjectId(csVm.getProjectId());
+                if (csVm.getProjectId() != null) {
+                    instance.setProjectId(csVm.getProjectId());
                 }
-                if(csVm.getInstanceOwnerId() != null){
-                instance.setInstanceOwnerId(csVm.getInstanceOwnerId());
+                if (csVm.getInstanceOwnerId() != null) {
+                    instance.setInstanceOwnerId(csVm.getInstanceOwnerId());
                 }
                 LOGGER.debug("sync VM for ASYNC");
                 // VNC password set.
@@ -1603,22 +1629,68 @@ public class SyncServiceImpl implements SyncService {
             if (vmInstance.getUuid().equals(instance.getUuid())) {
                 VmInstance csVm = vmInstance;
                 instance.setName(csVm.getName());
-                instance.setCpuCore(csVm.getCpuCore());
-                instance.setDomainId(csVm.getDomainId());
+                if (csVm.getCpuCore() != null) {
+                    instance.setCpuCore(csVm.getCpuCore());
+                }
+                if (csVm.getDomainId() != null) {
+                    instance.setDomainId(csVm.getDomainId());
+                }
                 instance.setStatus(csVm.getStatus());
+                if (csVm.getZoneId() != null) {
                 instance.setZoneId(csVm.getZoneId());
-                instance.setHostId(csVm.getHostId());
-                instance.setPodId(csVm.getPodId());
-                instance.setComputeOfferingId(csVm.getComputeOfferingId());
-                instance.setCpuSpeed(csVm.getCpuSpeed());
-                instance.setMemory(csVm.getMemory());
-                instance.setCpuUsage(csVm.getCpuUsage());
+                }
+                if (csVm.getHostId() != null) {
+                    instance.setHostId(csVm.getHostId());
+                }
+                if (csVm.getPodId() != null) {
+                    instance.setPodId(csVm.getPodId());
+                }
+                if (csVm.getComputeOfferingId() != null) {
+                    instance.setComputeOfferingId(csVm.getComputeOfferingId());
+                }
+                if (csVm.getCpuSpeed() != null) {
+                    instance.setCpuSpeed(csVm.getCpuSpeed());
+                }
+                if (csVm.getMemory() != null) {
+                    instance.setMemory(csVm.getMemory());
+                }
+                if (csVm.getCpuUsage() != null) {
+                    instance.setCpuUsage(csVm.getCpuUsage());
+                }
+                instance.setDiskIoRead(csVm.getDiskIoRead());
+                instance.setDiskIoWrite(csVm.getDiskIoWrite());
+                instance.setDiskKbsRead(csVm.getDiskKbsRead());
+                instance.setDiskKbsWrite(csVm.getDiskKbsWrite());
+                instance.setNetworkKbsRead(csVm.getNetworkKbsRead());
+                instance.setNetworkKbsWrite(csVm.getNetworkKbsWrite());
                 instance.setPasswordEnabled(csVm.getPasswordEnabled());
-                instance.setPassword(csVm.getPassword());
+                if (csVm.getPassword() != null) {
+                    instance.setPassword(csVm.getPassword());
+                }
                 instance.setIso(csVm.getIso());
                 instance.setIsoName(csVm.getIsoName());
-                instance.setIpAddress(csVm.getIpAddress());
-                instance.setNetworkId(csVm.getNetworkId());
+                if (csVm.getIpAddress() != null) {
+                    instance.setIpAddress(csVm.getIpAddress());
+                }
+                if (csVm.getNetworkId() != null) {
+                    instance.setNetworkId(csVm.getNetworkId());
+                }
+                if (csVm.getInstanceInternalName() != null) {
+                instance.setInstanceInternalName(csVm.getInstanceInternalName());
+                }
+                if (csVm.getVolumeSize() != null) {
+                    instance.setVolumeSize(csVm.getVolumeSize());
+                }
+                instance.setDisplayName(csVm.getDisplayName());
+                if (csVm.getDepartmentId() != null) {
+                    instance.setDepartmentId(csVm.getDepartmentId());
+                }
+                if (csVm.getProjectId() != null) {
+                    instance.setProjectId(csVm.getProjectId());
+                }
+                if (csVm.getInstanceOwnerId() != null) {
+                    instance.setInstanceOwnerId(csVm.getInstanceOwnerId());
+                }
                 LOGGER.debug("sync VM for ASYNC");
                 // VNC password set.
                 if (csVm.getPassword() != null) {

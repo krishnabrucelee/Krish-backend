@@ -94,7 +94,10 @@ public class VolumeServiceImpl implements VolumeService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                createVolume(volume, errors);
+                Volume volumeCS = createVolume(volume, errors);
+                if(volumeRepo.findByUUID(volumeCS.getUuid()) != null) {
+                	volume = volumeRepo.findByUUID(volumeCS.getUuid());
+                }
                 return volumeRepo.save(volume);
             }
         } else {
@@ -330,7 +333,7 @@ public class VolumeServiceImpl implements VolumeService {
      * @param errors global error and field errors
      * @throws Exception error
      */
-    private void createVolume(Volume volume, Errors errors) throws Exception {
+    private Volume createVolume(Volume volume, Errors errors) throws Exception {
         config.setUserServer();
         String volumeS = csVolumeService.createVolume(volume.getName(), convertEntityService.getStorageOfferingById(volume.getStorageOfferingId()),
                 convertEntityService.getZoneUuidById(volume.getZoneId()), "json", optional(volume));
@@ -379,6 +382,7 @@ public class VolumeServiceImpl implements VolumeService {
             LOGGER.error("ERROR AT VOLUME CREATION", e);
             throw new ApplicationException(e.getErrors());
         }
+        return volume;
     }
 
     /**
@@ -547,8 +551,11 @@ public class VolumeServiceImpl implements VolumeService {
         // set server for finding value in configuration
         config.setUserServer();
         csVolumeService.deleteVolume(volume.getUuid(), "json");
-        Thread.sleep(2000);
-        return volumeRepo.save(volume);
+
+        if(volumeRepo.findOne(volume.getId()).getIsActive() == true) {
+        	return volumeRepo.save(volume);
+        }
+        return volume;
     }
 
     /**
