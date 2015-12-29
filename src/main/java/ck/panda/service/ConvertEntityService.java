@@ -155,7 +155,7 @@ public class ConvertEntityService {
         }
 
     }
-    
+
     /**
      * Get zone by id.
      *
@@ -262,7 +262,7 @@ public class ConvertEntityService {
         }
         return null;
     }
-    
+
     /**
      * Get NetworkOffering object.
      *
@@ -370,6 +370,21 @@ public class ConvertEntityService {
      */
     public Department getDepartmentById(Long id) throws Exception {
         return departmentService.find(id);
+    }
+
+    /**
+     * Get department id.
+     *
+     * @param uuid uuid of department.
+     * @return department id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getDepartmentId(String uuid) throws Exception {
+        if (departmentService.findbyUUID(uuid) != null) {
+            return departmentService.findbyUUID(uuid).getId();
+        } else {
+            return null;
+        }
     }
 
     /**
