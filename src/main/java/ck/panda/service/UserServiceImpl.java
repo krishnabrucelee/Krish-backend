@@ -259,7 +259,7 @@ public class UserServiceImpl implements UserService {
         if (domain.equals("/")) {
             domain = "ROOT";
         }
-        User user = userRepository.findByUser(userName.trim(), domainRepository.findByName(domain));
+        User user = userRepository.findByUser(userName.trim(), domainRepository.findByName(domain), true);
         if (user != null && password != null) {
             String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
             byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
