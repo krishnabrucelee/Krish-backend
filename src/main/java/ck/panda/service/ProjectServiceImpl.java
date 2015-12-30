@@ -265,7 +265,7 @@ public class ProjectServiceImpl implements ProjectService {
                             isActive, Project.Status.ENABLED);
                 } else {
                     List<Project> projects = new ArrayList<Project>();
-                    projects = projectRepository.findByUserAndIsActive(user.getId(), isActive);
+                    projects = projectRepository.findByDepartmentAndIsActive(user.getDepartmentId(), isActive);
                     Page<Project> allProjectLists = new PageImpl<Project>(projects, pagingAndSorting.toPageRequest(),
                             pagingAndSorting.getPageSize());
                     return allProjectLists;
