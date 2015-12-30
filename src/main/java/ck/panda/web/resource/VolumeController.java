@@ -61,6 +61,7 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     @Override
     public Volume update(@RequestBody Volume volume, @PathVariable(PATH_ID) Long id)
             throws Exception {
+    	volume.setIsSyncFlag(true);
         return volumeService.update(volume);
     }
 
@@ -76,6 +77,7 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDelete(@RequestBody Volume volume, @PathVariable(PATH_ID) Long id) throws Exception {
         /** Doing Soft delete from the department table. */
+    	volume.setIsSyncFlag(true);
         volumeService.softDelete(volume);
     }
 
