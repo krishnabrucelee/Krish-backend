@@ -31,6 +31,9 @@ public class RolePrincipal {
     /** User domain id attributes. */
     private Long domainId;
 
+    /** User id attributes. */
+    private Long id;
+
     /** User department id attributes. */
     private Long departmentid;
 
@@ -52,8 +55,9 @@ public class RolePrincipal {
      * @param type to set
      * @param domainname to set
      */
-    public RolePrincipal(String username, Role role, UserType type, String domainname, Long domainId, Long departmentid, String buildVersion) {
+    public RolePrincipal(String username, Long id, Role role, UserType type, String domainname, Long domainId, Long departmentid, String buildVersion) {
         this.username = username;
+        this.id = id;
         this.role = role;
         this.type = type;
         this.domainname = domainname;
@@ -68,6 +72,7 @@ public class RolePrincipal {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("token", token.getDetails().toString());
+            jsonObject.put("id", id);
             jsonObject.put("userName", username);
             jsonObject.put("type", type);
             jsonObject.put("domainName", domainname);
