@@ -1044,4 +1044,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 		return virtualmachinerepository.findById(id);
 	}
 
+	@Override
+	public List<VmInstance> findByComputeOfferingId(Long computeOfferingId) throws Exception {
+		return virtualmachinerepository.findByComputeOffering(computeOfferingId);
+	}
+
 }

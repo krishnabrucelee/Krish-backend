@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.ComputeOffering;
+import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.repository.jpa.ComputeOfferingRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackComputeOffering;
@@ -45,6 +46,10 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     /** Service method for establishing connection to CloudStack. */
     @Autowired
     private CloudStackComputeOffering computeOffer;
+    
+    /** Virtual Machine service reference. */
+    @Autowired
+    private VirtualMachineService vmService;
 
     @Override
     public ComputeOffering save(ComputeOffering compute) throws Exception {
@@ -116,12 +121,23 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
 
     @Override
     public ComputeOffering softDelete(ComputeOffering compute) throws Exception {
-        compute.setIsActive(false);
-        if (compute.getIsSyncFlag()) {
+       if (compute.getIsSyncFlag()) {
+        	Errors errors = validator.rejectIfNullEntity("compute", compute);
+            errors = validator.validateEntity(compute, errors);
             // set server for finding value in configuration
             computeOffer.setServer(configServer.setServer(1L));
+			List<VmInstance> vmResponse = vmService.findByComputeOfferingId(compute.getId());
+			if(vmResponse.size() != 0){
+				errors.addGlobalError("Before deleting a plan please delete all the instance assocaited with this plan and try again");
+			}
+			 if (errors.hasErrors()) {
+		            throw new ApplicationException(errors);
+		        }
+			else {
+            compute.setIsActive(false);
             computeOffer.deleteComputeOffering(compute.getUuid(), "json");
-        }
+            }
+       }
         return computeRepo.save(compute);
     }
 

@@ -255,6 +255,16 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
    List<VmInstance> findByDepartment(@Param("id") Long departmentId);
 
    /**
+    * Find all vmInstance associated with Compute offering.
+    *
+    * @param computeOfferingId computeOffering id.
+    * @return vmInstance list.
+    */
+   @Query(value = "select vm from VmInstance vm where vm.computeOfferingId=:id ")
+   List<VmInstance> findByComputeOffering(@Param("id") Long computeOfferingId);
+
+   
+   /**
     * Find all vmInstance from project.
     *
     * @param projectId project id.
