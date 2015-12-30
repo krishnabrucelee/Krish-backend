@@ -503,7 +503,6 @@ public class SyncServiceImpl implements SyncService {
             if (csDomainMap.containsKey(domain.getUuid())) {
                 Domain csDomain = csDomainMap.get(domain.getUuid());
 
-                domain.setName(csDomain.getName());
                 domain.setCompanyNameAbbreviation(csDomain.getCompanyNameAbbreviation());
 
                 // 3.2 If found, update the domain object in app db

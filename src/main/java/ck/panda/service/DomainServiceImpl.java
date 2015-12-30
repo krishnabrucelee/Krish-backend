@@ -115,6 +115,7 @@ public class DomainServiceImpl implements DomainService {
             String cityHeadquarter = domain.getCityHeadquarter();
             String companyAddress = domain.getCompanyAddress();
             String email = domain.getEmail();
+            String name = domain.getName();
             String lastName = domain.getLastName();
             String password = domain.getPassword();
             String phone = domain.getPhone();
@@ -135,6 +136,7 @@ public class DomainServiceImpl implements DomainService {
             domain.setCityHeadquarter(cityHeadquarter);
             domain.setCompanyAddress(companyAddress);
             domain.setEmail(email);
+            domain.setName(name);
             domain.setLastName(lastName);
             domain.setPassword(password);
             domain.setPhone(phone);
@@ -236,7 +238,11 @@ public class DomainServiceImpl implements DomainService {
                  throw new ApplicationException(errors);
              }
             JSONObject updateDomain = updateDomainResponseJSON.getJSONObject("domain");
-            domain.setName((String) updateDomain.get("name"));
+            domain.setCompanyNameAbbreviation((String) updateDomain.get("name"));
+            String cityHeadquarter = domain.getCityHeadquarter();
+            String companyAddress = domain.getCompanyAddress();
+            domain.setCityHeadquarter(cityHeadquarter);
+            domain.setCompanyAddress(companyAddress);
              }
            }
         return domainRepo.save(domain);
@@ -289,23 +295,21 @@ public class DomainServiceImpl implements DomainService {
         Errors errors = validator.rejectIfNullEntity("domain", domain);
         if(domain.getSyncFlag()) {
 			domainService.setServer(configServer.setServer(1L));
-			List<Department> departmentedit = deptService.findDomain(domain.getId());
-			System.out.println(departmentedit);
-			if (departmentedit.size() != 0) {
-				errors.addGlobalError(
-						"Cannot delete domain. Please make sure all users and sub domains have been removed from the domain before deleting");
-			}
+			List<Department> department = deptService.findDomain(domain.getId());
+			if (department.size() != 0) {
+				errors.addGlobalError("cannot.delete.domain.before.deleting.please.make.sure.all.users.and.sub.domains.have.been.removed.from.the.domain");
+			} 
         }
         if (errors.hasErrors()) {
-            throw new ApplicationException(errors);
+        	throw new ApplicationException(errors);
         } else {
-             domain.setIsActive(false);
-             domain.setStatus(Domain.Status.INACTIVE);
-             if(domain.getSyncFlag()) {
+        		domain.setIsActive(false);
+        		domain.setStatus(Domain.Status.INACTIVE);
+        		if(domain.getSyncFlag()) {
 				String deleteResponse = domainService.deleteDomain(domain.getUuid(), "json");
 				JSONObject deleteJobId = new JSONObject(deleteResponse).getJSONObject("deletedomainresponse");
-             }
-        }
+        		}
+        	}
         return domainRepo.save(domain);
     }
 

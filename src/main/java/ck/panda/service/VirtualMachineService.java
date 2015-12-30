@@ -106,7 +106,7 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * @return department
      * @throws Exception unhandled errors.
      */
-    List<VmInstance> findByDepartment(Long deaprtmentId) throws Exception;
+    List<VmInstance> findByDepartment(Long departmentId) throws Exception;
 
     /**
      * Find vm Instance associated with project.
@@ -127,5 +127,14 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * @throws Exception unhandled errors.
      */
     List<VmInstance> findByDepartmentAndStatus(Long departmentId, List<Status> statusCode) throws Exception;
+
+    /**
+     * Find vm Instance assocaited with compute offering.
+     * 
+     * @param computeOfferingId of the compute offer
+     * @return compute offering
+     * @throws Exception error occurs.
+     */
+	List<VmInstance> findByComputeOfferingId(Long computeOfferingId) throws Exception;
 
 }
