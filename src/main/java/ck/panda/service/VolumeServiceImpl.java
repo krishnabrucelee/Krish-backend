@@ -3,6 +3,8 @@ package ck.panda.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -15,8 +17,10 @@ import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.StorageOffering;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
+import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.entity.Volume.Status;
 import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.domain.repository.jpa.DepartmentReposiory;
@@ -96,7 +100,7 @@ public class VolumeServiceImpl implements VolumeService {
             } else {
                 Volume volumeCS = createVolume(volume, errors);
                 if(volumeRepo.findByUUID(volumeCS.getUuid()) != null) {
-                	volume = volumeRepo.findByUUID(volumeCS.getUuid());
+                    volume = volumeRepo.findByUUID(volumeCS.getUuid());
                 }
                 return volumeRepo.save(volume);
             }
@@ -205,7 +209,7 @@ public class VolumeServiceImpl implements VolumeService {
     }
 
     @Override
-    public Page<Volume> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
+    public Page<Volume> findAllByIsActive(PagingAndSorting pagingAndSorting) throws Exception {
         Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && !domain.getName().equals("ROOT")) {
             return volumeRepo.findByDomainAndIsActive(domain.getId(), true, pagingAndSorting.toPageRequest());
@@ -263,11 +267,12 @@ public class VolumeServiceImpl implements VolumeService {
             optional.put("miniops", volume.getDiskMinIops().toString());
         }
 
-        if (volume.getProject() != null) {
+        if (volume.getProjectId() != null) {
             optional.put("projectid", convertEntityService.getProjectUuidById(volume.getProjectId()));
-        } else if(volume.getDepartment() != null) {
+        } else if(volume.getDepartmentId() != null) {
              optional.put("account", convertEntityService.getDepartmentUsernameById(volume.getDepartmentId()));
-             optional.put("domainid", domainService.find(volume.getDepartment().getDomainId()).getUuid());
+
+             optional.put("domainid", departmentService.find(volume.getDepartmentId()).getDomain().getUuid());
         } else {
             Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
             if (domain != null && !domain.getName().equals("ROOT")) {
@@ -362,10 +367,10 @@ public class VolumeServiceImpl implements VolumeService {
                         volume.setDiskSize(store.getDiskSize());
                     }
                     volume.setDomainId(Long.parseLong(tokenDetails.getTokenDetails("domainid")));
-                    Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-                    if (domain != null && !domain.getName().equals("ROOT")) {
-                        volume.setDepartmentId(Long.parseLong(tokenDetails.getTokenDetails("departmentid")));
-                    }
+//                    Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+//                    if (domain != null && !domain.getName().equals("ROOT")) {
+//                        volume.setDepartmentId(Long.parseLong(tokenDetails.getTokenDetails("departmentid")));
+//                    }
                     volume.setVolumeType(Volume.VolumeType.DATADISK);
                     if (volume.getProjectId() != null) {
                         volume.setProjectId(volume.getProjectId());
@@ -549,16 +554,16 @@ public class VolumeServiceImpl implements VolumeService {
         volume.setIsActive(false);
         volume.setStatus(Volume.Status.DESTROY);
         if(volume.getIsSyncFlag()) {
-			// set server for finding value in configuration
-			config.setUserServer();
-			csVolumeService.deleteVolume(volume.getUuid(), "json");
+            // set server for finding value in configuration
+            config.setUserServer();
+            csVolumeService.deleteVolume(volume.getUuid(), "json");
 
-			if (volumeRepo.findOne(volume.getId()).getIsActive() == true) {
-				return volumeRepo.save(volume);
-			}
-			return volume;
+            if (volumeRepo.findOne(volume.getId()).getIsActive() == true) {
+                return volumeRepo.save(volume);
+            }
+            return volume;
         } else {
-        	return volumeRepo.save(volume);
+            return volumeRepo.save(volume);
         }
     }
 
@@ -659,11 +664,39 @@ public class VolumeServiceImpl implements VolumeService {
 
     @Override
     public List<Volume> findByProjectAndVolumeType(Long projectId, List<VolumeType> volumeType) {
-        return volumeRepo.findByProjectAndVolumeType(projectId, volumeType);
+        return volumeRepo.findByProjectAndVolumeType(projectId, volumeType, true);
     }
 
     @Override
     public List<Volume> findByDepartmentAndVolumeType(Long departmentId, List<VolumeType> volumeType) {
-        return volumeRepo.findByDepartmentAndVolumeType(departmentId, volumeType);
+        return volumeRepo.findByDepartmentAndVolumeType(departmentId, volumeType, true);
     }
+
+    @Override
+    public List<Volume> findByDepartmentAndProjectAndVolumeType(Long departmentId, Long projectId, List<VolumeType> volumeType) {
+        return volumeRepo.findByDepartmentAndProjectAndVolumeType(departmentId, projectId, volumeType, true);
+    }
+//
+//    @Override
+//    public Integer findCountByStatus() throws NumberFormatException, Exception {
+//        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+//        if (domain != null && !domain.getName().equals("ROOT")) {
+//            List<Volume> volumeCount = (List<Volume>) volumeRepo.findAllByActive(true);
+//            for (Volume volume2 : volumeCount) {
+//              return volumeRepo.findVolumeCountByDomainAndInstanceId(domain.getId(), volume2.getVmInstanceId(), Volume.VolumeType.DATADISK, true);
+//            }
+//            return null;
+//        } else {
+//        List<Volume> volumeCount = (List<Volume>) volumeRepo.findAllByActive(true);
+//        for (Volume volume2 : volumeCount) {
+//
+//            List<Volume> ints = volumeRepo.findVolumeCountByInstanceId(volume2.getVmInstanceId(), Volume.VolumeType.DATADISK, true);
+//
+//            System.out.println(ints);
+//          return ints.size();
+//        }
+//        }
+//        return null;
+//    }
+
 }

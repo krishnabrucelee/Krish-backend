@@ -152,8 +152,8 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      * @param volumeType volume type.
      * @return project
      */
-    @Query(value = "select volume from Volume volume where volume.projectId=:projectId and volume.volumeType in :volumeType")
-    List<Volume> findByProjectAndVolumeType(@Param("projectId") Long projectId, @Param("volumeType") List<VolumeType> volumeType);
+    @Query(value = "select volume from Volume volume where volume.projectId=:projectId and volume.volumeType in :volumeType and volume.isActive =:isActive")
+    List<Volume> findByProjectAndVolumeType(@Param("projectId") Long projectId, @Param("volumeType") List<VolumeType> volumeType, @Param("isActive") Boolean isActive);
 
     /**
      * Get the volumes based on department.
@@ -162,7 +162,28 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      * @return department
      * @throws Exception error occurs.
      */
-    @Query(value = "select volume from Volume volume where volume.departmentId=:departmentId and volume.volumeType in :volumeType")
-    List<Volume> findByDepartmentAndVolumeType(@Param("departmentId") Long departmentId, @Param("volumeType") List<VolumeType> volumeType);
+    @Query(value = "select volume from Volume volume where volume.departmentId=:departmentId and volume.volumeType in :volumeType and volume.isActive =:isActive and volume.projectId = NULL")
+    List<Volume> findByDepartmentAndVolumeType(@Param("departmentId") Long departmentId, @Param("volumeType") List<VolumeType> volumeType, @Param("isActive") Boolean isActive);
+
+    /**
+     * Get the volumes based on department and not project.
+     *
+     * @param departmentId department id.
+     * @param projectId project id.
+     * @return department
+     * @throws Exception error occurs.
+     */
+    @Query(value = "select volume from Volume volume where volume.departmentId=:departmentId and volume.volumeType in :volumeType and volume.isActive =:isActive and volume.projectId<>:projectId")
+    List<Volume> findByDepartmentAndProjectAndVolumeType(@Param("departmentId") Long departmentId, @Param("projectId") Long projectId, @Param("volumeType") List<VolumeType> volumeType, @Param("isActive") Boolean isActive);
+
+//    @Query(value = "select volume from Volume volume where volume.isActive =:isActive AND volume.volumeType=:volumeType AND volume.vmInstanceId=:vmInstanceId AND volume.domainId=:domainId")
+//    Integer findVolumeCountByDomainAndInstanceId(@Param("domainId") Long domainId, @Param("vmInstanceId") Long vmInstanceId, @Param("volumeType") VolumeType datadisk, @Param("isActive") Boolean isActive);
+//
+//    @Query(value = "select volume from Volume volume where volume.isActive =:isActive AND volume.volumeType=:volumeType AND volume.vmInstanceId=:vmInstanceId")
+//    List<Volume> findVolumeCountByInstanceId(@Param("vmInstanceId") Long vmInstanceId, @Param("volumeType") VolumeType datadisk, @Param("isActive") Boolean isActive);
+//
+//    @Query(value = "select volume from Volume volume where volume.isActive =:isActive")
+//    List<Volume> findAllByActive(@Param("isActive") Boolean isActive);
+
 
 }

@@ -61,7 +61,7 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     @Override
     public Volume update(@RequestBody Volume volume, @PathVariable(PATH_ID) Long id)
             throws Exception {
-    	volume.setIsSyncFlag(true);
+        volume.setIsSyncFlag(true);
         return volumeService.update(volume);
     }
 
@@ -77,7 +77,7 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDelete(@RequestBody Volume volume, @PathVariable(PATH_ID) Long id) throws Exception {
         /** Doing Soft delete from the department table. */
-    	volume.setIsSyncFlag(true);
+        volume.setIsSyncFlag(true);
         volumeService.softDelete(volume);
     }
 
@@ -85,7 +85,7 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     public List<Volume> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Volume.class);
-        Page<Volume> pageResponse = volumeService.findAllByActive(page);
+        Page<Volume> pageResponse = volumeService.findAllByIsActive(page);
         System.out.println(pageResponse);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
 
@@ -253,8 +253,23 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
         volumeType.add(VolumeType.DATADISK);
         return volumeService.findByDepartmentAndVolumeType(departmentId, volumeType);
     }
+
+    /**
+     * Get the volumes based on department.
+     *
+     * @param departmentId department id.
+     * @return department
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/instance/department", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public List<Volume> findByDepartmentAndProjectAndStatus(@RequestParam("departmentId") Long departmentId, @RequestParam("projectId") Long projectId) throws Exception {
+        List<Volume.VolumeType> volumeType = new ArrayList<Volume.VolumeType>();
+        volumeType.add(VolumeType.DATADISK);
+        return volumeService.findByDepartmentAndProjectAndVolumeType(departmentId, projectId, volumeType);
+    }
 //    /**
-//     * Get the volume counts for attched, detached and total count.
+//     * Get the volume counts for attached, detached and total count.
 //     *
 //     * @param request
 //     * @param response
@@ -268,6 +283,6 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
 //                    throws Exception {
 //        Integer attachedCount = volumeService.findCountByStatus();
 //        Integer detachedCount = volumeService.findCountByStatus();
-//        return "{\"runningVmCount\":" + runningVmCount + ",\"stoppedVmCount\":" + stoppedVmCount + ",\"totalCount\":"+ vmCount + "}";
+//        return "{\"attachedCount\":" + attachedCount + ",\"detachedCount\":" + detachedCount + "}";
 //    }
 }

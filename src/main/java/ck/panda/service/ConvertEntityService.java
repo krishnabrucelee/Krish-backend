@@ -822,7 +822,7 @@ public class ConvertEntityService {
      */
     public String getDepartmentUsernameById(Long departmentId) throws Exception {
         if (departmentService.find(departmentId) != null) {
-            return departmentService.find(departmentId).getUuid();
+            return departmentService.find(departmentId).getUserName();
         } else {
             return null;
         }
