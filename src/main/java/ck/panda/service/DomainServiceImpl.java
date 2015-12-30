@@ -287,22 +287,26 @@ public class DomainServiceImpl implements DomainService {
     @Override
     public Domain softDelete(Domain domain) throws Exception {
         Errors errors = validator.rejectIfNullEntity("domain", domain);
-        domainService.setServer(configServer.setServer(1L));
-        List<Department> departmentedit =  deptService.findDomain(domain.getId());
-        System.out.println(departmentedit);
-        if (departmentedit.size() != 0) {
-            errors.addGlobalError("Cannot delete domain. Please make sure all users and sub domains have been removed from the domain before deleting");
+        if(domain.getSyncFlag()) {
+			domainService.setServer(configServer.setServer(1L));
+			List<Department> departmentedit = deptService.findDomain(domain.getId());
+			System.out.println(departmentedit);
+			if (departmentedit.size() != 0) {
+				errors.addGlobalError(
+						"Cannot delete domain. Please make sure all users and sub domains have been removed from the domain before deleting");
+			}
         }
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
-        }
-        else {
-            domain.setIsActive(false);
+        } else {
+             domain.setIsActive(false);
              domain.setStatus(Domain.Status.INACTIVE);
-             String deleteResponse = domainService.deleteDomain(domain.getUuid(), "json");
-           JSONObject deleteJobId = new JSONObject(deleteResponse).getJSONObject("deletedomainresponse");
+             if(domain.getSyncFlag()) {
+				String deleteResponse = domainService.deleteDomain(domain.getUuid(), "json");
+				JSONObject deleteJobId = new JSONObject(deleteResponse).getJSONObject("deletedomainresponse");
+             }
         }
-            return domainRepo.save(domain);
+        return domainRepo.save(domain);
     }
 
     @Override

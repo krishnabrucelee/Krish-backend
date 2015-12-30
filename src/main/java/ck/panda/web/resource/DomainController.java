@@ -40,11 +40,11 @@ public class DomainController extends CRUDController<Domain> implements ApiContr
     /** Service reference to Domain. */
     @Autowired
     private DomainService domainService;
-    
+
     /** Inject domain service business logic. */
     @Autowired
     private DomainRepository domainRepository;
-    
+
     /** Autowired TokenDetails */
     @Autowired
     private TokenDetails tokenDetails;
@@ -109,6 +109,7 @@ public class DomainController extends CRUDController<Domain> implements ApiContr
       @ResponseStatus(HttpStatus.NO_CONTENT)
       public void softDelete(@RequestBody Domain domain, @PathVariable(PATH_ID) Long id) throws Exception {
           /** Doing Soft delete from the department table. */
+    	domain.setSyncFlag(true);
         domainService.softDelete(domain);
       }
 }
