@@ -128,7 +128,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             cscomputeOffering.setServer(configServer.setServer(1L));
 			List<VmInstance> vmResponse = vmService.findByComputeOfferingId(compute.getId());
 			if(vmResponse.size() != 0){
-				errors.addGlobalError("Before deleting a plan please delete all the instance assocaited with this plan and try again");
+				errors.addGlobalError("before.deleting.a.plan.please.delete.all.the.instance.associated.with.this.plan.and.try.again");
 			}
 			 if (errors.hasErrors()) {
 		            throw new ApplicationException(errors);

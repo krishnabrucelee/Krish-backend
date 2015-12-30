@@ -297,8 +297,8 @@ public class DomainServiceImpl implements DomainService {
 			domainService.setServer(configServer.setServer(1L));
 			List<Department> department = deptService.findDomain(domain.getId());
 			if (department.size() != 0) {
-				errors.addGlobalError( "Cannot delete domain. Before deleting please make sure all users and sub domains have been removed from the domain ");
-			}
+				errors.addGlobalError("cannot.delete.domain.before.deleting.please.make.sure.all.users.and.sub.domains.have.been.removed.from.the.domain");
+			} 
         }
         if (errors.hasErrors()) {
         	throw new ApplicationException(errors);
