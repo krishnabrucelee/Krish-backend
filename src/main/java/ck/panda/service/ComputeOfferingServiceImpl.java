@@ -45,7 +45,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
 
     /** Service method for establishing connection to CloudStack. */
     @Autowired
-    private CloudStackComputeOffering computeOffer;
+    private CloudStackComputeOffering cscomputeOffering;
     
     /** Virtual Machine service reference. */
     @Autowired
@@ -64,8 +64,8 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             } else {
 
                 // set server for maintain session with configuration values
-                computeOffer.setServer(configServer.setServer(1L));
-                String createComputeResponse = computeOffer.createComputeOffering(compute.getName(),
+            	cscomputeOffering.setServer(configServer.setServer(1L));
+                String createComputeResponse = cscomputeOffering.createComputeOffering(compute.getName(),
                         compute.getDisplayText(), "json", addOptionalValues(compute));
                 JSONObject createComputeResponseJSON = new JSONObject(createComputeResponse).getJSONObject("createserviceofferingresponse");
 
@@ -96,8 +96,8 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             throw new ApplicationException(errors);
         } else {
             HashMap<String, String> hs = new HashMap<String, String>();
-            computeOffer.setServer(configServer.setServer(1L));
-            String editComputeResponse = computeOffer.updateComputeOffering(compute.getUuid(),compute.getName(),compute.getDisplayText(),"json", hs);
+            cscomputeOffering.setServer(configServer.setServer(1L));
+            String editComputeResponse = cscomputeOffering.updateComputeOffering(compute.getUuid(),compute.getName(),compute.getDisplayText(),"json", hs);
             JSONObject domainListJSON = new JSONObject(editComputeResponse).getJSONObject("updateserviceofferingresponse")
                     .getJSONObject("serviceoffering");
         }
@@ -125,7 +125,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
         	Errors errors = validator.rejectIfNullEntity("compute", compute);
             errors = validator.validateEntity(compute, errors);
             // set server for finding value in configuration
-            computeOffer.setServer(configServer.setServer(1L));
+            cscomputeOffering.setServer(configServer.setServer(1L));
 			List<VmInstance> vmResponse = vmService.findByComputeOfferingId(compute.getId());
 			if(vmResponse.size() != 0){
 				errors.addGlobalError("Before deleting a plan please delete all the instance assocaited with this plan and try again");
@@ -135,7 +135,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
 		        }
 			else {
             compute.setIsActive(false);
-            computeOffer.deleteComputeOffering(compute.getUuid(), "json");
+            cscomputeOffering.deleteComputeOffering(compute.getUuid(), "json");
             }
        }
         return computeRepo.save(compute);
@@ -255,7 +255,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
         HashMap<String, String> computeOfferingMap = new HashMap<String, String>();
         computeOfferingMap.put("listall", "true");
         // 1. Get the list of ComputeOffering from CS server using CS connector
-        String response = computeOffer.listComputeOfferings("json", computeOfferingMap);
+        String response = cscomputeOffering.listComputeOfferings("json", computeOfferingMap);
         JSONArray computeOfferingListJSON = null;
         JSONObject responseObject = new JSONObject(response).getJSONObject("listserviceofferingsresponse");
         if (responseObject.has("serviceoffering")) {

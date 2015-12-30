@@ -260,8 +260,8 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
     * @param computeOfferingId computeOffering id.
     * @return vmInstance list.
     */
-   @Query(value = "select vm from VmInstance vm where vm.computeOfferingId=:id ")
-   List<VmInstance> findByComputeOffering(@Param("id") Long computeOfferingId);
+   @Query(value = "select vm from VmInstance vm where vm.computeOfferingId=:computeOfferingId ")
+   List<VmInstance> findByComputeOffering(@Param("computeOfferingId") Long computeOfferingId);
 
    
    /**
