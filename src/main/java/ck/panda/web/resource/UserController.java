@@ -59,6 +59,7 @@ public class UserController extends CRUDController<User> implements ApiControlle
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDelete(@RequestBody User user) throws Exception {
+    	user.setSyncFlag(true);
         userService.softDelete(user);
     }
     @Override

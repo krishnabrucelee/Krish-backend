@@ -548,14 +548,18 @@ public class VolumeServiceImpl implements VolumeService {
     public Volume softDelete(Volume volume) throws Exception {
         volume.setIsActive(false);
         volume.setStatus(Volume.Status.DESTROY);
-        // set server for finding value in configuration
-        config.setUserServer();
-        csVolumeService.deleteVolume(volume.getUuid(), "json");
+        if(volume.getIsSyncFlag()) {
+			// set server for finding value in configuration
+			config.setUserServer();
+			csVolumeService.deleteVolume(volume.getUuid(), "json");
 
-        if(volumeRepo.findOne(volume.getId()).getIsActive() == true) {
+			if (volumeRepo.findOne(volume.getId()).getIsActive() == true) {
+				return volumeRepo.save(volume);
+			}
+			return volume;
+        } else {
         	return volumeRepo.save(volume);
         }
-        return volume;
     }
 
     /**
