@@ -28,7 +28,7 @@ public interface DomainRepository extends PagingAndSortingRepository<Domain, Lon
      * @param domainName for login check
      * @return domain object
      */
-    @Query(value = "select domain from Domain domain where domain.name = :domainName")
+    @Query(value = "select domain from Domain domain where domain.companyNameAbbreviation = :domainName")
     Domain findByName(@Param("domainName") String domainName);
 
     /**
