@@ -289,23 +289,21 @@ public class DomainServiceImpl implements DomainService {
         Errors errors = validator.rejectIfNullEntity("domain", domain);
         if(domain.getSyncFlag()) {
 			domainService.setServer(configServer.setServer(1L));
-			List<Department> departmentedit = deptService.findDomain(domain.getId());
-			System.out.println(departmentedit);
-			if (departmentedit.size() != 0) {
-				errors.addGlobalError(
-						"Cannot delete domain. Please make sure all users and sub domains have been removed from the domain before deleting");
+			List<Department> department = deptService.findDomain(domain.getId());
+			if (department.size() != 0) {
+				errors.addGlobalError( "Cannot delete domain. Before deleting please make sure all users and sub domains have been removed from the domain ");
 			}
         }
         if (errors.hasErrors()) {
-            throw new ApplicationException(errors);
+        	throw new ApplicationException(errors);
         } else {
-             domain.setIsActive(false);
-             domain.setStatus(Domain.Status.INACTIVE);
-             if(domain.getSyncFlag()) {
+        		domain.setIsActive(false);
+        		domain.setStatus(Domain.Status.INACTIVE);
+        		if(domain.getSyncFlag()) {
 				String deleteResponse = domainService.deleteDomain(domain.getUuid(), "json");
 				JSONObject deleteJobId = new JSONObject(deleteResponse).getJSONObject("deletedomainresponse");
-             }
-        }
+        		}
+        	}
         return domainRepo.save(domain);
     }
 
