@@ -276,10 +276,11 @@ public class UserServiceImpl implements UserService {
     public User softDelete(User user) throws Exception {
         user.setIsActive(false);
         user.setStatus(User.Status.DELETED);
-
-        // set server for finding value in configuration
-        config.setServer(1L);
-        csUserService.deleteUser((user.getUuid()), "json");
+        if(user.getSyncFlag()) {
+			// set server for finding value in configuration
+			config.setServer(1L);
+			csUserService.deleteUser((user.getUuid()), "json");
+        }
         return userRepository.save(user);
     }
 

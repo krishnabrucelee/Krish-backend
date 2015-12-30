@@ -96,9 +96,10 @@ public class NicController extends CRUDController<Nic> implements ApiController 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDelete(@RequestBody Nic nic, @PathVariable(PATH_ID) Long id) throws Exception {
         /** Doing Soft delete from the nic table. */
+    	 nic.setSyncFlag(true);
          nicOfferingService.softDelete(nic);
     }
-    
+
     /**
      * List by instance attached to nic.
      *

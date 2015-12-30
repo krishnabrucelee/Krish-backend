@@ -232,23 +232,24 @@ public class ProjectServiceImpl implements ProjectService {
     @PreAuthorize("hasPermission(#project.getSyncFlag(), 'DELETE_PROJECT')")
     public Project softDelete(Project project) throws Exception {
         Errors errors = validator.rejectIfNullEntity("project", project);
-        // Validation
-        if (errors.hasErrors()) {
-            throw new ApplicationException(errors);
-        } else {
-            config.setUserServer();
-            HashMap<String, String> optional = new HashMap<String, String>();
-            optional.put("domainid", project.getDepartment().getDomain().getUuid());
-            optional.put("account", project.getDepartment().getUserName());
-            String csResponse = cloudStackProjectService.deleteProject(project.getUuid());
-            JSONObject csProject = new JSONObject(csResponse).getJSONObject("deleteprojectresponse");
-            if (csProject.has("errorcode")) {
-                errors = this.validateEvent(errors, csProject.getString("errortext"));
-                throw new ApplicationException(errors);
-            } else {
-                project.setIsActive(false);
-                project.setStatus(Project.Status.DELETED);
-            }
+        project.setIsActive(false);
+        project.setStatus(Project.Status.DELETED);
+        if(project.getSyncFlag()) {
+			// Validation
+			if (errors.hasErrors()) {
+				throw new ApplicationException(errors);
+			} else {
+				config.setUserServer();
+				HashMap<String, String> optional = new HashMap<String, String>();
+				optional.put("domainid", project.getDepartment().getDomain().getUuid());
+				optional.put("account", project.getDepartment().getUserName());
+				String csResponse = cloudStackProjectService.deleteProject(project.getUuid());
+				JSONObject csProject = new JSONObject(csResponse).getJSONObject("deleteprojectresponse");
+				if (csProject.has("errorcode")) {
+					errors = this.validateEvent(errors, csProject.getString("errortext"));
+					throw new ApplicationException(errors);
+				}
+			}
         }
         return projectRepository.save(project);
     }

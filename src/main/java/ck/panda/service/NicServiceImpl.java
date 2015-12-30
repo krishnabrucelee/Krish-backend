@@ -63,7 +63,7 @@ public class NicServiceImpl implements NicService {
     /** Virtual Machine service for vminstance reference. */
     @Autowired
     private VirtualMachineService vmService;
-    
+
     /** Virtual Machine repository reference. */
     @Autowired
     private VirtualMachineRepository virtualmachinerepository;
@@ -71,7 +71,7 @@ public class NicServiceImpl implements NicService {
     /** Network Service for network reference .*/
     @Autowired
     private NetworkService networkService;
-    
+
     /** Reference of the convert entity service. */
     @Autowired
     private ConvertEntityService convertEntityService;
@@ -90,7 +90,7 @@ public class NicServiceImpl implements NicService {
            if (addNicResponse.has("jobid")) {
         	   Thread.sleep(5000);
                String jobResponse = cloudStackInstanceService.queryAsyncJobResult(addNicResponse.getString("jobid"), "json");
-               JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");              
+               JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
                   if (jobresult.getString("jobstatus").equals("2")) {
                       JSONObject jobresponse = jobresult.getJSONObject("jobresult");
                       if (jobresponse.has("errorcode")) {
@@ -104,9 +104,9 @@ public class NicServiceImpl implements NicService {
                   }
                   else  if (jobresult.getString("jobstatus").equals("0")) {
                    this.assignNicTovM(nic.getVmInstance());
-               }        
+               }
               }
-          }   
+          }
        return nicRepo.save(nic);
     }
 
@@ -152,7 +152,7 @@ public class NicServiceImpl implements NicService {
          errors = validator.validateEntity(nic, errors);
          configServer.setUserServer();
          HashMap<String,String> optional = new HashMap<String, String>();
-         VmInstance instance = vmService.findById(nic.getVmInstanceId()); 
+         VmInstance instance = vmService.findById(nic.getVmInstanceId());
          String updateNicResponse = cloudStackInstanceService.updateDefaultNicForVirtualMachine(nic.getUuid(),instance.getUuid(),"json", optional);
          JSONObject defaultNicResponse = new JSONObject(updateNicResponse).getJSONObject("updatedefaultnicforvirtualmachineresponse");
          Thread.sleep(6000);
@@ -163,10 +163,10 @@ public class NicServiceImpl implements NicService {
                  Thread.sleep(2000);
              }
              if (jobresult.getString("jobstatus").equals("1")) {
-            	 
+
          		Nic nicI =  nicRepo.findByInstanceIdAndIsDefault(nic.getVmInstanceId(), true);
             	  nicI.setIsDefault(false);
-            	 
+
             	 nic.setIsDefault(true);
              }
              else {
@@ -219,29 +219,34 @@ public class NicServiceImpl implements NicService {
     @PreAuthorize("hasPermission(#nic.getSyncFlag(), 'DELETE_NETWORK_TO_VM')")
     public Nic softDelete(Nic nic) throws Exception {
         nic.setIsActive(false);
-        Errors errors = validator.rejectIfNullEntity("nic", nic);
-        HashMap<String,String> optional = new HashMap<String, String>();
-        configServer.setUserServer();
-        VmInstance instance = vmService.findById(nic.getVmInstanceId()); 
-        String removeNicResponse = cloudStackInstanceService.removeNicFromVirtualMachine(nic.getUuid(), instance.getUuid(),optional, "json");
-        JSONObject deleteNicResponse = new JSONObject(removeNicResponse).getJSONObject("removenicfromvirtualmachineresponse");
-        if(deleteNicResponse.has("jobid")) {
-           String jobResponse = cloudStackInstanceService.queryAsyncJobResult(deleteNicResponse.getString("jobid"), "json");
-           Thread.sleep(5000);
-           JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
-            if (jobresult.getString("jobstatus").equals("0")) {
-            	nic.setIsActive(false);            
-           }
+        if(nic.getSyncFlag()) {
+			Errors errors = validator.rejectIfNullEntity("nic", nic);
+			HashMap<String, String> optional = new HashMap<String, String>();
+			configServer.setUserServer();
+			VmInstance instance = vmService.findById(nic.getVmInstanceId());
+			String removeNicResponse = cloudStackInstanceService.removeNicFromVirtualMachine(nic.getUuid(),
+					instance.getUuid(), optional, "json");
+			JSONObject deleteNicResponse = new JSONObject(removeNicResponse)
+					.getJSONObject("removenicfromvirtualmachineresponse");
+			if (deleteNicResponse.has("jobid")) {
+				String jobResponse = cloudStackInstanceService.queryAsyncJobResult(deleteNicResponse.getString("jobid"),
+						"json");
+				Thread.sleep(5000);
+				JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+				if (jobresult.getString("jobstatus").equals("0")) {
+					nic.setIsActive(false);
+				}
+			}
         }
-      return nicRepo.save(nic);
+        return nicRepo.save(nic);
     }
-    
+
 
     @Override
     public List<Nic> findByInstance(Long nic) throws Exception {
              return nicRepo.findByInstanceAndIsActive(nic, true);
     }
-    
+
     @Override
     public List<Nic> findAllFromCSServer() throws Exception {
         List<VmInstance> vmInstanceList = virtualmachinerepository.findAllByIsActive(VmInstance.Status.Expunging);
@@ -262,11 +267,11 @@ public class NicServiceImpl implements NicService {
 	            nic.setNetworkId(convertEntityService.getNetworkId(nic.getTransNetworkId()));
 		        nicList.add(nic);
 	        }
-	       
+
 	    }
         return nicList;
     }
-    
+
     /**
      * Find all the nic with pagination.
      *
