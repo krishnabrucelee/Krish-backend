@@ -115,6 +115,7 @@ public class DomainServiceImpl implements DomainService {
             String cityHeadquarter = domain.getCityHeadquarter();
             String companyAddress = domain.getCompanyAddress();
             String email = domain.getEmail();
+            String name = domain.getName();
             String lastName = domain.getLastName();
             String password = domain.getPassword();
             String phone = domain.getPhone();
@@ -135,6 +136,7 @@ public class DomainServiceImpl implements DomainService {
             domain.setCityHeadquarter(cityHeadquarter);
             domain.setCompanyAddress(companyAddress);
             domain.setEmail(email);
+            domain.setName(name);
             domain.setLastName(lastName);
             domain.setPassword(password);
             domain.setPhone(phone);
@@ -236,7 +238,11 @@ public class DomainServiceImpl implements DomainService {
                  throw new ApplicationException(errors);
              }
             JSONObject updateDomain = updateDomainResponseJSON.getJSONObject("domain");
-            domain.setName((String) updateDomain.get("name"));
+            domain.setCompanyNameAbbreviation((String) updateDomain.get("name"));
+            String cityHeadquarter = domain.getCityHeadquarter();
+            String companyAddress = domain.getCompanyAddress();
+            domain.setCityHeadquarter(cityHeadquarter);
+            domain.setCompanyAddress(companyAddress);
              }
            }
         return domainRepo.save(domain);
