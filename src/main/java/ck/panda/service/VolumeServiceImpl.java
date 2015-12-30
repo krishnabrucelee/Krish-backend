@@ -558,9 +558,9 @@ public class VolumeServiceImpl implements VolumeService {
             config.setUserServer();
             csVolumeService.deleteVolume(volume.getUuid(), "json");
 
-            if (volumeRepo.findOne(volume.getId()).getIsActive() == true) {
-                return volumeRepo.save(volume);
-            }
+//            if (volumeRepo.findOne(volume.getId()).getIsActive() == true) {
+//                return volumeRepo.save(volume);
+//            }
             return volume;
         } else {
             return volumeRepo.save(volume);
