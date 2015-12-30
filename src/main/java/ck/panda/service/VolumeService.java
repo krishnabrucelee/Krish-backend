@@ -8,8 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.util.domain.CRUDService;
@@ -17,14 +15,6 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
  * Volume service.
- */
-/**
- * @author Assistanz
- *
- */
-/**
- * @author Assistanz
- *
  */
 @Service
 public interface VolumeService extends CRUDService<Volume> {
@@ -100,7 +90,7 @@ public interface VolumeService extends CRUDService<Volume> {
     * @return list of volumes with pagination.
     * @throws Exception error occurs
     */
-   Page<Volume> findAllByActive(PagingAndSorting page) throws Exception;
+   Page<Volume> findAllByIsActive(PagingAndSorting page) throws Exception;
 
    /**
     * list by instance attached to volume.
@@ -165,5 +155,22 @@ public interface VolumeService extends CRUDService<Volume> {
     * @throws Exception error occurs.
     */
    List<Volume> findByDepartmentAndVolumeType(Long departmentId, List<VolumeType> volumeType);
+
+   /**
+    * Get the volumes based on department and not project.
+    *
+    * @param departmentId department id.
+    * @param projectId project id.
+    * @return department
+    * @throws Exception error occurs.
+    */
+   List<Volume> findByDepartmentAndProjectAndVolumeType(Long departmentId, Long projectId, List<VolumeType> volumeType);
+
+//   /**
+//    * Get the count of the volume based on the attached/detached.
+//    *
+//    * @return count
+//    */
+//   Integer findCountByStatus() throws NumberFormatException, Exception;
 
 }
