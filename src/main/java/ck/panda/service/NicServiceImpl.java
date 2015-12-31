@@ -100,9 +100,8 @@ public class NicServiceImpl implements NicService {
                   }
                   if(jobresult.getString("jobstatus").equals("1")){
                       this.assignNicTovM(nic.getVmInstance());
-                	  nicRepo.save(nic);
                   }
-                  else  if (jobresult.getString("jobstatus").equals("0")) {
+                  else if (jobresult.getString("jobstatus").equals("0")) {
                    this.assignNicTovM(nic.getVmInstance());
                }
               }
@@ -118,7 +117,6 @@ public class NicServiceImpl implements NicService {
         for(int i=0; i<nicListJSON.length(); i++) {
             Nic nic = findbyUUID(nicListJSON.getJSONObject(i).getString("id"));
             if(nic != null) {
-                nic = new Nic();
                 nic.setUuid(nicListJSON.getJSONObject(i).getString("id"));
                 nic.setVmInstanceId(vmService.findByUUID(nicListJSON.getJSONObject(i).getString("virtualmachineid")).getId());
                 nic.setNetworkId(networkService.findByUUID(nicListJSON.getJSONObject(i).getString("networkid")).getId());
@@ -127,6 +125,18 @@ public class NicServiceImpl implements NicService {
                 nic.setIpAddress(nicListJSON.getJSONObject(i).getString("ipaddress"));
                 nic.setIsDefault(nicListJSON.getJSONObject(i).getBoolean("isdefault"));
                 nic.setIsActive(true);
+                nicRepo.save(nic);
+            } else {
+            	nic = new Nic();
+                nic.setUuid(nicListJSON.getJSONObject(i).getString("id"));
+                nic.setVmInstanceId(vmService.findByUUID(nicListJSON.getJSONObject(i).getString("virtualmachineid")).getId());
+                nic.setNetworkId(networkService.findByUUID(nicListJSON.getJSONObject(i).getString("networkid")).getId());
+                nic.setNetMask(nicListJSON.getJSONObject(i).getString("netmask"));
+                nic.setGateway(nicListJSON.getJSONObject(i).getString("gateway"));
+                nic.setIpAddress(nicListJSON.getJSONObject(i).getString("ipaddress"));
+                nic.setIsDefault(nicListJSON.getJSONObject(i).getBoolean("isdefault"));
+                nic.setIsActive(true);
+            	nicRepo.save(nic);
             }
         }
 
