@@ -916,15 +916,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     memory = tempTotalCapacity - tempCapacityUsed;
                     if (memory < Long.valueOf(convertEntityService.getComputeOfferById(vm.getComputeOfferingId())
                             .getMemory().toString())) {
-                        if (vm.getProjectId() != null) {
-                            errMessage = "Maximum number of resources of type 'memory' for project "
-                                    + convertEntityService.getProjectById(vm.getProjectId()).getName()
-                                    + " has been exceeded.";
-                        } else {
-                            errMessage = "Maximum number of resources of type 'memory' for current domain "
-                                    + convertEntityService.getDomainById(vm.getDomainId()).getName()
-                                    + " has been exceeded.";
-                        }
+                    	errMessage = "There’s no memory available in the memory pool. Please contact the Cloud Admin";
                     }
                     break;
                 case "1":
@@ -932,45 +924,21 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     cpu = tempTotalCapacity - tempCapacityUsed;
                     if (Long.valueOf(convertEntityService.getComputeOfferById(vm.getComputeOfferingId()).getClockSpeed()
                             .toString()) > cpu) {
-                        if (vm.getProjectId() != null) {
-                            errMessage = "Maximum number of resources of type 'cpu' for project "
-                                    + convertEntityService.getProjectById(vm.getProjectId()).getName()
-                                    + " has been exceeded.";
-                        } else {
-                            errMessage = "Maximum number of resources of type 'cpu' for current domain "
-                                    + convertEntityService.getDomainById(vm.getDomainId()).getName()
-                                    + " has been exceeded.";
-                        }
+                    	errMessage = "There’s no CPU available in the CPU pool. Please contact the Cloud Admin";
                     }
                     break;
                 case "2":
                     tempCount = updateResourceCount(vm, "11");
                     secondaryStorage = tempTotalCapacity - tempCapacityUsed;
                     if (secondaryStorage < tempCount) {
-                        if (vm.getProjectId() != null) {
-                            errMessage = "Maximum number of resources of type 'seconday storage' for project "
-                                    + convertEntityService.getProjectById(vm.getProjectId()).getName()
-                                    + " has been exceeded.";
-                        } else {
-                            errMessage = "Maximum number of resources of type 'seconday storage' for current domain "
-                                    + convertEntityService.getDomainById(vm.getDomainId()).getName()
-                                    + " has been exceeded.";
-                        }
+                        errMessage = "There’s no secondary storage available in the secondary storage pool. Please contact the Cloud Admin";
                     }
                     break;
                 case "3":
                     tempCount = updateResourceCount(vm, "10");
                     primaryStorage = tempTotalCapacity - tempCapacityUsed;
                     if (primaryStorage < convertEntityService.getTemplateById(vm.getTemplateId()).getSize()) {
-                        if (vm.getProjectId() != null) {
-                            errMessage = "Maximum number of resources of type 'primary storage' for project "
-                                    + convertEntityService.getProjectById(vm.getProjectId()).getName()
-                                    + " has been exceeded.";
-                        } else {
-                            errMessage = "Maximum number of resources of type 'primary storage' for current domain "
-                                    + convertEntityService.getDomainById(vm.getDomainId()).getName()
-                                    + " has been exceeded.";
-                        }
+                        errMessage = "There’s no primary storage available in the primary storage pool. Please contact the Cloud Admin";
                     }
                     break;
                 case "4":
@@ -983,18 +951,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     JSONObject csIpCapacity = new JSONObject(csIpResponse)
                             .getJSONObject("listpublicipaddressesresponse");
                     if (csIpCapacity.has("count")) {
-                        LOGGER.debug("Already Ip address acquired ", type);
+                        LOGGER.debug("Already IP address acquired ", type);
                     } else {
                         if (ip < 1) {
-                            if (vm.getProjectId() != null) {
-                                errMessage = "Maximum number of resources of type 'public IP addresses' for project "
-                                        + convertEntityService.getProjectById(vm.getProjectId()).getName()
-                                        + " has been exceeded.";
-                            } else {
-                                errMessage = "Maximum number of resources of type 'public IP addresses' for current domain "
-                                        + convertEntityService.getDomainById(vm.getDomainId()).getName()
-                                        + " has been exceeded.";
-                            }
+                            errMessage = "There’s no public IP available in the IP pool. Please contact the Cloud Admin.";
                         }
                     }
                     break;
