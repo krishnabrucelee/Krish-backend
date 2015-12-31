@@ -17,6 +17,7 @@ import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
+import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
@@ -56,6 +57,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /** Volume Service for listing volumes. */
     @Autowired
     private VolumeService volumeService;
+    
+    /** Nic service for listing nic. */
+    @Autowired
+    private NicService nicService;
 
     /** CloudStack connector reference for instance. */
     @Autowired
@@ -242,6 +247,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 // 3.2 If found, update the vm object in app db
                 virtualMachineService.update(instance);
                 asyncVolume();
+                asyncNic();
             }
         }
     }
@@ -359,6 +365,51 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         for (String key : csVolumeMap.keySet()) {
 
             volumeService.save(csVolumeMap.get(key));
+        }
+    }
+    
+    /**
+     * Sync with Cloud Server NIC.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    public void asyncNic() throws ApplicationException, Exception {
+
+        // 1. Get all the nic objects from CS server as hash
+        List<Nic> csNicList = nicService.findAllFromCSServer();
+        HashMap<String, Nic> csNicMap = (HashMap<String, Nic>) Nic.convert(csNicList);
+
+        // 2. Get all the nic objects from application
+        List<Nic> appnicList = nicService.findAll();
+
+        // 3. Iterate application nic list
+        for (Nic nic : appnicList) {
+            nic.setSyncFlag(false);
+            LOGGER.debug("Total rows updated : " + (appnicList.size()));
+            // 3.1 Find the corresponding CS server ntService object by
+            // finding it in a hash using uuid
+            if (csNicMap.containsKey(nic.getUuid())) {
+                Nic csNic = csNicMap.get(nic.getUuid());
+
+                nic.setUuid(csNic.getUuid());
+
+                // 3.2 If found, update the nic object in app db
+                nicService.update(nic);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // nic which is not added in the app
+                csNicMap.remove(nic.getUuid());
+            } else {
+                nicService.softDelete(nic);
+            }
+        }
+        // 4. Get the remaining list of cs server hash NetworkOffering object,
+        // then iterate and
+        // add it to app db
+        for (String key : csNicMap.keySet()) {
+            LOGGER.debug("Syncservice Nic uuid:");
+            nicService.save(csNicMap.get(key));
         }
     }
 }

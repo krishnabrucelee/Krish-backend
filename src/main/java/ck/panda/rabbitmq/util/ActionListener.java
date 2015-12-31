@@ -88,6 +88,7 @@ public class ActionListener implements MessageListener {
                 LOGGER.debug("VM Sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
                 syncService.syncInstances();
                 syncService.syncVolume();
+                syncService.syncNic();
                 break;
             case EventTypes.EVENT_USER:
                 LOGGER.debug("User sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
