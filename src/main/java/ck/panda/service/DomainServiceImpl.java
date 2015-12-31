@@ -241,8 +241,18 @@ public class DomainServiceImpl implements DomainService {
             domain.setCompanyNameAbbreviation((String) updateDomain.get("name"));
             String cityHeadquarter = domain.getCityHeadquarter();
             String companyAddress = domain.getCompanyAddress();
+            String name = domain.getName();
+            String secondaryContactEmail = domain.getSecondaryContactEmail();
+            String secondaryContactName = domain.getSecondaryContactName();
+            String secondaryContactLastName = domain.getSecondaryContactLastName();
+            String secondaryContactPhone = domain.getSecondaryContactPhone();
             domain.setCityHeadquarter(cityHeadquarter);
             domain.setCompanyAddress(companyAddress);
+            domain.setName(name);
+            domain.setSecondaryContactEmail(secondaryContactEmail);
+            domain.setSecondaryContactName(secondaryContactName);
+            domain.setSecondaryContactLastName(secondaryContactLastName);
+            domain.setSecondaryContactPhone(secondaryContactPhone); 
              }
            }
         return domainRepo.save(domain);
