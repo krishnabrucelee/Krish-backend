@@ -9,8 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-
-import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.VolumeType;
 
@@ -150,19 +148,22 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      *
      * @param projectId project id.
      * @param volumeType volume type.
+     * @param isActive true/false
      * @return project
      */
-    @Query(value = "select volume from Volume volume where volume.projectId=:projectId and volume.volumeType in :volumeType and volume.isActive =:isActive")
+    @Query(value = "select volume from Volume volume where volume.projectId=:projectId and volume.volumeType in :volumeType and volume.isActive =:isActive and volume.vmInstanceId = NULL")
     List<Volume> findByProjectAndVolumeType(@Param("projectId") Long projectId, @Param("volumeType") List<VolumeType> volumeType, @Param("isActive") Boolean isActive);
 
     /**
      * Get the volumes based on department.
      *
      * @param departmentId department id.
+     * @param isActive true/false
+     * @param volumeType volume Type
      * @return department
      * @throws Exception error occurs.
      */
-    @Query(value = "select volume from Volume volume where volume.departmentId=:departmentId and volume.volumeType in :volumeType and volume.isActive =:isActive and volume.projectId = NULL")
+    @Query(value = "select volume from Volume volume where volume.departmentId=:departmentId and volume.volumeType in :volumeType and volume.isActive =:isActive and volume.projectId = NULL and volume.vmInstanceId = NULL")
     List<Volume> findByDepartmentAndVolumeType(@Param("departmentId") Long departmentId, @Param("volumeType") List<VolumeType> volumeType, @Param("isActive") Boolean isActive);
 
     /**
@@ -170,20 +171,53 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      *
      * @param departmentId department id.
      * @param projectId project id.
+     * @param volumeType volume Type
+     * @param isActive true/false
      * @return department
      * @throws Exception error occurs.
      */
     @Query(value = "select volume from Volume volume where volume.departmentId=:departmentId and volume.volumeType in :volumeType and volume.isActive =:isActive and volume.projectId<>:projectId")
-    List<Volume> findByDepartmentAndProjectAndVolumeType(@Param("departmentId") Long departmentId, @Param("projectId") Long projectId, @Param("volumeType") List<VolumeType> volumeType, @Param("isActive") Boolean isActive);
+    List<Volume> findByDepartmentAndNotProjectAndVolumeType(@Param("departmentId") Long departmentId, @Param("projectId") Long projectId, @Param("volumeType") List<VolumeType> volumeType, @Param("isActive") Boolean isActive);
 
-//    @Query(value = "select volume from Volume volume where volume.isActive =:isActive AND volume.volumeType=:volumeType AND volume.vmInstanceId=:vmInstanceId AND volume.domainId=:domainId")
-//    Integer findVolumeCountByDomainAndInstanceId(@Param("domainId") Long domainId, @Param("vmInstanceId") Long vmInstanceId, @Param("volumeType") VolumeType datadisk, @Param("isActive") Boolean isActive);
-//
-//    @Query(value = "select volume from Volume volume where volume.isActive =:isActive AND volume.volumeType=:volumeType AND volume.vmInstanceId=:vmInstanceId")
-//    List<Volume> findVolumeCountByInstanceId(@Param("vmInstanceId") Long vmInstanceId, @Param("volumeType") VolumeType datadisk, @Param("isActive") Boolean isActive);
-//
-//    @Query(value = "select volume from Volume volume where volume.isActive =:isActive")
-//    List<Volume> findAllByActive(@Param("isActive") Boolean isActive);
+    /**
+     * Find all volumes by active state.
+     *
+     * @param isActive true/false
+     * @return volumes
+     */
+    @Query(value = "select volume from Volume volume where volume.isActive =:isActive")
+    List<Volume> findAllByActive(@Param("isActive") Boolean isActive);
 
+    /**
+     * Get volumes by Department and VolumeType.
+     *
+     * @param departmentId department id
+     * @param volumeType volume Type
+     * @param isActive true/false
+     * @param pageable page
+     * @return volumes
+     */
+    @Query(value = "select volume from Volume volume where volume.departmentId=:departmentId and volume.volumeType in :volumeType and volume.isActive =:isActive and volume.projectId = NULL")
+    Page<Volume> findByDepartmentAndVolumeTypeAndPage(@Param("departmentId") Long departmentId, @Param("volumeType") List<VolumeType> volumeType,
+            @Param("isActive") Boolean isActive, Pageable pageable);
+
+    /**
+     * Get the volumes based on project.
+     *
+     * @param projectId project id.
+     * @param departmentId department id
+     * @param volumeType volume type.
+     * @param isActive true/false
+     * @return project
+     */
+    @Query(value = "select volume from Volume volume where (volume.projectId=:projectId and volume.departmentId=:departmentId) or (volume.projectId = NULL and volume.departmentId=:departmentId) and volume.volumeType in :volumeType and volume.isActive =:isActive")
+    List<Volume> findByProjectAndVolumeTypeWithInstance(@Param("projectId") Long projectId, @Param("departmentId") Long departmentId, @Param("volumeType") List<VolumeType> volumeType, @Param("isActive") Boolean isActive);
+
+
+//  @Query(value = "select volume from Volume volume where volume.isActive =:isActive AND volume.volumeType=:volumeType AND volume.vmInstanceId=:vmInstanceId AND volume.domainId=:domainId")
+//  Integer findVolumeCountByDomainAndInstanceId(@Param("domainId") Long domainId, @Param("vmInstanceId") Long vmInstanceId, @Param("volumeType") VolumeType datadisk, @Param("isActive") Boolean isActive);
+//
+//  @Query(value = "select volume from Volume volume where volume.isActive =:isActive AND volume.volumeType=:volumeType AND volume.vmInstanceId=:vmInstanceId")
+//  List<Volume> findVolumeCountByInstanceId(@Param("vmInstanceId") Long vmInstanceId, @Param("volumeType") VolumeType datadisk, @Param("isActive") Boolean isActive);
 
 }

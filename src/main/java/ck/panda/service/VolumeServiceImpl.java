@@ -3,18 +3,22 @@ package ck.panda.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.StorageOffering;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.Status;
@@ -210,7 +214,32 @@ public class VolumeServiceImpl implements VolumeService {
     public Page<Volume> findAllByIsActive(PagingAndSorting pagingAndSorting) throws Exception {
         Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && !domain.getName().equals("ROOT")) {
-            return volumeRepo.findByDomainAndIsActive(domain.getId(), true, pagingAndSorting.toPageRequest());
+            if (tokenDetails.getTokenDetails("usertype").equals("DOMAIN_ADMIN")) {
+                return volumeRepo.findByDomainAndIsActive(domain.getId(), true, pagingAndSorting.toPageRequest());
+            } else {
+                List<Volume.VolumeType> volumeType = new ArrayList<>();
+                volumeType.add(VolumeType.DATADISK);
+                volumeType.add(VolumeType.ROOT);
+                User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
+                if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
+                    List<Volume> allProjectList = new ArrayList<Volume>();
+                    for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
+                        System.out.println(project.getId());
+                        List<Volume> allProjectTempList = volumeRepo
+                                .findByProjectAndVolumeTypeWithInstance(project.getId(), Long.parseLong(tokenDetails.getTokenDetails("departmentid")), volumeType, true);
+                        System.out.println(allProjectTempList);
+                        allProjectList.addAll(allProjectTempList);
+                    }
+                    List<Volume> volumes = allProjectList.stream().distinct().collect(Collectors.toList());
+                    Page<Volume> allProjectLists = new PageImpl<Volume>(volumes);
+                    System.out.println(allProjectLists.getSize());
+                    return (Page<Volume>) allProjectLists;
+                } else {
+                    return volumeRepo.findByDepartmentAndVolumeTypeAndPage(
+                            Long.parseLong(tokenDetails.getTokenDetails("departmentid")), volumeType, true,
+                            pagingAndSorting.toPageRequest());
+                }
+            }
         }
         return volumeRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
     }
@@ -335,7 +364,7 @@ public class VolumeServiceImpl implements VolumeService {
      * @param volume Volume
      * @param errors global error and field errors
      * @throws Exception error
-     * @return volume
+     * @return Volumes
      */
     private Volume createVolume(Volume volume, Errors errors) throws Exception {
         config.setUserServer();
@@ -674,8 +703,8 @@ public class VolumeServiceImpl implements VolumeService {
     }
 
     @Override
-    public List<Volume> findByDepartmentAndProjectAndVolumeType(Long departmentId, Long projectId, List<VolumeType> volumeType) {
-        return volumeRepo.findByDepartmentAndProjectAndVolumeType(departmentId, projectId, volumeType, true);
+    public List<Volume> findByDepartmentAndNotProjectAndVolumeType(Long departmentId, Long projectId, List<VolumeType> volumeType) {
+        return volumeRepo.findByDepartmentAndNotProjectAndVolumeType(departmentId, projectId, volumeType, true);
     }
 //
 //    @Override
