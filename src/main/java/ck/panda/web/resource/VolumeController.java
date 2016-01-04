@@ -268,14 +268,14 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
         return volumeService.findByDepartmentAndNotProjectAndVolumeType(departmentId, projectId, volumeType);
     }
 
-//    /**
-//     * Get the volume counts for attached, detached and total count.
-//     *
-//     * @param request
-//     * @param response
-//     * @return
-//     * @throws Exception
-//     */
+    /**
+     * Get the volume counts for attached, detached and total count.
+     *
+     * @param request
+     * @param response
+     * @return
+     * @throws Exception
+     */
 //    @RequestMapping(value = "volumeCounts", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
 //    @ResponseStatus(HttpStatus.OK)
 //    @ResponseBody
