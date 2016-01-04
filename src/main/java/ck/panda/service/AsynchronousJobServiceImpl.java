@@ -286,6 +286,14 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 network.setDomainId(csNet.getDomainId());
                 network.setZoneId(csNet.getZoneId());
                 network.setDisplayText(csNet.getDisplayText());
+                network.setDomainId(convertEntityService.getDomainId(csNet.getTransDomainId()));
+                network.setZoneId(convertEntityService.getZoneId(csNet.getTransZoneId()));
+                network.setNetworkOfferingId(
+                        convertEntityService.getNetworkOfferingId(csNet.getTransNetworkOfferingId()));
+                network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
+                        csNet.getTransDepartmentId(), domainService.find(network.getDomainId())));
+                network.setProjectId(convertEntityService.getProjectId(csNet.getTransProjectId()));
+
                 networkService.update(network);
             }
         }
@@ -339,6 +347,11 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 Domain domain = domainService.find(volume.getDomainId());
                 volume.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(volume.getTransDepartmentId(), domain));
             }
+            if (eventObject.getString("commandEventType").equals("VOLUME.UPLOAD")) {
+                volume.setDiskSizeFlag(false);
+            } else {
+                volume.setDiskSizeFlag(true);
+            }
             if (volumeService.findByUUID(volume.getUuid()) == null) {
                 volumeService.save(volume);
             }
@@ -349,12 +362,18 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             Volume volume = volumeService.findByUUID(csVolume.getUuid());
             if (csVolume.getUuid().equals(volume.getUuid())) {
                 volume.setIsSyncFlag(false);
+                volume.setZoneId(convertEntityService.getZoneId(csVolume.getTransZoneId()));
+                volume.setDomainId(convertEntityService.getDomainId(csVolume.getTransDomainId()));
+                volume.setStorageOfferingId(convertEntityService.getStorageOfferId(csVolume.getTransStorageOfferingId()));
+                volume.setVmInstanceId(convertEntityService.getVmInstanceId(csVolume.getTransvmInstanceId()));
+                if (csVolume.getTransProjectId() != null) {
+                    volume.setProjectId(convertEntityService.getProjectId(csVolume.getTransProjectId()));
+                    volume.setDepartmentId(projectService.find(volume.getProjectId()).getDepartmentId());
+                } else {
+                    Domain domain = domainService.find(volume.getDomainId());
+                    volume.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(csVolume.getTransDepartmentId(), domain));
+                }
                 volume.setName(csVolume.getName());
-                volume.setStorageOfferingId(csVolume.getStorageOfferingId());
-                volume.setZoneId(csVolume.getZoneId());
-                volume.setDomainId(csVolume.getDomainId());
-                volume.setDepartmentId(csVolume.getDepartmentId());
-                volume.setVmInstanceId(csVolume.getVmInstanceId());
                 volume.setVolumeType(csVolume.getVolumeType());
                 volume.setIsActive(true);
                 if (volume.getDiskSize() != null) {
@@ -362,9 +381,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 } else {
                     volume.setDiskSize(csVolume.getStorageOffering().getDiskSize());
                 }
-                if (volume.getProjectId() != null) {
-                    volume.setProjectId(csVolume.getProjectId());
-                }
+                volume.setDiskSizeFlag(true);
                 volume.setChecksum(csVolume.getChecksum());
                 volume.setStatus(csVolume.getStatus());
                 volume.setDiskMaxIops(csVolume.getDiskMaxIops());
