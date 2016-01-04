@@ -560,17 +560,17 @@ public class Volume {
      * @return the diskSizeFlag of the Volume
      */
     public Boolean getDiskSizeFlag() {
-		return diskSizeFlag;
-	}
+        return diskSizeFlag;
+    }
 
     /**
      * Set the disk size flag of the Volume.
      *
      * @param diskSizeFlag the disk size to set
      */
-	public void setDiskSizeFlag(Boolean diskSizeFlag) {
-		this.diskSizeFlag = diskSizeFlag;
-	}
+    public void setDiskSizeFlag(Boolean diskSizeFlag) {
+        this.diskSizeFlag = diskSizeFlag;
+    }
 
     /**
      * Get the disk max iops of the Volume.

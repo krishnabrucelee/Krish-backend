@@ -219,7 +219,7 @@ public class VolumeServiceImpl implements VolumeService {
         //Checking the volume disk size from colud stack
         List<Volume> activeVolume = volumeRepo.findAllByActive(true);
         for (int k = 0; k < activeVolume.size(); k++) {
-        	if(!activeVolume.get(k).getDiskSizeFlag()) {
+            if (!activeVolume.get(k).getDiskSizeFlag()) {
                 HashMap<String, String> volumeMap = new HashMap<String, String>();
                 volumeMap.put("id", activeVolume.get(k).getUuid());
 
@@ -227,16 +227,16 @@ public class VolumeServiceImpl implements VolumeService {
                 String response = csVolumeService.listVolumes("json", volumeMap);
                 JSONObject responseObject = new JSONObject(response).getJSONObject("listvolumesresponse");
                 if (responseObject.has("volume")) {
-                	volumeListJSON = responseObject.getJSONArray("volume");
-                	if (JsonValidator.jsonStringValidation(volumeListJSON.getJSONObject(0), "state").equals("Uploaded")) {
-                		activeVolume.get(k).setDiskSize(volumeListJSON.getJSONObject(0).getLong("size"));
-                		activeVolume.get(k).setDiskSizeFlag(true);
-                	} else if (JsonValidator.jsonStringValidation(volumeListJSON.getJSONObject(0), "state").equals("UploadError")) {
-                		activeVolume.get(k).setDiskSizeFlag(true);
-                	}
-                	volumeRepo.save(activeVolume.get(k));
+                    volumeListJSON = responseObject.getJSONArray("volume");
+                    if (JsonValidator.jsonStringValidation(volumeListJSON.getJSONObject(0), "state").equals("Uploaded")) {
+                        activeVolume.get(k).setDiskSize(volumeListJSON.getJSONObject(0).getLong("size"));
+                        activeVolume.get(k).setDiskSizeFlag(true);
+                    } else if (JsonValidator.jsonStringValidation(volumeListJSON.getJSONObject(0), "state").equals("UploadError")) {
+                        activeVolume.get(k).setDiskSizeFlag(true);
+                    }
+                    volumeRepo.save(activeVolume.get(k));
                 }
-        	}
+            }
         }
         if (domain != null && !domain.getName().equals("ROOT")) {
             if (tokenDetails.getTokenDetails("usertype").equals("DOMAIN_ADMIN")) {
@@ -405,7 +405,7 @@ public class VolumeServiceImpl implements VolumeService {
             } else {
                 volume.setUuid((String) jobId.get("id"));
                 if (jobId.has("jobid")) {
-                	Thread.sleep(5000);
+                    Thread.sleep(5000);
                     String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
 
                     JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
@@ -515,7 +515,7 @@ public class VolumeServiceImpl implements VolumeService {
                 volume.setVmInstanceId(volume.getVmInstance().getId());
             }
             if (jobId.has("jobid")) {
-            	Thread.sleep(5000);
+                Thread.sleep(5000);
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
                 if (jobresult.getJSONObject("jobresult").has("errorcode")) {
@@ -556,7 +556,7 @@ public class VolumeServiceImpl implements VolumeService {
         } else {
             volume.setVmInstanceId(null);
             if (jobId.has("jobid")) {
-            	Thread.sleep(5000);
+                Thread.sleep(5000);
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
                 if (jobresult.getJSONObject("jobresult").has("errorcode")) {
@@ -606,7 +606,7 @@ public class VolumeServiceImpl implements VolumeService {
             throw new ApplicationException(errors);
         } else {
             if (jobId.has("jobid")) {
-            	Thread.sleep(5000);
+                Thread.sleep(5000);
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
                 if (jobresult.getString("jobstatus").equals("2")) {
@@ -677,7 +677,7 @@ public class VolumeServiceImpl implements VolumeService {
             throw new ApplicationException(errors);
         } else {
             if (jobId.has("jobid")) {
-            	Thread.sleep(5000);
+                Thread.sleep(5000);
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
 
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
@@ -705,9 +705,9 @@ public class VolumeServiceImpl implements VolumeService {
      */
     private void setValue(Volume volume) throws Exception {
 
-    	String uuid = volume.getUuid();
-    	Format format = volume.getFormat();
-    	String url = volume.getUrl();
+        String uuid = volume.getUuid();
+        Format format = volume.getFormat();
+        String url = volume.getUrl();
         if (volumeRepo.findByUUID(volume.getUuid()) != null) {
             volume = volumeRepo.findByUUID(volume.getUuid());
         }

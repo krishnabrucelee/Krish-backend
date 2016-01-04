@@ -287,12 +287,12 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 network.setZoneId(csNet.getZoneId());
                 network.setDisplayText(csNet.getDisplayText());
                 network.setDomainId(convertEntityService.getDomainId(csNet.getTransDomainId()));
-				network.setZoneId(convertEntityService.getZoneId(csNet.getTransZoneId()));
-				network.setNetworkOfferingId(
-						convertEntityService.getNetworkOfferingId(csNet.getTransNetworkOfferingId()));
-				network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
-						csNet.getTransDepartmentId(), domainService.find(network.getDomainId())));
-				network.setProjectId(convertEntityService.getProjectId(csNet.getTransProjectId()));
+                network.setZoneId(convertEntityService.getZoneId(csNet.getTransZoneId()));
+                network.setNetworkOfferingId(
+                        convertEntityService.getNetworkOfferingId(csNet.getTransNetworkOfferingId()));
+                network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
+                        csNet.getTransDepartmentId(), domainService.find(network.getDomainId())));
+                network.setProjectId(convertEntityService.getProjectId(csNet.getTransProjectId()));
 
                 networkService.update(network);
             }
@@ -348,13 +348,13 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 volume.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(volume.getTransDepartmentId(), domain));
             }
             if (eventObject.getString("commandEventType").equals("VOLUME.UPLOAD")) {
-            	volume.setDiskSizeFlag(false);
+                volume.setDiskSizeFlag(false);
             } else {
-            	volume.setDiskSizeFlag(true);
+                volume.setDiskSizeFlag(true);
             }
-            if(volumeService.findByUUID(volume.getUuid()) == null) {
-        	    volumeService.save(volume);
-        	}
+            if (volumeService.findByUUID(volume.getUuid()) == null) {
+                volumeService.save(volume);
+            }
         }
         if (eventObject.getString("commandEventType").equals("VOLUME.ATTACH")
                 || eventObject.getString("commandEventType").equals("VOLUME.DETACH")) {
