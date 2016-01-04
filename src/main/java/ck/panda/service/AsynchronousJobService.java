@@ -29,4 +29,13 @@ public interface AsynchronousJobService {
      */
     void asyncNetworkOffering(ResponseEvent eventObject) throws ApplicationException, Exception;
 
+    /**
+     * Sync with CloudStack server volume.
+     *
+     * @param eventObject volume response event
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
+     */
+    void asyncVolume(ResponseEvent eventObject) throws ApplicationException, Exception;
+
 }

@@ -3,8 +3,6 @@ package ck.panda.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -17,15 +15,10 @@ import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.StorageOffering;
-import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
-import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.entity.Volume.Status;
 import ck.panda.domain.entity.Volume.VolumeType;
-import ck.panda.domain.repository.jpa.DepartmentReposiory;
-import ck.panda.domain.repository.jpa.DomainRepository;
-import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.domain.repository.jpa.VolumeRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackVolumeService;
@@ -99,14 +92,12 @@ public class VolumeServiceImpl implements VolumeService {
                 throw new ApplicationException(errors);
             } else {
                 Volume volumeCS = createVolume(volume, errors);
-                if(volumeRepo.findByUUID(volumeCS.getUuid()) != null) {
+                if (volumeRepo.findByUUID(volumeCS.getUuid()) != null) {
                     volume = volumeRepo.findByUUID(volumeCS.getUuid());
                 }
-                return volumeRepo.save(volume);
             }
-        } else {
-            return volumeRepo.save(volume);
         }
+        return volumeRepo.save(volume);
     }
 
     @Override
@@ -130,12 +121,15 @@ public class VolumeServiceImpl implements VolumeService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                attach(volume, errors);
-                return volume;
+                Volume volumeCS = attach(volume, errors);
+                if (volumeRepo.findByUUID(volumeCS.getUuid()) != null) {
+                    volume = volumeRepo.findByUUID(volumeCS.getUuid());
+                    volume.setVmInstanceId(volumeCS.getVmInstanceId());
+                    volume.setStatus(volumeCS.getStatus());
+                }
             }
-        } else {
-            return volumeRepo.save(volume);
         }
+        return volumeRepo.save(volume);
     }
 
     @Override
@@ -147,12 +141,15 @@ public class VolumeServiceImpl implements VolumeService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                detach(volume, errors);
-                return volume;
+                Volume volumeCS = detach(volume, errors);
+                if (volumeRepo.findByUUID(volumeCS.getUuid()) != null) {
+                    volume = volumeRepo.findByUUID(volumeCS.getUuid());
+                    volume.setVmInstanceId(volumeCS.getVmInstanceId());
+                    volume.setStatus(volumeCS.getStatus());
+                }
             }
-        } else {
-            return volumeRepo.save(volume);
         }
+        return volumeRepo.save(volume);
     }
 
     @Override
@@ -163,12 +160,13 @@ public class VolumeServiceImpl implements VolumeService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                resize(volume, errors);
-                return volume;
+                Volume volumeCS = resize(volume, errors);
+                if (volumeRepo.findByUUID(volumeCS.getUuid()) != null) {
+                    volume = volumeRepo.findByUUID(volumeCS.getUuid());
+                }
             }
-        } else {
-            return volumeRepo.save(volume);
         }
+        return volumeRepo.save(volume);
     }
 
     @Override
@@ -269,7 +267,7 @@ public class VolumeServiceImpl implements VolumeService {
 
         if (volume.getProjectId() != null) {
             optional.put("projectid", convertEntityService.getProjectUuidById(volume.getProjectId()));
-        } else if(volume.getDepartmentId() != null) {
+        } else if (volume.getDepartmentId() != null) {
              optional.put("account", convertEntityService.getDepartmentUsernameById(volume.getDepartmentId()));
 
              optional.put("domainid", departmentService.find(volume.getDepartmentId()).getDomain().getUuid());
@@ -337,6 +335,7 @@ public class VolumeServiceImpl implements VolumeService {
      * @param volume Volume
      * @param errors global error and field errors
      * @throws Exception error
+     * @return volume
      */
     private Volume createVolume(Volume volume, Errors errors) throws Exception {
         config.setUserServer();
@@ -432,8 +431,9 @@ public class VolumeServiceImpl implements VolumeService {
      * @param volume volume
      * @param errors errors
      * @throws Exception error
+     * @return volume
      */
-    public void attach(Volume volume, Errors errors) throws Exception {
+    public Volume attach(Volume volume, Errors errors) throws Exception {
         config.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
         if (volume.getVmInstanceId() != null) {
@@ -467,6 +467,7 @@ public class VolumeServiceImpl implements VolumeService {
                 }
             }
         }
+        return volume;
     }
 
     /**
@@ -475,8 +476,9 @@ public class VolumeServiceImpl implements VolumeService {
      * @param volume volume
      * @param errors errors
      * @throws Exception error
+     * @return volume
      */
-    public void detach(Volume volume, Errors errors) throws Exception {
+    public Volume detach(Volume volume, Errors errors) throws Exception {
         config.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
         optional.put("id", volume.getUuid());
@@ -500,6 +502,7 @@ public class VolumeServiceImpl implements VolumeService {
                 }
             }
         }
+        return volume;
     }
 
     /**
@@ -508,8 +511,9 @@ public class VolumeServiceImpl implements VolumeService {
      * @param volume volume
      * @param errors errors
      * @throws Exception error
+     * @return volume
      */
-    public void resize(Volume volume, Errors errors) throws Exception {
+    public Volume resize(Volume volume, Errors errors) throws Exception {
         config.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
         if (volume.getDiskSize() != null) {
@@ -547,24 +551,22 @@ public class VolumeServiceImpl implements VolumeService {
                 }
             }
         }
+        return volume;
     }
 
     @Override
     public Volume softDelete(Volume volume) throws Exception {
         volume.setIsActive(false);
         volume.setStatus(Volume.Status.DESTROY);
-        if(volume.getIsSyncFlag()) {
+        if (volume.getIsSyncFlag()) {
             // set server for finding value in configuration
             config.setUserServer();
             csVolumeService.deleteVolume(volume.getUuid(), "json");
-
-//            if (volumeRepo.findOne(volume.getId()).getIsActive() == true) {
-//                return volumeRepo.save(volume);
-//            }
-            return volume;
-        } else {
+        }
+        if (volumeRepo.findByUUID(volume.getUuid()).getIsActive()) {
             return volumeRepo.save(volume);
         }
+        return volume;
     }
 
     /**
@@ -612,7 +614,6 @@ public class VolumeServiceImpl implements VolumeService {
                 }
                 if (jobresult.getString("jobstatus").equals("1")) {
                     setValue(volume);
-                    volumeRepo.save(volume);
                 }
                 if (jobresult.getString("jobstatus").equals("0")) {
                     setValue(volume);
