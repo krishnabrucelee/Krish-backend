@@ -195,8 +195,8 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Department>findDomain(Long id)throws Exception {
-       return  departmentRepo.findByDomain(id);
+    public List<Department>findDomainAndIsActive(Long id, Boolean isActive)throws Exception {
+       return  departmentRepo.findDomainAndIsActive(id, true);
     }
     @Override
     public Page<Department> findAll(PagingAndSorting pagingAndSorting) throws Exception {
@@ -240,9 +240,9 @@ public class DepartmentServiceImpl implements DepartmentService {
         config.setServer(1L);
         if(department.getSyncFlag()) {
 			List<Project> projectResponse = projectService.findByDepartmentAndIsActive(department.getId(), true);
-			List<VmInstance> vmResponse = vmService.findByDepartment(department.getId());
-			List<Role> roleResponse = roleService.findByDepartment(department);
-			List<Volume> volumeResponse = volumeService.findByDepartment(department.getId());
+			List<VmInstance> vmResponse = vmService.findByDepartmentAndVmStatus(department.getId(), VmInstance.Status.Expunging);
+			List<Role> roleResponse = roleService.findByDepartmentAndIsActive(department.getId(), true);
+			List<Volume> volumeResponse = volumeService.findByDepartmentAndIsActive(department.getId(), true);
 			List<User> userResponse = userService.findByDepartment(department.getId());
 			if (projectResponse.size() != 0 || vmResponse.size() != 0 || roleResponse.size() != 0
 					|| volumeResponse.size() != 0) {
@@ -254,7 +254,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 			}
         }
         if (errors.hasErrors()) {
-            throw new ApplicationException(errors);
+        	throw new ApplicationException(errors);
         } else {
              department.setIsActive(false);
              department.setStatus(Department.Status.DELETED);

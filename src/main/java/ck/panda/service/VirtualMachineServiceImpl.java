@@ -871,10 +871,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         }
     }
 
-    @Override
-    public List<VmInstance> findByDepartment(Long id) throws Exception {
-        return virtualmachinerepository.findByDepartment(id);
-    }
+   
 
     @Override
     public List<VmInstance> findByProjectAndStatus(Long projectId, List<Status> statusCode) throws Exception {
@@ -1045,8 +1042,13 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 	}
 
 	@Override
-	public List<VmInstance> findByComputeOfferingId(Long computeOfferingId) throws Exception {
-		return virtualmachinerepository.findByComputeOffering(computeOfferingId);
+	public List<VmInstance> findByComputeOfferingIdAndVmStatus(Long computeOfferingId, Status status) throws Exception {
+		return virtualmachinerepository.findByComputeOffering(computeOfferingId, status);
 	}
 
+	@Override
+	public List<VmInstance> findByDepartmentAndVmStatus(Long departmentId, Status status) throws Exception {
+		return virtualmachinerepository.findByDepartment(departmentId, status);
+	}
+;
 }

@@ -251,8 +251,8 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
     * @param isActive get the department list based on active/inactive status.
     * @return vmInstance list.
     */
-   @Query(value = "select vm from VmInstance vm where vm.departmentId=:id ")
-   List<VmInstance> findByDepartment(@Param("id") Long departmentId);
+   @Query(value = "select vm from VmInstance vm where vm.departmentId=:id and vm.status <> :status ")
+   List<VmInstance> findByDepartment(@Param("id") Long departmentId, @Param("status") Status status);
 
    /**
     * Find all vmInstance associated with Compute offering.
@@ -260,8 +260,8 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
     * @param computeOfferingId computeOffering id.
     * @return vmInstance list.
     */
-   @Query(value = "select vm from VmInstance vm where vm.computeOfferingId=:computeOfferingId ")
-   List<VmInstance> findByComputeOffering(@Param("computeOfferingId") Long computeOfferingId);
+   @Query(value = "select vm from VmInstance vm where vm.computeOfferingId=:computeOfferingId and vm.status <> :status  ")
+   List<VmInstance> findByComputeOffering(@Param("computeOfferingId") Long computeOfferingId, @Param("status") Status status);
 
    
    /**

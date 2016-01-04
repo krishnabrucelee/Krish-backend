@@ -140,10 +140,11 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      * Find all department from volume..
      *
      * @param departmentId department id.
+       * @param isActive get the volume list based on active/inactive status.
      * @return department list.
      */
-    @Query(value = "select volume from Volume volume where volume.departmentId=:id ")
-    List<Volume> findByDepartment(@Param("id") Long departmentId);
+    @Query(value = "select volume from Volume volume where volume.departmentId=:id and volume.isActive =:isActive ")
+    List<Volume> findByDepartmentAndIsActive(@Param("id") Long departmentId, @Param("isActive") Boolean isActive);
 
     /**
      * Get the volumes based on project.

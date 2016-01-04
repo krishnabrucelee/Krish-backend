@@ -653,8 +653,8 @@ public class VolumeServiceImpl implements VolumeService {
     }
 
     @Override
-    public List<Volume> findByDepartment(Long departmentId) {
-        return volumeRepo.findByDepartment(departmentId);
+    public List<Volume> findByDepartmentAndIsActive(Long departmentId, Boolean isActive) {
+        return volumeRepo.findByDepartmentAndIsActive(departmentId,true);
     }
 
     @Override
