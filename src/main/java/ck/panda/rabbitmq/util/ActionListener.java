@@ -44,8 +44,10 @@ public class ActionListener implements MessageListener {
      * Inject SyncService.
      *
      * @param syncService syncService object.
-     * @param asynchService asynchronous Service object.
+     * @param asyncService asynchronous Service object.
      * @param cloudStackServer cloudStackServer object.
+     * @param backendAdminUsername backend admin user name.
+     * @param backendAdminRole backend admin user role.
      */
     public ActionListener(SyncService syncService, AsynchronousJobService asyncService, CloudStackServer cloudStackServer,
             String backendAdminUsername, String backendAdminRole) {
@@ -129,7 +131,7 @@ public class ActionListener implements MessageListener {
             case EventTypes.EVENT_NETWORK:
                 if (eventObject.getEvent().contains("OFFERING")) {
                     LOGGER.debug("Network Offering sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
-                    if(eventObject.getEvent().contains("EDIT") || eventObject.getEvent().contains("DELETE")) {
+                    if (eventObject.getEvent().contains("EDIT") || eventObject.getEvent().contains("DELETE")) {
                         asyncService.asyncNetworkOffering(eventObject);
                     } else {
                         syncService.syncNetworkOffering();
@@ -162,8 +164,10 @@ public class ActionListener implements MessageListener {
                 LOGGER.debug("Volume snapshot sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
                 break;
             case EventTypes.EVENT_VOLUME:
-                LOGGER.debug("Volume sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
-                syncService.syncVolume();
+                if (eventObject.getEvent().contains("VOLUME.DELETE")) {
+                    LOGGER.debug("Volume sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+                    asyncService.asyncVolume(eventObject);
+                }
                 break;
             case EventTypes.EVENT_NIC:
                 LOGGER.debug("Nic sync", eventObject.getEntityuuid() + "===" + eventObject.getId());

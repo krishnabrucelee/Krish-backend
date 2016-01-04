@@ -16,7 +16,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -999,7 +998,17 @@ public class Volume {
             volume.setDiskSize(object.getLong("size"));
             volume.setIsActive(true);
             volume.setVolumeType(volume.getVolumeType().valueOf(JsonValidator.jsonStringValidation(object, "type")));
-            volume.setStatus(volume.getStatus().valueOf(JsonValidator.jsonStringValidation(object, "state").toUpperCase()));
+            if (JsonValidator.jsonStringValidation(object, "state").equals("UploadNotStarted")) {
+                volume.setStatus(volume.getStatus().UPLOAD_NOT_STARTED);
+            } else if (JsonValidator.jsonStringValidation(object, "state").equals("UploadOp")) {
+                volume.setStatus(volume.getStatus().UPLOAD_OP);
+            } else if (JsonValidator.jsonStringValidation(object, "state").equals("UploadAbandoned")) {
+                volume.setStatus(volume.getStatus().UPLOAD_ABANDONED);
+            } else if (JsonValidator.jsonStringValidation(object, "state").equals("UploadError")) {
+                volume.setStatus(volume.getStatus().UPLOAD_ERROR);
+            } else {
+                volume.setStatus(volume.getStatus().valueOf(JsonValidator.jsonStringValidation(object, "state").toUpperCase()));
+            }
             volume.setCreatedDateTime(JsonUtil.convertToZonedDateTime(object.getString("created")));
             volume.setTransStorageOfferingId((JsonUtil.getStringValue(object, "diskofferingid")));
             volume.setTransZoneId((JsonUtil.getStringValue(object, "zoneid")));
@@ -1007,11 +1016,6 @@ public class Volume {
             volume.setTransDomainId((JsonUtil.getStringValue(object, "domainid")));
             volume.setTransDepartmentId((JsonUtil.getStringValue(object, "account")));
             volume.setTransProjectId(JsonUtil.getStringValue(object, "projectid"));
-           /* if (object.has("virtualmachineid")) {
-                volume.setVmInstanceId(convertUtil.getVmInstanceId(JsonUtil.getStringValue(object, "virtualmachineid")));
-            } else {
-                volume.setVmInstanceId(null);
-            }*/
         } catch (Exception e) {
             e.printStackTrace();
         }
