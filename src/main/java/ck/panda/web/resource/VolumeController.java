@@ -23,10 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
-import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.VolumeType;
-import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.service.VolumeService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -228,8 +226,8 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
      * Get the volumes based on project.
      *
      * @param projectId project id.
-     * @param volumeType volume type.
      * @return project
+     * @throws Exception error occurs.
      */
     @RequestMapping(value = "/instance/project/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
@@ -258,6 +256,7 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
      * Get the volumes based on department.
      *
      * @param departmentId department id.
+     * @param projectId project id.
      * @return department
      * @throws Exception error occurs.
      */
@@ -266,8 +265,9 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     public List<Volume> findByDepartmentAndProjectAndStatus(@RequestParam("departmentId") Long departmentId, @RequestParam("projectId") Long projectId) throws Exception {
         List<Volume.VolumeType> volumeType = new ArrayList<Volume.VolumeType>();
         volumeType.add(VolumeType.DATADISK);
-        return volumeService.findByDepartmentAndProjectAndVolumeType(departmentId, projectId, volumeType);
+        return volumeService.findByDepartmentAndNotProjectAndVolumeType(departmentId, projectId, volumeType);
     }
+
 //    /**
 //     * Get the volume counts for attached, detached and total count.
 //     *

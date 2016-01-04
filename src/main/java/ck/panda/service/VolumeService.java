@@ -132,7 +132,6 @@ public interface VolumeService extends CRUDService<Volume> {
     * Find all vmInstance from department.
     *
     * @param departmentId department id.
-    * @param isActive get the department list based on active/inactive status.
     * @return vmInstance list.
     */
    @Query(value = "select vm from VmInstance vm where vm.departmentId=:id ")
@@ -152,19 +151,21 @@ public interface VolumeService extends CRUDService<Volume> {
     *
     * @param departmentId department id.
     * @return department
+    * @param volumeType volume type.
     * @throws Exception error occurs.
     */
    List<Volume> findByDepartmentAndVolumeType(Long departmentId, List<VolumeType> volumeType);
 
    /**
-    * Get the volumes based on department and not project.
+    * Get the volumes based on department not project.
     *
     * @param departmentId department id.
     * @param projectId project id.
+    * @param volumeType volume type.
     * @return department
     * @throws Exception error occurs.
     */
-   List<Volume> findByDepartmentAndProjectAndVolumeType(Long departmentId, Long projectId, List<VolumeType> volumeType);
+   List<Volume> findByDepartmentAndNotProjectAndVolumeType(Long departmentId, Long projectId, List<VolumeType> volumeType);
 
 //   /**
 //    * Get the count of the volume based on the attached/detached.
