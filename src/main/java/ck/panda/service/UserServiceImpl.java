@@ -68,6 +68,10 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private TokenDetails tokenDetails;
 
+    /** Reference of domain Service .*/
+    @Autowired
+    private DomainService domainService;
+
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
@@ -144,6 +148,12 @@ public class UserServiceImpl implements UserService {
               optional.put("domainid", user.getDomain().getUuid());
               optional.put("username", user.getUserName());
               csUserService.updateUser(user.getUuid(), optional,"json");
+              if(user.getType() == User.UserType.DOMAIN_ADMIN){
+                  Domain domain = user.getDomain();
+                  domain.setPortalUserName(user.getUserName());
+                  domain.setSyncFlag(false);
+                  domainService.update(domain);
+              }
               return userRepository.save(user);
           }
         } else {
@@ -277,9 +287,9 @@ public class UserServiceImpl implements UserService {
         user.setIsActive(false);
         user.setStatus(User.Status.DELETED);
         if(user.getSyncFlag()) {
-			// set server for finding value in configuration
-			config.setServer(1L);
-			csUserService.deleteUser((user.getUuid()), "json");
+            // set server for finding value in configuration
+            config.setServer(1L);
+            csUserService.deleteUser((user.getUuid()), "json");
         }
         return userRepository.save(user);
     }
