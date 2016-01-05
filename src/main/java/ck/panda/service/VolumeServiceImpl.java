@@ -515,9 +515,13 @@ public class VolumeServiceImpl implements VolumeService {
                 volume.setVmInstanceId(volume.getVmInstance().getId());
             }
             if (jobId.has("jobid")) {
-                Thread.sleep(5000);
+                Thread.sleep(10000);
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+//                if (!jobresult.has("jobresult")) {
+//                    jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
+//                    jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+//                }
                 if (jobresult.getJSONObject("jobresult").has("errorcode")) {
                     errors = this.validateEvent(errors, jobresult.getJSONObject("jobresult").getString("errortext"));
                     throw new ApplicationException(errors);
@@ -525,6 +529,7 @@ public class VolumeServiceImpl implements VolumeService {
                 if (jobresult.getJSONObject("jobresult").has("volume")) {
                     volume.setUuid((String) jobresult.getJSONObject("jobresult").getJSONObject("volume").get("id"));
                     volume.setVmInstanceId(volume.getVmInstanceId());
+                    volume.setStatus(Status.READY);
                 }
                 if (jobresult.getString("jobstatus").equals("0")) {
                        volume.setStatus(Status.READY);
@@ -651,16 +656,20 @@ public class VolumeServiceImpl implements VolumeService {
         config.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
 
-        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if (domain != null && !domain.getName().equals("ROOT")) {
-            optional.put("domainid", departmentService
-                    .find(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getDomain().getUuid());
-            optional.put("account", departmentService
-                    .find(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
+        if (volume.getProjectId() != null) {
+            optional.put("projectid", convertEntityService.getProjectUuidById(volume.getProjectId()));
+        } else if (volume.getDepartmentId() != null) {
+             optional.put("account", convertEntityService.getDepartmentUsernameById(volume.getDepartmentId()));
+
+             optional.put("domainid", departmentService.find(volume.getDepartmentId()).getDomain().getUuid());
         } else {
-            optional.put("domainid", tokenDetails.getTokenDetails("domainid"));
-            // optional.put("account",
-            // departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("domainid"))).getUserName());
+            Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+            if (domain != null && !domain.getName().equals("ROOT")) {
+                optional.put("domainid", departmentService
+                        .find(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getDomain().getUuid());
+                optional.put("account", departmentService
+                        .find(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
+            }
         }
         if (volume.getStorageOfferingId() != null) {
             optional.put("diskofferingid", convertEntityService.getStorageOfferingById(volume.getStorageOfferingId()));
@@ -677,7 +686,7 @@ public class VolumeServiceImpl implements VolumeService {
             throw new ApplicationException(errors);
         } else {
             if (jobId.has("jobid")) {
-                Thread.sleep(5000);
+                Thread.sleep(10000);
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
 
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
@@ -715,6 +724,7 @@ public class VolumeServiceImpl implements VolumeService {
         volume.setFormat(format);
         volume.setUrl(url);
         volume.setDiskSizeFlag(false);
+        volume.setVolumeType(Volume.VolumeType.DATADISK);
         volumeRepo.save(volume);
     }
 
