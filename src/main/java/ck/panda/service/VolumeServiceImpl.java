@@ -518,10 +518,6 @@ public class VolumeServiceImpl implements VolumeService {
                 Thread.sleep(10000);
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
-//                if (!jobresult.has("jobresult")) {
-//                    jobResponse = csVolumeService.volumeJobResult(jobId.getString("jobid"), "json");
-//                    jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
-//                }
                 if (jobresult.getJSONObject("jobresult").has("errorcode")) {
                     errors = this.validateEvent(errors, jobresult.getJSONObject("jobresult").getString("errortext"));
                     throw new ApplicationException(errors);
