@@ -1022,18 +1022,16 @@ public class Volume {
             volume.setDiskSize(object.getLong("size"));
             volume.setIsActive(true);
             volume.setVolumeType(volume.getVolumeType().valueOf(JsonValidator.jsonStringValidation(object, "type")));
+            volume.setDiskSizeFlag(true);
             if (JsonValidator.jsonStringValidation(object, "state").equals("UploadNotStarted")) {
                 volume.setStatus(volume.getStatus().UPLOAD_NOT_STARTED);
                 volume.setDiskSizeFlag(false);
             } else if (JsonValidator.jsonStringValidation(object, "state").equals("UploadOp")) {
                 volume.setStatus(volume.getStatus().UPLOAD_OP);
-                volume.setDiskSizeFlag(true);
             } else if (JsonValidator.jsonStringValidation(object, "state").equals("UploadAbandoned")) {
                 volume.setStatus(volume.getStatus().UPLOAD_ABANDONED);
-                volume.setDiskSizeFlag(true);
             } else if (JsonValidator.jsonStringValidation(object, "state").equals("UploadError")) {
                 volume.setStatus(volume.getStatus().UPLOAD_ERROR);
-                volume.setDiskSizeFlag(true);
             } else {
                 volume.setStatus(volume.getStatus().valueOf(JsonValidator.jsonStringValidation(object, "state").toUpperCase()));
             }
