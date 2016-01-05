@@ -154,8 +154,7 @@ public class CloudStackServer {
             }
         });
 
-        String queryString = EncodingUtil
-                .formUrlEncode(queryValues.toArray(new NameValuePair[queryValues.size()]), "UTF-8").replace("+", "%20");
+        String queryString = EncodingUtil.formUrlEncode(queryValues.toArray(new NameValuePair[queryValues.size()]), "UTF-8").replace("+", "%20").replace("%5B", "[").replace("%5D", "]");
         Mac mac = Mac.getInstance("HmacSHA1");
         SecretKeySpec secretKey = new SecretKeySpec(secret.getBytes(), "HmacSHA1");
         mac.init(secretKey);
