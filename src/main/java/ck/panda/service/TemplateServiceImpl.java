@@ -260,12 +260,12 @@ public class TemplateServiceImpl implements TemplateService {
     public void csRegisterTemplate(Template template, Errors errors) throws Exception {
         configUtil.setServer(1L);
         HashMap<String, String> optional = new HashMap<String, String>();
-        String resp = cloudStackTemplateService.registerTemplate(template.getDescription(), template.getFormat().name(),
+        String csResponse = cloudStackTemplateService.registerTemplate(template.getDescription(), template.getFormat().name(),
             hypervisorService.find(template.getHypervisorId()).getName(), template.getName(),
             osTypeService.find(template.getOsTypeId()).getUuid(), template.getUrl(),
             zoneService.find(template.getZoneId()).getUuid(), "json", optionalFieldValidation(template, optional));
         try {
-            JSONObject templateJSON = new JSONObject(resp).getJSONObject("registertemplateresponse");
+            JSONObject templateJSON = new JSONObject(csResponse).getJSONObject("registertemplateresponse");
             if (templateJSON.has("errorcode")) {
                 errors = this.validateCSEvent(errors, templateJSON.getString("errortext"));
                 throw new ApplicationException(errors);
