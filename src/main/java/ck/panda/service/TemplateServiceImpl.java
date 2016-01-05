@@ -137,7 +137,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public Page<Template> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-    	csPrepareTemplate(templateRepository.findByTemplate("ALL", TemplateType.SYSTEM, Status.INACTIVE, true));
+        csPrepareTemplate(templateRepository.findByTemplate("ALL", TemplateType.SYSTEM, Status.INACTIVE, true));
         return templateRepository.findAllByType(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), true);
     }
 
@@ -161,9 +161,9 @@ public class TemplateServiceImpl implements TemplateService {
                 OsType osType = osTypeService.findByUUID(template.getTransOsType());
                 template.setOsTypeId(osType.getId());
                 template.setOsCategoryId(osType.getOsCategoryId());
-                if(osType.getDescription().contains("32")) {
+                if (osType.getDescription().contains("32")) {
                     template.setArchitecture("32");
-                } else if(osType.getDescription().contains("64")) {
+                } else if (osType.getDescription().contains("64")) {
                     template.setArchitecture("64");
                 }
 
@@ -213,16 +213,21 @@ public class TemplateServiceImpl implements TemplateService {
         }
     }
 
+    /**
+     * @param templates list of templates
+     * @return template
+     * @throws Exception raise if error
+     */
     public List<Template> csPrepareTemplate(List<Template> templates) throws Exception {
         configUtil.setServer(1L);
         List<Template> allTemplate = new ArrayList<Template>();
         for (Template template : templates) {
-        	if (template.getStatus() == Status.INACTIVE) {
+            if (template.getStatus() == Status.INACTIVE) {
                 String resp = cloudStackTemplateService.prepareTemplate(template.getUuid(), zoneService.find(template.getZoneId()).getUuid(),
                     "json");
                 try {
                     JSONObject templateJSON = new JSONObject(resp).getJSONObject("preparetemplateresponse");
-                    if(templateJSON.has("template")) {
+                    if (templateJSON.has("template")) {
                         JSONArray templateArray = (JSONArray) templateJSON.get("template");
                         for (int i = 0; i < templateArray.length(); i++) {
                             JSONObject jsonobject = templateArray.getJSONObject(i);
@@ -242,7 +247,7 @@ public class TemplateServiceImpl implements TemplateService {
                 } catch (Exception e) {
                     LOGGER.error("ERROR AT TEMPLATE CREATION", e);
                 }
-        	}
+            }
         }
         return allTemplate;
     }
@@ -256,9 +261,9 @@ public class TemplateServiceImpl implements TemplateService {
         configUtil.setServer(1L);
         HashMap<String, String> optional = new HashMap<String, String>();
         String resp = cloudStackTemplateService.registerTemplate(template.getDescription(), template.getFormat().name(),
-        	hypervisorService.find(template.getHypervisorId()).getName(), template.getName(),
-        	osTypeService.find(template.getOsTypeId()).getUuid(), template.getUrl(),
-        	zoneService.find(template.getZoneId()).getUuid(), "json", optionalFieldValidation(template, optional));
+            hypervisorService.find(template.getHypervisorId()).getName(), template.getName(),
+            osTypeService.find(template.getOsTypeId()).getUuid(), template.getUrl(),
+            zoneService.find(template.getZoneId()).getUuid(), "json", optionalFieldValidation(template, optional));
         try {
             JSONObject templateJSON = new JSONObject(resp).getJSONObject("registertemplateresponse");
             if (templateJSON.has("errorcode")) {
@@ -408,7 +413,7 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     @PreAuthorize("hasPermission(#template.getSyncFlag(), 'DELETE_MY_TEMPLATE')")
     public Template softDelete(Template template) throws Exception {
-        if(template.getSyncFlag()) {
+        if (template.getSyncFlag()) {
             csDeleteTemplate(template.getId());
         }
         template.setIsActive(false);
