@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.entity.OsType;
@@ -137,6 +138,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public Page<Template> findAll(PagingAndSorting pagingAndSorting) throws Exception {
+        csPrepareTemplate(templateRepository.findByTemplate("ALL", TemplateType.SYSTEM, Status.INACTIVE, true));
         return templateRepository.findAllByType(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), true);
     }
 
@@ -160,10 +162,10 @@ public class TemplateServiceImpl implements TemplateService {
                 OsType osType = osTypeService.findByUUID(template.getTransOsType());
                 template.setOsTypeId(osType.getId());
                 template.setOsCategoryId(osType.getOsCategoryId());
-                if(osType.getDescription().contains("32")) {
-                    template.setArchitecture("32");
-                } else if(osType.getDescription().contains("64")) {
-                    template.setArchitecture("64");
+                if (osType.getDescription().contains(GenericConstants.TEMPLATE_ARCHITECTURE[0])) {
+                    template.setArchitecture(GenericConstants.TEMPLATE_ARCHITECTURE[0]);
+                } else if (osType.getDescription().contains(GenericConstants.TEMPLATE_ARCHITECTURE[1])) {
+                    template.setArchitecture(GenericConstants.TEMPLATE_ARCHITECTURE[1]);
                 }
 
                 template.setDisplayText(osType.getDescription());
@@ -212,30 +214,40 @@ public class TemplateServiceImpl implements TemplateService {
         }
     }
 
+    /**
+     * @param templates list of templates
+     * @return template
+     * @throws Exception raise if error
+     */
     public List<Template> csPrepareTemplate(List<Template> templates) throws Exception {
         configUtil.setServer(1L);
         List<Template> allTemplate = new ArrayList<Template>();
         for (Template template : templates) {
-            String resp = cloudStackTemplateService.prepareTemplate(template.getUuid(), zoneService.find(template.getZoneId()).getUuid(),
+            if (template.getStatus() == Status.INACTIVE) {
+                String csResponse = cloudStackTemplateService.prepareTemplate(template.getUuid(), zoneService.find(template.getZoneId()).getUuid(),
                     "json");
-            try {
-                JSONObject templateJSON = new JSONObject(resp).getJSONObject("preparetemplateresponse");
-                JSONArray templateArray = (JSONArray) templateJSON.get("template");
-                for (int i = 0; i < templateArray.length(); i++) {
-                    JSONObject jsonobject = templateArray.getJSONObject(i);
-                    if (jsonobject.getBoolean("isready")) {
-                        if (template.getSize() == null) {
-                            Template persistTemplate = templateRepository.findOne(template.getId());
-                            persistTemplate.setSize(jsonobject.getLong("size"));
-                            templateRepository.save(persistTemplate);
+                try {
+                    JSONObject templateJSON = new JSONObject(csResponse).getJSONObject("preparetemplateresponse");
+                    if (templateJSON.has("template")) {
+                        JSONArray templateArray = (JSONArray) templateJSON.get("template");
+                        for (int i = 0; i < templateArray.length(); i++) {
+                            JSONObject jsonobject = templateArray.getJSONObject(i);
+                            if (jsonobject.getBoolean("isready")) {
+                                if (template.getSize() == null) {
+                                    Template persistTemplate = templateRepository.findOne(template.getId());
+                                    persistTemplate.setSize(jsonobject.getLong("size"));
+                                    persistTemplate.setStatus(Status.valueOf("ACTIVE"));
+                                    templateRepository.save(persistTemplate);
+                                }
+                                allTemplate.add(template);
+                            } else {
+                                LOGGER.debug("Not yet complete");
+                            }
                         }
-                        allTemplate.add(template);
-                    } else {
-                        LOGGER.debug("Not yet complete");
                     }
+                } catch (Exception e) {
+                    LOGGER.error("ERROR AT TEMPLATE CREATION", e);
                 }
-            } catch (Exception e) {
-                LOGGER.error("ERROR AT TEMPLATE CREATION", e);
             }
         }
         return allTemplate;
@@ -249,12 +261,12 @@ public class TemplateServiceImpl implements TemplateService {
     public void csRegisterTemplate(Template template, Errors errors) throws Exception {
         configUtil.setServer(1L);
         HashMap<String, String> optional = new HashMap<String, String>();
-        String resp = cloudStackTemplateService.registerTemplate(template.getDescription(), template.getFormat().name(),
-        	hypervisorService.find(template.getHypervisorId()).getName(), template.getName(),
-        	osTypeService.find(template.getOsTypeId()).getUuid(), template.getUrl(),
-        	zoneService.find(template.getZoneId()).getUuid(), "json", optionalFieldValidation(template, optional));
+        String csResponse = cloudStackTemplateService.registerTemplate(template.getDescription(), template.getFormat().name(),
+            hypervisorService.find(template.getHypervisorId()).getName(), template.getName(),
+            osTypeService.find(template.getOsTypeId()).getUuid(), template.getUrl(),
+            zoneService.find(template.getZoneId()).getUuid(), "json", optionalFieldValidation(template, optional));
         try {
-            JSONObject templateJSON = new JSONObject(resp).getJSONObject("registertemplateresponse");
+            JSONObject templateJSON = new JSONObject(csResponse).getJSONObject("registertemplateresponse");
             if (templateJSON.has("errorcode")) {
                 errors = this.validateCSEvent(errors, templateJSON.getString("errortext"));
                 throw new ApplicationException(errors);
@@ -267,7 +279,7 @@ public class TemplateServiceImpl implements TemplateService {
                     if (jsonobject.getBoolean("isready")) {
                         template.setStatus(Status.valueOf("ACTIVE"));
                     } else {
-                        template.setStatus(Status.valueOf("ACTIVE"));
+                        template.setStatus(Status.valueOf("INACTIVE"));
                     }
                     template.setType(TemplateType.valueOf(jsonobject.getString("templatetype")));
                 }
@@ -402,7 +414,7 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     @PreAuthorize("hasPermission(#template.getSyncFlag(), 'DELETE_MY_TEMPLATE')")
     public Template softDelete(Template template) throws Exception {
-        if(template.getSyncFlag()) {
+        if (template.getSyncFlag()) {
             csDeleteTemplate(template.getId());
         }
         template.setIsActive(false);

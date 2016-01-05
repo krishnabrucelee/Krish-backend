@@ -25,4 +25,7 @@ public class GenericConstants {
      */
     public static final Integer DEFAULTLIMIT = 10;
 
+    /** Template architecture constant values. */
+    public static final String[] TEMPLATE_ARCHITECTURE = {"32", "64"};
+
 }
