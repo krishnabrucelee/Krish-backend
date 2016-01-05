@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.entity.OsType;
@@ -161,10 +163,10 @@ public class TemplateServiceImpl implements TemplateService {
                 OsType osType = osTypeService.findByUUID(template.getTransOsType());
                 template.setOsTypeId(osType.getId());
                 template.setOsCategoryId(osType.getOsCategoryId());
-                if (osType.getDescription().contains("32")) {
-                    template.setArchitecture("32");
-                } else if (osType.getDescription().contains("64")) {
-                    template.setArchitecture("64");
+                if (osType.getDescription().contains(GenericConstants.TEMPLATE_ARCHITECTURE[0])) {
+                    template.setArchitecture(GenericConstants.TEMPLATE_ARCHITECTURE[0]);
+                } else if (osType.getDescription().contains(GenericConstants.TEMPLATE_ARCHITECTURE[1])) {
+                    template.setArchitecture(GenericConstants.TEMPLATE_ARCHITECTURE[1]);
                 }
 
                 template.setDisplayText(osType.getDescription());

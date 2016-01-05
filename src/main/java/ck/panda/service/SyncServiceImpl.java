@@ -1089,11 +1089,11 @@ public class SyncServiceImpl implements SyncService {
                 csTemplate.setPasswordEnabled(csTemplate.getPasswordEnabled());
                 csTemplate.setFormat(csTemplate.getFormat());
                 csTemplate.setFeatured(csTemplate.getFeatured());
-                csTemplate.setOsTypeId(csTemplate.getOsType().getId());
-                csTemplate.setZoneId(csTemplate.getZone().getId());
+                csTemplate.setOsTypeId(csTemplate.getOsTypeId());
+                csTemplate.setZoneId(csTemplate.getZoneId());
                 csTemplate.setStatus(csTemplate.getStatus());
                 csTemplate.setType(csTemplate.getType());
-                csTemplate.setHypervisorId(csTemplate.getHypervisor().getId());
+                csTemplate.setHypervisorId(csTemplate.getHypervisorId());
                 csTemplate.setExtractable(csTemplate.getExtractable());
                 csTemplate.setDynamicallyScalable(csTemplate.getDynamicallyScalable());
 
