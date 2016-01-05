@@ -1363,12 +1363,13 @@ public class SyncServiceImpl implements SyncService {
                 volume.setVmInstanceId(csvolume.getVmInstanceId());
                 volume.setVolumeType(csvolume.getVolumeType());
                 volume.setIsActive(true);
-                if(volume.getDiskSize() !=null) {
+                if (volume.getDiskSize() != null) {
                     volume.setDiskSize(csvolume.getDiskSize());
                 } else {
                     volume.setDiskSize(csvolume.getStorageOffering().getDiskSize());
                 }
-                if(volume.getProjectId() !=null) {
+                volume.setDiskSizeFlag(true);
+                if (volume.getProjectId() != null) {
                     volume.setProjectId(csvolume.getProjectId());
                 }
                 volume.setChecksum(csvolume.getChecksum());
@@ -1384,16 +1385,13 @@ public class SyncServiceImpl implements SyncService {
                 // osType which is not added in the app
                 csVolumeMap.remove(volume.getUuid());
             } else {
-                volume.setIsActive(false);
-                volume.setStatus(Volume.Status.DESTROY);
-                volumeRepo.save(volume);
+                volumeService.softDelete(volume);
             }
         }
         // 4. Get the remaining list of cs server hash osType object, then
         // iterate and
         // add it to app db
         for (String key : csVolumeMap.keySet()) {
-
             volumeService.save(csVolumeMap.get(key));
         }
 

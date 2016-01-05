@@ -69,8 +69,8 @@ public class DomainServiceImpl implements DomainService {
     @Autowired
     private TokenDetails tokenDetails;
 
+    /** Reference of Cloud Stack Department service.*/
     @Autowired
-    /** Department service.*/
     private CloudStackAccountService departmentService;
 
     /** Reference of the convert entity service. */
@@ -128,7 +128,7 @@ public class DomainServiceImpl implements DomainService {
 
             JSONObject createDomain = createDomainResponseJSON.getJSONObject("domain");
             if(domainRepo.findByUUID(createDomain.getString("id")) != null) {
-            	domain = domainRepo.findByUUID(createDomain.getString("id"));
+                domain = domainRepo.findByUUID(createDomain.getString("id"));
             }
             domain.setUuid(createDomain.getString("id"));
             domain.setIsActive(true);
@@ -202,7 +202,7 @@ public class DomainServiceImpl implements DomainService {
      * Update user role.
      */
     void syncUpdateUserRole(User userObj) {
-    	List<UserType> types = new ArrayList<UserType>();
+        List<UserType> types = new ArrayList<UserType>();
         types.add(UserType.DOMAIN_ADMIN);
         try {
             Role newRole = new Role();
@@ -217,7 +217,7 @@ public class DomainServiceImpl implements DomainService {
         } catch (Exception e) {
             LOGGER.debug("syncUpdateUserRole" + e);
         }
-	}
+    }
 
     @Override
     public Domain update(Domain domain) throws Exception {
@@ -252,7 +252,7 @@ public class DomainServiceImpl implements DomainService {
             domain.setSecondaryContactEmail(secondaryContactEmail);
             domain.setSecondaryContactName(secondaryContactName);
             domain.setSecondaryContactLastName(secondaryContactLastName);
-            domain.setSecondaryContactPhone(secondaryContactPhone); 
+            domain.setSecondaryContactPhone(secondaryContactPhone);
              }
            }
         return domainRepo.save(domain);
@@ -303,23 +303,23 @@ public class DomainServiceImpl implements DomainService {
     @Override
     public Domain softDelete(Domain domain) throws Exception {
         Errors errors = validator.rejectIfNullEntity("domain", domain);
-        if(domain.getSyncFlag()) {
-			domainService.setServer(configServer.setServer(1L));
-			List<Department> department = deptService.findDomainAndIsActive(domain.getId(), true);
-			if (department.size() != 0) {
-				errors.addGlobalError("cannot.delete.domain.before.deleting.please.make.sure.all.users.and.sub.domains.have.been.removed.from.the.domain");
-			} 
+        if (domain.getSyncFlag()) {
+            domainService.setServer(configServer.setServer(1L));
+            List<Department> department = deptService.findDomainAndIsActive(domain.getId(), true);
+            if (department.size() != 0) {
+                errors.addGlobalError("cannot.delete.domain.before.deleting.please.make.sure.all.users.and.sub.domains.have.been.removed.from.the.domain");
+            }
         }
         if (errors.hasErrors()) {
-        	throw new ApplicationException(errors);
+            throw new ApplicationException(errors);
         } else {
-        		domain.setIsActive(false);
-        		domain.setStatus(Domain.Status.INACTIVE);
-        		if(domain.getSyncFlag()) {
-				String deleteResponse = domainService.deleteDomain(domain.getUuid(), "json");
-				JSONObject deleteJobId = new JSONObject(deleteResponse).getJSONObject("deletedomainresponse");
-        		}
-        	}
+                domain.setIsActive(false);
+                domain.setStatus(Domain.Status.INACTIVE);
+                if(domain.getSyncFlag()) {
+                String deleteResponse = domainService.deleteDomain(domain.getUuid(), "json");
+                JSONObject deleteJobId = new JSONObject(deleteResponse).getJSONObject("deletedomainresponse");
+                }
+            }
         return domainRepo.save(domain);
     }
 

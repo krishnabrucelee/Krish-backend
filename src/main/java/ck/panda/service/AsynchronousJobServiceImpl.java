@@ -2,7 +2,6 @@ package ck.panda.service;
 
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.List;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.json.JSONArray;
@@ -15,9 +14,9 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.CloudStackConfiguration;
+import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
-import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
@@ -57,10 +56,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /** Volume Service for listing volumes. */
     @Autowired
     private VolumeService volumeService;
-    
-    /** Nic service for listing nic. */
-    @Autowired
-    private NicService nicService;
 
     /** CloudStack connector reference for instance. */
     @Autowired
@@ -77,6 +72,21 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /** CloudStack Network Offering service for connectivity with cloudstack. */
     @Autowired
     private CloudStackNetworkOfferingService csNetworkOfferingService;
+
+    /** Sync service. */
+    private SyncService syncService;
+
+    /** Reference of the convert entity service. */
+    @Autowired
+    private ConvertEntityService convertEntityService;
+
+    /** Autowired Project Service. */
+    @Autowired
+    private ProjectService projectService;
+
+    /** Domain Service reference. */
+    @Autowired
+    private DomainService domainService;
 
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
@@ -112,12 +122,16 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             case EventTypes.EVENT_NETWORK:
                 if (!eventObject.getString("commandEventType").contains("OFFERING")) {
                     LOGGER.debug("Network sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
-                    asyncNetwork(jobresult, eventObject.getString("commandEventType"), eventObject);
+                    asyncNetwork(jobresult, eventObject);
                 }
                 break;
             case EventTypes.EVENT_TEMPLATE:
                 LOGGER.debug("templates sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
-                asyncTemplates(eventObject.getString("commandEventType"), eventObject);
+                asyncTemplates(eventObject);
+                break;
+            case EventTypes.EVENT_VOLUME:
+                LOGGER.debug("Volume sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+                asyncVolume(jobresult, eventObject);
                 break;
             default:
                 LOGGER.debug("No sync required", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
@@ -134,7 +148,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     @Override
     public void asyncNetworkOffering(ResponseEvent eventObject) throws ApplicationException, Exception {
 
-    	if (eventObject.getEvent().equals("NETWORK.OFFERING.EDIT")) {
+        if (eventObject.getEvent().equals("NETWORK.OFFERING.EDIT")) {
             HashMap<String, String> networkOfferingMap = new HashMap<String, String>();
             networkOfferingMap.put("id", eventObject.getEntityuuid());
             String response = csNetworkOfferingService.listNetworkOfferings("json", networkOfferingMap);
@@ -151,8 +165,8 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             }
         }
         if (eventObject.getEvent().equals("NETWORK.OFFERING.DELETE")) {
-        	NetworkOffering networkOffering = networkOfferingService.findByUUID(eventObject.getEntityuuid());
-        	networkOfferingService.delete(networkOffering);
+            NetworkOffering networkOffering = networkOfferingService.findByUUID(eventObject.getEntityuuid());
+            networkOfferingService.delete(networkOffering);
         }
     }
 
@@ -246,8 +260,8 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 }
                 // 3.2 If found, update the vm object in app db
                 virtualMachineService.update(instance);
-                asyncVolume();
-                asyncNic();
+                syncService.syncVolume();
+                syncService.syncNic();
             }
         }
     }
@@ -256,14 +270,13 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      * Sync with CloudStack server Network from Asynchronous Job.
      *
      * @param jobresult job result
-     * @param commandEventType action type
      * @param eventObject network event object
      * @throws ApplicationException unhandled application errors
      * @throws Exception cloudstack unhandled errors
      */
-    public void asyncNetwork(JSONObject jobresult, String commandEventType, JSONObject eventObject) throws ApplicationException, Exception {
+    public void asyncNetwork(JSONObject jobresult, JSONObject eventObject) throws ApplicationException, Exception {
 
-        if (commandEventType.equals("NETWORK.UPDATE")) {
+        if (eventObject.getString("commandEventType").equals("NETWORK.UPDATE")) {
             Network csNetwork = Network.convert(jobresult.getJSONObject("network"));
             Network network = networkService.findByUUID(csNetwork.getUuid());
             network.setSyncFlag(false);
@@ -273,10 +286,18 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 network.setDomainId(csNet.getDomainId());
                 network.setZoneId(csNet.getZoneId());
                 network.setDisplayText(csNet.getDisplayText());
+                network.setDomainId(convertEntityService.getDomainId(csNet.getTransDomainId()));
+                network.setZoneId(convertEntityService.getZoneId(csNet.getTransZoneId()));
+                network.setNetworkOfferingId(
+                        convertEntityService.getNetworkOfferingId(csNet.getTransNetworkOfferingId()));
+                network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
+                        csNet.getTransDepartmentId(), domainService.find(network.getDomainId())));
+                network.setProjectId(convertEntityService.getProjectId(csNet.getTransProjectId()));
+
                 networkService.update(network);
             }
         }
-        if (commandEventType.equals("NETWORK.DELETE")) {
+        if (eventObject.getString("commandEventType").equals("NETWORK.DELETE")) {
             JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
             Network network = networkService.findByUUID(json.getString("id"));
             network.setSyncFlag(false);
@@ -287,15 +308,13 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with CloudStack server Network from Asynchronous Job.
      *
-     * @param jobresult job result
-     * @param commandEventType action type
-     * @param eventObject network event object
+     * @param eventObject template event object
      * @throws ApplicationException unhandled application errors
      * @throws Exception cloudstack unhandled errors
      */
-    public void asyncTemplates(String commandEventType, JSONObject eventObject) throws ApplicationException, Exception {
+    public void asyncTemplates(JSONObject eventObject) throws ApplicationException, Exception {
 
-        if (commandEventType.equals("TEMPLATE.DELETE")) {
+        if (eventObject.getString("commandEventType").equals("TEMPLATE.DELETE")) {
             JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
             Template template = templateService.findByUUID(json.getString("id"));
             template.setSyncFlag(false);
@@ -306,110 +325,87 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with Cloud Server Volume.
      *
+     * @param jobresult job result
+     * @param eventObject volume event object
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    public void asyncVolume() throws ApplicationException, Exception {
+    public void asyncVolume(JSONObject jobresult, JSONObject eventObject) throws ApplicationException, Exception {
 
-        // 1. Get all the StorageOffering objects from CS server as hash
-        List<Volume> volumeList = volumeService.findAllFromCSServer();
-        HashMap<String, Volume> csVolumeMap = (HashMap<String, Volume>) Volume.convert(volumeList);
-
-        // 2. Get all the osType objects from application
-        List<Volume> appvolumeServiceList = volumeService.findAll();
-
-        // 3. Iterate application osType list
-        for (Volume volume : appvolumeServiceList) {
+        if (eventObject.getString("commandEventType").equals("VOLUME.CREATE")
+                || eventObject.getString("commandEventType").equals("VOLUME.UPLOAD")) {
+            Volume volume = Volume.convert(jobresult.getJSONObject("volume"));
             volume.setIsSyncFlag(false);
-            // 3.1 Find the corresponding CS server osType object by finding it
-            // in a hash using uuid
-            if (csVolumeMap.containsKey(volume.getUuid())) {
-                Volume csvolume = csVolumeMap.get(volume.getUuid());
-                volume.setName(csvolume.getName());
-                volume.setStorageOfferingId(csvolume.getStorageOfferingId());
-                volume.setZoneId(csvolume.getZoneId());
-                volume.setDomainId(csvolume.getDomainId());
-                volume.setDepartmentId(csvolume.getDepartmentId());
-                volume.setVmInstanceId(csvolume.getVmInstanceId());
-                volume.setVolumeType(csvolume.getVolumeType());
-                volume.setIsActive(true);
-                if (volume.getDiskSize() != null) {
-                    volume.setDiskSize(csvolume.getDiskSize());
-                } else {
-                    volume.setDiskSize(csvolume.getStorageOffering().getDiskSize());
-                }
-                if (volume.getProjectId() != null) {
-                    volume.setProjectId(csvolume.getProjectId());
-                }
-                volume.setChecksum(csvolume.getChecksum());
-                volume.setStatus(csvolume.getStatus());
-                volume.setDiskMaxIops(csvolume.getDiskMaxIops());
-                volume.setDiskMinIops(csvolume.getDiskMinIops());
-                volume.setCreatedDateTime(csvolume.getCreatedDateTime());
-                volume.setUpdatedDateTime(csvolume.getUpdatedDateTime());
-                // 3.2 If found, update the osType object in app db
-                volumeService.update(volume);
-
-                // 3.3 Remove once updated, so that we can have the list of cs
-                // osType which is not added in the app
-                csVolumeMap.remove(volume.getUuid());
+            volume.setZoneId(convertEntityService.getZoneId(volume.getTransZoneId()));
+            volume.setDomainId(convertEntityService.getDomainId(volume.getTransDomainId()));
+            volume.setStorageOfferingId(convertEntityService.getStorageOfferId(volume.getTransStorageOfferingId()));
+            volume.setVmInstanceId(convertEntityService.getVmInstanceId(volume.getTransvmInstanceId()));
+            if (volume.getTransProjectId() != null) {
+                volume.setProjectId(convertEntityService.getProjectId(volume.getTransProjectId()));
+                volume.setDepartmentId(projectService.find(volume.getProjectId()).getDepartmentId());
             } else {
-                volume.setIsActive(false);
-                volume.setStatus(Volume.Status.DESTROY);
+                Domain domain = domainService.find(volume.getDomainId());
+                volume.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(volume.getTransDepartmentId(), domain));
+            }
+            if (eventObject.getString("commandEventType").equals("VOLUME.UPLOAD")) {
+                volume.setDiskSizeFlag(false);
+            } else {
+                volume.setDiskSizeFlag(true);
+            }
+            if (volumeService.findByUUID(volume.getUuid()) == null) {
                 volumeService.save(volume);
             }
         }
-        // 4. Get the remaining list of cs server hash osType object, then
-        // iterate and
-        // add it to app db
-        for (String key : csVolumeMap.keySet()) {
-
-            volumeService.save(csVolumeMap.get(key));
+        if (eventObject.getString("commandEventType").equals("VOLUME.ATTACH")
+                || eventObject.getString("commandEventType").equals("VOLUME.DETACH")) {
+            Volume csVolume = Volume.convert(jobresult.getJSONObject("volume"));
+            Volume volume = volumeService.findByUUID(csVolume.getUuid());
+            if (csVolume.getUuid().equals(volume.getUuid())) {
+                volume.setIsSyncFlag(false);
+                volume.setZoneId(convertEntityService.getZoneId(csVolume.getTransZoneId()));
+                volume.setDomainId(convertEntityService.getDomainId(csVolume.getTransDomainId()));
+                volume.setStorageOfferingId(convertEntityService.getStorageOfferId(csVolume.getTransStorageOfferingId()));
+                volume.setVmInstanceId(convertEntityService.getVmInstanceId(csVolume.getTransvmInstanceId()));
+                if (csVolume.getTransProjectId() != null) {
+                    volume.setProjectId(convertEntityService.getProjectId(csVolume.getTransProjectId()));
+                    volume.setDepartmentId(projectService.find(volume.getProjectId()).getDepartmentId());
+                } else {
+                    Domain domain = domainService.find(volume.getDomainId());
+                    volume.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(csVolume.getTransDepartmentId(), domain));
+                }
+                volume.setName(csVolume.getName());
+                volume.setVolumeType(csVolume.getVolumeType());
+                volume.setIsActive(true);
+                if (volume.getDiskSize() != null) {
+                    volume.setDiskSize(csVolume.getDiskSize());
+                } else {
+                    volume.setDiskSize(csVolume.getStorageOffering().getDiskSize());
+                }
+                volume.setDiskSizeFlag(true);
+                volume.setChecksum(csVolume.getChecksum());
+                volume.setStatus(csVolume.getStatus());
+                volume.setDiskMaxIops(csVolume.getDiskMaxIops());
+                volume.setDiskMinIops(csVolume.getDiskMinIops());
+                volume.setCreatedDateTime(csVolume.getCreatedDateTime());
+                volume.setUpdatedDateTime(csVolume.getUpdatedDateTime());
+                volumeService.update(volume);
+            }
         }
     }
-    
+
     /**
-     * Sync with Cloud Server NIC.
+     * Sync with Cloud Server Volume.
      *
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    public void asyncNic() throws ApplicationException, Exception {
-
-        // 1. Get all the nic objects from CS server as hash
-        List<Nic> csNicList = nicService.findAllFromCSServer();
-        HashMap<String, Nic> csNicMap = (HashMap<String, Nic>) Nic.convert(csNicList);
-
-        // 2. Get all the nic objects from application
-        List<Nic> appnicList = nicService.findAll();
-
-        // 3. Iterate application nic list
-        for (Nic nic : appnicList) {
-            nic.setSyncFlag(false);
-            LOGGER.debug("Total rows updated : " + (appnicList.size()));
-            // 3.1 Find the corresponding CS server ntService object by
-            // finding it in a hash using uuid
-            if (csNicMap.containsKey(nic.getUuid())) {
-                Nic csNic = csNicMap.get(nic.getUuid());
-
-                nic.setUuid(csNic.getUuid());
-
-                // 3.2 If found, update the nic object in app db
-                nicService.update(nic);
-
-                // 3.3 Remove once updated, so that we can have the list of cs
-                // nic which is not added in the app
-                csNicMap.remove(nic.getUuid());
-            } else {
-                nicService.softDelete(nic);
-            }
-        }
-        // 4. Get the remaining list of cs server hash NetworkOffering object,
-        // then iterate and
-        // add it to app db
-        for (String key : csNicMap.keySet()) {
-            LOGGER.debug("Syncservice Nic uuid:");
-            nicService.save(csNicMap.get(key));
+    @Override
+    public void asyncVolume(ResponseEvent eventObject) throws ApplicationException, Exception {
+        if (eventObject.getEvent().contains("VOLUME.DELETE")) {
+            Volume volume = volumeService.findByUUID(eventObject.getEntityuuid());
+            volume.setIsSyncFlag(false);
+            volumeService.softDelete(volume);
         }
     }
+
 }
