@@ -223,10 +223,10 @@ public class TemplateServiceImpl implements TemplateService {
         List<Template> allTemplate = new ArrayList<Template>();
         for (Template template : templates) {
             if (template.getStatus() == Status.INACTIVE) {
-                String resp = cloudStackTemplateService.prepareTemplate(template.getUuid(), zoneService.find(template.getZoneId()).getUuid(),
+                String csResponse = cloudStackTemplateService.prepareTemplate(template.getUuid(), zoneService.find(template.getZoneId()).getUuid(),
                     "json");
                 try {
-                    JSONObject templateJSON = new JSONObject(resp).getJSONObject("preparetemplateresponse");
+                    JSONObject templateJSON = new JSONObject(csResponse).getJSONObject("preparetemplateresponse");
                     if (templateJSON.has("template")) {
                         JSONArray templateArray = (JSONArray) templateJSON.get("template");
                         for (int i = 0; i < templateArray.length(); i++) {
