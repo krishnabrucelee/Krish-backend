@@ -137,6 +137,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public Page<Template> findAll(PagingAndSorting pagingAndSorting) throws Exception {
+    	csPrepareTemplate(templateRepository.findByTemplate("ALL", TemplateType.SYSTEM, Status.INACTIVE, true));
         return templateRepository.findAllByType(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), true);
     }
 
@@ -216,27 +217,32 @@ public class TemplateServiceImpl implements TemplateService {
         configUtil.setServer(1L);
         List<Template> allTemplate = new ArrayList<Template>();
         for (Template template : templates) {
-            String resp = cloudStackTemplateService.prepareTemplate(template.getUuid(), zoneService.find(template.getZoneId()).getUuid(),
+        	if (template.getStatus() == Status.INACTIVE) {
+                String resp = cloudStackTemplateService.prepareTemplate(template.getUuid(), zoneService.find(template.getZoneId()).getUuid(),
                     "json");
-            try {
-                JSONObject templateJSON = new JSONObject(resp).getJSONObject("preparetemplateresponse");
-                JSONArray templateArray = (JSONArray) templateJSON.get("template");
-                for (int i = 0; i < templateArray.length(); i++) {
-                    JSONObject jsonobject = templateArray.getJSONObject(i);
-                    if (jsonobject.getBoolean("isready")) {
-                        if (template.getSize() == null) {
-                            Template persistTemplate = templateRepository.findOne(template.getId());
-                            persistTemplate.setSize(jsonobject.getLong("size"));
-                            templateRepository.save(persistTemplate);
+                try {
+                    JSONObject templateJSON = new JSONObject(resp).getJSONObject("preparetemplateresponse");
+                    if(templateJSON.has("template")) {
+                        JSONArray templateArray = (JSONArray) templateJSON.get("template");
+                        for (int i = 0; i < templateArray.length(); i++) {
+                            JSONObject jsonobject = templateArray.getJSONObject(i);
+                            if (jsonobject.getBoolean("isready")) {
+                                if (template.getSize() == null) {
+                                    Template persistTemplate = templateRepository.findOne(template.getId());
+                                    persistTemplate.setSize(jsonobject.getLong("size"));
+                                    persistTemplate.setStatus(Status.valueOf("ACTIVE"));
+                                    templateRepository.save(persistTemplate);
+                                }
+                                allTemplate.add(template);
+                            } else {
+                                LOGGER.debug("Not yet complete");
+                            }
                         }
-                        allTemplate.add(template);
-                    } else {
-                        LOGGER.debug("Not yet complete");
                     }
+                } catch (Exception e) {
+                    LOGGER.error("ERROR AT TEMPLATE CREATION", e);
                 }
-            } catch (Exception e) {
-                LOGGER.error("ERROR AT TEMPLATE CREATION", e);
-            }
+        	}
         }
         return allTemplate;
     }
@@ -267,7 +273,7 @@ public class TemplateServiceImpl implements TemplateService {
                     if (jsonobject.getBoolean("isready")) {
                         template.setStatus(Status.valueOf("ACTIVE"));
                     } else {
-                        template.setStatus(Status.valueOf("ACTIVE"));
+                        template.setStatus(Status.valueOf("INACTIVE"));
                     }
                     template.setType(TemplateType.valueOf(jsonobject.getString("templatetype")));
                 }
