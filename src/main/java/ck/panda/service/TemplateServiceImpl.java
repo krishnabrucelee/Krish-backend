@@ -248,6 +248,8 @@ public class TemplateServiceImpl implements TemplateService {
                 } catch (Exception e) {
                     LOGGER.error("ERROR AT TEMPLATE CREATION", e);
                 }
+            } else {
+            	allTemplate.add(template);
             }
         }
         return allTemplate;
