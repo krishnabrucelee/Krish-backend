@@ -860,18 +860,17 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-            if (vminstance.getTransDisplayName() != null
-                    && !vminstance.getTransDisplayName().trim().equalsIgnoreCase("")) {
+            if (vminstance.getDisplayName() != null
+                    && !vminstance.getDisplayName().trim().equalsIgnoreCase("")) {
                 HashMap<String, String> optional = new HashMap<String, String>();
-                optional.put("displayName", vminstance.getTransDisplayName());
+                optional.put("displayName", vminstance.getDisplayName());
                 cloudStackInstanceService.updateVirtualMachine(vminstance.getUuid(), optional);
-                vminstance.setDisplayName(vminstance.getTransDisplayName());
             }
             return virtualmachinerepository.save(vminstance);
         }
     }
 
-   
+
 
     @Override
     public List<VmInstance> findByProjectAndStatus(Long projectId, List<Status> statusCode) throws Exception {

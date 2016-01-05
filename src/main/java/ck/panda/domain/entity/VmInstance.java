@@ -368,6 +368,7 @@ public class VmInstance implements Serializable {
     private String transIsoId;
 
     /** Transient name of the instance. */
+    @Transient
     private String transDisplayName;
 
     /** Transient department id of the instance. */
