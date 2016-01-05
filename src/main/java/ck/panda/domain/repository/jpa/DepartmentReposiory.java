@@ -58,12 +58,13 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
     Department findByUuidAndIsActive(@Param("uuid") String uuid, @Param("isActive") Boolean isActive);
 
     /**
+     * Find department by domain id and isActive status.
      *
      * @param id domain id
      * @return department list
      */
-    @Query(value = "select dpt from Department dpt where dpt.domainId=:domainId")
-    List<Department> findByDomain(@Param("domainId") Long id);
+    @Query(value = "select dpt from Department dpt where dpt.domainId=:domainId and dpt.isActive =:isActive")
+    List<Department> findDomainAndIsActive(@Param("domainId") Long id , @Param("isActive") Boolean isActive);
 
     /**
      * Find the department by Domain Id and IsActive.

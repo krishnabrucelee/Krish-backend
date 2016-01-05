@@ -53,16 +53,6 @@ public interface RoleService  extends CRUDService<Role> {
      */
     Role softDelete(Role role) throws Exception;
 
-
-   /**
-     * Find role by Department.
-     *
-     * @param id of the department.
-     * @return id.
-     * @throws Exception unhandled errors.
-     */
-    List<Role> findByDepartment(Department department) throws Exception;
-
     /**
      * Method to find role by name and department id and active.
      *
@@ -73,4 +63,14 @@ public interface RoleService  extends CRUDService<Role> {
      * @throws Exception - if error occurs
      */
     Role findByNameAndDepartmentIdAndIsActive(String name, Long departmentId, Boolean isActive) throws Exception;
+
+    /**
+     * Find role by Department id.
+     * 
+     * @param id department id.
+     * @param isActive -true
+     * @return role
+     * @throws Exception if error occurs.
+     */
+	List<Role> findByDepartmentAndIsActive(Long id, Boolean isActive) throws Exception;
 }

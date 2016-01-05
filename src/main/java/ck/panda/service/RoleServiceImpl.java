@@ -152,8 +152,8 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public List<Role> findByDepartment(Department department) throws Exception {
-        return roleRepo.findByDepartment(department);
+    public List<Role> findByDepartmentAndIsActive(Long id, Boolean isActive) throws Exception {
+        return roleRepo.findByDepartmentAndIsActive(id, true);
     }
 
     /**

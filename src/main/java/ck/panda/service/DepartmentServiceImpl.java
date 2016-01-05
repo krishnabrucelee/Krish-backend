@@ -108,7 +108,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
             //Check the user is not a root and admin and set the domain value from login detail
 
-            if(!String.valueOf(tokenDetails.getTokenDetails("usertype")).equals("ROOT_ADMIN")) {
+            if (!String.valueOf(tokenDetails.getTokenDetails("usertype")).equals("ROOT_ADMIN")) {
                 department.setDomainId(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
             }
 
@@ -195,8 +195,8 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Department>findDomain(Long id)throws Exception {
-       return  departmentRepo.findByDomain(id);
+    public List<Department>findDomainAndIsActive(Long id, Boolean isActive)throws Exception {
+       return  departmentRepo.findDomainAndIsActive(id, true);
     }
     @Override
     public Page<Department> findAll(PagingAndSorting pagingAndSorting) throws Exception {
@@ -238,34 +238,34 @@ public class DepartmentServiceImpl implements DepartmentService {
         Errors errors = validator.rejectIfNullEntity("department", department);
         errors = validator.validateEntity(department, errors);
         config.setServer(1L);
-        if(department.getSyncFlag()) {
-			List<Project> projectResponse = projectService.findByDepartmentAndIsActive(department.getId(), true);
-			List<VmInstance> vmResponse = vmService.findByDepartment(department.getId());
-			List<Role> roleResponse = roleService.findByDepartment(department);
-			List<Volume> volumeResponse = volumeService.findByDepartment(department.getId());
-			List<User> userResponse = userService.findByDepartment(department.getId());
-			if (projectResponse.size() != 0 || vmResponse.size() != 0 || roleResponse.size() != 0
-					|| volumeResponse.size() != 0) {
-				errors.addGlobalError("You have following resources for this department: <br><ul><li>Project : "
-						+ projectResponse.size() + "</li><li>Instance : " + vmResponse.size() + "</li><li>Role : "
-						+ roleResponse.size() + "</li><li>Volume : " + volumeResponse.size() + "</li><li>User : "
-						+ userResponse.size() + "</li></ul><br>Kindly delete associated resources and try again");
+        if (department.getSyncFlag()) {
+            List<Project> projectResponse = projectService.findByDepartmentAndIsActive(department.getId(), true);
+            List<VmInstance> vmResponse = vmService.findByDepartmentAndVmStatus(department.getId(), VmInstance.Status.Expunging);
+            List<Role> roleResponse = roleService.findByDepartmentAndIsActive(department.getId(), true);
+            List<Volume> volumeResponse = volumeService.findByDepartmentAndIsActive(department.getId(), true);
+            List<User> userResponse = userService.findByDepartment(department.getId());
+            if (projectResponse.size() != 0 || vmResponse.size() != 0 || roleResponse.size() != 0
+                    || volumeResponse.size() != 0) {
+                errors.addGlobalError("You have following resources for this department: <br><ul><li>Project : "
+                        + projectResponse.size() + "</li><li>Instance : " + vmResponse.size() + "</li><li>Role : "
+                        + roleResponse.size() + "</li><li>Volume : " + volumeResponse.size() + "</li><li>User : "
+                        + userResponse.size() + "</li></ul><br>Kindly delete associated resources and try again");
 
-			}
+            }
         }
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
              department.setIsActive(false);
              department.setStatus(Department.Status.DELETED);
-             if(department.getSyncFlag()) {
-				String departmentResponse = csAccountService.deleteAccount(department.getUuid(), "json");
-				JSONObject jobId = new JSONObject(departmentResponse).getJSONObject("deleteaccountresponse");
-				if (jobId.has("jobid")) {
-					String jobResponse = csAccountService.accountJobResult(jobId.getString("jobid"), "json");
-					JSONObject jobresults = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
-				}
-				LOGGER.debug("Department deleted successfully" + department.getUserName());
+             if (department.getSyncFlag()) {
+                String departmentResponse = csAccountService.deleteAccount(department.getUuid(), "json");
+                JSONObject jobId = new JSONObject(departmentResponse).getJSONObject("deleteaccountresponse");
+                if (jobId.has("jobid")) {
+                    String jobResponse = csAccountService.accountJobResult(jobId.getString("jobid"), "json");
+                    JSONObject jobresults = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+                }
+                LOGGER.debug("Department deleted successfully" + department.getUserName());
              }
         }
 

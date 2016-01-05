@@ -68,8 +68,8 @@ public interface RoleReposiory extends PagingAndSortingRepository<Role, Long> {
      * @param departmentId department id.
      * @return vmInstance list.
      */
-    @Query(value = "select role from Role role where role.department=:department ")
-    List<Role> findByDepartment(@Param("department") Department department);
+    @Query(value = "select role from Role role where role.departmentId=:id and role.isActive =:isActive ")
+    List<Role> findByDepartmentAndIsActive(@Param("id") Long departmentId, @Param("isActive") Boolean isActive);
 
     /**
      * Method to find role by name and department id and active.
