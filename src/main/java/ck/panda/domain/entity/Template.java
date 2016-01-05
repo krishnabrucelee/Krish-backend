@@ -1288,6 +1288,7 @@ public class Template implements Serializable {
             template.setType(template.getType().valueOf(JsonValidator.jsonStringValidation(object, "templatetype")));
             if (JsonValidator.jsonBooleanValidation(object, "isready")) {
                 template.setStatus(template.getStatus().valueOf("ACTIVE"));
+                template.setSize(Long.parseLong(JsonValidator.jsonStringValidation(object, "size")));
             } else {
                 template.setStatus(template.getStatus().valueOf("INACTIVE"));
             }
