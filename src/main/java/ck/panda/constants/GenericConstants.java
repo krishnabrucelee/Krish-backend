@@ -1,11 +1,5 @@
 package ck.panda.constants;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import ck.panda.domain.entity.Volume;
-import ck.panda.domain.entity.Volume.VolumeType;
-
 /**
  * All the common constants for the application will go here.
  *
