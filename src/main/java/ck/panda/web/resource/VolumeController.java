@@ -271,18 +271,18 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     /**
      * Get the volume counts for attached, detached and total count.
      *
-     * @param request
-     * @param response
-     * @return
-     * @throws Exception
+     * @param request http request
+     * @param response http Servlet Response
+     * @return attached/detached count
+     * @throws Exception error
      */
-//    @RequestMapping(value = "volumeCounts", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-//    @ResponseStatus(HttpStatus.OK)
-//    @ResponseBody
-//    public String getVolumeCounts(HttpServletRequest request, HttpServletResponse response)
-//                    throws Exception {
-//        Integer attachedCount = volumeService.findCountByStatus();
-//        Integer detachedCount = volumeService.findCountByStatus();
-//        return "{\"attachedCount\":" + attachedCount + ",\"detachedCount\":" + detachedCount + "}";
-//    }
+    @RequestMapping(value = "volumeCounts", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public String getVolumeCounts(HttpServletRequest request, HttpServletResponse response)
+                    throws Exception {
+        Integer attachedCount = volumeService.findAttachedCount();
+        Integer detachedCount = volumeService.findDetachedCount();
+        return "{\"attachedCount\":" + attachedCount + ",\"detachedCount\":" + detachedCount + "}";
+    }
 }

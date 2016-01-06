@@ -167,11 +167,22 @@ public interface VolumeService extends CRUDService<Volume> {
     */
    List<Volume> findByDepartmentAndNotProjectAndVolumeType(Long departmentId, Long projectId, List<VolumeType> volumeType);
 
-//   /**
-//    * Get the count of the volume based on the attached/detached.
-//    *
-//    * @return count
-//    */
-//   Integer findCountByStatus() throws NumberFormatException, Exception;
+   /**
+    * Get the count of the volume based on the attached.
+    *
+    * @return count
+    * @throws NumberFormatException Number format
+    * @throws Exception error occurs
+    */
+   Integer findAttachedCount() throws NumberFormatException, Exception;
+
+   /**
+    * Get the count of the volume based on the detached.
+    *
+    * @return count
+    * @throws NumberFormatException Number format
+    * @throws Exception error occurs
+    */
+   Integer findDetachedCount() throws NumberFormatException, Exception;
 
 }

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -249,15 +248,12 @@ public class VolumeServiceImpl implements VolumeService {
                 if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
                     List<Volume> allProjectList = new ArrayList<Volume>();
                     for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
-                        System.out.println(project.getId());
                         List<Volume> allProjectTempList = volumeRepo
-                                .findByProjectAndVolumeTypeWithInstance(project.getId(), Long.parseLong(tokenDetails.getTokenDetails("departmentid")), volumeType, true);
-                        System.out.println(allProjectTempList);
+                                .findByProjectAndVolumeType(project.getId(), Long.parseLong(tokenDetails.getTokenDetails("departmentid")), volumeType, true);
                         allProjectList.addAll(allProjectTempList);
                     }
                     List<Volume> volumes = allProjectList.stream().distinct().collect(Collectors.toList());
                     Page<Volume> allProjectLists = new PageImpl<Volume>(volumes);
-                    System.out.println(allProjectLists.getSize());
                     return (Page<Volume>) allProjectLists;
                 } else {
                     return volumeRepo.findByDepartmentAndVolumeTypeAndPage(
@@ -748,27 +744,101 @@ public class VolumeServiceImpl implements VolumeService {
     public List<Volume> findByDepartmentAndNotProjectAndVolumeType(Long departmentId, Long projectId, List<VolumeType> volumeType) {
         return volumeRepo.findByDepartmentAndNotProjectAndVolumeType(departmentId, projectId, volumeType, true);
     }
-//
-//    @Override
-//    public Integer findCountByStatus() throws NumberFormatException, Exception {
-//        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-//        if (domain != null && !domain.getName().equals("ROOT")) {
-//            List<Volume> volumeCount = (List<Volume>) volumeRepo.findAllByActive(true);
-//            for (Volume volume2 : volumeCount) {
-//              return volumeRepo.findVolumeCountByDomainAndInstanceId(domain.getId(), volume2.getVmInstanceId(), Volume.VolumeType.DATADISK, true);
-//            }
-//            return null;
-//        } else {
-//        List<Volume> volumeCount = (List<Volume>) volumeRepo.findAllByActive(true);
-//        for (Volume volume2 : volumeCount) {
-//
-//            List<Volume> ints = volumeRepo.findVolumeCountByInstanceId(volume2.getVmInstanceId(), Volume.VolumeType.DATADISK, true);
-//
-//            System.out.println(ints);
-//          return ints.size();
-//        }
-//        }
-//        return null;
-//    }
+
+    @Override
+    public Integer findAttachedCount() throws NumberFormatException, Exception {
+        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if (domain != null && !domain.getName().equals("ROOT")) {
+            if (tokenDetails.getTokenDetails("usertype").equals("DOMAIN_ADMIN")) {
+                int count = 0;
+                for (Volume volume : volumeRepo.findAllByActive(true)) {
+                    if (volume.getVmInstanceId() != null && volume.getVolumeType().equals(VolumeType.DATADISK)
+                            && volume.getDomainId() == Long.valueOf(tokenDetails.getTokenDetails("domainid"))) {
+                        count++;
+                    }
+                }
+                return count;
+            } else {
+                List<Volume.VolumeType> volumeType = new ArrayList<>();
+                volumeType.add(VolumeType.DATADISK);
+                User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
+                int count = 0;
+                if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
+                    for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
+                        for (Volume volume : volumeRepo.findByProjectAndVolumeTypeCount(project.getId(),
+                                Long.parseLong(tokenDetails.getTokenDetails("departmentid")), volumeType, true)) {
+                            if (volume.getVmInstanceId() != null && volume.getVolumeType() != VolumeType.ROOT) {
+                                count++;
+                            }
+                        }
+                    }
+                } else {
+                    for (Volume volume : volumeRepo.findByDepartmentAndVolumeTypeCount(
+                            Long.parseLong(tokenDetails.getTokenDetails("departmentid")), volumeType, true)) {
+                        if (volume.getVmInstanceId() != null) {
+                            count++;
+                        }
+                    }
+                }
+                return count;
+            }
+        } else {
+            int count = 0;
+            for (Volume volume : volumeRepo.findAllByActive(true)) {
+                if (volume.getVmInstanceId() != null && volume.getVolumeType().equals(VolumeType.DATADISK)) {
+                    count++;
+                }
+            }
+            return count;
+        }
+    }
+
+    @Override
+    public Integer findDetachedCount() throws NumberFormatException, Exception {
+        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if (domain != null && !domain.getName().equals("ROOT")) {
+            if (tokenDetails.getTokenDetails("usertype").equals("DOMAIN_ADMIN")) {
+                int count = 0;
+                for (Volume volume : volumeRepo.findAllByActive(true)) {
+                    if (volume.getVmInstanceId() == null && volume.getVolumeType().equals(VolumeType.DATADISK)
+                            && volume.getDomainId() == Long.valueOf(tokenDetails.getTokenDetails("domainid"))) {
+                        count++;
+                    }
+                }
+                return count;
+            } else {
+                List<Volume.VolumeType> volumeType = new ArrayList<>();
+                volumeType.add(VolumeType.DATADISK);
+                User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
+                int count = 0;
+                if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
+                    for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
+                        for (Volume volume : volumeRepo.findByProjectAndVolumeTypeCount(project.getId(),
+                                Long.parseLong(tokenDetails.getTokenDetails("departmentid")), volumeType, true)) {
+                            if (volume.getVmInstanceId() == null && volume.getVolumeType() != VolumeType.ROOT) {
+                                count++;
+                            }
+                        }
+                    }
+                } else {
+                    for (Volume volume : volumeRepo.findByDepartmentAndVolumeTypeCount(
+                            Long.parseLong(tokenDetails.getTokenDetails("departmentid")), volumeType, true)) {
+                        if (volume.getVmInstanceId() == null) {
+                            count++;
+                        }
+                    }
+                }
+                return count;
+            }
+        } else {
+            int count = 0;
+            for (Volume volume : volumeRepo.findAllByActive(true)) {
+                if (volume.getVmInstanceId() == null && volume.getVolumeType().equals(VolumeType.DATADISK)) {
+                    count++;
+                }
+            }
+            return count;
+        }
+    }
 
 }
