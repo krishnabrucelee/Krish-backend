@@ -180,7 +180,7 @@ public class CloudStackServer {
         });
 
         String queryString = EncodingUtil
-                .formUrlEncode(queryValues.toArray(new NameValuePair[queryValues.size()]), "UTF-8").replace("+", "%20");
+                .formUrlEncode(queryValues.toArray(new NameValuePair[queryValues.size()]), "UTF-8").replace("+", "%20").replace("%5B", "[").replace("%5D", "]");
         byte[] digest = queryString.toLowerCase().getBytes();
 
         return DatatypeConverter.printBase64Binary(digest);
