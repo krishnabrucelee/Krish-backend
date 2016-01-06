@@ -248,15 +248,12 @@ public class VolumeServiceImpl implements VolumeService {
                 if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
                     List<Volume> allProjectList = new ArrayList<Volume>();
                     for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
-                        System.out.println(project.getId());
                         List<Volume> allProjectTempList = volumeRepo
                                 .findByProjectAndVolumeType(project.getId(), Long.parseLong(tokenDetails.getTokenDetails("departmentid")), volumeType, true);
-                        System.out.println(allProjectTempList);
                         allProjectList.addAll(allProjectTempList);
                     }
                     List<Volume> volumes = allProjectList.stream().distinct().collect(Collectors.toList());
                     Page<Volume> allProjectLists = new PageImpl<Volume>(volumes);
-                    System.out.println(allProjectLists.getSize());
                     return (Page<Volume>) allProjectLists;
                 } else {
                     return volumeRepo.findByDepartmentAndVolumeTypeAndPage(
@@ -768,9 +765,9 @@ public class VolumeServiceImpl implements VolumeService {
                 int count = 0;
                 if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
                     for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
-                        for (Volume volume : volumeRepo.findByProjectAndVolumeType(project.getId(),
+                        for (Volume volume : volumeRepo.findByProjectAndVolumeTypeCount(project.getId(),
                                 Long.parseLong(tokenDetails.getTokenDetails("departmentid")), volumeType, true)) {
-                            if (volume.getVmInstanceId() != null) {
+                            if (volume.getVmInstanceId() != null && volume.getVolumeType() != VolumeType.ROOT) {
                                 count++;
                             }
                         }
@@ -816,9 +813,9 @@ public class VolumeServiceImpl implements VolumeService {
                 int count = 0;
                 if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
                     for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
-                        for (Volume volume : volumeRepo.findByProjectAndVolumeType(project.getId(),
+                        for (Volume volume : volumeRepo.findByProjectAndVolumeTypeCount(project.getId(),
                                 Long.parseLong(tokenDetails.getTokenDetails("departmentid")), volumeType, true)) {
-                            if (volume.getVmInstanceId() == null) {
+                            if (volume.getVmInstanceId() == null && volume.getVolumeType() != VolumeType.ROOT) {
                                 count++;
                             }
                         }
