@@ -83,8 +83,8 @@ public class CloudStackInstanceService {
      * @return response json.
      * @throws Exception unhandled exceptions.
      */
-    public String startVirtualMachine(String virtualMachineId, String response) throws Exception {
-        LinkedList<NameValuePair> arguments = server.getDefaultQuery("startVirtualMachine", null);
+    public String startVirtualMachine(String virtualMachineId, String response, HashMap<String, String> optional) throws Exception {
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("startVirtualMachine", optional);
         arguments.add(new NameValuePair("id", virtualMachineId));
         arguments.add(new NameValuePair("response", response));
         return server.request(arguments);
