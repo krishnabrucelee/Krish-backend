@@ -25,7 +25,7 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * @return instance.
      */
     VmInstance findByUUID(String uuid);
-    
+
     /**
      * Find vm instance by id.
      *
@@ -33,8 +33,8 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * @return instance.
      */
     VmInstance findById(Long id);
-    
-   
+
+
     /**
      * VM related events are handled.
      *
@@ -130,11 +130,20 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
 
     /**
      * Find vm Instance assocaited with compute offering.
-     * 
+     *
      * @param computeOfferingId of the compute offer
      * @return compute offering
      * @throws Exception error occurs.
      */
-	List<VmInstance> findByComputeOfferingIdAndVmStatus(Long computeOfferingId, Status status) throws Exception;
+    List<VmInstance> findByComputeOfferingIdAndVmStatus(Long computeOfferingId, Status status) throws Exception;
 
+    /**
+     *  Find vm Instance associated with network.
+     *
+     * @param networkId of the instance.
+     * @param status of instance
+     * @return network
+     * @throws Exception error occurs.
+     */
+    List<VmInstance> findByNetworkAndVmStatus(Long networkId, Status status) throws Exception;
 }

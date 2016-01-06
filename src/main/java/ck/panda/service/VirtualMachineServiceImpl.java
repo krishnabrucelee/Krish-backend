@@ -392,9 +392,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         switch (event) {
         case EventTypes.EVENT_VM_START:
             try {
-            	if(!vmInstance.getHostUuid().isEmpty()){
+                if(!vmInstance.getHostUuid().isEmpty()){
                 optional.put("hostid", vmInstance.getHostUuid());
-            	}
+                }
                 String instanceResponse = cloudStackInstanceService.startVirtualMachine(vminstance.getUuid(), "json", optional);
                 JSONObject instance = new JSONObject(instanceResponse).getJSONObject("startvirtualmachineresponse");
                 if (instance.has("jobid")) {
@@ -917,29 +917,29 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     tempCount = updateResourceCount(vm, "9");
                     memory = tempTotalCapacity - tempCapacityUsed;
                     if (convertEntityService.getComputeOfferById(vm.getComputeOfferingId()).getCustomized()) {
-                    	if (memory < Long.valueOf(vm.getMemory())){
-                    		errMessage = "There’s no memory available in the memory pool. Please contact the Cloud Admin";
-                    	}
-					} else {
-						if (memory < Long.valueOf(convertEntityService.getComputeOfferById(vm.getComputeOfferingId())
-								.getMemory().toString())) {
-							errMessage = "There’s no memory available in the memory pool. Please contact the Cloud Admin";
-						}
-					}
+                        if (memory < Long.valueOf(vm.getMemory())){
+                            errMessage = "There’s no memory available in the memory pool. Please contact the Cloud Admin";
+                        }
+                    } else {
+                        if (memory < Long.valueOf(convertEntityService.getComputeOfferById(vm.getComputeOfferingId())
+                                .getMemory().toString())) {
+                            errMessage = "There’s no memory available in the memory pool. Please contact the Cloud Admin";
+                        }
+                    }
                     break;
                 case "1":
                     tempCount = updateResourceCount(vm, "8");
                     cpu = tempTotalCapacity - tempCapacityUsed;
                     if (convertEntityService.getComputeOfferById(vm.getComputeOfferingId()).getCustomized()) {
-                    	if (Long.valueOf(vm.getCpuSpeed()) > cpu){
-                    		errMessage = "There’s no CPU available in the CPU pool. Please contact the Cloud Admin";
-                    	}
-					} else {
-						if (Long.valueOf(convertEntityService.getComputeOfferById(vm.getComputeOfferingId())
-								.getClockSpeed().toString()) > cpu) {
-							errMessage = "There’s no CPU available in the CPU pool. Please contact the Cloud Admin";
-						}
-					}
+                        if (Long.valueOf(vm.getCpuSpeed()) > cpu){
+                            errMessage = "There’s no CPU available in the CPU pool. Please contact the Cloud Admin";
+                        }
+                    } else {
+                        if (Long.valueOf(convertEntityService.getComputeOfferById(vm.getComputeOfferingId())
+                                .getClockSpeed().toString()) > cpu) {
+                            errMessage = "There’s no CPU available in the CPU pool. Please contact the Cloud Admin";
+                        }
+                    }
                     break;
                 case "2":
                     tempCount = updateResourceCount(vm, "11");
@@ -1013,19 +1013,23 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         return 0L;
     }
 
-	@Override
-	public VmInstance findById(Long id) {
-		return virtualmachinerepository.findById(id);
-	}
+    @Override
+    public VmInstance findById(Long id) {
+        return virtualmachinerepository.findById(id);
+    }
 
-	@Override
-	public List<VmInstance> findByComputeOfferingIdAndVmStatus(Long computeOfferingId, Status status) throws Exception {
-		return virtualmachinerepository.findByComputeOffering(computeOfferingId, status);
-	}
+    @Override
+    public List<VmInstance> findByComputeOfferingIdAndVmStatus(Long computeOfferingId, Status status) throws Exception {
+        return virtualmachinerepository.findByComputeOffering(computeOfferingId, status);
+    }
 
-	@Override
-	public List<VmInstance> findByDepartmentAndVmStatus(Long departmentId, Status status) throws Exception {
-		return virtualmachinerepository.findByDepartment(departmentId, status);
-	}
-;
+    @Override
+    public List<VmInstance> findByDepartmentAndVmStatus(Long departmentId, Status status) throws Exception {
+        return virtualmachinerepository.findByDepartment(departmentId, status);
+    }
+
+    @Override
+    public List<VmInstance> findByNetworkAndVmStatus(Long networkId, Status status) throws Exception {
+        return virtualmachinerepository.findByNetwork(networkId, status);
+    }
 }
