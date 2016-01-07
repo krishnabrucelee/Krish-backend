@@ -21,7 +21,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
- * The Egress traffic originates from the guest network and sent to public network.
+ * The Firewall controlls the  traffic originates from the guest network and sent to public network.
  * This features controls the Egress (outgoing) traffic from the guest network in Advanced zone.
  * The egress firewall rules applied will restrict the traffic from guest network on the Virtual Router.
  *
@@ -30,58 +30,58 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Table(name = "firewall_rules")
 public class FirewallRules {
 
-    /** Unique Id of the egress rule. */
+    /** Unique Id of the Firewall Rule. */
     @Id
     @GeneratedValue
     @Column(name = "id")
     private Long id;
 
-    /** Cloudstack's egress rule uuid. */
+    /** Cloudstack's Firewall Rule uuid. */
     @Column(name = "uuid")
     private String uuid;
 
-    /** Network for Egress Rule. */
+    /** Network for Firewall Rule. */
     @JoinColumn(name = "network_id", referencedColumnName = "id", updatable = false, insertable = false)
     @OneToOne
     private Network network;
 
-    /** Network id for Egress Rule */
+    /** Network id for Firewall Rule */
     @Column(name = "network_id")
     private Long networkId;
 
-    /** Domain of the Egress Rule. */
+    /** Domain of the Firewall Rule. */
     @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
     private Domain domain;
 
-    /** Domain id of the Egress rule. */
+    /** Domain id of the Firewall Rule. */
     @Column(name = "domain_id")
     private Long domainId;
 
-    /** Project of the Egress Rule. */
+    /** Project of the Firewall Rule. */
     @JoinColumn(name = "project_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
     private Project project;
 
-    /** Project id of the Egress rule. */
+    /** Project id of the Firewall Rule. */
     @Column(name = "project_id")
     private Long projectId;
 
-    /** Department of the Egress Rule. */
+    /** Department of the Firewall Rule. */
     @JoinColumn(name = "department_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
     private Department department;
 
-    /** Department id of the Egress rule. */
+    /** Department id of the Firewall Rule. */
     @Column(name = "department_id")
     private Long departmentId;
 
-    /** ipAddress of the Egress Rule. */
+    /** ipAddress of the Firewall Rule. */
     @JoinColumn(name = "ipaddress_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
     private IpAddress ipAddress;
 
-    /** ipAddress id of the Egress rule. */
+    /** ipAddress id of the Firewall Rule. */
     @Column(name = "ipaddress_id")
     private Long ipAddressId;
 
@@ -122,6 +122,11 @@ public class FirewallRules {
     @Enumerated(EnumType.STRING)
     private Purpose purpose ;
 
+    /** TYpes of traffic over a network .*/
+    @Column(name = "traffic_type")
+    @Enumerated(EnumType.STRING)
+    private TrafficType trafficType ;
+
     /** Created by user. */
     @CreatedBy
     @Column(name = "created_user_id")
@@ -159,9 +164,17 @@ public class FirewallRules {
         LOADBALANCING
     }
 
+    /** Traffic type for a network .*/
+    public enum TrafficType {
+        /** Rule for controlling traffic to outside . */
+        EGRESS,
+
+        /** Rule for controlling traffic from inside. */
+        INGRESS
+    }
 
     /**
-     * Get Egress rule id.
+     * Get Firewall Rule id.
      *
      * @return the id
      */
@@ -170,7 +183,7 @@ public class FirewallRules {
     }
 
     /**
-     * Set the Egress rule id.
+     * Set the Firewall Rule id.
      *
      * @param id to set
      */
@@ -179,7 +192,7 @@ public class FirewallRules {
     }
 
     /**
-     * Get Egress rule Uuid.
+     * Get Firewall Rule Uuid.
      *
      * @return the uuid
      */
@@ -188,7 +201,7 @@ public class FirewallRules {
     }
 
     /**
-     * Set the Egress rule uuid.
+     * Set the Firewall Rule uuid.
      *
      * @param uuid  to set
      */
@@ -197,7 +210,7 @@ public class FirewallRules {
     }
 
     /**
-     * Get network of the Egress rule.
+     * Get network of the Firewall Rule.
      *
      * @return the network
      */
@@ -206,7 +219,7 @@ public class FirewallRules {
     }
 
     /**
-     * Set the network of the Egress rule.
+     * Set the network of the Firewall Rule.
      *
      * @param network  to set
      */
@@ -215,7 +228,7 @@ public class FirewallRules {
     }
 
     /**
-     * Get the networkId of the Egress rule.
+     * Get the networkId of the Firewall Rule.
      *
      * @return the networkId
      */
@@ -224,7 +237,7 @@ public class FirewallRules {
     }
 
     /**
-     * Set the networkId of the Egress rule.
+     * Set the networkId of the Firewall Rule.
      *
      * @param networkId  to set
      */
@@ -233,7 +246,7 @@ public class FirewallRules {
     }
 
     /**
-     * Get the domain of the Egress rule.
+     * Get the domain of the Firewall Rule.
      *
      * @return the domain
      */
@@ -242,7 +255,7 @@ public class FirewallRules {
     }
 
     /**
-     * Set the domain of the Egress rule.
+     * Set the domain of the Firewall Rule.
      *
      * @param domain  to set
      */
@@ -251,7 +264,7 @@ public class FirewallRules {
     }
 
     /**
-     * Get the domainId of the Egress rule.
+     * Get the domainId of the Firewall Rule.
      *
      * @return the domainId
      */
@@ -260,7 +273,7 @@ public class FirewallRules {
     }
 
     /**
-     * Set the domainId of the Egress rule.
+     * Set the domainId of the Firewall Rule.
      *
      * @param domainId  to set
      */
@@ -269,7 +282,7 @@ public class FirewallRules {
     }
 
     /**
-     * Get the department of the Egress rule.
+     * Get the department of the Firewall Rule.
      *
      * @return the department
      */
@@ -278,7 +291,7 @@ public class FirewallRules {
     }
 
     /**
-     * Set the department of the Egress rule.
+     * Set the department of the Firewall Rule.
      *
      * @param department  to set
      */
@@ -287,7 +300,7 @@ public class FirewallRules {
     }
 
     /**
-     * Get the departmentId of the Egress rule.
+     * Get the departmentId of the Firewall Rule.
      *
      * @return the departmentId
      */
@@ -296,7 +309,7 @@ public class FirewallRules {
     }
 
     /**
-     * Set the departmentId of the Egress rule.
+     * Set the departmentId of the Firewall Rule.
      *
      * @param departmentId to set
      */
@@ -449,7 +462,7 @@ public class FirewallRules {
     }
 
     /**
-     * Get  the ipAddress of the Egress rule.
+     * Get  the ipAddress of the Firewall Rule.
      *
      * @return the ipAddress
      */
@@ -458,7 +471,7 @@ public class FirewallRules {
     }
 
      /**
-     * Set  the ipAddress of the Egress rule.
+     * Set  the ipAddress of the Firewall Rule.
      *
      * @param ipAddress to set
      */
@@ -467,7 +480,7 @@ public class FirewallRules {
     }
 
      /**
-     * Get the ipAddressId of the Egress rule
+     * Get the ipAddressId of the Firewall Rule
      *
      * @return the ipAddressId
      */
@@ -494,7 +507,7 @@ public class FirewallRules {
     }
 
     /**
-     * Set the ipAddressId of the Egress rule.
+     * Set the ipAddressId of the Firewall Rule.
      *
      * @param ipAddressId to set
      */
@@ -536,6 +549,24 @@ public class FirewallRules {
      */
     public void setProjectId(Long projectId) {
         this.projectId = projectId;
+    }
+
+    /**
+     * Get the trafficType.
+     *
+     * @return the trafficType
+     */
+    public TrafficType getTrafficType() {
+        return trafficType;
+    }
+
+    /**
+     * Set the trafficType.
+     *
+     * @param trafficType  to set
+     */
+    public void setTrafficType(TrafficType trafficType) {
+        this.trafficType = trafficType;
     }
 
     /**
@@ -609,13 +640,4 @@ public class FirewallRules {
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
-
-
-
-
-
-
-
-
-
 }
