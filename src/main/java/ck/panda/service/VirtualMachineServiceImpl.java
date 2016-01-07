@@ -554,11 +554,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                                                 .getJSONObject("virtualmachine").getString("password"), originalKey));
                                 vminstance.setVncPassword(encryptedPassword);
                                 virtualmachinerepository.save(vminstance);
-                                errors = validator.sendGlobalError(jobresult.getJSONObject("jobresult")
-                                        .getJSONObject("virtualmachine").getString("password"));
+                                errors = validator.sendGlobalError("SUCCESS");
                                 if (errors.hasErrors()) {
-                                    throw new BadCredentialsException(jobresult.getJSONObject("jobresult")
-                                            .getJSONObject("virtualmachine").getString("password"));
+                                    throw new BadCredentialsException("SUCCESS");
                                 }
                             }
                         }
@@ -589,7 +587,14 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     @Override
     public VmInstance find(Long id) throws Exception {
-        return virtualmachinerepository.findOne(id);
+    	VmInstance vmInstance = virtualmachinerepository.findOne(id);
+    	String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+        byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+    	String decryptPassword = new String(
+                EncryptionUtil.decrypt(vmInstance.getVncPassword(), originalKey));
+    	vmInstance.setVncPassword(decryptPassword);
+        return vmInstance;
     }
 
     @Override
