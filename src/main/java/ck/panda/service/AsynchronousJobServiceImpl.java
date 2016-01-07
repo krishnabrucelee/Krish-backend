@@ -1,7 +1,9 @@
 package ck.panda.service;
 
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.json.JSONArray;
@@ -17,13 +19,17 @@ import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
+import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
 import ck.panda.rabbitmq.util.ResponseEvent;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackNetworkOfferingService;
+import ck.panda.util.CloudStackNicService;
 import ck.panda.util.CloudStackServer;
+import ck.panda.util.CloudStackVolumeService;
+import ck.panda.util.JsonUtil;
 import ck.panda.util.error.exception.ApplicationException;
 
 /**
@@ -73,9 +79,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     @Autowired
     private CloudStackNetworkOfferingService csNetworkOfferingService;
 
-    /** Sync service. */
-    private SyncService syncService;
-
     /** Reference of the convert entity service. */
     @Autowired
     private ConvertEntityService convertEntityService;
@@ -87,6 +90,18 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /** Domain Service reference. */
     @Autowired
     private DomainService domainService;
+
+    /** Nic service for listing nic. */
+    @Autowired
+    private NicService nicService;
+
+    /** CloudStack connector reference for instance. */
+    @Autowired
+    private CloudStackNicService cloudStackNicService;
+
+    /** Lists types of Volumes in cloudstack server. */
+    @Autowired
+    private CloudStackVolumeService csVolumeService;
 
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
@@ -117,7 +132,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         switch (commandText) {
             case EventTypes.EVENT_VM:
                 LOGGER.debug("VM Sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
-                syncvirtualmachine(jobresult);
+                syncvirtualmachine(jobresult, eventObject);
                 break;
             case EventTypes.EVENT_NETWORK:
                 if (!eventObject.getString("commandEventType").contains("OFFERING")) {
@@ -130,8 +145,12 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 asyncTemplates(eventObject);
                 break;
             case EventTypes.EVENT_VOLUME:
-                LOGGER.debug("Volume sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+                LOGGER.debug("VNC sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
                 asyncVolume(jobresult, eventObject);
+                break;
+            case EventTypes.EVENT_NIC:
+                LOGGER.debug("Volume sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+                asyncNic(jobresult, eventObject);
                 break;
             default:
                 LOGGER.debug("No sync required", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
@@ -139,44 +158,13 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     }
 
     /**
-     * Sync with CloudStack server Network offering.
-     *
-     * @param uuid network offering response event
-     * @throws ApplicationException unhandled application errors.
-     * @throws Exception cloudstack unhandled errors
-     */
-    @Override
-    public void asyncNetworkOffering(ResponseEvent eventObject) throws ApplicationException, Exception {
-
-        if (eventObject.getEvent().equals("NETWORK.OFFERING.EDIT")) {
-            HashMap<String, String> networkOfferingMap = new HashMap<String, String>();
-            networkOfferingMap.put("id", eventObject.getEntityuuid());
-            String response = csNetworkOfferingService.listNetworkOfferings("json", networkOfferingMap);
-            JSONArray networkOfferingListJSON = null;
-            JSONObject responseObject = new JSONObject(response).getJSONObject("listnetworkofferingsresponse");
-            if (responseObject.has("networkoffering")) {
-                networkOfferingListJSON = responseObject.getJSONArray("networkoffering");
-                NetworkOffering csNetworkOffering = NetworkOffering.convert(networkOfferingListJSON.getJSONObject(0));
-                NetworkOffering networkOffering = networkOfferingService.findByUUID(eventObject.getEntityuuid());
-                networkOffering.setName(csNetworkOffering.getName());
-                networkOffering.setDisplayText(csNetworkOffering.getDisplayText());
-                networkOffering.setAvailability(csNetworkOffering.getAvailability());
-                networkOfferingService.update(networkOffering);
-            }
-        }
-        if (eventObject.getEvent().equals("NETWORK.OFFERING.DELETE")) {
-            NetworkOffering networkOffering = networkOfferingService.findByUUID(eventObject.getEntityuuid());
-            networkOfferingService.delete(networkOffering);
-        }
-    }
-
-    /**
      * Sync with CloudStack server virtual machine.
      *
      * @param jobresult job result
+     * @param eventObject network event object
      * @throws Exception cloudstack unhandled errors
      */
-    public void syncvirtualmachine(JSONObject jobresult) throws Exception {
+    public void syncvirtualmachine(JSONObject jobresult, JSONObject eventObject) throws Exception {
 
         if (jobresult.has("virtualmachine")) {
             VmInstance vmInstance = VmInstance.convert(jobresult.getJSONObject("virtualmachine"));
@@ -259,11 +247,93 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     instance.setVncPassword(encryptedPassword);
                 }
                 // 3.2 If found, update the vm object in app db
-                virtualMachineService.update(instance);
-                syncService.syncVolume();
-                syncService.syncNic();
+                VmInstance vmIn = virtualMachineService.update(instance);
+                if (eventObject.getString("commandEventType").equals(EventTypes.EVENT_VM_CREATE)) {
+                    this.assignNicTovM(vmIn);
+                    this.assignVolumeTovM(vmIn);
+                }
             }
         }
+    }
+
+    /**
+     * Get the default NIC when creating the template.
+     *
+     * @param vmInstance instance details
+     * @throws ApplicationException unhandled application errors
+     * @throws Exception cloudstack unhandled errors
+     */
+    public void assignNicTovM(VmInstance vmInstance) throws ApplicationException, Exception {
+        HashMap<String,String> optional = new HashMap<String, String>();
+        optional.put("virtualmachineid", vmInstance.getUuid());
+        String listNic = cloudStackNicService.listNics(optional, "json");
+        JSONArray nicListJSON = new JSONObject(listNic).getJSONObject("listnicsresponse").getJSONArray("nic");
+        for (int i = 0; i < nicListJSON.length(); i++) {
+            Nic nic = nicService.findbyUUID(nicListJSON.getJSONObject(i).getString("id"));
+            if (nic != null) {
+                nic.setSyncFlag(false);
+                nic.setUuid(nicListJSON.getJSONObject(i).getString("id"));
+                nic.setVmInstanceId(virtualMachineService.findByUUID(nicListJSON.getJSONObject(i).getString("virtualmachineid")).getId());
+                nic.setNetworkId(networkService.findByUUID(nicListJSON.getJSONObject(i).getString("networkid")).getId());
+                nic.setNetMask(nicListJSON.getJSONObject(i).getString("netmask"));
+                nic.setGateway(nicListJSON.getJSONObject(i).getString("gateway"));
+                nic.setIpAddress(nicListJSON.getJSONObject(i).getString("ipaddress"));
+                nic.setIsDefault(nicListJSON.getJSONObject(i).getBoolean("isdefault"));
+                nic.setIsActive(true);
+                if (nicService.findbyUUID(nic.getUuid()) == null) {
+                    nicService.save(nic);
+                }
+            } else {
+                nic = new Nic();
+                nic.setSyncFlag(false);
+                nic.setUuid(nicListJSON.getJSONObject(i).getString("id"));
+                nic.setVmInstanceId(virtualMachineService.findByUUID(nicListJSON.getJSONObject(i).getString("virtualmachineid")).getId());
+                nic.setNetworkId(networkService.findByUUID(nicListJSON.getJSONObject(i).getString("networkid")).getId());
+                nic.setNetMask(nicListJSON.getJSONObject(i).getString("netmask"));
+                nic.setGateway(nicListJSON.getJSONObject(i).getString("gateway"));
+                nic.setIpAddress(nicListJSON.getJSONObject(i).getString("ipaddress"));
+                nic.setIsDefault(nicListJSON.getJSONObject(i).getBoolean("isdefault"));
+                nic.setIsActive(true);
+                if (nicService.findbyUUID(nic.getUuid()) == null) {
+                    nicService.save(nic);
+                }
+            }
+        }
+    }
+
+    /**
+     * Get the default Volume when creating the template.
+     *
+     * @param vmInstance instance details
+     * @throws ApplicationException unhandled application errors
+     * @throws Exception cloudstack unhandled errors
+     */
+    public void assignVolumeTovM(VmInstance vmInstance) throws ApplicationException, Exception {
+           HashMap<String, String> volumeMap = new HashMap<String, String>();
+           volumeMap.put("virtualmachineid", vmInstance.getUuid());
+           volumeMap.put("domainid", vmInstance.getDomain().getUuid());
+
+           String listVolume = csVolumeService.listVolumes("json", volumeMap);
+           JSONArray volumeListJSON = new JSONObject(listVolume).getJSONObject("listvolumesresponse").getJSONArray("volume");
+           for (int i = 0; i < volumeListJSON.length(); i++) {
+               Volume volume = Volume.convert(volumeListJSON.getJSONObject(i));
+               volume.setIsSyncFlag(false);
+               volume.setZoneId(convertEntityService.getZoneId(volume.getTransZoneId()));
+               volume.setDomainId(convertEntityService.getDomainId(volume.getTransDomainId()));
+               volume.setStorageOfferingId(convertEntityService.getStorageOfferId(volume.getTransStorageOfferingId()));
+               volume.setVmInstanceId(convertEntityService.getVmInstanceId(volume.getTransvmInstanceId()));
+               if (volume.getTransProjectId() != null) {
+                   volume.setProjectId(convertEntityService.getProjectId(volume.getTransProjectId()));
+                   volume.setDepartmentId(projectService.find(volume.getProjectId()).getDepartmentId());
+               } else {
+                   Domain domain = domainService.find(volume.getDomainId());
+                   volume.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(volume.getTransDepartmentId(), domain));
+               }
+               volume.setDiskSizeFlag(true);
+               if (volumeService.findByUUID(volume.getUuid()) == null) {
+                   volumeService.save(volume);
+               }
+           }
     }
 
     /**
@@ -390,6 +460,89 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 volume.setUpdatedDateTime(csVolume.getUpdatedDateTime());
                 volumeService.update(volume);
             }
+        }
+    }
+
+    /**
+     * Sync with Cloud Server Volume.
+     *
+     * @param jobresult job result
+     * @param eventObject volume event object
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    public void asyncNic(JSONObject jobresult, JSONObject eventObject) throws ApplicationException, Exception {
+
+        if (eventObject.getString("commandEventType").equals("NIC.CREATE") || eventObject.getString("commandEventType").equals("NIC.UPDATE")
+             || eventObject.getString("commandEventType").equals("NIC.DELETE")) {
+
+            JSONArray nicListJSON = jobresult.getJSONObject("virtualmachine").getJSONArray("nic");
+            List<Nic> nicList = new ArrayList<Nic>();
+            for (int i = 0, size = nicListJSON.length(); i < size; i++) {
+                Nic nic = Nic.convert(nicListJSON.getJSONObject(i));
+                nic.setVmInstanceId(convertEntityService.getVmInstanceId(JsonUtil.getStringValue(jobresult.getJSONObject("virtualmachine"), "id")));
+                nic.setNetworkId(convertEntityService.getNetworkId(nic.getTransNetworkId()));
+                nicList.add(nic);
+            }
+            HashMap<String, Nic> csNicMap = (HashMap<String, Nic>) Nic.convert(nicList);
+            List<Nic> appnicList = nicService.findByInstance(convertEntityService.getVmInstanceId(JsonUtil.getStringValue(jobresult.getJSONObject("virtualmachine"), "id")));
+
+            for (Nic nic : appnicList) {
+                nic.setSyncFlag(false);
+                LOGGER.debug("Total rows updated : " + (appnicList.size()));
+                if (csNicMap.containsKey(nic.getUuid())) {
+                    Nic csNic = csNicMap.get(nic.getUuid());
+                    nic.setUuid(csNic.getUuid());
+                    nic.setIsDefault(csNic.getIsDefault());
+
+                    nicService.update(nic);
+                    csNicMap.remove(nic.getUuid());
+                } else {
+                    nicService.softDelete(nic);
+                }
+            }
+            for (String key : csNicMap.keySet()) {
+                LOGGER.debug("Syncservice Nic uuid:");
+                nicService.save(csNicMap.get(key));
+            }
+        }
+        if (eventObject.getString("commandEventType").equals("NIC.SECONDARY.IP.ASSIGN")) {
+            LOGGER.debug("Not Implemented");
+        }
+        if (eventObject.getString("commandEventType").equals("NIC.SECONDARY.IP.UNASSIGN")) {
+            LOGGER.debug("Not Implemented");
+        }
+    }
+
+    /**
+     * Sync with CloudStack server Network offering.
+     *
+     * @param uuid network offering response event
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
+     */
+    @Override
+    public void asyncNetworkOffering(ResponseEvent eventObject) throws ApplicationException, Exception {
+
+        if (eventObject.getEvent().equals("NETWORK.OFFERING.EDIT")) {
+            HashMap<String, String> networkOfferingMap = new HashMap<String, String>();
+            networkOfferingMap.put("id", eventObject.getEntityuuid());
+            String response = csNetworkOfferingService.listNetworkOfferings("json", networkOfferingMap);
+            JSONArray networkOfferingListJSON = null;
+            JSONObject responseObject = new JSONObject(response).getJSONObject("listnetworkofferingsresponse");
+            if (responseObject.has("networkoffering")) {
+                networkOfferingListJSON = responseObject.getJSONArray("networkoffering");
+                NetworkOffering csNetworkOffering = NetworkOffering.convert(networkOfferingListJSON.getJSONObject(0));
+                NetworkOffering networkOffering = networkOfferingService.findByUUID(eventObject.getEntityuuid());
+                networkOffering.setName(csNetworkOffering.getName());
+                networkOffering.setDisplayText(csNetworkOffering.getDisplayText());
+                networkOffering.setAvailability(csNetworkOffering.getAvailability());
+                networkOfferingService.update(networkOffering);
+            }
+        }
+        if (eventObject.getEvent().equals("NETWORK.OFFERING.DELETE")) {
+            NetworkOffering networkOffering = networkOfferingService.findByUUID(eventObject.getEntityuuid());
+            networkOfferingService.delete(networkOffering);
         }
     }
 

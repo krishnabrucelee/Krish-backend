@@ -828,4 +828,31 @@ public class ConvertEntityService {
         }
     }
 
+    /**
+     * Get virtual machine service object.
+     *
+     * @return virtual machine service object
+     */
+    public VirtualMachineService getInstanceService() {
+        return this.virtualMachineService;
+    }
+
+    /**
+     * Get volume service object.
+     *
+     * @return volume service object
+     */
+    public VolumeService getVolumeService() {
+        return this.volumeService;
+    }
+
+    /**
+     * Get network service object.
+     *
+     * @return network service object
+     */
+    public NetworkService getNetworkService() {
+        return this.networkService;
+    }
+
 }

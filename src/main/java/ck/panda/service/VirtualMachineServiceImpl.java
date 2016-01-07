@@ -587,13 +587,15 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     @Override
     public VmInstance find(Long id) throws Exception {
-    	VmInstance vmInstance = virtualmachinerepository.findOne(id);
-    	String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
-        byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
-        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-    	String decryptPassword = new String(
-                EncryptionUtil.decrypt(vmInstance.getVncPassword(), originalKey));
-    	vmInstance.setVncPassword(decryptPassword);
+        VmInstance vmInstance = virtualmachinerepository.findOne(id);
+        if (vmInstance.getVncPassword() != null) {
+            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+            byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+            String decryptPassword = new String(
+            EncryptionUtil.decrypt(vmInstance.getVncPassword(), originalKey));
+            vmInstance.setVncPassword(decryptPassword);
+        }
         return vmInstance;
     }
 

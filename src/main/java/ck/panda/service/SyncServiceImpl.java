@@ -1082,20 +1082,20 @@ public class SyncServiceImpl implements SyncService {
                 Template csTemplate = csTemplateMap.get(template.getUuid());
 
                 template.setSyncFlag(false);
-                csTemplate.setUuid(csTemplate.getUuid());
-                csTemplate.setName(csTemplate.getName());
-                csTemplate.setDescription(csTemplate.getDescription());
-                csTemplate.setShare(csTemplate.getShare());
-                csTemplate.setPasswordEnabled(csTemplate.getPasswordEnabled());
-                csTemplate.setFormat(csTemplate.getFormat());
-                csTemplate.setFeatured(csTemplate.getFeatured());
-                csTemplate.setOsTypeId(csTemplate.getOsTypeId());
-                csTemplate.setZoneId(csTemplate.getZoneId());
-                csTemplate.setStatus(csTemplate.getStatus());
-                csTemplate.setType(csTemplate.getType());
-                csTemplate.setHypervisorId(csTemplate.getHypervisorId());
-                csTemplate.setExtractable(csTemplate.getExtractable());
-                csTemplate.setDynamicallyScalable(csTemplate.getDynamicallyScalable());
+                template.setUuid(csTemplate.getUuid());
+                template.setName(csTemplate.getName());
+                template.setDescription(csTemplate.getDescription());
+                template.setShare(csTemplate.getShare());
+                template.setPasswordEnabled(csTemplate.getPasswordEnabled());
+                template.setFormat(csTemplate.getFormat());
+                template.setFeatured(csTemplate.getFeatured());
+                template.setOsTypeId(csTemplate.getOsTypeId());
+                template.setZoneId(csTemplate.getZoneId());
+                template.setStatus(csTemplate.getStatus());
+                template.setType(csTemplate.getType());
+                template.setHypervisorId(csTemplate.getHypervisorId());
+                template.setExtractable(csTemplate.getExtractable());
+                template.setDynamicallyScalable(csTemplate.getDynamicallyScalable());
 
                 // 3.2 If found, update the template object in app db
                 templateService.update(template);
