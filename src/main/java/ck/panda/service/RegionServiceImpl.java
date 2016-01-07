@@ -34,7 +34,7 @@ public class RegionServiceImpl implements RegionService {
     /** For connectivity with cloudstack region. */
     @Autowired
     private CloudStackRegionService regionService;
-    
+
     /** Validator attribute. */
     @Autowired
     private AppValidator validator;
@@ -80,40 +80,40 @@ public class RegionServiceImpl implements RegionService {
     public List<Region> findAllFromCSServer() throws Exception {
         List<Region> regionList = new ArrayList<Region>();
         HashMap<String, String> regionMap = new HashMap<String, String>();
-        Errors errors = null ;
+        Errors errors = null;
         JSONArray regionListJSON = null;
         // 1. Get the list of Zones from CS server using CS connector
         String response = regionService.listRegions("json", regionMap);
         JSONObject responseObject = new JSONObject(response).getJSONObject("listregionsresponse");
-        if(responseObject != null){
-        	if (responseObject.has("errorcode")) {
-        		errors = this.validateEvent(errors, responseObject.getString("errortext"));
-        		throw new ApplicationException(errors);
-        	}
-        	if (responseObject.has("region")) {
-        		regionListJSON = responseObject.getJSONArray("region");
+        if (responseObject != null) {
+            if (responseObject.has("errorcode")) {
+                errors = this.validateEvent(errors, responseObject.getString("errortext"));
+                throw new ApplicationException(errors);
+            }
+            if (responseObject.has("region")) {
+                regionListJSON = responseObject.getJSONArray("region");
 
-        		// 2. Iterate the json list, convert the single json entity to Zone
-        		for (int i = 0, size = regionListJSON.length(); i < size; i++) {
-                // 2.1 Call convert by passing JSONObject to Zone entity and Add
-                // the converted Zone entity to list
-        			regionList.add(Region.convert(regionListJSON.getJSONObject(i)));
-        		}
-        	} 
-       }
+                // 2. Iterate the json list, convert the single json entity to Zone
+                for (int i = 0, size = regionListJSON.length(); i < size; i++) {
+                    // 2.1 Call convert by passing JSONObject to Zone entity and Add
+                    // the converted Zone entity to list
+                    regionList.add(Region.convert(regionListJSON.getJSONObject(i)));
+                }
+            }
+        }
         return regionList;
     }
-    
+
     /**
      * Validate Region Cs error handling.
      *
      * @param errors error creating status.
-     * @param errmessage error message.
+     * @param errormessage error message.
      * @return errors.
      * @throws Exception if error occurs.
      */
     private Errors validateEvent(Errors errors, String errormessage) throws Exception {
-       errors.addGlobalError(errormessage);
-       return errors;
+        errors.addGlobalError(errormessage);
+        return errors;
     }
 }

@@ -25,7 +25,7 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public Permission update(Permission t) throws Exception {
-       return null;
+        return null;
     }
 
     @Override
@@ -40,22 +40,22 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public Permission find(Long id) throws Exception {
-       return null;
+        return null;
     }
 
     @Override
     public Page<Permission> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-       return null;
+        return null;
     }
 
     @Override
     public List<Permission> findAll() throws Exception {
-       return (List<Permission>) permissionRepository.findAll();
+        return (List<Permission>) permissionRepository.findAll();
     }
 
     @Override
     public List<Permission> getPermissionList() throws Exception {
-       return permissionRepository.getPermissionList();
+        return permissionRepository.getPermissionList();
     }
 
 }

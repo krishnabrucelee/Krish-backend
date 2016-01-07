@@ -29,7 +29,7 @@ import ck.panda.util.web.CRUDController;
 @RestController
 @RequestMapping("/api/sshkeys")
 @Api(value = "SSHKeys", description = "Operations with sshkeys", produces = "sshkey/json")
-public class SSHKeyController extends CRUDController<SSHKey>implements ApiController {
+public class SSHKeyController extends CRUDController<SSHKey> implements ApiController {
 
     /** Service reference to SSH Key. */
     @Autowired
@@ -62,7 +62,8 @@ public class SSHKeyController extends CRUDController<SSHKey>implements ApiContro
      * @throws Exception error occurs.
      */
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing SSHKey.")
-    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDelete(@RequestBody SSHKey sshkey, @PathVariable(PATH_ID) Long id) throws Exception {
         /** Doing Soft delete from the SSH key table. */
@@ -73,7 +74,8 @@ public class SSHKeyController extends CRUDController<SSHKey>implements ApiContro
 
     @Override
     public List<SSHKey> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)throws Exception {
+            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
+                    throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, SSHKey.class);
         Page<SSHKey> pageResponse = sshkeyService.findAllByActive(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));

@@ -29,7 +29,7 @@ import ck.panda.util.error.exception.EntityNotFoundException;
 @Service
 public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartmentService {
 
-       /** Logger attribute. */
+    /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceLimitDomainServiceImpl.class);
 
     /** Validator attribute. */
@@ -99,13 +99,13 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
     public ResourceLimitDepartment find(Long id) throws Exception {
         ResourceLimitDepartment resourceLimit = resourceLimitDepartmentRepo.findOne(id);
 
-         LOGGER.debug("Sample Debug Message");
-         LOGGER.trace("Sample Trace Message");
+        LOGGER.debug("Sample Debug Message");
+        LOGGER.trace("Sample Trace Message");
 
-         if (resourceLimit == null) {
-             throw new EntityNotFoundException("ResourceLimit.not.found");
-         }
-         return resourceLimit;
+        if (resourceLimit == null) {
+            throw new EntityNotFoundException("ResourceLimit.not.found");
+        }
+        return resourceLimit;
     }
 
     @Override
@@ -170,8 +170,9 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
      * @param departmentId department id.
      */
     private void deleteResourceLimitByDepartment(Long departmentId) {
-        List<ResourceLimitDepartment> resourceLimits = resourceLimitDepartmentRepo.findAllByDepartmentIdAndIsActive(departmentId, true);
-        for (ResourceLimitDepartment resource: resourceLimits) {
+        List<ResourceLimitDepartment> resourceLimits = resourceLimitDepartmentRepo
+                .findAllByDepartmentIdAndIsActive(departmentId, true);
+        for (ResourceLimitDepartment resource : resourceLimits) {
             resourceLimitDepartmentRepo.delete(resource);
         }
     }
@@ -184,7 +185,8 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
      */
     private void updateResourceDepartment(ResourceLimitDepartment resource) throws Exception {
         config.setServer(1L);
-        String resourceLimits = csResourceLimitService.updateResourceLimit(resource.getResourceType().ordinal(), "json", optional(resource));
+        String resourceLimits = csResourceLimitService.updateResourceLimit(resource.getResourceType().ordinal(), "json",
+                optional(resource));
         LOGGER.info("Resource limit update response " + resourceLimits);
         JSONObject resourceLimitsResponse = new JSONObject(resourceLimits).getJSONObject("updateresourcelimitresponse")
                 .getJSONObject("resourcelimit");
@@ -207,44 +209,54 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
     private Errors validateResourceLimit(List<ResourceLimitDepartment> resourceLimits) throws Exception {
         Errors errors = new Errors(messageSource);
         for (ResourceLimitDepartment resourceLimit : resourceLimits) {
-            //Step1: Find max from domain with specific resource type.
-            ResourceLimitDomain domainLimit = resourceLimitDomainService.findByDomainAndResourceType(resourceLimit.getDomainId(), ResourceLimitDomain.ResourceType.valueOf(resourceLimit.getResourceType().name()), true);
-            //Step2: Find resource count from department for spcific domain and resource type
-            Long count = findByResourceCountByDepartmentAndResourceType(resourceLimit.getDomainId(), resourceLimit.getResourceType(),
-                    resourceLimit.getDepartmentId(), true);
+            // Step1: Find max from domain with specific resource type.
+            ResourceLimitDomain domainLimit = resourceLimitDomainService.findByDomainAndResourceType(
+                    resourceLimit.getDomainId(),
+                    ResourceLimitDomain.ResourceType.valueOf(resourceLimit.getResourceType().name()), true);
+            // Step2: Find resource count from department for spcific domain and resource type
+            Long count = findByResourceCountByDepartmentAndResourceType(resourceLimit.getDomainId(),
+                    resourceLimit.getResourceType(), resourceLimit.getDepartmentId(), true);
             Long totalCount = resourceLimit.getMax() + count;
-            //if(step1 < step2) {
+            // if(step1 < step2) {
             if (domainLimit != null) {
                 if (domainLimit.getMax() != -1 && domainLimit.getMax() < totalCount) {
-                    errors.addFieldError(resourceLimit.getResourceType().toString(), totalCount + " "
-                           + resourceLimit.getResourceType().toString() + "resource.limit.exceed");
+                    errors.addFieldError(resourceLimit.getResourceType().toString(),
+                            totalCount + " " + resourceLimit.getResourceType().toString() + "resource.limit.exceed");
 
                 }
             } else {
                 errors.addGlobalError("update.domain.quota.first");
             }
             // Comparing with project
-            Long projectResourceCount = resourceLimitProjectService.findByResourceCountByProjectAndResourceType(resourceLimit.getDepartmentId(), ResourceLimitProject.ResourceType.valueOf(resourceLimit.getResourceType().name()), 0L, true);
+            Long projectResourceCount = resourceLimitProjectService.findByResourceCountByProjectAndResourceType(
+                    resourceLimit.getDepartmentId(),
+                    ResourceLimitProject.ResourceType.valueOf(resourceLimit.getResourceType().name()), 0L, true);
             if (resourceLimit.getMax() < projectResourceCount) {
-                errors.addFieldError(resourceLimit.getResourceType().toString(), projectResourceCount + " " + resourceLimit.getResourceType().toString() + " already allocated to projects of this department");
+                errors.addFieldError(resourceLimit.getResourceType().toString(),
+                        projectResourceCount + " " + resourceLimit.getResourceType().toString()
+                                + " already allocated to projects of this department");
             }
         }
         return errors;
     }
 
     @Override
-    public List<ResourceLimitDepartment> findAllByDepartmentIdAndIsActive(Long departmentId, Boolean isActive) throws Exception {
-        return (List<ResourceLimitDepartment>) resourceLimitDepartmentRepo.findAllByDepartmentIdAndIsActive(departmentId, isActive);
+    public List<ResourceLimitDepartment> findAllByDepartmentIdAndIsActive(Long departmentId, Boolean isActive)
+            throws Exception {
+        return (List<ResourceLimitDepartment>) resourceLimitDepartmentRepo
+                .findAllByDepartmentIdAndIsActive(departmentId, isActive);
     }
 
     @Override
-    public Long findByResourceCountByDepartmentAndResourceType(Long domainId, ResourceLimitDepartment.ResourceType resourceType, Long departmentId, Boolean isActive) throws Exception {
-        return resourceLimitDepartmentRepo.findByResourceCountByDepartmentAndResourceType(domainId, resourceType, departmentId, isActive);
+    public Long findByResourceCountByDepartmentAndResourceType(Long domainId,
+            ResourceLimitDepartment.ResourceType resourceType, Long departmentId, Boolean isActive) throws Exception {
+        return resourceLimitDepartmentRepo.findByResourceCountByDepartmentAndResourceType(domainId, resourceType,
+                departmentId, isActive);
     }
 
     @Override
-    public ResourceLimitDepartment findByDepartmentAndResourceType(Long departmentId, ResourceLimitDepartment.ResourceType resourceType,
-            Boolean isActive) {
+    public ResourceLimitDepartment findByDepartmentAndResourceType(Long departmentId,
+            ResourceLimitDepartment.ResourceType resourceType, Boolean isActive) {
         return resourceLimitDepartmentRepo.findByDepartmentAndResourceType(departmentId, resourceType, isActive);
     }
 

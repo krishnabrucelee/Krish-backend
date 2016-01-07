@@ -5,8 +5,8 @@ package ck.panda.constants;
  */
 public class EventTypes {
     /**
-     * Makes sure that utility classes (classes that contain only static methods
-     * or fields in their API) do not have a public constructor.
+     * Makes sure that utility classes (classes that contain only static methods or fields in their API) do not have a
+     * public constructor.
      */
     protected EventTypes() {
         throw new UnsupportedOperationException();
@@ -23,7 +23,7 @@ public class EventTypes {
 
     /** VM Events . */
     public static final String EVENT_VM_START = "VM.START";
-    
+
     /** VM Events . */
     public static final String EVENT_PROJECT = "PROJECT.";
 
@@ -125,7 +125,7 @@ public class EventTypes {
 
     /** ISO. */
     public static final String EVENT_ISO = "ISO.";
-    
+
     /** HOST. */
     public static final String EVENT_HOST = "HOST.";
 
@@ -143,7 +143,7 @@ public class EventTypes {
 
     /** Zones. */
     public static final String EVENT_ZONE = "ZONE.";
-    
+
     /** Nic. */
     public static final String EVENT_NIC = "NIC.";
 

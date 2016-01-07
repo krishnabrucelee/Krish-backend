@@ -13,13 +13,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class CloudStackNetworkOfferingService {
 
-     /** Cloudstack server for connectivity. */
+    /** Cloudstack server for connectivity. */
     @Autowired
     private CloudStackServer server;
 
     /**
-     * setServer passes apikey, url, secretkey from UI and aids to establish
-     * cloudstack connectivity.
+     * setServer passes apikey, url, secretkey from UI and aids to establish cloudstack connectivity.
      *
      * @param server sets apikey and url.
      */
@@ -37,8 +36,7 @@ public class CloudStackNetworkOfferingService {
      */
     public String listNetworkOfferings(String response, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("listNetworkOfferings", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("listNetworkOfferings", optional);
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
         return responseDocument;

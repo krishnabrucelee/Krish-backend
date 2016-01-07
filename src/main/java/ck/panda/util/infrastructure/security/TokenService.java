@@ -13,7 +13,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import ck.panda.domain.entity.User;
-import ck.panda.service.EncryptionUtil;
 import ck.panda.service.UserService;
 import ck.panda.util.DateConvertUtil;
 import net.sf.ehcache.Cache;
@@ -100,7 +99,8 @@ public class TokenService {
             String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
             byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
             SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-            encryptedToken = new String(EncryptionUtil.encrypt(createTokenDetails(user, domainName).toString(), originalKey));
+            encryptedToken = new String(
+                    ck.panda.util.EncryptionUtil.encrypt(createTokenDetails(user, domainName).toString(), originalKey));
         } catch (UnsupportedEncodingException e) {
             LOGGER.error("ERROR AT TOKEN GENERATION", e);
         }
@@ -109,6 +109,7 @@ public class TokenService {
 
     /**
      * Store token.
+     *
      * @param token to set
      * @param authentication to set
      */
@@ -118,6 +119,7 @@ public class TokenService {
 
     /**
      * Check token already exists.
+     *
      * @param token to set
      * @return true/false.
      */
@@ -135,7 +137,8 @@ public class TokenService {
      * @return Authentication
      * @throws Exception raise if error
      */
-    public Authentication retrieve(String token, Authentication authentication, TokenService tokenService, ExternalServiceAuthenticator externalServiceAuthenticator) throws Exception {
+    public Authentication retrieve(String token, Authentication authentication, TokenService tokenService,
+            ExternalServiceAuthenticator externalServiceAuthenticator) throws Exception {
         AuthenticationWithToken resultOfAuthentication = null;
         HashMap<Integer, String> tokenDetails = getTokenDetails(token, "@@");
         if (tokenDetails.get(5).equals("ROOT")) {
@@ -145,7 +148,8 @@ public class TokenService {
                 user.setApiKey(tokenDetails.get(8));
                 token = tokenService.generateNewToken(user, "/");
                 tokenDetails = getTokenDetails(token, "@@");
-                resultOfAuthentication = externalServiceAuthenticator.authenticate(tokenDetails.get(1), tokenDetails.get(4), null, null, buildNumber);
+                resultOfAuthentication = externalServiceAuthenticator.authenticate(tokenDetails.get(1),
+                        tokenDetails.get(4), null, null, buildNumber);
                 resultOfAuthentication.setToken(token);
                 tokenService.store(token, resultOfAuthentication);
                 SecurityContextHolder.getContext().setAuthentication(resultOfAuthentication);
@@ -186,13 +190,13 @@ public class TokenService {
      * @return token details
      * @throws Exception raise if error
      */
-    public HashMap<Integer,String> getTokenDetails(String token, String splitChar) throws Exception {
+    public HashMap<Integer, String> getTokenDetails(String token, String splitChar) throws Exception {
         String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
         byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
         SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-        String decriptText = new String(EncryptionUtil.decrypt(token, originalKey));
+        String decriptText = new String(ck.panda.util.EncryptionUtil.decrypt(token, originalKey));
         String[] splitToken = decriptText.split(splitChar);
-        HashMap<Integer,String> returnToken = new HashMap<Integer,String>();
+        HashMap<Integer, String> returnToken = new HashMap<Integer, String>();
         int i = 0;
         for (String tokenDetails : splitToken) {
             returnToken.put(i, tokenDetails);

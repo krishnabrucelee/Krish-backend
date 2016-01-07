@@ -16,7 +16,9 @@ public class CloudStackSSHService {
     @Autowired
     private CloudStackServer server;
 
-    /** sets api key , secret key and url.
+    /**
+     * sets api key , secret key and url.
+     * 
      * @param server sets these values.
      */
     public void setServer(CloudStackServer server) {
@@ -24,24 +26,20 @@ public class CloudStackSSHService {
     }
 
     /**
-     * Resets the SSH Key for virtual machine The virtual machine must be in a
-     * "Stopped" state.
+     * Resets the SSH Key for virtual machine The virtual machine must be in a "Stopped" state.
      *
      *
      * @param virtualMachineId The ID of the virtual machine
-     * @param sshKeyPair name of the ssh key pair used to login to the virtual
-     * machine
+     * @param sshKeyPair name of the ssh key pair used to login to the virtual machine
      * @param optional values for SSH Key
      * @param response JSON response
      * @return resetResponse
      * @throws Exception if error occurs
      */
-    public String resetSSHKeyForVirtualMachine(String virtualMachineId,
-            String sshKeyPair, String response, HashMap<String, String> optional)
-            throws Exception {
+    public String resetSSHKeyForVirtualMachine(String virtualMachineId, String sshKeyPair, String response,
+            HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("resetSSHKeyForVirtualMachine", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("resetSSHKeyForVirtualMachine", optional);
         arguments.add(new NameValuePair("id", virtualMachineId));
         arguments.add(new NameValuePair("keypair", sshKeyPair));
         arguments.add(new NameValuePair("response", response));
@@ -61,12 +59,10 @@ public class CloudStackSSHService {
      * @return registerResponse
      * @throws Exception if error occurs
      */
-    public String registerSSHKeyPair(String keyPairName,
-            String publicKey, String response, HashMap<String, String> optional)
-            throws Exception {
+    public String registerSSHKeyPair(String keyPairName, String publicKey, String response,
+            HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("registerSSHKeyPair", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("registerSSHKeyPair", optional);
         arguments.add(new NameValuePair("name", keyPairName));
         arguments.add(new NameValuePair("publickey", publicKey));
         arguments.add(new NameValuePair("response", response));
@@ -85,12 +81,10 @@ public class CloudStackSSHService {
      * @return createResponse
      * @throws Exception if error occurs
      */
-    public String createSSHKeyPair(String keyPairName, String response,
-            HashMap<String, String> optional)
+    public String createSSHKeyPair(String keyPairName, String response, HashMap<String, String> optional)
             throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("createSSHKeyPair", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("createSSHKeyPair", optional);
         arguments.add(new NameValuePair("name", keyPairName));
         arguments.add(new NameValuePair("response", response));
 
@@ -108,12 +102,10 @@ public class CloudStackSSHService {
      * @return deleteResponse
      * @throws Exception if error occurs
      */
-    public String deleteSSHKeyPair(String keyPairName, String response,
-            HashMap<String, String> optional)
+    public String deleteSSHKeyPair(String keyPairName, String response, HashMap<String, String> optional)
             throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("deleteSSHKeyPair", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("deleteSSHKeyPair", optional);
         arguments.add(new NameValuePair("name", keyPairName));
         arguments.add(new NameValuePair("response", response));
 
@@ -130,12 +122,9 @@ public class CloudStackSSHService {
      * @return listResponse
      * @throws Exception if error occurs
      */
-    public String listSSHKeyPairs(String response,
-            HashMap<String, String> optional)
-            throws Exception {
+    public String listSSHKeyPairs(String response, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("listSSHKeyPairs", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("listSSHKeyPairs", optional);
         arguments.add(new NameValuePair("response", response));
         String listResponse = server.request(arguments);
 

@@ -14,17 +14,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class CloudStackNicService {
 
-	 /** Cloudstack server for connectivity. */
+    /** Cloudstack server for connectivity. */
     @Autowired
     private CloudStackServer server;
 
-    /** sets api key , secret key and url.
+    /**
+     * sets api key , secret key and url.
+     * 
      * @param server sets these values.
      */
     public void setServer(CloudStackServer server) {
         this.server = server;
     }
-
 
     /**
      * list the VM NICS IP to NIC
@@ -36,14 +37,11 @@ public class CloudStackNicService {
      */
     public String listNics(HashMap<String, String> optional, String response) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("listNics", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("listNics", optional);
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
 
         return responseDocument;
     }
 
-   
-
-   }
+}

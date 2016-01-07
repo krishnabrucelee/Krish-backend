@@ -22,13 +22,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonUtil;
 
 /**
- *
  * A Network Interface Card must be installed in a Virtual Machine so that it can be connected to a Network.
- *
  */
-
 @Entity
-@Table(name = "ck_nic")
+@Table(name = "nics")
 public class Nic {
 
     /** ID of the nic. */
@@ -71,7 +68,7 @@ public class Nic {
     @Column(name = "ip_address")
     private String ipAddress;
 
-    /** Net mask value of Network .*/
+    /** Net mask value of Network . */
     @Column(name = "net_mask")
     private String netMask;
 
@@ -79,7 +76,7 @@ public class Nic {
     @Column(name = "gate_way")
     private String gateway;
 
-    /** Is Default nic for a Vm Instance .*/
+    /** Is Default nic for a Vm Instance . */
     @Column(name = "is_default")
     private Boolean isDefault;
 
@@ -203,7 +200,7 @@ public class Nic {
     /**
      * Set the the network.
      *
-     * @param network  to set
+     * @param network to set
      */
     public void setNetwork(Network network) {
         this.network = network;
@@ -221,7 +218,7 @@ public class Nic {
     /**
      * Set the the network Id.
      *
-     * @param networkId  to set.
+     * @param networkId to set.
      */
     public void setNetworkId(Long networkId) {
         this.networkId = networkId;
@@ -327,7 +324,7 @@ public class Nic {
     }
 
     /**
-     * Set  the syncFlag.
+     * Set the syncFlag.
      *
      * @param syncFlag to set
      */
@@ -337,7 +334,7 @@ public class Nic {
 
     /**
      * Get the ipAddress of a Network.
-      *
+     *
      * @return the ipAddress
      */
     public String getIpAddress() {
@@ -347,7 +344,7 @@ public class Nic {
     /**
      * Set the ipAddress.
      *
-     * @param ipAddress  to set
+     * @param ipAddress to set
      */
     public void setIpAddress(String ipAddress) {
         this.ipAddress = ipAddress;
@@ -383,7 +380,7 @@ public class Nic {
     /**
      * Set the gateway.
      *
-     * @param gateway  to set
+     * @param gateway to set
      */
     public void setGateway(String gateway) {
         this.gateway = gateway;
@@ -392,8 +389,8 @@ public class Nic {
     /**
      * Get isDefault.
      *
-    * @return the isDefault
-    */
+     * @return the isDefault
+     */
     public Boolean getIsDefault() {
         return isDefault;
     }
@@ -401,7 +398,7 @@ public class Nic {
     /**
      * Set the isDefault.
      *
-     * @param isDefault  to set
+     * @param isDefault to set
      */
     public void setIsDefault(Boolean isDefault) {
         this.isDefault = isDefault;
@@ -472,10 +469,10 @@ public class Nic {
         Nic nic = new Nic();
         nic.setSyncFlag(false);
         nic.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-        nic.setIpAddress(JsonUtil.getStringValue(jsonObject,"ipaddress"));
-        nic.setGateway(JsonUtil.getStringValue(jsonObject,"gateway"));
+        nic.setIpAddress(JsonUtil.getStringValue(jsonObject, "ipaddress"));
+        nic.setGateway(JsonUtil.getStringValue(jsonObject, "gateway"));
         nic.setIsDefault(JsonUtil.getBooleanValue(jsonObject, "isdefault"));
-        nic.setNetMask(JsonUtil.getStringValue(jsonObject,"netmask"));
+        nic.setNetMask(JsonUtil.getStringValue(jsonObject, "netmask"));
         nic.setTransvmInstanceId((JsonUtil.getStringValue(jsonObject, "virtualmachineid")));
         nic.setTransNetworkId((JsonUtil.getStringValue(jsonObject, "networkid")));
         nic.setIsActive(true);
@@ -498,4 +495,4 @@ public class Nic {
         return nicMap;
     }
 
-  }
+}

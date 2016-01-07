@@ -11,7 +11,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 import org.hibernate.annotations.Type;
@@ -29,7 +28,7 @@ import ck.panda.domain.entity.StorageOffering.Status;
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "ck_storage_offering_cost")
+@Table(name = "storage_offerings_cost")
 public class StorageOfferingCost {
 
     /**
@@ -41,8 +40,7 @@ public class StorageOfferingCost {
     private Long id;
 
     /**
-     * The Zone ID, this disk offering belongs to. Ignore this information as it
-     * is not currently applicable.
+     * The Zone ID, this disk offering belongs to. Ignore this information as it is not currently applicable.
      */
     @JoinColumn(name = "zone_id", referencedColumnName = "Id")
     @ManyToOne

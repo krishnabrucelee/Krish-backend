@@ -73,7 +73,8 @@ public class DepartmentController extends CRUDController<Department> implements 
      * @throws Exception error occurs.
      */
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Department.")
-    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDelete(@RequestBody Department department, @PathVariable(PATH_ID) Long id) throws Exception {
         /** Doing Soft delete from the department table. */
@@ -83,7 +84,8 @@ public class DepartmentController extends CRUDController<Department> implements 
 
     @Override
     public List<Department> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
+            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
+                    throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Department.class);
         Page<Department> pageResponse = departmentService.findAllByActive(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
@@ -106,6 +108,7 @@ public class DepartmentController extends CRUDController<Department> implements 
     /**
      * Find the list of active departments.
      *
+     * @param id department id.
      * @return projects project list.
      * @throws Exception error occurs.
      */
@@ -128,6 +131,6 @@ public class DepartmentController extends CRUDController<Department> implements 
     @RequestMapping(value = "/domain/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     public List<Department> findByDomain(@PathVariable(PATH_ID) Long id) throws Exception {
-       return departmentService.findByDomainAndIsActive(id, true);
+        return departmentService.findByDomainAndIsActive(id, true);
     }
 }

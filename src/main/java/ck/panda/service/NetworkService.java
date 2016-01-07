@@ -14,6 +14,12 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 @Service
 public interface NetworkService extends CRUDService<Network> {
 
+    /**
+     * To get list of networks for sync.
+     *
+     * @return network list from server.
+     * @throws Exception unhandled errors.
+     */
     List<Network> findAllFromCSServerByDomain() throws Exception;
 
     /**
@@ -24,20 +30,21 @@ public interface NetworkService extends CRUDService<Network> {
      * @throws Exception unhandled errors.
      */
     Network findByUUID(String uuid) throws Exception;
-    
+
     /**
      * To get network from cloudstack server.
      *
-     * @param uuid network id.
+     * @param id network id.
      * @return network from server
      * @throws Exception unhandled errors.
      */
-    Network findById(Long Id) throws Exception;
+    Network findById(Long id) throws Exception;
 
     /**
      * To get list of networks from department.
      *
      * @param department department.
+     * @param isActive true/false.
      * @return network list from server.
      * @throws Exception unhandled errors.
      */
@@ -53,8 +60,7 @@ public interface NetworkService extends CRUDService<Network> {
     Network softDelete(Network network) throws Exception;
 
     /**
-     * Paging and Sorting for displaying more number of elements in list which
-     * are active.
+     * Paging and Sorting for displaying more number of elements in list which are active.
      *
      * @param page pagination
      * @return sorted values.
@@ -66,6 +72,7 @@ public interface NetworkService extends CRUDService<Network> {
      * To get list of networks from project.
      *
      * @param projectId project id.
+     * @param isActive true/false.
      * @return network list from server.
      * @throws Exception unhandled errors.
      */

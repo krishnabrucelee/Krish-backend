@@ -31,7 +31,7 @@ import ck.panda.util.web.CRUDController;
 @RestController
 @RequestMapping("/api/projects")
 @Api(value = "Projects", description = "Operations with projects", produces = "application/json")
-public class ProjectController extends CRUDController<Project>implements ApiController {
+public class ProjectController extends CRUDController<Project> implements ApiController {
     /** Service reference to project. */
     @Autowired
     private ProjectService projectService;
@@ -68,7 +68,7 @@ public class ProjectController extends CRUDController<Project>implements ApiCont
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDelete(@RequestBody Project project, @PathVariable(PATH_ID) Long id) throws Exception {
-    	project.setSyncFlag(true);
+        project.setSyncFlag(true);
         projectService.softDelete(project);
     }
 
@@ -121,12 +121,12 @@ public class ProjectController extends CRUDController<Project>implements ApiCont
      * @return department
      * @throws Exception error occurs.
      */
-    @RequestMapping(value = "/department/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/department/{id}", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     public List<Project> findByDepartmentAndIsActive(@PathVariable(PATH_ID) Long id) throws Exception {
-       return projectService.findByDepartmentAndIsActive(id, true);
+        return projectService.findByDepartmentAndIsActive(id, true);
     }
-
 
     /**
      * Get the project by department.
@@ -138,6 +138,6 @@ public class ProjectController extends CRUDController<Project>implements ApiCont
     @RequestMapping(value = "/user/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     public List<Project> findByUserAndIsActive(@PathVariable(PATH_ID) Long id) throws Exception {
-       return projectService.findByUserAndIsActive(id, true);
+        return projectService.findByUserAndIsActive(id, true);
     }
 }

@@ -24,7 +24,7 @@ import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 import ck.panda.util.error.exception.EntityNotFoundException;
 
-/**SSH key service implementation class. */
+/** SSH key service implementation class. */
 @Service
 public class SSHKeyServiceImpl implements SSHKeyService {
 
@@ -74,22 +74,25 @@ public class SSHKeyServiceImpl implements SSHKeyService {
                 optional.put("account", String.valueOf(sshkey.getDepartment().getUserName()));
                 optional.put("domainid", String.valueOf(sshkey.getDomain().getUuid()));
             } else {
-                optional.put("domainid", departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getDomain().getUuid());
-                optional.put("account", departmentRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
-        }
-        String sshkeyResponse = cloudStackSSHService.createSSHKeyPair(sshkey.getName(), "json", optional);
-        JSONObject createSSHResponseJSON = new JSONObject(sshkeyResponse).getJSONObject("createsshkeypairresponse");
+                optional.put("domainid", departmentRepository
+                        .findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getDomain().getUuid());
+                optional.put("account", departmentRepository
+                        .findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
+            }
+            String sshkeyResponse = cloudStackSSHService.createSSHKeyPair(sshkey.getName(), "json", optional);
+            JSONObject createSSHResponseJSON = new JSONObject(sshkeyResponse).getJSONObject("createsshkeypairresponse");
 
-        if (createSSHResponseJSON.has("errorcode")) {
-            errors = this.validateEvent(errors, createSSHResponseJSON.getString("errortext"));
-            throw new ApplicationException(errors);
-        }
-        JSONObject sshkeypair = createSSHResponseJSON.getJSONObject("keypair");
-        sshkey.setName((String) sshkeypair.get("name"));
-        sshkey.setFingerPrint((String) sshkeypair.get("fingerprint"));
-        sshkey.setPrivatekey((String) sshkeypair.get("privatekey"));
-        sshkey.setIsActive(true);
-        sshkey.setDepartmentId(convertEntity.getDepartmentByUsernameAndDomains(sshkeypair.getString("account"), domain));
+            if (createSSHResponseJSON.has("errorcode")) {
+                errors = this.validateEvent(errors, createSSHResponseJSON.getString("errortext"));
+                throw new ApplicationException(errors);
+            }
+            JSONObject sshkeypair = createSSHResponseJSON.getJSONObject("keypair");
+            sshkey.setName((String) sshkeypair.get("name"));
+            sshkey.setFingerPrint((String) sshkeypair.get("fingerprint"));
+            sshkey.setPrivatekey((String) sshkeypair.get("privatekey"));
+            sshkey.setIsActive(true);
+            sshkey.setDepartmentId(
+                    convertEntity.getDepartmentByUsernameAndDomains(sshkeypair.getString("account"), domain));
         }
         return sshkeyRepo.save(sshkey);
     }
@@ -97,13 +100,14 @@ public class SSHKeyServiceImpl implements SSHKeyService {
     /**
      * Validate the SSH key.
      *
-     * @param  sshkey reference of the SSH Key.
+     * @param sshkey reference of the SSH Key.
      * @throws Exception error occurs
      */
     private void validateSSHKey(SSHKey sshkey) throws Exception {
         Errors errors = validator.rejectIfNullEntity("sshkey", sshkey);
         errors = validator.validateEntity(sshkey, errors);
-        SSHKey ssh = sshkeyRepo.findByNameAndDepartmentAndIsActive(sshkey.getName(), Long.parseLong(tokenDetails.getTokenDetails("departmentid")),true);
+        SSHKey ssh = sshkeyRepo.findByNameAndDepartmentAndIsActive(sshkey.getName(),
+                Long.parseLong(tokenDetails.getTokenDetails("departmentid")), true);
         if (ssh != null && ssh.getName() == sshkey.getName()) {
             errors.addFieldError("name", "SSH.key.name.already.exist.for.same.account");
         }
@@ -144,9 +148,11 @@ public class SSHKeyServiceImpl implements SSHKeyService {
 
     @Override
     public List<SSHKey> findAll() throws Exception {
-        Department department = departmentRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("departmentid")));
+        Department department = departmentRepository
+                .findOne(Long.valueOf(tokenDetails.getTokenDetails("departmentid")));
         if (department != null && !department.getUserName().equals("ROOT")) {
-            return sshkeyRepo.findAllByDepartmentAndIsActive(Long.parseLong(tokenDetails.getTokenDetails("departmentid")), true);
+            return sshkeyRepo
+                    .findAllByDepartmentAndIsActive(Long.parseLong(tokenDetails.getTokenDetails("departmentid")), true);
         }
         return (List<SSHKey>) sshkeyRepo.findAllByIsActive(true);
     }
@@ -157,7 +163,8 @@ public class SSHKeyServiceImpl implements SSHKeyService {
         if (domain != null && domain.getName().equals("ROOT")) {
             return sshkeyRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
         }
-        return sshkeyRepo.findAllByDepartmentIsActive(Long.parseLong(tokenDetails.getTokenDetails("departmentid")), true, pagingAndSorting.toPageRequest());
+        return sshkeyRepo.findAllByDepartmentIsActive(Long.parseLong(tokenDetails.getTokenDetails("departmentid")),
+                true, pagingAndSorting.toPageRequest());
     }
 
     @Override
@@ -166,19 +173,20 @@ public class SSHKeyServiceImpl implements SSHKeyService {
         sshkey.setIsActive(false);
         sshkey.setStatus(SSHKey.Status.DISABLED);
         if (sshkey.getIsSyncFlag()) {
-     // set server for finding value in configuration
-        Errors errors = validator.rejectIfNullEntity("sshkey", sshkey);
-        errors = validator.validateEntity(sshkey, errors);
-        cloudStackSSHService.setServer(configServer.setServer(1L));
-        HashMap<String, String> optional = new HashMap<String, String>();
-        optional.put("domainid", sshkey.getDepartment().getDomain().getUuid());
-        optional.put("account", sshkey.getDepartment().getUserName());
-        String sshkeyResponse = cloudStackSSHService.deleteSSHKeyPair(sshkey.getName(),"json",optional);
-        JSONObject deletesshkeypairresponseJSON = new JSONObject(sshkeyResponse).getJSONObject("deletesshkeypairresponse");
-        if (deletesshkeypairresponseJSON.has("errorcode")) {
-            errors = validator.sendGlobalError(deletesshkeypairresponseJSON.getString("errortext"));
-            throw new ApplicationException(errors);
-        }
+            // set server for finding value in configuration
+            Errors errors = validator.rejectIfNullEntity("sshkey", sshkey);
+            errors = validator.validateEntity(sshkey, errors);
+            cloudStackSSHService.setServer(configServer.setServer(1L));
+            HashMap<String, String> optional = new HashMap<String, String>();
+            optional.put("domainid", sshkey.getDepartment().getDomain().getUuid());
+            optional.put("account", sshkey.getDepartment().getUserName());
+            String sshkeyResponse = cloudStackSSHService.deleteSSHKeyPair(sshkey.getName(), "json", optional);
+            JSONObject deletesshkeypairresponseJSON = new JSONObject(sshkeyResponse)
+                    .getJSONObject("deletesshkeypairresponse");
+            if (deletesshkeypairresponseJSON.has("errorcode")) {
+                errors = validator.sendGlobalError(deletesshkeypairresponseJSON.getString("errortext"));
+                throw new ApplicationException(errors);
+            }
         }
         return sshkeyRepo.save(sshkey);
     }
@@ -208,7 +216,8 @@ public class SSHKeyServiceImpl implements SSHKeyService {
 
     @Override
     public List<SSHKey> findAllByIsActive(Boolean isActive) throws Exception {
-        return sshkeyRepo.findAllByDepartmentAndIsActive(Long.parseLong(tokenDetails.getTokenDetails("departmentid")), true);
+        return sshkeyRepo.findAllByDepartmentAndIsActive(Long.parseLong(tokenDetails.getTokenDetails("departmentid")),
+                true);
     }
 
     /**
@@ -220,8 +229,8 @@ public class SSHKeyServiceImpl implements SSHKeyService {
      * @throws Exception if error occurs.
      */
     private Errors validateEvent(Errors errors, String errmessage) throws Exception {
-       errors.addGlobalError(errmessage);
-       return errors;
+        errors.addGlobalError(errmessage);
+        return errors;
     }
 
     @Override
@@ -229,4 +238,3 @@ public class SSHKeyServiceImpl implements SSHKeyService {
         return (List<SSHKey>) sshkeyRepo.findAll();
     }
 }
-

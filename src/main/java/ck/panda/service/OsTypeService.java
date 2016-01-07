@@ -12,7 +12,7 @@ import ck.panda.util.domain.CRUDService;
 @Service
 public interface OsTypeService extends CRUDService<OsType> {
 
-     /**
+    /**
      * To get list of OS types from cloudstack server.
      *
      * @return OS types list from server
@@ -38,4 +38,3 @@ public interface OsTypeService extends CRUDService<OsType> {
     OsType findByUUID(String uuid);
 
 }
-

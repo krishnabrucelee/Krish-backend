@@ -1,4 +1,4 @@
-package ck.panda.service;
+package ck.panda.util;
 
 import java.util.Base64;
 import javax.crypto.Cipher;
@@ -6,7 +6,6 @@ import javax.crypto.SecretKey;
 
 /**
  * Encrypt and Decrypt the string using the secret key.
- *
  */
 public class EncryptionUtil {
 
@@ -31,7 +30,7 @@ public class EncryptionUtil {
         Base64.Encoder encoder = Base64.getEncoder();
         String encryptedText = encoder.encodeToString(encryptedByte);
         return encryptedText;
-     }
+    }
 
     /**
      * To decrypt text using 'AES' algorithm.

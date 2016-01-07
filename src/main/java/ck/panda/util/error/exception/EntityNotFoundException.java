@@ -12,10 +12,10 @@ public class EntityNotFoundException extends Exception {
 
     /**
      * Constructor to display error message for EntityNotFoundException.
+     * 
      * @param message to be displayed as exception message.
      */
     public EntityNotFoundException(String message) {
         super(message);
     }
 }
-

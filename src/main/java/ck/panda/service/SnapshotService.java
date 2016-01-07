@@ -9,8 +9,7 @@ import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
- * Service class for Snapshot.
- * This service provides basic CRUD and essential api's for snapshot actions.
+ * Service class for Snapshot. This service provides basic CRUD and essential api's for snapshot actions.
  *
  */
 @Service

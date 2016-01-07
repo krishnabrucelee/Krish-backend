@@ -10,7 +10,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -26,12 +25,12 @@ import ck.panda.util.JsonUtil;
 /**
  * A cluster is a XenServer server pool, a set of KVM servers, , or a VMware cluster preconfigured in vCenter.
  *
- * The hosts in a cluster all have identical hardware, run the same hypervisor,are on the same subnet,
- * and access the same shared primary storage.
+ * The hosts in a cluster all have identical hardware, run the same hypervisor,are on the same subnet, and access the
+ * same shared primary storage.
  *
  */
 @Entity
-@Table(name = "ck_cluster")
+@Table(name = "clusters")
 public class Cluster {
 
     /** Unique Id of the cluster. */
@@ -72,7 +71,6 @@ public class Cluster {
     /** Transient pod of the cluster. */
     @Transient
     private String transPod;
-
 
     /** Zone Object for the pod. */
     @JoinColumn(name = "zone_id", referencedColumnName = "Id", updatable = false, insertable = false)
@@ -123,7 +121,7 @@ public class Cluster {
     /**
      * Set the id.
      *
-     * @param id  to set
+     * @param id to set
      */
     public void setId(Long id) {
         this.id = id;
@@ -141,7 +139,7 @@ public class Cluster {
     /**
      * Set the uuid.
      *
-     * @param uuid  to set
+     * @param uuid to set
      */
     public void setUuid(String uuid) {
         this.uuid = uuid;
@@ -159,7 +157,7 @@ public class Cluster {
     /**
      * Set the name.
      *
-     * @param name  to set
+     * @param name to set
      */
     public void setName(String name) {
         this.name = name;
@@ -175,7 +173,7 @@ public class Cluster {
     }
 
     /**
-     * Set  the clusterType.
+     * Set the clusterType.
      *
      * @param clusterType to set
      */
@@ -195,7 +193,7 @@ public class Cluster {
     /**
      * Set the hypervisorType.
      *
-     * @param hypervisorType  to set
+     * @param hypervisorType to set
      */
     public void setHypervisorType(String hypervisorType) {
         this.hypervisorType = hypervisorType;
@@ -213,7 +211,7 @@ public class Cluster {
     /**
      * Set the pod.
      *
-     * @param pod  to set
+     * @param pod to set
      */
     public void setPod(Pod pod) {
         this.pod = pod;
@@ -267,7 +265,7 @@ public class Cluster {
     /**
      * Set the zoneId.
      *
-     * @param zoneId  to set
+     * @param zoneId to set
      */
     public void setZoneId(Long zoneId) {
         this.zoneId = zoneId;
@@ -285,7 +283,7 @@ public class Cluster {
     /**
      * Set the created user.
      *
-     * @param createdBy  to set
+     * @param createdBy to set
      */
     public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
@@ -303,7 +301,7 @@ public class Cluster {
     /**
      * Set the updated user.
      *
-     * @param updatedBy  to set
+     * @param updatedBy to set
      */
     public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
@@ -339,45 +337,44 @@ public class Cluster {
     /**
      * Set the updatedDateTime.
      *
-     * @param updatedDateTime  to set
+     * @param updatedDateTime to set
      */
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
 
-
     /**
      * Get the transient zone.
      *
-    * @return the transZone
-    */
+     * @return the transZone
+     */
     public String getTransZone() {
         return transZone;
     }
 
     /**
-    * Set the transient Zone.
-    *
-    * @param transZone to set
-    */
+     * Set the transient Zone.
+     *
+     * @param transZone to set
+     */
     public void setTransZone(String transZone) {
         this.transZone = transZone;
     }
 
     /**
-    * Get the transient pod.
-    *
-    * @return the transPod
-    */
+     * Get the transient pod.
+     *
+     * @return the transPod
+     */
     public String getTransPod() {
         return transPod;
     }
 
     /**
-    * Set the transient pod.
-    *
-    * @param transPod to set
-    */
+     * Set the transient pod.
+     *
+     * @param transPod to set
+     */
     public void setTransPod(String transPod) {
         this.transPod = transPod;
     }
@@ -394,7 +391,7 @@ public class Cluster {
     /**
      * Set the isActive.
      *
-     * @param isActive  to set
+     * @param isActive to set
      */
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
@@ -419,7 +416,7 @@ public class Cluster {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-      return cluster;
+        return cluster;
     }
 
     /**

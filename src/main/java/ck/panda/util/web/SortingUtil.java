@@ -11,8 +11,8 @@ import java.lang.reflect.Field;
 public class SortingUtil {
 
     /**
-     * Makes sure that utility classes (classes that contain only static methods or fields in their API)
-     * do not have a public constructor.
+     * Makes sure that utility classes (classes that contain only static methods or fields in their API) do not have a
+     * public constructor.
      */
     protected SortingUtil() {
         throw new UnsupportedOperationException();
@@ -30,7 +30,7 @@ public class SortingUtil {
         String fieldName = field.toLowerCase().trim();
 
         Field[] fields = clazz.getDeclaredFields();
-        //For order by class fields
+        // For order by class fields
         for (Field classField : fields) {
 
             String name = classField.getName().toLowerCase();
@@ -58,7 +58,7 @@ public class SortingUtil {
         String fieldName = field.toLowerCase().trim();
         Field[] fields = clazz.getDeclaredFields();
 
-        //For order by class fields
+        // For order by class fields
         for (Field classField : fields) {
             String name = classField.getName().toLowerCase();
 

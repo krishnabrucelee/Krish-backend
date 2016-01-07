@@ -119,41 +119,47 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
         server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
         cloudStackInstanceService.setServer(server);
-        String eventObjectResult = cloudStackInstanceService.queryAsyncJobResult(eventObject.getString("jobId"), "json");
+        String eventObjectResult = cloudStackInstanceService.queryAsyncJobResult(eventObject.getString("jobId"),
+                "json");
         JSONObject jobresult = new JSONObject(eventObjectResult).getJSONObject("queryasyncjobresultresponse")
                 .getJSONObject("jobresult");
 
         String commandText = null;
         if (eventObject.getString("commandEventType").contains(".")) {
-            commandText = eventObject.getString("commandEventType").substring(0, eventObject.getString("commandEventType").indexOf('.', 0)) + ".";
+            commandText = eventObject.getString("commandEventType").substring(0,
+                    eventObject.getString("commandEventType").indexOf('.', 0)) + ".";
         } else {
             commandText = eventObject.getString("commandEventType");
         }
         switch (commandText) {
-            case EventTypes.EVENT_VM:
-                LOGGER.debug("VM Sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+        case EventTypes.EVENT_VM:
+            LOGGER.debug("VM Sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
                 syncvirtualmachine(jobresult, eventObject);
-                break;
-            case EventTypes.EVENT_NETWORK:
-                if (!eventObject.getString("commandEventType").contains("OFFERING")) {
-                    LOGGER.debug("Network sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
-                    asyncNetwork(jobresult, eventObject);
-                }
-                break;
-            case EventTypes.EVENT_TEMPLATE:
-                LOGGER.debug("templates sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
-                asyncTemplates(eventObject);
-                break;
-            case EventTypes.EVENT_VOLUME:
-                LOGGER.debug("VNC sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
-                asyncVolume(jobresult, eventObject);
-                break;
-            case EventTypes.EVENT_NIC:
+            break;
+        case EventTypes.EVENT_NETWORK:
+            if (!eventObject.getString("commandEventType").contains("OFFERING")) {
+                LOGGER.debug("Network sync",
+                        eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+                asyncNetwork(jobresult, eventObject);
+            }
+            break;
+        case EventTypes.EVENT_TEMPLATE:
+            LOGGER.debug("templates sync",
+                    eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+            asyncTemplates(eventObject);
+            break;
+        case EventTypes.EVENT_VOLUME:
                 LOGGER.debug("Volume sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+                    eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+            asyncVolume(jobresult, eventObject);
+            break;
+            case EventTypes.EVENT_NIC:
+                LOGGER.debug("NIC sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
                 asyncNic(jobresult, eventObject);
                 break;
-            default:
-                LOGGER.debug("No sync required", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+        default:
+            LOGGER.debug("No sync required",
+                    eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
         }
     }
 
@@ -183,7 +189,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 }
                 instance.setStatus(csVm.getStatus());
                 if (csVm.getZoneId() != null) {
-                instance.setZoneId(csVm.getZoneId());
+                    instance.setZoneId(csVm.getZoneId());
                 }
                 if (csVm.getHostId() != null) {
                     instance.setHostId(csVm.getHostId());
@@ -222,7 +228,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     instance.setNetworkId(csVm.getNetworkId());
                 }
                 if (csVm.getInstanceInternalName() != null) {
-                instance.setInstanceInternalName(csVm.getInstanceInternalName());
+                    instance.setInstanceInternalName(csVm.getInstanceInternalName());
                 }
                 if (csVm.getVolumeSize() != null) {
                     instance.setVolumeSize(csVm.getVolumeSize());
@@ -415,7 +421,8 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 volume.setDepartmentId(projectService.find(volume.getProjectId()).getDepartmentId());
             } else {
                 Domain domain = domainService.find(volume.getDomainId());
-                volume.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(volume.getTransDepartmentId(), domain));
+                volume.setDepartmentId(
+                        convertEntityService.getDepartmentByUsernameAndDomains(volume.getTransDepartmentId(), domain));
             }
             if (eventObject.getString("commandEventType").equals("VOLUME.UPLOAD")) {
                 volume.setDiskSizeFlag(false);
@@ -434,14 +441,16 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 volume.setIsSyncFlag(false);
                 volume.setZoneId(convertEntityService.getZoneId(csVolume.getTransZoneId()));
                 volume.setDomainId(convertEntityService.getDomainId(csVolume.getTransDomainId()));
-                volume.setStorageOfferingId(convertEntityService.getStorageOfferId(csVolume.getTransStorageOfferingId()));
+                volume.setStorageOfferingId(
+                        convertEntityService.getStorageOfferId(csVolume.getTransStorageOfferingId()));
                 volume.setVmInstanceId(convertEntityService.getVmInstanceId(csVolume.getTransvmInstanceId()));
                 if (csVolume.getTransProjectId() != null) {
                     volume.setProjectId(convertEntityService.getProjectId(csVolume.getTransProjectId()));
                     volume.setDepartmentId(projectService.find(volume.getProjectId()).getDepartmentId());
                 } else {
                     Domain domain = domainService.find(volume.getDomainId());
-                    volume.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(csVolume.getTransDepartmentId(), domain));
+                    volume.setDepartmentId(convertEntityService
+                            .getDepartmentByUsernameAndDomains(csVolume.getTransDepartmentId(), domain));
                 }
                 volume.setName(csVolume.getName());
                 volume.setVolumeType(csVolume.getVolumeType());

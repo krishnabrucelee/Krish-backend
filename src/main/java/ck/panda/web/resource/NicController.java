@@ -20,9 +20,6 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Nic;
-import ck.panda.domain.entity.Snapshot;
-import ck.panda.domain.entity.Volume;
-import ck.panda.domain.entity.Nic;
 import ck.panda.service.NicService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -56,8 +53,7 @@ public class NicController extends CRUDController<Nic> implements ApiController 
 
     @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing Nic.", response = Nic.class)
     @Override
-    public Nic update(@RequestBody Nic nic, @PathVariable(PATH_ID) Long id)
-            throws Exception {
+    public Nic update(@RequestBody Nic nic, @PathVariable(PATH_ID) Long id) throws Exception {
         nic.setSyncFlag(true);
         return nicOfferingService.update(nic);
     }
@@ -85,19 +81,20 @@ public class NicController extends CRUDController<Nic> implements ApiController 
     }
 
     /**
-     * Delete the Nic
+     * Delete the Nic.
      *
      * @param nic reference of the network interface card.
      * @param id the nic.
      * @throws Exception error occurs.
      */
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing nic.")
-    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDelete(@RequestBody Nic nic, @PathVariable(PATH_ID) Long id) throws Exception {
         /** Doing Soft delete from the nic table. */
-    	 nic.setSyncFlag(true);
-         nicOfferingService.softDelete(nic);
+        nic.setSyncFlag(true);
+        nicOfferingService.softDelete(nic);
     }
 
     /**
@@ -107,7 +104,8 @@ public class NicController extends CRUDController<Nic> implements ApiController 
      * @return nic by instances
      * @throws Exception exception
      */
-    @RequestMapping(value = "listbyinstances", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "listbyinstances", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<Nic> listByInstance(@RequestParam("instanceid") Long instanceId) throws Exception {
@@ -115,5 +113,4 @@ public class NicController extends CRUDController<Nic> implements ApiController 
         return nicOfferingService.findByInstance(instanceId);
     }
 
-   }
-
+}

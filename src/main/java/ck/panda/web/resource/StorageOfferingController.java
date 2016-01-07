@@ -34,88 +34,84 @@ import ck.panda.util.web.CRUDController;
 @Api(value = "StorageOfferings", description = "Operations with StorageOfferings", produces = "application/json")
 public class StorageOfferingController extends CRUDController<StorageOffering> implements ApiController {
 
-	/** Service reference to StorageOffering. */
-	@Autowired
-	private StorageOfferingService storageOfferingService;
+    /** Service reference to StorageOffering. */
+    @Autowired
+    private StorageOfferingService storageOfferingService;
 
-	@ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new StorageOffering.", response = StorageOffering.class)
-	@Override
-	public StorageOffering create(@RequestBody StorageOffering storage) throws Exception {
-		storage.setIsSyncFlag(true);
-		return storageOfferingService.save(storage);
-	}
+    @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new StorageOffering.", response = StorageOffering.class)
+    @Override
+    public StorageOffering create(@RequestBody StorageOffering storage) throws Exception {
+        storage.setIsSyncFlag(true);
+        return storageOfferingService.save(storage);
+    }
 
-	@ApiOperation(value = SW_METHOD_READ, notes = "Read an existing StorageOffering.", response = StorageOffering.class)
-	@Override
-	public StorageOffering read(@PathVariable(PATH_ID) Long id) throws Exception {
-		return storageOfferingService.find(id);
-	}
+    @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing StorageOffering.", response = StorageOffering.class)
+    @Override
+    public StorageOffering read(@PathVariable(PATH_ID) Long id) throws Exception {
+        return storageOfferingService.find(id);
+    }
 
-	@ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing StorageOffering.", response = StorageOffering.class)
-	@Override
-	public StorageOffering update(@RequestBody StorageOffering storage, @PathVariable(PATH_ID) Long id)
-			throws Exception {
-		storage.setIsSyncFlag(true);
-		return storageOfferingService.update(storage);
-	}
+    @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing StorageOffering.", response = StorageOffering.class)
+    @Override
+    public StorageOffering update(@RequestBody StorageOffering storage, @PathVariable(PATH_ID) Long id)
+            throws Exception {
+        storage.setIsSyncFlag(true);
+        return storageOfferingService.update(storage);
+    }
 
-	@ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing StorageOffering.")
-	@Override
-	public void delete(@PathVariable(PATH_ID) Long id) throws Exception {
-		storageOfferingService.delete(id);
-	}
+    @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing StorageOffering.")
+    @Override
+    public void delete(@PathVariable(PATH_ID) Long id) throws Exception {
+        storageOfferingService.delete(id);
+    }
 
-	@Override
-	public List<StorageOffering> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-			@RequestParam Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
-		PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, StorageOffering.class);
-		Page<StorageOffering> pageResponse = storageOfferingService.findAll(page);
-		System.out.println(pageResponse);
-		response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
-		return pageResponse.getContent();
-	}
+    @Override
+    public List<StorageOffering> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
+            @RequestParam Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, StorageOffering.class);
+        Page<StorageOffering> pageResponse = storageOfferingService.findAll(page);
+        System.out.println(pageResponse);
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
+    }
 
-	/**
-	 * list all storage service for instance.
-	 *
-	 * @return storage service
-	 * @throws Exception
-	 *             error
-	 */
-	@RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	@ResponseStatus(HttpStatus.OK)
-	@ResponseBody
-	protected List<StorageOffering> getSearch() throws Exception {
-		return storageOfferingService.findAll();
-	}
+    /**
+     * list all storage service for instance.
+     *
+     * @return storage service
+     * @throws Exception error
+     */
+    @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<StorageOffering> getSearch() throws Exception {
+        return storageOfferingService.findAll();
+    }
 
-	/**
-	 * list all storage service for instance.
-	 *
-	 * @param tags
-	 *            tags.
-	 * @return storage service
-	 * @throws Exception
-	 *             error
-	 */
-	@RequestMapping(value = "storagesort", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	@ResponseStatus(HttpStatus.OK)
-	@ResponseBody
-	protected List<StorageOffering> getFindByTags(@RequestParam String tags) throws Exception {
-		return storageOfferingService.findAllByTags(tags);
-	}
+    /**
+     * list all storage service for instance.
+     *
+     * @param tags tags.
+     * @return storage service
+     * @throws Exception error
+     */
+    @RequestMapping(value = "storagesort", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<StorageOffering> getFindByTags(@RequestParam String tags) throws Exception {
+        return storageOfferingService.findAllByTags(tags);
+    }
 
-	/**
-	 * list all storage service for instance.
-	 *
-	 * @return storage service
-	 * @throws Exception
-	 *             error
-	 */
-	@RequestMapping(value = "storagetags", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	@ResponseStatus(HttpStatus.OK)
-	@ResponseBody
-	protected List<String> getStorageTags() throws Exception {
-		return storageOfferingService.findTags(true);
-	}
+    /**
+     * list all storage service for instance.
+     *
+     * @return storage service
+     * @throws Exception error
+     */
+    @RequestMapping(value = "storagetags", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<String> getStorageTags() throws Exception {
+        return storageOfferingService.findTags(true);
+    }
 }

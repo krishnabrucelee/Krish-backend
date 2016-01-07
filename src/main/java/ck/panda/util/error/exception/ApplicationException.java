@@ -1,6 +1,5 @@
 package ck.panda.util.error.exception;
 
-
 import ck.panda.util.error.Errors;
 
 /**
@@ -36,4 +35,3 @@ public class ApplicationException extends Exception {
     }
 
 }
-

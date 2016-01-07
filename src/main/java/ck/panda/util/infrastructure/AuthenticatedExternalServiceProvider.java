@@ -12,6 +12,7 @@ public class AuthenticatedExternalServiceProvider {
 
     /**
      * Provide auth web service.
+     * 
      * @return AuthenticatedExternalWebService
      */
     public AuthenticatedExternalWebService provide() {

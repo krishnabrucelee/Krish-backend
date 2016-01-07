@@ -28,7 +28,7 @@ import ck.panda.util.JsonUtil;
 
 /** User entity. */
 @Entity
-@Table(name = "ck_users")
+@Table(name = "users")
 @EntityListeners(AuditingEntityListener.class)
 public class User {
 
@@ -51,7 +51,7 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "department_id", referencedColumnName = "id", updatable = false, insertable = false)
     private Department department;
-    
+
     /** Department id of the user. */
     @Column(name = "department_id")
     private Long departmentId;
@@ -82,11 +82,11 @@ public class User {
     @Column(name = "type")
     private UserType type;
 
-    /** First name of the user.  */
+    /** First name of the user. */
     @Column(name = "first_name")
     private String firstName;
 
-    /** Last name of the user.  */
+    /** Last name of the user. */
     @Column(name = "last_name")
     private String lastName;
 
@@ -161,18 +161,14 @@ public class User {
 
     /** Define user type. */
     public enum UserType {
-       /** Define type constant. */
-        USER,
-        ROOT_ADMIN,
-        DOMAIN_ADMIN;
+        /** Define type constant. */
+        USER, ROOT_ADMIN, DOMAIN_ADMIN;
     }
 
     /** Define status. */
     public enum Status {
-       /** Define status constant. */
-        ACTIVE,
-        DELETED,
-        BLOCKED;
+        /** Define status constant. */
+        ACTIVE, DELETED, BLOCKED;
     }
 
     /**
@@ -231,7 +227,7 @@ public class User {
 
     /**
      * Get the department.
-     * 
+     *
      * @return the department.
      */
     public Department getDepartment() {
@@ -240,16 +236,16 @@ public class User {
 
     /**
      * Set the department.
-     * 
+     *
      * @param department the department to set.
      */
     public void setDepartment(Department department) {
         this.department = department;
     }
-    
+
     /**
      * Get the departmentId.
-     * 
+     *
      * @return the departmentId.
      */
     public Long getDepartmentId() {
@@ -258,16 +254,16 @@ public class User {
 
     /**
      * Set the departmentId.
-     * 
+     *
      * @param departmentId the departmentId to set.
      */
     public void setDepartmentId(Long departmentId) {
         this.departmentId = departmentId;
     }
 
-	/**
-	 * Get the domain.
-	 * 
+    /**
+     * Get the domain.
+     *
      * @return the domain.
      */
     public Domain getDomain() {
@@ -276,7 +272,7 @@ public class User {
 
     /**
      * Set the domain.
-     * 
+     *
      * @param domain the domain to set.
      */
     public void setDomain(Domain domain) {
@@ -375,7 +371,7 @@ public class User {
 
     /**
      * Get the projectList.
-     * 
+     *
      * @return the projectList
      */
     public List<Project> getProjectList() {
@@ -384,7 +380,7 @@ public class User {
 
     /**
      * Set the projectList.
-     * 
+     *
      * @param projectList the projectList to set
      */
     public void setProjectList(List<Project> projectList) {
@@ -535,13 +531,13 @@ public class User {
         this.updatedBy = updatedBy;
     }
 
-   /**
+    /**
      * Get the sync flag.
      *
      * @return the syncFlag.
      */
     public Boolean getSyncFlag() {
-    return syncFlag;
+        return syncFlag;
     }
 
     /**
@@ -550,7 +546,7 @@ public class User {
      * @param syncFlag to set.
      */
     public void setSyncFlag(Boolean syncFlag) {
-    this.syncFlag = syncFlag;
+        this.syncFlag = syncFlag;
     }
 
     /**
@@ -572,55 +568,55 @@ public class User {
     }
 
     /**
-    * Get the transient account.
-    *
-    * @return the transAccount
-    */
+     * Get the transient account.
+     *
+     * @return the transAccount
+     */
     public String getTransAccount() {
         return transAccount;
     }
 
     /**
-    * Set  the transAccount .
-    *
-    * @param transAccountto set
-    */
+     * Set the transAccount .
+     *
+     * @param transAccount to set
+     */
     public void setTransAccount(String transAccount) {
         this.transAccount = transAccount;
     }
 
     /**
-    * Get the transient Department.
-    *
-    * @return the transDepartment
-    */
+     * Get the transient Department.
+     *
+     * @return the transDepartment
+     */
     public String getTransDepartment() {
         return transDepartment;
     }
 
     /**
-    * Set the transDepartment.
-    *
-    * @param transDepartment  to set
-    */
+     * Set the transDepartment.
+     *
+     * @param transDepartment to set
+     */
     public void setTransDepartment(String transDepartment) {
         this.transDepartment = transDepartment;
     }
 
     /**
-    * Get the domain Id.
-    *
-    * @return the domainId
-    */
+     * Get the domain Id.
+     *
+     * @return the domainId
+     */
     public Long getDomainId() {
         return domainId;
     }
 
     /**
-    * Set the domainId .
-    *
-    * @param domainId to set
-    */
+     * Set the domainId .
+     *
+     * @param domainId to set
+     */
     public void setDomainId(Long domainId) {
         this.domainId = domainId;
     }
@@ -663,7 +659,7 @@ public class User {
 
     /**
      * Get the roleId.
-     * 
+     *
      * @return the roleId
      */
     public Long getRoleId() {
@@ -672,7 +668,7 @@ public class User {
 
     /**
      * Set the roleId.
-     * 
+     *
      * @param roleId the roleId to set
      */
     public void setRoleId(Long roleId) {

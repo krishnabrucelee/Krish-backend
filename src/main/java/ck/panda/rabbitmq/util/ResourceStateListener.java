@@ -16,8 +16,8 @@ import ck.panda.service.VirtualMachineService;
 import ck.panda.service.VolumeService;
 
 /**
- * Resource State listener will listen and update resource status to our App DB when an event directly/from
- * application occurred in CS server.
+ * Resource State listener will listen and update resource status to our App DB when an event directly/from application
+ * occurred in CS server.
  */
 public class ResourceStateListener implements MessageListener {
     /** Logger attribute. */

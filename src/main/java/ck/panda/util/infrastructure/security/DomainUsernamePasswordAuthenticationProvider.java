@@ -20,10 +20,12 @@ public class DomainUsernamePasswordAuthenticationProvider implements Authenticat
 
     /**
      * Parameterized constructor.
+     * 
      * @param tokenService to set
      * @param externalServiceAuthenticator to set
      */
-    public DomainUsernamePasswordAuthenticationProvider(TokenService tokenService, ExternalServiceAuthenticator externalServiceAuthenticator) {
+    public DomainUsernamePasswordAuthenticationProvider(TokenService tokenService,
+            ExternalServiceAuthenticator externalServiceAuthenticator) {
         this.tokenService = tokenService;
         this.externalServiceAuthenticator = externalServiceAuthenticator;
     }
@@ -38,10 +40,11 @@ public class DomainUsernamePasswordAuthenticationProvider implements Authenticat
         }
 
         AuthenticationWithToken resultOfAuthentication = null;
-//        AuthenticationWithToken resultOfAuthentication = externalServiceAuthenticator.authenticate(username.get(), password.get());
-//        String newToken = tokenService.generateNewToken();
-//        resultOfAuthentication.setToken(newToken);
-//        tokenService.store(newToken, resultOfAuthentication);
+        // AuthenticationWithToken resultOfAuthentication = externalServiceAuthenticator.authenticate(username.get(),
+        // password.get());
+        // String newToken = tokenService.generateNewToken();
+        // resultOfAuthentication.setToken(newToken);
+        // tokenService.store(newToken, resultOfAuthentication);
 
         return resultOfAuthentication;
     }

@@ -26,14 +26,12 @@ import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonUtil;
 
 /**
- * A zone is the second largest organizational unit within a CloudStack
- * deployment. A zone typically corresponds to a single datacenter, although it
- * is permissible to have multiple zones in a datacenter. The benefit of
- * organizing infrastructure into zones is to provide physical isolation and
- * redundancy.
+ * A zone is the second largest organizational unit within a CloudStack deployment. A zone typically corresponds to a
+ * single datacenter, although it is permissible to have multiple zones in a datacenter. The benefit of organizing
+ * infrastructure into zones is to provide physical isolation and redundancy.
  */
 @Entity
-@Table(name = "ck_zone")
+@Table(name = "zones")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class Zone implements Serializable {
@@ -54,13 +52,13 @@ public class Zone implements Serializable {
     private String uuid;
 
     /** id for the Domain. */
-    //@OneToMany(mappedBy = "domain")
+    // @OneToMany(mappedBy = "domain")
     @Column(name = "domain_id")
     private Long domainId;
 
     /** id for the Region. */
-    //@OneToOne
-    //@JoinColumn(name = "region_id", referencedColumnName = "id")
+    // @OneToOne
+    // @JoinColumn(name = "region_id", referencedColumnName = "id")
     @Column(name = "region_id")
     private Long regionId;
 
@@ -107,14 +105,14 @@ public class Zone implements Serializable {
      */
     public enum Status {
 
-           /** If zone is enabled we can create instance. */
-           ENABLED,
+        /** If zone is enabled we can create instance. */
+        ENABLED,
 
-           /** If zone is disabled cannot create any instances and offers. */
-           DISABLED,
+        /** If zone is disabled cannot create any instances and offers. */
+        DISABLED,
 
-           /** If zone is deleted we cannot create instances. */
-           DELETED
+        /** If zone is deleted we cannot create instances. */
+        DELETED
     }
 
     /**
@@ -125,8 +123,7 @@ public class Zone implements Serializable {
     }
 
     /**
-     * @param id
-     * the zone id to set.
+     * @param id the zone id to set.
      */
     public void setId(Long id) {
         this.id = id;
@@ -140,8 +137,7 @@ public class Zone implements Serializable {
     }
 
     /**
-     * @param name
-     * the zone name to set.
+     * @param name the zone name to set.
      */
     public void setName(String name) {
         this.name = name;
@@ -155,8 +151,7 @@ public class Zone implements Serializable {
     }
 
     /**
-     * @param uuid
-     * the zone uuid to set.
+     * @param uuid the zone uuid to set.
      */
     public void setUuid(String uuid) {
         this.uuid = uuid;
@@ -170,8 +165,7 @@ public class Zone implements Serializable {
     }
 
     /**
-     * @param domainId
-     * the domain Id to set
+     * @param domainId the domain Id to set
      */
     public void setDomainId(Long domainId) {
         this.domainId = domainId;
@@ -185,8 +179,7 @@ public class Zone implements Serializable {
     }
 
     /**
-     * @param regionId
-     * the regionId to set.
+     * @param regionId the regionId to set.
      */
     public void setRegionId(Long regionId) {
         this.regionId = regionId;
@@ -200,8 +193,7 @@ public class Zone implements Serializable {
     }
 
     /**
-     * @param isActive
-     * the isActive to set.
+     * @param isActive the isActive to set.
      */
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
@@ -215,8 +207,7 @@ public class Zone implements Serializable {
     }
 
     /**
-     * @param version
-     * the version to set.
+     * @param version the version to set.
      */
     public void setVersion(Long version) {
         this.version = version;

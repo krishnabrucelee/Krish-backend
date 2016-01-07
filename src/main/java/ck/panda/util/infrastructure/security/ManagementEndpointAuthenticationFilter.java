@@ -39,7 +39,9 @@ public class ManagementEndpointAuthenticationFilter extends GenericFilterBean {
     /** Management endpoints. */
     private Set<String> managementEndpoints;
 
-    /** Parameterized constructor.
+    /**
+     * Parameterized constructor.
+     * 
      * @param authenticationManager to set
      */
     public ManagementEndpointAuthenticationFilter(AuthenticationManager authenticationManager) {
@@ -62,7 +64,8 @@ public class ManagementEndpointAuthenticationFilter extends GenericFilterBean {
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
         HttpServletRequest httpRequest = asHttp(request);
         HttpServletResponse httpResponse = asHttp(response);
 
@@ -73,7 +76,8 @@ public class ManagementEndpointAuthenticationFilter extends GenericFilterBean {
 
         try {
             if (postToManagementEndpoints(resourcePath)) {
-                LOGGER.debug("Trying to authenticate user {} for management endpoint by X-Auth-Username method", username);
+                LOGGER.debug("Trying to authenticate user {} for management endpoint by X-Auth-Username method",
+                        username);
                 processManagementEndpointUsernamePasswordAuthentication(username, password);
             }
 
@@ -87,6 +91,7 @@ public class ManagementEndpointAuthenticationFilter extends GenericFilterBean {
 
     /**
      * Convert ServletRequest to HttpServletRequest.
+     * 
      * @param request to set
      * @return HttpServletRequest
      */
@@ -96,6 +101,7 @@ public class ManagementEndpointAuthenticationFilter extends GenericFilterBean {
 
     /**
      * Convert ServletResponse to HttpServletResponse.
+     * 
      * @param response to set
      * @return HttpServletResponse
      */
@@ -105,6 +111,7 @@ public class ManagementEndpointAuthenticationFilter extends GenericFilterBean {
 
     /**
      * Post to management endpoints.
+     * 
      * @param resourcePath to set
      * @return true/false
      */
@@ -114,35 +121,42 @@ public class ManagementEndpointAuthenticationFilter extends GenericFilterBean {
 
     /**
      * Process management endpoint authentication.
+     * 
      * @param username to set
      * @param password to set
      * @throws IOException to set
      */
-    private void processManagementEndpointUsernamePasswordAuthentication(Optional<String> username, Optional<String> password) throws IOException {
+    private void processManagementEndpointUsernamePasswordAuthentication(Optional<String> username,
+            Optional<String> password) throws IOException {
         Authentication resultOfAuthentication = tryToAuthenticateWithUsernameAndPassword(username, password);
         SecurityContextHolder.getContext().setAuthentication(resultOfAuthentication);
     }
 
     /**
      * Authenticate with username and password.
+     * 
      * @param username to set
      * @param password to set
      * @return Authentication
      */
-    private Authentication tryToAuthenticateWithUsernameAndPassword(Optional<String> username, Optional<String> password) {
-        BackendAdminUsernamePasswordAuthenticationToken requestAuthentication = new BackendAdminUsernamePasswordAuthenticationToken(username, password);
+    private Authentication tryToAuthenticateWithUsernameAndPassword(Optional<String> username,
+            Optional<String> password) {
+        BackendAdminUsernamePasswordAuthenticationToken requestAuthentication = new BackendAdminUsernamePasswordAuthenticationToken(
+                username, password);
         return tryToAuthenticate(requestAuthentication);
     }
 
     /**
      * Authenticate with request.
+     * 
      * @param requestAuthentication to set
      * @return Authentication
      */
     private Authentication tryToAuthenticate(Authentication requestAuthentication) {
         Authentication responseAuthentication = authenticationManager.authenticate(requestAuthentication);
         if (responseAuthentication == null || !responseAuthentication.isAuthenticated()) {
-            throw new InternalAuthenticationServiceException("Unable to authenticate Backend Admin for provided credentials");
+            throw new InternalAuthenticationServiceException(
+                    "Unable to authenticate Backend Admin for provided credentials");
         }
         LOGGER.debug("Backend Admin successfully authenticated");
         return responseAuthentication;

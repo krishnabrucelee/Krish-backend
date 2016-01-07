@@ -23,6 +23,7 @@ import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
+import ck.panda.util.EncryptionUtil;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
@@ -36,7 +37,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private AppValidator validator;
 
-    /** Autowired user repository object.  */
+    /** Autowired user repository object. */
     @Autowired
     private UserRepository userRepository;
 
@@ -47,10 +48,6 @@ public class UserServiceImpl implements UserService {
     /** Inject departmentService business logic. */
     @Autowired
     private DepartmentService departmentService;
-
-    /** Inject Account Service business logic. */
-    @Autowired
-    private AccountService accountService;
 
     /** Cloud stack configuration utility class. */
     @Autowired
@@ -64,11 +61,11 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private DomainRepository domainRepository;
 
-    /** Autowired TokenDetails */
+    /** Autowired TokenDetails. */
     @Autowired
     private TokenDetails tokenDetails;
 
-    /** Reference of domain Service .*/
+    /** Reference of domain Service . */
     @Autowired
     private DomainService domainService;
 
@@ -80,36 +77,37 @@ public class UserServiceImpl implements UserService {
     @PreAuthorize("hasPermission(#user.getSyncFlag(), 'CREATE_USER')")
     public User save(User user) throws Exception {
         if (user.getSyncFlag()) {
-        Errors errors = validator.rejectIfNullEntity("user", user);
-        errors = validator.validateEntity(user, errors);
-        errors = this.validateName(errors, user.getUserName(), user.getDomain());
-        if (errors.hasErrors()) {
-            throw new ApplicationException(errors);
-        } else {
-            user.setType(User.UserType.USER);
-            user.setStatus(Status.ACTIVE);
-            user.setRoleId(user.getRole().getId());
-            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
-            byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
-            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-            String encryptedPassword = new String(EncryptionUtil.encrypt(user.getPassword(), originalKey));
-            user.setIsActive(true);
-            config.setServer(1L);
-            HashMap<String, String> userMap = new HashMap<String, String>();
-            userMap.put("domainid", user.getDomain().getUuid());
-            String cloudResponse = csUserService.createUser(user.getDepartment().getUserName(),
-                    user.getEmail(), user.getFirstName(), user.getLastName(), user.getUserName(), user.getPassword(), "json", userMap);
-            JSONObject createUserResponseJSON = new JSONObject(cloudResponse).getJSONObject("createuserresponse");
-                if (createUserResponseJSON.has("errorcode")) {
-                errors.addFieldError("username", "user.already.exist.for.same.domain");
+            Errors errors = validator.rejectIfNullEntity("user", user);
+            errors = validator.validateEntity(user, errors);
+            errors = this.validateName(errors, user.getUserName(), user.getDomain());
+            if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
+            } else {
+                user.setType(User.UserType.USER);
+                user.setStatus(Status.ACTIVE);
+                user.setRoleId(user.getRole().getId());
+                String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+                byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+                SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+                String encryptedPassword = new String(EncryptionUtil.encrypt(user.getPassword(), originalKey));
+                user.setIsActive(true);
+                config.setServer(1L);
+                HashMap<String, String> userMap = new HashMap<String, String>();
+                userMap.put("domainid", user.getDomain().getUuid());
+                String cloudResponse = csUserService.createUser(user.getDepartment().getUserName(), user.getEmail(),
+                        user.getFirstName(), user.getLastName(), user.getUserName(), user.getPassword(), "json",
+                        userMap);
+                JSONObject createUserResponseJSON = new JSONObject(cloudResponse).getJSONObject("createuserresponse");
+                if (createUserResponseJSON.has("errorcode")) {
+                    errors.addFieldError("username", "user.already.exist.for.same.domain");
+                    throw new ApplicationException(errors);
+                }
+                JSONObject userRes = createUserResponseJSON.getJSONObject("user");
+                user.setUuid((String) userRes.get("id"));
+                user.setPassword(encryptedPassword);
+                user.setDomainId(user.getDomain().getId());
+                return userRepository.save(user);
             }
-            JSONObject userRes = createUserResponseJSON.getJSONObject("user");
-            user.setUuid((String) userRes.get("id"));
-            user.setPassword(encryptedPassword);
-            user.setDomainId(user.getDomain().getId());
-            return userRepository.save(user);
-        }
         } else {
             user.setStatus(Status.ACTIVE);
             return userRepository.save(user);
@@ -123,7 +121,7 @@ public class UserServiceImpl implements UserService {
      * @param name name of the user.
      * @param domain domain object.
      * @return errors.
-     * @throws Exception
+     * @throws Exception unhandled errors.
      */
     private Errors validateName(Errors errors, String name, Domain domain) throws Exception {
         User user = userRepository.findByUserNameAndDomain(name, domain);
@@ -143,19 +141,19 @@ public class UserServiceImpl implements UserService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-              config.setServer(1L);
-              HashMap<String, String> optional = new HashMap<String, String>();
-              optional.put("domainid", user.getDomain().getUuid());
-              optional.put("username", user.getUserName());
-              csUserService.updateUser(user.getUuid(), optional,"json");
-              if(user.getType() == User.UserType.DOMAIN_ADMIN){
-                  Domain domain = user.getDomain();
-                  domain.setPortalUserName(user.getUserName());
-                  domain.setSyncFlag(false);
-                  domainService.update(domain);
-              }
-              return userRepository.save(user);
-          }
+                config.setServer(1L);
+                HashMap<String, String> optional = new HashMap<String, String>();
+                optional.put("domainid", user.getDomain().getUuid());
+                optional.put("username", user.getUserName());
+                csUserService.updateUser(user.getUuid(), optional, "json");
+                if (user.getType() == User.UserType.DOMAIN_ADMIN) {
+                    Domain domain = user.getDomain();
+                    domain.setPortalUserName(user.getUserName());
+                    domain.setSyncFlag(false);
+                    domainService.update(domain);
+                }
+                return userRepository.save(user);
+            }
         } else {
             user.setStatus(Status.ACTIVE);
             return userRepository.save(user);
@@ -165,7 +163,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @PreAuthorize("hasPermission(#user.getSyncFlag(), 'DELETE_USER')")
     public void delete(User user) throws Exception {
-        if (user.getSyncFlag() == true) {
+        if (user.getSyncFlag()) {
             config.setServer(1L);
             csUserService.deleteUser(user.getId().toString(), "json");
             this.softDelete(user);
@@ -217,8 +215,8 @@ public class UserServiceImpl implements UserService {
 
                 User user = User.convert(userListJSON.getJSONObject(i));
                 if (!user.getUserName().equalsIgnoreCase("baremetal-system-account")) {
-                user.setDepartmentId((convertEntityService.getDepartment(user.getTransDepartment()).getId()));
-                user.setDomainId(convertEntityService.getDomainId(user.getTransDomainId()));
+                    user.setDepartmentId((convertEntityService.getDepartment(user.getTransDepartment()).getId()));
+                    user.setDomainId(convertEntityService.getDomainId(user.getTransDomainId()));
                     userList.add(user);
                 }
             }
@@ -250,9 +248,9 @@ public class UserServiceImpl implements UserService {
             if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
                 return userRepository.findByDepartment(department);
             } else {
-            List<User> users = new ArrayList<User>();
-            users.add(user);
-            return users;
+                List<User> users = new ArrayList<User>();
+                users.add(user);
+                return users;
             }
         }
         return userRepository.findByDepartment(department);
@@ -286,7 +284,7 @@ public class UserServiceImpl implements UserService {
     public User softDelete(User user) throws Exception {
         user.setIsActive(false);
         user.setStatus(User.Status.DELETED);
-        if(user.getSyncFlag()) {
+        if (user.getSyncFlag()) {
             // set server for finding value in configuration
             config.setServer(1L);
             csUserService.deleteUser((user.getUuid()), "json");
@@ -303,8 +301,8 @@ public class UserServiceImpl implements UserService {
      * @throws Exception if error occurs.
      */
     private Errors validateEvent(Errors errors, String errmessage) throws Exception {
-       errors.addGlobalError(errmessage);
-       return errors;
+        errors.addGlobalError(errmessage);
+        return errors;
     }
 
     @Override

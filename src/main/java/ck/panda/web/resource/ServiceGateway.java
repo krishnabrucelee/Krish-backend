@@ -12,12 +12,14 @@ public interface ServiceGateway {
 
     /**
      * Get some stuff.
+     * 
      * @return stuff.
      */
     List<Stuff> getSomeStuff();
 
     /**
      * Create stuff.
+     * 
      * @param newStuff to set
      * @param domainUser to set
      */

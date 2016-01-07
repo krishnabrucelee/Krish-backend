@@ -41,6 +41,7 @@ public class BackendAdminUsernamePasswordAuthenticationProvider implements Authe
 
     /**
      * Credentials missing.
+     * 
      * @param username to set
      * @param password to set.
      * @return true/false
@@ -51,6 +52,7 @@ public class BackendAdminUsernamePasswordAuthenticationProvider implements Authe
 
     /**
      * Invalid credentials.
+     * 
      * @param username to set
      * @param password to set
      * @return true/false
@@ -61,6 +63,7 @@ public class BackendAdminUsernamePasswordAuthenticationProvider implements Authe
 
     /**
      * Is backend admin.
+     * 
      * @param username to set
      * @return true/false
      */

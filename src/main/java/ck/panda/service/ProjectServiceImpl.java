@@ -16,11 +16,8 @@ import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
-import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.User.UserType;
-import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.ProjectRepository;
-import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackProjectService;
 import ck.panda.util.CloudStackServer;
@@ -32,8 +29,8 @@ import ck.panda.util.error.exception.ApplicationException;
 import ck.panda.util.error.exception.EntityNotFoundException;
 
 /**
- * Project service implementation used to get list of project and save ,delete, update the project in
- * application database.
+ * Project service implementation used to get list of project and save ,delete, update the project in application
+ * database.
  */
 @Service
 public class ProjectServiceImpl implements ProjectService {
@@ -75,53 +72,56 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @PreAuthorize("hasPermission(#project.getSyncFlag(), 'CREATE_PROJECT')")
     public Project save(Project project) throws Exception {
-    	List<User> users = new ArrayList<User>();
+        List<User> users = new ArrayList<User>();
         if (project.getSyncFlag()) {
-        Errors errors = validator.rejectIfNullEntity("project", project);
-        errors = validator.validateEntity(project, errors);
-        errors = this.validateByName(errors, project.getName(), project.getDepartment(), 0L);
-        // Validation
-        if (errors.hasErrors()) {
-            throw new ApplicationException(errors);
-        } else {
-            HashMap<String, String> optional = new HashMap<String, String>();
-            optional.put("domainid", convertEntityService.getDomainById(project.getDomainId()).getUuid());
-            optional.put("account", convertEntityService.getDepartmentById(project.getDepartmentId()).getUserName());
-            config.setUserServer();
-            String csResponse = cloudStackProjectService.createProject("json", project.getName(),
-                    project.getDescription(), optional);
-            JSONObject csProject = new JSONObject(csResponse).getJSONObject("createprojectresponse");
-            if (csProject.has("errorcode")) {
-                errors = this.validateEvent(errors, csProject.getString("errortext"));
+            Errors errors = validator.rejectIfNullEntity("project", project);
+            errors = validator.validateEntity(project, errors);
+            errors = this.validateByName(errors, project.getName(), project.getDepartment(), 0L);
+            // Validation
+            if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                LOGGER.debug("Project UUID", csProject.getString("id"));
-                project.setUuid(csProject.getString("id"));
-                users.add(convertEntityService.getOwnerById(project.getProjectOwnerId()));
-                project.setUserList(users);
-                String instancePro = cloudStackProjectService.queryAsyncJobResult(csProject.getString("jobid"), "json");
-                JSONObject resProject = new JSONObject(instancePro).getJSONObject("queryasyncjobresultresponse");
-                if (resProject.getString("jobstatus").equals("2")) {
+                HashMap<String, String> optional = new HashMap<String, String>();
+                optional.put("domainid", convertEntityService.getDomainById(project.getDomainId()).getUuid());
+                optional.put("account",
+                        convertEntityService.getDepartmentById(project.getDepartmentId()).getUserName());
+                config.setUserServer();
+                String csResponse = cloudStackProjectService.createProject("json", project.getName(),
+                        project.getDescription(), optional);
+                JSONObject csProject = new JSONObject(csResponse).getJSONObject("createprojectresponse");
+                if (csProject.has("errorcode")) {
                     errors = this.validateEvent(errors, csProject.getString("errortext"));
-                    project.setIsActive(false);
+                    throw new ApplicationException(errors);
                 } else {
-                    project.setIsActive(true);
-                    project.setStatus(Project.Status.ENABLED);
+                    LOGGER.debug("Project UUID", csProject.getString("id"));
+                    project.setUuid(csProject.getString("id"));
+                    users.add(convertEntityService.getOwnerById(project.getProjectOwnerId()));
+                    project.setUserList(users);
+                    String instancePro = cloudStackProjectService.queryAsyncJobResult(csProject.getString("jobid"),
+                            "json");
+                    JSONObject resProject = new JSONObject(instancePro).getJSONObject("queryasyncjobresultresponse");
+                    if (resProject.getString("jobstatus").equals("2")) {
+                        errors = this.validateEvent(errors, csProject.getString("errortext"));
+                        project.setIsActive(false);
+                    } else {
+                        project.setIsActive(true);
+                        project.setStatus(Project.Status.ENABLED);
+                    }
                 }
-             }
-          }
+            }
         }
-           return projectRepository.save(project);
+        return projectRepository.save(project);
     }
 
     @Override
     @PreAuthorize("hasPermission(#project.getSyncFlag(), 'EDIT_PROJECT')")
     public Project update(Project project) throws Exception {
         if (project.getSyncFlag()) {
-        	List<User> users = new ArrayList<User>();
+            List<User> users = new ArrayList<User>();
             Errors errors = validator.rejectIfNullEntity("project", project);
             errors = validator.validateEntity(project, errors);
-            errors = this.validateByName(errors, project.getName(),  convertEntityService.getDepartmentById(project.getDepartmentId()), project.getId());
+            errors = this.validateByName(errors, project.getName(),
+                    convertEntityService.getDepartmentById(project.getDepartmentId()), project.getId());
             // Validation
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
@@ -129,7 +129,8 @@ public class ProjectServiceImpl implements ProjectService {
                 config.setUserServer();
                 HashMap<String, String> optional = new HashMap<String, String>();
                 optional.put("domainid", convertEntityService.getDomainById(project.getDomainId()).getUuid());
-                optional.put("account",  convertEntityService.getDepartmentById(project.getDepartmentId()).getUserName());
+                optional.put("account",
+                        convertEntityService.getDepartmentById(project.getDepartmentId()).getUserName());
                 String csResponse = cloudStackProjectService.updateProject(project.getUuid(), project.getDescription(),
                         "json", optional);
                 JSONObject csProject = new JSONObject(csResponse).getJSONObject("updateprojectresponse");
@@ -137,8 +138,8 @@ public class ProjectServiceImpl implements ProjectService {
                     errors = this.validateEvent(errors, csProject.getString("errortext"));
                     throw new ApplicationException(errors);
                 }
-                if(project.getProjectOwnerId() != null){
-                users.add(convertEntityService.getOwnerById(project.getProjectOwnerId()));
+                if (project.getProjectOwnerId() != null) {
+                    users.add(convertEntityService.getOwnerById(project.getProjectOwnerId()));
                 }
                 if (project.getUserList().size() > 0) {
                     for (User user : project.getUserList()) {
@@ -153,7 +154,6 @@ public class ProjectServiceImpl implements ProjectService {
         }
         return projectRepository.save(project);
     }
-
 
     @Override
     public void delete(Project project) throws Exception {
@@ -234,22 +234,22 @@ public class ProjectServiceImpl implements ProjectService {
         Errors errors = validator.rejectIfNullEntity("project", project);
         project.setIsActive(false);
         project.setStatus(Project.Status.DELETED);
-        if(project.getSyncFlag()) {
-			// Validation
-			if (errors.hasErrors()) {
-				throw new ApplicationException(errors);
-			} else {
-				config.setUserServer();
-				HashMap<String, String> optional = new HashMap<String, String>();
-				optional.put("domainid", project.getDepartment().getDomain().getUuid());
-				optional.put("account", project.getDepartment().getUserName());
-				String csResponse = cloudStackProjectService.deleteProject(project.getUuid());
-				JSONObject csProject = new JSONObject(csResponse).getJSONObject("deleteprojectresponse");
-				if (csProject.has("errorcode")) {
-					errors = this.validateEvent(errors, csProject.getString("errortext"));
-					throw new ApplicationException(errors);
-				}
-			}
+        if (project.getSyncFlag()) {
+            // Validation
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
+            } else {
+                config.setUserServer();
+                HashMap<String, String> optional = new HashMap<String, String>();
+                optional.put("domainid", project.getDepartment().getDomain().getUuid());
+                optional.put("account", project.getDepartment().getUserName());
+                String csResponse = cloudStackProjectService.deleteProject(project.getUuid());
+                JSONObject csProject = new JSONObject(csResponse).getJSONObject("deleteprojectresponse");
+                if (csProject.has("errorcode")) {
+                    errors = this.validateEvent(errors, csProject.getString("errortext"));
+                    throw new ApplicationException(errors);
+                }
+            }
         }
         return projectRepository.save(project);
     }
@@ -304,10 +304,10 @@ public class ProjectServiceImpl implements ProjectService {
                 // the converted Project entity to list
                 Project project = Project.convert(projectListJSON.getJSONObject(i));
                 project.setDomainId(convertEntityService.getDomainId(project.getTransDomainId()));
-                project.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(project.getTransAccount(),
-                        convertEntityService.getDomain(project.getTransDomainId())));
+                project.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
+                        project.getTransAccount(), convertEntityService.getDomain(project.getTransDomainId())));
                 project.setIsActive(convertEntityService.getState(project.getTransState()));
-                project.setStatus((Project.Status)convertEntityService.getStatus(project.getTransState()));
+                project.setStatus((Project.Status) convertEntityService.getStatus(project.getTransState()));
                 projectList.add(project);
 
             }
@@ -330,8 +330,8 @@ public class ProjectServiceImpl implements ProjectService {
         return projectRepository.findByDepartmentAndIsActive(id, true);
     }
 
-	@Override
-	public List<Project> findByUserAndIsActive(Long id, Boolean isActive) throws Exception {
-		return projectRepository.findByUserAndIsActive(id, isActive);
-	}
+    @Override
+    public List<Project> findByUserAndIsActive(Long id, Boolean isActive) throws Exception {
+        return projectRepository.findByUserAndIsActive(id, isActive);
+    }
 }

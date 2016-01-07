@@ -17,13 +17,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
-
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.CloudStackConfiguration;
-import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.service.CloudStackConfigurationService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -37,7 +34,8 @@ import ck.panda.util.web.CRUDController;
 @RestController
 @RequestMapping("/api/cloudconfiguration")
 @Api(value = "CloudStackConfiguration", description = "URL formation for cloudstack", produces = "application/json")
-public class CloudStackConfigurationController extends CRUDController<CloudStackConfiguration> implements ApiController {
+public class CloudStackConfigurationController extends CRUDController<CloudStackConfiguration>
+        implements ApiController {
 
     /** Service reference to CloudStackConfiguration. */
     @Autowired
@@ -57,7 +55,8 @@ public class CloudStackConfigurationController extends CRUDController<CloudStack
 
     @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing CloudStackConfiguration.", response = CloudStackConfiguration.class)
     @Override
-    public CloudStackConfiguration update(@RequestBody CloudStackConfiguration config, @PathVariable(PATH_ID) Long id) throws Exception {
+    public CloudStackConfiguration update(@RequestBody CloudStackConfiguration config, @PathVariable(PATH_ID) Long id)
+            throws Exception {
         return configService.update(config);
     }
 
@@ -76,18 +75,18 @@ public class CloudStackConfigurationController extends CRUDController<CloudStack
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
-    
+
     /**
-     * list all CloudStack configuration
-     * .
+     * list all CloudStack configuration .
+     *
      * @return configuration values.
      * @throws Exception unhandled errors.
      */
-      @RequestMapping(value = "configlist", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-      @ResponseStatus(HttpStatus.OK)
-      @ResponseBody
-      protected List<CloudStackConfiguration> getSearch() throws Exception {
-          return configService.findAll();
-      }
+    @RequestMapping(value = "configlist", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<CloudStackConfiguration> getSearch() throws Exception {
+        return configService.findAll();
+    }
 
 }

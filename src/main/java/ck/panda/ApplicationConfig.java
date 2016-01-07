@@ -1,6 +1,5 @@
 package ck.panda;
 
-import java.io.IOException;
 import java.util.Locale;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -22,7 +21,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
-import ck.panda.domain.entity.User;
 import ck.panda.util.audit.AuditingDateTimeProvider;
 import ck.panda.util.audit.CurrentTimeDateTimeService;
 import ck.panda.util.audit.DateTimeService;
@@ -63,7 +61,7 @@ public class ApplicationConfig extends WebMvcConfigurerAdapter {
     /**
      * Configures the DateTimeProvider bean for providing date and time.
      *
-     * @param dateTimeService DateTimeServiceObject. *
+     * @param dateTimeService DateTimeServiceObject.
      * @return AuditingDateTimeProvider implementation
      */
     @Bean
@@ -71,6 +69,11 @@ public class ApplicationConfig extends WebMvcConfigurerAdapter {
         return new AuditingDateTimeProvider(dateTimeService);
     }
 
+    /**
+     * Configures the auditProvider bean for providing updated and created user information.
+     *
+     * @return AuditingDateTimeProvider implementation
+     */
     @Bean
     AuditorAware<Long> auditorProvider() {
         return new UsernameAuditorAware();

@@ -22,6 +22,7 @@ import ck.panda.util.CloudStackIsoService;
 import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.ConfigUtil;
+import ck.panda.util.EncryptionUtil;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
@@ -140,6 +141,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         optional.put("diskofferingid",
                                 convertEntityService.getStorageOfferById(vminstance.getStorageOfferingId()).getUuid());
                     }
+                    if (convertEntityService.getComputeOfferById(vminstance.getComputeOfferingId()).getCustomized()) {
+                        optional.put("details[0].cpuNumber", vminstance.getCpuCore().toString());
+                        optional.put("details[0].cpuSpeed", vminstance.getCpuSpeed().toString());
+                        optional.put("details[0].memory", vminstance.getMemory().toString());
+                    }
                     String csResponse = cloudStackInstanceService.deployVirtualMachine(
                             convertEntityService.getComputeOfferById(vminstance.getComputeOfferingId()).getUuid(),
                             convertEntityService.getTemplateById(vminstance.getTemplateId()).getUuid(),
@@ -215,32 +221,6 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         HashMap<String, String> optional = new HashMap<String, String>();
         Errors errors = null;
         switch (event) {
-        case EventTypes.EVENT_VM_START:
-            try {
-                String instanceResponse = cloudStackInstanceService.startVirtualMachine(vminstance.getUuid(), "json");
-                JSONObject instance = new JSONObject(instanceResponse).getJSONObject("startvirtualmachineresponse");
-                if (instance.has("jobid")) {
-                    String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"),
-                            "json");
-                    JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
-                    if (jobresult.getString("jobstatus").equals("2")) {
-                        vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                        errors = validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
-                        if (errors.hasErrors()) {
-                            throw new BadCredentialsException(
-                                    jobresult.getJSONObject("jobresult").getString("errortext"));
-                        }
-                        vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
-                    } else {
-                        vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_CREATE));
-                        vminstance.setEventMessage("");
-                    }
-                }
-            } catch (BadCredentialsException e) {
-                LOGGER.error("ERROR AT VM START", e);
-                throw new BadCredentialsException(e.getMessage());
-            }
-            break;
         case EventTypes.EVENT_VM_STOP:
             try {
                 String instanceResponse = cloudStackInstanceService.stopVirtualMachine(vminstance.getUuid(), "json",
@@ -411,6 +391,36 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         HashMap<String, String> optional = new HashMap<String, String>();
         Errors errors = null;
         switch (event) {
+        case EventTypes.EVENT_VM_START:
+            try {
+                if (!vmInstance.getHostUuid().isEmpty()) {
+                    optional.put("hostid", vmInstance.getHostUuid());
+                }
+                String instanceResponse = cloudStackInstanceService.startVirtualMachine(vminstance.getUuid(), "json",
+                        optional);
+                JSONObject instance = new JSONObject(instanceResponse).getJSONObject("startvirtualmachineresponse");
+                if (instance.has("jobid")) {
+                    String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"),
+                            "json");
+                    JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse");
+                    if (jobresult.getString("jobstatus").equals("2")) {
+                        vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
+                        errors = validator.sendGlobalError(jobresult.getJSONObject("jobresult").getString("errortext"));
+                        if (errors.hasErrors()) {
+                            throw new BadCredentialsException(
+                                    jobresult.getJSONObject("jobresult").getString("errortext"));
+                        }
+                        vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
+                    } else {
+                        vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_CREATE));
+                        vminstance.setEventMessage("");
+                    }
+                }
+            } catch (BadCredentialsException e) {
+                LOGGER.error("ERROR AT VM START", e);
+                throw new BadCredentialsException(e.getMessage());
+            }
+            break;
         case EventTypes.EVENT_VM_MIGRATE:
             try {
                 if (vminstance.getStatus().equals(Status.Running)) {
@@ -597,6 +607,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             vmInstance.setVncPassword(decryptPassword);
         }
         return vmInstance;
+
     }
 
     @Override
@@ -867,8 +878,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-            if (vminstance.getDisplayName() != null
-                    && !vminstance.getDisplayName().trim().equalsIgnoreCase("")) {
+            if (vminstance.getDisplayName() != null && !vminstance.getDisplayName().trim().equalsIgnoreCase("")) {
                 HashMap<String, String> optional = new HashMap<String, String>();
                 optional.put("displayName", vminstance.getDisplayName());
                 cloudStackInstanceService.updateVirtualMachine(vminstance.getUuid(), optional);
@@ -876,8 +886,6 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             return virtualmachinerepository.save(vminstance);
         }
     }
-
-
 
     @Override
     public List<VmInstance> findByProjectAndStatus(Long projectId, List<Status> statusCode) throws Exception {
@@ -917,17 +925,29 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 case "0":
                     tempCount = updateResourceCount(vm, "9");
                     memory = tempTotalCapacity - tempCapacityUsed;
-                    if (memory < Long.valueOf(convertEntityService.getComputeOfferById(vm.getComputeOfferingId())
-                            .getMemory().toString())) {
-                    	errMessage = "There’s no memory available in the memory pool. Please contact the Cloud Admin";
+                    if (convertEntityService.getComputeOfferById(vm.getComputeOfferingId()).getCustomized()) {
+                        if (memory < Long.valueOf(vm.getMemory())) {
+                            errMessage = "There’s no memory available in the memory pool. Please contact the Cloud Admin";
+                        }
+                    } else {
+                        if (memory < Long.valueOf(convertEntityService.getComputeOfferById(vm.getComputeOfferingId())
+                                .getMemory().toString())) {
+                            errMessage = "There’s no memory available in the memory pool. Please contact the Cloud Admin";
+                        }
                     }
                     break;
                 case "1":
                     tempCount = updateResourceCount(vm, "8");
                     cpu = tempTotalCapacity - tempCapacityUsed;
-                    if (Long.valueOf(convertEntityService.getComputeOfferById(vm.getComputeOfferingId()).getClockSpeed()
-                            .toString()) > cpu) {
-                    	errMessage = "There’s no CPU available in the CPU pool. Please contact the Cloud Admin";
+                    if (convertEntityService.getComputeOfferById(vm.getComputeOfferingId()).getCustomized()) {
+                        if (Long.valueOf(vm.getCpuSpeed()) > cpu) {
+                            errMessage = "There’s no CPU available in the CPU pool. Please contact the Cloud Admin";
+                        }
+                    } else {
+                        if (Long.valueOf(convertEntityService.getComputeOfferById(vm.getComputeOfferingId())
+                                .getClockSpeed().toString()) > cpu) {
+                            errMessage = "There’s no CPU available in the CPU pool. Please contact the Cloud Admin";
+                        }
                     }
                     break;
                 case "2":
@@ -1002,19 +1022,23 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         return 0L;
     }
 
-	@Override
-	public VmInstance findById(Long id) {
-		return virtualmachinerepository.findById(id);
-	}
+    @Override
+    public VmInstance findById(Long id) {
+        return virtualmachinerepository.findById(id);
+    }
 
-	@Override
-	public List<VmInstance> findByComputeOfferingIdAndVmStatus(Long computeOfferingId, Status status) throws Exception {
-		return virtualmachinerepository.findByComputeOffering(computeOfferingId, status);
-	}
+    @Override
+    public List<VmInstance> findByComputeOfferingIdAndVmStatus(Long computeOfferingId, Status status) throws Exception {
+        return virtualmachinerepository.findByComputeOffering(computeOfferingId, status);
+    }
 
-	@Override
-	public List<VmInstance> findByDepartmentAndVmStatus(Long departmentId, Status status) throws Exception {
-		return virtualmachinerepository.findByDepartment(departmentId, status);
-	}
-;
+    @Override
+    public List<VmInstance> findByDepartmentAndVmStatus(Long departmentId, Status status) throws Exception {
+        return virtualmachinerepository.findByDepartment(departmentId, status);
+    }
+
+    @Override
+    public List<VmInstance> findByNetworkAndVmStatus(Long networkId, Status status) throws Exception {
+        return virtualmachinerepository.findByNetwork(networkId, status);
+    }
 }

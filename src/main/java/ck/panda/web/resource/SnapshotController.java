@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
-import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Snapshot;
 import ck.panda.service.SnapshotService;
@@ -26,6 +25,9 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
 
+/**
+ * Snapshot controller for volume snapshot.
+ */
 @RestController
 @RequestMapping("/api/snapshots")
 @Api(value = "Domains", description = "Operations with snapshot", produces = "application/json")
@@ -56,7 +58,8 @@ public class SnapshotController extends CRUDController<Snapshot> implements ApiC
 
     @Override
     public List<Snapshot> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
+            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
+                    throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Snapshot.class);
         Page<Snapshot> pageResponse = snapshotService.findAllByActive(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
@@ -71,11 +74,12 @@ public class SnapshotController extends CRUDController<Snapshot> implements ApiC
      * @throws Exception error occurs.
      */
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Snapshot.")
-    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDelete(@RequestBody Snapshot snapshot, @PathVariable(PATH_ID) Long id) throws Exception {
         /** Doing Soft delete from the snapshot table. */
-         snapshot.setSyncFlag(true);
+        snapshot.setSyncFlag(true);
         snapshotService.softDelete(snapshot);
     }
 }

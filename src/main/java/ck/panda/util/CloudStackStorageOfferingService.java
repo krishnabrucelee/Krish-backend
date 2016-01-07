@@ -10,8 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * CloudStack Storage Offering service for cloudStack connectivity with the
- * Cloud Stack server.
+ * CloudStack Storage Offering service for cloudStack connectivity with the Cloud Stack server.
  *
  */
 @Service
@@ -40,8 +39,7 @@ public class CloudStackStorageOfferingService {
      * @return created response.
      * @throws Exception if error.
      */
-    public String createStorageOffering(String response,
-            HashMap<String, String> optional) throws Exception {
+    public String createStorageOffering(String response, HashMap<String, String> optional) throws Exception {
 
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("createDiskOffering", optional);
         arguments.add(new NameValuePair("response", response));

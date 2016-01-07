@@ -24,12 +24,14 @@ public class AuthenticatedExternalWebService extends AuthenticationWithToken {
      * @param aCredentials to set
      * @param anAuthorities to set
      */
-    public AuthenticatedExternalWebService(Object aPrincipal, Object aCredentials, Collection<? extends GrantedAuthority> anAuthorities) {
+    public AuthenticatedExternalWebService(Object aPrincipal, Object aCredentials,
+            Collection<? extends GrantedAuthority> anAuthorities) {
         super(aPrincipal, aCredentials, anAuthorities);
     }
 
     /**
      * Set external service.
+     * 
      * @param externalWebService to set
      */
     public void setExternalWebService(ExternalWebServiceStub externalWebService) {
@@ -38,6 +40,7 @@ public class AuthenticatedExternalWebService extends AuthenticationWithToken {
 
     /**
      * Get external web service.
+     * 
      * @return external webservice
      */
     public ExternalWebServiceStub getExternalWebService() {

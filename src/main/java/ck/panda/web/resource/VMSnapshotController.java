@@ -25,14 +25,13 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
 
-
 /**
  * Virtual machine snapshot controller.
  */
 @RestController
 @RequestMapping("/api/vmsnapshot")
 @Api(value = "vmsnapshots", description = "Operations with vmsnapshot", produces = "application/json")
-public class VMSnapshotController extends CRUDController<VmSnapshot>implements ApiController {
+public class VMSnapshotController extends CRUDController<VmSnapshot> implements ApiController {
 
     /** Service reference to Snapshot. */
     @Autowired

@@ -15,24 +15,30 @@ import ck.panda.util.infrastructure.security.ExternalServiceAuthenticator;
 public class SomeExternalServiceAuthenticator implements ExternalServiceAuthenticator {
 
     @Override
-    public AuthenticationWithToken authenticate(String username, String rolename, Role role, User user, String buildVersion) {
+    public AuthenticationWithToken authenticate(String username, String rolename, Role role, User user,
+            String buildVersion) {
         ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
 
         // Do all authentication mechanisms required by external web service protocol and validated response.
-        // Throw descendant of Spring AuthenticationException in case of unsucessful authentication. For example BadCredentialsException
+        // Throw descendant of Spring AuthenticationException in case of unsucessful authentication. For example
+        // BadCredentialsException
 
         // ...
         // ...
 
-        // If authentication to external service succeeded then create authenticated wrapper with proper Principal and GrantedAuthorities.
-        // GrantedAuthorities may come from external service authentication or be hardcoded at our layer as they are here with ROLE_DOMAIN_USER
+        // If authentication to external service succeeded then create authenticated wrapper with proper Principal and
+        // GrantedAuthorities.
+        // GrantedAuthorities may come from external service authentication or be hardcoded at our layer as they are
+        // here with ROLE_DOMAIN_USER
         AuthenticatedExternalWebService authenticatedExternalWebService = null;
         if (role == null) {
             authenticatedExternalWebService = new AuthenticatedExternalWebService(username, null,
-                AuthorityUtils.commaSeparatedStringToAuthorityList(rolename));
+                    AuthorityUtils.commaSeparatedStringToAuthorityList(rolename));
         } else {
-            authenticatedExternalWebService = new AuthenticatedExternalWebService(new RolePrincipal(username, user.getId(), role, user.getType(), user.getDomain().getName(), user.getDomain().getId(), user.getDepartment().getId(), buildVersion), null,
-                AuthorityUtils.commaSeparatedStringToAuthorityList(rolename));
+            authenticatedExternalWebService = new AuthenticatedExternalWebService(
+                    new RolePrincipal(username, user.getId(), role, user.getType(), user.getDomain().getName(),
+                            user.getDomain().getId(), user.getDepartment().getId(), buildVersion),
+                    null, AuthorityUtils.commaSeparatedStringToAuthorityList(rolename));
         }
         authenticatedExternalWebService.setExternalWebService(externalWebService);
         return authenticatedExternalWebService;

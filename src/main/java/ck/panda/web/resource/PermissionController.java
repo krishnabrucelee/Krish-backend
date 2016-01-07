@@ -27,13 +27,14 @@ public class PermissionController extends CRUDController<Permission> implements 
 
     /**
      * List the permission.
+     * 
      * @return list of permission.
      * @throws Exception error occurs.
      */
-    @RequestMapping(value = "list",method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<Permission> getPermissionList() throws Exception {
-       return permissionService.getPermissionList();
+        return permissionService.getPermissionList();
     }
 }

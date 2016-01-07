@@ -184,8 +184,9 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
      * @param projectId project.
      */
     private void deleteResourceLimitByProject(Long projectId) {
-        List<ResourceLimitProject> resourceLimits = resourceLimitProjectRepo.findAllByProjectIdAndIsActive(projectId, true);
-        for (ResourceLimitProject resource: resourceLimits) {
+        List<ResourceLimitProject> resourceLimits = resourceLimitProjectRepo.findAllByProjectIdAndIsActive(projectId,
+                true);
+        for (ResourceLimitProject resource : resourceLimits) {
             resourceLimitProjectRepo.delete(resource);
         }
     }
@@ -212,8 +213,8 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
             // if(step1 < step2)
             if (projectLimit != null) {
                 if (projectLimit.getMax() < totalCount) {
-                errors.addFieldError(resourceLimit.getResourceType().toString(), totalCount + " "
-                       + resourceLimit.getResourceType().toString() + "resource.limit.exceed");
+                    errors.addFieldError(resourceLimit.getResourceType().toString(),
+                            totalCount + " " + resourceLimit.getResourceType().toString() + "resource.limit.exceed");
                 }
             } else {
                 errors.addGlobalError("update.department.quota.first");
@@ -225,7 +226,8 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
     @Override
     public Long findByResourceCountByProjectAndResourceType(Long departmentId,
             ResourceLimitProject.ResourceType resourceType, Long projectId, Boolean isActive) throws Exception {
-        return resourceLimitProjectRepo.findByResourceCountByProjectAndResourceType(departmentId, resourceType, projectId, isActive);
+        return resourceLimitProjectRepo.findByResourceCountByProjectAndResourceType(departmentId, resourceType,
+                projectId, isActive);
     }
 
     @Override

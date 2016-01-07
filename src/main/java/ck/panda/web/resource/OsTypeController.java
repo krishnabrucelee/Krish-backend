@@ -32,7 +32,8 @@ public class OsTypeController extends CRUDController<OsType> implements ApiContr
 
     @Override
     public List<OsType> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
+            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
+                    throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, OsType.class);
         Page<OsType> pageResponse = osTypeService.findAll(page);
         System.out.println(pageResponse);
