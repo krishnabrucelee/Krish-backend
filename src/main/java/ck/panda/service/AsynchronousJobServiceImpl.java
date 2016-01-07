@@ -29,6 +29,7 @@ import ck.panda.util.CloudStackNetworkOfferingService;
 import ck.panda.util.CloudStackNicService;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.CloudStackVolumeService;
+import ck.panda.util.EncryptionUtil;
 import ck.panda.util.JsonUtil;
 import ck.panda.util.error.exception.ApplicationException;
 
@@ -150,7 +151,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             break;
         case EventTypes.EVENT_VOLUME:
                 LOGGER.debug("Volume sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
-                    eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
             asyncVolume(jobresult, eventObject);
             break;
             case EventTypes.EVENT_NIC:

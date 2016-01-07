@@ -97,12 +97,12 @@ public class NicServiceImpl implements NicService {
                 if (jobresult.getString("jobstatus").equals("1")) {
                     this.assignNicTovM(nic.getVmInstance());
                 } else if (jobresult.getString("jobstatus").equals("0")) {
-                    this.assignNicTovM(nic.getVmInstance());
-                }
-            }
-        }
+                      this.assignNicTovM(nic.getVmInstance());
+                  }
+              }
+              return nic;
           } else {
-        return nicRepo.save(nic);
+              return nicRepo.save(nic);
           }
     }
 
@@ -111,7 +111,6 @@ public class NicServiceImpl implements NicService {
      *
      * @param vmInstance instance object.
      * @throws Exception unhandled exception.
-     */
      */
     private void assignNicTovM(VmInstance vmInstance) throws Exception {
         HashMap<String, String> optional = new HashMap<String, String>();
@@ -147,11 +146,11 @@ public class NicServiceImpl implements NicService {
                 nic.setIsDefault(nicListJSON.getJSONObject(i).getBoolean("isdefault"));
                 nic.setIsActive(true);
                 if (nicRepo.findByUUID(nic.getUuid()) == null) {
-                nicRepo.save(nic);
+                    nicRepo.save(nic);
                 }
             }
         }
-
+     }
 
     /**
      * Check the nic CS error handling.
@@ -253,8 +252,7 @@ public class NicServiceImpl implements NicService {
             if (deleteNicResponse.has("jobid")) {
                 Thread.sleep(5000);
                 String jobResponse = cloudStackInstanceService.queryAsyncJobResult(deleteNicResponse.getString("jobid"),
-                        "json");
-                Thread.sleep(5000);
+                    "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
                 if (jobresult.getString("jobstatus").equals("0")) {
                     nic.setIsActive(false);
