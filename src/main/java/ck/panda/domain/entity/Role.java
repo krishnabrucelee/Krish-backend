@@ -45,7 +45,6 @@ public class Role implements Serializable {
 
     /** Name of the Role. */
     @NotEmpty
-    @Size(min = 4, max = 20)
     @Column(name = "name", nullable = false)
     private String name;
 
