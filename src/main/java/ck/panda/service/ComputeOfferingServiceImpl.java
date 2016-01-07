@@ -46,7 +46,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     /** Service method for establishing connection to CloudStack. */
     @Autowired
     private CloudStackComputeOffering cscomputeOffering;
-    
+
     /** Virtual Machine service reference. */
     @Autowired
     private VirtualMachineService vmService;
@@ -64,7 +64,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             } else {
 
                 // set server for maintain session with configuration values
-            	cscomputeOffering.setServer(configServer.setServer(1L));
+                cscomputeOffering.setServer(configServer.setServer(1L));
                 String createComputeResponse = cscomputeOffering.createComputeOffering(compute.getName(),
                         compute.getDisplayText(), "json", addOptionalValues(compute));
                 JSONObject createComputeResponseJSON = new JSONObject(createComputeResponse).getJSONObject("createserviceofferingresponse");
@@ -122,18 +122,18 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     @Override
     public ComputeOffering softDelete(ComputeOffering compute) throws Exception {
        if (compute.getIsSyncFlag()) {
-        	Errors errors = validator.rejectIfNullEntity("compute", compute);
+            Errors errors = validator.rejectIfNullEntity("compute", compute);
             errors = validator.validateEntity(compute, errors);
             // set server for finding value in configuration
             cscomputeOffering.setServer(configServer.setServer(1L));
-			List<VmInstance> vmResponse = vmService.findByComputeOfferingIdAndVmStatus(compute.getId(), VmInstance.Status.Expunging);
-			if(vmResponse.size() != 0){
-				errors.addGlobalError("before.deleting.a.plan.please.delete.all.the.instance.associated.with.this.plan.and.try.again");
-			}
-			 if (errors.hasErrors()) {
-		            throw new ApplicationException(errors);
-		        }
-			else {
+            List<VmInstance> vmResponse = vmService.findByComputeOfferingIdAndVmStatus(compute.getId(), VmInstance.Status.Expunging);
+            if(vmResponse.size() != 0){
+                errors.addGlobalError("before.deleting.a.plan.please.delete.all.the.instance.associated.with.this.plan.and.try.again");
+            }
+             if (errors.hasErrors()) {
+                    throw new ApplicationException(errors);
+                }
+            else {
             compute.setIsActive(false);
             cscomputeOffering.deleteComputeOffering(compute.getUuid(), "json");
             }
@@ -299,7 +299,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     private void validateComputeOffering(ComputeOffering compute) throws Exception {
         Errors errors = validator.rejectIfNullEntity("computes", compute);
         errors = validator.validateEntity(compute, errors);
-        ComputeOffering computeOffering = computeRepo.findName(compute.getName());
+        ComputeOffering computeOffering = computeRepo.findNameAndIsActive(compute.getName(), true);
         if (computeOffering != null && compute.getId() != computeOffering.getId()) {
             errors.addFieldError("name", "computeoffering.already.exist");
         }
@@ -310,14 +310,14 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
 
     @Override
     public ComputeOffering findByName(String name) {
-        return (ComputeOffering) computeRepo.findName(name);
+        return (ComputeOffering) computeRepo.findNameAndIsActive(name, true);
     }
 
 
-	@Override
-	public List<ComputeOffering> findByIsActive(Boolean isActive) throws Exception {
-		return computeRepo.findByIsActive(true);
-	}
+    @Override
+    public List<ComputeOffering> findByIsActive(Boolean isActive) throws Exception {
+        return computeRepo.findByIsActive(true);
+    }
 
   }
 
