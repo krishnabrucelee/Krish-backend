@@ -16,6 +16,7 @@ import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.entity.OsType;
 import ck.panda.domain.entity.Template;
+import ck.panda.domain.entity.Template.Format;
 import ck.panda.domain.entity.Template.Status;
 import ck.panda.domain.entity.Template.TemplateType;
 import ck.panda.domain.entity.Zone;
@@ -139,7 +140,13 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     public Page<Template> findAll(PagingAndSorting pagingAndSorting) throws Exception {
         csPrepareTemplate(templateRepository.findByTemplate("ALL", TemplateType.SYSTEM, Status.INACTIVE, true));
-        return templateRepository.findAllByType(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), true);
+        return templateRepository.findAllByType(TemplateType.SYSTEM, Template.Format.ISO, pagingAndSorting.toPageRequest(), true);
+    }
+
+    @Override
+    public Page<Template> findAllIso(PagingAndSorting pagingAndSorting) throws Exception {
+        csPrepareTemplate(templateRepository.findByTemplate("ALL", TemplateType.SYSTEM, Status.INACTIVE, true));
+        return templateRepository.findAllByFormat(Template.Format.ISO, pagingAndSorting.toPageRequest(), true);
     }
 
     @Override
@@ -249,7 +256,7 @@ public class TemplateServiceImpl implements TemplateService {
                     LOGGER.error("ERROR AT TEMPLATE CREATION", e);
                 }
             } else {
-            	allTemplate.add(template);
+                allTemplate.add(template);
             }
         }
         return allTemplate;

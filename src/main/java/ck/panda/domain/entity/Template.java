@@ -157,7 +157,7 @@ public class Template implements Serializable {
     @Column(name = "os_type")
     private Long osTypeId;
 
-	/** Transient OS type of the template. */
+    /** Transient OS type of the template. */
     @Transient
     private String transOsType;
 
@@ -274,6 +274,10 @@ public class Template implements Serializable {
     /** IsActive attribute to verify Active or Inactive. */
     @Column(name = "is_active")
     private Boolean isActive;
+
+    /** Flag attribute to verify Iso or template. */
+    @Column(name = "flag")
+    private Boolean flag;
 
     /**
      * Get the id.
@@ -443,17 +447,17 @@ public class Template implements Serializable {
      * @return zoneId
      */
     public Long getZoneId() {
-		return zoneId;
-	}
+        return zoneId;
+    }
 
     /**
      * Set the zone id.
      *
      * @param zoneId - the Zone id to set
      */
-	public void setZoneId(Long zoneId) {
-		this.zoneId = zoneId;
-	}
+    public void setZoneId(Long zoneId) {
+        this.zoneId = zoneId;
+    }
 
     /**
      * Get the hypervisor type.
@@ -479,17 +483,17 @@ public class Template implements Serializable {
      * @return hypervisorId
      */
     public Long getHypervisorId() {
-		return hypervisorId;
-	}
+        return hypervisorId;
+    }
 
     /**
      * Set the hypervisor type id.
      *
      * @param hypervisorId - the Hypervisor id to set
      */
-	public void setHypervisorId(Long hypervisorId) {
-		this.hypervisorId = hypervisorId;
-	}
+    public void setHypervisorId(Long hypervisorId) {
+        this.hypervisorId = hypervisorId;
+    }
 
     /**
      * Get the original XS version.
@@ -605,17 +609,17 @@ public class Template implements Serializable {
      * @return osCategoryId
      */
     public Long getOsCategoryId() {
-		return osCategoryId;
-	}
+        return osCategoryId;
+    }
 
     /**
      * Set the OS category id.
      *
      * @param osCategoryId - the osCategory id to set
      */
-	public void setOsCategoryId(Long osCategoryId) {
-		this.osCategoryId = osCategoryId;
-	}
+    public void setOsCategoryId(Long osCategoryId) {
+        this.osCategoryId = osCategoryId;
+    }
 
     /**
      * Get the OS type.
@@ -641,17 +645,17 @@ public class Template implements Serializable {
      * @return osTypeId
      */
     public Long getOsTypeId() {
-		return osTypeId;
-	}
+        return osTypeId;
+    }
 
     /**
      * Set the OS type id.
      *
      * @param osTypeId - the osType id to set
      */
-	public void setOsTypeId(Long osTypeId) {
-		this.osTypeId = osTypeId;
-	}
+    public void setOsTypeId(Long osTypeId) {
+        this.osTypeId = osTypeId;
+    }
 
     /**
      * Get the OS version.
@@ -1185,7 +1189,23 @@ public class Template implements Serializable {
         this.isActive = isActive;
     }
 
+    /**
+     * Get the flag of the Template.
 
+     * @return the flag of Template.
+     */
+    public Boolean getFlag() {
+        return flag;
+    }
+
+    /**
+     * Set the flag of the Template.
+     *
+     * @param flag the flag to set
+     */
+    public void setFlag(Boolean flag) {
+        this.flag = flag;
+    }
 
     /** RootDiskController enum type used to list the static root disk controller values. */
     public enum RootDiskController {
@@ -1235,7 +1255,9 @@ public class Template implements Serializable {
     /** Hypervisor format type as BAREMETAL. */
     BAREMETAL,
     /** Hypervisor format type as TAR. */
-    TAR
+    TAR,
+    /** Hypervisor format type as ISO. */
+    ISO
     }
 
     /** TemplateType enum type used to list the static template type values. */

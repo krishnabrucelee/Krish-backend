@@ -20,6 +20,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Template;
+import ck.panda.domain.entity.Volume;
 import ck.panda.service.TemplateService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -63,13 +64,35 @@ public class TemplateController extends CRUDController<Template> implements ApiC
         templateService.softDelete(template);
     }
 
-    @Override
-    public List<Template> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    /**
+     * List all Iso-Templates and Templates.
+     *
+     * @param type iso/template
+     * @param sortBy ASC
+     * @param range 1-10
+     * @param limit page limit min 10
+     * @param request http request
+     * @param response http response
+     * @return Iso-Templates and Templates
+     * @throws Exception error
+     */
+    @RequestMapping(value = "/category", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Template> list(@RequestParam("type") String type, @RequestParam("sortBy") String sortBy,
+            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Template.class);
-        Page<Template> pageResponse = templateService.findAll(page);
-        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
-        return pageResponse.getContent();
+        String template = "template?lang=en";
+        if (type.equals(template)) {
+            Page<Template> pageResponse = templateService.findAll(page);
+            response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+            return pageResponse.getContent();
+        } else {
+            Page<Template> pageResponse = templateService.findAllIso(page);
+            response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+            return pageResponse.getContent();
+        }
     }
 
     /**
