@@ -58,6 +58,15 @@ public class FirewallRules {
     @Column(name = "domain_id")
     private Long domainId;
 
+    /** Project of the Egress Rule. */
+    @JoinColumn(name = "project_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Project project;
+
+    /** Project id of the Egress rule. */
+    @Column(name = "project_id")
+    private Long projectId;
+
     /** Department of the Egress Rule. */
     @JoinColumn(name = "department_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
@@ -491,6 +500,42 @@ public class FirewallRules {
      */
     public void setIpAddressId(Long ipAddressId) {
         this.ipAddressId = ipAddressId;
+    }
+
+    /**
+     * Get the project .
+     *
+     * @return the project
+     */
+    public Project getProject() {
+        return project;
+    }
+
+    /**
+     * Set the project.
+     *
+     * @param project  to set
+     */
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    /**
+     * Get the projectId .
+     *
+     * @return the projectId
+     */
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    /**
+     * Set the projectId .
+     *
+     * @param projectId to set
+     */
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
     }
 
     /**
