@@ -20,8 +20,8 @@ import ck.panda.domain.entity.VmInstance.Status;
  */
 @Repository
 public interface VirtualMachineRepository extends PagingAndSortingRepository<VmInstance, Long> {
-  
-	/**
+
+    /**
     * Find vm instance by uuid.
     *
     * @param uuid instance uuid.
@@ -39,7 +39,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
    @Query(value = "select vm from VmInstance vm where vm.id LIKE :id ")
    VmInstance findById(@Param("id") Long id);
 
-   
+
    /**
     * Find vm instance by name and department.
     *
@@ -263,7 +263,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
    @Query(value = "select vm from VmInstance vm where vm.computeOfferingId=:computeOfferingId and vm.status <> :status  ")
    List<VmInstance> findByComputeOffering(@Param("computeOfferingId") Long computeOfferingId, @Param("status") Status status);
 
-   
+
    /**
     * Find all vmInstance from project.
     *
@@ -283,4 +283,14 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
     */
    @Query(value = "select vm from VmInstance vm where vm.departmentId=:departmentId and vm.status in :statusCode")
    List<VmInstance> findByDepartmentAndStatus(@Param("departmentId") Long departmentId, @Param("statusCode") List<Status> statusCode);
+
+   /**
+    *  Find all instance associated with network.
+    *
+    * @param networkId of the network.
+    * @param status of the instance
+    * @return network.
+    */
+   @Query(value = "select vm from VmInstance vm where vm.networkId=:id and vm.status <> :status ")
+   List<VmInstance> findByNetwork(@Param("id") Long networkId, @Param("status") Status status);
 }
