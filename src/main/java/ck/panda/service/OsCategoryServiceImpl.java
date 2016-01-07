@@ -87,12 +87,13 @@ public class OsCategoryServiceImpl implements OsCategoryService {
     public List<OsCategory> findByOsCategoryFilters() {
         List<OsCategory> osCategory = (List<OsCategory>) osCategoryRepo.findAll();
         List<OsCategory> osList = new ArrayList<OsCategory>();
-        if(!osCategory.isEmpty()) {
-            for(OsCategory os:osCategory) {
-         List<Template> templates = templateRepository.findByOsCategoryFilters(TemplateType.SYSTEM, Status.ACTIVE, os);
-         if(templates.size() > 0){
-             osList.add(os);
-         }
+        if (!osCategory.isEmpty()) {
+            for (OsCategory os : osCategory) {
+                List<Template> templates = templateRepository.findByOsCategoryFilters(TemplateType.SYSTEM,
+                        Status.ACTIVE, os);
+                if (templates.size() > 0) {
+                    osList.add(os);
+                }
             }
         }
         return osList;

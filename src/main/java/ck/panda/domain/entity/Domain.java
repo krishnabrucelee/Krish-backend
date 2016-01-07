@@ -10,8 +10,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -23,18 +21,14 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import ck.panda.util.JsonUtil;
 
-
 /**
- * Accounts are grouped by domains. Domains usually contain multiple accounts
- * that have some logical relationship to each other and a set of delegated
- * administrators with some authority over the domain and its subdomains.
- *
+ * Accounts are grouped by domains. Domains usually contain multiple accounts that have some logical relationship to
+ * each other and a set of delegated administrators with some authority over the domain and its subdomains.
  */
 @Entity
-@Table(name = "ck_domain")
+@Table(name = "domains")
 public class Domain {
 
     /** Unique ID of the Domain. */
@@ -60,6 +54,7 @@ public class Domain {
     @Column(name = "portal_user_name")
     private String portalUserName;
 
+    /** Portal user password for the Domain. */
     @Column(name = "password")
     private String password;
 
@@ -71,12 +66,15 @@ public class Domain {
     @Column(name = "company_address")
     private String companyAddress;
 
+    /** Company user primary first name. */
     @Column(name = "company_primary_firstname")
     private String primaryFirstName;
 
+    /** Company user primary last name. */
     @Column(name = "company_primary_lastname")
     private String lastName;
 
+    /** Company user primary email. */
     @Column(name = "company_primary_email")
     private String email;
 
@@ -154,8 +152,7 @@ public class Domain {
     /**
      * Set id of the Domain.
      *
-     * @param id
-     *            the id to set
+     * @param id the id to set
      */
     public void setId(Long id) {
         this.id = id;
@@ -173,8 +170,7 @@ public class Domain {
     /**
      * Set uuid of the Domain.
      *
-     * @param uuid
-     *            the uuid to set
+     * @param uuid the uuid to set
      */
     public void setUuid(String uuid) {
         this.uuid = uuid;
@@ -215,8 +211,6 @@ public class Domain {
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
     }
-
-
 
     /**
      * Get the domain status.
@@ -290,8 +284,6 @@ public class Domain {
         this.updatedBy = updatedBy;
     }
 
-
-
     /**
      * Get the domain created date time.
      *
@@ -340,14 +332,14 @@ public class Domain {
     /**
      * Set companyNameAbbreviation.
      *
-     * @param companyNameAbb to set
+     * @param companyNameAbbreviation to set
      */
     public void setCompanyNameAbbreviation(String companyNameAbbreviation) {
         this.companyNameAbbreviation = companyNameAbbreviation;
     }
 
     /**
-     * Get  portalUserName
+     * Get portalUserName.
      *
      * @return the portalUserName
      */
@@ -358,7 +350,7 @@ public class Domain {
     /**
      * Set the portalUserName.
      *
-     * @param portalUserName  to set
+     * @param portalUserName to set
      */
     public void setPortalUserName(String portalUserName) {
         this.portalUserName = portalUserName;
@@ -374,9 +366,9 @@ public class Domain {
     }
 
     /**
-     * Set the password
+     * Set the password.
      *
-     * @param password  to set
+     * @param password to set
      */
     public void setPassword(String password) {
         this.password = password;
@@ -419,10 +411,10 @@ public class Domain {
     }
 
     /**
-     * Get  primaryFirstName.
+     * Get primaryFirstName.
      *
-    * @return the primaryFirstName
-    */
+     * @return the primaryFirstName
+     */
     public String getPrimaryFirstName() {
         return primaryFirstName;
     }
@@ -430,14 +422,14 @@ public class Domain {
     /**
      * Set the primaryFirstName.
      *
-     * @param primaryFirstName  to set
+     * @param primaryFirstName to set
      */
     public void setPrimaryFirstName(String primaryFirstName) {
         this.primaryFirstName = primaryFirstName;
     }
 
     /**
-     * Get the lastName
+     * Get the lastName.
      *
      * @return the lastName
      */
@@ -455,7 +447,7 @@ public class Domain {
     }
 
     /**
-     * Get the email
+     * Get the email.
      *
      * @return the email
      */
@@ -464,9 +456,9 @@ public class Domain {
     }
 
     /**
-     * Set the email
+     * Set the email.
      *
-     * @param email  to set
+     * @param email to set
      */
     public void setEmail(String email) {
         this.email = email;
@@ -484,14 +476,14 @@ public class Domain {
     /**
      * Set the phone.
      *
-     * @param phone  to set
+     * @param phone to set
      */
     public void setPhone(String phone) {
         this.phone = phone;
     }
 
     /**
-     * Get the syncFlag
+     * Get the syncFlag.
      *
      * @return the syncFlag
      */
@@ -502,12 +494,11 @@ public class Domain {
     /**
      * Set the syncFlag.
      *
-     * @param syncFlag  to set
+     * @param syncFlag to set
      */
     public void setSyncFlag(Boolean syncFlag) {
         this.syncFlag = syncFlag;
     }
-
 
     /**
      * Get secondaryContactName.
@@ -519,7 +510,7 @@ public class Domain {
     }
 
     /**
-     * Set the secondaryContactName
+     * Set the secondaryContactName.
      *
      * @param secondaryContactName to set
      */
@@ -546,7 +537,7 @@ public class Domain {
     }
 
     /**
-     * Get secondaryContactEmail
+     * Get secondaryContactEmail.
      *
      * @return the secondaryContactEmail
      */
@@ -557,7 +548,7 @@ public class Domain {
     /**
      * Set the secondaryContactEmail.
      *
-     * @param secondaryContactEmail  to set
+     * @param secondaryContactEmail to set
      */
     public void setSecondaryContactEmail(String secondaryContactEmail) {
         this.secondaryContactEmail = secondaryContactEmail;
@@ -575,12 +566,11 @@ public class Domain {
     /**
      * Set the secondaryContactPhone.
      *
-     * @param secondaryContactPhone  to set
+     * @param secondaryContactPhone to set
      */
     public void setSecondaryContactPhone(String secondaryContactPhone) {
         this.secondaryContactPhone = secondaryContactPhone;
     }
-
 
     /**
      * Enumeration status for Domain.
@@ -593,36 +583,36 @@ public class Domain {
         INACTIVE
     }
 
-  /**
-   * Convert JSONObject to domain entity.
-   *
-   * @param jsonObject json object
-   * @return domain entity object.
-   * @throws Exception unhandled errors.
-   */
-  public static Domain convert(JSONObject jsonObject) throws Exception {
-      Domain domain = new Domain();
-      domain.setSyncFlag(false);
-      domain.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-      domain.setName(JsonUtil.getStringValue(jsonObject, "name"));
-      domain.setCompanyNameAbbreviation(JsonUtil.getStringValue(jsonObject, "name"));
-      domain.setIsActive(true);
-      return domain;
-  }
+    /**
+     * Convert JSONObject to domain entity.
+     *
+     * @param jsonObject json object
+     * @return domain entity object.
+     * @throws Exception unhandled errors.
+     */
+    public static Domain convert(JSONObject jsonObject) throws Exception {
+        Domain domain = new Domain();
+        domain.setSyncFlag(false);
+        domain.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
+        domain.setName(JsonUtil.getStringValue(jsonObject, "name"));
+        domain.setCompanyNameAbbreviation(JsonUtil.getStringValue(jsonObject, "name"));
+        domain.setIsActive(true);
+        return domain;
+    }
 
-  /**
-   * Mapping entity object into list.
-   *
-   * @param domainList list of domains.
-   * @return domain map
-   */
-  public static Map<String, Domain> convert(List<Domain> domainList) {
-      Map<String, Domain> domainMap = new HashMap<String, Domain>();
+    /**
+     * Mapping entity object into list.
+     *
+     * @param domainList list of domains.
+     * @return domain map
+     */
+    public static Map<String, Domain> convert(List<Domain> domainList) {
+        Map<String, Domain> domainMap = new HashMap<String, Domain>();
 
-      for (Domain domain : domainList) {
-          domainMap.put(domain.getUuid(), domain);
-      }
+        for (Domain domain : domainList) {
+            domainMap.put(domain.getUuid(), domain);
+        }
 
-      return domainMap;
-  }
+        return domainMap;
+    }
 }

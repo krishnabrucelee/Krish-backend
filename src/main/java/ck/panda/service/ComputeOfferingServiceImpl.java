@@ -20,8 +20,8 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 
-/**.
- * Compute Offering service aid user to create compute offers in Cloud Stack Server.
+/**
+ * . Compute Offering service aid user to create compute offers in Cloud Stack Server.
  *
  */
 
@@ -46,7 +46,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     /** Service method for establishing connection to CloudStack. */
     @Autowired
     private CloudStackComputeOffering cscomputeOffering;
-    
+
     /** Virtual Machine service reference. */
     @Autowired
     private VirtualMachineService vmService;
@@ -55,7 +55,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     public ComputeOffering save(ComputeOffering compute) throws Exception {
 
         if (compute.getIsSyncFlag()) {
-             this.validateComputeOffering(compute);
+            this.validateComputeOffering(compute);
             Errors errors = validator.rejectIfNullEntity("compute", compute);
             errors = validator.validateEntity(compute, errors);
 
@@ -64,10 +64,11 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             } else {
 
                 // set server for maintain session with configuration values
-            	cscomputeOffering.setServer(configServer.setServer(1L));
+                cscomputeOffering.setServer(configServer.setServer(1L));
                 String createComputeResponse = cscomputeOffering.createComputeOffering(compute.getName(),
                         compute.getDisplayText(), "json", addOptionalValues(compute));
-                JSONObject createComputeResponseJSON = new JSONObject(createComputeResponse).getJSONObject("createserviceofferingresponse");
+                JSONObject createComputeResponseJSON = new JSONObject(createComputeResponse)
+                        .getJSONObject("createserviceofferingresponse");
 
                 if (createComputeResponseJSON.has("errorcode")) {
                     errors = this.validateEvent(errors, createComputeResponseJSON.getString("errortext"));
@@ -84,34 +85,34 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
         }
     }
 
-
     @Override
     public ComputeOffering update(ComputeOffering compute) throws Exception {
         if (compute.getIsSyncFlag()) {
-        this.validateComputeOffering(compute);
-        Errors errors = validator.rejectIfNullEntity("compute", compute);
-        errors = validator.validateEntity(compute, errors);
+            this.validateComputeOffering(compute);
+            Errors errors = validator.rejectIfNullEntity("compute", compute);
+            errors = validator.validateEntity(compute, errors);
 
-        if (errors.hasErrors()) {
-            throw new ApplicationException(errors);
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
+            } else {
+                HashMap<String, String> hs = new HashMap<String, String>();
+                cscomputeOffering.setServer(configServer.setServer(1L));
+                String editComputeResponse = cscomputeOffering.updateComputeOffering(compute.getUuid(),
+                        compute.getName(), compute.getDisplayText(), "json", hs);
+                JSONObject domainListJSON = new JSONObject(editComputeResponse)
+                        .getJSONObject("updateserviceofferingresponse").getJSONObject("serviceoffering");
+            }
+            return computeRepo.save(compute);
         } else {
-            HashMap<String, String> hs = new HashMap<String, String>();
-            cscomputeOffering.setServer(configServer.setServer(1L));
-            String editComputeResponse = cscomputeOffering.updateComputeOffering(compute.getUuid(),compute.getName(),compute.getDisplayText(),"json", hs);
-            JSONObject domainListJSON = new JSONObject(editComputeResponse).getJSONObject("updateserviceofferingresponse")
-                    .getJSONObject("serviceoffering");
-        }
-        return computeRepo.save(compute);
-        } else {
-             LOGGER.debug(compute.getUuid());
-             return computeRepo.save(compute);
+            LOGGER.debug(compute.getUuid());
+            return computeRepo.save(compute);
         }
 
     }
 
     @Override
     public void delete(ComputeOffering compute) throws Exception {
-            computeRepo.delete(compute);
+        computeRepo.delete(compute);
     }
 
     @Override
@@ -121,34 +122,35 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
 
     @Override
     public ComputeOffering softDelete(ComputeOffering compute) throws Exception {
-       if (compute.getIsSyncFlag()) {
-        	Errors errors = validator.rejectIfNullEntity("compute", compute);
+        if (compute.getIsSyncFlag()) {
+            Errors errors = validator.rejectIfNullEntity("compute", compute);
             errors = validator.validateEntity(compute, errors);
             // set server for finding value in configuration
             cscomputeOffering.setServer(configServer.setServer(1L));
-			List<VmInstance> vmResponse = vmService.findByComputeOfferingIdAndVmStatus(compute.getId(), VmInstance.Status.Expunging);
-			if(vmResponse.size() != 0){
-				errors.addGlobalError("before.deleting.a.plan.please.delete.all.the.instance.associated.with.this.plan.and.try.again");
-			}
-			 if (errors.hasErrors()) {
-		            throw new ApplicationException(errors);
-		        }
-			else {
-            compute.setIsActive(false);
-            cscomputeOffering.deleteComputeOffering(compute.getUuid(), "json");
+            List<VmInstance> vmResponse = vmService.findByComputeOfferingIdAndVmStatus(compute.getId(),
+                    VmInstance.Status.Expunging);
+            if (vmResponse.size() != 0) {
+                errors.addGlobalError(
+                        "before.deleting.a.plan.please.delete.all.the.instance.associated.with.this.plan.and.try.again");
             }
-       }
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
+            } else {
+                compute.setIsActive(false);
+                cscomputeOffering.deleteComputeOffering(compute.getUuid(), "json");
+            }
+        }
         return computeRepo.save(compute);
     }
 
     @Override
     public Page<ComputeOffering> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-          return computeRepo.findAll(pagingAndSorting.toPageRequest());
+        return computeRepo.findAll(pagingAndSorting.toPageRequest());
     }
 
     @Override
     public ComputeOffering find(Long id) throws Exception {
-              return computeRepo.findOne(id);
+        return computeRepo.findOne(id);
     }
 
     /**
@@ -160,8 +162,8 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
      * @throws Exception if error occurs.
      */
     private Errors validateEvent(Errors errors, String errmessage) throws Exception {
-       errors.addGlobalError(errmessage);
-       return errors;
+        errors.addGlobalError(errmessage);
+        return errors;
     }
 
     @Override
@@ -172,8 +174,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     /**
      * Method to add optional values from cloud stack.
      *
-     * @param compute
-     *            object for compute offering
+     * @param compute object for compute offering
      * @return optional values.
      */
     public HashMap<String, String> addOptionalValues(ComputeOffering compute) {
@@ -192,7 +193,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
         }
 
         if (compute.getClockSpeed() != null) {
-            computeMap.put("cpuspeed",compute.getClockSpeed().toString());
+            computeMap.put("cpuspeed", compute.getClockSpeed().toString());
         }
 
         if (compute.getNumberOfCores() != null) {
@@ -243,7 +244,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             computeMap.put("memory", compute.getMemory().toString());
         }
         if (compute.getCustomized() != null) {
-             computeMap.put("customized", compute.getCustomized().toString());
+            computeMap.put("customized", compute.getCustomized().toString());
         }
         return computeMap;
     }
@@ -280,10 +281,8 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     /**
      * Find all the compute offering with pagination.
      *
-     * @throws Exception
-     *             application errors.
-     * @param pagingAndSorting
-     *            do pagination with sorting for computeofferings.
+     * @throws Exception application errors.
+     * @param pagingAndSorting do pagination with sorting for computeofferings.
      * @return list of compute offerings.
      */
     public Page<ComputeOffering> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
@@ -313,11 +312,9 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
         return (ComputeOffering) computeRepo.findName(name);
     }
 
+    @Override
+    public List<ComputeOffering> findByIsActive(Boolean isActive) throws Exception {
+        return computeRepo.findByIsActive(true);
+    }
 
-	@Override
-	public List<ComputeOffering> findByIsActive(Boolean isActive) throws Exception {
-		return computeRepo.findByIsActive(true);
-	}
-
-  }
-
+}

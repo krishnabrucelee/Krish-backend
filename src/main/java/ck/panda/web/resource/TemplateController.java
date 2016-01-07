@@ -25,7 +25,7 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
 
-/**Template controller. */
+/** Template controller. */
 @RestController
 @RequestMapping("/api/templates")
 @Api(value = "Templates", description = "Operations with templates", produces = "application/json")
@@ -65,7 +65,8 @@ public class TemplateController extends CRUDController<Template> implements ApiC
 
     @Override
     public List<Template> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
+            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
+                    throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Template.class);
         Page<Template> pageResponse = templateService.findAll(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
@@ -88,6 +89,7 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     /**
      * Find the list of templates by filters.
      *
+     * @param template the template object.
      * @return template list from server
      * @throws Exception raise if error
      */

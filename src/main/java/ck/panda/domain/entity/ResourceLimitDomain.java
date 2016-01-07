@@ -14,7 +14,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -35,7 +34,7 @@ import ck.panda.util.JsonUtil;
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "ck_resource_limit_domain")
+@Table(name = "resource_limit_domains")
 public class ResourceLimitDomain {
 
     /** Unique ID of the Resource limit. */
@@ -53,7 +52,7 @@ public class ResourceLimitDomain {
     @Column(name = "domain_id")
     private Long domainId;
 
-    /**  Type of resource. */
+    /** Type of resource. */
     @Column(name = "resource_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private ResourceType resourceType;
@@ -102,14 +101,13 @@ public class ResourceLimitDomain {
     private Boolean isActive;
 
     /**
-     * isSyncFlag field is not to be serialized,
-     * whereas JPA's @Transient annotation is used to indicate
-     * that a field is not to be persisted in the database.
+     * isSyncFlag field is not to be serialized, whereas JPA's @Transient annotation is used to indicate that a field is
+     * not to be persisted in the database.
      */
     @Transient
     private Boolean isSyncFlag;
 
-    /** unique separator for each domain with resource type.*/
+    /** unique separator for each domain with resource type. */
     @Transient
     private String uniqueSeperator;
 
@@ -123,11 +121,11 @@ public class ResourceLimitDomain {
 
     /** Enum type for Resource Limit. */
     public enum ResourceType {
-        /**  Number of instances a user can create. */
+        /** Number of instances a user can create. */
         Instance,
         /** Number of public IP addresses a user can own. */
         IP,
-        /**  Number of disk volumes a user can create. */
+        /** Number of disk volumes a user can create. */
         Volume,
         /** Number of snapshots a user can create. */
         Snapshot,
@@ -410,31 +408,30 @@ public class ResourceLimitDomain {
         this.uniqueSeperator = uniqueSeperator;
     }
 
-
     /**
-    * @return the transDomainId
-    */
+     * @return the transDomainId
+     */
     public String getTransDomainId() {
         return transDomainId;
     }
 
     /**
-    * @param transDomainId the transDomainId to set
-    */
+     * @param transDomainId the transDomainId to set
+     */
     public void setTransDomainId(String transDomainId) {
         this.transDomainId = transDomainId;
     }
 
     /**
-    * @return the transResourceType
-    */
+     * @return the transResourceType
+     */
     public Integer getTransResourceType() {
         return transResourceType;
     }
 
     /**
-    * @param transResourceType the transResourceType to set
-    */
+     * @param transResourceType the transResourceType to set
+     */
     public void setTransResourceType(Integer transResourceType) {
         this.transResourceType = transResourceType;
     }

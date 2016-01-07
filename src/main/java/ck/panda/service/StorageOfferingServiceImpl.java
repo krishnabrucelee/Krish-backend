@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.StorageOffering;
-import ck.panda.domain.entity.Volume;
 import ck.panda.domain.repository.jpa.StorageOfferingRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackStorageOfferingService;
@@ -66,7 +65,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
                 return storageOfferingRepo.save(storage);
             }
         } else {
-             LOGGER.debug(storage.getUuid());
+            LOGGER.debug(storage.getUuid());
             return storageOfferingRepo.save(storage);
         }
 
@@ -233,7 +232,8 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
         config.setServer(1L);
         String storageOfferings = csStorageService.createStorageOffering(JSON, optional(storage));
         LOGGER.info("storage offer create response " + storageOfferings);
-        JSONObject storageOfferingsResponse = new JSONObject(storageOfferings).getJSONObject("creatediskofferingresponse");
+        JSONObject storageOfferingsResponse = new JSONObject(storageOfferings)
+                .getJSONObject("creatediskofferingresponse");
         if (storageOfferingsResponse.has("errorcode")) {
             errors = this.validateEvent(errors, storageOfferingsResponse.getString("errortext"));
             throw new ApplicationException(errors);
@@ -257,18 +257,18 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
      * @throws Exception error
      */
     private void updateStorageOffering(StorageOffering storage, Errors errors) throws Exception {
-      config.setServer(1L);
-      String storageOfferings = csStorageService.updateStorageOffering(String.valueOf(storage.getUuid()),
-              JSON, optional(storage));
-      LOGGER.info("storage offer update response " + storageOfferings);
-      JSONObject storageOfferingsResponse = new JSONObject(storageOfferings).getJSONObject("updatediskofferingresponse")
-              .getJSONObject("diskoffering");
-      if (storageOfferingsResponse.has("errorcode")) {
-          errors = this.validateEvent(errors, storageOfferingsResponse.getString("errortext"));
-          throw new ApplicationException(errors);
-      } else {
-          storage.setUuid((String) storageOfferingsResponse.get("id"));
-          }
+        config.setServer(1L);
+        String storageOfferings = csStorageService.updateStorageOffering(String.valueOf(storage.getUuid()), JSON,
+                optional(storage));
+        LOGGER.info("storage offer update response " + storageOfferings);
+        JSONObject storageOfferingsResponse = new JSONObject(storageOfferings)
+                .getJSONObject("updatediskofferingresponse").getJSONObject("diskoffering");
+        if (storageOfferingsResponse.has("errorcode")) {
+            errors = this.validateEvent(errors, storageOfferingsResponse.getString("errortext"));
+            throw new ApplicationException(errors);
+        } else {
+            storage.setUuid((String) storageOfferingsResponse.get("id"));
+        }
     }
 
     /**
@@ -306,7 +306,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     /**
      * Validate the StorageOffering.
      *
-     * @param volume reference of the Volume.
+     * @param storage reference of the Volume.
      * @throws Exception error occurs
      */
     private void validateVolumeUniqueness(StorageOffering storage) throws Exception {

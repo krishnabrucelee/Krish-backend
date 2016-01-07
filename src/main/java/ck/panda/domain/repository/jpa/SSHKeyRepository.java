@@ -22,7 +22,8 @@ public interface SSHKeyRepository extends PagingAndSortingRepository<SSHKey, Lon
      * @return SSH Key name
      */
     @Query(value = "select ssh from SSHKey ssh where ssh.name=:name AND  ssh.departmentId =:departmentId AND ssh.isActive =:isActive")
-    SSHKey findByNameAndDepartmentAndIsActive(@Param("name") String name, @Param("departmentId") Long departmentId, @Param("isActive")  Boolean isActive);
+    SSHKey findByNameAndDepartmentAndIsActive(@Param("name") String name, @Param("departmentId") Long departmentId,
+            @Param("isActive") Boolean isActive);
 
     /**
      * Find all the active or inactive SSH Keys with pagination.
@@ -62,7 +63,8 @@ public interface SSHKeyRepository extends PagingAndSortingRepository<SSHKey, Lon
      * @return list of SSH Keys
      */
     @Query(value = "select ssh from SSHKey ssh where ssh.departmentId=:departmentId and ssh.isActive =:isActive")
-    Page<SSHKey> findAllByDepartmentIsActive(@Param("departmentId") Long departmentId, @Param("isActive") Boolean isActive, Pageable pageable);
+    Page<SSHKey> findAllByDepartmentIsActive(@Param("departmentId") Long departmentId,
+            @Param("isActive") Boolean isActive, Pageable pageable);
 
     /**
      * Find all the SSH Key with active status.
@@ -72,6 +74,7 @@ public interface SSHKeyRepository extends PagingAndSortingRepository<SSHKey, Lon
      * @return list of SSH Keys
      */
     @Query(value = "select ssh from SSHKey ssh where ssh.departmentId=:departmentId and ssh.isActive =:isActive")
-    List<SSHKey> findAllByDepartmentAndIsActive(@Param("departmentId") Long departmentId, @Param("isActive") Boolean isActive);
+    List<SSHKey> findAllByDepartmentAndIsActive(@Param("departmentId") Long departmentId,
+            @Param("isActive") Boolean isActive);
 
 }

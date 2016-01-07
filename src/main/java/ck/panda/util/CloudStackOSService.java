@@ -18,7 +18,9 @@ public class CloudStackOSService {
     @Autowired
     private CloudStackServer server;
 
-    /** sets api key , secret key and url.
+    /**
+     * sets api key , secret key and url.
+     * 
      * @param server sets these values.
      */
     public void setServer(CloudStackServer server) {
@@ -33,16 +35,14 @@ public class CloudStackOSService {
      * @throws Exception unhandled errors.
      * @param response json or xml response.
      */
-    public String listOsTypes(String response, HashMap<String, String> optional)
-            throws Exception {
+    public String listOsTypes(String response, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("listOsTypes", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("listOsTypes", optional);
         arguments.add(new NameValuePair("response", response));
 
-       String responseDocument = server.request(arguments);
+        String responseDocument = server.request(arguments);
 
-        return  responseDocument;
+        return responseDocument;
     }
 
     /**
@@ -53,11 +53,9 @@ public class CloudStackOSService {
      * @return response Document.
      * @throws Exception unhandled errors.
      */
-    public String listOsCategories(String response, HashMap<String, String> optional)
-            throws Exception {
+    public String listOsCategories(String response, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("listOsCategories", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("listOsCategories", optional);
         arguments.add(new NameValuePair("response", response));
 
         String responseDocument = server.request(arguments);
@@ -65,4 +63,3 @@ public class CloudStackOSService {
         return responseDocument;
     }
 }
-

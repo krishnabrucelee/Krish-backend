@@ -15,6 +15,7 @@ public interface NetworkOfferingRepository extends PagingAndSortingRepository<Ne
 
     /**
      * Find NetworkOffering by the guestTpType is Isolated.
+     * 
      * @param pageable Isolated
      * @return guestIpType
      */
@@ -23,14 +24,16 @@ public interface NetworkOfferingRepository extends PagingAndSortingRepository<Ne
 
     /**
      * Find Network by uuid.
+     * 
      * @param uuid Network uuid.
      * @return uuid
      */
     @Query(value = "select net from NetworkOffering net where net.uuid LIKE :uuid ")
     NetworkOffering findByUUID(@Param("uuid") String uuid);
-    
+
     /**
      * Find Network by id.
+     * 
      * @param id Network id.
      * @return id
      */
@@ -39,9 +42,10 @@ public interface NetworkOfferingRepository extends PagingAndSortingRepository<Ne
 
     /**
      * Find NetworkOffering by the guestTpType is Isolated without Pagination.
+     * 
      * @return guestIpType
      */
-    @Query(value = "select networkOffer from NetworkOffering networkOffer where networkOffer.guestIpType = 'Isolated' AND networkOffer.availability = 'Required'" )
+    @Query(value = "select networkOffer from NetworkOffering networkOffer where networkOffer.guestIpType = 'Isolated' AND networkOffer.availability = 'Required'")
     List<NetworkOffering> findIsolated();
 
 }

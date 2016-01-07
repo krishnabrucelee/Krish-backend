@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Security configuration.
- *
  */
 @Configuration
 @EnableScheduling
@@ -48,41 +47,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
-        http.csrf().disable().
-                sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).
-                and().
-                  authorizeRequests().
-                  antMatchers(actuatorEndpoints()).hasRole(backendAdminRole).
-                  anyRequest().authenticated().
-                and().
-                  formLogin().
-                  loginPage("/login").
-                  permitAll().
-                and().
-                  logout().
-                  logoutRequestMatcher(new AntPathRequestMatcher("/logout")).
-                  logoutSuccessUrl("/login?out=1").
-                  deleteCookies("JSESSIONID" ).
-                  invalidateHttpSession(true).
-                and().
-                  anonymous().disable().
-                  exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint());
+        http.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+                .authorizeRequests().antMatchers(actuatorEndpoints()).hasRole(backendAdminRole).anyRequest()
+                .authenticated().and().formLogin().loginPage("/login").permitAll().and().logout()
+                .logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessUrl("/login?out=1")
+                .deleteCookies("JSESSIONID").invalidateHttpSession(true).and().anonymous().disable().exceptionHandling()
+                .authenticationEntryPoint(unauthorizedEntryPoint());
 
-        http.addFilterBefore(new AuthenticationFilter(databaseAuthenticationManager, userTokenDetails), BasicAuthenticationFilter.class);
+        http.addFilterBefore(new AuthenticationFilter(databaseAuthenticationManager, userTokenDetails),
+                BasicAuthenticationFilter.class);
     }
 
-    /** Actuator management endpoints.
+    /**
+     * Actuator management endpoints.
+     *
      * @return String array
      */
     private String[] actuatorEndpoints() {
-        return new String[]{
-                ApiController.AUTOCONFIG_ENDPOINT,
-                ApiController.BEANS_ENDPOINT,
-                ApiController.CONFIGPROPS_ENDPOINT,
-                ApiController.ENV_ENDPOINT,
-                ApiController.MAPPINGS_ENDPOINT,
-                ApiController.METRICS_ENDPOINT,
-                ApiController.SHUTDOWN_ENDPOINT};
+        return new String[] {ApiController.AUTOCONFIG_ENDPOINT, ApiController.BEANS_ENDPOINT,
+                ApiController.CONFIGPROPS_ENDPOINT, ApiController.ENV_ENDPOINT, ApiController.MAPPINGS_ENDPOINT,
+                ApiController.METRICS_ENDPOINT, ApiController.SHUTDOWN_ENDPOINT };
     }
 
     @Override
@@ -92,6 +76,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     /**
      * Factory method to get token service.
+     *
      * @return TokenService
      */
     @Bean
@@ -101,6 +86,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     /**
      * Factory method to get external service authenticator.
+     *
      * @return ExternalServiceAuthenticator
      */
     @Bean
@@ -109,7 +95,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     * Factory method to get  token authentication provider.
+     * Factory method to get token authentication provider.
+     *
      * @return AuthenticationProvider
      */
     @Bean
@@ -119,6 +106,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     /**
      * Unauthorized entrypoint.
+     *
      * @return AuthenticationEntryPoint to set
      */
     @Bean

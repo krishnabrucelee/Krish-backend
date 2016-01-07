@@ -2,7 +2,6 @@ package ck.panda.util.infrastructure;
 
 import ck.panda.util.infrastructure.externalwebservice.ExternalWebServiceStub;
 
-
 /**
  * Service gateway base.
  *
@@ -13,6 +12,7 @@ public abstract class ServiceGatewayBase {
 
     /**
      * Service gateway base.
+     * 
      * @param authenticatedExternalServiceProvider to set.
      */
     public ServiceGatewayBase(AuthenticatedExternalServiceProvider authenticatedExternalServiceProvider) {
@@ -21,6 +21,7 @@ public abstract class ServiceGatewayBase {
 
     /**
      * External service.
+     * 
      * @return ExternalWebServiceStub
      */
     protected ExternalWebServiceStub externalService() {

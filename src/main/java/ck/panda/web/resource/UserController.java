@@ -31,14 +31,14 @@ import ck.panda.util.web.CRUDController;
 @Api(value = "Users", description = "Operations with user", produces = "application/json")
 public class UserController extends CRUDController<User> implements ApiController {
 
-    /** Inject userService business logic.*/
+    /** Inject userService business logic. */
     @Autowired
     private UserService userService;
 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new User.", response = User.class)
     @Override
     public User create(@RequestBody User user) throws Exception {
-    	user.setSyncFlag(true);
+        user.setSyncFlag(true);
         return userService.save(user);
     }
 
@@ -51,20 +51,29 @@ public class UserController extends CRUDController<User> implements ApiControlle
     @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing User.", response = User.class)
     @Override
     public User update(@RequestBody User user, @PathVariable(PATH_ID) Long id) throws Exception {
-    	user.setSyncFlag(true);
+        user.setSyncFlag(true);
         return userService.update(user);
     }
 
+    /**
+     * Soft delete for user.
+     *
+     * @param user the user object.
+     * @throws Exception unhandled errors.
+     */
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing user.")
-    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDelete(@RequestBody User user) throws Exception {
-    	user.setSyncFlag(true);
+        user.setSyncFlag(true);
         userService.softDelete(user);
     }
+
     @Override
     public List<User> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
+            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
+                    throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, User.class);
         Page<User> pageResponse = userService.findAllUserByDomain(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
@@ -73,28 +82,37 @@ public class UserController extends CRUDController<User> implements ApiControlle
 
     /**
      * list all user for instance.
+     *
      * @return user
-     * @throws Exception
+     * @throws Exception unhandled errors.
      */
-    @RequestMapping(value = "list",method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-   	@ResponseStatus(HttpStatus.OK)
-   	@ResponseBody
-   	protected List<User> getSearch() throws Exception {
-   		return userService.findAll();
-   	}
+    @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<User> getSearch() throws Exception {
+        return userService.findAll();
+    }
 
-    @RequestMapping(value = "search",method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-   	@ResponseStatus(HttpStatus.OK)
-   	@ResponseBody
-   	protected List<User> findAllByDepartment(@RequestParam("dept") Long deptId) throws Exception {
-   		return userService.findByDepartment(deptId);
-   	}
+    /**
+     * find all users by department.
+     *
+     * @param deptId the department id.
+     * @return users.
+     * @throws Exception unhandled errors.
+     */
+    @RequestMapping(value = "search", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<User> findAllByDepartment(@RequestParam("dept") Long deptId) throws Exception {
+        return userService.findByDepartment(deptId);
+    }
 
     /**
      * list all user for instance along with department.
+     *
      * @param deptId department id.
      * @return user
-     * @throws Exception
+     * @throws Exception unhandled errors.
      */
     @RequestMapping(value = "departmentusers", method = RequestMethod.GET, produces = {
             MediaType.APPLICATION_JSON_VALUE })
@@ -106,27 +124,30 @@ public class UserController extends CRUDController<User> implements ApiControlle
 
     /**
      * list all user for instance.
+     *
      * @return user
-     * @throws Exception
+     * @throws Exception unhandled errors.
      */
-    @RequestMapping(value = "listbydomain",method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-   	@ResponseStatus(HttpStatus.OK)
-   	@ResponseBody
-   	protected List<User> findAllUserByDomain() throws Exception {
-   		return userService.findAllUserByDomain();
-   	}
+    @RequestMapping(value = "listbydomain", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<User> findAllUserByDomain() throws Exception {
+        return userService.findAllUserByDomain();
+    }
 
     /**
      * list all root admin.
+     *
      * @return user
-     * @throws Exception
+     * @throws Exception unhandled errors.
      */
-    @RequestMapping(value = "listbyrootadmin",method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-   	@ResponseStatus(HttpStatus.OK)
-   	@ResponseBody
-   	protected List<User> findAllRootAdminUser() throws Exception {
-   		return userService.findAllRootAdminUser();
-   	}
+    @RequestMapping(value = "listbyrootadmin", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<User> findAllRootAdminUser() throws Exception {
+        return userService.findAllRootAdminUser();
+    }
 
     /**
      * Method to find list of users by department.
@@ -135,7 +156,8 @@ public class UserController extends CRUDController<User> implements ApiControlle
      * @return list of users
      * @throws Exception - if error occurs
      */
-    @RequestMapping(value = "/department/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/department/{id}", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<User> getUsersByDepartment(@PathVariable(PATH_ID) Long id) throws Exception {
@@ -145,16 +167,16 @@ public class UserController extends CRUDController<User> implements ApiControlle
     /**
      * Assign role for users.
      *
-     * @param resourceLimits resource limit
-     * @return resource limit
+     * @param users user list.
+     * @return users.
      * @throws Exception error
      */
-    @RequestMapping(value = "/assignRole", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE }, consumes = {
-            MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/assignRole", method = RequestMethod.POST, produces = {
+            MediaType.APPLICATION_JSON_VALUE }, consumes = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public List<User> assignUserRoles(@RequestBody List<User> users) throws Exception {
-    	return userService.assignUserRoles(users);
+        return userService.assignUserRoles(users);
 
     }
 }

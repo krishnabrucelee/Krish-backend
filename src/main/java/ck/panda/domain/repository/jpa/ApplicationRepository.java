@@ -8,7 +8,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.Application;
 import ck.panda.domain.entity.Application.Status;
-import ck.panda.domain.entity.Domain;
 
 /**
  * JPA Repository for Application entity.
@@ -19,13 +18,14 @@ public interface ApplicationRepository extends PagingAndSortingRepository<Applic
      * Find the application for same domain with application type and is active status.
      *
      * @param type type of the application.
-     * @param domain Domain reference.
+     * @param domainId Domain reference.
      * @param isActive get the application list based on active/inactive status.
      * @param status of the application.
      * @return application type.
      */
     @Query(value = "select app from Application app where app.type=:type AND  app.domainId =:domainId AND app.isActive =:isActive and app.status = :status")
-    Application findByTypeAndDomainAndIsActive(@Param("type") String type, @Param("domainId") Long domainId, @Param("isActive")  Boolean isActive, @Param("status") Status status);
+    Application findByTypeAndDomainAndIsActive(@Param("type") String type, @Param("domainId") Long domainId,
+            @Param("isActive") Boolean isActive, @Param("status") Status status);
 
     /**
      * Find all the active or inactive applications with pagination.
@@ -36,7 +36,8 @@ public interface ApplicationRepository extends PagingAndSortingRepository<Applic
      * @return list of applications.
      */
     @Query(value = "select app from Application app where app.isActive =:isActive and app.status = :status")
-    Page<Application> findAllByIsActiveAndStatus(Pageable pageable, @Param("isActive") Boolean isActive, @Param("status") Status status);
+    Page<Application> findAllByIsActiveAndStatus(Pageable pageable, @Param("isActive") Boolean isActive,
+            @Param("status") Status status);
 
     /**
      * Find all the active or inactive applications with pagination.
@@ -47,7 +48,6 @@ public interface ApplicationRepository extends PagingAndSortingRepository<Applic
      */
     @Query(value = "select app from Application app where app.isActive =:isActive")
     Page<Application> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
-
 
     /**
      * Find all the application with active status.
@@ -78,7 +78,8 @@ public interface ApplicationRepository extends PagingAndSortingRepository<Applic
      * @return list of applications.
      */
     @Query(value = "select app from Application app where app.domainId=:domainId and app.isActive =:isActive and app.status = :status")
-    Page<Application> findAllByDomainIsActiveAndStatus(@Param("domainId") Long domainId, Pageable pageable, @Param("isActive") Boolean isActive, @Param("status") Status status);
+    Page<Application> findAllByDomainIsActiveAndStatus(@Param("domainId") Long domainId, Pageable pageable,
+            @Param("isActive") Boolean isActive, @Param("status") Status status);
 
     /**
      * Find all the application with active status.
@@ -89,7 +90,8 @@ public interface ApplicationRepository extends PagingAndSortingRepository<Applic
      * @return list of applications.
      */
     @Query(value = "select app from Application app where app.domainId=:domainId and app.isActive =:isActive")
-    Page<Application> findAllByDomainIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, Pageable pageable);
+    Page<Application> findAllByDomainIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive,
+            Pageable pageable);
 
     /**
      * Find all the application with active status.
@@ -110,6 +112,7 @@ public interface ApplicationRepository extends PagingAndSortingRepository<Applic
      * @return list of applications.
      */
     @Query(value = "select app from Application app where app.domainId=:domainId and app.isActive =:isActive and app.status = :status")
-    List<Application> findAllByIsActiveAndDomainAndStatus(@Param("domainId") Long id, @Param("isActive") Boolean isActive, @Param("status") Status status);
+    List<Application> findAllByIsActiveAndDomainAndStatus(@Param("domainId") Long id,
+            @Param("isActive") Boolean isActive, @Param("status") Status status);
 
 }

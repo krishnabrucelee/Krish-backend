@@ -23,13 +23,13 @@ import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonUtil;
 
 /**
- * A hypervisor is also known as a Virtual Machine Manager (VMM) and its sole purpose is to allow multiple “machines”
- * to share a single hardware platform.The hypervisor separates the operating system (OS) from the hardware by taking
- * the responsibility of allowing each running OS time with the underlying hardware.
+ * A hypervisor is also known as a Virtual Machine Manager (VMM) and its sole purpose is to allow multiple “machines” to
+ * share a single hardware platform.The hypervisor separates the operating system (OS) from the hardware by taking the
+ * responsibility of allowing each running OS time with the underlying hardware.
  *
  */
 @Entity
-@Table(name = "ck_hypervisor")
+@Table(name = "hypervisors")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class Hypervisor implements Serializable {

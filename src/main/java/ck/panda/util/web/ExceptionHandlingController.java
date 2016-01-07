@@ -17,8 +17,8 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 
 /**
- * Generic Exception handling controller.
- * TODO Replace instantiation of Errors object with scoped proxy, since we have to inject prototype bean (Errors) to singleton.
+ * Generic Exception handling controller. TODO Replace instantiation of Errors object with scoped proxy, since we have
+ * to inject prototype bean (Errors) to singleton.
  */
 public class ExceptionHandlingController {
 
@@ -38,7 +38,8 @@ public class ExceptionHandlingController {
      */
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ResponseBody Errors handleException(EntityNotFoundException ex) {
+    @ResponseBody
+    Errors handleException(EntityNotFoundException ex) {
         Errors errors = new Errors(messageSource);
         errors.addGlobalError(ex.getMessage());
         return errors;
@@ -52,41 +53,42 @@ public class ExceptionHandlingController {
      */
     @ExceptionHandler
     @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
-    @ResponseBody Errors handleException(ApplicationException ex) {
+    @ResponseBody
+    Errors handleException(ApplicationException ex) {
         return ex.getErrors();
     }
 
-//    @ExceptionHandler
-//    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-//    @ResponseBody Errors handleException(InsufficientAuthenticationException ex) {
-//        Errors errors =  beanFactory.createError();
-//        errors.setGlobalError(ex.getMessage());
-//        return errors;
-//    }
+    // @ExceptionHandler
+    // @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    // @ResponseBody Errors handleException(InsufficientAuthenticationException ex) {
+    // Errors errors = beanFactory.createError();
+    // errors.setGlobalError(ex.getMessage());
+    // return errors;
+    // }
 
-//    @ExceptionHandler
-//    @ResponseStatus(HttpStatus.LOCKED)
-//    @ResponseBody Errors handleException(AccessDeniedException e) {
-//        Errors errors =  beanFactory.createError();
-//        errors.setGlobalError("error.access.denied");
-//        return errors;
-//    }
-//
-//    @ExceptionHandler
-//    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-//    @ResponseBody Errors handleException(AuthenticationFailureException e) {
-//        Errors errors =  beanFactory.createError();
-//        errors.setGlobalError(e.getMessage());
-//        return errors;
-//    }
+    // @ExceptionHandler
+    // @ResponseStatus(HttpStatus.LOCKED)
+    // @ResponseBody Errors handleException(AccessDeniedException e) {
+    // Errors errors = beanFactory.createError();
+    // errors.setGlobalError("error.access.denied");
+    // return errors;
+    // }
+    //
+    // @ExceptionHandler
+    // @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    // @ResponseBody Errors handleException(AuthenticationFailureException e) {
+    // Errors errors = beanFactory.createError();
+    // errors.setGlobalError(e.getMessage());
+    // return errors;
+    // }
 
-//    @ExceptionHandler
-//    @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
-//    @ResponseBody Errors handleException(UnsupportedActionException e) {
-//        Errors errors =  beanFactory.createError();
-//        errors.setGlobalError(e.getMessage());
-//        return errors;
-//    }
+    // @ExceptionHandler
+    // @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
+    // @ResponseBody Errors handleException(UnsupportedActionException e) {
+    // Errors errors = beanFactory.createError();
+    // errors.setGlobalError(e.getMessage());
+    // return errors;
+    // }
 
     /**
      * Handle transaction related exception.
@@ -96,7 +98,8 @@ public class ExceptionHandlingController {
      */
     @ExceptionHandler
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
-    @ResponseBody Errors handleException(TransactionSystemException ex) {
+    @ResponseBody
+    Errors handleException(TransactionSystemException ex) {
         Errors errors = new Errors(messageSource);
         errors.addGlobalError(ex.getRootCause().getMessage());
         return errors;
@@ -110,7 +113,8 @@ public class ExceptionHandlingController {
      */
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ResponseBody Errors handleException(Exception ex) {
+    @ResponseBody
+    Errors handleException(Exception ex) {
         Errors errors = new Errors(messageSource);
         ex.printStackTrace();
         errors.addGlobalError(ex.getMessage());
@@ -125,7 +129,8 @@ public class ExceptionHandlingController {
      */
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ResponseBody Errors handleException(BadCredentialsException ex) {
+    @ResponseBody
+    Errors handleException(BadCredentialsException ex) {
         Errors errors = new Errors(messageSource);
         ex.printStackTrace();
         errors.addGlobalError(ex.getMessage());
@@ -140,7 +145,8 @@ public class ExceptionHandlingController {
      */
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ResponseBody Errors handleException(LockedException ex) {
+    @ResponseBody
+    Errors handleException(LockedException ex) {
         Errors errors = new Errors(messageSource);
         ex.printStackTrace();
         errors.addGlobalError(ex.getMessage());
@@ -155,7 +161,8 @@ public class ExceptionHandlingController {
      */
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ResponseBody Errors handleException(DisabledException ex) {
+    @ResponseBody
+    Errors handleException(DisabledException ex) {
         Errors errors = new Errors(messageSource);
         ex.printStackTrace();
         errors.addGlobalError(ex.getMessage());
@@ -170,11 +177,11 @@ public class ExceptionHandlingController {
      */
     @ExceptionHandler
     @ResponseStatus(HttpStatus.METHOD_FAILURE)
-    @ResponseBody Errors handleException(OptimisticLockException ex) {
+    @ResponseBody
+    Errors handleException(OptimisticLockException ex) {
         Errors errors = new Errors(messageSource);
         errors.addGlobalError("error.javax.optimistic.Exception");
         return errors;
     }
 
 }
-

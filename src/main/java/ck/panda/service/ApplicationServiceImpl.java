@@ -16,7 +16,7 @@ import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 import ck.panda.util.error.exception.EntityNotFoundException;
 
-/**Application service implementation class. */
+/** Application service implementation class. */
 @Service
 public class ApplicationServiceImpl implements ApplicationService {
 
@@ -55,8 +55,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     private void validateApplication(Application application) throws Exception {
         Errors errors = validator.rejectIfNullEntity("application", application);
         errors = validator.validateEntity(application, errors);
-        Application app = applicationRepo.findByTypeAndDomainAndIsActive(application.getType(), application.getDomainId(), true,
-                Status.ENABLED);
+        Application app = applicationRepo.findByTypeAndDomainAndIsActive(application.getType(),
+                application.getDomainId(), true, Status.ENABLED);
         if (app != null && application.getId() != app.getId()) {
             errors.addFieldError("type", "application.already.exist.for.same.domain");
         }
@@ -113,7 +113,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     public Page<Application> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
         Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && !domain.getName().equals("ROOT")) {
-            return applicationRepo.findAllByDomainIsActiveAndStatus(domain.getId(), pagingAndSorting.toPageRequest(), true, Status.ENABLED);
+            return applicationRepo.findAllByDomainIsActiveAndStatus(domain.getId(), pagingAndSorting.toPageRequest(),
+                    true, Status.ENABLED);
         }
         return applicationRepo.findAllByIsActiveAndStatus(pagingAndSorting.toPageRequest(), true, Status.ENABLED);
     }

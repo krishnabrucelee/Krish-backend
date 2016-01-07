@@ -7,8 +7,8 @@ package ck.panda.constants;
 public class GenericConstants {
 
     /**
-     * Makes sure that utility classes (classes that contain only static methods or fields in their API)
-     * do not have a public constructor.
+     * Makes sure that utility classes (classes that contain only static methods or fields in their API) do not have a
+     * public constructor.
      */
     protected GenericConstants() {
         throw new UnsupportedOperationException();

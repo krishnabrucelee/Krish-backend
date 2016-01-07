@@ -21,7 +21,7 @@ import ck.panda.util.error.exception.EntityNotFoundException;
 @Service
 public class ComputeOfferingCostServiceImpl implements ComputeOfferingCostService {
 
-     /** Logger attribute. */
+    /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(DepartmentServiceImpl.class);
 
     /** Validator attribute. */
@@ -35,14 +35,14 @@ public class ComputeOfferingCostServiceImpl implements ComputeOfferingCostServic
     @Override
     public ComputeOfferingCost save(ComputeOfferingCost cost) throws Exception {
 
-         Errors errors = validator.rejectIfNullEntity("computecost", cost);
-            errors = validator.validateEntity(cost, errors);
+        Errors errors = validator.rejectIfNullEntity("computecost", cost);
+        errors = validator.validateEntity(cost, errors);
 
-            if (errors.hasErrors()) {
-                throw new ApplicationException(errors);
-            } else {
-                return costRepo.save(cost);
-            }
+        if (errors.hasErrors()) {
+            throw new ApplicationException(errors);
+        } else {
+            return costRepo.save(cost);
+        }
     }
 
     @Override
@@ -59,25 +59,25 @@ public class ComputeOfferingCostServiceImpl implements ComputeOfferingCostServic
 
     @Override
     public void delete(ComputeOfferingCost cost) throws Exception {
-            costRepo.delete(cost);
+        costRepo.delete(cost);
     }
 
     @Override
     public void delete(Long id) throws Exception {
-            costRepo.delete(id);
+        costRepo.delete(id);
     }
 
     @Override
     public ComputeOfferingCost find(Long id) throws Exception {
-        ComputeOfferingCost cost  = costRepo.findOne(id);
+        ComputeOfferingCost cost = costRepo.findOne(id);
 
-         LOGGER.debug("Sample Debug Message");
-         LOGGER.trace("Sample Trace Message");
+        LOGGER.debug("Sample Debug Message");
+        LOGGER.trace("Sample Trace Message");
 
-         if (cost == null) {
-             throw new EntityNotFoundException("department.not.found");
-         }
-         return cost;
+        if (cost == null) {
+            throw new EntityNotFoundException("department.not.found");
+        }
+        return cost;
 
     }
 
@@ -89,6 +89,6 @@ public class ComputeOfferingCostServiceImpl implements ComputeOfferingCostServic
 
     @Override
     public List<ComputeOfferingCost> findAll() throws Exception {
-                return null;
+        return null;
     }
- }
+}

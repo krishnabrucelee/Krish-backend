@@ -14,10 +14,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
@@ -37,10 +35,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonUtil;
 
 /**
- * Projects are used to organize people and resources. CloudStack users within a single domain can group
- * themselves into project teams so they can collaborate and share virtual resources such as VMs, snapshots,
- * templates, data disks, and IP addresses. CloudStack tracks resource usage per project as well as per user,
- * so the usage can be billed to either a user account or a project.
+ * Projects are used to organize people and resources. CloudStack users within a single domain can group themselves into
+ * project teams so they can collaborate and share virtual resources such as VMs, snapshots, templates, data disks, and
+ * IP addresses. CloudStack tracks resource usage per project as well as per user, so the usage can be billed to either
+ * a user account or a project.
  */
 @Entity
 @Table(name = "projects")
@@ -112,7 +110,8 @@ public class Project implements Serializable {
     /** Enumeration status for Project. */
     public enum Status {
         /** Enabled status is used to list projects through out the application. */
-        ENABLED, /** Deleted status make projects as soft deleted and it will not list on the applicaiton. */
+        ENABLED,
+        /** Deleted status make projects as soft deleted and it will not list on the applicaiton. */
         DELETED
     }
 
@@ -532,10 +531,10 @@ public class Project implements Serializable {
     }
 
     /**
-    * Set the transient Account.
-    *
-    * @param transAccount  to set
-    */
+     * Set the transient Account.
+     *
+     * @param transAccount to set
+     */
     public void setTransAccount(String transAccount) {
         this.transAccount = transAccount;
     }
@@ -552,7 +551,7 @@ public class Project implements Serializable {
     /**
      * Set the transient State.
      *
-     * @param transState  to set
+     * @param transState to set
      */
     public void setTransState(String transState) {
         this.transState = transState;

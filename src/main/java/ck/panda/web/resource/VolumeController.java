@@ -57,8 +57,7 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
 
     @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing Volume.", response = Volume.class)
     @Override
-    public Volume update(@RequestBody Volume volume, @PathVariable(PATH_ID) Long id)
-            throws Exception {
+    public Volume update(@RequestBody Volume volume, @PathVariable(PATH_ID) Long id) throws Exception {
         volume.setIsSyncFlag(true);
         return volumeService.update(volume);
     }
@@ -71,7 +70,8 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
      * @throws Exception error
      */
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Volume.")
-    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDelete(@RequestBody Volume volume, @PathVariable(PATH_ID) Long id) throws Exception {
         /** Doing Soft delete from the department table. */
@@ -173,7 +173,8 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
      * @return volume Volume by instances
      * @throws Exception exception
      */
-    @RequestMapping(value = "listbyinstances", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "listbyinstances", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<Volume> listByInstance(@RequestParam("instanceid") Long instanceId) throws Exception {
@@ -188,7 +189,8 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
      * @return volume Volume by instances
      * @throws Exception exception
      */
-    @RequestMapping(value = "listbyinstancesandvolumetype", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "listbyinstancesandvolumetype", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<Volume> listByInstanceAndVolumeType(@RequestParam("instanceid") Long instanceId) throws Exception {
@@ -215,7 +217,8 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
      * @return Volume service
      * @throws Exception error
      */
-    @RequestMapping(value = "listbyvolumetype", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "listbyvolumetype", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<Volume> listbyvolumetype() throws Exception {
@@ -229,12 +232,13 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
      * @return project
      * @throws Exception error occurs.
      */
-    @RequestMapping(value = "/instance/project/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/instance/project/{id}", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     public List<Volume> findByProjectAndStatus(@PathVariable(PATH_ID) Long projectId) throws Exception {
         List<Volume.VolumeType> volumeType = new ArrayList<Volume.VolumeType>();
         volumeType.add(VolumeType.DATADISK);
-       return volumeService.findByProjectAndVolumeType(projectId, volumeType);
+        return volumeService.findByProjectAndVolumeType(projectId, volumeType);
     }
 
     /**
@@ -244,7 +248,8 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
      * @return department
      * @throws Exception error occurs.
      */
-    @RequestMapping(value = "/instance/department/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/instance/department/{id}", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     public List<Volume> findByDepartmentAndStatus(@PathVariable(PATH_ID) Long departmentId) throws Exception {
         List<Volume.VolumeType> volumeType = new ArrayList<Volume.VolumeType>();
@@ -260,9 +265,11 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
      * @return department
      * @throws Exception error occurs.
      */
-    @RequestMapping(value = "/instance/department", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/instance/department", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
-    public List<Volume> findByDepartmentAndProjectAndStatus(@RequestParam("departmentId") Long departmentId, @RequestParam("projectId") Long projectId) throws Exception {
+    public List<Volume> findByDepartmentAndProjectAndStatus(@RequestParam("departmentId") Long departmentId,
+            @RequestParam("projectId") Long projectId) throws Exception {
         List<Volume.VolumeType> volumeType = new ArrayList<Volume.VolumeType>();
         volumeType.add(VolumeType.DATADISK);
         return volumeService.findByDepartmentAndNotProjectAndVolumeType(departmentId, projectId, volumeType);
@@ -279,8 +286,7 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     @RequestMapping(value = "volumeCounts", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public String getVolumeCounts(HttpServletRequest request, HttpServletResponse response)
-                    throws Exception {
+    public String getVolumeCounts(HttpServletRequest request, HttpServletResponse response) throws Exception {
         Integer attachedCount = volumeService.findAttachedCount();
         Integer detachedCount = volumeService.findDetachedCount();
         return "{\"attachedCount\":" + attachedCount + ",\"detachedCount\":" + detachedCount + "}";

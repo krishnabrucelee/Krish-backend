@@ -15,27 +15,27 @@ import ck.panda.util.domain.vo.PagingAndSorting;
  * This service provides basic CRUD and essential api's for Department related business actions.
  */
 @Service
-public interface DepartmentService  extends CRUDService<Department>  {
+public interface DepartmentService extends CRUDService<Department> {
 
-     /**
-      * Delete the department.
-      *
-      * @param department Department entity.
-      * @return Department.
-      * @throws Exception error occurs
-      */
-     Department softDelete(Department department) throws Exception;
+    /**
+     * Delete the department.
+     *
+     * @param department Department entity.
+     * @return Department.
+     * @throws Exception error occurs
+     */
+    Department softDelete(Department department) throws Exception;
 
-     /**
-      * Find all the departments with active status.
-      *
-      * @param pagingAndSorting pagination and sorting values.
-      * @return list of departments with pagination.
-      * @throws Exception error occurs
-      */
-     Page<Department> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
+    /**
+     * Find all the departments with active status.
+     *
+     * @param pagingAndSorting pagination and sorting values.
+     * @return list of departments with pagination.
+     * @throws Exception error occurs
+     */
+    Page<Department> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
 
-     /**
+    /**
      * Find all the departments with active status.
      *
      * @param isActive department status Active/Inactive
@@ -84,6 +84,7 @@ public interface DepartmentService  extends CRUDService<Department>  {
      * Find the departments user name and domain and isActive status.
      *
      * @param name department name.
+     * @param domain of the department.
      * @param isActive department status Active/Inactive
      * @return department.
      */
@@ -134,7 +135,8 @@ public interface DepartmentService  extends CRUDService<Department>  {
      * @throws Exception error occur
      * @return departments.
      */
-    List<Department> findDepartmentsByDomainAndAccountTypesAndActive(Long domainId, List<AccountType> types, Boolean isActive) throws Exception;
+    List<Department> findDepartmentsByDomainAndAccountTypesAndActive(Long domainId, List<AccountType> types,
+            Boolean isActive) throws Exception;
 
     /**
      * Find department by uuid.

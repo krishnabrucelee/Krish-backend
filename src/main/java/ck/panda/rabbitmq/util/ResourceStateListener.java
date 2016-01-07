@@ -11,8 +11,8 @@ import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.service.VirtualMachineService;
 
 /**
- * Resource State listener will listen and update resource status to our App DB when an event directly/from
- * application occurred in CS server.
+ * Resource State listener will listen and update resource status to our App DB when an event directly/from application
+ * occurred in CS server.
  */
 public class ResourceStateListener implements MessageListener {
     /** Logger attribute. */
@@ -59,7 +59,8 @@ public class ResourceStateListener implements MessageListener {
         LOGGER.info("VM event message", event);
         JSONObject instance = new JSONObject(event);
         if (instance != null && !event.trim().isEmpty()) {
-            if (instance.has("id") && instance.has("resource") && instance.getString("resource").equalsIgnoreCase("VirtualMachine")) {
+            if (instance.has("id") && instance.has("resource")
+                    && instance.getString("resource").equalsIgnoreCase("VirtualMachine")) {
                 LOGGER.info("VM event UUID", instance.getString("id"));
                 VmInstance vmInstance = virtualmachineservice.findByUUID(instance.getString("id"));
                 if (vmInstance != null) {

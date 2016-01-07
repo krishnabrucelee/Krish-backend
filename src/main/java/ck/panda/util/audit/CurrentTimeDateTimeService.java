@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.ZonedDateTime;
 
-/** This class returns the current time.*/
+/** This class returns the current time. */
 @Service
 public class CurrentTimeDateTimeService implements DateTimeService {
 

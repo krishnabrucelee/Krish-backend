@@ -34,14 +34,13 @@ import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonValidator;
 
 /**
- * Template are the first level hierarchy and we are creating the instance based
- * on the template selection.
+ * Template are the first level hierarchy and we are creating the instance based on the template selection.
  *
- * Get the template information and push to the CS server for template creation
- * also update the application database for user view.
+ * Get the template information and push to the CS server for template creation also update the application database for
+ * user view.
  */
 @Entity
-@Table(name = "ck_template")
+@Table(name = "templates")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class Template implements Serializable {
@@ -157,7 +156,7 @@ public class Template implements Serializable {
     @Column(name = "os_type")
     private Long osTypeId;
 
-	/** Transient OS type of the template. */
+    /** Transient OS type of the template. */
     @Transient
     private String transOsType;
 
@@ -443,17 +442,17 @@ public class Template implements Serializable {
      * @return zoneId
      */
     public Long getZoneId() {
-		return zoneId;
-	}
+        return zoneId;
+    }
 
     /**
      * Set the zone id.
      *
      * @param zoneId - the Zone id to set
      */
-	public void setZoneId(Long zoneId) {
-		this.zoneId = zoneId;
-	}
+    public void setZoneId(Long zoneId) {
+        this.zoneId = zoneId;
+    }
 
     /**
      * Get the hypervisor type.
@@ -479,17 +478,17 @@ public class Template implements Serializable {
      * @return hypervisorId
      */
     public Long getHypervisorId() {
-		return hypervisorId;
-	}
+        return hypervisorId;
+    }
 
     /**
      * Set the hypervisor type id.
      *
      * @param hypervisorId - the Hypervisor id to set
      */
-	public void setHypervisorId(Long hypervisorId) {
-		this.hypervisorId = hypervisorId;
-	}
+    public void setHypervisorId(Long hypervisorId) {
+        this.hypervisorId = hypervisorId;
+    }
 
     /**
      * Get the original XS version.
@@ -605,17 +604,17 @@ public class Template implements Serializable {
      * @return osCategoryId
      */
     public Long getOsCategoryId() {
-		return osCategoryId;
-	}
+        return osCategoryId;
+    }
 
     /**
      * Set the OS category id.
      *
      * @param osCategoryId - the osCategory id to set
      */
-	public void setOsCategoryId(Long osCategoryId) {
-		this.osCategoryId = osCategoryId;
-	}
+    public void setOsCategoryId(Long osCategoryId) {
+        this.osCategoryId = osCategoryId;
+    }
 
     /**
      * Get the OS type.
@@ -641,17 +640,17 @@ public class Template implements Serializable {
      * @return osTypeId
      */
     public Long getOsTypeId() {
-		return osTypeId;
-	}
+        return osTypeId;
+    }
 
     /**
      * Set the OS type id.
      *
      * @param osTypeId - the osType id to set
      */
-	public void setOsTypeId(Long osTypeId) {
-		this.osTypeId = osTypeId;
-	}
+    public void setOsTypeId(Long osTypeId) {
+        this.osTypeId = osTypeId;
+    }
 
     /**
      * Get the OS version.
@@ -1068,32 +1067,36 @@ public class Template implements Serializable {
     }
 
     /**
-     * Get the Template.java of the Template.java
+     * Get the department.
      *
-     * @return the department of Template.java
+     * @return the department of template.
      */
     public Department getDepartment() {
         return department;
     }
 
     /**
-     * @param department the department to set
+     * Set the department.
+     *
+     * @param department the department to set.
      */
     public void setDepartment(Department department) {
         this.department = department;
     }
 
     /**
-     * Get the Template.java of the Template.java
+     * Get the department id.
      *
-     * @return the departmentId of Template.java
+     * @return the departmentId of template.
      */
     public Long getDepartmentId() {
         return departmentId;
     }
 
     /**
-     * @param departmentId the departmentId to set
+     * Set the department id.
+     *
+     * @param departmentId the departmentId to set.
      */
     public void setDepartmentId(Long departmentId) {
         this.departmentId = departmentId;
@@ -1185,79 +1188,78 @@ public class Template implements Serializable {
         this.isActive = isActive;
     }
 
-
-
     /** RootDiskController enum type used to list the static root disk controller values. */
     public enum RootDiskController {
-    /** Root disk controller type as SCSI. */
-    SCSI, /** Root disk controller type as IDE. */
-    IDE
+        /** Root disk controller type as SCSI. */
+        SCSI,
+        /** Root disk controller type as IDE. */
+        IDE
     }
 
     /** NicAdapter enum type used to list the static NIC adapter values. */
     public enum NicAdapter {
-    /** NIC adapter type as E1000. */
-    E1000,
-    /** NIC adapter type as PCNET32. */
-    PCNET32,
-    /** NIC adapter type as VMXNET2. */
-    VMXNET2,
-    /** NIC adapter type as VMXNET3. */
-    VMXNET3
+        /** NIC adapter type as E1000. */
+        E1000,
+        /** NIC adapter type as PCNET32. */
+        PCNET32,
+        /** NIC adapter type as VMXNET2. */
+        VMXNET2,
+        /** NIC adapter type as VMXNET3. */
+        VMXNET3
     }
 
     /** KeyboardType enum type used to list the static Keyboard type values. */
     public enum KeyboardType {
-    /** Keyboard type as US. */
-    US_KEYBOARD,
-    /** Keyboard type as UK. */
-    UK_KEYBOARD,
-    /** Keyboard type as Japanese. */
-    JAPANESE_KEYBOARD,
-    /** Keyboard type as simplified chinese. */
-    SIMPLIFIED_CHINESE
+        /** Keyboard type as US. */
+        US_KEYBOARD,
+        /** Keyboard type as UK. */
+        UK_KEYBOARD,
+        /** Keyboard type as Japanese. */
+        JAPANESE_KEYBOARD,
+        /** Keyboard type as simplified chinese. */
+        SIMPLIFIED_CHINESE
     }
 
     /** Format enum type used to list the static format values. */
     public enum Format {
-    /** Hypervisor format type as VHD. */
-    VHD,
-    /** Hypervisor format type as VHDX. */
-    VHDX,
-    /** Hypervisor format type as QCOW2. */
-    QCOW2,
-    /** Hypervisor format type as RAW. */
-    RAW,
-    /** Hypervisor format type as VMDK. */
-    VMDK,
-    /** Hypervisor format type as OVA. */
-    OVA,
-    /** Hypervisor format type as BAREMETAL. */
-    BAREMETAL,
-    /** Hypervisor format type as TAR. */
-    TAR
+        /** Hypervisor format type as VHD. */
+        VHD,
+        /** Hypervisor format type as VHDX. */
+        VHDX,
+        /** Hypervisor format type as QCOW2. */
+        QCOW2,
+        /** Hypervisor format type as RAW. */
+        RAW,
+        /** Hypervisor format type as VMDK. */
+        VMDK,
+        /** Hypervisor format type as OVA. */
+        OVA,
+        /** Hypervisor format type as BAREMETAL. */
+        BAREMETAL,
+        /** Hypervisor format type as TAR. */
+        TAR
     }
 
     /** TemplateType enum type used to list the static template type values. */
     public enum TemplateType {
-    /** Template type as SYSTEM. */
-    SYSTEM,
-    /** Template type as BUILTIN. */
-    BUILTIN,
-    /** Template type as PERHOST. */
-    PERHOST,
-    /** Template type as USER. */
-    USER,
-    /** Template type as ROUTING. */
-    ROUTING
+        /** Template type as SYSTEM. */
+        SYSTEM,
+        /** Template type as BUILTIN. */
+        BUILTIN,
+        /** Template type as PERHOST. */
+        PERHOST,
+        /** Template type as USER. */
+        USER,
+        /** Template type as ROUTING. */
+        ROUTING
     }
 
     /** Status enum type used to list the status values. */
     public enum Status {
-    /** Template status as ACTIVE. */
-    ACTIVE,
-    /** Template status as INACTIVE. */
-    INACTIVE
+        /** Template status as ACTIVE. */
+        ACTIVE,
+        /** Template status as INACTIVE. */
+        INACTIVE
     }
 
     /**

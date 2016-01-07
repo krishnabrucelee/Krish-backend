@@ -12,9 +12,9 @@ import java.util.Map;
  * Stores and exposes information about data-binding and validation errors of a specific object.
  *
  */
-//@Component
-//@XmlRootElement
-//@Scope(proxyMode = ScopedProxyMode.INTERFACES, value = "prototype")
+// @Component
+// @XmlRootElement
+// @Scope(proxyMode = ScopedProxyMode.INTERFACES, value = "prototype")
 public class Errors {
 
     /** Message source attribute for internationalization support. */
@@ -28,31 +28,34 @@ public class Errors {
 
     /**
      * Parameterized constructor.
+     * 
      * @param messageSource to set
      */
     public Errors(MessageSource messageSource) {
         this.messageSource = messageSource;
     }
 
-   /**
-    * Get global error.
-    * @return error list
-    */
+    /**
+     * Get global error.
+     * 
+     * @return error list
+     */
     public List<String> getGlobalError() {
         return this.globalError;
     }
 
     /**
      * Add global error.
+     * 
      * @param errorMessage to set
      */
     public void addGlobalError(String errorMessage) {
         try {
             errorMessage = messageSource.getMessage(errorMessage, new Object[] {}, LocaleContextHolder.getLocale());
         } catch (NoSuchMessageException ex) {
-            //Do nothing, the i18n key will be returned
+            // Do nothing, the i18n key will be returned
         } catch (NullPointerException ex) {
-            //Do nothing, the i18n key will be returned
+            // Do nothing, the i18n key will be returned
         }
 
         this.globalError.add(errorMessage);
@@ -60,6 +63,7 @@ public class Errors {
 
     /**
      * Get field errors.
+     * 
      * @return map of field errors
      */
     public HashMap<String, String> getFieldErrors() {
@@ -68,6 +72,7 @@ public class Errors {
 
     /**
      * Add field errors.
+     * 
      * @param field to set
      * @param errorMessage to set
      */
@@ -75,15 +80,16 @@ public class Errors {
         try {
             errorMessage = messageSource.getMessage(errorMessage, new Object[] {}, LocaleContextHolder.getLocale());
         } catch (NoSuchMessageException ex) {
-            //Do nothing, the i18n key will be returned
+            // Do nothing, the i18n key will be returned
         } catch (NullPointerException ex) {
-            //Do nothing, the i18n key will be returned
+            // Do nothing, the i18n key will be returned
         }
         this.fieldErrors.put(field, errorMessage);
     }
 
     /**
      * Set field errors.
+     * 
      * @param errorsMap to set
      */
     public void setFieldErrors(Map<String, String> errorsMap) {
@@ -92,6 +98,7 @@ public class Errors {
 
     /**
      * Check we have global and field errors.
+     * 
      * @return true/false
      */
     public Boolean hasErrors() {

@@ -12,12 +12,11 @@ import javax.validation.constraints.Size;
 import org.hibernate.validator.constraints.NotEmpty;
 
 /**
- * Configuration entity for cloudstack.
- * It requires api key, secret key and url for getting connected with cloudstack.
+ * Configuration entity for cloudstack. It requires api key, secret key and url for getting connected with cloudstack.
  *
  */
 @Entity
-@Table(name = "ck_configuration")
+@Table(name = "configurations")
 @SuppressWarnings("serial")
 public class CloudStackConfiguration implements Serializable {
 
@@ -44,7 +43,7 @@ public class CloudStackConfiguration implements Serializable {
     private String secretKey;
 
     /**
-     * @return  id
+     * @return id
      */
     public Long getId() {
         return id;
@@ -65,7 +64,7 @@ public class CloudStackConfiguration implements Serializable {
     }
 
     /**
-     * @param id  to set
+     * @param id to set
      */
     public void setId(Long id) {
         this.id = id;

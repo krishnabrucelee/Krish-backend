@@ -17,6 +17,7 @@ public class ServiceGatewayImpl extends ServiceGatewayBase implements ServiceGat
 
     /**
      * Parameterized constructor.
+     * 
      * @param authenticatedExternalServiceProvider to set
      */
     @Autowired
@@ -36,4 +37,3 @@ public class ServiceGatewayImpl extends ServiceGatewayBase implements ServiceGat
         // do some processing, store domainUser in newStuff, send newStuff over the wire to external web service etc.
     }
 }
-

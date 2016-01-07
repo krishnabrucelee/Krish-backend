@@ -1,6 +1,5 @@
 package ck.panda.util;
 
-
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -19,7 +18,9 @@ public class CloudStackDomainService {
     @Autowired
     private CloudStackServer server;
 
-    /** sets api key , secret key and url.
+    /**
+     * sets api key , secret key and url.
+     * 
      * @param server sets these values.
      */
     public void setServer(CloudStackServer server) {
@@ -34,11 +35,9 @@ public class CloudStackDomainService {
      * @return
      * @throws Exception
      */
-    public String createDomain(String domainName, String response,
-            HashMap<String, String> optional) throws Exception {
+    public String createDomain(String domainName, String response, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("createDomain", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("createDomain", optional);
         arguments.add(new NameValuePair("name", domainName));
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
@@ -53,11 +52,9 @@ public class CloudStackDomainService {
      * @return
      * @throws Exception
      */
-    public String updateDomain(String domainId, String response,
-            HashMap<String, String> optional) throws Exception {
+    public String updateDomain(String domainId, String response, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("updateDomain", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("updateDomain", optional);
         arguments.add(new NameValuePair("id", domainId));
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
@@ -71,11 +68,9 @@ public class CloudStackDomainService {
      * @return
      * @throws Exception
      */
-    public String deleteDomain(String domainId, String response)
-            throws Exception {
+    public String deleteDomain(String domainId, String response) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("deleteDomain", null);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("deleteDomain", null);
         arguments.add(new NameValuePair("id", domainId));
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
@@ -90,11 +85,9 @@ public class CloudStackDomainService {
      * @return response Document.
      * @throws Exception unhandled errors.
      */
-    public String listDomains(String response,
-            HashMap<String, String> optional) throws Exception {
+    public String listDomains(String response, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("listDomains", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("listDomains", optional);
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
         return responseDocument;

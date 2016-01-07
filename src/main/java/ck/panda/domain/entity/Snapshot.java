@@ -12,7 +12,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.hibernate.annotations.Type;
@@ -29,13 +28,13 @@ import ck.panda.util.JsonUtil;
 import ck.panda.util.JsonValidator;
 
 /**
- * Snapshots are a point-in-time capture of virtual machine disks. Memory and CPU states are not captured.
- *  If you are using the Oracle VM hypervisor, you can not take snapshots, since OVM does not support them.
+ * Snapshots are a point-in-time capture of virtual machine disks. Memory and CPU states are not captured. If you are
+ * using the Oracle VM hypervisor, you can not take snapshots, since OVM does not support them.
  *
  * Snapshots is taken for volumes, including both root and data disks
  */
 @Entity
-@Table(name = "ck_snapshot")
+@Table(name = "snapshots")
 public class Snapshot {
 
     /** Logger attribute. */
@@ -132,15 +131,15 @@ public class Snapshot {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
 
-    /** Transient domain of the snapshot.*/
+    /** Transient domain of the snapshot. */
     @Transient
     private String transDomainId;
 
-    /** Transient zone of the snapshot.*/
+    /** Transient zone of the snapshot. */
     @Transient
     private String transZoneId;
 
-    /** Transient volume of the snapshot.*/
+    /** Transient volume of the snapshot. */
     @Transient
     private String transVolumeId;
 
@@ -170,7 +169,7 @@ public class Snapshot {
     /**
      * Set the id.
      *
-     * @param id  to set
+     * @param id to set
      */
     public void setId(Long id) {
         this.id = id;
@@ -204,7 +203,7 @@ public class Snapshot {
     /**
      * Set the name.
      *
-     * @param name  to set
+     * @param name to set
      */
     public void setName(String name) {
         this.name = name;
@@ -222,7 +221,7 @@ public class Snapshot {
     /**
      * Set the account.
      *
-     * @param account  to set
+     * @param account to set
      */
     public void setAccount(String account) {
         this.account = account;
@@ -240,7 +239,7 @@ public class Snapshot {
     /**
      * Set the domain.
      *
-     * @param domain  to set
+     * @param domain to set
      */
     public void setDomain(Domain domain) {
         this.domain = domain;
@@ -258,7 +257,7 @@ public class Snapshot {
     /**
      * Set the domainId.
      *
-     * @param domainId  to set
+     * @param domainId to set
      */
     public void setDomainId(Long domainId) {
         this.domainId = domainId;
@@ -294,7 +293,7 @@ public class Snapshot {
     /**
      * Set the zoneId.
      *
-     * @param zoneId  to set
+     * @param zoneId to set
      */
     public void setZoneId(Long zoneId) {
         this.zoneId = zoneId;
@@ -312,7 +311,7 @@ public class Snapshot {
     /**
      * Set the volume.
      *
-     * @param volume  to set
+     * @param volume to set
      */
     public void setVolume(Volume volume) {
         this.volume = volume;
@@ -330,7 +329,7 @@ public class Snapshot {
     /**
      * Set the volumeId.
      *
-     * @param volumeId  to set
+     * @param volumeId to set
      */
     public void setVolumeId(Long volumeId) {
         this.volumeId = volumeId;
@@ -348,7 +347,7 @@ public class Snapshot {
     /**
      * Set the snapshotType.
      *
-     * @param snapshotType  to set
+     * @param snapshotType to set
      */
     public void setSnapshotType(String snapshotType) {
         this.snapshotType = snapshotType;
@@ -402,7 +401,7 @@ public class Snapshot {
     /**
      * Set isActive.
      *
-     * @param isActive  to set
+     * @param isActive to set
      */
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
@@ -420,7 +419,7 @@ public class Snapshot {
     /**
      * Set the syncFlag.
      *
-     * @param syncFlag  to set
+     * @param syncFlag to set
      */
     public void setSyncFlag(Boolean syncFlag) {
         this.syncFlag = syncFlag;
@@ -463,7 +462,7 @@ public class Snapshot {
     }
 
     /**
-     * Get the  createdDateTime.
+     * Get the createdDateTime.
      *
      * @return the createdDateTime
      */
@@ -517,33 +516,33 @@ public class Snapshot {
     }
 
     /**
-    * Get the transient zone id.
-    *
-    * @return the transZoneId
-    */
+     * Get the transient zone id.
+     *
+     * @return the transZoneId
+     */
     public String getTransZoneId() {
         return transZoneId;
     }
 
     /**
-    * Set the transient zone id.
-    *
-    * @param transZoneId the transZoneId to set
-    */
+     * Set the transient zone id.
+     *
+     * @param transZoneId the transZoneId to set
+     */
     public void setTransZoneId(String transZoneId) {
         this.transZoneId = transZoneId;
     }
 
     /**
-    * @return the transVolumeId
-    */
+     * @return the transVolumeId
+     */
     public String getTransVolumeId() {
         return transVolumeId;
     }
 
     /**
-    * @param transVolumeId the transVolumeId to set
-    */
+     * @param transVolumeId the transVolumeId to set
+     */
     public void setTransVolumeId(String transVolumeId) {
         this.transVolumeId = transVolumeId;
     }
@@ -566,7 +565,7 @@ public class Snapshot {
             snapshot.setTransZoneId(JsonUtil.getStringValue(jsonObject, "zoneid"));
             snapshot.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
             snapshot.setTransVolumeId(JsonUtil.getStringValue(jsonObject, "volumeid"));
-            snapshot.setSnapshotType(JsonUtil.getStringValue(jsonObject,"snapshottype"));
+            snapshot.setSnapshotType(JsonUtil.getStringValue(jsonObject, "snapshottype"));
             snapshot.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state").toUpperCase()));
             snapshot.account = JsonValidator.jsonStringValidation(jsonObject, "account");
             snapshot.intervalType = JsonValidator.jsonStringValidation(jsonObject, "intervaltype");
@@ -574,7 +573,7 @@ public class Snapshot {
         } catch (Exception ex) {
             LOGGER.error("Snapshot-convert", ex);
         }
-          return snapshot;
+        return snapshot;
     }
 
     /**

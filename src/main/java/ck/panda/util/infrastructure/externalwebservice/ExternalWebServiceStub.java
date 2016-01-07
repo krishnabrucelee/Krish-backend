@@ -8,6 +8,7 @@ public class ExternalWebServiceStub {
 
     /**
      * Get some stuff.
+     * 
      * @return string
      */
     public String getSomeStuff() {

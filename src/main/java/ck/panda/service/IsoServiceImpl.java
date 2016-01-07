@@ -103,9 +103,9 @@ public class IsoServiceImpl implements IsoService {
             for (int i = 0, size = isoListJSON.length(); i < size; i++) {
                 // 2.1 Call convert by passing JSONObject to iso entity and Add
                 // the converted Domain entity to list
-             Iso iso = Iso.convert(isoListJSON.getJSONObject(i));
-             iso.setDomainId(convertEntityService.getDomainId(iso.getTransDomainId()));
-             iso.setOsTypeId(convertEntityService.getOsTypeId(iso.getTransOsTypeId()));
+                Iso iso = Iso.convert(isoListJSON.getJSONObject(i));
+                iso.setDomainId(convertEntityService.getDomainId(iso.getTransDomainId()));
+                iso.setOsTypeId(convertEntityService.getOsTypeId(iso.getTransOsTypeId()));
                 isoList.add(iso);
             }
         }

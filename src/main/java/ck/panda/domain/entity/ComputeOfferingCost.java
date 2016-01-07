@@ -18,9 +18,8 @@ import org.springframework.data.annotation.Version;
 /**
  * Computer offerings cost for each Vcpu, iops and memory usage.
  */
-
 @Entity
-@Table(name = "ck_service_offerings_cost")
+@Table(name = "service_offerings_cost")
 @SuppressWarnings("serial")
 public class ComputeOfferingCost {
 
@@ -31,11 +30,11 @@ public class ComputeOfferingCost {
     private Long id;
 
     /** Zone id for this offering. */
-    @JoinColumn(name = "zone_id", referencedColumnName = "id",insertable = false, updatable = false)
+    @JoinColumn(name = "zone_id", referencedColumnName = "id", insertable = false, updatable = false)
     @OneToOne
     private Zone zone;
 
-    /** Id of the zone.*/
+    /** Id of the zone. */
     @Column(name = "zone_id")
     private Long zoneId;
 
@@ -91,7 +90,7 @@ public class ComputeOfferingCost {
     @Column(name = "instance_stoppage_cost_memory")
     private Double instanceStoppageCostMemory;
 
-    /** Cost of Stoppage Instance. for iops.*/
+    /** Cost of Stoppage Instance. for iops. */
     @Column(name = "instance_stoppage_cost_iops")
     private Double instanceStoppageCostIops;
 
@@ -178,14 +177,12 @@ public class ComputeOfferingCost {
         this.zoneId = zoneId;
     }
 
-
     /**
      * @param setupCost the setupCost to set
      */
     public void setSetupCost(Double setupCost) {
         this.setupCost = setupCost;
     }
-
 
     /** @return the zone. */
     public Zone getZone() {
@@ -443,6 +440,5 @@ public class ComputeOfferingCost {
     public void setStatus(String status) {
         this.status = status;
     }
-
 
 }

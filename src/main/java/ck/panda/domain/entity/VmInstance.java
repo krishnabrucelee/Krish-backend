@@ -30,12 +30,11 @@ import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonUtil;
 
 /**
- * VM Instances are main entity in our panda project to keep track the status of
- * each instances. Based on VM Instances we can create and destroy, update
- * instance, list Active VM's from cloud stack, etc.,
+ * VM Instances are main entity in our panda project to keep track the status of each instances. Based on VM Instances
+ * we can create and destroy, update instance, list Active VM's from cloud stack, etc.,
  */
 @Entity
-@Table(name = "ck_vm_instance")
+@Table(name = "vm_instances")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class VmInstance implements Serializable {
@@ -207,25 +206,30 @@ public class VmInstance implements Serializable {
     /** Enumeration status for instance. */
     public enum Status {
         /** Running status of instance. */
-        Running, /** destroy status of instance. */
-        Destroy, /** destroyed status of instance. */
-        Destroyed, /** Stopped status of instance. */
-        Stopped, /** Status of instance. */
-        Migrating, /** after launch or start instance get status as starting. */
-        Starting, /** after stop or destroy instance get status as stopping. */
-        Stopping, /**
-                     * after destroy or expunge instance get status as expunging.
-                     */
-        Expunging, /**
-                     * after destroy or expunge instance get status as expunged.
-                     */
-        Expunged, /**
-                     * while instance creation if get failure get status as Error
-                     * .
-                     */
-        Error, /** while instance creation if get status as creating . */
-        Creating, /** while instance creation if get status as Implemented . */
-        Implemented, /** after launch instance if get status as ready . */
+        Running,
+        /** destroy status of instance. */
+        Destroy,
+        /** destroyed status of instance. */
+        Destroyed,
+        /** Stopped status of instance. */
+        Stopped,
+        /** Status of instance. */
+        Migrating,
+        /** after launch or start instance get status as starting. */
+        Starting,
+        /** after stop or destroy instance get status as stopping. */
+        Stopping,
+        /** after destroy or expunge instance get status as expunging. */
+        Expunging,
+        /** after destroy or expunge instance get status as expunged. */
+        Expunged,
+        /** while instance creation if get failure get status as Error. */
+        Error,
+        /** while instance creation if get status as creating. */
+        Creating,
+        /** while instance creation if get status as Implemented. */
+        Implemented,
+        /** after launch instance if get status as ready. */
         Ready
     }
 
@@ -391,8 +395,7 @@ public class VmInstance implements Serializable {
     /**
      * Set sync status.
      *
-     * @param syncFlag
-     *            the syncFlag to set
+     * @param syncFlag the syncFlag to set
      */
     public void setSyncFlag(Boolean syncFlag) {
         this.syncFlag = syncFlag;
@@ -410,8 +413,7 @@ public class VmInstance implements Serializable {
     /**
      * Set updated date and time.
      *
-     * @param updatedDateTime
-     *            the updatedDateTime to set
+     * @param updatedDateTime the updatedDateTime to set
      */
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
@@ -429,8 +431,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the instance status.
      *
-     * @param status
-     *            to set.
+     * @param status to set.
      */
     public void setStatus(Status status) {
         this.status = status;
@@ -448,8 +449,7 @@ public class VmInstance implements Serializable {
     /**
      * Delete the instance.
      *
-     * @param isRemoved
-     *            to set.
+     * @param isRemoved to set.
      */
     public void setIsRemoved(Boolean isRemoved) {
         this.isRemoved = isRemoved;
@@ -467,8 +467,7 @@ public class VmInstance implements Serializable {
     /**
      * set the instance id.
      *
-     * @param id
-     *            to set.
+     * @param id to set.
      */
     public void setId(Long id) {
         this.id = id;
@@ -486,8 +485,7 @@ public class VmInstance implements Serializable {
     /**
      * set the instance name.
      *
-     * @param name
-     *            to set.
+     * @param name to set.
      */
     public void setName(String name) {
         this.name = name;
@@ -505,8 +503,7 @@ public class VmInstance implements Serializable {
     /**
      * set UUID from cloud stack.
      *
-     * @param uuid
-     *            to set.
+     * @param uuid to set.
      */
     public void setUuid(String uuid) {
         this.uuid = uuid;
@@ -524,8 +521,7 @@ public class VmInstance implements Serializable {
     /**
      * set instance owner.
      *
-     * @param instanceOwner
-     *            to set.
+     * @param instanceOwner to set.
      */
     public void setInstanceOwner(User instanceOwner) {
         this.instanceOwner = instanceOwner;
@@ -539,8 +535,7 @@ public class VmInstance implements Serializable {
     }
 
     /**
-     * @param application
-     *            the application name to set.
+     * @param application the application name to set.
      */
     public void setApplication(String application) {
         this.application = application;
@@ -558,8 +553,7 @@ public class VmInstance implements Serializable {
     /**
      * set instance project.
      *
-     * @param project
-     *            to set.
+     * @param project to set.
      */
     public void setProject(Project project) {
         this.project = project;
@@ -577,8 +571,7 @@ public class VmInstance implements Serializable {
     /**
      * set instance department.
      *
-     * @param department
-     *            to set.
+     * @param department to set.
      */
     public void setDepartment(Department department) {
         this.department = department;
@@ -596,8 +589,7 @@ public class VmInstance implements Serializable {
     /**
      * set instance template.
      *
-     * @param template
-     *            to set.
+     * @param template to set.
      */
     public void setTemplate(Template template) {
         this.template = template;
@@ -611,8 +603,7 @@ public class VmInstance implements Serializable {
     }
 
     /**
-     * @param computeOfferingId
-     *            the compute offering id to set.
+     * @param computeOfferingId the compute offering id to set.
      */
     public void setComputeOfferingId(Long computeOfferingId) {
         this.computeOfferingId = computeOfferingId;
@@ -626,8 +617,7 @@ public class VmInstance implements Serializable {
     }
 
     /**
-     * @param storageOfferingId
-     *            the storage offering id to set.
+     * @param storageOfferingId the storage offering id to set.
      */
     public void setStorageOfferingId(Long storageOfferingId) {
         this.storageOfferingId = storageOfferingId;
@@ -641,8 +631,7 @@ public class VmInstance implements Serializable {
     }
 
     /**
-     * @param networkOfferingId
-     *            the network offering id to set.
+     * @param networkOfferingId the network offering id to set.
      */
     public void setNetworkOfferingId(Long networkOfferingId) {
         this.networkOfferingId = networkOfferingId;
@@ -660,8 +649,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the version count.
      *
-     * @param version
-     *            to set.
+     * @param version to set.
      */
     public void setVersion(Long version) {
         this.version = version;
@@ -679,8 +667,7 @@ public class VmInstance implements Serializable {
     /**
      * Set created user id.
      *
-     * @param createdBy
-     *            to set.
+     * @param createdBy to set.
      */
     public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
@@ -698,8 +685,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the last modified user id.
      *
-     * @param updatedBy
-     *            to set.
+     * @param updatedBy to set.
      */
     public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
@@ -717,8 +703,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the created date and time.
      *
-     * @param createdDateTime
-     *            to set.
+     * @param createdDateTime to set.
      */
     public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
@@ -736,8 +721,7 @@ public class VmInstance implements Serializable {
     /**
      * Set last modified date and time.
      *
-     * @param updatedDateTime
-     *            last modified to set
+     * @param updatedDateTime last modified to set
      */
     public void setLastModifiedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
@@ -755,8 +739,7 @@ public class VmInstance implements Serializable {
     /**
      * set domain for instance.
      *
-     * @param domain
-     *            domain to set.
+     * @param domain domain to set.
      */
     public void setDomain(Domain domain) {
         this.domain = domain;
@@ -774,8 +757,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the instance IPAddress.
      *
-     * @param ipAddress
-     *            ip address to set.
+     * @param ipAddress ip address to set.
      */
     public void setIpAddress(String ipAddress) {
         this.ipAddress = ipAddress;
@@ -793,8 +775,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the VNC console password.
      *
-     * @param vncPassword
-     *            vnc password to set.
+     * @param vncPassword vnc password to set.
      */
     public void setVncPassword(String vncPassword) {
         this.vncPassword = vncPassword;
@@ -821,8 +802,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the networkKbsRead of the VmInstance.
      *
-     * @param networkKbsRead
-     *            the networkKbsRead to set
+     * @param networkKbsRead the networkKbsRead to set
      */
     public void setNetworkKbsRead(Integer networkKbsRead) {
         this.networkKbsRead = networkKbsRead;
@@ -840,8 +820,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the networkKbsWrite of the VmInstance.
      *
-     * @param networkKbsWrite
-     *            the networkKbsWrite to set
+     * @param networkKbsWrite the networkKbsWrite to set
      */
     public void setNetworkKbsWrite(Integer networkKbsWrite) {
         this.networkKbsWrite = networkKbsWrite;
@@ -859,8 +838,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the diskKbsRead of the VmInstance.
      *
-     * @param diskKbsRead
-     *            the diskKbsRead to set
+     * @param diskKbsRead the diskKbsRead to set
      */
     public void setDiskKbsRead(Integer diskKbsRead) {
         this.diskKbsRead = diskKbsRead;
@@ -878,8 +856,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the diskKbsWrite of the VmInstance.
      *
-     * @param diskKbsWrite
-     *            the diskKbsWrite to set
+     * @param diskKbsWrite the diskKbsWrite to set
      */
     public void setDiskKbsWrite(Integer diskKbsWrite) {
         this.diskKbsWrite = diskKbsWrite;
@@ -897,8 +874,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the diskIoRead of the VmInstance.
      *
-     * @param diskIoRead
-     *            the diskIoRead to set
+     * @param diskIoRead the diskIoRead to set
      */
     public void setDiskIoRead(Integer diskIoRead) {
         this.diskIoRead = diskIoRead;
@@ -916,8 +892,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the diskIoWrite of the VmInstance.
      *
-     * @param diskIoWrite
-     *            the diskIoWrite to set
+     * @param diskIoWrite the diskIoWrite to set
      */
     public void setDiskIoWrite(Integer diskIoWrite) {
         this.diskIoWrite = diskIoWrite;
@@ -926,8 +901,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the host.
      *
-     * @param host
-     *            the host to set
+     * @param host the host to set
      */
     public void setHost(Host host) {
         this.host = host;
@@ -945,8 +919,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the host id of instance.
      *
-     * @param hostID
-     *            to set.
+     * @param hostID to set.
      */
     public void setHostId(Long hostID) {
         this.hostId = hostID;
@@ -964,8 +937,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the pod id.
      *
-     * @param podID
-     *            to set.
+     * @param podID to set.
      */
     public void setPodId(Long podID) {
         this.podId = podID;
@@ -983,14 +955,15 @@ public class VmInstance implements Serializable {
     /**
      * Set the eventType.
      *
-     * @param eventType
-     *            the event type to set.
+     * @param eventType the event type to set.
      */
     public void setEventType(String eventType) {
         this.eventType = eventType;
     }
 
     /**
+     * Get the zone.
+     *
      * @return the zone.
      */
     public Zone getZone() {
@@ -998,14 +971,17 @@ public class VmInstance implements Serializable {
     }
 
     /**
-     * @param zone
-     *            the zone to set.
+     * Set the zone.
+     *
+     * @param zone the zone to set.
      */
     public void setZone(Zone zone) {
         this.zone = zone;
     }
 
     /**
+     * Get the instance owner id.
+     *
      * @return the instance owner id.
      */
     public Long getInstanceOwnerId() {
@@ -1013,14 +989,17 @@ public class VmInstance implements Serializable {
     }
 
     /**
-     * @param instanceOwnerId
-     *            the instance owner id to set.
+     * Set the instance owner id.
+     *
+     * @param instanceOwnerId the instance owner id to set.
      */
     public void setInstanceOwnerId(Long instanceOwnerId) {
         this.instanceOwnerId = instanceOwnerId;
     }
 
     /**
+     * Get the project's id.
+     *
      * @return the projectId.
      */
     public Long getProjectId() {
@@ -1028,14 +1007,17 @@ public class VmInstance implements Serializable {
     }
 
     /**
-     * @param projectId
-     *            the project id to set.
+     * Set the project's id.
+     *
+     * @param projectId the project id to set.
      */
     public void setProjectId(Long projectId) {
         this.projectId = projectId;
     }
 
     /**
+     * Get the department's id.
+     *
      * @return the departmentId.
      */
     public Long getDepartmentId() {
@@ -1043,14 +1025,17 @@ public class VmInstance implements Serializable {
     }
 
     /**
-     * @param departmentId
-     *            the department id to set.
+     * Set the department's id.
+     *
+     * @param departmentId the department id to set.
      */
     public void setDepartmentId(Long departmentId) {
         this.departmentId = departmentId;
     }
 
     /**
+     * Get the template's id.
+     *
      * @return the templateId.
      */
     public Long getTemplateId() {
@@ -1058,14 +1043,17 @@ public class VmInstance implements Serializable {
     }
 
     /**
-     * @param templateId
-     *            the template id to set.
+     * Set the template's id.
+     *
+     * @param templateId the template id to set.
      */
     public void setTemplateId(Long templateId) {
         this.templateId = templateId;
     }
 
     /**
+     * Get the domain's id.
+     *
      * @return the domainId.
      */
     public Long getDomainId() {
@@ -1073,14 +1061,17 @@ public class VmInstance implements Serializable {
     }
 
     /**
-     * @param domainId
-     *            the domain id to set.
+     * Set the domain's id.
+     *
+     * @param domainId the domain id to set.
      */
     public void setDomainId(Long domainId) {
         this.domainId = domainId;
     }
 
     /**
+     * Get the zone's id.
+     *
      * @return the zoneId.
      */
     public Long getZoneId() {
@@ -1088,14 +1079,17 @@ public class VmInstance implements Serializable {
     }
 
     /**
-     * @param zoneId
-     *            the zone id to set.
+     * Set the zone's id.
+     *
+     * @param zoneId the zone id to set.
      */
     public void setZoneId(Long zoneId) {
         this.zoneId = zoneId;
     }
 
     /**
+     * Get the compute offering.
+     *
      * @return the computeOffering.
      */
     public ComputeOffering getComputeOffering() {
@@ -1103,8 +1097,9 @@ public class VmInstance implements Serializable {
     }
 
     /**
-     * @param computeOffering
-     *            compute Offering to set.
+     * Set the compute offering.
+     *
+     * @param computeOffering compute Offering to set.
      */
     public void setComputeOffering(ComputeOffering computeOffering) {
         this.computeOffering = computeOffering;
@@ -1122,8 +1117,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the application list.
      *
-     * @param applicationList
-     *            the application list to set.
+     * @param applicationList the application list to set.
      */
     public void setApplicationList(List<Application> applicationList) {
         this.applicationList = applicationList;
@@ -1141,8 +1135,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the storage Offering.
      *
-     * @param storageOffering
-     *            the storage Offering to set.
+     * @param storageOffering the storage Offering to set.
      */
     public void setStorageOffering(StorageOffering storageOffering) {
         this.storageOffering = storageOffering;
@@ -1160,8 +1153,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the network Offering.
      *
-     * @param networkOffering
-     *            the network Offering to set.
+     * @param networkOffering the network Offering to set.
      */
     public void setNetworkOffering(NetworkOffering networkOffering) {
         this.networkOffering = networkOffering;
@@ -1179,8 +1171,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the network.
      *
-     * @param network
-     *            the network to set.
+     * @param network the network to set.
      */
     public void setNetwork(Network network) {
         this.network = network;
@@ -1198,8 +1189,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the network id..
      *
-     * @param networkId
-     *            network id to set.
+     * @param networkId network id to set.
      */
     public void setNetworkId(Long networkId) {
         this.networkId = networkId;
@@ -1217,8 +1207,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the networkUuid.
      *
-     * @param networkUuid
-     *            network uuid to set.
+     * @param networkUuid network uuid to set.
      */
     public void setNetworkUuid(String networkUuid) {
         this.networkUuid = networkUuid;
@@ -1232,8 +1221,7 @@ public class VmInstance implements Serializable {
     }
 
     /**
-     * @param eventMessage
-     *            event message to set.
+     * @param eventMessage event message to set.
      */
     public void setEventMessage(String eventMessage) {
         this.eventMessage = eventMessage;
@@ -1251,8 +1239,7 @@ public class VmInstance implements Serializable {
     /**
      * Set CPU number.
      *
-     * @param cpuCore
-     *            the cpuCore to set
+     * @param cpuCore the cpuCore to set
      */
     public void setCpuCore(Integer cpuCore) {
         this.cpuCore = cpuCore;
@@ -1270,8 +1257,7 @@ public class VmInstance implements Serializable {
     /**
      * Set CPU speed.
      *
-     * @param cpuSpeed
-     *            the cpuSpeed to set
+     * @param cpuSpeed the cpuSpeed to set
      */
     public void setCpuSpeed(Integer cpuSpeed) {
         this.cpuSpeed = cpuSpeed;
@@ -1289,8 +1275,7 @@ public class VmInstance implements Serializable {
     /**
      * Set memory size.
      *
-     * @param memory
-     *            the memory to set
+     * @param memory the memory to set
      */
     public void setMemory(Integer memory) {
         this.memory = memory;
@@ -1308,8 +1293,7 @@ public class VmInstance implements Serializable {
     /**
      * Set cpu usage.
      *
-     * @param cpuUsage
-     *            the cpuUsage to set
+     * @param cpuUsage the cpuUsage to set
      */
     public void setCpuUsage(String cpuUsage) {
         this.cpuUsage = cpuUsage;
@@ -1327,8 +1311,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the instance note.
      *
-     * @param instanceNote
-     *            the eventNote to set
+     * @param instanceNote the eventNote to set
      */
     public void setInstanceNote(String instanceNote) {
         this.instanceNote = instanceNote;
@@ -1346,8 +1329,7 @@ public class VmInstance implements Serializable {
     /**
      * Set temp password.
      *
-     * @param password
-     *            the password to set
+     * @param password the password to set
      */
     public void setPassword(String password) {
         this.password = password;
@@ -1365,8 +1347,7 @@ public class VmInstance implements Serializable {
     /**
      * Set status of vnc password for an instance is enabled/disabled.
      *
-     * @param passwordEnabled
-     *            the passwordEnabled to set
+     * @param passwordEnabled the passwordEnabled to set
      */
     public void setPasswordEnabled(Boolean passwordEnabled) {
         this.passwordEnabled = passwordEnabled;
@@ -1384,8 +1365,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the host uuid.
      *
-     * @param hostUuid
-     *            the hostUuid to set
+     * @param hostUuid the hostUuid to set
      */
     public void setHostUuid(String hostUuid) {
         this.hostUuid = hostUuid;
@@ -1403,8 +1383,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the iso id.
      *
-     * @param isoId
-     *            the isoId to set
+     * @param isoId the isoId to set
      */
     public void setIsoId(Long isoId) {
         this.isoId = isoId;
@@ -1422,8 +1401,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the iso.
      *
-     * @param iso
-     *            the iso to set
+     * @param iso the iso to set
      */
     public void setIso(String iso) {
         this.iso = iso;
@@ -1441,8 +1419,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the iso name.
      *
-     * @param isoName
-     *            the isoName to set
+     * @param isoName the isoName to set
      */
     public void setIsoName(String isoName) {
         this.isoName = isoName;
@@ -1460,8 +1437,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the event name.
      *
-     * @param event
-     *            the event to set
+     * @param event the event to set
      */
     public void setEvent(String event) {
         this.event = event;
@@ -1479,8 +1455,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the transient domain id..
      *
-     * @param transDomainId
-     *            to set
+     * @param transDomainId to set
      */
     public void setTransDomainId(String transDomainId) {
         this.transDomainId = transDomainId;
@@ -1498,8 +1473,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the transZoneId.
      *
-     * @param transZoneId
-     *            to set
+     * @param transZoneId to set
      */
     public void setTransZoneId(String transZoneId) {
         this.transZoneId = transZoneId;
@@ -1517,8 +1491,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the transHostId.
      *
-     * @param transHostId
-     *            to set
+     * @param transHostId to set
      */
     public void setTransHostId(String transHostId) {
         this.transHostId = transHostId;
@@ -1536,8 +1509,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the transComputeOfferingId .
      *
-     * @param transComputeOfferingId
-     *            to set
+     * @param transComputeOfferingId to set
      */
     public void setTransComputeOfferingId(String transComputeOfferingId) {
         this.transComputeOfferingId = transComputeOfferingId;
@@ -1555,8 +1527,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the transProjectId.
      *
-     * @param transProjectId
-     *            to set
+     * @param transProjectId to set
      */
     public void setTransProjectId(String transProjectId) {
         this.transProjectId = transProjectId;
@@ -1574,8 +1545,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the transNetworkId.
      *
-     * @param transNetworkId
-     *            to set
+     * @param transNetworkId to set
      */
     public void setTransNetworkId(String transNetworkId) {
         this.transNetworkId = transNetworkId;
@@ -1593,8 +1563,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the transIsoId.
      *
-     * @param transIsoId
-     *            the transIsoId to set
+     * @param transIsoId the transIsoId to set
      */
     public void setTransIsoId(String transIsoId) {
         this.transIsoId = transIsoId;
@@ -1612,8 +1581,7 @@ public class VmInstance implements Serializable {
     /**
      * Get the transTemplateId.
      *
-     * @param transTemplateId
-     *            to set
+     * @param transTemplateId to set
      */
     public void setTransTemplateId(String transTemplateId) {
         this.transTemplateId = transTemplateId;
@@ -1631,8 +1599,7 @@ public class VmInstance implements Serializable {
     /**
      * Get the transDepartmentId.
      *
-     * @param transDepartmentId
-     *            to set
+     * @param transDepartmentId to set
      */
     public void setTransDepartmentId(String transDepartmentId) {
         this.transDepartmentId = transDepartmentId;
@@ -1650,8 +1617,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the transDisplayName .
      *
-     * @param transDisplayName
-     *            to set
+     * @param transDisplayName to set
      */
     public void setTransDisplayName(String transDisplayName) {
         this.transDisplayName = transDisplayName;
@@ -1669,8 +1635,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the instance's internal name .
      *
-     * @param instanceInternalName
-     *            to set
+     * @param instanceInternalName to set
      */
     public void setInstanceInternalName(String instanceInternalName) {
         this.instanceInternalName = instanceInternalName;
@@ -1724,7 +1689,7 @@ public class VmInstance implements Serializable {
     /**
      * Set the instance's transient volume id .
      *
-     * @param volumeId to set.
+     * @param transVolumeId to set.
      */
     public void setTransVolumeId(String transVolumeId) {
         this.transVolumeId = transVolumeId;
@@ -1749,8 +1714,7 @@ public class VmInstance implements Serializable {
     /**
      * Convert JSONObject into vm object.
      *
-     * @param jsonObject
-     *            JSON object.
+     * @param jsonObject JSON object.
      * @return vm object.
      */
     public static VmInstance convert(JSONObject jsonObject) {
@@ -1798,8 +1762,7 @@ public class VmInstance implements Serializable {
     /**
      * Mapping entity object into list.
      *
-     * @param csInstanceService
-     *            list of vms.
+     * @param csInstanceService list of vms.
      * @return vm
      */
     public static Map<String, VmInstance> convert(List<VmInstance> csInstanceService) {

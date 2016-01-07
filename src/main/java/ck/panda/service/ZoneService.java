@@ -29,7 +29,7 @@ public interface ZoneService extends CRUDService<Zone> {
      * @throws Exception unhandled errors.
      */
     Zone findByUUID(String uuid) throws Exception;
-    
+
     /**
      * To get zone from cloudstack server.
      *

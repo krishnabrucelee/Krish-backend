@@ -44,7 +44,7 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
     @Autowired
     private RoleService roleService;
 
-    /** Autowired departmentService.  */
+    /** Autowired departmentService. */
     @Autowired
     private DepartmentService departmentService;
 
@@ -76,14 +76,14 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
      * @throws Exception error
      */
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing role.")
-    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDelete(@RequestBody Role role, @PathVariable(PATH_ID) Long id) throws Exception {
         /** Doing Soft delete from the department table. */
         role.setSyncFlag(true);
         roleService.softDelete(role);
     }
-
 
     @Override
     public List<Role> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
@@ -101,12 +101,12 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
      * @return list of roles
      * @throws Exception - if error occurs
      */
-    @RequestMapping(value = "/department/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/department/{id}", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<Role> getRolesByDepartment(@PathVariable(PATH_ID) Long id) throws Exception {
         return roleService.getRolesByDepartment(departmentService.find(id));
     }
-
 
 }

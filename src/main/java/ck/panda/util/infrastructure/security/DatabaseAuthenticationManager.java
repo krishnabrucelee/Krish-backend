@@ -83,7 +83,6 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
     @Value("${backend.admin.role}")
     private String backendAdminRole;
 
-
     /** Build Version. */
     @Value("${app.buildversion}")
     private String buildNumber;
@@ -111,14 +110,15 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
      * @return authentication token value
      * @throws AuthenticationException raise if error
      */
-    public AuthenticationWithToken authValidation(Optional<String> username, Optional<String> password, Optional<String> domain,
-            AuthenticationWithToken resultOfAuthentication) throws AuthenticationException {
+    public AuthenticationWithToken authValidation(Optional<String> username, Optional<String> password,
+            Optional<String> domain, AuthenticationWithToken resultOfAuthentication) throws AuthenticationException {
         User user = null;
         try {
             user = userService.findByUser(username.get(), password.get(), "/");
             if (user == null && domain.get().equals("BACKEND_ADMIN")) {
                 if (username.get().equals(backendAdminUsername) && password.get().equals(backendAdminPassword)) {
-                    resultOfAuthentication = externalServiceAuthenticator.authenticate(backendAdminUsername, backendAdminRole, null, null, buildNumber);
+                    resultOfAuthentication = externalServiceAuthenticator.authenticate(backendAdminUsername,
+                            backendAdminRole, null, null, buildNumber);
                     String newToken = null;
                     try {
                         newToken = tokenService.generateNewToken(user, "ROOT");
@@ -144,10 +144,11 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
                         throw new BadCredentialsException("Contact administrator to get the access permission granted");
                     } else {
                         Boolean authKeyResponse = apiSecretKeyGeneration(user);
-                        if(authKeyResponse) {
+                        if (authKeyResponse) {
                             Department department = departmentReposiory.findOne(user.getDepartment().getId());
                             Role role = roleReposiory.findUniqueness(user.getRole().getName(), department.getId());
-                            resultOfAuthentication = externalServiceAuthenticator.authenticate(username.get(), user.getRole().getName(), role, user, buildNumber);
+                            resultOfAuthentication = externalServiceAuthenticator.authenticate(username.get(),
+                                    user.getRole().getName(), role, user, buildNumber);
                             String newToken = null;
                             try {
                                 newToken = tokenService.generateNewToken(user, domain.get());
@@ -209,7 +210,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
             return false;
         } else {
             JSONArray userJsonobject = (JSONArray) listUsersResponse.get("user");
-            if(userJsonobject.getJSONObject(0).has("apikey")) {
+            if (userJsonobject.getJSONObject(0).has("apikey")) {
                 user.setApiKey(userJsonobject.getJSONObject(0).get("apikey").toString());
                 user.setSecretKey(userJsonobject.getJSONObject(0).get("secretkey").toString());
                 return true;
