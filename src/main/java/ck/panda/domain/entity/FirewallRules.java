@@ -117,6 +117,11 @@ public class FirewallRules {
     @Column(name = "state")
     private Boolean state;
 
+    /** Set of rules or protocols for an IP address .*/
+    @Column(name = "protocol" )
+    @Enumerated(EnumType.STRING)
+    private Protocol protocol;
+
     /** Different set of rules for a network .*/
     @Column(name = "purpose")
     @Enumerated(EnumType.STRING)
@@ -171,6 +176,22 @@ public class FirewallRules {
 
         /** Rule for controlling traffic from inside. */
         INGRESS
+    }
+
+    /** Types of protocol for an IP Address .*/
+    public enum Protocol {
+
+        /**  TCP enables two hosts to establish a connection and exchange streams of data. */
+        TCP,
+
+        /** User Datagram Protocol (UDP) is a transport layer protocol provides a best-effort datagram service to an End System (IP host).*/
+        UDP,
+
+        /** It is used to send error message when  requested service is not available or that a host or router could not be reached. */
+        ICMP,
+
+        /** All the above three protocols .*/
+        ALL
     }
 
     /**
@@ -567,6 +588,24 @@ public class FirewallRules {
      */
     public void setTrafficType(TrafficType trafficType) {
         this.trafficType = trafficType;
+    }
+
+    /**
+     * Get protocol of an Ip address.
+     *
+     * @return the protocol
+     */
+    public Protocol getProtocol() {
+        return protocol;
+    }
+
+    /**
+     * Set the protocol of an Ip address.
+     *
+     * @param protocol to set
+     */
+    public void setProtocol(Protocol protocol) {
+        this.protocol = protocol;
     }
 
     /**
