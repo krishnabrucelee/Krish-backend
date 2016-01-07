@@ -7,7 +7,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "ck_ip_address")
+@Table(name = "ipaddresses")
 public class IpAddress {
 
       /** Unique Id of the IP address. */
