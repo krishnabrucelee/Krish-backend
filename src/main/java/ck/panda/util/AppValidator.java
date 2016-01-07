@@ -5,8 +5,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
-import ck.panda.domain.entity.Department;
-import ck.panda.service.RoleService;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 import javax.validation.ConstraintViolation;
@@ -39,7 +37,7 @@ public class AppValidator {
      */
     public Errors validateEntity(Object object) throws Exception {
 
-        Set<ConstraintViolation<Object>> constraintViolationErrors =  validator.validate(object);
+        Set<ConstraintViolation<Object>> constraintViolationErrors = validator.validate(object);
 
         HashMap<String, String> errorsMap = convertValidationMessages(constraintViolationErrors);
 
@@ -54,7 +52,7 @@ public class AppValidator {
     }
 
     /**
-     * Validates the entity.
+     * import org.springframework.data.jpa.repository.Query; Validates the entity.
      *
      * @param object to be validated.
      * @param errors ,an error object.
@@ -63,7 +61,7 @@ public class AppValidator {
      */
     public Errors validateEntity(Object object, Errors errors) throws Exception {
 
-        Set<ConstraintViolation<Object>> constraintViolationErrors =  validator.validate(object);
+        Set<ConstraintViolation<Object>> constraintViolationErrors = validator.validate(object);
 
         HashMap<String, String> errorsMap = convertValidationMessages(constraintViolationErrors);
 
@@ -74,8 +72,6 @@ public class AppValidator {
         }
         return errors;
     }
-
-
 
     /**
      * Reject if null entity.
@@ -115,19 +111,18 @@ public class AppValidator {
      * @param constraintViolationErrors to set
      * @return <T> error messages of specific type
      */
-    private <T extends Object> HashMap<String, String>
-            convertValidationMessages(Set<ConstraintViolation<T>> constraintViolationErrors) {
+    private <T extends Object> HashMap<String, String> convertValidationMessages(
+            Set<ConstraintViolation<T>> constraintViolationErrors) {
 
         HashMap<String, String> failureMessages = new HashMap<String, String>();
 
         for (ConstraintViolation<T> constraintViolationError : constraintViolationErrors) {
 
-            //TODO handle the error code {javax.validation.constraints.NotNull.message}
+            // TODO handle the error code {javax.validation.constraints.NotNull.message}
             String errorMessage = constraintViolationError.getMessage();
 
             try {
-                errorMessage = messageSource.getMessage(errorMessage, new Object[] {},
-                        LocaleContextHolder.getLocale());
+                errorMessage = messageSource.getMessage(errorMessage, new Object[] {}, LocaleContextHolder.getLocale());
             } catch (NoSuchMessageException ex) {
             }
             failureMessages.put(constraintViolationError.getPropertyPath().toString(), errorMessage);
@@ -154,7 +149,7 @@ public class AppValidator {
      * @return Errors entity
      */
     public Errors createErrors() {
-        //Errors errors = beanFactory.createError();
-        return null;//errors;
+        // Errors errors = beanFactory.createError();
+        return null;// errors;
     }
 }

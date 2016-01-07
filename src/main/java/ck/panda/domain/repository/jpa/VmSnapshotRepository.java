@@ -31,8 +31,7 @@ public interface VmSnapshotRepository extends PagingAndSortingRepository<VmSnaps
      * @return Vm snapshot.
      */
     @Query(value = "select snapshot from VmSnapshot snapshot where snapshot.vmId=:vmId AND snapshot.isRemoved IS :isRemoved )")
-    List<VmSnapshot> findByVmInstance(@Param("vmId")Long vmId, @Param("isRemoved")Boolean isRemoved);
-
+    List<VmSnapshot> findByVmInstance(@Param("vmId") Long vmId, @Param("isRemoved") Boolean isRemoved);
 
     /**
      * Find all vm snapshot by active.

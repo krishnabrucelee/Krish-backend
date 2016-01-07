@@ -117,7 +117,7 @@ public class TemplateServiceImpl implements TemplateService {
     public void delete(Template template) throws Exception {
         template.setIsActive(false);
         template.setStatus(Template.Status.INACTIVE);
-           templateRepository.save(template);
+        templateRepository.save(template);
     }
 
     @Override
@@ -224,8 +224,8 @@ public class TemplateServiceImpl implements TemplateService {
         List<Template> allTemplate = new ArrayList<Template>();
         for (Template template : templates) {
             if (template.getStatus() == Status.INACTIVE) {
-                String csResponse = cloudStackTemplateService.prepareTemplate(template.getUuid(), zoneService.find(template.getZoneId()).getUuid(),
-                    "json");
+                String csResponse = cloudStackTemplateService.prepareTemplate(template.getUuid(),
+                        zoneService.find(template.getZoneId()).getUuid(), "json");
                 try {
                     JSONObject templateJSON = new JSONObject(csResponse).getJSONObject("preparetemplateresponse");
                     if (templateJSON.has("template")) {
@@ -249,7 +249,7 @@ public class TemplateServiceImpl implements TemplateService {
                     LOGGER.error("ERROR AT TEMPLATE CREATION", e);
                 }
             } else {
-            	allTemplate.add(template);
+                allTemplate.add(template);
             }
         }
         return allTemplate;
@@ -263,10 +263,10 @@ public class TemplateServiceImpl implements TemplateService {
     public void csRegisterTemplate(Template template, Errors errors) throws Exception {
         configUtil.setServer(1L);
         HashMap<String, String> optional = new HashMap<String, String>();
-        String csResponse = cloudStackTemplateService.registerTemplate(template.getDescription(), template.getFormat().name(),
-            hypervisorService.find(template.getHypervisorId()).getName(), template.getName(),
-            osTypeService.find(template.getOsTypeId()).getUuid(), template.getUrl(),
-            zoneService.find(template.getZoneId()).getUuid(), "json", optionalFieldValidation(template, optional));
+        String csResponse = cloudStackTemplateService.registerTemplate(template.getDescription(),
+                template.getFormat().name(), hypervisorService.find(template.getHypervisorId()).getName(),
+                template.getName(), osTypeService.find(template.getOsTypeId()).getUuid(), template.getUrl(),
+                zoneService.find(template.getZoneId()).getUuid(), "json", optionalFieldValidation(template, optional));
         try {
             JSONObject templateJSON = new JSONObject(csResponse).getJSONObject("registertemplateresponse");
             if (templateJSON.has("errorcode")) {
@@ -286,7 +286,7 @@ public class TemplateServiceImpl implements TemplateService {
                     template.setType(TemplateType.valueOf(jsonobject.getString("templatetype")));
                 }
                 template.setDisplayText(osTypeService.find(template.getOsTypeId()).getDescription());
-             }
+            }
         } catch (ApplicationException e) {
             LOGGER.error("ERROR AT TEMPLATE CREATION", e);
             throw new ApplicationException(e.getErrors());

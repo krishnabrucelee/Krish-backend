@@ -24,13 +24,12 @@ import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonUtil;
 
 /**
- * OS category purpose is to create which category of operation system you want when creating the template.
- * Get the OS category list from cloud stack server and push into the application database
- * When creating the template and instance fetch the OS category from application database
- *
+ * OS category purpose is to create which category of operation system you want when creating the template. Get the OS
+ * category list from cloud stack server and push into the application database When creating the template and instance
+ * fetch the OS category from application database.
  */
 @Entity
-@Table(name = "ck_os_category")
+@Table(name = "os_categories")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class OsCategory implements Serializable {
@@ -81,6 +80,7 @@ public class OsCategory implements Serializable {
 
     /**
      * Get the id.
+     *
      * @return id
      */
     public Long getId() {
@@ -89,6 +89,7 @@ public class OsCategory implements Serializable {
 
     /**
      * Set the id.
+     *
      * @param id - the Long to set
      */
     public void setId(Long id) {
@@ -97,6 +98,7 @@ public class OsCategory implements Serializable {
 
     /**
      * Get the name.
+     *
      * @return name
      */
     public String getName() {
@@ -105,6 +107,7 @@ public class OsCategory implements Serializable {
 
     /**
      * Set the name.
+     *
      * @param name - the String to set
      */
     public void setName(String name) {
@@ -113,6 +116,7 @@ public class OsCategory implements Serializable {
 
     /**
      * Get the UUID.
+     *
      * @return uuid
      */
     public String getUuid() {
@@ -121,6 +125,7 @@ public class OsCategory implements Serializable {
 
     /**
      * Set the UUID.
+     *
      * @param uuid - the String to set
      */
     public void setUuid(String uuid) {
@@ -129,6 +134,7 @@ public class OsCategory implements Serializable {
 
     /**
      * Get the version.
+     *
      * @return version
      */
     public Long getVersion() {
@@ -137,6 +143,7 @@ public class OsCategory implements Serializable {
 
     /**
      * Set the version.
+     *
      * @param version - the Long to set
      */
     public void setVersion(Long version) {
@@ -232,15 +239,15 @@ public class OsCategory implements Serializable {
     /**
      * Mapping the os categories entity in list.
      *
-     * @param  osCategoryList list of operating systems
+     * @param osCategoryList list of operating systems
      * @return mapped values
      */
     public static Map<String, OsCategory> convert(List<OsCategory> osCategoryList) {
         Map<String, OsCategory> osCategoryMap = new HashMap<String, OsCategory>();
 
         for (OsCategory osCategory : osCategoryList) {
-             osCategoryMap.put(osCategory.getUuid(), osCategory);
+            osCategoryMap.put(osCategory.getUuid(), osCategory);
         }
-        return  osCategoryMap;
+        return osCategoryMap;
     }
 }

@@ -14,7 +14,7 @@ import ck.panda.util.domain.vo.PagingAndSorting;
  * This service provides basic CRUD and essential api's for Role related business actions.
  */
 @Service
-public interface RoleService  extends CRUDService<Role> {
+public interface RoleService extends CRUDService<Role> {
 
     /**
      * Method to find name uniqueness from department in adding Roles.
@@ -57,7 +57,7 @@ public interface RoleService  extends CRUDService<Role> {
      * Method to find role by name and department id and active.
      *
      * @param name - name of the role
-     * @param department - department id
+     * @param departmentId - department id
      * @param isActive - true
      * @return role
      * @throws Exception - if error occurs
@@ -66,11 +66,11 @@ public interface RoleService  extends CRUDService<Role> {
 
     /**
      * Find role by Department id.
-     * 
+     *
      * @param id department id.
      * @param isActive -true
      * @return role
      * @throws Exception if error occurs.
      */
-	List<Role> findByDepartmentAndIsActive(Long id, Boolean isActive) throws Exception;
+    List<Role> findByDepartmentAndIsActive(Long id, Boolean isActive) throws Exception;
 }

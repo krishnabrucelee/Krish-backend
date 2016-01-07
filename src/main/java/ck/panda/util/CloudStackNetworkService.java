@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- *  CloudStack Network Service provider for cloud Stack connectivity with network providers.
+ * CloudStack Network Service provider for cloud Stack connectivity with network providers.
  *
  */
 
@@ -19,15 +19,13 @@ public class CloudStackNetworkService {
     private CloudStackServer server;
 
     /**
-     * setServer passes apikey, url, secretkey from UI and aids to establish
-     * cloudstack connectivity.
+     * setServer passes apikey, url, secretkey from UI and aids to establish cloudstack connectivity.
      *
      * @param server sets apikey and url.
      */
     public void setServer(CloudStackServer server) {
         this.server = server;
     }
-
 
     /**
      * Creates a network.
@@ -39,18 +37,14 @@ public class CloudStackNetworkService {
      * @return
      * @throws Exception exception
      */
-    public String createNetwork(String zoneId, String response,
-            HashMap<String, String> optional)
-            throws Exception {
+    public String createNetwork(String zoneId, String response, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("createNetwork", optional);
-        arguments.add(new NameValuePair("zoneid",zoneId));
-        arguments.add(new NameValuePair("response",response));
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("createNetwork", optional);
+        arguments.add(new NameValuePair("zoneid", zoneId));
+        arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
         return responseDocument;
     }
-
 
     /**
      * Lists network service providers for cloud stack.
@@ -60,12 +54,9 @@ public class CloudStackNetworkService {
      * @return response Document
      * @throws Exception unhandled errors.
      */
-    public String listNetworkServiceProviders(String response,
-            HashMap<String, String> optional)
-            throws Exception {
+    public String listNetworkServiceProviders(String response, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("listNetworkServiceProviders", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("listNetworkServiceProviders", optional);
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
         return responseDocument;
@@ -79,12 +70,10 @@ public class CloudStackNetworkService {
      * @return response Document
      * @throws Exception exception
      */
-    public String listNetworks(String response,HashMap<String, String> optional)
-            throws Exception {
+    public String listNetworks(String response, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("listNetworks", optional);
-        arguments.add(new NameValuePair("response",response));
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("listNetworks", optional);
+        arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
         return responseDocument;
     }
@@ -97,16 +86,14 @@ public class CloudStackNetworkService {
      * @throws Exception exception
      * @return response
      */
-    public String deleteNetwork(String networkId, String response)
-            throws Exception {
+    public String deleteNetwork(String networkId, String response) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("deleteNetwork", null);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("deleteNetwork", null);
         arguments.add(new NameValuePair("id", networkId));
         arguments.add(new NameValuePair("response", response));
 
         String responseDocument = server.request(arguments);
-        return  responseDocument;
+        return responseDocument;
     }
 
     /**
@@ -118,18 +105,14 @@ public class CloudStackNetworkService {
      * @return response
      * @throws Exception exception
      */
-    public String updateNetwork(String networkId,
-            HashMap<String, String> optional, String response)
-            throws Exception {
+    public String updateNetwork(String networkId, HashMap<String, String> optional, String response) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("updateNetwork", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("updateNetwork", optional);
         arguments.add(new NameValuePair("id", networkId));
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
         return responseDocument;
     }
-
 
     /**
      * Retrieves the current status of asynchronous job for network.
@@ -139,16 +122,13 @@ public class CloudStackNetworkService {
      * @return job response
      * @throws Exception error
      */
-    public String networkJobResult(String asychronousJobid, String response)
-            throws Exception {
+    public String networkJobResult(String asychronousJobid, String response) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("queryAsyncJobResult", null);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("queryAsyncJobResult", null);
         arguments.add(new NameValuePair("jobid", asychronousJobid));
         arguments.add(new NameValuePair("response", response));
         String jobResponse = server.request(arguments);
         return jobResponse;
     }
-
 
 }

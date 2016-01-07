@@ -21,10 +21,9 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
- * The Firewall controlls the  traffic originates from the guest network and sent to public network.
- * This features controls the Egress (outgoing) traffic from the guest network in Advanced zone.
- * The egress firewall rules applied will restrict the traffic from guest network on the Virtual Router.
- *
+ * The Firewall controlls the traffic originates from the guest network and sent to public network. This features
+ * controls the Egress (outgoing) traffic from the guest network in Advanced zone. The egress firewall rules applied
+ * will restrict the traffic from guest network on the Virtual Router. *
  */
 @Entity
 @Table(name = "firewall_rules")
@@ -45,7 +44,7 @@ public class FirewallRules {
     @OneToOne
     private Network network;
 
-    /** Network id for Firewall Rule */
+    /** Network id for Firewall Rule. */
     @Column(name = "network_id")
     private Long networkId;
 
@@ -89,15 +88,15 @@ public class FirewallRules {
     @Column(name = "start_port")
     private Integer startPort;
 
-    /** Ending port of the firewall rule.*/
+    /** Ending port of the firewall rule. */
     @Column(name = "end_port")
     private Integer endPort;
 
-    /** Error code for ICMP message.*/
+    /** Error code for ICMP message. */
     @Column(name = "icmp_code")
     private Integer icmpCode;
 
-    /** Type of the  ICMP message.*/
+    /** Type of the ICMP message. */
     @Column(name = "icmp_message")
     private Integer icmpMessage;
 
@@ -105,7 +104,7 @@ public class FirewallRules {
     @Column(name = "vpc")
     private String vpc;
 
-    /** The source cidr list to forward traffic .*/
+    /** The source cidr list to forward traffic . */
     @Column(name = "source_cidr")
     private String sourceCIDR;
 
@@ -113,7 +112,7 @@ public class FirewallRules {
     @Column(name = "display")
     private Boolean display;
 
-    /** Rule state .*/
+    /** Rule state . */
     @Column(name = "state")
     private Boolean state;
 
@@ -122,15 +121,15 @@ public class FirewallRules {
     @Enumerated(EnumType.STRING)
     private Protocol protocol;
 
-    /** Different set of rules for a network .*/
+    /** Different set of rules for a network . */
     @Column(name = "purpose")
     @Enumerated(EnumType.STRING)
-    private Purpose purpose ;
+    private Purpose purpose;
 
-    /** TYpes of traffic over a network .*/
+    /** TYpes of traffic over a network . */
     @Column(name = "traffic_type")
     @Enumerated(EnumType.STRING)
-    private TrafficType trafficType ;
+    private TrafficType trafficType;
 
     /** Created by user. */
     @CreatedBy
@@ -156,7 +155,7 @@ public class FirewallRules {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
 
-    /** Different set of rules .*/
+    /** Different set of rules . */
     public enum Purpose {
 
         /** Firewall rule for network. */
@@ -169,7 +168,7 @@ public class FirewallRules {
         LOADBALANCING
     }
 
-    /** Traffic type for a network .*/
+    /** Traffic type for a network . */
     public enum TrafficType {
         /** Rule for controlling traffic to outside . */
         EGRESS,
@@ -224,7 +223,7 @@ public class FirewallRules {
     /**
      * Set the Firewall Rule uuid.
      *
-     * @param uuid  to set
+     * @param uuid to set
      */
     public void setUuid(String uuid) {
         this.uuid = uuid;
@@ -242,7 +241,7 @@ public class FirewallRules {
     /**
      * Set the network of the Firewall Rule.
      *
-     * @param network  to set
+     * @param network to set
      */
     public void setNetwork(Network network) {
         this.network = network;
@@ -260,7 +259,7 @@ public class FirewallRules {
     /**
      * Set the networkId of the Firewall Rule.
      *
-     * @param networkId  to set
+     * @param networkId to set
      */
     public void setNetworkId(Long networkId) {
         this.networkId = networkId;
@@ -278,7 +277,7 @@ public class FirewallRules {
     /**
      * Set the domain of the Firewall Rule.
      *
-     * @param domain  to set
+     * @param domain to set
      */
     public void setDomain(Domain domain) {
         this.domain = domain;
@@ -296,7 +295,7 @@ public class FirewallRules {
     /**
      * Set the domainId of the Firewall Rule.
      *
-     * @param domainId  to set
+     * @param domainId to set
      */
     public void setDomainId(Long domainId) {
         this.domainId = domainId;
@@ -314,7 +313,7 @@ public class FirewallRules {
     /**
      * Set the department of the Firewall Rule.
      *
-     * @param department  to set
+     * @param department to set
      */
     public void setDepartment(Department department) {
         this.department = department;
@@ -422,7 +421,7 @@ public class FirewallRules {
     /**
      * Set the vpc.
      *
-     * @param vpc  to set
+     * @param vpc to set
      */
     public void setVpc(String vpc) {
         this.vpc = vpc;
@@ -447,7 +446,7 @@ public class FirewallRules {
     }
 
     /**
-     * Get the display
+     * Get the display.
      *
      * @return the display
      */
@@ -458,7 +457,7 @@ public class FirewallRules {
     /**
      * Set the display.
      *
-     * @param display  to set
+     * @param display to set
      */
     public void setDisplay(Boolean display) {
         this.display = display;
@@ -476,14 +475,14 @@ public class FirewallRules {
     /**
      * Set the state.
      *
-     * @param state  to set
+     * @param state to set
      */
     public void setState(Boolean state) {
         this.state = state;
     }
 
     /**
-     * Get  the ipAddress of the Firewall Rule.
+     * Get the ipAddress of the Firewall Rule.
      *
      * @return the ipAddress
      */
@@ -491,8 +490,8 @@ public class FirewallRules {
         return ipAddress;
     }
 
-     /**
-     * Set  the ipAddress of the Firewall Rule.
+    /**
+     * Set the ipAddress of the Firewall Rule.
      *
      * @param ipAddress to set
      */
@@ -500,8 +499,8 @@ public class FirewallRules {
         this.ipAddress = ipAddress;
     }
 
-     /**
-     * Get the ipAddressId of the Firewall Rule
+    /**
+     * Get the ipAddressId of the Firewall Rule.
      *
      * @return the ipAddressId
      */
@@ -521,7 +520,7 @@ public class FirewallRules {
     /**
      * Set the purpose.
      *
-     * @param purpose  to set
+     * @param purpose to set
      */
     public void setPurpose(Purpose purpose) {
         this.purpose = purpose;
@@ -548,7 +547,7 @@ public class FirewallRules {
     /**
      * Set the project.
      *
-     * @param project  to set
+     * @param project to set
      */
     public void setProject(Project project) {
         this.project = project;
@@ -584,7 +583,7 @@ public class FirewallRules {
     /**
      * Set the trafficType.
      *
-     * @param trafficType  to set
+     * @param trafficType to set
      */
     public void setTrafficType(TrafficType trafficType) {
         this.trafficType = trafficType;
@@ -620,7 +619,7 @@ public class FirewallRules {
     /**
      * Set the createdBy user id.
      *
-     * @param createdBy  to set
+     * @param createdBy to set
      */
     public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
@@ -638,7 +637,7 @@ public class FirewallRules {
     /**
      * Set the updatedBy user id.
      *
-     * @param updatedBy  to set
+     * @param updatedBy to set
      */
     public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
@@ -656,7 +655,7 @@ public class FirewallRules {
     /**
      * Set the createdDateTime.
      *
-     * @param createdDateTime  to set
+     * @param createdDateTime to set
      */
     public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
@@ -674,7 +673,7 @@ public class FirewallRules {
     /**
      * Set the updatedDateTime.
      *
-     * @param updatedDateTime  to set
+     * @param updatedDateTime to set
      */
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;

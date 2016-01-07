@@ -88,7 +88,7 @@ public class SnapshotServiceImpl implements SnapshotService {
     private void validateSnapshot(Snapshot snapshot) throws Exception {
         Errors errors = validator.rejectIfNullEntity("snapshots", snapshot);
         errors = validator.validateEntity(snapshot, errors);
-        Snapshot validateSnapshot = snapshotRepo.findByNameAndIsActive(snapshot.getName(),true);
+        Snapshot validateSnapshot = snapshotRepo.findByNameAndIsActive(snapshot.getName(), true);
         if (validateSnapshot != null && snapshot.getId() != validateSnapshot.getId()) {
             errors.addFieldError("name", "snapshot.already.exist");
         }
@@ -126,10 +126,8 @@ public class SnapshotServiceImpl implements SnapshotService {
     /**
      * Find all the departments with pagination.
      *
-     * @throws Exception
-     *             application errors.
-     * @param pagingAndSorting
-     *            do pagination with sorting for departments.
+     * @throws Exception application errors.
+     * @param pagingAndSorting do pagination with sorting for departments.
      * @return list of departments.
      */
     public Page<Snapshot> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
@@ -210,13 +208,10 @@ public class SnapshotServiceImpl implements SnapshotService {
     /**
      * Check the Snapshot CS error handling.
      *
-     * @param errors
-     *            error creating status.
-     * @param errmessage
-     *            error message.
+     * @param errors error creating status.
+     * @param errmessage error message.
      * @return errors.
-     * @throws Exception
-     *             unhandled exceptions.
+     * @throws Exception unhandled exceptions.
      */
     private Errors validateEvent(Errors errors, String errmessage) throws Exception {
         errors.addGlobalError(errmessage);

@@ -15,7 +15,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.hibernate.annotations.Type;
@@ -31,12 +30,11 @@ import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonUtil;
 
 /**
- * Departments are the first level hierarchy and we are grouping the departments
- * with different roles.
- * Roles should be classified based on Departments.
+ * Departments are the first level hierarchy and we are grouping the departments with different roles. Roles should be
+ * classified based on Departments.
  */
 @Entity
-@Table(name = "ck_department")
+@Table(name = "departments")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class Department implements Serializable {
@@ -156,7 +154,6 @@ public class Department implements Serializable {
         this.id = id;
     }
 
-
     /**
      * Get the domain.
      *
@@ -174,7 +171,6 @@ public class Department implements Serializable {
     public void setDomain(Domain domain) {
         this.domain = domain;
     }
-
 
     /**
      * Get the domain id.
@@ -253,9 +249,9 @@ public class Department implements Serializable {
      *
      * @param createdBy the User to set
      */
-    /*public void setCreatedBy(User createdBy) {
-        this.createdBy = createdBy.getId();
-    }*/
+    /*
+     * public void setCreatedBy(User createdBy) { this.createdBy = createdBy.getId(); }
+     */
 
     /**
      * Get the updatedBy.
@@ -401,8 +397,6 @@ public class Department implements Serializable {
         this.uuid = uuid;
     }
 
-
-
     /**
      * @return the user
      */
@@ -452,13 +446,13 @@ public class Department implements Serializable {
     /** Define user type. */
     public enum AccountType {
 
-       /** User status make department as user type. */
+        /** User status make department as user type. */
         USER,
 
-       /** Root admin status make department as Root Admin type. */
+        /** Root admin status make department as Root Admin type. */
         ROOT_ADMIN,
 
-       /** Domain admin status make department as Domain Admin type. */
+        /** Domain admin status make department as Domain Admin type. */
         DOMAIN_ADMIN;
     }
 

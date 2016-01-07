@@ -33,15 +33,14 @@ import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonUtil;
 
 /**
- * Storage Offerings, defined by administrator. provide a choice of disk size
- * and IOPS (Quality of Service) for primary data storage
+ * Storage Offerings, defined by administrator. provide a choice of disk size and IOPS (Quality of Service) for primary
+ * data storage
  *
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "ck_storage_offering")
+@Table(name = "storage_offerings")
 public class StorageOffering {
-
     /**
      * Unique ID of the storage offering.
      */
@@ -65,8 +64,7 @@ public class StorageOffering {
     private String name;
 
     /**
-     * The domain ID this disk offering belongs to. Ignore this information as
-     * it is not currently applicable.
+     * The domain ID this disk offering belongs to. Ignore this information as it is not currently applicable.
      */
     @JoinColumn(name = "domain_id", referencedColumnName = "id")
     @OneToOne
@@ -81,38 +79,34 @@ public class StorageOffering {
     private String description;
 
     /**
-     * Indicate whether the storage offering should be available all domains or
-     * only some domains. If checked, to make it available to all domains. If
-     * not checked, to limit the scope to a sub domain
+     * Indicate whether the storage offering should be available all domains or only some domains. If checked, to make
+     * it available to all domains. If not checked, to limit the scope to a sub domain
      */
     @Column(name = "is_public", columnDefinition = "tinyint default 1")
     private Boolean isPublic;
 
     /**
-     * If checked, the user can set their own disk size. If not checked, the
-     * root administrator must define a value in Disk size.
+     * If checked, the user can set their own disk size. If not checked, the root administrator must define a value in
+     * Disk size.
      */
     @Column(name = "is_custom_disk", nullable = false, columnDefinition = "tinyint default 0")
     private Boolean isCustomDisk;
 
     /**
-     * Appears only if Custom disk size is not selected. Define the volume size
-     * in GB.
+     * Appears only if Custom disk size is not selected. Define the volume size in GB.
      */
     @Column(name = "disk_size", nullable = false)
     private Long diskSize;
 
     /**
-     * The storage type for this storage offering, whether it is isolated or
-     * shared.
+     * The storage type for this storage offering, whether it is isolated or shared.
      */
     @Column(name = "storage_type")
     @Enumerated(EnumType.STRING)
     private StorageType storageType;
 
     /**
-     * The tags for the Storage offering. The tags that should be associated
-     * with the primary storage for this disk.
+     * The tags for the Storage offering. The tags that should be associated with the primary storage for this disk.
      */
     @Column(name = "storage_tags")
     private String storageTags;
@@ -149,8 +143,7 @@ public class StorageOffering {
     private Long diskIopsWriteRate;
 
     /**
-     * If checked, the user can set their own IOPS. If not checked, the root
-     * administrator can define values.
+     * If checked, the user can set their own IOPS. If not checked, the root administrator can define values.
      */
     @Column(name = "is_customized_iops", columnDefinition = "tinyint default 0")
     private Boolean isCustomizedIops;
@@ -213,9 +206,8 @@ public class StorageOffering {
     private List<StorageOfferingCost> storagePrice;
 
     /**
-     * isSyncFlag field is not to be serialized,
-     * whereas JPA's @Transient annotation is used to indicate
-     * that a field is not to be persisted in the database.
+     * isSyncFlag field is not to be serialized, whereas JPA's @Transient annotation is used to indicate that a field is
+     * not to be persisted in the database.
      */
     @Transient
     private Boolean isSyncFlag;
@@ -744,26 +736,27 @@ public class StorageOffering {
         storageOffering.diskSize = object.getLong("disksize");
         storageOffering.setStorageType(storageOffering.getStorageType().valueOf(object.getString("storagetype")));
         storageOffering.setIsCustomDisk(storageOffering.getIsCustomDisk().valueOf(object.getString("iscustomized")));
-        if(object.has("iscustomizediops")) {
-        storageOffering.setIsCustomizedIops(storageOffering.getIsCustomizedIops().valueOf(object.getString("iscustomizediops")));
+        if (object.has("iscustomizediops")) {
+            storageOffering.setIsCustomizedIops(
+                    storageOffering.getIsCustomizedIops().valueOf(object.getString("iscustomizediops")));
         }
-        if(object.has("bytesreadrate")) {
-        storageOffering.diskBytesReadRate = object.getLong("bytesreadrate");
+        if (object.has("bytesreadrate")) {
+            storageOffering.diskBytesReadRate = object.getLong("bytesreadrate");
         }
-        if(object.has("byteswriterate")) {
-        storageOffering.diskBytesWriteRate = object.getLong("byteswriterate");
+        if (object.has("byteswriterate")) {
+            storageOffering.diskBytesWriteRate = object.getLong("byteswriterate");
         }
-        if(object.has("iopsreadrate")) {
-        storageOffering.diskIopsReadRate = object.getLong("iopsreadrate");
+        if (object.has("iopsreadrate")) {
+            storageOffering.diskIopsReadRate = object.getLong("iopsreadrate");
         }
-        if(object.has("iopswriterate")) {
-        storageOffering.diskIopsWriteRate = object.getLong("iopswriterate");
+        if (object.has("iopswriterate")) {
+            storageOffering.diskIopsWriteRate = object.getLong("iopswriterate");
         }
-        if(object.has("maxiops")) {
-        storageOffering.diskMaxIops = object.getLong("maxiops");
+        if (object.has("maxiops")) {
+            storageOffering.diskMaxIops = object.getLong("maxiops");
         }
-        if(object.has("miniops")) {
-        storageOffering.diskMinIops = object.getLong("miniops");
+        if (object.has("miniops")) {
+            storageOffering.diskMinIops = object.getLong("miniops");
         }
         if (object.has("tags")) {
             storageOffering.storageTags = object.getString("tags");

@@ -17,7 +17,9 @@ public class CloudStackAuthenticationService {
     @Autowired
     private CloudStackServer server;
 
-    /** sets api key , secret key and url.
+    /**
+     * sets api key , secret key and url.
+     * 
      * @param server sets these values.
      */
     public void setServer(CloudStackServer server) {
@@ -34,11 +36,10 @@ public class CloudStackAuthenticationService {
      * @return - Json string response
      * @throws Exception - Raise if any error
      */
-    public String login(String userName, String password, String response,
-            HashMap<String, String> optional) throws Exception {
+    public String login(String userName, String password, String response, HashMap<String, String> optional)
+            throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQueryLogin("login", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQueryLogin("login", optional);
         arguments.add(new NameValuePair("username", userName));
         arguments.add(new NameValuePair("password", password));
         arguments.add(new NameValuePair("response", response));
@@ -54,11 +55,9 @@ public class CloudStackAuthenticationService {
      * @return - Json string response
      * @throws Exception - Raise if any error
      */
-    public String logout(String response,
-            HashMap<String, String> optional) throws Exception {
+    public String logout(String response, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("logout", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("logout", optional);
         arguments.add(new NameValuePair("response", response));
         String responseJson = server.request(arguments);
         return responseJson;
@@ -73,11 +72,9 @@ public class CloudStackAuthenticationService {
      * @return - Json string response
      * @throws Exception - Raise if any error
      */
-    public String samlSso(String idpUrl, String response,
-            HashMap<String, String> optional) throws Exception {
+    public String samlSso(String idpUrl, String response, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("samlSso", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("samlSso", optional);
         arguments.add(new NameValuePair("idpUrl", idpUrl));
         arguments.add(new NameValuePair("response", response));
         String responseJson = server.request(arguments);
@@ -92,11 +89,9 @@ public class CloudStackAuthenticationService {
      * @return - Json string response
      * @throws Exception - Raise if any error
      */
-    public String samlSlo(String response,
-            HashMap<String, String> optional) throws Exception {
+    public String samlSlo(String response, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("samlSlo", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("samlSlo", optional);
         arguments.add(new NameValuePair("response", response));
         String responseJson = server.request(arguments);
         return responseJson;
@@ -110,11 +105,9 @@ public class CloudStackAuthenticationService {
      * @return - Json string response
      * @throws Exception - Raise if any error
      */
-    public String getSpMetadata(String response,
-            HashMap<String, String> optional) throws Exception {
+    public String getSpMetadata(String response, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("getSpMetadata", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("getSpMetadata", optional);
         arguments.add(new NameValuePair("response", response));
         String responseJson = server.request(arguments);
         return responseJson;

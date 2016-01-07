@@ -14,7 +14,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -31,11 +30,11 @@ import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonUtil;
 
 /**
- * SSH Keys are used for authentication,In addition to the username and password authentication.
- * with SSH Key, an instance can be created and also multiple instances can be managed.
+ * SSH Keys are used for authentication,In addition to the username and password authentication. with SSH Key, an
+ * instance can be created and also multiple instances can be managed.
  */
 @Entity
-@Table(name = "ck_sshkey")
+@Table(name = "sshkeys")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class SSHKey implements Serializable {
@@ -243,8 +242,6 @@ public class SSHKey implements Serializable {
     public void setDomain(Domain domain) {
         this.domain = domain;
     }
-
-
 
     /**
      * Get the department.

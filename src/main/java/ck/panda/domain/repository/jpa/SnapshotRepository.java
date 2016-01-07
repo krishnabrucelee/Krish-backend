@@ -1,6 +1,5 @@
 package ck.panda.domain.repository.jpa;
 
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -29,11 +28,11 @@ public interface SnapshotRepository extends PagingAndSortingRepository<Snapshot,
     /**
      * Find the snapshot for same domain with username and is active status.
      *
-     * @param Name of the snapshot.
+     * @param name of the snapshot.
      * @param isActive get the snapshot list based on active/inactive status.
      * @return snapshot name.
      */
     @Query(value = "select snap from Snapshot snap where snap.name=:name AND snap.isActive =:isActive")
-    Snapshot findByNameAndIsActive(@Param("name") String Name, @Param("isActive")  Boolean isActive);
+    Snapshot findByNameAndIsActive(@Param("name") String name, @Param("isActive") Boolean isActive);
 
 }

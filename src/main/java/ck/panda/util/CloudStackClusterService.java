@@ -17,7 +17,9 @@ public class CloudStackClusterService {
     @Autowired
     private CloudStackServer server;
 
-    /** sets api key , secret key and url.
+    /**
+     * sets api key , secret key and url.
+     * 
      * @param server sets these values.
      */
     public void setServer(CloudStackServer server) {
@@ -32,13 +34,11 @@ public class CloudStackClusterService {
      * @return response from cloudstack server
      * @throws Exception unhandled errors.
      */
-    public String listClusters(String response, HashMap<String, String> optional)
-            throws Exception {
+    public String listClusters(String response, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("listClusters", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("listClusters", optional);
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
-        return  responseDocument;
+        return responseDocument;
     }
- }
+}

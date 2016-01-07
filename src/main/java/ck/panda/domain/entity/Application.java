@@ -24,12 +24,12 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
- * Application consists of different application types. Application types are unique to domain.
- * Application types may vary with respect to domain.
+ * Application consists of different application types. Application types are unique to domain. Application types may
+ * vary with respect to domain.
  *
  */
 @Entity
-@Table(name = "ck_application")
+@Table(name = "applications")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class Application implements Serializable {

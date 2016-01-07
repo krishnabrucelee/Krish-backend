@@ -35,7 +35,6 @@ import ck.panda.util.web.CRUDController;
 @Api(value = "ResourceLimit", description = "Operations with resource limits", produces = "application/json")
 public class ResourceLimitProjectController extends CRUDController<ResourceLimitProject> implements ApiController {
 
-
     /** Service reference to resource. */
     @Autowired
     private ResourceLimitProjectService resourceLimitService;
@@ -54,11 +53,12 @@ public class ResourceLimitProjectController extends CRUDController<ResourceLimit
      * @return resource limit
      * @throws Exception error
      */
-    @RequestMapping(value = "/create", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE }, consumes = {
-            MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/create", method = RequestMethod.POST, produces = {
+            MediaType.APPLICATION_JSON_VALUE }, consumes = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public List<ResourceLimitProject> createResourceLimits(@RequestBody List<ResourceLimitProject> resourceLimits) throws Exception {
+    public List<ResourceLimitProject> createResourceLimits(@RequestBody List<ResourceLimitProject> resourceLimits)
+            throws Exception {
         return resourceLimitService.createResourceLimits(resourceLimits);
     }
 
@@ -115,7 +115,8 @@ public class ResourceLimitProjectController extends CRUDController<ResourceLimit
     @RequestMapping(value = "project/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected List<ResourceLimitProject> getResourceLimitByProject(@PathVariable(PATH_ID) Long projectId) throws Exception {
+    protected List<ResourceLimitProject> getResourceLimitByProject(@PathVariable(PATH_ID) Long projectId)
+            throws Exception {
         return resourceLimitService.findAllByProjectIdAndIsActive(projectId, true);
     }
 }

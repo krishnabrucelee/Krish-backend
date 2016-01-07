@@ -74,10 +74,10 @@ public class RoleServiceImpl implements RoleService {
     public Role update(Role role) throws Exception {
         Errors errors = validator.rejectIfNullEntity("role", role);
         errors = validator.validateEntity(role, errors);
-//        Role roleUnique = roleRepo.findUniqueness(role.getName(), role.getDepartmentId());
-//        if (roleUnique != null && role.getId() != roleUnique.getId()) {
-//            errors.addGlobalError("role.name.unique.error");
-//        }
+        // Role roleUnique = roleRepo.findUniqueness(role.getName(), role.getDepartmentId());
+        // if (roleUnique != null && role.getId() != roleUnique.getId()) {
+        // errors.addGlobalError("role.name.unique.error");
+        // }
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
@@ -89,7 +89,7 @@ public class RoleServiceImpl implements RoleService {
     @PreAuthorize("hasPermission(#role.getSyncFlag(), 'DELETE_ROLE')")
     public Role softDelete(Role role) throws Exception {
         Errors errors = new Errors(messageSource);
-        if(userService.findByRole(role.getId(), true).size() > 0)  {
+        if (userService.findByRole(role.getId(), true).size() > 0) {
             errors.addGlobalError("role.assigned.to.user.cannot.be.deleted");
             throw new ApplicationException(errors);
         } else {
@@ -98,6 +98,7 @@ public class RoleServiceImpl implements RoleService {
             return roleRepo.save(role);
         }
     }
+
     @Override
     public void delete(Role role) throws Exception {
         roleRepo.delete(role);
@@ -126,7 +127,7 @@ public class RoleServiceImpl implements RoleService {
         Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && !domain.getName().equals("ROOT")) {
             return roleRepo.findByDomainAndIsActive(domain.getId(), true, pagingAndSorting.toPageRequest());
-        }else {
+        } else {
             return findAllRolesWithoutFullPermissionAndActive(pagingAndSorting);
         }
     }
@@ -161,7 +162,7 @@ public class RoleServiceImpl implements RoleService {
      *
      * @param errors an error object
      * @param name which is to be validated.
-     * @param department which is to be validated.
+     * @param departmentId which is to be validated.
      * @return error is present,else new error object is returned.
      * @throws Exception if error is present.
      */
@@ -174,7 +175,8 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public Role findByNameAndDepartmentIdAndIsActive(String name, Long departmentId, Boolean isActive) throws Exception {
+    public Role findByNameAndDepartmentIdAndIsActive(String name, Long departmentId, Boolean isActive)
+            throws Exception {
         return roleRepo.findByNameAndDepartmentIdAndIsActive(name, departmentId, isActive);
     }
 

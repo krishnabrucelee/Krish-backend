@@ -10,7 +10,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.hibernate.annotations.Type;
@@ -26,12 +25,10 @@ import ck.panda.util.JsonUtil;
 
 /**
  * A host is a single computer. Hosts provide the computing resources that run guest virtual machines. Each host has
- * hypervisor software installed on it to manage the guest VMs.
- *
+ * hypervisor software installed on it to manage the guest VMs. *
  */
-
 @Entity
-@Table(name = "ck_host")
+@Table(name = "hosts")
 @SuppressWarnings("serial")
 public class Host {
 
@@ -59,15 +56,15 @@ public class Host {
     @Column(name = "pod_id")
     private Long podId;
 
-    /** Transient pod of the host.*/
+    /** Transient pod of the host. */
     @Transient
     private String transPodId;
 
-    /** Transient zone of the host.*/
+    /** Transient zone of the host. */
     @Transient
     private String transZoneId;
 
-    /** Transient cluster of the host.*/
+    /** Transient cluster of the host. */
     @Transient
     private String transClusterId;
 
@@ -134,20 +131,21 @@ public class Host {
     private String hypervisor;
 
     /**
-     * Enum type for  Host Status.
+     * Enum type for Host Status.
      *
      */
     public enum Status {
 
-        /**  Host will be in a Enabled State. */
+        /** Host will be in a Enabled State. */
         UP,
 
-        /**  Host will be in a Alert State. */
+        /** Host will be in a Alert State. */
         ALERT,
 
-        /**  Host will be get disconnected. */
+        /** Host will be get disconnected. */
         DISCONNECTED,
     }
+
     /**
      * Get id.
      *
@@ -160,7 +158,7 @@ public class Host {
     /**
      * Set id.
      *
-     * @param id  to set
+     * @param id to set
      */
     public void setId(Long id) {
         this.id = id;
@@ -178,7 +176,7 @@ public class Host {
     /**
      * Set uuid of the host.
      *
-     * @param uuid  to set
+     * @param uuid to set
      */
     public void setUuid(String uuid) {
         this.uuid = uuid;
@@ -196,7 +194,7 @@ public class Host {
     /**
      * Set the name.
      *
-     * @param name  to set
+     * @param name to set
      */
     public void setName(String name) {
         this.name = name;
@@ -214,7 +212,7 @@ public class Host {
     /**
      * Set the pod.
      *
-     * @param pod  to set
+     * @param pod to set
      */
     public void setPod(Pod pod) {
         this.pod = pod;
@@ -232,7 +230,7 @@ public class Host {
     /**
      * Set the podId.
      *
-     * @param podId  to set
+     * @param podId to set
      */
     public void setPodId(Long podId) {
         this.podId = podId;
@@ -248,7 +246,7 @@ public class Host {
     /**
      * Set the zone.
      *
-     * @param zone  to set
+     * @param zone to set
      */
     public void setZone(Zone zone) {
         this.zone = zone;
@@ -266,7 +264,7 @@ public class Host {
     /**
      * Set the zoneId.
      *
-     * @param zoneId  to set
+     * @param zoneId to set
      */
     public void setZoneId(Long zoneId) {
         this.zoneId = zoneId;
@@ -300,7 +298,7 @@ public class Host {
     /**
      * Set the clusterId.
      *
-     * @param clusterId  to set
+     * @param clusterId to set
      */
     public void setClusterId(Long clusterId) {
         this.clusterId = clusterId;
@@ -318,7 +316,7 @@ public class Host {
     /**
      * Set the createdBy.
      *
-     * @param createdBy  to set
+     * @param createdBy to set
      */
     public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
@@ -376,11 +374,11 @@ public class Host {
         this.updatedDateTime = updatedDateTime;
     }
 
-   /**
-    * Get the transient pod id.
-    *
-    * @return the transPodId
-    */
+    /**
+     * Get the transient pod id.
+     *
+     * @return the transPodId
+     */
     public String getTransPodId() {
         return transPodId;
     }
@@ -388,7 +386,7 @@ public class Host {
     /**
      * Set the transient Pod Id.
      *
-     * @param transPodId  to set
+     * @param transPodId to set
      */
     public void setTransPodId(String transPodId) {
         this.transPodId = transPodId;
@@ -406,7 +404,7 @@ public class Host {
     /**
      * Set the transZoneId.
      *
-     * @param transZoneId  to set
+     * @param transZoneId to set
      */
     public void setTransZoneId(String transZoneId) {
         this.transZoneId = transZoneId;
@@ -440,7 +438,7 @@ public class Host {
     }
 
     /**
-     *  Set the status.
+     * Set the status.
      *
      * @param status to set
      */
@@ -458,7 +456,7 @@ public class Host {
     }
 
     /**
-     * Set  the isActive.
+     * Set the isActive.
      *
      * @param isActive to set
      */
@@ -475,11 +473,10 @@ public class Host {
         return hostIpaddress;
     }
 
-
     /**
      * Set the ipaddress for host.
      *
-     * @param ipAddress to set
+     * @param hostIpaddress to set
      */
     public void setHostIpaddress(String hostIpaddress) {
         this.hostIpaddress = hostIpaddress;
@@ -504,7 +501,7 @@ public class Host {
     }
 
     /**
-     * Get Hypervisor name
+     * Get Hypervisor name.
      *
      * @return hypertvisor
      */
@@ -513,7 +510,7 @@ public class Host {
     }
 
     /**
-     * Set the hypervisor
+     * Set the hypervisor.
      *
      * @param hypervisor name to set
      */
@@ -538,8 +535,8 @@ public class Host {
             host.setTransZoneId((JsonUtil.getStringValue(jsonObject, "zoneid")));
             host.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state").toUpperCase()));
             host.setHostIpaddress(JsonUtil.getStringValue(jsonObject, "ipaddress"));
-            host.setHostHighAvailability(JsonUtil.getStringValue(jsonObject,"hahost"));
-            host.setHypervisor(JsonUtil.getStringValue(jsonObject,"hypervisor"));
+            host.setHostHighAvailability(JsonUtil.getStringValue(jsonObject, "hahost"));
+            host.setHypervisor(JsonUtil.getStringValue(jsonObject, "hypervisor"));
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -549,8 +546,7 @@ public class Host {
     /**
      * Mapping entity object into list.
      *
-     * @param hostList
-     *            list of hosts.
+     * @param hostList list of hosts.
      * @return host map
      */
     public static Map<String, Host> convert(List<Host> hostList) {

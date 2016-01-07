@@ -11,7 +11,7 @@ import ck.panda.domain.entity.ResourceLimitProject;
 /**
  * Jpa Repository for ResourceLimit project entity.
  */
-public interface ResourceLimitProjectRepository extends PagingAndSortingRepository<ResourceLimitProject, Long>  {
+public interface ResourceLimitProjectRepository extends PagingAndSortingRepository<ResourceLimitProject, Long> {
 
     /**
      * method to find list of entities having active status.
@@ -30,7 +30,8 @@ public interface ResourceLimitProjectRepository extends PagingAndSortingReposito
      * @return projects.
      */
     @Query(value = "select resource from ResourceLimitProject resource where resource.isActive =:isActive AND resource.projectId =:projectId")
-    List<ResourceLimitProject> findAllByProjectIdAndIsActive(@Param("projectId") Long projectId, @Param("isActive") Boolean isActive);
+    List<ResourceLimitProject> findAllByProjectIdAndIsActive(@Param("projectId") Long projectId,
+            @Param("isActive") Boolean isActive);
 
     /**
      * Find by resource count by domain and resourceType.
@@ -42,6 +43,8 @@ public interface ResourceLimitProjectRepository extends PagingAndSortingReposito
      * @return resource count of project.
      */
     @Query(value = "select coalesce(sum(resource.max),0) from ResourceLimitProject resource where resource.isActive =:isActive AND resource.departmentId =:departmentId AND resource.resourceType =:resourceType AND resource.projectId !=:projectId")
-    Long findByResourceCountByProjectAndResourceType(@Param("departmentId") Long departmentId, @Param("resourceType") ResourceLimitProject.ResourceType resourceType, @Param("projectId") Long projectId, @Param("isActive") Boolean isActive);
+    Long findByResourceCountByProjectAndResourceType(@Param("departmentId") Long departmentId,
+            @Param("resourceType") ResourceLimitProject.ResourceType resourceType, @Param("projectId") Long projectId,
+            @Param("isActive") Boolean isActive);
 
 }

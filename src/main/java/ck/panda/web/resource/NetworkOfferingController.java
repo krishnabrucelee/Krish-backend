@@ -52,7 +52,8 @@ public class NetworkOfferingController extends CRUDController<NetworkOffering> i
 
     @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing Network Offer.", response = NetworkOffering.class)
     @Override
-    public NetworkOffering update(@RequestBody NetworkOffering network, @PathVariable(PATH_ID) Long id) throws Exception {
+    public NetworkOffering update(@RequestBody NetworkOffering network, @PathVariable(PATH_ID) Long id)
+            throws Exception {
         return networkOffer.update(network);
     }
 
@@ -64,7 +65,8 @@ public class NetworkOfferingController extends CRUDController<NetworkOffering> i
 
     @Override
     public List<NetworkOffering> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
+            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
+                    throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, NetworkOffering.class);
         Page<NetworkOffering> pageResponse = networkOffer.findAll(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
@@ -73,25 +75,27 @@ public class NetworkOfferingController extends CRUDController<NetworkOffering> i
 
     /**
      * list all Networks Offerings.
+     * 
      * @return NetworkOffering
      * @throws Exception Exception
      */
-      @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-      @ResponseStatus(HttpStatus.OK)
-      @ResponseBody
-      protected List<NetworkOffering> getSearch() throws Exception {
-          return networkOffer.findAll();
-      }
+    @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<NetworkOffering> getSearch() throws Exception {
+        return networkOffer.findAll();
+    }
 
-      /**
-       * list all isolated Networks Offerings.
-       * @return isolated Network Offerings
-       * @throws Exception Exception
-       */
-        @RequestMapping(value = "isolated", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-        @ResponseStatus(HttpStatus.OK)
-        @ResponseBody
-        protected List<NetworkOffering> getIsolated() throws Exception {
-            return networkOffer.findIsolated();
-        }
+    /**
+     * list all isolated Networks Offerings.
+     * 
+     * @return isolated Network Offerings
+     * @throws Exception Exception
+     */
+    @RequestMapping(value = "isolated", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<NetworkOffering> getIsolated() throws Exception {
+        return networkOffer.findIsolated();
+    }
 }

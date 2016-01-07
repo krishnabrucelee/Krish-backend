@@ -25,7 +25,7 @@ public interface UserService extends CRUDService<User> {
     /**
      * @param query search term.
      * @return list of user.
-     * @throws Exception
+     * @throws Exception unhandled errors.
      */
     List<User> findByName(String query) throws Exception;
 
@@ -68,49 +68,50 @@ public interface UserService extends CRUDService<User> {
      */
     User findByUser(String userName, String password, String domainName) throws Exception;
 
+    /**
+     * Method to soft delete user.
+     *
+     * @param user user object.
+     * @return user.
+     * @throws Exception if error occurs.
+     */
+    User softDelete(User user) throws Exception;
 
-     /**
-      * Method to soft delete user.
-      *
-      * @param user user object.
-      * @return user.
-      * @throws Exception if error occurs.
-      */
-     User softDelete(User user) throws Exception;
+    /**
+     * Find user by uuid Id and status.
+     *
+     * @param uuid of the user.
+     * @param isActive status of the user.
+     * @return account.
+     * @throws Exception if error occurs.
+     */
+    User findByUuIdAndIsActive(String uuid, Boolean isActive) throws Exception;
 
-     /**
-      * Find user by uuid Id and status.
-      *
-      * @param uuid of the user.
-      * @param isActive status of the user.
-      * @return account.
-      * @throws Exception if error occurs.
-      */
-     User findByUuIdAndIsActive(String uuid, Boolean isActive) throws Exception;
+    /**
+     * Find all the user by domain.
+     *
+     * @param pagingAndSorting paging and sorting information.
+     * @return list of user.
+     * @throws Exception if error occurs.
+     */
+    Page<User> findAllUserByDomain(PagingAndSorting pagingAndSorting) throws Exception;
 
-     /**
-      * Find all the user by domain.
-      *
-      * @param pagingAndSorting paging and sorting information.
-      * @return list of user.
-      * @throws Exception if error occurs.
-      */
-     Page<User> findAllUserByDomain(PagingAndSorting pagingAndSorting) throws Exception;
+    /**
+     * Find all the user by domain.
+     *
+     * @return list of user.
+     * @throws Exception if error occurs.
+     */
+    List<User> findAllUserByDomain() throws Exception;
 
-     /**
-      * Find all the user by domain.
-      *
-      * @return list of user.
-      * @throws Exception if error occurs.
-      */
-     List<User> findAllUserByDomain() throws Exception;
-
-     /**
-      * Find all the user by domain.
-      *
-      * @return list of user.
-      * @throws Exception if error occurs.
-      */
+    /**
+     * Find the user by domain.
+     *
+     * @param owner user object.
+     * @param domain domain object.
+     * @return user.
+     * @throws Exception if error occurs.
+     */
     User findByNameAndDomain(String owner, Domain domain) throws Exception;
 
     /**
@@ -136,9 +137,9 @@ public interface UserService extends CRUDService<User> {
      *
      * @param users List of users
      * @return users
-     * @throws Exception
+     * @throws Exception unhandled errors.
      */
-    public List<User> assignUserRoles(List<User> users) throws Exception;
+    List<User> assignUserRoles(List<User> users) throws Exception;
 
     /**
      * Find user role whether assigned or not.

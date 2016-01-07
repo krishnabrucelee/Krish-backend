@@ -29,11 +29,11 @@ import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonUtil;
 
 /**
- * VM snapshot: snapshot on entire VM, including its volumes, memory and CPU
- * state, resides on primary storage. Mainly used for revert purpose.
+ * VM snapshot: snapshot on entire VM, including its volumes, memory and CPU state, resides on primary storage. Mainly
+ * used for revert purpose.
  */
 @Entity
-@Table(name = "vm_snapshot")
+@Table(name = "vm_snapshots")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class VmSnapshot implements Serializable {
@@ -624,7 +624,6 @@ public class VmSnapshot implements Serializable {
         this.isCurrent = isCurrent;
     }
 
-
     /**
      * Get the memory snapshot.
      *
@@ -644,71 +643,71 @@ public class VmSnapshot implements Serializable {
     }
 
     /**
-    * @return the transvmInstanceId
-    */
+     * @return the transvmInstanceId
+     */
     public String getTransvmInstanceId() {
         return transvmInstanceId;
     }
 
     /**
-    * @param transvmInstanceId the transvmInstanceId to set
-    */
+     * @param transvmInstanceId the transvmInstanceId to set
+     */
     public void setTransvmInstanceId(String transvmInstanceId) {
         this.transvmInstanceId = transvmInstanceId;
     }
 
     /**
-    * @return the transZoneId
-    */
+     * @return the transZoneId
+     */
     public String getTransZoneId() {
         return transZoneId;
     }
 
     /**
-    * @param transZoneId the transZoneId to set
-    */
+     * @param transZoneId the transZoneId to set
+     */
     public void setTransZoneId(String transZoneId) {
         this.transZoneId = transZoneId;
     }
 
     /**
-    * @return the transDisplayName
-    */
+     * @return the transDisplayName
+     */
     public String getTransDisplayName() {
         return transDisplayName;
     }
 
     /**
-    * @param transDisplayName the transDisplayName to set
-    */
+     * @param transDisplayName the transDisplayName to set
+     */
     public void setTransDisplayName(String transDisplayName) {
         this.transDisplayName = transDisplayName;
     }
 
     /**
-    * @return the transDomainId
-    */
+     * @return the transDomainId
+     */
     public String getTransDomainId() {
         return transDomainId;
     }
 
     /**
-    * @param transDomainId the transDomainId to set
-    */
+     * @param transDomainId the transDomainId to set
+     */
     public void setTransDomainId(String transDomainId) {
         this.transDomainId = transDomainId;
     }
 
     /**
-    * @return the transOwnerId
-    */
+     * @return the transOwnerId
+     */
     public String getTransOwnerId() {
         return transOwnerId;
     }
 
     /**
-    * @param transOwnerId the transOwnerId to set
-    */
+     * @param transOwnerId the transOwnerId to set
+     */
     public void setTransOwnerId(String transOwnerId) {
         this.transOwnerId = transOwnerId;
     }

@@ -25,9 +25,9 @@ import ck.panda.service.VirtualMachineService;
 import ck.panda.util.CloudStackServer;
 
 /**
- * RabbitMQ configuration to publish/consume messages from CS server via RabbitMQ server with specified
- * Exchange name. All CS server events are tracked and update the status of resources in APP DB, update usage
- * of resource in APP DB, sync APP DB while action directly handled at CS server, CS server Alert.
+ * RabbitMQ configuration to publish/consume messages from CS server via RabbitMQ server with specified Exchange name.
+ * All CS server events are tracked and update the status of resources in APP DB, update usage of resource in APP DB,
+ * sync APP DB while action directly handled at CS server, CS server Alert.
  */
 @Configuration
 public class RabbitConfig {
@@ -251,8 +251,8 @@ public class RabbitConfig {
     }
 
     /**
-     * Message listener adapter that delegates the handling of action event messages to target listener
-     * methods via reflection, with flexible type conversion.
+     * Message listener adapter that delegates the handling of action event messages to target listener methods via
+     * reflection, with flexible type conversion.
      *
      * @return message action event listener.
      */
@@ -262,27 +262,27 @@ public class RabbitConfig {
         AsynchronousJobService asyncService = applicationContext.getBean(AsynchronousJobService.class);
         CloudStackServer cloudStackServer = applicationContext.getBean(CloudStackServer.class);
         return new MessageListenerAdapter(new ActionListener(syncService, asyncService, cloudStackServer,
-        		backendAdminUsername, backendAdminRole));
+                backendAdminUsername, backendAdminRole));
     }
 
     /**
-     * Message listener adapter that delegates the handling of asynchronous job messages to target listener
-     * methods via reflection, with flexible type conversion.
+     * Message listener adapter that delegates the handling of asynchronous job messages to target listener methods via
+     * reflection, with flexible type conversion.
      *
      * @return message asynchronous job listener.
      */
     @Bean
     MessageListenerAdapter asynchJobListenerAdapter() {
-    	SyncService syncService = applicationContext.getBean(SyncService.class);
-    	AsynchronousJobService asyncService = applicationContext.getBean(AsynchronousJobService.class);
+        SyncService syncService = applicationContext.getBean(SyncService.class);
+        AsynchronousJobService asyncService = applicationContext.getBean(AsynchronousJobService.class);
         CloudStackServer cloudStackServer = applicationContext.getBean(CloudStackServer.class);
         return new MessageListenerAdapter(new AsynchronousJobListener(syncService, asyncService, cloudStackServer,
-        		backendAdminUsername, backendAdminRole));
+                backendAdminUsername, backendAdminRole));
     }
 
     /**
-     * Message listener adapter that delegates the handling of resource state event messages to target
-     * listener methods via reflection, with flexible type conversion.
+     * Message listener adapter that delegates the handling of resource state event messages to target listener methods
+     * via reflection, with flexible type conversion.
      *
      * @return message asynchronous job listener.
      */
@@ -293,8 +293,8 @@ public class RabbitConfig {
     }
 
     /**
-     * Message listener adapter that delegates the handling of alert messages to target listener methods via
-     * reflection, with flexible type conversion.
+     * Message listener adapter that delegates the handling of alert messages to target listener methods via reflection,
+     * with flexible type conversion.
      *
      * @return message alert listener.
      */
@@ -304,8 +304,8 @@ public class RabbitConfig {
     }
 
     /**
-     * Message listener adapter that delegates the handling of usage messages to target listener methods via
-     * reflection, with flexible type conversion.
+     * Message listener adapter that delegates the handling of usage messages to target listener methods via reflection,
+     * with flexible type conversion.
      *
      * @return message usage listener.
      */
@@ -315,8 +315,7 @@ public class RabbitConfig {
     }
 
     /**
-     * Add message listerner to message listener container with specified queue to listen/consume action event
-     * message.
+     * Add message listerner to message listener container with specified queue to listen/consume action event message.
      *
      * @param queue queue for action event.
      * @return message listener container for action event messages.
@@ -331,8 +330,7 @@ public class RabbitConfig {
     }
 
     /**
-     * Add message listerner to message listener container with specified queue to listen/consume alert
-     * message.
+     * Add message listerner to message listener container with specified queue to listen/consume alert message.
      *
      * @param queue3 queue for alert event.
      * @return message listener container for alert message.
@@ -347,8 +345,7 @@ public class RabbitConfig {
     }
 
     /**
-     * Add message listerner to message listener container with specified queue to listen/consume usage
-     * message.
+     * Add message listerner to message listener container with specified queue to listen/consume usage message.
      *
      * @param queue2 queue for usage event.
      * @return message listener container for usage message.
@@ -363,8 +360,8 @@ public class RabbitConfig {
     }
 
     /**
-     * Add message listerner to message listener container with specified queue to listen/consume asynchronous
-     * job message.
+     * Add message listerner to message listener container with specified queue to listen/consume asynchronous job
+     * message.
      *
      * @param queue1 queue for asynchronous event.
      * @return message listener container for asynchronous message.
@@ -379,8 +376,8 @@ public class RabbitConfig {
     }
 
     /**
-     * Add message listerner to message listener container with specified queue to listen/consume resource's
-     * state message.
+     * Add message listerner to message listener container with specified queue to listen/consume resource's state
+     * message.
      *
      * @param queue4 queue for asynchronous event.
      * @return message listener container for resource's state message.

@@ -1,19 +1,16 @@
 package ck.panda.service;
 
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
- * Service class for Virtual Machine. This service provides basic CRUD and essential api's for Virtual Machine
- * related business actions.
+ * Service class for Virtual Machine. This service provides basic CRUD and essential api's for Virtual Machine related
+ * business actions.
  */
 @Service
 public interface VirtualMachineService extends CRUDService<VmInstance> {
@@ -29,11 +26,10 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
     /**
      * Find vm instance by id.
      *
-     * @param uuid instance id.
+     * @param id instance id.
      * @return instance.
      */
     VmInstance findById(Long id);
-
 
     /**
      * VM related events are handled.
@@ -75,18 +71,18 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
     /**
      * Find all the instance based on the given status for paginated list.
      *
-     * @param pagingAndSorting
-     * @param status
-     * @return
-     * @throws Exception
+     * @param pagingAndSorting page request.
+     * @param status status of vm.
+     * @return instances.
+     * @throws Exception unhandled errors.
      */
     Page<VmInstance> findAllByStatus(PagingAndSorting pagingAndSorting, String status) throws Exception;
 
     /**
      * Get the count of the instance based on the status.
      *
-     * @param status
-     * @return
+     * @param status status of vm.
+     * @return count.
      */
     Integer findCountByStatus(Status status);
 
@@ -102,8 +98,9 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
     /**
      * Find vm Instance associated with department.
      *
-     * @param deaprtmentId of the department.
+     * @param departmentId of the department.
      * @return department
+     * @param status status of vm.
      * @throws Exception unhandled errors.
      */
     List<VmInstance> findByDepartmentAndVmStatus(Long departmentId, Status status) throws Exception;
@@ -122,23 +119,24 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * Find vm Instance associated with department.
      *
      * @param departmentId of the department.
-     * @param status status of instance
+     * @param statusCode status of instance
      * @return department
      * @throws Exception unhandled errors.
      */
-    List<VmInstance> findByDepartmentAndStatus(Long departmentId,List<Status> statusCode)throws Exception;
+    List<VmInstance> findByDepartmentAndStatus(Long departmentId, List<Status> statusCode) throws Exception;
 
     /**
      * Find vm Instance assocaited with compute offering.
      *
      * @param computeOfferingId of the compute offer
      * @return compute offering
+     * @param status status of vm.
      * @throws Exception error occurs.
      */
     List<VmInstance> findByComputeOfferingIdAndVmStatus(Long computeOfferingId, Status status) throws Exception;
 
     /**
-     *  Find vm Instance associated with network.
+     * Find vm Instance associated with network.
      *
      * @param networkId of the instance.
      * @param status of instance

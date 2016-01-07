@@ -32,8 +32,8 @@ import ck.panda.util.web.CRUDController;
 @RestController
 @RequestMapping("/api/resourceDepartments")
 @Api(value = "ResourceLimitDepartment", description = "Operations with resource limits", produces = "application/json")
-public class ResourceLimitDepartmentController extends CRUDController<ResourceLimitDepartment> implements ApiController {
-
+public class ResourceLimitDepartmentController extends CRUDController<ResourceLimitDepartment>
+        implements ApiController {
 
     /** Service reference to resource. */
     @Autowired
@@ -53,11 +53,12 @@ public class ResourceLimitDepartmentController extends CRUDController<ResourceLi
      * @return resource limit
      * @throws Exception error
      */
-    @RequestMapping(value = "/create", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE }, consumes = {
-            MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/create", method = RequestMethod.POST, produces = {
+            MediaType.APPLICATION_JSON_VALUE }, consumes = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public List<ResourceLimitDepartment> createResourceLimits(@RequestBody List<ResourceLimitDepartment> resourceLimits) throws Exception {
+    public List<ResourceLimitDepartment> createResourceLimits(@RequestBody List<ResourceLimitDepartment> resourceLimits)
+            throws Exception {
         return resourceLimitService.createResourceLimits(resourceLimits);
     }
 
@@ -111,10 +112,12 @@ public class ResourceLimitDepartmentController extends CRUDController<ResourceLi
      * @return resource service.
      * @throws Exception error occurs.
      */
-    @RequestMapping(value = "department/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "department/{id}", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected List<ResourceLimitDepartment> getResourceLimitByDepartment(@PathVariable(PATH_ID) Long departmentId) throws Exception {
+    protected List<ResourceLimitDepartment> getResourceLimitByDepartment(@PathVariable(PATH_ID) Long departmentId)
+            throws Exception {
         return resourceLimitService.findAllByDepartmentIdAndIsActive(departmentId, true);
     }
 

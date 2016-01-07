@@ -22,6 +22,7 @@ import ck.panda.util.CloudStackIsoService;
 import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.ConfigUtil;
+import ck.panda.util.EncryptionUtil;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
@@ -392,10 +393,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         switch (event) {
         case EventTypes.EVENT_VM_START:
             try {
-                if(!vmInstance.getHostUuid().isEmpty()){
-                optional.put("hostid", vmInstance.getHostUuid());
+                if (!vmInstance.getHostUuid().isEmpty()) {
+                    optional.put("hostid", vmInstance.getHostUuid());
                 }
-                String instanceResponse = cloudStackInstanceService.startVirtualMachine(vminstance.getUuid(), "json", optional);
+                String instanceResponse = cloudStackInstanceService.startVirtualMachine(vminstance.getUuid(), "json",
+                        optional);
                 JSONObject instance = new JSONObject(instanceResponse).getJSONObject("startvirtualmachineresponse");
                 if (instance.has("jobid")) {
                     String instances = cloudStackInstanceService.queryAsyncJobResult(instance.getString("jobid"),
@@ -876,8 +878,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-            if (vminstance.getDisplayName() != null
-                    && !vminstance.getDisplayName().trim().equalsIgnoreCase("")) {
+            if (vminstance.getDisplayName() != null && !vminstance.getDisplayName().trim().equalsIgnoreCase("")) {
                 HashMap<String, String> optional = new HashMap<String, String>();
                 optional.put("displayName", vminstance.getDisplayName());
                 cloudStackInstanceService.updateVirtualMachine(vminstance.getUuid(), optional);
@@ -925,7 +926,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     tempCount = updateResourceCount(vm, "9");
                     memory = tempTotalCapacity - tempCapacityUsed;
                     if (convertEntityService.getComputeOfferById(vm.getComputeOfferingId()).getCustomized()) {
-                        if (memory < Long.valueOf(vm.getMemory())){
+                        if (memory < Long.valueOf(vm.getMemory())) {
                             errMessage = "There’s no memory available in the memory pool. Please contact the Cloud Admin";
                         }
                     } else {
@@ -939,7 +940,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     tempCount = updateResourceCount(vm, "8");
                     cpu = tempTotalCapacity - tempCapacityUsed;
                     if (convertEntityService.getComputeOfferById(vm.getComputeOfferingId()).getCustomized()) {
-                        if (Long.valueOf(vm.getCpuSpeed()) > cpu){
+                        if (Long.valueOf(vm.getCpuSpeed()) > cpu) {
                             errMessage = "There’s no CPU available in the CPU pool. Please contact the Cloud Admin";
                         }
                     } else {

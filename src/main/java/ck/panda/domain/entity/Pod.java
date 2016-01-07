@@ -10,7 +10,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.hibernate.annotations.Type;
@@ -23,19 +22,16 @@ import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonUtil;
 
 /**
- * A pod is the third-largest organizational unit within a CloudStack deployment. Pods are contained within zones.
- *  Each zone can contain one or more pods. A pod consists of one or more clusters of hosts and one or more primary storage
- *  servers.
- *
- *  Pods are not visible to the end user.
- *
+ * A pod is the third-largest organizational unit within a CloudStack deployment. Pods are contained within zones. Each
+ * zone can contain one or more pods. A pod consists of one or more clusters of hosts and one or more primary storage
+ * servers. *
+ * Pods are not visible to the end user. *
  */
-
 @Entity
-@Table(name = "ck_pod")
+@Table(name = "pods")
 public class Pod {
 
-     /** Unique Id of the pod. */
+    /** Unique Id of the pod. */
     @Id
     @GeneratedValue
     @Column(name = "id")
@@ -66,7 +62,7 @@ public class Pod {
     @Column(name = "zone_id")
     private Long zoneId;
 
-    /** Transient zone of the pod.*/
+    /** Transient zone of the pod. */
     @Transient
     private String transZoneId;
 
@@ -103,15 +99,15 @@ public class Pod {
     private Boolean isActive;
 
     /**
-     * Enum type for  pod Status.
+     * Enum type for pod Status.
      *
      */
     public enum Status {
 
-        /**  Pod will be in a Enabled State. */
+        /** Pod will be in a Enabled State. */
         ENABLED,
 
-        /**  Pod will be in a Disabled State. */
+        /** Pod will be in a Disabled State. */
         DISABLED,
     }
 
@@ -141,7 +137,7 @@ public class Pod {
     /**
      * Set the uuid.
      *
-     * @param uuid  to set
+     * @param uuid to set
      */
     public void setUuid(String uuid) {
         this.uuid = uuid;
@@ -195,7 +191,7 @@ public class Pod {
     /**
      * Set the netmask.
      *
-     * @param netmask  to set
+     * @param netmask to set
      */
     public void setNetmask(String netmask) {
         this.netmask = netmask;
@@ -231,7 +227,7 @@ public class Pod {
     /**
      * Set the zoneId.
      *
-     * @param zoneId  to set
+     * @param zoneId to set
      */
     public void setZoneId(Long zoneId) {
         this.zoneId = zoneId;
@@ -249,7 +245,7 @@ public class Pod {
     /**
      * Set the createdBy.
      *
-     * @param createdBy  to set
+     * @param createdBy to set
      */
     public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
@@ -267,7 +263,7 @@ public class Pod {
     /**
      * Set the updatedBy.
      *
-     * @param updatedBy  to set
+     * @param updatedBy to set
      */
     public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
@@ -285,7 +281,7 @@ public class Pod {
     /**
      * Set the createdDateTime.
      *
-     * @param createdDateTime  to set
+     * @param createdDateTime to set
      */
     public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
@@ -309,11 +305,11 @@ public class Pod {
         this.updatedDateTime = updatedDateTime;
     }
 
-     /**
-      * Get the transient zone id.
-      *
-      * @return the transZoneId
-      */
+    /**
+     * Get the transient zone id.
+     *
+     * @return the transZoneId
+     */
     public String getTransZoneId() {
         return transZoneId;
     }
@@ -337,7 +333,7 @@ public class Pod {
     }
 
     /**
-     *  Set the status.
+     * Set the status.
      *
      * @param status the status to set
      */
@@ -382,7 +378,7 @@ public class Pod {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-      return pod;
+        return pod;
     }
 
     /**
@@ -401,5 +397,3 @@ public class Pod {
         return podMap;
     }
 }
-
-

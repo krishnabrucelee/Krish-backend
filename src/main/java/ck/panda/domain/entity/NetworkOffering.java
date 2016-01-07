@@ -10,8 +10,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.joda.time.DateTime;
 import org.json.JSONException;
@@ -25,12 +23,11 @@ import org.springframework.data.annotation.Version;
 import ck.panda.util.JsonValidator;
 
 /**
- * The CloudStack administrator can create any number of custom network
- * offerings, in addition to the default network offerings provided by
- * CloudStack.
+ * The CloudStack administrator can create any number of custom network offerings, in addition to the default network
+ * offerings provided by CloudStack.
  */
 @Entity
-@Table(name = "ck_network_offering")
+@Table(name = "network_offerings")
 @SuppressWarnings("serial")
 public class NetworkOffering implements Serializable {
 
@@ -202,8 +199,7 @@ public class NetworkOffering implements Serializable {
     /**
      * Set the NetworkOffer Id.
      *
-     * @param id
-     * the id to set
+     * @param id the id to set
      */
     public void setId(Long id) {
         this.id = id;
@@ -212,8 +208,7 @@ public class NetworkOffering implements Serializable {
     /**
      * Set the NetworkOffer uuid.
      *
-     * @param uuid
-     * the uuid to set
+     * @param uuid the uuid to set
      */
     public void setUuid(String uuid) {
         this.uuid = uuid;
@@ -222,8 +217,7 @@ public class NetworkOffering implements Serializable {
     /**
      * Set the NetworkOffer Name.
      *
-     * @param name
-     * the name to set
+     * @param name the name to set
      */
     public void setName(String name) {
         this.name = name;
@@ -232,8 +226,7 @@ public class NetworkOffering implements Serializable {
     /**
      * Set the NetworkOffer description.
      *
-     * @param displayText
-     * the displayText to set
+     * @param displayText the displayText to set
      */
     public void setDisplayText(String displayText) {
         this.displayText = displayText;
@@ -251,8 +244,7 @@ public class NetworkOffering implements Serializable {
     /**
      * Set the NetworkOffer guestIpType.
      *
-     * @param guestIpType
-     *  the guestIpType to set
+     * @param guestIpType the guestIpType to set
      */
     public void setGuestIpType(String guestIpType) {
         this.guestIpType = guestIpType;
@@ -261,8 +253,7 @@ public class NetworkOffering implements Serializable {
     /**
      * Set the NetworkOffer State.
      *
-     * @param isActive
-     * the isActive to set
+     * @param isActive the isActive to set
      */
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
@@ -271,8 +262,7 @@ public class NetworkOffering implements Serializable {
     /**
      * Set the NetworkOffer Version.
      *
-     * @param version
-     * the version to set
+     * @param version the version to set
      */
     public void setVersion(Long version) {
         this.version = version;
@@ -290,8 +280,7 @@ public class NetworkOffering implements Serializable {
     /**
      * Set the NetworkOffer status.
      *
-     * @param status
-     * the status to set
+     * @param status the status to set
      */
     public void setStatus(Status status) {
         this.status = status;
@@ -300,8 +289,7 @@ public class NetworkOffering implements Serializable {
     /**
      * Set the user who creates NetworkOffer.
      *
-     * @param createdBy
-     * the createdBy to set
+     * @param createdBy the createdBy to set
      */
     public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
@@ -310,8 +298,7 @@ public class NetworkOffering implements Serializable {
     /**
      * Set the offer updated user.
      *
-     * @param updatedBy
-     * the updatedBy to set
+     * @param updatedBy the updatedBy to set
      */
     public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
@@ -320,8 +307,7 @@ public class NetworkOffering implements Serializable {
     /**
      * Set Network offer created date.
      *
-     * @param createdDateTime
-     * the createdDateTime to set
+     * @param createdDateTime the createdDateTime to set
      */
     public void setCreatedDateTime(DateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
@@ -330,8 +316,7 @@ public class NetworkOffering implements Serializable {
     /**
      * Set Network offer updated time.
      *
-     * @param updatedDateTime
-     * the updatedDateTime to set
+     * @param updatedDateTime the updatedDateTime to set
      */
     public void setUpdatedDateTime(DateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
@@ -349,11 +334,10 @@ public class NetworkOffering implements Serializable {
     /**
      * Set the Network Offer Traffic type.
      *
-     * @param trafficType
-     * the trafficType to set
+     * @param trafficType the trafficType to set
      */
     public void setTrafficType(String trafficType) {
-      this.trafficType = trafficType;
+        this.trafficType = trafficType;
     }
 
     /**
@@ -368,8 +352,7 @@ public class NetworkOffering implements Serializable {
     /**
      * Set the Network Offer availability.
      *
-     * @param availability
-     * the availability to set
+     * @param availability the availability to set
      */
     public void setAvailability(String availability) {
         this.availability = availability;
@@ -385,12 +368,12 @@ public class NetworkOffering implements Serializable {
     public static NetworkOffering convert(JSONObject object) throws JSONException {
         NetworkOffering networkOffering = new NetworkOffering();
         try {
-            networkOffering.uuid =  JsonValidator.jsonStringValidation(object, "id");
+            networkOffering.uuid = JsonValidator.jsonStringValidation(object, "id");
             networkOffering.name = JsonValidator.jsonStringValidation(object, "name");
             networkOffering.trafficType = JsonValidator.jsonStringValidation(object, "traffictype");
             networkOffering.guestIpType = JsonValidator.jsonStringValidation(object, "guestiptype");
             networkOffering.displayText = JsonValidator.jsonStringValidation(object, "displaytext");
-            networkOffering.availability= JsonValidator.jsonStringValidation(object, "availability");
+            networkOffering.availability = JsonValidator.jsonStringValidation(object, "availability");
             networkOffering.setIsActive(true);
         } catch (Exception e) {
             e.printStackTrace();

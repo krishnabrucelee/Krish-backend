@@ -10,8 +10,7 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 /**
  * Service class for Application.
  *
- * This service provides basic CRUD and essential api's for Application related
- * business actions.
+ * This service provides basic CRUD and essential api's for Application related business actions.
  */
 @Service
 public interface ApplicationService extends CRUDService<Application> {
@@ -35,12 +34,12 @@ public interface ApplicationService extends CRUDService<Application> {
     Page<Application> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
 
     /**
-    * Find all the applications with active status.
-    *
-    * @param isActive application status Active/Inactive
-    * @return list of applications with active status
-    * @throws Exception error occurs.
-    */
-   List<Application> findAllByIsActive(Boolean isActive) throws Exception;
+     * Find all the applications with active status.
+     *
+     * @param isActive application status Active/Inactive
+     * @return list of applications with active status
+     * @throws Exception error occurs.
+     */
+    List<Application> findAllByIsActive(Boolean isActive) throws Exception;
 
 }

@@ -16,6 +16,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
 
     /**
      * Find user by active and query.
+     *
      * @param query for user name
      * @return user list
      */
@@ -50,17 +51,20 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @return user details
      */
     @Query(value = "select user from User user where user.userName = :userName AND user.domain=:domain AND user.isActive =:isActive")
-    User findByUser(@Param("userName") String userName, @Param("domain") Domain domain, @Param("isActive") Boolean isActive);
+    User findByUser(@Param("userName") String userName, @Param("domain") Domain domain,
+            @Param("isActive") Boolean isActive);
 
     /**
      * find all the user by domain.
      *
      * @param pageable pagination information.
      * @param domain domain object.
+     * @param isActive true/false
      * @return list of user.
      */
     @Query(value = "select user from User user where user.domain =:domain AND user.isActive =:isActive")
-    Page<User> findAllUserByDomain(Pageable pageable, @Param("domain") Domain domain, @Param("isActive") Boolean isActive);
+    Page<User> findAllUserByDomain(Pageable pageable, @Param("domain") Domain domain,
+            @Param("isActive") Boolean isActive);
 
     /**
      * find all the user by domain.
@@ -84,7 +88,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     /**
      * find all the root admin.
      *
-     * @param domain domain object.
+     * @param type user type.
      * @return list of user.
      */
     @Query(value = "select user from User user where user.type =:type ")
@@ -99,7 +103,6 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      */
     @Query(value = "select user from User user where user.isActive =:isActive AND user.type in (:types)")
     List<User> findUsersByTypesAndActive(@Param("types") List<UserType> types, @Param("isActive") Boolean isActive);
-
 
     /**
      * Find the user by given uuid and the status.
@@ -120,6 +123,5 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      */
     @Query(value = "select user from User user where user.roleId =:roleId AND user.isActive =:isActive")
     List<User> findByRole(@Param("roleId") Long roleId, @Param("isActive") Boolean isActive);
-
 
 }

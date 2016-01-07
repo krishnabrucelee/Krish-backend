@@ -7,8 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * CloudStack resource capacity service for cloudStack connectivity with the
- * Cloud Stack server.
+ * CloudStack resource capacity service for cloudStack connectivity with the Cloud Stack server.
  *
  */
 @Service

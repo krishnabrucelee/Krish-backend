@@ -8,9 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.hibernate.annotations.Type;
@@ -27,7 +25,7 @@ import org.springframework.format.annotation.DateTimeFormat;
  * Permissions is the authorization to allow the users for specific actions.
  */
 @Entity
-@Table(name = "ck_permission")
+@Table(name = "permissions")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class Permission implements Serializable {
@@ -110,7 +108,7 @@ public class Permission implements Serializable {
      * @return the id
      */
     public Long getId() {
-       return id;
+        return id;
     }
 
     /**
@@ -119,7 +117,7 @@ public class Permission implements Serializable {
      * @param id the id to set
      */
     public void setId(Long id) {
-       this.id = id;
+        this.id = id;
     }
 
     /**
@@ -128,7 +126,7 @@ public class Permission implements Serializable {
      * @return the action
      */
     public String getAction() {
-       return action;
+        return action;
     }
 
     /**
@@ -137,7 +135,7 @@ public class Permission implements Serializable {
      * @param action action to set
      */
     public void setAction(String action) {
-       this.action = action;
+        this.action = action;
     }
 
     /**
@@ -150,7 +148,7 @@ public class Permission implements Serializable {
     }
 
     /**
-     * Set  the actionKey of the permission.
+     * Set the actionKey of the permission.
      *
      * @param actionKey the actionKey to set
      */
@@ -173,7 +171,7 @@ public class Permission implements Serializable {
      * @param description the description to set
      */
     public void setDescription(String description) {
-       this.description = description;
+        this.description = description;
     }
 
     /**
@@ -182,7 +180,7 @@ public class Permission implements Serializable {
      * @return the module
      */
     public Module getModule() {
-       return module;
+        return module;
     }
 
     /**
@@ -191,7 +189,7 @@ public class Permission implements Serializable {
      * @param module the module to set
      */
     public void setModule(Module module) {
-       this.module = module;
+        this.module = module;
     }
 
     /**
@@ -200,7 +198,7 @@ public class Permission implements Serializable {
      * @return the roleList
      */
     public List<Role> getRoleList() {
-       return roleList;
+        return roleList;
     }
 
     /**
@@ -209,7 +207,7 @@ public class Permission implements Serializable {
      * @param roleList the roleList to set
      */
     public void setRoleList(List<Role> roleList) {
-       this.roleList = roleList;
+        this.roleList = roleList;
     }
 
     /**
@@ -218,7 +216,7 @@ public class Permission implements Serializable {
      * @return the isActive
      */
     public Boolean getIsActive() {
-       return isActive;
+        return isActive;
     }
 
     /**
@@ -227,7 +225,7 @@ public class Permission implements Serializable {
      * @param isActive the isActive to set
      */
     public void setIsActive(Boolean isActive) {
-       this.isActive = isActive;
+        this.isActive = isActive;
     }
 
     /**
@@ -236,7 +234,7 @@ public class Permission implements Serializable {
      * @return the status
      */
     public Status getStatus() {
-       return status;
+        return status;
     }
 
     /**
@@ -245,7 +243,7 @@ public class Permission implements Serializable {
      * @param status the status to set
      */
     public void setStatus(Status status) {
-       this.status = status;
+        this.status = status;
     }
 
     /**
@@ -254,7 +252,7 @@ public class Permission implements Serializable {
      * @return the version
      */
     public Long getVersion() {
-       return version;
+        return version;
     }
 
     /**
@@ -263,7 +261,7 @@ public class Permission implements Serializable {
      * @param version the version to set
      */
     public void setVersion(Long version) {
-       this.version = version;
+        this.version = version;
     }
 
     /**
@@ -272,7 +270,7 @@ public class Permission implements Serializable {
      * @return the createdBy
      */
     public Long getCreatedBy() {
-       return createdBy;
+        return createdBy;
     }
 
     /**
@@ -281,7 +279,7 @@ public class Permission implements Serializable {
      * @param createdBy the createdBy to set
      */
     public void setCreatedBy(Long createdBy) {
-       this.createdBy = createdBy;
+        this.createdBy = createdBy;
     }
 
     /**
@@ -290,7 +288,7 @@ public class Permission implements Serializable {
      * @return the updatedBy
      */
     public Long getUpdatedBy() {
-       return updatedBy;
+        return updatedBy;
     }
 
     /**
@@ -299,7 +297,7 @@ public class Permission implements Serializable {
      * @param updatedBy the updatedBy to set
      */
     public void setUpdatedBy(Long updatedBy) {
-       this.updatedBy = updatedBy;
+        this.updatedBy = updatedBy;
     }
 
     /**
@@ -308,7 +306,7 @@ public class Permission implements Serializable {
      * @return the createdDateTime
      */
     public ZonedDateTime getCreatedDateTime() {
-       return createdDateTime;
+        return createdDateTime;
     }
 
     /**
@@ -317,7 +315,7 @@ public class Permission implements Serializable {
      * @param createdDateTime the createdDateTime to set
      */
     public void setCreatedDateTime(ZonedDateTime createdDateTime) {
-       this.createdDateTime = createdDateTime;
+        this.createdDateTime = createdDateTime;
     }
 
     /**
@@ -326,7 +324,7 @@ public class Permission implements Serializable {
      * @return the updatedDateTime
      */
     public ZonedDateTime getUpdatedDateTime() {
-       return updatedDateTime;
+        return updatedDateTime;
     }
 
     /**
@@ -335,7 +333,7 @@ public class Permission implements Serializable {
      * @param updatedDateTime the updatedDateTime to set
      */
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
-       this.updatedDateTime = updatedDateTime;
+        this.updatedDateTime = updatedDateTime;
     }
 
     /**
@@ -343,34 +341,34 @@ public class Permission implements Serializable {
      */
     public enum Module {
 
-    /** Instance module constant. */
-    INSTANCE,
-    /** Storage module constant. */
-    STORAGE,
-    /** Network module constant. */
-    NETWORK,
-    /** SSH keys module constant. */
-    SSH_KEYS,
-    /** Quota limit module constant. */
-    QUOTA_LIMIT,
-    /** VPC module constant. */
-    VPC,
-    /** Template module constant. */
-    TEMPLATES,
-    /** Additional Services module constant. */
-    ADDITIONAL_SERVICE,
-    /** Project module constant. */
-    PROJECTS,
-    /** Application module constant. */
-    APPLICATION,
-    /** Department module constant. */
-    DEPARTMENT,
-    /** Roles module constant. */
-    ROLES,
-    /** User module constant. */
-    USER,
-    /** Report module constant. */
-    REPORT;
+        /** Instance module constant. */
+        INSTANCE,
+        /** Storage module constant. */
+        STORAGE,
+        /** Network module constant. */
+        NETWORK,
+        /** SSH keys module constant. */
+        SSH_KEYS,
+        /** Quota limit module constant. */
+        QUOTA_LIMIT,
+        /** VPC module constant. */
+        VPC,
+        /** Template module constant. */
+        TEMPLATES,
+        /** Additional Services module constant. */
+        ADDITIONAL_SERVICE,
+        /** Project module constant. */
+        PROJECTS,
+        /** Application module constant. */
+        APPLICATION,
+        /** Department module constant. */
+        DEPARTMENT,
+        /** Roles module constant. */
+        ROLES,
+        /** User module constant. */
+        USER,
+        /** Report module constant. */
+        REPORT;
     }
 
     /**
@@ -389,45 +387,4 @@ public class Permission implements Serializable {
         return ToStringBuilder.reflectionToString(this);
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((action == null) ? 0 : action.hashCode());
-        result = prime * result + ((description == null) ? 0 : description.hashCode());
-        result = prime * result + ((module == null) ? 0 : module.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-           return true;
-        }
-        if (obj == null) {
-           return false;
-        }
-        if (!(obj instanceof Permission)) {
-            return false;
-        }
-        Permission other = (Permission) obj;
-        if (action == null) {
-            if (other.action != null) {
-                return false;
-            }
-        } else if (!action.equals(other.action)) {
-            return false;
-        }
-        if (description == null) {
-            if (other.description != null) {
-               return false;
-            }
-        } else if (!description.equals(other.description)) {
-            return false;
-        }
-        if (module != other.module) {
-            return false;
-        }
-        return true;
-    }
 }

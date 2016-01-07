@@ -75,12 +75,12 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
 
     @Override
     public CloudStackConfiguration find(Long id) throws Exception {
-    	CloudStackConfiguration config = configRepo.findOne(id);
-          if (config == null) {
-              throw new EntityNotFoundException("config.not.found");
-          }
-          return config;
-        
+        CloudStackConfiguration config = configRepo.findOne(id);
+        if (config == null) {
+            throw new EntityNotFoundException("config.not.found");
+        }
+        return config;
+
     }
 
     @Override
@@ -93,4 +93,4 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
         return (List<CloudStackConfiguration>) configRepo.findAll();
     }
 
-   }
+}

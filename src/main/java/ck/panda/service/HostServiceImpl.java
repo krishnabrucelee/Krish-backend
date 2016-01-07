@@ -22,58 +22,58 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 @Service
 public class HostServiceImpl implements HostService {
 
-  /** Logger attribute. */
-  private static final Logger LOGGER = LoggerFactory.getLogger(DomainServiceImpl.class);
+    /** Logger attribute. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(DomainServiceImpl.class);
 
-  /** Host repository reference. */
-  @Autowired
-  private HostRepository hostRepo;
+    /** Host repository reference. */
+    @Autowired
+    private HostRepository hostRepo;
 
-  /** Reference of the convert entity service. */
-  @Autowired
-  private ConvertEntityService convertEntityService;
+    /** Reference of the convert entity service. */
+    @Autowired
+    private ConvertEntityService convertEntityService;
 
-  /** CloudStack Host service for getting host connectivity with cloudstack. */
-  @Autowired
-  private CloudStackHostService hostService;
+    /** CloudStack Host service for getting host connectivity with cloudstack. */
+    @Autowired
+    private CloudStackHostService hostService;
 
-  @Override
-  public Host save(Host host) throws Exception {
-      LOGGER.debug(host.getUuid());
-    return hostRepo.save(host);
-  }
+    @Override
+    public Host save(Host host) throws Exception {
+        LOGGER.debug(host.getUuid());
+        return hostRepo.save(host);
+    }
 
-  @Override
-  public Host update(Host host) throws Exception {
-      LOGGER.debug(host.getUuid());
-    return hostRepo.save(host);
-  }
+    @Override
+    public Host update(Host host) throws Exception {
+        LOGGER.debug(host.getUuid());
+        return hostRepo.save(host);
+    }
 
-  @Override
-  public void delete(Host host) throws Exception {
-      hostRepo.delete(host);
-  }
+    @Override
+    public void delete(Host host) throws Exception {
+        hostRepo.delete(host);
+    }
 
-  @Override
-  public void delete(Long id) throws Exception {
-      hostRepo.delete(id);
-  }
+    @Override
+    public void delete(Long id) throws Exception {
+        hostRepo.delete(id);
+    }
 
-  @Override
-  public Host find(Long id) throws Exception {
-      Host host = hostRepo.findOne(id);
-      return host;
-  }
+    @Override
+    public Host find(Long id) throws Exception {
+        Host host = hostRepo.findOne(id);
+        return host;
+    }
 
-  @Override
-  public Page<Host> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-      return hostRepo.findAll(pagingAndSorting.toPageRequest());
-  }
+    @Override
+    public Page<Host> findAll(PagingAndSorting pagingAndSorting) throws Exception {
+        return hostRepo.findAll(pagingAndSorting.toPageRequest());
+    }
 
-  @Override
-  public List<Host> findAll() throws Exception {
-      return (List<Host>) hostRepo.findAll();
-  }
+    @Override
+    public List<Host> findAll() throws Exception {
+        return (List<Host>) hostRepo.findAll();
+    }
 
     @Override
     public List<Host> findAllFromCSServer() throws Exception {
@@ -107,8 +107,8 @@ public class HostServiceImpl implements HostService {
 
     @Override
     public Host softDelete(Host host) throws Exception {
-            host.setIsActive(false);
-            host.setStatus(Host.Status.DISCONNECTED);
-            return hostRepo.save(host);
+        host.setIsActive(false);
+        host.setStatus(Host.Status.DISCONNECTED);
+        return hostRepo.save(host);
     }
-  }
+}

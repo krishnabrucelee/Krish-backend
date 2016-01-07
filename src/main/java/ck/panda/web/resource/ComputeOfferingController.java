@@ -49,13 +49,14 @@ public class ComputeOfferingController extends CRUDController<ComputeOffering> i
     @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing ComputeOffering.", response = ComputeOffering.class)
     @Override
     public ComputeOffering read(@PathVariable(PATH_ID) Long id) throws Exception {
-        System.out.println(id+"======================================");
+        System.out.println(id + "======================================");
         return computeService.find(id);
     }
 
     @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing ComputeOffering.", response = ComputeOffering.class)
     @Override
-    public ComputeOffering update(@RequestBody ComputeOffering compute, @PathVariable(PATH_ID) Long id) throws Exception {
+    public ComputeOffering update(@RequestBody ComputeOffering compute, @PathVariable(PATH_ID) Long id)
+            throws Exception {
         compute.setIsSyncFlag(true);
         return computeService.update(compute);
     }
@@ -68,26 +69,28 @@ public class ComputeOfferingController extends CRUDController<ComputeOffering> i
      * @throws Exception error occurs.
      */
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing compute Offering.")
-    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDelete(@RequestBody ComputeOffering compute, @PathVariable(PATH_ID) Long id) throws Exception {
         /** Doing Soft delete from the compute offering table. */
-         compute = computeService.find(id);
-         compute.setIsSyncFlag(true);
-         computeService.softDelete(compute);
+        compute = computeService.find(id);
+        compute.setIsSyncFlag(true);
+        computeService.softDelete(compute);
     }
 
     /**
      * list all compute offing and offer Id for instance.
+     *
      * @return compute offing.
-     * @throws Exception
+     * @throws Exception unhandled errors.
      */
-      @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-      @ResponseStatus(HttpStatus.OK)
-      @ResponseBody
-      protected List<ComputeOffering> getSearch() throws Exception {
-          return computeService.findByIsActive(true);
-      }
+    @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<ComputeOffering> getSearch() throws Exception {
+        return computeService.findByIsActive(true);
+    }
 
     @Override
     public List<ComputeOffering> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,

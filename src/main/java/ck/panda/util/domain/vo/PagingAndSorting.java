@@ -42,15 +42,17 @@ public class PagingAndSorting {
         this.sortDirection = SortingUtil.checkSortStyle(clazz, sortBy).toString();
         parsedRange = new Range(range.replaceAll(GenericConstants.RANGE_PREFIX, ""), limit);
         System.out.println(range);
-        /*this.pageNumber = parsedRange.getPageNumber();
-        this.pageSize = parsedRange.getMaxResults();*/
-        
+        /*
+         * this.pageNumber = parsedRange.getPageNumber(); this.pageSize = parsedRange.getMaxResults();
+         */
+
         this.pageNumber = parsedRange.getPageNumber();
         this.pageSize = parsedRange.getMaxResults();
     }
 
     /**
      * Get the pageNumber.
+     * 
      * @return pageNumber
      */
     public Integer getPageNumber() {
@@ -59,24 +61,25 @@ public class PagingAndSorting {
 
     /**
      * Get the pageSize.
+     * 
      * @return pageSize
      */
     public Integer getPageSize() {
         return pageSize;
     }
 
-
     /**
      * Get the sortField.
+     * 
      * @return sortField
      */
     public String getSortField() {
         return sortField;
     }
 
-
     /**
      * Get the sortDirection.
+     * 
      * @return sortDirection
      */
     public String getSortDirection() {
@@ -85,6 +88,7 @@ public class PagingAndSorting {
 
     /**
      * Converts to Spring PageRequest object.
+     * 
      * @return PageRequest
      */
     public PageRequest toPageRequest() {
@@ -104,6 +108,6 @@ public class PagingAndSorting {
      * @return header value
      */
     public String getPageHeaderValue(Page<? extends Object> page) {
-       return parsedRange.getContentRangeValue(page.getNumberOfElements(), Long.valueOf(page.getTotalElements()));
+        return parsedRange.getContentRangeValue(page.getNumberOfElements(), Long.valueOf(page.getTotalElements()));
     }
 }

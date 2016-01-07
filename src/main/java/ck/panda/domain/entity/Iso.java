@@ -10,7 +10,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.hibernate.annotations.Type;
@@ -31,7 +30,7 @@ import ck.panda.util.JsonUtil;
  *
  */
 @Entity
-@Table(name = "ck_iso")
+@Table(name = "isos")
 public class Iso {
 
     /** Logger attribute. */
@@ -321,70 +320,69 @@ public class Iso {
     /**
      * Get Transient Domain Id.
      *
-    * @return the transDomainId
-    */
+     * @return the transDomainId
+     */
     public String getTransDomainId() {
         return transDomainId;
     }
 
     /**
-    * Set the transient domain Id.
-    *
-    * @param transDomainId to set
-    */
+     * Set the transient domain Id.
+     *
+     * @param transDomainId to set
+     */
     public void setTransDomainId(String transDomainId) {
         this.transDomainId = transDomainId;
     }
 
-
     /**
-    * Get the TransOs Type Id.
-    *
-    * @return the transOsTypeId
-    */
+     * Get the TransOs Type Id.
+     *
+     * @return the transOsTypeId
+     */
     public String getTransOsTypeId() {
         return transOsTypeId;
     }
 
     /**
-    * Set the transOsTypeId.
-    *
-    * @param transOsTypeId  to set
-    */
+     * Set the transOsTypeId.
+     *
+     * @param transOsTypeId to set
+     */
     public void setTransOsTypeId(String transOsTypeId) {
         this.transOsTypeId = transOsTypeId;
     }
 
     /**
-    * @return the isActive
-    */
+     * @return the isActive
+     */
     public Boolean getIsActive() {
         return isActive;
     }
 
     /**
-    * Set the isActive .
-    *
-    * @param isActive to set
-    */
+     * Set the isActive .
+     *
+     * @param isActive to set
+     */
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
     }
 
     /**
-    * Get is Removed.
-    *
-    * @return the isRemoved
-    */
+     * Get is Removed.
+     *
+     * @return the isRemoved
+     */
     public Boolean getIsRemoved() {
         return isRemoved;
     }
 
     /**
-    * Set the isRemoved.
-    *
-    * @param isRemoved  to set
-    */
+     * Set the isRemoved.
+     *
+     * @param isRemoved to set
+     */
     public void setIsRemoved(Boolean isRemoved) {
         this.isRemoved = isRemoved;
     }
@@ -407,7 +405,7 @@ public class Iso {
         this.isReady = isReady;
     }
 
-     /**
+    /**
      * Get Is Bootable iso.
      *
      * @return iso.
@@ -416,10 +414,10 @@ public class Iso {
         return isBootable;
     }
 
-     /**
+    /**
      * Set Is Bootable iso.
      *
-     * @return bootable iso status.
+     * @param isBootable true/false.
      */
     public void setIsBootable(Boolean isBootable) {
         this.isBootable = isBootable;
@@ -435,7 +433,7 @@ public class Iso {
     }
 
     /**
-     * Set is Public
+     * Set is Public.
      *
      * @param isPublic iso to set.
      */
@@ -459,8 +457,8 @@ public class Iso {
             iso.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
             iso.setTransOsTypeId(JsonUtil.getStringValue(jsonObject, "ostypeid"));
             iso.setIsBootable(JsonUtil.getBooleanValue(jsonObject, "bootable"));
-            iso.setIsPublic(JsonUtil.getBooleanValue(jsonObject,"ispublic"));
-            iso.setIsReady(JsonUtil.getBooleanValue(jsonObject,"isready"));
+            iso.setIsPublic(JsonUtil.getBooleanValue(jsonObject, "ispublic"));
+            iso.setIsReady(JsonUtil.getBooleanValue(jsonObject, "isready"));
             iso.setIsActive(true);
         } catch (Exception ex) {
             LOGGER.error("Iso-convert", ex);
@@ -471,8 +469,7 @@ public class Iso {
     /**
      * Mapping entity object into list.
      *
-     * @param isoList
-     *            list of iso images.
+     * @param isoList list of iso images.
      * @return iso map
      */
     public static Map<String, Iso> convert(List<Iso> isoList) {

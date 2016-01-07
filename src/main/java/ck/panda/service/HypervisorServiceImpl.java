@@ -14,8 +14,7 @@ import ck.panda.util.CloudStackHypervisorsService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
- * Hypervisor service implementation used to get list of hypervisor and save the hypervisor from
- * cloudstack server.
+ * Hypervisor service implementation used to get list of hypervisor and save the hypervisor from cloudstack server.
  *
  */
 @Service
@@ -61,7 +60,7 @@ public class HypervisorServiceImpl implements HypervisorService {
 
     @Override
     public List<Hypervisor> findAll() throws Exception {
-       return (List<Hypervisor>) hypervisorRepo.findAll();
+        return (List<Hypervisor>) hypervisorRepo.findAll();
     }
 
     @Override
@@ -85,10 +84,9 @@ public class HypervisorServiceImpl implements HypervisorService {
         return hypervisorList;
     }
 
-	@Override
-	public Hypervisor findByName(String name) throws Exception {
-		return hypervisorRepo.findByName(name);
-	}
+    @Override
+    public Hypervisor findByName(String name) throws Exception {
+        return hypervisorRepo.findByName(name);
+    }
 
 }
-
