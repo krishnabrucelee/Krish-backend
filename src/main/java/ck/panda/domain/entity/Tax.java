@@ -2,9 +2,6 @@ package ck.panda.domain.entity;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -13,15 +10,9 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import org.hibernate.annotations.Type;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -29,18 +20,15 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
-import ck.panda.util.JsonUtil;
 
 /**
- * Billable Items are the list of billable services.
- * Billable Items may Infrastructure, Managed Service or Optional.
- * Each billable items must have tax.
+ * Tax contains the name for different offerings.
  */
 @Entity
-@Table(name = "billable_item")
+@Table(name = "tax")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
-public class BillableItem implements Serializable {
+public class Tax implements Serializable {
 
     /** Id of the BillableItem. */
     @Id
@@ -48,24 +36,17 @@ public class BillableItem implements Serializable {
     @Column(name = "id")
     private Long id;
 
-    /** Name of the billable item */
+    /** Name of the tax */
     private String name;
 
-    /** Type of the billable items */
-    private BillableType billableType;
 
-    /** Tax for the billable item. */
-    @JoinColumn(name = "tax_id", referencedColumnName = "Id", updatable = false, insertable = false)
-    @ManyToOne
-    private Tax tax;
+    /** Description of the tax */
+    private String description;
 
-    /** Tax id for the billable item. */
-    @Column(name = "tax_id")
-    private Long taxId;
-
-    /** Whether BillableItem is customized or not. */
-    @Column(name = "is_customized")
-    private Boolean isCustomized;
+    /**
+     * The percentage value of the tax.
+     */
+    private Double percentage;
 
     /** Whether BillableItem is in active state or in active state. */
     @Column(name = "is_active")
@@ -108,7 +89,7 @@ public class BillableItem implements Serializable {
     /**
      * Default constructor.
      */
-    public BillableItem() {
+    public Tax() {
         super();
     }
 
@@ -117,7 +98,7 @@ public class BillableItem implements Serializable {
      *
      * @param name to set
      */
-    public BillableItem(String name) {
+    public Tax(String name) {
         super();
     }
 
@@ -139,8 +120,10 @@ public class BillableItem implements Serializable {
         this.id = id;
     }
 
+
+
     /**
-     * Get name of the billable item.
+     * Get the tax name.
      *
      * @return the name
      */
@@ -149,7 +132,7 @@ public class BillableItem implements Serializable {
     }
 
     /**
-     * Set name of the billable item.
+     * Set the tax name.
      *
      * @param name the name to set
      */
@@ -160,77 +143,39 @@ public class BillableItem implements Serializable {
 
 
     /**
-     * Get the billable item type.
+     * Get the description.
      *
-     * @return the billableType
+     * @return the description
      */
-    public BillableType getBillableType() {
-        return billableType;
+    public String getDescription() {
+        return description;
     }
 
     /**
-     * Set the billable item type.
+     * Set the description.
      *
-     * @param billableType the billableType to set
+     * @param description the description to set
      */
-    public void setBillableType(BillableType billableType) {
-        this.billableType = billableType;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     /**
-     * Get tax of the billable item.
+     * Get the tax percentage.
      *
-     * @return the tax
+     * @return the percentage
      */
-    public Tax getTax() {
-        return tax;
+    public Double getPercentage() {
+        return percentage;
     }
 
     /**
-     * Set tax of the billable item.
+     * Set the tax percentage.
      *
-     * @param tax the tax to set
+     * @param percentage the percentage to set
      */
-    public void setTax(Tax tax) {
-        this.tax = tax;
-    }
-
-
-
-    /**
-     * Get the tax id.
-     *
-     * @return the taxId
-     */
-    public Long getTaxId() {
-        return taxId;
-    }
-
-    /**
-     * Set the tax id.
-     *
-     * @param taxId the taxId to set
-     */
-    public void setTaxId(Long taxId) {
-        this.taxId = taxId;
-    }
-
-    /**
-     * Get the billable item customized status either true or false.
-     *
-     * @return the isCustomized
-     */
-    public Boolean getIsCustomized() {
-        return isCustomized;
-    }
-
-    /**
-     * Set the billable state is customized or not.
-     *
-     * @param isCustomized the isCustomized to set
-     */
-    public void setIsCustomized(Boolean isCustomized) {
-        this.isCustomized = isCustomized;
+    public void setPercentage(Double percentage) {
+        this.percentage = percentage;
     }
 
     /**
@@ -252,7 +197,7 @@ public class BillableItem implements Serializable {
     }
 
     /**
-     * Get the created user id.
+     * Get the createdBy.
      *
      * @return createdBy
      */
@@ -261,7 +206,7 @@ public class BillableItem implements Serializable {
     }
 
     /**
-     * Set the created user id.
+     * Set the createdBy.
      *
      * @param createdBy the User to set
      */
@@ -270,7 +215,7 @@ public class BillableItem implements Serializable {
     }
 
     /**
-     * Get the updated user id.
+     * Get the updatedBy.
      *
      * @return updatedBy
      */
@@ -279,7 +224,7 @@ public class BillableItem implements Serializable {
     }
 
     /**
-     * Set the updated user id.
+     * Set the updatedBy.
      *
      * @param updatedBy the User to set
      */
@@ -288,7 +233,7 @@ public class BillableItem implements Serializable {
     }
 
     /**
-     * Get the created date.
+     * Get the createdDateTime.
      *
      * @return createdDateTime
      */
@@ -297,7 +242,7 @@ public class BillableItem implements Serializable {
     }
 
     /**
-     * Set the created date.
+     * Set the createdDateTime.
      *
      * @param createdDateTime the DateTime to set
      */
@@ -306,7 +251,7 @@ public class BillableItem implements Serializable {
     }
 
     /**
-     * Get the updated date.
+     * Get the updatedDateTime.
      *
      * @return updatedDateTime
      */
@@ -315,7 +260,7 @@ public class BillableItem implements Serializable {
     }
 
     /**
-     * Set the updated date.
+     * Set the updatedDateTime.
      *
      * @param updatedDateTime the DateTime to set
      */
@@ -324,7 +269,7 @@ public class BillableItem implements Serializable {
     }
 
     /**
-     * Get is Active state of the Department.
+     * Get is Active state of the Tax.
      *
      * @return the isActive
      */
@@ -333,7 +278,7 @@ public class BillableItem implements Serializable {
     }
 
     /**
-     * Set is Active state of the Department.
+     * Set is Active state of the Tax.
      *
      * @param isActive the isActive to set
      */
@@ -342,7 +287,7 @@ public class BillableItem implements Serializable {
     }
 
     /**
-     * Get the billable item status.
+     * Get the department status.
      *
      * @return the status
      */
@@ -351,7 +296,7 @@ public class BillableItem implements Serializable {
     }
 
     /**
-     * Set the billable item status.
+     * Set the department status.
      *
      * @param status the status to set
      */
@@ -361,7 +306,7 @@ public class BillableItem implements Serializable {
 
 
     /**
-     * Enumeration status for billable item.
+     * Enumeration status for Tax.
      */
     public enum Status {
         /** Enabled status is used to list departments through out the application. */
@@ -369,21 +314,6 @@ public class BillableItem implements Serializable {
 
         /** Deleted status make department as soft deleted and it will not list on the applicaiton. */
         DELETED
-    }
-
-
-    /**
-     * Billable type of the billable item.
-     */
-    public enum BillableType {
-        /** Infrastructure billable type is the default billable items of cloudstack. */
-        INFRASTRUCTURE,
-
-        /** Additional billable items for panda portal. */
-        MANAGED,
-
-        /** Optional billable items for panda portal */
-        OPTIONAL
     }
 
 }
