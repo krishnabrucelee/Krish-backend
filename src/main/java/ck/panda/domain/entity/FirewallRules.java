@@ -121,7 +121,7 @@ public class FirewallRules {
     private State state;
 
     /** Set of rules or protocols for an IP address .*/
-    @Column(name = "protocol" )
+    @Column(name = "protocol")
     @Enumerated(EnumType.STRING)
     private Protocol protocol;
 
