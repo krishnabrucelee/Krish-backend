@@ -98,7 +98,7 @@ public class VolumeServiceImpl implements VolumeService {
             } else {
                 Volume volumeCS = createVolume(volume, errors);
                 if (volumeRepo.findByUUID(volumeCS.getUuid()) == null) {
-                	volume = volumeRepo.save(volumeCS);
+                    volume = volumeRepo.save(volumeCS);
                 }
             }
             return volume;
