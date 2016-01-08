@@ -26,6 +26,7 @@ import ck.panda.util.CloudStackAccountService;
 import ck.panda.util.CloudStackDomainService;
 import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
+import ck.panda.util.EncryptionUtil;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
@@ -69,7 +70,7 @@ public class DomainServiceImpl implements DomainService {
     @Autowired
     private TokenDetails tokenDetails;
 
-    /** Reference of Cloud Stack Department service.*/
+    /** Reference of Cloud Stack Department service. */
     @Autowired
     private CloudStackAccountService departmentService;
 
@@ -96,85 +97,96 @@ public class DomainServiceImpl implements DomainService {
     @Override
     public Domain save(Domain domain) throws Exception {
         Domain persistedDomain = null;
-         if (domain.getSyncFlag()) {
-          this.validateDomain(domain);
-         Errors errors = validator.rejectIfNullEntity("domain", domain);
-         errors = validator.validateEntity(domain, errors);
-         if (errors.hasErrors()) {
-             throw new ApplicationException(errors);
-         } else {
-             // set server for maintain session with configuration values
-            domainService.setServer(configServer.setServer(1L));
-            HashMap<String,String> optional = new HashMap<String, String>();
-            String domainResponse = domainService.createDomain(domain.getCompanyNameAbbreviation(), "json", optional);
-            JSONObject createDomainResponseJSON = new JSONObject(domainResponse).getJSONObject("createdomainresponse");
-            if (createDomainResponseJSON.has("errorcode")) {
-                errors = this.validateEvent(errors, createDomainResponseJSON.getString("errortext"));
+        if (domain.getSyncFlag()) {
+            this.validateDomain(domain);
+            Errors errors = validator.rejectIfNullEntity("domain", domain);
+            errors = validator.validateEntity(domain, errors);
+            if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
-            }
-            String cityHeadquarter = domain.getCityHeadquarter();
-            String companyAddress = domain.getCompanyAddress();
-            String email = domain.getEmail();
-            String name = domain.getName();
-            String lastName = domain.getLastName();
-            String password = domain.getPassword();
-            String phone = domain.getPhone();
-            String portalUserName = domain.getPortalUserName();
-            String primaryFirstName = domain.getPrimaryFirstName();
-            String secondaryContactEmail = domain.getSecondaryContactEmail();
-            String secondaryContactName = domain.getSecondaryContactName();
-            String secondaryContactLastName = domain.getSecondaryContactLastName();
-            String secondaryContactPhone = domain.getSecondaryContactPhone();
+            } else {
+                // set server for maintain session with configuration values
+                domainService.setServer(configServer.setServer(1L));
+                HashMap<String, String> optional = new HashMap<String, String>();
+                String domainResponse = domainService.createDomain(domain.getCompanyNameAbbreviation(), "json",
+                        optional);
+                JSONObject createDomainResponseJSON = new JSONObject(domainResponse)
+                        .getJSONObject("createdomainresponse");
+                if (createDomainResponseJSON.has("errorcode")) {
+                    errors = this.validateEvent(errors, createDomainResponseJSON.getString("errortext"));
+                    throw new ApplicationException(errors);
+                }
+                String cityHeadquarter = domain.getCityHeadquarter();
+                String companyAddress = domain.getCompanyAddress();
+                String email = domain.getEmail();
+                String name = domain.getName();
+                String lastName = domain.getLastName();
+                String password = domain.getPassword();
+                String phone = domain.getPhone();
+                String portalUserName = domain.getPortalUserName();
+                String primaryFirstName = domain.getPrimaryFirstName();
+                String secondaryContactEmail = domain.getSecondaryContactEmail();
+                String secondaryContactName = domain.getSecondaryContactName();
+                String secondaryContactLastName = domain.getSecondaryContactLastName();
+                String secondaryContactPhone = domain.getSecondaryContactPhone();
 
-            JSONObject createDomain = createDomainResponseJSON.getJSONObject("domain");
-            if(domainRepo.findByUUID(createDomain.getString("id")) != null) {
-                domain = domainRepo.findByUUID(createDomain.getString("id"));
-            }
-            domain.setUuid(createDomain.getString("id"));
-            domain.setIsActive(true);
-            domain.setStatus(Status.ACTIVE);
-            domain.setCityHeadquarter(cityHeadquarter);
-            domain.setCompanyAddress(companyAddress);
-            domain.setEmail(email);
-            domain.setName(name);
-            domain.setLastName(lastName);
-            domain.setPassword(password);
-            domain.setPhone(phone);
-            domain.setPortalUserName(portalUserName);
-            domain.setPrimaryFirstName(primaryFirstName);
-            domain.setSecondaryContactEmail(secondaryContactEmail);
-            domain.setSecondaryContactName(secondaryContactName);
-            domain.setSecondaryContactLastName(secondaryContactLastName);
-            domain.setSecondaryContactPhone(secondaryContactPhone);
+                JSONObject createDomain = createDomainResponseJSON.getJSONObject("domain");
+                if (domainRepo.findByUUID(createDomain.getString("id")) != null) {
+                    domain = domainRepo.findByUUID(createDomain.getString("id"));
+                }
+                domain.setUuid(createDomain.getString("id"));
+                domain.setIsActive(true);
+                domain.setStatus(Status.ACTIVE);
+                domain.setCityHeadquarter(cityHeadquarter);
+                domain.setCompanyAddress(companyAddress);
+                domain.setEmail(email);
+                domain.setName(name);
+                domain.setLastName(lastName);
+                domain.setPassword(password);
+                domain.setPhone(phone);
+                domain.setPortalUserName(portalUserName);
+                domain.setPrimaryFirstName(primaryFirstName);
+                domain.setSecondaryContactEmail(secondaryContactEmail);
+                domain.setSecondaryContactName(secondaryContactName);
+                domain.setSecondaryContactLastName(secondaryContactLastName);
+                domain.setSecondaryContactPhone(secondaryContactPhone);
 
-            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
-            byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
-            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-            String encryptedPassword = new String(EncryptionUtil.encrypt(password, originalKey));
-            domain.setPassword(encryptedPassword);
-            persistedDomain = domainRepo.save(domain);
-            LOGGER.debug("Company created : "+ domain.getName());
-            Department department = this.createDomainAdmin(persistedDomain, password);
-         }
+                String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+                byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+                SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+                String encryptedPassword = new String(EncryptionUtil.encrypt(password, originalKey));
+                domain.setPassword(encryptedPassword);
+                persistedDomain = domainRepo.save(domain);
+                LOGGER.debug("Company created : " + domain.getName());
+                Department department = this.createDomainAdmin(persistedDomain, password);
+            }
         }
-         persistedDomain = domainRepo.save(domain);
-     return persistedDomain;
-   }
+        persistedDomain = domainRepo.save(domain);
+        return persistedDomain;
+    }
 
+    /**
+     * Find department.
+     *
+     * @param persistedDomain the domain.
+     * @param password for user portal.
+     * @return department list.
+     * @throws Exception unhandled errors.
+     */
     private Department createDomainAdmin(Domain persistedDomain, String password) throws Exception {
         Errors errors = validator.rejectIfNullEntity("domain", persistedDomain);
         errors = validator.validateEntity(persistedDomain, errors);
-        HashMap<String,String> optional = new HashMap<String, String>();
+        HashMap<String, String> optional = new HashMap<String, String>();
         Department department = new Department();
         department.setDomainId(persistedDomain.getId());
         department.setUserName(persistedDomain.getPortalUserName());
-        department.setDescription("HOD for this company "+ persistedDomain.getName());
+        department.setDescription("HOD for this company " + persistedDomain.getName());
         department.setType(Department.AccountType.DOMAIN_ADMIN);
         department.setIsActive(true);
         optional.put("domainid", String.valueOf(persistedDomain.getUuid()));
-        String accountresponse = departmentService.createAccount(String.valueOf(department.getType().ordinal()),persistedDomain.getEmail(), persistedDomain.getPrimaryFirstName(), persistedDomain.getLastName(), department.getUserName(), persistedDomain.getPassword(), "json", optional);
-        JSONObject createAccountResponseJSON = new JSONObject(accountresponse)
-                .getJSONObject("createaccountresponse");
+        String accountresponse = departmentService.createAccount(String.valueOf(department.getType().ordinal()),
+                persistedDomain.getEmail(), persistedDomain.getPrimaryFirstName(), persistedDomain.getLastName(),
+                department.getUserName(), persistedDomain.getPassword(), "json", optional);
+        JSONObject createAccountResponseJSON = new JSONObject(accountresponse).getJSONObject("createaccountresponse");
         if (createAccountResponseJSON.has("errorcode")) {
             errors = this.validateEvent(errors, createAccountResponseJSON.getString("errortext"));
             throw new ApplicationException(errors);
@@ -190,18 +202,19 @@ public class DomainServiceImpl implements DomainService {
         User updatedUser = userService.save(user);
         this.syncUpdateUserRole(updatedUser);
         optional.clear();
-        optional.put("password",password);
+        optional.put("password", password);
         String userresponse = csUserService.updateUser(user.getUuid(), optional, "json");
-        JSONObject updateUserJSON = new JSONObject(userresponse)
-                .getJSONObject("updateuserresponse");
-        LOGGER.debug("Department created : "+ department.getUserName());
+        JSONObject updateUserJSON = new JSONObject(userresponse).getJSONObject("updateuserresponse");
+        LOGGER.debug("Department created : " + department.getUserName());
         return department;
     }
 
     /**
      * Update user role.
+     *
+     * @param userObj to set
      */
-    void syncUpdateUserRole(User userObj) {
+    public void syncUpdateUserRole(User userObj) {
         List<UserType> types = new ArrayList<UserType>();
         types.add(UserType.DOMAIN_ADMIN);
         try {
@@ -224,37 +237,38 @@ public class DomainServiceImpl implements DomainService {
         LOGGER.debug(domain.getUuid());
         if (domain.getSyncFlag()) {
             this.validateDomain(domain);
-           Errors errors = validator.rejectIfNullEntity("domain", domain);
-           errors = validator.validateEntity(domain, errors);
-           if (errors.hasErrors()) {
-               throw new ApplicationException(errors);
-           } else {
-            HashMap<String, String> domainMap = new HashMap<String, String>();
-            domainMap.put("name", domain.getCompanyNameAbbreviation());
-            String updateDomainResponse = domainService.updateDomain(domain.getUuid(), "json", domainMap);
-            JSONObject updateDomainResponseJSON = new JSONObject( updateDomainResponse).getJSONObject("updatedomainresponse");
-            if (updateDomainResponseJSON.has("errorcode")) {
-                 errors = this.validateEvent(errors, updateDomainResponseJSON.getString("errortext"));
-                 throw new ApplicationException(errors);
-             }
-            JSONObject updateDomain = updateDomainResponseJSON.getJSONObject("domain");
-            domain.setCompanyNameAbbreviation((String) updateDomain.get("name"));
-            String cityHeadquarter = domain.getCityHeadquarter();
-            String companyAddress = domain.getCompanyAddress();
-            String name = domain.getName();
-            String secondaryContactEmail = domain.getSecondaryContactEmail();
-            String secondaryContactName = domain.getSecondaryContactName();
-            String secondaryContactLastName = domain.getSecondaryContactLastName();
-            String secondaryContactPhone = domain.getSecondaryContactPhone();
-            domain.setCityHeadquarter(cityHeadquarter);
-            domain.setCompanyAddress(companyAddress);
-            domain.setName(name);
-            domain.setSecondaryContactEmail(secondaryContactEmail);
-            domain.setSecondaryContactName(secondaryContactName);
-            domain.setSecondaryContactLastName(secondaryContactLastName);
-            domain.setSecondaryContactPhone(secondaryContactPhone);
-             }
-           }
+            Errors errors = validator.rejectIfNullEntity("domain", domain);
+            errors = validator.validateEntity(domain, errors);
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
+            } else {
+                HashMap<String, String> domainMap = new HashMap<String, String>();
+                domainMap.put("name", domain.getCompanyNameAbbreviation());
+                String updateDomainResponse = domainService.updateDomain(domain.getUuid(), "json", domainMap);
+                JSONObject updateDomainResponseJSON = new JSONObject(updateDomainResponse)
+                        .getJSONObject("updatedomainresponse");
+                if (updateDomainResponseJSON.has("errorcode")) {
+                    errors = this.validateEvent(errors, updateDomainResponseJSON.getString("errortext"));
+                    throw new ApplicationException(errors);
+                }
+                JSONObject updateDomain = updateDomainResponseJSON.getJSONObject("domain");
+                domain.setCompanyNameAbbreviation((String) updateDomain.get("name"));
+                String cityHeadquarter = domain.getCityHeadquarter();
+                String companyAddress = domain.getCompanyAddress();
+                String name = domain.getName();
+                String secondaryContactEmail = domain.getSecondaryContactEmail();
+                String secondaryContactName = domain.getSecondaryContactName();
+                String secondaryContactLastName = domain.getSecondaryContactLastName();
+                String secondaryContactPhone = domain.getSecondaryContactPhone();
+                domain.setCityHeadquarter(cityHeadquarter);
+                domain.setCompanyAddress(companyAddress);
+                domain.setName(name);
+                domain.setSecondaryContactEmail(secondaryContactEmail);
+                domain.setSecondaryContactName(secondaryContactName);
+                domain.setSecondaryContactLastName(secondaryContactLastName);
+                domain.setSecondaryContactPhone(secondaryContactPhone);
+            }
+        }
         return domainRepo.save(domain);
     }
 
@@ -307,19 +321,20 @@ public class DomainServiceImpl implements DomainService {
             domainService.setServer(configServer.setServer(1L));
             List<Department> department = deptService.findDomainAndIsActive(domain.getId(), true);
             if (department.size() != 0) {
-                errors.addGlobalError("cannot.delete.domain.before.deleting.please.make.sure.all.users.and.sub.domains.have.been.removed.from.the.domain");
+                errors.addGlobalError(
+                        "cannot.delete.domain.before.deleting.please.make.sure.all.users.and.sub.domains.have.been.removed.from.the.domain");
             }
         }
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-                domain.setIsActive(false);
-                domain.setStatus(Domain.Status.INACTIVE);
-                if(domain.getSyncFlag()) {
+            domain.setIsActive(false);
+            domain.setStatus(Domain.Status.INACTIVE);
+            if (domain.getSyncFlag()) {
                 String deleteResponse = domainService.deleteDomain(domain.getUuid(), "json");
                 JSONObject deleteJobId = new JSONObject(deleteResponse).getJSONObject("deletedomainresponse");
-                }
             }
+        }
         return domainRepo.save(domain);
     }
 
@@ -342,13 +357,11 @@ public class DomainServiceImpl implements DomainService {
     }
 
     /**
-    * Validate the compute.
-    *
-    * @param domain object
-    *            reference of the domain.
-    * @throws Exception
-    *             error occurs
-    */
+     * Validate the compute.
+     *
+     * @param domain object reference of the domain.
+     * @throws Exception error occurs
+     */
     private void validateDomain(Domain domain) throws Exception {
         Errors errors = validator.rejectIfNullEntity("domain", domain);
         errors = validator.validateEntity(domain, errors);
@@ -370,17 +383,15 @@ public class DomainServiceImpl implements DomainService {
      * @throws Exception if error occurs.
      */
     private Errors validateEvent(Errors errors, String errmessage) throws Exception {
-       errors.addGlobalError(errmessage);
-       return errors;
+        errors.addGlobalError(errmessage);
+        return errors;
     }
 
     /**
      * Find all the domain with pagination.
      *
-     * @throws Exception
-     *             application errors.
-     * @param pagingAndSorting
-     *            do pagination with sorting for domains.
+     * @throws Exception application errors.
+     * @param pagingAndSorting do pagination with sorting for domains.
      * @return list of domains.
      */
     public Page<Domain> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {

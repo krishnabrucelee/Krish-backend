@@ -28,7 +28,6 @@ import ck.panda.util.error.exception.ApplicationException;
 
 /**
  * Service implementation for Network entity.
- *
  */
 @Service
 @SuppressWarnings("PMD.CyclomaticComplexity")
@@ -81,7 +80,7 @@ public class NetworkServiceImpl implements NetworkService {
     @Autowired
     private DepartmentService departmentService;
 
-     /** Virtual Machine service reference. */
+    /** Virtual Machine service reference. */
     @Autowired
     private VirtualMachineService vmService;
 
@@ -159,6 +158,7 @@ public class NetworkServiceImpl implements NetworkService {
                 if (network.getcIDR() != null && network.getcIDR().trim() != "") {
                     Network networkcidr = networkRepo.findOne(network.getId());
                     if (network.getcIDR().equals(networkcidr.getcIDR())) {
+                        LOGGER.info("network params");
                     } else {
                         optional.put("guestvmcidr", network.getcIDR());
                     }
@@ -224,14 +224,15 @@ public class NetworkServiceImpl implements NetworkService {
         errors = validator.validateEntity(network, errors);
         network.setIsActive(false);
         if (network.getSyncFlag()) {
-            List<VmInstance> vmResponse = vmService.findByNetworkAndVmStatus(network.getId(), VmInstance.Status.Expunging);
+            List<VmInstance> vmResponse = vmService.findByNetworkAndVmStatus(network.getId(),
+                    VmInstance.Status.Expunging);
             if (vmResponse.size() != 0) {
                 errors.addGlobalError("Network is associated with Vm instances. You cannot delete this network");
             }
         }
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
-        }  else {
+        } else {
             network.setIsActive(false);
             network.setStatus(Network.Status.Destroy);
             if (network.getSyncFlag()) {
@@ -382,7 +383,7 @@ public class NetworkServiceImpl implements NetworkService {
     /**
      * Find all the compute offering with pagination.
      *
-     * @throws Exception  application errors.
+     * @throws Exception application errors.
      * @param pagingAndSorting do pagination with sorting for computeofferings.
      * @return list of compute offerings.
      */
@@ -414,7 +415,7 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public Network findById(Long Id) throws Exception {
-        return networkRepo.findById(Id);
+    public Network findById(Long id) throws Exception {
+        return networkRepo.findById(id);
     }
 }

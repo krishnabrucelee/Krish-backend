@@ -5,8 +5,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 import org.joda.time.DateTime;
@@ -20,10 +18,9 @@ import org.springframework.data.annotation.LastModifiedDate;
  *
  */
 @Entity
-@Table(name = "ck_templatecost")
+@Table(name = "templatecosts")
 @SuppressWarnings("serial")
 public class TemplateCost implements Serializable {
-
     /** Id of the template cost. */
     @Id
     @GeneratedValue
@@ -61,6 +58,7 @@ public class TemplateCost implements Serializable {
 
     /**
      * Get the id.
+     *
      * @return id
      */
     public Long getId() {
@@ -69,6 +67,7 @@ public class TemplateCost implements Serializable {
 
     /**
      * Set the id.
+     *
      * @param id - the Long to set
      */
     public void setId(Long id) {
@@ -77,6 +76,7 @@ public class TemplateCost implements Serializable {
 
     /**
      * Get the cost.
+     *
      * @return cost
      */
     public Integer getCost() {
@@ -85,6 +85,7 @@ public class TemplateCost implements Serializable {
 
     /**
      * Set the cost.
+     *
      * @param cost - the Integer to set
      */
     public void setCost(Integer cost) {
@@ -93,6 +94,7 @@ public class TemplateCost implements Serializable {
 
     /**
      * Get the version.
+     *
      * @return version
      */
     public Long getVersion() {
@@ -101,6 +103,7 @@ public class TemplateCost implements Serializable {
 
     /**
      * Set the version.
+     *
      * @param version - the Long to set
      */
     public void setVersion(Long version) {
@@ -109,6 +112,7 @@ public class TemplateCost implements Serializable {
 
     /**
      * Get the created by.
+     *
      * @return createdBy
      */
     public Long getCreatedBy() {
@@ -117,6 +121,7 @@ public class TemplateCost implements Serializable {
 
     /**
      * Set the created by.
+     *
      * @param createdBy - the User entity to set
      */
     public void setCreatedBy(Long createdBy) {
@@ -125,6 +130,7 @@ public class TemplateCost implements Serializable {
 
     /**
      * Get the updated by.
+     *
      * @return updatedBy
      */
     public Long getUpdatedBy() {
@@ -133,6 +139,7 @@ public class TemplateCost implements Serializable {
 
     /**
      * Set the updated by.
+     *
      * @param updatedBy - the User entity to set
      */
     public void setUpdatedBy(Long updatedBy) {
@@ -141,6 +148,7 @@ public class TemplateCost implements Serializable {
 
     /**
      * Get the created date time.
+     *
      * @return the createdDateTime
      */
     public DateTime getCreatedDateTime() {
@@ -149,6 +157,7 @@ public class TemplateCost implements Serializable {
 
     /**
      * Set the created date time.
+     *
      * @param createdDateTime - the DateTime to set
      */
     public void setCreatedDateTime(DateTime createdDateTime) {
@@ -157,6 +166,7 @@ public class TemplateCost implements Serializable {
 
     /**
      * Get the updated date time.
+     *
      * @return updatedDateTime
      */
     public DateTime getUpdatedDateTime() {
@@ -165,6 +175,7 @@ public class TemplateCost implements Serializable {
 
     /**
      * Set the updated date time.
+     *
      * @param updatedDateTime - the DateTime to set
      */
     public void setUpdatedDateTime(DateTime updatedDateTime) {

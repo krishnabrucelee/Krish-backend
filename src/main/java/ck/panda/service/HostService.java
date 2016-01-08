@@ -6,8 +6,7 @@ import ck.panda.domain.entity.Host;
 import ck.panda.util.domain.CRUDService;
 
 /**
- * Service class for host.
- * This service provides basic CRUD and essential api's for host actions.
+ * Service class for host. This service provides basic CRUD and essential api's for host actions.
  *
  */
 @Service

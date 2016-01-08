@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.OsCategory;
-import ck.panda.domain.entity.Template;
 import ck.panda.service.OsCategoryService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -38,7 +37,8 @@ public class OsCategoryController extends CRUDController<OsCategory> implements 
 
     @Override
     public List<OsCategory> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
+            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
+                    throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, OsCategory.class);
         Page<OsCategory> pageResponse = osCategoryService.findAll(page);
         System.out.println(pageResponse);

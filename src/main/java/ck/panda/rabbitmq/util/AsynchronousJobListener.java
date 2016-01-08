@@ -14,8 +14,8 @@ import ck.panda.util.infrastructure.AuthenticatedExternalWebService;
 import ck.panda.util.infrastructure.externalwebservice.ExternalWebServiceStub;
 
 /**
- * Asynchronous Job listener will listen and update resource data to our App DB
- * when an event handled directly in CS server.
+ * Asynchronous Job listener will listen and update resource data to our App DB when an event handled directly in CS
+ * server.
  *
  */
 public class AsynchronousJobListener implements MessageListener {
@@ -45,8 +45,8 @@ public class AsynchronousJobListener implements MessageListener {
      * @param asynchService asynchronous Service object.
      * @param cloudStackServer cloudStackServer object.
      */
-    public AsynchronousJobListener(SyncService syncService, AsynchronousJobService asyncService, CloudStackServer cloudStackServer,
-    		String backendAdminUsername, String backendAdminRole) {
+    public AsynchronousJobListener(SyncService syncService, AsynchronousJobService asyncService,
+            CloudStackServer cloudStackServer, String backendAdminUsername, String backendAdminRole) {
         this.syncService = syncService;
         this.asyncService = asyncService;
         this.cloudStackServer = cloudStackServer;
@@ -76,7 +76,8 @@ public class AsynchronousJobListener implements MessageListener {
             if (eventObject.getString("status").equalsIgnoreCase("SUCCEEDED")) {
                 syncService.init(cloudStackServer);
                 ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
-                AuthenticatedExternalWebService authenticatedExternalWebService = new AuthenticatedExternalWebService(backendAdminUsername, null,
+                AuthenticatedExternalWebService authenticatedExternalWebService = new AuthenticatedExternalWebService(
+                        backendAdminUsername, null,
                         AuthorityUtils.commaSeparatedStringToAuthorityList(backendAdminRole));
                 authenticatedExternalWebService.setExternalWebService(externalWebService);
                 SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);

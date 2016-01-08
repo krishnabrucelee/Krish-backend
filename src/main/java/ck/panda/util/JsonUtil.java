@@ -29,7 +29,7 @@ public abstract class JsonUtil {
      * @param object JSON array
      * @param key value
      * @return boolean status
-     * @throws Exception  raise if error
+     * @throws Exception raise if error
      */
     public static Boolean getBooleanValue(JSONObject object, String key) throws Exception {
         if (object.has(key)) {
@@ -43,7 +43,7 @@ public abstract class JsonUtil {
      * @param object JSON array
      * @param key value
      * @return integer value.
-     * @throws Exception  raise if error
+     * @throws Exception raise if error
      */
     public static Integer getIntegerValue(JSONObject object, String key) throws Exception {
         if (object.has(key)) {
@@ -66,27 +66,26 @@ public abstract class JsonUtil {
         }
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
         java.util.Date date = null;
-		try {
-			date = format.parse(dateTime);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		final ZoneId systemDefault = ZoneId.systemDefault();
-		return ZonedDateTime.ofInstant(date.toInstant(), systemDefault);
+        try {
+            date = format.parse(dateTime);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        final ZoneId systemDefault = ZoneId.systemDefault();
+        return ZonedDateTime.ofInstant(date.toInstant(), systemDefault);
     }
 
-
-//    /**
-//     * @param object JSON array
-//     * @param key value
-//     * @return string value
-//     * @throws Exception raise if error
-//     */
-//    public static String getEnumValue(JSONObject object, String key) throws Exception {
-//        if (object.has(key)) {
-//            return object.optString(key);
-//        } else {
-//            return null;
-//        }
-//    }
+    // /**
+    // * @param object JSON array
+    // * @param key value
+    // * @return string value
+    // * @throws Exception raise if error
+    // */
+    // public static String getEnumValue(JSONObject object, String key) throws Exception {
+    // if (object.has(key)) {
+    // return object.optString(key);
+    // } else {
+    // return null;
+    // }
+    // }
 }

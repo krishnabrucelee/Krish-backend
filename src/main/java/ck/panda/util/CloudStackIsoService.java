@@ -12,11 +12,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class CloudStackIsoService {
 
-     /** Cloudstack server for connectivity. */
+    /** Cloudstack server for connectivity. */
     @Autowired
     private CloudStackServer server;
 
-    /** sets api key , secret key and url.
+    /**
+     * sets api key , secret key and url.
+     * 
      * @param server sets these values.
      */
     public void setServer(CloudStackServer server) {
@@ -31,14 +33,12 @@ public class CloudStackIsoService {
      * @param response json or xml
      * @throws Exception unhandled errors.
      */
-    public String listIsos(String response, HashMap<String, String> optional)
-            throws Exception {
+    public String listIsos(String response, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("listIsos", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("listIsos", optional);
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
-        return  responseDocument;
+        return responseDocument;
     }
 
     /**
@@ -51,8 +51,7 @@ public class CloudStackIsoService {
      */
     public String attachIso(String isoId, String virtualMachineId, String response) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("attachIso", null);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("attachIso", null);
         arguments.add(new NameValuePair("id", isoId));
         arguments.add(new NameValuePair("virtualmachineid", virtualMachineId));
         arguments.add(new NameValuePair("response", response));
@@ -69,8 +68,7 @@ public class CloudStackIsoService {
      */
     public String detachIso(String virtualMachineId, String response) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("detachIso", null);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("detachIso", null);
         arguments.add(new NameValuePair("virtualmachineid", virtualMachineId));
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);

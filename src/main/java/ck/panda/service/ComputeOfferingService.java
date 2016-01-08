@@ -12,7 +12,7 @@ import ck.panda.util.domain.vo.PagingAndSorting;
  *
  */
 @Service
-public interface ComputeOfferingService  extends CRUDService<ComputeOffering>  {
+public interface ComputeOfferingService extends CRUDService<ComputeOffering> {
 
     /**
      * To get list of compute offerings from cloudstack server.
@@ -55,14 +55,13 @@ public interface ComputeOfferingService  extends CRUDService<ComputeOffering>  {
      * @return compute offering.
      */
     ComputeOffering findByName(String name);
-    
+
     /**
      * Find compute offering by isActive status.
      * 
-     * @param isActive offer	
-     * @return compute offer	
+     * @param isActive offer
+     * @return compute offer
      * @throws Exception unhandled errors.
      */
     List<ComputeOffering> findByIsActive(Boolean isActive) throws Exception;
 }
-

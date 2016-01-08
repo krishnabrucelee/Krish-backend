@@ -3,7 +3,6 @@ package ck.panda.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.OsCategory;
-import ck.panda.domain.entity.Template;
 import ck.panda.util.domain.CRUDService;
 
 /**

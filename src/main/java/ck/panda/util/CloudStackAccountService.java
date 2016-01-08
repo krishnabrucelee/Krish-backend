@@ -14,39 +14,37 @@ import org.springframework.stereotype.Service;
 @Service
 public class CloudStackAccountService {
 
-     /** Cloudstack server for connectivity. */
-     @Autowired
-     private CloudStackServer server;
+    /** Cloudstack server for connectivity. */
+    @Autowired
+    private CloudStackServer server;
 
-     /** Sets api key , secret key and url.
-      *
-      * @param server sets these values.
-      */
-      public void setServer(CloudStackServer server) {
-            this.server = server;
-      }
+    /**
+     * Sets api key , secret key and url.
+     *
+     * @param server sets these values.
+     */
+    public void setServer(CloudStackServer server) {
+        this.server = server;
+    }
 
-     /**
+    /**
      * Creates an account.
      *
-     * @param accountType Type of the account. Specify 0 for user, 1 for root
-     * admin, and 2 for domain admin
+     * @param accountType Type of the account. Specify 0 for user, 1 for root admin, and 2 for domain admin
      * @param emailId email
      * @param firstName first name
      * @param lastName last name
      * @param userName Unique username
-     * @param password Hashed password (Default is MD5). If you wish to use any
-     * other hashing algorithm, you would need to write a custom authentication
-     * adapter See Docs section.Hashed password (Default is MD5). If you wish to
-     * use any other hashing algorithm, you would need to write a custom
-     * authentication adapter See Docs section.
+     * @param password Hashed password (Default is MD5). If you wish to use any other hashing algorithm, you would need
+     *            to write a custom authentication adapter See Docs section.Hashed password (Default is MD5). If you
+     *            wish to use any other hashing algorithm, you would need to write a custom authentication adapter See
+     *            Docs section.
      * @param optional values for mclouds
      * @return
      * @throws Exception
      */
-    public String createAccount(String accountType, String emailId,
-            String firstName, String lastName, String userName, String password,String response,
-            HashMap<String, String> optional) throws Exception {
+    public String createAccount(String accountType, String emailId, String firstName, String lastName, String userName,
+            String password, String response, HashMap<String, String> optional) throws Exception {
 
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("createAccount", optional);
         arguments.add(new NameValuePair("accounttype", accountType));
@@ -55,7 +53,7 @@ public class CloudStackAccountService {
         arguments.add(new NameValuePair("lastname", lastName));
         arguments.add(new NameValuePair("username", userName));
         arguments.add(new NameValuePair("password", password));
-        arguments.add(new NameValuePair("response",response));
+        arguments.add(new NameValuePair("response", response));
 
         String responseDocument = server.request(arguments);
 
@@ -70,10 +68,9 @@ public class CloudStackAccountService {
      */
     public String deleteAccount(String accountId, String response) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("deleteAccount", null);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("deleteAccount", null);
         arguments.add(new NameValuePair("id", accountId));
-        arguments.add(new NameValuePair("response",response));
+        arguments.add(new NameValuePair("response", response));
 
         String responseDocument = server.request(arguments);
         return responseDocument;
@@ -90,10 +87,9 @@ public class CloudStackAccountService {
      */
     public String updateAccount(String newName, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("updateAccount", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("updateAccount", optional);
         arguments.add(new NameValuePair("newname", newName));
-               String responseDocument = server.request(arguments);
+        String responseDocument = server.request(arguments);
 
         return responseDocument;
 
@@ -107,15 +103,14 @@ public class CloudStackAccountService {
      * @return
      * @throws Exception
      */
-    public String disableAccount(String lock, String accountName, String domainId,String response,
+    public String disableAccount(String lock, String accountName, String domainId, String response,
             HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("disableAccount", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("disableAccount", optional);
         arguments.add(new NameValuePair("lock", lock));
         arguments.add(new NameValuePair("account", accountName));
         arguments.add(new NameValuePair("domainid", domainId));
-         arguments.add(new NameValuePair("response",response));
+        arguments.add(new NameValuePair("response", response));
 
         String responseDocument = server.request(arguments);
 
@@ -129,14 +124,13 @@ public class CloudStackAccountService {
      * @return
      * @throws Exception
      */
-    public String enableAccount(String accountName, String domainId,String response,
-            HashMap<String, String> optional) throws Exception {
+    public String enableAccount(String accountName, String domainId, String response, HashMap<String, String> optional)
+            throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("enableAccount", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("enableAccount", optional);
         arguments.add(new NameValuePair("account", accountName));
         arguments.add(new NameValuePair("domainid", domainId));
-         arguments.add(new NameValuePair("response",response));
+        arguments.add(new NameValuePair("response", response));
 
         String responseDocument = server.request(arguments);
 
@@ -150,14 +144,13 @@ public class CloudStackAccountService {
      * @return
      * @throws Exception
      */
-    public String lockAccount(String accountName, String domainId,String response,
-            HashMap<String, String> optional) throws Exception {
+    public String lockAccount(String accountName, String domainId, String response, HashMap<String, String> optional)
+            throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("lockAccount", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("lockAccount", optional);
         arguments.add(new NameValuePair("account", accountName));
         arguments.add(new NameValuePair("domainid", domainId));
-         arguments.add(new NameValuePair("response",response));
+        arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
 
         return responseDocument;
@@ -165,19 +158,16 @@ public class CloudStackAccountService {
     }
 
     /**
-     * Lists accounts and provides detailed account information for listed
-     * accounts
+     * Lists accounts and provides detailed account information for listed accounts
      *
      * @param optional
      * @return
      * @throws Exception
      */
-    public String listAccounts( String response,
-            HashMap<String, String> optional) throws Exception {
+    public String listAccounts(String response, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("listAccounts", optional);
-         arguments.add(new NameValuePair("response",response));
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("listAccounts", optional);
+        arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
 
         return responseDocument;
@@ -193,15 +183,14 @@ public class CloudStackAccountService {
      * @return
      * @throws Exception
      */
-    public String markDefaultZoneForAccount(String accountName, String domainId,
-        String response, String zoneId, HashMap<String, String> optional) throws Exception {
+    public String markDefaultZoneForAccount(String accountName, String domainId, String response, String zoneId,
+            HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("markDefaultZoneForAccount", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("markDefaultZoneForAccount", optional);
         arguments.add(new NameValuePair("account", accountName));
         arguments.add(new NameValuePair("domainid", domainId));
         arguments.add(new NameValuePair("zoneid", zoneId));
-         arguments.add(new NameValuePair("response",response));
+        arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
 
         return responseDocument;
@@ -215,14 +204,13 @@ public class CloudStackAccountService {
      * @return
      * @throws Exception
      */
-    public String addAccountToProject(String projectId,String account,String response,
+    public String addAccountToProject(String projectId, String account, String response,
             HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("addAccountToProject", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("addAccountToProject", optional);
         arguments.add(new NameValuePair("projectid", projectId));
         arguments.add(new NameValuePair("account", account));
-                 arguments.add(new NameValuePair("response",response));
+        arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
 
         return responseDocument;
@@ -236,13 +224,11 @@ public class CloudStackAccountService {
      * @return
      * @throws Exception
      */
-    public String accountJobResult(String asychronousJobid, String response)
-            throws Exception {
+    public String accountJobResult(String asychronousJobid, String response) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("queryAsyncJobResult", null);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("queryAsyncJobResult", null);
         arguments.add(new NameValuePair("jobid", asychronousJobid));
-         arguments.add(new NameValuePair("response",response));
+        arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
 
         return responseDocument;
@@ -256,14 +242,12 @@ public class CloudStackAccountService {
      * @return
      * @throws Exception
      */
-    public String deleteAccountFromProject(String accountName, String response,
-            String projectId) throws Exception {
+    public String deleteAccountFromProject(String accountName, String response, String projectId) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("deleteAccountFromProject", null);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("deleteAccountFromProject", null);
         arguments.add(new NameValuePair("account", accountName));
         arguments.add(new NameValuePair("projectid", projectId));
-         arguments.add(new NameValuePair("response",response));
+        arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
 
         return responseDocument;
@@ -278,25 +262,24 @@ public class CloudStackAccountService {
      * @return
      * @throws Exception
      */
-    public String listProjectAccounts(String projectId, String response,
-            HashMap<String, String> optional) throws Exception {
+    public String listProjectAccounts(String projectId, String response, HashMap<String, String> optional)
+            throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("listProjectAccounts", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("listProjectAccounts", optional);
         arguments.add(new NameValuePair("projectid", projectId));
-         arguments.add(new NameValuePair("response",response));
+        arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
 
         return responseDocument;
 
     }
 
-    public String getSolidFireAccountId(String accountId, String storageId,
-    String response, HashMap<String, String> optional) throws Exception {
+    public String getSolidFireAccountId(String accountId, String storageId, String response,
+            HashMap<String, String> optional) throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("getSolidFireAccountId", optional);
         arguments.add(new NameValuePair("accountid", accountId));
         arguments.add(new NameValuePair("storageid", storageId));
-         arguments.add(new NameValuePair("response",response));
+        arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
 
         return responseDocument;

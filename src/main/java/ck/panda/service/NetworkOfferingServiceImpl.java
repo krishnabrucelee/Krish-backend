@@ -109,7 +109,7 @@ public class NetworkOfferingServiceImpl implements NetworkOfferingService {
 
     @Override
     public NetworkOffering findByUUID(String uuid) throws Exception {
-       return networkRepo.findByUUID(uuid);
+        return networkRepo.findByUUID(uuid);
     }
 
     @Override
@@ -117,9 +117,9 @@ public class NetworkOfferingServiceImpl implements NetworkOfferingService {
         return networkRepo.findIsolated();
     }
 
-	@Override
-	public NetworkOffering findById(Long id) throws Exception {
-		return networkRepo.findById(id);
-	}
+    @Override
+    public NetworkOffering findById(Long id) throws Exception {
+        return networkRepo.findById(id);
+    }
 
 }

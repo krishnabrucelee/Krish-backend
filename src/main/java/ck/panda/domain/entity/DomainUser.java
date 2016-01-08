@@ -10,6 +10,7 @@ public class DomainUser {
 
     /**
      * Parameterized constructor.
+     * 
      * @param username to set
      */
     public DomainUser(String username) {
@@ -18,6 +19,7 @@ public class DomainUser {
 
     /**
      * Get the user name.
+     * 
      * @return user name
      */
     public String getUsername() {

@@ -93,8 +93,8 @@ public class ClusterServiceImpl implements ClusterService {
                 // the converted cluster entity to list
                 Cluster cluster = Cluster.convert(clusterListJSON.getJSONObject(i));
                 cluster.setZoneId(convertEntityService.getZoneId(cluster.getTransZone()));
-                 cluster.setPodId(convertEntityService.getPodId(cluster.getTransPod()));
-                 clusterList.add(cluster);
+                cluster.setPodId(convertEntityService.getPodId(cluster.getTransPod()));
+                clusterList.add(cluster);
             }
         }
         return clusterList;
@@ -105,6 +105,3 @@ public class ClusterServiceImpl implements ClusterService {
         return clusterRepo.findByUUID(uuid);
     }
 }
-
-
-

@@ -10,6 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 public class BackendAdminUsernamePasswordAuthenticationToken extends UsernamePasswordAuthenticationToken {
     /**
      * Parameterized constructor.
+     * 
      * @param principal to set
      * @param credentials to set
      */

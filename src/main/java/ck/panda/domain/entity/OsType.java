@@ -29,13 +29,13 @@ import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonUtil;
 
 /**
- * OS type purpose is to create which type of operation system you want when creating the template.
- * Get the OS type list from cloud stack server and push into the application database
- * When creating the template fetch the OS type from application database
+ * OS type purpose is to create which type of operation system you want when creating the template. Get the OS type list
+ * from cloud stack server and push into the application database When creating the template fetch the OS type from
+ * application database
  *
  */
 @Entity
-@Table(name = "ck_os_type")
+@Table(name = "os_types")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class OsType implements Serializable {
@@ -95,12 +95,13 @@ public class OsType implements Serializable {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
 
-    /** Transient oscategory of the ostype.*/
+    /** Transient oscategory of the ostype. */
     @Transient
     private String transOsCategoryId;
 
     /**
      * Get the id.
+     *
      * @return id
      */
     public Long getId() {
@@ -109,6 +110,7 @@ public class OsType implements Serializable {
 
     /**
      * Set the id.
+     *
      * @param id - the Long to set
      */
     public void setId(Long id) {
@@ -117,6 +119,7 @@ public class OsType implements Serializable {
 
     /**
      * Get the UUID.
+     *
      * @return uuid
      */
     public String getUuid() {
@@ -125,6 +128,7 @@ public class OsType implements Serializable {
 
     /**
      * Set the UUID.
+     *
      * @param uuid - the String to set
      */
     public void setUuid(String uuid) {
@@ -133,6 +137,7 @@ public class OsType implements Serializable {
 
     /**
      * Get the osCategory.
+     *
      * @return the osCategory
      */
     public OsCategory getOsCategory() {
@@ -141,6 +146,7 @@ public class OsType implements Serializable {
 
     /**
      * Set the osCategory.
+     *
      * @param osCategory the osCategory to set
      */
     public void setOsCategory(OsCategory osCategory) {
@@ -149,22 +155,25 @@ public class OsType implements Serializable {
 
     /**
      * Get the osCategoryId.
+     *
      * @return the osCategoryId
      */
-     public Long getOsCategoryId() {
-         return osCategoryId;
-     }
+    public Long getOsCategoryId() {
+        return osCategoryId;
+    }
 
     /**
      * Set the osCategoryId.
+     *
      * @param osCategoryId the osCategoryId to set
      */
     public void setOsCategoryId(Long osCategoryId) {
         this.osCategoryId = osCategoryId;
     }
 
-     /**
+    /**
      * Get the description of the OS type.
+     *
      * @return the description
      */
     public String getDescription() {
@@ -173,6 +182,7 @@ public class OsType implements Serializable {
 
     /**
      * Set the description of the OS type.
+     *
      * @param description the description to set
      */
     public void setDescription(String description) {
@@ -181,6 +191,7 @@ public class OsType implements Serializable {
 
     /**
      * Get the version.
+     *
      * @return version
      */
     public Long getVersion() {
@@ -189,6 +200,7 @@ public class OsType implements Serializable {
 
     /**
      * Set the version.
+     *
      * @param version - the Long to set
      */
     public void setVersion(Long version) {
@@ -277,17 +289,17 @@ public class OsType implements Serializable {
     }
 
     /**
-    * Set transient OsCategory id.
-    *
-    * @param transOsCategoryId to set
-    */
+     * Set transient OsCategory id.
+     *
+     * @param transOsCategoryId to set
+     */
     public void setTransOsCategoryId(String transOsCategoryId) {
         this.transOsCategoryId = transOsCategoryId;
     }
 
     /**
-    * Convert JSONObject to os type entity.
-    *
+     * Convert JSONObject to os type entity.
+     *
      * @param jsonObject to set
      * @return OS type
      * @throws JSONException raise if error

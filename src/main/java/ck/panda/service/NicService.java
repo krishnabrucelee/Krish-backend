@@ -1,19 +1,14 @@
 package ck.panda.service;
 
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Nic;
-import ck.panda.domain.entity.Volume;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
  * Service interface for nic entity.
- *
  */
 @Service
 public interface NicService extends CRUDService<Nic> {
@@ -29,13 +24,13 @@ public interface NicService extends CRUDService<Nic> {
 
     /**
      * Soft delete method for nic.
-     * 
+     *
      * @param nic for network
      * @return nic.
      * @throws Exception unhandled errors.
      */
     Nic softDelete(Nic nic) throws Exception;
-    
+
     /**
      * List by instance attached to nic.
      *
@@ -46,13 +41,12 @@ public interface NicService extends CRUDService<Nic> {
     List<Nic> findByInstance(Long nic) throws Exception;
 
     /**
-     * Find all nics from CloudStack
-     * 
+     * Find all nics from CloudStack.
+     *
      * @return nic
      * @throws Exception unhandled errors.
      */
-	List<Nic> findAllFromCSServer() throws Exception;
-	
+    List<Nic> findAllFromCSServer() throws Exception;
 
     /**
      * Paging and Sorting for displaying more number of elements in list.

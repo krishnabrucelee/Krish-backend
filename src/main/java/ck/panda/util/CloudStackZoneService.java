@@ -7,8 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * CloudStack Zone service for cloudStack connectivity with the Cloud Stack
- * server.
+ * CloudStack Zone service for cloudStack connectivity with the Cloud Stack server.
  *
  */
 @Service
@@ -21,8 +20,7 @@ public class CloudStackZoneService {
     /**
      * Set values in CloudStack server.
      *
-     * @param server
-     *            setting apikey, secretkey, URL in cloudStack server.
+     * @param server setting apikey, secretkey, URL in cloudStack server.
      */
     public void setServer(CloudStackServer server) {
         this.server = server;
@@ -31,13 +29,10 @@ public class CloudStackZoneService {
     /**
      * Lists zones.
      *
-     * @param optional
-     *            values from cloudstack.
-     * @param response
-     *            json or xml
+     * @param optional values from cloudstack.
+     * @param response json or xml
      * @return response document.
-     * @throws Exception
-     *             unhandled errors.
+     * @throws Exception unhandled errors.
      */
     public String listZones(HashMap<String, String> optional, String response) throws Exception {
 

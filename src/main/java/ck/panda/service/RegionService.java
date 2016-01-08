@@ -8,8 +8,7 @@ import ck.panda.util.domain.CRUDService;
 /**
  * Service class for Region.
  *
- * This service provides basic CRUD and essential api's for Region related
- * business actions.
+ * This service provides basic CRUD and essential api's for Region related business actions.
  */
 @Service
 public interface RegionService extends CRUDService<Region> {
@@ -23,4 +22,3 @@ public interface RegionService extends CRUDService<Region> {
     List<Region> findAllFromCSServer() throws Exception;
 
 }
-

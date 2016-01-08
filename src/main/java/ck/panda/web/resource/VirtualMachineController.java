@@ -24,12 +24,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
-import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.service.SyncService;
 import ck.panda.service.VirtualMachineService;
-import ck.panda.service.VirtualMachineServiceImpl;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -41,7 +39,7 @@ import ck.panda.util.web.CRUDController;
 @RestController
 @RequestMapping("/api/virtualmachine")
 @Api(value = "VirtualMachines", description = "Operations with Virtual Machine", produces = "application/json")
-public class VirtualMachineController extends CRUDController<VmInstance>implements ApiController {
+public class VirtualMachineController extends CRUDController<VmInstance> implements ApiController {
     /** Service reference to Virtual Machine. */
     @Autowired
     private VirtualMachineService virtualmachineservice;
@@ -54,6 +52,7 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
     @Autowired
     private SyncService syncService;
 
+    /** console proxy reference. */
     @Value(value = "${console.proxy}")
     private String consoleProxy;
 
@@ -90,20 +89,32 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, VmInstance.class);
-        Page<VmInstance> pageResponse =  virtualmachineservice.findAll(page);
+        Page<VmInstance> pageResponse = virtualmachineservice.findAll(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
 
+    /**
+     * Get vmlist.
+     *
+     * @param sortBy asc/desc
+     * @param status status of vm.
+     * @param range pagination range.
+     * @param limit per page limit.
+     * @param request page request.
+     * @param response response content.
+     * @return vmlist.
+     * @throws Exception unhandled exception.
+     */
     @RequestMapping(value = "listByStatus", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<VmInstance>  listVmByStatus(@RequestParam String sortBy, @RequestParam String status, @RequestHeader(value = RANGE) String range,
-            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
-                    throws Exception {
+    public List<VmInstance> listVmByStatus(@RequestParam String sortBy, @RequestParam String status,
+            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, VmInstance.class);
         Page<VmInstance> pageResponse = virtualmachineservice.findAll(page);
-        if(!status.equals("Expunging")) {
+        if (!status.equals("Expunging")) {
             pageResponse = virtualmachineservice.findAllByStatus(page, status);
         }
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
@@ -111,24 +122,23 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
 
     }
 
-
     /**
      * Get the vm counts for stopped, running and total count.
      *
-     * @param request
-     * @param response
-     * @return
-     * @throws Exception
+     * @param request page request.
+     * @param response page response content.
+     * @return vm count.
+     * @throws Exception unhandled errors.
      */
     @RequestMapping(value = "vmCounts", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public String getVmCounts(HttpServletRequest request, HttpServletResponse response)
-                    throws Exception {
+    public String getVmCounts(HttpServletRequest request, HttpServletResponse response) throws Exception {
         Integer vmCount = virtualmachineservice.findAll().size();
         Integer runningVmCount = virtualmachineservice.findCountByStatus(Status.Running);
         Integer stoppedVmCount = virtualmachineservice.findCountByStatus(Status.Stopped);
-        return "{\"runningVmCount\":" + runningVmCount + ",\"stoppedVmCount\":" + stoppedVmCount + ",\"totalCount\":"+ vmCount + "}";
+        return "{\"runningVmCount\":" + runningVmCount + ",\"stoppedVmCount\":" + stoppedVmCount + ",\"totalCount\":"
+                + vmCount + "}";
     }
 
     /**
@@ -195,8 +205,8 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
         String display = persistInstance.getDisplayName(); // Novnc display
         String str = host + "|" + instance + "|" + display;
         token = Base64.encodeBase64String(str.getBytes());
-        LOGGER.debug("VNC Token"+ token);
-        return "{\"success\":" + "\""+consoleProxy+"/console/?token="+ token +"\"}";
+        LOGGER.debug("VNC Token" + token);
+        return "{\"success\":" + "\"" + consoleProxy + "/console/?token=" + token + "\"}";
     }
 
     /**
@@ -220,13 +230,14 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
      * @return project
      * @throws Exception error occurs.
      */
-    @RequestMapping(value = "/volume/project/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/volume/project/{id}", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     public List<VmInstance> findByProjectAndStatus(@PathVariable(PATH_ID) Long projectId) throws Exception {
         List<VmInstance.Status> statusCode = new ArrayList<VmInstance.Status>();
         statusCode.add(Status.Running);
         statusCode.add(Status.Stopped);
-       return virtualmachineservice.findByProjectAndStatus(projectId, statusCode);
+        return virtualmachineservice.findByProjectAndStatus(projectId, statusCode);
     }
 
     /**
@@ -236,7 +247,8 @@ public class VirtualMachineController extends CRUDController<VmInstance>implemen
      * @return department
      * @throws Exception error occurs.
      */
-    @RequestMapping(value = "/volume/department/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/volume/department/{id}", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     public List<VmInstance> findByDepartmentAndStatus(@PathVariable(PATH_ID) Long derpartmentId) throws Exception {
         List<VmInstance.Status> statusCode = new ArrayList<VmInstance.Status>();

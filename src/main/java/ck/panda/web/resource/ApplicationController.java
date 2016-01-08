@@ -29,7 +29,7 @@ import ck.panda.util.web.CRUDController;
 @RestController
 @RequestMapping("/api/applications")
 @Api(value = "Applications", description = "Operations with applications", produces = "application/json")
-public class ApplicationController extends CRUDController<Application>implements ApiController {
+public class ApplicationController extends CRUDController<Application> implements ApiController {
 
     /** Service reference to Application. */
     @Autowired
@@ -61,7 +61,8 @@ public class ApplicationController extends CRUDController<Application>implements
      * @throws Exception error occurs.
      */
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Application Type.")
-    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDelete(@RequestBody Application application, @PathVariable(PATH_ID) Long id) throws Exception {
         /** Doing Soft delete from the application table. */
@@ -70,7 +71,8 @@ public class ApplicationController extends CRUDController<Application>implements
 
     @Override
     public List<Application> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)throws Exception {
+            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
+                    throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Application.class);
         Page<Application> pageResponse = applicationService.findAll(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));

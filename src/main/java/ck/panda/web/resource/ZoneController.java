@@ -47,7 +47,7 @@ public class ZoneController extends CRUDController<Zone> implements ApiControlle
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Department.", response = Department.class)
     @Override
     public Zone create(@RequestBody Zone zone) throws Exception {
-                return zoneService.save(zone);
+        return zoneService.save(zone);
     }
 
     @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing Department.", response = Department.class)
@@ -65,12 +65,13 @@ public class ZoneController extends CRUDController<Zone> implements ApiControlle
     /**
      * Soft deleting the department from the table.
      *
-     * @param department
-     * @param id
-     * @throws Exception
+     * @param zone zone object.
+     * @param id zone's id.
+     * @throws Exception unhandled errors.
      */
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Department.")
-    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDelete(@RequestBody Zone zone, @PathVariable(PATH_ID) Long id) throws Exception {
         /** Doing Soft delete from the department table. */
@@ -79,7 +80,8 @@ public class ZoneController extends CRUDController<Zone> implements ApiControlle
 
     @Override
     public List<Zone> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
+            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
+                    throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Zone.class);
         Page<Zone> pageResponse = zoneService.findAll(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
@@ -89,8 +91,8 @@ public class ZoneController extends CRUDController<Zone> implements ApiControlle
     /**
      * Get the list of zones.
      *
-     * @return
-     * @throws Exception
+     * @return zone list.
+     * @throws Exception unhandled errors.
      */
     @RequestMapping(value = "/list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)

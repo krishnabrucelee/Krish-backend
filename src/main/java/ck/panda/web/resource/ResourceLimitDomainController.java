@@ -37,7 +37,6 @@ import ck.panda.util.web.CRUDController;
 @Api(value = "ResourceLimitDomain", description = "Operations with resource limits", produces = "application/json")
 public class ResourceLimitDomainController extends CRUDController<ResourceLimitDomain> implements ApiController {
 
-
     /** Service reference to resource. */
     @Autowired
     private ResourceLimitDomainService resourceLimitDomainService;
@@ -56,11 +55,12 @@ public class ResourceLimitDomainController extends CRUDController<ResourceLimitD
      * @return resource limit
      * @throws Exception error
      */
-    @RequestMapping(value = "/create", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE }, consumes = {
-            MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/create", method = RequestMethod.POST, produces = {
+            MediaType.APPLICATION_JSON_VALUE }, consumes = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public List<ResourceLimitDomain> createResourceLimits(@RequestBody List<ResourceLimitDomain> resourceLimits) throws Exception {
+    public List<ResourceLimitDomain> createResourceLimits(@RequestBody List<ResourceLimitDomain> resourceLimits)
+            throws Exception {
         resourceLimits.get(0).setIsSyncFlag(true);
         return resourceLimitDomainService.createResourceLimits(resourceLimits);
     }

@@ -2,7 +2,7 @@ package ck.panda.util.audit;
 
 import java.time.ZonedDateTime;
 
-/** This interface defines the method used to get the current date and time.*/
+/** This interface defines the method used to get the current date and time. */
 public interface DateTimeService {
 
     /**

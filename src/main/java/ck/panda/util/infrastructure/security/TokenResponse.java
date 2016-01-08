@@ -19,6 +19,7 @@ public class TokenResponse {
 
     /**
      * Parameterized constructor.
+     * 
      * @param token to set
      */
     public TokenResponse(String token) {

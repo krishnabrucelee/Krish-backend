@@ -1,6 +1,5 @@
 package ck.panda.util;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +40,7 @@ public class ConfigUtil {
 
     /**
      * To find the apikey, secret key and url from our db.
+     * 
      * @param id table id
      * @return server
      * @throws EntityNotFoundException if entity not found
@@ -56,7 +56,7 @@ public class ConfigUtil {
     }
 
     public CloudStackServer setUserServer() throws NumberFormatException, Exception {
-        server.setServer(apiURL ,tokenDetails.getTokenDetails("secretkey"), tokenDetails.getTokenDetails("apikey"));
+        server.setServer(apiURL, tokenDetails.getTokenDetails("secretkey"), tokenDetails.getTokenDetails("apikey"));
         return server;
     }
 }

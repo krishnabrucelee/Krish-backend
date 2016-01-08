@@ -35,7 +35,8 @@ public interface ResourceLimitDomainRepository extends PagingAndSortingRepositor
      * @return domain
      */
     @Query(value = "select resource from ResourceLimitDomain resource where resource.isActive =:isActive AND resource.domainId =:domainId")
-    List<ResourceLimitDomain> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive);
+    List<ResourceLimitDomain> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId,
+            @Param("isActive") Boolean isActive);
 
     /**
      * Find all the active resource limits based on the domain id.
@@ -46,7 +47,8 @@ public interface ResourceLimitDomainRepository extends PagingAndSortingRepositor
      * @return domain resource type.
      */
     @Query(value = "select resource from ResourceLimitDomain resource where resource.isActive =:isActive AND resource.domainId =:domainId AND resource.resourceType =:resourceType")
-    ResourceLimitDomain findByDomainAndResourceType(@Param("domainId") Long id, @Param("resourceType") ResourceLimitDomain.ResourceType resourceType, @Param("isActive") Boolean isActive);
+    ResourceLimitDomain findByDomainAndResourceType(@Param("domainId") Long id,
+            @Param("resourceType") ResourceLimitDomain.ResourceType resourceType, @Param("isActive") Boolean isActive);
 
     /**
      * Delete all the resource limits based on the domain.
@@ -56,5 +58,6 @@ public interface ResourceLimitDomainRepository extends PagingAndSortingRepositor
      * @return domain resource type
      */
     @Query(value = "delete from ResourceLimitDomain resource where resource.isActive =:isActive AND resource.domainId =:domainId")
-    ResourceLimitDomain deleteByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive);
+    ResourceLimitDomain deleteByDomainAndIsActive(@Param("domainId") Long domainId,
+            @Param("isActive") Boolean isActive);
 }

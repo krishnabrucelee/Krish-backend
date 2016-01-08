@@ -10,8 +10,6 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 import org.hibernate.annotations.Type;
@@ -27,13 +25,11 @@ import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonUtil;
 
 /**
- * A region is the largest available organizational unit within a CloudStack
- * deployment. A region is made up of several availability Regions, where each
- * Region is roughly equivalent to a datacenter.
- *
+ * A region is the largest available organizational unit within a CloudStack deployment. A region is made up of several
+ * availability Regions, where each Region is roughly equivalent to a data center.
  */
 @Entity
-@Table(name = "ck_region")
+@Table(name = "regions")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class Region implements Serializable {
@@ -99,14 +95,14 @@ public class Region implements Serializable {
      */
     public enum Status {
 
-           /** If region is enabled we can create zones and pods. */
-           ENABLED,
+        /** If region is enabled we can create zones and pods. */
+        ENABLED,
 
-           /** If region is disabled cannot create any zones and pods until region gets enabled. */
-           DISABLED,
+        /** If region is disabled cannot create any zones and pods until region gets enabled. */
+        DISABLED,
 
-           /** If region is deleted we cannot create zones and pods. */
-           DELETED
+        /** If region is deleted we cannot create zones and pods. */
+        DELETED
     }
 
     /**

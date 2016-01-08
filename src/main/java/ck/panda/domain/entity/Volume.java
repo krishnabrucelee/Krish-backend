@@ -39,7 +39,7 @@ import ck.panda.util.JsonValidator;
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "ck_volume")
+@Table(name = "volumes")
 public class Volume {
 
     /** Unique ID of the volume. */
@@ -48,7 +48,7 @@ public class Volume {
     @Column(name = "id")
     private Long id;
 
-    /**  Unique ID from Cloud Stack. */
+    /** Unique ID from Cloud Stack. */
     @Column(name = "uuid")
     private String uuid;
 
@@ -58,7 +58,7 @@ public class Volume {
     @Column(name = "name", nullable = false)
     private String name;
 
-    /**  Type of disk. Either rook or data disk. */
+    /** Type of disk. Either rook or data disk. */
     @Column(name = "volume_type", nullable = false)
     private VolumeType volumeType;
 
@@ -90,8 +90,7 @@ public class Volume {
     private Long projectId;
 
     /**
-     * The Zone ID, this disk offering belongs to. Ignore this information as it
-     * is not currently applicable.
+     * The Zone ID, this disk offering belongs to. Ignore this information as it is not currently applicable.
      */
     @JoinColumn(name = "zone_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
@@ -111,8 +110,7 @@ public class Volume {
     private Long storageOfferingId;
 
     /**
-     * Appears only if Custom disk size is not selected. Define the volume size
-     * in GB.
+     * Appears only if Custom disk size is not selected. Define the volume size in GB.
      */
     @Column(name = "disk_size")
     private Long diskSize;
@@ -229,9 +227,8 @@ public class Volume {
     private String transProjectId;
 
     /**
-     * isSyncFlag field is not to be serialized,
-     * whereas JPA's @Transient annotation is used to indicate
-     * that a field is not to be persisted in the database.
+     * isSyncFlag field is not to be serialized, whereas JPA's @Transient annotation is used to indicate that a field is
+     * not to be persisted in the database.
      */
     @Transient
     private Boolean isSyncFlag;
@@ -358,7 +355,7 @@ public class Volume {
 
     /**
      * Get the domain of the Volume.
-
+     *
      * @return the domain of Volume.
      */
     public Domain getDomain() {
@@ -376,7 +373,7 @@ public class Volume {
 
     /**
      * Get the domainId of the Volume.
-
+     *
      * @return the domainId of Volume.
      */
     public Long getDomainId() {
@@ -394,7 +391,7 @@ public class Volume {
 
     /**
      * Get the department of the Volume.
-
+     *
      * @return the department of Volume.
      */
     public Department getDepartment() {
@@ -412,7 +409,7 @@ public class Volume {
 
     /**
      * Get the departmentId of the Volume.
-
+     *
      * @return the departmentId of Volume.
      */
     public Long getDepartmentId() {
@@ -430,7 +427,7 @@ public class Volume {
 
     /**
      * Get the project of the Volume.
-
+     *
      * @return the project of Volume.
      */
     public Project getProject() {
@@ -448,7 +445,7 @@ public class Volume {
 
     /**
      * Get the projectId of the Volume.
-
+     *
      * @return the projectId of Volume.
      */
     public Long getProjectId() {
@@ -610,7 +607,7 @@ public class Volume {
 
     /**
      * Get the format of the Volume.
-
+     *
      * @return the format of Volume.
      */
     public Format getFormat() {
@@ -628,7 +625,7 @@ public class Volume {
 
     /**
      * Get the url of the Volume.
-
+     *
      * @return the url of Volume.
      */
     public String getUrl() {
@@ -646,7 +643,7 @@ public class Volume {
 
     /**
      * Get the checksum of the Volume.
-
+     *
      * @return the checksum of Volume.
      */
     public String getChecksum() {
@@ -664,7 +661,7 @@ public class Volume {
 
     /**
      * Get the eventMessage of the Volume.
-
+     *
      * @return the eventMessage of Volume.
      */
     public String getEventMessage() {
@@ -824,7 +821,6 @@ public class Volume {
         this.isSyncFlag = isSyncFlag;
     }
 
-
     /**
      * Get the instance.
      *
@@ -863,7 +859,7 @@ public class Volume {
 
     /**
      * Get the is removed of the Volume.
-
+     *
      * @return the isRemoved of Volume.
      */
     public Boolean getIsRemoved() {
@@ -881,7 +877,7 @@ public class Volume {
 
     /**
      * Get the is Shrink of the Volume.
-
+     *
      * @return the isShrink of Volume.
      */
     public Boolean getIsShrink() {
@@ -900,8 +896,8 @@ public class Volume {
     /**
      * Get the Transient VM Instance Id.
      *
-    * @return the transvmInstanceId
-    */
+     * @return the transvmInstanceId
+     */
     public String getTransvmInstanceId() {
         return transvmInstanceId;
     }
@@ -927,7 +923,7 @@ public class Volume {
     /**
      * Get the transZoneId.
      *
-     * @param transZoneId  to set
+     * @param transZoneId to set
      */
     public void setTransZoneId(String transZoneId) {
         this.transZoneId = transZoneId;
@@ -945,7 +941,7 @@ public class Volume {
     /**
      * Set the transStorageOfferingId.
      *
-     * @param transStorageOfferingId  to set
+     * @param transStorageOfferingId to set
      */
     public void setTransStorageOfferingId(String transStorageOfferingId) {
         this.transStorageOfferingId = transStorageOfferingId;
@@ -953,7 +949,7 @@ public class Volume {
 
     /**
      * Get the transDomainId of the Volume.
-
+     *
      * @return the transDomainId of Volume.
      */
     public String getTransDomainId() {
@@ -971,7 +967,7 @@ public class Volume {
 
     /**
      * Get the transDepartmentId of the Volume.
-
+     *
      * @return the transDepartmentId of Volume.
      */
     public String getTransDepartmentId() {
@@ -989,7 +985,7 @@ public class Volume {
 
     /**
      * Get the transProjectId of the Volume.
-
+     *
      * @return the transProjectId of Volume.
      */
     public String getTransProjectId() {
@@ -1033,7 +1029,8 @@ public class Volume {
             } else if (JsonValidator.jsonStringValidation(object, "state").equals("UploadError")) {
                 volume.setStatus(volume.getStatus().UPLOAD_ERROR);
             } else {
-                volume.setStatus(volume.getStatus().valueOf(JsonValidator.jsonStringValidation(object, "state").toUpperCase()));
+                volume.setStatus(
+                        volume.getStatus().valueOf(JsonValidator.jsonStringValidation(object, "state").toUpperCase()));
             }
             volume.setCreatedDateTime(JsonUtil.convertToZonedDateTime(object.getString("created")));
             volume.setTransStorageOfferingId((JsonUtil.getStringValue(object, "diskofferingid")));

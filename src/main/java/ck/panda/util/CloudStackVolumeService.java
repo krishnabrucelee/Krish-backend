@@ -41,11 +41,10 @@ public class CloudStackVolumeService {
      * @return created response
      * @throws Exception error
      */
-    public String createVolume(String diskVolumeName, String diskOffering, String zone, String response, HashMap<String, String> optional)
-            throws Exception {
+    public String createVolume(String diskVolumeName, String diskOffering, String zone, String response,
+            HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("createVolume", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("createVolume", optional);
         arguments.add(new NameValuePair("name", diskVolumeName));
         arguments.add(new NameValuePair("diskofferingid", diskOffering));
         arguments.add(new NameValuePair("zoneid", zone));
@@ -56,7 +55,6 @@ public class CloudStackVolumeService {
         return createResponse;
     }
 
-
     /**
      * Deletes a detached disk volume.
      *
@@ -65,11 +63,9 @@ public class CloudStackVolumeService {
      * @return delete response
      * @throws Exception error
      */
-    public String deleteVolume(String diskVolumeId, String response)
-            throws Exception {
+    public String deleteVolume(String diskVolumeId, String response) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("deleteVolume", null);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("deleteVolume", null);
         arguments.add(new NameValuePair("id", diskVolumeId));
         arguments.add(new NameValuePair("response", response));
 
@@ -79,7 +75,6 @@ public class CloudStackVolumeService {
 
     }
 
-
     /**
      * Lists all volumes.
      *
@@ -88,11 +83,9 @@ public class CloudStackVolumeService {
      * @return list response.
      * @throws Exception error
      */
-    public String listVolumes(String response, HashMap<String, String> optional)
-            throws Exception {
+    public String listVolumes(String response, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("listVolumes", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("listVolumes", optional);
         arguments.add(new NameValuePair("response", response));
 
         String listResponse = server.request(arguments);
@@ -108,11 +101,9 @@ public class CloudStackVolumeService {
      * @return job response
      * @throws Exception error
      */
-    public String volumeJobResult(String asychronousJobid, String response)
-            throws Exception {
+    public String volumeJobResult(String asychronousJobid, String response) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("queryAsyncJobResult", null);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("queryAsyncJobResult", null);
         arguments.add(new NameValuePair("jobid", asychronousJobid));
         arguments.add(new NameValuePair("response", response));
         String jobResponse = server.request(arguments);
@@ -132,16 +123,14 @@ public class CloudStackVolumeService {
     public String attachVolume(String diskVolumeId, String response, HashMap<String, String> optional)
             throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("attachVolume", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("attachVolume", optional);
         arguments.add(new NameValuePair("id", diskVolumeId));
         arguments.add(new NameValuePair("response", response));
 
         String responseDocument = server.request(arguments);
 
-        return  responseDocument;
+        return responseDocument;
     }
-
 
     /**
      * Detaches a disk volume from a virtual machine.
@@ -151,15 +140,13 @@ public class CloudStackVolumeService {
      * @return response
      * @throws Exception Exception
      */
-    public String detachVolume(String response, HashMap<String, String> optional)
-            throws Exception {
+    public String detachVolume(String response, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("detachVolume", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("detachVolume", optional);
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
 
-        return  responseDocument;
+        return responseDocument;
     }
 
     /**
@@ -196,12 +183,10 @@ public class CloudStackVolumeService {
      * @return uploadResponse uploaded volume response
      * @throws Exception error
      */
-    public String uploadVolume(String name, String format, String zoneId,
-            String url, String response, HashMap<String, String> optional)
-            throws Exception {
+    public String uploadVolume(String name, String format, String zoneId, String url, String response,
+            HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("uploadVolume", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("uploadVolume", optional);
         arguments.add(new NameValuePair("name", name));
         arguments.add(new NameValuePair("url", url));
         arguments.add(new NameValuePair("format", format));

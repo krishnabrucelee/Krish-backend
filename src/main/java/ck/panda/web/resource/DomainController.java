@@ -45,7 +45,7 @@ public class DomainController extends CRUDController<Domain> implements ApiContr
     @Autowired
     private DomainRepository domainRepository;
 
-    /** Autowired TokenDetails */
+    /** Autowired TokenDetails. */
     @Autowired
     private TokenDetails tokenDetails;
 
@@ -71,7 +71,8 @@ public class DomainController extends CRUDController<Domain> implements ApiContr
 
     @Override
     public List<Domain> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
+            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
+                    throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Domain.class);
         Page<Domain> pageResponse = domainService.findAllByActive(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
@@ -84,32 +85,33 @@ public class DomainController extends CRUDController<Domain> implements ApiContr
      * @return projects
      * @throws Exception error
      */
-      @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-      @ResponseStatus(HttpStatus.OK)
-      @ResponseBody
-      protected List<Domain> getSearch() throws Exception {
-    	  Domain domain = domainService.find(Long.parseLong(tokenDetails.getTokenDetails("domainid")));
-          if (domain != null && !domain.getName().equals("ROOT")) {
-        	  List<Domain> domainList = new ArrayList<Domain>();
-        	  domainList.add(domain);
-              return domainList;
-          }
-          return domainService.findAll();
-      }
+    @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<Domain> getSearch() throws Exception {
+        Domain domain = domainService.find(Long.parseLong(tokenDetails.getTokenDetails("domainid")));
+        if (domain != null && !domain.getName().equals("ROOT")) {
+            List<Domain> domainList = new ArrayList<Domain>();
+            domainList.add(domain);
+            return domainList;
+        }
+        return domainService.findAll();
+    }
 
-      /**
-       * Delete the Domain.
-       *
-       * @param domain id reference of the domain.
-       * @param id domain id.
-       * @throws Exception error occurs.
-       */
-      @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Domain.")
-      @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
-      @ResponseStatus(HttpStatus.NO_CONTENT)
-      public void softDelete(@RequestBody Domain domain, @PathVariable(PATH_ID) Long id) throws Exception {
-          /** Doing Soft delete from the department table. */
-    	domain.setSyncFlag(true);
+    /**
+     * Delete the Domain.
+     *
+     * @param domain id reference of the domain.
+     * @param id domain id.
+     * @throws Exception error occurs.
+     */
+    @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Domain.")
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void softDelete(@RequestBody Domain domain, @PathVariable(PATH_ID) Long id) throws Exception {
+        /** Doing Soft delete from the department table. */
+        domain.setSyncFlag(true);
         domainService.softDelete(domain);
-      }
+    }
 }

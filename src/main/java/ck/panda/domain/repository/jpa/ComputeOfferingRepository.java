@@ -8,11 +8,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.ComputeOffering;
-import ck.panda.domain.entity.Department;
 
 /**
- * ComputeOfferingRepository interface that extends PagingAndSortingRepository along with sorting and
- * pagination.
+ * ComputeOfferingRepository interface that extends PagingAndSortingRepository along with sorting and pagination.
  */
 public interface ComputeOfferingRepository extends PagingAndSortingRepository<ComputeOffering, Long> {
     /**

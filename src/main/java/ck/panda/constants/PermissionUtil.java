@@ -8,20 +8,21 @@ import java.util.Map;
 import java.util.Map.Entry;
 import ck.panda.domain.entity.Permission;
 import ck.panda.domain.entity.Permission.Module;
+
 /**
  *
  * Prepare permission list.
  */
 public final class PermissionUtil {
 
-   /**
-    * PermissionUtil constructor.
-    */
+    /**
+     * PermissionUtil constructor.
+     */
     private PermissionUtil() {
 
     }
 
-   /**
+    /**
      *
      * @param instance - Name of instance
      * @param storage - Name of storage
@@ -41,11 +42,11 @@ public final class PermissionUtil {
      */
 
     @SuppressWarnings("rawtypes")
-    public static List<Permission> createPermissions(String instance, String storage, String network, String sshkey, String quotaLimit,
-			String vpc, String temp, String addService, String project, String application, String dept, String roles, String user, String report) {
+    public static List<Permission> createPermissions(String instance, String storage, String network, String sshkey,
+            String quotaLimit, String vpc, String temp, String addService, String project, String application,
+            String dept, String roles, String user, String report) {
         List<String> stringList = new ArrayList<String>();
-        Map<Module, List<String>> moduleActionMap =
-        		new HashMap<Module, List<String>>();
+        Map<Module, List<String>> moduleActionMap = new HashMap<Module, List<String>>();
         List<Module> moduleList = new ArrayList<Module>();
         stringList.add(instance);
         stringList.add(storage);
@@ -64,7 +65,7 @@ public final class PermissionUtil {
 
         for (String string : stringList) {
             List<String> actionList = new ArrayList<String>();
-            String[] stringArray =  string.split("-");
+            String[] stringArray = string.split("-");
             String[] actions = stringArray[1].split(",");
             for (String action : actions) {
                 actionList.add(action);
@@ -113,10 +114,11 @@ public final class PermissionUtil {
      * @param report - Name of report
      * @return Permission list - Name of Permission
      */
-    public static List<Permission> updatePermissions(String instance, String storage, String network, String sshkey, String quotaLimit,
-			String vpc, String temp, String addService, String project, String application, String dept, String roles, String user, String report) {
-        List<Permission> newList = PermissionUtil.createPermissions(instance, storage, network, sshkey, quotaLimit, vpc, temp,
-            addService, project, application, dept, roles, user, report);
+    public static List<Permission> updatePermissions(String instance, String storage, String network, String sshkey,
+            String quotaLimit, String vpc, String temp, String addService, String project, String application,
+            String dept, String roles, String user, String report) {
+        List<Permission> newList = PermissionUtil.createPermissions(instance, storage, network, sshkey, quotaLimit, vpc,
+                temp, addService, project, application, dept, roles, user, report);
         return newList;
     }
 
@@ -126,7 +128,7 @@ public final class PermissionUtil {
      * @param moduleDesc - Module and description map
      * @return Module map
      */
-    private static Map<Module,String> prepareModuleDesc(Module[] modules, Map<Module,String> moduleDesc) {
+    private static Map<Module, String> prepareModuleDesc(Module[] modules, Map<Module, String> moduleDesc) {
         moduleDesc.put(Module.INSTANCE, "Instance");
         moduleDesc.put(Module.STORAGE, "Storage");
         moduleDesc.put(Module.NETWORK, "Network");
@@ -160,18 +162,17 @@ public final class PermissionUtil {
 
                 String[] formKeyArray = action.split(" ");
                 String tempStr = "";
-                for (int i=0 ;i< formKeyArray.length;i++) {
-                	if(i != formKeyArray.length-1) {
-                		tempStr += formKeyArray[i].concat("_");
-                		}
-                	else {
-                		tempStr += formKeyArray[i];
-                	}
-				}
+                for (int i = 0; i < formKeyArray.length; i++) {
+                    if (i != formKeyArray.length - 1) {
+                        tempStr += formKeyArray[i].concat("_");
+                    } else {
+                        tempStr += formKeyArray[i];
+                    }
+                }
                 actionsModule.put(action.concat(",").concat(tempStr), entry.getKey());
             }
         }
         return actionsModule;
     }
 
-    }
+}

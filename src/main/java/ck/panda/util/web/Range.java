@@ -3,7 +3,6 @@ package ck.panda.util.web;
 import org.springframework.util.Assert;
 import ck.panda.constants.GenericConstants;
 
-
 /**
  * Range object to handle pagination values.
  *
@@ -28,7 +27,7 @@ public class Range {
     public Range(String range, Integer limit) {
         String[] parsed = range.split("-");
 
-        //TODO Add translation
+        // TODO Add translation
         Assert.isTrue(parsed.length == 2, "Range header in an unexpected format.");
         this.firstResult = new Integer(parsed[0]);
         this.endResult = new Integer(parsed[1]);
@@ -45,67 +44,69 @@ public class Range {
 
     /**
      * Get the first result.
+     * 
      * @return first result.
      */
     public Integer getFirstResult() {
-       return this.firstResult;
+        return this.firstResult;
     }
 
     /**
      * Get the max results.
+     * 
      * @return max results.
      */
     public Integer getMaxResults() {
-       return this.maxResults;
+        return this.maxResults;
     }
 
     /**
      * Get the page number.
+     * 
      * @return page number.
      */
     public Integer getPageNumber() {
         return (firstResult / pageElementCount) + 1;
     }
 
+    /**
+     * Get the content range value.
+     *
+     * @param resultCount to set
+     * @param totalCount to set
+     * @return the content range
+     */
+    public String getContentRangeValue(Integer resultCount, Long totalCount) {
+        StringBuilder value = new StringBuilder("items " + firstResult + "-");
 
-     /**
-      * Get the content range value.
-      *
-      * @param resultCount to set
-      * @param totalCount to set
-      * @return the content range
-      */
-     public String getContentRangeValue(Integer resultCount, Long totalCount) {
-         StringBuilder value = new StringBuilder("items " + firstResult + "-");
-
-         if (resultCount == 0) {
-             value.append("0");
-         } else if (resultCount >= totalCount.intValue()) {
-             if (totalCount.intValue() > 0) {
-                 value.append(totalCount - 1);
-             } else {
-                 value.append("0");
-             }
-         } else {
-             Integer tempEndResult = (firstResult + resultCount - 1);
-             if (tempEndResult >= totalCount) {
-                 value.append(totalCount - 1);
-             } else {
-                 value.append(firstResult + resultCount - 1);
-             }
-         }
-         value.append("/" + totalCount);
-         return value.toString();
+        if (resultCount == 0) {
+            value.append("0");
+        } else if (resultCount >= totalCount.intValue()) {
+            if (totalCount.intValue() > 0) {
+                value.append(totalCount - 1);
+            } else {
+                value.append("0");
+            }
+        } else {
+            Integer tempEndResult = (firstResult + resultCount - 1);
+            if (tempEndResult >= totalCount) {
+                value.append(totalCount - 1);
+            } else {
+                value.append(firstResult + resultCount - 1);
+            }
+        }
+        value.append("/" + totalCount);
+        return value.toString();
     }
 
-     /**
-      * Get the content range value.
-      *
-      * @param resultCount to set
-      * @param totalCount to set
-      * @param offSet to set
-      * @return the content range
-      */
+    /**
+     * Get the content range value.
+     *
+     * @param resultCount to set
+     * @param totalCount to set
+     * @param offSet to set
+     * @return the content range
+     */
     public String getContentRangeValue(Integer resultCount, Long totalCount, Integer offSet) {
         StringBuilder value = new StringBuilder("items " + offSet + "-");
 

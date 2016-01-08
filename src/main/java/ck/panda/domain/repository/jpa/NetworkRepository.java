@@ -7,9 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Network;
-import ck.panda.domain.entity.Project;
 
 /**
  * JPA repository for Network entity.
@@ -18,35 +16,43 @@ public interface NetworkRepository extends PagingAndSortingRepository<Network, L
 
     /**
      * Find Network by uuid.
+     *
      * @param uuid Network uuid.
      * @return uuid
      */
     @Query(value = "select net from Network net where net.uuid LIKE :uuid ")
     Network findByUUID(@Param("uuid") String uuid);
-    
+
     /**
      * Find Network by id.
+     *
      * @param id Network id.
      * @return id
      */
     @Query(value = "select net from Network net where net.id LIKE :id ")
-    Network findById(@Param("id") Long Id);
+    Network findById(@Param("id") Long id);
 
     /**
      * Find Network list by department.
-     * @param department department name.
+     *
+     * @param departmentId department id.
+     * @param isActive true/false.
      * @return network list.
      */
     @Query(value = "select net from Network net where net.departmentId=:departmentId AND net.isActive =:isActive ")
-    List<Network> findByDepartmentAndNetworkIsActive(@Param("departmentId") Long departmentId, @Param("isActive") Boolean isActive);
+    List<Network> findByDepartmentAndNetworkIsActive(@Param("departmentId") Long departmentId,
+            @Param("isActive") Boolean isActive);
 
     /**
      * Find Network list by department.
-     * @param department department name.
+     *
+     * @param projectId project id.
+     * @param isActive true/false.
      * @return network list.
      */
     @Query(value = "select net from Network net where net.projectId=:projectId AND net.isActive =:isActive ")
-    List<Network> findByProjectAndNetworkIsActive(@Param("projectId") Long projectId, @Param("isActive") Boolean isActive);
+    List<Network> findByProjectAndNetworkIsActive(@Param("projectId") Long projectId,
+            @Param("isActive") Boolean isActive);
 
     /**
      * Find all the active or inactive snapshots with pagination.
@@ -67,7 +73,8 @@ public interface NetworkRepository extends PagingAndSortingRepository<Network, L
      * @return list of network.
      */
     @Query(value = "select net from Network net where net.isActive =:isActive AND net.domainId =:domainId")
-    Page<Network> findByDomainIsActive(Pageable pageable, @Param("isActive") Boolean isActive, @Param("domainId") Long domainId);
+    Page<Network> findByDomainIsActive(Pageable pageable, @Param("isActive") Boolean isActive,
+            @Param("domainId") Long domainId);
 
     /**
      * Find by name of the Network.

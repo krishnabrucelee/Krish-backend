@@ -8,8 +8,7 @@ import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
- * Service class for Domain.
- * This service provides basic CRUD and essential api's for Domain related business actions.
+ * Service class for Domain. This service provides basic CRUD and essential api's for Domain related business actions.
  *
  */
 @Service
@@ -59,4 +58,3 @@ public interface DomainService extends CRUDService<Domain> {
     List<Domain> findAllDomain() throws Exception;
 
 }
-

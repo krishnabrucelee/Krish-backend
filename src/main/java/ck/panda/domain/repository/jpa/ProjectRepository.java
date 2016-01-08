@@ -2,7 +2,6 @@ package ck.panda.domain.repository.jpa;
 
 import java.util.List;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -56,7 +55,7 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, L
      * @return list of active project.
      */
     @Query(value = "select project from Project project where project.isActive IS TRUE and project.domainId = :domain")
-    List<Project> findbyDomain(@Param("domain")Long id);
+    List<Project> findbyDomain(@Param("domain") Long id);
 
     /**
      * Find all the project using Uuid and IsActive Status.
@@ -98,15 +97,16 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, L
     List<Project> findByUserAndIsActive(@Param("id") Long userId, @Param("isActive") Boolean isActive);
 
     /**
-     * find all the project with active status.
+     * Find all the project with active status.
      *
      * @param pageable pagination information.
+     * @param domainId domain id.
      * @param isActive true/false.
      * @param status of project.
      * @return list of project.
      */
-    @Query(value = "select project from Project project where project.isActive IS :isactive and project.domainId = :domain and project.status = :status ")
-    Page<Project> findAllProjectByDomain(@Param("domain") Long id, Pageable pageable,@Param("isactive") Boolean isActive,@Param("status") Status enabled);
+    @Query(value = "select project from Project project where project.isActive IS :isactive and project.domainId = :domainid and project.status = :status ")
+    Page<Project> findAllProjectByDomain(@Param("domainid") Long domainId, Pageable pageable,
+            @Param("isactive") Boolean isActive, @Param("status") Status status);
 
 }
-

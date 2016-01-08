@@ -17,6 +17,7 @@ public interface IsoRepository extends PagingAndSortingRepository<Iso, Long> {
      * Find iso by uuid.
      *
      * @param uuid of iso.
+     * @param bootable true/false.
      * @return iso object.
      */
     @Query(value = "select iso from Iso iso where iso.uuid = :uuid and iso.isBootable = :bootable")
@@ -29,6 +30,6 @@ public interface IsoRepository extends PagingAndSortingRepository<Iso, Long> {
      * @return list of iso objects.
      */
     @Query(value = "select iso from Iso iso where iso.isBootable = :bootable")
-    List<Iso> findByBootable( @Param("bootable") Boolean bootable);
+    List<Iso> findByBootable(@Param("bootable") Boolean bootable);
 
 }

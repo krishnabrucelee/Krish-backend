@@ -13,7 +13,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -26,12 +25,11 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
- * Resource limit department entity.
- *
+ * Resource limit department entity. *
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "ck_resource_limit_department")
+@Table(name = "resource_limit_departments")
 public class ResourceLimitDepartment {
 
     /** Unique ID of the Resource limit. */
@@ -58,7 +56,7 @@ public class ResourceLimitDepartment {
     @Column(name = "department_id")
     private Long departmentId;
 
-    /**  Type of resource. */
+    /** Type of resource. */
     @Column(name = "resource_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private ResourceType resourceType;
@@ -77,7 +75,7 @@ public class ResourceLimitDepartment {
     @Column(name = "version")
     private Long version;
 
-    /** unique separator for each department with resource type.*/
+    /** unique separator for each department with resource type. */
     @Transient
     private String uniqueSeperator;
 
@@ -111,9 +109,8 @@ public class ResourceLimitDepartment {
     private Boolean isActive;
 
     /**
-     * isSyncFlag field is not to be serialized,
-     * whereas JPA's @Transient annotation is used to indicate
-     * that a field is not to be persisted in the database.
+     * isSyncFlag field is not to be serialized, whereas JPA's @Transient annotation is used to indicate that a field is
+     * not to be persisted in the database.
      */
     @Transient
     private Boolean isSyncFlag;
@@ -129,11 +126,11 @@ public class ResourceLimitDepartment {
     /** Enum type for Resource Limit. */
     public enum ResourceType {
 
-        /**  Number of instances a user can create. */
+        /** Number of instances a user can create. */
         Instance,
         /** Number of public IP addresses a user can own. */
         IP,
-        /**  Number of disk volumes a user can create. */
+        /** Number of disk volumes a user can create. */
         Volume,
         /** Number of snapshots a user can create. */
         Snapshot,
@@ -471,19 +468,19 @@ public class ResourceLimitDepartment {
     }
 
     /**
-    * Get transient department.
-    *
-    * @return the transDepartment
-    */
+     * Get transient department.
+     *
+     * @return the transDepartment
+     */
     public String getTransDepartment() {
         return transDepartment;
     }
 
     /**
-    * Set the transient Department.
-    *
-    * @param transDepartment  to set
-    */
+     * Set the transient Department.
+     *
+     * @param transDepartment to set
+     */
     public void setTransDepartment(String transDepartment) {
         this.transDepartment = transDepartment;
     }
