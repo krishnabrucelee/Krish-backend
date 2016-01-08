@@ -117,8 +117,8 @@ public class EgressRuleServiceImpl implements EgressRuleService {
     }
 
     @Override
-    public Page<FirewallRules> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return egressRepo.findAll(pagingAndSorting.toPageRequest());
+    public Page<FirewallRules> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
+        return egressRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
     }
 
     @Override
@@ -183,4 +183,9 @@ public class EgressRuleServiceImpl implements EgressRuleService {
             }
         return egressList;
    }
+
+    @Override
+    public Page<FirewallRules> findAll(PagingAndSorting pagingAndSorting) throws Exception {
+          return egressRepo.findAll(pagingAndSorting.toPageRequest());
+    }
 }

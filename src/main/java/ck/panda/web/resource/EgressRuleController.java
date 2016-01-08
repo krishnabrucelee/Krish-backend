@@ -62,7 +62,7 @@ public class EgressRuleController extends CRUDController<FirewallRules> implemen
     public List<FirewallRules> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, FirewallRules.class);
-        Page<FirewallRules> pageResponse = egressService.findAll(page);
+        Page<FirewallRules> pageResponse = egressService.findAllByActive(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
