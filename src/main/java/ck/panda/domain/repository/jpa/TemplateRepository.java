@@ -47,7 +47,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * Get the template without system type.
      *
      * @param type of template
-     * @param format format of template
+     * @param format of template
      * @param isActive true/false
      * @param pageable of template
      * @return user and routing template list

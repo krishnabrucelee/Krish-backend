@@ -274,10 +274,6 @@ public class Template implements Serializable {
     @Column(name = "is_active")
     private Boolean isActive;
 
-    /** Flag attribute to verify Iso or template. */
-    @Column(name = "flag")
-    private Boolean flag;
-
     /**
      * Get the id.
      *
@@ -1192,22 +1188,6 @@ public class Template implements Serializable {
         this.isActive = isActive;
     }
 
-    /**
-     * Get the flag of the Template.
-
-     * @return the flag of Template.
-     */
-    public Boolean getFlag() {
-        return flag;
-    }
-    /**
-     * Set the flag of the Template.
-     *
-     * @param flag the flag to set
-     */
-    public void setFlag(Boolean flag) {
-        this.flag = flag;
-    }
     /** RootDiskController enum type used to list the static root disk controller values. */
     public enum RootDiskController {
         /** Root disk controller type as SCSI. */
@@ -1282,6 +1262,14 @@ public class Template implements Serializable {
         ACTIVE,
         /** Template status as INACTIVE. */
         INACTIVE
+    }
+
+    /** Flag enum type used to choose whether it is template or iso. */
+    public enum Flag {
+        /** Template flag. */
+        TEMPLATE,
+        /** Iso flag. */
+        ISO
     }
 
     /**
