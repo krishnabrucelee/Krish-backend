@@ -175,89 +175,112 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         if (jobresult.has("virtualmachine")) {
             VmInstance vmInstance = VmInstance.convert(jobresult.getJSONObject("virtualmachine"));
             VmInstance instance = virtualMachineService.findByUUID(vmInstance.getUuid());
-            instance.setSyncFlag(false);
-            // 3.1 Find the corresponding CS server vm object by finding it in a
-            // hash using uuid
-            if (vmInstance.getUuid().equals(instance.getUuid())) {
-                VmInstance csVm = vmInstance;
-                instance.setName(csVm.getName());
-                if (csVm.getCpuCore() != null) {
-                    instance.setCpuCore(csVm.getCpuCore());
+            VmInstance vmIn = null;
+            if (instance != null) {
+                instance.setSyncFlag(false);
+                // 3.1 Find the corresponding CS server vm object by finding it in a
+                // hash using uuid
+                if (vmInstance.getUuid().equals(instance.getUuid())) {
+                    VmInstance csVm = vmInstance;
+                    instance.setName(csVm.getName());
+                    if (csVm.getCpuCore() != null) {
+                        instance.setCpuCore(csVm.getCpuCore());
+                    }
+                    if (csVm.getDomainId() != null) {
+                        instance.setDomainId(csVm.getDomainId());
+                    }
+                    instance.setStatus(csVm.getStatus());
+                    if (csVm.getZoneId() != null) {
+                        instance.setZoneId(csVm.getZoneId());
+                    }
+                    if (csVm.getHostId() != null) {
+                        instance.setHostId(csVm.getHostId());
+                    }
+                    if (csVm.getPodId() != null) {
+                        instance.setPodId(csVm.getPodId());
+                    }
+                    if (csVm.getComputeOfferingId() != null) {
+                        instance.setComputeOfferingId(csVm.getComputeOfferingId());
+                    }
+                    if (csVm.getCpuSpeed() != null) {
+                        instance.setCpuSpeed(csVm.getCpuSpeed());
+                    }
+                    if (csVm.getMemory() != null) {
+                        instance.setMemory(csVm.getMemory());
+                    }
+                    if (csVm.getCpuUsage() != null) {
+                        instance.setCpuUsage(csVm.getCpuUsage());
+                    }
+                    instance.setDiskIoRead(csVm.getDiskIoRead());
+                    instance.setDiskIoWrite(csVm.getDiskIoWrite());
+                    instance.setDiskKbsRead(csVm.getDiskKbsRead());
+                    instance.setDiskKbsWrite(csVm.getDiskKbsWrite());
+                    instance.setNetworkKbsRead(csVm.getNetworkKbsRead());
+                    instance.setNetworkKbsWrite(csVm.getNetworkKbsWrite());
+                    instance.setPasswordEnabled(csVm.getPasswordEnabled());
+                    if (csVm.getPassword() != null) {
+                        instance.setPassword(csVm.getPassword());
+                    }
+                    instance.setIso(csVm.getIso());
+                    instance.setIsoName(csVm.getIsoName());
+                    if (csVm.getIpAddress() != null) {
+                        instance.setIpAddress(csVm.getIpAddress());
+                    }
+                    if (csVm.getNetworkId() != null) {
+                        instance.setNetworkId(csVm.getNetworkId());
+                    }
+                    if (csVm.getInstanceInternalName() != null) {
+                        instance.setInstanceInternalName(csVm.getInstanceInternalName());
+                    }
+                    if (csVm.getVolumeSize() != null) {
+                        instance.setVolumeSize(csVm.getVolumeSize());
+                    }
+                    instance.setDisplayName(csVm.getDisplayName());
+                    if (csVm.getDepartmentId() != null) {
+                        instance.setDepartmentId(csVm.getDepartmentId());
+                    }
+                    if (csVm.getProjectId() != null) {
+                        instance.setProjectId(csVm.getProjectId());
+                    }
+                    if (csVm.getInstanceOwnerId() != null) {
+                        instance.setInstanceOwnerId(csVm.getInstanceOwnerId());
+                    }
+                    LOGGER.debug("sync VM for ASYNC");
+                    // VNC password set.
+                    if (csVm.getPassword() != null) {
+                        String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+                        byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+                        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+                        String encryptedPassword = new String(EncryptionUtil.encrypt(csVm.getPassword(), originalKey));
+                        instance.setVncPassword(encryptedPassword);
+                    }
+                    // 3.2 If found, update the vm object in app db
+                    vmIn = virtualMachineService.update(instance);
                 }
-                if (csVm.getDomainId() != null) {
-                    instance.setDomainId(csVm.getDomainId());
+            } else {
+                vmInstance.setDomainId(convertEntityService.getDomainId(vmInstance.getTransDomainId()));
+                vmInstance.setZoneId(convertEntityService.getZoneId(vmInstance.getTransZoneId()));
+                vmInstance.setNetworkId(convertEntityService.getNetworkId(vmInstance.getTransNetworkId()));
+                vmInstance.setProjectId(convertEntityService.getProjectId(vmInstance.getTransProjectId()));
+                vmInstance.setHostId(convertEntityService.getHostId(vmInstance.getTransHostId()));
+                vmInstance.setInstanceOwnerId(convertEntityService.getUserByName(vmInstance.getTransDisplayName(),
+                        convertEntityService.getDomain(vmInstance.getTransDomainId())));
+                vmInstance.setDepartmentId(
+                        convertEntityService.getDepartmentByUsernameAndDomains(vmInstance.getTransDepartmentId(),
+                                convertEntityService.getDomain(vmInstance.getTransDomainId())));
+                vmInstance.setTemplateId(convertEntityService.getTemplateId(vmInstance.getTransTemplateId()));
+                vmInstance.setComputeOfferingId(
+                        convertEntityService.getComputeOfferId(vmInstance.getTransComputeOfferingId()));
+                if (vmInstance.getHostId() != null) {
+                    vmInstance.setPodId(convertEntityService
+                            .getPodIdByHost(convertEntityService.getHostId(vmInstance.getTransHostId())));
                 }
-                instance.setStatus(csVm.getStatus());
-                if (csVm.getZoneId() != null) {
-                    instance.setZoneId(csVm.getZoneId());
-                }
-                if (csVm.getHostId() != null) {
-                    instance.setHostId(csVm.getHostId());
-                }
-                if (csVm.getPodId() != null) {
-                    instance.setPodId(csVm.getPodId());
-                }
-                if (csVm.getComputeOfferingId() != null) {
-                    instance.setComputeOfferingId(csVm.getComputeOfferingId());
-                }
-                if (csVm.getCpuSpeed() != null) {
-                    instance.setCpuSpeed(csVm.getCpuSpeed());
-                }
-                if (csVm.getMemory() != null) {
-                    instance.setMemory(csVm.getMemory());
-                }
-                if (csVm.getCpuUsage() != null) {
-                    instance.setCpuUsage(csVm.getCpuUsage());
-                }
-                instance.setDiskIoRead(csVm.getDiskIoRead());
-                instance.setDiskIoWrite(csVm.getDiskIoWrite());
-                instance.setDiskKbsRead(csVm.getDiskKbsRead());
-                instance.setDiskKbsWrite(csVm.getDiskKbsWrite());
-                instance.setNetworkKbsRead(csVm.getNetworkKbsRead());
-                instance.setNetworkKbsWrite(csVm.getNetworkKbsWrite());
-                instance.setPasswordEnabled(csVm.getPasswordEnabled());
-                if (csVm.getPassword() != null) {
-                    instance.setPassword(csVm.getPassword());
-                }
-                instance.setIso(csVm.getIso());
-                instance.setIsoName(csVm.getIsoName());
-                if (csVm.getIpAddress() != null) {
-                    instance.setIpAddress(csVm.getIpAddress());
-                }
-                if (csVm.getNetworkId() != null) {
-                    instance.setNetworkId(csVm.getNetworkId());
-                }
-                if (csVm.getInstanceInternalName() != null) {
-                    instance.setInstanceInternalName(csVm.getInstanceInternalName());
-                }
-                if (csVm.getVolumeSize() != null) {
-                    instance.setVolumeSize(csVm.getVolumeSize());
-                }
-                instance.setDisplayName(csVm.getDisplayName());
-                if (csVm.getDepartmentId() != null) {
-                    instance.setDepartmentId(csVm.getDepartmentId());
-                }
-                if (csVm.getProjectId() != null) {
-                    instance.setProjectId(csVm.getProjectId());
-                }
-                if (csVm.getInstanceOwnerId() != null) {
-                    instance.setInstanceOwnerId(csVm.getInstanceOwnerId());
-                }
-                LOGGER.debug("sync VM for ASYNC");
-                // VNC password set.
-                if (csVm.getPassword() != null) {
-                    String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
-                    byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
-                    SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-                    String encryptedPassword = new String(EncryptionUtil.encrypt(csVm.getPassword(), originalKey));
-                    instance.setVncPassword(encryptedPassword);
-                }
-                // 3.2 If found, update the vm object in app db
-                VmInstance vmIn = virtualMachineService.update(instance);
-                if (eventObject.getString("commandEventType").equals(EventTypes.EVENT_VM_CREATE)) {
-                    this.assignNicTovM(vmIn);
-                    this.assignVolumeTovM(vmIn);
-                }
+
+                vmIn = virtualMachineService.update(vmInstance);
+            }
+            if (eventObject.getString("commandEventType").equals(EventTypes.EVENT_VM_CREATE)) {
+                this.assignNicTovM(vmIn);
+                this.assignVolumeTovM(vmIn);
             }
         }
     }
@@ -317,7 +340,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     public void assignVolumeTovM(VmInstance vmInstance) throws ApplicationException, Exception {
            HashMap<String, String> volumeMap = new HashMap<String, String>();
            volumeMap.put("virtualmachineid", vmInstance.getUuid());
-           volumeMap.put("domainid", vmInstance.getDomain().getUuid());
+           volumeMap.put("domainid", convertEntityService.getDomainById(vmInstance.getDomainId()).getUuid());
 
            String listVolume = csVolumeService.listVolumes("json", volumeMap);
            JSONArray volumeListJSON = new JSONObject(listVolume).getJSONObject("listvolumesresponse").getJSONArray("volume");

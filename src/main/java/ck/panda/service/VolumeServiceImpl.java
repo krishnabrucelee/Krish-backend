@@ -852,4 +852,9 @@ public class VolumeServiceImpl implements VolumeService {
         }
     }
 
+    @Override
+    public List<Volume> findByInstanceForResourceState(Long volume) throws Exception {
+        return volumeRepo.findByInstanceAndIsActive(volume, true);
+    }
+
 }
