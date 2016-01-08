@@ -8,6 +8,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.Template;
+import ck.panda.domain.entity.Template.Format;
 import ck.panda.domain.entity.Template.Status;
 import ck.panda.domain.entity.Template.TemplateType;
 
@@ -46,14 +47,13 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * Get the template without system type.
      *
      * @param type of template
+     * @param format of template
      * @param isActive true/false
      * @param pageable of template
      * @return user and routing template list
      */
-    @Query(value = "select template from Template template where template.type <>:type AND template.isActive =:isActive")
-    Page<Template> findAllByType(@Param("type") TemplateType type, Pageable pageable,
-            @Param("isActive") Boolean isActive);
-
+    @Query(value = "select template from Template template where template.type <>:type AND template.format <>:format AND template.isActive =:isActive")
+    Page<Template> findAllByType(@Param("type") TemplateType type, @Param("format") Format format, Pageable pageable, @Param("isActive") Boolean isActive);
     /**
      * Get the template based on the uuid.
      *
@@ -105,5 +105,16 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
     @Query(value = "select DISTINCT t from Template t where t.type <>:type AND t.status = :status AND t.osCategory LIKE :osCategory")
     List<Template> findByOsCategoryFilters(@Param("type") TemplateType type, @Param("status") Status status,
             @Param("osCategory") OsCategory osCategory);
+
+    /**
+     * Get the template with Format ISO.
+     *
+     * @param format of template
+     * @param pageable of template
+     * @param isActive true/false
+     * @return user and routing template list
+     */
+    @Query(value = "select template from Template template where template.format =:format AND template.isActive =:isActive")
+    Page<Template> findAllByFormat(@Param("format") Format format, Pageable pageable, @Param("isActive") Boolean isActive);
 
 }

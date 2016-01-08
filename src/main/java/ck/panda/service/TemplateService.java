@@ -1,9 +1,12 @@
 package ck.panda.service;
 
 import java.util.List;
+
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Template;
 import ck.panda.util.domain.CRUDService;
+import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
  * Service interface for Template entity.
@@ -55,5 +58,14 @@ public interface TemplateService extends CRUDService<Template> {
      * @throws Exception unhandled errors.
      */
     Template softDelete(Template template) throws Exception;
+
+    /**
+     * Get all Iso templates.
+     *
+     * @param pagingAndSorting page
+     * @return iso templates
+     * @throws Exception error
+     */
+    Page<Template> findAllIso(PagingAndSorting pagingAndSorting) throws Exception;
 
 }

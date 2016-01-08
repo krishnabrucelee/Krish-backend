@@ -1237,7 +1237,9 @@ public class Template implements Serializable {
         /** Hypervisor format type as BAREMETAL. */
         BAREMETAL,
         /** Hypervisor format type as TAR. */
-        TAR
+        TAR,
+        /** Hypervisor format type as ISO. */
+        ISO
     }
 
     /** TemplateType enum type used to list the static template type values. */
@@ -1260,6 +1262,14 @@ public class Template implements Serializable {
         ACTIVE,
         /** Template status as INACTIVE. */
         INACTIVE
+    }
+
+    /** Flag enum type used to choose whether it is template or iso. */
+    public enum Flag {
+        /** Template flag. */
+        TEMPLATE,
+        /** Iso flag. */
+        ISO
     }
 
     /**

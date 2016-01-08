@@ -139,7 +139,13 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     public Page<Template> findAll(PagingAndSorting pagingAndSorting) throws Exception {
         csPrepareTemplate(templateRepository.findByTemplate("ALL", TemplateType.SYSTEM, Status.INACTIVE, true));
-        return templateRepository.findAllByType(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), true);
+        return templateRepository.findAllByType(TemplateType.SYSTEM, Template.Format.ISO, pagingAndSorting.toPageRequest(), true);
+    }
+
+    @Override
+    public Page<Template> findAllIso(PagingAndSorting pagingAndSorting) throws Exception {
+        csPrepareTemplate(templateRepository.findByTemplate("ALL", TemplateType.SYSTEM, Status.INACTIVE, true));
+        return templateRepository.findAllByFormat(Template.Format.ISO, pagingAndSorting.toPageRequest(), true);
     }
 
     @Override
