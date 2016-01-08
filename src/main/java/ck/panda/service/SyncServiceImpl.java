@@ -21,6 +21,7 @@ import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.Host;
 import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.entity.Iso;
@@ -182,6 +183,10 @@ public class SyncServiceImpl implements SyncService {
     /** For listing iso image in cloudstack server. */
     @Autowired
     private IsoService isoService;
+
+    /** Egress service for listing egress rules. */
+    @Autowired
+    private EgressRuleService egressService;
 
     /** Resource Limit Service for listing resource limits. */
     @Autowired
@@ -448,7 +453,12 @@ public class SyncServiceImpl implements SyncService {
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Nic", e);
         }
-
+        try {
+            // 24. Sync Nic entity
+            this.syncEgressFirewallRules();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch EgressRule", e);
+        }
         try {
             // 25. Sync SSHKey entity
             this.syncSSHKey();
@@ -1853,6 +1863,46 @@ public class SyncServiceImpl implements SyncService {
             nicService.save(csNicMap.get(key));
         }
     }
+
+    @Override
+    public void syncEgressFirewallRules() throws ApplicationException, Exception {
+
+        // 1. Get all the egressFirewallRules objects from CS server as hash
+        List<FirewallRules> csEgressList = egressService.findAllFromCSServer();
+        HashMap<String, FirewallRules> csEgressMap = (HashMap<String, FirewallRules>) FirewallRules.convert(csEgressList);
+
+        // 2. Get all the egressFirewallRules objects from application
+        List<FirewallRules> appEgressList = egressService.findAll();
+
+        // 3. Iterate application egressFirewallRules list
+        for (FirewallRules egress : appEgressList) {
+            egress.setSyncFlag(false);
+            LOGGER.debug("Total rows updated : " + (appEgressList.size()));
+            // 3.1 Find the corresponding CS server egressFirewallRulesService object by
+            // finding it in a hash using uuid
+            if (csEgressMap.containsKey(egress.getUuid())) {
+                FirewallRules csNic = csEgressMap.get(egress.getUuid());
+                egress.setUuid(csNic.getUuid());
+
+                // 3.2 If found, update the egressFirewallRules object in app db
+                egressService.update(egress);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // egressFirewallRules which is not added in the app
+                csEgressMap.remove(egress.getUuid());
+            } else {
+                egressService.softDelete(egress);
+            }
+        }
+        // 4. Get the remaining list of cs server hash NetworkOffering object,
+        // then iterate and
+        // add it to app db
+        for (String key : csEgressMap.keySet()) {
+            LOGGER.debug("Syncservice Egress uuid:");
+            egressService.save(csEgressMap.get(key));
+        }
+    }
+
 
     /**
      * Create default roles and permissions.

@@ -58,7 +58,7 @@ public interface ComputeOfferingService extends CRUDService<ComputeOffering> {
 
     /**
      * Find compute offering by isActive status.
-     * 
+     *
      * @param isActive offer
      * @return compute offer
      * @throws Exception unhandled errors.

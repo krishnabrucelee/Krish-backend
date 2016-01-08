@@ -203,4 +203,13 @@ public interface SyncService {
      */
     void syncNic() throws ApplicationException, Exception;
 
+    /**
+    *
+    * Sync with Cloud Server Account.
+    *
+    * @throws ApplicationException unhandled application errors.
+    * @throws Exception unhandled errors.
+    */
+    void syncEgressFirewallRules() throws ApplicationException, Exception;
+
 }
