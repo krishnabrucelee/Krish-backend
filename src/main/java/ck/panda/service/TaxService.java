@@ -8,7 +8,6 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
  * Service interface for Tax entity.
- *
  */
 @Service
 public interface TaxService extends CRUDService<Tax> {
@@ -25,9 +24,9 @@ public interface TaxService extends CRUDService<Tax> {
     /**
      * Find all the tax with status.
      *
-     * @param pagingAndSorting
-     * @return
-     * @throws Exception
+     * @param pagingAndSorting page request.
+     * @return Tax list.
+     * @throws Exception unhandled exception.
      */
     Page<Tax> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
 }

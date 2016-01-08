@@ -12,6 +12,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.CreatedBy;
@@ -83,6 +84,10 @@ public class IpAddress {
     @Column(name = "state")
     @Enumerated(EnumType.STRING)
     private State state;
+
+    /** Set syncFlag. */
+    @Transient
+    private Boolean syncFlag;
 
     /**
      * Enumeration state for ipaddress.
@@ -500,6 +505,24 @@ public class IpAddress {
      */
     public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
+    }
+
+    /**
+     * Get the sync flag.
+     *
+     * @return the syncFlag.
+     */
+    public Boolean getSyncFlag() {
+        return syncFlag;
+    }
+
+    /**
+     * Set the sync flag.
+     *
+     * @param syncFlag to set.
+     */
+    public void setSyncFlag(Boolean syncFlag) {
+        this.syncFlag = syncFlag;
     }
 
     /**

@@ -9,8 +9,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.CreatedBy;
@@ -36,11 +34,11 @@ public class Tax implements Serializable {
     @Column(name = "id")
     private Long id;
 
-    /** Name of the tax */
+    /** Name of the tax. */
     private String name;
 
 
-    /** Description of the tax */
+    /** Description of the tax. */
     private String description;
 
     /**
