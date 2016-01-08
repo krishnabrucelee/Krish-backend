@@ -6,8 +6,7 @@ import ck.panda.domain.entity.Hypervisor;
 import ck.panda.util.domain.CRUDService;
 
 /**
- * Service interface for Hypervisor.
- * This service provides basic list and save business actions.
+ * Service interface for Hypervisor. This service provides basic list and save business actions.
  */
 @Service
 public interface HypervisorService extends CRUDService<Hypervisor> {
@@ -23,7 +22,8 @@ public interface HypervisorService extends CRUDService<Hypervisor> {
     /**
      * To get the hypervisor from name.
      *
-     * @return name hypervisor name
+     * @param name hypervisor name
+     * @return hypervisor
      * @throws Exception unhandled errors.
      */
     Hypervisor findByName(String name) throws Exception;

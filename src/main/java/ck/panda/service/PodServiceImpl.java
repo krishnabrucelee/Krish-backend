@@ -92,9 +92,9 @@ public class PodServiceImpl implements PodService {
                 // 2.1 Call convert by passing JSONObject to Domain entity and
                 // Add
                 // the converted pod entity to list
-               Pod pod = Pod.convert(podListJSON.getJSONObject(i));
-               pod.setZoneId(convertEntityService.getZoneId(pod.getTransZoneId()));
-               podList.add(pod);
+                Pod pod = Pod.convert(podListJSON.getJSONObject(i));
+                pod.setZoneId(convertEntityService.getZoneId(pod.getTransZoneId()));
+                podList.add(pod);
             }
         }
         return podList;

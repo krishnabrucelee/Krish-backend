@@ -14,7 +14,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.hibernate.annotations.Type;
@@ -30,11 +29,11 @@ import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonUtil;
 
 /**
- * A virtual network is a logical construct that enables multi-tenancy on a single physical network.
- * In CloudStack a virtual network can be shared or isolated.
+ * A virtual network is a logical construct that enables multi-tenancy on a single physical network. In CloudStack a
+ * virtual network can be shared or isolated.
  */
 @Entity
-@Table(name = "ck_network")
+@Table(name = "networks")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class Network implements Serializable {
@@ -107,11 +106,11 @@ public class Network implements Serializable {
     @Enumerated(EnumType.STRING)
     private NetworkType networkType;
 
-    /**  CIDR Range of the IP address. */
+    /** CIDR Range of the IP address. */
     @Column(name = "cidr")
     private String cIDR;
 
-    /**  Gateway of the Network. */
+    /** Gateway of the Network. */
     @Column(name = "gateway")
     private String gateway;
 
@@ -165,22 +164,22 @@ public class Network implements Serializable {
     @Transient
     private String transDomainId;
 
-    /** Transient zone of the network.*/
+    /** Transient zone of the network. */
     @Transient
     private String transZoneId;
 
-    /** Transient department of the network.*/
+    /** Transient department of the network. */
     @Transient
     private String transDepartmentId;
 
-    /** Transient network offering of the network.*/
+    /** Transient network offering of the network. */
     @Transient
     private String transNetworkOfferingId;
 
     /** Transient host of the instance. */
     @Transient
     private String transProjectId;
-    
+
     /** Instance id. */
     @JoinColumn(name = "instance_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
@@ -195,27 +194,27 @@ public class Network implements Serializable {
      *
      */
     public enum NetworkType {
-        /**  Network type be Shared. */
+        /** Network type be Shared. */
         Shared,
-        /**  Network type be Isolated. */
+        /** Network type be Isolated. */
         Isolated,
-   }
+    }
 
     /**
-     * Enum type for  Network Status.
+     * Enum type for Network Status.
      *
      */
     public enum Status {
 
-        /**  Network will be in a Enabled State. */
+        /** Network will be in a Enabled State. */
         Implemented,
 
-        /**  Network will be in a Allocated State. */
+        /** Network will be in a Allocated State. */
         Allocated,
 
-        /**  Network will be in a destroyed State. */
+        /** Network will be in a destroyed State. */
         Destroy
-     }
+    }
 
     /** Set syncFlag. */
     @Transient
@@ -231,7 +230,7 @@ public class Network implements Serializable {
     }
 
     /**
-     * Get the  Network uuid.
+     * Get the Network uuid.
      *
      * @return the uuid of the Network
      */
@@ -312,7 +311,7 @@ public class Network implements Serializable {
     }
 
     /**
-     * Get the  Network Name.
+     * Get the Network Name.
      *
      * @return the name of the Network
      */
@@ -321,7 +320,7 @@ public class Network implements Serializable {
     }
 
     /**
-     * Get the  Network Description.
+     * Get the Network Description.
      *
      * @return the description of Network
      */
@@ -339,7 +338,7 @@ public class Network implements Serializable {
     }
 
     /**
-     * Get the  Network type.
+     * Get the Network type.
      *
      * @return the type of the network
      */
@@ -368,7 +367,7 @@ public class Network implements Serializable {
     /**
      * Get the Network Status.
      *
-     * @return the status of  Network
+     * @return the status of Network
      */
     public Status getStatus() {
         return status;
@@ -413,8 +412,7 @@ public class Network implements Serializable {
     /**
      * Set the Network Id.
      *
-     * @param id
-     * Network id to set
+     * @param id Network id to set
      */
     public void setId(Long id) {
         this.id = id;
@@ -423,8 +421,7 @@ public class Network implements Serializable {
     /**
      * Set the Network uuid.
      *
-     * @param uuid
-     * Network uuid to set
+     * @param uuid Network uuid to set
      */
     public void setUuid(String uuid) {
         this.uuid = uuid;
@@ -433,8 +430,7 @@ public class Network implements Serializable {
     /**
      * Set the Network name.
      *
-     * @param name
-     * Network name to set
+     * @param name Network name to set
      */
     public void setName(String name) {
         this.name = name;
@@ -443,8 +439,7 @@ public class Network implements Serializable {
     /**
      * Set the Network Description.
      *
-     * @param displayText
-     *  Network description to set
+     * @param displayText Network description to set
      */
     public void setDisplayText(String displayText) {
         this.displayText = displayText;
@@ -465,11 +460,12 @@ public class Network implements Serializable {
      * @return the networkOffering
      */
     public NetworkOffering getNetworkOffering() {
-      return networkOffering;
+        return networkOffering;
     }
 
     /**
      * Get the Network cIDR.
+     *
      * @return the cIDR
      */
     public String getcIDR() {
@@ -497,8 +493,7 @@ public class Network implements Serializable {
     /**
      * Set the Network Type.
      *
-     * @param networkType
-     * the networkType to set
+     * @param networkType the networkType to set
      */
     public void setNetworkType(NetworkType networkType) {
         this.networkType = networkType;
@@ -507,8 +502,7 @@ public class Network implements Serializable {
     /**
      * Set the Network State.
      *
-     * @param isActive
-     * the isActive state to set
+     * @param isActive the isActive state to set
      */
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
@@ -517,18 +511,16 @@ public class Network implements Serializable {
     /**
      * Set the Network Version.
      *
-     * @param version
-     * the version to set
+     * @param version the version to set
      */
     public void setVersion(Long version) {
         this.version = version;
     }
 
     /**
-     * Set the  Network Status.
+     * Set the Network Status.
      *
-     * @param status
-     * the status to set
+     * @param status the status to set
      */
     public void setStatus(Status status) {
         this.status = status;
@@ -537,8 +529,7 @@ public class Network implements Serializable {
     /**
      * Set the user who creates Network.
      *
-     * @param createdBy
-     * Network createdBy to set
+     * @param createdBy Network createdBy to set
      */
     public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
@@ -547,8 +538,7 @@ public class Network implements Serializable {
     /**
      * Set the user who updates Network.
      *
-     * @param updatedBy
-     *  Network updatedBy to set
+     * @param updatedBy Network updatedBy to set
      */
     public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
@@ -557,8 +547,7 @@ public class Network implements Serializable {
     /**
      * Set the Created DateTime for Network.
      *
-     * @param createdDateTime
-     * Network createdDateTime to set
+     * @param createdDateTime Network createdDateTime to set
      */
     public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
@@ -567,13 +556,11 @@ public class Network implements Serializable {
     /**
      * Set the Updated DateTime for Network.
      *
-     * @param updatedDateTime
-     * Network updatedDateTime to set
+     * @param updatedDateTime Network updatedDateTime to set
      */
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
-
 
     /**
      * Get the syncFlag.
@@ -629,7 +616,6 @@ public class Network implements Serializable {
         this.networkOfferingId = networkOfferingId;
     }
 
-
     /**
      * Get the Network Gateway.
      *
@@ -657,103 +643,103 @@ public class Network implements Serializable {
         return department;
     }
 
-   /**
-    * Set the Department object.
-    *
-    * @param department the department to set
-    */
+    /**
+     * Set the Department object.
+     *
+     * @param department the department to set
+     */
 
     public void setDepartment(Department department) {
         this.department = department;
     }
 
-   /**
-    * Get the department Id.
-    *
-    * @return the departmentId
-    */
+    /**
+     * Get the department Id.
+     *
+     * @return the departmentId
+     */
 
     public Long getDepartmentId() {
         return departmentId;
     }
 
-   /**
-    * Set the Department Id.
-    *
-    * @param departmentId the departmentId to set
-    */
+    /**
+     * Set the Department Id.
+     *
+     * @param departmentId the departmentId to set
+     */
     public void setDepartmentId(Long departmentId) {
         this.departmentId = departmentId;
     }
 
-   /**
-    * Get the domain Id.
-    *
-    * @return the transDomainId
-    */
+    /**
+     * Get the domain Id.
+     *
+     * @return the transDomainId
+     */
     public String getTransDomainId() {
         return transDomainId;
     }
 
-   /**
-    * Set the domain Id.
-    *
-    * @param transDomainId the transDomainId to set
-    */
+    /**
+     * Set the domain Id.
+     *
+     * @param transDomainId the transDomainId to set
+     */
     public void setTransDomainId(String transDomainId) {
         this.transDomainId = transDomainId;
     }
 
-   /**
-    * Get the Zone Id.
-    *
-    * @return the transZoneId
-    */
+    /**
+     * Get the Zone Id.
+     *
+     * @return the transZoneId
+     */
     public String getTransZoneId() {
         return transZoneId;
     }
 
-   /**
-    * Set the Zone Id.
-    *
-    * @param transZoneId the transZoneId to set
-    */
+    /**
+     * Set the Zone Id.
+     *
+     * @param transZoneId the transZoneId to set
+     */
     public void setTransZoneId(String transZoneId) {
         this.transZoneId = transZoneId;
     }
 
-   /**
-    * Get the Department Id.
-    *
-    * @return the transDepartmentId
-    */
+    /**
+     * Get the Department Id.
+     *
+     * @return the transDepartmentId
+     */
     public String getTransDepartmentId() {
         return transDepartmentId;
     }
 
-   /**
-    * Set the department Id.
-    *
-    * @param transDepartmentId the transDepartmentId to set
-    */
+    /**
+     * Set the department Id.
+     *
+     * @param transDepartmentId the transDepartmentId to set
+     */
     public void setTransDepartmentId(String transDepartmentId) {
         this.transDepartmentId = transDepartmentId;
     }
 
-   /**
-    * Get the NetworkOffering Id.
-    *
-    * @return the transNetworkOfferingId
-    */
+    /**
+     * Get the NetworkOffering Id.
+     *
+     * @return the transNetworkOfferingId
+     */
     public String getTransNetworkOfferingId() {
         return transNetworkOfferingId;
     }
 
-   /**
-    * Set the NetworkOffering Id.
-    *
-    * @param transNetworkOfferingId the transNetworkOfferingId to set
-    */
+    /**
+     * Set the NetworkOffering Id.
+     *
+     * @param transNetworkOfferingId the transNetworkOfferingId to set
+     */
     public void setTransNetworkOfferingId(String transNetworkOfferingId) {
         this.transNetworkOfferingId = transNetworkOfferingId;
     }
@@ -770,7 +756,7 @@ public class Network implements Serializable {
     /**
      * Set the transProjectId.
      *
-     * @param transProjectId  to set
+     * @param transProjectId to set
      */
     public void setTransProjectId(String transProjectId) {
         this.transProjectId = transProjectId;
@@ -811,7 +797,7 @@ public class Network implements Serializable {
     public void setNetworkDomain(String networkDomain) {
         this.networkDomain = networkDomain;
     }
-    
+
     /**
      * Get the instance.
      *
@@ -848,53 +834,53 @@ public class Network implements Serializable {
         this.vmInstanceId = vmInstanceId;
     }
 
-    /** Convert JSONObject to domain entity.
+    /**
+     * Convert JSONObject to domain entity.
      *
-     * @param convertUtil Utilities
      * @param jsonObject Object
      * @return domain entity object.
      * @throws JSONException handles json exception.
      */
-   public static Network convert(JSONObject jsonObject) throws JSONException {
-       Network network = new Network();
-       network.setSyncFlag(false);
-       try {
-           network.setName(JsonUtil.getStringValue(jsonObject, "name"));
-           network.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-           network.setTransZoneId((JsonUtil.getStringValue(jsonObject, "zoneid")));
-           network.setTransDomainId((JsonUtil.getStringValue(jsonObject, "domainid")));
-           network.setNetworkType(NetworkType.valueOf(JsonUtil.getStringValue(jsonObject, "type")));
-           network.setTransNetworkOfferingId(JsonUtil.getStringValue(jsonObject, "networkofferingid"));
-           network.setcIDR(JsonUtil.getStringValue(jsonObject, "cidr"));
-           network.setDisplayText(JsonUtil.getStringValue(jsonObject, "displaytext"));
-           network.setGateway(JsonUtil.getStringValue(jsonObject, "gateway"));
-           network.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, "account"));
-           network.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
-           network.setNetMask(JsonUtil.getStringValue(jsonObject, "netmask"));
-           network.setNetworkDomain(JsonUtil.getStringValue(jsonObject, "networkdomain"));
-           network.setTransProjectId(JsonUtil.getStringValue(jsonObject, "projectid"));
+    public static Network convert(JSONObject jsonObject) throws JSONException {
+        Network network = new Network();
+        network.setSyncFlag(false);
+        try {
+            network.setName(JsonUtil.getStringValue(jsonObject, "name"));
+            network.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
+            network.setTransZoneId((JsonUtil.getStringValue(jsonObject, "zoneid")));
+            network.setTransDomainId((JsonUtil.getStringValue(jsonObject, "domainid")));
+            network.setNetworkType(NetworkType.valueOf(JsonUtil.getStringValue(jsonObject, "type")));
+            network.setTransNetworkOfferingId(JsonUtil.getStringValue(jsonObject, "networkofferingid"));
+            network.setcIDR(JsonUtil.getStringValue(jsonObject, "cidr"));
+            network.setDisplayText(JsonUtil.getStringValue(jsonObject, "displaytext"));
+            network.setGateway(JsonUtil.getStringValue(jsonObject, "gateway"));
+            network.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, "account"));
+            network.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
+            network.setNetMask(JsonUtil.getStringValue(jsonObject, "netmask"));
+            network.setNetworkDomain(JsonUtil.getStringValue(jsonObject, "networkdomain"));
+            network.setTransProjectId(JsonUtil.getStringValue(jsonObject, "projectid"));
 
-           network.setIsActive(true);
-       } catch (Exception ex) {
-           ex.printStackTrace();
+            network.setIsActive(true);
+        } catch (Exception ex) {
+            ex.printStackTrace();
 
-       }
-       return network;
-   }
+        }
+        return network;
+    }
 
-   /**
-    * Mapping entity object into list.
-    *
-    * @param networkList list of networks.
-    * @return network map
-    */
-   public static Map<String, Network> convert(List<Network> networkList) {
-       Map<String, Network> networkMap = new HashMap<String, Network>();
+    /**
+     * Mapping entity object into list.
+     *
+     * @param networkList list of networks.
+     * @return network map
+     */
+    public static Map<String, Network> convert(List<Network> networkList) {
+        Map<String, Network> networkMap = new HashMap<String, Network>();
 
-       for (Network network : networkList) {
-           networkMap.put(network.getUuid(), network);
-       }
+        for (Network network : networkList) {
+            networkMap.put(network.getUuid(), network);
+        }
 
-       return networkMap;
-   }
+        return networkMap;
+    }
 }

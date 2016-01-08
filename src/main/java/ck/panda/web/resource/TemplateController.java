@@ -20,13 +20,12 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Template;
-import ck.panda.domain.entity.Volume;
 import ck.panda.service.TemplateService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
 
-/**Template controller. */
+/** Template controller. */
 @RestController
 @RequestMapping("/api/templates")
 @Api(value = "Templates", description = "Operations with templates", produces = "application/json")
@@ -111,6 +110,7 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     /**
      * Find the list of templates by filters.
      *
+     * @param template the template object.
      * @return template list from server
      * @throws Exception raise if error
      */

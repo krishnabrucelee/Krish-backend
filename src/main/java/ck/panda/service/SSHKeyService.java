@@ -10,8 +10,7 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 /**
  * Service class for SSH key.
  *
- * This service provides basic CRUD and essential api's for SSH key related
- * business actions.
+ * This service provides basic CRUD and essential api's for SSH key related business actions.
  */
 @Service
 public interface SSHKeyService extends CRUDService<SSHKey> {

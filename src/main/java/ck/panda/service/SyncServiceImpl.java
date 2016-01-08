@@ -15,7 +15,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.PermissionUtil;
-import ck.panda.domain.entity.Account;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Cluster;
 import ck.panda.domain.entity.ComputeOffering;
@@ -52,19 +51,19 @@ import ck.panda.domain.entity.Zone;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackServer;
+import ck.panda.util.EncryptionUtil;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 
 /**
  * We have to sync up with cloudstack server for the following data
  *
- * 1. Zone 2. Domain 3. Region 4. Hypervisor 5. OS Catogory 6. OS Type 7.
- * Network Offering 8. Template 9. User 10. Network 11. Instance
+ * 1. Zone 2. Domain 3. Region 4. Hypervisor 5. OS Catogory 6. OS Type 7. Network Offering 8. Template 9. User 10.
+ * Network 11. Instance
  *
- * Get the corresponding data from cloud stack server, if the application does
- * not have the data add it. If the application has the data update it, if the
- * application has data which the cloud stack server does not have, then delete
- * it.
+ * Get the corresponding data from cloud stack server, if the application does not have the data add it. If the
+ * application has the data update it, if the application has data which the cloud stack server does not have, then
+ * delete it.
  *
  */
 @PropertySource(value = "classpath:permission.properties")
@@ -143,10 +142,6 @@ public class SyncServiceImpl implements SyncService {
     /** Department service for listing users. */
     @Autowired
     private DepartmentService departmentService;
-
-    /** Account service for listing users. */
-    @Autowired
-    private AccountService accountService;
 
     /** Nic service for listing nic. */
     @Autowired
@@ -296,31 +291,30 @@ public class SyncServiceImpl implements SyncService {
     }
 
     /**
-     * Sync call for synchronization list of Region, domain, SSH key, region. template,
-     * hypervisor
+     * Sync call for synchronization list of Region, domain, SSH key, region. template, hypervisor
      *
-     * @throws Exception
-     *             unhandled errors.
+     * @throws Exception unhandled errors.
      */
     @Override
     public void sync() throws Exception {
 
-         try {
-             // 1. Sync Region entity
-             this.syncRegion();
-         } catch (Exception e) {
-        	   Errors errors = new  Errors(messageSource);
-			   errors.addGlobalError("Either of URL or API key or Secret key is wrong. please provide correct values and proceed ");
-               if (errors.hasErrors()) {
-                   throw new ApplicationException(errors);
-               }
-         }
-         try {
-             // 2. Sync Zone entity
-             this.syncZone();
-         } catch (Exception e) {
-             LOGGER.error("ERROR AT synch Zone", e);
-         }
+        try {
+            // 1. Sync Region entity
+            this.syncRegion();
+        } catch (Exception e) {
+            Errors errors = new Errors(messageSource);
+            errors.addGlobalError(
+                    "Either of URL or API key or Secret key is wrong. please provide correct values and proceed ");
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
+            }
+        }
+        try {
+            // 2. Sync Zone entity
+            this.syncZone();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Zone", e);
+        }
         try {
             // 3. Sync Domain entity
             this.syncDomain();
@@ -358,118 +352,112 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.error("ERROR AT synch Department", e);
         }
         try {
-            // 9. Sync Account entity
-            this.syncAccount();
+            // 9. Sync User entity
+            this.syncUser();
         } catch (Exception e) {
-            LOGGER.error("ERROR AT synch Account", e);
+            LOGGER.error("ERROR AT synch User", e);
         }
         try {
-            // 10. Sync User entity
-               this.syncUser();
-        } catch (Exception e) {
-               LOGGER.error("ERROR AT synch User", e);
-        }
-        try {
-            // 11. Sync Project entity
+            // 10. Sync Project entity
             this.syncProject();
         } catch (Exception e) {
             LOGGER.error("ERROR AT sync Project", e);
         }
         try {
-            // 12. Sync OSCategory entity
+            // 11. Sync OSCategory entity
             this.syncOsCategory();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch OS Category", e);
         }
         try {
-            // 13. Sync OSType entity
+            // 12. Sync OSType entity
             this.syncOsTypes();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch OS Types", e);
         }
         try {
-            // 14. Sync Network offering entity
-               this.syncNetworkOffering();
+            // 13. Sync Network offering entity
+            this.syncNetworkOffering();
         } catch (Exception e) {
-               LOGGER.error("ERROR AT synch NetworkOffering", e);
+            LOGGER.error("ERROR AT synch NetworkOffering", e);
         }
         try {
-            // 15. Sync Compute Offering entity
+            // 14. Sync Compute Offering entity
             this.syncComputeOffering();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Compute Offering", e);
         }
         try {
-            // 16. Sync Storage offering entity
+            // 15. Sync Storage offering entity
             this.syncStorageOffering();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Storage Offering", e);
         }
         try {
-            // 17. Sync Iso entity
+            // 16. Sync Iso entity
             this.syncIso();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Iso", e);
         }
         try {
-            // 18. Sync Network entity
+            // 17. Sync Network entity
             this.syncNetwork();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Network ", e);
         }
         try {
-            // 19. Sync Templates entity
-               this.syncTemplates();
+            // 18. Sync Templates entity
+            this.syncTemplates();
         } catch (Exception e) {
-               LOGGER.error("ERROR AT synch Templates", e);
+            LOGGER.error("ERROR AT synch Templates", e);
         }
         try {
-            // 20. Sync ResourceLimit entity
+            // 19. Sync ResourceLimit entity
             this.syncResourceLimit();
         } catch (Exception e) {
             LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
         }
         try {
-            // 21. Sync Instance entity
-              this.syncInstances();
+            // 20. Sync Instance entity
+            this.syncInstances();
         } catch (Exception e) {
-              LOGGER.error("ERROR AT synch Instance", e);
+            LOGGER.error("ERROR AT synch Instance", e);
         }
         try {
-            // 22. Sync Volume entity
+            // 21. Sync Volume entity
             this.syncVolume();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Volume", e);
         }
-       try {
-            // 23. Sync VmSnapshot entity
-              this.syncVmSnapshots();
+        try {
+            // 22. Sync VmSnapshot entity
+            this.syncVmSnapshots();
         } catch (Exception e) {
-              LOGGER.error("ERROR AT synch vm snapshots", e);
+            LOGGER.error("ERROR AT synch vm snapshots", e);
         }
         try {
-            // 24. Sync Snapshot entity
+            // 23. Sync Snapshot entity
             this.syncSnapshot();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Snapshot", e);
         }
-        try{
-            // 25. Sync Nic entity
+        try {
+            // 24. Sync Nic entity
             this.syncNic();
             LOGGER.debug("nic");
-        }catch (Exception e) {
+        } catch (Exception e) {
             LOGGER.error("ERROR AT synch Nic", e);
         }
 
         try {
-            // 26. Sync SSHKey entity
+            // 25. Sync SSHKey entity
             this.syncSSHKey();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch SSH Key", e);
         }
 
         try {
-            // 27. Sync for update role in user entity
+            // 26. Sync for update role in user entity
             this.syncUpdateUserRole();
         } catch (Exception e) {
             LOGGER.error("ERROR AT Sync for update role in user entity", e);
@@ -479,10 +467,8 @@ public class SyncServiceImpl implements SyncService {
     /**
      * Sync with CloudStack server Domain.
      *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
      */
     @Override
     public void syncDomain() throws ApplicationException, Exception {
@@ -521,17 +507,15 @@ public class SyncServiceImpl implements SyncService {
         for (String key : csDomainMap.keySet()) {
             LOGGER.debug("Syncservice domain uuid:");
             domainService.save(csDomainMap.get(key));
-        LOGGER.debug("Total rows added", (csDomainMap.size()));
+            LOGGER.debug("Total rows added", (csDomainMap.size()));
         }
     }
 
     /**
      * Sync with Cloud Server Zone.
      *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     @Override
     public void syncZone() throws ApplicationException, Exception {
@@ -560,9 +544,9 @@ public class SyncServiceImpl implements SyncService {
                 // zone which is not added in the app
                 csZoneMap.remove(zone.getUuid());
             } else {
-                if(zone.getIsActive() != false){
+                if (!zone.getIsActive()) {
                     zoneService.softDelete(zone);
-                 }
+                }
             }
         }
         // 4. Get the remaining list of cs server hash zone object, then iterate
@@ -578,10 +562,8 @@ public class SyncServiceImpl implements SyncService {
     /**
      * Sync with Cloud Server Region.
      *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     @Override
     public void syncRegion() throws ApplicationException, Exception {
@@ -628,10 +610,8 @@ public class SyncServiceImpl implements SyncService {
     /**
      * Sync with Cloud Server Hypervisor.
      *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     @Override
     public void syncHypervisor() throws ApplicationException, Exception {
@@ -677,10 +657,8 @@ public class SyncServiceImpl implements SyncService {
     /**
      * Sync with Cloud Server osCategory.
      *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     @Override
     public void syncOsCategory() throws ApplicationException, Exception {
@@ -727,10 +705,8 @@ public class SyncServiceImpl implements SyncService {
     /**
      * Sync with CloudStack server osType.
      *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
      */
     @Override
     public void syncOsTypes() throws ApplicationException, Exception {
@@ -776,10 +752,8 @@ public class SyncServiceImpl implements SyncService {
     /**
      * Sync with CloudStack server osType.
      *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
      */
     @Override
     public void syncStorageOffering() throws ApplicationException, Exception {
@@ -844,10 +818,8 @@ public class SyncServiceImpl implements SyncService {
     /**
      * Sync with Cloud Server Account.
      *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     @Override
     public void syncUser() throws ApplicationException, Exception {
@@ -902,10 +874,8 @@ public class SyncServiceImpl implements SyncService {
     /**
      * Sync with CloudStack server Network offering.
      *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
      */
     @Override
     public void syncNetworkOffering() throws ApplicationException, Exception {
@@ -954,10 +924,8 @@ public class SyncServiceImpl implements SyncService {
     /**
      * Sync with CloudStack server Domain.
      *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
      */
     @Override
     public void syncNetwork() throws ApplicationException, Exception {
@@ -1007,10 +975,8 @@ public class SyncServiceImpl implements SyncService {
     /**
      * Sync with CloudStack server Domain.
      *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
      */
     @Override
     public void syncComputeOffering() throws ApplicationException, Exception {
@@ -1058,10 +1024,8 @@ public class SyncServiceImpl implements SyncService {
     /**
      * Sync with CloudStack server template.
      *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
      */
     @Override
     public void syncTemplates() throws ApplicationException, Exception {
@@ -1082,20 +1046,20 @@ public class SyncServiceImpl implements SyncService {
                 Template csTemplate = csTemplateMap.get(template.getUuid());
 
                 template.setSyncFlag(false);
-                csTemplate.setUuid(csTemplate.getUuid());
-                csTemplate.setName(csTemplate.getName());
-                csTemplate.setDescription(csTemplate.getDescription());
-                csTemplate.setShare(csTemplate.getShare());
-                csTemplate.setPasswordEnabled(csTemplate.getPasswordEnabled());
-                csTemplate.setFormat(csTemplate.getFormat());
-                csTemplate.setFeatured(csTemplate.getFeatured());
-                csTemplate.setOsTypeId(csTemplate.getOsTypeId());
-                csTemplate.setZoneId(csTemplate.getZoneId());
-                csTemplate.setStatus(csTemplate.getStatus());
-                csTemplate.setType(csTemplate.getType());
-                csTemplate.setHypervisorId(csTemplate.getHypervisorId());
-                csTemplate.setExtractable(csTemplate.getExtractable());
-                csTemplate.setDynamicallyScalable(csTemplate.getDynamicallyScalable());
+                template.setUuid(csTemplate.getUuid());
+                template.setName(csTemplate.getName());
+                template.setDescription(csTemplate.getDescription());
+                template.setShare(csTemplate.getShare());
+                template.setPasswordEnabled(csTemplate.getPasswordEnabled());
+                template.setFormat(csTemplate.getFormat());
+                template.setFeatured(csTemplate.getFeatured());
+                template.setOsTypeId(csTemplate.getOsTypeId());
+                template.setZoneId(csTemplate.getZoneId());
+                template.setStatus(csTemplate.getStatus());
+                template.setType(csTemplate.getType());
+                template.setHypervisorId(csTemplate.getHypervisorId());
+                template.setExtractable(csTemplate.getExtractable());
+                template.setDynamicallyScalable(csTemplate.getDynamicallyScalable());
 
                 // 3.2 If found, update the template object in app db
                 templateService.update(template);
@@ -1121,10 +1085,8 @@ public class SyncServiceImpl implements SyncService {
     /**
      * Sync with Cloud Server Account.
      *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     @Override
     public void syncDepartment() throws ApplicationException, Exception {
@@ -1175,10 +1137,8 @@ public class SyncServiceImpl implements SyncService {
     /**
      * Sync with Cloud Server Instance.
      *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     @Override
     public void syncInstances() throws Exception {
@@ -1203,7 +1163,7 @@ public class SyncServiceImpl implements SyncService {
                 }
                 instance.setStatus(csVm.getStatus());
                 if (csVm.getZoneId() != null) {
-                instance.setZoneId(csVm.getZoneId());
+                    instance.setZoneId(csVm.getZoneId());
                 }
                 if (csVm.getHostId() != null) {
                     instance.setHostId(csVm.getHostId());
@@ -1242,7 +1202,7 @@ public class SyncServiceImpl implements SyncService {
                     instance.setNetworkId(csVm.getNetworkId());
                 }
                 if (csVm.getInstanceInternalName() != null) {
-                instance.setInstanceInternalName(csVm.getInstanceInternalName());
+                    instance.setInstanceInternalName(csVm.getInstanceInternalName());
                 }
                 if (csVm.getVolumeSize() != null) {
                     instance.setVolumeSize(csVm.getVolumeSize());
@@ -1289,10 +1249,8 @@ public class SyncServiceImpl implements SyncService {
     /**
      * Sync with Cloud Server Host.
      *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     private void syncHost() throws ApplicationException, Exception {
 
@@ -1334,10 +1292,8 @@ public class SyncServiceImpl implements SyncService {
     /**
      * Sync with Cloud Server Volume.
      *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     public void syncVolume() throws ApplicationException, Exception {
 
@@ -1395,7 +1351,7 @@ public class SyncServiceImpl implements SyncService {
             volumeService.save(csVolumeMap.get(key));
         }
 
-        //Update instance disk size from volume
+        // Update instance disk size from volume
         List<Volume> listVolume = volumeService.findAll();
         for (int j = 0; j < listVolume.size(); j++) {
             if (listVolume.get(j).getVolumeType() == VolumeType.ROOT) {
@@ -1409,10 +1365,8 @@ public class SyncServiceImpl implements SyncService {
     /**
      * Sync with Cloud Server Snapshot.
      *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     private void syncSnapshot() throws ApplicationException, Exception {
 
@@ -1455,10 +1409,8 @@ public class SyncServiceImpl implements SyncService {
     /**
      * Sync with Cloud Server Pod.
      *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     private void syncPod() throws ApplicationException, Exception {
 
@@ -1501,10 +1453,8 @@ public class SyncServiceImpl implements SyncService {
     /**
      * Sync with Cloud Server Cluster.
      *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     private void syncCluster() throws ApplicationException, Exception {
 
@@ -1549,10 +1499,8 @@ public class SyncServiceImpl implements SyncService {
     /**
      * Sync with Cloud Server Instance snapshots.
      *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     @Override
     public void syncVmSnapshots() throws Exception {
@@ -1598,19 +1546,16 @@ public class SyncServiceImpl implements SyncService {
     /**
      * Sync status of Vm resource with Cloud Server.
      *
-     * @param Object
-     *            response object.
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @param object response object.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     @Override
-    public void syncResourceStatus(String Object) throws Exception {
+    public void syncResourceStatus(String object) throws Exception {
         CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
         server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
         cloudStackInstanceService.setServer(server);
-        String instances = cloudStackInstanceService.queryAsyncJobResult(Object, "json");
+        String instances = cloudStackInstanceService.queryAsyncJobResult(object, "json");
         JSONObject jobresult = new JSONObject(instances).getJSONObject("queryasyncjobresultresponse")
                 .getJSONObject("jobresult");
         if (jobresult.has("virtualmachine")) {
@@ -1630,7 +1575,7 @@ public class SyncServiceImpl implements SyncService {
                 }
                 instance.setStatus(csVm.getStatus());
                 if (csVm.getZoneId() != null) {
-                instance.setZoneId(csVm.getZoneId());
+                    instance.setZoneId(csVm.getZoneId());
                 }
                 if (csVm.getHostId() != null) {
                     instance.setHostId(csVm.getHostId());
@@ -1669,7 +1614,7 @@ public class SyncServiceImpl implements SyncService {
                     instance.setNetworkId(csVm.getNetworkId());
                 }
                 if (csVm.getInstanceInternalName() != null) {
-                instance.setInstanceInternalName(csVm.getInstanceInternalName());
+                    instance.setInstanceInternalName(csVm.getInstanceInternalName());
                 }
                 if (csVm.getVolumeSize() != null) {
                     instance.setVolumeSize(csVm.getVolumeSize());
@@ -1741,14 +1686,11 @@ public class SyncServiceImpl implements SyncService {
         LOGGER.debug("Total rows added", (csResourceMap.size()));
     }
 
-
     /**
      * Sync with Cloud Server Iso.
      *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     private void syncIso() throws ApplicationException, Exception {
 
@@ -1791,7 +1733,7 @@ public class SyncServiceImpl implements SyncService {
     public void syncProject() throws ApplicationException, Exception {
 
         // 1. Get all the networkOffering objects from CS server as hash
-       List<Project> csProjectList = projectService.findAllFromCSServerByDomain();
+        List<Project> csProjectList = projectService.findAllFromCSServerByDomain();
         HashMap<String, Project> csProjectMap = (HashMap<String, Project>) Project.convert(csProjectList);
 
         // 2. Get all the networkOffering objects from application
@@ -1827,53 +1769,6 @@ public class SyncServiceImpl implements SyncService {
         for (String key : csProjectMap.keySet()) {
             LOGGER.debug("Syncservice Project uuid:");
             projectService.save(csProjectMap.get(key));
-        }
-    }
-
-    /**
-     * Sync with Cloud Server Account.
-     *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
-     */
-    public void syncAccount() throws ApplicationException, Exception {
-
-        // 1. Get all the account objects from CS server as hash
-        List<Account> csAccountService = accountService.findAllFromCSServerByDomain();
-        HashMap<String, Account> csAccountMap = (HashMap<String, Account>) Account.convert(csAccountService);
-
-        // 2. Get all the account objects from application
-        List<Account> appAccountList = accountService.findAll();
-
-        // 3. Iterate application account list
-        for (Account account : appAccountList) {
-            // 3.1 Find the corresponding CS server account object by finding it in
-            // a hash using uuid
-            if (csAccountMap.containsKey(account.getUuid())) {
-                Account csUser = csAccountMap.get(account.getUuid());
-
-                account.setFirstName(csUser.getFirstName());
-                account.setLastName(csUser.getLastName());
-                account.setEmail(csUser.getEmail());
-                account.setUserName(csUser.getUserName());
-                // 3.2 If found, update the account object in app db
-                accountService.update(account);
-
-                // 3.3 Remove once updated, so that we can have the list of cs
-                // user which is not added in the app
-                csAccountMap.remove(account.getUuid());
-            } else {
-                accountService.softDelete(account);
-            }
-
-        }
-        // 4. Get the remaining list of cs server hash account object, then iterate
-        // and
-        // add it to app db
-        for (String key : csAccountMap.keySet()) {
-            accountService.save(csAccountMap.get(key));
         }
     }
 
@@ -1923,7 +1818,7 @@ public class SyncServiceImpl implements SyncService {
     public void syncNic() throws ApplicationException, Exception {
 
         // 1. Get all the nic objects from CS server as hash
-       List<Nic> csNicList = nicService.findAllFromCSServer();
+        List<Nic> csNicList = nicService.findAllFromCSServer();
         HashMap<String, Nic> csNicMap = (HashMap<String, Nic>) Nic.convert(csNicList);
 
         // 2. Get all the nic objects from application
@@ -1968,7 +1863,9 @@ public class SyncServiceImpl implements SyncService {
     void createRole(List<Department> departmnetList, List<Permission> existPermissionList) {
         try {
             if (existPermissionList.size() == 0) {
-                List<Permission> newPermissionList = PermissionUtil.createPermissions(instance, storage, network, sshkey, quatoLimit, vpc, template, additionalServive, project, application, department, roles, user, report);
+                List<Permission> newPermissionList = PermissionUtil.createPermissions(instance, storage, network,
+                        sshkey, quatoLimit, vpc, template, additionalServive, project, application, department, roles,
+                        user, report);
                 for (Permission permission : newPermissionList) {
                     permissionService.save(permission);
                 }
@@ -1983,8 +1880,7 @@ public class SyncServiceImpl implements SyncService {
                         newRole.setPermissionList(newPermissionList);
                         newRole.setSyncFlag(false);
                         roleService.save(newRole);
-                    }
-                    else if (role != null) {
+                    } else if (role != null) {
                         role.setName("FULL_PERMISSION");
                         role.setDepartmentId(department.getId());
                         role.setDescription("Allow full permission");
@@ -1995,7 +1891,9 @@ public class SyncServiceImpl implements SyncService {
                     }
                 }
             } else {
-                List<Permission> newList = PermissionUtil.updatePermissions(instance, storage, network, sshkey, quatoLimit, vpc, template, additionalServive, project, application, department, roles, user, report);
+                List<Permission> newList = PermissionUtil.updatePermissions(instance, storage, network, sshkey,
+                        quatoLimit, vpc, template, additionalServive, project, application, department, roles, user,
+                        report);
 
                 newList.removeAll(existPermissionList);
                 for (Permission permission : newList) {
@@ -2011,8 +1909,7 @@ public class SyncServiceImpl implements SyncService {
                         role.setPermissionList(permissionService.findAll());
                         role.setSyncFlag(false);
                         roleService.update(role);
-                    }
-                    else if (role == null) {
+                    } else if (role == null) {
                         Role newRole = new Role();
                         newRole.setName("FULL_PERMISSION");
                         newRole.setDepartmentId(department.getId());
@@ -2039,7 +1936,8 @@ public class SyncServiceImpl implements SyncService {
         try {
             List<User> userList = userService.findUsersByTypesAndActive(types, true);
             for (User user : userList) {
-                Role role = roleService.findByNameAndDepartmentIdAndIsActive("FULL_PERMISSION",user.getDepartmentId(),true);
+                Role role = roleService.findByNameAndDepartmentIdAndIsActive("FULL_PERMISSION", user.getDepartmentId(),
+                        true);
                 user.setRoleId(role.getId());
                 userService.update(user);
             }

@@ -12,12 +12,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
-import javax.validation.constraints.Size;
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
@@ -27,13 +25,11 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 
 /**
- * Roles are categorize the departments with different permissions. We restrict
- * the user based on the permission and the permission assigned with Role and
- * give access based on the assigned permissions.
- *
+ * Roles are categorize the departments with different permissions. We restrict the user based on the permission and the
+ * permission assigned with Role and give access based on the assigned permissions.
  */
 @Entity
-@Table(name = "ck_role")
+@Table(name = "roles")
 @SuppressWarnings("serial")
 public class Role implements Serializable {
 
@@ -45,7 +41,6 @@ public class Role implements Serializable {
 
     /** Name of the Role. */
     @NotEmpty
-    @Size(min = 4, max = 20)
     @Column(name = "name", nullable = false)
     private String name;
 
@@ -66,7 +61,6 @@ public class Role implements Serializable {
     /** Department id of the Role. */
     @Column(name = "department_id")
     private Long departmentId;
-
 
     /** Description of the Role. */
     @Column(name = "description")
@@ -157,7 +151,7 @@ public class Role implements Serializable {
      * @return the id
      */
     public Long getId() {
-       return id;
+        return id;
     }
 
     /**
@@ -166,7 +160,7 @@ public class Role implements Serializable {
      * @param id the id to set
      */
     public void setId(Long id) {
-       this.id = id;
+        this.id = id;
     }
 
     /**
@@ -175,7 +169,7 @@ public class Role implements Serializable {
      * @return the name
      */
     public String getName() {
-       return name;
+        return name;
     }
 
     /**
@@ -184,7 +178,7 @@ public class Role implements Serializable {
      * @param name the name to set
      */
     public void setName(String name) {
-       this.name = name;
+        this.name = name;
     }
 
     /**
@@ -229,7 +223,7 @@ public class Role implements Serializable {
      * @return the department
      */
     public Department getDepartment() {
-       return department;
+        return department;
     }
 
     /**
@@ -238,12 +232,12 @@ public class Role implements Serializable {
      * @param department the department to set
      */
     public void setDepartment(Department department) {
-       this.department = department;
+        this.department = department;
     }
 
     /**
      * Get the departmentId of the Role.
-
+     *
      * @return the departmentId of Role.
      */
     public Long getDepartmentId() {
@@ -265,7 +259,7 @@ public class Role implements Serializable {
      * @return the description
      */
     public String getDescription() {
-       return description;
+        return description;
     }
 
     /**
@@ -274,7 +268,7 @@ public class Role implements Serializable {
      * @param description the description to set
      */
     public void setDescription(String description) {
-       this.description = description;
+        this.description = description;
     }
 
     /**
@@ -283,7 +277,7 @@ public class Role implements Serializable {
      * @return the permissionList.
      */
     public List<Permission> getPermissionList() {
-       return permissionList;
+        return permissionList;
     }
 
     /**
@@ -292,7 +286,7 @@ public class Role implements Serializable {
      * @param permissionList the permissionList to set.
      */
     public void setPermissionList(List<Permission> permissionList) {
-       this.permissionList = permissionList;
+        this.permissionList = permissionList;
     }
 
     /**
@@ -301,7 +295,7 @@ public class Role implements Serializable {
      * @return the version
      */
     public Long getVersion() {
-       return version;
+        return version;
     }
 
     /**
@@ -310,7 +304,7 @@ public class Role implements Serializable {
      * @param version the version to set
      */
     public void setVersion(Long version) {
-       this.version = version;
+        this.version = version;
     }
 
     /**
@@ -319,7 +313,7 @@ public class Role implements Serializable {
      * @return the status
      */
     public Status getStatus() {
-       return status;
+        return status;
     }
 
     /**
@@ -328,7 +322,7 @@ public class Role implements Serializable {
      * @param status the status to set
      */
     public void setStatus(Status status) {
-       this.status = status;
+        this.status = status;
     }
 
     /**
@@ -337,7 +331,7 @@ public class Role implements Serializable {
      * @return the createdBy
      */
     public Long getCreatedBy() {
-       return createdBy;
+        return createdBy;
     }
 
     /**
@@ -346,7 +340,7 @@ public class Role implements Serializable {
      * @param createdBy the created by to set
      */
     public void setCreatedBy(Long createdBy) {
-       this.createdBy = createdBy;
+        this.createdBy = createdBy;
     }
 
     /**
@@ -355,7 +349,7 @@ public class Role implements Serializable {
      * @return the updatedBy
      */
     public Long getUpdatedBy() {
-       return updatedBy;
+        return updatedBy;
     }
 
     /**
@@ -364,7 +358,7 @@ public class Role implements Serializable {
      * @param updatedBy the updated by to set
      */
     public void setUpdatedBy(Long updatedBy) {
-       this.updatedBy = updatedBy;
+        this.updatedBy = updatedBy;
     }
 
     /**
@@ -373,7 +367,7 @@ public class Role implements Serializable {
      * @return the createdDateTime
      */
     public DateTime getCreatedDateTime() {
-       return createdDateTime;
+        return createdDateTime;
     }
 
     /**
@@ -382,7 +376,7 @@ public class Role implements Serializable {
      * @param createdDateTime the created date time to set
      */
     public void setCreatedDateTime(DateTime createdDateTime) {
-       this.createdDateTime = createdDateTime;
+        this.createdDateTime = createdDateTime;
     }
 
     /**
@@ -391,7 +385,7 @@ public class Role implements Serializable {
      * @return the updatedDateTime
      */
     public DateTime getUpdatedDateTime() {
-       return updatedDateTime;
+        return updatedDateTime;
     }
 
     /**
@@ -400,7 +394,7 @@ public class Role implements Serializable {
      * @param updatedDateTime the updated date time to set
      */
     public void setUpdatedDateTime(DateTime updatedDateTime) {
-       this.updatedDateTime = updatedDateTime;
+        this.updatedDateTime = updatedDateTime;
     }
 
     /**
@@ -409,7 +403,7 @@ public class Role implements Serializable {
      * @return the isActive
      */
     public Boolean getIsActive() {
-       return isActive;
+        return isActive;
     }
 
     /**
@@ -418,7 +412,7 @@ public class Role implements Serializable {
      * @param isActive the is active to set
      */
     public void setIsActive(Boolean isActive) {
-       this.isActive = isActive;
+        this.isActive = isActive;
     }
 
     /**
@@ -438,7 +432,5 @@ public class Role implements Serializable {
     public void setSyncFlag(Boolean syncFlag) {
         this.syncFlag = syncFlag;
     }
-
-
 
 }

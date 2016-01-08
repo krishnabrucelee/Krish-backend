@@ -8,11 +8,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.ComputeOffering;
-import ck.panda.domain.entity.Department;
 
 /**
- * ComputeOfferingRepository interface that extends PagingAndSortingRepository along with sorting and
- * pagination.
+ * ComputeOfferingRepository interface that extends PagingAndSortingRepository along with sorting and pagination.
  */
 public interface ComputeOfferingRepository extends PagingAndSortingRepository<ComputeOffering, Long> {
     /**
@@ -40,13 +38,13 @@ public interface ComputeOfferingRepository extends PagingAndSortingRepository<Co
      * @param name of compute offering.
      * @return compute offering.
      */
-    @Query(value = "select compute from ComputeOffering compute where compute.name =:name")
-    ComputeOffering findName(@Param("name") String name);
-    
+    @Query(value = "select compute from ComputeOffering compute where compute.name =:name and compute.isActive =:isActive")
+    ComputeOffering findNameAndIsActive(@Param("name") String name, @Param("isActive") Boolean isActive);
+
     /**
      * Find by is Active in Compute Offering.
-     * 
-     * @param isActive offer.	
+     *
+     * @param isActive offer.
      * @return compute offering.
      */
     @Query(value = "select compute from ComputeOffering compute where compute.isActive =:isActive")

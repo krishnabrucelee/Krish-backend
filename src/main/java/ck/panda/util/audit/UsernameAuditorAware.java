@@ -18,7 +18,7 @@ public class UsernameAuditorAware implements AuditorAware<Long> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UsernameAuditorAware.class);
 
-    /** Autowired user repository object.  */
+    /** Autowired user repository object. */
     @Autowired
     private UserRepository userRepository;
 
@@ -49,7 +49,7 @@ public class UsernameAuditorAware implements AuditorAware<Long> {
 
         // Now returning the user id instead of user object.
         Long userId = null;
-        if(user != null) {
+        if (user != null) {
             userId = user.getId();
         } else {
             userId = 0L;

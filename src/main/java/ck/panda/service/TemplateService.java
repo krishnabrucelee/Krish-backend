@@ -35,7 +35,7 @@ public interface TemplateService extends CRUDService<Template> {
     /**
      * To get list of templates by filters.
      *
-     * @param template
+     * @param template template object.
      * @return template list from server
      * @throws Exception unhandled errors.
      */
@@ -51,7 +51,7 @@ public interface TemplateService extends CRUDService<Template> {
     Template findByUUID(String uuid);
 
     /**
-     * Soft delete for template
+     * Soft delete for template.
      *
      * @param template object
      * @return template

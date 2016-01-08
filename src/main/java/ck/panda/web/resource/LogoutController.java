@@ -13,18 +13,26 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-/**Template controller. */
+/** Template controller. */
 @RestController
 @RequestMapping("/api/logout")
 public class LogoutController {
-	@RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	@ResponseStatus(HttpStatus.OK)
-	@ResponseBody
-	public String read(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-	    if (auth != null){
-	        new SecurityContextLogoutHandler().logout(request, response, auth);
-	    }
-	    return "redirect:/login?logout";
-	}
+    /**
+     * logout from panda.
+     *
+     * @param request servlet request
+     * @param response servlet response.
+     * @return redirect url for logout.
+     * @throws Exception unhandled errors.
+     */
+    @RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public String read(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            new SecurityContextLogoutHandler().logout(request, response, auth);
+        }
+        return "redirect:/login?logout";
+    }
 }

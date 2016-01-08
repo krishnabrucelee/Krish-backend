@@ -6,8 +6,7 @@ import ck.panda.domain.entity.Iso;
 import ck.panda.util.domain.CRUDService;
 
 /**
- * Service class for Iso.
- * This service provides basic CRUD and essential api's for Iso related business actions.
+ * Service class for Iso. This service provides basic CRUD and essential api's for Iso related business actions.
  *
  */
 @Service

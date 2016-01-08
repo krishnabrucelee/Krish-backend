@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 /**
  * Currently logged in user.
  */
-@Target({ElementType.PARAMETER, ElementType.TYPE})
+@Target({ ElementType.PARAMETER, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @AuthenticationPrincipal
 public @interface CurrentlyLoggedUser {

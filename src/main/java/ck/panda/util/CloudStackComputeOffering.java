@@ -16,7 +16,8 @@ public class CloudStackComputeOffering {
     @Autowired
     private CloudStackServer server;
 
-    /** Sets api key , secret key and url.
+    /**
+     * Sets api key , secret key and url.
      *
      * @param server sets these values.
      */
@@ -34,13 +35,12 @@ public class CloudStackComputeOffering {
      * @return response Document
      * @throws Exception unhandled errors.
      */
-    public String createComputeOffering(String name, String displayText,String response,
+    public String createComputeOffering(String name, String displayText, String response,
             HashMap<String, String> optional) throws Exception {
 
         System.err.println("optional" + optional);
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("createServiceOffering", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("createServiceOffering", optional);
         arguments.add(new NameValuePair("displaytext", displayText));
         arguments.add(new NameValuePair("name", name));
         arguments.add(new NameValuePair("response", response));
@@ -48,18 +48,17 @@ public class CloudStackComputeOffering {
         return responseDocument;
     }
 
-   /**
-    * Deletes a service offering.
-    * @param serviceOfferingId to delete offer
-    * @param response json or xml
-    * @return response Document
-    * @throws Exception unhandled errors.
-    */
-    public String deleteComputeOffering(String serviceOfferingId, String response)
-            throws Exception {
+    /**
+     * Deletes a service offering.
+     * 
+     * @param serviceOfferingId to delete offer
+     * @param response json or xml
+     * @return response Document
+     * @throws Exception unhandled errors.
+     */
+    public String deleteComputeOffering(String serviceOfferingId, String response) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("deleteServiceOffering", null);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("deleteServiceOffering", null);
         arguments.add(new NameValuePair("id", serviceOfferingId));
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
@@ -77,18 +76,17 @@ public class CloudStackComputeOffering {
      * @return response Document
      * @throws Exception unhandled errors.
      */
-    public String updateComputeOffering(String serviceOfferingId,String name, String displayText, String response,
+    public String updateComputeOffering(String serviceOfferingId, String name, String displayText, String response,
             HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("updateServiceOffering", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("updateServiceOffering", optional);
         arguments.add(new NameValuePair("id", serviceOfferingId));
         arguments.add(new NameValuePair("name", name));
-        arguments.add(new NameValuePair("displaytext",displayText));
+        arguments.add(new NameValuePair("displaytext", displayText));
         arguments.add(new NameValuePair("response", response));
 
         String responseDocument = server.request(arguments);
-        return  responseDocument;
+        return responseDocument;
     }
 
     /**
@@ -99,13 +97,11 @@ public class CloudStackComputeOffering {
      * @return response Document.
      * @throws Exception unhandled errors.
      */
-    public String listComputeOfferings(String response,
-            HashMap<String, String> optional) throws Exception {
+    public String listComputeOfferings(String response, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("listServiceOfferings", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("listServiceOfferings", optional);
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
-        return  responseDocument;
+        return responseDocument;
     }
 }

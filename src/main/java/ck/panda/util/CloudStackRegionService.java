@@ -19,8 +19,7 @@ public class CloudStackRegionService {
     private CloudStackServer server;
 
     /**
-     * setServer passes apikey, url, secretkey from UI and aids to establish
-     * cloudstack connectivity.
+     * setServer passes apikey, url, secretkey from UI and aids to establish cloudstack connectivity.
      *
      * @param server sets apikey and url.
      */
@@ -28,7 +27,7 @@ public class CloudStackRegionService {
         this.server = server;
     }
 
-     /**
+    /**
      * Lists Regions for cloud stack.
      *
      * @param optional from values cloud stack
@@ -36,11 +35,9 @@ public class CloudStackRegionService {
      * @return response Document
      * @throws Exception unhandled errors.
      */
-    public String listRegions(String response, HashMap<String, String> optional)
-            throws Exception {
+    public String listRegions(String response, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("listRegions", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("listRegions", optional);
         arguments.add(new NameValuePair("response", response));
 
         String responseDocument = server.request(arguments);

@@ -1,7 +1,7 @@
 package ck.panda.util;
 
 /**
- *  If the user credentials is invalid the CloudStackException throws exception.
+ * If the user credentials is invalid the CloudStackException throws exception.
  */
 public class CloudStackException extends Exception {
 
@@ -12,6 +12,7 @@ public class CloudStackException extends Exception {
 
     /**
      * Throws error with a message.
+     * 
      * @param message that consists of reason.
      */
     public CloudStackException(String message) {
@@ -20,6 +21,7 @@ public class CloudStackException extends Exception {
 
     /**
      * Displays message with throwable reason.
+     * 
      * @param message that consists of reason.
      * @param cause for why the error occurs.
      */
@@ -29,6 +31,7 @@ public class CloudStackException extends Exception {
 
     /**
      * Throws only the reason.
+     * 
      * @param cause for why the error occurs.
      */
     public CloudStackException(Throwable cause) {
@@ -37,6 +40,7 @@ public class CloudStackException extends Exception {
 
     /**
      * Throws exception with a cause.
+     * 
      * @param message that consists of reason.
      * @param cause for why the error occurs.
      * @param enableSuppression when exceptional error occurs

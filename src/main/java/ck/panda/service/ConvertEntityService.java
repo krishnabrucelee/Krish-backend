@@ -7,7 +7,6 @@ import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import ck.panda.domain.entity.Account;
 import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
@@ -61,12 +60,6 @@ public class ConvertEntityService {
      */
     @Autowired
     private NetworkService networkService;
-
-    /**
-     * AccountService for listing network offers in cloudstack server.
-     */
-    @Autowired
-    private AccountService accountService;
 
     /**
      * NetworkOfferingService for listing network offers in cloudstack server.
@@ -258,7 +251,7 @@ public class ConvertEntityService {
      */
     public Long getNetworkOfferingId(String uuid) throws Exception {
         if (networkOfferingService.findByUUID(uuid) != null) {
-        return networkOfferingService.findByUUID(uuid).getId();
+            return networkOfferingService.findByUUID(uuid).getId();
         }
         return null;
     }
@@ -266,7 +259,7 @@ public class ConvertEntityService {
     /**
      * Get NetworkOffering object.
      *
-     * @param uuid uuid of NetworkOffering
+     * @param id of NetworkOffering
      * @return NetworkOffering.
      * @throws Exception unhandled exception.
      */
@@ -283,7 +276,7 @@ public class ConvertEntityService {
      */
     public Long getOsTypeId(String uuid) throws Exception {
         if (osTypeService.findByUUID(uuid) != null) {
-        return osTypeService.findByUUID(uuid).getId();
+            return osTypeService.findByUUID(uuid).getId();
         }
         return null;
     }
@@ -306,8 +299,8 @@ public class ConvertEntityService {
      * @return network.
      * @throws Exception unhandled exception.
      */
-    public Network getNetworkById(Long Id) throws Exception {
-        return networkService.findById(Id);
+    public Network getNetworkById(Long id) throws Exception {
+        return networkService.findById(id);
     }
 
     /**
@@ -320,8 +313,6 @@ public class ConvertEntityService {
     public VmInstance getVmInstanceById(Long id) throws Exception {
         return virtualMachineService.findById(id);
     }
-
-
 
     /**
      * Get owner id.
@@ -364,7 +355,7 @@ public class ConvertEntityService {
     /**
      * Get department object.
      *
-     * @param uuid uuid of department.
+     * @param id id of department.
      * @return department.
      * @throws Exception unhandled exception.
      */
@@ -385,17 +376,6 @@ public class ConvertEntityService {
         } else {
             return null;
         }
-    }
-
-    /**
-     * Get account object.
-     *
-     * @param uuid uuid of account.
-     * @return account.
-     * @throws Exception unhandled exception.
-     */
-    public Account getAccount(String uuid) throws Exception {
-        return accountService.findByUuidAndIsActive(uuid, true);
     }
 
     /**
@@ -429,7 +409,7 @@ public class ConvertEntityService {
      */
     public Long getProjectId(String uuid) throws Exception {
         if (projectService.findByUuid(uuid) != null) {
-        return projectService.findByUuid(uuid).getId();
+            return projectService.findByUuid(uuid).getId();
         }
         return null;
     }
@@ -443,7 +423,7 @@ public class ConvertEntityService {
      */
     public Long getPodId(String uuid) throws Exception {
         if (podService.findByUUID(uuid) != null) {
-        return podService.findByUUID(uuid).getId();
+            return podService.findByUUID(uuid).getId();
         }
         return null;
     }
@@ -457,7 +437,7 @@ public class ConvertEntityService {
      */
     public Long getVolumeId(String uuid) throws Exception {
         if (volumeService.findByUUID(uuid) != null) {
-        return volumeService.findByUUID(uuid).getId();
+            return volumeService.findByUUID(uuid).getId();
         }
         return null;
     }
@@ -596,62 +576,13 @@ public class ConvertEntityService {
      * Get department id.
      *
      * @param name of the department.
+     * @param domain of the department.
      * @return domain id.
      * @throws Exception unhandled exception.
      */
     public Long getDepartmentByUsernameAndDomains(String name, Domain domain) throws Exception {
         if (departmentService.findByUsernameAndDomain(name, domain, true) != null) {
             return departmentService.findByUsernameAndDomain(name, domain, true).getId();
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Get domain id.
-     *
-     * @param domain object for account.
-     * @param name of the domain.
-     * @return domain id.
-     * @throws Exception unhandled exception.
-     */
-    public Account getAccountByUsernameAndDomain(String name,Domain domain) throws Exception {
-        if (accountService.findByNameAndDomainAndIsActive(name, domain, true) != null) {
-            return accountService.findByNameAndDomainAndIsActive(name, domain, true);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Get department id.
-     *
-     * @param domain object for account.
-     * @param name of the domain.
-     * @return domain id.
-     * @throws Exception unhandled exception.
-     */
-    public Long getDepartmentByUsernameAndDomain(String name, Domain domain) throws Exception {
-        if (accountService.findByNameAndDomainAndIsActiveAndUserType(name, domain, true) != null) {
-            return departmentService.findByUuidAndIsActive(
-                    accountService.findByNameAndDomainAndIsActiveAndUserType(name, domain, true).getUuid(), true)
-                    .getId();
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Get Account id.
-     *
-     * @param name of the account.
-     * @param domain uuid of domain.
-     * @return account id.
-     * @throws Exception unhandled exception.
-     */
-    public Long getAccountIdByUsernameAndDomain(String name, Domain domain) throws Exception {
-        if (accountService.findByNameAndDomainAndIsActive(name, domain, true) != null) {
-            return accountService.findByNameAndDomainAndIsActive(name, domain, true).getId();
         } else {
             return null;
         }
@@ -667,7 +598,7 @@ public class ConvertEntityService {
      */
     public Long getUserIdByAccount(String name, Domain domain) throws Exception {
         User user = userService.findByUserNameAndDomain(name, domain);
-        if(user != null){
+        if (user != null) {
             return user.getId();
         }
         return null;
@@ -722,7 +653,7 @@ public class ConvertEntityService {
      * @throws Exception unhandled exception.
      */
     public OsCategory getOsCategory(String uuid) throws Exception {
-         return osCategoryService.findbyUUID(uuid);
+        return osCategoryService.findbyUUID(uuid);
     }
 
     /**
@@ -763,7 +694,7 @@ public class ConvertEntityService {
      * @return osCategory id.
      * @throws Exception unhandled exception.
      */
-    public Long getUserByName(String owner, Domain domain)  throws Exception {
+    public Long getUserByName(String owner, Domain domain) throws Exception {
         if (userService.findByNameAndDomain(owner, domain) != null) {
             return userService.findByNameAndDomain(owner, domain).getId();
         }
@@ -787,7 +718,7 @@ public class ConvertEntityService {
     /**
      * Get Zone By Id.
      *
-     * @param ZoneId Zone Id.
+     * @param zoneId Zone Id.
      * @return Zone.
      * @throws Exception unhandled exception.
      */
@@ -802,7 +733,7 @@ public class ConvertEntityService {
     /**
      * Get Project By Id.
      *
-     * @param ProjectId Project Id.
+     * @param projectId Project Id.
      * @return Project.
      * @throws Exception unhandled exception.
      */
@@ -816,7 +747,7 @@ public class ConvertEntityService {
     /**
      * Get Department By Id.
      *
-     * @param DepartmentId Department Id.
+     * @param departmentId Department Id.
      * @return Department.
      * @throws Exception unhandled exception.
      */
@@ -826,6 +757,33 @@ public class ConvertEntityService {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Get virtual machine service object.
+     *
+     * @return virtual machine service object
+     */
+    public VirtualMachineService getInstanceService() {
+        return this.virtualMachineService;
+    }
+
+    /**
+     * Get volume service object.
+     *
+     * @return volume service object
+     */
+    public VolumeService getVolumeService() {
+        return this.volumeService;
+    }
+
+    /**
+     * Get network service object.
+     *
+     * @return network service object
+     */
+    public NetworkService getNetworkService() {
+        return this.networkService;
     }
 
 }

@@ -32,12 +32,12 @@ public interface NetworkOfferingService extends CRUDService<NetworkOffering> {
     /**
      * To get network offering from cloudstack server.
      *
-     * @param d id of network offering.
+     * @param id of network offering.
      * @return network offering from server
      * @throws Exception unhandled errors.
      */
     NetworkOffering findById(Long id) throws Exception;
-    
+
     /**
      * To get list of Isolated network offering from cloudstack server.
      *

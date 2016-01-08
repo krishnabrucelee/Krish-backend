@@ -13,7 +13,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -26,12 +25,11 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
- * Resource limit Project entity.
- *
+ * Resource limit Project entity. *
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "ck_resource_limit_project")
+@Table(name = "resource_limit_projects")
 public class ResourceLimitProject {
 
     /** Unique ID of the Resource limit. */
@@ -67,7 +65,7 @@ public class ResourceLimitProject {
     @Column(name = "project_id")
     private Long projectId;
 
-    /**  Type of resource. */
+    /** Type of resource. */
     @Column(name = "resource_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private ResourceType resourceType;
@@ -81,7 +79,7 @@ public class ResourceLimitProject {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    /** unique separator for each project with resource type.*/
+    /** unique separator for each project with resource type. */
     @Transient
     private String uniqueSeperator;
 
@@ -128,20 +126,19 @@ public class ResourceLimitProject {
     private Integer transResourceType;
 
     /**
-     * isSyncFlag field is not to be serialized,
-     * whereas JPA's @Transient annotation is used to indicate
-     * that a field is not to be persisted in the database.
+     * isSyncFlag field is not to be serialized, whereas JPA's @Transient annotation is used to indicate that a field is
+     * not to be persisted in the database.
      */
     @Transient
     private Boolean isSyncFlag;
 
     /** Enum type for Resource Limit. */
     public enum ResourceType {
-        /**  Number of instances a user can create. */
+        /** Number of instances a user can create. */
         Instance,
         /** Number of public IP addresses a user can own. */
         IP,
-        /**  Number of disk volumes a user can create. */
+        /** Number of disk volumes a user can create. */
         Volume,
         /** Number of snapshots a user can create. */
         Snapshot,
@@ -225,7 +222,6 @@ public class ResourceLimitProject {
     public void setDomainId(Long domainId) {
         this.domainId = domainId;
     }
-
 
     /**
      * Get the department of the Resource limit.
@@ -500,35 +496,35 @@ public class ResourceLimitProject {
     /**
      * Get Transient Project Id.
      *
-    * @return the transProjectId
-    */
+     * @return the transProjectId
+     */
     public String getTransProjectId() {
         return transProjectId;
     }
 
     /**
-    * Set the Transient Project Id.
-    *
-    * @param transProjectId the transProjectId to set
-    */
+     * Set the Transient Project Id.
+     *
+     * @param transProjectId the transProjectId to set
+     */
     public void setTransProjectId(String transProjectId) {
         this.transProjectId = transProjectId;
     }
 
     /**
-    * Get the transient Resource Type.
-    *
-    * @return the transResourceType
-    */
+     * Get the transient Resource Type.
+     *
+     * @return the transResourceType
+     */
     public Integer getTransResourceType() {
         return transResourceType;
     }
 
     /**
-    * Set the transResourceType.
-    *
-    * @param transResourceType  to set
-    */
+     * Set the transResourceType.
+     *
+     * @param transResourceType to set
+     */
     public void setTransResourceType(Integer transResourceType) {
         this.transResourceType = transResourceType;
     }

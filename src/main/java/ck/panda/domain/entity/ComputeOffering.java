@@ -14,7 +14,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -29,18 +28,17 @@ import org.springframework.data.annotation.Version;
 import ck.panda.util.JsonUtil;
 
 /**
- *  A service offering is a set of virtual hardware features such as CPU core count and speed, memory, and disk size.
- *  The CloudStack administrator can set up various offerings, and then end users choose from the
- *  available offerings when they create a new VM.
+ * A service offering is a set of virtual hardware features such as CPU core count and speed, memory, and disk size. The
+ * CloudStack administrator can set up various offerings, and then end users choose from the available offerings when
+ * they create a new VM.
  *
  */
 
 @Entity
-@Table(name = "ck_service_offerings")
+@Table(name = "service_offerings")
 @SuppressWarnings("serial")
 
 public class ComputeOffering implements Serializable {
-
 
     /** The id of the Compute offering table. */
     @Id
@@ -94,7 +92,7 @@ public class ComputeOffering implements Serializable {
     @Column(name = "memory")
     private Integer memory;
 
-    /** The Disk Bytes read rate.  */
+    /** The Disk Bytes read rate. */
     @Column(name = "disk_bytes_read_rate")
     private Integer diskBytesReadRate;
 
@@ -143,17 +141,17 @@ public class ComputeOffering implements Serializable {
     @ManyToOne
     private Domain domain;
 
-    /**  Domain id for offer. */
-   @Column(name = "domain_id")
+    /** Domain id for offer. */
+    @Column(name = "domain_id")
     private Long domainId;
-
 
     /** The Disk Input and Output write rate per second. */
     @Column(name = "disk_iops_write_rate")
     private Integer diskIopsWriteRate;
 
     /**
-     * The storage type local, shared for this Compute offering. */
+     * The storage type local, shared for this Compute offering.
+     */
     @Column(name = "storage_type")
     @Enumerated(EnumType.STRING)
     private StorageType storageType;
@@ -200,14 +198,14 @@ public class ComputeOffering implements Serializable {
      */
     public enum DiskIo {
 
-           /** If average disk input and speed at is better level. */
-           AVERAGE,
+        /** If average disk input and speed at is better level. */
+        AVERAGE,
 
-           /** If good disk input and output speed is above average level. */
-           GOOD,
+        /** If good disk input and output speed is above average level. */
+        GOOD,
 
-           /** If excellent disk input and output speed is at highest level. */
-           EXCELLENT
+        /** If excellent disk input and output speed is at highest level. */
+        EXCELLENT
     }
 
     /**
@@ -215,11 +213,11 @@ public class ComputeOffering implements Serializable {
      */
     public enum StorageType {
 
-           /** If shared is selected we can create instance without enabling zone to use local storage. */
-           shared,
+        /** If shared is selected we can create instance without enabling zone to use local storage. */
+        shared,
 
-           /** If zone is enabled to access local storage then only we can create vm using this option. */
-           local,
+        /** If zone is enabled to access local storage then only we can create vm using this option. */
+        local,
     }
 
     /**
@@ -227,11 +225,11 @@ public class ComputeOffering implements Serializable {
      */
     public enum QosType {
 
-           /** If hypervisor is chosed we can specify disk bytes read and write bytes value. */
-           HYPERVISOR,
+        /** If hypervisor is chosed we can specify disk bytes read and write bytes value. */
+        HYPERVISOR,
 
-           /** If storage is chosed we can specify minimum and maximum iops values. */
-           STORAGE,
+        /** If storage is chosed we can specify minimum and maximum iops values. */
+        STORAGE,
     }
 
     /**
@@ -397,7 +395,7 @@ public class ComputeOffering implements Serializable {
     /**
      * Set the uuid.
      *
-     * @param uuid  to set
+     * @param uuid to set
      */
     public void setUuid(String uuid) {
         this.uuid = uuid;
@@ -406,7 +404,7 @@ public class ComputeOffering implements Serializable {
     /**
      * Set the name.
      *
-     * @param name  to set
+     * @param name to set
      */
     public void setName(String name) {
         this.name = name;
@@ -415,7 +413,7 @@ public class ComputeOffering implements Serializable {
     /**
      * Set the numberOfCores.
      *
-     * @param numberOfCores  to set
+     * @param numberOfCores to set
      */
     public void setNumberOfCores(Integer numberOfCores) {
         this.numberOfCores = numberOfCores;
@@ -424,7 +422,7 @@ public class ComputeOffering implements Serializable {
     /**
      * Set the clockSpeed.
      *
-     * @param clockSpeed  to set
+     * @param clockSpeed to set
      */
     public void setClockSpeed(Integer clockSpeed) {
         this.clockSpeed = clockSpeed;
@@ -433,7 +431,7 @@ public class ComputeOffering implements Serializable {
     /**
      * Set the displayText.
      *
-     * @param displayText  to set
+     * @param displayText to set
      */
     public void setDisplayText(String displayText) {
         this.displayText = displayText;
@@ -442,7 +440,7 @@ public class ComputeOffering implements Serializable {
     /**
      * Set the hostTags.
      *
-     * @param hostTags  to set
+     * @param hostTags to set
      */
     public void setHostTags(String hostTags) {
         this.hostTags = hostTags;
@@ -469,7 +467,7 @@ public class ComputeOffering implements Serializable {
     /**
      * Set the diskBytesReadRate.
      *
-     * @param diskBytesReadRate  to set
+     * @param diskBytesReadRate to set
      */
     public void setDiskBytesReadRate(Integer diskBytesReadRate) {
         this.diskBytesReadRate = diskBytesReadRate;
@@ -478,7 +476,7 @@ public class ComputeOffering implements Serializable {
     /**
      * Set the diskBytesWriteRate.
      *
-     * @param diskBytesWriteRate  to set
+     * @param diskBytesWriteRate to set
      */
     public void setDiskBytesWriteRate(Integer diskBytesWriteRate) {
         this.diskBytesWriteRate = diskBytesWriteRate;
@@ -514,7 +512,7 @@ public class ComputeOffering implements Serializable {
     /**
      * Set the diskIopsWriteRate.
      *
-     * @param diskIopsWriteRate  to set
+     * @param diskIopsWriteRate to set
      */
     public void setDiskIopsWriteRate(Integer diskIopsWriteRate) {
         this.diskIopsWriteRate = diskIopsWriteRate;
@@ -545,7 +543,7 @@ public class ComputeOffering implements Serializable {
         return isPublic;
     }
 
-   /**
+    /**
      * Get domain id.
      *
      * @return the domainId
@@ -557,7 +555,7 @@ public class ComputeOffering implements Serializable {
     /**
      * Set the isPublic.
      *
-     * @param isPublic  to set
+     * @param isPublic to set
      */
     public void setIsPublic(Boolean isPublic) {
         this.isPublic = isPublic;
@@ -566,7 +564,7 @@ public class ComputeOffering implements Serializable {
     /**
      * Set the domainId.
      *
-     * @param domainId  to set
+     * @param domainId to set
      */
     public void setDomainId(Long domainId) {
         this.domainId = domainId;
@@ -590,7 +588,6 @@ public class ComputeOffering implements Serializable {
         this.version = version;
     }
 
-
     /**
      * Get disk io.
      *
@@ -603,7 +600,7 @@ public class ComputeOffering implements Serializable {
     /**
      * Set the diskIo.
      *
-     * @param diskIo  to set
+     * @param diskIo to set
      */
     public void setDiskIo(DiskIo diskIo) {
         this.diskIo = diskIo;
@@ -639,7 +636,7 @@ public class ComputeOffering implements Serializable {
     /**
      * Set the lastModifiedDateTime.
      *
-     * @param lastModifiedDateTime  to set
+     * @param lastModifiedDateTime to set
      */
     public void setLastModifiedDateTime(DateTime lastModifiedDateTime) {
         this.lastModifiedDateTime = lastModifiedDateTime;
@@ -711,7 +708,7 @@ public class ComputeOffering implements Serializable {
     /**
      * Set the storageTags.
      *
-     * @param storageTags  to set
+     * @param storageTags to set
      */
     public void setStorageTags(String storageTags) {
         this.storageTags = storageTags;
@@ -720,7 +717,7 @@ public class ComputeOffering implements Serializable {
     /**
      * Set the qosType.
      *
-     * @param qosType  to set
+     * @param qosType to set
      */
     public void setQosType(QosType qosType) {
         this.qosType = qosType;
@@ -729,7 +726,7 @@ public class ComputeOffering implements Serializable {
     /**
      * Set the minIops.
      *
-     * @param minIops  to set
+     * @param minIops to set
      */
     public void setMinIops(Integer minIops) {
         this.minIops = minIops;
@@ -738,7 +735,7 @@ public class ComputeOffering implements Serializable {
     /**
      * Set the maxIops.
      *
-     * @param maxIops  to set
+     * @param maxIops to set
      */
     public void setMaxIops(Integer maxIops) {
         this.maxIops = maxIops;
@@ -747,7 +744,7 @@ public class ComputeOffering implements Serializable {
     /**
      * Set the isActive.
      *
-     * @param isActive  to set
+     * @param isActive to set
      */
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
@@ -774,7 +771,7 @@ public class ComputeOffering implements Serializable {
     /**
      * Set the customizedIops.
      *
-     * @param customizedIops  to set
+     * @param customizedIops to set
      */
     public void setCustomizedIops(Boolean customizedIops) {
         this.customizedIops = customizedIops;
@@ -783,7 +780,7 @@ public class ComputeOffering implements Serializable {
     /**
      * Set the customized.
      *
-     * @param customized  to set
+     * @param customized to set
      */
     public void setCustomized(Boolean customized) {
         this.customized = customized;
@@ -837,13 +834,11 @@ public class ComputeOffering implements Serializable {
     /**
      * Set the storageType.
      *
-     * @param storageType  to set
+     * @param storageType to set
      */
     public void setStorageType(StorageType storageType) {
         this.storageType = storageType;
     }
-
-
 
     /**
      * @return the computeCost
@@ -872,24 +867,23 @@ public class ComputeOffering implements Serializable {
         ComputeOffering compute = new ComputeOffering();
         compute.setIsSyncFlag(false);
         try {
-        compute.setUuid(JsonUtil.getStringValue(object, "id"));
-        compute.setDisplayText(JsonUtil.getStringValue(object, "displaytext"));
-        compute.setName(JsonUtil.getStringValue(object, "name"));
-        compute.setMemory(JsonUtil.getIntegerValue(object, "memory"));
-        compute.setClockSpeed(JsonUtil.getIntegerValue(object, "cpuspeed"));
-        compute.setCustomized(JsonUtil.getBooleanValue(object, "iscustomized"));
-        compute.setCustomizedIops(JsonUtil.getBooleanValue(object, "iscustomizediops"));
-        compute.setNumberOfCores(JsonUtil.getIntegerValue(object, "cpunumber"));
-        compute.setStorageType(StorageType.valueOf(JsonUtil.getStringValue(object, "storagetype")));
-        compute.setIsHighAvailabilityEnabled(JsonUtil.getBooleanValue(object,"offerha"));
-        compute.setIsActive(true);
+            compute.setUuid(JsonUtil.getStringValue(object, "id"));
+            compute.setDisplayText(JsonUtil.getStringValue(object, "displaytext"));
+            compute.setName(JsonUtil.getStringValue(object, "name"));
+            compute.setMemory(JsonUtil.getIntegerValue(object, "memory"));
+            compute.setClockSpeed(JsonUtil.getIntegerValue(object, "cpuspeed"));
+            compute.setCustomized(JsonUtil.getBooleanValue(object, "iscustomized"));
+            compute.setCustomizedIops(JsonUtil.getBooleanValue(object, "iscustomizediops"));
+            compute.setNumberOfCores(JsonUtil.getIntegerValue(object, "cpunumber"));
+            compute.setStorageType(StorageType.valueOf(JsonUtil.getStringValue(object, "storagetype")));
+            compute.setIsHighAvailabilityEnabled(JsonUtil.getBooleanValue(object, "offerha"));
+            compute.setIsActive(true);
 
         } catch (Exception ex) {
             ex.printStackTrace();
         }
         return compute;
     }
-
 
     /**
      * Mapping entity object into list.
@@ -906,4 +900,4 @@ public class ComputeOffering implements Serializable {
 
         return computeOfferingMap;
     }
- }
+}

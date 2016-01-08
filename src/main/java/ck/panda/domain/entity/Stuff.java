@@ -17,6 +17,7 @@ public class Stuff {
 
     /**
      * Get the description.
+     * 
      * @return description
      */
     public String getDescription() {
@@ -34,6 +35,7 @@ public class Stuff {
 
     /**
      * Get the owner.
+     * 
      * @return owner
      */
     public DomainUser getOwner() {
@@ -42,6 +44,7 @@ public class Stuff {
 
     /**
      * Set the owner.
+     * 
      * @param owner to set
      */
     public void setOwner(DomainUser owner) {
@@ -50,6 +53,7 @@ public class Stuff {
 
     /**
      * Get the details.
+     * 
      * @return details
      */
     public String getDetails() {

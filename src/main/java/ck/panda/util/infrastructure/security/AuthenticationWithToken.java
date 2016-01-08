@@ -14,6 +14,7 @@ public class AuthenticationWithToken extends PreAuthenticatedAuthenticationToken
 
     /**
      * Parameterized constructor.
+     * 
      * @param aPrincipal to set
      * @param aCredentials to set
      */
@@ -23,16 +24,19 @@ public class AuthenticationWithToken extends PreAuthenticatedAuthenticationToken
 
     /**
      * Parameterized constructor.
+     * 
      * @param aPrincipal to set
      * @param aCredentials to set
      * @param anAuthorities to set
      */
-    public AuthenticationWithToken(Object aPrincipal, Object aCredentials, Collection<? extends GrantedAuthority> anAuthorities) {
+    public AuthenticationWithToken(Object aPrincipal, Object aCredentials,
+            Collection<? extends GrantedAuthority> anAuthorities) {
         super(aPrincipal, aCredentials, anAuthorities);
     }
 
     /**
      * Set token.
+     * 
      * @param token to set
      */
     public void setToken(String token) {
@@ -41,9 +45,10 @@ public class AuthenticationWithToken extends PreAuthenticatedAuthenticationToken
 
     /**
      * Get token.
+     * 
      * @return token
      */
     public String getToken() {
-        return (String)getDetails();
+        return (String) getDetails();
     }
 }

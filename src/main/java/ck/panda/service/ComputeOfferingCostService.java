@@ -10,8 +10,8 @@ import ck.panda.util.domain.CRUDService;
  *
  */
 @Service
-public interface ComputeOfferingCostService  extends CRUDService<ComputeOfferingCost>  {
+public interface ComputeOfferingCostService extends CRUDService<ComputeOfferingCost> {
 
-   /* void save(ComputeOfferingAndPrice compute);*/
+    /* void save(ComputeOfferingAndPrice compute); */
 
 }

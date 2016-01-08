@@ -78,8 +78,8 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                 if (vmSnapshot.getSnapshotMemory()) {
                     optional.put("snapshotmemory", "true");
                 }
-                optional.put("name",vmSnapshot.getName());
-                optional.put("description",vmSnapshot.getDescription());
+                optional.put("name", vmSnapshot.getName());
+                optional.put("description", vmSnapshot.getDescription());
                 VmInstance vmInstance = virtualMachineService.find(vmSnapshot.getVmId());
                 if (vmInstance == null) {
                     errors.addGlobalError("Virtual machine may not be null");
@@ -222,13 +222,14 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                 // 2.1 Call convert by passing JSONObject to vm snapshot entity
                 // and Add
                 // the converted vm snapshot entity to list
-              VmSnapshot vmSnapshot = VmSnapshot.convert(vmSnapshotListJSON.getJSONObject(i));
-              vmSnapshot.setVmId(convertEntityService.getVmInstanceId(vmSnapshot.getTransvmInstanceId()));
-              vmSnapshot.setDomainId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getDomainId());
-              vmSnapshot.setOwnerId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getInstanceOwnerId());
-              vmSnapshot.setZoneId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getZoneId());
+                VmSnapshot vmSnapshot = VmSnapshot.convert(vmSnapshotListJSON.getJSONObject(i));
+                vmSnapshot.setVmId(convertEntityService.getVmInstanceId(vmSnapshot.getTransvmInstanceId()));
+                vmSnapshot.setDomainId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getDomainId());
+                vmSnapshot
+                        .setOwnerId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getInstanceOwnerId());
+                vmSnapshot.setZoneId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getZoneId());
 
-              vmsnapshotList.add(vmSnapshot);
+                vmsnapshotList.add(vmSnapshot);
             }
         }
         return vmsnapshotList;

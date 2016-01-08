@@ -10,7 +10,7 @@ import ck.panda.domain.entity.OsCategory;
  */
 public interface OsCategoryRepository extends PagingAndSortingRepository<OsCategory, Long> {
 
-	 /**
+    /**
      * Find osCategory by uuid.
      *
      * @param uuid uuid of osCategory.

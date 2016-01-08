@@ -18,7 +18,9 @@ public class CloudStackHypervisorsService {
     @Autowired
     private CloudStackServer server;
 
-    /** sets api key , secret key and url.
+    /**
+     * sets api key , secret key and url.
+     * 
      * @param server sets these values.
      */
     public void setServer(CloudStackServer server) {
@@ -33,14 +35,11 @@ public class CloudStackHypervisorsService {
      * @return response Document
      * @throws Exception unhandled errors.
      */
-    public String listHypervisors(String response,
-            HashMap<String, String> optional)
-            throws Exception {
+    public String listHypervisors(String response, HashMap<String, String> optional) throws Exception {
 
-        LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("listHypervisors", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("listHypervisors", optional);
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
-        return  responseDocument;
+        return responseDocument;
     }
 }

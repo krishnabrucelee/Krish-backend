@@ -6,35 +6,35 @@ package ck.panda.util.web;
  */
 public interface ApiController {
 
-    //Generic constants
-    /** Create.*/
+    // Generic constants
+    /** Create. */
     String PATH_ID = "id";
 
-    //Swagger constants
-    /** Create.*/
+    // Swagger constants
+    /** Create. */
     String SW_METHOD_CREATE = "create";
 
-    /** Read.*/
+    /** Read. */
     String SW_METHOD_READ = "read";
 
-    /** Update.*/
+    /** Update. */
     String SW_METHOD_UPDATE = "update";
 
-    /** Delete.*/
+    /** Delete. */
     String SW_METHOD_DELETE = "delete";
 
-    /** List.*/
+    /** List. */
     String SW_METHOD_LIST = "/";
 
-    //Paging constants
-    /** Create.*/
+    // Paging constants
+    /** Create. */
     String RANGE = "Range";
 
-  //Paging Limit constants
-    /** Pagination limit for number of rows.*/
+    // Paging Limit constants
+    /** Pagination limit for number of rows. */
     String CONTENT_LIMIT = "Content-Limit";
 
-    //Application paths
+    // Application paths
 
     /** API path. */
     String API_PATH = "/api";
@@ -52,7 +52,7 @@ public interface ApiController {
     String BEANS_ENDPOINT = "/beans";
     /** Config groups endpoint. */
     String CONFIGPROPS_ENDPOINT = "/configprops";
-    /**Environment endpoint. */
+    /** Environment endpoint. */
     String ENV_ENDPOINT = "/env";
     /** Mappings endpoint. */
     String MAPPINGS_ENDPOINT = "/mappings";

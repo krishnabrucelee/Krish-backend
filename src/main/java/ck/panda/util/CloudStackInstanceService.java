@@ -53,7 +53,8 @@ public class CloudStackInstanceService {
      * @return json response.
      * @throws Exception cloud stack connector exception.
      */
-    public String destroyVirtualMachine(String virtualMachineId, String response, HashMap<String, String> optional) throws Exception {
+    public String destroyVirtualMachine(String virtualMachineId, String response, HashMap<String, String> optional)
+            throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("destroyVirtualMachine", optional);
         arguments.add(new NameValuePair("id", virtualMachineId));
         arguments.add(new NameValuePair("response", response));
@@ -83,8 +84,9 @@ public class CloudStackInstanceService {
      * @return response json.
      * @throws Exception unhandled exceptions.
      */
-    public String startVirtualMachine(String virtualMachineId, String response) throws Exception {
-        LinkedList<NameValuePair> arguments = server.getDefaultQuery("startVirtualMachine", null);
+    public String startVirtualMachine(String virtualMachineId, String response, HashMap<String, String> optional)
+            throws Exception {
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("startVirtualMachine", optional);
         arguments.add(new NameValuePair("id", virtualMachineId));
         arguments.add(new NameValuePair("response", response));
         return server.request(arguments);
@@ -124,8 +126,8 @@ public class CloudStackInstanceService {
     }
 
     /**
-     * Resets the password for virtual machine. The virtual machine must be in a "Stopped" state and the
-     * template must already support this feature for this command to take effect. [async]
+     * Resets the password for virtual machine. The virtual machine must be in a "Stopped" state and the template must
+     * already support this feature for this command to take effect. [async]
      *
      * @param virtualMachineId vm id.
      * @return json response.
@@ -139,15 +141,16 @@ public class CloudStackInstanceService {
     }
 
     /**
-     * Changes the service offering for a virtual machine. The virtual machine must be in a "Stopped" state
-     * for this command to take effect.
+     * Changes the service offering for a virtual machine. The virtual machine must be in a "Stopped" state for this
+     * command to take effect.
      *
      * @param virtualMachineId The ID of the virtual machine
      * @param serviceOfferingId the service offering ID to apply to the virtual machine
      * @return json response.
      * @throws Exception unhandled exceptions.
      */
-    public String changeServiceForVirtualMachine(String virtualMachineId, String serviceOfferingId, String response, HashMap<String, String> optional) throws Exception {
+    public String changeServiceForVirtualMachine(String virtualMachineId, String serviceOfferingId, String response,
+            HashMap<String, String> optional) throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("changeServiceForVirtualMachine", optional);
         arguments.add(new NameValuePair("id", virtualMachineId));
         arguments.add(new NameValuePair("response", response));
@@ -156,15 +159,16 @@ public class CloudStackInstanceService {
     }
 
     /**
-     * Changes the service offering for a virtual machine. The virtual machine must be in a "Stopped" state
-     * for this command to take effect.
+     * Changes the service offering for a virtual machine. The virtual machine must be in a "Stopped" state for this
+     * command to take effect.
      *
      * @param virtualMachineId The ID of the virtual machine
      * @param serviceOfferingId the service offering ID to apply to the virtual machine
      * @return json response.
      * @throws Exception unhandled exceptions.
      */
-    public String scaleVirtualMachine(String virtualMachineId, String serviceOfferingId, String response, HashMap<String, String> optional) throws Exception {
+    public String scaleVirtualMachine(String virtualMachineId, String serviceOfferingId, String response,
+            HashMap<String, String> optional) throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("scaleVirtualMachine", optional);
         arguments.add(new NameValuePair("id", virtualMachineId));
         arguments.add(new NameValuePair("response", response));
@@ -231,8 +235,8 @@ public class CloudStackInstanceService {
     }
 
     /**
-     * attempts Migration of a Virtual Machine to a different host or Root volume of the Virtual Machine to a
-     * different storage pool.
+     * attempts Migration of a Virtual Machine to a different host or Root volume of the Virtual Machine to a different
+     * storage pool.
      *
      * @param virtualMachineId the ID of the virtual machine
      * @param optional optional parameters.
@@ -294,8 +298,8 @@ public class CloudStackInstanceService {
     }
 
     /**
-     * attempts Migration of a Virtual Machine to a different host or Root volume of the Virtual Machine to a
-     * different storage pool.
+     * attempts Migration of a Virtual Machine to a different host or Root volume of the Virtual Machine to a different
+     * storage pool.
      *
      * @param virtualMachineId the ID of the virtual machine
      * @param optional optional arguments.
@@ -332,8 +336,8 @@ public class CloudStackInstanceService {
      * @return json response.
      * @throws Exception unhandled exception.
      */
-    public String addNicToVirtualMachine(String networkId, String virtualMachineId, HashMap<String, String> optional, String response)
-            throws Exception {
+    public String addNicToVirtualMachine(String networkId, String virtualMachineId, HashMap<String, String> optional,
+            String response) throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("addNicToVirtualMachine", optional);
         arguments.add(new NameValuePair("networkid", networkId));
         arguments.add(new NameValuePair("virtualmachineid", virtualMachineId));
@@ -350,8 +354,8 @@ public class CloudStackInstanceService {
      * @return json response.
      * @throws Exception unhandled exception.
      */
-    public String removeNicFromVirtualMachine(String nicId, String virtualMachineId, HashMap<String, String> optional, String response)
-            throws Exception {
+    public String removeNicFromVirtualMachine(String nicId, String virtualMachineId, HashMap<String, String> optional,
+            String response) throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("removeNicFromVirtualMachine", optional);
         arguments.add(new NameValuePair("nicid", nicId));
         arguments.add(new NameValuePair("virtualmachineid", virtualMachineId));
@@ -368,7 +372,7 @@ public class CloudStackInstanceService {
      * @return json response.
      * @throws Exception unhandled exception.
      */
-    public String updateDefaultNicForVirtualMachine(String nicId, String virtualMachineId,String response,
+    public String updateDefaultNicForVirtualMachine(String nicId, String virtualMachineId, String response,
             HashMap<String, String> optional) throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("updateDefaultNicForVirtualMachine", optional);
         arguments.add(new NameValuePair("nicid", nicId));

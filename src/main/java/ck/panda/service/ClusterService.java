@@ -29,4 +29,3 @@ public interface ClusterService extends CRUDService<Cluster> {
      */
     Cluster findByUUID(String uuid) throws Exception;
 }
-
