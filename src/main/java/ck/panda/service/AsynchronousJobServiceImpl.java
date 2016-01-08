@@ -150,13 +150,13 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             asyncTemplates(eventObject);
             break;
         case EventTypes.EVENT_VOLUME:
-                LOGGER.debug("Volume sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+            LOGGER.debug("Volume sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
             asyncVolume(jobresult, eventObject);
             break;
-            case EventTypes.EVENT_NIC:
-                LOGGER.debug("NIC sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
-                asyncNic(jobresult, eventObject);
-                break;
+        case EventTypes.EVENT_NIC:
+            LOGGER.debug("NIC sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+            asyncNic(jobresult, eventObject);
+            break;
         default:
             LOGGER.debug("No sync required",
                     eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));

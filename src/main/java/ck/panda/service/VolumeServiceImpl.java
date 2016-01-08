@@ -97,12 +97,14 @@ public class VolumeServiceImpl implements VolumeService {
                 throw new ApplicationException(errors);
             } else {
                 Volume volumeCS = createVolume(volume, errors);
-                if (volumeRepo.findByUUID(volumeCS.getUuid()) != null) {
-                    volume = volumeRepo.findByUUID(volumeCS.getUuid());
+                if (volumeRepo.findByUUID(volumeCS.getUuid()) == null) {
+                	volume = volumeRepo.save(volumeCS);
                 }
             }
+            return volume;
+        } else {
+            return volumeRepo.save(volume);
         }
-        return volumeRepo.save(volume);
     }
 
     @Override
