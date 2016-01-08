@@ -298,7 +298,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     private void validateComputeOffering(ComputeOffering compute) throws Exception {
         Errors errors = validator.rejectIfNullEntity("computes", compute);
         errors = validator.validateEntity(compute, errors);
-        ComputeOffering computeOffering = computeRepo.findName(compute.getName());
+        ComputeOffering computeOffering = computeRepo.findNameAndIsActive(compute.getName(), true);
         if (computeOffering != null && compute.getId() != computeOffering.getId()) {
             errors.addFieldError("name", "computeoffering.already.exist");
         }
@@ -309,7 +309,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
 
     @Override
     public ComputeOffering findByName(String name) {
-        return (ComputeOffering) computeRepo.findName(name);
+        return (ComputeOffering) computeRepo.findNameAndIsActive(name, true);
     }
 
     @Override

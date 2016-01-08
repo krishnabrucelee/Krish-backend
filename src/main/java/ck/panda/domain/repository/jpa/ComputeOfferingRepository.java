@@ -38,8 +38,8 @@ public interface ComputeOfferingRepository extends PagingAndSortingRepository<Co
      * @param name of compute offering.
      * @return compute offering.
      */
-    @Query(value = "select compute from ComputeOffering compute where compute.name =:name")
-    ComputeOffering findName(@Param("name") String name);
+    @Query(value = "select compute from ComputeOffering compute where compute.name =:name and compute.isActive =:isActive")
+    ComputeOffering findNameAndIsActive(@Param("name") String name, @Param("isActive") Boolean isActive);
 
     /**
      * Find by is Active in Compute Offering.
