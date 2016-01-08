@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
+import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.Nic;
 import ck.panda.service.NicService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -112,5 +113,13 @@ public class NicController extends CRUDController<Nic> implements ApiController 
         System.out.println(instanceId);
         return nicOfferingService.findByInstance(instanceId);
     }
+
+    @RequestMapping(value = "acquire/{id}", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected Nic acquireSecondaryIP(@RequestBody Nic nic, @PathVariable(PATH_ID) Long id) throws Exception {
+        return nicOfferingService.acquireSecondaryIP(nic);
+    }
+
 
 }

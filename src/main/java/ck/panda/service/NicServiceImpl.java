@@ -301,4 +301,29 @@ public class NicServiceImpl implements NicService {
     public Page<Nic> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
         return nicRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
     }
+
+    @Override
+    public Nic acquireSecondaryIP(Nic nic) throws Exception  {
+         Errors errors = validator.rejectIfNullEntity("nic", nic);
+         errors = validator.validateEntity(nic, errors);
+         configServer.setUserServer();
+         Network network = convertEntityService.getNetworkById(nic.getNetworkId());
+         HashMap<String, String> nicMap = new HashMap<String, String>();
+         nicMap.put("ipaddress", nic.getVmIpAddress().getId().toString());
+         String acquireIPResponse = cloudStackNicService.addIpToNic(nic.getUuid(), "json",nicMap );
+         JSONObject csacquireIPResponseJSON = new JSONObject(acquireIPResponse)
+                 .getJSONObject("addiptovmnicresponse");
+         if (csacquireIPResponseJSON.has("errorcode")) {
+             errors = this.validateEvent(errors, csacquireIPResponseJSON.getString("errortext"));
+             throw new ApplicationException(errors);
+         } else if (csacquireIPResponseJSON.has("jobid")) {
+             String jobResponse = cloudStackNicService.AcquireIpJobResult(csacquireIPResponseJSON.getString("jobid"), "json");
+             JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+             if (jobresult.getString("jobstatus").equals("1")) {
+                 nic.setUuid((String) csacquireIPResponseJSON.get("id"));
+             }
+         }
+        return nic;
+
+    }
 }

@@ -1,7 +1,9 @@
 package ck.panda.domain.entity;
 
 import java.time.ZonedDateTime;
-
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -13,14 +15,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
 import org.hibernate.annotations.Type;
+import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.format.annotation.DateTimeFormat;
+import ck.panda.util.JsonUtil;
 
 /**
  * IP addresses will need to be reserved for each POD, and a Guest IP Range assigned during the initial configuration of
@@ -44,6 +47,10 @@ public class IpAddress {
     @Column(name = "uuid", nullable = false)
     private String uuid;
 
+    /** Ip address source nat. */
+    @Column(name = "is_source_nat")
+    private Boolean isSourcenat;
+
     /** Network for ip address. */
     @JoinColumn(name = "network_id", referencedColumnName = "id", updatable = false, insertable = false)
     @OneToOne
@@ -52,6 +59,14 @@ public class IpAddress {
     /** Network id for ip address. */
     @Column(name = "network_id")
     private Long networkId;
+
+    /** Is the rule for display to the regular user. */
+    @Column(name = "display")
+    private Boolean display;
+
+    /** IsActive attribute to verify Active or Inactive. */
+    @Column(name = "is_active")
+    private Boolean isActive;
 
     /** Domain of the ip address. */
     @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
@@ -88,6 +103,26 @@ public class IpAddress {
     /** Set syncFlag. */
     @Transient
     private Boolean syncFlag;
+
+    /** Transient domain of the ip Address. */
+    @Transient
+    private String transDomainId;
+
+    /** Transient host of the ip Address. */
+    @Transient
+    private String transProjectId;
+
+    /** Transient network of the ip Address. */
+    @Transient
+    private String transNetworkId;
+
+    /** Transient department id of the ip Address. */
+    @Transient
+    private String transDepartmentId;
+
+    /** Transient zone of the instance. */
+    @Transient
+    private String transZoneId;
 
     /**
      * Enumeration state for ipaddress.
@@ -454,6 +489,150 @@ public class IpAddress {
     }
 
     /**
+     * Get the isSourcenat.
+     *
+     * @return the isSourcenat
+     */
+    public Boolean getIsSourcenat() {
+        return isSourcenat;
+    }
+
+    /**
+     * Set the isSourcenat.
+     *
+     * @param isSourcenat  to set
+     */
+    public void setIsSourcenat(Boolean isSourcenat) {
+        this.isSourcenat = isSourcenat;
+    }
+
+    /**
+     * Get the display.
+     *
+     * @return the display
+     */
+    public Boolean getDisplay() {
+        return display;
+    }
+
+    /**
+     * Set the display.
+     *
+     * @param display to set
+     */
+    public void setDisplay(Boolean display) {
+        this.display = display;
+    }
+
+    /**
+     * Get the transDepartmentId.
+     *
+     * @return the transDepartmentId
+     */
+    public String getTransDepartmentId() {
+        return transDepartmentId;
+    }
+
+    /**
+     * Get the transDepartmentId.
+     *
+     * @param transDepartmentId to set
+     */
+    public void setTransDepartmentId(String transDepartmentId) {
+        this.transDepartmentId = transDepartmentId;
+    }
+
+    /**
+     * Get the transProjectId.
+     *
+     * @return the transProjectId
+     */
+    public String getTransProjectId() {
+        return transProjectId;
+    }
+
+    /**
+     * Set the transProjectId.
+     *
+     * @param transProjectId to set
+     */
+    public void setTransProjectId(String transProjectId) {
+        this.transProjectId = transProjectId;
+    }
+
+    /**
+     * Get the transNetworkId.
+     *
+     * @return the transNetworkId
+     */
+    public String getTransNetworkId() {
+        return transNetworkId;
+    }
+
+    /**
+     * Set the transNetworkId.
+     *
+     * @param transNetworkId to set
+     */
+    public void setTransNetworkId(String transNetworkId) {
+        this.transNetworkId = transNetworkId;
+    }
+
+    /**
+     * Get the transient domain id.
+     *
+     * @return the transDomainId
+     */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
+
+    /**
+     * Set the transient domain id..
+     *
+     * @param transDomainId to set
+     */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
+
+    /**
+     * Get transient zone id.
+     *
+     * @return the transZoneId
+     */
+    public String getTransZoneId() {
+        return transZoneId;
+    }
+
+    /**
+     * Set the transZoneId.
+     *
+     * @param transZoneId to set
+     */
+    public void setTransZoneId(String transZoneId) {
+        this.transZoneId = transZoneId;
+    }
+
+    /**
+     * Get isActive.
+     *
+     * @return the isActive
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    /**
+     * Set is Active.
+     *
+     * @param isActive the isActive to set
+     */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    /**
      * Get the created By.
      *
      * @return the createdBy.
@@ -541,6 +720,49 @@ public class IpAddress {
      */
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
+    }
+
+    /**
+     * Convert JSONObject into pod object.
+     *
+     * @param jsonObject JSON object.
+     * @return pod object.
+     */
+    public static IpAddress convert(JSONObject jsonObject) {
+        IpAddress ipAddress = new IpAddress();
+        try {
+            ipAddress.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
+            ipAddress.setTransZoneId((JsonUtil.getStringValue(jsonObject, "zoneid")));
+            ipAddress.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
+            ipAddress.setTransNetworkId(JsonUtil.getStringValue(jsonObject,"associatednetworkid"));
+            ipAddress.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, "account"));
+            ipAddress.setTransProjectId(JsonUtil.getStringValue(jsonObject, "projectid"));
+            ipAddress.setPublicIpAddress(JsonUtil.getStringValue(jsonObject,"ipaddress"));
+            ipAddress.setDisplay(JsonUtil.getBooleanValue(jsonObject, "fordisplay"));
+            ipAddress.setIsSourcenat(JsonUtil.getBooleanValue(jsonObject,"issourcenat"));
+            ipAddress.setState(State.valueOf(JsonUtil.getStringValue(jsonObject, "state").toUpperCase()));
+            ipAddress.setIsActive(true);
+            ipAddress.setSyncFlag(false);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return ipAddress;
+    }
+
+    /**
+     * Mapping entity object into list.
+     *
+     * @param IpAddressList list of IpAddress.
+     * @return IpAddress map
+     */
+    public static Map<String, IpAddress> convert(List<IpAddress> ipAddressList) {
+        Map<String, IpAddress> ipAddressMap = new HashMap<String, IpAddress>();
+
+        for (IpAddress ipAddress : ipAddressList) {
+            ipAddressMap.put(ipAddress.getUuid(), ipAddress);
+        }
+
+        return ipAddressMap;
     }
 
 }

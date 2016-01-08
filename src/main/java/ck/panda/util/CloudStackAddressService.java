@@ -77,4 +77,23 @@ public class CloudStackAddressService {
         arguments.add(new NameValuePair("response", response));
         return server.request(arguments);
     }
+
+    /**
+     * Retrieves the current status of asynchronous job for Ip address rules.
+     *
+     * @param asychronousJobid the ID of the asychronous job
+     * @param response json or xml.
+     * @return response.
+     * @throws Exception if error occurs.
+     */
+    public String associatedJobResult(String asychronousJobid, String response)
+            throws Exception {
+
+        LinkedList<NameValuePair> arguments
+                = server.getDefaultQuery("queryAsyncJobResult", null);
+        arguments.add(new NameValuePair("jobid", asychronousJobid));
+         arguments.add(new NameValuePair("response",response));
+        String responseDocument = server.request(arguments);
+        return responseDocument;
+    }
 }

@@ -203,13 +203,22 @@ public interface SyncService {
      */
     void syncNic() throws ApplicationException, Exception;
 
-    /**
+   /**
     *
-    * Sync with Cloud Server Account.
+    * Sync with Cloud Server fire wall rules.
     *
     * @throws ApplicationException unhandled application errors.
     * @throws Exception unhandled errors.
     */
     void syncEgressFirewallRules() throws ApplicationException, Exception;
+
+    /**
+    *
+    * Sync with Cloud Server IP Address list.
+    *
+    * @throws ApplicationException unhandled application errors.
+    * @throws Exception unhandled errors.
+    */
+    void syncIpAddress() throws ApplicationException, Exception;
 
 }
