@@ -94,18 +94,18 @@ public class ResourceStateListener implements MessageListener {
                 break;
             case "Volume":
                 if (resourceEvent.has("id")) {
-                    Volume volume = volumeService.findByUUID(resourceEvent.getString("id"));
-                    volume.setStatus(volume.getStatus().valueOf(resourceEvent.getString(EventTypes.RESOURCE_STATE).toUpperCase()));
-                    volume.setIsSyncFlag(false);
-                    volumeService.update(volume);
+//                    Volume volume = volumeService.findByUUID(resourceEvent.getString("id"));
+//                    volume.setStatus(volume.getStatus().valueOf(resourceEvent.getString(EventTypes.RESOURCE_STATE).toUpperCase()));
+//                    volume.setIsSyncFlag(false);
+//                    volumeService.update(volume);
                 }
                 break;
             case "Network":
                 if (resourceEvent.has("id")) {
-                    Network network = networkService.findByUUID(resourceEvent.getString("id"));
-                    network.setStatus(network.getStatus().valueOf(resourceEvent.getString(EventTypes.RESOURCE_STATE)));
-                    network.setSyncFlag(false);
-                    networkService.update(network);
+//                    Network network = networkService.findByUUID(resourceEvent.getString("id"));
+//                    network.setStatus(network.getStatus().valueOf(resourceEvent.getString(EventTypes.RESOURCE_STATE)));
+//                    network.setSyncFlag(false);
+//                    networkService.update(network);
                 }
                 break;
             default:
