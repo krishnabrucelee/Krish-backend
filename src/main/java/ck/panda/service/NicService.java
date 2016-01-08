@@ -65,5 +65,14 @@ public interface NicService extends CRUDService<Nic> {
      * @throws Exception if error occurs.
      */
     Nic acquireSecondaryIP(Nic nic) throws Exception;
+    
+    /**
+     * Method to update NIC resource state.
+     *
+     * @param nic entity
+     * @return updated entity
+     * @throws Exception error occurs
+     */
+    Nic updatebyResourceState(Nic nic) throws Exception;
 
 }

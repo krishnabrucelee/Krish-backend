@@ -182,4 +182,13 @@ public interface VolumeService extends CRUDService<Volume> {
      */
     Integer findDetachedCount() throws NumberFormatException, Exception;
 
+    /**
+     * list by instance attached to volume.
+     *
+     * @param volume Volume
+     * @return volume Volumes from instance.
+     * @throws Exception exception
+     */
+    List<Volume> findByInstanceForResourceState(Long volume) throws Exception;
+
 }

@@ -291,6 +291,11 @@ public class NicServiceImpl implements NicService {
         return nicList;
     }
 
+    @Override
+    public Nic updatebyResourceState(Nic nic) throws Exception {
+        return nicRepo.save(nic);
+    }
+
     /**
      * Find all the nic with pagination.
      *
@@ -310,7 +315,7 @@ public class NicServiceImpl implements NicService {
          Network network = convertEntityService.getNetworkById(nic.getNetworkId());
          HashMap<String, String> nicMap = new HashMap<String, String>();
          nicMap.put("ipaddress", nic.getVmIpAddress().getId().toString());
-         String acquireIPResponse = cloudStackNicService.addIpToNic(nic.getUuid(), "json",nicMap );
+         String acquireIPResponse = cloudStackNicService.addIpToNic(nic.getUuid(), "json", nicMap);
          JSONObject csacquireIPResponseJSON = new JSONObject(acquireIPResponse)
                  .getJSONObject("addiptovmnicresponse");
          if (csacquireIPResponseJSON.has("errorcode")) {

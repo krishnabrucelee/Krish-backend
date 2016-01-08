@@ -103,6 +103,10 @@ public class ConvertEntityService {
     @Autowired
     private ProjectService projectService;
 
+    /** Nic service for listing nic. */
+    @Autowired
+    private NicService nicService;
+
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
@@ -775,6 +779,15 @@ public class ConvertEntityService {
      */
     public VolumeService getVolumeService() {
         return this.volumeService;
+    }
+
+    /**
+     * Get NIC service object.
+     *
+     * @return NIC service object
+     */
+    public NicService getNicService() {
+        return this.nicService;
     }
 
     /**

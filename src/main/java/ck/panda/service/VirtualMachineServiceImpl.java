@@ -345,8 +345,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
-                        vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_EXPUNGING));
-                        vminstance.setIsRemoved(true);
+                        vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_DESTROYED));
                         vminstance.setEventMessage("VM EXPUNGING");
                     }
                 }
