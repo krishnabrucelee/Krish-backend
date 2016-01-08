@@ -3,7 +3,6 @@ package ck.panda.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -13,8 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.Network;
-import ck.panda.domain.entity.Nic;
-import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.repository.jpa.EgressRuleRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackFirewallService;
@@ -31,7 +28,7 @@ import ck.panda.util.error.exception.ApplicationException;
 public class EgressRuleServiceImpl implements EgressRuleService {
 
     /** Logger attribute. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(DomainServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EgressRuleServiceImpl.class);
 
     /** Egress Rule repository reference. */
     @Autowired
@@ -49,7 +46,7 @@ public class EgressRuleServiceImpl implements EgressRuleService {
     @Autowired
     private ConvertEntityService convertEntityService;
 
-    /** Reference fro Network Service .*/
+    /** Reference for Network Service .*/
     @Autowired
     private NetworkService networkService;
 
@@ -68,6 +65,15 @@ public class EgressRuleServiceImpl implements EgressRuleService {
         configServer.setUserServer();
         Network network = convertEntityService.getNetworkById(egressFirewallRule.getNetworkId());
         HashMap<String, String> egressMap = new HashMap<String, String>();
+        if (egressFirewallRule.getStartPort() != null) {
+            egressMap.put("startport", egressFirewallRule.getStartPort().toString());
+        }
+        if (egressFirewallRule.getEndPort() != null) {
+            egressMap.put("endport", egressFirewallRule.getEndPort().toString());
+        }
+        if (egressFirewallRule.getSourceCIDR()!= null) {
+            egressMap.put("cidrlist", egressFirewallRule.getSourceCIDR().toString());
+        }
         String createEgressResponse = csEgressService.createEgressFirewallRule(network.getUuid(),
                 egressFirewallRule.getProtocol().toString(), "json", egressMap);
         JSONObject csegressResponseJSON = new JSONObject(createEgressResponse)
@@ -80,6 +86,10 @@ public class EgressRuleServiceImpl implements EgressRuleService {
             JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
             if (jobresult.getString("jobstatus").equals("1")) {
                 egressFirewallRule.setUuid((String) csegressResponseJSON.get("id"));
+                egressFirewallRule.setSourceCIDR((String) csegressResponseJSON.get("cidrlist"));
+                egressFirewallRule.setStartPort((Integer) csegressResponseJSON.get("startport"));
+                egressFirewallRule.setEndPort((Integer) csegressResponseJSON.get("endport"));
+
             }
          }
       }
@@ -144,14 +154,14 @@ public class EgressRuleServiceImpl implements EgressRuleService {
                 JSONObject jobresults = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
             }
         }
-        return null;
+        return egressRepo.save(egressFirewallRule);
     }
 
     @Override
     public List<FirewallRules> findAllFromCSServer() throws Exception {
         List<Network> networkList = networkService.findAllByActive(true);
         List<FirewallRules> egressList = new ArrayList<FirewallRules>();
-        LOGGER.debug("VM size" + networkList.size());
+        LOGGER.debug("Network size" + networkList.size());
         for (Network net : networkList) {
             HashMap<String, String> egressMap = new HashMap<String, String>();
             egressMap.put("networkid", net.getUuid());

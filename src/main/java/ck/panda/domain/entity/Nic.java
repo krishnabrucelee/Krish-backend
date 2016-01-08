@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -63,6 +64,15 @@ public class Nic {
     /** Check whether nic is in active state or in active state. */
     @Column(name = "is_active")
     private Boolean isActive;
+
+    /** Secondary ipAddress of the Nic. */
+    @JoinColumn(name = "vm_ipaddress_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private VmIpaddress vmIpAddress;
+
+    /** Secondary ipAddress Id of the Nic. */
+    @Column(name = "vm_ipaddress_id")
+    private Long vmIpAddressId;
 
     /** Network ip Address to establish a connection. */
     @Column(name = "ip_address")
@@ -222,6 +232,42 @@ public class Nic {
      */
     public void setNetworkId(Long networkId) {
         this.networkId = networkId;
+    }
+
+    /**
+     * Get the the vmIpAddress.
+     *
+     * @return the vmIpAddress
+     */
+    public VmIpaddress getVmIpAddress() {
+        return vmIpAddress;
+    }
+
+    /**
+     * Set the vmIpAddress.
+     *
+     * @param vmIpAddress  to set
+     */
+    public void setVmIpAddress(VmIpaddress vmIpAddress) {
+        this.vmIpAddress = vmIpAddress;
+    }
+
+    /**
+     * Get the vmIpAddressId.
+     *
+     * @return the vmIpAddressId
+     */
+    public Long getVmIpAddressId() {
+        return vmIpAddressId;
+    }
+
+    /**
+     * Set the vmIpAddressId.
+     *
+     * @param vmIpAddressId  to set
+     */
+    public void setVmIpAddressId(Long vmIpAddressId) {
+        this.vmIpAddressId = vmIpAddressId;
     }
 
     /**

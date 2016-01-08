@@ -57,4 +57,13 @@ public interface IpaddressService extends CRUDService<IpAddress> {
      */
     Page<IpAddress> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
 
+    /**
+     * Dissociate IP address.
+     *
+     * @param ipAddress to be dissociated.
+     * @return ip address.
+     * @throws Exception if error occurs.
+     */
+    IpAddress dissocitateIpAddress(IpAddress ipAddress) throws Exception;
+
 }

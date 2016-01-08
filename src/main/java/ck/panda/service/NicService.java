@@ -57,4 +57,13 @@ public interface NicService extends CRUDService<Nic> {
      */
     Page<Nic> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
 
+    /**
+     * Secondary IP for a Network.
+     *
+     * @param nic sencondary ip.
+     * @return nic
+     * @throws Exception if error occurs.
+     */
+    Nic acquireSecondaryIP(Nic nic) throws Exception;
+
 }

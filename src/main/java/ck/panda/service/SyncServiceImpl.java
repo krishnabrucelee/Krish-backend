@@ -24,6 +24,7 @@ import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.Host;
 import ck.panda.domain.entity.Hypervisor;
+import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.Iso;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
@@ -184,6 +185,10 @@ public class SyncServiceImpl implements SyncService {
     @Autowired
     private IsoService isoService;
 
+    /** For listing Public Ip address from  cloudstack server. */
+    @Autowired
+    private IpaddressService ipAddressService;
+
     /** Egress service for listing egress rules. */
     @Autowired
     private EgressRuleService egressService;
@@ -275,6 +280,10 @@ public class SyncServiceImpl implements SyncService {
     /** Permission user properties. */
     @Value(value = "${permission.user}")
     private String user;
+
+    /** Permission ip address properties. */
+    @Value(value = "${permission.network}")
+    private String ipAdddress;
 
     /** Permission report properties. */
     @Value(value = "${permission.report}")
@@ -454,20 +463,27 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.error("ERROR AT synch Nic", e);
         }
         try {
-            // 24. Sync Nic entity
+            // 25. Sync Egress firewall rules entity
             this.syncEgressFirewallRules();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch EgressRule", e);
         }
         try {
-            // 25. Sync SSHKey entity
+            // 26. Sync IP address entity
+            this.syncIpAddress();
+            LOGGER.debug("ipAddress");
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Ip Address", e);
+        }
+        try {
+            // 27. Sync SSHKey entity
             this.syncSSHKey();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch SSH Key", e);
         }
 
         try {
-            // 26. Sync for update role in user entity
+            // 28. Sync for update role in user entity
             this.syncUpdateUserRole();
         } catch (Exception e) {
             LOGGER.error("ERROR AT Sync for update role in user entity", e);
@@ -1900,6 +1916,46 @@ public class SyncServiceImpl implements SyncService {
         for (String key : csEgressMap.keySet()) {
             LOGGER.debug("Syncservice Egress uuid:");
             egressService.save(csEgressMap.get(key));
+        }
+    }
+
+    @Override
+    public void syncIpAddress() throws ApplicationException, Exception {
+
+        // 1. Get all the nic objects from CS server as hash
+        List<IpAddress> csIpList = ipAddressService.findAllFromCSServer();
+        HashMap<String, IpAddress> csIpMap = (HashMap<String, IpAddress>) IpAddress.convert(csIpList);
+
+        // 2. Get all the nic objects from application
+        List<IpAddress> appIpList = ipAddressService.findAll();
+
+        // 3. Iterate application nic list
+        for (IpAddress ipAddress : appIpList) {
+            ipAddress.setSyncFlag(false);
+            LOGGER.debug("Total rows updated : " + (appIpList.size()));
+            // 3.1 Find the corresponding CS server ntService object by
+            // finding it in a hash using uuid
+            if (csIpMap.containsKey(ipAddress)) {
+                IpAddress csNic = csIpMap.get(ipAddress.getUuid());
+
+                ipAddress.setUuid(csNic.getUuid());
+
+                // 3.2 If found, update the nic object in app db
+                ipAddressService.update(ipAddress);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // nic which is not added in the app
+                csIpMap.remove(ipAddress.getUuid());
+            } else {
+                ipAddressService.softDelete(ipAddress);
+            }
+        }
+        // 4. Get the remaining list of cs server hash NetworkOffering object,
+        // then iterate and
+        // add it to app db
+        for (String key : csIpMap.keySet()) {
+            LOGGER.debug("Syncservice IP Address uuid:");
+            ipAddressService.save(csIpMap.get(key));
         }
     }
 
