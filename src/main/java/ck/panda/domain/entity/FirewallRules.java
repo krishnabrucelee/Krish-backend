@@ -773,6 +773,8 @@ public class FirewallRules {
         egress.setSourceCIDR(JsonUtil.getStringValue(jsonObject,"cidrlist"));
         egress.setTransNetworkId((JsonUtil.getStringValue(jsonObject, "networkid")));
         egress.setState(State.valueOf(JsonUtil.getStringValue(jsonObject,"state").toUpperCase()));
+        egress.setStartPort(JsonUtil.getIntegerValue(jsonObject, "startport"));
+        egress.setEndPort(JsonUtil.getIntegerValue(jsonObject, "endport"));
         egress.setIsActive(true);
         return egress;
     }
