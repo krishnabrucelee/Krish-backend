@@ -97,11 +97,13 @@ public class NicServiceImpl implements NicService {
                 if (jobresult.getString("jobstatus").equals("1")) {
                     this.assignNicTovM(nic.getVmInstance());
                 } else if (jobresult.getString("jobstatus").equals("0")) {
-                    this.assignNicTovM(nic.getVmInstance());
-                }
-            }
-        }
-        return nicRepo.save(nic);
+                      this.assignNicTovM(nic.getVmInstance());
+                  }
+              }
+              return nic;
+          } else {
+              return nicRepo.save(nic);
+          }
     }
 
     /**
@@ -128,7 +130,9 @@ public class NicServiceImpl implements NicService {
                 nic.setIpAddress(nicListJSON.getJSONObject(i).getString("ipaddress"));
                 nic.setIsDefault(nicListJSON.getJSONObject(i).getBoolean("isdefault"));
                 nic.setIsActive(true);
-                nicRepo.save(nic);
+                if (nicRepo.findByUUID(nic.getUuid()) == null) {
+                    nicRepo.save(nic);
+                }
             } else {
                 nic = new Nic();
                 nic.setUuid(nicListJSON.getJSONObject(i).getString("id"));
@@ -141,11 +145,12 @@ public class NicServiceImpl implements NicService {
                 nic.setIpAddress(nicListJSON.getJSONObject(i).getString("ipaddress"));
                 nic.setIsDefault(nicListJSON.getJSONObject(i).getBoolean("isdefault"));
                 nic.setIsActive(true);
-                nicRepo.save(nic);
+                if (nicRepo.findByUUID(nic.getUuid()) == null) {
+                    nicRepo.save(nic);
+                }
             }
         }
-
-    }
+     }
 
     /**
      * Check the nic CS error handling.
@@ -182,10 +187,8 @@ public class NicServiceImpl implements NicService {
                     Thread.sleep(2000);
                 }
                 if (jobresult.getString("jobstatus").equals("1")) {
-
                     Nic nicI = nicRepo.findByInstanceIdAndIsDefault(nic.getVmInstanceId(), true);
                     nicI.setIsDefault(false);
-
                     nic.setIsDefault(true);
                 } else {
                     JSONObject jobresponse = jobresult.getJSONObject("jobresult");
@@ -247,9 +250,9 @@ public class NicServiceImpl implements NicService {
             JSONObject deleteNicResponse = new JSONObject(removeNicResponse)
                     .getJSONObject("removenicfromvirtualmachineresponse");
             if (deleteNicResponse.has("jobid")) {
-                String jobResponse = cloudStackInstanceService.queryAsyncJobResult(deleteNicResponse.getString("jobid"),
-                        "json");
                 Thread.sleep(5000);
+                String jobResponse = cloudStackInstanceService.queryAsyncJobResult(deleteNicResponse.getString("jobid"),
+                    "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
                 if (jobresult.getString("jobstatus").equals("0")) {
                     nic.setIsActive(false);
@@ -284,7 +287,6 @@ public class NicServiceImpl implements NicService {
                 nic.setNetworkId(convertEntityService.getNetworkId(nic.getTransNetworkId()));
                 nicList.add(nic);
             }
-
         }
         return nicList;
     }

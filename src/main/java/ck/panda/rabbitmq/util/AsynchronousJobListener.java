@@ -42,11 +42,13 @@ public class AsynchronousJobListener implements MessageListener {
      * Inject SyncService.
      *
      * @param syncService synchronous service object.
-     * @param asynchService asynchronous Service object.
+     * @param asyncService asynchronous Service object.
      * @param cloudStackServer cloudStackServer object.
+     * @param backendAdminUsername default admin name.
+     * @param backendAdminRole default admin role.
      */
-    public AsynchronousJobListener(SyncService syncService, AsynchronousJobService asyncService,
-            CloudStackServer cloudStackServer, String backendAdminUsername, String backendAdminRole) {
+    public AsynchronousJobListener(SyncService syncService, AsynchronousJobService asyncService, CloudStackServer cloudStackServer,
+    		String backendAdminUsername, String backendAdminRole) {
         this.syncService = syncService;
         this.asyncService = asyncService;
         this.cloudStackServer = cloudStackServer;

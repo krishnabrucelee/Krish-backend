@@ -85,12 +85,6 @@ public class ActionListener implements MessageListener {
         SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);
         Thread.sleep(5000);
         switch (eventObject.getEventStart()) {
-        case EventTypes.EVENT_VM:
-            LOGGER.debug("VM Sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
-            syncService.syncInstances();
-            syncService.syncVolume();
-            syncService.syncNic();
-            break;
         case EventTypes.EVENT_USER:
             LOGGER.debug("User sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
             if (!eventObject.getEvent().equals(EventTypes.EVENT_USER_LOGIN)
@@ -167,10 +161,6 @@ public class ActionListener implements MessageListener {
                 LOGGER.debug("Volume sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
                 asyncService.asyncVolume(eventObject);
             }
-            break;
-        case EventTypes.EVENT_NIC:
-            LOGGER.debug("Nic sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
-            syncService.syncNic();
             break;
         case EventTypes.EVENT_TEMPLATE:
             if (!eventObject.getEvent().contains("TEMPLATE.DELETE")) {

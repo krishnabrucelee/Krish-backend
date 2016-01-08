@@ -20,8 +20,8 @@ import ck.panda.rabbitmq.util.AsynchronousJobListener;
 import ck.panda.rabbitmq.util.ResourceStateListener;
 import ck.panda.rabbitmq.util.UsageEventListener;
 import ck.panda.service.AsynchronousJobService;
+import ck.panda.service.ConvertEntityService;
 import ck.panda.service.SyncService;
-import ck.panda.service.VirtualMachineService;
 import ck.panda.util.CloudStackServer;
 
 /**
@@ -262,7 +262,7 @@ public class RabbitConfig {
         AsynchronousJobService asyncService = applicationContext.getBean(AsynchronousJobService.class);
         CloudStackServer cloudStackServer = applicationContext.getBean(CloudStackServer.class);
         return new MessageListenerAdapter(new ActionListener(syncService, asyncService, cloudStackServer,
-                backendAdminUsername, backendAdminRole));
+            backendAdminUsername, backendAdminRole));
     }
 
     /**
@@ -277,7 +277,7 @@ public class RabbitConfig {
         AsynchronousJobService asyncService = applicationContext.getBean(AsynchronousJobService.class);
         CloudStackServer cloudStackServer = applicationContext.getBean(CloudStackServer.class);
         return new MessageListenerAdapter(new AsynchronousJobListener(syncService, asyncService, cloudStackServer,
-                backendAdminUsername, backendAdminRole));
+            backendAdminUsername, backendAdminRole));
     }
 
     /**
@@ -288,8 +288,8 @@ public class RabbitConfig {
      */
     @Bean
     MessageListenerAdapter resourceStateListenerAdapter() {
-        VirtualMachineService virtualMachineService = applicationContext.getBean(VirtualMachineService.class);
-        return new MessageListenerAdapter(new ResourceStateListener(virtualMachineService));
+        ConvertEntityService convertEntityService = applicationContext.getBean(ConvertEntityService.class);
+        return new MessageListenerAdapter(new ResourceStateListener(convertEntityService));
     }
 
     /**
