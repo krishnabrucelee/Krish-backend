@@ -84,4 +84,13 @@ public interface NetworkRepository extends PagingAndSortingRepository<Network, L
      */
     @Query(value = "select net from Network net where net.name =:name")
     Network findName(@Param("name") String name);
+
+    /**
+     * Find  all the active networks.
+     *
+     * @param isActive get the network list based on active/inactive status.
+     * @return list of network.
+     */
+    @Query(value = "select net from Network net where net.isActive =:isActive")
+    List<Network> findAllByIsActive(@Param("isActive") Boolean isActive);
 }

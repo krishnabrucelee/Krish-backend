@@ -418,4 +418,9 @@ public class NetworkServiceImpl implements NetworkService {
     public Network findById(Long id) throws Exception {
         return networkRepo.findById(id);
     }
+
+    @Override
+    public List<Network> findAllByActive( Boolean isActive) throws Exception {
+        return networkRepo.findAllByIsActive(true);
+    }
 }

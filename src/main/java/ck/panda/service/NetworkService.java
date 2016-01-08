@@ -77,4 +77,13 @@ public interface NetworkService extends CRUDService<Network> {
      * @throws Exception unhandled errors.
      */
     List<Network> findByProjectAndNetworkIsActive(Long projectId, Boolean isActive) throws Exception;
+
+    /**
+     * To get active networks list.
+     *
+     * @param network object to get list.
+     * @return network
+     * @throws Exception if error occurs.
+     */
+    List<Network> findAllByActive(Boolean isActive) throws Exception;
 }

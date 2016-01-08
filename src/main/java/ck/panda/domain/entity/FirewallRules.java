@@ -1,7 +1,9 @@
 package ck.panda.domain.entity;
 
 import java.time.ZonedDateTime;
-
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -12,13 +14,15 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
+import javax.persistence.Transient;
 import org.hibernate.annotations.Type;
+import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
+import ck.panda.util.JsonUtil;
 
 /**
  * The Firewall controlls the traffic originates from the guest network and sent to public network. This features
@@ -114,7 +118,7 @@ public class FirewallRules {
 
     /** Rule state . */
     @Column(name = "state")
-    private Boolean state;
+    private State state;
 
     /** Set of rules or protocols for an IP address .*/
     @Column(name = "protocol" )
@@ -130,6 +134,18 @@ public class FirewallRules {
     @Column(name = "traffic_type")
     @Enumerated(EnumType.STRING)
     private TrafficType trafficType;
+
+    /** Is this firewall rule is active. */
+    @Column(name = "is_Active")
+    private Boolean isActive;
+
+    /** Temporary variable. */
+    @Transient
+    private Boolean syncFlag;
+
+    /** Transient network of the instance. */
+    @Transient
+    private String transNetworkId;
 
     /** Created by user. */
     @CreatedBy
@@ -191,6 +207,14 @@ public class FirewallRules {
 
         /** All the above three protocols .*/
         ALL
+    }
+
+    public enum State {
+        /** Egress rule in Active state */
+        ACTIVE,
+
+        /** Egress rule in Staged state.*/
+        STAGED
     }
 
     /**
@@ -468,7 +492,7 @@ public class FirewallRules {
      *
      * @return the state
      */
-    public Boolean getState() {
+    public State getState() {
         return state;
     }
 
@@ -477,7 +501,7 @@ public class FirewallRules {
      *
      * @param state to set
      */
-    public void setState(Boolean state) {
+    public void setState(State state) {
         this.state = state;
     }
 
@@ -608,6 +632,60 @@ public class FirewallRules {
     }
 
     /**
+     * Get isActive.
+     *
+     * @return the isActive
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    /**
+     * Set the isActive.
+     *
+     * @param isActive to set
+     */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    /**
+     * Get the syncFlag.
+     *
+     * @return the syncFlag
+     */
+    public Boolean getSyncFlag() {
+        return syncFlag;
+    }
+
+    /**
+     * Set the syncFlag.
+     *
+     * @param syncFlag to set
+     */
+    public void setSyncFlag(Boolean syncFlag) {
+        this.syncFlag = syncFlag;
+    }
+
+    /**
+     * Get the Transient Network Id.
+     *
+     * @return the transNetworkId
+     */
+    public String getTransNetworkId() {
+        return transNetworkId;
+    }
+
+    /**
+     * Set the transNetworkId .
+     *
+     * @param transNetworkId to set
+     */
+    public void setTransNetworkId(String transNetworkId) {
+        this.transNetworkId = transNetworkId;
+    }
+
+    /**
      * Get the createdBy user id.
      *
      * @return the createdBy
@@ -677,5 +755,40 @@ public class FirewallRules {
      */
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
+    }
+
+    /**
+     * Convert JSONObject to nic entity.
+     *
+     * @param jsonObject json object
+     * @return nic entity object.
+     * @throws Exception unhandled errors.
+     */
+    public static FirewallRules convert(JSONObject jsonObject) throws Exception {
+        FirewallRules egress = new FirewallRules();
+        egress.setSyncFlag(false);
+        egress.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
+        egress.setProtocol(Protocol.valueOf(JsonUtil.getStringValue(jsonObject, "protocol").toUpperCase()));
+        egress.setDisplay(JsonUtil.getBooleanValue(jsonObject, "fordisplay"));
+        egress.setSourceCIDR(JsonUtil.getStringValue(jsonObject,"cidrlist"));
+        egress.setTransNetworkId((JsonUtil.getStringValue(jsonObject, "networkid")));
+        egress.setState(State.valueOf(JsonUtil.getStringValue(jsonObject,"state").toUpperCase()));
+        egress.setIsActive(true);
+        return egress;
+    }
+
+    /**
+     * Mapping entity object into list.
+     *
+     * @param egressList list of egress.
+     * @return egressMap egress.
+     */
+    public static Map<String, FirewallRules> convert(List<FirewallRules> nicList) {
+        Map<String, FirewallRules> egressMap = new HashMap<String, FirewallRules>();
+
+        for (FirewallRules nic : nicList) {
+            egressMap.put(nic.getUuid(), nic);
+        }
+        return egressMap;
     }
 }
