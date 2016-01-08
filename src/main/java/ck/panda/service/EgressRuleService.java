@@ -1,9 +1,13 @@
 package ck.panda.service;
 
 import java.util.List;
+
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.FirewallRules;
+import ck.panda.domain.entity.Nic;
 import ck.panda.util.domain.CRUDService;
+import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
  * Service class for Firewall rules.
@@ -29,5 +33,14 @@ public interface EgressRuleService extends CRUDService<FirewallRules> {
      * @throws Exception unhandled errors.
      */
     FirewallRules softDelete(FirewallRules egressFirewallRule) throws Exception;
+
+    /**
+     * Paging and Sorting for displaying more number of elements in list.
+     *
+     * @param pagingAndSorting sortable method.
+     * @return sorted values.
+     * @throws Exception unhandled errors.
+     */
+    Page<FirewallRules> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
 
 }
