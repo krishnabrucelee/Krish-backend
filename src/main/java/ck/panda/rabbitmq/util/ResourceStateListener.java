@@ -8,6 +8,7 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.Nic;
+import ck.panda.domain.entity.PortForwarding;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.domain.entity.Volume;
@@ -15,6 +16,7 @@ import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.service.ConvertEntityService;
 import ck.panda.service.NetworkService;
 import ck.panda.service.NicService;
+import ck.panda.service.PortForwardingService;
 import ck.panda.service.VirtualMachineService;
 import ck.panda.service.VolumeService;
 
@@ -35,6 +37,9 @@ public class ResourceStateListener implements MessageListener {
     /** Nic service for listing nic. */
     private NicService nicService;
 
+    /** Service reference to Port Forwarding. */
+    private PortForwardingService portForwardingService;
+
     /** Network Service references to update. */
     private NetworkService networkService;
 
@@ -47,6 +52,7 @@ public class ResourceStateListener implements MessageListener {
         this.virtualmachineservice = convertEntityService.getInstanceService();
         this.volumeService = convertEntityService.getVolumeService();
         this.nicService = convertEntityService.getNicService();
+        this.portForwardingService = convertEntityService.getPortForwardingService();
         this.networkService = convertEntityService.getNetworkService();
     }
 
@@ -112,6 +118,12 @@ public class ResourceStateListener implements MessageListener {
                                 nic.setIsActive(false);
                                 nic.setSyncFlag(false);
                                 nicService.updatebyResourceState(nic);
+                            }
+                            List<PortForwarding> portForwardingList = portForwardingService.findByInstance(vmInstance.getId());
+                            for (PortForwarding portForwarding : portForwardingList) {
+                                portForwarding.setIsActive(false);
+                                portForwarding.setSyncFlag(false);
+                                portForwardingService.update(portForwarding);
                             }
                         }
                     }
