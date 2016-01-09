@@ -186,8 +186,8 @@ public class VolumeServiceImpl implements VolumeService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                upload(volume, errors);
-                return volume;
+                Volume volumeCS = upload(volume, errors);
+                return volumeCS;
             }
         } else {
             return volumeRepo.save(volume);
@@ -653,8 +653,9 @@ public class VolumeServiceImpl implements VolumeService {
      * @param volume volume
      * @param errors errors
      * @throws Exception error
+     * @return volume
      */
-    public void upload(Volume volume, Errors errors) throws Exception {
+    public Volume upload(Volume volume, Errors errors) throws Exception {
         config.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
 
@@ -693,7 +694,8 @@ public class VolumeServiceImpl implements VolumeService {
 
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
                 if (jobresult.getString("jobstatus").equals("2")) {
-                    volume.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
+                    errors = this.validateEvent(errors, jobresult.getJSONObject("jobresult").getString("errortext"));
+                    throw new ApplicationException(errors);
                 }
                 if (jobresult.getJSONObject("jobresult").has("volume")) {
                     volume.setUuid((String) jobresult.getJSONObject("jobresult").getJSONObject("volume").get("id"));
@@ -706,6 +708,7 @@ public class VolumeServiceImpl implements VolumeService {
                 }
             }
         }
+        return volume;
     }
 
     /**

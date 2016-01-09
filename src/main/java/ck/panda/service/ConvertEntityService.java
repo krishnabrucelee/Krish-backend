@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.Nic;
@@ -107,6 +108,14 @@ public class ConvertEntityService {
     /** Nic service for listing nic. */
     @Autowired
     private NicService nicService;
+
+    /** Service reference to IpAddress. */
+    @Autowired
+    private IpaddressService ipAddressService;
+
+    /** Service reference to Port Forwarding. */
+    @Autowired
+    private PortForwardingService portForwardingService;
 
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
@@ -777,6 +786,32 @@ public class ConvertEntityService {
     }
 
     /**
+     * Get the IP address id.
+     *
+     * @param uuid uuid of IP address.
+     * @return IP address id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getIpAddressId(String uuid) throws Exception {
+        if (ipAddressService.findbyUUID(uuid) != null) {
+            return ipAddressService.findbyUUID(uuid).getId();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get IP address by id.
+     *
+     * @param id of IP address.
+     * @return IP address.
+     * @throws Exception unhandled exception.
+     */
+    public IpAddress getIpAddress(Long id) throws Exception {
+        return ipAddressService.find(id);
+    }
+
+    /**
      * Get virtual machine service object.
      *
      * @return virtual machine service object
@@ -810,6 +845,15 @@ public class ConvertEntityService {
      */
     public NetworkService getNetworkService() {
         return this.networkService;
+    }
+
+    /**
+     * Get Port Forwarding service object.
+     *
+     * @return PortForwarding service object
+     */
+    public PortForwardingService getPortForwardingService() {
+        return this.portForwardingService;
     }
 
 }

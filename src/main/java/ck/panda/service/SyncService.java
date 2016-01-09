@@ -1,7 +1,6 @@
 package ck.panda.service;
 
 import org.springframework.stereotype.Service;
-
 import ck.panda.domain.entity.Domain;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.error.exception.ApplicationException;
@@ -220,5 +219,14 @@ public interface SyncService {
     * @throws Exception unhandled errors.
     */
     void syncIpAddress() throws ApplicationException, Exception;
+
+    /**
+    *
+    * Sync with Cloud Server Port Forwarding list.
+    *
+    * @throws ApplicationException unhandled application errors.
+    * @throws Exception unhandled errors.
+    */
+    void syncPortForwarding() throws ApplicationException, Exception;
 
 }

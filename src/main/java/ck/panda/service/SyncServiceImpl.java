@@ -37,6 +37,7 @@ import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.OsType;
 import ck.panda.domain.entity.Permission;
 import ck.panda.domain.entity.Pod;
+import ck.panda.domain.entity.PortForwarding;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.Region;
 import ck.panda.domain.entity.ResourceLimitDomain;
@@ -233,6 +234,10 @@ public class SyncServiceImpl implements SyncService {
     /** Autowired roleService. */
     @Autowired
     private RoleService roleService;
+
+    /** Listing Port Forwarding details from cloudstack server. */
+    @Autowired
+    private PortForwardingService portForwardingService;
 
     /** Permission instance properties. */
     @Value(value = "${permission.instance}")
@@ -481,14 +486,20 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.error("ERROR AT synch Ip Address", e);
         }
         try {
-            // 27. Sync SSHKey entity
+            // 27. Sync Port Forwarding entity
+            this.syncPortForwarding();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch PortForwarding", e);
+        }
+        try {
+            // 28. Sync SSHKey entity
             this.syncSSHKey();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch SSH Key", e);
         }
 
         try {
-            // 28. Sync for update role in user entity
+            // 29. Sync for update role in user entity
             this.syncUpdateUserRole();
         } catch (Exception e) {
             LOGGER.error("ERROR AT Sync for update role in user entity", e);
@@ -1979,6 +1990,45 @@ public class SyncServiceImpl implements SyncService {
         }
     }
 
+    @Override
+    public void syncPortForwarding() throws ApplicationException, Exception {
+
+        // 1. Get all the PortForwarding objects from CS server as hash
+        List<PortForwarding> csPortForwardingList = portForwardingService.findAllFromCSServer();
+        HashMap<String, PortForwarding> csPortForwardingMap = (HashMap<String, PortForwarding>) PortForwarding.convert(csPortForwardingList);
+
+        // 2. Get all the PortForwarding objects from application
+        List<PortForwarding> appPortForwardingList = portForwardingService.findAll();
+
+        // 3. Iterate application PortForwarding list
+        for (PortForwarding portForwarding : appPortForwardingList) {
+            portForwarding.setSyncFlag(false);
+            LOGGER.debug("Total rows updated : " + (appPortForwardingList.size()));
+            // 3.1 Find the corresponding CS server ntService object by
+            // finding it in a hash using uuid
+            if (csPortForwardingMap.containsKey(portForwarding)) {
+                PortForwarding csPortForwarding = csPortForwardingMap.get(portForwarding.getUuid());
+
+                portForwarding.setUuid(csPortForwarding.getUuid());
+
+                // 3.2 If found, update the PortForwarding object in app db
+                portForwardingService.update(portForwarding);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // nic which is not added in the app
+                csPortForwardingMap.remove(portForwarding.getUuid());
+            } else {
+                portForwardingService.softDelete(portForwarding);
+            }
+        }
+        // 4. Get the remaining list of cs server hash NetworkOffering object,
+        // then iterate and
+        // add it to app db
+        for (String key : csPortForwardingMap.keySet()) {
+            LOGGER.debug("Syncservice Port Forwarding uuid:");
+            portForwardingService.save(csPortForwardingMap.get(key));
+        }
+    }
 
     /**
      * Create default roles and permissions.
