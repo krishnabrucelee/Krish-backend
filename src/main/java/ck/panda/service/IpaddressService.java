@@ -66,4 +66,23 @@ public interface IpaddressService extends CRUDService<IpAddress> {
      */
     IpAddress dissocitateIpAddress(IpAddress ipAddress) throws Exception;
 
+    /**
+     * Acquire IP address.
+     *
+     * @param ipAddress to be associate with network.
+     * @return ip address.
+     * @throws Exception if error occurs.
+     */
+    List<IpAddress> acquireIP(Long networkId) throws Exception;
+
+    /**
+     * List by network acquired to ipaddress.
+     *
+     * @param networkId network id.
+     * @param pagingAndSorting page request.
+     * @return list of ipaddresses.
+     * @throws Exception exception
+     */
+    Page<IpAddress> findByNetwork(Long networkId, PagingAndSorting pagingAndSorting) throws Exception;
+
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
@@ -20,6 +21,8 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.FirewallRules;
+import ck.panda.domain.entity.FirewallRules.Purpose;
+import ck.panda.domain.entity.FirewallRules.TrafficType;
 import ck.panda.service.EgressRuleService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -42,6 +45,7 @@ public class EgressRuleController extends CRUDController<FirewallRules> implemen
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new FirewallRules.", response = FirewallRules.class)
     @Override
     public FirewallRules create(@RequestBody FirewallRules egressFirewallRule) throws Exception {
+        egressFirewallRule.setSyncFlag(true);
         return egressService.save(egressFirewallRule);
     }
 
@@ -55,11 +59,39 @@ public class EgressRuleController extends CRUDController<FirewallRules> implemen
     @Override
     public FirewallRules update(@RequestBody FirewallRules egressFirewallRule, @PathVariable(PATH_ID) Long id)
             throws Exception {
+        egressFirewallRule.setSyncFlag(true);
+        egressFirewallRule.setIsActive(true);
+        egressFirewallRule.setPurpose(Purpose.FIREWALL);
+        egressFirewallRule.setTrafficType(TrafficType.EGRESS);
         return egressService.update(egressFirewallRule);
     }
 
-    @Override
-    public List<FirewallRules> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
+    /**
+     * Paging and Sorting for displaying more number of elements egress firewall rules in list.
+     */
+    @RequestMapping(value = "firewallrules", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<FirewallRules> listAll(@RequestParam String sortBy, @RequestParam("network") Long networkId, @RequestParam("type") String type, @RequestHeader(value = RANGE) String range,
+            @RequestParam Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, FirewallRules.class);
+        Page<FirewallRules> pageResponse = null;
+        if (type.equalsIgnoreCase("egress")) {
+            pageResponse = egressService.findAllByTraffictypeAndNetwork(page, networkId);
+        }
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
+    }
+
+    /**
+     * list of egress FirewallRule
+     *
+     * @param egressFirewallRule reference of theegressFirewallRule.
+     * @param networkId network's id.
+     * @param id egressFirewallRule id.
+     * @throws Exception error occurs.
+     */
+    public List<FirewallRules> listbyNetwork(@RequestParam("network") Long networkId, @RequestParam("type") String type, @RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, FirewallRules.class);
         Page<FirewallRules> pageResponse = egressService.findAllByActive(page);

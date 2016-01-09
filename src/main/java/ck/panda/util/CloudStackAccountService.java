@@ -61,7 +61,7 @@ public class CloudStackAccountService {
     }
 
     /**
-     * Deletes a account, and all users associated with this account
+     * Deletes a account, and all users associated with this account.
      *
      * @param accountId Account id
      * @return

@@ -153,6 +153,9 @@ public class EventTypes {
     /** VPC. */
     public static final String EVENT_VPC = "VPC.";
 
+    /** VPC. */
+    public static final String EVENT_FIREWALL = "FIREWALL.";
+
     /** vm snapshot events. */
     public static final String EVENT_VM_SNAPSHOT = "VMSNAPSHOT.";
 

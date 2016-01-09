@@ -26,6 +26,15 @@ public interface EgressRuleService extends CRUDService<FirewallRules> {
     List<FirewallRules> findAllFromCSServer() throws Exception;
 
     /**
+     * Firewall Rules by uuid.
+     *
+     * @param uuid uuid of firewall
+     * @return FirewallRules
+     * @throws Exception unhandled errors.
+     */
+    FirewallRules findByUUID(String uuid) throws Exception;
+
+    /**
      * Soft delete for egressFirewallRule.
      *
      * @param egressFirewallRule object
@@ -43,4 +52,13 @@ public interface EgressRuleService extends CRUDService<FirewallRules> {
      */
     Page<FirewallRules> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
 
+    /**
+     * Paging and Sorting for displaying more number of elements in list.
+     *
+     * @param pagingAndSorting sortable method.
+     * @param networkId network's id.
+     * @return sorted values.
+     * @throws Exception unhandled errors.
+     */
+    Page<FirewallRules> findAllByTraffictypeAndNetwork(PagingAndSorting pagingAndSorting,  Long networkId) throws Exception;
 }

@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.IpAddress.State;
@@ -59,38 +60,32 @@ public class IpaddressServiceImpl implements IpaddressService {
     private DepartmentService departmentService;
 
     @Override
-    public IpAddress save(IpAddress ipAddress) throws Exception {
-        if (ipAddress.getSyncFlag()) {
-            Errors errors = validator.rejectIfNullEntity("egressFirewallRule", ipAddress);
-            errors = validator.validateEntity(ipAddress, errors);
-            configServer.setUserServer();
-            Network network = convertEntityService.getNetworkById(ipAddress.getNetworkId());
-            HashMap<String, String> ipMap = new HashMap<String, String>();
-            ipMap.put("domainid",
-                    domainService.find(Long.parseLong(tokenDetails.getTokenDetails("domainid"))).getUuid());
-            if (network.getProjectId() != null) {
-                ipMap.put("projectid", convertEntityService.getProjectById(network.getProjectId()).getUuid());
-
-            } else {
-                ipMap.put("account", departmentService
-                        .find(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
-            }
-            String associatedResponse = csipaddressService.associateIpAddress("json", ipMap);
-            JSONObject csassociatedIPResponseJSON = new JSONObject(associatedResponse)
-                    .getJSONObject("associateipaddressresponse");
-            if (csassociatedIPResponseJSON.has("errorcode")) {
-                errors = this.validateEvent(errors, csassociatedIPResponseJSON.getString("errortext"));
-                throw new ApplicationException(errors);
-            } else if (csassociatedIPResponseJSON.has("jobid")) {
-                String jobResponse = csipaddressService
-                        .associatedJobResult(csassociatedIPResponseJSON.getString("jobid"), "json");
-                JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
-                if (jobresult.getString("jobstatus").equals("1")) {
-                    ipAddress.setUuid((String) csassociatedIPResponseJSON.get("id"));
-                }
-            }
+    public List<IpAddress> acquireIP(Long networkId) throws Exception {
+        Errors errors = null;
+        configServer.setUserServer();
+        Network network = convertEntityService.getNetworkById(networkId);
+        HashMap<String, String> ipMap = new HashMap<String, String>();
+        ipMap.put("domainid", domainService.find(Long.parseLong(tokenDetails.getTokenDetails("domainid"))).getUuid());
+        if (network.getProjectId() != null) {
+            ipMap.put("projectid", convertEntityService.getProjectById(network.getProjectId()).getUuid());
+        } else {
+            ipMap.put("account", departmentService
+                    .find(convertEntityService.getDepartmentById(network.getDepartmentId()).getId()).getUserName());
         }
-        return ipRepo.save(ipAddress);
+        String associatedResponse = csipaddressService.associateIpAddress("json", ipMap);
+        JSONObject csassociatedIPResponseJSON = new JSONObject(associatedResponse)
+                .getJSONObject("associateipaddressresponse");
+        if (csassociatedIPResponseJSON.has("errorcode")) {
+            errors = validator.sendGlobalError(csassociatedIPResponseJSON.getString("errortext"));
+            if (errors.hasErrors()) {
+                throw new BadCredentialsException(csassociatedIPResponseJSON.getString("errortext"));
+            }
+        } else if (csassociatedIPResponseJSON.has("jobid")) {
+            String jobResponse = csipaddressService.associatedJobResult(csassociatedIPResponseJSON.getString("jobid"),
+                    "json");
+            JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+        }
+        return (List<IpAddress>) ipRepo.findByNetwork(networkId, IpAddress.State.ALLOCATED);
     }
 
     @Override
@@ -132,12 +127,17 @@ public class IpaddressServiceImpl implements IpaddressService {
     @Override
     public IpAddress softDelete(IpAddress ipaddress) throws Exception {
         ipaddress.setIsActive(false);
-          return ipRepo.save(ipaddress);
+        return ipRepo.save(ipaddress);
     }
 
     @Override
     public List<IpAddress> findByNetwork(Long networkId) throws Exception {
         return null;
+    }
+
+    @Override
+    public Page<IpAddress> findByNetwork(Long networkId, PagingAndSorting pagingAndSorting) throws Exception {
+        return ipRepo.findByNetwork(pagingAndSorting.toPageRequest(), networkId, State.ALLOCATED);
     }
 
     @Override
@@ -171,19 +171,16 @@ public class IpaddressServiceImpl implements IpaddressService {
 
     @Override
     public Page<IpAddress> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
-        return ipRepo.findAllByIsActive(pagingAndSorting.toPageRequest(),true);
+        return ipRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
     }
 
     /**
      * Check the IP address CS error handling.
      *
-     * @param errors
-     *            error creating status.
-     * @param errmessage
-     *            error message.
+     * @param errors error creating status.
+     * @param errmessage error message.
      * @return errors.
-     * @throws Exception
-     *             if error occurs.
+     * @throws Exception if error occurs.
      */
     private Errors validateEvent(Errors errors, String errmessage) throws Exception {
         errors.addGlobalError(errmessage);
@@ -197,11 +194,17 @@ public class IpaddressServiceImpl implements IpaddressService {
         configServer.setUserServer();
         String deleteResponse = csipaddressService.disassociateIpAddress(ipAddress.getUuid(), "json");
         JSONObject jobId = new JSONObject(deleteResponse).getJSONObject("disassociateipaddressresponse");
-         if (jobId.has("jobid")) {
-             String jobResponse = csipaddressService.associatedJobResult(jobId.getString("jobid"), "json");
-             JSONObject jobresults = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
-         }
+        if (jobId.has("jobid")) {
+            String jobResponse = csipaddressService.associatedJobResult(jobId.getString("jobid"), "json");
+            JSONObject jobresults = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+        }
         return ipRepo.save(ipAddress);
+    }
+
+    @Override
+    public IpAddress save(IpAddress t) throws Exception {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
