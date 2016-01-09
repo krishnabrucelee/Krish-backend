@@ -604,7 +604,8 @@ public class PortForwarding {
         portForwarding.setPublicEndPort(JsonUtil.getIntegerValue(jsonObject, "publicendport"));
         portForwarding.setFordisplay(JsonUtil.getBooleanValue(jsonObject, "fordisplay"));
         portForwarding.setvmGuestIp(JsonUtil.getStringValue(jsonObject, "vmguestip"));
-        portForwarding.setProtocolType(portForwarding.getProtocolType().valueOf(JsonValidator.jsonStringValidation(jsonObject, "protocol").toUpperCase()));
+        portForwarding.setProtocolType(portForwarding.getProtocolType().valueOf(
+                JsonValidator.jsonStringValidation(jsonObject, "protocol").toUpperCase()));
         portForwarding.setTransvmInstanceId((JsonUtil.getStringValue(jsonObject, "virtualmachineid")));
         portForwarding.setTransNetworkId((JsonUtil.getStringValue(jsonObject, "networkid")));
         portForwarding.setTransIpAddressId((JsonUtil.getStringValue(jsonObject, "ipaddressid")));
