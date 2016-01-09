@@ -1,6 +1,3 @@
-/**
- *
- */
 package ck.panda.web.resource;
 
 import java.util.List;
@@ -40,6 +37,7 @@ public class PortForwardingController extends CRUDController<PortForwarding> imp
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Port Forwarding.", response = PortForwarding.class)
     @Override
     public PortForwarding create(@RequestBody PortForwarding portForwarding) throws Exception {
+        portForwarding.setSyncFlag(true);
         return portForwardingService.save(portForwarding);
     }
 
@@ -53,7 +51,16 @@ public class PortForwardingController extends CRUDController<PortForwarding> imp
     @Override
     public PortForwarding update(@RequestBody PortForwarding portForwarding, @PathVariable(PATH_ID) Long id)
             throws Exception {
+        portForwarding.setSyncFlag(true);
         return portForwardingService.update(portForwarding);
+    }
+
+    @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing port Forwarding.")
+    @Override
+    public void delete(@PathVariable(PATH_ID) Long id) throws Exception {
+        PortForwarding portForwarding = portForwardingService.find(id);
+        portForwarding.setSyncFlag(true);
+        portForwardingService.softDelete(portForwarding);
     }
 
     @Override

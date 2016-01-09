@@ -22,6 +22,7 @@ import ck.panda.domain.entity.FirewallRules.State;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.Nic;
+import ck.panda.domain.entity.PortForwarding;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
@@ -110,6 +111,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     @Autowired
     private CloudStackVolumeService csVolumeService;
 
+    /** Service reference to Port Forwarding. */
+    @Autowired
+    private PortForwardingService portForwardingService;
+
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
@@ -169,6 +174,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         case EventTypes.EVENT_NIC:
             LOGGER.debug("NIC sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
             asyncNic(jobresult, eventObject);
+            break;
+        case EventTypes.EVENT_PORTFORWARDING_RULE:
+            LOGGER.debug("NET sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+            asyncNet(jobresult, eventObject);
             break;
         default:
             LOGGER.debug("No sync required",
@@ -622,6 +631,35 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         if (eventObject.getString("commandEventType").equals("NIC.SECONDARY.IP.UNASSIGN")) {
             LOGGER.debug("Not Implemented");
         }
+    }
+
+    /**
+     * Sync with Cloud Server Network port forwarding.
+     *
+     * @param jobresult job result
+     * @param eventObject volume event object
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    public void asyncNet(JSONObject jobresult, JSONObject eventObject) throws ApplicationException, Exception {
+
+        if (eventObject.getString("commandEventType").equals("NET.RULEADD")) {
+            PortForwarding portForwarding = PortForwarding.convert(jobresult.getJSONObject("portforwardingrule"));
+            portForwarding.setVmInstanceId(convertEntityService.getVmInstanceId(portForwarding.getTransvmInstanceId()));
+            portForwarding.setNetworkId(convertEntityService.getNetworkId(portForwarding.getTransNetworkId()));
+            portForwarding.setIpAddressId(convertEntityService.getIpAddressId(portForwarding.getTransIpAddressId()));
+            if (portForwardingService.findByUUID(portForwarding.getUuid()) == null) {
+                portForwardingService.save(portForwarding);
+            }
+        }
+
+        if (eventObject.getString("commandEventType").equals("NET.RULEDELETE")) {
+            JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
+            PortForwarding portForwarding = portForwardingService.findByUUID(json.getString("id"));
+            portForwarding.setSyncFlag(false);
+            portForwardingService.softDelete(portForwarding);
+        }
+
     }
 
     /**
