@@ -68,29 +68,6 @@ public class IpaddressController extends CRUDController<IpAddress> implements Ap
         return pageResponse.getContent();
     }
 
-    /**
-     * Get list of ipaddress with in the network.
-     *
-     * @param sortBy Asc/Desc
-     * @param range range per page.
-     * @param limit limit per page.
-     * @param request servlet request
-     * @param response servlet response
-     * @return list of ipaddress.
-     * @throws Exception unhandled errors.
-     */
-    @RequestMapping(value = "/iplist", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public List<IpAddress> listByNetwork(@RequestParam("network") Long networkId, @RequestParam String sortBy,
-            @RequestHeader(value = RANGE) String range, @RequestParam Integer limit, HttpServletRequest request,
-            HttpServletResponse response) throws Exception {
-        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, IpAddress.class);
-        Page<IpAddress> pageResponse = ipAddressService.findByNetwork(networkId, page);
-        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
-        return pageResponse.getContent();
-    }
-
     @RequestMapping(value = "dissociate/{id}", method = RequestMethod.POST, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
@@ -100,7 +77,6 @@ public class IpaddressController extends CRUDController<IpAddress> implements Ap
         ipAddress.setSyncFlag(true);
         return ipAddressService.dissocitateIpAddress(ipAddress);
     }
-
 
     /**
      * Get list of ipaddresses with pagination object.
