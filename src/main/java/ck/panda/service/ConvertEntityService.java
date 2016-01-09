@@ -12,6 +12,7 @@ import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
+import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.StorageOffering;
@@ -306,6 +307,18 @@ public class ConvertEntityService {
     public Network getNetworkById(Long id) throws Exception {
         return networkService.findById(id);
     }
+
+    /**
+     * Get Network object.
+     *
+     * @param id of network
+     * @return network.
+     * @throws Exception unhandled exception.
+     */
+    public Nic getNicById(Long id) throws Exception {
+        return nicService.findById(id);
+    }
+
 
     /**
      * Get Vm Instance object.

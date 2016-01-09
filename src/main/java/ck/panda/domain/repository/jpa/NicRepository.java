@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Nic;
 
 /**
@@ -54,4 +56,14 @@ public interface NicRepository extends PagingAndSortingRepository<Nic, Long> {
     */
     @Query(value = "select nic from Nic nic where  nic.vmInstanceId=:vmInstanceId AND nic.isDefault =:isDefault")
     Nic findByInstanceIdAndIsDefault(@Param("vmInstanceId") Long vmInstanceId, @Param("isDefault") Boolean isDefault);
+
+    /**
+     * Find Nic by id.
+     *
+     * @param id Nic id.
+     * @return id
+     */
+    @Query(value = "select nic from Nic nic where nic.id LIKE :id ")
+    Nic findById(@Param("id") Long id);
+
 }

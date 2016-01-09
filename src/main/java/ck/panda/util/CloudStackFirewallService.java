@@ -237,7 +237,6 @@ public class CloudStackFirewallService {
      * Retrieves the current status of asynchronous job for fire wall rules.
      *
      * @param asychronousJobid the ID of the asychronous job
-     * @param response json or xml.
      * @return response.
      * @throws Exception if error occurs.
      */
@@ -251,6 +250,7 @@ public class CloudStackFirewallService {
         String responseDocument = server.request(arguments);
         return responseDocument;
     }
+
 
 
    }

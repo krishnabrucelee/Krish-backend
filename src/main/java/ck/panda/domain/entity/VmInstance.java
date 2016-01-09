@@ -246,6 +246,15 @@ public class VmInstance implements Serializable {
     @Column(name = "pod_id")
     private Long podId;
 
+    /** Hypervisor object. */
+    @ManyToOne
+    @JoinColumn(name = "hypervisor_type_id", referencedColumnName = "id", updatable = false, insertable = false)
+    private Hypervisor hypervisor;
+
+    /** Hypervisor type id. */
+    @Column(name = "hypervisor_type_id")
+    private Long hypervisorId;
+
     /** Instance event message. */
     @Column(name = "event_message")
     private String eventMessage;
@@ -382,6 +391,10 @@ public class VmInstance implements Serializable {
     /** Transient volume id of the instance. */
     @Transient
     private String transVolumeId;
+
+    /** Transient hypervisor of the template. */
+    @Transient
+    private String transHypervisor;
 
     /**
      * Get sync status.
@@ -1693,6 +1706,60 @@ public class VmInstance implements Serializable {
      */
     public void setTransVolumeId(String transVolumeId) {
         this.transVolumeId = transVolumeId;
+    }
+
+    /**
+     * Get the hypervisor of the VmInstance.
+
+     * @return the hypervisor of VmInstance.
+     */
+    public Hypervisor getHypervisor() {
+        return hypervisor;
+    }
+
+    /**
+     * Set the hypervisor of the VmInstance.
+     *
+     * @param hypervisor the hypervisor to set
+     */
+    public void setHypervisor(Hypervisor hypervisor) {
+        this.hypervisor = hypervisor;
+    }
+
+    /**
+     * Get the hypervisorId of the VmInstance.
+
+     * @return the hypervisorId of VmInstance.
+     */
+    public Long getHypervisorId() {
+        return hypervisorId;
+    }
+
+    /**
+     * Set the hypervisorId of the VmInstance.
+     *
+     * @param hypervisorId the hypervisorId to set
+     */
+    public void setHypervisorId(Long hypervisorId) {
+        this.hypervisorId = hypervisorId;
+    }
+
+    /**
+     * Get the transHypervisor of the VmInstance.
+
+     * @return the transHypervisor of VmInstance.
+     */
+    public String getTransHypervisor() {
+        return transHypervisor;
+    }
+
+    /**
+     * Set the transHypervisor of the VmInstance.
+     *
+     * @param transHypervisor the transHypervisor to set
+     */
+    public void setTransHypervisor(String transHypervisor) {
+        this.transHypervisor = transHypervisor;
     }
 
     @Override
