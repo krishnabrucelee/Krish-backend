@@ -114,11 +114,24 @@ public class TemplateController extends CRUDController<Template> implements ApiC
      * @return template list from server
      * @throws Exception raise if error
      */
-    @RequestMapping(value = "/search", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/searchtemplate", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<Template> findByFilters(@RequestBody Template template) throws Exception {
-        return templateService.findByFilters(template);
+    public List<Template> findTemplateByFilters(@RequestBody Template template) throws Exception {
+        return templateService.findTemplateByFilters(template);
     }
 
+    /**
+     * Find the list of iso by filters.
+     *
+     * @param templateIso the template iso object.
+     * @return template list from server
+     * @throws Exception raise if error
+     */
+    @RequestMapping(value = "/searchiso", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Template> findIsoByFilters(@RequestBody Template templateIso) throws Exception {
+        return templateService.findIsoByFilters(templateIso);
+    }
 }

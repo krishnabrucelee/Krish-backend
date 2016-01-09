@@ -19,7 +19,7 @@ public class CloudStackTemplateService {
 
     /**
      * sets api key , secret key and url.
-     * 
+     *
      * @param server sets these values.
      */
     public void setServer(CloudStackServer server) {
@@ -164,6 +164,30 @@ public class CloudStackTemplateService {
 
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("listTemplates", optional);
         arguments.add(new NameValuePair("templatefilter", templateFilter));
+        arguments.add(new NameValuePair("response", response));
+        String responseJson = server.request(arguments);
+
+        return responseJson;
+    }
+
+    /**
+     * List all public, private, and privileged ISO templates.
+     *
+     * @param isofilter - Possible values are "featured", "self", "self-executable", "executable", and
+     *            "community".* featured-templates that are featured and are public* self-templates that have been
+     *            registered/created by the owner* selfexecutable-templates that have been registered/created by the
+     *            owner that can be used to deploy a new VM* executable-all templates that can be used to deploy a new
+     *            VM* community-templates that are public
+     * @param response - Response format as json
+     * @param optional - List of optional values
+     * @return - Json string response
+     * @throws Exception - Raise if any error
+     */
+    public String listIsos(String isofilter, String response, HashMap<String, String> optional)
+            throws Exception {
+
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("listIsos", optional);
+        arguments.add(new NameValuePair("isofilter", isofilter));
         arguments.add(new NameValuePair("response", response));
         String responseJson = server.request(arguments);
 

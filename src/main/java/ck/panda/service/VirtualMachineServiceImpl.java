@@ -99,6 +99,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Autowired
     private TokenDetails tokenDetails;
 
+    /** Hypervisor repository reference. */
+    @Autowired
+    private HypervisorService hypervisorService;
+
     @Override
     @PreAuthorize("hasPermission(#vminstance.getSyncFlag(), 'CREATE_VM')")
     public VmInstance save(VmInstance vminstance) throws Exception {
@@ -128,6 +132,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     optional.put("displayname", vminstance.getName());
                     optional.put("keyboard", "us");
                     optional.put("name", vminstance.getName());
+                    if (vminstance.getHypervisorId() != null) {
+                       optional.put("hypervisor", hypervisorService.find(vminstance.getHypervisorId()).getName());
+                    }
                     if (vminstance.getProjectId() != null) {
                         optional.put("projectid",
                                 convertEntityService.getProjectById(vminstance.getProjectId()).getUuid());

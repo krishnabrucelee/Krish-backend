@@ -109,12 +109,71 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
     /**
      * Get the template with Format ISO.
      *
+     * @param type of the template
      * @param format of template
      * @param pageable of template
      * @param isActive true/false
      * @return user and routing template list
      */
-    @Query(value = "select template from Template template where template.format =:format AND template.isActive =:isActive")
-    Page<Template> findAllByFormat(@Param("format") Format format, Pageable pageable, @Param("isActive") Boolean isActive);
+    @Query(value = "select template from Template template where template.type <>:type AND template.format =:format AND template.isActive =:isActive")
+    Page<Template> findAllByFormat(@Param("type") TemplateType type, @Param("format") Format format, Pageable pageable, @Param("isActive") Boolean isActive);
+
+    /**
+     * Get the template without system type.
+     *
+     * @param architecture of the template
+     * @param type of the template
+     * @param format of template
+     * @param isActive true/false
+     * @param status of the template
+     * @return list of filtered template
+     */
+    @Query(value = "select template from Template template where (template.architecture =:architecture OR 'ALL' =:architecture) and template.type <>:type and template.status = :status and (template.share IS TRUE OR template.featured IS TRUE) and template.format =:format and template.isActive =:isActive")
+    List<Template> findByIsoAndFeature(@Param("architecture") String architecture, @Param("type") TemplateType type, @Param("format") List<Format> format, @Param("status") Status status, @Param("isActive") Boolean isActive);
+
+    /**
+     * Get the template without system type.
+     *
+     * @param architecture of the template
+     * @param type of the template
+     * @param format of template
+     * @param isActive true/false
+     * @param status of the template
+     * @return list of filtered template
+     */
+    @Query(value = "select template from Template template where (template.architecture =:architecture OR 'ALL' =:architecture) and template.type <>:type and template.status = :status and template.share IS TRUE AND template.isActive =:isActive and template.format =:format")
+    List<Template> findByIso(@Param("architecture") String architecture, @Param("type") TemplateType type, @Param("format") List<Format> format, @Param("status") Status status, @Param("isActive") Boolean isActive);
+
+    /**
+     * Get the iso based on the osCategory,architecture and type.
+     *
+     * @param osCategoryId of the template
+     * @param architecture of the template
+     * @param format of template
+     * @param isActive true/false
+     * @param type of the template
+     * @param status of the template
+     * @return template
+     */
+    @Query(value = "select t from Template t where t.osCategoryId=:osCategoryId AND (t.architecture =:architecture OR 'ALL' =:architecture) and t.type <>:type and t.status = :status and (t.share IS TRUE OR t.featured IS TRUE) and t.isActive =:isActive and t.format =:format")
+    List<Template> findAllByOsCategoryAndArchitectureAndTypeAndIso(@Param("osCategoryId") Long osCategoryId,
+            @Param("architecture") String architecture,
+            @Param("type") TemplateType type, @Param("format") List<Format> format, @Param("status") Status status, @Param("isActive") Boolean isActive);
+
+    /**
+     * Get the template based on the osCategory,architecture and type.
+     *
+     * @param osCategoryId of the template
+     * @param architecture of the template
+     * @param type of the template
+     * @param format of template
+     * @param isActive true/false
+     * @param status of the template
+     * @return template
+     */
+    @Query(value = "select t from Template t where t.osCategoryId=:osCategoryId AND (t.architecture =:architecture OR 'ALL' =:architecture) and t.type <>:type and t.status = :status and t.share IS TRUE and t.isActive =:isActive and t.format =:format")
+    List<Template> findAllByOsCategoryAndArchitectureAndTypeAndStatusAndIso(@Param("osCategoryId") Long osCategoryId,
+            @Param("architecture") String architecture,
+            @Param("type") TemplateType type, @Param("format") List<Format> format, @Param("status") Status status, @Param("isActive") Boolean isActive);
 
 }
