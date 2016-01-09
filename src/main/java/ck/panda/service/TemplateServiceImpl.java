@@ -16,6 +16,7 @@ import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.entity.OsType;
 import ck.panda.domain.entity.Template;
+import ck.panda.domain.entity.Template.Format;
 import ck.panda.domain.entity.Template.Status;
 import ck.panda.domain.entity.Template.TemplateType;
 import ck.panda.domain.entity.Zone;
@@ -144,8 +145,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public Page<Template> findAllIso(PagingAndSorting pagingAndSorting) throws Exception {
-        csPrepareTemplate(templateRepository.findByTemplate("ALL", TemplateType.SYSTEM, Status.INACTIVE, true));
-        return templateRepository.findAllByFormat(Template.Format.ISO, pagingAndSorting.toPageRequest(), true);
+        return templateRepository.findAllByFormat(TemplateType.SYSTEM, Template.Format.ISO, pagingAndSorting.toPageRequest(), true);
     }
 
     @Override
@@ -182,6 +182,32 @@ public class TemplateServiceImpl implements TemplateService {
                 templateList.add(template);
             }
         }
+
+        //Getting the ISO template list from CS
+        String isoResponse = cloudStackTemplateService.listIsos("all", "json", templateMap);
+        JSONArray isoTemplateListJSON = null;
+        JSONObject isoResponseObject = new JSONObject(isoResponse).getJSONObject("listisosresponse");
+        if (isoResponseObject.has("iso")) {
+            isoTemplateListJSON = isoResponseObject.getJSONArray("iso");
+            for (int i = 0, size = isoTemplateListJSON.length(); i < size; i++) {
+                Template template = Template.convert(isoTemplateListJSON.getJSONObject(i));
+                OsType osType = osTypeService.findByUUID(template.getTransOsType());
+                template.setOsTypeId(osType.getId());
+                template.setOsCategoryId(osType.getOsCategoryId());
+                if (osType.getDescription().contains(GenericConstants.TEMPLATE_ARCHITECTURE[0])) {
+                    template.setArchitecture(GenericConstants.TEMPLATE_ARCHITECTURE[0]);
+                } else if (osType.getDescription().contains(GenericConstants.TEMPLATE_ARCHITECTURE[1])) {
+                    template.setArchitecture(GenericConstants.TEMPLATE_ARCHITECTURE[1]);
+                }
+
+                template.setDisplayText(osType.getDescription());
+                if(!template.getTransZone().equals("")) {
+                    template.setZoneId(zoneService.findByUUID(template.getTransZone()).getId());
+                }
+                template.setHypervisorId(8L);
+                templateList.add(template);
+            }
+        }
         return templateList;
     }
 
@@ -196,7 +222,7 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    public List<Template> findByFilters(Template template) throws Exception {
+    public List<Template> findTemplateByFilters(Template template) throws Exception {
         Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (template.getArchitecture() == null) {
             template.setArchitecture("ALL");
@@ -217,6 +243,33 @@ public class TemplateServiceImpl implements TemplateService {
             }
             return csPrepareTemplate(templateRepository.findAllByOsCategoryAndArchitectureAndTypeAndStatus(
                     template.getOsCategoryId(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true));
+        }
+    }
+
+    @Override
+    public List<Template> findIsoByFilters(Template templateIso) throws Exception {
+        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        List<Template.Format> format = new ArrayList<Template.Format>();
+        format.add(Format.ISO);
+        if (templateIso.getArchitecture() == null) {
+            templateIso.setArchitecture("ALL");
+        }
+        if (templateIso.getOsCategoryId() == null) {
+            if (domain != null && domain.getName().equals("ROOT")) {
+                return csPrepareTemplate((List<Template>) templateRepository.findByIsoAndFeature(
+                        templateIso.getArchitecture(), TemplateType.SYSTEM, format, Status.ACTIVE, true));
+            }
+            return (List<Template>) templateRepository.findByIso(templateIso.getArchitecture(), TemplateType.SYSTEM, format,
+                    Status.ACTIVE, true);
+        } else {
+            if (domain != null && domain.getName().equals("ROOT")) {
+                return csPrepareTemplate(
+                        templateRepository.findAllByOsCategoryAndArchitectureAndTypeAndIso(templateIso.getOsCategoryId(),
+                                templateIso.getArchitecture(), TemplateType.SYSTEM, format, Status.ACTIVE, true));
+
+            }
+            return csPrepareTemplate(templateRepository.findAllByOsCategoryAndArchitectureAndTypeAndStatusAndIso(
+                    templateIso.getOsCategoryId(), templateIso.getArchitecture(), TemplateType.SYSTEM, format, Status.ACTIVE, true));
         }
     }
 

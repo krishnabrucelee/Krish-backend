@@ -39,7 +39,16 @@ public interface TemplateService extends CRUDService<Template> {
      * @return template list from server
      * @throws Exception unhandled errors.
      */
-    List<Template> findByFilters(Template template) throws Exception;
+    List<Template> findTemplateByFilters(Template template) throws Exception;
+
+    /**
+     * To get list of iso by filters.
+     *
+     * @param templateIso template iso object.
+     * @return iso-template list from server
+     * @throws Exception unhandled errors.
+     */
+    List<Template> findIsoByFilters(Template templateIso) throws Exception;
 
     /**
      * To get template by uuid.
