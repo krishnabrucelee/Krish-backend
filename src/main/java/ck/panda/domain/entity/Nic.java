@@ -82,6 +82,10 @@ public class Nic {
     @Column(name = "net_mask")
     private String netMask;
 
+    /** Net mask value of Network . */
+    @Transient
+    private String secondaryIpAddress;
+
     /** Gateway of a network . */
     @Column(name = "gate_way")
     private String gateway;
@@ -502,6 +506,25 @@ public class Nic {
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+
+    /**
+     * Get the secondaryIpAddress.
+     *
+     * @return the secondaryIpAddress
+     */
+    public String getSecondaryIpAddress() {
+        return secondaryIpAddress;
+    }
+
+    /**
+     * Set the secondaryIpAddress.
+     *
+     * @param secondaryIpAddress to set
+     */
+    public void setSecondaryIpAddress(String secondaryIpAddress) {
+        this.secondaryIpAddress = secondaryIpAddress;
     }
 
     /**

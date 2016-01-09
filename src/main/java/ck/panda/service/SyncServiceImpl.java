@@ -1958,6 +1958,7 @@ public class SyncServiceImpl implements SyncService {
                 IpAddress csNic = csIpMap.get(ipAddress.getUuid());
 
                 ipAddress.setUuid(csNic.getUuid());
+                ipAddress.setPublicIpAddress(csNic.getPublicIpAddress());
 
                 // 3.2 If found, update the nic object in app db
                 ipAddressService.update(ipAddress);
