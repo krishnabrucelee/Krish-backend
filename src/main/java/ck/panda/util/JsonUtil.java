@@ -49,7 +49,7 @@ public abstract class JsonUtil {
         if (object.has(key)) {
             return Integer.valueOf(object.getInt(key));
         } else {
-            return Integer.valueOf(0);
+            return null;
         }
     }
 

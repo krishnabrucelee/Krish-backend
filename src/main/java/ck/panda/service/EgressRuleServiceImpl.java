@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.FirewallRules;
+import ck.panda.domain.entity.FirewallRules.TrafficType;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.repository.jpa.EgressRuleRepository;
 import ck.panda.util.AppValidator;
@@ -46,13 +47,12 @@ public class EgressRuleServiceImpl implements EgressRuleService {
     @Autowired
     private ConvertEntityService convertEntityService;
 
-    /** Reference for Network Service .*/
+    /** Reference for Network Service . */
     @Autowired
     private NetworkService networkService;
 
     /**
-     * CloudStack FirewallRules service for getting egressFirewallRule
-     * connectivity with cloudstack.
+     * CloudStack FirewallRules service for getting egressFirewallRule connectivity with cloudstack.
      */
     @Autowired
     private CloudStackFirewallService csEgressService;
@@ -60,44 +60,47 @@ public class EgressRuleServiceImpl implements EgressRuleService {
     @Override
     public FirewallRules save(FirewallRules egressFirewallRule) throws Exception {
         if (egressFirewallRule.getSyncFlag()) {
-        Errors errors = validator.rejectIfNullEntity("egressFirewallRule", egressFirewallRule);
-        errors = validator.validateEntity(egressFirewallRule, errors);
-        configServer.setUserServer();
-        Network network = convertEntityService.getNetworkById(egressFirewallRule.getNetworkId());
-        HashMap<String, String> egressMap = new HashMap<String, String>();
-        if (egressFirewallRule.getStartPort() != null) {
-            egressMap.put("startport", egressFirewallRule.getStartPort().toString());
-        }
-        if (egressFirewallRule.getEndPort() != null) {
-            egressMap.put("endport", egressFirewallRule.getEndPort().toString());
-        }
-        if (egressFirewallRule.getSourceCIDR()!= null) {
-            egressMap.put("cidrlist", egressFirewallRule.getSourceCIDR().toString());
-        }
-        String createEgressResponse = csEgressService.createEgressFirewallRule(network.getUuid(),
-                egressFirewallRule.getProtocol().toString(), "json", egressMap);
-        JSONObject csegressResponseJSON = new JSONObject(createEgressResponse)
-                .getJSONObject("createegressfirewallruleresponse");
-        if (csegressResponseJSON.has("errorcode")) {
-            errors = this.validateEvent(errors, csegressResponseJSON.getString("errortext"));
-            throw new ApplicationException(errors);
-        } else if (csegressResponseJSON.has("jobid")) {
-            String jobResponse = csEgressService.firewallJobResult(csegressResponseJSON.getString("jobid"), "json");
-            JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
-            if (jobresult.getString("jobstatus").equals("1")) {
-                egressFirewallRule.setUuid((String) csegressResponseJSON.get("id"));
-                egressFirewallRule.setSourceCIDR((String) csegressResponseJSON.get("cidrlist"));
-                egressFirewallRule.setStartPort((Integer) csegressResponseJSON.get("startport"));
-                egressFirewallRule.setEndPort((Integer) csegressResponseJSON.get("endport"));
-
+            Errors errors = validator.rejectIfNullEntity("egressFirewallRule", egressFirewallRule);
+            errors = validator.validateEntity(egressFirewallRule, errors);
+            configServer.setUserServer();
+            Network network = convertEntityService.getNetworkById(egressFirewallRule.getNetworkId());
+            HashMap<String, String> egressMap = new HashMap<String, String>();
+            if (egressFirewallRule.getStartPort() != null) {
+                egressMap.put("startport", egressFirewallRule.getStartPort().toString());
             }
-         }
-      }
+            if (egressFirewallRule.getEndPort() != null) {
+                egressMap.put("endport", egressFirewallRule.getEndPort().toString());
+            }
+            if (egressFirewallRule.getSourceCIDR() != null) {
+                egressMap.put("cidrlist", egressFirewallRule.getSourceCIDR().toString());
+            }
+            String createEgressResponse = csEgressService.createEgressFirewallRule(network.getUuid(),
+                    egressFirewallRule.getProtocol().toString(), "json", egressMap);
+            JSONObject csegressResponseJSON = new JSONObject(createEgressResponse)
+                    .getJSONObject("createegressfirewallruleresponse");
+            if (csegressResponseJSON.has("errorcode")) {
+                errors = this.validateEvent(errors, csegressResponseJSON.getString("errortext"));
+                throw new ApplicationException(errors);
+            } else if (csegressResponseJSON.has("jobid")) {
+                String jobResponse = csEgressService.firewallJobResult(csegressResponseJSON.getString("jobid"), "json");
+                JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+                egressFirewallRule.setUuid((String) csegressResponseJSON.get("id"));
+                if (jobresult.getString("jobstatus").equals("1")) {
+                    egressFirewallRule.setSourceCIDR((String) csegressResponseJSON.get("cidrlist"));
+                    egressFirewallRule.setStartPort((Integer) csegressResponseJSON.get("startport"));
+                    egressFirewallRule.setEndPort((Integer) csegressResponseJSON.get("endport"));
+                }
+            }
+            egressFirewallRule.setIsActive(true);
+        }
         return egressRepo.save(egressFirewallRule);
     }
 
     @Override
     public FirewallRules update(FirewallRules egressFirewallRule) throws Exception {
+        if (egressFirewallRule.getSyncFlag()) {
+        return egressRepo.save(egressFirewallRule);
+        }
         return egressRepo.save(egressFirewallRule);
     }
 
@@ -129,13 +132,10 @@ public class EgressRuleServiceImpl implements EgressRuleService {
     /**
      * Check the egress firewall CS error handling.
      *
-     * @param errors
-     *            error creating status.
-     * @param errmessage
-     *            error message.
+     * @param errors error creating status.
+     * @param errmessage error message.
      * @return errors.
-     * @throws Exception
-     *             if error occurs.
+     * @throws Exception if error occurs.
      */
     private Errors validateEvent(Errors errors, String errmessage) throws Exception {
         errors.addGlobalError(errmessage);
@@ -158,6 +158,11 @@ public class EgressRuleServiceImpl implements EgressRuleService {
     }
 
     @Override
+    public FirewallRules findByUUID(String uuid) throws Exception {
+        return egressRepo.findByUUID(uuid);
+    }
+
+    @Override
     public List<FirewallRules> findAllFromCSServer() throws Exception {
         List<Network> networkList = networkService.findAllByActive(true);
         List<FirewallRules> egressList = new ArrayList<FirewallRules>();
@@ -170,22 +175,36 @@ public class EgressRuleServiceImpl implements EgressRuleService {
             String response = csEgressService.listEgressFirewallRules("json", egressMap);
             JSONObject listJSON = new JSONObject(response).getJSONObject("listegressfirewallrulesresponse");
             if (response != null && listJSON.has("firewallrule")) {
-             JSONArray EgressListJSON = listJSON.getJSONArray("firewallrule");
-            // 2. Iterate the json list, convert the single json entity to nic
-            for (int i = 0, size = EgressListJSON.length(); i < size; i++) {
-                // 2.1 Call convert by passing JSONObject to nic entity and Add
-                // the converted nic entity to list
-                FirewallRules egress = FirewallRules.convert(EgressListJSON.getJSONObject(i));
-                egress.setNetworkId(convertEntityService.getNetworkId(egress.getTransNetworkId()));
-                egressList.add(egress);
+                JSONArray egressListJSON = listJSON.getJSONArray("firewallrule");
+                // 2. Iterate the json list, convert the single json entity to nic
+                for (int i = 0, size = egressListJSON.length(); i < size; i++) {
+                    // 2.1 Call convert by passing JSONObject to nic entity and Add
+                    // the converted nic entity to list
+                    FirewallRules egress = FirewallRules.convert(egressListJSON.getJSONObject(i));
+                    egress.setNetworkId(convertEntityService.getNetworkByUuid(egress.getTransNetworkId()));
+                    egress.setDepartmentId(convertEntityService
+                            .getNetworkById(convertEntityService.getNetworkByUuid(egress.getTransNetworkId()))
+                            .getDepartmentId());
+                    egress.setProjectId(convertEntityService
+                            .getNetworkById(convertEntityService.getNetworkByUuid(egress.getTransNetworkId()))
+                            .getProjectId());
+                    egress.setDomainId(convertEntityService
+                            .getNetworkById(convertEntityService.getNetworkByUuid(egress.getTransNetworkId()))
+                            .getDomainId());
+                    egressList.add(egress);
+                }
             }
-                 }
-            }
+        }
         return egressList;
-   }
+    }
 
     @Override
     public Page<FirewallRules> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-          return egressRepo.findAll(pagingAndSorting.toPageRequest());
+        return egressRepo.findAll(pagingAndSorting.toPageRequest());
+    }
+
+    @Override
+    public Page<FirewallRules> findAllByTraffictypeAndNetwork(PagingAndSorting pagingAndSorting,  Long networkId) throws Exception {
+        return egressRepo.findAllByTraffictypeAndNetworkAndIsActive(pagingAndSorting.toPageRequest(), TrafficType.EGRESS, networkId, true);
     }
 }

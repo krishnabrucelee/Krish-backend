@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.FirewallRules;
+import ck.panda.domain.entity.FirewallRules.State;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.Nic;
@@ -71,6 +73,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /** Template Service for listing templates. */
     @Autowired
     private TemplateService templateService;
+
+    /** Egress Service for listing egressrules. */
+    @Autowired
+    private EgressRuleService egressRuleService;
 
     /** NetworkOfferingService for listing network offers in cloudstack server. */
     @Autowired
@@ -142,6 +148,13 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 LOGGER.debug("Network sync",
                         eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
                 asyncNetwork(jobresult, eventObject);
+            }
+            break;
+        case EventTypes.EVENT_FIREWALL:
+            if (eventObject.getString("commandEventType").contains("FIREWALL")) {
+                LOGGER.debug("Firewall sync",
+                        eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+                asyncFirewall(jobresult, eventObject);
             }
             break;
         case EventTypes.EVENT_TEMPLATE:
@@ -402,6 +415,71 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             network.setSyncFlag(false);
             networkService.softDelete(network);
         }
+    }
+
+    /**
+     * Sync with CloudStack server Firewall from Asynchronous Job.
+     *
+     * @param jobresult job result
+     * @param eventObject network event object
+     * @throws ApplicationException unhandled application errors
+     * @throws Exception cloudstack unhandled errors
+     */
+    public void asyncFirewall(JSONObject jobresult, JSONObject eventObject) throws ApplicationException, Exception {
+        if (eventObject.getString("commandEventType").equals("FIREWALL.EGRESS.OPEN")) {
+            FirewallRules csFirewallRule = FirewallRules.convert(jobresult.getJSONObject("firewallrule"));
+            FirewallRules egress = egressRuleService.findByUUID(csFirewallRule.getUuid());
+            if (egress != null) {
+                egress.setSyncFlag(false);
+                if (csFirewallRule.getUuid().equals(egress.getUuid())) {
+                    FirewallRules csFirewall = csFirewallRule;
+                    egress.setUuid(csFirewall.getUuid());
+                    egress.setProtocol(csFirewall.getProtocol());
+                    egress.setDisplay(csFirewall.getDisplay());
+                    egress.setSourceCIDR(csFirewall.getSourceCIDR());
+                    egress.setState(csFirewall.getState());
+                    egress.setStartPort(csFirewall.getStartPort());
+                    egress.setEndPort(csFirewall.getEndPort());
+                    egress.setIcmpCode(csFirewall.getIcmpCode());
+                    egress.setIcmpMessage(csFirewall.getIcmpMessage());
+                    egress.setPurpose(csFirewall.getPurpose());
+                    egress.setTrafficType(csFirewall.getTrafficType());
+                    egress.setNetworkId(convertEntityService.getNetworkByUuid(csFirewall.getTransNetworkId()));
+                    egress.setDepartmentId(convertEntityService
+                            .getNetworkById(convertEntityService.getNetworkByUuid(csFirewall.getTransNetworkId()))
+                            .getDepartmentId());
+                    egress.setProjectId(convertEntityService
+                            .getNetworkById(convertEntityService.getNetworkByUuid(csFirewall.getTransNetworkId()))
+                            .getProjectId());
+                    egress.setDomainId(convertEntityService
+                            .getNetworkById(convertEntityService.getNetworkByUuid(csFirewall.getTransNetworkId()))
+                            .getDomainId());
+                    egress.setIsActive(csFirewall.getIsActive());
+                    egressRuleService.update(egress);
+                }
+            } else {
+                csFirewallRule.setNetworkId(convertEntityService.getNetworkByUuid(csFirewallRule.getTransNetworkId()));
+                csFirewallRule.setDepartmentId(convertEntityService
+                        .getNetworkById(convertEntityService.getNetworkByUuid(csFirewallRule.getTransNetworkId()))
+                        .getDepartmentId());
+                csFirewallRule.setProjectId(convertEntityService
+                        .getNetworkById(convertEntityService.getNetworkByUuid(csFirewallRule.getTransNetworkId()))
+                        .getProjectId());
+                csFirewallRule.setDomainId(convertEntityService
+                        .getNetworkById(convertEntityService.getNetworkByUuid(csFirewallRule.getTransNetworkId()))
+                        .getDomainId());
+                egressRuleService.save(csFirewallRule);
+            }
+        }
+        if (eventObject.getString("commandEventType").equals("FIREWALL.EGRESS.CLOSE")) {
+            JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
+            FirewallRules egressRule = egressRuleService.findByUUID(json.getString("id"));
+            if (egressRule != null) {
+                egressRule.setSyncFlag(false);
+                egressRuleService.softDelete(egressRule);
+            }
+        }
+
     }
 
     /**

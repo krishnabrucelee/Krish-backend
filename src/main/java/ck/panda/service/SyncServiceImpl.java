@@ -20,6 +20,10 @@ import ck.panda.domain.entity.Cluster;
 import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Department.AccountType;
+import ck.panda.domain.entity.FirewallRules.Protocol;
+import ck.panda.domain.entity.FirewallRules.Purpose;
+import ck.panda.domain.entity.FirewallRules.State;
+import ck.panda.domain.entity.FirewallRules.TrafficType;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.Host;
@@ -54,6 +58,7 @@ import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.EncryptionUtil;
+import ck.panda.util.JsonUtil;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 
@@ -1897,9 +1902,23 @@ public class SyncServiceImpl implements SyncService {
             // 3.1 Find the corresponding CS server egressFirewallRulesService object by
             // finding it in a hash using uuid
             if (csEgressMap.containsKey(egress.getUuid())) {
-                FirewallRules csNic = csEgressMap.get(egress.getUuid());
-                egress.setUuid(csNic.getUuid());
-
+                FirewallRules csFirewall = csEgressMap.get(egress.getUuid());
+                egress.setUuid(csFirewall.getUuid());
+                egress.setProtocol(csFirewall.getProtocol());
+                egress.setDisplay(csFirewall.getDisplay());
+                egress.setSourceCIDR(csFirewall.getSourceCIDR());
+                egress.setNetworkId(csFirewall.getNetworkId());
+                egress.setState(csFirewall.getState());
+                egress.setStartPort(csFirewall.getStartPort());
+                egress.setEndPort(csFirewall.getEndPort());
+                egress.setIcmpCode(csFirewall.getIcmpCode());
+                egress.setIcmpMessage(csFirewall.getIcmpMessage());
+                egress.setPurpose(csFirewall.getPurpose());
+                egress.setTrafficType(csFirewall.getTrafficType());
+                egress.setDepartmentId(csFirewall.getDepartmentId());
+                egress.setProjectId(csFirewall.getProjectId());
+                egress.setDomainId(csFirewall.getProjectId());
+                egress.setIsActive(csFirewall.getIsActive());
                 // 3.2 If found, update the egressFirewallRules object in app db
                 egressService.update(egress);
 
@@ -1935,7 +1954,7 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.debug("Total rows updated : " + (appIpList.size()));
             // 3.1 Find the corresponding CS server ntService object by
             // finding it in a hash using uuid
-            if (csIpMap.containsKey(ipAddress)) {
+            if (csIpMap.containsKey(ipAddress.getUuid())) {
                 IpAddress csNic = csIpMap.get(ipAddress.getUuid());
 
                 ipAddress.setUuid(csNic.getUuid());

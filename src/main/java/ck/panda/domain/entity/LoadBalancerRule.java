@@ -29,12 +29,12 @@ import ck.panda.util.JsonUtil;
 /**
  * The Firewall controlls the traffic originates from the guest network and sent to public network. This features
  * controls the Egress (outgoing) traffic from the guest network in Advanced zone. The egress firewall rules applied
- * will restrict the traffic from guest network on the Virtual Router. *
+ * will restrict the traffic from guest network on the Virtual Router.
  */
 @Entity
-@Table(name = "firewall_rules")
+@Table(name = "load_balance_rules")
 @EntityListeners(AuditingEntityListener.class)
-public class FirewallRules {
+public class LoadBalancerRule {
 
     /** Unique Id of the Firewall Rule. */
     @Id
@@ -767,8 +767,8 @@ public class FirewallRules {
      * @return nic entity object.
      * @throws Exception unhandled errors.
      */
-    public static FirewallRules convert(JSONObject jsonObject) throws Exception {
-        FirewallRules egress = new FirewallRules();
+    public static LoadBalancerRule convert(JSONObject jsonObject) throws Exception {
+        LoadBalancerRule egress = new LoadBalancerRule();
         egress.setSyncFlag(false);
         egress.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
         egress.setProtocol(Protocol.valueOf(JsonUtil.getStringValue(jsonObject, "protocol").toUpperCase()));
@@ -776,12 +776,6 @@ public class FirewallRules {
         egress.setSourceCIDR(JsonUtil.getStringValue(jsonObject,"cidrlist"));
         egress.setTransNetworkId((JsonUtil.getStringValue(jsonObject, "networkid")));
         egress.setState(State.valueOf(JsonUtil.getStringValue(jsonObject,"state").toUpperCase()));
-        egress.setStartPort(JsonUtil.getIntegerValue(jsonObject, "startport"));
-        egress.setEndPort(JsonUtil.getIntegerValue(jsonObject, "endport"));
-        egress.setIcmpCode(JsonUtil.getIntegerValue(jsonObject, "icmpcode"));
-        egress.setIcmpMessage(JsonUtil.getIntegerValue(jsonObject, "icmptype"));
-        egress.setPurpose(Purpose.FIREWALL);
-        egress.setTrafficType(TrafficType.EGRESS);
         egress.setIsActive(true);
         return egress;
     }
@@ -792,10 +786,10 @@ public class FirewallRules {
      * @param egressList list of egress.
      * @return egressMap egress.
      */
-    public static Map<String, FirewallRules> convert(List<FirewallRules> nicList) {
-        Map<String, FirewallRules> egressMap = new HashMap<String, FirewallRules>();
+    public static Map<String, LoadBalancerRule> convert(List<LoadBalancerRule> nicList) {
+        Map<String, LoadBalancerRule> egressMap = new HashMap<String, LoadBalancerRule>();
 
-        for (FirewallRules nic : nicList) {
+        for (LoadBalancerRule nic : nicList) {
             egressMap.put(nic.getUuid(), nic);
         }
         return egressMap;

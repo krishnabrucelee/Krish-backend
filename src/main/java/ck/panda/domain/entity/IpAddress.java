@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
@@ -22,6 +23,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonUtil;
 
@@ -31,6 +33,7 @@ import ck.panda.util.JsonUtil;
  */
 @Entity
 @Table(name = "ip_addresses")
+@EntityListeners(AuditingEntityListener.class)
 public class IpAddress {
 
     /** Unique Id of the IP address. */
@@ -47,9 +50,17 @@ public class IpAddress {
     @Column(name = "uuid", nullable = false)
     private String uuid;
 
+    /** public ip address vlan. */
+    @Column(name = "vlan")
+    private String Vlan;
+
     /** Ip address source nat. */
     @Column(name = "is_source_nat")
     private Boolean isSourcenat;
+
+    /** Ip address static nat. */
+    @Column(name = "is_static_nat")
+    private Boolean isStaticnat;
 
     /** Network for ip address. */
     @JoinColumn(name = "network_id", referencedColumnName = "id", updatable = false, insertable = false)
@@ -723,6 +734,42 @@ public class IpAddress {
     }
 
     /**
+     * Get ipaddress Vlan name.
+     *
+     * @return vlan name.
+     */
+    public String getVlan() {
+        return Vlan;
+    }
+
+    /**
+     * Set ipaddress Vlan name.
+     *
+     * @param vlan to set.
+     */
+    public void setVlan(String vlan) {
+        Vlan = vlan;
+    }
+
+    /**
+     * Get the isStaticnat.
+     *
+     * @return Static nat
+     */
+    public Boolean getIsStaticnat() {
+        return isStaticnat;
+    }
+
+    /**
+     * Set the isStaticnat.
+     *
+     * @param isStaticnat  to set
+     */
+    public void setIsStaticnat(Boolean isStaticnat) {
+        this.isStaticnat = isStaticnat;
+    }
+
+    /**
      * Convert JSONObject into pod object.
      *
      * @param jsonObject JSON object.
@@ -732,6 +779,8 @@ public class IpAddress {
         IpAddress ipAddress = new IpAddress();
         try {
             ipAddress.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
+            ipAddress.setIsStaticnat(JsonUtil.getBooleanValue(jsonObject, "isstaticnat"));
+            ipAddress.setVlan(JsonUtil.getStringValue(jsonObject, "vlanname"));
             ipAddress.setTransZoneId((JsonUtil.getStringValue(jsonObject, "zoneid")));
             ipAddress.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
             ipAddress.setTransNetworkId(JsonUtil.getStringValue(jsonObject,"associatednetworkid"));

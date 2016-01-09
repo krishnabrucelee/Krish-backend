@@ -37,6 +37,17 @@ public interface IpaddressRepository extends PagingAndSortingRepository<IpAddres
     List<IpAddress> findByNetwork(@Param("networkId") Long networkId, @Param("state") IpAddress.State state);
 
     /**
+     * Find all ipaddresses by network Id.
+     *
+     * @param state get the ipaddress state.
+     * @param pageable to get the list with pagination.
+     * @param networkId from ipaddress
+     * @return ipaddress list.
+     */
+    @Query(value = "select ip from IpAddress ip where  ip.networkId=:networkId AND ip.state =:state")
+    Page<IpAddress> findByNetwork(Pageable pageable, @Param("networkId") Long networkId, @Param("state") IpAddress.State state);
+
+    /**
      * Find all the Allocate or Free ipaddress with pagination.
      *
      * @param pageable to get the list with pagination.
