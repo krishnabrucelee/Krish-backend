@@ -108,7 +108,7 @@ public class IpaddressController extends CRUDController<IpAddress> implements Ap
      * @throws Exception if error occurs.
      * @return ipaddress list.
      */
-    @RequestMapping(value = "/acquireip", method = RequestMethod.PUT, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/acquireip", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<IpAddress> handleEventWithIPAddress(@RequestParam("network") Long networkId) throws Exception {
