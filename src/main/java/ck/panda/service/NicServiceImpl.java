@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.repository.jpa.NicRepository;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.util.AppValidator;
@@ -68,6 +69,11 @@ public class NicServiceImpl implements NicService {
     /** Reference of the convert entity service. */
     @Autowired
     private ConvertEntityService convertEntityService;
+
+    /** Virtual Machine service for vminstance reference. */
+    @Autowired
+    private VmIpaddressService vmIpService;
+
 
     @Override
     @PreAuthorize("hasPermission(#nic.getSyncFlag(), 'ADD_NETWORK_TO_VM')")
@@ -271,6 +277,7 @@ public class NicServiceImpl implements NicService {
     public List<Nic> findAllFromCSServer() throws Exception {
         List<VmInstance> vmInstanceList = virtualmachinerepository.findAllByIsActive(VmInstance.Status.Expunging);
         List<Nic> nicList = new ArrayList<Nic>();
+        List<VmIpaddress> vmIpList = new ArrayList<VmIpaddress>();
         LOGGER.debug("VM size" + vmInstanceList.size());
         for (VmInstance vm : vmInstanceList) {
             HashMap<String, String> nicMap = new HashMap<String, String>();
@@ -278,14 +285,17 @@ public class NicServiceImpl implements NicService {
             // 1. Get the list of nics from CS server using CS connector
             String response = cloudStackNicService.listNics(nicMap, "json");
             JSONArray nicListJSON = new JSONObject(response).getJSONObject("listnicsresponse").getJSONArray("nic");
+            JSONArray secondaryIpJSON = new JSONObject(response).getJSONObject("listnicsresponse").getJSONArray("secondaryip");
             // 2. Iterate the json list, convert the single json entity to nic
             for (int i = 0, size = nicListJSON.length(); i < size; i++) {
                 // 2.1 Call convert by passing JSONObject to nic entity and Add
                 // the converted nic entity to list
                 Nic nic = Nic.convert(nicListJSON.getJSONObject(i));
+                VmIpaddress vmIp = VmIpaddress.convert(secondaryIpJSON.getJSONObject(i));
                 nic.setVmInstanceId(convertEntityService.getVmInstanceId(nic.getTransvmInstanceId()));
                 nic.setNetworkId(convertEntityService.getNetworkId(nic.getTransNetworkId()));
                 nicList.add(nic);
+                vmIpList.add(vmIp);
             }
         }
         return nicList;
@@ -312,10 +322,10 @@ public class NicServiceImpl implements NicService {
          Errors errors = validator.rejectIfNullEntity("nic", nic);
          errors = validator.validateEntity(nic, errors);
          configServer.setUserServer();
-         Network network = convertEntityService.getNetworkById(nic.getNetworkId());
+         Nic nics = convertEntityService.getNicById(nic.getId());
          HashMap<String, String> nicMap = new HashMap<String, String>();
-         nicMap.put("ipaddress", nic.getVmIpAddress().getId().toString());
-         String acquireIPResponse = cloudStackNicService.addIpToNic(nic.getUuid(), "json", nicMap);
+         nicMap.put("ipaddress", nic.getSecondaryIpAddress());
+         String acquireIPResponse = cloudStackNicService.addIpToNic(nics.getUuid(), "json", nicMap);
          JSONObject csacquireIPResponseJSON = new JSONObject(acquireIPResponse)
                  .getJSONObject("addiptovmnicresponse");
          if (csacquireIPResponseJSON.has("errorcode")) {
@@ -325,10 +335,18 @@ public class NicServiceImpl implements NicService {
              String jobResponse = cloudStackNicService.AcquireIpJobResult(csacquireIPResponseJSON.getString("jobid"), "json");
              JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
              if (jobresult.getString("jobstatus").equals("1")) {
-                 nic.setUuid((String) csacquireIPResponseJSON.get("id"));
-             }
+                 VmIpaddress vm = new VmIpaddress();
+                 vm.setUuid((String) csacquireIPResponseJSON.get("id"));
+                 vm.setSecondaryIpAddress(((String) jobresult.get("ipaddress")));
+                 vm.setVmInstanceId((Long)(jobresult.get("virtualmachineid")));
+                 vmIpService.save(vm);
+            }
          }
         return nic;
+    }
 
+    @Override
+    public Nic findById(Long id) throws Exception {
+        return nicRepo.findById(id);
     }
 }
