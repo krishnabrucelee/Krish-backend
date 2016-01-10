@@ -58,13 +58,23 @@ public interface IpaddressRepository extends PagingAndSortingRepository<IpAddres
     Page<IpAddress> findAllByIsActive(Pageable pageable, @Param("state") IpAddress.State state);
 
     /**
-     * Find all the active or inactive snapshots with pagination.
+     * Find all the active or inactive ipaddress with pagination.
      *
      * @param pageable to get the list with pagination.
-     * @param isActive get the snapshot list based on active/inactive status.
-     * @return list of snapshots.
+     * @param isActive get the ipaddress list based on active/inactive status.
+     * @return list of ipaddress.
      */
     @Query(value = "select ip from IpAddress ip where ip.isActive =:isActive")
     Page<IpAddress> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find all the active or inactive ipaddresses.
+     *
+     *.@param state get the ipaddress list based on state.
+     * @param isActive get the ipaddress list based on active/inactive status.
+     * @return list of ipaddress.
+     */
+    @Query(value = "select ip from IpAddress ip where ip.isActive =:isActive and ip.state =:state")
+    List<IpAddress> findAllByIsActiveAndState(@Param("state") IpAddress.State state, @Param("isActive") Boolean isActive);
 
 }

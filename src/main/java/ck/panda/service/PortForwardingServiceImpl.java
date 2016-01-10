@@ -198,4 +198,10 @@ public class PortForwardingServiceImpl implements PortForwardingService {
     public List<PortForwarding> findByInstance(Long portForwarding) throws Exception {
         return portForwardingRepo.findByInstanceAndIsActive(portForwarding, true);
     }
+
+    @Override
+    public Page<PortForwarding> findAllByIpaddress(PagingAndSorting pagingAndSorting, Long ipaddressId)
+            throws Exception {
+        return portForwardingRepo.findAllByIpaddressAndIsActive(pagingAndSorting.toPageRequest(), ipaddressId, true);
+    }
 }

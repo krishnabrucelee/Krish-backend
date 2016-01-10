@@ -82,6 +82,14 @@ public class SyncServiceImpl implements SyncService {
     @Autowired
     private DomainService domainService;
 
+    /** Ip address Service for listing ipaddress. */
+    @Autowired
+    private IpaddressService ipService;
+
+    /** Egress Service for listing egressrules. */
+    @Autowired
+    private EgressRuleService egressRuleService;
+
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(SyncServiceImpl.class);
 
@@ -92,6 +100,10 @@ public class SyncServiceImpl implements SyncService {
     /** Virtual machine Service for listing vms. */
     @Autowired
     private VirtualMachineService virtualMachineService;
+
+    /** Reference of the convert entity service. */
+    @Autowired
+    private ConvertEntityService convertEntityService;
 
     /** VolumeRepository repository reference. */
     @Autowired
@@ -473,33 +485,39 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.error("ERROR AT synch Nic", e);
         }
         try {
-            // 25. Sync Egress firewall rules entity
-            this.syncEgressFirewallRules();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch EgressRule", e);
-        }
-        try {
-            // 26. Sync IP address entity
+            // 25. Sync IP address entity
             this.syncIpAddress();
             LOGGER.debug("ipAddress");
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Ip Address", e);
         }
         try {
-            // 27. Sync Port Forwarding entity
+            // 26. Sync Egress firewall rules entity
+            this.syncEgressFirewallRules();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch EgressRule", e);
+        }
+        try {
+            // 27. Sync Ingress firewall rules entity
+            this.syncIngressFirewallRules();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch EgressRule", e);
+        }
+        try {
+            // 28. Sync Port Forwarding entity
             this.syncPortForwarding();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch PortForwarding", e);
         }
         try {
-            // 28. Sync SSHKey entity
+            // 30. Sync SSHKey entity
             this.syncSSHKey();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch SSH Key", e);
         }
 
         try {
-            // 29. Sync for update role in user entity
+            // 31. Sync for update role in user entity
             this.syncUpdateUserRole();
         } catch (Exception e) {
             LOGGER.error("ERROR AT Sync for update role in user entity", e);
@@ -1904,7 +1922,7 @@ public class SyncServiceImpl implements SyncService {
         HashMap<String, FirewallRules> csEgressMap = (HashMap<String, FirewallRules>) FirewallRules.convert(csEgressList);
 
         // 2. Get all the egressFirewallRules objects from application
-        List<FirewallRules> appEgressList = egressService.findAll();
+        List<FirewallRules> appEgressList = egressService.findAllByTrafficType(TrafficType.EGRESS);
 
         // 3. Iterate application egressFirewallRules list
         for (FirewallRules egress : appEgressList) {
@@ -1946,6 +1964,59 @@ public class SyncServiceImpl implements SyncService {
         for (String key : csEgressMap.keySet()) {
             LOGGER.debug("Syncservice Egress uuid:");
             egressService.save(csEgressMap.get(key));
+        }
+    }
+
+    @Override
+    public void syncIngressFirewallRules() throws ApplicationException, Exception {
+
+        // 1. Get all the egressFirewallRules objects from CS server as hash
+        List<FirewallRules> csIngressList = egressService.findAllFromCSServerForIngress();
+        HashMap<String, FirewallRules> csIngressMap = (HashMap<String, FirewallRules>) FirewallRules.convert(csIngressList);
+
+        // 2. Get all the egressFirewallRules objects from application
+        List<FirewallRules> appIngressList =  egressService.findAllByTrafficType(TrafficType.INGRESS);
+
+        // 3. Iterate application egressFirewallRules list
+        for (FirewallRules ingress : appIngressList) {
+            ingress.setSyncFlag(false);
+            if (csIngressMap.containsKey(ingress.getUuid())) {
+                FirewallRules csFirewall = csIngressMap.get(ingress.getUuid());
+                ingress.setUuid(csFirewall.getUuid());
+                ingress.setProtocol(csFirewall.getProtocol());
+                ingress.setDisplay(csFirewall.getDisplay());
+                ingress.setSourceCIDR(csFirewall.getSourceCIDR());
+                ingress.setState(csFirewall.getState());
+                ingress.setStartPort(csFirewall.getStartPort());
+                ingress.setEndPort(csFirewall.getEndPort());
+                ingress.setIcmpCode(csFirewall.getIcmpCode());
+                ingress.setIcmpMessage(csFirewall.getIcmpMessage());
+                ingress.setPurpose(csFirewall.getPurpose());
+                ingress.setTrafficType(csFirewall.getTrafficType());
+                ingress.setNetworkId(convertEntityService.getNetworkByUuid(csFirewall.getTransNetworkId()));
+                ingress.setDepartmentId(convertEntityService
+                        .getNetworkById(convertEntityService.getNetworkByUuid(csFirewall.getTransNetworkId()))
+                        .getDepartmentId());
+                ingress.setProjectId(convertEntityService
+                        .getNetworkById(convertEntityService.getNetworkByUuid(csFirewall.getTransNetworkId()))
+                        .getProjectId());
+                ingress.setDomainId(convertEntityService
+                        .getNetworkById(convertEntityService.getNetworkByUuid(csFirewall.getTransNetworkId()))
+                        .getDomainId());
+                ingress.setIsActive(csFirewall.getIsActive());
+                ingress.setIpAddressId(ipService.findbyUUID(csFirewall.getTransIpaddressId()).getId());
+                egressRuleService.update(ingress);
+                csIngressMap.remove(ingress.getUuid());
+            } else {
+                egressService.softDelete(ingress);
+            }
+        }
+        // 4. Get the remaining list of cs server hash NetworkOffering object,
+        // then iterate and
+        // add it to app db
+        for (String key : csIngressMap.keySet()) {
+            LOGGER.debug("Syncservice Ingress uuid:");
+            egressService.save(csIngressMap.get(key));
         }
     }
 
@@ -2006,7 +2077,7 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.debug("Total rows updated : " + (appPortForwardingList.size()));
             // 3.1 Find the corresponding CS server ntService object by
             // finding it in a hash using uuid
-            if (csPortForwardingMap.containsKey(portForwarding)) {
+            if (csPortForwardingMap.containsKey(portForwarding.getUuid())) {
                 PortForwarding csPortForwarding = csPortForwardingMap.get(portForwarding.getUuid());
 
                 portForwarding.setUuid(csPortForwarding.getUuid());

@@ -155,6 +155,20 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     }
 
     /**
+     * get all instances.
+     *
+     * @param networkId network's id.
+     * @throws Exception if error occurs.
+     * @return list of instances.
+     */
+    @RequestMapping(value = "/network", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<VmInstance> getListByNetwork(@RequestParam("networkId") Long networkId) throws Exception {
+        return virtualmachineservice.findByNetworkAndVmStatus(networkId, VmInstance.Status.Expunging);
+    }
+
+    /**
      * Get instance with latest state update.
      *
      * @param vm vm uuid.

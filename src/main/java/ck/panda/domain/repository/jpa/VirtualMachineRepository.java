@@ -207,9 +207,9 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      * @param project belongs to VM.
      * @return instance list
      */
-    @Query(value = "select vm from VmInstance vm where vm.status <>:status and (vm.instanceOwner = :user or vm.project = :project)")
-    List<VmInstance> findAllByUserAndProjectIsActiveAndStatus(@Param("status") Status status,
-            @Param("user") User instanceOwner, @Param("project") Project project);
+    @Query(value = "select vm from VmInstance vm where vm.status <>:status and (vm.project = :project or vm.department = :department)")
+    List<VmInstance> findAllByDepartmentAndProjectIsActiveAndStatus(@Param("status") Status status,
+            @Param("department") Department department, @Param("project") Project project);
 
     /**
      * Get the list of VMs by status and user.
@@ -241,6 +241,17 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      */
     @Query(value = "select vm from VmInstance vm where vm.departmentId=:id and vm.status <> :status ")
     List<VmInstance> findByDepartment(@Param("id") Long departmentId, @Param("status") Status status);
+
+    /**
+     * Find all vmInstance from department with pagination.
+     *
+     * @param departmentId department id.
+     * @param pageable page request.
+     * @param status get the instance list based on current state.
+     * @return vmInstance list.
+     */
+    @Query(value = "select vm from VmInstance vm where vm.departmentId = :id and vm.status <> :status ")
+    Page<VmInstance> findAllByDepartment(@Param("id") Long departmentId, @Param("status") Status status, Pageable pageable);
 
     /**
      * Find all vmInstance associated with Compute offering.

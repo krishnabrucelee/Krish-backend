@@ -93,8 +93,9 @@ public class IpaddressController extends CRUDController<IpAddress> implements Ap
     @RequestMapping(value = "/iplist", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<IpAddress> listbyNetwork(@RequestParam("network") Long networkId, @RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-            @RequestParam Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public List<IpAddress> listbyNetwork(@RequestParam("network") Long networkId, @RequestParam String sortBy,
+            @RequestHeader(value = RANGE) String range, @RequestParam Integer limit, HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, IpAddress.class);
         Page<IpAddress> pageResponse = ipAddressService.findByNetwork(networkId, page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
@@ -102,17 +103,38 @@ public class IpaddressController extends CRUDController<IpAddress> implements Ap
     }
 
     /**
-     * Get instance with latest state update.
+     * Get new ip from zone for current network.
      *
-     * @param network network object.
+     * @param network network's id.
      * @throws Exception if error occurs.
      * @return ipaddress list.
      */
-    @RequestMapping(value = "/acquireip", method = RequestMethod.PUT, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/acquireip", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<IpAddress> handleEventWithIPAddress(@RequestParam("network") Long networkId) throws Exception {
         return ipAddressService.acquireIP(networkId);
+    }
+
+    /**
+     * Set static NAT for ipaddress that doesn't have source nat.
+     *
+     * @param ipaddressId ipaddress's id.
+     * @param vmId virtual machine's id.
+     * @param guestip guest ipaddress.
+     * @throws Exception if error occurs.
+     * @return ipaddress.
+     */
+    @RequestMapping(value = "/nat", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public IpAddress enableStatic(@RequestParam("ipaddress") Long ipaddressId, @RequestParam("vm") Long vmId,
+            @RequestParam("guestip") String guestip, @RequestParam("type") String type) throws Exception {
+        if (type.equalsIgnoreCase("enable")) {
+            return ipAddressService.enableStaticNat(ipaddressId, vmId, guestip);
+        } else {
+            return ipAddressService.disableStaticNat(ipaddressId);
+        }
     }
 
 }

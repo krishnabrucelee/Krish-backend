@@ -123,7 +123,7 @@ public class FirewallRules {
     @Column(name = "state")
     private State state;
 
-    /** Set of rules or protocols for an IP address .*/
+    /** Set of rules or protocols for an IP address . */
     @Column(name = "protocol")
     @Enumerated(EnumType.STRING)
     private Protocol protocol;
@@ -149,6 +149,10 @@ public class FirewallRules {
     /** Transient network of the instance. */
     @Transient
     private String transNetworkId;
+
+    /** Transient ipaddress of the network. */
+    @Transient
+    private String transIpaddressId;
 
     /** Created by user. */
     @CreatedBy
@@ -196,19 +200,25 @@ public class FirewallRules {
         INGRESS
     }
 
-    /** Types of protocol for an IP Address .*/
+    /** Types of protocol for an IP Address . */
     public enum Protocol {
 
-        /**  TCP enables two hosts to establish a connection and exchange streams of data. */
+        /** TCP enables two hosts to establish a connection and exchange streams of data. */
         TCP,
 
-        /** User Datagram Protocol (UDP) is a transport layer protocol provides a best-effort datagram service to an End System (IP host).*/
+        /**
+         * User Datagram Protocol (UDP) is a transport layer protocol provides a best-effort datagram service to an End
+         * System (IP host).
+         */
         UDP,
 
-        /** It is used to send error message when  requested service is not available or that a host or router could not be reached. */
+        /**
+         * It is used to send error message when requested service is not available or that a host or router could not
+         * be reached.
+         */
         ICMP,
 
-        /** All the above three protocols .*/
+        /** All the above three protocols . */
         ALL
     }
 
@@ -216,8 +226,10 @@ public class FirewallRules {
         /** Egress rule in Active state */
         ACTIVE,
 
-        /** Egress rule in Staged state.*/
-        STAGED
+        /** Egress rule in Staged state. */
+        STAGED,
+        /** Egress rule in ADD state. */
+        ADD
     }
 
     /**
@@ -761,27 +773,46 @@ public class FirewallRules {
     }
 
     /**
+     * Get the transient ipaddress uuid.
+     *
+     * @param transIpaddressId to set
+     */
+    public String getTransIpaddressId() {
+        return transIpaddressId;
+    }
+
+    /**
+     * Set the transient ipaddress uuid.
+     *
+     * @param transIpaddressId to set
+     */
+    public void setTransIpaddressId(String transIpaddressId) {
+        this.transIpaddressId = transIpaddressId;
+    }
+
+    /**
      * Convert JSONObject to nic entity.
      *
      * @param jsonObject json object
      * @return nic entity object.
      * @throws Exception unhandled errors.
      */
-    public static FirewallRules convert(JSONObject jsonObject) throws Exception {
+    public static FirewallRules convert(JSONObject jsonObject, FirewallRules.TrafficType type) throws Exception {
         FirewallRules egress = new FirewallRules();
         egress.setSyncFlag(false);
         egress.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
+        egress.setTransIpaddressId(JsonUtil.getStringValue(jsonObject, "ipaddressid"));
         egress.setProtocol(Protocol.valueOf(JsonUtil.getStringValue(jsonObject, "protocol").toUpperCase()));
         egress.setDisplay(JsonUtil.getBooleanValue(jsonObject, "fordisplay"));
-        egress.setSourceCIDR(JsonUtil.getStringValue(jsonObject,"cidrlist"));
+        egress.setSourceCIDR(JsonUtil.getStringValue(jsonObject, "cidrlist"));
         egress.setTransNetworkId((JsonUtil.getStringValue(jsonObject, "networkid")));
-        egress.setState(State.valueOf(JsonUtil.getStringValue(jsonObject,"state").toUpperCase()));
+        egress.setState(State.valueOf(JsonUtil.getStringValue(jsonObject, "state").toUpperCase()));
         egress.setStartPort(JsonUtil.getIntegerValue(jsonObject, "startport"));
         egress.setEndPort(JsonUtil.getIntegerValue(jsonObject, "endport"));
         egress.setIcmpCode(JsonUtil.getIntegerValue(jsonObject, "icmpcode"));
         egress.setIcmpMessage(JsonUtil.getIntegerValue(jsonObject, "icmptype"));
         egress.setPurpose(Purpose.FIREWALL);
-        egress.setTrafficType(TrafficType.EGRESS);
+        egress.setTrafficType(type);
         egress.setIsActive(true);
         return egress;
     }
@@ -792,11 +823,11 @@ public class FirewallRules {
      * @param egressList list of egress.
      * @return egressMap egress.
      */
-    public static Map<String, FirewallRules> convert(List<FirewallRules> nicList) {
+    public static Map<String, FirewallRules> convert(List<FirewallRules> firewallList) {
         Map<String, FirewallRules> egressMap = new HashMap<String, FirewallRules>();
 
-        for (FirewallRules nic : nicList) {
-            egressMap.put(nic.getUuid(), nic);
+        for (FirewallRules firewall : firewallList) {
+            egressMap.put(firewall.getUuid(), firewall);
         }
         return egressMap;
     }

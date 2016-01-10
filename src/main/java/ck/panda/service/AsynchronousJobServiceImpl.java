@@ -19,6 +19,7 @@ import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.FirewallRules.State;
+import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.Nic;
@@ -66,6 +67,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /** Volume Service for listing volumes. */
     @Autowired
     private VolumeService volumeService;
+
+    /** Ip address Service for listing ipaddress. */
+    @Autowired
+    private IpaddressService ipService;
 
     /** CloudStack connector reference for instance. */
     @Autowired
@@ -160,6 +165,20 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 LOGGER.debug("Firewall sync",
                         eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
                 asyncFirewall(jobresult, eventObject);
+            }
+            break;
+        case EventTypes.EVENT_NAT:
+            if (eventObject.getString("commandEventType").contains("STATICNAT")) {
+                LOGGER.debug("Nat sync",
+                        eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+                asyncNat(jobresult, eventObject);
+            }
+            break;
+        case EventTypes.EVENT_NET:
+            if (eventObject.getString("commandEventType").contains("NET")) {
+                LOGGER.debug("NET IP sync",
+                        eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+                asyncIpAddress(jobresult, eventObject);
             }
             break;
         case EventTypes.EVENT_TEMPLATE:
@@ -436,7 +455,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      */
     public void asyncFirewall(JSONObject jobresult, JSONObject eventObject) throws ApplicationException, Exception {
         if (eventObject.getString("commandEventType").equals("FIREWALL.EGRESS.OPEN")) {
-            FirewallRules csFirewallRule = FirewallRules.convert(jobresult.getJSONObject("firewallrule"));
+            FirewallRules csFirewallRule = FirewallRules.convert(jobresult.getJSONObject("firewallrule"), FirewallRules.TrafficType.EGRESS);
             FirewallRules egress = egressRuleService.findByUUID(csFirewallRule.getUuid());
             if (egress != null) {
                 egress.setSyncFlag(false);
@@ -486,6 +505,151 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             if (egressRule != null) {
                 egressRule.setSyncFlag(false);
                 egressRuleService.softDelete(egressRule);
+            }
+        }
+        if (eventObject.getString("commandEventType").equals("FIREWALL.CLOSE")) {
+            JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
+            FirewallRules ingressRule = egressRuleService.findByUUID(json.getString("id"));
+            if (ingressRule != null) {
+                ingressRule.setSyncFlag(false);
+                egressRuleService.softDelete(ingressRule);
+            }
+        }
+        if (eventObject.getString("commandEventType").equals("FIREWALL.OPEN")) {
+            FirewallRules csFirewallRule = FirewallRules.convert(jobresult.getJSONObject("firewallrule"), FirewallRules.TrafficType.INGRESS);
+            FirewallRules ingress = egressRuleService.findByUUID(csFirewallRule.getUuid());
+            if (ingress != null) {
+                ingress.setSyncFlag(false);
+                if (csFirewallRule.getUuid().equals(ingress.getUuid())) {
+                    FirewallRules csFirewall = csFirewallRule;
+                    ingress.setUuid(csFirewall.getUuid());
+                    ingress.setProtocol(csFirewall.getProtocol());
+                    ingress.setDisplay(csFirewall.getDisplay());
+                    ingress.setSourceCIDR(csFirewall.getSourceCIDR());
+                    ingress.setState(csFirewall.getState());
+                    ingress.setStartPort(csFirewall.getStartPort());
+                    ingress.setEndPort(csFirewall.getEndPort());
+                    ingress.setIcmpCode(csFirewall.getIcmpCode());
+                    ingress.setIcmpMessage(csFirewall.getIcmpMessage());
+                    ingress.setPurpose(csFirewall.getPurpose());
+                    ingress.setTrafficType(csFirewall.getTrafficType());
+                    ingress.setNetworkId(convertEntityService.getNetworkByUuid(csFirewall.getTransNetworkId()));
+                    ingress.setDepartmentId(convertEntityService
+                            .getNetworkById(convertEntityService.getNetworkByUuid(csFirewall.getTransNetworkId()))
+                            .getDepartmentId());
+                    ingress.setProjectId(convertEntityService
+                            .getNetworkById(convertEntityService.getNetworkByUuid(csFirewall.getTransNetworkId()))
+                            .getProjectId());
+                    ingress.setDomainId(convertEntityService
+                            .getNetworkById(convertEntityService.getNetworkByUuid(csFirewall.getTransNetworkId()))
+                            .getDomainId());
+                    ingress.setIsActive(csFirewall.getIsActive());
+                    ingress.setIpAddressId(ipService.findbyUUID(csFirewall.getTransIpaddressId()).getId());
+                    egressRuleService.update(ingress);
+                }
+            } else {
+                csFirewallRule.setNetworkId(convertEntityService.getNetworkByUuid(csFirewallRule.getTransNetworkId()));
+                csFirewallRule.setDepartmentId(convertEntityService
+                        .getNetworkById(convertEntityService.getNetworkByUuid(csFirewallRule.getTransNetworkId()))
+                        .getDepartmentId());
+                csFirewallRule.setProjectId(convertEntityService
+                        .getNetworkById(convertEntityService.getNetworkByUuid(csFirewallRule.getTransNetworkId()))
+                        .getProjectId());
+                csFirewallRule.setDomainId(convertEntityService
+                        .getNetworkById(convertEntityService.getNetworkByUuid(csFirewallRule.getTransNetworkId()))
+                        .getDomainId());
+                csFirewallRule.setIpAddressId(ipService.findbyUUID(csFirewallRule.getTransIpaddressId()).getId());
+                egressRuleService.save(csFirewallRule);
+            }
+        }
+
+    }
+
+    /**
+     * Sync with CloudStack server Ip address for sourcenat from Asynchronous Job.
+     *
+     * @param jobresult job result
+     * @param eventObject network event object
+     * @throws ApplicationException unhandled application errors
+     * @throws Exception cloudstack unhandled errors
+     */
+    public void asyncNat(JSONObject jobresult, JSONObject eventObject) throws ApplicationException, Exception {
+        if (eventObject.getString("commandEventType").equals("STATICNAT.DISABLE")) {
+            JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
+            IpAddress ipAddress = ipService.findbyUUID(json.getString("ipaddressid"));
+            if (ipAddress != null) {
+                ipAddress.setSyncFlag(false);
+                ipAddress.setIsStaticnat(false);
+                ipAddress.setVmInstanceId(null);
+                ipService.update(ipAddress);
+            }
+        }
+    }
+    /**
+     * Sync with CloudStack server Ip address from Asynchronous Job.
+     *
+     * @param jobresult job result
+     * @param eventObject network event object
+     * @throws ApplicationException unhandled application errors
+     * @throws Exception cloudstack unhandled errors
+     */
+    public void asyncIpAddress(JSONObject jobresult, JSONObject eventObject) throws ApplicationException, Exception {
+        if (eventObject.getString("commandEventType").equals("NET.IPASSIGN")) {
+            IpAddress ipaddress = IpAddress.convert(jobresult.getJSONObject("ipaddress"));
+            IpAddress persistIp = ipService.findbyUUID(ipaddress.getUuid());
+            if (persistIp != null) {
+                persistIp.setSyncFlag(false);
+                if (ipaddress.getUuid().equals(persistIp.getUuid())) {
+                    IpAddress csIp = ipaddress;
+                    persistIp.setUuid(csIp.getUuid());
+                    persistIp.setIsStaticnat(csIp.getIsStaticnat());
+                    persistIp.setVlan(csIp.getVlan());
+                    persistIp.setPublicIpAddress(csIp.getPublicIpAddress());
+                    persistIp.setDisplay(csIp.getDisplay());
+                    persistIp.setIsSourcenat(csIp.getIsSourcenat());
+                    persistIp.setState(IpAddress.State.ALLOCATED);
+                    persistIp.setIsActive(true);
+                    persistIp.setSyncFlag(false);
+                    persistIp.setNetworkId(convertEntityService.getNetworkByUuid(csIp.getTransNetworkId()));
+                    persistIp.setDepartmentId(convertEntityService
+                            .getNetworkById(convertEntityService.getNetworkByUuid(csIp.getTransNetworkId()))
+                            .getDepartmentId());
+                    persistIp.setProjectId(convertEntityService
+                            .getNetworkById(convertEntityService.getNetworkByUuid(csIp.getTransNetworkId()))
+                            .getProjectId());
+                    persistIp.setZoneId(convertEntityService
+                            .getNetworkById(convertEntityService.getNetworkByUuid(csIp.getTransNetworkId()))
+                            .getZoneId());
+                    persistIp.setDomainId(convertEntityService
+                            .getNetworkById(convertEntityService.getNetworkByUuid(csIp.getTransNetworkId()))
+                            .getDomainId());
+                    ipService.update(persistIp);
+                }
+            } else {
+                ipaddress.setState(IpAddress.State.ALLOCATED);
+                ipaddress.setIsActive(ipaddress.getIsActive());
+                ipaddress.setNetworkId(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()));
+                ipaddress.setDepartmentId(convertEntityService
+                        .getNetworkById(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()))
+                        .getDepartmentId());
+                ipaddress.setZoneId(convertEntityService
+                        .getNetworkById(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()))
+                        .getZoneId());
+                ipaddress.setProjectId(convertEntityService
+                        .getNetworkById(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()))
+                        .getProjectId());
+                ipaddress.setDomainId(convertEntityService
+                        .getNetworkById(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()))
+                        .getDomainId());
+                ipService.save(ipaddress);
+            }
+        }
+        if (eventObject.getString("commandEventType").equals("NET.IPRELEASE")) {
+            JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
+            IpAddress ipAddress = ipService.findbyUUID(json.getString("id"));
+            if (ipAddress != null) {
+                ipAddress.setSyncFlag(false);
+                ipService.softDelete(ipAddress);
             }
         }
 
@@ -658,6 +822,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             PortForwarding portForwarding = portForwardingService.findByUUID(json.getString("id"));
             portForwarding.setSyncFlag(false);
             portForwardingService.softDelete(portForwarding);
+
         }
 
     }
