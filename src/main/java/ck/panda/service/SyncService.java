@@ -213,6 +213,15 @@ public interface SyncService {
 
     /**
     *
+    * Sync with Cloud Server ingress fire wall rules.
+    *
+    * @throws ApplicationException unhandled application errors.
+    * @throws Exception unhandled errors.
+    */
+    void syncIngressFirewallRules() throws ApplicationException, Exception;
+
+    /**
+    *
     * Sync with Cloud Server IP Address list.
     *
     * @throws ApplicationException unhandled application errors.

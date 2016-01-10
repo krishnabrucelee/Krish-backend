@@ -144,6 +144,9 @@ public class EventTypes {
     /** Zones. */
     public static final String EVENT_ZONE = "ZONE.";
 
+    /** Zones. */
+    public static final String EVENT_NAT = "STATICNAT.";
+
     /** Nic. */
     public static final String EVENT_NIC = "NIC.";
 
@@ -153,8 +156,11 @@ public class EventTypes {
     /** VPC. */
     public static final String EVENT_VPC = "VPC.";
 
-    /** VPC. */
+    /** FIREWALL. */
     public static final String EVENT_FIREWALL = "FIREWALL.";
+
+    /** NET IP. */
+    public static final String EVENT_NET = "NET.IP";
 
     /** vm snapshot events. */
     public static final String EVENT_VM_SNAPSHOT = "VMSNAPSHOT.";
@@ -217,6 +223,6 @@ public class EventTypes {
     public static final String EVENT_READY = "Ready";
 
     /** PortForwarding rule add events. */
-    public static final String EVENT_PORTFORWARDING_RULE = "NET.";
+    public static final String EVENT_PORTFORWARDING_RULE = "NET.RULE";
 
 }

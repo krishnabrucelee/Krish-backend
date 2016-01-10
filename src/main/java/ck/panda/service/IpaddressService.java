@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.IpAddress;
+import ck.panda.domain.entity.IpAddress.State;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
@@ -32,13 +33,23 @@ public interface IpaddressService extends CRUDService<IpAddress> {
     IpAddress softDelete(IpAddress ipaddress) throws Exception;
 
     /**
-     * List by network acquired to ipaddress.
+     * List by network ipaddress.
      *
      * @param networkId network id.
      * @return list of ipaddresses.
      * @throws Exception exception
      */
     List<IpAddress> findByNetwork(Long networkId) throws Exception;
+
+    /**
+     * List by state based ipaddress.
+     *
+     * @param state state of ipaddress.
+     * @param isActive active/inactive.
+     * @return list of ipaddresses.
+     * @throws Exception exception
+     */
+    List<IpAddress> findByStateAndActive(State state, Boolean isActive) throws Exception;
 
     /**
      * Find all ipaddress from CloudStack.
@@ -65,6 +76,26 @@ public interface IpaddressService extends CRUDService<IpAddress> {
      * @throws Exception if error occurs.
      */
     IpAddress dissocitateIpAddress(IpAddress ipAddress) throws Exception;
+
+    /**
+     * Enable static NAT for IP address.
+     *
+     * @param ipAddress to be dissociated.
+     * @param vmId virtual machine id.
+     * @param ipaddress guest ipaddress.
+     * @return ip address.
+     * @throws Exception if error occurs.
+     */
+    IpAddress enableStaticNat(Long ipAddressId, Long vmId, String ipaddress) throws Exception;
+
+    /**
+     * Disable static NAT for IP address.
+     *
+     * @param ipAddress to be dissociated.
+     * @return ip address.
+     * @throws Exception if error occurs.
+     */
+    IpAddress disableStaticNat(Long ipAddressId) throws Exception;
 
     /**
      * Acquire IP address.

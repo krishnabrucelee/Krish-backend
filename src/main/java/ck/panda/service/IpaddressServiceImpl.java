@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.IpAddress.State;
 import ck.panda.domain.entity.Network;
+import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.repository.jpa.IpaddressRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackAddressService;
@@ -19,7 +20,6 @@ import ck.panda.util.ConfigUtil;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
-import ck.panda.util.error.exception.ApplicationException;
 
 /**
  * IpAddress service implementation class.
@@ -65,13 +65,15 @@ public class IpaddressServiceImpl implements IpaddressService {
         configServer.setUserServer();
         Network network = convertEntityService.getNetworkById(networkId);
         HashMap<String, String> ipMap = new HashMap<String, String>();
-        ipMap.put("domainid", domainService.find(Long.parseLong(tokenDetails.getTokenDetails("domainid"))).getUuid());
+        ipMap.put("domainid", network.getDomain().getUuid());
         if (network.getProjectId() != null) {
             ipMap.put("projectid", convertEntityService.getProjectById(network.getProjectId()).getUuid());
         } else {
             ipMap.put("account", departmentService
                     .find(convertEntityService.getDepartmentById(network.getDepartmentId()).getId()).getUserName());
         }
+        ipMap.put("zoneid", network.getZone().getUuid());
+        ipMap.put("networkid", network.getUuid());
         String associatedResponse = csipaddressService.associateIpAddress("json", ipMap);
         JSONObject csassociatedIPResponseJSON = new JSONObject(associatedResponse)
                 .getJSONObject("associateipaddressresponse");
@@ -126,13 +128,18 @@ public class IpaddressServiceImpl implements IpaddressService {
 
     @Override
     public IpAddress softDelete(IpAddress ipaddress) throws Exception {
+        if(!ipaddress.getSyncFlag()){
         ipaddress.setIsActive(false);
+        ipaddress.setState(IpAddress.State.FREE);
+        } else {
+            ipaddress = this.dissocitateIpAddress(ipaddress);
+        }
         return ipRepo.save(ipaddress);
     }
 
     @Override
     public List<IpAddress> findByNetwork(Long networkId) throws Exception {
-        return null;
+        return ipRepo.findByNetwork(networkId, State.ALLOCATED);
     }
 
     @Override
@@ -189,22 +196,83 @@ public class IpaddressServiceImpl implements IpaddressService {
 
     @Override
     public IpAddress dissocitateIpAddress(IpAddress ipAddress) throws Exception {
-        ipAddress.setIsActive(false);
-        ipAddress.setState(State.FREE);
-        configServer.setUserServer();
-        String deleteResponse = csipaddressService.disassociateIpAddress(ipAddress.getUuid(), "json");
-        JSONObject jobId = new JSONObject(deleteResponse).getJSONObject("disassociateipaddressresponse");
-        if (jobId.has("jobid")) {
-            String jobResponse = csipaddressService.associatedJobResult(jobId.getString("jobid"), "json");
-            JSONObject jobresults = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+        try {
+            ipAddress.setIsActive(false);
+            ipAddress.setState(State.FREE);
+            configServer.setUserServer();
+            String deleteResponse = csipaddressService.disassociateIpAddress(ipAddress.getUuid(), "json");
+            JSONObject jobId = new JSONObject(deleteResponse).getJSONObject("disassociateipaddressresponse");
+            if (jobId.has("errorcode")) {
+                Errors errors = validator.sendGlobalError(jobId.getString("errortext"));
+                if (errors.hasErrors()) {
+                    throw new BadCredentialsException(jobId.getString("errortext"));
+                }
+            }
+            if (jobId.has("jobid")) {
+                String jobResponse = csipaddressService.associatedJobResult(jobId.getString("jobid"), "json");
+                JSONObject jobresults = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+            }
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException(e.getMessage());
         }
         return ipRepo.save(ipAddress);
     }
 
     @Override
-    public IpAddress save(IpAddress t) throws Exception {
-        // TODO Auto-generated method stub
-        return null;
+    public IpAddress save(IpAddress ipAddress) throws Exception {
+        return ipRepo.save(ipAddress);
+    }
+
+    @Override
+    public IpAddress enableStaticNat(Long ipAddressId, Long vmId, String ipAddress) throws Exception {
+        IpAddress ipaddress = ipRepo.findOne(ipAddressId);
+        String vmid = null;
+        if(convertEntityService.getVmInstanceById(vmId) != null) {
+        ipaddress.setVmInstanceId(vmId);
+        vmid = convertEntityService.getVmInstanceById(vmId).getUuid();
+        }
+        try {
+            HashMap<String, String> ipMap = new HashMap<String, String>();
+            configServer.setUserServer();
+            ipMap.put("vmguestip", ipAddress);
+            String enableResponse = csipaddressService.enableStaticNat(ipaddress.getUuid(), vmid, ipMap);
+            JSONObject jobId = new JSONObject(enableResponse).getJSONObject("enablestaticnatresponse");
+            if (jobId.has("errorcode")) {
+                Errors errors = validator.sendGlobalError(jobId.getString("errortext"));
+                if (errors.hasErrors()) {
+                    throw new BadCredentialsException(jobId.getString("errortext"));
+                }
+            } else {
+                ipaddress.setIsStaticnat(true);
+            }
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException(e.getMessage());
+        }
+        return ipRepo.save(ipaddress);
+    }
+
+    @Override
+    public IpAddress disableStaticNat(Long ipAddressId) throws Exception {
+        IpAddress ipaddress = ipRepo.findOne(ipAddressId);
+        try {
+            configServer.setUserServer();
+            String disableResponse = csipaddressService.disableStaticNat(ipaddress.getUuid());
+            JSONObject jobId = new JSONObject(disableResponse).getJSONObject("disablestaticnatresponse");
+            if (jobId.has("errorcode")) {
+                Errors errors = validator.sendGlobalError(jobId.getString("errortext"));
+                if (errors.hasErrors()) {
+                    throw new BadCredentialsException(jobId.getString("errortext"));
+                }
+            }
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException(e.getMessage());
+        }
+        return ipaddress;
+    }
+
+    @Override
+    public List<IpAddress> findByStateAndActive(State state, Boolean isActive) throws Exception {
+       return ipRepo.findAllByIsActiveAndState(state, isActive);
     }
 
 }

@@ -44,6 +44,44 @@ public class CloudStackAddressService {
         return server.request(arguments);
     }
 
+
+    /**
+     * Disables static rule for given ip address.
+     *
+     * @param ipAddressId ipaddress id.
+     * @return disable static nat.
+     * @throws Exception unhandled errors.
+     */
+    public String  disableStaticNat(String ipAddressId)
+            throws Exception {
+        LinkedList<NameValuePair> arguments
+                = server.getDefaultQuery("disableStaticNat", null);
+        arguments.add(new NameValuePair("ipaddressid", ipAddressId));
+        arguments.add(new NameValuePair("response", "json"));
+        return server.request(arguments);
+    }
+
+    /**
+     * Enables static nat for given ip address.
+     *
+     * @param ipAddressId the public IP address id for which static nat feature
+     *                    is being enabled
+     * @param virtualMachineId the ID of the virtual machine for enabling static
+     *        nat feature
+     * @param optional additional parameters
+     * @return enable static nat.
+     * @throws Exception unhandled errors.
+     */
+    public String enableStaticNat(String ipAddressId, String virtualMachineId, HashMap<String, String> optional)
+            throws Exception {
+        LinkedList<NameValuePair> arguments
+                = server.getDefaultQuery("enableStaticNat", optional);
+        arguments.add(new NameValuePair("ipaddressid", ipAddressId));
+        arguments.add(new NameValuePair("virtualmachineid", virtualMachineId));
+        arguments.add(new NameValuePair("response", "json"));
+        return server.request(arguments);
+    }
+
     /**
      * Disassociates an ip address from the account.
      *
