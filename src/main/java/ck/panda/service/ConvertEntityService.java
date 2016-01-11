@@ -20,6 +20,7 @@ import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.entity.Zone;
 
 /**
@@ -112,6 +113,10 @@ public class ConvertEntityService {
     /** Service reference to IpAddress. */
     @Autowired
     private IpaddressService ipAddressService;
+
+    /** Service reference to VmIpAddress. */
+    @Autowired
+    private VmIpaddressService vmIpAddressService;
 
     /** Service reference to Port Forwarding. */
     @Autowired
@@ -402,6 +407,17 @@ public class ConvertEntityService {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Get vm Ip address object.
+     *
+     * @param id of ip address.
+     * @return vm ipaddress.
+     * @throws Exception unhandled exception.
+     */
+    public VmIpaddress getVmIpaddressById(Long id) throws Exception {
+        return vmIpAddressService.findById(id);
     }
 
     /**
