@@ -174,13 +174,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 asyncNat(jobresult, eventObject);
             }
             break;
-        case EventTypes.EVENT_NET:
-            if (eventObject.getString("commandEventType").contains("NET")) {
-                LOGGER.debug("NET IP sync",
-                        eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
-                asyncIpAddress(jobresult, eventObject);
-            }
-            break;
         case EventTypes.EVENT_TEMPLATE:
             LOGGER.debug("templates sync",
                     eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
@@ -194,7 +187,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             LOGGER.debug("NIC sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
             asyncNic(jobresult, eventObject);
             break;
-        case EventTypes.EVENT_PORTFORWARDING_RULE:
+        case EventTypes.EVENT_PORTFORWARDING:
             LOGGER.debug("NET sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
             asyncNet(jobresult, eventObject);
             break;
@@ -823,6 +816,11 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             portForwarding.setSyncFlag(false);
             portForwardingService.softDelete(portForwarding);
 
+        }
+
+        if (eventObject.getString("commandEventType").equals("NET.IPASSIGN") ||
+                eventObject.getString("commandEventType").equals("NET.IPRELEASE")) {
+            asyncIpAddress(jobresult, eventObject);
         }
 
     }
