@@ -222,6 +222,9 @@ public class EventTypes {
     /** State of snapshot. */
     public static final String EVENT_READY = "Ready";
 
+    /** PortForwarding events. */
+    public static final String EVENT_PORTFORWARDING = "NET.";
+
     /** PortForwarding rule add events. */
     public static final String EVENT_PORTFORWARDING_RULE = "NET.RULE";
 
