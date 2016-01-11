@@ -290,13 +290,14 @@ public class NicServiceImpl implements NicService {
             for (int i = 0, size = nicListJSON.length(); i < size; i++) {
                 // 2.1 Call convert by passing JSONObject to nic entity and Add
                 // the converted nic entity to list
-                System.out.println(nicListJSON.getJSONObject(i));
                 if( nicListJSON.getJSONObject(i).has("secondaryip")){
                         JSONArray secondaryIpJSON = nicListJSON.getJSONObject(i).getJSONArray("secondaryip");
                         for (int j = 0, sizes = secondaryIpJSON.length(); j < sizes; j++) {
                             VmIpaddress vmIp = VmIpaddress.convert(secondaryIpJSON.getJSONObject(j));
-                            if(vmIp.getUuid() == vmIpService.findByUUID(secondaryIpJSON.getJSONObject(j).getString("id")).getUuid()){
+                            if(vmIpService.findByUUID(secondaryIpJSON.getJSONObject(j).getString("id")) != null) {
+                                if(vmIp.getUuid().equals(vmIpService.findByUUID(secondaryIpJSON.getJSONObject(j).getString("id")).getUuid())){
                                 vmIpService.update(vmIp);
+                                }
                             }
                             vmIpList.add(vmIp);
                             vmIpService.save(vmIp);
