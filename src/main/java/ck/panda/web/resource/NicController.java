@@ -110,7 +110,6 @@ public class NicController extends CRUDController<Nic> implements ApiController 
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<Nic> listByInstance(@RequestParam("instanceid") Long instanceId) throws Exception {
-        System.out.println(instanceId);
         return nicOfferingService.findByInstance(instanceId);
     }
 

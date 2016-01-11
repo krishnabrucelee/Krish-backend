@@ -216,6 +216,26 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 // hash using uuid
                 if (vmInstance.getUuid().equals(instance.getUuid())) {
                     VmInstance csVm = vmInstance;
+                    if (csVm != null) {
+                        if (volumeService.findByInstanceAndVolumeType(instance.getId()) != null) {
+                            csVm.setVolumeSize(volumeService.findByInstanceAndVolumeType(instance.getId()).getDiskSize());
+                        }
+                    }
+                    csVm.setDomainId(convertEntityService.getDomainId(csVm.getTransDomainId()));
+                    csVm.setZoneId(convertEntityService.getZoneId(csVm.getTransZoneId()));
+                    csVm.setNetworkId(convertEntityService.getNetworkId(csVm.getTransNetworkId()));
+                    csVm.setProjectId(convertEntityService.getProjectId(csVm.getTransProjectId()));
+                    csVm.setHostId(convertEntityService.getHostId(csVm.getTransHostId()));
+                    csVm.setInstanceOwnerId(convertEntityService.getUserByName(csVm.getTransDisplayName(),
+                            convertEntityService.getDomain(csVm.getTransDomainId())));
+                    csVm.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
+                            csVm.getTransDepartmentId(), convertEntityService.getDomain(csVm.getTransDomainId())));
+                    csVm.setTemplateId(convertEntityService.getTemplateId(csVm.getTransTemplateId()));
+                    csVm.setComputeOfferingId(convertEntityService.getComputeOfferId(csVm.getTransComputeOfferingId()));
+                    if (csVm.getHostId() != null) {
+                        csVm.setPodId(convertEntityService
+                                .getPodIdByHost(convertEntityService.getHostId(csVm.getTransHostId())));
+                    }
                     instance.setName(csVm.getName());
                     if (csVm.getCpuCore() != null) {
                         instance.setCpuCore(csVm.getCpuCore());
@@ -315,6 +335,11 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             if (eventObject.getString("commandEventType").equals(EventTypes.EVENT_VM_CREATE)) {
                 this.assignNicTovM(vmIn);
                 this.assignVolumeTovM(vmIn);
+                if (volumeService.findByInstanceAndVolumeType(vmIn.getId()) != null) {
+                    vmIn.setVolumeSize(volumeService.findByInstanceAndVolumeType(vmIn.getId()).getDiskSize());
+                    vmIn = virtualMachineService.update(vmIn);
+                }
+
             }
         }
     }
