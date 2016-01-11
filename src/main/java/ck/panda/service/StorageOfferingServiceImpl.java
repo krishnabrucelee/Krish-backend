@@ -74,6 +74,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     @Override
     public StorageOffering update(StorageOffering storage) throws Exception {
         if (storage.getIsSyncFlag()) {
+            this.validateVolumeUniqueness(storage);
             Errors errors = validator.rejectIfNullEntity("storageOffering", storage);
             errors = validator.validateEntity(storage, errors);
 
