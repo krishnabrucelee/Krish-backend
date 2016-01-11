@@ -144,6 +144,9 @@ public class Host {
 
         /** Host will be get disconnected. */
         DISCONNECTED,
+
+        /** Host will be down.*/
+        DOWN
     }
 
     /**
