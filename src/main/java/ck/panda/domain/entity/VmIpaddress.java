@@ -9,8 +9,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.json.JSONObject;
 
@@ -35,9 +37,13 @@ public class VmIpaddress {
     @Column(name = "uuid")
     private String uuid;
 
+    /** Nic for an instance  */
+    @ManyToOne
+    private Nic nic;
+
     /** Net mask value of Network . */
-    @Column(name = "secondary_ipaddress")
-    private String secondaryIpAddress;
+    @Column(name = "guest_ipaddress")
+    private String guestIpAddress;
 
     /** Instance nic id. */
     @JoinColumn(name = "instance_id", referencedColumnName = "id", updatable = false, insertable = false)
@@ -47,6 +53,14 @@ public class VmIpaddress {
     /** Instance id for nic. */
     @Column(name = "instance_id")
     private Long vmInstanceId;
+
+    /** Is this secondary vm ipaddress is active. */
+    @Column(name = "is_Active")
+    private Boolean isActive;
+
+    /** Transient network of the instance. */
+    @Transient
+    private String transvmInstanceId;
 
     /**
      * Get the id of the vm Ip address.
@@ -121,21 +135,53 @@ public class VmIpaddress {
     }
 
     /**
-     * Get the secondaryIpAddress.
+     * Get the guestIpAddress.
      *
-     * @return the secondaryIpAddress
+     * @return the guestIpAddress
      */
-    public String getSecondaryIpAddress() {
-        return secondaryIpAddress;
+    public String getGuestIpAddress() {
+        return guestIpAddress;
     }
 
     /**
-     * Set the secondaryIpAddress.
+     * Set the guestIpAddress.
      *
-     * @param secondaryIpAddress to set
+     * @param guestIpAddress to set
      */
-    public void setSecondaryIpAddress(String secondaryIpAddress) {
-        this.secondaryIpAddress = secondaryIpAddress;
+    public void setGuestIpAddress(String guestIpAddress) {
+        this.guestIpAddress = guestIpAddress;
+    }
+
+    /**
+     * Get isActive.
+     *
+     * @return the isActive
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    /**
+     * Set the isActive.
+     *
+     * @param isActive to set
+     */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
+    /**
+     * @return the nic
+     */
+    public Nic getNic() {
+        return nic;
+    }
+
+    /**
+     * @param nic the nic to set
+     */
+    public void setNic(Nic nic) {
+        this.nic = nic;
     }
 
     /**
@@ -148,7 +194,7 @@ public class VmIpaddress {
     public static VmIpaddress convert(JSONObject jsonObject) throws Exception {
         VmIpaddress vm = new VmIpaddress();
         vm.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-        vm.setSecondaryIpAddress(JsonUtil.getStringValue(jsonObject, "ipaddress"));
+        vm.setGuestIpAddress(JsonUtil.getStringValue(jsonObject, "ipaddress"));
         return vm;
     }
         /**

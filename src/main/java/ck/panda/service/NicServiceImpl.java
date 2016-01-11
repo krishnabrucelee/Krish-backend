@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Nic;
@@ -285,21 +286,30 @@ public class NicServiceImpl implements NicService {
             // 1. Get the list of nics from CS server using CS connector
             String response = cloudStackNicService.listNics(nicMap, "json");
             JSONArray nicListJSON = new JSONObject(response).getJSONObject("listnicsresponse").getJSONArray("nic");
-            JSONArray secondaryIpJSON = new JSONObject(response).getJSONObject("listnicsresponse").getJSONArray("secondaryip");
             // 2. Iterate the json list, convert the single json entity to nic
             for (int i = 0, size = nicListJSON.length(); i < size; i++) {
                 // 2.1 Call convert by passing JSONObject to nic entity and Add
                 // the converted nic entity to list
+                System.out.println(nicListJSON.getJSONObject(i));
+                if( nicListJSON.getJSONObject(i).has("secondaryip")){
+                        JSONArray secondaryIpJSON = nicListJSON.getJSONObject(i).getJSONArray("secondaryip");
+                        for (int j = 0, sizes = secondaryIpJSON.length(); j < sizes; j++) {
+                            VmIpaddress vmIp = VmIpaddress.convert(secondaryIpJSON.getJSONObject(j));
+                            if(vmIp.getUuid() == vmIpService.findByUUID(secondaryIpJSON.getJSONObject(j).getString("id")).getUuid()){
+                                vmIpService.update(vmIp);
+                            }
+                            vmIpList.add(vmIp);
+                            vmIpService.save(vmIp);
+                        }
+                }
                 Nic nic = Nic.convert(nicListJSON.getJSONObject(i));
-                VmIpaddress vmIp = VmIpaddress.convert(secondaryIpJSON.getJSONObject(i));
                 nic.setVmInstanceId(convertEntityService.getVmInstanceId(nic.getTransvmInstanceId()));
                 nic.setNetworkId(convertEntityService.getNetworkId(nic.getTransNetworkId()));
                 nicList.add(nic);
-                vmIpList.add(vmIp);
             }
-        }
+           }
         return nicList;
-    }
+        }
 
     @Override
     public Nic updatebyResourceState(Nic nic) throws Exception {
@@ -337,14 +347,36 @@ public class NicServiceImpl implements NicService {
              if (jobresult.getString("jobstatus").equals("1")) {
                  VmIpaddress vm = new VmIpaddress();
                  vm.setUuid((String) csacquireIPResponseJSON.get("id"));
-                 vm.setSecondaryIpAddress(((String) jobresult.get("ipaddress")));
-                 vm.setVmInstanceId((Long)(jobresult.get("virtualmachineid")));
+                 vm.setGuestIpAddress(((String) jobresult.get("ipaddress")));
                  vmIpService.save(vm);
             }
          }
         return nic;
     }
 
+    @Override
+    public Nic releaseSecondaryIP(Nic nic, Long vmIpaddressId)throws Exception {
+         try {
+             VmIpaddress vm = convertEntityService.getVmIpaddressById(vmIpaddressId);
+             vm.setIsActive(false);
+             configServer.setUserServer();
+             String deleteResponse = cloudStackNicService.removeIpFromNic(vm.getUuid(), "json");
+             JSONObject jobId = new JSONObject(deleteResponse).getJSONObject("removeipfromnicresponse");
+             if (jobId.has("errorcode")) {
+                 Errors errors = validator.sendGlobalError(jobId.getString("errortext"));
+                 if (errors.hasErrors()) {
+                     throw new BadCredentialsException(jobId.getString("errortext"));
+                 }
+             }
+             if (jobId.has("jobid")) {
+                 String jobResponse = cloudStackNicService.AcquireIpJobResult(jobId.getString("jobid"), "json");
+                 JSONObject jobresults = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+             }
+             } catch (BadCredentialsException e) {
+                 throw new BadCredentialsException(e.getMessage());
+         }
+        return nic;
+    }
     @Override
     public Nic findById(Long id) throws Exception {
         return nicRepo.findById(id);

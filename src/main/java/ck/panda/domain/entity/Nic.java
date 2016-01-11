@@ -4,12 +4,14 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -66,13 +68,8 @@ public class Nic {
     private Boolean isActive;
 
     /** Secondary ipAddress of the Nic. */
-    @JoinColumn(name = "vm_ipaddress_id", referencedColumnName = "Id", updatable = false, insertable = false)
-    @ManyToOne
-    private VmIpaddress vmIpAddress;
-
-    /** Secondary ipAddress Id of the Nic. */
-    @Column(name = "vm_ipaddress_id")
-    private Long vmIpAddressId;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<VmIpaddress> vmIpAddress;
 
     /** Network ip Address to establish a connection. */
     @Column(name = "ip_address")
@@ -238,40 +235,19 @@ public class Nic {
         this.networkId = networkId;
     }
 
+
     /**
-     * Get the the vmIpAddress.
-     *
      * @return the vmIpAddress
      */
-    public VmIpaddress getVmIpAddress() {
+    public List<VmIpaddress> getVmIpAddress() {
         return vmIpAddress;
     }
 
     /**
-     * Set the vmIpAddress.
-     *
-     * @param vmIpAddress  to set
+     * @param vmIpAddress the vmIpAddress to set
      */
-    public void setVmIpAddress(VmIpaddress vmIpAddress) {
+    public void setVmIpAddress(List<VmIpaddress> vmIpAddress) {
         this.vmIpAddress = vmIpAddress;
-    }
-
-    /**
-     * Get the vmIpAddressId.
-     *
-     * @return the vmIpAddressId
-     */
-    public Long getVmIpAddressId() {
-        return vmIpAddressId;
-    }
-
-    /**
-     * Set the vmIpAddressId.
-     *
-     * @param vmIpAddressId  to set
-     */
-    public void setVmIpAddressId(Long vmIpAddressId) {
-        this.vmIpAddressId = vmIpAddressId;
     }
 
     /**

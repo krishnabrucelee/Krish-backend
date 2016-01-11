@@ -84,4 +84,13 @@ public interface NicService extends CRUDService<Nic> {
      */
     Nic findById(Long id) throws Exception;
 
+    /**
+     * Relase vm instance secondary Ip
+     *
+     * @param vmIpaddressId of nic.
+     * @return
+     * @throws Exception if error occurs.
+     */
+    Nic releaseSecondaryIP(Nic nic, Long vmIpaddressId) throws Exception;
+
 }

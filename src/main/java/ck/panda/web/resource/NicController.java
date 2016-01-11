@@ -121,5 +121,12 @@ public class NicController extends CRUDController<Nic> implements ApiController 
         return nicOfferingService.acquireSecondaryIP(nic);
     }
 
+    @RequestMapping(value = "/release", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public Nic ReleaseSecondaryIp(@RequestBody Nic nic, @RequestParam("VmIpaddress") Long vmIpaddressId) throws Exception {
+        return nicOfferingService.releaseSecondaryIP(nic, vmIpaddressId);
+    }
 
-}
+ }
+
