@@ -109,7 +109,6 @@ public class NicServiceImpl implements NicService {
               }
               return nic;
           } else {
-              System.out.println(nic.getVmIpAddress());
               return nicRepo.save(nic);
           }
     }
@@ -210,7 +209,6 @@ public class NicServiceImpl implements NicService {
                 }
             }
         }
-        System.out.println(nic.getVmIpAddress());
         return nicRepo.save(nic);
     }
 
