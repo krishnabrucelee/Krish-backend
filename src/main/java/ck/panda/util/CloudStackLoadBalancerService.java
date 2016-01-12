@@ -275,8 +275,8 @@ public class CloudStackLoadBalancerService {
             throws Exception {
 
         LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("listVirtualMachines", optional);
-        arguments.add(new NameValuePair("lbruleid", lbRuleId));
+                = server.getDefaultQuery("listLoadBalancerRuleInstances", optional);
+        arguments.add(new NameValuePair("id", lbRuleId));
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
         return  responseDocument;

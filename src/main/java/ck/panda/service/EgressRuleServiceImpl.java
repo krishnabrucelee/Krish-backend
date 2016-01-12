@@ -196,7 +196,7 @@ public class EgressRuleServiceImpl implements EgressRuleService {
                 for (int i = 0, size = egressListJSON.length(); i < size; i++) {
                     // 2.1 Call convert by passing JSONObject to nic entity and Add
                     // the converted nic entity to list
-                    FirewallRules egress = FirewallRules.convert(egressListJSON.getJSONObject(i), TrafficType.EGRESS);
+                    FirewallRules egress = FirewallRules.convert(egressListJSON.getJSONObject(i), TrafficType.EGRESS, FirewallRules.Purpose.FIREWALL);
                     egress.setNetworkId(convertEntityService.getNetworkByUuid(egress.getTransNetworkId()));
                     egress.setDepartmentId(convertEntityService
                             .getNetworkById(convertEntityService.getNetworkByUuid(egress.getTransNetworkId()))
@@ -248,7 +248,7 @@ public class EgressRuleServiceImpl implements EgressRuleService {
                 for (int i = 0, size = ingressListJSON.length(); i < size; i++) {
                     // 2.1 Call convert by passing JSONObject to firewalls entity and Add
                     // the converted firewalls entity to list
-                    FirewallRules ingress = FirewallRules.convert(ingressListJSON.getJSONObject(i), TrafficType.INGRESS);
+                    FirewallRules ingress = FirewallRules.convert(ingressListJSON.getJSONObject(i), TrafficType.INGRESS, FirewallRules.Purpose.FIREWALL);
                     ingress.setNetworkId(convertEntityService.getNetworkByUuid(ingress.getTransNetworkId()));
                     ingress.setDepartmentId(convertEntityService
                             .getNetworkById(convertEntityService.getNetworkByUuid(ingress.getTransNetworkId()))

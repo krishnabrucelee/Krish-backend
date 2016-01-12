@@ -6,8 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-
-import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.PortForwarding;
 
 /**
@@ -50,8 +48,7 @@ public interface PortForwardingRepository extends PagingAndSortingRepository<Por
      * Find all by network and status active or inactive with pagination.
      *
      * @param pageable to get the list with pagination.
-     * @param networkid network's id.
-     * @param trafficType traffic type.
+     * @param ipAddressId ip address id id.
      * @param isActive get the snapshot list based on active/inactive status.
      * @return list of firewall rule.
      */

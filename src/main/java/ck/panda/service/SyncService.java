@@ -238,4 +238,13 @@ public interface SyncService {
     */
     void syncPortForwarding() throws ApplicationException, Exception;
 
+    /**
+    *
+    * Sync with Cloud Server Load Balancer list.
+    *
+    * @throws ApplicationException unhandled application errors.
+    * @throws Exception unhandled errors.
+    */
+    void syncLoadBalancer() throws ApplicationException, Exception;
+
 }
