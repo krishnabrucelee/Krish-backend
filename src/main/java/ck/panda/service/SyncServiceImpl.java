@@ -1848,8 +1848,8 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.debug("Total rows updated : " + (appSSHKeyList.size()));
             // 3.1 Find the corresponding CS server region object by finding it
             // in a hash using uuid
-            if (csSSHkeyMap.containsKey(sshKey.getName())) {
-                SSHKey csSSHKey = csSSHkeyMap.get(sshKey.getName());
+            if (csSSHkeyMap.containsKey(sshKey.getDepartmentId())) {
+                SSHKey csSSHKey = csSSHkeyMap.get(sshKey.getDepartment().getUuid());
 
                 sshKey.setName(csSSHKey.getName());
 
@@ -1858,7 +1858,7 @@ public class SyncServiceImpl implements SyncService {
 
                 // 3.3 Remove once updated, so that we can have the list of cs
                 // region which is not added in the app
-                csSSHkeyMap.remove(sshKey.getName());
+                csSSHkeyMap.remove(sshKey.getDepartment().getUuid());
             } else {
                 sshKeyService.delete(sshKey);
             }
@@ -2138,14 +2138,6 @@ public class SyncServiceImpl implements SyncService {
                     }
                 }
             } else {
-                List<Permission> newList = PermissionUtil.updatePermissions(instance, storage, network, sshkey,
-                        quatoLimit, vpc, template, additionalServive, project, application, department, roles, user,
-                        report);
-
-                newList.removeAll(existPermissionList);
-                for (Permission permission : newList) {
-                    permissionService.save(permission);
-                }
                 for (Department department : departmnetList) {
                     Role role = roleService.findByName("FULL_PERMISSION", department.getId());
                     if (role != null) {
