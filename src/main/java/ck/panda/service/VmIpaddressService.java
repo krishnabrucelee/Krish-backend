@@ -31,4 +31,13 @@ public interface VmIpaddressService extends CRUDService<VmIpaddress> {
      */
     VmIpaddress findByUUID(String uuid) throws Exception;
 
+    /**
+     * Soft delete for vm Ip address
+     *
+     * @param vmIpaddress object.
+     * @return vm Ip address.
+     * @throws Exception if error occurs.
+     */
+    VmIpaddress softDelete(VmIpaddress vmIpaddress) throws Exception;
+
 }

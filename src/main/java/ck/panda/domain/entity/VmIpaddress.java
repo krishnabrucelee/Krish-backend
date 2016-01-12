@@ -195,6 +195,7 @@ public class VmIpaddress {
         VmIpaddress vm = new VmIpaddress();
         vm.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
         vm.setGuestIpAddress(JsonUtil.getStringValue(jsonObject, "ipaddress"));
+        vm.setIsActive(true);
         return vm;
     }
         /**

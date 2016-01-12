@@ -7,15 +7,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.repository.jpa.VmIpaddressRepository;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
  * VmIpaddress service implementation class.
- *
  */
 @Service
 public class VmIpaddressServiceImpl implements VmIpaddressService {
@@ -77,5 +74,11 @@ public class VmIpaddressServiceImpl implements VmIpaddressService {
     @Override
     public VmIpaddress findByUUID(String uuid) throws Exception {
         return ipaddressRepo.findByUUID(uuid);
+    }
+
+    @Override
+    public VmIpaddress softDelete(VmIpaddress vmIpaddress) throws Exception {
+        vmIpaddress.setIsActive(false);
+         return ipaddressRepo.save(vmIpaddress);
     }
 }

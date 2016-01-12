@@ -109,6 +109,7 @@ public class NicServiceImpl implements NicService {
               }
               return nic;
           } else {
+              System.out.println(nic.getVmIpAddress());
               return nicRepo.save(nic);
           }
     }
@@ -209,6 +210,7 @@ public class NicServiceImpl implements NicService {
                 }
             }
         }
+        System.out.println(nic.getVmIpAddress());
         return nicRepo.save(nic);
     }
 
@@ -278,7 +280,6 @@ public class NicServiceImpl implements NicService {
     public List<Nic> findAllFromCSServer() throws Exception {
         List<VmInstance> vmInstanceList = virtualmachinerepository.findAllByIsActive(VmInstance.Status.Expunging);
         List<Nic> nicList = new ArrayList<Nic>();
-        List<VmIpaddress> vmIpList = new ArrayList<VmIpaddress>();
         LOGGER.debug("VM size" + vmInstanceList.size());
         for (VmInstance vm : vmInstanceList) {
             HashMap<String, String> nicMap = new HashMap<String, String>();
@@ -288,24 +289,32 @@ public class NicServiceImpl implements NicService {
             JSONArray nicListJSON = new JSONObject(response).getJSONObject("listnicsresponse").getJSONArray("nic");
             // 2. Iterate the json list, convert the single json entity to nic
             for (int i = 0, size = nicListJSON.length(); i < size; i++) {
+                 List<VmIpaddress> vmIpList = new ArrayList<VmIpaddress>();
                 // 2.1 Call convert by passing JSONObject to nic entity and Add
                 // the converted nic entity to list
-                if( nicListJSON.getJSONObject(i).has("secondaryip")){
+                if (nicListJSON.getJSONObject(i).has("secondaryip")) {
                         JSONArray secondaryIpJSON = nicListJSON.getJSONObject(i).getJSONArray("secondaryip");
                         for (int j = 0, sizes = secondaryIpJSON.length(); j < sizes; j++) {
-                            VmIpaddress vmIp = VmIpaddress.convert(secondaryIpJSON.getJSONObject(j));
-                            if(vmIpService.findByUUID(secondaryIpJSON.getJSONObject(j).getString("id")) != null) {
-                                if(vmIp.getUuid().equals(vmIpService.findByUUID(secondaryIpJSON.getJSONObject(j).getString("id")).getUuid())){
-                                vmIpService.update(vmIp);
+                            JSONObject json = (JSONObject)secondaryIpJSON.get(j);
+                            VmIpaddress vmIp = VmIpaddress.convert(json);
+                            if (json.getString("id") != null) {
+                                if (vmIpService.findByUUID(json.getString("id")) != null){
+                                    if (vmIp.getUuid().equals(vmIpService.findByUUID(json.getString("id")).getUuid())) {
+                                    vmIpService.update(vmIpService.findByUUID(json.getString("id")));
                                 }
+                            } else{
+                                VmIpaddress guestIp = vmIpService.save(vmIp);
+                                vmIpList.add(guestIp);
                             }
-                            vmIpList.add(vmIp);
-                            vmIpService.save(vmIp);
+                            }
                         }
                 }
                 Nic nic = Nic.convert(nicListJSON.getJSONObject(i));
                 nic.setVmInstanceId(convertEntityService.getVmInstanceId(nic.getTransvmInstanceId()));
                 nic.setNetworkId(convertEntityService.getNetworkId(nic.getTransNetworkId()));
+                if (vmIpList.size() > 0) {
+                    nic.setVmIpAddress(vmIpList);
+                }
                 nicList.add(nic);
             }
            }
