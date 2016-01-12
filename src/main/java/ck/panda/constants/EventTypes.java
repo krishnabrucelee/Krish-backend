@@ -228,4 +228,7 @@ public class EventTypes {
     /** PortForwarding rule add events. */
     public static final String EVENT_PORTFORWARDING_RULE = "NET.RULE";
 
+    /** LoadBalancer events. */
+    public static final String EVENT_LOADBALANCER = "LB.";
+
 }

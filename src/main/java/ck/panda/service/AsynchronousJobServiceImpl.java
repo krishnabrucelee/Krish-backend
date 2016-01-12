@@ -18,8 +18,9 @@ import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.FirewallRules;
-import ck.panda.domain.entity.FirewallRules.State;
+import ck.panda.domain.entity.FirewallRules.Purpose;
 import ck.panda.domain.entity.IpAddress;
+import ck.panda.domain.entity.LoadBalancerRule;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.Nic;
@@ -29,6 +30,7 @@ import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
 import ck.panda.rabbitmq.util.ResponseEvent;
 import ck.panda.util.CloudStackInstanceService;
+import ck.panda.util.CloudStackLoadBalancerService;
 import ck.panda.util.CloudStackNetworkOfferingService;
 import ck.panda.util.CloudStackNicService;
 import ck.panda.util.CloudStackServer;
@@ -120,6 +122,14 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     @Autowired
     private PortForwardingService portForwardingService;
 
+    /** Service reference to Load Balancer. */
+    @Autowired
+    private LoadBalancerService loadBalancerService;
+
+    /** Cloud stack firewall service. */
+    @Autowired
+    private CloudStackLoadBalancerService cloudStackLoadBalancerService;
+
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
@@ -190,6 +200,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         case EventTypes.EVENT_PORTFORWARDING:
             LOGGER.debug("NET sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
             asyncNet(jobresult, eventObject);
+            break;
+        case EventTypes.EVENT_LOADBALANCER:
+            LOGGER.debug("LB sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+            asyncLb(jobresult, eventObject);
             break;
         default:
             LOGGER.debug("No sync required",
@@ -473,7 +487,8 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      */
     public void asyncFirewall(JSONObject jobresult, JSONObject eventObject) throws ApplicationException, Exception {
         if (eventObject.getString("commandEventType").equals("FIREWALL.EGRESS.OPEN")) {
-            FirewallRules csFirewallRule = FirewallRules.convert(jobresult.getJSONObject("firewallrule"), FirewallRules.TrafficType.EGRESS);
+            FirewallRules csFirewallRule = FirewallRules.convert(jobresult.getJSONObject("firewallrule"),
+                    FirewallRules.TrafficType.EGRESS, FirewallRules.Purpose.FIREWALL);
             FirewallRules egress = egressRuleService.findByUUID(csFirewallRule.getUuid());
             if (egress != null) {
                 egress.setSyncFlag(false);
@@ -534,7 +549,8 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             }
         }
         if (eventObject.getString("commandEventType").equals("FIREWALL.OPEN")) {
-            FirewallRules csFirewallRule = FirewallRules.convert(jobresult.getJSONObject("firewallrule"), FirewallRules.TrafficType.INGRESS);
+            FirewallRules csFirewallRule = FirewallRules.convert(jobresult.getJSONObject("firewallrule"),
+                    FirewallRules.TrafficType.INGRESS, FirewallRules.Purpose.FIREWALL);
             FirewallRules ingress = egressRuleService.findByUUID(csFirewallRule.getUuid());
             if (ingress != null) {
                 ingress.setSyncFlag(false);
@@ -832,22 +848,146 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             portForwarding.setIpAddressId(convertEntityService.getIpAddressId(portForwarding.getTransIpAddressId()));
             if (portForwardingService.findByUUID(portForwarding.getUuid()) == null) {
                 portForwardingService.save(portForwarding);
+                firewallRules(jobresult, FirewallRules.Purpose.PORTFORWARDING);
             }
         }
 
         if (eventObject.getString("commandEventType").equals("NET.RULEDELETE")) {
             JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
             PortForwarding portForwarding = portForwardingService.findByUUID(json.getString("id"));
-            portForwarding.setSyncFlag(false);
-            portForwardingService.softDelete(portForwarding);
+            if (portForwarding != null) {
+                portForwarding.setSyncFlag(false);
+                portForwardingService.softDelete(portForwarding);
+            }
 
+            //Delete the port forwarding firewall rule
+            FirewallRules firewallRules = egressRuleService.findByUUID(json.getString("id"));
+            if (firewallRules != null) {
+                firewallRules.setSyncFlag(false);
+                egressRuleService.deleteFirewallIngressRule(firewallRules);
+            }
         }
 
-        if (eventObject.getString("commandEventType").equals("NET.IPASSIGN") ||
-                eventObject.getString("commandEventType").equals("NET.IPRELEASE")) {
+        if (eventObject.getString("commandEventType").equals("NET.IPASSIGN")
+                || eventObject.getString("commandEventType").equals("NET.IPRELEASE")) {
             asyncIpAddress(jobresult, eventObject);
         }
 
+    }
+
+    /**
+     * Sync with Cloud Server Network Load Balancer.
+     *
+     * @param jobresult job result
+     * @param eventObject Load Balancer event object
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    @SuppressWarnings("unused")
+    public void asyncLb(JSONObject jobresult, JSONObject eventObject) throws ApplicationException, Exception {
+
+        if (eventObject.getString("commandEventType").equals("LB.CREATE")) {
+            LoadBalancerRule loadBalancerRule = LoadBalancerRule.convert(jobresult.getJSONObject("loadbalancer"));
+            loadBalancerRule.setNetworkId(convertEntityService.getNetworkId(loadBalancerRule.getTransNetworkId()));
+            loadBalancerRule.setIpAddressId(convertEntityService.getIpAddressId(loadBalancerRule.getTransIpAddressId()));
+            loadBalancerRule.setZoneId(convertEntityService.getZoneId(loadBalancerRule.getTransZoneId()));
+            loadBalancerRule.setDomainId(convertEntityService.getDomainId(loadBalancerRule.getTransDomainId()));
+            if (loadBalancerService.findByUUID(loadBalancerRule.getUuid()) == null) {
+                loadBalancerService.save(loadBalancerRule);
+                firewallRules(jobresult, FirewallRules.Purpose.LOADBALANCING);
+            }
+        }
+
+        if (eventObject.getString("commandEventType").equals("LB.UPDATE")) {
+            LoadBalancerRule csLoadBalancer = LoadBalancerRule.convert(jobresult.getJSONObject("loadbalancer"));
+            LoadBalancerRule loadBalancer = loadBalancerService.findByUUID(csLoadBalancer.getUuid());
+            loadBalancer.setSyncFlag(false);
+            if (csLoadBalancer.getUuid().equals(loadBalancer.getUuid())) {
+                LoadBalancerRule csLb = csLoadBalancer;
+                loadBalancer.setName(csLb.getName());
+                loadBalancer.setAlgorithm(csLb.getAlgorithm());
+                loadBalancerService.update(loadBalancer);
+            }
+        }
+
+        if (eventObject.getString("commandEventType").equals("LB.ASSIGN.TO.RULE")
+                || eventObject.getString("commandEventType").equals("LB.REMOVE.FROM.RULE")) {
+            JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
+
+            LoadBalancerRule loadBalancer = loadBalancerService.findByUUID(json.getString("id"));
+            if (loadBalancer != null) {
+                HashMap<String, String> loadBalancerInstanceMap = new HashMap<String, String>();
+                loadBalancerInstanceMap.put("lbvmips", "true");
+                loadBalancerInstanceMap.put("listall", "true");
+                String response = cloudStackLoadBalancerService.listLoadBalancerRuleInstances(json.getString("id"), "json", loadBalancerInstanceMap);
+                JSONArray vmListJSON = null;
+                JSONObject responseObject = new JSONObject(response).getJSONObject("listloadbalancerruleinstancesresponse");
+                if (responseObject.has("lbrulevmidip")) {
+                    vmListJSON = responseObject.getJSONArray("lbrulevmidip");
+                    List<VmInstance> newVmInstance = new ArrayList<VmInstance>();
+                    for (int i = 0; i < vmListJSON.length(); i++) {
+                        VmInstance vmInstance = virtualMachineService.findByUUID(vmListJSON.getJSONObject(i).
+                                getJSONObject("loadbalancerruleinstance").getString("id"));
+                        newVmInstance.add(vmInstance);
+                    }
+                    loadBalancer.setVmInstanceList(newVmInstance);
+                } else {
+                    loadBalancer.setVmInstanceList(null);
+                }
+                loadBalancer.setSyncFlag(false);
+                loadBalancerService.update(loadBalancer);
+            }
+        }
+
+        if (eventObject.getString("commandEventType").equals("LB.DELETE")) {
+            JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
+            LoadBalancerRule loadBalancer = loadBalancerService.findByUUID(json.getString("id"));
+            if (loadBalancer != null) {
+                loadBalancer.setSyncFlag(false);
+                loadBalancer.setVmInstanceList(null);
+                loadBalancerService.softDelete(loadBalancer);
+            }
+
+            //Delete the load balancer firewall rule
+            FirewallRules firewallRules = egressRuleService.findByUUID(json.getString("id"));
+            if (firewallRules != null) {
+                firewallRules.setSyncFlag(false);
+                egressRuleService.deleteFirewallIngressRule(firewallRules);
+            }
+        }
+    }
+
+    /**
+     * Sync with Cloud Server Network Firewall Rules.
+     *
+     * @param jobresult job result
+     * @param purpose of the firewall
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    public void firewallRules(JSONObject jobresult, FirewallRules.Purpose purpose) throws ApplicationException, Exception {
+        FirewallRules csFirewallRule = null;
+        if (purpose == Purpose.LOADBALANCING) {
+            csFirewallRule = FirewallRules.convert(jobresult.getJSONObject("loadbalancer"),
+                null, purpose);
+        } else {
+            csFirewallRule = FirewallRules.convert(jobresult.getJSONObject("portforwardingrule"),
+                    null, purpose);
+        }
+        FirewallRules loadBalancer = egressRuleService.findByUUID(csFirewallRule.getUuid());
+        if (loadBalancer == null) {
+            csFirewallRule.setNetworkId(convertEntityService.getNetworkByUuid(csFirewallRule.getTransNetworkId()));
+            csFirewallRule.setDepartmentId(convertEntityService
+                    .getNetworkById(convertEntityService.getNetworkByUuid(csFirewallRule.getTransNetworkId()))
+                    .getDepartmentId());
+            csFirewallRule.setProjectId(convertEntityService
+                    .getNetworkById(convertEntityService.getNetworkByUuid(csFirewallRule.getTransNetworkId()))
+                    .getProjectId());
+            csFirewallRule.setDomainId(convertEntityService
+                    .getNetworkById(convertEntityService.getNetworkByUuid(csFirewallRule.getTransNetworkId()))
+                    .getDomainId());
+            egressRuleService.save(csFirewallRule);
+        }
     }
 
     /**

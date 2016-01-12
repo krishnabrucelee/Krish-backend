@@ -12,6 +12,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -46,6 +47,10 @@ public class LoadBalancerRule {
     @Column(name = "uuid")
     private String uuid;
 
+    /** Cloudstack's Firewall Rule name. */
+    @Column(name = "name")
+    private String name;
+
     /** Network for Firewall Rule. */
     @JoinColumn(name = "network_id", referencedColumnName = "id", updatable = false, insertable = false)
     @OneToOne
@@ -54,6 +59,19 @@ public class LoadBalancerRule {
     /** Network id for Firewall Rule. */
     @Column(name = "network_id")
     private Long networkId;
+
+    /** Zone for Firewall Rule. */
+    @JoinColumn(name = "zone_id", referencedColumnName = "id", updatable = false, insertable = false)
+    @OneToOne
+    private Zone zone;
+
+    /** Zone id for Firewall Rule. */
+    @Column(name = "zone_id")
+    private Long zoneId;
+
+    /** List of instance Class for an Load balancer. */
+    @ManyToMany
+    private List<VmInstance> vmInstanceList;
 
     /** Domain of the Firewall Rule. */
     @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
@@ -64,24 +82,6 @@ public class LoadBalancerRule {
     @Column(name = "domain_id")
     private Long domainId;
 
-    /** Project of the Firewall Rule. */
-    @JoinColumn(name = "project_id", referencedColumnName = "Id", updatable = false, insertable = false)
-    @ManyToOne
-    private Project project;
-
-    /** Project id of the Firewall Rule. */
-    @Column(name = "project_id")
-    private Long projectId;
-
-    /** Department of the Firewall Rule. */
-    @JoinColumn(name = "department_id", referencedColumnName = "Id", updatable = false, insertable = false)
-    @ManyToOne
-    private Department department;
-
-    /** Department id of the Firewall Rule. */
-    @Column(name = "department_id")
-    private Long departmentId;
-
     /** ipAddress of the Firewall Rule. */
     @JoinColumn(name = "ipaddress_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
@@ -91,13 +91,13 @@ public class LoadBalancerRule {
     @Column(name = "ipaddress_id")
     private Long ipAddressId;
 
-    /** Starting port of the firewall rule. */
-    @Column(name = "start_port")
-    private Integer startPort;
+    /** Private port of the firewall rule. */
+    @Column(name = "private_port")
+    private Integer privatePort;
 
-    /** Ending port of the firewall rule. */
-    @Column(name = "end_port")
-    private Integer endPort;
+    /** Public port of the firewall rule. */
+    @Column(name = "public_port")
+    private Integer publicPort;
 
     /** Error code for ICMP message. */
     @Column(name = "icmp_code")
@@ -138,6 +138,10 @@ public class LoadBalancerRule {
     @Enumerated(EnumType.STRING)
     private TrafficType trafficType;
 
+    /** Cloudstack's Firewall Rule algorithm. */
+    @Column(name = "algorithm")
+    private String algorithm;
+
     /** Is this firewall rule is active. */
     @Column(name = "is_Active")
     private Boolean isActive;
@@ -149,6 +153,22 @@ public class LoadBalancerRule {
     /** Transient network of the instance. */
     @Transient
     private String transNetworkId;
+
+    /** Transient zone of the instance. */
+    @Transient
+    private String transZoneId;
+
+    /** Transient id of the instance. */
+    @Transient
+    private String transvmInstanceId;
+
+    /** Transient id of the ipAddress. */
+    @Transient
+    private String transIpAddressId;
+
+    /** Transient id of the domain. */
+    @Transient
+    private String transDomainId;
 
     /** Created by user. */
     @CreatedBy
@@ -176,7 +196,6 @@ public class LoadBalancerRule {
 
     /** Different set of rules . */
     public enum Purpose {
-
         /** Firewall rule for network. */
         FIREWALL,
 
@@ -198,7 +217,6 @@ public class LoadBalancerRule {
 
     /** Types of protocol for an IP Address .*/
     public enum Protocol {
-
         /**  TCP enables two hosts to establish a connection and exchange streams of data. */
         TCP,
 
@@ -212,12 +230,16 @@ public class LoadBalancerRule {
         ALL
     }
 
+    /** Types of state for an firewall . */
     public enum State {
-        /** Egress rule in Active state */
+        /** Load Balance rule in Active state. */
         ACTIVE,
 
-        /** Egress rule in Staged state.*/
-        STAGED
+        /** Load Balance rule in Staged state.*/
+        STAGED,
+
+        /** Load Balance rule in ADD state. */
+        ADD
     }
 
     /**
@@ -257,6 +279,24 @@ public class LoadBalancerRule {
     }
 
     /**
+     * Get Firewall Rule Name.
+     *
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Set the Firewall Rule Name.
+     *
+     * @param name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
      * Get network of the Firewall Rule.
      *
      * @return the network
@@ -290,6 +330,60 @@ public class LoadBalancerRule {
      */
     public void setNetworkId(Long networkId) {
         this.networkId = networkId;
+    }
+
+    /**
+     * Get zone of the Firewall Rule.
+     *
+     * @return the zone
+     */
+    public Zone getZone() {
+        return zone;
+    }
+
+    /**
+     * Set the zone of the Firewall Rule.
+     *
+     * @param zone to set
+     */
+    public void setZone(Zone zone) {
+        this.zone = zone;
+    }
+
+    /**
+     * Get the zoneId of the Firewall Rule.
+     *
+     * @return the zoneId
+     */
+    public Long getZoneId() {
+        return zoneId;
+    }
+
+    /**
+     * Set the zoneId of the Firewall Rule.
+     *
+     * @param zoneId to set
+     */
+    public void setZoneId(Long zoneId) {
+        this.zoneId = zoneId;
+    }
+
+    /**
+     * Get the instance list.
+     *
+     * @return the instance list.
+     */
+    public List<VmInstance> getVmInstanceList() {
+        return vmInstanceList;
+    }
+
+    /**
+     * Set the instance list.
+     *
+     * @param vmInstanceList the instance list to set.
+     */
+    public void setVmInstanceList(List<VmInstance> vmInstanceList) {
+        this.vmInstanceList = vmInstanceList;
     }
 
     /**
@@ -329,75 +423,39 @@ public class LoadBalancerRule {
     }
 
     /**
-     * Get the department of the Firewall Rule.
+     * Get the private port.
      *
-     * @return the department
+     * @return the privatePort
      */
-    public Department getDepartment() {
-        return department;
+    public Integer getPrivatePort() {
+        return privatePort;
     }
 
     /**
-     * Set the department of the Firewall Rule.
+     * Set the private port .
      *
-     * @param department to set
+     * @param privatePort to set
      */
-    public void setDepartment(Department department) {
-        this.department = department;
+    public void setPrivatePort(Integer privatePort) {
+        this.privatePort = privatePort;
     }
 
     /**
-     * Get the departmentId of the Firewall Rule.
+     * Get the public port.
      *
-     * @return the departmentId
+     * @return the publicPort
      */
-    public Long getDepartmentId() {
-        return departmentId;
+    public Integer getPublicPort() {
+        return publicPort;
     }
 
     /**
-     * Set the departmentId of the Firewall Rule.
+     * Set the public port.
      *
-     * @param departmentId to set
+     * @param publicPort to set
      */
-    public void setDepartmentId(Long departmentId) {
-        this.departmentId = departmentId;
-    }
-
-    /**
-     * Get the startport.
-     *
-     * @return the startPort
-     */
-    public Integer getStartPort() {
-        return startPort;
-    }
-
-    /**
-     * Set the startPort .
-     *
-     * @param startPort to set
-     */
-    public void setStartPort(Integer startPort) {
-        this.startPort = startPort;
-    }
-
-    /**
-     * Get the endPort.
-     *
-     * @return the endPort
-     */
-    public Integer getEndPort() {
-        return endPort;
-    }
-
-    /**
-     * Set the endPort.
-     *
-     * @param endPort t to set
-     */
-    public void setEndPort(Integer endPort) {
-        this.endPort = endPort;
+    public void setPublicPort(Integer publicPort) {
+        this.publicPort = publicPort;
     }
 
     /**
@@ -563,48 +621,30 @@ public class LoadBalancerRule {
     }
 
     /**
-     * Get the project .
-     *
-     * @return the project
-     */
-    public Project getProject() {
-        return project;
-    }
-
-    /**
-     * Set the project.
-     *
-     * @param project to set
-     */
-    public void setProject(Project project) {
-        this.project = project;
-    }
-
-    /**
-     * Get the projectId .
-     *
-     * @return the projectId
-     */
-    public Long getProjectId() {
-        return projectId;
-    }
-
-    /**
-     * Set the projectId .
-     *
-     * @param projectId to set
-     */
-    public void setProjectId(Long projectId) {
-        this.projectId = projectId;
-    }
-
-    /**
      * Get the trafficType.
      *
      * @return the trafficType
      */
     public TrafficType getTrafficType() {
         return trafficType;
+    }
+
+    /**
+     * Get Firewall Rule Algorithm.
+     *
+     * @return the algorithm
+     */
+    public String getAlgorithm() {
+        return algorithm;
+    }
+
+    /**
+     * Set the Firewall Rule Algorithm.
+     *
+     * @param algorithm to set
+     */
+    public void setAlgorithm(String algorithm) {
+        this.algorithm = algorithm;
     }
 
     /**
@@ -689,6 +729,78 @@ public class LoadBalancerRule {
     }
 
     /**
+     * Get the Transient Zone Id.
+     *
+     * @return the transZoneId
+     */
+    public String getTransZoneId() {
+        return transZoneId;
+    }
+
+    /**
+     * Set the transZoneId .
+     *
+     * @param transZoneId to set
+     */
+    public void setTransZoneId(String transZoneId) {
+        this.transZoneId = transZoneId;
+    }
+
+    /**
+     * Get the Transient IP Address Id.
+     *
+     * @return the transIpAddressId
+     */
+    public String getTransIpAddressId() {
+        return transIpAddressId;
+    }
+
+    /**
+     * Set the transIpAddressId .
+     *
+     * @param transIpAddressId to set
+     */
+    public void setTransIpAddressId(String transIpAddressId) {
+        this.transIpAddressId = transIpAddressId;
+    }
+
+    /**
+     * Get the Transient domain Id.
+     *
+     * @return the transDomainId
+     */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
+
+    /**
+     * Set the transDomainId .
+     *
+     * @param transDomainId to set
+     */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
+
+    /**
+     * Get the Transient VM Instance Id.
+     *
+     * @return the transvmInstanceId
+     */
+    public String getTransvmInstanceId() {
+        return transvmInstanceId;
+    }
+
+    /**
+     * Set the transvmInstanceId .
+     *
+     * @param transvmInstanceId to set
+     */
+    public void setTransvmInstanceId(String transvmInstanceId) {
+        this.transvmInstanceId = transvmInstanceId;
+    }
+
+    /**
      * Get the createdBy user id.
      *
      * @return the createdBy
@@ -768,28 +880,34 @@ public class LoadBalancerRule {
      * @throws Exception unhandled errors.
      */
     public static LoadBalancerRule convert(JSONObject jsonObject) throws Exception {
-        LoadBalancerRule egress = new LoadBalancerRule();
-        egress.setSyncFlag(false);
-        egress.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-        egress.setProtocol(Protocol.valueOf(JsonUtil.getStringValue(jsonObject, "protocol").toUpperCase()));
-        egress.setDisplay(JsonUtil.getBooleanValue(jsonObject, "fordisplay"));
-        egress.setSourceCIDR(JsonUtil.getStringValue(jsonObject,"cidrlist"));
-        egress.setTransNetworkId((JsonUtil.getStringValue(jsonObject, "networkid")));
-        egress.setState(State.valueOf(JsonUtil.getStringValue(jsonObject,"state").toUpperCase()));
-        egress.setIsActive(true);
-        return egress;
+        LoadBalancerRule loadBalancer = new LoadBalancerRule();
+        loadBalancer.setSyncFlag(false);
+        loadBalancer.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
+        loadBalancer.setDisplay(JsonUtil.getBooleanValue(jsonObject, "fordisplay"));
+        loadBalancer.setSourceCIDR(JsonUtil.getStringValue(jsonObject,"cidrlist"));
+        loadBalancer.setState(State.valueOf(JsonUtil.getStringValue(jsonObject,"state").toUpperCase()));
+        loadBalancer.setName(JsonUtil.getStringValue(jsonObject, "name"));
+        loadBalancer.setPrivatePort(JsonUtil.getIntegerValue(jsonObject, "privateport"));
+        loadBalancer.setPublicPort(JsonUtil.getIntegerValue(jsonObject, "publicport"));
+        loadBalancer.setAlgorithm(JsonUtil.getStringValue(jsonObject, "algorithm"));
+        loadBalancer.setTransNetworkId((JsonUtil.getStringValue(jsonObject, "networkid")));
+        loadBalancer.setTransIpAddressId(JsonUtil.getStringValue(jsonObject, "publicipid"));
+        loadBalancer.setTransZoneId(JsonUtil.getStringValue(jsonObject, "zoneid"));
+        loadBalancer.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
+        loadBalancer.setIsActive(true);
+        return loadBalancer;
     }
 
     /**
      * Mapping entity object into list.
      *
-     * @param egressList list of egress.
+     * @param loadBalancerList list of Load Balancer.
      * @return egressMap egress.
      */
-    public static Map<String, LoadBalancerRule> convert(List<LoadBalancerRule> nicList) {
+    public static Map<String, LoadBalancerRule> convert(List<LoadBalancerRule> loadBalancerList) {
         Map<String, LoadBalancerRule> egressMap = new HashMap<String, LoadBalancerRule>();
 
-        for (LoadBalancerRule nic : nicList) {
+        for (LoadBalancerRule nic : loadBalancerList) {
             egressMap.put(nic.getUuid(), nic);
         }
         return egressMap;

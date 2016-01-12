@@ -21,7 +21,6 @@ import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.FirewallRules.Protocol;
-import ck.panda.domain.entity.FirewallRules.Purpose;
 import ck.panda.domain.entity.FirewallRules.State;
 import ck.panda.domain.entity.FirewallRules.TrafficType;
 import ck.panda.domain.entity.Domain;
@@ -30,6 +29,7 @@ import ck.panda.domain.entity.Host;
 import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.Iso;
+import ck.panda.domain.entity.LoadBalancerRule;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.Nic;
@@ -59,7 +59,6 @@ import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.EncryptionUtil;
-import ck.panda.util.JsonUtil;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 
@@ -250,6 +249,10 @@ public class SyncServiceImpl implements SyncService {
     /** Listing Port Forwarding details from cloudstack server. */
     @Autowired
     private PortForwardingService portForwardingService;
+
+    /** Listing Load Balancer details from cloudstack server. */
+    @Autowired
+    private LoadBalancerService loadBalancerService;
 
     /** Permission instance properties. */
     @Value(value = "${permission.instance}")
@@ -508,6 +511,12 @@ public class SyncServiceImpl implements SyncService {
             this.syncPortForwarding();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch PortForwarding", e);
+        }
+        try {
+            // 29. Sync Load Balancer entity
+            this.syncLoadBalancer();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch LoadBalancer", e);
         }
         try {
             // 30. Sync SSHKey entity
@@ -2090,6 +2099,13 @@ public class SyncServiceImpl implements SyncService {
                 csPortForwardingMap.remove(portForwarding.getUuid());
             } else {
                 portForwardingService.softDelete(portForwarding);
+
+                //Delete the load balancer firewall rule
+                FirewallRules firewallRules = egressRuleService.findByUUID(portForwarding.getUuid());
+                if (firewallRules != null) {
+                    firewallRules.setSyncFlag(false);
+                    egressRuleService.deleteFirewallIngressRule(firewallRules);
+                }
             }
         }
         // 4. Get the remaining list of cs server hash NetworkOffering object,
@@ -2098,6 +2114,120 @@ public class SyncServiceImpl implements SyncService {
         for (String key : csPortForwardingMap.keySet()) {
             LOGGER.debug("Syncservice Port Forwarding uuid:");
             portForwardingService.save(csPortForwardingMap.get(key));
+            portForwardingFirewallRules(csPortForwardingMap.get(key));
+        }
+    }
+
+    /**
+     * Sync with Cloud Server Network Firewall Rules.
+     *
+     * @param portForwarding job result
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    public void portForwardingFirewallRules(PortForwarding portForwarding) throws ApplicationException, Exception {
+        FirewallRules portForward = egressRuleService.findByUUID(portForwarding.getUuid());
+        if (portForward == null) {
+            FirewallRules csFirewallRule = new FirewallRules();
+            csFirewallRule.setSyncFlag(false);
+            csFirewallRule.setUuid(portForwarding.getUuid());
+            csFirewallRule.setDisplay(portForwarding.getFordisplay());
+            csFirewallRule.setStartPort(portForwarding.getPrivateStartPort());
+            csFirewallRule.setEndPort(portForwarding.getPrivateEndPort());
+            csFirewallRule.setProtocol(Protocol.valueOf(portForwarding.getProtocolType().name()));
+            csFirewallRule.setIsActive(true);
+            csFirewallRule.setIpAddressId(portForwarding.getIpAddressId());
+            csFirewallRule.setPurpose(FirewallRules.Purpose.PORTFORWARDING);
+            csFirewallRule.setNetworkId(convertEntityService.getNetworkByUuid(portForwarding.getTransNetworkId()));
+            csFirewallRule.setDepartmentId(convertEntityService.getNetworkById(csFirewallRule.getNetworkId())
+                    .getDepartmentId());
+            csFirewallRule.setProjectId(convertEntityService.getNetworkById(csFirewallRule.getNetworkId())
+                    .getProjectId());
+            csFirewallRule.setDomainId(convertEntityService.getNetworkById(csFirewallRule.getNetworkId())
+                    .getDomainId());
+            egressRuleService.save(csFirewallRule);
+        }
+    }
+
+    @Override
+    public void syncLoadBalancer() throws ApplicationException, Exception {
+
+        // 1. Get all the LoadBalancer objects from CS server as hash
+        List<LoadBalancerRule> csLoadBalancerList = loadBalancerService.findAllFromCSServer();
+        HashMap<String, LoadBalancerRule> csLoadBalancerMap = (HashMap<String, LoadBalancerRule>) LoadBalancerRule.convert(csLoadBalancerList);
+
+        // 2. Get all the LoadBalancer objects from application
+        List<LoadBalancerRule> appLoadBalancerList = loadBalancerService.findAll();
+
+        // 3. Iterate application LoadBalancer list
+        for (LoadBalancerRule loadBalancer : appLoadBalancerList) {
+            loadBalancer.setSyncFlag(false);
+            LOGGER.debug("Total rows updated : " + (appLoadBalancerList.size()));
+            // 3.1 Find the corresponding CS server ntService object by
+            // finding it in a hash using uuid
+            if (csLoadBalancerMap.containsKey(loadBalancer.getUuid())) {
+                LoadBalancerRule csLoadBalancer = csLoadBalancerMap.get(loadBalancer.getUuid());
+
+                loadBalancer.setUuid(csLoadBalancer.getUuid());
+                loadBalancer.setName(csLoadBalancer.getName());
+                loadBalancer.setAlgorithm(csLoadBalancer.getAlgorithm());
+
+                // 3.2 If found, update the LoadBalancer object in app db
+                loadBalancerService.update(loadBalancer);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // nic which is not added in the app
+                csLoadBalancerMap.remove(loadBalancer.getUuid());
+            } else {
+                loadBalancerService.softDelete(loadBalancer);
+
+                //Delete the load balancer firewall rule
+                FirewallRules firewallRules = egressRuleService.findByUUID(loadBalancer.getUuid());
+                if (firewallRules != null) {
+                    firewallRules.setSyncFlag(false);
+                    egressRuleService.deleteFirewallIngressRule(firewallRules);
+                }
+            }
+        }
+        // 4. Get the remaining list of cs server hash NetworkOffering object,
+        // then iterate and
+        // add it to app db
+        for (String key : csLoadBalancerMap.keySet()) {
+            LOGGER.debug("Syncservice Load Balancer uuid:");
+            loadBalancerService.save(csLoadBalancerMap.get(key));
+            loadBalancerFirewallRules(csLoadBalancerMap.get(key));
+        }
+    }
+
+    /**
+     * Sync with Cloud Server Network Firewall Rules.
+     *
+     * @param loadBalancerRule job result
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    public void loadBalancerFirewallRules(LoadBalancerRule loadBalancerRule) throws ApplicationException, Exception {
+        FirewallRules loadBalancer = egressRuleService.findByUUID(loadBalancerRule.getUuid());
+        if (loadBalancer == null) {
+            FirewallRules csFirewallRule = new FirewallRules();
+            csFirewallRule.setSyncFlag(false);
+            csFirewallRule.setUuid(loadBalancerRule.getUuid());
+            csFirewallRule.setDisplay(loadBalancerRule.getDisplay());
+            csFirewallRule.setSourceCIDR(loadBalancerRule.getSourceCIDR());
+            csFirewallRule.setState(State.valueOf(loadBalancerRule.getState().name()));
+            csFirewallRule.setStartPort(loadBalancerRule.getPrivatePort());
+            csFirewallRule.setEndPort(loadBalancerRule.getPublicPort());
+            csFirewallRule.setIsActive(true);
+            csFirewallRule.setIpAddressId(loadBalancerRule.getIpAddressId());
+            csFirewallRule.setPurpose(FirewallRules.Purpose.LOADBALANCING);
+            csFirewallRule.setNetworkId(convertEntityService.getNetworkByUuid(loadBalancerRule.getTransNetworkId()));
+            csFirewallRule.setDepartmentId(convertEntityService.getNetworkById(csFirewallRule.getNetworkId())
+                    .getDepartmentId());
+            csFirewallRule.setProjectId(convertEntityService.getNetworkById(csFirewallRule.getNetworkId())
+                    .getProjectId());
+            csFirewallRule.setDomainId(convertEntityService.getNetworkById(csFirewallRule.getNetworkId())
+                    .getDomainId());
+            egressRuleService.save(csFirewallRule);
         }
     }
 

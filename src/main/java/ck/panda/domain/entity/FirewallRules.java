@@ -180,7 +180,6 @@ public class FirewallRules {
 
     /** Different set of rules . */
     public enum Purpose {
-
         /** Firewall rule for network. */
         FIREWALL,
 
@@ -202,7 +201,6 @@ public class FirewallRules {
 
     /** Types of protocol for an IP Address . */
     public enum Protocol {
-
         /** TCP enables two hosts to establish a connection and exchange streams of data. */
         TCP,
 
@@ -222,12 +220,14 @@ public class FirewallRules {
         ALL
     }
 
+    /** Types of state for an firewall . */
     public enum State {
-        /** Egress rule in Active state */
+        /** Egress rule in Active state. */
         ACTIVE,
 
         /** Egress rule in Staged state. */
         STAGED,
+
         /** Egress rule in ADD state. */
         ADD
     }
@@ -775,7 +775,7 @@ public class FirewallRules {
     /**
      * Get the transient ipaddress uuid.
      *
-     * @param transIpaddressId to set
+     * @return the transIpaddressId
      */
     public String getTransIpaddressId() {
         return transIpaddressId;
@@ -794,33 +794,48 @@ public class FirewallRules {
      * Convert JSONObject to nic entity.
      *
      * @param jsonObject json object
-     * @return nic entity object.
+     * @param type traffic type
+     * @param purpose purpose of firewall
+     * @return firewall rules object.
      * @throws Exception unhandled errors.
      */
-    public static FirewallRules convert(JSONObject jsonObject, FirewallRules.TrafficType type) throws Exception {
+    public static FirewallRules convert(JSONObject jsonObject, FirewallRules.TrafficType type, FirewallRules.Purpose purpose) throws Exception {
         FirewallRules egress = new FirewallRules();
         egress.setSyncFlag(false);
         egress.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-        egress.setTransIpaddressId(JsonUtil.getStringValue(jsonObject, "ipaddressid"));
-        egress.setProtocol(Protocol.valueOf(JsonUtil.getStringValue(jsonObject, "protocol").toUpperCase()));
         egress.setDisplay(JsonUtil.getBooleanValue(jsonObject, "fordisplay"));
         egress.setSourceCIDR(JsonUtil.getStringValue(jsonObject, "cidrlist"));
         egress.setTransNetworkId((JsonUtil.getStringValue(jsonObject, "networkid")));
         egress.setState(State.valueOf(JsonUtil.getStringValue(jsonObject, "state").toUpperCase()));
-        egress.setStartPort(JsonUtil.getIntegerValue(jsonObject, "startport"));
-        egress.setEndPort(JsonUtil.getIntegerValue(jsonObject, "endport"));
         egress.setIcmpCode(JsonUtil.getIntegerValue(jsonObject, "icmpcode"));
         egress.setIcmpMessage(JsonUtil.getIntegerValue(jsonObject, "icmptype"));
-        egress.setPurpose(Purpose.FIREWALL);
         egress.setTrafficType(type);
         egress.setIsActive(true);
+        if (purpose == Purpose.FIREWALL) {
+            egress.setTransIpaddressId(JsonUtil.getStringValue(jsonObject, "ipaddressid"));
+            egress.setProtocol(Protocol.valueOf(JsonUtil.getStringValue(jsonObject, "protocol").toUpperCase()));
+            egress.setStartPort(JsonUtil.getIntegerValue(jsonObject, "startport"));
+            egress.setEndPort(JsonUtil.getIntegerValue(jsonObject, "endport"));
+            egress.setPurpose(purpose);
+        } else if (purpose == Purpose.LOADBALANCING) {
+            egress.setTransIpaddressId(JsonUtil.getStringValue(jsonObject, "publicipid"));
+            egress.setStartPort(JsonUtil.getIntegerValue(jsonObject, "privateport"));
+            egress.setEndPort(JsonUtil.getIntegerValue(jsonObject, "publicport"));
+            egress.setPurpose(purpose);
+        } else if (purpose == Purpose.PORTFORWARDING) {
+            egress.setProtocol(Protocol.valueOf(JsonUtil.getStringValue(jsonObject, "protocol").toUpperCase()));
+            egress.setStartPort(JsonUtil.getIntegerValue(jsonObject, "privateport"));
+            egress.setEndPort(JsonUtil.getIntegerValue(jsonObject, "publicport"));
+            egress.setTransIpaddressId(JsonUtil.getStringValue(jsonObject, "ipaddressid"));
+            egress.setPurpose(purpose);
+        }
         return egress;
     }
 
     /**
      * Mapping entity object into list.
      *
-     * @param egressList list of egress.
+     * @param firewallList list of egress.
      * @return egressMap egress.
      */
     public static Map<String, FirewallRules> convert(List<FirewallRules> firewallList) {
