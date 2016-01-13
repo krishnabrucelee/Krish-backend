@@ -62,6 +62,11 @@ public class VmIpaddress {
     @Transient
     private String transvmInstanceId;
 
+    /** Temporary variable. */
+    @Transient
+    private Boolean syncFlag;
+
+
     /**
      * Get the id of the vm Ip address.
      *
@@ -183,6 +188,24 @@ public class VmIpaddress {
     public void setNic(Nic nic) {
         this.nic = nic;
     }
+
+   /** Get the syncFlag.
+    *
+    * @return the syncFlag
+    */
+   public Boolean getSyncFlag() {
+       return syncFlag;
+   }
+
+   /**
+    * Set the syncFlag.
+    *
+    * @param syncFlag to set
+    */
+   public void setSyncFlag(Boolean syncFlag) {
+       this.syncFlag = syncFlag;
+   }
+
 
     /**
      * Convert JSONObject to vm ip address entity.

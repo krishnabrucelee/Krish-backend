@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.repository.jpa.VmIpaddressRepository;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -81,4 +83,10 @@ public class VmIpaddressServiceImpl implements VmIpaddressService {
         vmIpaddress.setIsActive(false);
          return ipaddressRepo.save(vmIpaddress);
     }
+
+    @Override
+    public List<VmIpaddress> findByVMInstance(Long nic) throws Exception {
+        return ipaddressRepo.findByVMInstanceAndIsActive(nic, true);
+    }
+
 }

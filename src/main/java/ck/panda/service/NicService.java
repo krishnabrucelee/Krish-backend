@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Nic;
+import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
@@ -39,6 +40,15 @@ public interface NicService extends CRUDService<Nic> {
      * @throws Exception exception
      */
     List<Nic> findByInstance(Long nic) throws Exception;
+
+    /**
+     * List by instance attached to nic.
+     *
+     * @param nic Nic
+     * @return nic Nics from instance.
+     * @throws Exception exception
+     */
+    List<VmIpaddress> findByVMInstance(Long nic) throws Exception;
 
     /**
      * Find all nics from CloudStack.
@@ -91,6 +101,6 @@ public interface NicService extends CRUDService<Nic> {
      * @return
      * @throws Exception if error occurs.
      */
-    Nic releaseSecondaryIP(Nic nic, Long vmIpaddressId) throws Exception;
+  	Nic releaseSecondaryIP(Nic nic, Long vmIpaddressId) throws Exception;
 
 }

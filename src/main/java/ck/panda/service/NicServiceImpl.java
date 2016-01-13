@@ -275,6 +275,11 @@ public class NicServiceImpl implements NicService {
     }
 
     @Override
+    public List<VmIpaddress> findByVMInstance(Long nic) throws Exception {
+        return vmIpService.findByVMInstance(nic);
+    }
+
+    @Override
     public List<Nic> findAllFromCSServer() throws Exception {
         List<VmInstance> vmInstanceList = virtualmachinerepository.findAllByIsActive(VmInstance.Status.Expunging);
         List<Nic> nicList = new ArrayList<Nic>();
@@ -350,14 +355,17 @@ public class NicServiceImpl implements NicService {
              errors = this.validateEvent(errors, csacquireIPResponseJSON.getString("errortext"));
              throw new ApplicationException(errors);
          } else if (csacquireIPResponseJSON.has("jobid")) {
+        	 Thread.sleep(5000);
              String jobResponse = cloudStackNicService.AcquireIpJobResult(csacquireIPResponseJSON.getString("jobid"), "json");
-             JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
-             if (jobresult.getString("jobstatus").equals("1")) {
+             JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse").getJSONObject("jobresult");
+             JSONObject secondaryIP = jobresult.getJSONObject("nicsecondaryip");
                  VmIpaddress vm = new VmIpaddress();
-                 vm.setUuid((String) csacquireIPResponseJSON.get("id"));
-                 vm.setGuestIpAddress(((String) jobresult.get("ipaddress")));
+                 vm.setUuid((String) secondaryIP.get("id"));
+                vm.setGuestIpAddress(((String) secondaryIP.get("ipaddress")));
+                vm.setNic(convertEntityService.getNic(secondaryIP.getString("nicid")));
+                vm.setVmInstanceId(convertEntityService.getNic(secondaryIP.getString("nicid")).getVmInstanceId());
+                vm.setIsActive(true);
                  vmIpService.save(vm);
-            }
          }
         return nic;
     }
@@ -366,9 +374,10 @@ public class NicServiceImpl implements NicService {
     public Nic releaseSecondaryIP(Nic nic, Long vmIpaddressId)throws Exception {
          try {
              VmIpaddress vm = convertEntityService.getVmIpaddressById(vmIpaddressId);
-             vm.setIsActive(false);
+
              configServer.setUserServer();
              String deleteResponse = cloudStackNicService.removeIpFromNic(vm.getUuid(), "json");
+             vm.setIsActive(false);
              JSONObject jobId = new JSONObject(deleteResponse).getJSONObject("removeipfromnicresponse");
              if (jobId.has("errorcode")) {
                  Errors errors = validator.sendGlobalError(jobId.getString("errortext"));
@@ -383,7 +392,7 @@ public class NicServiceImpl implements NicService {
              } catch (BadCredentialsException e) {
                  throw new BadCredentialsException(e.getMessage());
          }
-        return nic;
+		return nic;
     }
     @Override
     public Nic findById(Long id) throws Exception {

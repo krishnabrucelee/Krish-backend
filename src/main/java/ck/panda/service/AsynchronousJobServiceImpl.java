@@ -27,6 +27,7 @@ import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.PortForwarding;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.entity.Volume;
 import ck.panda.rabbitmq.util.ResponseEvent;
 import ck.panda.util.CloudStackInstanceService;
@@ -73,6 +74,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /** Ip address Service for listing ipaddress. */
     @Autowired
     private IpaddressService ipService;
+
+    /** Ip address Service for listing ipaddress. */
+    @Autowired
+    private VmIpaddressService vmIpService;
 
     /** CloudStack connector reference for instance. */
     @Autowired
@@ -824,10 +829,36 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             }
         }
         if (eventObject.getString("commandEventType").equals("NIC.SECONDARY.IP.ASSIGN")) {
-            LOGGER.debug("Not Implemented");
+        	 if (eventObject.getString("commandEventType").equals("NIC.SECONDARY.IP.ASSIGN")) {
+                 VmIpaddress csVmIpaddress = VmIpaddress.convert(jobresult.getJSONObject("nicsecondaryip"));
+                 VmIpaddress vmIpaddress = vmIpService.findByUUID(csVmIpaddress.getUuid());
+                 vmIpaddress.setSyncFlag(false);
+                 vmIpaddress.setUuid(csVmIpaddress.getUuid());
+                 vmIpaddress.setGuestIpAddress(csVmIpaddress.getGuestIpAddress());
+                 Nic nic = nicService.findbyUUID(csVmIpaddress.getNic().getUuid());
+                 if (vmIpService.findByUUID(csVmIpaddress.getUuid()) == null) {
+                     vmIpService.save(csVmIpaddress);
+                 }
+                 nicService.update(nic);
+             }
+
         }
         if (eventObject.getString("commandEventType").equals("NIC.SECONDARY.IP.UNASSIGN")) {
-            LOGGER.debug("Not Implemented");
+        	 if (eventObject.getString("commandEventType").equals("NIC.SECONDARY.IP.UNASSIGN")) {
+                 LOGGER.debug("Nic secondary IP Implemented");
+                 if (eventObject.getString("commandEventType").equals("NIC.SECONDARY.IP.UNASSIGN")) {
+                     JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
+                     VmIpaddress vmIpAddress = vmIpService.findByUUID((json.getString("id")));
+                     if (vmIpAddress != null) {
+                         vmIpAddress.setSyncFlag(false);
+                         vmIpService.softDelete(vmIpAddress);
+                         Nic nic = new Nic();
+                         nicService.releaseSecondaryIP(nic, vmIpAddress.getId());
+                         nicService.update(nic);
+                     }
+                 }
+
+             }
         }
     }
 

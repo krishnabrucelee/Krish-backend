@@ -21,7 +21,9 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.Nic;
+import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.service.NicService;
+import ck.panda.service.VmIpaddressService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -113,6 +115,21 @@ public class NicController extends CRUDController<Nic> implements ApiController 
         return nicOfferingService.findByInstance(instanceId);
     }
 
+    /**
+     * List by instance attached to nic.
+     *
+     * @param instanceId Nic
+     * @return nic by instances
+     * @throws Exception exception
+     */
+    @RequestMapping(value = "listbyvminstances", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<VmIpaddress> listByVMInstance(@RequestParam("instanceid") Long instanceId) throws Exception {
+        return nicOfferingService.findByVMInstance(instanceId);
+    }
+
     @RequestMapping(value = "acquire/{id}", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
@@ -120,10 +137,10 @@ public class NicController extends CRUDController<Nic> implements ApiController 
         return nicOfferingService.acquireSecondaryIP(nic);
     }
 
-    @RequestMapping(value = "/release", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/release/{id}", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public Nic ReleaseSecondaryIp(@RequestBody Nic nic, @RequestParam("VmIpaddress") Long vmIpaddressId) throws Exception {
+    public Nic ReleaseSecondaryIp(@RequestBody Nic nic,@PathVariable(PATH_ID) Long vmIpaddressId) throws Exception {
         return nicOfferingService.releaseSecondaryIP(nic, vmIpaddressId);
     }
 
