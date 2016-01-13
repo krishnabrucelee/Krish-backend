@@ -201,7 +201,7 @@ public class TemplateServiceImpl implements TemplateService {
                 }
 
                 template.setDisplayText(osType.getDescription());
-                if(!template.getTransZone().equals("")) {
+                if (!template.getTransZone().equals("")) {
                     template.setZoneId(zoneService.findByUUID(template.getTransZone()).getId());
                 }
                 template.setHypervisorId(8L);
@@ -481,6 +481,33 @@ public class TemplateServiceImpl implements TemplateService {
         template.setIsActive(false);
         template.setStatus(Template.Status.INACTIVE);
         return templateRepository.save(template);
+    }
+
+    @Override
+    public String findTemplateCounts() throws Exception {
+            List<Template> template = templateRepository.findTemplateCounts(TemplateType.SYSTEM, true);
+            Integer windowsCount = 0, linuxCount = 0, totalCount = 0;
+            Integer windowsIsoCount = 0, linuxIsoCount = 0, totalIsoCount = 0;
+            for (int i = 0; i < template.size(); i++) {
+                if (template.get(i).getFormat() == Template.Format.ISO) {
+                    if (template.get(i).getOsType().getDescription().contains("Windows")) {
+                        windowsIsoCount++;
+                    } else {
+                        linuxIsoCount++;
+                    }
+                    totalIsoCount++;
+                } else {
+                    if (template.get(i).getOsType().getDescription().contains("Windows")) {
+                        windowsCount++;
+                    } else {
+                        linuxCount++;
+                    }
+                    totalCount++;
+                }
+            }
+            return "{\"windowsCount\":" + windowsCount + ",\"linuxCount\":" + linuxCount + ",\"totalCount\":"
+            + totalCount + ",\"windowsIsoCount\":" + windowsIsoCount + ",\"linuxIsoCount\":"
+            + linuxIsoCount + ",\"totalIsoCount\":" + totalIsoCount + "}";
     }
 
 }

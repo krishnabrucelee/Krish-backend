@@ -66,8 +66,8 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     /**
      * List all Iso-Templates and Templates.
      *
-     * @param type iso/template
      * @param sortBy ASC
+     * @param type iso/template
      * @param range 1-10
      * @param limit page limit min 10
      * @param request http request
@@ -75,15 +75,14 @@ public class TemplateController extends CRUDController<Template> implements ApiC
      * @return Iso-Templates and Templates
      * @throws Exception error
      */
-    @RequestMapping(value = "/category", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/listall", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<Template> list(@RequestParam("type") String type, @RequestParam("sortBy") String sortBy,
-            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
-            HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public List<Template> list(@RequestParam String sortBy, @RequestParam String type, @RequestHeader(value = RANGE) String range,
+            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
+                    throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Template.class);
-        String template = "template?lang=en";
-        if (type.equals(template)) {
+        if (type.contains("template")) {
             Page<Template> pageResponse = templateService.findAll(page);
             response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
             return pageResponse.getContent();
@@ -133,5 +132,20 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     @ResponseBody
     public List<Template> findIsoByFilters(@RequestBody Template templateIso) throws Exception {
         return templateService.findIsoByFilters(templateIso);
+    }
+
+    /**
+     * Get the template counts for linux, windows and total count.
+     *
+     * @param request page request.
+     * @param response page response content.
+     * @return template count.
+     * @throws Exception unhandled errors.
+     */
+    @RequestMapping(value = "templateCounts", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public String getTemplateCounts(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        return templateService.findTemplateCounts();
     }
 }

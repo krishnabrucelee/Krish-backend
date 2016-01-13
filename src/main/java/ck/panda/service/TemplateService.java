@@ -1,7 +1,6 @@
 package ck.panda.service;
 
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Template;
@@ -76,5 +75,13 @@ public interface TemplateService extends CRUDService<Template> {
      * @throws Exception error
      */
     Page<Template> findAllIso(PagingAndSorting pagingAndSorting) throws Exception;
+
+    /**
+     * To get count of templates.
+     *
+     * @return template counts from server
+     * @throws Exception unhandled errors.
+     */
+    String findTemplateCounts() throws Exception;
 
 }

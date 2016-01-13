@@ -176,4 +176,14 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
             @Param("architecture") String architecture,
             @Param("type") TemplateType type, @Param("format") List<Format> format, @Param("status") Status status, @Param("isActive") Boolean isActive);
 
+    /**
+     * Get the template count without system type.
+     *
+     * @param type of template
+     * @param isActive true/false
+     * @return template list
+     */
+    @Query(value = "select template from Template template where template.type <>:type AND template.isActive =:isActive")
+    List<Template> findTemplateCounts(@Param("type") TemplateType type, @Param("isActive") Boolean isActive);
+
 }
