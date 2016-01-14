@@ -116,6 +116,10 @@ public class SSHKey implements Serializable {
     @Transient
     private String transDepartment;
 
+    /** Transient domain of the user. */
+    @Transient
+    private String transDomain;
+
     /** Created date and time. */
     @CreatedDate
     @Column(name = "created_date_time")
@@ -410,6 +414,24 @@ public class SSHKey implements Serializable {
     }
 
     /**
+     * Get the transient Domain.
+     *
+     * @return the transDomain
+     */
+    public String getTransDomain() {
+        return transDomain;
+    }
+
+    /**
+     * Set the transDomain.
+     *
+     * @param transDomain to set
+     */
+    public void setTransDomain(String transDomain) {
+        this.transDomain = transDomain;
+    }
+
+    /**
      * Get the created date time.
      *
      * @return createdDateTime
@@ -459,6 +481,7 @@ public class SSHKey implements Serializable {
         sshkey.setName(JsonUtil.getStringValue(jsonObject, "name"));
         sshkey.setFingerPrint(JsonUtil.getStringValue(jsonObject, "fingerPrint"));
         sshkey.setTransDepartment(JsonUtil.getStringValue(jsonObject, "account"));
+        sshkey.setTransDomain(JsonUtil.getStringValue(jsonObject, "domainid"));
         sshkey.setIsActive(true);
         return sshkey;
     }

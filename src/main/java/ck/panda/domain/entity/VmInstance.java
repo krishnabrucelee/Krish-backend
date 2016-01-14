@@ -396,6 +396,10 @@ public class VmInstance implements Serializable {
     @Transient
     private String transHypervisor;
 
+    /** Transient owner id of the instance. */
+    @Transient
+    private String transOwnerId;
+
     /**
      * Get sync status.
      *
@@ -1762,6 +1766,24 @@ public class VmInstance implements Serializable {
         this.transHypervisor = transHypervisor;
     }
 
+    /**
+     * Get the transOwnerId of the VmInstance.
+
+     * @return the transOwnerId of VmInstance.
+     */
+    public String getTransOwnerId() {
+        return transOwnerId;
+    }
+
+    /**
+     * Set the transOwnerId of the VmInstance.
+     *
+     * @param transOwnerId the transOwnerId to set
+     */
+    public void setTransOwnerId(String transOwnerId) {
+        this.transOwnerId = transOwnerId;
+    }
+
     @Override
     public String toString() {
         return "VmInstance [Id=" + id + ", name=" + name + ", uuid=" + uuid + ", vncPassword=" + vncPassword
@@ -1820,6 +1842,7 @@ public class VmInstance implements Serializable {
             vmInstance.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, "account"));
             vmInstance.setTransProjectId(JsonUtil.getStringValue(jsonObject, "projectid"));
             vmInstance.setInstanceInternalName(JsonUtil.getStringValue(jsonObject, "instancename"));
+            vmInstance.setTransOwnerId(JsonUtil.getStringValue(jsonObject, "userid"));
         } catch (Exception e) {
             e.printStackTrace();
         }
