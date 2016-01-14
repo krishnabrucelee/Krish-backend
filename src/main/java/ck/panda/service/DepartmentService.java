@@ -78,7 +78,7 @@ public interface DepartmentService extends CRUDService<Department> {
      * @param isActive department status Active/Inactive
      * @return department.
      */
-    Department findByUsername(String name, Boolean isActive);
+    Department findByUsername(String name, Long domainId, Boolean isActive);
 
     /**
      * Find the departments user name and domain and isActive status.
