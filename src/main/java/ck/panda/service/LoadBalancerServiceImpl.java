@@ -10,12 +10,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.LoadBalancerRule;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.repository.jpa.LoadBalancerRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackLoadBalancerService;
 import ck.panda.util.ConfigUtil;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -53,6 +56,15 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     /** Cloud stack configuration reference. */
     @Autowired
     private ConfigUtil configUtil;
+
+    /** Domain Service reference. */
+    @Autowired
+    private DomainService domainService;
+
+    /** Token Detail Utilities. */
+    @Autowired
+    private TokenDetails tokenDetails;
+
 
     @Override
     public LoadBalancerRule save(LoadBalancerRule loadBalancer) throws Exception {
@@ -175,8 +187,11 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     public LoadBalancerRule csCreateLoadBalancerRule(LoadBalancerRule loadBalancer, Errors errors) throws Exception {
         configUtil.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
+        IpAddress vm = convertEntityService.getIpAddress(loadBalancer.getIpAddressId());
+        optional.put("domainid",domainService.find(Long.parseLong(tokenDetails.getTokenDetails("domainid"))).getUuid());
+        optional.put("publicipid", vm.getUuid());
         String csResponse = cloudStackLoadBalancerService.createLoadBalancerRule(loadBalancer.getAlgorithm(), loadBalancer.getName(),
-                loadBalancer.getPrivatePort().toString(), loadBalancer.getPublicPort().toString(), "json", optional);
+        loadBalancer.getPrivatePort().toString(), loadBalancer.getPublicPort().toString(), "json", optional);
         try {
             JSONObject loadBalancerJSON = new JSONObject(csResponse).getJSONObject("createloadbalancerruleresponse");
             if (loadBalancerJSON.has("errorcode")) {
@@ -212,5 +227,11 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         errors.addGlobalError(errmessage);
         return errors;
     }
+
+    @Override
+    public List<LoadBalancerRule> findByIpaddress(Long ipAddressId, Boolean isActive) {
+        return loadBalancerRepo.findAllByIpaddressAndIsActive(ipAddressId, true);
+    }
+
 
 }

@@ -38,4 +38,13 @@ public interface LoadBalancerService extends CRUDService<LoadBalancerRule> {
      */
     LoadBalancerRule findByUUID(String uuid);
 
+    /**
+     * List load balancer by ip address.
+     *
+     * @param ipAddressId of the load balancer.
+     * @param isActive of the load balancer.
+     * @return load balancer.
+     */
+    List<LoadBalancerRule> findByIpaddress(Long ipAddressId, Boolean isActive);
+
 }
