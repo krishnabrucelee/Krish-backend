@@ -3,7 +3,6 @@ package ck.panda.domain.entity;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,13 +12,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
 import org.json.JSONObject;
-
 import ck.panda.util.JsonUtil;
 
 /**
- * .Secondary Vm IP Address.
+ * Secondary Vm IP Address.
  *
  */
 
@@ -227,14 +224,14 @@ public class VmIpaddress {
          * @param vmIpaddressList list of nics.
          * @return nicMap nics.
          */
-        public static Map<String, VmIpaddress> convert(List<VmIpaddress> vmIpaddressList) {
-            Map<String, VmIpaddress> vmIpaddressListMap = new HashMap<String, VmIpaddress>();
+    public static Map<String, VmIpaddress> convert(List<VmIpaddress> vmIpaddressList) {
+    	Map<String, VmIpaddress> vmIpaddressListMap = new HashMap<String, VmIpaddress>();
 
-            for (VmIpaddress nic : vmIpaddressList) {
-                vmIpaddressListMap.put(nic.getUuid(), nic);
-            }
+    	for (VmIpaddress nic : vmIpaddressList) {
+    		vmIpaddressListMap.put(nic.getUuid(), nic);
+    	}
 
-            return vmIpaddressListMap;
-        }
+    	return vmIpaddressListMap;
+    }
 
 }

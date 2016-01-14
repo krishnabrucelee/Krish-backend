@@ -1,14 +1,11 @@
 package ck.panda.service;
 
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.repository.jpa.VmIpaddressRepository;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -25,10 +22,6 @@ public class VmIpaddressServiceImpl implements VmIpaddressService {
     /** Department repository reference. */
     @Autowired
     private VmIpaddressRepository ipaddressRepo;
-
-    /** Reference of the convert entity service. */
-    @Autowired
-    private ConvertEntityService convertEntityService;
 
     @Override
     public VmIpaddress save(VmIpaddress ipaddress) throws Exception {

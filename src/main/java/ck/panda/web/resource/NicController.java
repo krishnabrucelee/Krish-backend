@@ -19,11 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
-import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.service.NicService;
-import ck.panda.service.VmIpaddressService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -130,6 +128,14 @@ public class NicController extends CRUDController<Nic> implements ApiController 
         return nicOfferingService.findByVMInstance(instanceId);
     }
 
+    /**
+     * Acquire secondary  ip from nic.
+     *
+     * @param nic object for acquiring ip
+     * @param id of the nic.
+     * @return nic.
+     * @throws Exception if error occurs.
+     */
     @RequestMapping(value = "acquire/{id}", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
@@ -137,6 +143,14 @@ public class NicController extends CRUDController<Nic> implements ApiController 
         return nicOfferingService.acquireSecondaryIP(nic);
     }
 
+    /**
+     * Release Secondary Ip from Ip
+     *
+     * @param nic object for releasing ip.
+     * @param vmIpaddressId of the secondary ip.
+     * @return vm ip address.
+     * @throws Exception if error occurs.
+     */
     @RequestMapping(value = "/release/{id}", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody

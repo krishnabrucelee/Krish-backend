@@ -361,10 +361,10 @@ public class NicServiceImpl implements NicService {
              JSONObject secondaryIP = jobresult.getJSONObject("nicsecondaryip");
                  VmIpaddress vm = new VmIpaddress();
                  vm.setUuid((String) secondaryIP.get("id"));
-                vm.setGuestIpAddress(((String) secondaryIP.get("ipaddress")));
-                vm.setNic(convertEntityService.getNic(secondaryIP.getString("nicid")));
-                vm.setVmInstanceId(convertEntityService.getNic(secondaryIP.getString("nicid")).getVmInstanceId());
-                vm.setIsActive(true);
+                 vm.setGuestIpAddress(((String) secondaryIP.get("ipaddress")));
+                 vm.setNic(convertEntityService.getNic(secondaryIP.getString("nicid")));
+                 vm.setVmInstanceId(convertEntityService.getNic(secondaryIP.getString("nicid")).getVmInstanceId());
+                 vm.setIsActive(true);
                  vmIpService.save(vm);
          }
         return nic;
@@ -374,7 +374,6 @@ public class NicServiceImpl implements NicService {
     public Nic releaseSecondaryIP(Nic nic, Long vmIpaddressId)throws Exception {
          try {
              VmIpaddress vm = convertEntityService.getVmIpaddressById(vmIpaddressId);
-
              configServer.setUserServer();
              String deleteResponse = cloudStackNicService.removeIpFromNic(vm.getUuid(), "json");
              vm.setIsActive(false);
@@ -386,14 +385,15 @@ public class NicServiceImpl implements NicService {
                  }
              }
              if (jobId.has("jobid")) {
-                 String jobResponse = cloudStackNicService.AcquireIpJobResult(jobId.getString("jobid"), "json");
+            	 String jobResponse = cloudStackNicService.AcquireIpJobResult(jobId.getString("jobid"), "json");
                  JSONObject jobresults = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
              }
-             } catch (BadCredentialsException e) {
+         } catch (BadCredentialsException e) {
                  throw new BadCredentialsException(e.getMessage());
          }
-		return nic;
+         return nic;
     }
+
     @Override
     public Nic findById(Long id) throws Exception {
         return nicRepo.findById(id);
