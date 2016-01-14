@@ -22,6 +22,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import ck.panda.util.audit.AuditingDateTimeProvider;
+import org.springframework.boot.autoconfigure.web.ErrorMvcAutoConfiguration;
 import ck.panda.util.audit.CurrentTimeDateTimeService;
 import ck.panda.util.audit.DateTimeService;
 import ck.panda.util.audit.UsernameAuditorAware;
@@ -30,7 +31,7 @@ import ck.panda.util.audit.UsernameAuditorAware;
  * Spring boot application configuration class.
  */
 @Configuration
-@EnableAutoConfiguration
+@EnableAutoConfiguration(exclude = {ErrorMvcAutoConfiguration.class})
 @ComponentScan
 @SpringBootApplication
 @EnableConfigurationProperties
