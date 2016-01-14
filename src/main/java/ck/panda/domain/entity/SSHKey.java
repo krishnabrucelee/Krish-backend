@@ -71,9 +71,9 @@ public class SSHKey implements Serializable {
     @Transient
     private String publicKey;
 
-    /** Domain of the SSH Key. */
+    /** Domain id of the SSH Key. */
     @Transient
-    private Domain domain;
+    private Long domainId;
 
     /** Department of the SSH Key. */
     @ManyToOne
@@ -226,21 +226,21 @@ public class SSHKey implements Serializable {
     }
 
     /**
-     * Get the domain.
+     * Get the domainId.
      *
-     * @return domain
+     * @return domainId
      */
-    public Domain getDomain() {
-        return domain;
+    public Long getDomainId() {
+        return domainId;
     }
 
     /**
-     * Set the domain.
+     * Set the domainId.
      *
-     * @param domain to set
+     * @param domainId to set
      */
-    public void setDomain(Domain domain) {
-        this.domain = domain;
+    public void setDomainId(Long domainId) {
+        this.domainId = domainId;
     }
 
     /**
