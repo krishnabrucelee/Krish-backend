@@ -12,8 +12,6 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.SSHKey;
-import ck.panda.domain.repository.jpa.DepartmentReposiory;
-import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.SSHKeyRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackSSHService;
@@ -44,9 +42,9 @@ public class SSHKeyServiceImpl implements SSHKeyService {
     @Autowired
     private TokenDetails tokenDetails;
 
-    /** Department repository reference. */
+    /** Department service reference. */
     @Autowired
-    private DepartmentReposiory departmentRepository;
+    private DepartmentService departmentService;
 
     /** CloudStack configuration reference. */
     @Autowired
@@ -56,9 +54,9 @@ public class SSHKeyServiceImpl implements SSHKeyService {
     @Autowired
     private ConvertEntityService convertEntity;
 
-    /** Domain repository reference. */
+    /** Domain service reference. */
     @Autowired
-    private DomainRepository domainRepository;
+    private DomainService domainService;
 
     @Override
     @PreAuthorize("hasPermission(#sshkey.getIsSyncFlag(), 'CREATE_SSH_KEY')")
@@ -69,15 +67,15 @@ public class SSHKeyServiceImpl implements SSHKeyService {
             errors = validator.validateEntity(sshkey, errors);
             cloudStackSSHService.setServer(configServer.setServer(1L));
             HashMap<String, String> optional = new HashMap<String, String>();
-            Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+            Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
             if (domain != null && domain.getName().equals("ROOT")) {
-                optional.put("account", String.valueOf(sshkey.getDepartment().getUserName()));
-                optional.put("domainid", String.valueOf(sshkey.getDomain().getUuid()));
+                optional.put("account", String.valueOf(convertEntity.getDepartmentById(sshkey.getDepartmentId()).getUserName()));
+                optional.put("domainid", String.valueOf(convertEntity.getDomainById(sshkey.getDomainId()).getUuid()));
             } else {
-                optional.put("domainid", departmentRepository
-                        .findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getDomain().getUuid());
-                optional.put("account", departmentRepository
-                        .findOne(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
+                optional.put("domainid", departmentService
+                        .find(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getDomain().getUuid());
+                optional.put("account", departmentService
+                        .find(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
             }
             String sshkeyResponse = cloudStackSSHService.createSSHKeyPair(sshkey.getName(), "json", optional);
             JSONObject createSSHResponseJSON = new JSONObject(sshkeyResponse).getJSONObject("createsshkeypairresponse");
@@ -91,8 +89,9 @@ public class SSHKeyServiceImpl implements SSHKeyService {
             sshkey.setFingerPrint((String) sshkeypair.get("fingerprint"));
             sshkey.setPrivatekey((String) sshkeypair.get("privatekey"));
             sshkey.setIsActive(true);
-            sshkey.setDepartmentId(
-                    convertEntity.getDepartmentByUsernameAndDomains(sshkeypair.getString("account"), domain));
+            if (domain != null && !domain.getName().equals("ROOT")) {
+                sshkey.setDepartmentId(Long.parseLong(tokenDetails.getTokenDetails("departmentid")));
+           }
         }
         return sshkeyRepo.save(sshkey);
     }
@@ -148,8 +147,8 @@ public class SSHKeyServiceImpl implements SSHKeyService {
 
     @Override
     public List<SSHKey> findAll() throws Exception {
-        Department department = departmentRepository
-                .findOne(Long.valueOf(tokenDetails.getTokenDetails("departmentid")));
+        Department department = departmentService
+                .find(Long.valueOf(tokenDetails.getTokenDetails("departmentid")));
         if (department != null && !department.getUserName().equals("ROOT")) {
             return sshkeyRepo
                     .findAllByDepartmentAndIsActive(Long.parseLong(tokenDetails.getTokenDetails("departmentid")), true);
@@ -159,7 +158,7 @@ public class SSHKeyServiceImpl implements SSHKeyService {
 
     @Override
     public Page<SSHKey> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
-        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && domain.getName().equals("ROOT")) {
             return sshkeyRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
         }
@@ -178,8 +177,8 @@ public class SSHKeyServiceImpl implements SSHKeyService {
             errors = validator.validateEntity(sshkey, errors);
             cloudStackSSHService.setServer(configServer.setServer(1L));
             HashMap<String, String> optional = new HashMap<String, String>();
-            optional.put("domainid", sshkey.getDepartment().getDomain().getUuid());
-            optional.put("account", sshkey.getDepartment().getUserName());
+            optional.put("domainid", convertEntity.getDepartmentById(sshkey.getDepartmentId()).getDomain().getUuid());
+            optional.put("account", convertEntity.getDepartmentById(sshkey.getDepartmentId()).getUserName());
             String sshkeyResponse = cloudStackSSHService.deleteSSHKeyPair(sshkey.getName(), "json", optional);
             JSONObject deletesshkeypairresponseJSON = new JSONObject(sshkeyResponse)
                     .getJSONObject("deletesshkeypairresponse");
