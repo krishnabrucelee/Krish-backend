@@ -333,6 +333,16 @@ public class ConvertEntityService {
         return nicService.findById(id);
     }
 
+    /**
+     * Get domain object.
+     *
+     * @param uuid uuid of domain
+     * @return domain.
+     * @throws Exception unhandled exception.
+     */
+    public Nic getNic(String uuid) throws Exception {
+        return nicService.findbyUUID(uuid);
+    }
 
     /**
      * Get Vm Instance object.

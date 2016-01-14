@@ -1,8 +1,7 @@
 package ck.panda.service;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.Pod;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.util.domain.CRUDService;
 
@@ -39,5 +38,14 @@ public interface VmIpaddressService extends CRUDService<VmIpaddress> {
      * @throws Exception if error occurs.
      */
     VmIpaddress softDelete(VmIpaddress vmIpaddress) throws Exception;
+
+    /**
+     * List by vmInstanceId.
+     *
+     * @param nic Nic
+     * @return vm Ipaddress.
+     * @throws Exception exception
+     */
+    List<VmIpaddress> findByVMInstance(Long nic) throws Exception;
 
 }

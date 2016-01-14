@@ -1,7 +1,6 @@
 package ck.panda.service;
 
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +22,6 @@ public class VmIpaddressServiceImpl implements VmIpaddressService {
     /** Department repository reference. */
     @Autowired
     private VmIpaddressRepository ipaddressRepo;
-
-    /** Reference of the convert entity service. */
-    @Autowired
-    private ConvertEntityService convertEntityService;
 
     @Override
     public VmIpaddress save(VmIpaddress ipaddress) throws Exception {
@@ -81,4 +76,10 @@ public class VmIpaddressServiceImpl implements VmIpaddressService {
         vmIpaddress.setIsActive(false);
          return ipaddressRepo.save(vmIpaddress);
     }
+
+    @Override
+    public List<VmIpaddress> findByVMInstance(Long nic) throws Exception {
+        return ipaddressRepo.findByVMInstanceAndIsActive(nic, true);
+    }
+
 }
