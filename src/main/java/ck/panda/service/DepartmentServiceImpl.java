@@ -325,8 +325,8 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public Department findByUsername(String name, Boolean isActive) {
-        return (Department) departmentRepo.findByUsername(name, isActive);
+    public Department findByUsername(String name, Long domainId, Boolean isActive) {
+        return (Department) departmentRepo.findByUsername(name, domainId, isActive);
     }
 
     @Override

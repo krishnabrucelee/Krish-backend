@@ -231,4 +231,7 @@ public class EventTypes {
     /** LoadBalancer events. */
     public static final String EVENT_LOADBALANCER = "LB.";
 
+    /** VM ADD APPLICATION . */
+    public static final String EVENT_ADD_APPLICATION = "ADD.APPLICATION";
+
 }

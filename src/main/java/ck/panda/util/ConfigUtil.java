@@ -40,7 +40,7 @@ public class ConfigUtil {
 
     /**
      * To find the apikey, secret key and url from our db.
-     * 
+     *
      * @param id table id
      * @return server
      * @throws EntityNotFoundException if entity not found
@@ -56,7 +56,13 @@ public class ConfigUtil {
     }
 
     public CloudStackServer setUserServer() throws NumberFormatException, Exception {
-        server.setServer(apiURL, tokenDetails.getTokenDetails("secretkey"), tokenDetails.getTokenDetails("apikey"));
+        CloudStackConfiguration config = configRepo.findOne(1L);
+        if (config == null) {
+            throw new EntityNotFoundException("config.not.found");
+        } else {
+            server.setServer(config.getApiURL(), tokenDetails.getTokenDetails("secretkey"),
+                    tokenDetails.getTokenDetails("apikey"));
+        }
         return server;
     }
 }

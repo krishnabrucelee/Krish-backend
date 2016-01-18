@@ -383,6 +383,21 @@ public class ConvertEntityService {
     }
 
     /**
+     * Get owner by UUID.
+     *
+     * @param uuid uuid of account/user.
+     * @return user id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getOwnerByUuid(String uuid) throws Exception {
+        if (userService.findByUuIdAndIsActive(uuid, true) != null) {
+            return userService.findByUuIdAndIsActive(uuid, true).getId();
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Get department object.
      *
      * @param uuid uuid of department.
@@ -616,9 +631,9 @@ public class ConvertEntityService {
      * @return domain id.
      * @throws Exception unhandled exception.
      */
-    public Long getDepartmentByUsername(String name) throws Exception {
-        if (departmentService.findByUsername(name, true) != null) {
-            return departmentService.findByUsername(name, true).getId();
+    public Long getDepartmentByUsername(String name, Long domainId) throws Exception {
+        if (departmentService.findByUsername(name, domainId, true) != null) {
+            return departmentService.findByUsername(name, domainId, true).getId();
         } else {
             return null;
         }

@@ -1,5 +1,6 @@
 package ck.panda.domain.repository.jpa;
 
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -44,4 +45,13 @@ public interface LoadBalancerRepository extends PagingAndSortingRepository<LoadB
     @Query(value = "select lb from LoadBalancerRule lb where lb.ipAddressId =:ipAddressId AND lb.isActive =:isActive")
     Page<LoadBalancerRule> findAllByIpaddressAndIsActive(Pageable pageable, @Param("ipAddressId") Long ipAddressId, @Param("isActive") Boolean isActive);
 
+    /**
+     * Find all by ipaddress and is active.
+     *
+     * @param ipAddressId of the load balancer.
+     * @param isActive status of the load balancer.
+     * @return load balancer.
+     */
+    @Query(value = "select lb from LoadBalancerRule lb where lb.ipAddressId =:ipAddressId AND lb.isActive =:isActive")
+    List<LoadBalancerRule> findAllByIpaddressAndIsActive(@Param("ipAddressId") Long ipAddressId, @Param("isActive") Boolean isActive);
 }

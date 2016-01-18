@@ -71,9 +71,9 @@ public class SSHKey implements Serializable {
     @Transient
     private String publicKey;
 
-    /** Domain of the SSH Key. */
+    /** Domain id of the SSH Key. */
     @Transient
-    private Domain domain;
+    private Long domainId;
 
     /** Department of the SSH Key. */
     @ManyToOne
@@ -115,6 +115,10 @@ public class SSHKey implements Serializable {
     /** Transient department of the user. */
     @Transient
     private String transDepartment;
+
+    /** Transient domain of the user. */
+    @Transient
+    private String transDomain;
 
     /** Created date and time. */
     @CreatedDate
@@ -226,21 +230,21 @@ public class SSHKey implements Serializable {
     }
 
     /**
-     * Get the domain.
+     * Get the domainId.
      *
-     * @return domain
+     * @return domainId
      */
-    public Domain getDomain() {
-        return domain;
+    public Long getDomainId() {
+        return domainId;
     }
 
     /**
-     * Set the domain.
+     * Set the domainId.
      *
-     * @param domain to set
+     * @param domainId to set
      */
-    public void setDomain(Domain domain) {
-        this.domain = domain;
+    public void setDomainId(Long domainId) {
+        this.domainId = domainId;
     }
 
     /**
@@ -410,6 +414,24 @@ public class SSHKey implements Serializable {
     }
 
     /**
+     * Get the transient Domain.
+     *
+     * @return the transDomain
+     */
+    public String getTransDomain() {
+        return transDomain;
+    }
+
+    /**
+     * Set the transDomain.
+     *
+     * @param transDomain to set
+     */
+    public void setTransDomain(String transDomain) {
+        this.transDomain = transDomain;
+    }
+
+    /**
      * Get the created date time.
      *
      * @return createdDateTime
@@ -459,6 +481,7 @@ public class SSHKey implements Serializable {
         sshkey.setName(JsonUtil.getStringValue(jsonObject, "name"));
         sshkey.setFingerPrint(JsonUtil.getStringValue(jsonObject, "fingerPrint"));
         sshkey.setTransDepartment(JsonUtil.getStringValue(jsonObject, "account"));
+        sshkey.setTransDomain(JsonUtil.getStringValue(jsonObject, "domainid"));
         sshkey.setIsActive(true);
         return sshkey;
     }

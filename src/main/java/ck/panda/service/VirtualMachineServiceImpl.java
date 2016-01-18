@@ -177,10 +177,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         }
                     }
                 }
-                return virtualmachinerepository.save(vminstance);
+
+                return virtualmachinerepository.save(convertEncryptPassword(vminstance));
             }
         } else {
-            return virtualmachinerepository.save(vminstance);
+            return virtualmachinerepository.save(convertEncryptPassword(vminstance));
         }
     }
 
@@ -191,7 +192,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-            return virtualmachinerepository.save(vminstance);
+            return virtualmachinerepository.save(convertEncryptPassword(vminstance));
         }
     }
 
@@ -383,7 +384,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         default:
             LOGGER.debug("No VM Action ", event);
         }
-        return virtualmachinerepository.save(vminstance);
+        return virtualmachinerepository.save(convertEncryptPassword(vminstance));
     }
 
     /**
@@ -590,10 +591,14 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 throw new BadCredentialsException(e.getMessage());
             }
             break;
+        case EventTypes.EVENT_ADD_APPLICATION:
+            vminstance.setApplication(vmInstance.getApplication());
+            vminstance.setApplicationList(vmInstance.getApplicationList());
+            break;
         default:
             LOGGER.debug("No VM Action ", event);
         }
-        return virtualmachinerepository.save(vminstance);
+        return virtualmachinerepository.save(convertEncryptPassword(vminstance));
     }
 
     @Override
@@ -749,7 +754,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 if (jobresult.getString("jobstatus").equals("1")) {
                     vminstance.setComputeOfferingId(vminstance.getComputeOffering().getId());
                 }
-                virtualmachinerepository.save(vminstance);
+                virtualmachinerepository.save(convertEncryptPassword(vminstance));
             }
         }
         return vminstance;
@@ -822,8 +827,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     vmInstance.setNetworkId(convertEntityService.getNetworkId(vmInstance.getTransNetworkId()));
                     vmInstance.setProjectId(convertEntityService.getProjectId(vmInstance.getTransProjectId()));
                     vmInstance.setHostId(convertEntityService.getHostId(vmInstance.getTransHostId()));
-                    vmInstance.setInstanceOwnerId(convertEntityService.getUserByName(vmInstance.getTransDisplayName(),
-                            convertEntityService.getDomain(vmInstance.getTransDomainId())));
+                    vmInstance.setInstanceOwnerId(convertEntityService.getOwnerByUuid(vmInstance.getTransOwnerId()));
                     vmInstance.setDepartmentId(
                             convertEntityService.getDepartmentByUsernameAndDomains(vmInstance.getTransDepartmentId(),
                                     convertEntityService.getDomain(vmInstance.getTransDomainId())));
@@ -889,7 +893,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 optional.put("displayName", vminstance.getDisplayName());
                 cloudStackInstanceService.updateVirtualMachine(vminstance.getUuid(), optional);
             }
-            return virtualmachinerepository.save(vminstance);
+            return virtualmachinerepository.save(convertEncryptPassword(vminstance));
         }
     }
 
@@ -1046,5 +1050,16 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Override
     public List<VmInstance> findByNetworkAndVmStatus(Long networkId, Status status) throws Exception {
         return virtualmachinerepository.findByNetwork(networkId, status);
+    }
+
+    public VmInstance convertEncryptPassword(VmInstance vminstance) throws Exception {
+        if(vminstance.getVncPassword() != null && vminstance.getVncPassword().length() < 10) {
+            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+            byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+            String encryptedPassword = new String(EncryptionUtil.encrypt(vminstance.getVncPassword(), originalKey));
+            vminstance.setVncPassword(encryptedPassword);
+        }
+        return vminstance;
     }
 }
