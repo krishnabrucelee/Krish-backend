@@ -24,7 +24,7 @@ import ck.panda.util.error.exception.ApplicationException;
 import ck.panda.util.error.exception.EntityNotFoundException;
 
 /**
- * Resource Limit Service Implementation.
+ * Resource Limit Department Service Implementation.
  */
 @Service
 public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartmentService {
