@@ -129,6 +129,19 @@ public class ProjectController extends CRUDController<Project> implements ApiCon
     }
 
     /**
+     * Remove user from project.
+     *
+     * @throws Exception if error occurs.
+     * @return project.
+     */
+    @RequestMapping(value = "/remove/user", method = RequestMethod.PUT, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public Project removeUser(@RequestBody Project project) throws Exception {
+        return projectService.removeUser(project);
+    }
+
+    /**
      * Get the project by department.
      *
      * @param id user id.

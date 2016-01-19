@@ -51,6 +51,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Autowired
     private AppValidator validator;
 
+    /** Host service reference. */
+    @Autowired
+    private HostService hostService;
+
     /** Virtual Machine repository reference. */
     @Autowired
     private VirtualMachineRepository virtualmachinerepository;
@@ -227,6 +231,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     public VmInstance vmEventHandle(String vmId, String event) throws Exception {
         VmInstance vminstance = getCSConnector(vmId);
         HashMap<String, String> optional = new HashMap<String, String>();
+        if (vminstance.getProject() != null) {
+            optional.put("projectid", vminstance.getProject().getUuid());
+        }
         Errors errors = null;
         switch (event) {
         case EventTypes.EVENT_VM_STOP:
@@ -353,7 +360,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
-                        vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_DESTROYED));
+                        vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_STOPPING));
                         vminstance.setEventMessage("VM EXPUNGING");
                     }
                 }
@@ -396,12 +403,18 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     public VmInstance vmEventHandleWithVM(VmInstance vmInstance, String event) throws Exception {
         VmInstance vminstance = getCSConnector(vmInstance.getUuid());
         HashMap<String, String> optional = new HashMap<String, String>();
+        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
         Errors errors = null;
+        if (vminstance.getProject() != null) {
+            optional.put("projectid", vminstance.getProject().getUuid());
+        }
         switch (event) {
         case EventTypes.EVENT_VM_START:
             try {
-                if (!vmInstance.getHostUuid().isEmpty()) {
-                    optional.put("hostid", vmInstance.getHostUuid());
+                if (user != null && user.getType().equals(UserType.ROOT_ADMIN)) {
+                    if (!vmInstance.getHostUuid().isEmpty() && vmInstance.getHostUuid() != null) {
+                        optional.put("hostid", vmInstance.getHostUuid());
+                    }
                 }
                 String instanceResponse = cloudStackInstanceService.startVirtualMachine(vminstance.getUuid(), "json",
                         optional);
@@ -431,9 +444,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         case EventTypes.EVENT_VM_MIGRATE:
             try {
                 if (vminstance.getStatus().equals(Status.Running)) {
-                    errors = validator.sendGlobalError("No Hosts are available for Migration");
-                    if (errors.hasErrors()) {
-                        throw new BadCredentialsException("No Hosts are available for Migration");
+                    if (hostService.findAll().size() <= 1) {
+                        errors = validator.sendGlobalError("No Hosts are available for Migration");
+                        if (errors.hasErrors()) {
+                            throw new BadCredentialsException("No Hosts are available for Migration");
+                        }
                     }
                     optional.put("hostid", vmInstance.getHostUuid());
                     String instanceResponse = cloudStackInstanceService.migrateVirtualMachine(vmInstance.getUuid(),
@@ -634,7 +649,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
                     for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
                         List<VmInstance> allInstanceTempList = virtualmachinerepository
-                                .findAllByDepartmentAndProjectIsActiveAndStatus(Status.Expunging, user.getDepartment(), project);
+                                .findAllByDepartmentAndProject(Status.Expunging, user.getDepartment(), project);
                         allInstanceList.addAll(allInstanceTempList);
                     }
                     List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
@@ -643,7 +658,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     return (Page<VmInstance>) allInstanceLists;
                 } else {
                     Page<VmInstance> allInstanceLists = virtualmachinerepository
-                            .findAllByDepartment(user.getDepartmentId() ,Status.Expunging, pagingAndSorting.toPageRequest());
+                            .findAllByDepartment(user.getDepartmentId(), Status.Expunging, pagingAndSorting.toPageRequest());
                     return (Page<VmInstance>) allInstanceLists;
                 }
 
@@ -665,7 +680,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
                     for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
                         List<VmInstance> allInstanceTempList = virtualmachinerepository
-                                .findAllByDepartmentAndProjectIsActiveAndStatus(Status.valueOf(status), user.getDepartment(), project);
+                                .findAllByDepartmentAndProjectAndStatus(Status.valueOf(status), user.getDepartment(), project);
                         allInstanceList.addAll(allInstanceTempList);
                     }
                     List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
@@ -674,7 +689,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     return (Page<VmInstance>) allInstanceLists;
                 } else {
                     Page<VmInstance> allInstanceLists = virtualmachinerepository
-                            .findAllByDepartment(user.getDepartmentId(), Status.valueOf(status), pagingAndSorting.toPageRequest());
+                            .findAllByDepartmentAndStatus(Status.valueOf(status), user.getDepartment(), pagingAndSorting.toPageRequest());
                     return (Page<VmInstance>) allInstanceLists;
                 }
 
@@ -698,14 +713,14 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
                         for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
                             List<VmInstance> allInstanceTempList = virtualmachinerepository
-                                    .findAllByDepartmentAndProjectIsActiveAndStatus(Status.Expunging, user.getDepartment(), project);
+                                    .findAllByDepartmentAndProject(Status.Expunging, user.getDepartment(), project);
                             allInstanceList.addAll(allInstanceTempList);
                         }
                         List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
                         return instances;
                     } else {
-                        List<VmInstance> allInstanceLists = virtualmachinerepository.findAllByUser(Status.Expunging,
-                                user);
+                        List<VmInstance> allInstanceLists = virtualmachinerepository.findAllByDepartment(Status.Expunging,
+                                user.getDepartment());
                         return allInstanceLists;
                     }
                 }
@@ -860,14 +875,14 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
                         for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
                             List<VmInstance> allInstanceTempList = virtualmachinerepository
-                                    .findAllByUserAndProjectIsActive(status, user, project);
+                                    .findAllByDepartmentAndProjectAndStatus(status, user.getDepartment(), project);
                             allInstanceList.addAll(allInstanceTempList);
                         }
                         List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
                         return instances.size();
                     } else {
-                        List<VmInstance> allInstanceLists = virtualmachinerepository.findAllByUserIsActive(status,
-                                user);
+                        List<VmInstance> allInstanceLists = virtualmachinerepository.findAllByDepartmentIsActive(status,
+                                user.getDepartment());
                         return allInstanceLists.size();
                     }
                 }

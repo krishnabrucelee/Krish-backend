@@ -22,6 +22,15 @@ public interface ProjectService extends CRUDService<Project> {
     Project softDelete(Project project) throws Exception;
 
     /**
+     * Method to remove user from project.
+     *
+     * @param project project object.
+     * @return project.
+     * @throws Exception if error occurs.
+     */
+    Project removeUser(Project project) throws Exception;
+
+    /**
      * Find all the projects with active status.
      *
      * @param isActive true/false.

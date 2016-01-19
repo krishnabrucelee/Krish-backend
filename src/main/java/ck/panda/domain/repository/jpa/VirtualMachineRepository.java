@@ -161,11 +161,11 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      * Get the list of VMs by status and user.
      *
      * @param status of the status of VM.
-     * @param instanceOwner belongs to VM.
+     * @param department belongs to VM.
      * @return instance list
      */
-    @Query(value = "select vm from VmInstance vm where vm.status = :status and vm.instanceOwner = :user")
-    List<VmInstance> findAllByUserIsActive(@Param("status") Status status, @Param("user") User instanceOwner);
+    @Query(value = "select vm from VmInstance vm where vm.status = :status and vm.project is NULL and vm.department = :department")
+    List<VmInstance> findAllByDepartmentIsActive(@Param("status") Status status, @Param("department") Department department);
 
     /**
      * Get the list of VMs by status and user.
@@ -181,11 +181,22 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      * Get the list of VMs by status and user.
      *
      * @param status of the status of VM.
-     * @param instanceOwner belongs to VM.
+     * @param department belongs to VM.
      * @return instance list
      */
-    @Query(value = "select vm from VmInstance vm where vm.status <> :status and vm.instanceOwner = :user")
-    List<VmInstance> findAllByUser(@Param("status") Status status, @Param("user") User instanceOwner);
+    @Query(value = "select vm from VmInstance vm where vm.status <> :status and vm.project is NULL and vm.department = :department")
+    List<VmInstance> findAllByDepartment(@Param("status") Status status, @Param("department") Department department);
+
+    /**
+     * Get the list of VMs by status and user.
+     *
+     * @param status of the status of VM.
+     * @param department belongs to VM.
+     * @return instance list
+     */
+    @Query(value = "select vm from VmInstance vm where vm.status = :status and vm.project is NULL and vm.department = :department")
+    Page<VmInstance> findAllByDepartmentAndStatus(@Param("status") Status status, @Param("department") Department department, Pageable pageable);
+
 
     /**
      * Get the list of VMs by status and user.
@@ -203,12 +214,25 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      * Get the list of VMs by status and user.
      *
      * @param status of the status of VM.
-     * @param instanceOwner belongs to VM.
+     * @param department belongs to VM.
+     * @param isActive check whether instance is removed or not.
      * @param project belongs to VM.
      * @return instance list
      */
-    @Query(value = "select vm from VmInstance vm where vm.status <>:status and (vm.project = :project or vm.department = :department)")
-    List<VmInstance> findAllByDepartmentAndProjectIsActiveAndStatus(@Param("status") Status status,
+    @Query(value = "select vm from VmInstance vm where vm.status = :status and (vm.project = :project or (vm.project is NULL and vm.department = :department))")
+    List<VmInstance> findAllByDepartmentAndProjectAndStatus(@Param("status") Status status,
+            @Param("department") Department department, @Param("project") Project project);
+
+    /**
+     * Get the list of VMs by status and user.
+     *
+     * @param status of the status of VM.
+     * @param department belongs to VM.
+     * @param project belongs to VM.
+     * @return instance list
+     */
+    @Query(value = "select vm from VmInstance vm where vm.status <> :status and (vm.project = :project or (vm.project is NULL and vm.department = :department))")
+    List<VmInstance> findAllByDepartmentAndProject(@Param("status") Status status,
             @Param("department") Department department, @Param("project") Project project);
 
     /**
@@ -219,7 +243,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      * @param project belongs to VM.
      * @return instance list
      */
-    @Query(value = "select vm from VmInstance vm where vm.status <> :status and (vm.instanceOwner = :user or vm.project = :project)")
+    @Query(value = "select vm from VmInstance vm where vm.status = :status and (vm.instanceOwner = :user or vm.project = :project)")
     List<VmInstance> findAllByUserAndProject(@Param("status") Status status, @Param("user") User instanceOwner,
             @Param("project") Project project);
 
@@ -250,8 +274,8 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      * @param status get the instance list based on current state.
      * @return vmInstance list.
      */
-    @Query(value = "select vm from VmInstance vm where vm.departmentId = :id and vm.status <> :status ")
-    Page<VmInstance> findAllByDepartment(@Param("id") Long departmentId, @Param("status") Status status, Pageable pageable);
+    @Query(value = "select vm from VmInstance vm where vm.project is NULL and vm.departmentId = :departmentId and vm.status <> :status ")
+    Page<VmInstance> findAllByDepartment(@Param("departmentId") Long departmentId, @Param("status") Status status, Pageable pageable);
 
     /**
      * Find all vmInstance associated with Compute offering.
