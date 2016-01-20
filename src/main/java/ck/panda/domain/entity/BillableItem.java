@@ -2,6 +2,9 @@ package ck.panda.domain.entity;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -42,6 +45,9 @@ public class BillableItem implements Serializable {
 
     /** Type of the billable items. */
     private BillableType billableType;
+
+    /** Type of the billable unit. */
+    private BillableUnit billableUnit;
 
     /** Tax for the billable item. */
     @JoinColumn(name = "tax_id", referencedColumnName = "Id", updatable = false, insertable = false)
@@ -162,6 +168,26 @@ public class BillableItem implements Serializable {
      */
     public void setBillableType(BillableType billableType) {
         this.billableType = billableType;
+    }
+
+
+
+    /**
+     * Get the billable unit.
+     *
+     * @return the billableUnit
+     */
+    public BillableUnit getBillableUnit() {
+        return billableUnit;
+    }
+
+    /**
+     * Set the billable unit.
+     *
+     * @param billableUnit the billableUnit to set
+     */
+    public void setBillableUnit(BillableUnit billableUnit) {
+        this.billableUnit = billableUnit;
     }
 
     /**
@@ -369,4 +395,24 @@ public class BillableItem implements Serializable {
         OPTIONAL
     }
 
+    /**
+     * Unit of the billable item.
+     */
+    public enum BillableUnit {
+
+        /** Billable unit per Core per Hour. */
+        PER_CORE_PER_HOUR,
+
+        /** Billable unit per GB per Hour. */
+        PER_GB_PER_HOUR,
+
+        /** Billable unit per OS per Hour. */
+        PER_OS_PER_HOUR,
+
+        /** Billable unit per DB per Hour. */
+        PER_DB_PER_HOUR,
+
+        /** Billable unit per APP per Hour. */
+        PER_APP_PER_HOUR
+    }
 }
