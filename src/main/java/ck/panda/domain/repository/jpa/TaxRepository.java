@@ -20,4 +20,13 @@ public interface TaxRepository extends PagingAndSortingRepository<Tax, Long> {
      */
     @Query(value = "select t from Tax t where t.isActive =:isActive")
     Page<Tax> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find tax by name and is active.
+     *
+     * @param name tax name
+     * @param isActive get the tax based on active/inactive status.
+     * @return tax
+     */
+    Tax findByNameAndIsActive(@Param("name") String name, @Param("isActive") Boolean isActive);
 }

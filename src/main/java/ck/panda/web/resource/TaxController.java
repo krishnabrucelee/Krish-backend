@@ -25,7 +25,7 @@ import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
 
 /**
- * Department controller.
+ * Tax controller.
  *
  */
 @RestController
@@ -33,7 +33,7 @@ import ck.panda.util.web.CRUDController;
 @Api(value = "Taxes", description = "Operations with taxes", produces = "application/json")
 public class TaxController extends CRUDController<Tax> implements ApiController {
 
-    /** Service reference to Department. */
+    /** Service reference to Tax. */
     @Autowired
     private TaxService taxService;
 
@@ -78,5 +78,4 @@ public class TaxController extends CRUDController<Tax> implements ApiController 
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
-
 }
