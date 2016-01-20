@@ -360,46 +360,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                         for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
                             String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
                             String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
-                            String resource = null;
-                            switch (resourceType) {
-                            case "0":
-                                resource = String.valueOf(ResourceType.Instance);
-                                break;
-                            case "1":
-                                resource = String.valueOf(ResourceType.IP);
-                                break;
-                            case "2":
-                                resource = String.valueOf(ResourceType.Volume);
-                                break;
-                            case "3":
-                                resource = String.valueOf(ResourceType.Snapshot);
-                                break;
-                            case "4":
-                                resource = String.valueOf(ResourceType.Template);
-                                break;
-                            case "5":
-                                break;
-                            case "6":
-                                resource = String.valueOf(ResourceType.Network);
-                                break;
-                            case "7":
-                                resource = String.valueOf(ResourceType.VPC);
-                                break;
-                            case "8":
-                                resource = String.valueOf(ResourceType.CPU);
-                                break;
-                            case "9":
-                                resource = String.valueOf(ResourceType.Memory);
-                                break;
-                            case "10":
-                                resource = String.valueOf(ResourceType.PrimaryStorage);
-                                break;
-                            case "11":
-                                resource = String.valueOf(ResourceType.SecondaryStorage);
-                                break;
-                            default:
-                                LOGGER.debug("No Resource ", resourceType);
-                            }
+                            String resource = updateResourceCount(resourceType);
                             if (resource != null) {
                                 ResourceLimitDomain res = resourceLimitDomainService
                                         .findByDomainAndResourceCount(instance.getDomainId(), ResourceType.valueOf(resource), true);
@@ -579,46 +540,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
                         String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
                         String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
-                        String resource = null;
-                        switch (resourceType) {
-                        case "0":
-                            resource = String.valueOf(ResourceType.Instance);
-                            break;
-                        case "1":
-                            resource = String.valueOf(ResourceType.IP);
-                            break;
-                        case "2":
-                            resource = String.valueOf(ResourceType.Volume);
-                            break;
-                        case "3":
-                            resource = String.valueOf(ResourceType.Snapshot);
-                            break;
-                        case "4":
-                            resource = String.valueOf(ResourceType.Template);
-                            break;
-                        case "5":
-                            break;
-                        case "6":
-                            resource = String.valueOf(ResourceType.Network);
-                            break;
-                        case "7":
-                            resource = String.valueOf(ResourceType.VPC);
-                            break;
-                        case "8":
-                            resource = String.valueOf(ResourceType.CPU);
-                            break;
-                        case "9":
-                            resource = String.valueOf(ResourceType.Memory);
-                            break;
-                        case "10":
-                            resource = String.valueOf(ResourceType.PrimaryStorage);
-                            break;
-                        case "11":
-                            resource = String.valueOf(ResourceType.SecondaryStorage);
-                            break;
-                        default:
-                            LOGGER.debug("No Resource ", resourceType);
-                        }
+                        String resource = updateResourceCount(resourceType);
                         if (resource != null) {
                             ResourceLimitDomain res = resourceLimitDomainService
                                     .findByDomainAndResourceCount(network.getDomainId(), ResourceType.valueOf(resource), true);
@@ -654,46 +576,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
                     String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
                     String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
-                    String resource = null;
-                    switch (resourceType) {
-                    case "0":
-                        resource = String.valueOf(ResourceType.Instance);
-                        break;
-                    case "1":
-                        resource = String.valueOf(ResourceType.IP);
-                        break;
-                    case "2":
-                        resource = String.valueOf(ResourceType.Volume);
-                        break;
-                    case "3":
-                        resource = String.valueOf(ResourceType.Snapshot);
-                        break;
-                    case "4":
-                        resource = String.valueOf(ResourceType.Template);
-                        break;
-                    case "5":
-                        break;
-                    case "6":
-                        resource = String.valueOf(ResourceType.Network);
-                        break;
-                    case "7":
-                        resource = String.valueOf(ResourceType.VPC);
-                        break;
-                    case "8":
-                        resource = String.valueOf(ResourceType.CPU);
-                        break;
-                    case "9":
-                        resource = String.valueOf(ResourceType.Memory);
-                        break;
-                    case "10":
-                        resource = String.valueOf(ResourceType.PrimaryStorage);
-                        break;
-                    case "11":
-                        resource = String.valueOf(ResourceType.SecondaryStorage);
-                        break;
-                    default:
-                        LOGGER.debug("No Resource ", resourceType);
-                    }
+                    String resource = updateResourceCount(resourceType);
                     if (resource != null) {
                      ResourceLimitDomain res = resourceLimitDomainService.findByDomainAndResourceCount(network.getDomainId(), ResourceType.valueOf(resource), true);
                      res.setUsedLimit(Long.valueOf(resourceCount));
@@ -905,46 +788,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                         for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
                             String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
                             String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
-                            String resource = null;
-                            switch (resourceType) {
-                            case "0":
-                                resource = String.valueOf(ResourceType.Instance);
-                                break;
-                            case "1":
-                                resource = String.valueOf(ResourceType.IP);
-                                break;
-                            case "2":
-                                resource = String.valueOf(ResourceType.Volume);
-                                break;
-                            case "3":
-                                resource = String.valueOf(ResourceType.Snapshot);
-                                break;
-                            case "4":
-                                resource = String.valueOf(ResourceType.Template);
-                                break;
-                            case "5":
-                                break;
-                            case "6":
-                                resource = String.valueOf(ResourceType.Network);
-                                break;
-                            case "7":
-                                resource = String.valueOf(ResourceType.VPC);
-                                break;
-                            case "8":
-                                resource = String.valueOf(ResourceType.CPU);
-                                break;
-                            case "9":
-                                resource = String.valueOf(ResourceType.Memory);
-                                break;
-                            case "10":
-                                resource = String.valueOf(ResourceType.PrimaryStorage);
-                                break;
-                            case "11":
-                                resource = String.valueOf(ResourceType.SecondaryStorage);
-                                break;
-                            default:
-                                LOGGER.debug("No Resource ", resourceType);
-                            }
+                            String resource = updateResourceCount(resourceType);
                             if (resource != null) {
                                 ResourceLimitDomain res = resourceLimitDomainService
                                         .findByDomainAndResourceCount(persistIp.getDomainId(), ResourceType.valueOf(resource), true);
@@ -997,46 +841,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
                         String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
                         String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
-                        String resource = null;
-                        switch (resourceType) {
-                        case "0":
-                            resource = String.valueOf(ResourceType.Instance);
-                            break;
-                        case "1":
-                            resource = String.valueOf(ResourceType.IP);
-                            break;
-                        case "2":
-                            resource = String.valueOf(ResourceType.Volume);
-                            break;
-                        case "3":
-                            resource = String.valueOf(ResourceType.Snapshot);
-                            break;
-                        case "4":
-                            resource = String.valueOf(ResourceType.Template);
-                            break;
-                        case "5":
-                            break;
-                        case "6":
-                            resource = String.valueOf(ResourceType.Network);
-                            break;
-                        case "7":
-                            resource = String.valueOf(ResourceType.VPC);
-                            break;
-                        case "8":
-                            resource = String.valueOf(ResourceType.CPU);
-                            break;
-                        case "9":
-                            resource = String.valueOf(ResourceType.Memory);
-                            break;
-                        case "10":
-                            resource = String.valueOf(ResourceType.PrimaryStorage);
-                            break;
-                        case "11":
-                            resource = String.valueOf(ResourceType.SecondaryStorage);
-                            break;
-                        default:
-                            LOGGER.debug("No Resource ", resourceType);
-                        }
+                        String resource = updateResourceCount(resourceType);
                         if (resource != null) {
                          ResourceLimitDomain res = resourceLimitDomainService.findByDomainAndResourceCount(ipAddress.getDomainId(), ResourceType.valueOf(resource), true);
                          res.setUsedLimit(Long.valueOf(resourceCount));
@@ -1118,46 +923,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
                     String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
                     String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
-                    String resource = null;
-                    switch (resourceType) {
-                    case "0":
-                        resource = String.valueOf(ResourceType.Instance);
-                        break;
-                    case "1":
-                        resource = String.valueOf(ResourceType.IP);
-                        break;
-                    case "2":
-                        resource = String.valueOf(ResourceType.Volume);
-                        break;
-                    case "3":
-                        resource = String.valueOf(ResourceType.Snapshot);
-                        break;
-                    case "4":
-                        resource = String.valueOf(ResourceType.Template);
-                        break;
-                    case "5":
-                        break;
-                    case "6":
-                        resource = String.valueOf(ResourceType.Network);
-                        break;
-                    case "7":
-                        resource = String.valueOf(ResourceType.VPC);
-                        break;
-                    case "8":
-                        resource = String.valueOf(ResourceType.CPU);
-                        break;
-                    case "9":
-                        resource = String.valueOf(ResourceType.Memory);
-                        break;
-                    case "10":
-                        resource = String.valueOf(ResourceType.PrimaryStorage);
-                        break;
-                    case "11":
-                        resource = String.valueOf(ResourceType.SecondaryStorage);
-                        break;
-                    default:
-                        LOGGER.debug("No Resource ", resourceType);
-                    }
+                    String resource = updateResourceCount(resourceType);
                     if (resource != null) {
                         ResourceLimitDomain res = resourceLimitDomainService
                                 .findByDomainAndResourceCount(volume.getDomainId(), ResourceType.valueOf(resource), true);
@@ -1510,46 +1276,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
                     String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
                     String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
-                    String resource = null;
-                    switch (resourceType) {
-                    case "0":
-                        resource = String.valueOf(ResourceType.Instance);
-                        break;
-                    case "1":
-                        resource = String.valueOf(ResourceType.IP);
-                        break;
-                    case "2":
-                        resource = String.valueOf(ResourceType.Volume);
-                        break;
-                    case "3":
-                        resource = String.valueOf(ResourceType.Snapshot);
-                        break;
-                    case "4":
-                        resource = String.valueOf(ResourceType.Template);
-                        break;
-                    case "5":
-                        break;
-                    case "6":
-                        resource = String.valueOf(ResourceType.Network);
-                        break;
-                    case "7":
-                        resource = String.valueOf(ResourceType.VPC);
-                        break;
-                    case "8":
-                        resource = String.valueOf(ResourceType.CPU);
-                        break;
-                    case "9":
-                        resource = String.valueOf(ResourceType.Memory);
-                        break;
-                    case "10":
-                        resource = String.valueOf(ResourceType.PrimaryStorage);
-                        break;
-                    case "11":
-                        resource = String.valueOf(ResourceType.SecondaryStorage);
-                        break;
-                    default:
-                        LOGGER.debug("No Resource ", resourceType);
-                    }
+                    String resource = updateResourceCount(resourceType);
                     if (resource != null) {
                      ResourceLimitDomain res = resourceLimitDomainService.findByDomainAndResourceCount(volume.getDomainId(), ResourceType.valueOf(resource), true);
                      res.setUsedLimit(Long.valueOf(resourceCount));
@@ -1561,6 +1288,56 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             volume.setIsSyncFlag(false);
             volumeService.softDelete(volume);
         }
+    }
+
+    /**
+     * Update and map the resource count current resource type.
+     *
+     * @param resourceType
+     * @return resource
+     */
+    private String updateResourceCount(String resourceType) {
+        String resource = null;
+        switch (resourceType) {
+        case "0":
+            resource = String.valueOf(ResourceType.Instance);
+            break;
+        case "1":
+            resource = String.valueOf(ResourceType.IP);
+            break;
+        case "2":
+            resource = String.valueOf(ResourceType.Volume);
+            break;
+        case "3":
+            resource = String.valueOf(ResourceType.Snapshot);
+            break;
+        case "4":
+            resource = String.valueOf(ResourceType.Template);
+            break;
+        case "5":
+            break;
+        case "6":
+            resource = String.valueOf(ResourceType.Network);
+            break;
+        case "7":
+            resource = String.valueOf(ResourceType.VPC);
+            break;
+        case "8":
+            resource = String.valueOf(ResourceType.CPU);
+            break;
+        case "9":
+            resource = String.valueOf(ResourceType.Memory);
+            break;
+        case "10":
+            resource = String.valueOf(ResourceType.PrimaryStorage);
+            break;
+        case "11":
+            resource = String.valueOf(ResourceType.SecondaryStorage);
+            break;
+        default:
+            LOGGER.debug("No Resource ", resourceType);
+        }
+        return resource;
     }
 
 }
