@@ -60,10 +60,10 @@ public class PortForwardingServiceImpl implements PortForwardingService {
                 throw new ApplicationException(errors);
             } else {
                 PortForwarding csPortForwarding = csCreatePortForwardingRule(portForwarding, errors);
-                if (portForwardingRepo.findByUUID(csPortForwarding.getUuid(), true) == null) {
-                    portForwardingRepo.save(portForwarding);
+                if (csPortForwarding != null && portForwardingRepo.findByUUID(csPortForwarding.getUuid(), true) == null) {
+                    portForwardingRepo.save(csPortForwarding);
                 }
-                return csPortForwarding;
+                return portForwarding;
             }
         } else {
             return portForwardingRepo.save(portForwarding);
@@ -164,19 +164,26 @@ public class PortForwardingServiceImpl implements PortForwardingService {
                 errors = this.validateEvent(errors, portForwardingJSON.getString("errortext"));
                 throw new ApplicationException(errors);
             } else {
+                Thread.sleep(20000);
                 String eventObjectResult = cloudStackFirewallService.firewallJobResult(portForwardingJSON.getString("jobid"),
                         "json");
-                JSONObject jobresult = new JSONObject(eventObjectResult).getJSONObject("queryasyncjobresultresponse")
-                        .getJSONObject("jobresult");
-
-                PortForwarding csPortForwarding = PortForwarding.convert(jobresult.getJSONObject("portforwardingrule"));
-                csPortForwarding.setVmInstanceId(convertEntityService.getVmInstanceId(csPortForwarding.getTransvmInstanceId()));
-                csPortForwarding.setNetworkId(convertEntityService.getNetworkId(csPortForwarding.getTransNetworkId()));
-                csPortForwarding.setIpAddressId(convertEntityService.getIpAddressId(csPortForwarding.getTransIpAddressId()));
-                return csPortForwarding;
+                JSONObject jobresult = new JSONObject(eventObjectResult).getJSONObject("queryasyncjobresultresponse");
+                if (jobresult.getString("jobstatus").equals("0")) {
+                    errors = this.validateEvent(errors, jobresult.getString("jobstatus"));
+                    throw new ApplicationException(errors);
+                }
+                if (jobresult.getJSONObject("jobresult").has("portforwardingrule")) {
+                    PortForwarding csPortForwarding = PortForwarding.convert(jobresult.getJSONObject("jobresult").getJSONObject("portforwardingrule"));
+                    csPortForwarding.setVmInstanceId(convertEntityService.getVmInstanceId(csPortForwarding.getTransvmInstanceId()));
+                    csPortForwarding.setNetworkId(convertEntityService.getNetworkId(csPortForwarding.getTransNetworkId()));
+                    csPortForwarding.setIpAddressId(convertEntityService.getIpAddressId(csPortForwarding.getTransIpAddressId()));
+                    return csPortForwarding;
+                } else {
+                    return null;
+                }
             }
         } catch (ApplicationException e) {
-            LOGGER.error("ERROR AT TEMPLATE CREATION", e);
+            LOGGER.error("ERROR AT PORT FORWARDING RULE CREATION", e);
             throw new ApplicationException(e.getErrors());
         }
     }
