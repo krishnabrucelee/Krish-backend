@@ -1029,11 +1029,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         HashMap<String, String> optional = new HashMap<String, String>();
         if (vm.getProjectId() != null) {
             optional.put("projectid", convertEntityService.getProjectById(vm.getProjectId()).getUuid());
-        } else {
-            optional.put("domainid", convertEntityService.getDomainById(vm.getDomainId()).getUuid());
         }
         optional.put("resourcetype", type);
-        String csResponse = cloudStackResourceCapacity.updateResourceCount(optional, "json");
+        String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(vm.getDomainId()).getUuid(), optional, "json");
         JSONArray capacityArrayJSON = null;
         JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
         if (csCapacity.has("resourcecount")) {

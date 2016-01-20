@@ -49,8 +49,9 @@ public class CloudStackResourceCapacity {
      * @return response json string.
      * @throws Exception unhandled errors.
      */
-    public String updateResourceCount(HashMap<String, String> optional, String response) throws Exception {
+    public String updateResourceCount(String  domainId, HashMap<String, String> optional, String response) throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("updateResourceCount", optional);
+        arguments.add(new NameValuePair("domainid", domainId));
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
         return responseDocument;

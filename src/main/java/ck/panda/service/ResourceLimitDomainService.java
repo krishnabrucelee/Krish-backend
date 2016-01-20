@@ -6,7 +6,6 @@ package ck.panda.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
-import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
 import ck.panda.util.domain.CRUDService;
@@ -75,11 +74,20 @@ public interface ResourceLimitDomainService extends CRUDService<ResourceLimitDom
 
     /**
      * Get ResourceCount.
+     *
      * @param domainId domain id
      * @param resource resource type count
      * @param isActive true/false
      * @return resource count
      */
-    ResourceLimitDomain findByDomainAndResourceCount(Long domainId, List<ResourceType> resource, Boolean isActive);
+    ResourceLimitDomain findByDomainAndResourceCount(Long domainId, ResourceType resource, Boolean isActive);
+
+    /**
+     * List current domain for resource count.
+     *
+     * @return domain
+     * @throws Exception error
+     */
+    List<ResourceLimitDomain> findCurrentLoginDomain() throws Exception;
 
 }

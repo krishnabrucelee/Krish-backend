@@ -766,7 +766,7 @@ public class VolumeServiceImpl implements VolumeService {
             if (tokenDetails.getTokenDetails("usertype").equals("DOMAIN_ADMIN")) {
                 int count = 0;
                 for (Volume volume : volumeRepo.findAllByActive(true)) {
-                    if (volume.getVmInstanceId() != null && volume.getVolumeType().equals(VolumeType.DATADISK)
+                    if (volume.getVmInstanceId() != null
                             && volume.getDomainId() == Long.valueOf(tokenDetails.getTokenDetails("domainid"))) {
                         count++;
                     }
@@ -775,13 +775,14 @@ public class VolumeServiceImpl implements VolumeService {
             } else {
                 List<Volume.VolumeType> volumeType = new ArrayList<>();
                 volumeType.add(VolumeType.DATADISK);
+                volumeType.add(VolumeType.ROOT);
                 User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
                 int count = 0;
                 if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
                     for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
                         for (Volume volume : volumeRepo.findByProjectAndVolumeTypeCount(project.getId(),
                                 Long.parseLong(tokenDetails.getTokenDetails("departmentid")), volumeType, true)) {
-                            if (volume.getVmInstanceId() != null && volume.getVolumeType() != VolumeType.ROOT) {
+                            if (volume.getVmInstanceId() != null) {
                                 count++;
                             }
                         }
@@ -799,7 +800,7 @@ public class VolumeServiceImpl implements VolumeService {
         } else {
             int count = 0;
             for (Volume volume : volumeRepo.findAllByActive(true)) {
-                if (volume.getVmInstanceId() != null && volume.getVolumeType().equals(VolumeType.DATADISK)) {
+                if (volume.getVmInstanceId() != null) {
                     count++;
                 }
             }
@@ -814,7 +815,7 @@ public class VolumeServiceImpl implements VolumeService {
             if (tokenDetails.getTokenDetails("usertype").equals("DOMAIN_ADMIN")) {
                 int count = 0;
                 for (Volume volume : volumeRepo.findAllByActive(true)) {
-                    if (volume.getVmInstanceId() == null && volume.getVolumeType().equals(VolumeType.DATADISK)
+                    if (volume.getVmInstanceId() == null
                             && volume.getDomainId() == Long.valueOf(tokenDetails.getTokenDetails("domainid"))) {
                         count++;
                     }
@@ -823,13 +824,14 @@ public class VolumeServiceImpl implements VolumeService {
             } else {
                 List<Volume.VolumeType> volumeType = new ArrayList<>();
                 volumeType.add(VolumeType.DATADISK);
+                volumeType.add(VolumeType.ROOT);
                 User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
                 int count = 0;
                 if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
                     for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
                         for (Volume volume : volumeRepo.findByProjectAndVolumeTypeCount(project.getId(),
                                 Long.parseLong(tokenDetails.getTokenDetails("departmentid")), volumeType, true)) {
-                            if (volume.getVmInstanceId() == null && volume.getVolumeType() != VolumeType.ROOT) {
+                            if (volume.getVmInstanceId() == null) {
                                 count++;
                             }
                         }
@@ -847,7 +849,7 @@ public class VolumeServiceImpl implements VolumeService {
         } else {
             int count = 0;
             for (Volume volume : volumeRepo.findAllByActive(true)) {
-                if (volume.getVmInstanceId() == null && volume.getVolumeType().equals(VolumeType.DATADISK)) {
+                if (volume.getVmInstanceId() == null) {
                     count++;
                 }
             }

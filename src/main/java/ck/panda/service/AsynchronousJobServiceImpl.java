@@ -27,18 +27,17 @@ import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.PortForwarding;
 import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
-import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.entity.Volume;
+import ck.panda.domain.entity.Volume.Status;
 import ck.panda.rabbitmq.util.ResponseEvent;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackLoadBalancerService;
 import ck.panda.util.CloudStackNetworkOfferingService;
 import ck.panda.util.CloudStackNicService;
 import ck.panda.util.CloudStackResourceCapacity;
-import ck.panda.util.CloudStackResourceLimitService;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.CloudStackVolumeService;
 import ck.panda.util.EncryptionUtil;
@@ -244,13 +243,15 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             VmInstance vmIn = null;
             if (instance != null) {
                 instance.setSyncFlag(false);
-                // 3.1 Find the corresponding CS server vm object by finding it in a
+                // 3.1 Find the corresponding CS server vm object by finding it
+                // in a
                 // hash using uuid
                 if (vmInstance.getUuid().equals(instance.getUuid())) {
                     VmInstance csVm = vmInstance;
                     if (csVm != null) {
                         if (volumeService.findByInstanceAndVolumeType(instance.getId()) != null) {
-                            csVm.setVolumeSize(volumeService.findByInstanceAndVolumeType(instance.getId()).getDiskSize());
+                            csVm.setVolumeSize(
+                                    volumeService.findByInstanceAndVolumeType(instance.getId()).getDiskSize());
                         }
                     }
                     csVm.setDomainId(convertEntityService.getDomainId(csVm.getTransDomainId()));
@@ -342,54 +343,77 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     }
                     // 3.2 If found, update the vm object in app db
                     vmIn = virtualMachineService.update(instance);
-
-//                    HashMap<String, String> optional = new HashMap<String, String>();
-//                    if (instance.getProjectId() != null) {
-//                        optional.put("projectid", convertEntityService.getProjectById(instance.getProjectId()).getUuid());
-//                    } else {
-//                        optional.put("domainid", convertEntityService.getDomainById(instance.getDomainId()).getUuid());
-//                    }
-//                    List<ResourceType> domainType = new ArrayList<>();
-//                    domainType.get(ResourceType.CPU.ordinal());
-//                    domainType.get(ResourceType.IP.ordinal());
-//                    domainType.get(ResourceType.Memory.ordinal());
-//                    domainType.get(ResourceType.PrimaryStorage.ordinal());
-//                    domainType.get(ResourceType.SecondaryStorage.ordinal());
-//                    domainType.get(ResourceType.Network.ordinal());
-//                    for (ResourceType type : domainType){
-//                        optional.put("resourcetype", type.toString());
-//                        resourceLimitCount.updateResourceCount(instance.getDomain().getUuid(), "json", optional);
-//                    }
-
-//                    HashMap<String, String> optional = new HashMap<String, String>();
-//                    if (instance.getProjectId() != null) {
-//                        optional.put("projectid", convertEntityService.getProjectById(instance.getProjectId()).getUuid());
-//                    } else {
-//                        optional.put("domainid", convertEntityService.getDomainById(instance.getDomainId()).getUuid());
-//                        optional.put("account", convertEntityService.getDepartmentUsernameById(instance.getDepartmentId()));
-//                    }
-//                    String csResponse = cloudStackResourceCapacity.updateResourceCount(optional, "json");
-//                    JSONArray capacityArrayJSON = null;
-//                    JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
-//                    if (csCapacity.has("resourcecount")) {
-//                        capacityArrayJSON = csCapacity.getJSONArray("resourcecount");
-//                        for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
-//                            String resource = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
-//                             ResourceLimitDomain res = resourceLimitDomainService.findByDomainAndResourceType(instance.getDomainId(), ResourceType.Volume, true);
-//                             if() {
-//
-//                             }
-//                             if (res.getMax() != -1) {
-//                                res.setAvailable(res.getMax() - Long.valueOf(resource));
-//                             } else {
-//                                 res.setAvailable(res.getMax());
-//                             }
-//                             res.setUsedLimit(Long.valueOf(resource));
-//                             res.setIsSyncFlag(true);
-//                            resourceLimitDomainService.update(res);
-//                        }
-//                    }
-
+                    // Resource count for domain
+                    HashMap<String, String> optional = new HashMap<String, String>();
+                    if (instance.getProjectId() != null) {
+                        optional.put("projectid",
+                                convertEntityService.getProjectById(instance.getProjectId()).getUuid());
+                    } else {
+                        optional.put("account",
+                                convertEntityService.getDepartmentUsernameById(instance.getDepartmentId()));
+                    }
+                    String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(instance.getDomainId()).getUuid(), optional, "json");
+                    JSONArray capacityArrayJSON = null;
+                    JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
+                    if (csCapacity.has("resourcecount")) {
+                        capacityArrayJSON = csCapacity.getJSONArray("resourcecount");
+                        for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
+                            String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
+                            String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
+                            String resource = null;
+                            switch (resourceType) {
+                            case "0":
+                                resource = String.valueOf(ResourceType.Instance);
+                                break;
+                            case "1":
+                                resource = String.valueOf(ResourceType.IP);
+                                break;
+                            case "2":
+                                resource = String.valueOf(ResourceType.Volume);
+                                break;
+                            case "3":
+                                resource = String.valueOf(ResourceType.Snapshot);
+                                break;
+                            case "4":
+                                resource = String.valueOf(ResourceType.Template);
+                                break;
+                            case "5":
+                                break;
+                            case "6":
+                                resource = String.valueOf(ResourceType.Network);
+                                break;
+                            case "7":
+                                resource = String.valueOf(ResourceType.VPC);
+                                break;
+                            case "8":
+                                resource = String.valueOf(ResourceType.CPU);
+                                break;
+                            case "9":
+                                resource = String.valueOf(ResourceType.Memory);
+                                break;
+                            case "10":
+                                resource = String.valueOf(ResourceType.PrimaryStorage);
+                                break;
+                            case "11":
+                                resource = String.valueOf(ResourceType.SecondaryStorage);
+                                break;
+                            default:
+                                LOGGER.debug("No Resource ", resourceType);
+                            }
+                            if (resource != null) {
+                                ResourceLimitDomain res = resourceLimitDomainService
+                                        .findByDomainAndResourceCount(instance.getDomainId(), ResourceType.valueOf(resource), true);
+                                if (res.getMax() != -1) {
+                                    res.setAvailable(res.getMax() - Long.valueOf(resourceCount));
+                                } else {
+                                    res.setAvailable(res.getMax());
+                                }
+                                res.setUsedLimit(Long.valueOf(resourceCount));
+                                res.setIsSyncFlag(false);
+                                resourceLimitDomainService.update(res);
+                            }
+                        }
+                    }
                 }
             } else {
                 vmInstance.setDomainId(convertEntityService.getDomainId(vmInstance.getTransDomainId()));
@@ -537,12 +561,148 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 network.setProjectId(convertEntityService.getProjectId(csNet.getTransProjectId()));
 
                 networkService.update(network);
+
+                // Resource count for domain
+                HashMap<String, String> optional = new HashMap<String, String>();
+                if (network.getProjectId() != null) {
+                    optional.put("projectid",
+                            convertEntityService.getProjectById(network.getProjectId()).getUuid());
+                } else {
+                    optional.put("account",
+                            convertEntityService.getDepartmentUsernameById(network.getDepartmentId()));
+                }
+                String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(network.getDomainId()).getUuid(), optional, "json");
+                JSONArray capacityArrayJSON = null;
+                JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
+                if (csCapacity.has("resourcecount")) {
+                    capacityArrayJSON = csCapacity.getJSONArray("resourcecount");
+                    for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
+                        String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
+                        String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
+                        String resource = null;
+                        switch (resourceType) {
+                        case "0":
+                            resource = String.valueOf(ResourceType.Instance);
+                            break;
+                        case "1":
+                            resource = String.valueOf(ResourceType.IP);
+                            break;
+                        case "2":
+                            resource = String.valueOf(ResourceType.Volume);
+                            break;
+                        case "3":
+                            resource = String.valueOf(ResourceType.Snapshot);
+                            break;
+                        case "4":
+                            resource = String.valueOf(ResourceType.Template);
+                            break;
+                        case "5":
+                            break;
+                        case "6":
+                            resource = String.valueOf(ResourceType.Network);
+                            break;
+                        case "7":
+                            resource = String.valueOf(ResourceType.VPC);
+                            break;
+                        case "8":
+                            resource = String.valueOf(ResourceType.CPU);
+                            break;
+                        case "9":
+                            resource = String.valueOf(ResourceType.Memory);
+                            break;
+                        case "10":
+                            resource = String.valueOf(ResourceType.PrimaryStorage);
+                            break;
+                        case "11":
+                            resource = String.valueOf(ResourceType.SecondaryStorage);
+                            break;
+                        default:
+                            LOGGER.debug("No Resource ", resourceType);
+                        }
+                        if (resource != null) {
+                            ResourceLimitDomain res = resourceLimitDomainService
+                                    .findByDomainAndResourceCount(network.getDomainId(), ResourceType.valueOf(resource), true);
+                            if (res.getMax() != -1) {
+                                res.setAvailable(res.getMax() - Long.valueOf(resourceCount));
+                            } else {
+                                res.setAvailable(res.getMax());
+                            }
+                            res.setUsedLimit(Long.valueOf(resourceCount));
+                            res.setIsSyncFlag(false);
+                            resourceLimitDomainService.update(res);
+                        }
+                    }
+                }
             }
         }
         if (eventObject.getString("commandEventType").equals("NETWORK.DELETE")) {
             JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
             Network network = networkService.findByUUID(json.getString("id"));
             network.setSyncFlag(false);
+
+            HashMap<String, String> optional = new HashMap<String, String>();
+            if (network.getProjectId() != null) {
+                optional.put("projectid", convertEntityService.getProjectById(network.getProjectId()).getUuid());
+            } else {
+                optional.put("account", convertEntityService.getDepartmentUsernameById(network.getDepartmentId()));
+            }
+            String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(network.getDomainId()).getUuid(), optional, "json");
+            JSONArray capacityArrayJSON = null;
+            JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
+            if (csCapacity.has("resourcecount")) {
+                capacityArrayJSON = csCapacity.getJSONArray("resourcecount");
+                for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
+                    String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
+                    String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
+                    String resource = null;
+                    switch (resourceType) {
+                    case "0":
+                        resource = String.valueOf(ResourceType.Instance);
+                        break;
+                    case "1":
+                        resource = String.valueOf(ResourceType.IP);
+                        break;
+                    case "2":
+                        resource = String.valueOf(ResourceType.Volume);
+                        break;
+                    case "3":
+                        resource = String.valueOf(ResourceType.Snapshot);
+                        break;
+                    case "4":
+                        resource = String.valueOf(ResourceType.Template);
+                        break;
+                    case "5":
+                        break;
+                    case "6":
+                        resource = String.valueOf(ResourceType.Network);
+                        break;
+                    case "7":
+                        resource = String.valueOf(ResourceType.VPC);
+                        break;
+                    case "8":
+                        resource = String.valueOf(ResourceType.CPU);
+                        break;
+                    case "9":
+                        resource = String.valueOf(ResourceType.Memory);
+                        break;
+                    case "10":
+                        resource = String.valueOf(ResourceType.PrimaryStorage);
+                        break;
+                    case "11":
+                        resource = String.valueOf(ResourceType.SecondaryStorage);
+                        break;
+                    default:
+                        LOGGER.debug("No Resource ", resourceType);
+                    }
+                    if (resource != null) {
+                     ResourceLimitDomain res = resourceLimitDomainService.findByDomainAndResourceCount(network.getDomainId(), ResourceType.valueOf(resource), true);
+                     res.setUsedLimit(Long.valueOf(resourceCount));
+                     res.setIsSyncFlag(false);
+                    resourceLimitDomainService.update(res);
+                    }
+                }
+            }
+
             networkService.softDelete(network);
         }
     }
@@ -728,6 +888,77 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                             .getNetworkById(convertEntityService.getNetworkByUuid(csIp.getTransNetworkId()))
                             .getDomainId());
                     ipService.update(persistIp);
+                    // Resource count for domain
+                    HashMap<String, String> optional = new HashMap<String, String>();
+                    if (persistIp.getProjectId() != null) {
+                        optional.put("projectid",
+                                convertEntityService.getProjectById(persistIp.getProjectId()).getUuid());
+                    } else {
+                        optional.put("account",
+                                convertEntityService.getDepartmentUsernameById(persistIp.getDepartmentId()));
+                    }
+                    String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(persistIp.getDomainId()).getUuid(), optional, "json");
+                    JSONArray capacityArrayJSON = null;
+                    JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
+                    if (csCapacity.has("resourcecount")) {
+                        capacityArrayJSON = csCapacity.getJSONArray("resourcecount");
+                        for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
+                            String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
+                            String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
+                            String resource = null;
+                            switch (resourceType) {
+                            case "0":
+                                resource = String.valueOf(ResourceType.Instance);
+                                break;
+                            case "1":
+                                resource = String.valueOf(ResourceType.IP);
+                                break;
+                            case "2":
+                                resource = String.valueOf(ResourceType.Volume);
+                                break;
+                            case "3":
+                                resource = String.valueOf(ResourceType.Snapshot);
+                                break;
+                            case "4":
+                                resource = String.valueOf(ResourceType.Template);
+                                break;
+                            case "5":
+                                break;
+                            case "6":
+                                resource = String.valueOf(ResourceType.Network);
+                                break;
+                            case "7":
+                                resource = String.valueOf(ResourceType.VPC);
+                                break;
+                            case "8":
+                                resource = String.valueOf(ResourceType.CPU);
+                                break;
+                            case "9":
+                                resource = String.valueOf(ResourceType.Memory);
+                                break;
+                            case "10":
+                                resource = String.valueOf(ResourceType.PrimaryStorage);
+                                break;
+                            case "11":
+                                resource = String.valueOf(ResourceType.SecondaryStorage);
+                                break;
+                            default:
+                                LOGGER.debug("No Resource ", resourceType);
+                            }
+                            if (resource != null) {
+                                ResourceLimitDomain res = resourceLimitDomainService
+                                        .findByDomainAndResourceCount(persistIp.getDomainId(), ResourceType.valueOf(resource), true);
+                                if (res.getMax() != -1) {
+                                    res.setAvailable(res.getMax() - Long.valueOf(resourceCount));
+                                } else {
+                                    res.setAvailable(res.getMax());
+                                }
+                                res.setUsedLimit(Long.valueOf(resourceCount));
+                                res.setIsSyncFlag(false);
+                                resourceLimitDomainService.update(res);
+                            }
+                        }
+                    }
                 }
             } else {
                 ipaddress.setState(IpAddress.State.ALLOCATED);
@@ -752,6 +983,68 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
             IpAddress ipAddress = ipService.findbyUUID(json.getString("id"));
             if (ipAddress != null) {
+                HashMap<String, String> optional = new HashMap<String, String>();
+                if (ipAddress.getProjectId() != null) {
+                    optional.put("projectid", convertEntityService.getProjectById(ipAddress.getProjectId()).getUuid());
+                } else {
+                    optional.put("account", convertEntityService.getDepartmentUsernameById(ipAddress.getDepartmentId()));
+                }
+                String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(ipAddress.getDomainId()).getUuid(), optional, "json");
+                JSONArray capacityArrayJSON = null;
+                JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
+                if (csCapacity.has("resourcecount")) {
+                    capacityArrayJSON = csCapacity.getJSONArray("resourcecount");
+                    for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
+                        String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
+                        String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
+                        String resource = null;
+                        switch (resourceType) {
+                        case "0":
+                            resource = String.valueOf(ResourceType.Instance);
+                            break;
+                        case "1":
+                            resource = String.valueOf(ResourceType.IP);
+                            break;
+                        case "2":
+                            resource = String.valueOf(ResourceType.Volume);
+                            break;
+                        case "3":
+                            resource = String.valueOf(ResourceType.Snapshot);
+                            break;
+                        case "4":
+                            resource = String.valueOf(ResourceType.Template);
+                            break;
+                        case "5":
+                            break;
+                        case "6":
+                            resource = String.valueOf(ResourceType.Network);
+                            break;
+                        case "7":
+                            resource = String.valueOf(ResourceType.VPC);
+                            break;
+                        case "8":
+                            resource = String.valueOf(ResourceType.CPU);
+                            break;
+                        case "9":
+                            resource = String.valueOf(ResourceType.Memory);
+                            break;
+                        case "10":
+                            resource = String.valueOf(ResourceType.PrimaryStorage);
+                            break;
+                        case "11":
+                            resource = String.valueOf(ResourceType.SecondaryStorage);
+                            break;
+                        default:
+                            LOGGER.debug("No Resource ", resourceType);
+                        }
+                        if (resource != null) {
+                         ResourceLimitDomain res = resourceLimitDomainService.findByDomainAndResourceCount(ipAddress.getDomainId(), ResourceType.valueOf(resource), true);
+                         res.setUsedLimit(Long.valueOf(resourceCount));
+                         res.setIsSyncFlag(false);
+                        resourceLimitDomainService.update(res);
+                        }
+                    }
+                }
                 ipAddress.setSyncFlag(false);
                 ipService.softDelete(ipAddress);
             }
@@ -807,14 +1100,17 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             } else {
                 volume.setDiskSizeFlag(true);
             }
+            if (jobresult.getJSONObject("volume").getString("state").equalsIgnoreCase("ALLOCATED")) {
+                volume.setStatus(Status.ALLOCATED);
+            }
+
             HashMap<String, String> optional = new HashMap<String, String>();
             if (volume.getProjectId() != null) {
                 optional.put("projectid", convertEntityService.getProjectById(volume.getProjectId()).getUuid());
             } else {
-                optional.put("domainid", convertEntityService.getDomainById(volume.getDomainId()).getUuid());
                 optional.put("account", convertEntityService.getDepartmentUsernameById(volume.getDepartmentId()));
             }
-            String csResponse = cloudStackResourceCapacity.updateResourceCount(optional, "json");
+            String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(volume.getDomainId()).getUuid(), optional, "json");
             JSONArray capacityArrayJSON = null;
             JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
             if (csCapacity.has("resourcecount")) {
@@ -822,19 +1118,57 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
                     String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
                     String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
-                    if (resourceType.equals("2") || resourceType.equals("11")) {
-                        List<ResourceLimitDomain.ResourceType> resource = new ArrayList<ResourceLimitDomain.ResourceType>();
-                        resource.add(ResourceType.Volume);
-                        resource.add(ResourceType.SecondaryStorage);
+                    String resource = null;
+                    switch (resourceType) {
+                    case "0":
+                        resource = String.valueOf(ResourceType.Instance);
+                        break;
+                    case "1":
+                        resource = String.valueOf(ResourceType.IP);
+                        break;
+                    case "2":
+                        resource = String.valueOf(ResourceType.Volume);
+                        break;
+                    case "3":
+                        resource = String.valueOf(ResourceType.Snapshot);
+                        break;
+                    case "4":
+                        resource = String.valueOf(ResourceType.Template);
+                        break;
+                    case "5":
+                        break;
+                    case "6":
+                        resource = String.valueOf(ResourceType.Network);
+                        break;
+                    case "7":
+                        resource = String.valueOf(ResourceType.VPC);
+                        break;
+                    case "8":
+                        resource = String.valueOf(ResourceType.CPU);
+                        break;
+                    case "9":
+                        resource = String.valueOf(ResourceType.Memory);
+                        break;
+                    case "10":
+                        resource = String.valueOf(ResourceType.PrimaryStorage);
+                        break;
+                    case "11":
+                        resource = String.valueOf(ResourceType.SecondaryStorage);
+                        break;
+                    default:
+                        LOGGER.debug("No Resource ", resourceType);
+                    }
+                    if (resource != null) {
                         ResourceLimitDomain res = resourceLimitDomainService
-                                .findByDomainAndResourceCount(volume.getDomainId(), resource, true);
-                        if (res.getMax() != -1) {
+                                .findByDomainAndResourceCount(volume.getDomainId(), ResourceType.valueOf(resource), true);
+
+                    if (res.getMax() != -1) {
                             res.setAvailable(res.getMax() - Long.valueOf(resourceCount));
                         } else {
                             res.setAvailable(res.getMax());
                         }
                         res.setUsedLimit(Long.valueOf(resourceCount));
-                        res.setIsSyncFlag(true);
+                        res.setIsSyncFlag(false);
                         resourceLimitDomainService.update(res);
                     }
                 }
@@ -1161,16 +1495,14 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     public void asyncVolume(ResponseEvent eventObject) throws ApplicationException, Exception {
         if (eventObject.getEvent().contains("VOLUME.DELETE")) {
             Volume volume = volumeService.findByUUID(eventObject.getEntityuuid());
-            volume.setIsSyncFlag(false);
+            //Resource count domain
             HashMap<String, String> optional = new HashMap<String, String>();
             if (volume.getProjectId() != null) {
                 optional.put("projectid", convertEntityService.getProjectById(volume.getProjectId()).getUuid());
             } else {
-                optional.put("domainid", convertEntityService.getDomainById(volume.getDomainId()).getUuid());
                 optional.put("account", convertEntityService.getDepartmentUsernameById(volume.getDepartmentId()));
             }
-            optional.put("resourcetype", "2");
-            String csResponse = cloudStackResourceCapacity.updateResourceCount(optional, "json");
+            String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(volume.getDomainId()).getUuid(), optional, "json");
             JSONArray capacityArrayJSON = null;
             JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
             if (csCapacity.has("resourcecount")) {
@@ -1178,18 +1510,55 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
                     String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
                     String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
-
-                    if(resourceType.equals("2") || resourceType.equals("11")) {
-                        List<ResourceLimitDomain.ResourceType> resource = new ArrayList<ResourceLimitDomain.ResourceType>();
-                        resource.add(ResourceType.Volume);
-                        resource.add(ResourceType.SecondaryStorage);
-                     ResourceLimitDomain res = resourceLimitDomainService.findByDomainAndResourceCount(volume.getDomainId(), resource, true);
+                    String resource = null;
+                    switch (resourceType) {
+                    case "0":
+                        resource = String.valueOf(ResourceType.Instance);
+                        break;
+                    case "1":
+                        resource = String.valueOf(ResourceType.IP);
+                        break;
+                    case "2":
+                        resource = String.valueOf(ResourceType.Volume);
+                        break;
+                    case "3":
+                        resource = String.valueOf(ResourceType.Snapshot);
+                        break;
+                    case "4":
+                        resource = String.valueOf(ResourceType.Template);
+                        break;
+                    case "5":
+                        break;
+                    case "6":
+                        resource = String.valueOf(ResourceType.Network);
+                        break;
+                    case "7":
+                        resource = String.valueOf(ResourceType.VPC);
+                        break;
+                    case "8":
+                        resource = String.valueOf(ResourceType.CPU);
+                        break;
+                    case "9":
+                        resource = String.valueOf(ResourceType.Memory);
+                        break;
+                    case "10":
+                        resource = String.valueOf(ResourceType.PrimaryStorage);
+                        break;
+                    case "11":
+                        resource = String.valueOf(ResourceType.SecondaryStorage);
+                        break;
+                    default:
+                        LOGGER.debug("No Resource ", resourceType);
+                    }
+                    if (resource != null) {
+                     ResourceLimitDomain res = resourceLimitDomainService.findByDomainAndResourceCount(volume.getDomainId(), ResourceType.valueOf(resource), true);
                      res.setUsedLimit(Long.valueOf(resourceCount));
-                     res.setIsSyncFlag(true);
-                    resourceLimitDomainService.update(res);
+                     res.setIsSyncFlag(false);
+                     resourceLimitDomainService.update(res);
                     }
                 }
             }
+            volume.setIsSyncFlag(false);
             volumeService.softDelete(volume);
         }
     }

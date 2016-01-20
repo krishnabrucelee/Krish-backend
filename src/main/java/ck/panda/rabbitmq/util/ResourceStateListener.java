@@ -1,24 +1,33 @@
 package ck.panda.rabbitmq.util;
 
+import java.util.HashMap;
 import java.util.List;
+
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.PortForwarding;
+import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.domain.entity.Volume;
+import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
 import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.service.ConvertEntityService;
 import ck.panda.service.NetworkService;
 import ck.panda.service.NicService;
 import ck.panda.service.PortForwardingService;
+import ck.panda.service.ResourceLimitDomainService;
 import ck.panda.service.VirtualMachineService;
 import ck.panda.service.VolumeService;
+import ck.panda.util.CloudStackResourceCapacity;
 
 /**
  * Resource State listener will listen and update resource status to our App DB when an event directly/from application
@@ -42,6 +51,18 @@ public class ResourceStateListener implements MessageListener {
 
     /** Network Service references to update. */
     private NetworkService networkService;
+
+    /** Reference of the convert entity service. */
+    @Autowired
+    private ConvertEntityService convertEntityService;
+
+    /** Resource Limit Domain Service. */
+    @Autowired
+    private ResourceLimitDomainService resourceLimitDomainService;
+
+    /** CloudStack Resource Limit Service. */
+    @Autowired
+    private CloudStackResourceCapacity cloudStackResourceCapacity;
 
     /**
      * Inject convert entity service.
@@ -125,6 +146,73 @@ public class ResourceStateListener implements MessageListener {
                                 portForwarding.setSyncFlag(false);
                                 portForwardingService.update(portForwarding);
                             }
+
+                            // Resource count for domain
+                            HashMap<String, String> optional = new HashMap<String, String>();
+                            if (vmInstance.getProjectId() != null) {
+                                optional.put("projectid",
+                                        convertEntityService.getProjectById(vmInstance.getProjectId()).getUuid());
+                            } else {
+                                optional.put("account",
+                                        convertEntityService.getDepartmentUsernameById(vmInstance.getDepartmentId()));
+                            }
+                            String csResponse = cloudStackResourceCapacity.updateResourceCount(vmInstance.getDomain().getUuid(), optional, "json");
+                            JSONArray capacityArrayJSON = null;
+                            JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
+                            if (csCapacity.has("resourcecount")) {
+                                capacityArrayJSON = csCapacity.getJSONArray("resourcecount");
+                                for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
+                                    String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
+                                    String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
+                                    String resource = null;
+                                    switch (resourceType) {
+                                    case "0":
+                                        resource = String.valueOf(ResourceType.Instance);
+                                        break;
+                                    case "1":
+                                        resource = String.valueOf(ResourceType.IP);
+                                        break;
+                                    case "2":
+                                        resource = String.valueOf(ResourceType.Volume);
+                                        break;
+                                    case "3":
+                                        resource = String.valueOf(ResourceType.Snapshot);
+                                        break;
+                                    case "4":
+                                        resource = String.valueOf(ResourceType.Template);
+                                        break;
+                                    case "5":
+                                        break;
+                                    case "6":
+                                        resource = String.valueOf(ResourceType.Network);
+                                        break;
+                                    case "7":
+                                        resource = String.valueOf(ResourceType.VPC);
+                                        break;
+                                    case "8":
+                                        resource = String.valueOf(ResourceType.CPU);
+                                        break;
+                                    case "9":
+                                        resource = String.valueOf(ResourceType.Memory);
+                                        break;
+                                    case "10":
+                                        resource = String.valueOf(ResourceType.PrimaryStorage);
+                                        break;
+                                    case "11":
+                                        resource = String.valueOf(ResourceType.SecondaryStorage);
+                                        break;
+                                    default:
+                                        LOGGER.debug("No Resource ", resourceType);
+                                    }
+                                    if (resource != null) {
+                                        ResourceLimitDomain res = resourceLimitDomainService
+                                                .findByDomainAndResourceCount(vmInstance.getDomainId(), ResourceType.valueOf(resource), true);
+                                        res.setUsedLimit(Long.valueOf(resourceCount));
+                                        res.setIsSyncFlag(true);
+                                        resourceLimitDomainService.update(res);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -139,12 +227,12 @@ public class ResourceStateListener implements MessageListener {
                 }
                 break;
             case "Network":
-                if (resourceEvent.has("id")) {
+//                if (resourceEvent.has("id")) {
 //                    Network network = networkService.findByUUID(resourceEvent.getString("id"));
 //                    network.setStatus(network.getStatus().valueOf(resourceEvent.getString(EventTypes.RESOURCE_STATE)));
 //                    network.setSyncFlag(false);
 //                    networkService.update(network);
-                }
+//                }
                 break;
             default:
                 LOGGER.info("VM event message", event);

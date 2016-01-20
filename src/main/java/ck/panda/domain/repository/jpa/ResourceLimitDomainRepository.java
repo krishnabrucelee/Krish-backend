@@ -10,9 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-
 import ck.panda.domain.entity.ResourceLimitDomain;
-import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
 
 /**
  * Jpa Repository for ResourceLimit entity.
@@ -70,8 +68,8 @@ public interface ResourceLimitDomainRepository extends PagingAndSortingRepositor
      * @param resourceType resource type
      * @return domain resource type.
      */
-    @Query(value = "select resource from ResourceLimitDomain resource where resource.isActive =:isActive AND resource.domainId =:domainId AND resource.resourceType =:resourceType")
+    @Query(value = "select resource from ResourceLimitDomain resource where resource.isActive =:isActive AND resource.domainId =:domainId AND resource.resourceType in :resourceType")
     ResourceLimitDomain findByDomainAndResourceCount(@Param("domainId") Long id,
-            @Param("resourceType") List<ResourceLimitDomain.ResourceType> resourceType, @Param("isActive") Boolean isActive);
+            @Param("resourceType") ResourceLimitDomain.ResourceType resourceType, @Param("isActive") Boolean isActive);
 
 }

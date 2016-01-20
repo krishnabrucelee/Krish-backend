@@ -24,6 +24,7 @@ import ck.panda.domain.repository.jpa.ResourceLimitDomainRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackResourceLimitService;
 import ck.panda.util.ConfigUtil;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -65,6 +66,14 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
     /** Message source attribute. */
     @Autowired
     private MessageSource messageSource;
+
+    /** Domain Service reference. */
+    @Autowired
+    private DomainService domainService;
+
+    /** Autowired TokenDetails. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     @Override
     public ResourceLimitDomain save(ResourceLimitDomain resource) throws Exception {
@@ -268,8 +277,14 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
     }
 
     @Override
-    public ResourceLimitDomain findByDomainAndResourceCount(Long domainId, List<ResourceType> resource, Boolean isActive) {
+    public ResourceLimitDomain findByDomainAndResourceCount(Long domainId, ResourceType resource, Boolean isActive) {
         return resourceLimitDomainRepo.findByDomainAndResourceCount(domainId, resource, isActive);
+    }
+
+    @Override
+    public List<ResourceLimitDomain> findCurrentLoginDomain() throws NumberFormatException, Exception {
+        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        return (List<ResourceLimitDomain>) resourceLimitDomainRepo.findAllByDomainIdAndIsActive(domain.getId(), true);
     }
 
 }

@@ -78,14 +78,11 @@ public class CloudStackResourceLimitService {
     public String updateResourceCount(String domainId, String response,
             HashMap<String, String> optional)
             throws Exception {
-
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("updateResourceCount", optional);
         arguments.add(new NameValuePair("domainid", domainId));
         arguments.add(new NameValuePair("response", response));
-
         String countResponse = server.request(arguments);
-
         return countResponse;
     }
 
