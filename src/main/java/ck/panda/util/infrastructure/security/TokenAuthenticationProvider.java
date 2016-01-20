@@ -16,19 +16,13 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
     /** Token service attribute. */
     private TokenService tokenService;
 
-    /** External service authenticator attribute. */
-    private ExternalServiceAuthenticator externalServiceAuthenticator;
-
     /**
      * Parameterized constructor.
-     * 
+     *
      * @param tokenService to set
-     * @param externalServiceAuthenticator to set
      */
-    public TokenAuthenticationProvider(TokenService tokenService,
-            ExternalServiceAuthenticator externalServiceAuthenticator) {
+    public TokenAuthenticationProvider(TokenService tokenService) {
         this.tokenService = tokenService;
-        this.externalServiceAuthenticator = externalServiceAuthenticator;
     }
 
     @Override
@@ -41,8 +35,7 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
             throw new BadCredentialsException("INVALID_TOKEN");
         }
         try {
-            authentication = tokenService.retrieve(token.get(), authentication, tokenService,
-                    externalServiceAuthenticator);
+            authentication = tokenService.retrieve(token.get());
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -101,7 +101,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Bean
     public AuthenticationProvider tokenAuthenticationProvider() {
-        return new TokenAuthenticationProvider(tokenService(), someExternalServiceAuthenticator());
+        return new TokenAuthenticationProvider(tokenService());
     }
 
     /**

@@ -2,18 +2,14 @@ package ck.panda.util.infrastructure.security;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
-import java.util.HashMap;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import ck.panda.domain.entity.User;
-import ck.panda.service.UserService;
 import ck.panda.util.DateConvertUtil;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -69,10 +65,6 @@ public class TokenService {
     /** Secret key. */
     @Value("${backend.admin.usersecretkey}")
     private String userSecretKey;
-
-    /** User service reference. */
-    @Autowired
-    private UserService userService;
 
     /** Build Version. */
     @Value("${app.buildversion}")
@@ -131,31 +123,10 @@ public class TokenService {
      * Get the auth token.
      *
      * @param token to set
-     * @param authentication to set
-     * @param tokenService to set
-     * @param externalServiceAuthenticator to set
      * @return Authentication
      * @throws Exception raise if error
      */
-    public Authentication retrieve(String token, Authentication authentication, TokenService tokenService,
-            ExternalServiceAuthenticator externalServiceAuthenticator) throws Exception {
-        AuthenticationWithToken resultOfAuthentication = null;
-        HashMap<Integer, String> tokenDetails = getTokenDetails(token, "@@");
-        if (tokenDetails.get(5).equals("ROOT")) {
-            User user = userService.findByUser(tokenDetails.get(1), null, "/");
-            if (user != null) {
-                user.setApiKey(tokenDetails.get(7));
-                user.setApiKey(tokenDetails.get(8));
-                token = tokenService.generateNewToken(user, "/");
-                tokenDetails = getTokenDetails(token, "@@");
-                resultOfAuthentication = externalServiceAuthenticator.authenticate(tokenDetails.get(1),
-                        tokenDetails.get(4), null, null, buildNumber);
-                resultOfAuthentication.setToken(token);
-                tokenService.store(token, resultOfAuthentication);
-                SecurityContextHolder.getContext().setAuthentication(resultOfAuthentication);
-                return resultOfAuthentication;
-            }
-        }
+    public Authentication retrieve(String token) throws Exception {
         return (Authentication) REST_API_AUTH_TOKEN.get(token).getObjectValue();
     }
 
@@ -182,27 +153,6 @@ public class TokenService {
             e.printStackTrace();
         }
         return stringBuilder;
-    }
-
-    /**
-     * @param token to set
-     * @param splitChar to set
-     * @return token details
-     * @throws Exception raise if error
-     */
-    public HashMap<Integer, String> getTokenDetails(String token, String splitChar) throws Exception {
-        String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
-        byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
-        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-        String decriptText = new String(ck.panda.util.EncryptionUtil.decrypt(token, originalKey));
-        String[] splitToken = decriptText.split(splitChar);
-        HashMap<Integer, String> returnToken = new HashMap<Integer, String>();
-        int i = 0;
-        for (String tokenDetails : splitToken) {
-            returnToken.put(i, tokenDetails);
-            i++;
-        }
-        return returnToken;
     }
 
 }
