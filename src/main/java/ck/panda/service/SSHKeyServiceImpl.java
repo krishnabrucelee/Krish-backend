@@ -10,8 +10,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
-import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.SSHKey;
+import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.repository.jpa.SSHKeyRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackSSHService;
@@ -67,8 +68,8 @@ public class SSHKeyServiceImpl implements SSHKeyService {
             errors = validator.validateEntity(sshkey, errors);
             cloudStackSSHService.setServer(configServer.setServer(1L));
             HashMap<String, String> optional = new HashMap<String, String>();
-            Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-            if (domain != null && domain.getName().equals("ROOT")) {
+            User user = convertEntity.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
+            if ((user != null && user.getType().equals(UserType.ROOT_ADMIN)) || (user != null && user.getType().equals(UserType.DOMAIN_ADMIN))) {
                 optional.put("account", String.valueOf(convertEntity.getDepartmentById(sshkey.getDepartmentId()).getUserName()));
                 optional.put("domainid", String.valueOf(convertEntity.getDomainById(sshkey.getDomainId()).getUuid()));
             } else {
@@ -77,6 +78,22 @@ public class SSHKeyServiceImpl implements SSHKeyService {
                 optional.put("account", departmentService
                         .find(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
             }
+            if (sshkey.getPublicKey() != null) {
+                String sshkeyResponse = cloudStackSSHService.registerSSHKeyPair(sshkey.getName(), sshkey.getPublicKey(), "json", optional);
+                JSONObject registerSSHResponseJSON = new JSONObject(sshkeyResponse).getJSONObject("registersshkeypairresponse");
+                if (registerSSHResponseJSON.has("errorcode")) {
+                 errors = this.validateEvent(errors, registerSSHResponseJSON.getString("errortext"));
+                    throw new ApplicationException(errors);
+                }
+                JSONObject sshkeypair = registerSSHResponseJSON.getJSONObject("keypair");
+                sshkey.setName((String) sshkeypair.get("name"));
+                sshkey.setFingerPrint((String) sshkeypair.get("fingerprint"));
+                sshkey.setIsActive(true);
+                if (user != null && user.getType().equals(UserType.USER)) {
+                    sshkey.setDomainId(Long.parseLong(tokenDetails.getTokenDetails("domainid")));
+                    sshkey.setDepartmentId(Long.parseLong(tokenDetails.getTokenDetails("departmentid")));
+                }
+            } else if (sshkey.getPublicKey() == null) {
             String sshkeyResponse = cloudStackSSHService.createSSHKeyPair(sshkey.getName(), "json", optional);
             JSONObject createSSHResponseJSON = new JSONObject(sshkeyResponse).getJSONObject("createsshkeypairresponse");
 
@@ -89,9 +106,11 @@ public class SSHKeyServiceImpl implements SSHKeyService {
             sshkey.setFingerPrint((String) sshkeypair.get("fingerprint"));
             sshkey.setPrivatekey((String) sshkeypair.get("privatekey"));
             sshkey.setIsActive(true);
-            if (domain != null && !domain.getName().equals("ROOT")) {
+            if (user != null && user.getType().equals(UserType.USER)) {
+                sshkey.setDomainId(Long.parseLong(tokenDetails.getTokenDetails("domainid")));
                 sshkey.setDepartmentId(Long.parseLong(tokenDetails.getTokenDetails("departmentid")));
-           }
+            }
+            }
         }
         return sshkeyRepo.save(sshkey);
     }
@@ -117,7 +136,9 @@ public class SSHKeyServiceImpl implements SSHKeyService {
 
     @Override
     public SSHKey update(SSHKey sshkey) throws Exception {
-        this.validateSSHKey(sshkey);
+        if (sshkey.getIsSyncFlag()) {
+            this.validateSSHKey(sshkey);
+        }
         return sshkeyRepo.save(sshkey);
     }
 
@@ -158,9 +179,13 @@ public class SSHKeyServiceImpl implements SSHKeyService {
 
     @Override
     public Page<SSHKey> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
-        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if (domain != null && domain.getName().equals("ROOT")) {
+        User user = convertEntity.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
+        if (user != null && user.getType().equals(UserType.ROOT_ADMIN)) {
             return sshkeyRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
+        } else if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
+            Page<SSHKey> allSSHKeyList = sshkeyRepo.findAllByDomainIsActive(Long.valueOf(tokenDetails.getTokenDetails("domainid")),
+                    true, pagingAndSorting.toPageRequest());
+            return allSSHKeyList;
         }
         return sshkeyRepo.findAllByDepartmentIsActive(Long.parseLong(tokenDetails.getTokenDetails("departmentid")),
                 true, pagingAndSorting.toPageRequest());
@@ -172,7 +197,6 @@ public class SSHKeyServiceImpl implements SSHKeyService {
         sshkey.setIsActive(false);
         sshkey.setStatus(SSHKey.Status.DISABLED);
         if (sshkey.getIsSyncFlag()) {
-            // set server for finding value in configuration
             Errors errors = validator.rejectIfNullEntity("sshkey", sshkey);
             errors = validator.validateEntity(sshkey, errors);
             cloudStackSSHService.setServer(configServer.setServer(1L));
@@ -206,8 +230,9 @@ public class SSHKeyServiceImpl implements SSHKeyService {
                 // 2.1 Call convert by passing JSONObject to User entity and Add
                 // the converted User entity to list
                 SSHKey sshkey = SSHKey.convert(sshKeyListJSON.getJSONObject(i));
+                sshkey.setDomainId(convertEntity.getDomainId(sshkey.getTransDomainId()));
                 sshkey.setDepartmentId(convertEntity.getDepartmentByUsername(sshkey.getTransDepartment(),
-                        domainService.findbyUUID(sshkey.getTransDomain()).getId()));
+                        domainService.findbyUUID(sshkey.getTransDomainId()).getId()));
                 sshKeyList.add(sshkey);
             }
         }
