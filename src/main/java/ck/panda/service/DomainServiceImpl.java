@@ -365,8 +365,8 @@ public class DomainServiceImpl implements DomainService {
     private void validateDomain(Domain domain) throws Exception {
         Errors errors = validator.rejectIfNullEntity("domain", domain);
         errors = validator.validateEntity(domain, errors);
-        Domain domainObject = domainRepo.findByName(domain.getName(), true);
-        if (domainObject != null && domain.getId() != domainObject.getId()) {
+        Domain validateDomain = domainRepo.findByName(domain.getName(), true);
+        if (validateDomain != null && domain.getId() != validateDomain.getId()) {
             errors.addFieldError("name", "domain.already.exist");
         }
         if (errors.hasErrors()) {
