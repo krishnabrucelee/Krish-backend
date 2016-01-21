@@ -140,7 +140,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     @Autowired
     private CloudStackLoadBalancerService cloudStackLoadBalancerService;
 
-    /** CloudStack Resource Limit Service. */
+    /** CloudStack Resource Capacity Service. */
     @Autowired
     private CloudStackResourceCapacity cloudStackResourceCapacity;
 
@@ -345,36 +345,36 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     // 3.2 If found, update the vm object in app db
                     vmIn = virtualMachineService.update(instance);
                     // Resource count for domain
-                    HashMap<String, String> optional = new HashMap<String, String>();
+                    HashMap<String, String> optionalValues = new HashMap<String, String>();
                     if (instance.getProjectId() != null) {
-                        optional.put("projectid",
+                        optionalValues.put("projectid",
                                 convertEntityService.getProjectById(instance.getProjectId()).getUuid());
                     } else {
-                        optional.put("account",
+                        optionalValues.put("account",
                                 convertEntityService.getDepartmentUsernameById(instance.getDepartmentId()));
                     }
-                    String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(instance.getDomainId()).getUuid(), optional, "json");
-                    JSONArray capacityArrayJSON = null;
-                    JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
-                    if (csCapacity.has("resourcecount")) {
-                        capacityArrayJSON = csCapacity.getJSONArray("resourcecount");
-                        for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
-                            String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
-                            String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
+                    String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(instance.getDomainId()).getUuid(), optionalValues, "json");
+                    JSONArray resourceCountArrayJSON = null;
+                    JSONObject csCountJson = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
+                    if (csCountJson.has("resourcecount")) {
+                        resourceCountArrayJSON = csCountJson.getJSONArray("resourcecount");
+                        for (int i = 0, size = resourceCountArrayJSON.length(); i < size; i++) {
+                            String resourceCount = resourceCountArrayJSON.getJSONObject(i).getString("resourcecount");
+                            String resourceType = resourceCountArrayJSON.getJSONObject(i).getString("resourcetype");
                             if (!resourceType.equals("5")) {
-                                HashMap<String, String> resource = updateResourceCount(resourceType);
-                                if (resource != null) {
-                                    ResourceLimitDomain res = resourceLimitDomainService.findByDomainAndResourceCount(
-                                            instance.getDomainId(), ResourceType.valueOf(resource.get(resourceType)),
+                                HashMap<String, String> resourceMap = updateResourceCount(resourceType);
+                                if (resourceMap != null) {
+                                    ResourceLimitDomain resourceDomainCount = resourceLimitDomainService.findByDomainAndResourceCount(
+                                            instance.getDomainId(), ResourceType.valueOf(resourceMap.get(resourceType)),
                                             true);
-                                    if (res.getMax() != -1) {
-                                        res.setAvailable(res.getMax() - Long.valueOf(resourceCount));
+                                    if (resourceDomainCount.getMax() != -1) {
+                                        resourceDomainCount.setAvailable(resourceDomainCount.getMax() - Long.valueOf(resourceCount));
                                     } else {
-                                        res.setAvailable(res.getMax());
+                                        resourceDomainCount.setAvailable(resourceDomainCount.getMax());
                                     }
-                                    res.setUsedLimit(Long.valueOf(resourceCount));
-                                    res.setIsSyncFlag(false);
-                                    resourceLimitDomainService.update(res);
+                                    resourceDomainCount.setUsedLimit(Long.valueOf(resourceCount));
+                                    resourceDomainCount.setIsSyncFlag(false);
+                                    resourceLimitDomainService.update(resourceDomainCount);
                                 }
                             }
                         }
@@ -421,9 +421,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      * @throws Exception cloudstack unhandled errors
      */
     public void assignNicTovM(VmInstance vmInstance) throws ApplicationException, Exception {
-        HashMap<String,String> optional = new HashMap<String, String>();
-        optional.put("virtualmachineid", vmInstance.getUuid());
-        String listNic = cloudStackNicService.listNics(optional, "json");
+        HashMap<String,String> optionalValues = new HashMap<String, String>();
+        optionalValues.put("virtualmachineid", vmInstance.getUuid());
+        String listNic = cloudStackNicService.listNics(optionalValues, "json");
         JSONArray nicListJSON = new JSONObject(listNic).getJSONObject("listnicsresponse").getJSONArray("nic");
         for (int i = 0; i < nicListJSON.length(); i++) {
             Nic nic = nicService.findbyUUID(nicListJSON.getJSONObject(i).getString("id"));
@@ -528,35 +528,35 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 networkService.update(network);
 
                 // Resource count for domain
-                HashMap<String, String> optional = new HashMap<String, String>();
+                HashMap<String, String> optionalValues = new HashMap<String, String>();
                 if (network.getProjectId() != null) {
-                    optional.put("projectid",
+                    optionalValues.put("projectid",
                             convertEntityService.getProjectById(network.getProjectId()).getUuid());
                 } else {
-                    optional.put("account",
+                    optionalValues.put("account",
                             convertEntityService.getDepartmentUsernameById(network.getDepartmentId()));
                 }
-                String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(network.getDomainId()).getUuid(), optional, "json");
-                JSONArray capacityArrayJSON = null;
-                JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
-                if (csCapacity.has("resourcecount")) {
-                    capacityArrayJSON = csCapacity.getJSONArray("resourcecount");
-                    for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
-                        String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
-                        String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
+                String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(network.getDomainId()).getUuid(), optionalValues, "json");
+                JSONArray resourceCountArrayJSON = null;
+                JSONObject csCountJson = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
+                if (csCountJson.has("resourcecount")) {
+                    resourceCountArrayJSON = csCountJson.getJSONArray("resourcecount");
+                    for (int i = 0, size = resourceCountArrayJSON.length(); i < size; i++) {
+                        String resourceCount = resourceCountArrayJSON.getJSONObject(i).getString("resourcecount");
+                        String resourceType = resourceCountArrayJSON.getJSONObject(i).getString("resourcetype");
                         if (!resourceType.equals("5")) {
-                            HashMap<String, String> resource = updateResourceCount(resourceType);
-                            if (resource != null) {
-                                ResourceLimitDomain res = resourceLimitDomainService.findByDomainAndResourceCount(
-                                        network.getDomainId(), ResourceType.valueOf(resource.get(resourceType)), true);
-                                if (res.getMax() != -1) {
-                                    res.setAvailable(res.getMax() - Long.valueOf(resourceCount));
+                            HashMap<String, String> resourceMap = updateResourceCount(resourceType);
+                            if (resourceMap != null) {
+                                ResourceLimitDomain resourceDomainCount = resourceLimitDomainService.findByDomainAndResourceCount(
+                                        network.getDomainId(), ResourceType.valueOf(resourceMap.get(resourceType)), true);
+                                if (resourceDomainCount.getMax() != -1) {
+                                    resourceDomainCount.setAvailable(resourceDomainCount.getMax() - Long.valueOf(resourceCount));
                                 } else {
-                                    res.setAvailable(res.getMax());
+                                    resourceDomainCount.setAvailable(resourceDomainCount.getMax());
                                 }
-                                res.setUsedLimit(Long.valueOf(resourceCount));
-                                res.setIsSyncFlag(false);
-                                resourceLimitDomainService.update(res);
+                                resourceDomainCount.setUsedLimit(Long.valueOf(resourceCount));
+                                resourceDomainCount.setIsSyncFlag(false);
+                                resourceLimitDomainService.update(resourceDomainCount);
                             }
                         }
                     }
@@ -568,28 +568,28 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             Network network = networkService.findByUUID(json.getString("id"));
             network.setSyncFlag(false);
 
-            HashMap<String, String> optional = new HashMap<String, String>();
+            HashMap<String, String> optionalValues = new HashMap<String, String>();
             if (network.getProjectId() != null) {
-                optional.put("projectid", convertEntityService.getProjectById(network.getProjectId()).getUuid());
+                optionalValues.put("projectid", convertEntityService.getProjectById(network.getProjectId()).getUuid());
             } else {
-                optional.put("account", convertEntityService.getDepartmentUsernameById(network.getDepartmentId()));
+                optionalValues.put("account", convertEntityService.getDepartmentUsernameById(network.getDepartmentId()));
             }
-            String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(network.getDomainId()).getUuid(), optional, "json");
-            JSONArray capacityArrayJSON = null;
-            JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
-            if (csCapacity.has("resourcecount")) {
-                capacityArrayJSON = csCapacity.getJSONArray("resourcecount");
-                for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
-                    String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
-                    String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
+            String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(network.getDomainId()).getUuid(), optionalValues, "json");
+            JSONArray resourceCountArrayJSON = null;
+            JSONObject csCountJson = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
+            if (csCountJson.has("resourcecount")) {
+                resourceCountArrayJSON = csCountJson.getJSONArray("resourcecount");
+                for (int i = 0, size = resourceCountArrayJSON.length(); i < size; i++) {
+                    String resourceCount = resourceCountArrayJSON.getJSONObject(i).getString("resourcecount");
+                    String resourceType = resourceCountArrayJSON.getJSONObject(i).getString("resourcetype");
                     if (!resourceType.equals("5")) {
-                        HashMap<String, String> resource = updateResourceCount(resourceType);
-                        if (resource != null) {
-                            ResourceLimitDomain res = resourceLimitDomainService.findByDomainAndResourceCount(
-                                    network.getDomainId(), ResourceType.valueOf(resource.get(resourceType)), true);
-                            res.setUsedLimit(Long.valueOf(resourceCount));
-                            res.setIsSyncFlag(false);
-                            resourceLimitDomainService.update(res);
+                        HashMap<String, String> resourceMap = updateResourceCount(resourceType);
+                        if (resourceMap != null) {
+                            ResourceLimitDomain resourceDomainCount = resourceLimitDomainService.findByDomainAndResourceCount(
+                                    network.getDomainId(), ResourceType.valueOf(resourceMap.get(resourceType)), true);
+                            resourceDomainCount.setUsedLimit(Long.valueOf(resourceCount));
+                            resourceDomainCount.setIsSyncFlag(false);
+                            resourceLimitDomainService.update(resourceDomainCount);
                         }
                     }
                 }
@@ -781,35 +781,35 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                             .getDomainId());
                     ipService.update(persistIp);
                     // Resource count for domain
-                    HashMap<String, String> optional = new HashMap<String, String>();
+                    HashMap<String, String> optionalValues = new HashMap<String, String>();
                     if (persistIp.getProjectId() != null) {
-                        optional.put("projectid",
+                        optionalValues.put("projectid",
                                 convertEntityService.getProjectById(persistIp.getProjectId()).getUuid());
                     } else {
-                        optional.put("account",
+                        optionalValues.put("account",
                                 convertEntityService.getDepartmentUsernameById(persistIp.getDepartmentId()));
                     }
-                    String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(persistIp.getDomainId()).getUuid(), optional, "json");
-                    JSONArray capacityArrayJSON = null;
-                    JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
-                    if (csCapacity.has("resourcecount")) {
-                        capacityArrayJSON = csCapacity.getJSONArray("resourcecount");
-                        for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
-                            String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
-                            String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
+                    String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(persistIp.getDomainId()).getUuid(), optionalValues, "json");
+                    JSONArray resourceCountArrayJSON = null;
+                    JSONObject csCountJson = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
+                    if (csCountJson.has("resourcecount")) {
+                        resourceCountArrayJSON = csCountJson.getJSONArray("resourcecount");
+                        for (int i = 0, size = resourceCountArrayJSON.length(); i < size; i++) {
+                            String resourceCount = resourceCountArrayJSON.getJSONObject(i).getString("resourcecount");
+                            String resourceType = resourceCountArrayJSON.getJSONObject(i).getString("resourcetype");
                             if (!resourceType.equals("5")) {
-                                HashMap<String, String> resource = updateResourceCount(resourceType);
-                                if (resource != null) {
-                                ResourceLimitDomain res = resourceLimitDomainService
-                                        .findByDomainAndResourceCount(persistIp.getDomainId(), ResourceType.valueOf(resource.get(resourceType)), true);
-                                if (res.getMax() != -1) {
-                                    res.setAvailable(res.getMax() - Long.valueOf(resourceCount));
+                                HashMap<String, String> resourceMap = updateResourceCount(resourceType);
+                                if (resourceMap != null) {
+                                ResourceLimitDomain resourceDomainCount = resourceLimitDomainService
+                                        .findByDomainAndResourceCount(persistIp.getDomainId(), ResourceType.valueOf(resourceMap.get(resourceType)), true);
+                                if (resourceDomainCount.getMax() != -1) {
+                                    resourceDomainCount.setAvailable(resourceDomainCount.getMax() - Long.valueOf(resourceCount));
                                 } else {
-                                    res.setAvailable(res.getMax());
+                                    resourceDomainCount.setAvailable(resourceDomainCount.getMax());
                                 }
-                                res.setUsedLimit(Long.valueOf(resourceCount));
-                                res.setIsSyncFlag(false);
-                                resourceLimitDomainService.update(res);
+                                resourceDomainCount.setUsedLimit(Long.valueOf(resourceCount));
+                                resourceDomainCount.setIsSyncFlag(false);
+                                resourceLimitDomainService.update(resourceDomainCount);
                             }
                             }
                         }
@@ -838,29 +838,29 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
             IpAddress ipAddress = ipService.findbyUUID(json.getString("id"));
             if (ipAddress != null) {
-                HashMap<String, String> optional = new HashMap<String, String>();
+                HashMap<String, String> optionalValues = new HashMap<String, String>();
                 if (ipAddress.getProjectId() != null) {
-                    optional.put("projectid", convertEntityService.getProjectById(ipAddress.getProjectId()).getUuid());
+                    optionalValues.put("projectid", convertEntityService.getProjectById(ipAddress.getProjectId()).getUuid());
                 } else {
-                    optional.put("account", convertEntityService.getDepartmentUsernameById(ipAddress.getDepartmentId()));
+                    optionalValues.put("account", convertEntityService.getDepartmentUsernameById(ipAddress.getDepartmentId()));
                 }
-                String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(ipAddress.getDomainId()).getUuid(), optional, "json");
-                JSONArray capacityArrayJSON = null;
-                JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
-                if (csCapacity.has("resourcecount")) {
-                    capacityArrayJSON = csCapacity.getJSONArray("resourcecount");
-                    for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
-                        String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
-                        String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
+                String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(ipAddress.getDomainId()).getUuid(), optionalValues, "json");
+                JSONArray resourceCountArrayJSON = null;
+                JSONObject csCountJson = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
+                if (csCountJson.has("resourcecount")) {
+                    resourceCountArrayJSON = csCountJson.getJSONArray("resourcecount");
+                    for (int i = 0, size = resourceCountArrayJSON.length(); i < size; i++) {
+                        String resourceCount = resourceCountArrayJSON.getJSONObject(i).getString("resourcecount");
+                        String resourceType = resourceCountArrayJSON.getJSONObject(i).getString("resourcetype");
                         if (!resourceType.equals("5")) {
-                            HashMap<String, String> resource = updateResourceCount(resourceType);
-                            if (resource != null) {
-                                ResourceLimitDomain res = resourceLimitDomainService.findByDomainAndResourceCount(
-                                        ipAddress.getDomainId(), ResourceType.valueOf(resource.get(resourceType)),
+                            HashMap<String, String> resourceMap = updateResourceCount(resourceType);
+                            if (resourceMap != null) {
+                                ResourceLimitDomain resourceDomainCount = resourceLimitDomainService.findByDomainAndResourceCount(
+                                        ipAddress.getDomainId(), ResourceType.valueOf(resourceMap.get(resourceType)),
                                         true);
-                                res.setUsedLimit(Long.valueOf(resourceCount));
-                                res.setIsSyncFlag(false);
-                                resourceLimitDomainService.update(res);
+                                resourceDomainCount.setUsedLimit(Long.valueOf(resourceCount));
+                                resourceDomainCount.setIsSyncFlag(false);
+                                resourceLimitDomainService.update(resourceDomainCount);
                             }
                         }
                     }
@@ -924,34 +924,34 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 volume.setStatus(Status.ALLOCATED);
             }
 
-            HashMap<String, String> optional = new HashMap<String, String>();
+            HashMap<String, String> optionalValues = new HashMap<String, String>();
             if (volume.getProjectId() != null) {
-                optional.put("projectid", convertEntityService.getProjectById(volume.getProjectId()).getUuid());
+                optionalValues.put("projectid", convertEntityService.getProjectById(volume.getProjectId()).getUuid());
             } else {
-                optional.put("account", convertEntityService.getDepartmentUsernameById(volume.getDepartmentId()));
+                optionalValues.put("account", convertEntityService.getDepartmentUsernameById(volume.getDepartmentId()));
             }
-            String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(volume.getDomainId()).getUuid(), optional, "json");
-            JSONArray capacityArrayJSON = null;
-            JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
-            if (csCapacity.has("resourcecount")) {
-                capacityArrayJSON = csCapacity.getJSONArray("resourcecount");
-                for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
-                    String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
-                    String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
+            String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(volume.getDomainId()).getUuid(), optionalValues, "json");
+            JSONArray resourceCountArrayJSON = null;
+            JSONObject csCountJson = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
+            if (csCountJson.has("resourcecount")) {
+                resourceCountArrayJSON = csCountJson.getJSONArray("resourcecount");
+                for (int i = 0, size = resourceCountArrayJSON.length(); i < size; i++) {
+                    String resourceCount = resourceCountArrayJSON.getJSONObject(i).getString("resourcecount");
+                    String resourceType = resourceCountArrayJSON.getJSONObject(i).getString("resourcetype");
                     if (!resourceType.equals("5")) {
-                        HashMap<String, String> resource = updateResourceCount(resourceType);
-                        if (resource != null) {
-                            ResourceLimitDomain res = resourceLimitDomainService.findByDomainAndResourceCount(
-                                    volume.getDomainId(), ResourceType.valueOf(resource.get(resourceType)), true);
+                        HashMap<String, String> resourceMap = updateResourceCount(resourceType);
+                        if (resourceMap != null) {
+                            ResourceLimitDomain resourceDomainCount = resourceLimitDomainService.findByDomainAndResourceCount(
+                                    volume.getDomainId(), ResourceType.valueOf(resourceMap.get(resourceType)), true);
 
-                            if (res.getMax() != -1) {
-                                res.setAvailable(res.getMax() - Long.valueOf(resourceCount));
+                            if (resourceDomainCount.getMax() != -1) {
+                                resourceDomainCount.setAvailable(resourceDomainCount.getMax() - Long.valueOf(resourceCount));
                             } else {
-                                res.setAvailable(res.getMax());
+                                resourceDomainCount.setAvailable(resourceDomainCount.getMax());
                             }
-                            res.setUsedLimit(Long.valueOf(resourceCount));
-                            res.setIsSyncFlag(false);
-                            resourceLimitDomainService.update(res);
+                            resourceDomainCount.setUsedLimit(Long.valueOf(resourceCount));
+                            resourceDomainCount.setIsSyncFlag(false);
+                            resourceLimitDomainService.update(resourceDomainCount);
                         }
                     }
                 }
@@ -1279,27 +1279,27 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         if (eventObject.getEvent().contains("VOLUME.DELETE")) {
             Volume volume = volumeService.findByUUID(eventObject.getEntityuuid());
             //Resource count domain
-            HashMap<String, String> optional = new HashMap<String, String>();
+            HashMap<String, String> optionalValues = new HashMap<String, String>();
             if (volume.getProjectId() != null) {
-                optional.put("projectid", convertEntityService.getProjectById(volume.getProjectId()).getUuid());
+                optionalValues.put("projectid", convertEntityService.getProjectById(volume.getProjectId()).getUuid());
             } else {
-                optional.put("account", convertEntityService.getDepartmentUsernameById(volume.getDepartmentId()));
+                optionalValues.put("account", convertEntityService.getDepartmentUsernameById(volume.getDepartmentId()));
             }
-            String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(volume.getDomainId()).getUuid(), optional, "json");
-            JSONArray capacityArrayJSON = null;
-            JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
-            if (csCapacity.has("resourcecount")) {
-                capacityArrayJSON = csCapacity.getJSONArray("resourcecount");
-                for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
-                    String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
-                    String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
+            String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(volume.getDomainId()).getUuid(), optionalValues, "json");
+            JSONArray resourceCountArrayJSON = null;
+            JSONObject csCountJson = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
+            if (csCountJson.has("resourcecount")) {
+                resourceCountArrayJSON = csCountJson.getJSONArray("resourcecount");
+                for (int i = 0, size = resourceCountArrayJSON.length(); i < size; i++) {
+                    String resourceCount = resourceCountArrayJSON.getJSONObject(i).getString("resourcecount");
+                    String resourceType = resourceCountArrayJSON.getJSONObject(i).getString("resourcetype");
                     if (!resourceType.equals("5")) {
-                        HashMap<String, String> resource = updateResourceCount(resourceType);
-                        if (resource != null) {
-                            ResourceLimitDomain res = resourceLimitDomainService.findByDomainAndResourceCount(volume.getDomainId(), ResourceType.valueOf(resource.get(resourceType)), true);
-                            res.setUsedLimit(Long.valueOf(resourceCount));
-                            res.setIsSyncFlag(false);
-                            resourceLimitDomainService.update(res);
+                        HashMap<String, String> resourceMap = updateResourceCount(resourceType);
+                        if (resourceMap != null) {
+                            ResourceLimitDomain resourceDomainCount = resourceLimitDomainService.findByDomainAndResourceCount(volume.getDomainId(), ResourceType.valueOf(resourceMap.get(resourceType)), true);
+                            resourceDomainCount.setUsedLimit(Long.valueOf(resourceCount));
+                            resourceDomainCount.setIsSyncFlag(false);
+                            resourceLimitDomainService.update(resourceDomainCount);
                         }
                     }
                 }
@@ -1312,23 +1312,23 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Update and map the resource count current resource type.
      *
-     * @param resourceType
+     * @param resourceType resource type of domain resource.
      * @return resource
      */
     private HashMap<String, String> updateResourceCount(String resourceType) {
-        HashMap<String, String> resource = new HashMap<>();
-        resource.put("0", String.valueOf(ResourceType.Instance));
-        resource.put("1", String.valueOf(ResourceType.IP));
-        resource.put("2", String.valueOf(ResourceType.Volume));
-        resource.put("3", String.valueOf(ResourceType.Snapshot));
-        resource.put("4", String.valueOf(ResourceType.Template));
-        resource.put("6", String.valueOf(ResourceType.Network));
-        resource.put("7", String.valueOf(ResourceType.VPC));
-        resource.put("8", String.valueOf(ResourceType.CPU));
-        resource.put("9", String.valueOf(ResourceType.Memory));
-        resource.put("10", String.valueOf(ResourceType.PrimaryStorage));
-        resource.put("11", String.valueOf(ResourceType.SecondaryStorage));
-        return resource;
+        HashMap<String, String> resourceMap = new HashMap<>();
+        resourceMap.put("0", String.valueOf(ResourceType.Instance));
+        resourceMap.put("1", String.valueOf(ResourceType.IP));
+        resourceMap.put("2", String.valueOf(ResourceType.Volume));
+        resourceMap.put("3", String.valueOf(ResourceType.Snapshot));
+        resourceMap.put("4", String.valueOf(ResourceType.Template));
+        resourceMap.put("6", String.valueOf(ResourceType.Network));
+        resourceMap.put("7", String.valueOf(ResourceType.VPC));
+        resourceMap.put("8", String.valueOf(ResourceType.CPU));
+        resourceMap.put("9", String.valueOf(ResourceType.Memory));
+        resourceMap.put("10", String.valueOf(ResourceType.PrimaryStorage));
+        resourceMap.put("11", String.valueOf(ResourceType.SecondaryStorage));
+        return resourceMap;
     }
 
 }

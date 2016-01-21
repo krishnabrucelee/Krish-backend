@@ -266,7 +266,7 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
     }
 
     @Override
-    public ResourceLimitDomain findByDomainAndResourceType(Long domainId, ResourceLimitDomain.ResourceType resourceType,
+    public ResourceLimitDomain findByDomainAndResourceType(Long domainId, ResourceType resourceType,
             Boolean isActive) throws Exception {
         return resourceLimitDomainRepo.findByDomainAndResourceType(domainId, resourceType, isActive);
     }

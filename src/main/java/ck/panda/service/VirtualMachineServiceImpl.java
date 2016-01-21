@@ -151,6 +151,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     if (vminstance.getStorageOfferingId() != null) {
                         optional.put("diskofferingid",
                                 convertEntityService.getStorageOfferById(vminstance.getStorageOfferingId()).getUuid());
+                        optional.put("details[0].maxIopsDo", convertEntityService.getStorageOfferById(vminstance.getStorageOfferingId()).getDiskMaxIops().toString());
+                        optional.put("details[0].minIopsDo", convertEntityService.getStorageOfferById(vminstance.getStorageOfferingId()).getDiskMinIops().toString());
                     }
                     if (convertEntityService.getComputeOfferById(vminstance.getComputeOfferingId()).getCustomized()) {
                         optional.put("details[0].cpuNumber", vminstance.getCpuCore().toString());
@@ -1023,15 +1025,15 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
      * @return resouce count.
      * @throws Exception unhandled errors.
      */
-    public Long updateResourceCount(VmInstance vm, String type) throws Exception {
+    public Long updateResourceCount(VmInstance vmInstance, String type) throws Exception {
         CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
         this.server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
         HashMap<String, String> optional = new HashMap<String, String>();
-        if (vm.getProjectId() != null) {
-            optional.put("projectid", convertEntityService.getProjectById(vm.getProjectId()).getUuid());
+        if (vmInstance.getProjectId() != null) {
+            optional.put("projectid", convertEntityService.getProjectById(vmInstance.getProjectId()).getUuid());
         }
         optional.put("resourcetype", type);
-        String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(vm.getDomainId()).getUuid(), optional, "json");
+        String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(vmInstance.getDomainId()).getUuid(), optional, "json");
         JSONArray capacityArrayJSON = null;
         JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
         if (csCapacity.has("resourcecount")) {

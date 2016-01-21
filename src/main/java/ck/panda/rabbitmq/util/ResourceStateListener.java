@@ -60,7 +60,7 @@ public class ResourceStateListener implements MessageListener {
     @Autowired
     private ResourceLimitDomainService resourceLimitDomainService;
 
-    /** CloudStack Resource Limit Service. */
+    /** CloudStack Resource Capacity Service. */
     @Autowired
     private CloudStackResourceCapacity cloudStackResourceCapacity;
 
@@ -157,22 +157,22 @@ public class ResourceStateListener implements MessageListener {
                                         convertEntityService.getDepartmentUsernameById(vmInstance.getDepartmentId()));
                             }
                             String csResponse = cloudStackResourceCapacity.updateResourceCount(vmInstance.getDomain().getUuid(), optional, "json");
-                            JSONArray capacityArrayJSON = null;
-                            JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
-                            if (csCapacity.has("resourcecount")) {
-                                capacityArrayJSON = csCapacity.getJSONArray("resourcecount");
-                                for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
-                                    String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
-                                    String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
+                            JSONArray resourceCountArrayJSON = null;
+                            JSONObject csCountJson = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
+                            if (csCountJson.has("resourcecount")) {
+                                resourceCountArrayJSON = csCountJson.getJSONArray("resourcecount");
+                                for (int i = 0, size = resourceCountArrayJSON.length(); i < size; i++) {
+                                    String resourceCount = resourceCountArrayJSON.getJSONObject(i).getString("resourcecount");
+                                    String resourceType = resourceCountArrayJSON.getJSONObject(i).getString("resourcetype");
                                     if (!resourceType.equals("5")) {
-                                        HashMap<String, String> resource = updateResourceCount(resourceType);
-                                        if (resource != null) {
-                                            ResourceLimitDomain res = resourceLimitDomainService
+                                        HashMap<String, String> resourceMap = updateResourceCount(resourceType);
+                                        if (resourceMap != null) {
+                                            ResourceLimitDomain resourceDomainCount = resourceLimitDomainService
                                                     .findByDomainAndResourceCount(vmInstance.getDomainId(),
-                                                            ResourceType.valueOf(resource.get(resourceType)), true);
-                                            res.setUsedLimit(Long.valueOf(resourceCount));
-                                            res.setIsSyncFlag(true);
-                                            resourceLimitDomainService.update(res);
+                                                            ResourceType.valueOf(resourceMap.get(resourceType)), true);
+                                            resourceDomainCount.setUsedLimit(Long.valueOf(resourceCount));
+                                            resourceDomainCount.setIsSyncFlag(true);
+                                            resourceLimitDomainService.update(resourceDomainCount);
                                         }
                                     }
                                 }
@@ -202,22 +202,22 @@ public class ResourceStateListener implements MessageListener {
     /**
      * Update and map the resource count current resource type.
      *
-     * @param resourceType resource type
+     * @param resourceType resource type of domain resource.
      * @return resource
      */
     private HashMap<String, String> updateResourceCount(String resourceType) {
-        HashMap<String, String> resource = new HashMap<>();
-        resource.put("0", String.valueOf(ResourceType.Instance));
-        resource.put("1", String.valueOf(ResourceType.IP));
-        resource.put("2", String.valueOf(ResourceType.Volume));
-        resource.put("3", String.valueOf(ResourceType.Snapshot));
-        resource.put("4", String.valueOf(ResourceType.Template));
-        resource.put("6", String.valueOf(ResourceType.Network));
-        resource.put("7", String.valueOf(ResourceType.VPC));
-        resource.put("8", String.valueOf(ResourceType.CPU));
-        resource.put("9", String.valueOf(ResourceType.Memory));
-        resource.put("10", String.valueOf(ResourceType.PrimaryStorage));
-        resource.put("11", String.valueOf(ResourceType.SecondaryStorage));
-        return resource;
+        HashMap<String, String> resourceMap = new HashMap<>();
+        resourceMap.put("0", String.valueOf(ResourceType.Instance));
+        resourceMap.put("1", String.valueOf(ResourceType.IP));
+        resourceMap.put("2", String.valueOf(ResourceType.Volume));
+        resourceMap.put("3", String.valueOf(ResourceType.Snapshot));
+        resourceMap.put("4", String.valueOf(ResourceType.Template));
+        resourceMap.put("6", String.valueOf(ResourceType.Network));
+        resourceMap.put("7", String.valueOf(ResourceType.VPC));
+        resourceMap.put("8", String.valueOf(ResourceType.CPU));
+        resourceMap.put("9", String.valueOf(ResourceType.Memory));
+        resourceMap.put("10", String.valueOf(ResourceType.PrimaryStorage));
+        resourceMap.put("11", String.valueOf(ResourceType.SecondaryStorage));
+        return resourceMap;
     }
 }
