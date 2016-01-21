@@ -151,8 +151,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     if (vminstance.getStorageOfferingId() != null) {
                         optional.put("diskofferingid",
                                 convertEntityService.getStorageOfferById(vminstance.getStorageOfferingId()).getUuid());
-                        optional.put("details[0].maxIopsDo", convertEntityService.getStorageOfferById(vminstance.getStorageOfferingId()).getDiskMaxIops().toString());
-                        optional.put("details[0].minIopsDo", convertEntityService.getStorageOfferById(vminstance.getStorageOfferingId()).getDiskMinIops().toString());
+                        optional.put("size", vminstance.getDiskSize().toString());
+                        if (vminstance.getDiskMaxIops() != null) {
+                            optional.put("details[0].maxIopsDo",vminstance.getDiskMaxIops().toString());
+                            optional.put("details[0].minIopsDo", vminstance.getDiskMinIops().toString());
+                        }
                     }
                     if (convertEntityService.getComputeOfferById(vminstance.getComputeOfferingId()).getCustomized()) {
                         optional.put("details[0].cpuNumber", vminstance.getCpuCore().toString());

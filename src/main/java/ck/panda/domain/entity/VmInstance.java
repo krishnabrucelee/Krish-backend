@@ -319,6 +319,20 @@ public class VmInstance implements Serializable {
     @Column(name = "disk_io_write")
     private Integer diskIoWrite;
 
+    /**
+     * Appears only if Custom disk size is selected. Define the volume size in GB.
+     */
+    @Column(name = "disk_size")
+    private Long diskSize;
+
+    /** The maximum iops of the disk offering. */
+    @Column(name = "max_iops")
+    private Long diskMaxIops;
+
+    /** The minimum iops of the disk offering. */
+    @Column(name = "min_iops")
+    private Long diskMinIops;
+
     /** Version attribute to handle optimistic locking. */
     @Version
     @Column(name = "version")
@@ -913,6 +927,60 @@ public class VmInstance implements Serializable {
      */
     public void setDiskIoWrite(Integer diskIoWrite) {
         this.diskIoWrite = diskIoWrite;
+    }
+
+    /**
+     * Get the diskSize of the Instance.
+
+     * @return the diskSize of Instance.
+     */
+    public Long getDiskSize() {
+        return diskSize;
+    }
+
+    /**
+     * Set the diskSize of the Instance.
+     *
+     * @param diskSize the diskSize to set
+     */
+    public void setDiskSize(Long diskSize) {
+        this.diskSize = diskSize;
+    }
+
+    /**
+     * Get the diskMaxIops of the Instance.
+
+     * @return the diskMaxIops of Instance.
+     */
+    public Long getDiskMaxIops() {
+        return diskMaxIops;
+    }
+
+    /**
+     * Set the diskMaxIops of the Instance.
+     *
+     * @param diskMaxIops the diskMaxIops to set
+     */
+    public void setDiskMaxIops(Long diskMaxIops) {
+        this.diskMaxIops = diskMaxIops;
+    }
+
+    /**
+     * Get the diskMinIops of the Instance.
+
+     * @return the diskMinIops of Instance.
+     */
+    public Long getDiskMinIops() {
+        return diskMinIops;
+    }
+
+    /**
+     * Set the diskMinIops of the Instance.
+     *
+     * @param diskMinIops the diskMinIops to set
+     */
+    public void setDiskMinIops(Long diskMinIops) {
+        this.diskMinIops = diskMinIops;
     }
 
     /**
