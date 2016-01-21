@@ -135,6 +135,7 @@ public class NetworkServiceImpl implements NetworkService {
             }
         } else {
             LOGGER.debug(network.getUuid());
+            network.setIsActive(true);
             return networkRepo.save(network);
         }
     }
@@ -397,13 +398,13 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     /**
-     * Validate the department.
+     * Validate the Network.
      *
-     * @param network reference of the department.
+     * @param network reference of the network.
      * @throws Exception error occurs
      */
     private void validateNetwork(Network network) throws Exception {
-        Errors errors = validator.rejectIfNullEntity("computes", network);
+        Errors errors = validator.rejectIfNullEntity("networks", network);
         errors = validator.validateEntity(network, errors);
         Network validNetwork = networkRepo.findName(network.getName());
         if (validNetwork != null && network.getId() != validNetwork.getId()) {
@@ -420,7 +421,7 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public List<Network> findAllByActive( Boolean isActive) throws Exception {
+    public List<Network> findAllByActive(Boolean isActive) throws Exception {
         return networkRepo.findAllByIsActive(true);
     }
 }

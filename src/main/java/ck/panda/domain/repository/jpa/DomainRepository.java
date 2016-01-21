@@ -26,10 +26,11 @@ public interface DomainRepository extends PagingAndSortingRepository<Domain, Lon
      * Find domain name to avoid duplications.
      *
      * @param domainName for login check
+     * @param isActive get the Domain list based on active/inactive status.
      * @return domain object
      */
-    @Query(value = "select domain from Domain domain where domain.companyNameAbbreviation = :domainName")
-    Domain findByName(@Param("domainName") String domainName);
+    @Query(value = "select domain from Domain domain where domain.companyNameAbbreviation = :domainName AND domain.isActive =:isActive")
+    Domain findByName(@Param("domainName") String domainName, @Param("isActive") Boolean isActive);
 
     /**
      * Find all the active or inactive domains with pagination.
