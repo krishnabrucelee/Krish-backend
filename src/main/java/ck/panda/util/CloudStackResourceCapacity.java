@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import org.apache.commons.httpclient.NameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ck.panda.service.ResourceLimitDomainService;
 
 /**
  * CloudStack resource capacity service for cloudStack connectivity with the Cloud Stack server.
@@ -16,6 +17,10 @@ public class CloudStackResourceCapacity {
     /** CloudStack server for connectivity. */
     @Autowired
     private CloudStackServer server;
+
+    /** Resource Limit Domain Service. */
+    @Autowired
+    private ResourceLimitDomainService resourceLimitDomainService;
 
     /**
      * Set values in CloudStack server.
@@ -86,5 +91,4 @@ public class CloudStackResourceCapacity {
         String responseDocument = server.request(arguments);
         return responseDocument;
     }
-
 }
