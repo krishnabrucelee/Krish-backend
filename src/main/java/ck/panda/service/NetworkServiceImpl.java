@@ -397,24 +397,6 @@ public class NetworkServiceImpl implements NetworkService {
         }
     }
 
-    /**
-     * Validate the Network.
-     *
-     * @param network reference of the network.
-     * @throws Exception error occurs
-     */
-    private void validateNetwork(Network network) throws Exception {
-        Errors errors = validator.rejectIfNullEntity("networks", network);
-        errors = validator.validateEntity(network, errors);
-        Network validNetwork = networkRepo.findName(network.getName());
-        if (validNetwork != null && network.getId() != validNetwork.getId()) {
-            errors.addFieldError("name", "network.already.exist");
-        }
-        if (errors.hasErrors()) {
-            throw new ApplicationException(errors);
-        }
-    }
-
     @Override
     public Network findById(Long id) throws Exception {
         return networkRepo.findById(id);
