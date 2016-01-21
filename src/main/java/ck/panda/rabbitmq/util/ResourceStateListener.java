@@ -164,13 +164,16 @@ public class ResourceStateListener implements MessageListener {
                                 for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
                                     String resourceCount = capacityArrayJSON.getJSONObject(i).getString("resourcecount");
                                     String resourceType = capacityArrayJSON.getJSONObject(i).getString("resourcetype");
-                                    String resource = updateResourceCount(resourceType);
-                                    if (resource != null) {
-                                        ResourceLimitDomain res = resourceLimitDomainService
-                                                .findByDomainAndResourceCount(vmInstance.getDomainId(), ResourceType.valueOf(resource), true);
-                                        res.setUsedLimit(Long.valueOf(resourceCount));
-                                        res.setIsSyncFlag(true);
-                                        resourceLimitDomainService.update(res);
+                                    if (!resourceType.equals("5")) {
+                                        HashMap<String, String> resource = updateResourceCount(resourceType);
+                                        if (resource != null) {
+                                            ResourceLimitDomain res = resourceLimitDomainService
+                                                    .findByDomainAndResourceCount(vmInstance.getDomainId(),
+                                                            ResourceType.valueOf(resource.get(resourceType)), true);
+                                            res.setUsedLimit(Long.valueOf(resourceCount));
+                                            res.setIsSyncFlag(true);
+                                            resourceLimitDomainService.update(res);
+                                        }
                                     }
                                 }
                             }
@@ -199,50 +202,22 @@ public class ResourceStateListener implements MessageListener {
     /**
      * Update and map the resource count current resource type.
      *
-     * @param resourceType
+     * @param resourceType resource type
      * @return resource
      */
-    private String updateResourceCount(String resourceType) {
-        String resource = null;
-        switch (resourceType) {
-        case "0":
-            resource = String.valueOf(ResourceType.Instance);
-            break;
-        case "1":
-            resource = String.valueOf(ResourceType.IP);
-            break;
-        case "2":
-            resource = String.valueOf(ResourceType.Volume);
-            break;
-        case "3":
-            resource = String.valueOf(ResourceType.Snapshot);
-            break;
-        case "4":
-            resource = String.valueOf(ResourceType.Template);
-            break;
-        case "5":
-            break;
-        case "6":
-            resource = String.valueOf(ResourceType.Network);
-            break;
-        case "7":
-            resource = String.valueOf(ResourceType.VPC);
-            break;
-        case "8":
-            resource = String.valueOf(ResourceType.CPU);
-            break;
-        case "9":
-            resource = String.valueOf(ResourceType.Memory);
-            break;
-        case "10":
-            resource = String.valueOf(ResourceType.PrimaryStorage);
-            break;
-        case "11":
-            resource = String.valueOf(ResourceType.SecondaryStorage);
-            break;
-        default:
-            LOGGER.debug("No Resource ", resourceType);
-        }
+    private HashMap<String, String> updateResourceCount(String resourceType) {
+        HashMap<String, String> resource = new HashMap<>();
+        resource.put("0", String.valueOf(ResourceType.Instance));
+        resource.put("1", String.valueOf(ResourceType.IP));
+        resource.put("2", String.valueOf(ResourceType.Volume));
+        resource.put("3", String.valueOf(ResourceType.Snapshot));
+        resource.put("4", String.valueOf(ResourceType.Template));
+        resource.put("6", String.valueOf(ResourceType.Network));
+        resource.put("7", String.valueOf(ResourceType.VPC));
+        resource.put("8", String.valueOf(ResourceType.CPU));
+        resource.put("9", String.valueOf(ResourceType.Memory));
+        resource.put("10", String.valueOf(ResourceType.PrimaryStorage));
+        resource.put("11", String.valueOf(ResourceType.SecondaryStorage));
         return resource;
     }
 }
