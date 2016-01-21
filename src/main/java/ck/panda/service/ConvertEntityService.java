@@ -2,8 +2,13 @@ package ck.panda.service;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
+import java.util.HashMap;
+
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,12 +21,14 @@ import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.Project;
+import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.entity.Zone;
+import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
 
 /**
  * Convert Util used to get entity object from CS server's resource uuid.
@@ -121,6 +128,10 @@ public class ConvertEntityService {
     /** Service reference to Port Forwarding. */
     @Autowired
     private PortForwardingService portForwardingService;
+
+    /** Resource Limit Domain Service. */
+    @Autowired
+    private ResourceLimitDomainService resourceLimitDomainService;
 
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
@@ -895,6 +906,62 @@ public class ConvertEntityService {
      */
     public PortForwardingService getPortForwardingService() {
         return this.portForwardingService;
+    }
+
+    /**
+     * Update the resource count for current resource type.
+     *
+     * @param csResponse cloud stack response resource type for domain resource.
+     * @throws Exception resource count error
+     */
+    public void resourceCount(String csResponse) throws Exception {
+        JSONArray resourceCountArrayJSON = null;
+        JSONObject csCountJson = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
+        if (csCountJson.has("resourcecount")) {
+            resourceCountArrayJSON = csCountJson.getJSONArray("resourcecount");
+            for (int i = 0, size = resourceCountArrayJSON.length(); i < size; i++) {
+                String resourceCount = resourceCountArrayJSON.getJSONObject(i).getString("resourcecount");
+                String resourceType = resourceCountArrayJSON.getJSONObject(i).getString("resourcetype");
+                String domainId = resourceCountArrayJSON.getJSONObject(i).getString("domainid");
+                if (!resourceType.equals("5")) {
+                    HashMap<String, String> resourceMap = getResourceTypeValue();
+                    if (resourceMap != null) {
+                        ResourceLimitDomain resourceDomainCount = resourceLimitDomainService.findByDomainAndResourceCount(
+                                getDomainId(domainId), ResourceType.valueOf(resourceMap.get(resourceType)),
+                                true);
+                        if (resourceDomainCount.getMax() != -1) {
+                            resourceDomainCount.setAvailable(resourceDomainCount.getMax() - Long.valueOf(resourceCount));
+                        } else {
+                            resourceDomainCount.setAvailable(resourceDomainCount.getMax());
+                        }
+                        resourceDomainCount.setUsedLimit(Long.valueOf(resourceCount));
+                        resourceDomainCount.setIsSyncFlag(false);
+                        resourceLimitDomainService.update(resourceDomainCount);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Map and get the resource count for current resource type value.
+     *
+     * @return resourceMap resource count mapped values for resource type.
+     */
+    private HashMap<String, String> getResourceTypeValue() {
+        HashMap<String, String> resourceMap = new HashMap<>();
+        resourceMap.put("0", String.valueOf(ResourceType.Instance));
+        resourceMap.put("1", String.valueOf(ResourceType.IP));
+        resourceMap.put("2", String.valueOf(ResourceType.Volume));
+        resourceMap.put("3", String.valueOf(ResourceType.Snapshot));
+        resourceMap.put("4", String.valueOf(ResourceType.Template));
+        resourceMap.put("6", String.valueOf(ResourceType.Network));
+        resourceMap.put("7", String.valueOf(ResourceType.VPC));
+        resourceMap.put("8", String.valueOf(ResourceType.CPU));
+        resourceMap.put("9", String.valueOf(ResourceType.Memory));
+        resourceMap.put("10", String.valueOf(ResourceType.PrimaryStorage));
+        resourceMap.put("11", String.valueOf(ResourceType.SecondaryStorage));
+        return resourceMap;
     }
 
 }

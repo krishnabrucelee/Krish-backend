@@ -3,7 +3,6 @@ package ck.panda.rabbitmq.util;
 import java.util.HashMap;
 import java.util.List;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,17 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.PortForwarding;
-import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.domain.entity.Volume;
-import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
 import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.service.ConvertEntityService;
 import ck.panda.service.NetworkService;
 import ck.panda.service.NicService;
 import ck.panda.service.PortForwardingService;
-import ck.panda.service.ResourceLimitDomainService;
 import ck.panda.service.VirtualMachineService;
 import ck.panda.service.VolumeService;
 import ck.panda.util.CloudStackResourceCapacity;
@@ -55,10 +51,6 @@ public class ResourceStateListener implements MessageListener {
     /** Reference of the convert entity service. */
     @Autowired
     private ConvertEntityService convertEntityService;
-
-    /** Resource Limit Domain Service. */
-    @Autowired
-    private ResourceLimitDomainService resourceLimitDomainService;
 
     /** CloudStack Resource Capacity Service. */
     @Autowired
@@ -148,35 +140,16 @@ public class ResourceStateListener implements MessageListener {
                             }
 
                             // Resource count for domain
-                            HashMap<String, String> optional = new HashMap<String, String>();
+                            HashMap<String, String> domainCountMap = new HashMap<String, String>();
                             if (vmInstance.getProjectId() != null) {
-                                optional.put("projectid",
+                                domainCountMap.put("projectid",
                                         convertEntityService.getProjectById(vmInstance.getProjectId()).getUuid());
                             } else {
-                                optional.put("account",
+                                domainCountMap.put("account",
                                         convertEntityService.getDepartmentUsernameById(vmInstance.getDepartmentId()));
                             }
-                            String csResponse = cloudStackResourceCapacity.updateResourceCount(vmInstance.getDomain().getUuid(), optional, "json");
-                            JSONArray resourceCountArrayJSON = null;
-                            JSONObject csCountJson = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
-                            if (csCountJson.has("resourcecount")) {
-                                resourceCountArrayJSON = csCountJson.getJSONArray("resourcecount");
-                                for (int i = 0, size = resourceCountArrayJSON.length(); i < size; i++) {
-                                    String resourceCount = resourceCountArrayJSON.getJSONObject(i).getString("resourcecount");
-                                    String resourceType = resourceCountArrayJSON.getJSONObject(i).getString("resourcetype");
-                                    if (!resourceType.equals("5")) {
-                                        HashMap<String, String> resourceMap = updateResourceCount(resourceType);
-                                        if (resourceMap != null) {
-                                            ResourceLimitDomain resourceDomainCount = resourceLimitDomainService
-                                                    .findByDomainAndResourceCount(vmInstance.getDomainId(),
-                                                            ResourceType.valueOf(resourceMap.get(resourceType)), true);
-                                            resourceDomainCount.setUsedLimit(Long.valueOf(resourceCount));
-                                            resourceDomainCount.setIsSyncFlag(true);
-                                            resourceLimitDomainService.update(resourceDomainCount);
-                                        }
-                                    }
-                                }
-                            }
+                            String csResponse = cloudStackResourceCapacity.updateResourceCount(vmInstance.getDomain().getUuid(), domainCountMap, "json");
+                            convertEntityService.resourceCount(csResponse);
                         }
                     }
                 }
@@ -197,27 +170,5 @@ public class ResourceStateListener implements MessageListener {
                 break;
             }
         }
-    }
-
-    /**
-     * Update and map the resource count current resource type.
-     *
-     * @param resourceType resource type of domain resource.
-     * @return resource
-     */
-    private HashMap<String, String> updateResourceCount(String resourceType) {
-        HashMap<String, String> resourceMap = new HashMap<>();
-        resourceMap.put("0", String.valueOf(ResourceType.Instance));
-        resourceMap.put("1", String.valueOf(ResourceType.IP));
-        resourceMap.put("2", String.valueOf(ResourceType.Volume));
-        resourceMap.put("3", String.valueOf(ResourceType.Snapshot));
-        resourceMap.put("4", String.valueOf(ResourceType.Template));
-        resourceMap.put("6", String.valueOf(ResourceType.Network));
-        resourceMap.put("7", String.valueOf(ResourceType.VPC));
-        resourceMap.put("8", String.valueOf(ResourceType.CPU));
-        resourceMap.put("9", String.valueOf(ResourceType.Memory));
-        resourceMap.put("10", String.valueOf(ResourceType.PrimaryStorage));
-        resourceMap.put("11", String.valueOf(ResourceType.SecondaryStorage));
-        return resourceMap;
     }
 }
