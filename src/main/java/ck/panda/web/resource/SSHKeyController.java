@@ -77,7 +77,7 @@ public class SSHKeyController extends CRUDController<SSHKey> implements ApiContr
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, SSHKey.class);
-        Page<SSHKey> pageResponse = sshkeyService.findAllByActive(page);
+        Page<SSHKey> pageResponse = sshkeyService.findAll(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
@@ -92,7 +92,7 @@ public class SSHKeyController extends CRUDController<SSHKey> implements ApiContr
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<SSHKey> getSearch() throws Exception {
-        return sshkeyService.findAllByIsActive(true);
+        return sshkeyService.findAll();
     }
 
 }

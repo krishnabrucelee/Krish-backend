@@ -9,10 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.SSHKey;
-import ck.panda.domain.entity.User;
-import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.repository.jpa.SSHKeyRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackSSHService;
@@ -68,8 +65,7 @@ public class SSHKeyServiceImpl implements SSHKeyService {
             errors = validator.validateEntity(sshkey, errors);
             cloudStackSSHService.setServer(configServer.setServer(1L));
             HashMap<String, String> optional = new HashMap<String, String>();
-            User user = convertEntity.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
-            if ((user != null && user.getType().equals(UserType.ROOT_ADMIN)) || (user != null && user.getType().equals(UserType.DOMAIN_ADMIN))) {
+            if ((String.valueOf(tokenDetails.getTokenDetails("usertype")).equals("ROOT_ADMIN")) || (String.valueOf(tokenDetails.getTokenDetails("usertype")).equals("DOMAIN_ADMIN"))) {
                 optional.put("account", String.valueOf(convertEntity.getDepartmentById(sshkey.getDepartmentId()).getUserName()));
                 optional.put("domainid", String.valueOf(convertEntity.getDomainById(sshkey.getDomainId()).getUuid()));
             } else {
@@ -89,7 +85,7 @@ public class SSHKeyServiceImpl implements SSHKeyService {
                 sshkey.setName((String) sshkeypair.get("name"));
                 sshkey.setFingerPrint((String) sshkeypair.get("fingerprint"));
                 sshkey.setIsActive(true);
-                if (user != null && user.getType().equals(UserType.USER)) {
+                if (String.valueOf(tokenDetails.getTokenDetails("usertype")).equals("USER")) {
                     sshkey.setDomainId(Long.parseLong(tokenDetails.getTokenDetails("domainid")));
                     sshkey.setDepartmentId(Long.parseLong(tokenDetails.getTokenDetails("departmentid")));
                 }
@@ -106,7 +102,7 @@ public class SSHKeyServiceImpl implements SSHKeyService {
             sshkey.setFingerPrint((String) sshkeypair.get("fingerprint"));
             sshkey.setPrivatekey((String) sshkeypair.get("privatekey"));
             sshkey.setIsActive(true);
-            if (user != null && user.getType().equals(UserType.USER)) {
+            if (String.valueOf(tokenDetails.getTokenDetails("usertype")).equals("USER")) {
                 sshkey.setDomainId(Long.parseLong(tokenDetails.getTokenDetails("domainid")));
                 sshkey.setDepartmentId(Long.parseLong(tokenDetails.getTokenDetails("departmentid")));
             }
@@ -163,32 +159,25 @@ public class SSHKeyServiceImpl implements SSHKeyService {
 
     @Override
     public Page<SSHKey> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return sshkeyRepo.findAll(pagingAndSorting.toPageRequest());
-    }
-
-    @Override
-    public List<SSHKey> findAll() throws Exception {
-        Department department = departmentService
-                .find(Long.valueOf(tokenDetails.getTokenDetails("departmentid")));
-        if (department != null && !department.getUserName().equals("ROOT")) {
-            return sshkeyRepo
-                    .findAllByDepartmentAndIsActive(Long.parseLong(tokenDetails.getTokenDetails("departmentid")), true);
-        }
-        return (List<SSHKey>) sshkeyRepo.findAllByIsActive(true);
-    }
-
-    @Override
-    public Page<SSHKey> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
-        User user = convertEntity.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
-        if (user != null && user.getType().equals(UserType.ROOT_ADMIN)) {
+        if (String.valueOf(tokenDetails.getTokenDetails("usertype")).equals("ROOT_ADMIN")) {
             return sshkeyRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
-        } else if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
+        } else if (String.valueOf(tokenDetails.getTokenDetails("usertype")).equals("DOMAIN_ADMIN")) {
             Page<SSHKey> allSSHKeyList = sshkeyRepo.findAllByDomainIsActive(Long.valueOf(tokenDetails.getTokenDetails("domainid")),
                     true, pagingAndSorting.toPageRequest());
             return allSSHKeyList;
         }
         return sshkeyRepo.findAllByDepartmentIsActive(Long.parseLong(tokenDetails.getTokenDetails("departmentid")),
                 true, pagingAndSorting.toPageRequest());
+    }
+
+    @Override
+    public List<SSHKey> findAll() throws Exception {
+        if (String.valueOf(tokenDetails.getTokenDetails("usertype")).equals("ROOT_ADMIN")) {
+            return sshkeyRepo.findAllByIsActive(true);
+        } else if (String.valueOf(tokenDetails.getTokenDetails("usertype")).equals("DOMAIN_ADMIN")) {
+            return sshkeyRepo.findAllByDomainIsActive(Long.valueOf(tokenDetails.getTokenDetails("domainid")),true);
+        }
+        return sshkeyRepo.findAllByDepartmentAndIsActive(Long.parseLong(tokenDetails.getTokenDetails("departmentid")),true);
     }
 
     @Override
@@ -237,12 +226,6 @@ public class SSHKeyServiceImpl implements SSHKeyService {
             }
         }
         return sshKeyList;
-    }
-
-    @Override
-    public List<SSHKey> findAllByIsActive(Boolean isActive) throws Exception {
-        return sshkeyRepo.findAllByDepartmentAndIsActive(Long.parseLong(tokenDetails.getTokenDetails("departmentid")),
-                true);
     }
 
     /**

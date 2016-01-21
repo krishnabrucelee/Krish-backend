@@ -447,7 +447,7 @@ public class SSHKey implements Serializable {
     }
 
     /**
-     * Set the transDomainId .
+     * Set the transDomainId.
      *
      * @param transDomainId to set
      */
