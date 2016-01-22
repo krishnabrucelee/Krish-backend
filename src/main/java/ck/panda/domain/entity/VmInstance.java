@@ -323,7 +323,7 @@ public class VmInstance implements Serializable {
     @Column(name = "compute_min_iops")
     private Integer computeMinIops;
 
-    /** Compute offering maximum input output per second */
+    /** Compute offering maximum input output per second. */
     @Column(name = "compute_max_iops")
     private Integer computeMaxIops;
 
@@ -1792,44 +1792,43 @@ public class VmInstance implements Serializable {
         this.transOwnerId = transOwnerId;
     }
 
+    /**
+     * Get the  Compute offering Min Iops..
+     *
+     * @return the computeMinIops
+     */
+    public Integer getComputeMinIops() {
+        return computeMinIops;
+    }
 
     /**
-     * Get the computeMinIops.
+     * Set the Compute offering Min Iops.
      *
-	 * @return the computeMinIops
-	 */
-	public Integer getComputeMinIops() {
-		return computeMinIops;
-	}
+     * @param computeMinIops  to set
+     */
+    public void setComputeMinIops(Integer computeMinIops) {
+        this.computeMinIops = computeMinIops;
+    }
 
-	/**
-	 * Set the computeMinIops.
-	 *
-	 * @param computeMinIops  to set
-	 */
-	public void setComputeMinIops(Integer computeMinIops) {
-		this.computeMinIops = computeMinIops;
-	}
+    /**
+     * Get the Compute offering Max Iops.
+     *
+     * @return the computeMaxIops
+     */
+    public Integer getComputeMaxIops() {
+        return computeMaxIops;
+    }
 
-	/**
-	 * Get the the computeMaxIops.
-	 *
-	 * @return the computeMaxIops
-	 */
-	public Integer getComputeMaxIops() {
-		return computeMaxIops;
-	}
+    /**
+     * Set the Compute offering Max Iops..
+     *
+     * @param computeMaxIops  to set
+     */
+    public void setComputeMaxIops(Integer computeMaxIops) {
+        this.computeMaxIops = computeMaxIops;
+    }
 
-	/**
-	 * Set the computeMaxIops.
-	 *
-	 * @param computeMaxIops  to set
-	 */
-	public void setComputeMaxIops(Integer computeMaxIops) {
-		this.computeMaxIops = computeMaxIops;
-	}
-
-	@Override
+    @Override
     public String toString() {
         return "VmInstance [Id=" + id + ", name=" + name + ", uuid=" + uuid + ", vncPassword=" + vncPassword
                 + ", instanceOwner=" + instanceOwner + ", instanceOwnerId=" + instanceOwnerId + ", application="

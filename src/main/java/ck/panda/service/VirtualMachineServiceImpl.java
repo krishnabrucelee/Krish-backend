@@ -148,16 +148,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         optional.put("diskofferingid",
                                 convertEntityService.getStorageOfferById(vminstance.getStorageOfferingId()).getUuid());
                     }
-                    if (convertEntityService.getComputeOfferById(vminstance.getComputeOfferingId()).getCustomized()) {
-                        optional.put("details[0].cpuNumber", vminstance.getCpuCore().toString());
-                        optional.put("details[0].cpuSpeed", vminstance.getCpuSpeed().toString());
-                        optional.put("details[0].memory", vminstance.getMemory().toString());
-                    }
-                    // If it is customized iops in Compute offering then assign value for min and max iops value in Instance.
-                    if(convertEntityService.getComputeOfferById(vminstance.getComputeOfferingId()).getCustomizedIops()) {
-                    	optional.put("details[0].maxIops", vminstance.getComputeMaxIops().toString());
-                    	optional.put("details[0].minIops", vminstance.getComputeMinIops().toString());
-
+                    if (vminstance.getComputeOfferingId() != null) {
+                        this.customComputeForInstance(vminstance, optional);
                     }
                     String csResponse = cloudStackInstanceService.deployVirtualMachine(
                             convertEntityService.getComputeOfferById(vminstance.getComputeOfferingId()).getUuid(),
@@ -191,6 +183,26 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         }
     }
 
+    /**
+     * Custom compute offering for an Instance.
+     *
+     * @param vminstance object for compute.
+     * @throws Exception if error occurs.
+     */
+    private HashMap<String, String> customComputeForInstance(VmInstance vminstance,  HashMap<String, String> optional) throws Exception {
+          // If it customized compute offering then assgin value for memory, speed, core in Instance.
+          if (convertEntityService.getComputeOfferById(vminstance.getComputeOfferingId()).getCustomized()) {
+              optional.put("details[0].cpuNumber", vminstance.getCpuCore().toString());
+              optional.put("details[0].cpuSpeed", vminstance.getCpuSpeed().toString());
+              optional.put("details[0].memory", vminstance.getMemory().toString());
+          }
+          // If it is customized iops in Compute offering then assign value for min and max iops value in Instance.
+          if (convertEntityService.getComputeOfferById(vminstance.getComputeOfferingId()).getCustomizedIops()) {
+              optional.put("details[0].maxIops", vminstance.getComputeMaxIops().toString());
+              optional.put("details[0].minIops", vminstance.getComputeMinIops().toString());
+          }
+        return optional;
+    }
     @Override
     public VmInstance update(VmInstance vminstance) throws Exception {
         Errors errors = validator.rejectIfNullEntity("vminstance", vminstance);
