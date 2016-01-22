@@ -3,10 +3,8 @@ package ck.panda.service;
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 import java.util.HashMap;
-
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -927,7 +925,7 @@ public class ConvertEntityService {
                 String resourceCount = resourceCountArrayJSON.getJSONObject(i).getString("resourcecount");
                 String resourceType = resourceCountArrayJSON.getJSONObject(i).getString("resourcetype");
                 String domainId = resourceCountArrayJSON.getJSONObject(i).getString("domainid");
-                //check resource type other than 5 and allow to update
+                //check resource type other than 5(resource type of project) and allow to update
                 if (!resourceType.equals("5")) {
                     //Map and get the resource count for current resource type value
                     HashMap<String, String> resourceMap = getResourceTypeValue();
@@ -982,7 +980,7 @@ public class ConvertEntityService {
      * @throws Exception error
      */
     public void customStorageForInstance(VmInstance vmInstance) throws Exception {
-        HashMap<String, String> instanceMap = getResourceTypeValue();
+        HashMap<String, String> instanceMap = new HashMap<>();
             instanceMap.put("diskofferingid",
                     getStorageOfferById(vmInstance.getStorageOfferingId()).getUuid());
             //Check the disk size not null validation and set the disk size
