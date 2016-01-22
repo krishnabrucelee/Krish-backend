@@ -87,6 +87,7 @@ public interface DepartmentReposiory extends PagingAndSortingRepository<Departme
      * Find the department by username and isActive.
      *
      * @param userName for each users.
+     * @param domainId domain id
      * @param isActive get the department list based on active/inactive status.
      * @return Department.
      */

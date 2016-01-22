@@ -29,11 +29,13 @@ import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.entity.Volume;
+import ck.panda.domain.entity.Volume.Status;
 import ck.panda.rabbitmq.util.ResponseEvent;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackLoadBalancerService;
 import ck.panda.util.CloudStackNetworkOfferingService;
 import ck.panda.util.CloudStackNicService;
+import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.CloudStackVolumeService;
 import ck.panda.util.EncryptionUtil;
@@ -135,9 +137,16 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     @Autowired
     private CloudStackLoadBalancerService cloudStackLoadBalancerService;
 
+    /** CloudStack Resource Capacity Service. */
+    @Autowired
+    private CloudStackResourceCapacity cloudStackResourceCapacity;
+
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
+
+    /** Used for setting optional values for resource count. */
+    HashMap<String, String> domainCountMap = new HashMap<String, String>();
 
     /**
      * Sync with CloudStack server list via Asynchronous Job.
@@ -231,13 +240,15 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             VmInstance vmIn = null;
             if (instance != null) {
                 instance.setSyncFlag(false);
-                // 3.1 Find the corresponding CS server vm object by finding it in a
+                // 3.1 Find the corresponding CS server vm object by finding it
+                // in a
                 // hash using uuid
                 if (vmInstance.getUuid().equals(instance.getUuid())) {
                     VmInstance csVm = vmInstance;
                     if (csVm != null) {
                         if (volumeService.findByInstanceAndVolumeType(instance.getId()) != null) {
-                            csVm.setVolumeSize(volumeService.findByInstanceAndVolumeType(instance.getId()).getDiskSize());
+                            csVm.setVolumeSize(
+                                    volumeService.findByInstanceAndVolumeType(instance.getId()).getDiskSize());
                         }
                     }
                     csVm.setDomainId(convertEntityService.getDomainId(csVm.getTransDomainId()));
@@ -329,6 +340,19 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     }
                     // 3.2 If found, update the vm object in app db
                     vmIn = virtualMachineService.update(instance);
+
+                    // Resource count update for domain
+                    if (instance.getProjectId() != null) {
+                        domainCountMap.put("projectid",
+                                convertEntityService.getProjectById(instance.getProjectId()).getUuid());
+                    } else {
+                        domainCountMap.put("account",
+                                convertEntityService.getDepartmentUsernameById(instance.getDepartmentId()));
+                    }
+                    String csResponse = cloudStackResourceCapacity.updateResourceCount(
+                            convertEntityService.getDomainById(instance.getDomainId()).getUuid(), domainCountMap,
+                            "json");
+                    convertEntityService.resourceCount(csResponse);
                 }
             } else {
                 vmInstance.setDomainId(convertEntityService.getDomainId(vmInstance.getTransDomainId()));
@@ -371,9 +395,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      * @throws Exception cloudstack unhandled errors
      */
     public void assignNicTovM(VmInstance vmInstance) throws ApplicationException, Exception {
-        HashMap<String,String> optional = new HashMap<String, String>();
-        optional.put("virtualmachineid", vmInstance.getUuid());
-        String listNic = cloudStackNicService.listNics(optional, "json");
+        HashMap<String,String> nicMap = new HashMap<String, String>();
+        nicMap.put("virtualmachineid", vmInstance.getUuid());
+        String listNic = cloudStackNicService.listNics(nicMap, "json");
         JSONArray nicListJSON = new JSONObject(listNic).getJSONObject("listnicsresponse").getJSONArray("nic");
         for (int i = 0; i < nicListJSON.length(); i++) {
             Nic nic = nicService.findbyUUID(nicListJSON.getJSONObject(i).getString("id"));
@@ -418,8 +442,12 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     public void assignVolumeTovM(VmInstance vmInstance) throws ApplicationException, Exception {
            HashMap<String, String> volumeMap = new HashMap<String, String>();
            volumeMap.put("virtualmachineid", vmInstance.getUuid());
-           volumeMap.put("domainid", convertEntityService.getDomainById(vmInstance.getDomainId()).getUuid());
-
+           if (vmInstance.getProjectId() != null) {
+               volumeMap.put("projectid", convertEntityService.getProjectById(vmInstance.getProjectId()).getUuid());
+           } else {
+               volumeMap.put("domainid", convertEntityService.getDomainById(vmInstance.getDomainId()).getUuid());
+               volumeMap.put("account", convertEntityService.getDepartmentUsernameById(vmInstance.getDepartmentId()));
+           }
            String listVolume = csVolumeService.listVolumes("json", volumeMap);
            JSONArray volumeListJSON = new JSONObject(listVolume).getJSONObject("listvolumesresponse").getJSONArray("volume");
            for (int i = 0; i < volumeListJSON.length(); i++) {
@@ -472,6 +500,18 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 network.setProjectId(convertEntityService.getProjectId(csNet.getTransProjectId()));
 
                 networkService.update(network);
+
+                // Resource count for domain
+                if (network.getProjectId() != null) {
+                    domainCountMap.put("projectid",
+                            convertEntityService.getProjectById(network.getProjectId()).getUuid());
+                } else {
+                    domainCountMap.put("account",
+                            convertEntityService.getDepartmentUsernameById(network.getDepartmentId()));
+                }
+                String csResponse = cloudStackResourceCapacity.updateResourceCount(
+                        convertEntityService.getDomainById(network.getDomainId()).getUuid(), domainCountMap, "json");
+                convertEntityService.resourceCount(csResponse);
             }
         }
         if (eventObject.getString("commandEventType").equals("NETWORK.DELETE")) {
@@ -479,6 +519,18 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             Network network = networkService.findByUUID(json.getString("id"));
             network.setSyncFlag(false);
             networkService.softDelete(network);
+
+            // Resource count for domain
+            if (network.getProjectId() != null) {
+                domainCountMap.put("projectid",
+                        convertEntityService.getProjectById(network.getProjectId()).getUuid());
+            } else {
+                domainCountMap.put("account",
+                        convertEntityService.getDepartmentUsernameById(network.getDepartmentId()));
+            }
+            String csResponse = cloudStackResourceCapacity.updateResourceCount(
+                    convertEntityService.getDomainById(network.getDomainId()).getUuid(), domainCountMap, "json");
+            convertEntityService.resourceCount(csResponse);
         }
     }
 
@@ -663,6 +715,19 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                             .getNetworkById(convertEntityService.getNetworkByUuid(csIp.getTransNetworkId()))
                             .getDomainId());
                     ipService.update(persistIp);
+
+                 // Resource count for domain
+                    if (persistIp.getProjectId() != null) {
+                        domainCountMap.put("projectid",
+                                convertEntityService.getProjectById(persistIp.getProjectId()).getUuid());
+                    } else {
+                        domainCountMap.put("account",
+                                convertEntityService.getDepartmentUsernameById(persistIp.getDepartmentId()));
+                    }
+                    String csResponse = cloudStackResourceCapacity.updateResourceCount(
+                            convertEntityService.getDomainById(persistIp.getDomainId()).getUuid(), domainCountMap,
+                            "json");
+                    convertEntityService.resourceCount(csResponse);
                 }
             } else {
                 ipaddress.setState(IpAddress.State.ALLOCATED);
@@ -689,6 +754,18 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             if (ipAddress != null) {
                 ipAddress.setSyncFlag(false);
                 ipService.softDelete(ipAddress);
+
+                // Resource count for domain
+                if (ipAddress.getProjectId() != null) {
+                    domainCountMap.put("projectid",
+                            convertEntityService.getProjectById(ipAddress.getProjectId()).getUuid());
+                } else {
+                    domainCountMap.put("account",
+                            convertEntityService.getDepartmentUsernameById(ipAddress.getDepartmentId()));
+                }
+                String csResponse = cloudStackResourceCapacity.updateResourceCount(
+                        convertEntityService.getDomainById(ipAddress.getDomainId()).getUuid(), domainCountMap, "json");
+                convertEntityService.resourceCount(csResponse);
             }
         }
 
@@ -742,8 +819,21 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             } else {
                 volume.setDiskSizeFlag(true);
             }
+            if (jobresult.getJSONObject("volume").getString("state").equalsIgnoreCase("ALLOCATED")) {
+                volume.setStatus(Status.ALLOCATED);
+            }
             if (volumeService.findByUUID(volume.getUuid()) == null) {
                 volumeService.save(volume);
+
+                // Resource count update for domain
+                if (volume.getProjectId() != null) {
+                    domainCountMap.put("projectid", convertEntityService.getProjectById(volume.getProjectId()).getUuid());
+                } else {
+                    domainCountMap.put("account", convertEntityService.getDepartmentUsernameById(volume.getDepartmentId()));
+                }
+                String csResponse = cloudStackResourceCapacity.updateResourceCount(
+                        convertEntityService.getDomainById(volume.getDomainId()).getUuid(), domainCountMap, "json");
+                convertEntityService.resourceCount(csResponse);
             }
         }
         if (eventObject.getString("commandEventType").equals("VOLUME.ATTACH")
@@ -781,6 +871,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 volume.setCreatedDateTime(csVolume.getCreatedDateTime());
                 volume.setUpdatedDateTime(csVolume.getUpdatedDateTime());
                 volumeService.update(volume);
+
             }
         }
     }
@@ -829,7 +920,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             }
         }
         if (eventObject.getString("commandEventType").equals("NIC.SECONDARY.IP.ASSIGN")) {
-        	 if (eventObject.getString("commandEventType").equals("NIC.SECONDARY.IP.ASSIGN")) {
+             if (eventObject.getString("commandEventType").equals("NIC.SECONDARY.IP.ASSIGN")) {
                  VmIpaddress csVmIpaddress = VmIpaddress.convert(jobresult.getJSONObject("nicsecondaryip"));
                  VmIpaddress vmIpaddress = vmIpService.findByUUID(csVmIpaddress.getUuid());
                  vmIpaddress.setSyncFlag(false);
@@ -844,7 +935,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
 
         }
         if (eventObject.getString("commandEventType").equals("NIC.SECONDARY.IP.UNASSIGN")) {
-        	 if (eventObject.getString("commandEventType").equals("NIC.SECONDARY.IP.UNASSIGN")) {
+             if (eventObject.getString("commandEventType").equals("NIC.SECONDARY.IP.UNASSIGN")) {
                  LOGGER.debug("Nic secondary IP Implemented");
                  if (eventObject.getString("commandEventType").equals("NIC.SECONDARY.IP.UNASSIGN")) {
                      JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
@@ -1065,7 +1156,16 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             Volume volume = volumeService.findByUUID(eventObject.getEntityuuid());
             volume.setIsSyncFlag(false);
             volumeService.softDelete(volume);
+
+            // Resource count update for domain
+            if (volume.getProjectId() != null) {
+                domainCountMap.put("projectid", convertEntityService.getProjectById(volume.getProjectId()).getUuid());
+            } else {
+                domainCountMap.put("account", convertEntityService.getDepartmentUsernameById(volume.getDepartmentId()));
+            }
+            String csResponse = cloudStackResourceCapacity.updateResourceCount(
+                    convertEntityService.getDomainById(volume.getDomainId()).getUuid(), domainCountMap, "json");
+            convertEntityService.resourceCount(csResponse);
         }
     }
-
 }
