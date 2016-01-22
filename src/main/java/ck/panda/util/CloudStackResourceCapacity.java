@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import org.apache.commons.httpclient.NameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ck.panda.service.ResourceLimitDomainService;
 
 /**
  * CloudStack resource capacity service for cloudStack connectivity with the Cloud Stack server.
@@ -16,6 +17,10 @@ public class CloudStackResourceCapacity {
     /** CloudStack server for connectivity. */
     @Autowired
     private CloudStackServer server;
+
+    /** Resource Limit Domain Service. */
+    @Autowired
+    private ResourceLimitDomainService resourceLimitDomainService;
 
     /**
      * Set values in CloudStack server.
@@ -49,8 +54,9 @@ public class CloudStackResourceCapacity {
      * @return response json string.
      * @throws Exception unhandled errors.
      */
-    public String updateResourceCount(HashMap<String, String> optional, String response) throws Exception {
+    public String updateResourceCount(String  domainId, HashMap<String, String> optional, String response) throws Exception {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("updateResourceCount", optional);
+        arguments.add(new NameValuePair("domainid", domainId));
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
         return responseDocument;
@@ -85,5 +91,4 @@ public class CloudStackResourceCapacity {
         String responseDocument = server.request(arguments);
         return responseDocument;
     }
-
 }
