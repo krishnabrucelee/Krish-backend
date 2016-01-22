@@ -93,7 +93,7 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, L
      * @param isActive get the department list based on active/inactive status.
      * @return Project list.
      */
-    @Query(value = "select project from Project project join project.userList users where project.isActive =:isActive AND users.id = :id")
+    @Query(value = "select DISTINCT project from Project project join project.userList users where project.isActive =:isActive AND users.id = :id")
     List<Project> findByUserAndIsActive(@Param("id") Long userId, @Param("isActive") Boolean isActive);
 
     /**

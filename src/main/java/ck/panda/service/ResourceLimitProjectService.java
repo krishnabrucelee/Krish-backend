@@ -9,8 +9,7 @@ import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.util.domain.CRUDService;
 
 /**
- * @author Assistanz
- *
+ * Resource Limit Project Service.
  */
 @Service
 public interface ResourceLimitProjectService extends CRUDService<ResourceLimitProject> {

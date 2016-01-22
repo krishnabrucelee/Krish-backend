@@ -334,4 +334,20 @@ public class ProjectServiceImpl implements ProjectService {
     public List<Project> findByUserAndIsActive(Long id, Boolean isActive) throws Exception {
         return projectRepository.findByUserAndIsActive(id, isActive);
     }
+
+
+    @Override
+    @PreAuthorize("hasPermission(#project.getSyncFlag(), 'EDIT_PROJECT')")
+    public Project removeUser(Project project) throws Exception {
+        List<User> users = new ArrayList<User>();
+        if (project.getUserList().size() > 0) {
+            for (User user : project.getUserList()) {
+                if (project.getProjectOwnerId() != user.getId()) {
+                    users.add(user);
+                }
+            }
+        }
+        project.setUserList(users);
+        return projectRepository.save(project);
+    }
 }

@@ -39,7 +39,7 @@ public interface NetworkRepository extends PagingAndSortingRepository<Network, L
      * @param isActive true/false.
      * @return network list.
      */
-    @Query(value = "select net from Network net where net.departmentId=:departmentId AND net.isActive =:isActive ")
+    @Query(value = "select net from Network net where net.projectId is NULL and net.departmentId=:departmentId and net.isActive =:isActive ")
     List<Network> findByDepartmentAndNetworkIsActive(@Param("departmentId") Long departmentId,
             @Param("isActive") Boolean isActive);
 

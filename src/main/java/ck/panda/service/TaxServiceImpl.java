@@ -8,7 +8,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Tax;
 import ck.panda.domain.repository.jpa.TaxRepository;
+import ck.panda.util.AppValidator;
 import ck.panda.util.domain.vo.PagingAndSorting;
+import ck.panda.util.error.Errors;
+import ck.panda.util.error.exception.ApplicationException;
 
 /**
  * Service implementation for Tax entity.
@@ -24,15 +27,39 @@ public class TaxServiceImpl implements TaxService {
     @Autowired
     private TaxRepository taxRepo;
 
+    /** Validator attribute. */
+    @Autowired
+    private AppValidator validator;
+
+    /**
+     * Validate the tax.
+     *
+     * @param tax reference of the tax.
+     * @throws Exception error occurs
+     */
+    private void validateTax(Tax tax) throws Exception {
+        Errors errors = validator.rejectIfNullEntity("tax", tax);
+        errors = validator.validateEntity(tax, errors);
+        Tax t = taxRepo.findByNameAndIsActive(tax.getName(), true);
+        if (t != null && tax.getId() != t.getId()) {
+            errors.addFieldError("name", "tax.already.exist");
+        }
+        if (errors.hasErrors()) {
+            throw new ApplicationException(errors);
+        }
+    }
+
     @Override
     public Tax save(Tax tax) throws Exception {
         tax.setIsActive(true);
+        this.validateTax(tax);
         return taxRepo.save(tax);
     }
 
     @Override
     public Tax update(Tax tax) throws Exception {
-         return taxRepo.save(tax);
+        this.validateTax(tax);
+        return taxRepo.save(tax);
     }
 
     @Override
