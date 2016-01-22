@@ -109,90 +109,82 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     @Override
     @PreAuthorize("hasPermission(#vminstance.getSyncFlag(), 'CREATE_VM')")
-    public VmInstance save(VmInstance vminstance) throws Exception {
-        LOGGER.debug("instance sync ", vminstance.getSyncFlag());
-        if (vminstance.getSyncFlag()) {
+    public VmInstance save(VmInstance vmInstance) throws Exception {
+        LOGGER.debug("instance sync ", vmInstance.getSyncFlag());
+        if (vmInstance.getSyncFlag()) {
 
-            Errors errors = validator.rejectIfNullEntity("vminstance", vminstance);
-            errors = validator.validateEntity(vminstance, errors);
-            errors = this.validateName(errors, vminstance.getName(), vminstance.getDepartment(), 0L);
+            Errors errors = validator.rejectIfNullEntity("vmInstance", vmInstance);
+            errors = validator.validateEntity(vmInstance, errors);
+            errors = this.validateName(errors, vmInstance.getName(), vmInstance.getDepartment(), 0L);
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                String isAvailable = isResourceAvailable(vminstance);
+                String isAvailable = isResourceAvailable(vmInstance);
                 if (isAvailable != null) {
                     errors = validator.sendGlobalError(isAvailable);
                     throw new ApplicationException(errors);
                 } else {
                     HashMap<String, String> optional = new HashMap<String, String>();
-                    optional.put("displayname", vminstance.getName());
-                    vminstance.setDisplayName(vminstance.getName());
-                    optional.put("name", vminstance.getName());
-                    vminstance.setNetworkId(convertEntityService.getNetworkByUuid(vminstance.getNetworkUuid()));
+                    optional.put("displayname", vmInstance.getName());
+                    vmInstance.setDisplayName(vmInstance.getName());
+                    optional.put("name", vmInstance.getName());
+                    vmInstance.setNetworkId(convertEntityService.getNetworkByUuid(vmInstance.getNetworkUuid()));
                     config.setUserServer();
-                    LOGGER.debug("Cloud stack connectivity at VM", vminstance.getNetworkUuid());
-                    optional.put("networkids", vminstance.getNetworkUuid());
+                    LOGGER.debug("Cloud stack connectivity at VM", vmInstance.getNetworkUuid());
+                    optional.put("networkids", vmInstance.getNetworkUuid());
                     optional.put("displayvm", "true");
-                    optional.put("displayname", vminstance.getName());
+                    optional.put("displayname", vmInstance.getName());
                     optional.put("keyboard", "us");
-                    optional.put("name", vminstance.getName());
-                    if (vminstance.getHypervisorId() != null) {
-                       optional.put("hypervisor", hypervisorService.find(vminstance.getHypervisorId()).getName());
+                    optional.put("name", vmInstance.getName());
+                    if (vmInstance.getHypervisorId() != null) {
+                       optional.put("hypervisor", hypervisorService.find(vmInstance.getHypervisorId()).getName());
                     }
-                    if (vminstance.getProjectId() != null) {
+                    if (vmInstance.getProjectId() != null) {
                         optional.put("projectid",
-                                convertEntityService.getProjectById(vminstance.getProjectId()).getUuid());
+                                convertEntityService.getProjectById(vmInstance.getProjectId()).getUuid());
                     } else {
                         optional.put("account",
-                                convertEntityService.getDepartmentById(vminstance.getDepartmentId()).getUserName());
+                                convertEntityService.getDepartmentById(vmInstance.getDepartmentId()).getUserName());
                         optional.put("domainid",
-                                convertEntityService.getDomainById(vminstance.getDomainId()).getUuid());
+                                convertEntityService.getDomainById(vmInstance.getDomainId()).getUuid());
                     }
-                    if (vminstance.getStorageOfferingId() != null) {
-                        optional.put("diskofferingid",
-                                convertEntityService.getStorageOfferById(vminstance.getStorageOfferingId()).getUuid());
-                        if (vminstance.getDiskSize() != null) {
-                            optional.put("size", vminstance.getDiskSize().toString());
-                        }
-                        if (vminstance.getDiskMaxIops() != null && vminstance.getDiskMinIops() != null) {
-                            optional.put("details[0].maxIopsDo",vminstance.getDiskMaxIops().toString());
-                            optional.put("details[0].minIopsDo", vminstance.getDiskMinIops().toString());
-                        }
+                    if (vmInstance.getStorageOfferingId() != null) {
+                        convertEntityService.customStorageForInstance(vmInstance);
                     }
-                    if (convertEntityService.getComputeOfferById(vminstance.getComputeOfferingId()).getCustomized()) {
-                        optional.put("details[0].cpuNumber", vminstance.getCpuCore().toString());
-                        optional.put("details[0].cpuSpeed", vminstance.getCpuSpeed().toString());
-                        optional.put("details[0].memory", vminstance.getMemory().toString());
+                    if (convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getCustomized()) {
+                        optional.put("details[0].cpuNumber", vmInstance.getCpuCore().toString());
+                        optional.put("details[0].cpuSpeed", vmInstance.getCpuSpeed().toString());
+                        optional.put("details[0].memory", vmInstance.getMemory().toString());
                     }
                     String csResponse = cloudStackInstanceService.deployVirtualMachine(
-                            convertEntityService.getComputeOfferById(vminstance.getComputeOfferingId()).getUuid(),
-                            convertEntityService.getTemplateById(vminstance.getTemplateId()).getUuid(),
-                            convertEntityService.getZoneById(vminstance.getZoneId()).getUuid(), "json", optional);
+                            convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getUuid(),
+                            convertEntityService.getTemplateById(vmInstance.getTemplateId()).getUuid(),
+                            convertEntityService.getZoneById(vmInstance.getZoneId()).getUuid(), "json", optional);
                     JSONObject csInstance = new JSONObject(csResponse).getJSONObject("deployvirtualmachineresponse");
                     if (csInstance.has("errorcode")) {
                         errors = this.validateEvent(errors, csInstance.getString("errortext"));
                         throw new ApplicationException(errors);
                     } else {
                         LOGGER.debug("VM UUID", csInstance.getString("id"));
-                        vminstance.setUuid(csInstance.getString("id"));
+                        vmInstance.setUuid(csInstance.getString("id"));
                         String instanceResponse = cloudStackInstanceService
                                 .queryAsyncJobResult(csInstance.getString("jobid"), "json");
                         JSONObject instance = new JSONObject(instanceResponse)
                                 .getJSONObject("queryasyncjobresultresponse");
                         if (instance.getString("jobstatus").equals("2")) {
-                            vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                            vminstance.setEventMessage(csInstance.getJSONObject("jobresult").getString("errortext"));
+                            vmInstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
+                            vmInstance.setEventMessage(csInstance.getJSONObject("jobresult").getString("errortext"));
                         } else {
-                            vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_CREATE));
-                            vminstance.setEventMessage("Started creating VM on Server");
+                            vmInstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_CREATE));
+                            vmInstance.setEventMessage("Started creating VM on Server");
                         }
                     }
                 }
 
-                return virtualmachinerepository.save(convertEncryptPassword(vminstance));
+                return virtualmachinerepository.save(convertEncryptPassword(vmInstance));
             }
         } else {
-            return virtualmachinerepository.save(convertEncryptPassword(vminstance));
+            return virtualmachinerepository.save(convertEncryptPassword(vmInstance));
         }
     }
 

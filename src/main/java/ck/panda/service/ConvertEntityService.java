@@ -916,24 +916,34 @@ public class ConvertEntityService {
      */
     public void resourceCount(String csResponse) throws Exception {
         JSONArray resourceCountArrayJSON = null;
+        //get cloud stack resource count response
         JSONObject csCountJson = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
+        //If json response has resource count object
         if (csCountJson.has("resourcecount")) {
             resourceCountArrayJSON = csCountJson.getJSONArray("resourcecount");
+            // Iterate resource count response from resource type
             for (int i = 0, size = resourceCountArrayJSON.length(); i < size; i++) {
+                //get resource count, type, domain and set in a variable for future use
                 String resourceCount = resourceCountArrayJSON.getJSONObject(i).getString("resourcecount");
                 String resourceType = resourceCountArrayJSON.getJSONObject(i).getString("resourcetype");
                 String domainId = resourceCountArrayJSON.getJSONObject(i).getString("domainid");
+                //check resource type other than 5 and allow to update
                 if (!resourceType.equals("5")) {
+                    //Map and get the resource count for current resource type value
                     HashMap<String, String> resourceMap = getResourceTypeValue();
+                    // checking null validation for resource map
                     if (resourceMap != null) {
+                        //update resource count in resource limit domain table
                         ResourceLimitDomain resourceDomainCount = resourceLimitDomainService.findByDomainAndResourceCount(
                                 getDomainId(domainId), ResourceType.valueOf(resourceMap.get(resourceType)),
                                 true);
+                        //check the max value if not -1 and upadate the available value
                         if (resourceDomainCount.getMax() != -1) {
                             resourceDomainCount.setAvailable(resourceDomainCount.getMax() - Long.valueOf(resourceCount));
                         } else {
                             resourceDomainCount.setAvailable(resourceDomainCount.getMax());
                         }
+                        //Set used limit value
                         resourceDomainCount.setUsedLimit(Long.valueOf(resourceCount));
                         resourceDomainCount.setIsSyncFlag(false);
                         resourceLimitDomainService.update(resourceDomainCount);
@@ -950,6 +960,7 @@ public class ConvertEntityService {
      */
     private HashMap<String, String> getResourceTypeValue() {
         HashMap<String, String> resourceMap = new HashMap<>();
+        //Map and get the resource count for current resource type value
         resourceMap.put("0", String.valueOf(ResourceType.Instance));
         resourceMap.put("1", String.valueOf(ResourceType.IP));
         resourceMap.put("2", String.valueOf(ResourceType.Volume));
@@ -964,4 +975,24 @@ public class ConvertEntityService {
         return resourceMap;
     }
 
+    /**
+     * A method a set Custom storage values for instance.
+     *
+     * @param vmInstance Vm instance object
+     * @throws Exception error
+     */
+    public void customStorageForInstance(VmInstance vmInstance) throws Exception {
+        HashMap<String, String> instanceMap = getResourceTypeValue();
+            instanceMap.put("diskofferingid",
+                    getStorageOfferById(vmInstance.getStorageOfferingId()).getUuid());
+            //Check the disk size not null validation and set the disk size
+            if (vmInstance.getDiskSize() != null) {
+                instanceMap.put("size", vmInstance.getDiskSize().toString());
+            }
+            //Check the disk Iops (Max and Min) not null validation and set the disk iops
+            if (vmInstance.getDiskMaxIops() != null && vmInstance.getDiskMinIops() != null) {
+                instanceMap.put("details[0].maxIopsDo",vmInstance.getDiskMaxIops().toString());
+                instanceMap.put("details[0].minIopsDo", vmInstance.getDiskMinIops().toString());
+            }
+    }
 }
