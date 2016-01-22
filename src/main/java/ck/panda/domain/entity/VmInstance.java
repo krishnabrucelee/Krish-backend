@@ -319,6 +319,14 @@ public class VmInstance implements Serializable {
     @Column(name = "disk_io_write")
     private Integer diskIoWrite;
 
+    /** Compute offering Minimum input output per second. */
+    @Column(name = "compute_min_iops")
+    private Integer computeMinIops;
+
+    /** Compute offering maximum input output per second */
+    @Column(name = "compute_max_iops")
+    private Integer computeMaxIops;
+
     /** Version attribute to handle optimistic locking. */
     @Version
     @Column(name = "version")
@@ -1784,7 +1792,44 @@ public class VmInstance implements Serializable {
         this.transOwnerId = transOwnerId;
     }
 
-    @Override
+
+    /**
+     * Get the computeMinIops.
+     *
+	 * @return the computeMinIops
+	 */
+	public Integer getComputeMinIops() {
+		return computeMinIops;
+	}
+
+	/**
+	 * Set the computeMinIops.
+	 *
+	 * @param computeMinIops  to set
+	 */
+	public void setComputeMinIops(Integer computeMinIops) {
+		this.computeMinIops = computeMinIops;
+	}
+
+	/**
+	 * Get the the computeMaxIops.
+	 *
+	 * @return the computeMaxIops
+	 */
+	public Integer getComputeMaxIops() {
+		return computeMaxIops;
+	}
+
+	/**
+	 * Set the computeMaxIops.
+	 *
+	 * @param computeMaxIops  to set
+	 */
+	public void setComputeMaxIops(Integer computeMaxIops) {
+		this.computeMaxIops = computeMaxIops;
+	}
+
+	@Override
     public String toString() {
         return "VmInstance [Id=" + id + ", name=" + name + ", uuid=" + uuid + ", vncPassword=" + vncPassword
                 + ", instanceOwner=" + instanceOwner + ", instanceOwnerId=" + instanceOwnerId + ", application="

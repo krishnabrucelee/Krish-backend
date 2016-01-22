@@ -153,6 +153,12 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         optional.put("details[0].cpuSpeed", vminstance.getCpuSpeed().toString());
                         optional.put("details[0].memory", vminstance.getMemory().toString());
                     }
+                    // If it is customized iops in Compute offering then assign value for min and max iops value in Instance.
+                    if(convertEntityService.getComputeOfferById(vminstance.getComputeOfferingId()).getCustomizedIops()) {
+                    	optional.put("details[0].maxIops", vminstance.getComputeMaxIops().toString());
+                    	optional.put("details[0].minIops", vminstance.getComputeMinIops().toString());
+
+                    }
                     String csResponse = cloudStackInstanceService.deployVirtualMachine(
                             convertEntityService.getComputeOfferById(vminstance.getComputeOfferingId()).getUuid(),
                             convertEntityService.getTemplateById(vminstance.getTemplateId()).getUuid(),
