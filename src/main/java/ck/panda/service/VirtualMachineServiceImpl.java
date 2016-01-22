@@ -151,8 +151,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     if (vmInstance.getStorageOfferingId() != null) {
                         convertEntityService.customStorageForInstance(vmInstance);
                     }
-                    if (vminstance.getComputeOfferingId() != null) {
-                        this.customComputeForInstance(vminstance, optional);
+                    if (vmInstance.getComputeOfferingId() != null) {
+                        this.customComputeForInstance(vmInstance, optional);
                     }
                     String csResponse = cloudStackInstanceService.deployVirtualMachine(
                             convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getUuid(),
@@ -192,17 +192,17 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
      * @param vminstance object for compute.
      * @throws Exception if error occurs.
      */
-    private HashMap<String, String> customComputeForInstance(VmInstance vminstance,  HashMap<String, String> optional) throws Exception {
+    private HashMap<String, String> customComputeForInstance(VmInstance vmInstance,  HashMap<String, String> optional) throws Exception {
           // If it customized compute offering then assgin value for memory, speed, core in Instance.
-          if (convertEntityService.getComputeOfferById(vminstance.getComputeOfferingId()).getCustomized()) {
-              optional.put("details[0].cpuNumber", vminstance.getCpuCore().toString());
-              optional.put("details[0].cpuSpeed", vminstance.getCpuSpeed().toString());
-              optional.put("details[0].memory", vminstance.getMemory().toString());
+          if (convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getCustomized()) {
+              optional.put("details[0].cpuNumber", vmInstance.getCpuCore().toString());
+              optional.put("details[0].cpuSpeed", vmInstance.getCpuSpeed().toString());
+              optional.put("details[0].memory", vmInstance.getMemory().toString());
           }
           // If it is customized iops in Compute offering then assign value for min and max iops value in Instance.
-          if (convertEntityService.getComputeOfferById(vminstance.getComputeOfferingId()).getCustomizedIops()) {
-              optional.put("details[0].maxIops", vminstance.getComputeMaxIops().toString());
-              optional.put("details[0].minIops", vminstance.getComputeMinIops().toString());
+          if (convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getCustomizedIops()) {
+              optional.put("details[0].maxIops", vmInstance.getComputeMaxIops().toString());
+              optional.put("details[0].minIops", vmInstance.getComputeMinIops().toString());
           }
         return optional;
     }
