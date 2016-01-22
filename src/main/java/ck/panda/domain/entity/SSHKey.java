@@ -66,7 +66,7 @@ public class SSHKey implements Serializable {
 
     /** Private key. */
     @Transient
-    private String privatekey;
+    private String privateKey;
 
     /** public Key. */
     @Column(name = "public_key")
@@ -202,19 +202,19 @@ public class SSHKey implements Serializable {
     /**
      * Get the private key.
      *
-     * @return the privatekey
+     * @return the privateKey
      */
-    public String getPrivatekey() {
-        return privatekey;
+    public String getPrivateKey() {
+        return privateKey;
     }
 
     /**
      * Set the private key.
      *
-     * @param privatekey the privatekey to set
+     * @param privateKey the privateKey to set
      */
-    public void setPrivatekey(String privatekey) {
-        this.privatekey = privatekey;
+    public void setPrivateKey(String privateKey) {
+        this.privateKey = privateKey;
     }
 
     /**
@@ -524,5 +524,4 @@ public class SSHKey implements Serializable {
         }
         return sshkeyMap;
     }
-
 }
