@@ -937,12 +937,21 @@ public class ConvertEntityService {
                                 true);
                         //check the max value if not -1 and upadate the available value
                         if (resourceDomainCount.getMax() != -1) {
-                            resourceDomainCount.setAvailable(resourceDomainCount.getMax() - Long.valueOf(resourceCount));
+                        	//Check resource type primary and secondary storage and convert resource
+                        	//count values GiB to MB.
+                        	if(resourceType.equals("10") || resourceType.equals("11")) {
+                        		resourceDomainCount.setAvailable(resourceDomainCount.getMax() - (Long.valueOf(resourceCount)/(1024*1024*1024)));
+                        		resourceDomainCount.setUsedLimit((Long.valueOf(resourceCount)/(1024*1024*1024)));
+                        	} else {
+                        		resourceDomainCount.setAvailable(resourceDomainCount.getMax() - Long.valueOf(resourceCount));
+                        		resourceDomainCount.setUsedLimit(Long.valueOf(resourceCount));
+                        	}
                         } else {
                             resourceDomainCount.setAvailable(resourceDomainCount.getMax());
+                            resourceDomainCount.setUsedLimit(Long.valueOf(resourceCount));
                         }
                         //Set used limit value
-                        resourceDomainCount.setUsedLimit(Long.valueOf(resourceCount));
+
                         resourceDomainCount.setIsSyncFlag(false);
                         resourceLimitDomainService.update(resourceDomainCount);
                     }
