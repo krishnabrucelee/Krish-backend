@@ -15,6 +15,8 @@ import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
@@ -22,13 +24,14 @@ import ck.panda.domain.repository.jpa.ResourceLimitDomainRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackResourceLimitService;
 import ck.panda.util.ConfigUtil;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 import ck.panda.util.error.exception.EntityNotFoundException;
 
 /**
- * Resource Limit Service Implementation.
+ * Resource Limit Domain Service Implementation.
  */
 @Service
 public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainService {
@@ -63,6 +66,14 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
     /** Message source attribute. */
     @Autowired
     private MessageSource messageSource;
+
+    /** Domain Service reference. */
+    @Autowired
+    private DomainService domainService;
+
+    /** Autowired TokenDetails. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     @Override
     public ResourceLimitDomain save(ResourceLimitDomain resource) throws Exception {
@@ -255,9 +266,25 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
     }
 
     @Override
-    public ResourceLimitDomain findByDomainAndResourceType(Long domainId, ResourceLimitDomain.ResourceType resourceType,
+    public ResourceLimitDomain findByDomainAndResourceType(Long domainId, ResourceType resourceType,
             Boolean isActive) throws Exception {
         return resourceLimitDomainRepo.findByDomainAndResourceType(domainId, resourceType, isActive);
+    }
+
+    @Override
+    public ResourceLimitDomain findAllByResourceType(Long domainById) {
+        return resourceLimitDomainRepo.deleteByDomainAndIsActive(domainById, true);
+    }
+
+    @Override
+    public ResourceLimitDomain findByDomainAndResourceCount(Long domainId, ResourceType resource, Boolean isActive) {
+        return resourceLimitDomainRepo.findByDomainAndResourceCount(domainId, resource, isActive);
+    }
+
+    @Override
+    public List<ResourceLimitDomain> findCurrentLoginDomain() throws NumberFormatException, Exception {
+        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        return (List<ResourceLimitDomain>) resourceLimitDomainRepo.findAllByDomainIdAndIsActive(domain.getId(), true);
     }
 
 }

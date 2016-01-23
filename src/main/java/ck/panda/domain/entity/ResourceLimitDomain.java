@@ -61,6 +61,14 @@ public class ResourceLimitDomain {
     @Column(name = "max", columnDefinition = "bigint(20) default -1")
     private Long max;
 
+    /** Available Resource limit usage for Domain. */
+    @Column(name = "available_limit")
+    private Long available;
+
+    /** Resource limit usage for Domain. */
+    @Column(name = "used_limit")
+    private Long usedLimit;
+
     /** Status attribute to verify status of the resource limit. */
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
@@ -244,6 +252,42 @@ public class ResourceLimitDomain {
      */
     public void setMax(Long max) {
         this.max = max;
+    }
+
+    /**
+     * Get the available of the ResourceLimitDomain.
+
+     * @return the available of ResourceLimitDomain.
+     */
+    public Long getAvailable() {
+        return available;
+    }
+
+    /**
+     * Set the available of the ResourceLimitDomain.
+     *
+     * @param available the available to set
+     */
+    public void setAvailable(Long available) {
+        this.available = available;
+    }
+
+    /**
+     * Get the usedLimit of the ResourceLimitDomain.
+
+     * @return the usedLimit of ResourceLimitDomain.
+     */
+    public Long getUsedLimit() {
+        return usedLimit;
+    }
+
+    /**
+     * Set the usedLimit of the ResourceLimitDomain.
+     *
+     * @param usedLimit the usedLimit to set
+     */
+    public void setUsedLimit(Long usedLimit) {
+        this.usedLimit = usedLimit;
     }
 
     /**

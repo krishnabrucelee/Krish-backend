@@ -65,4 +65,25 @@ public class CloudStackResourceLimitService {
         return listResponse;
     }
 
+    /**
+     * Recalculate and update resource count for an account or domain.
+     *
+     * @param domainId updates resource counts for a specified account in this
+     * domain
+     * @param optional optional values
+     * @param response json response
+     * @return Resource Count Response
+     * @throws Exception errors.
+     */
+    public String updateResourceCount(String domainId, String response,
+            HashMap<String, String> optional)
+            throws Exception {
+        LinkedList<NameValuePair> arguments
+                = server.getDefaultQuery("updateResourceCount", optional);
+        arguments.add(new NameValuePair("domainid", domainId));
+        arguments.add(new NameValuePair("response", response));
+        String countResponse = server.request(arguments);
+        return countResponse;
+    }
+
 }
