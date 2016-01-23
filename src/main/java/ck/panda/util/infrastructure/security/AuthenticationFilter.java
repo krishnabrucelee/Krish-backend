@@ -9,6 +9,7 @@ import ck.panda.util.web.ApiController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
@@ -54,6 +55,7 @@ public class AuthenticationFilter extends GenericFilterBean {
      * Parameterized constructor.
      *
      * @param databaseAuthenticationManager to set
+     * @param userTokenDetails to set
      */
     public AuthenticationFilter(DatabaseAuthenticationManager databaseAuthenticationManager,
             TokenDetails userTokenDetails) {
@@ -94,13 +96,13 @@ public class AuthenticationFilter extends GenericFilterBean {
             httpResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             httpResponse.setContentType("application/json");
             httpResponse.setCharacterEncoding("UTF-8");
-            httpResponse.getWriter().write("{\"message\":\""+ internalAuthenticationServiceException.getMessage() +"\"}");
+            httpResponse.getWriter().write("{\"message\":\"" + internalAuthenticationServiceException.getMessage() + "\"}");
         } catch (AuthenticationException authenticationException) {
             SecurityContextHolder.clearContext();
             httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             httpResponse.setContentType("application/json");
             httpResponse.setCharacterEncoding("UTF-8");
-            httpResponse.getWriter().write("{\"message\":\""+ authenticationException.getMessage() +"\"}");
+            httpResponse.getWriter().write("{\"message\":\"" + authenticationException.getMessage() + "\"}");
         } finally {
             MDC.remove(TOKEN_SESSION_KEY);
             MDC.remove(USER_SESSION_KEY);
@@ -145,7 +147,7 @@ public class AuthenticationFilter extends GenericFilterBean {
     }
 
     /**
-     * Post to authentivate.
+     * Post to authenticate process.
      *
      * @param httpRequest to set
      * @param resourcePath to set
@@ -156,13 +158,14 @@ public class AuthenticationFilter extends GenericFilterBean {
     }
 
     /**
-     * Process authentication.
+     * Process the user login authentication.
      *
+     * @param httpRequest to set
      * @param httpResponse to set
      * @param username to set
      * @param password to set
-     * @param domain to set
-     * @throws IOException if any error occurs
+     * @param domain name to set
+     * @throws IOException if I/O exception occurs.
      */
     private void processUsernamePasswordAuthentication(HttpServletRequest httpRequest, HttpServletResponse httpResponse,
             Optional<String> username, Optional<String> password, Optional<String> domain) throws IOException {
@@ -188,6 +191,7 @@ public class AuthenticationFilter extends GenericFilterBean {
     /**
      * Try to authenticate with username and password.
      *
+     * @param httpRequest to set
      * @param username to set
      * @param password to set
      * @param domain to set
@@ -205,6 +209,7 @@ public class AuthenticationFilter extends GenericFilterBean {
      * Process token authentication.
      *
      * @param token to set
+     * @param httpRequest to set
      */
     private void processTokenAuthentication(Optional<String> token, HttpServletRequest httpRequest) {
         Authentication resultOfAuthentication = tryToAuthenticateWithToken(token, httpRequest);
@@ -215,6 +220,7 @@ public class AuthenticationFilter extends GenericFilterBean {
      * Try to authenticate with token.
      *
      * @param token to set
+     * @param httpRequest to set
      * @return Authentication
      */
     private Authentication tryToAuthenticateWithToken(Optional<String> token, HttpServletRequest httpRequest) {
@@ -227,6 +233,7 @@ public class AuthenticationFilter extends GenericFilterBean {
      * Try to authenticate.
      *
      * @param requestAuthentication to set
+     * @param httpRequest to set
      * @return Authentication
      */
     private Authentication tryToAuthenticate(Authentication requestAuthentication, HttpServletRequest httpRequest) {
@@ -235,7 +242,7 @@ public class AuthenticationFilter extends GenericFilterBean {
         if (responseAuthentication == null || !responseAuthentication.isAuthenticated()) {
             LOGGER.debug("User authentication failed : " + httpRequest.getServletPath() + " : "
                     + dateFormat.format(new Date()));
-            throw new InternalAuthenticationServiceException(
+            throw new BadCredentialsException(
                     "Unable to authenticate Domain User for provided credentials");
         }
         LOGGER.debug("User authentication success : " + httpRequest.getServletPath() + " : "

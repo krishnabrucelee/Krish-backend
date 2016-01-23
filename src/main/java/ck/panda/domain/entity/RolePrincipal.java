@@ -1,13 +1,14 @@
 package ck.panda.domain.entity;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import ck.panda.domain.entity.User.UserType;
+import ck.panda.util.DateConvertUtil;
 
 /**
  * Role permission for login user.
@@ -20,20 +21,8 @@ public class RolePrincipal {
     /** User role attributes. */
     private Role role;
 
-    /** User type attributes. */
-    private UserType type;
-
-    /** User domain name attributes. */
-    private String domainname;
-
-    /** User domain id attributes. */
-    private Long domainId;
-
-    /** User id attributes. */
-    private Long id;
-
-    /** User department id attributes. */
-    private Long departmentid;
+    /** User attributes. */
+    private User user;
 
     /** Build Version number. */
     private String buildVersion;
@@ -47,21 +36,16 @@ public class RolePrincipal {
     /**
      * Parameterized constructor.
      *
+     * @param user to set
      * @param username to set
      * @param role to set
-     * @param type to set
-     * @param domainname to set
+     * @param buildVersion to set
      */
-    public RolePrincipal(String username, Long id, Role role, UserType type, String domainname, Long domainId,
-            Long departmentid, String buildVersion) {
+    public RolePrincipal(User user, String username, Role role, String buildVersion) {
+        this.user = user;
         this.username = username;
-        this.id = id;
         this.role = role;
-        this.type = type;
-        this.domainname = domainname;
-        this.departmentid = departmentid;
         this.buildVersion = buildVersion;
-        this.domainId = domainId;
     }
 
     @Override
@@ -69,14 +53,17 @@ public class RolePrincipal {
         Authentication token = SecurityContextHolder.getContext().getAuthentication();
         JSONObject jsonObject = new JSONObject();
         try {
+            TimeZone tz = Calendar.getInstance().getTimeZone();
             jsonObject.put("token", token.getDetails().toString());
-            jsonObject.put("id", id);
+            jsonObject.put("id", user.getId());
             jsonObject.put("userName", username);
-            jsonObject.put("type", type);
-            jsonObject.put("domainName", domainname);
-            jsonObject.put("domainId", domainId);
-            jsonObject.put("departmentId", departmentid);
+            jsonObject.put("type", user.getType());
+            jsonObject.put("domainName", user.getDomain().getName());
+            jsonObject.put("domainId", user.getDomain().getId());
+            jsonObject.put("departmentId", user.getDepartment().getId());
             jsonObject.put("buildNumber", buildVersion);
+            jsonObject.put("loginTime", DateConvertUtil.getTimestamp());
+            jsonObject.put("timeZone", tz.getID());
             JSONArray jsonArray = new JSONArray();
             Map<String, Object> hashList = new HashMap<String, Object>();
             for (int i = 0; i < role.getPermissionList().size(); i++) {
@@ -90,7 +77,7 @@ public class RolePrincipal {
                 hashList = new HashMap<String, Object>();
             }
             jsonObject.put("permissionList", jsonArray);
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return jsonObject.toString();

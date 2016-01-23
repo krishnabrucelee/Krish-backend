@@ -7,13 +7,13 @@ import javax.crypto.spec.SecretKeySpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import ck.panda.domain.entity.User;
 import ck.panda.util.DateConvertUtil;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
+import net.sf.ehcache.config.CacheConfiguration;
 
 /**
  * Token Service.
@@ -66,19 +66,6 @@ public class TokenService {
     @Value("${backend.admin.usersecretkey}")
     private String userSecretKey;
 
-    /** Build Version. */
-    @Value("${app.buildversion}")
-    private String buildNumber;
-
-    /**
-     * Evict expire tokens.
-     */
-    @Scheduled(fixedRate = HALF_AN_HOUR_IN_MILLISECONDS)
-    public void evictExpiredTokens() {
-        LOGGER.info("Evicting expired tokens");
-        REST_API_AUTH_TOKEN.evictExpiredElements();
-    }
-
     /**
      * @param user token.
      * @param domainName name of the domain
@@ -123,10 +110,14 @@ public class TokenService {
      * Get the auth token.
      *
      * @param token to set
-     * @return Authentication
-     * @throws Exception raise if error
+     * @return Authentication status object
+     * @throws Exception if unhandled exception occurs
      */
     public Authentication retrieve(String token) throws Exception {
+        CacheConfiguration config = REST_API_AUTH_TOKEN.getCacheConfiguration();
+
+        // Sets the time to idle for an element before it expires. This property can be modified dynamically while the cache is operating.
+        config.setTimeToIdleSeconds(HALF_AN_HOUR_IN_MILLISECONDS);
         return (Authentication) REST_API_AUTH_TOKEN.get(token).getObjectValue();
     }
 
@@ -154,5 +145,4 @@ public class TokenService {
         }
         return stringBuilder;
     }
-
 }

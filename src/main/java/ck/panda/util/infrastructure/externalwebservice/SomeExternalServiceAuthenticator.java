@@ -36,8 +36,7 @@ public class SomeExternalServiceAuthenticator implements ExternalServiceAuthenti
                     AuthorityUtils.commaSeparatedStringToAuthorityList(rolename));
         } else {
             authenticatedExternalWebService = new AuthenticatedExternalWebService(
-                    new RolePrincipal(username, user.getId(), role, user.getType(), user.getDomain().getName(),
-                            user.getDomain().getId(), user.getDepartment().getId(), buildVersion),
+                    new RolePrincipal(user, username, role, buildVersion),
                     null, AuthorityUtils.commaSeparatedStringToAuthorityList(rolename));
         }
         authenticatedExternalWebService.setExternalWebService(externalWebService);

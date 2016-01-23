@@ -1,6 +1,8 @@
 package ck.panda.util.infrastructure.security;
 
 import com.google.common.base.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -12,6 +14,9 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
  *
  */
 public class TokenAuthenticationProvider implements AuthenticationProvider {
+
+    /** Logger constant. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(TokenService.class);
 
     /** Token service attribute. */
     private TokenService tokenService;
@@ -29,15 +34,15 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         Optional<String> token = (Optional) authentication.getPrincipal();
         if (!token.isPresent() || token.get().isEmpty()) {
-            throw new BadCredentialsException("INVALID_TOKEN");
+            throw new BadCredentialsException("Your session has expired. Please log-in again");
         }
         if (!tokenService.contains(token.get())) {
-            throw new BadCredentialsException("INVALID_TOKEN");
+            throw new BadCredentialsException("Your session has expired. Please log-in again");
         }
         try {
             authentication = tokenService.retrieve(token.get());
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("ERROR AT TOKEN AUTHENTICATION");
         }
         return authentication;
     }
