@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
  */
 public class RolePrincipal {
 
-	/** Logger constant. */
-	private static final Logger LOGGER = LoggerFactory.getLogger(RolePrincipal.class);
+    /** Logger constant. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(RolePrincipal.class);
 
     /** User name attributes. */
     private String username;
