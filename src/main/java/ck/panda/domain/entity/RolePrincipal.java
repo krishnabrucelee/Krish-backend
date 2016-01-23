@@ -9,11 +9,16 @@ import org.json.JSONObject;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import ck.panda.util.DateConvertUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Role permission for login user.
  */
 public class RolePrincipal {
+
+	/** Logger constant. */
+	private static final Logger LOGGER = LoggerFactory.getLogger(RolePrincipal.class);
 
     /** User name attributes. */
     private String username;
@@ -78,7 +83,7 @@ public class RolePrincipal {
             }
             jsonObject.put("permissionList", jsonArray);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("ERROR AT GETTING LOGIN USER DETAILS");
         }
         return jsonObject.toString();
     }

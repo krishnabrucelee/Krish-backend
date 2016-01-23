@@ -16,7 +16,7 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 public class TokenAuthenticationProvider implements AuthenticationProvider {
 
     /** Logger constant. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(TokenService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TokenAuthenticationProvider.class);
 
     /** Token service attribute. */
     private TokenService tokenService;
