@@ -36,11 +36,11 @@ public class TokenService {
 
     /** Admin username. */
     @Value("${backend.admin.userid}")
-    private String backendAdminUserid;
+    private String backendAdminUserId;
 
     /** Admin username. */
     @Value("${backend.admin.username}")
-    private String backendAdminUsername;
+    private String backendAdminUserName;
 
     /** Admin role. */
     @Value("${backend.admin.dominid}")
@@ -116,12 +116,15 @@ public class TokenService {
     public Authentication retrieve(String token) throws Exception {
         CacheConfiguration config = REST_API_AUTH_TOKEN.getCacheConfiguration();
 
-        // Sets the time to idle for an element before it expires. This property can be modified dynamically while the cache is operating.
+        // Sets the time to idle for an element before it expires. This property can be modified dynamically while the
+        // cache is operating.
         config.setTimeToIdleSeconds(HALF_AN_HOUR_IN_MILLISECONDS);
         return (Authentication) REST_API_AUTH_TOKEN.get(token).getObjectValue();
     }
 
     /**
+     * Generate the new token with user login details.
+     *
      * @param user details for token generation
      * @param domainName name of the domain
      * @return user details
@@ -130,15 +133,28 @@ public class TokenService {
         StringBuilder stringBuilder = null;
         try {
             stringBuilder = new StringBuilder();
-            stringBuilder.append(user == null ? backendAdminUserid : user.getId()).append("@@");
-            stringBuilder.append(user == null ? backendAdminUsername : user.getUserName()).append("@@");
-            stringBuilder.append(user == null ? backendAdminDomainId : user.getDomain().getId()).append("@@");
-            stringBuilder.append(user == null ? backendAdminDepartmentId : user.getDepartment().getId()).append("@@");
-            stringBuilder.append(user == null ? backendAdminRole : user.getRole().getName()).append("@@");
-            stringBuilder.append(domainName).append("@@");
-            stringBuilder.append(user == null ? backendAdminType : user.getType()).append("@@");
-            stringBuilder.append(user == null ? userApiKey : user.getApiKey()).append("@@");
-            stringBuilder.append(user == null ? userSecretKey : user.getSecretKey()).append("@@");
+            //Removed the conditional operator
+            if(user == null) {
+            	stringBuilder.append(backendAdminUserId).append("@@");
+                stringBuilder.append(backendAdminUserName).append("@@");
+                stringBuilder.append(backendAdminDomainId).append("@@");
+                stringBuilder.append(backendAdminDepartmentId).append("@@");
+                stringBuilder.append(backendAdminRole).append("@@");
+                stringBuilder.append(domainName).append("@@");
+                stringBuilder.append(backendAdminType).append("@@");
+                stringBuilder.append(userApiKey).append("@@");
+                stringBuilder.append(userSecretKey).append("@@");
+            } else {
+            	stringBuilder.append(user.getId()).append("@@");
+                stringBuilder.append(user.getUserName()).append("@@");
+                stringBuilder.append(user.getDomain().getId()).append("@@");
+                stringBuilder.append(user.getDepartment().getId()).append("@@");
+                stringBuilder.append(user.getRole().getName()).append("@@");
+                stringBuilder.append(domainName).append("@@");
+                stringBuilder.append(user.getType()).append("@@");
+                stringBuilder.append(user.getApiKey()).append("@@");
+                stringBuilder.append(user.getSecretKey()).append("@@");
+            }
             stringBuilder.append(DateConvertUtil.getTimestamp());
         } catch (Exception e) {
             e.printStackTrace();
