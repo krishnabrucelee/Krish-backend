@@ -191,7 +191,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
      *
      * @param vmInstance object for compute.
      * @param optional values to be mapped with the vm instance.
-     * @return optinal values for vm instance.
+     * @return optional values for vm instance.
      * @throws Exception if error occurs.
      */
     private HashMap<String, String> customComputeForInstance(VmInstance vmInstance,  HashMap<String, String> optional) throws Exception {
