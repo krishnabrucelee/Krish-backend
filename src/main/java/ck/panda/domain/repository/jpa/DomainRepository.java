@@ -19,7 +19,7 @@ public interface DomainRepository extends PagingAndSortingRepository<Domain, Lon
      * @param uuid uuid of domain.
      * @return domain object.
      */
-    @Query(value = "select domain from Domain domain where domain.uuid = :uuid")
+    @Query(value = "SELECT domain FROM Domain domain WHERE domain.uuid = :uuid")
     Domain findByUUID(@Param("uuid") String uuid);
 
     /**
@@ -29,7 +29,7 @@ public interface DomainRepository extends PagingAndSortingRepository<Domain, Lon
      * @param isActive get the Domain list based on active/inactive status.
      * @return domain object
      */
-    @Query(value = "select domain from Domain domain where domain.companyNameAbbreviation = :domainName AND domain.isActive =:isActive")
+    @Query(value = "SELECT domain FROM Domain domain WHERE domain.companyNameAbbreviation = :domainName AND domain.isActive =:isActive")
     Domain findByName(@Param("domainName") String domainName, @Param("isActive") Boolean isActive);
 
     /**
@@ -39,6 +39,6 @@ public interface DomainRepository extends PagingAndSortingRepository<Domain, Lon
      * @param isActive get the Domain list based on active/inactive status.
      * @return list of Domains.
      */
-    @Query(value = "select domain from Domain domain where domain.isActive =:isActive")
+    @Query(value = "SELECT domain FROM Domain domain WHERE domain.isActive =:isActive")
     Page<Domain> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
 }

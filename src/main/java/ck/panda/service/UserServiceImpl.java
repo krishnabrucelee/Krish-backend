@@ -18,7 +18,6 @@ import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.Status;
 import ck.panda.domain.entity.User.UserType;
-import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackUserService;
@@ -56,10 +55,6 @@ public class UserServiceImpl implements UserService {
     /** Reference of the convert entity service. */
     @Autowired
     private ConvertEntityService convertEntityService;
-
-    /** Inject domain service business logic. */
-    @Autowired
-    private DomainRepository domainRepository;
 
     /** Autowired TokenDetails. */
     @Autowired
@@ -267,7 +262,8 @@ public class UserServiceImpl implements UserService {
         if (domain.equals("/")) {
             domain = "ROOT";
         }
-        User user = userRepository.findByUser(userName.trim(), domainRepository.findByName(domain, true), true);
+        Domain doaminByName = domainService.findByName(domain);
+        User user = userRepository.findByUser(userName.trim(), doaminByName, true);
         if (user != null && password != null) {
             String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
             byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
@@ -307,7 +303,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<User> findAllUserByDomain(PagingAndSorting pagingAndSorting) throws Exception {
-        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = domainService.findDomain();
         if (domain != null && !domain.getName().equals("ROOT")) {
             return userRepository.findAllUserByDomain(pagingAndSorting.toPageRequest(), domain, true);
         }
@@ -316,7 +312,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> findAllUserByDomain() throws Exception {
-        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        Domain domain = domainService.findDomain();
         return userRepository.findAllUserByDomain(domain);
     }
 

@@ -57,4 +57,20 @@ public interface DomainService extends CRUDService<Domain> {
      */
     List<Domain> findAllDomain() throws Exception;
 
+    /**
+     * To list the domain by name.
+     *
+     * @param domainName object
+     * @return domain name
+     */
+    Domain findByName(String domainName);
+
+    /**
+     * Retrieves domain entity by its id.
+     *
+     * @return domain
+     * @throws Exception unhandled errors.
+     */
+    Domain findDomain() throws Exception;
+
 }

@@ -66,10 +66,6 @@ public class DomainServiceImpl implements DomainService {
     @Autowired
     private AppValidator validator;
 
-    /** Autowired TokenDetails. */
-    @Autowired
-    private TokenDetails tokenDetails;
-
     /** Reference of Cloud Stack Department service. */
     @Autowired
     private CloudStackAccountService departmentService;
@@ -93,6 +89,10 @@ public class DomainServiceImpl implements DomainService {
     /** Secret key for the user encryption. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
+
+    /** Autowired TokenDetails. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     @Override
     public Domain save(Domain domain) throws Exception {
@@ -396,6 +396,17 @@ public class DomainServiceImpl implements DomainService {
      */
     public Page<Domain> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
         return domainRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
+    }
+
+    @Override
+    public Domain findByName(String domainName) {
+
+        return domainRepo.findByName(domainName, true);
+    }
+
+    @Override
+    public Domain findDomain() throws Exception {
+        return domainRepo.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
     }
 
 }
