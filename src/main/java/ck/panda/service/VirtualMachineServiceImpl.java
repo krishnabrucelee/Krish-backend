@@ -187,9 +187,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     }
 
     /**
-     * Custom compute offering for an Instance.
+     * Custom compute offering for a vm instance.
      *
-     * @param vminstance object for compute.
+     * @param vmInstance object for compute.
      * @throws Exception if error occurs.
      */
     private HashMap<String, String> customComputeForInstance(VmInstance vmInstance,  HashMap<String, String> optional) throws Exception {
