@@ -1861,7 +1861,7 @@ public class VmInstance implements Serializable {
     }
 
     /**
-     * Get the  Compute offering Min Iops..
+     * Get the  compute offering min iops.
      *
      * @return the computeMinIops
      */
@@ -1870,7 +1870,7 @@ public class VmInstance implements Serializable {
     }
 
     /**
-     * Set the Compute offering Min Iops.
+     * Set the  compute offering min iops.
      *
      * @param computeMinIops  to set
      */
@@ -1879,7 +1879,7 @@ public class VmInstance implements Serializable {
     }
 
     /**
-     * Get the Compute offering Max Iops.
+     * Get the compute offering max iops.
      *
      * @return the computeMaxIops
      */
@@ -1888,7 +1888,7 @@ public class VmInstance implements Serializable {
     }
 
     /**
-     * Set the Compute offering Max Iops..
+     * Set the compute offering max iops.
      *
      * @param computeMaxIops  to set
      */
