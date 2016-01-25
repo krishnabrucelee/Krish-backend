@@ -937,11 +937,13 @@ public class ConvertEntityService {
                                 true);
                         //check the max value if not -1 and upadate the available value
                         if (resourceDomainCount.getMax() != -1) {
-							// Check resource type primary and secondary storage and convert resource
+							// Check resource type primary = 10 and secondary storage = 11 and convert resource
 							// count values GiB to MB.
 							if (resourceType.equals("10") || resourceType.equals("11")) {
+								//Convert and set Available resource count of primary and secondary GiB to MB.
 								resourceDomainCount.setAvailable(resourceDomainCount.getMax()
 										- (Long.valueOf(resourceCount) / (1024 * 1024 * 1024)));
+								//Convert and set Used resource count of primary and secondary GiB to MB.
 								resourceDomainCount.setUsedLimit((Long.valueOf(resourceCount) / (1024 * 1024 * 1024)));
 							} else {
 								resourceDomainCount
