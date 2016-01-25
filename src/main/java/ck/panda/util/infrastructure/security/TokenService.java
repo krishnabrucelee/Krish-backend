@@ -34,19 +34,19 @@ public class TokenService {
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
 
-    /** Admin username. */
+    /** Admin user ID. */
     @Value("${backend.admin.userid}")
     private String backendAdminUserId;
 
-    /** Admin username. */
+    /** Admin user name. */
     @Value("${backend.admin.username}")
     private String backendAdminUserName;
 
-    /** Admin role. */
+    /** Admin domain ID. */
     @Value("${backend.admin.dominid}")
     private String backendAdminDomainId;
 
-    /** Admin role. */
+    /** Admin department ID. */
     @Value("${backend.admin.departmentid}")
     private String backendAdminDepartmentId;
 
@@ -67,6 +67,8 @@ public class TokenService {
     private String userSecretKey;
 
     /**
+     * Generate new encrypted token using user login details.
+     *
      * @param user token.
      * @param domainName name of the domain
      * @return token
