@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.SSHKey;
 import ck.panda.domain.repository.jpa.SSHKeyRepository;
 import ck.panda.util.AppValidator;
@@ -56,18 +57,6 @@ public class SSHKeyServiceImpl implements SSHKeyService {
     @Autowired
     private DomainService domainService;
 
-    /** Json response for SSH Key. */
-    private static final String JSON = "json";
-
-    /** User type of the login user for SSH Key. */
-    private static final String USERTYPE = "usertype";
-
-    /** DomainId for SSH Key. */
-    private static final String DOMAINID = "domainid";
-
-    /** DomainId for SSH Key. */
-    private static final String DEPARTMENTID = "departmentid";
-
     @Override
     @PreAuthorize("hasPermission(#sshkey.getIsSyncFlag(), 'CREATE_SSH_KEY')")
     public SSHKey save(SSHKey sshkey) throws Exception {
@@ -103,7 +92,7 @@ public class SSHKeyServiceImpl implements SSHKeyService {
         Errors errors = validator.rejectIfNullEntity("sshkey", sshkey);
         errors = validator.validateEntity(sshkey, errors);
         SSHKey ssh = sshkeyRepo.findByNameAndDepartmentAndIsActive(sshkey.getName(),
-                Long.parseLong(tokenDetails.getTokenDetails(DEPARTMENTID)), true);
+                Long.parseLong(tokenDetails.getTokenDetails(GenericConstants.DEPARTMENTID)), true);
         // Check SSHKey name for uniqueness, if not field error occurs
         if (ssh != null && ssh.getName() == sshkey.getName()) {
             errors.addFieldError("name", "SSH.key.name.already.exist.for.same.account");
@@ -125,16 +114,17 @@ public class SSHKeyServiceImpl implements SSHKeyService {
         HashMap<String, String> optional = new HashMap<String, String>();
         // If Usertype is root admin or domain admin, then get the optional values from user input or else from
         // token details
-        if ((String.valueOf(tokenDetails.getTokenDetails(USERTYPE)).equals("ROOT_ADMIN"))
-              || (String.valueOf(tokenDetails.getTokenDetails(USERTYPE)).equals("DOMAIN_ADMIN"))) {
+        if ((String.valueOf(tokenDetails.getTokenDetails(GenericConstants.USERTYPE)).equals("ROOT_ADMIN"))
+              || (String.valueOf(tokenDetails.getTokenDetails(GenericConstants.USERTYPE)).equals("DOMAIN_ADMIN"))) {
               optional.put("account", String.valueOf(convertEntity.getDepartmentById(sshkey.getDepartmentId())
-              .getUserName()));
-              optional.put(DOMAINID, String.valueOf(convertEntity.getDomainById(sshkey.getDomainId()).getUuid()));
+                      .getUserName()));
+              optional.put(GenericConstants.DOMAINID, String.valueOf(convertEntity.getDomainById(sshkey.getDomainId())
+                      .getUuid()));
         } else {
-              optional.put(DOMAINID, departmentService
-                      .find(Long.parseLong(tokenDetails.getTokenDetails(DEPARTMENTID))).getDomain().getUuid());
-              optional.put("account", departmentService
-                      .find(Long.parseLong(tokenDetails.getTokenDetails(DEPARTMENTID))).getUserName());
+              optional.put(GenericConstants.DOMAINID, departmentService.find(Long.parseLong(tokenDetails
+                      .getTokenDetails(GenericConstants.DEPARTMENTID))).getDomain().getUuid());
+              optional.put("account", departmentService.find(Long.parseLong(tokenDetails
+                      .getTokenDetails(GenericConstants.DEPARTMENTID))).getUserName());
         }
         return optional;
     }
@@ -148,7 +138,8 @@ public class SSHKeyServiceImpl implements SSHKeyService {
      */
     private void createSSHKey(SSHKey sshkey, Errors errors) throws Exception {
         cloudStackSSHService.setServer(configServer.setServer(1L));
-        String sshkeyResponse = cloudStackSSHService.createSSHKeyPair(sshkey.getName(), JSON, optional(sshkey));
+        String sshkeyResponse = cloudStackSSHService.createSSHKeyPair(sshkey.getName(), GenericConstants.JSON,
+            optional(sshkey));
         JSONObject createSSHResponseJSON = new JSONObject(sshkeyResponse).getJSONObject("createsshkeypairresponse");
         // If credentials for creation of new keypair are not valid, then global error occurs
         if (createSSHResponseJSON.has("errorcode")) {
@@ -163,9 +154,9 @@ public class SSHKeyServiceImpl implements SSHKeyService {
         sshkey.setFingerPrint((String) sshkeypair.get("fingerprint"));
         sshkey.setPrivateKey((String) sshkeypair.get("privatekey"));
         sshkey.setIsActive(true);
-        if (String.valueOf(tokenDetails.getTokenDetails(USERTYPE)).equals("USER")) {
-            sshkey.setDomainId(Long.parseLong(tokenDetails.getTokenDetails(DOMAINID)));
-            sshkey.setDepartmentId(Long.parseLong(tokenDetails.getTokenDetails(DEPARTMENTID)));
+        if (String.valueOf(tokenDetails.getTokenDetails(GenericConstants.USERTYPE)).equals("USER")) {
+            sshkey.setDomainId(Long.parseLong(tokenDetails.getTokenDetails(GenericConstants.DOMAINID)));
+            sshkey.setDepartmentId(Long.parseLong(tokenDetails.getTokenDetails(GenericConstants.DEPARTMENTID)));
         }
     }
 
@@ -178,8 +169,8 @@ public class SSHKeyServiceImpl implements SSHKeyService {
      */
     private void registerSSHKey(SSHKey sshkey, Errors errors) throws Exception {
         cloudStackSSHService.setServer(configServer.setServer(1L));
-        String sshkeyResponse = cloudStackSSHService.registerSSHKeyPair(sshkey.getName(), sshkey.getPublicKey(), JSON,
-            optional(sshkey));
+        String sshkeyResponse = cloudStackSSHService.registerSSHKeyPair(sshkey.getName(), sshkey.getPublicKey(),
+            GenericConstants.JSON, optional(sshkey));
         JSONObject registerSSHResponseJSON = new JSONObject(sshkeyResponse).getJSONObject("registersshkeypairresponse");
         // If given the given input is invalid, then error is thrown
         if (registerSSHResponseJSON.has("errorcode")) {
@@ -193,9 +184,9 @@ public class SSHKeyServiceImpl implements SSHKeyService {
         sshkey.setName((String) sshkeypair.get("name"));
         sshkey.setFingerPrint((String) sshkeypair.get("fingerprint"));
         sshkey.setIsActive(true);
-        if (String.valueOf(tokenDetails.getTokenDetails(USERTYPE)).equals("USER")) {
-            sshkey.setDomainId(Long.parseLong(tokenDetails.getTokenDetails(DOMAINID)));
-            sshkey.setDepartmentId(Long.parseLong(tokenDetails.getTokenDetails(DEPARTMENTID)));
+        if (String.valueOf(tokenDetails.getTokenDetails(GenericConstants.USERTYPE)).equals("USER")) {
+            sshkey.setDomainId(Long.parseLong(tokenDetails.getTokenDetails(GenericConstants.DOMAINID)));
+            sshkey.setDepartmentId(Long.parseLong(tokenDetails.getTokenDetails(GenericConstants.DEPARTMENTID)));
         }
     }
 
@@ -232,15 +223,15 @@ public class SSHKeyServiceImpl implements SSHKeyService {
         // If Usertype is root admin, then list the entire SSHKey list according to active status
         // If Usertype is domain admin, then list the SSHKey list with respect to domainId and active status or else
         // list the SSHKey list according to deparmentId along with active status
-        if (String.valueOf(tokenDetails.getTokenDetails(USERTYPE)).equals("ROOT_ADMIN")) {
+        if (String.valueOf(tokenDetails.getTokenDetails(GenericConstants.USERTYPE)).equals("ROOT_ADMIN")) {
             return sshkeyRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
-        } else if (String.valueOf(tokenDetails.getTokenDetails(USERTYPE)).equals("DOMAIN_ADMIN")) {
+        } else if (String.valueOf(tokenDetails.getTokenDetails(GenericConstants.USERTYPE)).equals("DOMAIN_ADMIN")) {
             Page<SSHKey> allSSHKeyList = sshkeyRepo.findAllByDomainIsActive(Long.valueOf(tokenDetails
-            .getTokenDetails(DOMAINID)), true, pagingAndSorting.toPageRequest());
+            .getTokenDetails(GenericConstants.DOMAINID)), true, pagingAndSorting.toPageRequest());
             return allSSHKeyList;
         }
-        return sshkeyRepo.findAllByDepartmentIsActive(Long.parseLong(tokenDetails.getTokenDetails(DEPARTMENTID)),
-            true, pagingAndSorting.toPageRequest());
+        return sshkeyRepo.findAllByDepartmentIsActive(Long.parseLong(tokenDetails
+            .getTokenDetails(GenericConstants.DEPARTMENTID)), true, pagingAndSorting.toPageRequest());
     }
 
     @Override
@@ -248,13 +239,14 @@ public class SSHKeyServiceImpl implements SSHKeyService {
         // If Usertype is root admin, then list the entire SSHKey list according to active status
         // If Usertype is domain admin, then list the SSHKey list with respect to domainId and active status or else
         // list the SSHKey list according to deparmentId along with active status
-        if (String.valueOf(tokenDetails.getTokenDetails(USERTYPE)).equals("ROOT_ADMIN")) {
+        if (String.valueOf(tokenDetails.getTokenDetails(GenericConstants.USERTYPE)).equals("ROOT_ADMIN")) {
             return sshkeyRepo.findAllByIsActive(true);
-        } else if (String.valueOf(tokenDetails.getTokenDetails(USERTYPE)).equals("DOMAIN_ADMIN")) {
-            return sshkeyRepo.findAllByDomainIsActive(Long.valueOf(tokenDetails.getTokenDetails(DOMAINID)),true);
+        } else if (String.valueOf(tokenDetails.getTokenDetails(GenericConstants.USERTYPE)).equals("DOMAIN_ADMIN")) {
+            return sshkeyRepo.findAllByDomainIsActive(Long.valueOf(tokenDetails
+                .getTokenDetails(GenericConstants.DOMAINID)),true);
         }
-        return sshkeyRepo.findAllByDepartmentAndIsActive(Long.parseLong(tokenDetails.getTokenDetails(DEPARTMENTID)),
-            true);
+        return sshkeyRepo.findAllByDepartmentAndIsActive(Long.parseLong(tokenDetails
+            .getTokenDetails(GenericConstants.DEPARTMENTID)), true);
     }
 
     @Override
@@ -267,9 +259,11 @@ public class SSHKeyServiceImpl implements SSHKeyService {
             errors = validator.validateEntity(sshkey, errors);
             cloudStackSSHService.setServer(configServer.setServer(1L));
             HashMap<String, String> optional = new HashMap<String, String>();
-            optional.put(DOMAINID, convertEntity.getDepartmentById(sshkey.getDepartmentId()).getDomain().getUuid());
+            optional.put(GenericConstants.DOMAINID, convertEntity.getDepartmentById(sshkey.getDepartmentId())
+                .getDomain().getUuid());
             optional.put("account", convertEntity.getDepartmentById(sshkey.getDepartmentId()).getUserName());
-            String sshkeyResponse = cloudStackSSHService.deleteSSHKeyPair(sshkey.getName(), JSON, optional);
+            String sshkeyResponse = cloudStackSSHService.deleteSSHKeyPair(sshkey.getName(), GenericConstants.JSON,
+                optional);
             // Get cloud stack SSHkey delete response
             JSONObject deletesshkeypairresponseJSON = new JSONObject(sshkeyResponse)
                     .getJSONObject("deletesshkeypairresponse");
@@ -288,7 +282,7 @@ public class SSHKeyServiceImpl implements SSHKeyService {
         HashMap<String, String> sshKeyMap = new HashMap<String, String>();
         sshKeyMap.put("listall", "true");
         // 1. Get the list of SSH Key from CS server using CS connector
-        String response = cloudStackSSHService.listSSHKeyPairs(JSON, sshKeyMap);
+        String response = cloudStackSSHService.listSSHKeyPairs(GenericConstants.JSON, sshKeyMap);
         JSONArray sshKeyListJSON = null;
         JSONObject responseObject = new JSONObject(response).getJSONObject("listsshkeypairsresponse");
         if (responseObject.has("sshkeypair")) {

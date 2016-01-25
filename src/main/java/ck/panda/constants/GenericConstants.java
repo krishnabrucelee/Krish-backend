@@ -20,12 +20,21 @@ public class GenericConstants {
     /** Constant used to set content range response for pagination. */
     public static final String CONTENT_RANGE_HEADER = "Content-Range";
 
-    /**
-     * constant for default limit.
-     */
+    /** constant for default limit. */
     public static final Integer DEFAULTLIMIT = 10;
 
     /** Template architecture constant values. */
     public static final String[] TEMPLATE_ARCHITECTURE = {"32", "64"};
 
+    /** Json response constant values. */
+    public static final String JSON = "json";
+
+    /** User type constant value. */
+    public static final String USERTYPE = "usertype";
+
+    /** DomainId constant value. */
+    public static final String DOMAINID = "domainid";
+
+    /** DepartmentId constant value. */
+    public static final String DEPARTMENTID = "departmentid";
 }
