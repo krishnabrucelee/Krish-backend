@@ -35,7 +35,7 @@ public class SomeExternalServiceAuthenticator implements ExternalServiceAuthenti
             authenticatedExternalWebService = new AuthenticatedExternalWebService(username, null,
                     AuthorityUtils.commaSeparatedStringToAuthorityList(rolename));
         } else {
-        	//Reduced the role principal parameter count
+            //Reduced the role principal parameter count
             authenticatedExternalWebService = new AuthenticatedExternalWebService(
                     new RolePrincipal(user, username, role, buildVersion),
                     null, AuthorityUtils.commaSeparatedStringToAuthorityList(rolename));
