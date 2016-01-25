@@ -3,16 +3,20 @@ package ck.panda.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Project;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.Network.Status;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.VmInstance;
@@ -91,7 +95,6 @@ public class NetworkServiceImpl implements NetworkService {
         if (network.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity("Network", network);
             errors = validator.validateEntity(network, errors);
-
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
@@ -114,9 +117,9 @@ public class NetworkServiceImpl implements NetworkService {
                 network.setNetworkOfferingId(
                         networkOfferingService.findByUUID(networkResponse.getString("networkofferingid")).getId());
                 network.setStatus(network.getStatus().valueOf(networkResponse.getString("state")));
-                if (network.getProject() != null) {
+                if (network.getProjectId() != null) {
                     network.setProjectId(convertEntityService.getProjectId(networkResponse.getString("projectid")));
-                    network.setDepartmentId(null);
+                    //network.setDepartmentId(null);
                 } else {
                     if (network.getDepartmentId() != null) {
                         network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
@@ -129,12 +132,12 @@ public class NetworkServiceImpl implements NetworkService {
                     }
                 }
                 network.setGateway(networkResponse.getString("gateway"));
-
                 network.setIsActive(true);
                 return networkRepo.save(network);
             }
         } else {
-            LOGGER.debug(network.getUuid());
+            // To check Network UUID while Syncing Network.
+            LOGGER.debug("Sync-Network UUID :" + network.getUuid());
             network.setIsActive(true);
             return networkRepo.save(network);
         }
@@ -199,13 +202,11 @@ public class NetworkServiceImpl implements NetworkService {
                                 throw new ApplicationException(errors);
                             }
                         }
-
                     }
                 }
             }
         }
         return networkRepo.save(network);
-
     }
 
     @Override
@@ -254,8 +255,41 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public Page<Network> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return networkRepo.findAll(pagingAndSorting.toPageRequest());
+    public Page<Network> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
+        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+        if (domain.getName().equals("ROOT")) {
+            return networkRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
+        }
+        if (domain != null && !domain.getName().equals("ROOT")) {
+            if (tokenDetails.getTokenDetails("usertype").equals("DOMAIN_ADMIN")) {
+                return networkRepo.findByDomainIsActive(pagingAndSorting.toPageRequest(), true, domain.getId());
+            }
+        }
+        Page<Network> network = this.listNetworkByDepartmentAndProject(pagingAndSorting);
+        return network;
+    }
+
+    /**
+     * @param pagingAndSorting do pagination with sorting for network.
+     * @return network
+     * @throws Exception exception
+     */
+    private Page<Network> listNetworkByDepartmentAndProject(PagingAndSorting pagingAndSorting) throws  Exception {
+        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
+        if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
+            List<Network> listNetworks = new ArrayList<Network>();
+            for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
+                List<Network> projectNetwork = networkRepo.findByProjectDepartmentAndNetwork(project.getId(),
+                     Long.parseLong(tokenDetails.getTokenDetails("departmentid")), true);
+                listNetworks.addAll(projectNetwork);
+            }
+            List<Network> networks = listNetworks.stream().distinct().collect(Collectors.toList());
+            Page<Network> listingNetworksWithPagination = new PageImpl<Network>(networks);
+            return (Page<Network>) listingNetworksWithPagination;
+        } else {
+            return networkRepo.findByDepartmentAndPagination(Long.parseLong(tokenDetails.getTokenDetails("departmentid")), true,
+                pagingAndSorting.toPageRequest());
+        }
     }
 
     @Override
@@ -265,7 +299,6 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public List<Network> findAllFromCSServerByDomain() throws Exception {
-
         List<Project> project = projectService.findAllByActive(true);
         List<Network> networkList = new ArrayList<Network>();
         for (int j = 0; j <= project.size(); j++) {
@@ -294,7 +327,7 @@ public class NetworkServiceImpl implements NetworkService {
                     network.setNetworkOfferingId(
                             convertEntityService.getNetworkOfferingId(network.getTransNetworkOfferingId()));
                     network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
-                            network.getTransDepartmentId(), domainService.find(network.getDomainId())));
+                    network.getTransDepartmentId(), domainService.find(network.getDomainId())));
                     network.setProjectId(convertEntityService.getProjectId(network.getTransProjectId()));
                     networkList.add(network);
                 }
@@ -329,7 +362,6 @@ public class NetworkServiceImpl implements NetworkService {
      * @throws Exception Exception
      */
     public HashMap<String, String> optional(Network network) throws Exception {
-
         HashMap<String, String> optional = new HashMap<String, String>();
         if (network.getNetMask() != null && network.getNetMask().trim() != "") {
             optional.put("netmask", network.getNetMask());
@@ -367,7 +399,6 @@ public class NetworkServiceImpl implements NetworkService {
                         .find(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getUserName());
             }
         }
-
         return optional;
     }
 
@@ -388,7 +419,7 @@ public class NetworkServiceImpl implements NetworkService {
      * @param pagingAndSorting do pagination with sorting for computeofferings.
      * @return list of compute offerings.
      */
-    public Page<Network> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
+    public Page<Network> findAll(PagingAndSorting pagingAndSorting) throws Exception {
         if (tokenDetails.getTokenDetails("domainname").equals("/")) {
             return networkRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
         } else {

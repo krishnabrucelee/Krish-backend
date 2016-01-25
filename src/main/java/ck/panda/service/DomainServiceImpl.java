@@ -400,7 +400,6 @@ public class DomainServiceImpl implements DomainService {
 
     @Override
     public Domain findByName(String domainName) {
-
         return domainRepo.findByName(domainName, true);
     }
 
