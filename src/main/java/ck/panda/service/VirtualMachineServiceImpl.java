@@ -124,40 +124,40 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     errors = validator.sendGlobalError(isAvailable);
                     throw new ApplicationException(errors);
                 } else {
-                    HashMap<String, String> optional = new HashMap<String, String>();
-                    optional.put("displayname", vmInstance.getName());
+                    HashMap<String, String> optionalParams = new HashMap<String, String>();
+                    optionalParams.put("displayname", vmInstance.getName());
                     vmInstance.setDisplayName(vmInstance.getName());
-                    optional.put("name", vmInstance.getName());
+                    optionalParams.put("name", vmInstance.getName());
                     vmInstance.setNetworkId(convertEntityService.getNetworkByUuid(vmInstance.getNetworkUuid()));
                     config.setUserServer();
                     LOGGER.debug("Cloud stack connectivity at VM", vmInstance.getNetworkUuid());
-                    optional.put("networkids", vmInstance.getNetworkUuid());
-                    optional.put("displayvm", "true");
-                    optional.put("displayname", vmInstance.getName());
-                    optional.put("keyboard", "us");
-                    optional.put("name", vmInstance.getName());
+                    optionalParams.put("networkids", vmInstance.getNetworkUuid());
+                    optionalParams.put("displayvm", "true");
+                    optionalParams.put("displayname", vmInstance.getName());
+                    optionalParams.put("keyboard", "us");
+                    optionalParams.put("name", vmInstance.getName());
                     if (vmInstance.getHypervisorId() != null) {
-                       optional.put("hypervisor", hypervisorService.find(vmInstance.getHypervisorId()).getName());
+                        optionalParams.put("hypervisor", hypervisorService.find(vmInstance.getHypervisorId()).getName());
                     }
                     if (vmInstance.getProjectId() != null) {
-                        optional.put("projectid",
+                        optionalParams.put("projectid",
                                 convertEntityService.getProjectById(vmInstance.getProjectId()).getUuid());
                     } else {
-                        optional.put("account",
+                        optionalParams.put("account",
                                 convertEntityService.getDepartmentById(vmInstance.getDepartmentId()).getUserName());
-                        optional.put("domainid",
+                        optionalParams.put("domainid",
                                 convertEntityService.getDomainById(vmInstance.getDomainId()).getUuid());
                     }
                     if (vmInstance.getStorageOfferingId() != null) {
                         convertEntityService.customStorageForInstance(vmInstance);
                     }
                     if (vmInstance.getComputeOfferingId() != null) {
-                        this.customComputeForInstance(vmInstance, optional);
+                        this.customComputeForInstance(vmInstance, optionalParams);
                     }
                     String csResponse = cloudStackInstanceService.deployVirtualMachine(
                             convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getUuid(),
                             convertEntityService.getTemplateById(vmInstance.getTemplateId()).getUuid(),
-                            convertEntityService.getZoneById(vmInstance.getZoneId()).getUuid(), "json", optional);
+                            convertEntityService.getZoneById(vmInstance.getZoneId()).getUuid(), "json", optionalParams);
                     JSONObject csInstance = new JSONObject(csResponse).getJSONObject("deployvirtualmachineresponse");
                     if (csInstance.has("errorcode")) {
                         errors = this.validateEvent(errors, csInstance.getString("errortext"));
@@ -194,19 +194,19 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
      * @return optional values for vm instance.
      * @throws Exception if error occurs.
      */
-    private HashMap<String, String> customComputeForInstance(VmInstance vmInstance,  HashMap<String, String> optional) throws Exception {
+    private HashMap<String, String> customComputeForInstance(VmInstance vmInstance,  HashMap<String, String> optionalParams) throws Exception {
           // If it customized compute offering then assgin value for memory, speed, core in Instance.
           if (convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getCustomized()) {
-              optional.put("details[0].cpuNumber", vmInstance.getCpuCore().toString());
-              optional.put("details[0].cpuSpeed", vmInstance.getCpuSpeed().toString());
-              optional.put("details[0].memory", vmInstance.getMemory().toString());
+              optionalParams.put("details[0].cpuNumber", vmInstance.getCpuCore().toString());
+              optionalParams.put("details[0].cpuSpeed", vmInstance.getCpuSpeed().toString());
+              optionalParams.put("details[0].memory", vmInstance.getMemory().toString());
           }
           // If it is customized iops in Compute offering then assign value for min and max iops value in Instance.
           if (convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getCustomizedIops()) {
-              optional.put("details[0].maxIops", vmInstance.getComputeMaxIops().toString());
-              optional.put("details[0].minIops", vmInstance.getComputeMinIops().toString());
+              optionalParams.put("details[0].maxIops", vmInstance.getComputeMaxIops().toString());
+              optionalParams.put("details[0].minIops", vmInstance.getComputeMinIops().toString());
           }
-        return optional;
+        return optionalParams;
     }
     @Override
     public VmInstance update(VmInstance vminstance) throws Exception {
