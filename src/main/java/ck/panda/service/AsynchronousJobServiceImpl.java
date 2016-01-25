@@ -340,15 +340,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     }
                     // 3.2 If found, update the vm object in app db
                     vmIn = virtualMachineService.update(instance);
-
-                    // Resource count update for domain
-                    if (instance.getProjectId() != null) {
-                        domainCountMap.put("projectid",
-                                convertEntityService.getProjectById(instance.getProjectId()).getUuid());
-                    } else {
-                        domainCountMap.put("account",
-                                convertEntityService.getDepartmentUsernameById(instance.getDepartmentId()));
-                    }
+                    // Resource count for domain
                     String csResponse = cloudStackResourceCapacity.updateResourceCount(
                             convertEntityService.getDomainById(instance.getDomainId()).getUuid(), domainCountMap,
                             "json");
@@ -502,13 +494,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 networkService.update(network);
 
                 // Resource count for domain
-                if (network.getProjectId() != null) {
-                    domainCountMap.put("projectid",
-                            convertEntityService.getProjectById(network.getProjectId()).getUuid());
-                } else {
-                    domainCountMap.put("account",
-                            convertEntityService.getDepartmentUsernameById(network.getDepartmentId()));
-                }
                 String csResponse = cloudStackResourceCapacity.updateResourceCount(
                         convertEntityService.getDomainById(network.getDomainId()).getUuid(), domainCountMap, "json");
                 convertEntityService.resourceCount(csResponse);
@@ -521,13 +506,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             networkService.softDelete(network);
 
             // Resource count for domain
-            if (network.getProjectId() != null) {
-                domainCountMap.put("projectid",
-                        convertEntityService.getProjectById(network.getProjectId()).getUuid());
-            } else {
-                domainCountMap.put("account",
-                        convertEntityService.getDepartmentUsernameById(network.getDepartmentId()));
-            }
             String csResponse = cloudStackResourceCapacity.updateResourceCount(
                     convertEntityService.getDomainById(network.getDomainId()).getUuid(), domainCountMap, "json");
             convertEntityService.resourceCount(csResponse);
@@ -716,14 +694,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                             .getDomainId());
                     ipService.update(persistIp);
 
-                 // Resource count for domain
-                    if (persistIp.getProjectId() != null) {
-                        domainCountMap.put("projectid",
-                                convertEntityService.getProjectById(persistIp.getProjectId()).getUuid());
-                    } else {
-                        domainCountMap.put("account",
-                                convertEntityService.getDepartmentUsernameById(persistIp.getDepartmentId()));
-                    }
+                    // Resource count for domain
                     String csResponse = cloudStackResourceCapacity.updateResourceCount(
                             convertEntityService.getDomainById(persistIp.getDomainId()).getUuid(), domainCountMap,
                             "json");
@@ -756,13 +727,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 ipService.softDelete(ipAddress);
 
                 // Resource count for domain
-                if (ipAddress.getProjectId() != null) {
-                    domainCountMap.put("projectid",
-                            convertEntityService.getProjectById(ipAddress.getProjectId()).getUuid());
-                } else {
-                    domainCountMap.put("account",
-                            convertEntityService.getDepartmentUsernameById(ipAddress.getDepartmentId()));
-                }
                 String csResponse = cloudStackResourceCapacity.updateResourceCount(
                         convertEntityService.getDomainById(ipAddress.getDomainId()).getUuid(), domainCountMap, "json");
                 convertEntityService.resourceCount(csResponse);
@@ -826,11 +790,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 volumeService.save(volume);
 
                 // Resource count update for domain
-                if (volume.getProjectId() != null) {
-                    domainCountMap.put("projectid", convertEntityService.getProjectById(volume.getProjectId()).getUuid());
-                } else {
-                    domainCountMap.put("account", convertEntityService.getDepartmentUsernameById(volume.getDepartmentId()));
-                }
                 String csResponse = cloudStackResourceCapacity.updateResourceCount(
                         convertEntityService.getDomainById(volume.getDomainId()).getUuid(), domainCountMap, "json");
                 convertEntityService.resourceCount(csResponse);
@@ -1158,14 +1117,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             volumeService.softDelete(volume);
 
             // Resource count update for domain
-            if (volume.getProjectId() != null) {
-                domainCountMap.put("projectid", convertEntityService.getProjectById(volume.getProjectId()).getUuid());
-            } else {
-                domainCountMap.put("account", convertEntityService.getDepartmentUsernameById(volume.getDepartmentId()));
-            }
             String csResponse = cloudStackResourceCapacity.updateResourceCount(
                     convertEntityService.getDomainById(volume.getDomainId()).getUuid(), domainCountMap, "json");
             convertEntityService.resourceCount(csResponse);
         }
     }
 }
+
