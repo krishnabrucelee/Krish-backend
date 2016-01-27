@@ -21,7 +21,7 @@ public interface BillableItemRepository extends PagingAndSortingRepository<Billa
      * @param itemName name of the billable item
      * @return Billable Item object
      */
-    @Query(value = "select bi from BillableItem bi where bi.name =:itemName")
+    @Query(value = "SELECT bi FROM BillableItem bi WHERE bi.name =:itemName")
     BillableItem findByName(@Param("itemName") String itemName);
 
     /**
@@ -31,7 +31,7 @@ public interface BillableItemRepository extends PagingAndSortingRepository<Billa
      * @param isActive get the billable item list based on active/inactive status.
      * @return list of billable items.
      */
-    @Query(value = "select bi from BillableItem bi where bi.isActive =:isActive")
+    @Query(value = "SELECT bi FROM BillableItem bi WHERE bi.isActive =:isActive")
     Page<BillableItem> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
 
     /**
@@ -40,7 +40,6 @@ public interface BillableItemRepository extends PagingAndSortingRepository<Billa
      * @param isActive get the billable item list based on active/inactive status.
      * @return list of billable items.
      */
-    @Query(value = "select bi from BillableItem bi where bi.isActive =:isActive")
+    @Query(value = "SELECT bi FROM BillableItem bi WHERE bi.isActive =:isActive")
     List<BillableItem> findAllByIsActive(@Param("isActive") Boolean isActive);
-
 }

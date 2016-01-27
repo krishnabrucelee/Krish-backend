@@ -31,7 +31,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 @SuppressWarnings("serial")
 public class BillableItem implements Serializable {
 
-    /** Id of the BillableItem. */
+    /** Id of the billable item. */
     @Id
     @GeneratedValue
     @Column(name = "id")
@@ -55,19 +55,19 @@ public class BillableItem implements Serializable {
     @Column(name = "tax_id")
     private Long taxId;
 
-    /** Whether BillableItem is discountable or not. */
+    /** Whether billable item is discountable or not. */
     @Column(name = "is_discountable")
     private Boolean isDiscountable;
 
-    /** Whether BillableItem is customized or not. */
+    /** Whether billable item is customized or not. */
     @Column(name = "is_customized")
     private Boolean isCustomized;
 
-    /** Whether BillableItem is in active state or in active state. */
+    /** Whether billable item is in active state or in active state. */
     @Column(name = "is_active")
     private Boolean isActive;
 
-    /** Status for BillableItem, whether it is Deleted, Disabled etc . */
+    /** Status for billable item, whether it is Deleted, Disabled etc . */
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private Status status;

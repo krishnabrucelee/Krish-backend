@@ -76,5 +76,4 @@ public class BillableItemServiceImpl implements BillableItemService {
     public List<BillableItem> findAllByIsActive(Boolean isActive) throws Exception {
         return billableItemRepo.findAllByIsActive(isActive);
     }
-
 }

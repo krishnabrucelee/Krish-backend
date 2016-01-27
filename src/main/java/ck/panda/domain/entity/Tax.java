@@ -29,7 +29,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 @SuppressWarnings("serial")
 public class Tax implements Serializable {
 
-    /** Id of the BillableItem. */
+    /** Id of the tax. */
     @Id
     @GeneratedValue
     @Column(name = "id")
@@ -44,11 +44,11 @@ public class Tax implements Serializable {
     /** The percentage value of the tax. */
     private Double percentage;
 
-    /** Whether BillableItem is in active state or in active state. */
+    /** Whether tax is in active state or in active state. */
     @Column(name = "is_active")
     private Boolean isActive;
 
-    /** Status for BillableItem, whether it is Deleted, Disabled etc . */
+    /** Status for tax, whether it is Deleted, Disabled etc . */
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private Status status;
@@ -296,7 +296,6 @@ public class Tax implements Serializable {
         this.status = status;
     }
 
-
     /**
      * Enumeration status for Tax.
      */
@@ -307,5 +306,4 @@ public class Tax implements Serializable {
         /** Deleted status make tax as soft deleted and it will not list on the applicaiton. */
         DELETED
     }
-
 }

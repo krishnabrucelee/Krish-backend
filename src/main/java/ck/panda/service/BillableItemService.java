@@ -42,6 +42,5 @@ public interface BillableItemService extends CRUDService<BillableItem> {
       * @throws Exception error occurs
       */
       List<BillableItem> findAllByIsActive(Boolean isActive) throws Exception;
-
 }
 

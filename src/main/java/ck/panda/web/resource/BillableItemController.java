@@ -79,7 +79,6 @@ public class BillableItemController extends CRUDController<BillableItem> impleme
           return billableItemService.findAllByIsActive(true);
       }
 
-
       /**
        * Delete the Billable item.
        *

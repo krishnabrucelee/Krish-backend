@@ -80,6 +80,7 @@ public class TaxController extends CRUDController<Tax> implements ApiController 
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
+
     /**
      * Find the list of tax with active state.
      *

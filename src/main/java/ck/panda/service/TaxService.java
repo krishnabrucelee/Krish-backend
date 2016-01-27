@@ -32,7 +32,6 @@ public interface TaxService extends CRUDService<Tax> {
      */
     Page<Tax> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
 
-
     /**
      * Find all the tax with isActive status.
      *
