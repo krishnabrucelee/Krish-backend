@@ -1,5 +1,7 @@
 package ck.panda.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Tax;
@@ -29,4 +31,14 @@ public interface TaxService extends CRUDService<Tax> {
      * @throws Exception unhandled exception.
      */
     Page<Tax> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
+
+
+    /**
+     * Find all the tax with isActive status.
+     *
+     * @param isActive active/inactive
+     * @return tax list.
+     * @throws Exception error occurs.
+     */
+    List<Tax> findAllByIsActive(Boolean isActive) throws Exception;
 }

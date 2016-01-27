@@ -6,7 +6,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Tax;
+import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.repository.jpa.TaxRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -96,6 +99,10 @@ public class TaxServiceImpl implements TaxService {
         return taxRepo.save(tax);
     }
 
+    @Override
+    public List<Tax> findAllByIsActive(Boolean isActive) throws Exception {
+        return taxRepo.findAllByIsActive(isActive);
+    }
 
     /**
      * Find all the tax with pagination.

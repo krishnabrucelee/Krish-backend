@@ -41,6 +41,7 @@ public class BillableItemController extends CRUDController<BillableItem> impleme
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new billable items.", response = BillableItem.class)
     @Override
     public BillableItem create(@RequestBody BillableItem billableItem) throws Exception {
+        billableItem.setIsActive(true);
         return billableItemService.save(billableItem);
     }
 
@@ -50,7 +51,7 @@ public class BillableItemController extends CRUDController<BillableItem> impleme
         return billableItemService.find(id);
     }
 
-    @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing Domain.", response = BillableItem.class)
+    @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing billable items.", response = BillableItem.class)
     @Override
     public BillableItem update(@RequestBody BillableItem billableItem, @PathVariable(PATH_ID) Long id) throws Exception {
         return billableItemService.update(billableItem);
@@ -60,13 +61,13 @@ public class BillableItemController extends CRUDController<BillableItem> impleme
     public List<BillableItem> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, BillableItem.class);
-        Page<BillableItem> pageResponse = billableItemService.findAll(page);
+        Page<BillableItem> pageResponse = billableItemService.findAllByIsActive(page, true);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
 
     /**
-     * List all billable items.
+     * List all billable items with active status.
      *
      * @return projects
      * @throws Exception error
@@ -75,7 +76,23 @@ public class BillableItemController extends CRUDController<BillableItem> impleme
       @ResponseStatus(HttpStatus.OK)
       @ResponseBody
       protected List<BillableItem> getSearch() throws Exception {
-          return billableItemService.findAll();
+          return billableItemService.findAllByIsActive(true);
       }
 
+
+      /**
+       * Delete the Billable item.
+       *
+       * @param billableItem reference of the item.
+       * @param id billable item id.
+       * @throws Exception error occurs.
+       */
+      @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Tax.")
+      @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
+      @ResponseStatus(HttpStatus.NO_CONTENT)
+      public void softDelete(@RequestBody BillableItem billableItem, @PathVariable(PATH_ID) Long id) throws Exception {
+          /** Doing Soft delete from the billable_item table. */
+          billableItem.setIsActive(false);
+          billableItemService.softDelete(billableItem);
+      }
 }

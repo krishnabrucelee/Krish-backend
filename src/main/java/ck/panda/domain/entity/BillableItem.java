@@ -2,9 +2,6 @@ package ck.panda.domain.entity;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -43,10 +40,10 @@ public class BillableItem implements Serializable {
     /** Name of the billable item. */
     private String name;
 
-    /** Type of the billable items. */
+    /** Type of the billable item. */
     private BillableType billableType;
 
-    /** Type of the billable unit. */
+    /** Unit of the billable item. */
     private BillableUnit billableUnit;
 
     /** Tax for the billable item. */
@@ -57,6 +54,10 @@ public class BillableItem implements Serializable {
     /** Tax id for the billable item. */
     @Column(name = "tax_id")
     private Long taxId;
+
+    /** Whether BillableItem is discountable or not. */
+    @Column(name = "is_discountable")
+    private Boolean isDiscountable;
 
     /** Whether BillableItem is customized or not. */
     @Column(name = "is_customized")
@@ -170,8 +171,6 @@ public class BillableItem implements Serializable {
         this.billableType = billableType;
     }
 
-
-
     /**
      * Get the billable unit.
      *
@@ -227,9 +226,27 @@ public class BillableItem implements Serializable {
     }
 
     /**
+     * Get the billable item discount status either true or false.
+     *
+     * @return the discountable
+     */
+    public Boolean getIsDiscountable() {
+        return isDiscountable;
+    }
+
+    /**
+     * Set the billable item discount.
+     *
+     * @param isDiscountable the isDiscountable to set
+     */
+    public void setIsDiscountable(Boolean isDiscountable) {
+        this.isDiscountable = isDiscountable;
+    }
+
+    /**
      * Get the billable item customized status either true or false.
      *
-     * @return the isCustomized
+     * @return the customized
      */
     public Boolean getIsCustomized() {
         return isCustomized;
@@ -374,10 +391,10 @@ public class BillableItem implements Serializable {
      * Enumeration status for billable item.
      */
     public enum Status {
-        /** Enabled status is used to list departments through out the application. */
+        /** Enabled status is used to list billable items through out the application. */
         ENABLED,
 
-        /** Deleted status make department as soft deleted and it will not list on the applicaiton. */
+        /** Deleted status make billable items as soft deleted and it will not list on the applicaiton. */
         DELETED
     }
 

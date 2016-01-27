@@ -20,7 +20,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
- * Tax contains the name for different offerings.
+ * Tax is a contribution to state revenue, levied by the government.
+ * Here we apply the tax based on the service offerings.
  */
 @Entity
 @Table(name = "tax")
@@ -37,13 +38,10 @@ public class Tax implements Serializable {
     /** Name of the tax. */
     private String name;
 
-
     /** Description of the tax. */
     private String description;
 
-    /**
-     * The percentage value of the tax.
-     */
+    /** The percentage value of the tax. */
     private Double percentage;
 
     /** Whether BillableItem is in active state or in active state. */
@@ -118,8 +116,6 @@ public class Tax implements Serializable {
         this.id = id;
     }
 
-
-
     /**
      * Get the tax name.
      *
@@ -137,8 +133,6 @@ public class Tax implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
-
-
 
     /**
      * Get the description.
@@ -195,7 +189,7 @@ public class Tax implements Serializable {
     }
 
     /**
-     * Get the createdBy.
+     * Get the created user id.
      *
      * @return createdBy
      */
@@ -204,16 +198,16 @@ public class Tax implements Serializable {
     }
 
     /**
-     * Set the createdBy.
+     * Set the created user id.
      *
-     * @param createdBy the User to set
+     * @param createdBy
      */
     public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
     /**
-     * Get the updatedBy.
+     * Get the updated user id.
      *
      * @return updatedBy
      */
@@ -222,16 +216,16 @@ public class Tax implements Serializable {
     }
 
     /**
-     * Set the updatedBy.
+     * Set the updated user id.
      *
-     * @param updatedBy the User to set
+     * @param updatedBy
      */
     public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
     }
 
     /**
-     * Get the createdDateTime.
+     * Get the created date and time.
      *
      * @return createdDateTime
      */
@@ -240,16 +234,16 @@ public class Tax implements Serializable {
     }
 
     /**
-     * Set the createdDateTime.
+     * Set the created date and time.
      *
-     * @param createdDateTime the DateTime to set
+     * @param createdDateTime
      */
     public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
     }
 
     /**
-     * Get the updatedDateTime.
+     * Get the updated date and time.
      *
      * @return updatedDateTime
      */
@@ -258,7 +252,7 @@ public class Tax implements Serializable {
     }
 
     /**
-     * Set the updatedDateTime.
+     * Set the updated date and time.
      *
      * @param updatedDateTime the DateTime to set
      */
@@ -267,7 +261,7 @@ public class Tax implements Serializable {
     }
 
     /**
-     * Get is Active state of the Tax.
+     * Get the tax state.
      *
      * @return the isActive
      */
@@ -276,7 +270,7 @@ public class Tax implements Serializable {
     }
 
     /**
-     * Set is Active state of the Tax.
+     * Set tax state to active or inactive.
      *
      * @param isActive the isActive to set
      */
@@ -307,10 +301,10 @@ public class Tax implements Serializable {
      * Enumeration status for Tax.
      */
     public enum Status {
-        /** Enabled status is used to list departments through out the application. */
+        /** Enabled status is used to list taxs through out the application. */
         ENABLED,
 
-        /** Deleted status make department as soft deleted and it will not list on the applicaiton. */
+        /** Deleted status make tax as soft deleted and it will not list on the applicaiton. */
         DELETED
     }
 

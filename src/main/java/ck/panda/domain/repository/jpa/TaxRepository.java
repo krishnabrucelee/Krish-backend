@@ -1,5 +1,7 @@
 package ck.panda.domain.repository.jpa;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -21,6 +23,16 @@ public interface TaxRepository extends PagingAndSortingRepository<Tax, Long> {
     @Query(value = "select t from Tax t where t.isActive =:isActive")
     Page<Tax> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
 
+
+    /**
+     * Find all the active or inactive tax.
+     *
+     * @param isActive get the tax list based on active/inactive status.
+     * @return list of tax.
+     */
+    @Query(value = "select t from Tax t where t.isActive =:isActive")
+    List<Tax> findAllByIsActive(@Param("isActive") Boolean isActive);
+    
     /**
      * Find tax by name and is active.
      *

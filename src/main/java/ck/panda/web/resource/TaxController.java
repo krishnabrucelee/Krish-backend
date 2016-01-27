@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
@@ -43,13 +44,13 @@ public class TaxController extends CRUDController<Tax> implements ApiController 
         return taxService.save(tax);
     }
 
-    @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing Department.", response = Tax.class)
+    @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing Tax.", response = Tax.class)
     @Override
     public Tax read(@PathVariable(PATH_ID) Long id) throws Exception {
         return taxService.find(id);
     }
 
-    @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing Department.", response = Tax.class)
+    @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing Tax.", response = Tax.class)
     @Override
     public Tax update(@RequestBody Tax tax, @PathVariable(PATH_ID) Long id) throws Exception {
         return taxService.update(tax);
@@ -67,6 +68,7 @@ public class TaxController extends CRUDController<Tax> implements ApiController 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void softDelete(@RequestBody Tax tax, @PathVariable(PATH_ID) Long id) throws Exception {
         /** Doing Soft delete from the tax table. */
+        tax.setIsActive(false);
         taxService.softDelete(tax);
     }
 
@@ -77,5 +79,17 @@ public class TaxController extends CRUDController<Tax> implements ApiController 
         Page<Tax> pageResponse = taxService.findAllByActive(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
+    }
+    /**
+     * Find the list of tax with active state.
+     *
+     * @return tax list.
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<Tax> getTaxList() throws Exception {
+        return taxService.findAllByIsActive(true);
     }
 }

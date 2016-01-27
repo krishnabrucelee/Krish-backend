@@ -17,49 +17,64 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 @Service
 public class BillableItemServiceImpl implements BillableItemService {
 
-  /** Logger attribute. */
-  private static final Logger LOGGER = LoggerFactory.getLogger(BillableItemServiceImpl.class);
+    /** Logger attribute. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(BillableItemServiceImpl.class);
 
-  /** BillableItem repository reference. */
-  @Autowired
-  private BillableItemRepository billableItemRepo;
+    /** BillableItem repository reference. */
+    @Autowired
+    private BillableItemRepository billableItemRepo;
 
-  @Override
-  public BillableItem save(BillableItem billableItem) throws Exception {
-      LOGGER.debug("Billabel item created");
-      return billableItemRepo.save(billableItem);
-  }
+    @Override
+    public BillableItem save(BillableItem billableItem) throws Exception {
+        LOGGER.debug("Billabel item created");
+        return billableItemRepo.save(billableItem);
+    }
 
-  @Override
-  public BillableItem update(BillableItem billableItem) throws Exception {
-      LOGGER.debug("Billabel item updated");
-    return billableItemRepo.save(billableItem);
-  }
+    @Override
+    public BillableItem update(BillableItem billableItem) throws Exception {
+        LOGGER.debug("Billabel item updated");
+        return billableItemRepo.save(billableItem);
+    }
 
-  @Override
-  public void delete(BillableItem domain) throws Exception {
-    billableItemRepo.delete(domain);
-  }
+    @Override
+    public void delete(BillableItem domain) throws Exception {
+        billableItemRepo.delete(domain);
+    }
 
-  @Override
-  public void delete(Long id) throws Exception {
-    billableItemRepo.delete(id);
-  }
+    @Override
+    public void delete(Long id) throws Exception {
+        billableItemRepo.delete(id);
+    }
 
-  @Override
-  public BillableItem find(Long id) throws Exception {
-      return billableItemRepo.findOne(id);
-  }
+    @Override
+    public BillableItem find(Long id) throws Exception {
+        return billableItemRepo.findOne(id);
+    }
 
-  @Override
-  public Page<BillableItem> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-    return billableItemRepo.findAll(pagingAndSorting.toPageRequest());
-  }
+    @Override
+    public Page<BillableItem> findAll(PagingAndSorting pagingAndSorting) throws Exception {
+        return billableItemRepo.findAll(pagingAndSorting.toPageRequest());
+    }
 
-  @Override
-  public List<BillableItem> findAll() throws Exception {
-      return (List<BillableItem>) billableItemRepo.findAll();
-  }
+    @Override
+    public List<BillableItem> findAll() throws Exception {
+        return (List<BillableItem>) billableItemRepo.findAll();
+    }
+
+    @Override
+    public BillableItem softDelete(BillableItem billableItem) throws Exception {
+        LOGGER.debug("Billable item soft deleted");
+        return billableItemRepo.save(billableItem);
+    }
+
+    @Override
+    public Page<BillableItem> findAllByIsActive(PagingAndSorting pagingAndSorting, Boolean isActive) throws Exception {
+        return billableItemRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), isActive);
+    }
+
+    @Override
+    public List<BillableItem> findAllByIsActive(Boolean isActive) throws Exception {
+        return billableItemRepo.findAllByIsActive(isActive);
+    }
 
 }
-
