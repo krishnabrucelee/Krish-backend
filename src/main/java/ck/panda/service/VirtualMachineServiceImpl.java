@@ -51,6 +51,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Autowired
     private AppValidator validator;
 
+    /** Host service reference. */
+    @Autowired
+    private HostService hostService;
+
     /** Virtual Machine repository reference. */
     @Autowired
     private VirtualMachineRepository virtualmachinerepository;
@@ -105,86 +109,105 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     @Override
     @PreAuthorize("hasPermission(#vminstance.getSyncFlag(), 'CREATE_VM')")
-    public VmInstance save(VmInstance vminstance) throws Exception {
-        LOGGER.debug("instance sync ", vminstance.getSyncFlag());
-        if (vminstance.getSyncFlag()) {
+    public VmInstance save(VmInstance vmInstance) throws Exception {
+        LOGGER.debug("instance sync ", vmInstance.getSyncFlag());
+        if (vmInstance.getSyncFlag()) {
 
-            Errors errors = validator.rejectIfNullEntity("vminstance", vminstance);
-            errors = validator.validateEntity(vminstance, errors);
-            errors = this.validateName(errors, vminstance.getName(), vminstance.getDepartment(), 0L);
+            Errors errors = validator.rejectIfNullEntity("vmInstance", vmInstance);
+            errors = validator.validateEntity(vmInstance, errors);
+            errors = this.validateName(errors, vmInstance.getName(), vmInstance.getDepartment(), 0L);
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                String isAvailable = isResourceAvailable(vminstance);
+                String isAvailable = isResourceAvailable(vmInstance);
                 if (isAvailable != null) {
                     errors = validator.sendGlobalError(isAvailable);
                     throw new ApplicationException(errors);
                 } else {
-                    HashMap<String, String> optional = new HashMap<String, String>();
-                    optional.put("displayname", vminstance.getName());
-                    vminstance.setDisplayName(vminstance.getName());
-                    optional.put("name", vminstance.getName());
-                    vminstance.setNetworkId(convertEntityService.getNetworkByUuid(vminstance.getNetworkUuid()));
+                    HashMap<String, String> optionalParams = new HashMap<String, String>();
+                    optionalParams.put("displayname", vmInstance.getName());
+                    vmInstance.setDisplayName(vmInstance.getName());
+                    optionalParams.put("name", vmInstance.getName());
+                    vmInstance.setNetworkId(convertEntityService.getNetworkByUuid(vmInstance.getNetworkUuid()));
                     config.setUserServer();
-                    LOGGER.debug("Cloud stack connectivity at VM", vminstance.getNetworkUuid());
-                    optional.put("networkids", vminstance.getNetworkUuid());
-                    optional.put("displayvm", "true");
-                    optional.put("displayname", vminstance.getName());
-                    optional.put("keyboard", "us");
-                    optional.put("name", vminstance.getName());
-                    if (vminstance.getHypervisorId() != null) {
-                       optional.put("hypervisor", hypervisorService.find(vminstance.getHypervisorId()).getName());
+                    LOGGER.debug("Cloud stack connectivity at VM", vmInstance.getNetworkUuid());
+                    optionalParams.put("networkids", vmInstance.getNetworkUuid());
+                    optionalParams.put("displayvm", "true");
+                    optionalParams.put("displayname", vmInstance.getName());
+                    optionalParams.put("keyboard", "us");
+                    optionalParams.put("name", vmInstance.getName());
+                    if (vmInstance.getHypervisorId() != null) {
+                        optionalParams.put("hypervisor", hypervisorService.find(vmInstance.getHypervisorId()).getName());
                     }
-                    if (vminstance.getProjectId() != null) {
-                        optional.put("projectid",
-                                convertEntityService.getProjectById(vminstance.getProjectId()).getUuid());
+                    if (vmInstance.getProjectId() != null) {
+                        optionalParams.put("projectid",
+                                convertEntityService.getProjectById(vmInstance.getProjectId()).getUuid());
                     } else {
-                        optional.put("account",
-                                convertEntityService.getDepartmentById(vminstance.getDepartmentId()).getUserName());
-                        optional.put("domainid",
-                                convertEntityService.getDomainById(vminstance.getDomainId()).getUuid());
+                        optionalParams.put("account",
+                                convertEntityService.getDepartmentById(vmInstance.getDepartmentId()).getUserName());
+                        optionalParams.put("domainid",
+                                convertEntityService.getDomainById(vmInstance.getDomainId()).getUuid());
                     }
-                    if (vminstance.getStorageOfferingId() != null) {
-                        optional.put("diskofferingid",
-                                convertEntityService.getStorageOfferById(vminstance.getStorageOfferingId()).getUuid());
+                    if (vmInstance.getStorageOfferingId() != null) {
+                        convertEntityService.customStorageForInstance(vmInstance);
                     }
-                    if (convertEntityService.getComputeOfferById(vminstance.getComputeOfferingId()).getCustomized()) {
-                        optional.put("details[0].cpuNumber", vminstance.getCpuCore().toString());
-                        optional.put("details[0].cpuSpeed", vminstance.getCpuSpeed().toString());
-                        optional.put("details[0].memory", vminstance.getMemory().toString());
+                    if (vmInstance.getComputeOfferingId() != null) {
+                        this.customComputeForInstance(vmInstance, optionalParams);
                     }
                     String csResponse = cloudStackInstanceService.deployVirtualMachine(
-                            convertEntityService.getComputeOfferById(vminstance.getComputeOfferingId()).getUuid(),
-                            convertEntityService.getTemplateById(vminstance.getTemplateId()).getUuid(),
-                            convertEntityService.getZoneById(vminstance.getZoneId()).getUuid(), "json", optional);
+                            convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getUuid(),
+                            convertEntityService.getTemplateById(vmInstance.getTemplateId()).getUuid(),
+                            convertEntityService.getZoneById(vmInstance.getZoneId()).getUuid(), "json", optionalParams);
                     JSONObject csInstance = new JSONObject(csResponse).getJSONObject("deployvirtualmachineresponse");
                     if (csInstance.has("errorcode")) {
                         errors = this.validateEvent(errors, csInstance.getString("errortext"));
                         throw new ApplicationException(errors);
                     } else {
                         LOGGER.debug("VM UUID", csInstance.getString("id"));
-                        vminstance.setUuid(csInstance.getString("id"));
+                        vmInstance.setUuid(csInstance.getString("id"));
                         String instanceResponse = cloudStackInstanceService
                                 .queryAsyncJobResult(csInstance.getString("jobid"), "json");
                         JSONObject instance = new JSONObject(instanceResponse)
                                 .getJSONObject("queryasyncjobresultresponse");
                         if (instance.getString("jobstatus").equals("2")) {
-                            vminstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
-                            vminstance.setEventMessage(csInstance.getJSONObject("jobresult").getString("errortext"));
+                            vmInstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
+                            vmInstance.setEventMessage(csInstance.getJSONObject("jobresult").getString("errortext"));
                         } else {
-                            vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_CREATE));
-                            vminstance.setEventMessage("Started creating VM on Server");
+                            vmInstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_CREATE));
+                            vmInstance.setEventMessage("Started creating VM on Server");
                         }
                     }
                 }
 
-                return virtualmachinerepository.save(convertEncryptPassword(vminstance));
+                return virtualmachinerepository.save(convertEncryptPassword(vmInstance));
             }
         } else {
-            return virtualmachinerepository.save(convertEncryptPassword(vminstance));
+            return virtualmachinerepository.save(convertEncryptPassword(vmInstance));
         }
     }
 
+    /**
+     * Custom compute offering for a vm instance.
+     *
+     * @param vmInstance object for compute.
+     * @param optional values to be mapped with the vm instance.
+     * @return optional values for vm instance.
+     * @throws Exception if error occurs.
+     */
+    private HashMap<String, String> customComputeForInstance(VmInstance vmInstance,  HashMap<String, String> optionalParams) throws Exception {
+          // If it customized compute offering then assgin value for memory, speed, core in Instance.
+          if (convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getCustomized()) {
+              optionalParams.put("details[0].cpuNumber", vmInstance.getCpuCore().toString());
+              optionalParams.put("details[0].cpuSpeed", vmInstance.getCpuSpeed().toString());
+              optionalParams.put("details[0].memory", vmInstance.getMemory().toString());
+          }
+          // If it is customized iops in Compute offering then assign value for min and max iops value in Instance.
+          if (convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getCustomizedIops()) {
+              optionalParams.put("details[0].maxIops", vmInstance.getComputeMaxIops().toString());
+              optionalParams.put("details[0].minIops", vmInstance.getComputeMinIops().toString());
+          }
+        return optionalParams;
+    }
     @Override
     public VmInstance update(VmInstance vminstance) throws Exception {
         Errors errors = validator.rejectIfNullEntity("vminstance", vminstance);
@@ -227,6 +250,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     public VmInstance vmEventHandle(String vmId, String event) throws Exception {
         VmInstance vminstance = getCSConnector(vmId);
         HashMap<String, String> optional = new HashMap<String, String>();
+        if (vminstance.getProject() != null) {
+            optional.put("projectid", vminstance.getProject().getUuid());
+        }
         Errors errors = null;
         switch (event) {
         case EventTypes.EVENT_VM_STOP:
@@ -353,7 +379,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         }
                         vminstance.setEventMessage(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
-                        vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_DESTROYED));
+                        vminstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_STOPPING));
                         vminstance.setEventMessage("VM EXPUNGING");
                     }
                 }
@@ -396,12 +422,18 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     public VmInstance vmEventHandleWithVM(VmInstance vmInstance, String event) throws Exception {
         VmInstance vminstance = getCSConnector(vmInstance.getUuid());
         HashMap<String, String> optional = new HashMap<String, String>();
+        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
         Errors errors = null;
+        if (vminstance.getProject() != null) {
+            optional.put("projectid", vminstance.getProject().getUuid());
+        }
         switch (event) {
         case EventTypes.EVENT_VM_START:
             try {
-                if (!vmInstance.getHostUuid().isEmpty()) {
-                    optional.put("hostid", vmInstance.getHostUuid());
+                if (user != null && user.getType().equals(UserType.ROOT_ADMIN)) {
+                    if (!vmInstance.getHostUuid().isEmpty() && vmInstance.getHostUuid() != null) {
+                        optional.put("hostid", vmInstance.getHostUuid());
+                    }
                 }
                 String instanceResponse = cloudStackInstanceService.startVirtualMachine(vminstance.getUuid(), "json",
                         optional);
@@ -431,9 +463,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         case EventTypes.EVENT_VM_MIGRATE:
             try {
                 if (vminstance.getStatus().equals(Status.Running)) {
-                    errors = validator.sendGlobalError("No Hosts are available for Migration");
-                    if (errors.hasErrors()) {
-                        throw new BadCredentialsException("No Hosts are available for Migration");
+                    if (hostService.findAll().size() <= 1) {
+                        errors = validator.sendGlobalError("No Hosts are available for Migration");
+                        if (errors.hasErrors()) {
+                            throw new BadCredentialsException("No Hosts are available for Migration");
+                        }
                     }
                     optional.put("hostid", vmInstance.getHostUuid());
                     String instanceResponse = cloudStackInstanceService.migrateVirtualMachine(vmInstance.getUuid(),
@@ -634,7 +668,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
                     for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
                         List<VmInstance> allInstanceTempList = virtualmachinerepository
-                                .findAllByDepartmentAndProjectIsActiveAndStatus(Status.Expunging, user.getDepartment(), project);
+                                .findAllByDepartmentAndProject(Status.Expunging, user.getDepartment(), project);
                         allInstanceList.addAll(allInstanceTempList);
                     }
                     List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
@@ -643,7 +677,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     return (Page<VmInstance>) allInstanceLists;
                 } else {
                     Page<VmInstance> allInstanceLists = virtualmachinerepository
-                            .findAllByDepartment(user.getDepartmentId() ,Status.Expunging, pagingAndSorting.toPageRequest());
+                            .findAllByDepartment(user.getDepartmentId(), Status.Expunging, pagingAndSorting.toPageRequest());
                     return (Page<VmInstance>) allInstanceLists;
                 }
 
@@ -665,7 +699,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
                     for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
                         List<VmInstance> allInstanceTempList = virtualmachinerepository
-                                .findAllByDepartmentAndProjectIsActiveAndStatus(Status.valueOf(status), user.getDepartment(), project);
+                                .findAllByDepartmentAndProjectAndStatus(Status.valueOf(status), user.getDepartment(), project);
                         allInstanceList.addAll(allInstanceTempList);
                     }
                     List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
@@ -674,7 +708,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     return (Page<VmInstance>) allInstanceLists;
                 } else {
                     Page<VmInstance> allInstanceLists = virtualmachinerepository
-                            .findAllByDepartment(user.getDepartmentId(), Status.valueOf(status), pagingAndSorting.toPageRequest());
+                            .findAllByDepartmentAndStatus(Status.valueOf(status), user.getDepartment(), pagingAndSorting.toPageRequest());
                     return (Page<VmInstance>) allInstanceLists;
                 }
 
@@ -698,14 +732,14 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
                         for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
                             List<VmInstance> allInstanceTempList = virtualmachinerepository
-                                    .findAllByDepartmentAndProjectIsActiveAndStatus(Status.Expunging, user.getDepartment(), project);
+                                    .findAllByDepartmentAndProject(Status.Expunging, user.getDepartment(), project);
                             allInstanceList.addAll(allInstanceTempList);
                         }
                         List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
                         return instances;
                     } else {
-                        List<VmInstance> allInstanceLists = virtualmachinerepository.findAllByUser(Status.Expunging,
-                                user);
+                        List<VmInstance> allInstanceLists = virtualmachinerepository.findAllByDepartment(Status.Expunging,
+                                user.getDepartment());
                         return allInstanceLists;
                     }
                 }
@@ -860,14 +894,14 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
                         for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
                             List<VmInstance> allInstanceTempList = virtualmachinerepository
-                                    .findAllByUserAndProjectIsActive(status, user, project);
+                                    .findAllByDepartmentAndProjectAndStatus(status, user.getDepartment(), project);
                             allInstanceList.addAll(allInstanceTempList);
                         }
                         List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
                         return instances.size();
                     } else {
-                        List<VmInstance> allInstanceLists = virtualmachinerepository.findAllByUserIsActive(status,
-                                user);
+                        List<VmInstance> allInstanceLists = virtualmachinerepository.findAllByDepartmentIsActive(status,
+                                user.getDepartment());
                         return allInstanceLists.size();
                     }
                 }
@@ -1008,17 +1042,15 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
      * @return resouce count.
      * @throws Exception unhandled errors.
      */
-    public Long updateResourceCount(VmInstance vm, String type) throws Exception {
+    public Long updateResourceCount(VmInstance vmInstance, String type) throws Exception {
         CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
         this.server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
         HashMap<String, String> optional = new HashMap<String, String>();
-        if (vm.getProjectId() != null) {
-            optional.put("projectid", convertEntityService.getProjectById(vm.getProjectId()).getUuid());
-        } else {
-            optional.put("domainid", convertEntityService.getDomainById(vm.getDomainId()).getUuid());
+        if (vmInstance.getProjectId() != null) {
+            optional.put("projectid", convertEntityService.getProjectById(vmInstance.getProjectId()).getUuid());
         }
         optional.put("resourcetype", type);
-        String csResponse = cloudStackResourceCapacity.updateResourceCount(optional, "json");
+        String csResponse = cloudStackResourceCapacity.updateResourceCount(convertEntityService.getDomainById(vmInstance.getDomainId()).getUuid(), optional, "json");
         JSONArray capacityArrayJSON = null;
         JSONObject csCapacity = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
         if (csCapacity.has("resourcecount")) {

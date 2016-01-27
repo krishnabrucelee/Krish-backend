@@ -10,8 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-
 import ck.panda.domain.entity.ResourceLimitDomain;
+import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
 
 /**
  * Jpa Repository for ResourceLimit entity.
@@ -48,7 +48,7 @@ public interface ResourceLimitDomainRepository extends PagingAndSortingRepositor
      */
     @Query(value = "select resource from ResourceLimitDomain resource where resource.isActive =:isActive AND resource.domainId =:domainId AND resource.resourceType =:resourceType")
     ResourceLimitDomain findByDomainAndResourceType(@Param("domainId") Long id,
-            @Param("resourceType") ResourceLimitDomain.ResourceType resourceType, @Param("isActive") Boolean isActive);
+            @Param("resourceType") ResourceType resourceType, @Param("isActive") Boolean isActive);
 
     /**
      * Delete all the resource limits based on the domain.
@@ -60,4 +60,17 @@ public interface ResourceLimitDomainRepository extends PagingAndSortingRepositor
     @Query(value = "delete from ResourceLimitDomain resource where resource.isActive =:isActive AND resource.domainId =:domainId")
     ResourceLimitDomain deleteByDomainAndIsActive(@Param("domainId") Long domainId,
             @Param("isActive") Boolean isActive);
+
+    /**
+     * Find all the active resource limits based on the domain id.
+     *
+     * @param id domain id.
+     * @param isActive true/false
+     * @param resourceType resource type
+     * @return domain resource type.
+     */
+    @Query(value = "select resource from ResourceLimitDomain resource where resource.isActive =:isActive AND resource.domainId =:domainId AND resource.resourceType in :resourceType")
+    ResourceLimitDomain findByDomainAndResourceCount(@Param("domainId") Long id,
+            @Param("resourceType") ResourceType resourceType, @Param("isActive") Boolean isActive);
+
 }

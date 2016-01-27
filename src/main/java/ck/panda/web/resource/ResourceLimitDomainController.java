@@ -96,7 +96,7 @@ public class ResourceLimitDomainController extends CRUDController<ResourceLimitD
     }
 
     /**
-     * list all resources for instance.
+     * List all resources for instance.
      *
      * @return resource service
      * @throws Exception error
@@ -122,4 +122,16 @@ public class ResourceLimitDomainController extends CRUDController<ResourceLimitD
         return resourceLimitDomainService.findAllByDomainIdAndIsActive(id, true);
     }
 
+    /**
+     * List current domain for resource count.
+     *
+     * @return domain
+     * @throws Exception error
+     */
+    @RequestMapping(value = "listresourcedomains", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<ResourceLimitDomain> getDomainSearch() throws Exception {
+        return resourceLimitDomainService.findCurrentLoginDomain();
+    }
 }

@@ -1,11 +1,15 @@
 package ck.panda.rabbitmq.util;
 
+import java.util.HashMap;
 import java.util.List;
+
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.PortForwarding;
@@ -19,6 +23,7 @@ import ck.panda.service.NicService;
 import ck.panda.service.PortForwardingService;
 import ck.panda.service.VirtualMachineService;
 import ck.panda.service.VolumeService;
+import ck.panda.util.CloudStackResourceCapacity;
 
 /**
  * Resource State listener will listen and update resource status to our App DB when an event directly/from application
@@ -42,6 +47,14 @@ public class ResourceStateListener implements MessageListener {
 
     /** Network Service references to update. */
     private NetworkService networkService;
+
+    /** Reference of the convert entity service. */
+    @Autowired
+    private ConvertEntityService convertEntityService;
+
+    /** CloudStack Resource Capacity Service. */
+    @Autowired
+    private CloudStackResourceCapacity cloudStackResourceCapacity;
 
     /**
      * Inject convert entity service.
@@ -125,6 +138,18 @@ public class ResourceStateListener implements MessageListener {
                                 portForwarding.setSyncFlag(false);
                                 portForwardingService.update(portForwarding);
                             }
+
+                            // Resource count for domain
+                            HashMap<String, String> domainCountMap = new HashMap<String, String>();
+                            if (vmInstance.getProjectId() != null) {
+                                domainCountMap.put("projectid",
+                                        convertEntityService.getProjectById(vmInstance.getProjectId()).getUuid());
+                            } else {
+                                domainCountMap.put("account",
+                                        convertEntityService.getDepartmentUsernameById(vmInstance.getDepartmentId()));
+                            }
+                            String csResponse = cloudStackResourceCapacity.updateResourceCount(vmInstance.getDomain().getUuid(), domainCountMap, "json");
+                            convertEntityService.resourceCount(csResponse);
                         }
                     }
                 }
@@ -139,12 +164,6 @@ public class ResourceStateListener implements MessageListener {
                 }
                 break;
             case "Network":
-                if (resourceEvent.has("id")) {
-//                    Network network = networkService.findByUUID(resourceEvent.getString("id"));
-//                    network.setStatus(network.getStatus().valueOf(resourceEvent.getString(EventTypes.RESOURCE_STATE)));
-//                    network.setSyncFlag(false);
-//                    networkService.update(network);
-                }
                 break;
             default:
                 LOGGER.info("VM event message", event);
