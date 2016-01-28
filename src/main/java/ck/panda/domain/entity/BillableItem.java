@@ -55,7 +55,7 @@ public class BillableItem implements Serializable {
     @Column(name = "tax_id")
     private Long taxId;
 
-    /** Whether billable item has discountable or not. */
+    /** Whether billable item has discount or not. */
     @Column(name = "has_discount")
     private Boolean hasDiscount;
 
