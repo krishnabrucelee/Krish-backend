@@ -20,7 +20,7 @@ import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
-import ck.panda.domain.repository.jpa.DepartmentReposiory;
+import ck.panda.domain.repository.jpa.DepartmentRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackAccountService;
 import ck.panda.util.CloudStackUserService;
@@ -46,7 +46,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     /** Department repository reference. */
     @Autowired
-    private DepartmentReposiory departmentRepo;
+    private DepartmentRepository departmentRepo;
 
     /** CloudStack account service reference. */
     @Autowired
@@ -194,10 +194,6 @@ public class DepartmentServiceImpl implements DepartmentService {
         return department;
     }
 
-    @Override
-    public List<Department> findDomainAndIsActive(Long id, Boolean isActive) throws Exception {
-        return departmentRepo.findDomainAndIsActive(id, true);
-    }
 
     @Override
     public Page<Department> findAll(PagingAndSorting pagingAndSorting) throws Exception {
@@ -206,15 +202,6 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<Department> findAll() throws Exception {
-        return (List<Department>) departmentRepo.findAllByIsActive(true, AccountType.USER);
-    }
-
-    @Override
-    public List<Department> findByAll() throws Exception {
-        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if (domain != null && !domain.getName().equals("ROOT")) {
-            return (List<Department>) departmentRepo.findByDomainAndIsActive(domain.getId(), true, AccountType.USER);
-        }
         return (List<Department>) departmentRepo.findAllByIsActive(true, AccountType.USER);
     }
 
@@ -285,7 +272,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Department> findAllFromCSServerByDomain() throws Exception {
+    public List<Department> findAllFromCSServer() throws Exception {
         List<Department> departmentList = new ArrayList<Department>();
         HashMap<String, String> departmentMap = new HashMap<String, String>();
         // departmentMap.put("domainid", domainUuid);
@@ -320,18 +307,17 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Department> findByDomainAndIsActive(Long domainId, Boolean isActive) {
+    public List<Department> findByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception {
+        Domain domain = domainService.find(domainId);
+        if (domain != null && !domain.getName().equals("ROOT")) {
+            return (List<Department>) departmentRepo.findByDomainAndIsActive(domain.getId(), isActive, AccountType.USER);
+        }
         return departmentRepo.findByDomainAndIsActive(domainId, isActive, AccountType.USER);
     }
 
     @Override
-    public Department findByUsername(String name, Long domainId, Boolean isActive) {
-        return (Department) departmentRepo.findByUsername(name, domainId, isActive);
-    }
-
-    @Override
-    public Department findByUsernameAndDomain(String name, Domain domain, Boolean isActive) {
-        return (Department) departmentRepo.findByUsernameAndDomain(name, domain, isActive);
+    public Department findByUsernameDomainAndIsActive(String username, Long domainId, Boolean isActive) {
+        return (Department) departmentRepo.findByUsernameDomainAndIsActive(username, domainId, isActive);
     }
 
     @Override

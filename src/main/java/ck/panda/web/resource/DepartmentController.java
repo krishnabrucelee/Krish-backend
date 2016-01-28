@@ -24,6 +24,7 @@ import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.service.DepartmentService;
 import ck.panda.service.DomainService;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -41,9 +42,9 @@ public class DepartmentController extends CRUDController<Department> implements 
     @Autowired
     private DepartmentService departmentService;
 
-    /** Service reference to Domain. */
+    /** Autowired TokenDetails. */
     @Autowired
-    private DomainService domainService;
+    private TokenDetails tokenDetails;
 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Department.", response = Department.class)
     @Override
@@ -102,7 +103,7 @@ public class DepartmentController extends CRUDController<Department> implements 
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<Department> getDepartmentList() throws Exception {
-        return departmentService.findByAll();
+        return departmentService.findByDomainAndIsActive(Long.valueOf(tokenDetails.getTokenDetails("domainid")), true);
     }
 
     /**

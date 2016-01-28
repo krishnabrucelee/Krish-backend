@@ -18,7 +18,7 @@ import com.google.common.base.Optional;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.User;
-import ck.panda.domain.repository.jpa.DepartmentReposiory;
+import ck.panda.domain.repository.jpa.DepartmentRepository;
 import ck.panda.domain.repository.jpa.RoleReposiory;
 import ck.panda.service.UserService;
 import ck.panda.util.CloudStackAuthenticationService;
@@ -69,7 +69,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
 
     /** Department repository reference. */
     @Autowired
-    private DepartmentReposiory departmentReposiory;
+    private DepartmentRepository departmentRepository;
 
     /** Admin username. */
     @Value("${backend.admin.username}")
@@ -145,7 +145,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
                     } else {
                         Boolean authKeyResponse = apiSecretKeyGeneration(user);
                         if (authKeyResponse) {
-                            Department department = departmentReposiory.findOne(user.getDepartment().getId());
+                            Department department = departmentRepository.findOne(user.getDepartment().getId());
                             Role role = roleReposiory.findUniqueness(user.getRole().getName(), department.getId());
                             resultOfAuthentication = externalServiceAuthenticator.authenticate(username.get(),
                                     user.getRole().getName(), role, user, buildNumber);

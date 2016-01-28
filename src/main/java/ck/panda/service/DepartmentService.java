@@ -50,7 +50,7 @@ public interface DepartmentService extends CRUDService<Department> {
      * @return domain list from server
      * @throws Exception unhandled errors.
      */
-    List<Department> findAllFromCSServerByDomain() throws Exception;
+    List<Department> findAllFromCSServer() throws Exception;
 
     /**
      * Find the departments based on the given Uuid and isActive status.
@@ -69,47 +69,20 @@ public interface DepartmentService extends CRUDService<Department> {
      * @param isActive department status Active/Inactive
      * @return department.
      */
-    List<Department> findByDomainAndIsActive(Long domainId, Boolean isActive);
+    List<Department> findByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception;
 
     /**
      * Find the departments user name and isActive status.
      *
-     * @param name department name.
+     * @param username department name.
+     * @param domainId domain id of the department.
      * @param isActive department status Active/Inactive
      * @return department.
      */
-    Department findByUsername(String name, Long domainId, Boolean isActive);
+    Department findByUsernameDomainAndIsActive(String username, Long domainId, Boolean isActive);
 
     /**
-     * Find the departments user name and domain and isActive status.
-     *
-     * @param name department name.
-     * @param domain of the department.
-     * @param isActive department status Active/Inactive
-     * @return department.
-     */
-    Department findByUsernameAndDomain(String name, Domain domain, Boolean isActive);
-
-    /**
-     * Find the departments based on the isActive status.
-     *
-     * @throws Exception error occurs.
-     * @return department.
-     */
-    List<Department> findByAll() throws Exception;
-
-    /**
-     * Find the departments based on the isActive status.
-     *
-     * @param id for domain.
-     * @param isActive department status Active/Inactive
-     * @throws Exception error occur
-     * @return departments.
-     */
-    List<Department> findDomainAndIsActive(Long id, Boolean isActive) throws Exception;
-
-    /**
-     * Find the departments based on the isActive status.
+     * Find the departments based on the account type and isActive status.
      *
      * @param types for each department.
      * @param isActive department status Active/Inactive

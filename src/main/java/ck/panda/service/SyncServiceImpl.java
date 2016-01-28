@@ -1161,7 +1161,7 @@ public class SyncServiceImpl implements SyncService {
     public void syncDepartment() throws ApplicationException, Exception {
 
         // 1. Get all the user objects from CS server as hash
-        List<Department> csAccountService = departmentService.findAllFromCSServerByDomain();
+        List<Department> csAccountService = departmentService.findAllFromCSServer();
         HashMap<String, Department> csUserMap = (HashMap<String, Department>) Department.convert(csAccountService);
 
         // 2. Get all the user objects from application
