@@ -55,9 +55,9 @@ public class BillableItem implements Serializable {
     @Column(name = "tax_id")
     private Long taxId;
 
-    /** Whether billable item is discountable or not. */
-    @Column(name = "is_discountable")
-    private Boolean isDiscountable;
+    /** Whether billable item has discountable or not. */
+    @Column(name = "has_discount")
+    private Boolean hasDiscount;
 
     /** Whether billable item is customized or not. */
     @Column(name = "is_customized")
@@ -230,17 +230,17 @@ public class BillableItem implements Serializable {
      *
      * @return the discountable
      */
-    public Boolean getIsDiscountable() {
-        return isDiscountable;
+    public Boolean getHasDiscount() {
+        return hasDiscount;
     }
 
     /**
      * Set the billable item discount.
      *
-     * @param isDiscountable the isDiscountable to set
+     * @param hasDiscountable the discount to set for the billable item
      */
-    public void setIsDiscountable(Boolean isDiscountable) {
-        this.isDiscountable = isDiscountable;
+    public void setHasDiscountable(Boolean hasDiscountable) {
+        this.hasDiscount = hasDiscountable;
     }
 
     /**
