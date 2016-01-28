@@ -26,10 +26,10 @@ import org.springframework.format.annotation.DateTimeFormat;
  * Each billable items must have tax.
  */
 @Entity
-@Table(name = "billable_item")
+@Table(name = "item")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
-public class BillableItem implements Serializable {
+public class Item implements Serializable {
 
     /** Id of the billable item. */
     @Id
@@ -104,7 +104,7 @@ public class BillableItem implements Serializable {
     /**
      * Default constructor.
      */
-    public BillableItem() {
+    public Item() {
         super();
     }
 
@@ -113,7 +113,7 @@ public class BillableItem implements Serializable {
      *
      * @param name to set
      */
-    public BillableItem(String name) {
+    public Item(String name) {
         super();
     }
 

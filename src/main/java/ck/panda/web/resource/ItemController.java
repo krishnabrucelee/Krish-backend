@@ -19,55 +19,55 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
-import ck.panda.domain.entity.BillableItem;
-import ck.panda.service.BillableItemService;
+import ck.panda.domain.entity.Item;
+import ck.panda.service.ItemService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
 
 /**
- * BillableItem controller.
+ * Item controller.
  *
  */
 @RestController
 @RequestMapping("/api/billableItems")
-@Api(value = "Domains", description = "Operations with billable items", produces = "application/json")
-public class BillableItemController extends CRUDController<BillableItem> implements ApiController {
+@Api(value = "Domains", description = "Operations with items", produces = "application/json")
+public class ItemController extends CRUDController<Item> implements ApiController {
 
     /** Service reference to Domain. */
     @Autowired
-    private BillableItemService billableItemService;
+    private ItemService itemService;
 
-    @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new billable items.", response = BillableItem.class)
+    @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new item.", response = Item.class)
     @Override
-    public BillableItem create(@RequestBody BillableItem billableItem) throws Exception {
-        billableItem.setIsActive(true);
-        return billableItemService.save(billableItem);
+    public Item create(@RequestBody Item item) throws Exception {
+        item.setIsActive(true);
+        return itemService.save(item);
     }
 
-    @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing billable items.", response = BillableItem.class)
+    @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing items.", response = Item.class)
     @Override
-    public BillableItem read(@PathVariable(PATH_ID) Long id) throws Exception {
-        return billableItemService.find(id);
+    public Item read(@PathVariable(PATH_ID) Long id) throws Exception {
+        return itemService.find(id);
     }
 
-    @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing billable items.", response = BillableItem.class)
+    @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing items.", response = Item.class)
     @Override
-    public BillableItem update(@RequestBody BillableItem billableItem, @PathVariable(PATH_ID) Long id) throws Exception {
-        return billableItemService.update(billableItem);
+    public Item update(@RequestBody Item item, @PathVariable(PATH_ID) Long id) throws Exception {
+        return itemService.update(item);
     }
 
     @Override
-    public List<BillableItem> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
+    public List<Item> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, BillableItem.class);
-        Page<BillableItem> pageResponse = billableItemService.findAllByIsActive(page, true);
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Item.class);
+        Page<Item> pageResponse = itemService.findAllByIsActive(page, true);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
 
     /**
-     * List all billable items with active status.
+     * List all items with active status.
      *
      * @return projects
      * @throws Exception error
@@ -75,23 +75,23 @@ public class BillableItemController extends CRUDController<BillableItem> impleme
       @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
       @ResponseStatus(HttpStatus.OK)
       @ResponseBody
-      protected List<BillableItem> getSearch() throws Exception {
-          return billableItemService.findAllByIsActive(true);
+      protected List<Item> getSearch() throws Exception {
+          return itemService.findAllByIsActive(true);
       }
 
       /**
-       * Delete the Billable item.
+       * Delete the item.
        *
-       * @param billableItem reference of the item.
-       * @param id billable item id.
+       * @param item reference of the item.
+       * @param id item id.
        * @throws Exception error occurs.
        */
       @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Tax.")
       @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE })
       @ResponseStatus(HttpStatus.NO_CONTENT)
-      public void softDelete(@RequestBody BillableItem billableItem, @PathVariable(PATH_ID) Long id) throws Exception {
-          /** Doing Soft delete from the billable_item table. */
-          billableItem.setIsActive(false);
-          billableItemService.softDelete(billableItem);
+      public void softDelete(@RequestBody Item item, @PathVariable(PATH_ID) Long id) throws Exception {
+          /** Doing Soft delete from the item table. */
+          item.setIsActive(false);
+          itemService.update(item);
       }
 }

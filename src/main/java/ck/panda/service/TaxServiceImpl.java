@@ -88,13 +88,6 @@ public class TaxServiceImpl implements TaxService {
     }
 
     @Override
-    public Tax softDelete(Tax tax) throws Exception {
-        tax.setIsActive(false);
-        tax.setStatus(Tax.Status.DELETED);
-        return taxRepo.save(tax);
-    }
-
-    @Override
     public List<Tax> findAllByIsActive(Boolean isActive) throws Exception {
         return taxRepo.findAllByIsActive(isActive);
     }

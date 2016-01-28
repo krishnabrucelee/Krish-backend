@@ -15,15 +15,6 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 public interface TaxService extends CRUDService<Tax> {
 
     /**
-     * Delete the tax.
-     *
-     * @param tax Tax entity.
-     * @return Tax.
-     * @throws Exception error occurs
-     */
-    Tax softDelete(Tax tax) throws Exception;
-
-    /**
      * Find all the tax with status.
      *
      * @param pagingAndSorting page request.

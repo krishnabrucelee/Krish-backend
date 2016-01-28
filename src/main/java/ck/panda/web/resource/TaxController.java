@@ -69,7 +69,7 @@ public class TaxController extends CRUDController<Tax> implements ApiController 
     public void softDelete(@RequestBody Tax tax, @PathVariable(PATH_ID) Long id) throws Exception {
         /** Doing Soft delete from the tax table. */
         tax.setIsActive(false);
-        taxService.softDelete(tax);
+        taxService.update(tax);
     }
 
     @Override
