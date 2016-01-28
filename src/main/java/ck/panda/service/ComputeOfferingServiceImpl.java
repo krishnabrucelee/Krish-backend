@@ -15,13 +15,14 @@ import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.repository.jpa.ComputeOfferingRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackComputeOffering;
+import ck.panda.util.CloudStackOptionalUtil;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 
 /**
- * . Compute Offering service aid user to create compute offers in Cloud Stack Server.
+ *  Compute Offering service aid user to create compute offers in Cloud Stack Server.
  *
  */
 
@@ -58,15 +59,16 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             this.validateComputeOffering(compute);
             Errors errors = validator.rejectIfNullEntity("compute", compute);
             errors = validator.validateEntity(compute, errors);
-
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
 
                 // set server for maintain session with configuration values
                 cscomputeOffering.setServer(configServer.setServer(1L));
+                // create compute offering in ACS and getting response in Json String.
                 String createComputeResponse = cscomputeOffering.createComputeOffering(compute.getName(),
                         compute.getDisplayText(), "json", addOptionalValues(compute));
+                // convert json string to json object
                 JSONObject createComputeResponseJSON = new JSONObject(createComputeResponse)
                         .getJSONObject("createserviceofferingresponse");
 
@@ -97,17 +99,15 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             } else {
                 HashMap<String, String> hs = new HashMap<String, String>();
                 cscomputeOffering.setServer(configServer.setServer(1L));
+                // update compute offering in ACS and getting response in Json String.
                 String editComputeResponse = cscomputeOffering.updateComputeOffering(compute.getUuid(),
                         compute.getName(), compute.getDisplayText(), "json", hs);
-                JSONObject domainListJSON = new JSONObject(editComputeResponse)
+                // convert json string to json object
+                JSONObject editComputeJSON = new JSONObject(editComputeResponse)
                         .getJSONObject("updateserviceofferingresponse").getJSONObject("serviceoffering");
             }
-            return computeRepo.save(compute);
-        } else {
-            LOGGER.debug(compute.getUuid());
-            return computeRepo.save(compute);
         }
-
+       return computeRepo.save(compute);
     }
 
     @Override
@@ -127,6 +127,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             errors = validator.validateEntity(compute, errors);
             // set server for finding value in configuration
             cscomputeOffering.setServer(configServer.setServer(1L));
+            // before deleting a compute offer checking whether a vm instance associated with that offer
             List<VmInstance> vmResponse = vmService.findByComputeOfferingIdAndVmStatus(compute.getId(),
                     VmInstance.Status.Expunging);
             if (vmResponse.size() != 0) {
@@ -137,6 +138,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
                 throw new ApplicationException(errors);
             } else {
                 compute.setIsActive(false);
+                // update compute offering in ACS .
                 cscomputeOffering.deleteComputeOffering(compute.getUuid(), "json");
             }
         }
@@ -176,76 +178,28 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
      *
      * @param compute object for compute offering
      * @return optional values.
+     * @throws Exception
      */
-    public HashMap<String, String> addOptionalValues(ComputeOffering compute) {
+    public HashMap<String, String> addOptionalValues(ComputeOffering compute) throws Exception {
         HashMap<String, String> computeMap = new HashMap<String, String>();
 
-        if (compute.getStorageTags() != null) {
-            computeMap.put("tags", compute.getStorageTags().toString());
-        }
+         CloudStackOptionalUtil.updateOptionalStringValue("tags", compute.getStorageTags(), computeMap);
+         CloudStackOptionalUtil.updateOptionalStringValue("hosttags", compute.getStorageTags(), computeMap);
+         CloudStackOptionalUtil.updateOptionalBooleanValue("limitcpuuse", compute.getCpuCapacity(), computeMap);
+         CloudStackOptionalUtil.updateOptionalIntegerValue("cpuspeed", compute.getClockSpeed(), computeMap);
+         CloudStackOptionalUtil.updateOptionalIntegerValue("cpunumber", compute.getNumberOfCores(), computeMap);
+         CloudStackOptionalUtil.updateOptionalIntegerValue("memory", compute.getMemory(), computeMap);
+         CloudStackOptionalUtil.updateOptionalIntegerValue("bytesreadrate", compute.getDiskBytesReadRate(), computeMap);
+         CloudStackOptionalUtil.updateOptionalIntegerValue("byteswriterate", compute.getDiskBytesWriteRate(), computeMap);
+         CloudStackOptionalUtil.updateOptionalIntegerValue("iopsreadrate", compute.getDiskIopsReadRate(), computeMap);
+         CloudStackOptionalUtil.updateOptionalIntegerValue("iopswriterate", compute.getDiskIopsWriteRate(), computeMap);
+         CloudStackOptionalUtil.updateOptionalBooleanValue("customizediops", compute.getCustomizedIops(), computeMap);
+         CloudStackOptionalUtil.updateOptionalBooleanValue("customized", compute.getCustomized(), computeMap);
+         CloudStackOptionalUtil.updateOptionalIntegerValue("miniops", compute.getMinIops(), computeMap);
+         CloudStackOptionalUtil.updateOptionalIntegerValue("maxiops", compute.getMaxIops(), computeMap);
+         CloudStackOptionalUtil.updateOptionalIntegerValue("networkrate", compute.getNetworkRate(), computeMap);
+         CloudStackOptionalUtil.updateOptionalBooleanValue("offerha", compute.getIsHighAvailabilityEnabled(), computeMap);
 
-        if (compute.getHostTags() != null) {
-            computeMap.put("hosttags", compute.getHostTags().toString());
-        }
-
-        if (compute.getCpuCapacity() != null) {
-            computeMap.put("limitcpuuse", compute.getCpuCapacity().toString());
-        }
-
-        if (compute.getClockSpeed() != null) {
-            computeMap.put("cpuspeed", compute.getClockSpeed().toString());
-        }
-
-        if (compute.getNumberOfCores() != null) {
-            computeMap.put("cpunumber", compute.getNumberOfCores().toString());
-        }
-
-        if (compute.getDiskBytesReadRate() != null) {
-            computeMap.put("bytesreadrate", compute.getDiskBytesReadRate().toString());
-        }
-
-        if (compute.getDiskBytesWriteRate() != null) {
-            computeMap.put("byteswriterate", compute.getDiskBytesWriteRate().toString());
-        }
-
-        if (compute.getDiskIopsReadRate() != null) {
-            computeMap.put("iopsreadrate", compute.getDiskIopsReadRate().toString());
-        }
-
-        if (compute.getDiskIopsWriteRate() != null) {
-            computeMap.put("iopswriterate", compute.getDiskIopsWriteRate().toString());
-        }
-
-        if (compute.getCustomizedIops() != null) {
-            computeMap.put("customizediops", compute.getCustomizedIops().toString());
-        }
-
-        if (compute.getMinIops() != null) {
-            computeMap.put("miniops", compute.getMinIops().toString());
-        }
-
-        if (compute.getMaxIops() != null) {
-            computeMap.put("maxiops", compute.getMaxIops().toString());
-        }
-
-        if (compute.getNetworkRate() != null) {
-            computeMap.put("networkrate", compute.getNetworkRate().toString());
-        }
-
-        if (compute.getDomain() != null) {
-            computeMap.put("domain", compute.getDomain().getName());
-        }
-
-        if (compute.getIsHighAvailabilityEnabled() != null) {
-            computeMap.put("offerha", compute.getIsHighAvailabilityEnabled().toString());
-        }
-
-        if (compute.getMemory() != null) {
-            computeMap.put("memory", compute.getMemory().toString());
-        }
-        if (compute.getCustomized() != null) {
-            computeMap.put("customized", compute.getCustomized().toString());
-        }
         return computeMap;
     }
 
@@ -264,8 +218,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             // 2. Iterate the json list, convert the single json entity to
             // domain
             for (int i = 0, size = computeOfferingListJSON.length(); i < size; i++) {
-                // 2.1 Call convert by passing JSONObject to ComputeOffering
-                // entity and Add
+                // 2.1 Call convert by passing JSONObject to ComputeOffering entity and Add
                 // the converted ComputeOffering entity to list
                 computeOfferingList.add(ComputeOffering.convert(computeOfferingListJSON.getJSONObject(i)));
             }
