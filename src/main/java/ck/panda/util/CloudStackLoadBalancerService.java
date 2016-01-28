@@ -128,15 +128,12 @@ public class CloudStackLoadBalancerService {
      * @return create LB stickiness policy.
      * @throws Exception if error occurs.
      */
-    public String createLBStickinessPolicy(String lbruleId, String methodName,
-            String name, String response, HashMap<String, String> optional)
+    public String createLBStickinessPolicy(String lbruleId,String response, HashMap<String, String> optional)
             throws Exception {
 
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("createLBStickinessPolicy", optional);
         arguments.add(new NameValuePair("lbruleid", lbruleId));
-        arguments.add(new NameValuePair("methodname", methodName));
-        arguments.add(new NameValuePair("name", name));
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
         return  responseDocument;

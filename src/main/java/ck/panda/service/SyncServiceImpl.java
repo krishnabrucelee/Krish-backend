@@ -51,6 +51,7 @@ import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.domain.repository.jpa.VolumeRepository;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.VolumeType;
@@ -241,6 +242,9 @@ public class SyncServiceImpl implements SyncService {
     /** Autowired permission service. */
     @Autowired
     private PermissionService permissionService;
+
+    @Autowired
+    private VmIpaddressService vmIpService;
 
     /** Autowired roleService. */
     @Autowired
@@ -1900,9 +1904,9 @@ public class SyncServiceImpl implements SyncService {
             // 3.1 Find the corresponding CS server ntService object by
             // finding it in a hash using uuid
             if (csNicMap.containsKey(nic.getUuid())) {
-                Nic csNic = csNicMap.get(nic.getUuid());
-
+            	Nic csNic = csNicMap.get(nic.getUuid());
                 nic.setUuid(csNic.getUuid());
+                nic.setVmIpAddress(csNic.getVmIpAddress());
 
                 // 3.2 If found, update the nic object in app db
                 nicService.update(nic);
@@ -1910,7 +1914,7 @@ public class SyncServiceImpl implements SyncService {
                 // 3.3 Remove once updated, so that we can have the list of cs
                 // nic which is not added in the app
                 csNicMap.remove(nic.getUuid());
-            } else {
+            }else {
                 nicService.softDelete(nic);
             }
         }

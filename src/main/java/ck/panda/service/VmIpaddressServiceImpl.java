@@ -81,5 +81,4 @@ public class VmIpaddressServiceImpl implements VmIpaddressService {
     public List<VmIpaddress> findByVMInstance(Long nic) throws Exception {
         return ipaddressRepo.findByVMInstanceAndIsActive(nic, true);
     }
-
 }

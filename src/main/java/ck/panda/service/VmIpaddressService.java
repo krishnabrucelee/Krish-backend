@@ -31,7 +31,7 @@ public interface VmIpaddressService extends CRUDService<VmIpaddress> {
     VmIpaddress findByUUID(String uuid) throws Exception;
 
     /**
-     * Soft delete for vm Ip address
+     * Soft delete for vm Ip address.
      *
      * @param vmIpaddress object.
      * @return vm Ip address.
@@ -44,8 +44,7 @@ public interface VmIpaddressService extends CRUDService<VmIpaddress> {
      *
      * @param nic Nic
      * @return vm Ipaddress.
-     * @throws Exception exception
+     * @throws Exception if error occurs.
      */
     List<VmIpaddress> findByVMInstance(Long nic) throws Exception;
-
 }

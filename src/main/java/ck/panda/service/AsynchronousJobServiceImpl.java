@@ -926,10 +926,11 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                  vmIpaddress.setSyncFlag(false);
                  vmIpaddress.setUuid(csVmIpaddress.getUuid());
                  vmIpaddress.setGuestIpAddress(csVmIpaddress.getGuestIpAddress());
-                 Nic nic = nicService.findbyUUID(csVmIpaddress.getNic().getUuid());
+                 Nic nic = nicService.findbyUUID(csVmIpaddress.getTransNicId());
                  if (vmIpService.findByUUID(csVmIpaddress.getUuid()) == null) {
                      vmIpService.save(csVmIpaddress);
                  }
+                 nic.setSyncFlag(false);
                  nicService.update(nic);
              }
 
@@ -945,6 +946,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                          vmIpService.softDelete(vmIpAddress);
                          Nic nic = new Nic();
                          nicService.releaseSecondaryIP(nic, vmIpAddress.getId());
+                         nic.setSyncFlag(false);
                          nicService.update(nic);
                      }
                  }
@@ -1018,6 +1020,18 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 loadBalancerService.save(loadBalancerRule);
                 firewallRules(jobresult, FirewallRules.Purpose.LOADBALANCING);
             }
+        }
+
+        if (eventObject.getString("commandEventType").equals(" LB.STICKINESSPOLICY.CREATE")) {
+            LoadBalancerRule csLoadBalancer = LoadBalancerRule.convert(jobresult.getJSONObject("stickinesspolicies"));
+            LoadBalancerRule loadBalancer = loadBalancerService.findByUUID(csLoadBalancer.getUuid());
+            if (csLoadBalancer.getUuid().equals(loadBalancer.getUuid())) {
+                LoadBalancerRule csLb = csLoadBalancer;
+            	loadBalancer.setStickinessName(csLb.getStickinessName());
+            	loadBalancer.setStickinessMethod(csLb.getStickinessMethod());
+            }
+
+
         }
 
         if (eventObject.getString("commandEventType").equals("LB.UPDATE")) {
