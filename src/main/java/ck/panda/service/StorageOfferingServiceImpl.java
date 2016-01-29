@@ -10,9 +10,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.repository.jpa.StorageOfferingRepository;
 import ck.panda.util.AppValidator;
+import ck.panda.util.CloudStackOptionalUtil;
 import ck.panda.util.CloudStackStorageOfferingService;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -28,6 +31,15 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
 
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(StorageOfferingServiceImpl.class);
+
+    /** Constant for list disk offering response. */
+    public static final String CS_LIST_DISK_RESPONSE = "listdiskofferingsresponse";
+
+    /** Constant for create disk offering response. */
+    public static final String CS_CREATE_DISK_RESPONSE = "creatediskofferingresponse";
+
+    /** Constant for update disk offering response. */
+    public static final String CS_UPDATE_DISK_RESPONSE = "updatediskofferingresponse";
 
     /** Validator attribute. */
     @Autowired
@@ -45,17 +57,15 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     @Autowired
     private ConfigUtil config;
 
-    /** Json response for storage offering. */
-    private static final String JSON = "json";
-
-    /** Disk offering response field from cloud stack. */
-    private static final String DISK = "diskoffering";
+    /** Reference of the convert entity service. */
+    @Autowired
+    private ConvertEntityService convertEntityService;
 
     @Override
     public StorageOffering save(StorageOffering storage) throws Exception {
         if (storage.getIsSyncFlag()) {
             this.validateVolumeUniqueness(storage);
-            Errors errors = validator.rejectIfNullEntity("storageOffering", storage);
+            Errors errors = validator.rejectIfNullEntity(CloudStackConstants.CS_STORAGE_OFFERING, storage);
             errors = validator.validateEntity(storage, errors);
 
             if (errors.hasErrors()) {
@@ -75,7 +85,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     public StorageOffering update(StorageOffering storage) throws Exception {
         if (storage.getIsSyncFlag()) {
             this.validateVolumeUniqueness(storage);
-            Errors errors = validator.rejectIfNullEntity("storageOffering", storage);
+            Errors errors = validator.rejectIfNullEntity(CloudStackConstants.CS_STORAGE_OFFERING, storage);
             errors = validator.validateEntity(storage, errors);
 
             if (errors.hasErrors()) {
@@ -100,7 +110,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
         StorageOffering storage = this.find(id);
         // set server for finding value in configuration
         config.setServer(1L);
-        csStorageService.deleteStorageOffering(storage.getUuid(), JSON);
+        csStorageService.deleteStorageOffering(storage.getUuid(), CloudStackConstants.JSON);
         storageOfferingRepo.delete(id);
     }
 
@@ -112,7 +122,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
         LOGGER.trace("Sample Trace Message");
 
         if (storageOffering == null) {
-            throw new EntityNotFoundException("StorageOffering.not.found");
+            throw new EntityNotFoundException("error.storageOffering.not.found");
         }
         return storageOffering;
     }
@@ -132,83 +142,99 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
      *
      * @param storage optional storage offering values
      * @return optional values
+     * @throws Exception error
      */
-    public HashMap<String, String> optional(StorageOffering storage) {
-        HashMap<String, String> optional = new HashMap<String, String>();
+    public HashMap<String, String> optional(StorageOffering storage) throws Exception {
+        HashMap<String, String> stoarageMap = new HashMap<String, String>();
+        CloudStackOptionalUtil.updateOptionalStringValue(CloudStackConstants.CS_TAGS, storage.getStorageTags(),
+                stoarageMap);
+        CloudStackOptionalUtil.updateOptionalStringValue(CloudStackConstants.CS_NAME, storage.getName(), stoarageMap);
+        CloudStackOptionalUtil.updateOptionalStringValue(CloudStackConstants.CS_DISPLAY_TEXT, storage.getDescription(),
+                stoarageMap);
+        CloudStackOptionalUtil.updateOptionalBooleanValue(CloudStackConstants.CS_PUBLIC, storage.getIsPublic(),
+                stoarageMap);
+        CloudStackOptionalUtil.updateOptionalBooleanValue(CloudStackConstants.CS_CUSTOM_OFFER,
+                storage.getIsCustomDisk(), stoarageMap);
+        CloudStackOptionalUtil.updateOptionalStringValue(CloudStackConstants.CS_STORAGE_TYPE,
+                storage.getStorageType().toString(), stoarageMap);
+        CloudStackOptionalUtil.updateOptionalBooleanValue(CloudStackConstants.CS_CUSTOM_IOPS,
+                storage.getIsCustomizedIops(), stoarageMap);
+        CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_DISK_SIZE,
+                storage.getDiskSize().intValue(), stoarageMap);
+        CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_IOPS_READ,
+                storage.getDiskIopsReadRate().intValue(), stoarageMap);
+        CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_IOPS_WRITE,
+                storage.getDiskIopsWriteRate().intValue(), stoarageMap);
+        CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_BYTES_READ,
+                storage.getDiskBytesReadRate().intValue(), stoarageMap);
+        CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_BYTES_WRITE,
+                storage.getDiskBytesWriteRate().intValue(), stoarageMap);
+        CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_MIN_IOPS,
+                storage.getDiskMinIops().intValue(), stoarageMap);
+        CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_MAX_IOPS,
+                storage.getDiskMaxIops().intValue(), stoarageMap);
+        CloudStackOptionalUtil.updateOptionalStringValue(CloudStackConstants.CS_DOMAIN_ID,
+                convertEntityService.getDomainById(storage.getDomainId()).getUuid(), stoarageMap);
 
-        if (storage.getStorageTags() != null) {
-            optional.put("tags", storage.getStorageTags().toString());
-        }
-
-        if (storage.getName() != null) {
-            optional.put("name", storage.getName());
-        }
-
-        if (storage.getDescription() != null) {
-            optional.put("displaytext", storage.getDescription());
-        }
-
-        if (storage.getIsPublic() != null) {
-            optional.put("public", storage.getIsPublic().toString());
-        }
-
-        if (storage.getIsCustomDisk() != null) {
-            optional.put("customized", storage.getIsCustomDisk().toString());
-        }
-
-        if (storage.getStorageType() != null) {
-            optional.put("storagetype", storage.getStorageType().toString());
-        }
-
-        if (storage.getIsCustomizedIops() != null) {
-            optional.put("customizediops", storage.getIsCustomizedIops().toString());
-        }
-
-        if (storage.getStorageTags() != null) {
-            optional.put("tags", storage.getStorageTags().toString());
-        }
-
-        if (storage.getDiskSize() != null) {
-            optional.put("disksize", storage.getDiskSize().toString());
-        }
-
-        if (storage.getDiskBytesReadRate() != null) {
-            optional.put("bytesreadrate", storage.getDiskBytesReadRate().toString());
-        }
-
-        if (storage.getDiskBytesWriteRate() != null) {
-            optional.put("byteswriterate", storage.getDiskBytesWriteRate().toString());
-        }
-
-        if (storage.getDiskIopsReadRate() != null) {
-            optional.put("iopsreadrate", storage.getDiskIopsReadRate().toString());
-        }
-
-        if (storage.getDiskIopsWriteRate() != null) {
-            optional.put("iopswriterate", storage.getDiskIopsWriteRate().toString());
-        }
-
-        if (storage.getDiskMaxIops() != null) {
-            optional.put("maxiops", storage.getDiskMaxIops().toString());
-        }
-
-        if (storage.getDiskMinIops() != null) {
-            optional.put("miniops", storage.getDiskMinIops().toString());
-        }
-        return optional;
+//        if (storage.getStorageTags() != null) {
+//            stoarageMap.put(CloudStackConstants.CS_TAGS, storage.getStorageTags().toString());
+//        }
+//        if (storage.getName() != null) {
+//            stoarageMap.put(CloudStackConstants.CS_NAME, storage.getName());
+//        }
+//        if (storage.getDescription() != null) {
+//            stoarageMap.put(CloudStackConstants.CS_DISPLAY_TEXT, storage.getDescription());
+//        }
+//        if (storage.getIsPublic() != null) {
+//            stoarageMap.put(CloudStackConstants.CS_PUBLIC, storage.getIsPublic().toString());
+//        }
+//        if (storage.getIsCustomDisk() != null) {
+//            stoarageMap.put(CloudStackConstants.CS_CUSTOM_OFFER, storage.getIsCustomDisk().toString());
+//        }
+//        if (storage.getStorageType() != null) {
+//            stoarageMap.put(CloudStackConstants.CS_STORAGE_TYPE, storage.getStorageType().toString());
+//        }
+//        if (storage.getIsCustomizedIops() != null) {
+//            stoarageMap.put(CloudStackConstants.CS_CUSTOM_IOPS, storage.getIsCustomizedIops().toString());
+//        }
+//        if (storage.getDiskSize() != null) {
+//            stoarageMap.put(CloudStackConstants.CS_DISK_SIZE, storage.getDiskSize().toString());
+//        }
+//        if (storage.getDiskBytesReadRate() != null) {
+//            stoarageMap.put(CloudStackConstants.CS_BYTES_READ, storage.getDiskBytesReadRate().toString());
+//        }
+//        if (storage.getDiskBytesWriteRate() != null) {
+//            stoarageMap.put(CloudStackConstants.CS_BYTES_WRITE, storage.getDiskBytesWriteRate().toString());
+//        }
+//        if (storage.getDiskIopsReadRate() != null) {
+//            stoarageMap.put(CloudStackConstants.CS_IOPS_READ, storage.getDiskIopsReadRate().toString());
+//        }
+//        if (storage.getDiskIopsWriteRate() != null) {
+//            stoarageMap.put(CloudStackConstants.CS_IOPS_WRITE, storage.getDiskIopsWriteRate().toString());
+//        }
+//        if (storage.getDiskMaxIops() != null) {
+//            stoarageMap.put(CloudStackConstants.CS_MAX_IOPS, storage.getDiskMaxIops().toString());
+//        }
+//        if (storage.getDiskMinIops() != null) {
+//            stoarageMap.put(CloudStackConstants.CS_MIN_IOPS, storage.getDiskMinIops().toString());
+//        }
+//        if (storage.getDomainId() != null) {
+//            stoarageMap.put(CloudStackConstants.CS_DOMAIN_ID, convertEntityService.getDomainById(storage.getDomainId()).getUuid());
+//        }
+        return stoarageMap;
     }
 
     @Override
     public List<StorageOffering> findAllFromCSServer() throws Exception {
         List<StorageOffering> storageOfferingList = new ArrayList<StorageOffering>();
         HashMap<String, String> storageOfferingMap = new HashMap<String, String>();
-        storageOfferingMap.put("listall", "true");
+        storageOfferingMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
         // 1. Get the list of StorageOffering from CS server using CS connector
-        String response = csStorageService.listStorageOfferings(JSON, storageOfferingMap);
+        String response = csStorageService.listStorageOfferings(CloudStackConstants.JSON, storageOfferingMap);
         JSONArray storageOfferingListJSON = null;
-        JSONObject responseObject = new JSONObject(response).getJSONObject("listdiskofferingsresponse");
-        if (responseObject.has(DISK)) {
-            storageOfferingListJSON = responseObject.getJSONArray(DISK);
+        JSONObject responseObject = new JSONObject(response).getJSONObject(CS_LIST_DISK_RESPONSE);
+        if (responseObject.has(CloudStackConstants.CS_DISK_OFFERING)) {
+            storageOfferingListJSON = responseObject.getJSONArray(CloudStackConstants.CS_DISK_OFFERING);
             // 2. Iterate the json list, convert the single json entity to
             // StorageOffering
             for (int i = 0, size = storageOfferingListJSON.length(); i < size; i++) {
@@ -231,20 +257,19 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
      */
     private void createStorage(StorageOffering storage, Errors errors) throws Exception {
         config.setServer(1L);
-        String storageOfferings = csStorageService.createStorageOffering(JSON, optional(storage));
+        String storageOfferings = csStorageService.createStorageOffering(CloudStackConstants.JSON, optional(storage));
         LOGGER.info("storage offer create response " + storageOfferings);
         JSONObject storageOfferingsResponse = new JSONObject(storageOfferings)
-                .getJSONObject("creatediskofferingresponse");
-        if (storageOfferingsResponse.has("errorcode")) {
-            errors = this.validateEvent(errors, storageOfferingsResponse.getString("errortext"));
+                .getJSONObject(CS_CREATE_DISK_RESPONSE);
+        if (storageOfferingsResponse.has(CloudStackConstants.CS_ERROR_CODE)) {
+            errors = this.validateEvent(errors, storageOfferingsResponse.getString(CloudStackConstants.CS_ERROR_TEXT));
             throw new ApplicationException(errors);
         } else {
-            storage.setUuid(storageOfferingsResponse.getJSONObject("diskoffering").getString("id"));
-
-            if (storageOfferingsResponse.getJSONObject("diskoffering").get("disksize").equals(0)) {
+            storage.setUuid(storageOfferingsResponse.getJSONObject(CloudStackConstants.CS_DISK_OFFERING).getString(CloudStackConstants.CS_ID));
+            if (storageOfferingsResponse.getJSONObject(CloudStackConstants.CS_DISK_OFFERING).get(CloudStackConstants.CS_DISK_SIZE).equals(0)) {
                 storage.setDiskSize(0L);
             }
-            if (storageOfferingsResponse.getJSONObject("diskoffering").get("iscustomized").equals(false)) {
+            if (storageOfferingsResponse.getJSONObject(CloudStackConstants.CS_DISK_OFFERING).get(CloudStackConstants.CS_CUSTOM_STATUS).equals(false)) {
                 storage.setIsCustomDisk(false);
             }
         }
@@ -259,16 +284,16 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
      */
     private void updateStorageOffering(StorageOffering storage, Errors errors) throws Exception {
         config.setServer(1L);
-        String storageOfferings = csStorageService.updateStorageOffering(String.valueOf(storage.getUuid()), JSON,
+        String storageOfferings = csStorageService.updateStorageOffering(String.valueOf(storage.getUuid()), CloudStackConstants.JSON,
                 optional(storage));
         LOGGER.info("storage offer update response " + storageOfferings);
         JSONObject storageOfferingsResponse = new JSONObject(storageOfferings)
-                .getJSONObject("updatediskofferingresponse").getJSONObject("diskoffering");
-        if (storageOfferingsResponse.has("errorcode")) {
-            errors = this.validateEvent(errors, storageOfferingsResponse.getString("errortext"));
+                .getJSONObject(CS_UPDATE_DISK_RESPONSE).getJSONObject(CloudStackConstants.CS_DISK_OFFERING);
+        if (storageOfferingsResponse.has(CloudStackConstants.CS_ERROR_CODE)) {
+            errors = this.validateEvent(errors, storageOfferingsResponse.getString(CloudStackConstants.CS_ERROR_TEXT));
             throw new ApplicationException(errors);
         } else {
-            storage.setUuid((String) storageOfferingsResponse.get("id"));
+            storage.setUuid((String) storageOfferingsResponse.get(CloudStackConstants.CS_ID));
         }
     }
 
@@ -311,11 +336,11 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
      * @throws Exception error occurs
      */
     private void validateVolumeUniqueness(StorageOffering storage) throws Exception {
-        Errors errors = validator.rejectIfNullEntity("storageOffering", storage);
+        Errors errors = validator.rejectIfNullEntity(CloudStackConstants.CS_STORAGE_OFFERING, storage);
         errors = validator.validateEntity(storage, errors);
         StorageOffering validateStorage = storageOfferingRepo.findByNameAndIsActive(storage.getName(), true);
         if (validateStorage != null && storage.getId() != validateStorage.getId()) {
-            errors.addGlobalError("Storage.offering.already.exist");
+            errors.addGlobalError("error.storage.offering.already.exist");
         }
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);

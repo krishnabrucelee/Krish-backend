@@ -22,10 +22,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.service.VolumeService;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -42,11 +44,15 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     @Autowired
     private VolumeService volumeService;
 
+    /** Autowired TokenDetails. */
+    @Autowired
+    private TokenDetails tokenDetails;
+
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Volume.", response = Volume.class)
     @Override
     public Volume create(@RequestBody Volume volume) throws Exception {
         volume.setIsSyncFlag(true);
-        return volumeService.save(volume);
+        return volumeService.saveVolume(volume, Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
     }
 
     @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing Volume.", response = Volume.class)
@@ -83,10 +89,8 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     public List<Volume> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Volume.class);
-        Page<Volume> pageResponse = volumeService.findAllByIsActive(page);
-        System.out.println(pageResponse);
+        Page<Volume> pageResponse = volumeService.findAllByIsActive(page, Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
-
         return pageResponse.getContent();
     }
 
@@ -163,7 +167,7 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     @ResponseBody
     protected Volume uploadVolume(@RequestBody Volume volume) throws Exception {
         volume.setIsSyncFlag(true);
-        return volumeService.uploadVolume(volume);
+        return volumeService.uploadVolume(volume, Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
     }
 
     /**
@@ -178,8 +182,7 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<Volume> listByInstance(@RequestParam("instanceid") Long instanceId) throws Exception {
-        System.out.println(instanceId);
-        return volumeService.findByInstanceAndIsActive(instanceId);
+        return volumeService.findByInstanceAndIsActive(instanceId, Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
     }
 
     /**
@@ -222,7 +225,7 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<Volume> listbyvolumetype() throws Exception {
-        return volumeService.findByVolumeTypeAndIsActive();
+        return volumeService.findByVolumeTypeAndIsActive(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
     }
 
     /**
@@ -287,8 +290,8 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public String getVolumeCounts(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        Integer attachedCount = volumeService.findAttachedCount();
-        Integer detachedCount = volumeService.findDetachedCount();
+        Integer attachedCount = volumeService.findAttachedCount(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
+        Integer detachedCount = volumeService.findDetachedCount(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
         return "{\"attachedCount\":" + attachedCount + ",\"detachedCount\":" + detachedCount + "}";
     }
 
