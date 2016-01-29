@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Department.AccountType;
-import ck.panda.domain.entity.Domain;
 
 /**
  * JPA Repository for Department entity.
@@ -25,7 +24,8 @@ public interface DepartmentRepository extends PagingAndSortingRepository<Departm
      * @param isActive get the department list based on active/inactive status.
      * @return department name.
      */
-    @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.userName=:userName AND  dpt.domainId =:domainId AND dpt.isActive =:isActive")
+    @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.userName=:userName AND  dpt.domainId =:domainId "
+            + "AND dpt.isActive =:isActive")
     Department findByNameAndDomainAndIsActive(@Param("userName") String userName, @Param("domainId") Long domainId,
             @Param("isActive") Boolean isActive);
 
@@ -79,7 +79,8 @@ public interface DepartmentRepository extends PagingAndSortingRepository<Departm
      * @param isActive get the department list based on active/inactive status.
      * @return Department.
      */
-    @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.isActive =:isActive AND dpt.domainId=:domainId AND dpt.type=:type")
+    @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.isActive =:isActive AND dpt.domainId=:domainId "
+            + "AND dpt.type=:type")
     List<Department> findByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive,
             @Param("type") AccountType type);
 
@@ -91,7 +92,8 @@ public interface DepartmentRepository extends PagingAndSortingRepository<Departm
      * @param isActive get the department list based on active/inactive status.
      * @return Department.
      */
-    @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.userName=:userName AND dpt.domainId=:domainId AND dpt.isActive =:isActive")
+    @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.userName=:userName AND dpt.domainId=:domainId "
+            + "AND dpt.isActive =:isActive")
     Department findByUsernameDomainAndIsActive(@Param("userName") String userName, @Param("domainId") Long domainId,
             @Param("isActive") Boolean isActive);
 
@@ -104,7 +106,8 @@ public interface DepartmentRepository extends PagingAndSortingRepository<Departm
      * @param type for account.
      * @return Department.
      */
-    @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.isActive =:isActive AND dpt.domainId=:domainId AND dpt.type=:type")
+    @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.isActive =:isActive AND dpt.domainId=:domainId "
+            + "AND dpt.type=:type")
     Page<Department> findByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive,
             Pageable pageable, @Param("type") AccountType type);
 
@@ -127,7 +130,8 @@ public interface DepartmentRepository extends PagingAndSortingRepository<Departm
      * @param isActive get the department list based on active/inactive status.
      * @return Department list.
      */
-    @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.domainId =:domainId AND dpt.isActive =:isActive AND dpt.type in (:types)")
+    @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.domainId =:domainId AND dpt.isActive =:isActive "
+            + "AND dpt.type in (:types)")
     List<Department> findDepartmentsByDomainAndAccountTypesAndActive(@Param("domainId") Long domainId,
             @Param("types") List<AccountType> types, @Param("isActive") Boolean isActive);
 }

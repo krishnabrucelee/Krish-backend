@@ -36,15 +36,6 @@ public interface DepartmentService extends CRUDService<Department> {
     Page<Department> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
 
     /**
-     * Find all the departments with active status.
-     *
-     * @param isActive department status Active/Inactive
-     * @return list of departments with active status
-     * @throws Exception error occurs.
-     */
-    List<Department> findAllByIsActive(Boolean isActive) throws Exception;
-
-    /**
      * To get list of domains from cloudstack server.
      *
      * @return domain list from server
@@ -72,7 +63,7 @@ public interface DepartmentService extends CRUDService<Department> {
     List<Department> findByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception;
 
     /**
-     * Find the departments user name and isActive status.
+     * Find by username domain id and isActive status.
      *
      * @param username department name.
      * @param domainId domain id of the department.
@@ -89,7 +80,7 @@ public interface DepartmentService extends CRUDService<Department> {
      * @throws Exception error occur
      * @return departments.
      */
-    List<Department> findDepartmentsByAccountTypesAndActive(List<AccountType> types, Boolean isActive) throws Exception;
+    List<Department> findByAccountTypesAndActive(List<AccountType> types, Boolean isActive) throws Exception;
 
     /**
      * Find all the departments for sync.
@@ -108,7 +99,7 @@ public interface DepartmentService extends CRUDService<Department> {
      * @throws Exception error occur
      * @return departments.
      */
-    List<Department> findDepartmentsByDomainAndAccountTypesAndActive(Long domainId, List<AccountType> types,
+    List<Department> findByDomainAndAccountTypesAndActive(Long domainId, List<AccountType> types,
             Boolean isActive) throws Exception;
 
     /**

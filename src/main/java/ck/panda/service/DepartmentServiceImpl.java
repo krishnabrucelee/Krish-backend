@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.Domain;
@@ -103,15 +104,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     @PreAuthorize("hasPermission(#department.getSyncFlag(), 'ADD_DEPARTMENT')")
     public Department save(Department department) throws Exception {
-
         if (department.getSyncFlag()) {
-
             // Check the user is not a root and admin and set the domain value from login detail
-
             if (!String.valueOf(tokenDetails.getTokenDetails("usertype")).equals("ROOT_ADMIN")) {
                 department.setDomainId(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
             }
-
             // Validate department
             this.validateDepartment(department);
             Domain domain = domainService.find(department.getDomainId());
@@ -162,7 +159,6 @@ public class DepartmentServiceImpl implements DepartmentService {
             // Validate department
             this.validateDepartment(department);
             Domain domain = domainService.find(department.getDomainId());
-
             Department departmentedit = departmentRepo.findOne(department.getId());
             department.setDomainId(department.getDomainId());
             config.setServer(1L);
@@ -193,7 +189,6 @@ public class DepartmentServiceImpl implements DepartmentService {
         }
         return department;
     }
-
 
     @Override
     public Page<Department> findAll(PagingAndSorting pagingAndSorting) throws Exception {
@@ -229,17 +224,18 @@ public class DepartmentServiceImpl implements DepartmentService {
         config.setServer(1L);
         if (department.getSyncFlag()) {
             List<Project> projectResponse = projectService.findByDepartmentAndIsActive(department.getId(), true);
-            List<VmInstance> vmResponse = vmService.findByDepartmentAndVmStatus(department.getId(),
-                    VmInstance.Status.Expunging);
+            List<VmInstance> vmResponse = vmService.findByDepartmentAndVmStatus(department.getId(), VmInstance.Status.Expunging);
             List<Role> roleResponse = roleService.findByDepartmentAndIsActive(department.getId(), true);
             List<Volume> volumeResponse = volumeService.findByDepartmentAndIsActive(department.getId(), true);
             List<User> userResponse = userService.findByDepartment(department.getId());
-            if (projectResponse.size() != 0 || vmResponse.size() != 0 || roleResponse.size() != 0
-                    || volumeResponse.size() != 0) {
-                errors.addGlobalError("You have following resources for this department: <br><ul><li>Project : "
-                        + projectResponse.size() + "</li><li>Instance : " + vmResponse.size() + "</li><li>Role : "
-                        + roleResponse.size() + "</li><li>Volume : " + volumeResponse.size() + "</li><li>User : "
-                        + userResponse.size() + "</li></ul><br>Kindly delete associated resources and try again");
+            if (projectResponse.size() != 0 || vmResponse.size() != 0
+                    || roleResponse.size() != 0 || volumeResponse.size() != 0) {
+                errors.addGlobalError(
+                        projectResponse.size() + GenericConstants.TOKEN_SEPARATOR +
+                        vmResponse.size() + GenericConstants.TOKEN_SEPARATOR +
+                        roleResponse.size() + GenericConstants.TOKEN_SEPARATOR +
+                        volumeResponse.size() + GenericConstants.TOKEN_SEPARATOR +
+                        userResponse.size());
 
             }
         }
@@ -258,24 +254,13 @@ public class DepartmentServiceImpl implements DepartmentService {
                 LOGGER.debug("Department deleted successfully" + department.getUserName());
             }
         }
-
         return departmentRepo.save(department);
-    }
-
-    @Override
-    public List<Department> findAllByIsActive(Boolean isActive) throws Exception {
-        // TODO :For Usage
-        // Step1: Get all the account details
-
-        // Step2: Get the usage response for each account from cloudstack
-        return departmentRepo.findAllByIsActive(true, AccountType.USER);
     }
 
     @Override
     public List<Department> findAllFromCSServer() throws Exception {
         List<Department> departmentList = new ArrayList<Department>();
         HashMap<String, String> departmentMap = new HashMap<String, String>();
-        // departmentMap.put("domainid", domainUuid);
         departmentMap.put("listall", "true");
 
         // 1. Get the list of accounts from CS server using CS connector
@@ -284,15 +269,12 @@ public class DepartmentServiceImpl implements DepartmentService {
         JSONObject responseObject = new JSONObject(response).getJSONObject("listaccountsresponse");
         if (responseObject.has("account")) {
             userListJSON = responseObject.getJSONArray("account");
-            // 2. Iterate the json list, convert the single json entity to user
+            // 2. Iterate the json list, convert the single json entity to department
             for (int i = 0, size = userListJSON.length(); i < size; i++) {
-                // 2.1 Call convert by passing JSONObject to Department entity
-                // and
-                // Add the converted Department entity to list
+                // 2.1 Call convert by passing JSONObject to department entity and
+                // Add the converted department entity to list
                 Department department = Department.convert(userListJSON.getJSONObject(i));
                 department.setDomainId(convertEntityService.getDomainId(department.getTransDomainId()));
-                // TODO : Need to get root admin account for role permission so you need to check the department where
-                // our you use.
                 if (!department.getUserName().equalsIgnoreCase("baremetal-system-account")) {
                     departmentList.add(department);
                 }
@@ -321,7 +303,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Department> findDepartmentsByAccountTypesAndActive(List<AccountType> types, Boolean isActive)
+    public List<Department> findByAccountTypesAndActive(List<AccountType> types, Boolean isActive)
             throws Exception {
         return (List<Department>) departmentRepo.findDepartmentsByAccountTypesAndActive(types, isActive);
     }
@@ -337,7 +319,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Department> findDepartmentsByDomainAndAccountTypesAndActive(Long domainId, List<AccountType> types,
+    public List<Department> findByDomainAndAccountTypesAndActive(Long domainId, List<AccountType> types,
             Boolean isActive) throws Exception {
         return (List<Department>) departmentRepo.findDepartmentsByDomainAndAccountTypesAndActive(domainId, types,
                 isActive);

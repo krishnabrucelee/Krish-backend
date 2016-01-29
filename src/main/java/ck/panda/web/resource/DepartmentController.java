@@ -107,19 +107,19 @@ public class DepartmentController extends CRUDController<Department> implements 
     }
 
     /**
-     * Find the list of active departments.
+     * Find the list of active departments based on the domain.
      *
-     * @param id department id.
+     * @param domainId domain id of the department.
      * @return projects project list.
      * @throws Exception error occurs.
      */
     @RequestMapping(value = "search", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected List<Department> getDepartmentListByDomain(@RequestParam("dept") Long id) throws Exception {
+    protected List<Department> getDepartmentListByDomain(@RequestParam("dept") Long domainId) throws Exception {
         List<AccountType> types = new ArrayList<AccountType>();
         types.add(Department.AccountType.USER);
-        return departmentService.findDepartmentsByDomainAndAccountTypesAndActive(id, types, true);
+        return departmentService.findByDomainAndAccountTypesAndActive(domainId, types, true);
     }
 
     /**
