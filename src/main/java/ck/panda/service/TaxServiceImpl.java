@@ -65,7 +65,6 @@ public class TaxServiceImpl implements TaxService {
     @Override
     public void delete(Tax tax) throws Exception {
         taxRepo.delete(tax);
-
     }
 
     @Override
@@ -88,14 +87,10 @@ public class TaxServiceImpl implements TaxService {
         return taxRepo.findAll(pagingAndSorting.toPageRequest());
     }
 
-
     @Override
-    public Tax softDelete(Tax tax) throws Exception {
-        tax.setIsActive(false);
-        tax.setStatus(Tax.Status.DELETED);
-        return taxRepo.save(tax);
+    public List<Tax> findAllByIsActive(Boolean isActive) throws Exception {
+        return taxRepo.findAllByIsActive(isActive);
     }
-
 
     /**
      * Find all the tax with pagination.
