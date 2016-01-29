@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import ck.panda.constants.CloudStackConstants;
+import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.repository.jpa.ComputeOfferingRepository;
@@ -52,32 +55,73 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     @Autowired
     private VirtualMachineService vmService;
 
+    /** Constant for service offering id. */
+    private static final String CS_SERVICE_OFFERING = "serviceoffering";
+
+    /** Constant for bytes read rate. */
+    private static final String CS_BYTES_READ_RATE = "bytesreadrate";
+
+    /** Constant for bytes write rate */
+    private static final String CS_BYTES_WRITE_RATE = "byteswriterate";
+
+    /** Constant for memory */
+    private static final String CS_MEMORY = "memory";
+
+    /** Constant for compute. */
+    private static final String COMPUTE = "compute";
+
+    /** Constant for cpu number. */
+    private static final String CS_CPU_CORE = "cpunumber";
+
+    /** Constant for cpu speed. */
+    private static final String CS_SPEED = "cpuspeed";
+
+    /** Constant for limit cpu use. */
+    private static final String CS_CAPACITY = "limitcpuuse";
+
+    /** Constant for network rate. */
+    private static final String CS_NETWORK_RATE = "networkrate";
+
+    /** Constant for offer ha. */
+    private static final String CS_OFFER_HA = "offerha";
+
+    /** Constant for host tags. */
+    private static final String CS_HOST_TAGS = "hosttags";
+
+    /** Constant for create compute offering .*/
+    private static final String CS_COMPUTEOFFERING = "createserviceofferingresponse";
+
+    /** Constant for update compute offering .*/
+    private static final String CS_UPDATECOMPUTEOFFERING = "updateserviceofferingresponse";
+
+    /** Constant for list compute offering. */
+    private static final String CS_LISTCOMPUTEOFFERING = "listserviceofferingsresponse";
+
     @Override
     public ComputeOffering save(ComputeOffering compute) throws Exception {
 
         if (compute.getIsSyncFlag()) {
             this.validateComputeOffering(compute);
-            Errors errors = validator.rejectIfNullEntity("compute", compute);
+            Errors errors = validator.rejectIfNullEntity(COMPUTE, compute);
             errors = validator.validateEntity(compute, errors);
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-
                 // set server for maintain session with configuration values
                 cscomputeOffering.setServer(configServer.setServer(1L));
                 // create compute offering in ACS and getting response in Json String.
                 String createComputeResponse = cscomputeOffering.createComputeOffering(compute.getName(),
-                        compute.getDisplayText(), "json", addOptionalValues(compute));
+                        compute.getDisplayText(),CloudStackConstants.JSON, addOptionalValues(compute));
                 // convert json string to json object
                 JSONObject createComputeResponseJSON = new JSONObject(createComputeResponse)
-                        .getJSONObject("createserviceofferingresponse");
+                        .getJSONObject(CS_COMPUTEOFFERING);
 
-                if (createComputeResponseJSON.has("errorcode")) {
-                    errors = this.validateEvent(errors, createComputeResponseJSON.getString("errortext"));
+                if (createComputeResponseJSON.has(CloudStackConstants.CS_ERROR_CODE)) {
+                    errors = this.validateEvent(errors, createComputeResponseJSON.getString(CloudStackConstants.CS_ERROR_TEXT));
                     throw new ApplicationException(errors);
                 }
-                JSONObject serviceOffering = createComputeResponseJSON.getJSONObject("serviceoffering");
-                compute.setUuid((String) serviceOffering.get("id"));
+                JSONObject serviceOffering = createComputeResponseJSON.getJSONObject(CS_SERVICE_OFFERING );
+                compute.setUuid((String) serviceOffering.get(CloudStackConstants.CS_ID));
                 compute.setIsActive(true);
                 return computeRepo.save(compute);
             }
@@ -91,7 +135,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     public ComputeOffering update(ComputeOffering compute) throws Exception {
         if (compute.getIsSyncFlag()) {
             this.validateComputeOffering(compute);
-            Errors errors = validator.rejectIfNullEntity("compute", compute);
+            Errors errors = validator.rejectIfNullEntity(COMPUTE, compute);
             errors = validator.validateEntity(compute, errors);
 
             if (errors.hasErrors()) {
@@ -101,10 +145,10 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
                 cscomputeOffering.setServer(configServer.setServer(1L));
                 // update compute offering in ACS and getting response in Json String.
                 String editComputeResponse = cscomputeOffering.updateComputeOffering(compute.getUuid(),
-                        compute.getName(), compute.getDisplayText(), "json", hs);
+                        compute.getName(), compute.getDisplayText(), CloudStackConstants.JSON, hs);
                 // convert json string to json object
                 JSONObject editComputeJSON = new JSONObject(editComputeResponse)
-                        .getJSONObject("updateserviceofferingresponse").getJSONObject("serviceoffering");
+                        .getJSONObject(CS_UPDATECOMPUTEOFFERING).getJSONObject(CS_SERVICE_OFFERING);
             }
         }
        return computeRepo.save(compute);
@@ -123,7 +167,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     @Override
     public ComputeOffering softDelete(ComputeOffering compute) throws Exception {
         if (compute.getIsSyncFlag()) {
-            Errors errors = validator.rejectIfNullEntity("compute", compute);
+            Errors errors = validator.rejectIfNullEntity(COMPUTE, compute);
             errors = validator.validateEntity(compute, errors);
             // set server for finding value in configuration
             cscomputeOffering.setServer(configServer.setServer(1L));
@@ -132,14 +176,14 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
                     VmInstance.Status.Expunging);
             if (vmResponse.size() != 0) {
                 errors.addGlobalError(
-                        "before.deleting.a.plan.please.delete.all.the.instance.associated.with.this.plan.and.try.again");
+                        "error.before.deleting.a.plan.please.delete.all.the.instance.associated.with.this.plan.and.try.again");
             }
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
                 compute.setIsActive(false);
                 // update compute offering in ACS .
-                cscomputeOffering.deleteComputeOffering(compute.getUuid(), "json");
+                cscomputeOffering.deleteComputeOffering(compute.getUuid(),CloudStackConstants.JSON);
             }
         }
         return computeRepo.save(compute);
@@ -183,22 +227,22 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     public HashMap<String, String> addOptionalValues(ComputeOffering compute) throws Exception {
         HashMap<String, String> computeMap = new HashMap<String, String>();
 
-         CloudStackOptionalUtil.updateOptionalStringValue("tags", compute.getStorageTags(), computeMap);
-         CloudStackOptionalUtil.updateOptionalStringValue("hosttags", compute.getStorageTags(), computeMap);
-         CloudStackOptionalUtil.updateOptionalBooleanValue("limitcpuuse", compute.getCpuCapacity(), computeMap);
-         CloudStackOptionalUtil.updateOptionalIntegerValue("cpuspeed", compute.getClockSpeed(), computeMap);
-         CloudStackOptionalUtil.updateOptionalIntegerValue("cpunumber", compute.getNumberOfCores(), computeMap);
-         CloudStackOptionalUtil.updateOptionalIntegerValue("memory", compute.getMemory(), computeMap);
-         CloudStackOptionalUtil.updateOptionalIntegerValue("bytesreadrate", compute.getDiskBytesReadRate(), computeMap);
-         CloudStackOptionalUtil.updateOptionalIntegerValue("byteswriterate", compute.getDiskBytesWriteRate(), computeMap);
-         CloudStackOptionalUtil.updateOptionalIntegerValue("iopsreadrate", compute.getDiskIopsReadRate(), computeMap);
-         CloudStackOptionalUtil.updateOptionalIntegerValue("iopswriterate", compute.getDiskIopsWriteRate(), computeMap);
-         CloudStackOptionalUtil.updateOptionalBooleanValue("customizediops", compute.getCustomizedIops(), computeMap);
-         CloudStackOptionalUtil.updateOptionalBooleanValue("customized", compute.getCustomized(), computeMap);
-         CloudStackOptionalUtil.updateOptionalIntegerValue("miniops", compute.getMinIops(), computeMap);
-         CloudStackOptionalUtil.updateOptionalIntegerValue("maxiops", compute.getMaxIops(), computeMap);
-         CloudStackOptionalUtil.updateOptionalIntegerValue("networkrate", compute.getNetworkRate(), computeMap);
-         CloudStackOptionalUtil.updateOptionalBooleanValue("offerha", compute.getIsHighAvailabilityEnabled(), computeMap);
+         CloudStackOptionalUtil.updateOptionalStringValue(CloudStackConstants.CS_TAGS, compute.getStorageTags(), computeMap);
+         CloudStackOptionalUtil.updateOptionalStringValue(CS_HOST_TAGS, compute.getStorageTags(), computeMap);
+         CloudStackOptionalUtil.updateOptionalBooleanValue(CS_CAPACITY, compute.getCpuCapacity(), computeMap);
+         CloudStackOptionalUtil.updateOptionalIntegerValue(CS_SPEED, compute.getClockSpeed(), computeMap);
+         CloudStackOptionalUtil.updateOptionalIntegerValue(CS_CPU_CORE, compute.getNumberOfCores(), computeMap);
+         CloudStackOptionalUtil.updateOptionalIntegerValue(CS_MEMORY, compute.getMemory(), computeMap);
+         CloudStackOptionalUtil.updateOptionalIntegerValue(CS_BYTES_READ_RATE, compute.getDiskBytesReadRate(), computeMap);
+         CloudStackOptionalUtil.updateOptionalIntegerValue(CS_BYTES_WRITE_RATE, compute.getDiskBytesWriteRate(), computeMap);
+         CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_IOPS_READ, compute.getDiskIopsReadRate(), computeMap);
+         CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_IOPS_WRITE, compute.getDiskIopsWriteRate(), computeMap);
+         CloudStackOptionalUtil.updateOptionalBooleanValue(CloudStackConstants.CS_CUSTOM_IOPS, compute.getCustomizedIops(), computeMap);
+         CloudStackOptionalUtil.updateOptionalBooleanValue(CloudStackConstants.CS_CUSTOM_OFFER, compute.getCustomized(), computeMap);
+         CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_MIN_IOPS, compute.getMinIops(), computeMap);
+         CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_MAX_IOPS, compute.getMaxIops(), computeMap);
+         CloudStackOptionalUtil.updateOptionalIntegerValue(CS_NETWORK_RATE, compute.getNetworkRate(), computeMap);
+         CloudStackOptionalUtil.updateOptionalBooleanValue(CS_OFFER_HA, compute.getIsHighAvailabilityEnabled(), computeMap);
 
         return computeMap;
     }
@@ -208,13 +252,13 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
 
         List<ComputeOffering> computeOfferingList = new ArrayList<ComputeOffering>();
         HashMap<String, String> computeOfferingMap = new HashMap<String, String>();
-        computeOfferingMap.put("listall", "true");
+        computeOfferingMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
         // 1. Get the list of ComputeOffering from CS server using CS connector
-        String response = cscomputeOffering.listComputeOfferings("json", computeOfferingMap);
+        String response = cscomputeOffering.listComputeOfferings(CloudStackConstants.JSON, computeOfferingMap);
         JSONArray computeOfferingListJSON = null;
-        JSONObject responseObject = new JSONObject(response).getJSONObject("listserviceofferingsresponse");
-        if (responseObject.has("serviceoffering")) {
-            computeOfferingListJSON = responseObject.getJSONArray("serviceoffering");
+        JSONObject responseObject = new JSONObject(response).getJSONObject(CS_LISTCOMPUTEOFFERING);
+        if (responseObject.has(CS_SERVICE_OFFERING)) {
+            computeOfferingListJSON = responseObject.getJSONArray(CS_SERVICE_OFFERING);
             // 2. Iterate the json list, convert the single json entity to
             // domain
             for (int i = 0, size = computeOfferingListJSON.length(); i < size; i++) {
@@ -249,11 +293,11 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
      * @throws Exception error occurs
      */
     private void validateComputeOffering(ComputeOffering compute) throws Exception {
-        Errors errors = validator.rejectIfNullEntity("computes", compute);
+        Errors errors = validator.rejectIfNullEntity(COMPUTE, compute);
         errors = validator.validateEntity(compute, errors);
         ComputeOffering computeOffering = computeRepo.findNameAndIsActive(compute.getName(), true);
         if (computeOffering != null && compute.getId() != computeOffering.getId()) {
-            errors.addFieldError("name", "computeoffering.already.exist");
+            errors.addFieldError(GenericConstants.NAME, "error.computeoffering.already.exist");
         }
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);

@@ -29,7 +29,7 @@ public interface ComputeOfferingRepository extends PagingAndSortingRepository<Co
      * @param isActive get the snapshot list based on active/inactive status.
      * @return list of compute offerings.
      */
-    @Query(value = "SELECT compute FROM ComputeOffering compute WHERE compute.isActive =:isActive")
+    @Query(value = "SELECT compute FROM ComputeOffering compute WHERE compute.isActive = :isActive")
     Page<ComputeOffering> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
 
     /**
@@ -38,7 +38,7 @@ public interface ComputeOfferingRepository extends PagingAndSortingRepository<Co
      * @param name of compute offering.
      * @return compute offering.
      */
-    @Query(value = "SELECT compute FROM ComputeOffering compute WHERE compute.name =:name AND compute.isActive =:isActive")
+    @Query(value = "SELECT compute FROM ComputeOffering compute WHERE compute.name = :name AND compute.isActive = :isActive")
     ComputeOffering findNameAndIsActive(@Param("name") String name, @Param("isActive") Boolean isActive);
 
     /**
@@ -47,6 +47,6 @@ public interface ComputeOfferingRepository extends PagingAndSortingRepository<Co
      * @param isActive offer.
      * @return compute offering.
      */
-    @Query(value = "SELECT compute FROM ComputeOffering compute WHERE compute.isActive =:isActive")
+    @Query(value = "SELECT compute FROM ComputeOffering compute WHERE compute.isActive = :isActive")
     List<ComputeOffering> findByIsActive(@Param("isActive") Boolean isActive);
 }
