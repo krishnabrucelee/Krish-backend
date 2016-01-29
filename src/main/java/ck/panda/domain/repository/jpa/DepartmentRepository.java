@@ -30,7 +30,7 @@ public interface DepartmentRepository extends PagingAndSortingRepository<Departm
             @Param("isActive") Boolean isActive);
 
     /**
-     * Find all the active or inactive departments with pagination.
+     * Find all the departments with pagination based on the active/inactive state and type.
      *
      * @param pageable to get the list with pagination.
      * @param type for account type.
@@ -52,7 +52,7 @@ public interface DepartmentRepository extends PagingAndSortingRepository<Departm
     List<Department> findAllByIsActive(@Param("isActive") Boolean isActive, @Param("type") AccountType type);
 
     /**
-     * Find the department by uuid.
+     * Find the department by uuid and active/inactive status.
      *
      * @param uuid department uuid.
      * @param isActive get the department list based on active/inactive status.
@@ -62,7 +62,7 @@ public interface DepartmentRepository extends PagingAndSortingRepository<Departm
     Department findByUuidAndIsActive(@Param("uuid") String uuid, @Param("isActive") Boolean isActive);
 
     /**
-     * Find department by domain id and isActive status.
+     * Find departments by domain id and isActive status.
      *
      * @param id domain id
      * @param isActive get the department list based on active/inactive status.
@@ -72,7 +72,7 @@ public interface DepartmentRepository extends PagingAndSortingRepository<Departm
     List<Department> findDomainAndIsActive(@Param("domainId") Long id, @Param("isActive") Boolean isActive);
 
     /**
-     * Find the department by Domain Id and IsActive.
+     * Find all the departments based on the active/inactive state and type.
      *
      * @param domainId for each domain.
      * @param type for account.
@@ -98,7 +98,7 @@ public interface DepartmentRepository extends PagingAndSortingRepository<Departm
             @Param("isActive") Boolean isActive);
 
     /**
-     * Find the department by Domain Id and IsActive.
+     * Find all the departments based on the domain id, active/inactive state and type.
      *
      * @param domainId for each domain.
      * @param isActive get the department list based on active/inactive status.
@@ -119,7 +119,7 @@ public interface DepartmentRepository extends PagingAndSortingRepository<Departm
      * @return Department list.
      */
     @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.isActive =:isActive AND dpt.type in (:types)")
-    List<Department> findDepartmentsByAccountTypesAndActive(@Param("types") List<AccountType> types,
+    List<Department> findByAccountTypesAndActive(@Param("types") List<AccountType> types,
             @Param("isActive") Boolean isActive);
 
     /**
@@ -132,6 +132,6 @@ public interface DepartmentRepository extends PagingAndSortingRepository<Departm
      */
     @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.domainId =:domainId AND dpt.isActive =:isActive "
             + "AND dpt.type in (:types)")
-    List<Department> findDepartmentsByDomainAndAccountTypesAndActive(@Param("domainId") Long domainId,
+    List<Department> findByDomainAndAccountTypesAndActive(@Param("domainId") Long domainId,
             @Param("types") List<AccountType> types, @Param("isActive") Boolean isActive);
 }

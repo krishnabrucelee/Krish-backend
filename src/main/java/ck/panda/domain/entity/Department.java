@@ -74,11 +74,11 @@ public class Department implements Serializable {
     @Transient
     private Boolean syncFlag;
 
-    /** User type of the user. */
+    /** Type of the department. */
     @Column(name = "account_type")
     private AccountType type;
 
-    /** Check whether department is in active state or in active state. */
+    /** Check whether department is active state or in active state. */
     @Column(name = "is_active")
     private Boolean isActive;
 
