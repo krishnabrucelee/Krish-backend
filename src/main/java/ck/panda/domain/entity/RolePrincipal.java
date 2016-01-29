@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.DateConvertUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,48 @@ public class RolePrincipal {
 
     /** Logger constant. */
     private static final Logger LOGGER = LoggerFactory.getLogger(RolePrincipal.class);
+
+    /** Login user token. */
+    public static final String LOGIN_USER_TOKEN = "token";
+
+    /** Login user name. */
+    public static final String LOGIN_USER_NAME = "userName";
+
+    /** Login user type. */
+    public static final String LOGIN_USER_TYPE = "type";
+
+    /** Login user domain name. */
+    public static final String LOGIN_USER_DOMAIN_NAME = "domainName";
+
+    /** Login user domain id. */
+    public static final String LOGIN_USER_DOMAIN_ID = "domainId";
+
+    /** Login user department id. */
+    public static final String LOGIN_USER_DEPARTMENT_ID = "departmentId";
+
+    /** Build number. */
+    public static final String BUILD_NUMBER = "buildNumber";
+
+    /** Login time . */
+    public static final String LOGIN_TIME = "loginTime";
+
+    /** Login time zone . */
+    public static final String TIME_ZONE = "timeZone";
+
+    /** Login user role permission action. */
+    public static final String ROLE_ACTION = "action";
+
+    /** Login user role permission action key. */
+    public static final String ROLE_ACTION_KEY = "action_key";
+
+    /** Login user role permission description. */
+    public static final String ROLE_DESCRIPTION = "description";
+
+    /** Login user role permission status. */
+    public static final String ROLE_STATUS = "isActive";
+
+    /** Login user role permission list. */
+    public static final String ROLE_PERMISSION_LIST = "permissionList";
 
     /** User name attributes. */
     private String userName;
@@ -59,29 +102,29 @@ public class RolePrincipal {
         JSONObject jsonObject = new JSONObject();
         try {
             TimeZone timeZone = Calendar.getInstance().getTimeZone();
-            jsonObject.put("token", token.getDetails().toString());
-            jsonObject.put("id", user.getId());
-            jsonObject.put("userName", userName);
-            jsonObject.put("type", user.getType());
-            jsonObject.put("domainName", user.getDomain().getName());
-            jsonObject.put("domainId", user.getDomain().getId());
-            jsonObject.put("departmentId", user.getDepartment().getId());
-            jsonObject.put("buildNumber", buildVersion);
-            jsonObject.put("loginTime", DateConvertUtil.getTimestamp());
-            jsonObject.put("timeZone", timeZone.getID());
+            jsonObject.put(LOGIN_USER_TOKEN, token.getDetails().toString());
+            jsonObject.put(CloudStackConstants.CS_ID, user.getId());
+            jsonObject.put(LOGIN_USER_NAME, userName);
+            jsonObject.put(LOGIN_USER_TYPE, user.getType());
+            jsonObject.put(LOGIN_USER_DOMAIN_NAME, user.getDomain().getName());
+            jsonObject.put(LOGIN_USER_DOMAIN_ID, user.getDomain().getId());
+            jsonObject.put(LOGIN_USER_DEPARTMENT_ID, user.getDepartment().getId());
+            jsonObject.put(BUILD_NUMBER, buildVersion);
+            jsonObject.put(LOGIN_TIME, DateConvertUtil.getTimestamp());
+            jsonObject.put(TIME_ZONE, timeZone.getID());
             JSONArray jsonArray = new JSONArray();
             Map<String, Object> hashList = new HashMap<String, Object>();
             for (int i = 0; i < role.getPermissionList().size(); i++) {
                 Permission permission = role.getPermissionList().get(i);
-                hashList.put("id", permission.getId());
-                hashList.put("action", permission.getAction());
-                hashList.put("action_key", permission.getActionKey());
-                hashList.put("description", permission.getDescription());
-                hashList.put("isActive", permission.getIsActive());
+                hashList.put(CloudStackConstants.CS_ID, permission.getId());
+                hashList.put(ROLE_ACTION, permission.getAction());
+                hashList.put(ROLE_ACTION_KEY, permission.getActionKey());
+                hashList.put(ROLE_DESCRIPTION, permission.getDescription());
+                hashList.put(ROLE_STATUS, permission.getIsActive());
                 jsonArray.put(hashList);
                 hashList = new HashMap<String, Object>();
             }
-            jsonObject.put("permissionList", jsonArray);
+            jsonObject.put(ROLE_PERMISSION_LIST, jsonArray);
         } catch (Exception e) {
             LOGGER.error("ERROR AT GETTING LOGIN USER DETAILS");
         }
