@@ -175,52 +175,6 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
                 storage.getDiskMaxIops().intValue(), stoarageMap);
         CloudStackOptionalUtil.updateOptionalStringValue(CloudStackConstants.CS_DOMAIN_ID,
                 convertEntityService.getDomainById(storage.getDomainId()).getUuid(), stoarageMap);
-
-//        if (storage.getStorageTags() != null) {
-//            stoarageMap.put(CloudStackConstants.CS_TAGS, storage.getStorageTags().toString());
-//        }
-//        if (storage.getName() != null) {
-//            stoarageMap.put(CloudStackConstants.CS_NAME, storage.getName());
-//        }
-//        if (storage.getDescription() != null) {
-//            stoarageMap.put(CloudStackConstants.CS_DISPLAY_TEXT, storage.getDescription());
-//        }
-//        if (storage.getIsPublic() != null) {
-//            stoarageMap.put(CloudStackConstants.CS_PUBLIC, storage.getIsPublic().toString());
-//        }
-//        if (storage.getIsCustomDisk() != null) {
-//            stoarageMap.put(CloudStackConstants.CS_CUSTOM_OFFER, storage.getIsCustomDisk().toString());
-//        }
-//        if (storage.getStorageType() != null) {
-//            stoarageMap.put(CloudStackConstants.CS_STORAGE_TYPE, storage.getStorageType().toString());
-//        }
-//        if (storage.getIsCustomizedIops() != null) {
-//            stoarageMap.put(CloudStackConstants.CS_CUSTOM_IOPS, storage.getIsCustomizedIops().toString());
-//        }
-//        if (storage.getDiskSize() != null) {
-//            stoarageMap.put(CloudStackConstants.CS_DISK_SIZE, storage.getDiskSize().toString());
-//        }
-//        if (storage.getDiskBytesReadRate() != null) {
-//            stoarageMap.put(CloudStackConstants.CS_BYTES_READ, storage.getDiskBytesReadRate().toString());
-//        }
-//        if (storage.getDiskBytesWriteRate() != null) {
-//            stoarageMap.put(CloudStackConstants.CS_BYTES_WRITE, storage.getDiskBytesWriteRate().toString());
-//        }
-//        if (storage.getDiskIopsReadRate() != null) {
-//            stoarageMap.put(CloudStackConstants.CS_IOPS_READ, storage.getDiskIopsReadRate().toString());
-//        }
-//        if (storage.getDiskIopsWriteRate() != null) {
-//            stoarageMap.put(CloudStackConstants.CS_IOPS_WRITE, storage.getDiskIopsWriteRate().toString());
-//        }
-//        if (storage.getDiskMaxIops() != null) {
-//            stoarageMap.put(CloudStackConstants.CS_MAX_IOPS, storage.getDiskMaxIops().toString());
-//        }
-//        if (storage.getDiskMinIops() != null) {
-//            stoarageMap.put(CloudStackConstants.CS_MIN_IOPS, storage.getDiskMinIops().toString());
-//        }
-//        if (storage.getDomainId() != null) {
-//            stoarageMap.put(CloudStackConstants.CS_DOMAIN_ID, convertEntityService.getDomainById(storage.getDomainId()).getUuid());
-//        }
         return stoarageMap;
     }
 
