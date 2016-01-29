@@ -21,7 +21,7 @@ public class RolePrincipal {
     private static final Logger LOGGER = LoggerFactory.getLogger(RolePrincipal.class);
 
     /** User name attributes. */
-    private String username;
+    private String userName;
 
     /** User role attributes. */
     private Role role;
@@ -42,13 +42,13 @@ public class RolePrincipal {
      * Parameterized constructor.
      *
      * @param user to set
-     * @param username to set
+     * @param userName to set
      * @param role to set
      * @param buildVersion to set
      */
-    public RolePrincipal(User user, String username, Role role, String buildVersion) {
+    public RolePrincipal(User user, String userName, Role role, String buildVersion) {
         this.user = user;
-        this.username = username;
+        this.userName = userName;
         this.role = role;
         this.buildVersion = buildVersion;
     }
@@ -58,17 +58,17 @@ public class RolePrincipal {
         Authentication token = SecurityContextHolder.getContext().getAuthentication();
         JSONObject jsonObject = new JSONObject();
         try {
-            TimeZone tz = Calendar.getInstance().getTimeZone();
+            TimeZone timeZone = Calendar.getInstance().getTimeZone();
             jsonObject.put("token", token.getDetails().toString());
             jsonObject.put("id", user.getId());
-            jsonObject.put("userName", username);
+            jsonObject.put("userName", userName);
             jsonObject.put("type", user.getType());
             jsonObject.put("domainName", user.getDomain().getName());
             jsonObject.put("domainId", user.getDomain().getId());
             jsonObject.put("departmentId", user.getDepartment().getId());
             jsonObject.put("buildNumber", buildVersion);
             jsonObject.put("loginTime", DateConvertUtil.getTimestamp());
-            jsonObject.put("timeZone", tz.getID());
+            jsonObject.put("timeZone", timeZone.getID());
             JSONArray jsonArray = new JSONArray();
             Map<String, Object> hashList = new HashMap<String, Object>();
             for (int i = 0; i < role.getPermissionList().size(); i++) {

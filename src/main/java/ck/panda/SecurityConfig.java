@@ -14,6 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import ck.panda.constants.GenericConstants;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.infrastructure.externalwebservice.SomeExternalServiceAuthenticator;
 import ck.panda.util.infrastructure.security.AuthenticationFilter;
@@ -32,7 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    /** Admin role. */
+    /** Root admin role. */
     @Value("${backend.admin.role}")
     private String backendAdminRole;
 
@@ -40,7 +41,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private DatabaseAuthenticationManager databaseAuthenticationManager;
 
-    /** Autowired TokenDetails. */
+    /** Token details reference. */
     @Autowired
     private TokenDetails userTokenDetails;
 
@@ -49,17 +50,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests().antMatchers(actuatorEndpoints()).hasRole(backendAdminRole).anyRequest()
-                .authenticated().and().formLogin().loginPage("/login").permitAll().and().logout()
-                .logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessUrl("/login?out=1")
-                .deleteCookies("JSESSIONID").invalidateHttpSession(true).and().anonymous().disable().exceptionHandling()
-                .authenticationEntryPoint(unauthorizedEntryPoint());
+                .authenticated().and().formLogin().loginPage(GenericConstants.LOGIN_URL).permitAll().and().logout()
+                .logoutRequestMatcher(new AntPathRequestMatcher(GenericConstants.LOGOUT_URL))
+                .logoutSuccessUrl(GenericConstants.LOGIN_OUT_URL)
+                .deleteCookies(GenericConstants.COOKIES_NAME).invalidateHttpSession(true).and().anonymous().disable()
+                .exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint());
 
         http.addFilterBefore(new AuthenticationFilter(databaseAuthenticationManager, userTokenDetails),
                 BasicAuthenticationFilter.class);
     }
 
     /**
-     * Actuator management endpoints.
+     * Actuator management end points.
      *
      * @return String array
      */
@@ -105,9 +107,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     /**
-     * Unauthorized entrypoint.
+     * Unauthorized entry point.
      *
-     * @return AuthenticationEntryPoint to set
+     * @return AuthenticationEntryPoint
      */
     @Bean
     public AuthenticationEntryPoint unauthorizedEntryPoint() {

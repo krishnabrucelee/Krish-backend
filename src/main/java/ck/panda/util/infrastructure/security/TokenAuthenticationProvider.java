@@ -34,15 +34,15 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         Optional<String> token = (Optional) authentication.getPrincipal();
         if (!token.isPresent() || token.get().isEmpty()) {
-            throw new BadCredentialsException("Your session has expired. Please log-in again");
+            throw new BadCredentialsException("error.session.expired");
         }
         if (!tokenService.contains(token.get())) {
-            throw new BadCredentialsException("Your session has expired. Please log-in again");
+            throw new BadCredentialsException("error.session.expired");
         }
         try {
             authentication = tokenService.retrieve(token.get());
         } catch (Exception e) {
-            LOGGER.error("ERROR AT TOKEN AUTHENTICATION");
+            LOGGER.error("Error at token authentication");
         }
         return authentication;
     }
