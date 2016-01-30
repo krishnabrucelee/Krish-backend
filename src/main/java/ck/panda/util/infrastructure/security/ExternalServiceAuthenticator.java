@@ -11,12 +11,12 @@ public interface ExternalServiceAuthenticator {
     /**
      * Authenticate.
      *
-     * @param username to set
-     * @param rolename to set
+     * @param userName to set
+     * @param roleName to set
      * @param role to set
      * @param user to set
-     * @param buildNumber build number.
-     * @return token
+     * @param buildNumber to set.
+     * @return authenticated token
      */
-    AuthenticationWithToken authenticate(String username, String rolename, Role role, User user, String buildNumber);
+    AuthenticationWithToken authenticate(String userName, String roleName, Role role, User user, String buildNumber);
 }

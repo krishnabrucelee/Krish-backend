@@ -3,8 +3,11 @@
  */
 package ck.panda.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitProject;
+import ck.panda.domain.entity.ResourceLimitProject.ResourceType;
 import ck.panda.domain.repository.jpa.ResourceLimitProjectRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackResourceLimitService;
@@ -56,6 +60,10 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
     /** Resource limit domain service reference. */
     @Autowired
     private ResourceLimitDepartmentService resourceLimitDepartmentService;
+
+    /** Reference of the convert entity service. */
+    @Autowired
+    private ConvertEntityService convertEntityService;
 
     @Override
     public ResourceLimitProject save(ResourceLimitProject resource) throws Exception {
@@ -136,6 +144,29 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
             optional.put("max", resource.getMax().toString());
         }
         return optional;
+    }
+
+    @Override
+    public List<ResourceLimitProject> findAllFromCSServerProject(String projectId) throws Exception {
+        List<ResourceLimitProject> resourceList = new ArrayList<ResourceLimitProject>();
+        HashMap<String, String> resourceMap = new HashMap<String, String>();
+        resourceMap.put("projectid", projectId);
+        // 1. Get the list of ResourceLimit from CS server using CS connector
+        String response = csResourceLimitService.listResourceLimits("json", resourceMap);
+        JSONArray resourceListJSON = new JSONObject(response).getJSONObject("listresourcelimitsresponse")
+                .getJSONArray("resourcelimit");
+        // 2. Iterate the json list, convert the single json entity to
+        // Resource limit
+        for (int i = 0, size = resourceListJSON.length(); i < size; i++) {
+            // 2.1 Call convert by passing JSONObject to StorageOffering entity
+            // and Add the converted Resource limit entity to list
+            ResourceLimitProject resource = ResourceLimitProject.convert(resourceListJSON.getJSONObject(i));
+            resource.setProjectId(convertEntityService.getProject(resource.getTransProjectId()).getId());
+            resource.setUniqueSeperator(
+                    resource.getTransProjectId() + "-" + ResourceType.values()[(resource.getTransResourceType())]);
+            resourceList.add(resource);
+        }
+        return resourceList;
     }
 
     /**
