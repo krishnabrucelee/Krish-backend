@@ -234,4 +234,6 @@ public class EventTypes {
     /** VM ADD APPLICATION . */
     public static final String EVENT_ADD_APPLICATION = "ADD.APPLICATION";
 
+    /** User Create Events. */
+    public static final String EVENT_USER_CREATE = "USER.CREATE";
 }

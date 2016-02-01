@@ -87,11 +87,14 @@ public class ActionListener implements MessageListener {
         switch (eventObject.getEventStart()) {
         case EventTypes.EVENT_USER:
             LOGGER.debug("User sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
-            if (!eventObject.getEvent().equals(EventTypes.EVENT_USER_LOGIN)
+            if (eventObject.getEvent().equals(EventTypes.EVENT_USER_LOGIN)
                     || eventObject.getEvent().equals(EventTypes.EVENT_USER_LOGOUT)) {
                 LOGGER.debug("Account sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
             } else {
                 syncService.syncUser();
+                if(eventObject.getEvent().equals(EventTypes.EVENT_USER_CREATE)) {
+                    syncService.syncUpdateUserRole();
+                }
             }
             break;
         case EventTypes.EVENT_REGISTER_SSH:
