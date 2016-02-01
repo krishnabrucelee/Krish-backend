@@ -322,7 +322,7 @@ public class DomainServiceImpl implements DomainService {
             List<Department> department = deptService.findDomainAndIsActive(domain.getId(), true);
             if (department.size() != 0) {
                 errors.addGlobalError(
-                        "cannot.delete.domain.before.deleting.please.make.sure.all.users.and.sub.domains.have.been.removed.from.the.domain");
+                        "cannot.delete.domain");
             }
         }
         if (errors.hasErrors()) {
