@@ -28,6 +28,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -502,10 +503,10 @@ public class SSHKey implements Serializable {
     public static SSHKey convert(JSONObject jsonObject) throws Exception {
         SSHKey sshkey = new SSHKey();
         sshkey.setIsSyncFlag(false);
-        sshkey.setName(JsonUtil.getStringValue(jsonObject, "name"));
-        sshkey.setFingerPrint(JsonUtil.getStringValue(jsonObject, "fingerprint"));
-        sshkey.setTransDepartment(JsonUtil.getStringValue(jsonObject, "account"));
-        sshkey.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
+        sshkey.setName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_NAME));
+        sshkey.setFingerPrint(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_FINGER_PRINT));
+        sshkey.setTransDepartment(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ACCOUNT));
+        sshkey.setTransDomainId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DOMAIN_ID));
         sshkey.setIsActive(true);
         return sshkey;
     }

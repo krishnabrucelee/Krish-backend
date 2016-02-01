@@ -325,7 +325,15 @@ public class VmInstance implements Serializable {
     @Column(name = "disk_size")
     private Long diskSize;
 
-    /** The maximum iops of the disk offering. */
+    /** Compute offering Minimum input output per second. */
+    @Column(name = "compute_min_iops")
+    private Integer computeMinIops;
+
+    /** Compute offering maximum input output per second. */
+    @Column(name = "compute_max_iops")
+    private Integer computeMaxIops;
+
+     /** The maximum iops of the disk offering. */
     @Column(name = "max_iops")
     private Long diskMaxIops;
 
@@ -1850,6 +1858,42 @@ public class VmInstance implements Serializable {
      */
     public void setTransOwnerId(String transOwnerId) {
         this.transOwnerId = transOwnerId;
+    }
+
+    /**
+     * Get the  compute offering min iops.
+     *
+     * @return the computeMinIops
+     */
+    public Integer getComputeMinIops() {
+        return computeMinIops;
+    }
+
+    /**
+     * Set the  compute offering min iops.
+     *
+     * @param computeMinIops  to set
+     */
+    public void setComputeMinIops(Integer computeMinIops) {
+        this.computeMinIops = computeMinIops;
+    }
+
+    /**
+     * Get the compute offering max iops.
+     *
+     * @return the computeMaxIops
+     */
+    public Integer getComputeMaxIops() {
+        return computeMaxIops;
+    }
+
+    /**
+     * Set the compute offering max iops.
+     *
+     * @param computeMaxIops  to set
+     */
+    public void setComputeMaxIops(Integer computeMaxIops) {
+        this.computeMaxIops = computeMaxIops;
     }
 
     @Override
