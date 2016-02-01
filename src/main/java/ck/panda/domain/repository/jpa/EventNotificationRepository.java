@@ -5,32 +5,29 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
-import ck.panda.domain.entity.Pod;
-import ck.panda.domain.entity.VmIpaddress;
+import ck.panda.domain.entity.Event;
 
 /**
- * Jpa Repository for Pod entity.
- *
+ * Jpa Repository for Event entity.
  */
 @Service
-public interface EventNotificationRepository extends PagingAndSortingRepository<VmIpaddress, Long> {
+public interface EventNotificationRepository extends PagingAndSortingRepository<Event, Long> {
 
     /**
-     * Find VmIpaddress by id.
+     * Find Event by id.
      *
-     * @param id Network id.
+     * @param id event id.
      * @return id
      */
-    @Query(value = "select net from VmIpaddress net where net.id LIKE :id ")
-    VmIpaddress findById(@Param("id") Long id);
+    @Query(value = "SELECT event FROM Event event WHERE event.id LIKE :id ")
+    Event findById(@Param("id") Long id);
 
     /**
-     * Get the vm ip address  based on the uuid.
+     * Get event based on the uuid.
      *
-     * @param uuid of the vm ip address.
-     * @return vm ipaddress.
+     * @param uuid of the event.
+     * @return event.
      */
-    @Query(value = "select net from VmIpaddress net where net.uuid = :uuid")
-    VmIpaddress findByUUID(@Param("uuid") String uuid);
-
+    @Query(value = "SELECT event FROM VmIpaddress Event event WHERE event.uuid = :uuid")
+    Event findByUUID(@Param("uuid") String uuid);
 }

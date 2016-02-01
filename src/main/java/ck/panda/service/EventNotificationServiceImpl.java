@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
 import ck.panda.domain.entity.Event;
 import ck.panda.domain.entity.Event.EventType;
 import ck.panda.domain.entity.Event.Status;
@@ -123,6 +122,4 @@ public class EventNotificationServiceImpl implements EventNotificationService {
         // TODO Auto-generated method stub
         return null;
     }
-
-
 }

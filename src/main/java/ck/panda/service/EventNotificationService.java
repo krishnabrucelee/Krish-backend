@@ -9,8 +9,7 @@ import ck.panda.domain.entity.User;
 import ck.panda.util.domain.CRUDService;
 
 /**
- * Service interface for VmIpaddress entity.
- *
+ * Service interface for VmIpaddress entity. *
  */
 @Service
 public interface EventNotificationService extends CRUDService<Event> {
@@ -36,7 +35,7 @@ public interface EventNotificationService extends CRUDService<Event> {
     /**
      * Find event by job id.
      *
-     * @param jobId  job id of event.
+     * @param jobId job id of event.
      * @param status status of event.
      * @return events.
      * @throws Exception if error occurs.
@@ -86,15 +85,15 @@ public interface EventNotificationService extends CRUDService<Event> {
      * @return event.
      * @throws Exception unhandled errors.
      */
-    Event findByUserAndEventAndJobIdAndState(User owner, String eventName, String jobId, Status status) throws Exception;
+    Event findByUserAndEventAndJobIdAndState(User owner, String eventName, String jobId, Status status)
+            throws Exception;
 
     /**
-     * Soft delete for vm Ip address
+     * Soft delete for vm Ip address.
      *
      * @param vmIpaddress object.
      * @return vm Ip address.
      * @throws Exception if error occurs.
      */
     Event softDelete(Event event) throws Exception;
-
 }
