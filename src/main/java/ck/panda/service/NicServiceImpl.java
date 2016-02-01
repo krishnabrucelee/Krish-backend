@@ -77,9 +77,6 @@ public class NicServiceImpl implements NicService {
     @Autowired
     private SyncService sync;
 
-    /** Constant for nic object. */
-    public static final String NIC = "nics";
-
     /** Constant for add ip to nic. */
     public static final String CS_ADD_IPTONIC = "addiptovmnicresponse";
 
@@ -301,7 +298,7 @@ public class NicServiceImpl implements NicService {
     public Nic softDelete(Nic nic) throws Exception {
         nic.setIsActive(false);
         if (nic.getSyncFlag()) {
-            Errors errors = validator.rejectIfNullEntity(NIC, nic);
+            Errors errors = validator.rejectIfNullEntity(CS_NIC, nic);
             HashMap<String, String> optional = new HashMap<String, String>();
             configServer.setUserServer();
             VmInstance instance = vmService.findById(nic.getVmInstanceId());
@@ -401,7 +398,7 @@ public class NicServiceImpl implements NicService {
     @Override
     @PreAuthorize("hasPermission(#nic.getSyncFlag(), 'ACQUIRE_SECONDARY_IP_ADDRESS')")
     public Nic acquireSecondaryIP(Nic nic) throws Exception  {
-         Errors errors = validator.rejectIfNullEntity(NIC, nic);
+         Errors errors = validator.rejectIfNullEntity(CS_NIC, nic);
          errors = validator.validateEntity(nic, errors);
          configServer.setUserServer();
          Nic nics = convertEntityService.getNicById(nic.getId());

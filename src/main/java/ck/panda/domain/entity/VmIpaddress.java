@@ -22,7 +22,7 @@ import ck.panda.util.JsonUtil;
  */
 
 @Entity
-@Table(name = "vmIpaddress")
+@Table(name = "vm_ipaddress")
 public class VmIpaddress {
 
      /** Constant for nic uuid. */
