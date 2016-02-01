@@ -17,19 +17,6 @@ import ck.panda.domain.entity.Department.AccountType;
 public interface DepartmentRepository extends PagingAndSortingRepository<Department, Long> {
 
     /**
-     * Find the department by domain with username and is active status.
-     *
-     * @param userName user name of the department.
-     * @param domainId Domain reference.
-     * @param isActive get the department list based on active/inactive status.
-     * @return department name.
-     */
-    @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.userName = :userName AND  dpt.domainId = :domainId "
-            + "AND dpt.isActive = :isActive")
-    Department findByNameAndDomainAndIsActive(@Param("userName") String userName, @Param("domainId") Long domainId,
-            @Param("isActive") Boolean isActive);
-
-    /**
      * Find all the departments with pagination based on the active/inactive state and type.
      *
      * @param pageable to get the list with pagination.

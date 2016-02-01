@@ -133,7 +133,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     private void validateDepartment(Department department) throws Exception {
         Errors errors = validator.rejectIfNullEntity("department", department);
         errors = validator.validateEntity(department, errors);
-        Department dep = departmentRepo.findByNameAndDomainAndIsActive(department.getUserName(),
+        Department dep = departmentRepo.findByUsernameDomainAndIsActive(department.getUserName(),
                 department.getDomainId(), true);
         if (dep != null && department.getId() != dep.getId()) {
             errors.addFieldError("userName", "department.already.exist.for.same.domain");
