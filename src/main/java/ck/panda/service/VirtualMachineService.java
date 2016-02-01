@@ -144,4 +144,13 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * @throws Exception error occurs.
      */
     List<VmInstance> findByNetworkAndVmStatus(Long networkId, Status status) throws Exception;
+
+    /**
+     * Find vm instance by status.
+     *
+     * @param status of the instance.
+     * @return list of instance.
+     * @throws Exception if error occurs.
+     */
+    List<VmInstance> findByVmStatus(Status status) throws Exception;
 }

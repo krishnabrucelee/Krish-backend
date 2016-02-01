@@ -12,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.VmInstance;
@@ -59,17 +61,9 @@ public class NicServiceImpl implements NicService {
     @Autowired
     private VirtualMachineService vmService;
 
-    /** Virtual Machine repository reference. */
-    @Autowired
-    private VirtualMachineRepository virtualmachinerepository;
-
     /** Network Service for network reference . */
     @Autowired
     private NetworkService networkService;
-
-    /** Network Service for network reference . */
-    @Autowired
-    private IpaddressService ipService;
 
     /** Reference of the convert entity service. */
     @Autowired
@@ -79,8 +73,36 @@ public class NicServiceImpl implements NicService {
     @Autowired
     private VmIpaddressService vmIpService;
 
+    /** Referrence of sync service.*/
     @Autowired
     private SyncService sync;
+
+    /** Constant for nic object. */
+    public static final String NIC = "nics";
+
+    /** Constant for add ip to nic. */
+    public static final String CS_ADD_IPTONIC = "addiptovmnicresponse";
+
+    /** Constant for remove ip to nic. */
+    public static final String CS_REMOVE_IPTONIC = "removeipfromnicresponse";
+
+    /** Constant for list of nic secondary ip. */
+    public static final String CS_NIC_SECONDARYIP = "secondaryip";
+
+    /** Constant for nic secondary ip. */
+    public static final String CS_SECONDARYIP = "nicsecondaryip";
+
+    /** Constant for nic object. */
+    public static final String CS_NIC = "nic";
+
+    /** Constant for nic uuid. */
+    public static final String CS_NIC_UUID = "nicuuid";
+
+    /** Constant for nic list. */
+    public static final String CS_NIC_LIST = "listnicsresponse";
+
+    /** Constant for removing nic response. */
+    public static final String CS_REMOVE_NIC = "removenicfromvirtualmachineresponse";
 
 
     @Override
@@ -108,16 +130,15 @@ public class NicServiceImpl implements NicService {
                         throw new ApplicationException(errors);
                     }
                 }
-                if (jobresult.getString("jobstatus").equals("1")) {
+                if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.SUCCEEDED_JOB_STATUS)) {
                     this.assignNicTovM(nic.getVmInstance());
+                    // to update acquired ipaddress while attaching a network in our DB.
                     sync.syncIpAddress();
-                    //ipService.acquireIP(nic.getNetworkId());
-                } else if (jobresult.getString("jobstatus").equals("0")) {
+                } else if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.PROGRESS_JOB_STATUS)) {
+                     // to update acquired ipaddress while attaching a network in our DB.
                       this.assignNicTovM(nic.getVmInstance());
                       sync.syncIpAddress();
-
-                      //ipService.acquireIP(nic.getNetworkId());
-                  }
+                 }
               }
               return nic;
           } else {
@@ -280,22 +301,30 @@ public class NicServiceImpl implements NicService {
     public Nic softDelete(Nic nic) throws Exception {
         nic.setIsActive(false);
         if (nic.getSyncFlag()) {
-            Errors errors = validator.rejectIfNullEntity("nic", nic);
+            Errors errors = validator.rejectIfNullEntity(NIC, nic);
             HashMap<String, String> optional = new HashMap<String, String>();
             configServer.setUserServer();
             VmInstance instance = vmService.findById(nic.getVmInstanceId());
             String removeNicResponse = cloudStackInstanceService.removeNicFromVirtualMachine(nic.getUuid(),
-                    instance.getUuid(), optional, "json");
+                    instance.getUuid(), optional, CloudStackConstants.JSON);
             JSONObject deleteNicResponse = new JSONObject(removeNicResponse)
-                    .getJSONObject("removenicfromvirtualmachineresponse");
-            if (deleteNicResponse.has("jobid")) {
+                    .getJSONObject(CS_REMOVE_NIC);
+            if (deleteNicResponse.has(CloudStackConstants.CS_JOB_ID)) {
                 Thread.sleep(5000);
-                String jobResponse = cloudStackInstanceService.queryAsyncJobResult(deleteNicResponse.getString("jobid"),
-                    "json");
-                JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
-                if (jobresult.getString("jobstatus").equals("0")) {
+                String jobResponse = cloudStackInstanceService.queryAsyncJobResult(deleteNicResponse.getString(CloudStackConstants.CS_JOB_ID),
+                        CloudStackConstants.JSON);
+                JSONObject queryasyncjobresult = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+                if (queryasyncjobresult.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.ERROR_JOB_STATUS)) {
+                    JSONObject jobResponseResult = queryasyncjobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT);
+                    if (jobResponseResult.has(CloudStackConstants.CS_ERROR_CODE)) {
+                            errors = this.validateEvent(errors, jobResponseResult.getString(CloudStackConstants.CS_ERROR_TEXT));
+                            throw new ApplicationException(errors);
+                    }
+              }
+                if (queryasyncjobresult.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.PROGRESS_JOB_STATUS)) {
                     nic.setIsActive(false);
                 }
+
             }
         }
         return nicRepo.save(nic);
@@ -311,17 +340,18 @@ public class NicServiceImpl implements NicService {
         return vmIpService.findByVMInstance(nic);
     }
 
+    @Override
     public List<Nic> findAllFromCSServer() throws Exception {
-        List<VmInstance> vmInstanceList = virtualmachinerepository.findAllByIsActive(VmInstance.Status.Expunging);
+        List<VmInstance> vmInstanceList = vmService.findByVmStatus(VmInstance.Status.Expunging);
         List<Nic> nicList = new ArrayList<Nic>();
         LOGGER.debug("VM size" + vmInstanceList.size());
         for (VmInstance vm : vmInstanceList) {
             HashMap<String, String> nicMap = new HashMap<String, String>();
             // Set virtual machine id to know nic belongs to which vm instance.
-            nicMap.put("virtualmachineid", vm.getUuid());
+            nicMap.put(CloudStackConstants.CS_VIRTUAL_MACHINE_ID, vm.getUuid());
             // 1. Get the list of nics from CS server using CS connector
-            String response = cloudStackNicService.listNics(nicMap, "json");
-            JSONArray nicListJSON = new JSONObject(response).getJSONObject("listnicsresponse").getJSONArray("nic");
+            String response = cloudStackNicService.listNics(nicMap, CloudStackConstants.JSON);
+            JSONArray nicListJSON = new JSONObject(response).getJSONObject(CS_NIC_LIST).getJSONArray(CS_NIC);
             // 2. Iterate the json list, convert the single json entity to nic
             for (int i = 0, size = nicListJSON.length(); i < size; i++) {
                  List<VmIpaddress> vmIpList = new ArrayList<VmIpaddress>();
@@ -331,12 +361,12 @@ public class NicServiceImpl implements NicService {
                  nic.setVmInstanceId(convertEntityService.getVmInstanceId(nic.getTransvmInstanceId()));
                  nic.setNetworkId(convertEntityService.getNetworkId(nic.getTransNetworkId()));
                  // Get secondary ip address from nic.
-                 if (nicListJSON.getJSONObject(i).has("secondaryip")) {
+                 if (nicListJSON.getJSONObject(i).has(CS_NIC_SECONDARYIP)) {
                         // Get JSON array secondary ip.
-                        JSONArray secondaryIpJSON = nicListJSON.getJSONObject(i).getJSONArray("secondaryip");
+                        JSONArray secondaryIpJSON = nicListJSON.getJSONObject(i).getJSONArray(CS_NIC_SECONDARYIP);
                         for (int j = 0, sizes = secondaryIpJSON.length(); j < sizes; j++) {
                             JSONObject json = (JSONObject)secondaryIpJSON.get(j);
-                            json.put("nicuuid", nicListJSON.getJSONObject(i).getString("id"));
+                            json.put(CS_NIC_UUID, nicListJSON.getJSONObject(i).getString(CloudStackConstants.CS_ID));
                             // 2.2  Call convert by passing JSONObject to Vmipaddress entity and Add
                             // the converted vm ipaddress entity to list
                             VmIpaddress vmIp = VmIpaddress.convert(json);
@@ -369,29 +399,30 @@ public class NicServiceImpl implements NicService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#nic.getSyncFlag(), 'ACQUIRE_SECONDARY_IP_ADDRESS')")
     public Nic acquireSecondaryIP(Nic nic) throws Exception  {
-         Errors errors = validator.rejectIfNullEntity("nic", nic);
+         Errors errors = validator.rejectIfNullEntity(NIC, nic);
          errors = validator.validateEntity(nic, errors);
          configServer.setUserServer();
          Nic nics = convertEntityService.getNicById(nic.getId());
          HashMap<String, String> nicMap = new HashMap<String, String>();
-         nicMap.put("ipaddress", nic.getSecondaryIpAddress());
-         String acquireIPResponse = cloudStackNicService.addIpToNic(nics.getUuid(), "json", nicMap);
+         nicMap.put(CloudStackConstants.CS_IP_ADDRESS, nic.getSecondaryIpAddress());
+         String acquireIPResponse = cloudStackNicService.addIpToNic(nics.getUuid(), CloudStackConstants.JSON, nicMap);
          JSONObject csacquireIPResponseJSON = new JSONObject(acquireIPResponse)
-                 .getJSONObject("addiptovmnicresponse");
-         if (csacquireIPResponseJSON.has("errorcode")) {
-             errors = this.validateEvent(errors, csacquireIPResponseJSON.getString("errortext"));
+                 .getJSONObject(CS_ADD_IPTONIC);
+         if (csacquireIPResponseJSON.has(CloudStackConstants.CS_ERROR_CODE)) {
+             errors = this.validateEvent(errors, csacquireIPResponseJSON.getString(CloudStackConstants.CS_ERROR_TEXT));
              throw new ApplicationException(errors);
-         } else if (csacquireIPResponseJSON.has("jobid")) {
+         } else if (csacquireIPResponseJSON.has(CloudStackConstants.CS_JOB_ID)) {
              Thread.sleep(5000);
-             String jobResponse = cloudStackNicService.AcquireIpJobResult(csacquireIPResponseJSON.getString("jobid"), "json");
-             JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse").getJSONObject("jobresult");
-             JSONObject secondaryIP = jobresult.getJSONObject("nicsecondaryip");
+             String jobResponse = cloudStackNicService.AcquireIpJobResult(csacquireIPResponseJSON.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
+             JSONObject jobresult = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE).getJSONObject(CloudStackConstants.CS_JOB_RESULT);
+             JSONObject secondaryIP = jobresult.getJSONObject(CS_SECONDARYIP);
                  VmIpaddress vm = new VmIpaddress();
-                 vm.setUuid((String) secondaryIP.get("id"));
-                 vm.setGuestIpAddress(((String) secondaryIP.get("ipaddress")));
-                 vm.setNicId(convertEntityService.getNic(secondaryIP.getString("nicid")).getId());
-                 vm.setVmInstanceId(convertEntityService.getNic(secondaryIP.getString("nicid")).getVmInstanceId());
+                 vm.setUuid((String) secondaryIP.get(CloudStackConstants.CS_ID));
+                 vm.setGuestIpAddress(((String) secondaryIP.get(CloudStackConstants.CS_IP_ADDRESS)));
+                 vm.setNicId(convertEntityService.getNic(secondaryIP.getString(CloudStackConstants.CS_NIC_ID)).getId());
+                 vm.setVmInstanceId(convertEntityService.getNic(secondaryIP.getString(CloudStackConstants.CS_NIC_ID)).getVmInstanceId());
                  vm.setIsActive(true);
                  vmIpService.save(vm);
          }
@@ -401,21 +432,26 @@ public class NicServiceImpl implements NicService {
     @Override
     public Nic releaseSecondaryIP(Nic nic, Long vmIpaddressId)throws Exception {
          try {
+             // Get vm ipaddress object by id.
              VmIpaddress vm = convertEntityService.getVmIpaddressById(vmIpaddressId);
+             // Set api key, secret key and ACS URL for individual user.
              configServer.setUserServer();
-             String deleteResponse = cloudStackNicService.removeIpFromNic(vm.getUuid(), "json");
+             // Establishing connectivity with ACS to release secondary Ip from Nic.
+             String deleteResponse = cloudStackNicService.removeIpFromNic(vm.getUuid(),CloudStackConstants.JSON);
              vm.setIsActive(false);
-             JSONObject jobId = new JSONObject(deleteResponse).getJSONObject("removeipfromnicresponse");
-             if (jobId.has("errorcode")) {
-                 Errors errors = validator.sendGlobalError(jobId.getString("errortext"));
+             // Converting Json String to Json object.
+             JSONObject jobResponse = new JSONObject(deleteResponse).getJSONObject(CS_REMOVE_IPTONIC);
+             if (jobResponse.has(CloudStackConstants.CS_ERROR_CODE)) {
+                 Errors errors = validator.sendGlobalError(jobResponse.getString(CloudStackConstants.CS_ERROR_TEXT));
                  if (errors.hasErrors()) {
-                     throw new BadCredentialsException(jobId.getString("errortext"));
+                     throw new BadCredentialsException(jobResponse.getString(CloudStackConstants.CS_ERROR_TEXT));
                  }
              }
-             if (jobId.has("jobid")) {
-                 String jobResponse = cloudStackNicService.AcquireIpJobResult(jobId.getString("jobid"), "json");
-                 JSONObject jobresults = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+             if (jobResponse.has(CloudStackConstants.CS_JOB_ID)) {
+                 String jobResponseResult = cloudStackNicService.AcquireIpJobResult(jobResponse.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
+                 JSONObject queryJobresults = new JSONObject(jobResponseResult).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
              }
+             vmIpService.save(vm);
          } catch (BadCredentialsException e) {
                  throw new BadCredentialsException(e.getMessage());
          }

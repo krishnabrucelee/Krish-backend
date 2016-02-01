@@ -134,4 +134,15 @@ public class CloudStackConstants {
 
     /** Constant for register user key response. */
     public static final String CS_REGISTER_KEY_RESPONSE = "registeruserkeysresponse";
+
+    /** Constant for ip address. */
+    public static final String CS_IP_ADDRESS = "ipaddress";
+
+    /** Constant for nic id. */
+    public static final String CS_NIC_ID = "nicid";
+
+    /** Constants for jobs status. */
+     public static final String ERROR_JOB_STATUS = "2", PROGRESS_JOB_STATUS = "0",  SUCCEEDED_JOB_STATUS = "1";
+
+
 }

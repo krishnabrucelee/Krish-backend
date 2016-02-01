@@ -1084,6 +1084,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         return virtualmachinerepository.findByNetwork(networkId, status);
     }
 
+    @Override
+    public List<VmInstance> findByVmStatus(Status status) throws Exception {
+        return virtualmachinerepository.findAllByIsActive(status);
+    }
+
     public VmInstance convertEncryptPassword(VmInstance vminstance) throws Exception {
         if(vminstance.getVncPassword() != null && vminstance.getVncPassword().length() < 10) {
             String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));

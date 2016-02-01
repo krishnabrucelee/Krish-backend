@@ -12,6 +12,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.json.JSONObject;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -22,6 +24,9 @@ import ck.panda.util.JsonUtil;
 @Entity
 @Table(name = "vmIpaddress")
 public class VmIpaddress {
+
+     /** Constant for nic uuid. */
+    public static final String CS_NIC_UUID = "nicuuid";
 
     /** ID of the nic. */
     @Id
@@ -278,9 +283,9 @@ public class VmIpaddress {
      */
     public static VmIpaddress convert(JSONObject jsonObject) throws Exception {
         VmIpaddress vm = new VmIpaddress();
-        vm.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-        vm.setGuestIpAddress(JsonUtil.getStringValue(jsonObject, "ipaddress"));
-        vm.setTransNicId(JsonUtil.getStringValue(jsonObject, "nicuuid"));
+        vm.setUuid(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ID));
+        vm.setGuestIpAddress(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_IP_ADDRESS));
+        vm.setTransNicId(JsonUtil.getStringValue(jsonObject, CS_NIC_UUID));
         vm.setIsActive(true);
         vm.setSyncFlag(false);
         return vm;
