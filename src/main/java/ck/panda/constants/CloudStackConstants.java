@@ -142,7 +142,5 @@ public class CloudStackConstants {
     public static final String CS_NIC_ID = "nicid";
 
     /** Constants for jobs status. */
-     public static final String ERROR_JOB_STATUS = "2", PROGRESS_JOB_STATUS = "0",  SUCCEEDED_JOB_STATUS = "1";
-
-
+    public static final String ERROR_JOB_STATUS = "2", PROGRESS_JOB_STATUS = "0",  SUCCEEDED_JOB_STATUS = "1";
 }

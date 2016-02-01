@@ -99,12 +99,11 @@ public class NicServiceImpl implements NicService {
     /** Constant for removing nic response. */
     public static final String CS_REMOVE_NIC = "removenicfromvirtualmachineresponse";
 
-
     @Override
     @PreAuthorize("hasPermission(#nic.getSyncFlag(), 'ADD_NETWORK_TO_VM')")
     public Nic save(Nic nic) throws Exception {
         if (nic.getSyncFlag()) {
-            Errors errors = validator.rejectIfNullEntity("nic", nic);
+            Errors errors = validator.rejectIfNullEntity(CS_NIC , nic);
             errors = validator.validateEntity(nic, errors);
             configServer.setUserServer();
             Network network = convertEntityService.getNetworkById(nic.getNetworkId());
