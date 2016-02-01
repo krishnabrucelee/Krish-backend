@@ -37,7 +37,6 @@ import ck.panda.util.JsonUtil;
 @Entity
 @Table(name = "service_offerings")
 @SuppressWarnings("serial")
-
 public class ComputeOffering implements Serializable {
 
     /** The id of the Compute offering table. */

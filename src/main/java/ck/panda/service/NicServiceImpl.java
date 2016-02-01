@@ -281,7 +281,7 @@ public class NicServiceImpl implements NicService {
 
     @Override
     public List<Nic> findAllFromCSServer() throws Exception {
-        List<VmInstance> vmInstanceList = virtualmachinerepository.findAllByIsActive(VmInstance.Status.Expunging);
+        List<VmInstance> vmInstanceList = vmService.findAllByExceptStatus(VmInstance.Status.EXPUNGING);
         List<Nic> nicList = new ArrayList<Nic>();
         LOGGER.debug("VM size" + vmInstanceList.size());
         for (VmInstance vm : vmInstanceList) {
@@ -355,7 +355,7 @@ public class NicServiceImpl implements NicService {
              errors = this.validateEvent(errors, csacquireIPResponseJSON.getString("errortext"));
              throw new ApplicationException(errors);
          } else if (csacquireIPResponseJSON.has("jobid")) {
-        	 Thread.sleep(5000);
+             Thread.sleep(5000);
              String jobResponse = cloudStackNicService.AcquireIpJobResult(csacquireIPResponseJSON.getString("jobid"), "json");
              JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse").getJSONObject("jobresult");
              JSONObject secondaryIP = jobresult.getJSONObject("nicsecondaryip");
@@ -385,7 +385,7 @@ public class NicServiceImpl implements NicService {
                  }
              }
              if (jobId.has("jobid")) {
-            	 String jobResponse = cloudStackNicService.AcquireIpJobResult(jobId.getString("jobid"), "json");
+                 String jobResponse = cloudStackNicService.AcquireIpJobResult(jobId.getString("jobid"), "json");
                  JSONObject jobresults = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
              }
          } catch (BadCredentialsException e) {

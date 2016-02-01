@@ -398,4 +398,9 @@ public class DomainServiceImpl implements DomainService {
         return domainRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
     }
 
+    @Override
+    public Domain findByName(String name) throws Exception {
+        return domainRepo.findByName(name);
+    }
+
 }

@@ -921,7 +921,6 @@ public class SyncServiceImpl implements SyncService {
                 csUserMap.remove(user.getUuid());
             } else {
                 userService.softDelete(user);
-
                 // 3.2 If not found, delete it from app db
                 // TODO clarify the business requirement, since it has impact in
                 // the application if it is used

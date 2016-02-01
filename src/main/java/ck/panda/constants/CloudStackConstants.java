@@ -16,7 +16,7 @@ public class CloudStackConstants {
 
     /** Constant for upload types. */
     public static final String CS_UPLOAD_NOT_STARTED = "UploadNotStarted", CS_UPLOAD_OPERATION = "UploadOp",
-        CS_UPLOAD_ABANDONED = "UploadAbandoned", CS_UPLOAD_ERROR = "UploadError";
+            CS_UPLOAD_ABANDONED = "UploadAbandoned", CS_UPLOAD_ERROR = "UploadError";
 
     /** Constant for job types. */
     public static final String CS_JOB_ID = "jobid", CS_JOB_RESULT = "jobresult", CS_JOB_STATUS = "jobstatus";
@@ -45,14 +45,14 @@ public class CloudStackConstants {
     /** Constant for iops. */
     public static final String CS_MAX_IOPS = "maxiops", CS_MIN_IOPS = "miniops";
 
-    /** Constant for state. */
+    /** Constant for resource's state. */
     public static final String CS_STATE = "state";
 
     /** Constant for uploaded volume. */
     public static final String CS_UPLOADED = "Uploaded";
 
-    /** Constant for disk offering id. */
-    public static final String CS_DISK_OFFERING_ID = "diskofferingid";
+    /** Constant for offerings id. */
+    public static final String CS_DISK_OFFERING_ID = "diskofferingid", CS_SERVICE_OFFERING_ID = "serviceofferingid";
 
     /** Constant for resource's tags. */
     public static final String CS_TAGS = "tags";
@@ -134,4 +134,71 @@ public class CloudStackConstants {
 
     /** Constant for register user key response. */
     public static final String CS_REGISTER_KEY_RESPONSE = "registeruserkeysresponse";
+
+    /** Constant for account type. */
+    public static final String CS_ACCOUNT_TYPE = "accounttype";
+
+    /** Constant for create account response. */
+    public static final String CS_ACCOUNT_RESPONSE = "createaccountresponse";
+
+    /** Constant for domain. */
+    public static final String CS_DOMAIN = "domain";
+
+    /** Constant for user name. */
+    public static final String CS_USER_NAME = "username";
+
+    /** Constant for first name of the user. */
+    public static final String CS_FIRST_NAME = "firstname";
+
+    /** Constant for last name of the user. */
+    public static final String CS_LAST_NAME = "lastname";
+
+    /** Constant for email of the user. */
+    public static final String CS_EMAIL = "email";
+
+    /** Constant for host id. */
+    public static final String CS_HOST_ID = "hostid";
+
+    /** Constant for template id. */
+    public static final String CS_TEMPLATE_ID = "templateid";
+
+    /** Constant for cpu details. */
+    public static final String CS_CPU_NUMBER = "cpunumber", CS_CPU_SPEED = "cpuspeed", CS_CPU_USED = "cpuused";
+
+    /** Constant for storage details. */
+    public static final String CS_DISK_IO_READ = "diskioread", CS_DISK_IO_WRITE = "diskiowrite",
+            CS_DISK_KBS_READ = "diskkbsread", CS_DISK_KBS_WRITE = "diskkbswrite";
+
+    /** Constant for network details. */
+    public static final String CS_NETWORK_KBS_READ = "networkkbsread", CS_NETWORK_KBS_WRITE = "networkkbswrite";
+
+    /** Constant for password status. */
+    public static final String CS_PASSWORD_STATUS = "passwordenabled";
+
+    /** Constant for iso id. */
+    public static final String CS_ISO_ID = "isoid";
+
+    /** Constant for iso name. */
+    public static final String CS_ISO_NAME = "isoname";
+
+    /** Constant for nic. */
+    public static final String CS_NIC = "nic";
+
+    /** Constant for network id. */
+    public static final String CS_NETWORK_ID = "networkid";
+
+    /** Constant for instance name. */
+    public static final String CS_INSTANCE_NAME = "instancename";
+
+    /** Constant for user id. */
+    public static final String CS_USER_ID = "userid";
+
+    /** Constant for ip address. */
+    public static final String CS_IP_ADDRESS = "ipaddress";
+
+    /** Constant for primary memory. */
+    public static final String CS_MEMORY = "memory";
+
+    /** Constant for resource name. */
+    public static final String CS_DISPLAY_NAME = "displayname";
 }

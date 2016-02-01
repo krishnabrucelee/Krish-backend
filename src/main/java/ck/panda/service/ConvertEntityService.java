@@ -462,7 +462,7 @@ public class ConvertEntityService {
      * @throws Exception unhandled exception.
      */
     public Project getProject(String uuid) throws Exception {
-        return projectService.findByUuidAndIsActive(uuid, true);
+        return projectService.findByUuid(uuid);
     }
 
     /**
