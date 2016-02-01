@@ -186,16 +186,16 @@ public class VmIpaddress {
     }
 
     /**
-     *  Get the transNicId .
+     *  Get the transient NicId .
      *
-     * @return the transNicId
+     * @return the transient NicId .
      */
     public String getTransNicId() {
         return transNicId;
     }
 
     /**
-     * Set the transNicId .
+     * Set the transient NicId .
      *
      * @param transNicId to set
      */

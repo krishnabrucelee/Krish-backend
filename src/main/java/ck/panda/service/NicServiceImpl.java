@@ -12,14 +12,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.repository.jpa.NicRepository;
-import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackNicService;
