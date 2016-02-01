@@ -48,7 +48,7 @@ public interface DepartmentRepository extends PagingAndSortingRepository<Departm
      * @param isActive get the department list based on active/inactive status.
      * @return list of departments.
      */
-    @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.isActive =:isActive AND dpt.type=:type")
+    @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.isActive = :isActive AND dpt.type= :type")
     List<Department> findAllByIsActive(@Param("isActive") Boolean isActive, @Param("type") AccountType type);
 
     /**
@@ -58,7 +58,7 @@ public interface DepartmentRepository extends PagingAndSortingRepository<Departm
      * @param isActive get the department list based on active/inactive status.
      * @return Department.
      */
-    @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.isActive =:isActive AND dpt.uuid=:uuid")
+    @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.isActive =: isActive AND dpt.uuid = :uuid")
     Department findByUuidAndIsActive(@Param("uuid") String uuid, @Param("isActive") Boolean isActive);
 
     /**
@@ -68,7 +68,7 @@ public interface DepartmentRepository extends PagingAndSortingRepository<Departm
      * @param isActive get the department list based on active/inactive status.
      * @return department list
      */
-    @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.domainId=:domainId AND dpt.isActive =:isActive")
+    @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.domainId = :domainId AND dpt.isActive = :isActive")
     List<Department> findDomainAndIsActive(@Param("domainId") Long id, @Param("isActive") Boolean isActive);
 
     /**
@@ -79,7 +79,7 @@ public interface DepartmentRepository extends PagingAndSortingRepository<Departm
      * @param isActive get the department list based on active/inactive status.
      * @return Department.
      */
-    @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.isActive =:isActive AND dpt.domainId=:domainId "
+    @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.isActive = :isActive AND dpt.domainId= :domainId "
             + "AND dpt.type=:type")
     List<Department> findByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive,
             @Param("type") AccountType type);
