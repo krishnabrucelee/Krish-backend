@@ -22,45 +22,52 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
- * Billable Items are the list of billable services. Billable Items may Infrastructure, Managed Service or Optional.
- * Each billable items must have tax.
+ * items are the list of billable services. items may Infrastructure, Managed Service or Optional.
+ * Each items must have tax.
  */
 @Entity
-@Table(name = "billable_item")
+@Table(name = "item")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
-public class BillableItem implements Serializable {
+public class Item implements Serializable {
 
-    /** Id of the BillableItem. */
+    /** Id of the item. */
     @Id
     @GeneratedValue
     @Column(name = "id")
     private Long id;
 
-    /** Name of the billable item. */
+    /** Name of the item. */
     private String name;
 
-    /** Type of the billable items. */
-    private BillableType billableType;
+    /** Type of the item. */
+    private ItemType itemType;
 
-    /** Tax for the billable item. */
+    /** Unit of the item. */
+    private ItemUnit itemUnit;
+
+    /** Tax for the item. */
     @JoinColumn(name = "tax_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
     private Tax tax;
 
-    /** Tax id for the billable item. */
+    /** Tax id for the item. */
     @Column(name = "tax_id")
     private Long taxId;
 
-    /** Whether BillableItem is customized or not. */
+    /** Whether item has discount or not. */
+    @Column(name = "has_discount")
+    private Boolean hasDiscount;
+
+    /** Whether item is customized or not. */
     @Column(name = "is_customized")
     private Boolean isCustomized;
 
-    /** Whether BillableItem is in active state or in active state. */
+    /** Whether item is in active state or in active state. */
     @Column(name = "is_active")
     private Boolean isActive;
 
-    /** Status for BillableItem, whether it is Deleted, Disabled etc . */
+    /** Status for item, whether it is Deleted, Disabled etc . */
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private Status status;
@@ -97,7 +104,7 @@ public class BillableItem implements Serializable {
     /**
      * Default constructor.
      */
-    public BillableItem() {
+    public Item() {
         super();
     }
 
@@ -106,7 +113,7 @@ public class BillableItem implements Serializable {
      *
      * @param name to set
      */
-    public BillableItem(String name) {
+    public Item(String name) {
         super();
     }
 
@@ -129,7 +136,7 @@ public class BillableItem implements Serializable {
     }
 
     /**
-     * Get name of the billable item.
+     * Get name of the item.
      *
      * @return the name
      */
@@ -138,7 +145,7 @@ public class BillableItem implements Serializable {
     }
 
     /**
-     * Set name of the billable item.
+     * Set name of the item.
      *
      * @param name the name to set
      */
@@ -147,25 +154,43 @@ public class BillableItem implements Serializable {
     }
 
     /**
-     * Get the billable item type.
+     * Get the item type.
      *
-     * @return the billableType
+     * @return the itemType
      */
-    public BillableType getBillableType() {
-        return billableType;
+    public ItemType getItemType() {
+        return itemType;
     }
 
     /**
-     * Set the billable item type.
+     * Set the item type.
      *
-     * @param billableType the billableType to set
+     * @param itemType the itemType to set
      */
-    public void setBillableType(BillableType billableType) {
-        this.billableType = billableType;
+    public void setItemType(ItemType billableType) {
+        this.itemType = billableType;
     }
 
     /**
-     * Get tax of the billable item.
+     * Get the Unit.
+     *
+     * @return the itemUnit
+     */
+    public ItemUnit getItemUnit() {
+        return itemUnit;
+    }
+
+    /**
+     * Set the Unit.
+     *
+     * @param itemUnit the itemUnit to set
+     */
+    public void setItemUnit(ItemUnit itemUnit) {
+        this.itemUnit = itemUnit;
+    }
+
+    /**
+     * Get tax of the item.
      *
      * @return the tax
      */
@@ -174,7 +199,7 @@ public class BillableItem implements Serializable {
     }
 
     /**
-     * Set tax of the billable item.
+     * Set tax of the item.
      *
      * @param tax the tax to set
      */
@@ -201,9 +226,27 @@ public class BillableItem implements Serializable {
     }
 
     /**
-     * Get the billable item customized status either true or false.
+     * Get the item discount status either true or false.
      *
-     * @return the isCustomized
+     * @return the discountable
+     */
+    public Boolean getHasDiscount() {
+        return hasDiscount;
+    }
+
+    /**
+     * Set the item discount.
+     *
+     * @param hasDiscountable the discount to set for the item
+     */
+    public void setHasDiscountable(Boolean hasDiscountable) {
+        this.hasDiscount = hasDiscountable;
+    }
+
+    /**
+     * Get the item customized status either true or false.
+     *
+     * @return the customized
      */
     public Boolean getIsCustomized() {
         return isCustomized;
@@ -327,7 +370,7 @@ public class BillableItem implements Serializable {
     }
 
     /**
-     * Get the billable item status.
+     * Get the item status.
      *
      * @return the status
      */
@@ -336,7 +379,7 @@ public class BillableItem implements Serializable {
     }
 
     /**
-     * Set the billable item status.
+     * Set the item status.
      *
      * @param status the status to set
      */
@@ -345,28 +388,48 @@ public class BillableItem implements Serializable {
     }
 
     /**
-     * Enumeration status for billable item.
+     * Enumeration status for item.
      */
     public enum Status {
-        /** Enabled status is used to list departments through out the application. */
+        /** Enabled status is used to list items through out the application. */
         ENABLED,
 
-        /** Deleted status make department as soft deleted and it will not list on the applicaiton. */
+        /** Deleted status make items as soft deleted and it will not list on the applicaiton. */
         DELETED
     }
 
     /**
-     * Billable type of the billable item.
+     * Item type of the item.
      */
-    public enum BillableType {
-        /** Infrastructure billable type is the default billable items of cloudstack. */
+    public enum ItemType {
+        /** Infrastructure item type is the default items of cloudstack. */
         INFRASTRUCTURE,
 
-        /** Additional billable items for panda portal. */
+        /** Additional items for panda portal. */
         MANAGED,
 
-        /** Optional billable items for panda portal. */
+        /** Optional items for panda portal. */
         OPTIONAL
     }
 
+    /**
+     * Unit of the item.
+     */
+    public enum ItemUnit {
+
+        /** Unit per Core per Hour. */
+        PER_CORE_PER_HOUR,
+
+        /** Unit per GB per Hour. */
+        PER_GB_PER_HOUR,
+
+        /** Unit per OS per Hour. */
+        PER_OS_PER_HOUR,
+
+        /** Unit per DB per Hour. */
+        PER_DB_PER_HOUR,
+
+        /** Unit per APP per Hour. */
+        PER_APP_PER_HOUR
+    }
 }
