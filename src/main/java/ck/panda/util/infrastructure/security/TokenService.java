@@ -7,13 +7,14 @@ import javax.crypto.spec.SecretKeySpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
+import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.User;
 import ck.panda.util.DateConvertUtil;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
+import net.sf.ehcache.config.CacheConfiguration;
 
 /**
  * Token Service.
@@ -28,25 +29,25 @@ public class TokenService {
     private static final Cache REST_API_AUTH_TOKEN = CacheManager.getInstance().getCache("restApiAuthTokenCache");
 
     /** Scheduler time constant. */
-    public static final int HALF_AN_HOUR_IN_MILLISECONDS = 4 * 60 * 60 * 1000;
+    public static final int FOUR_HOUR_IN_MILLISECONDS = 4 * 60 * 60 * 1000;
 
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
 
-    /** Admin username. */
+    /** Admin user id. */
     @Value("${backend.admin.userid}")
-    private String backendAdminUserid;
+    private String backendAdminUserId;
 
-    /** Admin username. */
+    /** Admin user name. */
     @Value("${backend.admin.username}")
-    private String backendAdminUsername;
+    private String backendAdminUserName;
 
-    /** Admin role. */
+    /** Admin domain id. */
     @Value("${backend.admin.dominid}")
     private String backendAdminDomainId;
 
-    /** Admin role. */
+    /** Admin department id. */
     @Value("${backend.admin.departmentid}")
     private String backendAdminDepartmentId;
 
@@ -66,35 +67,24 @@ public class TokenService {
     @Value("${backend.admin.usersecretkey}")
     private String userSecretKey;
 
-    /** Build Version. */
-    @Value("${app.buildversion}")
-    private String buildNumber;
-
     /**
-     * Evict expire tokens.
-     */
-    @Scheduled(fixedRate = HALF_AN_HOUR_IN_MILLISECONDS)
-    public void evictExpiredTokens() {
-        LOGGER.info("Evicting expired tokens");
-        REST_API_AUTH_TOKEN.evictExpiredElements();
-    }
-
-    /**
+     * Generate new encrypted token using user login details.
+     *
      * @param user token.
      * @param domainName name of the domain
      * @return token
-     * @throws Exception raise if error
+     * @throws Exception unhandled exceptions.
      */
     public String generateNewToken(User user, String domainName) throws Exception {
         String encryptedToken = null;
         try {
-            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes(GenericConstants.CHARACTER_ENCODING));
             byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
-            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, GenericConstants.ENCRYPT_ALGORITHM);
             encryptedToken = new String(
                     ck.panda.util.EncryptionUtil.encrypt(createTokenDetails(user, domainName).toString(), originalKey));
         } catch (UnsupportedEncodingException e) {
-            LOGGER.error("ERROR AT TOKEN GENERATION", e);
+            LOGGER.error("Error at token generation : ", e);
         }
         return encryptedToken;
     }
@@ -120,17 +110,24 @@ public class TokenService {
     }
 
     /**
-     * Get the auth token.
+     * Get the authentication token.
      *
      * @param token to set
-     * @return Authentication
-     * @throws Exception raise if error
+     * @return Authentication status object
+     * @throws Exception unhandled exceptions.
      */
     public Authentication retrieve(String token) throws Exception {
+        CacheConfiguration config = REST_API_AUTH_TOKEN.getCacheConfiguration();
+
+        // Sets the time to idle for an element before it expires. This property can be modified dynamically while the
+        // cache is operating.
+        config.setTimeToIdleSeconds(FOUR_HOUR_IN_MILLISECONDS);
         return (Authentication) REST_API_AUTH_TOKEN.get(token).getObjectValue();
     }
 
     /**
+     * Generate the new token with user login details.
+     *
      * @param user details for token generation
      * @param domainName name of the domain
      * @return user details
@@ -139,20 +136,31 @@ public class TokenService {
         StringBuilder stringBuilder = null;
         try {
             stringBuilder = new StringBuilder();
-            stringBuilder.append(user == null ? backendAdminUserid : user.getId()).append("@@");
-            stringBuilder.append(user == null ? backendAdminUsername : user.getUserName()).append("@@");
-            stringBuilder.append(user == null ? backendAdminDomainId : user.getDomain().getId()).append("@@");
-            stringBuilder.append(user == null ? backendAdminDepartmentId : user.getDepartment().getId()).append("@@");
-            stringBuilder.append(user == null ? backendAdminRole : user.getRole().getName()).append("@@");
-            stringBuilder.append(domainName).append("@@");
-            stringBuilder.append(user == null ? backendAdminType : user.getType()).append("@@");
-            stringBuilder.append(user == null ? userApiKey : user.getApiKey()).append("@@");
-            stringBuilder.append(user == null ? userSecretKey : user.getSecretKey()).append("@@");
+            if (user == null) {
+                stringBuilder.append(backendAdminUserId).append(GenericConstants.TOKEN_SEPARATOR);
+                stringBuilder.append(backendAdminUserName).append(GenericConstants.TOKEN_SEPARATOR);
+                stringBuilder.append(backendAdminDomainId).append(GenericConstants.TOKEN_SEPARATOR);
+                stringBuilder.append(backendAdminDepartmentId).append(GenericConstants.TOKEN_SEPARATOR);
+                stringBuilder.append(backendAdminRole).append(GenericConstants.TOKEN_SEPARATOR);
+                stringBuilder.append(domainName).append(GenericConstants.TOKEN_SEPARATOR);
+                stringBuilder.append(backendAdminType).append(GenericConstants.TOKEN_SEPARATOR);
+                stringBuilder.append(userApiKey).append(GenericConstants.TOKEN_SEPARATOR);
+                stringBuilder.append(userSecretKey).append(GenericConstants.TOKEN_SEPARATOR);
+            } else {
+                stringBuilder.append(user.getId()).append(GenericConstants.TOKEN_SEPARATOR);
+                stringBuilder.append(user.getUserName()).append(GenericConstants.TOKEN_SEPARATOR);
+                stringBuilder.append(user.getDomain().getId()).append(GenericConstants.TOKEN_SEPARATOR);
+                stringBuilder.append(user.getDepartment().getId()).append(GenericConstants.TOKEN_SEPARATOR);
+                stringBuilder.append(user.getRole().getName()).append(GenericConstants.TOKEN_SEPARATOR);
+                stringBuilder.append(domainName).append(GenericConstants.TOKEN_SEPARATOR);
+                stringBuilder.append(user.getType()).append(GenericConstants.TOKEN_SEPARATOR);
+                stringBuilder.append(user.getApiKey()).append(GenericConstants.TOKEN_SEPARATOR);
+                stringBuilder.append(user.getSecretKey()).append(GenericConstants.TOKEN_SEPARATOR);
+            }
             stringBuilder.append(DateConvertUtil.getTimestamp());
         } catch (Exception e) {
             e.printStackTrace();
         }
         return stringBuilder;
     }
-
 }
