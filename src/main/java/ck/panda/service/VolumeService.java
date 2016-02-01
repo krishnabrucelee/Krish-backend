@@ -142,7 +142,7 @@ public interface VolumeService extends CRUDService<Volume> {
      *
      * @param projectId project id.
      * @param volumeType volume type.
-     * @return project
+     * @return volume
      */
     List<Volume> findByProjectAndVolumeType(Long projectId, List<VolumeType> volumeType);
 
@@ -150,7 +150,7 @@ public interface VolumeService extends CRUDService<Volume> {
      * Get the volumes based on department.
      *
      * @param departmentId department id.
-     * @return department
+     * @return volume
      * @param volumeType volume type.
      * @throws Exception error occurs.
      */
@@ -162,7 +162,7 @@ public interface VolumeService extends CRUDService<Volume> {
      * @param departmentId department id.
      * @param projectId project id.
      * @param volumeType volume type.
-     * @return department
+     * @return volume
      * @throws Exception error occurs.
      */
     List<Volume> findByDepartmentAndNotProjectAndVolumeType(Long departmentId, Long projectId,
@@ -172,7 +172,7 @@ public interface VolumeService extends CRUDService<Volume> {
      * Get the count of the volume based on the attached.
      *
      * @param userId user details
-     * @return count
+     * @return volume count
      * @throws NumberFormatException Number format
      * @throws Exception error occurs
      */
@@ -182,7 +182,7 @@ public interface VolumeService extends CRUDService<Volume> {
      * Get the count of the volume based on the detached.
      *
      * @param userId user details
-     * @return count
+     * @return volume count
      * @throws NumberFormatException Number format
      * @throws Exception error occurs
      */
