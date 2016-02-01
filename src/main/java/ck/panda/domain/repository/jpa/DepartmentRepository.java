@@ -25,7 +25,7 @@ public interface DepartmentRepository extends PagingAndSortingRepository<Departm
      * @return department name.
      */
     @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.userName = :userName AND  dpt.domainId = :domainId "
-            + "AND dpt.isActive =:isActive")
+            + "AND dpt.isActive = :isActive")
     Department findByNameAndDomainAndIsActive(@Param("userName") String userName, @Param("domainId") Long domainId,
             @Param("isActive") Boolean isActive);
 
@@ -80,7 +80,7 @@ public interface DepartmentRepository extends PagingAndSortingRepository<Departm
      * @return Department.
      */
     @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.isActive = :isActive AND dpt.domainId= :domainId "
-            + "AND dpt.type=:type")
+            + "AND dpt.type= :type")
     List<Department> findByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive,
             @Param("type") AccountType type);
 
