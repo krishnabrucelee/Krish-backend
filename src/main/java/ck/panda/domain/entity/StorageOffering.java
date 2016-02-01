@@ -22,15 +22,15 @@ import javax.validation.constraints.Size;
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import ck.panda.constants.CloudStackConstants;
-import ck.panda.util.CloudStackOptionalUtil;
 import ck.panda.util.JsonUtil;
 import ck.panda.util.JsonValidator;
 
@@ -43,6 +43,10 @@ import ck.panda.util.JsonValidator;
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "storage_offerings")
 public class StorageOffering {
+
+    /** Logger attribute. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(StorageOffering.class);
+
     /**
      * Unique ID of the storage offering.
      */
@@ -336,7 +340,7 @@ public class StorageOffering {
     }
 
     /**
-     * Get the domainId of the StorageOffering.
+     * Get the domain id of the Storage Offering.
      *
      * @return the domainId
      */
@@ -345,7 +349,7 @@ public class StorageOffering {
     }
 
     /**
-     * Set the domainId of the StorageOffering.
+     * Set the domain id of the Storage Offering.
      *
      * @param domainId the domainId to set
      */
@@ -552,7 +556,7 @@ public class StorageOffering {
     }
 
     /**
-     * Get the isCustomizedIops of the storage offering.
+     * Get the is Customized Iops of the storage offering.
      *
      * @return the isCustomizedIops of the storage offering
      */
@@ -561,7 +565,7 @@ public class StorageOffering {
     }
 
     /**
-     * Set the isCustomizedIops of the storage offering.
+     * Set the is Customized Iops of the storage offering.
      *
      * @param isCustomizedIops the isCustomizedIops to set
      */
@@ -714,16 +718,16 @@ public class StorageOffering {
     }
 
     /**
-     * Get the storage price of the StorageOffering.java.
+     * Get the storage price of the Storage Offering.
      *
-     * @return the storagePrice of the StorageOffering.java
+     * @return the storagePrice of the Storage Offering.
      */
     public List<StorageOfferingCost> getStoragePrice() {
         return storagePrice;
     }
 
     /**
-     * Set the storage price of the StorageOffering.java.
+     * Set the storage price of the Storage Offering.
      *
      * @param storagePrice the storagePrice to set
      */
@@ -772,7 +776,7 @@ public class StorageOffering {
      *
      * @param storageMap json object
      * @return Storage Offering entity objects
-     * @throws Exception error
+     * @throws Exception error at Storage Offering
      */
     public static StorageOffering convert(JSONObject storageMap) throws Exception {
         StorageOffering storageOffering = new StorageOffering();
@@ -811,7 +815,7 @@ public class StorageOffering {
                     .setStorageType(StorageType.valueOf(JsonValidator.jsonStringValidation(storageMap, CloudStackConstants.CS_STORAGE_TYPE)));
             storageOffering.setCreatedDateTime(JsonUtil.convertToZonedDateTime(storageMap.getString(CloudStackConstants.CS_CREATED)));
         } catch (Exception e) {
-            e.printStackTrace();
+        	LOGGER.error("ERROR AT STORAGE OFFERING", e);
         }
         return storageOffering;
     }

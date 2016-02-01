@@ -10,6 +10,8 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
@@ -912,57 +914,64 @@ public class ConvertEntityService {
      * @param csResponse cloud stack response resource type for domain resource.
      * @throws Exception resource count error
      */
-    public void resourceCount(String csResponse) throws Exception {
-        JSONArray resourceCountArrayJSON = null;
-        //get cloud stack resource count response
-        JSONObject csCountJson = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
-        //If json response has resource count object
-        if (csCountJson.has("resourcecount")) {
-            resourceCountArrayJSON = csCountJson.getJSONArray("resourcecount");
-            // Iterate resource count response from resource type
-            for (int i = 0, size = resourceCountArrayJSON.length(); i < size; i++) {
-                //get resource count, type, domain and set in a variable for future use
-                String resourceCount = resourceCountArrayJSON.getJSONObject(i).getString("resourcecount");
-                String resourceType = resourceCountArrayJSON.getJSONObject(i).getString("resourcetype");
-                String domainId = resourceCountArrayJSON.getJSONObject(i).getString("domainid");
-                //check resource type other than 5(resource type of project) and allow to update
-                if (!resourceType.equals("5")) {
-                    //Map and get the resource count for current resource type value
-                    HashMap<String, String> resourceMap = getResourceTypeValue();
-                    // checking null validation for resource map
-                    if (resourceMap != null) {
-                        //update resource count in resource limit domain table
-                        ResourceLimitDomain resourceDomainCount = resourceLimitDomainService.findByDomainAndResourceCount(
-                                getDomainId(domainId), ResourceType.valueOf(resourceMap.get(resourceType)),
-                                true);
-                        //check the max value if not -1 and upadate the available value
-                        if (resourceDomainCount.getMax() != -1) {
-							// Check resource type primary = 10 and secondary storage = 11 and convert resource
+	public void resourceCount(String csResponse) throws Exception {
+		JSONArray resourceCountArrayJSON = null;
+		// get cloud stack resource count response
+		JSONObject csCountJson = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
+		// If json response has resource count object
+		if (csCountJson.has("resourcecount")) {
+			resourceCountArrayJSON = csCountJson.getJSONArray("resourcecount");
+			// Iterate resource count response from resource type
+			for (int i = 0, size = resourceCountArrayJSON.length(); i < size; i++) {
+				// get resource count, type, domain and set in a variable for
+				// future use
+				String resourceCount = resourceCountArrayJSON.getJSONObject(i).getString("resourcecount");
+				String resourceType = resourceCountArrayJSON.getJSONObject(i).getString("resourcetype");
+				String domainId = resourceCountArrayJSON.getJSONObject(i).getString("domainid");
+				// check resource type other than 5(resource type of project)
+				// and allow to update
+				if (!resourceType.equals("5")) {
+					// Map and get the resource count for current resource type
+					// value
+					HashMap<String, String> resourceMap = getResourceTypeValue();
+					// checking null validation for resource map
+					if (resourceMap != null) {
+						// update resource count in resource limit domain table
+						ResourceLimitDomain resourceDomainCount = resourceLimitDomainService
+								.findByDomainAndResourceCount(getDomainId(domainId),
+										ResourceType.valueOf(resourceMap.get(resourceType)), true);
+						// check the max value if not -1 and upadate the
+						// available value
+						if (resourceDomainCount.getMax() != -1) {
+							// Check resource type primary = 10 and secondary
+							// storage = 11 and convert resource
 							// count values GiB to MB.
 							if (resourceType.equals("10") || resourceType.equals("11")) {
-								//Convert and set Available resource count of primary and secondary GiB to MB.
+								// Convert and set Available resource count of
+								// primary and secondary GiB to MB.
 								resourceDomainCount.setAvailable(resourceDomainCount.getMax()
 										- (Long.valueOf(resourceCount) / (1024 * 1024 * 1024)));
-								//Convert and set Used resource count of primary and secondary GiB to MB.
+								// Convert and set Used resource count of
+								// primary and secondary GiB to MB.
 								resourceDomainCount.setUsedLimit((Long.valueOf(resourceCount) / (1024 * 1024 * 1024)));
 							} else {
 								resourceDomainCount
 										.setAvailable(resourceDomainCount.getMax() - Long.valueOf(resourceCount));
 								resourceDomainCount.setUsedLimit(Long.valueOf(resourceCount));
 							}
-                        } else {
-                            resourceDomainCount.setAvailable(resourceDomainCount.getMax());
-                            resourceDomainCount.setUsedLimit(Long.valueOf(resourceCount));
-                        }
-                        //Set used limit value
+						} else {
+							resourceDomainCount.setAvailable(resourceDomainCount.getMax());
+							resourceDomainCount.setUsedLimit(Long.valueOf(resourceCount));
+						}
+						// Set used limit value
 
-                        resourceDomainCount.setIsSyncFlag(false);
-                        resourceLimitDomainService.update(resourceDomainCount);
-                    }
-                }
-            }
-        }
-    }
+						resourceDomainCount.setIsSyncFlag(false);
+						resourceLimitDomainService.update(resourceDomainCount);
+					}
+				}
+			}
+		}
+	}
 
     /**
      * Map and get the resource count for current resource type value.
@@ -986,24 +995,4 @@ public class ConvertEntityService {
         return resourceMap;
     }
 
-    /**
-     * A method a set Custom storage values for instance.
-     *
-     * @param vmInstance Vm instance object
-     * @throws Exception error
-     */
-    public void customStorageForInstance(VmInstance vmInstance) throws Exception {
-        HashMap<String, String> instanceMap = new HashMap<>();
-            instanceMap.put("diskofferingid",
-                    getStorageOfferById(vmInstance.getStorageOfferingId()).getUuid());
-            //Check the disk size not null validation and set the disk size
-            if (vmInstance.getDiskSize() != null) {
-                instanceMap.put("size", vmInstance.getDiskSize().toString());
-            }
-            //Check the disk Iops (Max and Min) not null validation and set the disk iops
-            if (vmInstance.getDiskMaxIops() != null && vmInstance.getDiskMinIops() != null) {
-                instanceMap.put("details[0].maxIopsDo",vmInstance.getDiskMaxIops().toString());
-                instanceMap.put("details[0].minIopsDo", vmInstance.getDiskMinIops().toString());
-            }
-    }
 }

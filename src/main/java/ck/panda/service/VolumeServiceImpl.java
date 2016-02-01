@@ -331,7 +331,7 @@ public class VolumeServiceImpl implements VolumeService {
      * @param volume optional storage offering values
      * @param userId user details
      * @return optional values
-     * @throws Exception error
+     * @throws Exception error at option values
      */
     public HashMap<String, String> optionalValuesToMap(Volume volume, Long userId) throws Exception {
         HashMap<String, String> volumeMap = new HashMap<String, String>();
@@ -412,7 +412,7 @@ public class VolumeServiceImpl implements VolumeService {
      * @param volume Volume
      * @param userId user details
      * @param errors global error and field errors
-     * @throws Exception error
+     * @throws Exception error for creating volume
      * @return Volumes
      */
     private Volume createVolume(Volume volume, Long userId, Errors errors) throws Exception {
@@ -480,7 +480,7 @@ public class VolumeServiceImpl implements VolumeService {
      * @param errors error creating status.
      * @param errMessage error message.
      * @return errors.
-     * @throws Exception error
+     * @throws Exception error for validation
      */
     private Errors validateEvent(Errors errors, String errMessage) throws Exception {
         errors.addGlobalError(errMessage);
@@ -518,7 +518,7 @@ public class VolumeServiceImpl implements VolumeService {
      *
      * @param volume volume
      * @param errors errors
-     * @throws Exception error
+     * @throws Exception error for attach volume
      * @return volume
      */
     public Volume attach(Volume volume, Errors errors) throws Exception {
@@ -573,7 +573,7 @@ public class VolumeServiceImpl implements VolumeService {
      *
      * @param volume volume
      * @param errors errors
-     * @throws Exception error
+     * @throws Exception error for deatch volume
      * @return volume
      */
     public Volume detach(Volume volume, Errors errors) throws Exception {
@@ -616,7 +616,7 @@ public class VolumeServiceImpl implements VolumeService {
      *
      * @param volume volume
      * @param errors errors
-     * @throws Exception error
+     * @throws Exception error for resize volume
      * @return volume
      */
     public Volume resize(Volume volume, Errors errors) throws Exception {
@@ -689,7 +689,7 @@ public class VolumeServiceImpl implements VolumeService {
      * @param userId user details
      * @param domainId domain details
      * @param errors errors
-     * @throws Exception error
+     * @throws Exception error for upload volume
      * @return volume
      */
     public Volume upload(Volume volume, Long domainId, Long userId, Errors errors) throws Exception {
@@ -762,7 +762,7 @@ public class VolumeServiceImpl implements VolumeService {
      * To set response values from cloud stack.
      *
      * @param volume volume response.
-     * @throws Exception error
+     * @throws Exception error at upload volume
      */
     private void setUploadVolume(Volume volume) throws Exception {
         String uuid = volume.getUuid();

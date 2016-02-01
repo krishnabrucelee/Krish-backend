@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.repository.jpa.StorageOfferingRepository;
@@ -142,7 +141,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
      *
      * @param storage optional storage offering values
      * @return optional values
-     * @throws Exception error
+     * @throws Exception error at optional values
      */
     public HashMap<String, String> optional(StorageOffering storage) throws Exception {
         HashMap<String, String> stoarageMap = new HashMap<String, String>();
@@ -207,7 +206,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
      *
      * @param storage Storage offering
      * @param errors global error and field errors
-     * @throws Exception error
+     * @throws Exception error at storage creation
      */
     private void createStorage(StorageOffering storage, Errors errors) throws Exception {
         config.setServer(1L);
@@ -234,7 +233,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
      *
      * @param storage Storage offering
      * @param errors global error and field errors
-     * @throws Exception error
+     * @throws Exception error at update storage
      */
     private void updateStorageOffering(StorageOffering storage, Errors errors) throws Exception {
         config.setServer(1L);
@@ -257,7 +256,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
      * @param errors error creating status.
      * @param errmessage error message.
      * @return errors.
-     * @throws Exception error
+     * @throws Exception error at validation
      */
     private Errors validateEvent(Errors errors, String errmessage) throws Exception {
         errors.addGlobalError(errmessage);
