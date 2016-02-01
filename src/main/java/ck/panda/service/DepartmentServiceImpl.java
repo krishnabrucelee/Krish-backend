@@ -215,7 +215,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             List<User> userResponse = userService.findByDepartment(department.getId());
             if (projectResponse.size() != 0 || vmResponse.size() != 0
                     || roleResponse.size() != 0 || volumeResponse.size() != 0) {
-                errors.addGlobalError(
+                errors.addGlobalError(GenericConstants.PAGE_ERROR_SEPARATOR + GenericConstants.TOKEN_SEPARATOR +
                         projectResponse.size() + GenericConstants.TOKEN_SEPARATOR +
                         vmResponse.size() + GenericConstants.TOKEN_SEPARATOR +
                         roleResponse.size() + GenericConstants.TOKEN_SEPARATOR +
