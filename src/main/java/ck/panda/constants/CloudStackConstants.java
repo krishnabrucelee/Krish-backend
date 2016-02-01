@@ -134,4 +134,10 @@ public class CloudStackConstants {
 
     /** Constant for register user key response. */
     public static final String CS_REGISTER_KEY_RESPONSE = "registeruserkeysresponse";
+
+    /** Constants for jobs status. */
+    public static final String ERROR_JOB_STATUS = "2", PROGRESS_JOB_STATUS = "0",  SUCCEEDED_JOB_STATUS = "1";
+
+    /** Constant for volume type. */
+    public static final String CS_VOLUME_TYPE = "type";
 }
