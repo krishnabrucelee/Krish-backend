@@ -124,7 +124,7 @@ public class NicController extends CRUDController<Nic> implements ApiController 
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<VmIpaddress> listByVMInstance(@RequestParam("instanceid") Long instanceId) throws Exception {
+    public List<VmIpaddress> listByVMInstance(@RequestParam("instanceId") Long instanceId) throws Exception {
         return nicOfferingService.findByVMInstance(instanceId);
     }
 

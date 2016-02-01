@@ -8,7 +8,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -34,9 +33,13 @@ public class VmIpaddress {
     @Column(name = "uuid")
     private String uuid;
 
-    /** Nic for an instance  */
-    @ManyToOne
-    private Nic nic;
+    /** Nic id . */
+    @Column(name = "nic_id")
+    private Long nicId;
+
+    /** Network ip Address to establish a connection. */
+    @Column(name = "primary_ip_address")
+    private String primaryIpAddress;
 
     /** Net mask value of Network . */
     @Column(name = "guest_ipaddress")
@@ -58,6 +61,11 @@ public class VmIpaddress {
     /** Transient network of the instance. */
     @Transient
     private String transvmInstanceId;
+
+    /** Transient nic id. */
+    @Transient
+    private String transNicId;
+
 
     /** Temporary variable. */
     @Transient
@@ -173,17 +181,57 @@ public class VmIpaddress {
     }
 
     /**
-     * @return the nic
+     *  Get the transNicId .
+     *
+     * @return the transNicId
      */
-    public Nic getNic() {
-        return nic;
+    public String getTransNicId() {
+        return transNicId;
     }
 
     /**
-     * @param nic the nic to set
+     * Set the transNicId .
+     *
+     * @param transNicId to set
      */
-    public void setNic(Nic nic) {
-        this.nic = nic;
+    public void setTransNicId(String transNicId) {
+        this.transNicId = transNicId;
+    }
+
+    /**
+     * Get the nicId.
+     *
+     * @return the nicId
+     */
+    public Long getNicId() {
+        return nicId;
+    }
+
+    /**
+     * Set the nicId.
+     *
+     * @param nicId  to set
+     */
+    public void setNicId(Long nicId) {
+        this.nicId = nicId;
+    }
+
+    /**
+     * Get the transvmInstanceId.
+     *
+     * @return the transvmInstanceId
+     */
+    public String getTransvmInstanceId() {
+        return transvmInstanceId;
+    }
+
+    /**
+     * Set the transvmInstanceId.
+     *
+     * @param transvmInstanceId  to set
+     */
+    public void setTransvmInstanceId(String transvmInstanceId) {
+        this.transvmInstanceId = transvmInstanceId;
     }
 
    /** Get the syncFlag.
@@ -203,6 +251,23 @@ public class VmIpaddress {
        this.syncFlag = syncFlag;
    }
 
+   /**
+    * Get the primaryIpAddress .
+    *
+    * @return the primaryIpAddress
+    */
+   public String getPrimaryIpAddress() {
+      return primaryIpAddress;
+   }
+
+  /**
+   * Set the primaryIpAddress .
+   *
+   * @param primaryIpAddress to set
+   */
+   public void setPrimaryIpAddress(String primaryIpAddress) {
+      this.primaryIpAddress = primaryIpAddress;
+   }
 
     /**
      * Convert JSONObject to vm ip address entity.
@@ -215,23 +280,25 @@ public class VmIpaddress {
         VmIpaddress vm = new VmIpaddress();
         vm.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
         vm.setGuestIpAddress(JsonUtil.getStringValue(jsonObject, "ipaddress"));
+        vm.setTransNicId(JsonUtil.getStringValue(jsonObject, "nicuuid"));
         vm.setIsActive(true);
+        vm.setSyncFlag(false);
         return vm;
     }
         /**
          * Mapping entity object into list.
          *
-         * @param vmIpaddressList list of nics.
-         * @return nicMap nics.
+         * @param vmIpaddressList of secondary ip address
+         * @return vmIpaddressListMap secondary ip address.
          */
     public static Map<String, VmIpaddress> convert(List<VmIpaddress> vmIpaddressList) {
-    	Map<String, VmIpaddress> vmIpaddressListMap = new HashMap<String, VmIpaddress>();
+        Map<String, VmIpaddress> vmIpaddressListMap = new HashMap<String, VmIpaddress>();
 
-    	for (VmIpaddress nic : vmIpaddressList) {
-    		vmIpaddressListMap.put(nic.getUuid(), nic);
-    	}
+        for (VmIpaddress vmIp : vmIpaddressList) {
+            vmIpaddressListMap.put(vmIp.getUuid(), vmIp);
+        }
 
-    	return vmIpaddressListMap;
+        return vmIpaddressListMap;
     }
 
 }

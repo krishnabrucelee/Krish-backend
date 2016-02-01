@@ -108,7 +108,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     private HypervisorService hypervisorService;
 
     @Override
-    @PreAuthorize("hasPermission(#vminstance.getSyncFlag(), 'CREATE_VM')")
+    @PreAuthorize("hasPermission(#vmInstance.getSyncFlag(), 'CREATE_VM')")
     public VmInstance save(VmInstance vmInstance) throws Exception {
         LOGGER.debug("instance sync ", vmInstance.getSyncFlag());
         if (vmInstance.getSyncFlag()) {
