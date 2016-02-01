@@ -61,7 +61,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     private static final String CS_MEMORY = "memory";
 
     /** Constant for compute. */
-    private static final String COMPUTE = "compute";
+    private static final String CS_COMPUTE = "compute";
 
     /** Constant for cpu number. */
     private static final String CS_CPU_CORE = "cpunumber";
@@ -95,7 +95,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
 
         if (compute.getIsSyncFlag()) {
             this.validateComputeOffering(compute);
-            Errors errors = validator.rejectIfNullEntity(COMPUTE, compute);
+            Errors errors = validator.rejectIfNullEntity(CS_COMPUTE, compute);
             errors = validator.validateEntity(compute, errors);
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
@@ -127,7 +127,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     public ComputeOffering update(ComputeOffering compute) throws Exception {
         if (compute.getIsSyncFlag()) {
             this.validateComputeOffering(compute);
-            Errors errors = validator.rejectIfNullEntity(COMPUTE, compute);
+            Errors errors = validator.rejectIfNullEntity(CS_COMPUTE, compute);
             errors = validator.validateEntity(compute, errors);
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
@@ -158,7 +158,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     @Override
     public ComputeOffering softDelete(ComputeOffering compute) throws Exception {
         if (compute.getIsSyncFlag()) {
-            Errors errors = validator.rejectIfNullEntity(COMPUTE, compute);
+            Errors errors = validator.rejectIfNullEntity(CS_COMPUTE, compute);
             errors = validator.validateEntity(compute, errors);
             // set server for finding value in configuration
             cscomputeOffering.setServer(configServer.setServer(1L));
@@ -283,7 +283,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
      * @throws Exception error occurs
      */
     private void validateComputeOffering(ComputeOffering compute) throws Exception {
-        Errors errors = validator.rejectIfNullEntity(COMPUTE, compute);
+        Errors errors = validator.rejectIfNullEntity(CS_COMPUTE, compute);
         errors = validator.validateEntity(compute, errors);
         ComputeOffering computeOffering = computeRepo.findNameAndIsActive(compute.getName(), true);
         if (computeOffering != null && compute.getId() != computeOffering.getId()) {
