@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -30,10 +31,11 @@ public interface DepartmentService extends CRUDService<Department> {
      * Find all the departments with active status.
      *
      * @param pagingAndSorting pagination and sorting values.
+     * @param userId user id of the department.
      * @return list of departments with pagination.
      * @throws Exception error occurs
      */
-    Page<Department> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
+    Page<Department> findAllByActive(PagingAndSorting pagingAndSorting, Long userId) throws Exception;
 
     /**
      * To get list of domains from cloudstack server.
@@ -110,5 +112,16 @@ public interface DepartmentService extends CRUDService<Department> {
      * @throws Exception unhandled errors.
      */
     Department findbyUUID(String uuid) throws Exception;
+
+
+    /**
+     * Save the department.
+     *
+     * @param department Department entity
+     * @param userId id of the user
+     * @return saved entity
+     * @throws Exception error occurs
+     */
+    Department save(Department department, Long userId) throws Exception;
 
 }

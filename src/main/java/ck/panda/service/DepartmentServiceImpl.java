@@ -8,7 +8,6 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,6 @@ import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackAccountService;
 import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
-import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -53,21 +51,9 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Autowired
     private CloudStackAccountService csAccountService;
 
-    /** CloudStack configuration reference. */
-    @Autowired
-    private ConfigUtil configServer;
-
-    /** Secret key for the user encryption. */
-    @Value(value = "${aes.salt.secretKey}")
-    private String secretKey;
-
     /** Reference of the convert entity service. */
     @Autowired
     private ConvertEntityService convertEntityService;
-
-    /** Autowired TokenDetails. */
-    @Autowired
-    private TokenDetails tokenDetails;
 
     /** Domain repository reference. */
     @Autowired
@@ -101,14 +87,19 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Autowired
     private UserService userService;
 
+    public static final String BAREMETAL_SYSTEM_ACCOUNT = "baremetal-system-account";
+
+
     @Override
     @PreAuthorize("hasPermission(#department.getSyncFlag(), 'ADD_DEPARTMENT')")
-    public Department save(Department department) throws Exception {
+    public Department save(Department department, Long userId) throws Exception {
         if (department.getSyncFlag()) {
+            User user = convertEntityService.getOwnerById(userId);
             // Check the user is not a root and admin and set the domain value from login detail
-            if (!String.valueOf(tokenDetails.getTokenDetails("usertype")).equals("ROOT_ADMIN")) {
-                department.setDomainId(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+            if (user.getType().equals(User.UserType.ROOT_ADMIN)) {
+                department.setDomainId(user.getDomainId());
             }
+
             // Validate department
             this.validateDepartment(department);
             Domain domain = domainService.find(department.getDomainId());
@@ -200,15 +191,9 @@ public class DepartmentServiceImpl implements DepartmentService {
         return (List<Department>) departmentRepo.findAllByIsActive(true, AccountType.USER);
     }
 
-    /**
-     * Find all the departments with pagination.
-     *
-     * @throws Exception application errors.
-     * @param pagingAndSorting do pagination with sorting for departments.
-     * @return list of departments.
-     */
-    public Page<Department> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
-        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+    @Override
+    public Page<Department> findAllByActive(PagingAndSorting pagingAndSorting, Long userId) throws Exception {
+        Domain domain = convertEntityService.getOwnerById(userId).getDomain();
         if (domain != null && !domain.getName().equals("ROOT")) {
             return departmentRepo.findByDomainAndIsActive(domain.getId(), true, pagingAndSorting.toPageRequest(),
                     AccountType.USER);
@@ -275,7 +260,7 @@ public class DepartmentServiceImpl implements DepartmentService {
                 // Add the converted department entity to list
                 Department department = Department.convert(userListJSON.getJSONObject(i));
                 department.setDomainId(convertEntityService.getDomainId(department.getTransDomainId()));
-                if (!department.getUserName().equalsIgnoreCase("baremetal-system-account")) {
+                if (!department.getUserName().equalsIgnoreCase(BAREMETAL_SYSTEM_ACCOUNT)) {
                     departmentList.add(department);
                 }
             }
@@ -305,7 +290,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public List<Department> findByAccountTypesAndActive(List<AccountType> types, Boolean isActive)
             throws Exception {
-        return (List<Department>) departmentRepo.findDepartmentsByAccountTypesAndActive(types, isActive);
+        return (List<Department>) departmentRepo.findByAccountTypesAndActive(types, isActive);
     }
 
     /**
@@ -321,13 +306,18 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public List<Department> findByDomainAndAccountTypesAndActive(Long domainId, List<AccountType> types,
             Boolean isActive) throws Exception {
-        return (List<Department>) departmentRepo.findDepartmentsByDomainAndAccountTypesAndActive(domainId, types,
+        return (List<Department>) departmentRepo.findByDomainAndAccountTypesAndActive(domainId, types,
                 isActive);
     }
 
     @Override
     public Department findbyUUID(String uuid) throws Exception {
         return departmentRepo.findByUuidAndIsActive(uuid, true);
+    }
+
+    @Override
+    public Department save(Department department) throws Exception {
+        return null;
     }
 
 }
