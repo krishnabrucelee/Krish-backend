@@ -2339,6 +2339,8 @@ public class SyncServiceImpl implements SyncService {
                 Role role = roleService.findByNameAndDepartmentIdAndIsActive("FULL_PERMISSION", user.getDepartmentId(),
                         true);
                 user.setRoleId(role.getId());
+
+                user.setSyncFlag(false);
                 user.setSyncFlag(false);
                 userService.update(user);
             }
