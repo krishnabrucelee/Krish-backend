@@ -2,10 +2,14 @@ package ck.panda.util;
 
 import java.util.HashMap;
 
-public class CloudStackOptionalUtil {
+/**
+ * In order to handle optional values for ACS.
+ *
+ */
+public abstract class CloudStackOptionalUtil {
 
      /**
-     * Update the Cloudstack API optional values.
+     * Update the Cloudstack API optional String values.
      *
      * @param key of the property
      * @param value of the property
@@ -21,7 +25,7 @@ public class CloudStackOptionalUtil {
     }
 
     /**
-     * Update the Cloudstack API optional values.
+     * Update the Cloudstack API Integer optional values.
      *
      * @param key of the property
      * @param value of the property
@@ -37,7 +41,7 @@ public class CloudStackOptionalUtil {
     }
 
     /**
-     * Update the Cloudstack API optional values.
+     * Update the Cloudstack API optional Boolean values.
      *
      * @param key of the property
      * @param value of the property

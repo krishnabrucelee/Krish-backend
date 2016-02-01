@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.ComputeOffering;
 
 /**
- * ComputeOfferingRepository interface that extends PagingAndSortingRepository along with sorting AND pagination.
+ * Compute Offering Repository interface that extends PagingAndSortingRepository along with sorting AND pagination.
  */
 public interface ComputeOfferingRepository extends PagingAndSortingRepository<ComputeOffering, Long> {
     /**
@@ -26,7 +26,7 @@ public interface ComputeOfferingRepository extends PagingAndSortingRepository<Co
      * Find all the active or inactive compute offering with pagination.
      *
      * @param pageable to get the list with pagination.
-     * @param isActive get the snapshot list based on active/inactive status.
+     * @param isActive get the compute offering list based on active/inactive status.
      * @return list of compute offerings.
      */
     @Query(value = "SELECT compute FROM ComputeOffering compute WHERE compute.isActive = :isActive")
@@ -36,6 +36,7 @@ public interface ComputeOfferingRepository extends PagingAndSortingRepository<Co
      * Find by name of the offering.
      *
      * @param name of compute offering.
+     * @param isActive get the compute offering list based on active/inactive status.
      * @return compute offering.
      */
     @Query(value = "SELECT compute FROM ComputeOffering compute WHERE compute.name = :name AND compute.isActive = :isActive")
