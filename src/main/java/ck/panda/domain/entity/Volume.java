@@ -1008,10 +1008,10 @@ public class Volume {
      *
      * @param object json object
      * @return Volume entity objects
-     * @throws JSONException unhandled json errors
+     * @throws Exception error at volume
      */
     @SuppressWarnings("static-access")
-    public static Volume convert(JSONObject object) throws JSONException {
+    public static Volume convert(JSONObject object) throws Exception {
         Volume volume = new Volume();
         volume.setIsSyncFlag(false);
         try {
@@ -1044,7 +1044,7 @@ public class Volume {
             volume.setTransDepartmentId((JsonUtil.getStringValue(object, CloudStackConstants.CS_ACCOUNT)));
             volume.setTransProjectId(JsonUtil.getStringValue(object, CloudStackConstants.CS_PROJECT_ID));
         } catch (Exception e) {
-            e.printStackTrace();
+        	throw new Exception(e);
         }
 
         return volume;

@@ -22,8 +22,6 @@ import javax.validation.constraints.Size;
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -43,9 +41,6 @@ import ck.panda.util.JsonValidator;
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "storage_offerings")
 public class StorageOffering {
-
-    /** Logger attribute. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(StorageOffering.class);
 
     /**
      * Unique ID of the storage offering.
@@ -815,7 +810,7 @@ public class StorageOffering {
                     .setStorageType(StorageType.valueOf(JsonValidator.jsonStringValidation(storageMap, CloudStackConstants.CS_STORAGE_TYPE)));
             storageOffering.setCreatedDateTime(JsonUtil.convertToZonedDateTime(storageMap.getString(CloudStackConstants.CS_CREATED)));
         } catch (Exception e) {
-        	LOGGER.error("ERROR AT STORAGE OFFERING", e);
+            throw new Exception(e);
         }
         return storageOffering;
     }
