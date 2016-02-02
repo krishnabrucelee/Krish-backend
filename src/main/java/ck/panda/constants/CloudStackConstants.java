@@ -224,8 +224,8 @@ public class CloudStackConstants {
     /** Constant for display vm. */
     public static final String CS_DISPLAY_VM = "displayvm";
 
-    /** Constant for is ready state. */
-    public static final String CS_READY_STATE = "isready";
+    /** Constant for active vm. */
+    public static final String CS_ACTIVE_VM = "true";
 
     /** Constant for keyboard type. */
     public static final String CS_KEYBOARD_TYPE = "keyboard";
@@ -349,7 +349,7 @@ public class CloudStackConstants {
 
     /** Constant used scale vm response. */
     public static final String SCALE_VM_RESPONSE = "scalevirtualmachineresponse";
-    
+
     /** Constant for command information. */
     public static final String CS_CMD_INFO = "cmdInfo";
 
