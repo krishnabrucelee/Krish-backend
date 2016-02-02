@@ -1708,7 +1708,7 @@ public class SyncServiceImpl implements SyncService {
 
     @Override
     public void syncResourceLimit() throws ApplicationException, Exception {
-        List<Domain> domains = domainService.findAll();
+        List<Domain> domains = domainService.findAllDomain();
         for (Domain domain : domains) {
             syncResourceLimitDomain(domain);
         }
