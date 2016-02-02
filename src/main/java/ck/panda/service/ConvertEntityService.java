@@ -10,7 +10,6 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Department;
@@ -35,6 +34,52 @@ import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
  */
 @Service
 public class ConvertEntityService {
+
+    /** Constant for Instance resource type. */
+    public static final String CS_INSTANCE = "0";
+
+    /** Constant for Ip resource type. */
+    public static final String CS_IP = "1";
+
+    /** Constant for Volume resource type. */
+    public static final String CS_VOLUME = "2";
+
+    /** Constant for Snapshot resource type. */
+    public static final String CS_SNAPSHOT = "3";
+
+    /** Constant for Template resource type. */
+    public static final String CS_TEMPLATE = "4";
+
+    /** Constant for Project resource type. */
+    public static final String CS_PROJECT = "5";
+
+    /** Constant for Network resource type. */
+    public static final String CS_NETWORK = "6";
+
+    /** Constant for Vpc resource type. */
+    public static final String CS_VPC = "7";
+
+    /** Constant for Cpu resource type. */
+    public static final String CS_CPU = "8";
+
+    /** Constant for Memery resource type. */
+    public static final String CS_MEMORY = "9";
+
+    /** Constant for Primary storage resource type. */
+    public static final String CS_PRIMARY_STORAGE = "10";
+
+    /** Constant for Secondary storage resource type. */
+    public static final String CS_SECONDARY_STORAGE = "11";
+
+    /** Constant for resource type. */
+    public static final String CS_RESOUCE_TYPE = "resourcetype";
+
+    /** Constant for resource count. */
+    public static final String CS_RESOUCE_COUNT = "resourcecount";
+
+    /** Constant for update resource count. */
+    public static final String CS_UPDATE_RESOURCE_RESPONSE = "updateresourcecountresponse";
+
     /** Domain Service for listing domains. */
     @Autowired
     private DomainService domainService;
@@ -917,20 +962,21 @@ public class ConvertEntityService {
 	public void resourceCount(String csResponse) throws Exception {
 		JSONArray resourceCountArrayJSON = null;
 		// get cloud stack resource count response
-		JSONObject csCountJson = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
+		JSONObject csCountJson = new JSONObject(csResponse).getJSONObject(CS_UPDATE_RESOURCE_RESPONSE);
 		// If json response has resource count object
-		if (csCountJson.has("resourcecount")) {
-			resourceCountArrayJSON = csCountJson.getJSONArray("resourcecount");
+		if (csCountJson.has(CS_RESOUCE_COUNT)) {
+			resourceCountArrayJSON = csCountJson.getJSONArray(CS_RESOUCE_COUNT);
 			// Iterate resource count response from resource type
 			for (int i = 0, size = resourceCountArrayJSON.length(); i < size; i++) {
 				// get resource count, type, domain and set in a variable for
 				// future use
-				String resourceCount = resourceCountArrayJSON.getJSONObject(i).getString("resourcecount");
-				String resourceType = resourceCountArrayJSON.getJSONObject(i).getString("resourcetype");
-				String domainId = resourceCountArrayJSON.getJSONObject(i).getString("domainid");
+				String resourceCount = resourceCountArrayJSON.getJSONObject(i).getString(CS_RESOUCE_COUNT);
+				String resourceType = resourceCountArrayJSON.getJSONObject(i).getString(CS_RESOUCE_TYPE);
+				String domainId = resourceCountArrayJSON.getJSONObject(i)
+						.getString(CloudStackConstants.CS_DEPARTMENT_ID);
 				// check resource type other than 5(resource type of project)
 				// and allow to update
-				if (!resourceType.equals("5")) {
+				if (!resourceType.equals(CS_PROJECT)) {
 					// Map and get the resource count for current resource type
 					// value
 					HashMap<String, String> resourceMap = getResourceTypeValue();
@@ -946,7 +992,7 @@ public class ConvertEntityService {
 							// Check resource type primary = 10 and secondary
 							// storage = 11 and convert resource
 							// count values GiB to MB.
-							if (resourceType.equals("10") || resourceType.equals("11")) {
+							if (resourceType.equals(CS_PRIMARY_STORAGE) || resourceType.equals(CS_SECONDARY_STORAGE)) {
 								// Convert and set Available resource count of
 								// primary and secondary GiB to MB.
 								resourceDomainCount.setAvailable(resourceDomainCount.getMax()
@@ -981,17 +1027,17 @@ public class ConvertEntityService {
     private HashMap<String, String> getResourceTypeValue() {
         HashMap<String, String> resourceMap = new HashMap<>();
         //Map and get the resource count for current resource type value
-        resourceMap.put("0", String.valueOf(ResourceType.Instance));
-        resourceMap.put("1", String.valueOf(ResourceType.IP));
-        resourceMap.put("2", String.valueOf(ResourceType.Volume));
-        resourceMap.put("3", String.valueOf(ResourceType.Snapshot));
-        resourceMap.put("4", String.valueOf(ResourceType.Template));
-        resourceMap.put("6", String.valueOf(ResourceType.Network));
-        resourceMap.put("7", String.valueOf(ResourceType.VPC));
-        resourceMap.put("8", String.valueOf(ResourceType.CPU));
-        resourceMap.put("9", String.valueOf(ResourceType.Memory));
-        resourceMap.put("10", String.valueOf(ResourceType.PrimaryStorage));
-        resourceMap.put("11", String.valueOf(ResourceType.SecondaryStorage));
+        resourceMap.put(CS_INSTANCE, String.valueOf(ResourceType.Instance));
+        resourceMap.put(CS_IP, String.valueOf(ResourceType.IP));
+        resourceMap.put(CS_VOLUME, String.valueOf(ResourceType.Volume));
+        resourceMap.put(CS_SNAPSHOT, String.valueOf(ResourceType.Snapshot));
+        resourceMap.put(CS_TEMPLATE, String.valueOf(ResourceType.Template));
+        resourceMap.put(CS_NETWORK, String.valueOf(ResourceType.Network));
+        resourceMap.put(CS_VPC, String.valueOf(ResourceType.VPC));
+        resourceMap.put(CS_CPU, String.valueOf(ResourceType.CPU));
+        resourceMap.put(CS_MEMORY, String.valueOf(ResourceType.Memory));
+        resourceMap.put(CS_PRIMARY_STORAGE, String.valueOf(ResourceType.PrimaryStorage));
+        resourceMap.put(CS_SECONDARY_STORAGE, String.valueOf(ResourceType.SecondaryStorage));
         return resourceMap;
     }
 
