@@ -27,6 +27,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -37,6 +38,12 @@ import ck.panda.util.JsonUtil;
 @Table(name = "resource_limit_projects")
 @SuppressWarnings("serial")
 public class ResourceLimitProject implements Serializable {
+
+    /** Constant for resource type. */
+    public static final String CS_RESOUCE_TYPE = "resourcetype";
+
+    /** Constant for max resource limits. */
+    public static final String CS_MAX = "max";
 
     /** Unique ID of the Resource limit. */
     @Id
@@ -592,10 +599,10 @@ public class ResourceLimitProject implements Serializable {
             resource.setIsSyncFlag(false);
             try {
                resource.setIsActive(true);
-                resource.setResourceType(ResourceType.values()[(JsonUtil.getIntegerValue(jsonObject, "resourcetype"))]);
-                resource.setTransProjectId(JsonUtil.getStringValue(jsonObject, "projectid"));
-                resource.setMax(resource.getMax().valueOf(JsonUtil.getIntegerValue(jsonObject, "max")));
-                resource.setTransResourceType(JsonUtil.getIntegerValue(jsonObject, "resourcetype"));
+                resource.setResourceType(ResourceType.values()[(JsonUtil.getIntegerValue(jsonObject, CS_RESOUCE_TYPE))]);
+                resource.setTransProjectId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_PROJECT_ID));
+                resource.setMax(resource.getMax().valueOf(JsonUtil.getIntegerValue(jsonObject, CS_MAX)));
+                resource.setTransResourceType(JsonUtil.getIntegerValue(jsonObject, CS_RESOUCE_TYPE));
             } catch (Exception e) {
                 e.printStackTrace();
             }
