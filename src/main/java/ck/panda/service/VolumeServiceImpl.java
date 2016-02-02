@@ -335,7 +335,7 @@ public class VolumeServiceImpl implements VolumeService {
      */
     public HashMap<String, String> optionalValuesToMap(Volume volume, Long userId) throws Exception {
         HashMap<String, String> volumeMap = new HashMap<String, String>();
-        CloudStackOptionalUtil.updateOptionalLongValue(CloudStackConstants.CS_DISK_SIZE,
+        CloudStackOptionalUtil.updateOptionalLongValue(CloudStackConstants.CS_SIZE,
                 volume.getDiskSize(), volumeMap);
         CloudStackOptionalUtil.updateOptionalLongValue(CloudStackConstants.CS_MIN_IOPS,
                 volume.getDiskMinIops(), volumeMap);
@@ -870,7 +870,10 @@ public class VolumeServiceImpl implements VolumeService {
 
     @Override
     public Volume save(Volume volume) throws Exception {
-        return volumeRepo.save(volume);
+        if (!volume.getIsSyncFlag()) {
+            return volumeRepo.save(volume);
+        }
+        return volume;
     }
 
 }
