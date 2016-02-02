@@ -105,12 +105,12 @@ public class ResourceStateListener implements MessageListener {
                     VmInstance vmInstance = virtualmachineservice.findByUUID(resourceEvent.getString("id"));
                     if (vmInstance != null) {
                         if (resourceEvent.getString(EventTypes.RESOURCE_STATE).equals("Error")) {
-                            vmInstance.setStatus(Status.valueOf(resourceEvent.getString(EventTypes.RESOURCE_STATE)));
+                            vmInstance.setStatus(Status.valueOf(resourceEvent.getString(EventTypes.RESOURCE_STATE).toUpperCase()));
                             vmInstance.setEventMessage(resourceEvent.getString(EventTypes.RESOURCE_STATE) + "occured");
                         }
                         LOGGER.info("VM event message", resourceEvent);
                         if (resourceEvent != null) {
-                            vmInstance.setStatus(Status.valueOf(resourceEvent.getString(EventTypes.RESOURCE_STATE)));
+                            vmInstance.setStatus(Status.valueOf(resourceEvent.getString(EventTypes.RESOURCE_STATE).toUpperCase()));
                             vmInstance.setEventMessage("");
                         }
                         vmInstance.setSyncFlag(false);

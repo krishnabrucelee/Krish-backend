@@ -8,7 +8,6 @@ import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import ck.panda.domain.entity.Role;
-import ck.panda.domain.repository.jpa.DepartmentReposiory;
 import ck.panda.domain.repository.jpa.RoleReposiory;
 import ck.panda.util.TokenDetails;
 
@@ -27,10 +26,6 @@ public class RolePermissionService implements PermissionEvaluator {
     @Autowired
     private RoleReposiory roleReposiory;
 
-    /** Department repository reference. */
-    @Autowired
-    private DepartmentReposiory departmentReposiory;
-
     /** Token details repository reference. */
     @Autowired
     private TokenDetails tokenDetails;
@@ -47,8 +42,9 @@ public class RolePermissionService implements PermissionEvaluator {
                     return true;
                 }
             }
-            Role role = roleReposiory.findUniqueness(tokenDetails.getTokenDetails("rolename"),
-                    Long.parseLong(tokenDetails.getTokenDetails("departmentid")));
+            Role role = roleReposiory.findRoleWithPermissionsByNameAndDepartment(
+                    tokenDetails.getTokenDetails("rolename"),
+                    Long.parseLong(tokenDetails.getTokenDetails("departmentid")), true);
             for (int i = 0; i < role.getPermissionList().size(); i++) {
                 if (role.getPermissionList().get(i).getActionKey().equals(permission.toString())) {
                     return true;

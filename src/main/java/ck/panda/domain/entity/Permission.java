@@ -2,13 +2,11 @@ package ck.panda.domain.entity;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.hibernate.annotations.Type;
@@ -53,10 +51,6 @@ public class Permission implements Serializable {
     /** Assign module category. */
     @Column(name = "module")
     private Module module;
-
-    /** List of role for permission. */
-    @ManyToMany
-    private List<Role> roleList;
 
     /** Check whether Permission is in active state or in active state. */
     @Column(name = "is_active")
@@ -190,24 +184,6 @@ public class Permission implements Serializable {
      */
     public void setModule(Module module) {
         this.module = module;
-    }
-
-    /**
-     * Get role list of the permission.
-     *
-     * @return the roleList
-     */
-    public List<Role> getRoleList() {
-        return roleList;
-    }
-
-    /**
-     * Set the role list of the permission.
-     *
-     * @param roleList the roleList to set
-     */
-    public void setRoleList(List<Role> roleList) {
-        this.roleList = roleList;
     }
 
     /**

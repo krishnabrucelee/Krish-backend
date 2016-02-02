@@ -1,5 +1,6 @@
 package ck.panda.domain.entity;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +32,8 @@ import ck.panda.util.JsonUtil;
  */
 @Entity
 @Table(name = "clusters")
-public class Cluster {
+@SuppressWarnings("serial")
+public class Cluster implements Serializable {
 
     /** Unique Id of the cluster. */
     @Id

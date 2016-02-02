@@ -243,8 +243,8 @@ public class NetworkServiceImpl implements NetworkService {
         errors = validator.validateEntity(network, errors);
         network.setIsActive(false);
         if (network.getSyncFlag()) {
-            List<VmInstance> vmResponse = vmService.findByNetworkAndVmStatus(network.getId(),
-                    VmInstance.Status.Expunging);
+            List<VmInstance> vmResponse = vmService.findAllByNetworkAndVmStatus(network.getId(),
+                    VmInstance.Status.EXPUNGING);
             if (vmResponse.size() != 0) {
                 errors.addGlobalError("Network is associated with Vm instances. You cannot delete this network");
             }
@@ -298,9 +298,9 @@ public class NetworkServiceImpl implements NetworkService {
      */
     private Page<Network> getNetworkListByUser(PagingAndSorting pagingAndSorting, Long userId) throws  Exception {
                 User user = convertEntityService.getOwnerById(userId);
-                 if (projectService.findByUserAndIsActive(user.getId(), true).size() > 0) {
+                 if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
                 List<Network> networkList = new ArrayList<Network>();
-                for (Project project : projectService.findByUserAndIsActive(user.getId(), true)) {
+                for (Project project : projectService.findAllByUserAndIsActive(user.getId(), true)) {
                     List<Network> projectNetwork = networkRepo.findByProjectDepartmentAndNetwork(project.getId(),
                             user.getDepartmentId(), true);
                     networkList.addAll(projectNetwork);

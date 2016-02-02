@@ -21,6 +21,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.User;
 import ck.panda.service.UserService;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -34,6 +35,10 @@ public class UserController extends CRUDController<User> implements ApiControlle
     /** Inject userService business logic. */
     @Autowired
     private UserService userService;
+
+    /** Autowired TokenDetails. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new User.", response = User.class)
     @Override
@@ -75,7 +80,7 @@ public class UserController extends CRUDController<User> implements ApiControlle
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, User.class);
-        Page<User> pageResponse = userService.findAllUserByDomain(page);
+        Page<User> pageResponse = userService.findAllUserByDomain(page, Long.valueOf(tokenDetails.getTokenDetails("id")));
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
@@ -119,7 +124,7 @@ public class UserController extends CRUDController<User> implements ApiControlle
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<User> findAllByDepartmentwithLoggedUser(@RequestParam("dept") Long deptId) throws Exception {
-        return userService.findByDepartmentWithLoggedUser(deptId);
+        return userService.findByDepartmentWithLoggedUser(deptId, Long.valueOf(tokenDetails.getTokenDetails("id")));
     }
 
     /**
@@ -132,7 +137,7 @@ public class UserController extends CRUDController<User> implements ApiControlle
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<User> findAllUserByDomain() throws Exception {
-        return userService.findAllUserByDomain();
+        return userService.findAllUserByDomain(Long.valueOf(tokenDetails.getTokenDetails("id")));
     }
 
     /**
