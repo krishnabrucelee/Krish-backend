@@ -289,7 +289,8 @@ public class RabbitConfig {
     @Bean
     MessageListenerAdapter resourceStateListenerAdapter() {
         ConvertEntityService convertEntityService = applicationContext.getBean(ConvertEntityService.class);
-        return new MessageListenerAdapter(new ResourceStateListener(convertEntityService));
+        SyncService sync = applicationContext.getBean(SyncService.class);
+        return new MessageListenerAdapter(new ResourceStateListener(convertEntityService,sync));
     }
 
     /**

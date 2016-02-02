@@ -66,4 +66,12 @@ public interface DomainService extends CRUDService<Domain> {
      */
     List<Domain> findAllDomain() throws Exception;
 
+     /**
+     * Retrieves domain entity by its id.
+     *
+     * @return domain
+     * @throws Exception unhandled errors.
+     */
+    Domain findDomain() throws Exception;
+
 }

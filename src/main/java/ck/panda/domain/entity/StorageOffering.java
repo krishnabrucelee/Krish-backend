@@ -811,7 +811,7 @@ public class StorageOffering implements Serializable {
                     .setStorageType(StorageType.valueOf(JsonValidator.jsonStringValidation(storageMap, CloudStackConstants.CS_STORAGE_TYPE)));
             storageOffering.setCreatedDateTime(JsonUtil.convertToZonedDateTime(storageMap.getString(CloudStackConstants.CS_CREATED)));
         } catch (Exception e) {
-            throw new Exception(e);
+            throw new Exception(e.getMessage());
         }
         return storageOffering;
     }

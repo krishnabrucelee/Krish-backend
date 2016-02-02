@@ -1924,6 +1924,7 @@ public class SyncServiceImpl implements SyncService {
                 Nic csNic = csNicMap.get(nic.getUuid());
 
                 nic.setUuid(csNic.getUuid());
+                nic.setVmIpAddress(csNic.getVmIpAddress());
 
                 // 3.2 If found, update the nic object in app db
                 nicService.update(nic);
@@ -2071,7 +2072,10 @@ public class SyncServiceImpl implements SyncService {
 
                 ipAddress.setUuid(csNic.getUuid());
                 ipAddress.setPublicIpAddress(csNic.getPublicIpAddress());
-
+                ipAddress.setState(csNic.getState());
+                ipAddress.setIsSourcenat(csNic.getIsSourcenat());
+                ipAddress.setIsStaticnat(csNic.getIsStaticnat());
+                ipAddress.setNetworkId(csNic.getNetworkId());
                 // 3.2 If found, update the nic object in app db
                 ipAddressService.update(ipAddress);
 

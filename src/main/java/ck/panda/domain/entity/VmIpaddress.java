@@ -9,11 +9,11 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.json.JSONObject;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -21,9 +21,12 @@ import ck.panda.util.JsonUtil;
  *
  */
 @Entity
-@Table(name = "vmIpaddress")
+@Table(name = "vm_ipaddress")
 @SuppressWarnings("serial")
 public class VmIpaddress implements Serializable {
+
+     /** Constant for nic uuid. */
+    public static final String CS_NIC_UUID = "nicuuid";
 
     /** ID of the nic. */
     @Id
@@ -35,9 +38,13 @@ public class VmIpaddress implements Serializable {
     @Column(name = "uuid")
     private String uuid;
 
-    /** Nic for an instance.  */
-    @ManyToOne
-    private Nic nic;
+    /** Nic id . */
+    @Column(name = "nic_id")
+    private Long nicId;
+
+    /** Network ip Address to establish a connection. */
+    @Column(name = "primary_ip_address")
+    private String primaryIpAddress;
 
     /** Net mask value of Network . */
     @Column(name = "guest_ipaddress")
@@ -60,10 +67,14 @@ public class VmIpaddress implements Serializable {
     @Transient
     private String transvmInstanceId;
 
+    /** Transient nic id. */
+    @Transient
+    private String transNicId;
+
+
     /** Temporary variable. */
     @Transient
     private Boolean syncFlag;
-
 
     /**
      * Get the id of the vm Ip address.
@@ -120,7 +131,7 @@ public class VmIpaddress implements Serializable {
     }
 
     /**
-     * Get instance Id.
+     * Get the vm instance id.
      *
      * @return the vmInstanceId
      */
@@ -129,7 +140,7 @@ public class VmIpaddress implements Serializable {
     }
 
     /**
-     * Set the vmInstanceId .
+     * Set the vm instance id.
      *
      * @param vmInstanceId to set
      */
@@ -138,7 +149,7 @@ public class VmIpaddress implements Serializable {
     }
 
     /**
-     * Get the guestIpAddress.
+     * Get the guest ip address.
      *
      * @return the guestIpAddress
      */
@@ -147,7 +158,7 @@ public class VmIpaddress implements Serializable {
     }
 
     /**
-     * Set the guestIpAddress.
+     * Set the guest ip address.
      *
      * @param guestIpAddress to set
      */
@@ -174,20 +185,78 @@ public class VmIpaddress implements Serializable {
     }
 
     /**
-     * @return the nic
+     *  Get the transient nic id .
+     *
+     * @return the transient NicId .
      */
-    public Nic getNic() {
-        return nic;
+    public String getTransNicId() {
+        return transNicId;
     }
 
     /**
-     * @param nic the nic to set
+     * Set the transient  nic id.
+     *
+     * @param transNicId to set
      */
-    public void setNic(Nic nic) {
-        this.nic = nic;
+    public void setTransNicId(String transNicId) {
+        this.transNicId = transNicId;
     }
 
-   /** Get the syncFlag.
+    /**
+     * Get the primaryIpAddress.
+     *
+     * @return the primaryIpAddress
+     */
+    public String getPrimaryIpAddress() {
+        return primaryIpAddress;
+    }
+
+    /**
+     * Set the primaryIpAddress.
+     *
+     * @param primaryIpAddress  to set
+     */
+    public void setPrimaryIpAddress(String primaryIpAddress) {
+        this.primaryIpAddress = primaryIpAddress;
+    }
+
+    /**
+     * Get the nic id.
+     *
+     * @return the nicId
+     */
+    public Long getNicId() {
+        return nicId;
+    }
+
+    /**
+     * Set the  nic id.
+     *
+     * @param nicId  to set
+     */
+    public void setNicId(Long nicId) {
+        this.nicId = nicId;
+    }
+
+    /**
+     * Get the transient vminstance id.
+     *
+     * @return the transvmInstanceId
+     */
+    public String getTransvmInstanceId() {
+        return transvmInstanceId;
+    }
+
+    /**
+     * Set the transient vm instance id.
+     *
+     * @param transvmInstanceId  to set
+     */
+    public void setTransvmInstanceId(String transvmInstanceId) {
+        this.transvmInstanceId = transvmInstanceId;
+    }
+
+   /** Get the sync flag.
     *
     * @return the syncFlag
     */
@@ -196,13 +265,14 @@ public class VmIpaddress implements Serializable {
    }
 
    /**
-    * Set the syncFlag.
+    * Set the sync flag.
     *
     * @param syncFlag to set
     */
    public void setSyncFlag(Boolean syncFlag) {
        this.syncFlag = syncFlag;
    }
+
 
 
     /**
@@ -214,25 +284,29 @@ public class VmIpaddress implements Serializable {
      */
     public static VmIpaddress convert(JSONObject jsonObject) throws Exception {
         VmIpaddress vm = new VmIpaddress();
-        vm.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-        vm.setGuestIpAddress(JsonUtil.getStringValue(jsonObject, "ipaddress"));
+        vm.setUuid(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ID));
+        vm.setGuestIpAddress(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_IP_ADDRESS));
+        vm.setTransNicId(JsonUtil.getStringValue(jsonObject, CS_NIC_UUID));
         vm.setIsActive(true);
+        vm.setSyncFlag(false);
         return vm;
     }
-        /**
-         * Mapping entity object into list.
-         *
-         * @param vmIpaddressList list of nics.
-         * @return nicMap nics.
-         */
-    public static Map<String, VmIpaddress> convert(List<VmIpaddress> vmIpaddressList) {
-        Map<String, VmIpaddress> vmIpaddressListMap = new HashMap<String, VmIpaddress>();
 
-        for (VmIpaddress nic : vmIpaddressList) {
-            vmIpaddressListMap.put(nic.getUuid(), nic);
+    /**
+     * Mapping entity object into list.
+     *
+         * @param vmIpaddressList of secondary ip address
+         * @return vmIpaddressListMap secondary ip address.
+     */
+    public static Map<String, VmIpaddress> convert(List<VmIpaddress> vmIpaddressList) {
+        Map<String, VmIpaddress> vmIpaddressMap = new HashMap<String, VmIpaddress>();
+
+        for (VmIpaddress vmIp : vmIpaddressList) {
+            vmIpaddressMap.put(vmIp.getUuid(), vmIp);
         }
 
-        return vmIpaddressListMap;
+
+        return vmIpaddressMap;
     }
 
 }

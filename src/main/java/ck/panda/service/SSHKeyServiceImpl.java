@@ -335,26 +335,29 @@ public class SSHKeyServiceImpl implements SSHKeyService {
     }
 
     @Override
-    public SSHKey save(SSHKey t) throws Exception {
-        // TODO Auto-generated method stub
-        return null;
+    public SSHKey save(SSHKey sshkey) throws Exception {
+        if (!sshkey.getIsSyncFlag()) {
+            return sshkeyRepo.save(sshkey);
+        }
+        return sshkey;
+
     }
 
     @Override
-    public SSHKey update(SSHKey t) throws Exception {
-        // TODO Auto-generated method stub
-        return null;
+    public SSHKey update(SSHKey sshkey) throws Exception {
+         if (!sshkey.getIsSyncFlag()) {
+             return sshkeyRepo.save(sshkey);
+         }
+         return sshkey;
     }
 
     @Override
     public Page<SSHKey> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public List<SSHKey> findAll() throws Exception {
-        // TODO Auto-generated method stub
         return null;
     }
 }
