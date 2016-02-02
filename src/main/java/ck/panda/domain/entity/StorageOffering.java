@@ -14,15 +14,14 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.Size;
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -30,7 +29,9 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
+import ck.panda.util.JsonValidator;
 
 /**
  * Storage Offerings, defined by administrator. provide a choice of disk size and IOPS (Quality of Service) for primary
@@ -67,9 +68,13 @@ public class StorageOffering implements Serializable {
     /**
      * The domain ID this disk offering belongs to. Ignore this information as it is not currently applicable.
      */
-    @JoinColumn(name = "domain_id", referencedColumnName = "id")
-    @OneToOne
+    @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
     private Domain domain;
+
+    /** Domain id of the Storage Offering. */
+    @Column(name = "domain_id")
+    private Long domainId;
 
     /**
      * Description of Storage Offering.
@@ -213,6 +218,10 @@ public class StorageOffering implements Serializable {
     @Transient
     private Boolean isSyncFlag;
 
+    /** Transient domain of the instance. */
+    @Transient
+    private String transDomainId;
+
     /**
      * To set the default value while creating tables in database.
      */
@@ -324,6 +333,24 @@ public class StorageOffering implements Serializable {
      */
     public void setDomain(Domain domain) {
         this.domain = domain;
+    }
+
+    /**
+     * Get the domain id of the Storage Offering.
+     *
+     * @return the domainId
+     */
+    public Long getDomainId() {
+        return domainId;
+    }
+
+    /**
+     * Set the domain id of the Storage Offering.
+     *
+     * @param domainId the domainId to set
+     */
+    public void setDomainId(Long domainId) {
+        this.domainId = domainId;
     }
 
     /**
@@ -525,7 +552,7 @@ public class StorageOffering implements Serializable {
     }
 
     /**
-     * Get the isCustomizedIops of the storage offering.
+     * Get the is Customized Iops of the storage offering.
      *
      * @return the isCustomizedIops of the storage offering
      */
@@ -534,7 +561,7 @@ public class StorageOffering implements Serializable {
     }
 
     /**
-     * Set the isCustomizedIops of the storage offering.
+     * Set the is Customized Iops of the storage offering.
      *
      * @param isCustomizedIops the isCustomizedIops to set
      */
@@ -687,16 +714,16 @@ public class StorageOffering implements Serializable {
     }
 
     /**
-     * Get the storage price of the StorageOffering.java.
+     * Get the storage price of the Storage Offering.
      *
-     * @return the storagePrice of the StorageOffering.java
+     * @return the storagePrice of the Storage Offering.
      */
     public List<StorageOfferingCost> getStoragePrice() {
         return storagePrice;
     }
 
     /**
-     * Set the storage price of the StorageOffering.java.
+     * Set the storage price of the Storage Offering.
      *
      * @param storagePrice the storagePrice to set
      */
@@ -723,48 +750,69 @@ public class StorageOffering implements Serializable {
     }
 
     /**
+     * Get the transient domain id.
+     *
+     * @return the transDomainId
+     */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
+
+    /**
+     * Set the transient domain id..
+     *
+     * @param transDomainId to set
+     */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
+
+    /**
      * Convert JSONObject to Storage Offering entity.
      *
-     * @param object json object
+     * @param storageMap json object
      * @return Storage Offering entity objects
-     * @throws JSONException unhandled json errors
+     * @throws Exception error at Storage Offering
      */
-    public static StorageOffering convert(JSONObject object) throws JSONException {
+    public static StorageOffering convert(JSONObject storageMap) throws Exception {
         StorageOffering storageOffering = new StorageOffering();
-        storageOffering.uuid = object.getString("id");
-        storageOffering.name = object.getString("name");
-        storageOffering.description = object.getString("displaytext");
-        storageOffering.diskSize = object.getLong("disksize");
-        storageOffering.setStorageType(storageOffering.getStorageType().valueOf(object.getString("storagetype")));
-        storageOffering.setIsCustomDisk(storageOffering.getIsCustomDisk().valueOf(object.getString("iscustomized")));
-        if (object.has("iscustomizediops")) {
-            storageOffering.setIsCustomizedIops(
-                    storageOffering.getIsCustomizedIops().valueOf(object.getString("iscustomizediops")));
-        }
-        if (object.has("bytesreadrate")) {
-            storageOffering.diskBytesReadRate = object.getLong("bytesreadrate");
-        }
-        if (object.has("byteswriterate")) {
-            storageOffering.diskBytesWriteRate = object.getLong("byteswriterate");
-        }
-        if (object.has("iopsreadrate")) {
-            storageOffering.diskIopsReadRate = object.getLong("iopsreadrate");
-        }
-        if (object.has("iopswriterate")) {
-            storageOffering.diskIopsWriteRate = object.getLong("iopswriterate");
-        }
-        if (object.has("maxiops")) {
-            storageOffering.diskMaxIops = object.getLong("maxiops");
-        }
-        if (object.has("miniops")) {
-            storageOffering.diskMinIops = object.getLong("miniops");
-        }
-        if (object.has("tags")) {
-            storageOffering.storageTags = object.getString("tags");
-        }
-        storageOffering.setCreatedDateTime(JsonUtil.convertToZonedDateTime(object.getString("created")));
         storageOffering.setIsSyncFlag(false);
-
+        try {
+            storageOffering.setUuid(JsonUtil.getStringValue(storageMap, CloudStackConstants.CS_ID));
+            storageOffering.setName(JsonUtil.getStringValue(storageMap, CloudStackConstants.CS_NAME));
+            storageOffering.setDescription(JsonUtil.getStringValue(storageMap, CloudStackConstants.CS_DISPLAY_TEXT));
+            if (storageMap.has(CloudStackConstants.CS_BYTES_READ)) {
+                storageOffering.setDiskBytesReadRate(storageMap.getLong(CloudStackConstants.CS_BYTES_READ));
+            }
+            if (storageMap.has(CloudStackConstants.CS_BYTES_WRITE)) {
+                storageOffering.setDiskBytesWriteRate(storageMap.getLong(CloudStackConstants.CS_BYTES_WRITE));
+            }
+            if (storageMap.has(CloudStackConstants.CS_IOPS_READ)) {
+                storageOffering.setDiskIopsReadRate(storageMap.getLong(CloudStackConstants.CS_IOPS_READ));
+            }
+            if (storageMap.has(CloudStackConstants.CS_IOPS_WRITE)) {
+                storageOffering.setDiskIopsWriteRate(storageMap.getLong(CloudStackConstants.CS_IOPS_WRITE));
+            }
+            if (storageMap.has(CloudStackConstants.CS_MAX_IOPS)) {
+                storageOffering.setDiskMaxIops(storageMap.getLong(CloudStackConstants.CS_MAX_IOPS));
+            }
+            if (storageMap.has(CloudStackConstants.CS_MIN_IOPS)) {
+                storageOffering.setDiskMinIops(storageMap.getLong(CloudStackConstants.CS_MIN_IOPS));
+            }
+            if (storageMap.has(CloudStackConstants.CS_CUSTOM_IOPS_STATUS)) {
+                storageOffering.setIsCustomizedIops(storageMap.getBoolean(CloudStackConstants.CS_CUSTOM_IOPS_STATUS));
+            }
+            if (storageMap.has(CloudStackConstants.CS_DOMAIN_ID)) {
+                storageOffering.setTransDomainId(JsonUtil.getStringValue(storageMap, CloudStackConstants.CS_DOMAIN_ID));
+            }
+            storageOffering.setDiskSize(storageMap.getLong(CloudStackConstants.CS_DISK_SIZE));
+            storageOffering.setIsCustomDisk(storageMap.getBoolean(CloudStackConstants.CS_CUSTOM_STATUS));
+            storageOffering
+                    .setStorageType(StorageType.valueOf(JsonValidator.jsonStringValidation(storageMap, CloudStackConstants.CS_STORAGE_TYPE)));
+            storageOffering.setCreatedDateTime(JsonUtil.convertToZonedDateTime(storageMap.getString(CloudStackConstants.CS_CREATED)));
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
         return storageOffering;
     }
 

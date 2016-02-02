@@ -221,10 +221,10 @@ public class CloudStackConstants {
     /** Constant for resource name. */
     public static final String CS_DISPLAY_NAME = "displayname";
 
-    /** Constant for display vm. */
+    /** Constant for keyboard type. */
     public static final String CS_DISPLAY_VM = "displayvm";
 
-    /** Constant for active vm. */
+    /** Constant for keyboard type. */
     public static final String CS_ACTIVE_VM = "true";
 
     /** Constant for keyboard type. */
@@ -405,4 +405,8 @@ public class CloudStackConstants {
 
     /** Constant for asynchronous event type. */
     public static final String CS_COMMAND_EVENT_TYPE = "commandEventType";
+    
+    /** Constant for volume type. */
+    public static final String CS_VOLUME_TYPE = "type";
+
 }

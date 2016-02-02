@@ -31,6 +31,8 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 import ck.panda.util.JsonValidator;
 
@@ -1008,41 +1010,43 @@ public class Volume implements Serializable {
      *
      * @param object json object
      * @return Volume entity objects
-     * @throws JSONException unhandled json errors
+     * @throws Exception error at volume
      */
     @SuppressWarnings("static-access")
-    public static Volume convert(JSONObject object) throws JSONException {
+    public static Volume convert(JSONObject object) throws Exception {
         Volume volume = new Volume();
         volume.setIsSyncFlag(false);
         try {
-            volume.uuid = JsonValidator.jsonStringValidation(object, "id");
-            volume.name = JsonValidator.jsonStringValidation(object, "name");
-            volume.setDiskSize(object.getLong("size"));
+            volume.uuid = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_ID);
+            volume.name = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_NAME);
+            volume.setDiskSize(object.getLong(CloudStackConstants.CS_SIZE));
             volume.setIsActive(true);
-            volume.setVolumeType(volume.getVolumeType().valueOf(JsonValidator.jsonStringValidation(object, "type")));
+            volume.setVolumeType(volume.getVolumeType().valueOf(JsonValidator.jsonStringValidation(object,
+                    CloudStackConstants.CS_VOLUME_TYPE)));
             volume.setDiskSizeFlag(true);
-            if (JsonValidator.jsonStringValidation(object, "state").equals("UploadNotStarted")) {
+            if (JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_STATE)
+                    .equals(CloudStackConstants.CS_UPLOAD_NOT_STARTED)) {
                 volume.setStatus(volume.getStatus().UPLOAD_NOT_STARTED);
                 volume.setDiskSizeFlag(false);
-            } else if (JsonValidator.jsonStringValidation(object, "state").equals("UploadOp")) {
+            } else if (JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_STATE).equals(CloudStackConstants.CS_UPLOAD_OPERATION)) {
                 volume.setStatus(volume.getStatus().UPLOAD_OP);
-            } else if (JsonValidator.jsonStringValidation(object, "state").equals("UploadAbandoned")) {
+            } else if (JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_STATE).equals(CloudStackConstants.CS_UPLOAD_ABANDONED)) {
                 volume.setStatus(volume.getStatus().UPLOAD_ABANDONED);
-            } else if (JsonValidator.jsonStringValidation(object, "state").equals("UploadError")) {
+            } else if (JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_STATE).equals(CloudStackConstants.CS_UPLOAD_ERROR)) {
                 volume.setStatus(volume.getStatus().UPLOAD_ERROR);
             } else {
                 volume.setStatus(
-                        volume.getStatus().valueOf(JsonValidator.jsonStringValidation(object, "state").toUpperCase()));
+                        volume.getStatus().valueOf(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_STATE).toUpperCase()));
             }
-            volume.setCreatedDateTime(JsonUtil.convertToZonedDateTime(object.getString("created")));
-            volume.setTransStorageOfferingId((JsonUtil.getStringValue(object, "diskofferingid")));
-            volume.setTransZoneId((JsonUtil.getStringValue(object, "zoneid")));
-            volume.setTransvmInstanceId((JsonUtil.getStringValue(object, "virtualmachineid")));
-            volume.setTransDomainId((JsonUtil.getStringValue(object, "domainid")));
-            volume.setTransDepartmentId((JsonUtil.getStringValue(object, "account")));
-            volume.setTransProjectId(JsonUtil.getStringValue(object, "projectid"));
+            volume.setCreatedDateTime(JsonUtil.convertToZonedDateTime(object.getString(CloudStackConstants.CS_CREATED)));
+            volume.setTransStorageOfferingId((JsonUtil.getStringValue(object, CloudStackConstants.CS_DISK_OFFERING_ID)));
+            volume.setTransZoneId((JsonUtil.getStringValue(object, CloudStackConstants.CS_ZONE_ID)));
+            volume.setTransvmInstanceId((JsonUtil.getStringValue(object, CloudStackConstants.CS_VIRTUAL_MACHINE_ID)));
+            volume.setTransDomainId((JsonUtil.getStringValue(object, CloudStackConstants.CS_DOMAIN_ID)));
+            volume.setTransDepartmentId((JsonUtil.getStringValue(object, CloudStackConstants.CS_ACCOUNT)));
+            volume.setTransProjectId(JsonUtil.getStringValue(object, CloudStackConstants.CS_PROJECT_ID));
         } catch (Exception e) {
-            e.printStackTrace();
+        	throw new Exception(e);
         }
 
         return volume;
