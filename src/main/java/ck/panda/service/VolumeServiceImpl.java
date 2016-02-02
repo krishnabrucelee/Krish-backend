@@ -275,16 +275,9 @@ public class VolumeServiceImpl implements VolumeService {
                 List<Volume.VolumeType> volumeType = new ArrayList<>();
                 volumeType.add(VolumeType.DATADISK);
                 volumeType.add(VolumeType.ROOT);
-<<<<<<< HEAD
-                if (projectService.findByUserAndIsActive(userId, true).size() > 0) {
+                if (projectService.findAllByUserAndIsActive(userId, true).size() > 0) {
                     List<Volume> allProjectList = new ArrayList<Volume>();
-                    for (Project project : projectService.findByUserAndIsActive(userId, true)) {
-=======
-                User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
-                if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
-                    List<Volume> allProjectList = new ArrayList<Volume>();
-                    for (Project project : projectService.findAllByUserAndIsActive(user.getId(), true)) {
->>>>>>> ddf963b11ff0a99b2a6a8f3c56119804093f74a6
+                    for (Project project : projectService.findAllByUserAndIsActive(userId, true)) {
                         List<Volume> allProjectTempList = volumeRepo.findByProjectAndVolumeType(project.getId(),
                                 convertEntityService.getOwnerById(userId).getDepartmentId(), volumeType, true);
                         allProjectList.addAll(allProjectTempList);
@@ -342,12 +335,12 @@ public class VolumeServiceImpl implements VolumeService {
      */
     public HashMap<String, String> optionalValuesToMap(Volume volume, Long userId) throws Exception {
         HashMap<String, String> volumeMap = new HashMap<String, String>();
-        CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_DISK_SIZE,
-                volume.getDiskSize().intValue(), volumeMap);
-        CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_MIN_IOPS,
-                volume.getDiskMinIops().intValue(), volumeMap);
-        CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_MAX_IOPS,
-                volume.getDiskMaxIops().intValue(), volumeMap);
+        CloudStackOptionalUtil.updateOptionalLongValue(CloudStackConstants.CS_DISK_SIZE,
+                volume.getDiskSize(), volumeMap);
+        CloudStackOptionalUtil.updateOptionalLongValue(CloudStackConstants.CS_MIN_IOPS,
+                volume.getDiskMinIops(), volumeMap);
+        CloudStackOptionalUtil.updateOptionalLongValue(CloudStackConstants.CS_MAX_IOPS,
+                volume.getDiskMaxIops(), volumeMap);
         if (volume.getProjectId() != null) {
             volumeMap.put(CloudStackConstants.CS_PROJECT_ID,
                     convertEntityService.getProjectUuidById(volume.getProjectId()));
@@ -822,7 +815,7 @@ public class VolumeServiceImpl implements VolumeService {
         List<Volume.VolumeType> volumeType = new ArrayList<>();
         volumeType.add(VolumeType.DATADISK);
         volumeType.add(VolumeType.ROOT);
-        List<Project> projectList = projectService.findByUserAndIsActive(userId, true);
+        List<Project> projectList = projectService.findAllByUserAndIsActive(userId, true);
         if (convertEntityService.getOwnerById(userId).getDomainId() != null
                 && !convertEntityService.getOwnerById(userId).getType().equals(User.UserType.ROOT_ADMIN)) {
             if (convertEntityService.getOwnerById(userId).getType().equals(User.UserType.DOMAIN_ADMIN)) {
@@ -830,27 +823,10 @@ public class VolumeServiceImpl implements VolumeService {
                         .getAttachedCountByDomain(convertEntityService.getOwnerById(userId).getDomainId(), true).size();
                 return domainAttachedCount;
             } else {
-<<<<<<< HEAD
                 if (projectList.size() > 0) {
                     Integer projectAttachedCount = volumeRepo.getAttachedCountByProject(projectList,
                             convertEntityService.getOwnerById(userId).getDepartmentId(), volumeType, true).size();
                     return projectAttachedCount;
-=======
-                List<Volume.VolumeType> volumeType = new ArrayList<>();
-                volumeType.add(VolumeType.DATADISK);
-                volumeType.add(VolumeType.ROOT);
-                User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
-                int count = 0;
-                if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
-                    for (Project project : projectService.findAllByUserAndIsActive(user.getId(), true)) {
-                        for (Volume volume : volumeRepo.findByProjectAndVolumeTypeCount(project.getId(),
-                                Long.parseLong(tokenDetails.getTokenDetails("departmentid")), volumeType, true)) {
-                            if (volume.getVmInstanceId() != null) {
-                                count++;
-                            }
-                        }
-                    }
->>>>>>> ddf963b11ff0a99b2a6a8f3c56119804093f74a6
                 } else {
                     Integer departmentAttachedCount = volumeRepo.getAttachedCountByDepartment(
                             convertEntityService.getOwnerById(userId).getDepartmentId(), volumeType, true).size();
@@ -868,7 +844,7 @@ public class VolumeServiceImpl implements VolumeService {
         List<Volume.VolumeType> volumeType = new ArrayList<>();
         volumeType.add(VolumeType.DATADISK);
         volumeType.add(VolumeType.ROOT);
-        List<Project> projectList = projectService.findByUserAndIsActive(userId, true);
+        List<Project> projectList = projectService.findAllByUserAndIsActive(userId, true);
         if (convertEntityService.getOwnerById(userId).getDomainId() != null
                 && !convertEntityService.getOwnerById(userId).getType().equals(User.UserType.ROOT_ADMIN)) {
             if (convertEntityService.getOwnerById(userId).getType().equals(User.UserType.DOMAIN_ADMIN)) {
@@ -876,27 +852,10 @@ public class VolumeServiceImpl implements VolumeService {
                         .getDetachedCountByDomain(convertEntityService.getOwnerById(userId).getDomainId(), true).size();
                 return domainDetachedCount;
             } else {
-<<<<<<< HEAD
                 if (projectList.size() > 0) {
                     Integer projectDetachedCount = volumeRepo.getDetachedCountByProject(projectList,
                             convertEntityService.getOwnerById(userId).getDepartmentId(), volumeType, true).size();
                     return projectDetachedCount;
-=======
-                List<Volume.VolumeType> volumeType = new ArrayList<>();
-                volumeType.add(VolumeType.DATADISK);
-                volumeType.add(VolumeType.ROOT);
-                User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
-                int count = 0;
-                if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
-                    for (Project project : projectService.findAllByUserAndIsActive(user.getId(), true)) {
-                        for (Volume volume : volumeRepo.findByProjectAndVolumeTypeCount(project.getId(),
-                                Long.parseLong(tokenDetails.getTokenDetails("departmentid")), volumeType, true)) {
-                            if (volume.getVmInstanceId() == null) {
-                                count++;
-                            }
-                        }
-                    }
->>>>>>> ddf963b11ff0a99b2a6a8f3c56119804093f74a6
                 } else {
                     Integer departmentDetachedCount = volumeRepo.getDetachedCountByDepartment(
                             convertEntityService.getOwnerById(userId).getDepartmentId(), volumeType, true).size();

@@ -76,6 +76,21 @@ public abstract class CloudStackOptionalUtil {
         return optionalMap;
     }
 
+    /**
+     * Update the Cloudstack API optional values.
+     *
+     * @param key of the property
+     * @param value of the property
+     * @param optionalMap Hashmap of the optional parameters
+     * @return Hashmap
+     * @throws Exception error occurs.
+     */
+    public static HashMap<String, String> updateOptionalLongValue(String key, Long value, HashMap<String, String> optionalMap) throws Exception {
+        if (value != null) {
+            optionalMap.put(key, value.toString());
+        }
+        return optionalMap;
+    }
 }
 <<<<<<< HEAD
 

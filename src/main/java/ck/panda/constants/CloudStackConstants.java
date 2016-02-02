@@ -135,13 +135,6 @@ public class CloudStackConstants {
     /** Constant for register user key response. */
     public static final String CS_REGISTER_KEY_RESPONSE = "registeruserkeysresponse";
 
-<<<<<<< HEAD
-    /** Constants for jobs status. */
-    public static final String ERROR_JOB_STATUS = "2", PROGRESS_JOB_STATUS = "0", SUCCEEDED_JOB_STATUS = "1";
-
-    /** Constant for volume type. */
-    public static final String CS_VOLUME_TYPE = "type";
-=======
     /** Constant for account type. */
     public static final String CS_ACCOUNT_TYPE = "accounttype";
 
@@ -208,5 +201,11 @@ public class CloudStackConstants {
 
     /** Constant for resource name. */
     public static final String CS_DISPLAY_NAME = "displayname";
->>>>>>> ddf963b11ff0a99b2a6a8f3c56119804093f74a6
+    
+    /** Constants for jobs status. */
+    public static final String ERROR_JOB_STATUS = "2", PROGRESS_JOB_STATUS = "0", SUCCEEDED_JOB_STATUS = "1";
+
+    /** Constant for volume type. */
+    public static final String CS_VOLUME_TYPE = "type";
+
 }

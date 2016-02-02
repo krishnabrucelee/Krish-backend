@@ -29,10 +29,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
-<<<<<<< HEAD
 import ck.panda.constants.CloudStackConstants;
-=======
->>>>>>> ddf963b11ff0a99b2a6a8f3c56119804093f74a6
 import ck.panda.util.JsonUtil;
 import ck.panda.util.JsonValidator;
 
@@ -44,13 +41,8 @@ import ck.panda.util.JsonValidator;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "storage_offerings")
-<<<<<<< HEAD
-public class StorageOffering {
-
-=======
 @SuppressWarnings("serial")
 public class StorageOffering implements Serializable {
->>>>>>> ddf963b11ff0a99b2a6a8f3c56119804093f74a6
     /**
      * Unique ID of the storage offering.
      */

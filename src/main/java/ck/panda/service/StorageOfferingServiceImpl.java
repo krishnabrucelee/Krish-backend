@@ -158,20 +158,20 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
                 storage.getStorageType().toString(), stoarageMap);
         CloudStackOptionalUtil.updateOptionalBooleanValue(CloudStackConstants.CS_CUSTOM_IOPS,
                 storage.getIsCustomizedIops(), stoarageMap);
-        CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_DISK_SIZE,
-                storage.getDiskSize().intValue(), stoarageMap);
-        CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_IOPS_READ,
-                storage.getDiskIopsReadRate().intValue(), stoarageMap);
-        CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_IOPS_WRITE,
-                storage.getDiskIopsWriteRate().intValue(), stoarageMap);
-        CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_BYTES_READ,
-                storage.getDiskBytesReadRate().intValue(), stoarageMap);
-        CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_BYTES_WRITE,
-                storage.getDiskBytesWriteRate().intValue(), stoarageMap);
-        CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_MIN_IOPS,
-                storage.getDiskMinIops().intValue(), stoarageMap);
-        CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_MAX_IOPS,
-                storage.getDiskMaxIops().intValue(), stoarageMap);
+        CloudStackOptionalUtil.updateOptionalLongValue(CloudStackConstants.CS_DISK_SIZE,
+                storage.getDiskSize(), stoarageMap);
+        CloudStackOptionalUtil.updateOptionalLongValue(CloudStackConstants.CS_IOPS_READ,
+                storage.getDiskIopsReadRate(), stoarageMap);
+        CloudStackOptionalUtil.updateOptionalLongValue(CloudStackConstants.CS_IOPS_WRITE,
+                storage.getDiskIopsWriteRate(), stoarageMap);
+        CloudStackOptionalUtil.updateOptionalLongValue(CloudStackConstants.CS_BYTES_READ,
+                storage.getDiskBytesReadRate(), stoarageMap);
+        CloudStackOptionalUtil.updateOptionalLongValue(CloudStackConstants.CS_BYTES_WRITE,
+                storage.getDiskBytesWriteRate(), stoarageMap);
+        CloudStackOptionalUtil.updateOptionalLongValue(CloudStackConstants.CS_MIN_IOPS,
+                storage.getDiskMinIops(), stoarageMap);
+        CloudStackOptionalUtil.updateOptionalLongValue(CloudStackConstants.CS_MAX_IOPS,
+                storage.getDiskMaxIops(), stoarageMap);
         CloudStackOptionalUtil.updateOptionalStringValue(CloudStackConstants.CS_DOMAIN_ID,
                 convertEntityService.getDomainById(storage.getDomainId()).getUuid(), stoarageMap);
         return stoarageMap;

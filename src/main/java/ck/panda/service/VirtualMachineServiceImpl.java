@@ -7,10 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-<<<<<<< HEAD
 
-=======
->>>>>>> ddf963b11ff0a99b2a6a8f3c56119804093f74a6
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EventTypes;
 import ck.panda.constants.GenericConstants;
@@ -52,16 +49,6 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(VirtualMachineServiceImpl.class);
 
-<<<<<<< HEAD
-    /** Constant for custom details. */
-    public static final String CS_CUSTOM_DETAILS = "details[0]";
-
-    /** Constant for max io disk offering. */
-    public static final String CS_MAX_IOPS_DO = ".maxIopsDo";
-
-    /** Constant for min io disk offering. */
-    public static final String CS_MIN_IOPS_DO = ".minIopsDo";
-=======
     /** Constant for display vm. */
     public static final String CS_DISPLAY_VM = "displayvm";
 
@@ -91,6 +78,12 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     /** Constant for resource count. */
     public static final String CS_RESOURCE_COUNT = "resourcecount";
+    
+    /** Constant for max io disk offering. */
+    public static final String CS_MAX_IOPS_DO = ".maxIopsDo";
+
+    /** Constant for min io disk offering. */
+    public static final String CS_MIN_IOPS_DO = ".minIopsDo";
 
     /** Constant for response vm array. */
     public static final String CS_VM = "virtualmachine";
@@ -103,7 +96,6 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     /** Constant used for entity validation. */
     public static final String entity_vmInstance = "vmInstance";
->>>>>>> ddf963b11ff0a99b2a6a8f3c56119804093f74a6
 
     /** Validator attribute. */
     @Autowired
@@ -1001,26 +993,6 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     }
 
     /**
-<<<<<<< HEAD
-     * A method a set Custom storage values for instance.
-     *
-     * @param vmInstance Vm instance object
-     * @throws Exception error
-     */
-    public void customStorageForInstance(VmInstance vmInstance) throws Exception {
-        HashMap<String, String> instanceMap = new HashMap<>();
-            instanceMap.put(CloudStackConstants.CS_DISK_OFFERING_ID,
-            		convertEntityService.getStorageOfferById(vmInstance.getStorageOfferingId()).getUuid());
-            //Check the disk size not null validation and set the disk size
-            if (vmInstance.getDiskSize() != null) {
-                instanceMap.put(CloudStackConstants.CS_SIZE, vmInstance.getDiskSize().toString());
-            }
-            //Check the disk Iops (Max and Min) not null validation and set the disk iops
-            if (vmInstance.getDiskMaxIops() != null && vmInstance.getDiskMinIops() != null) {
-                instanceMap.put(CS_CUSTOM_DETAILS + CS_MAX_IOPS_DO,vmInstance.getDiskMaxIops().toString());
-                instanceMap.put(CS_CUSTOM_DETAILS + CS_MAX_IOPS_DO, vmInstance.getDiskMinIops().toString());
-            }
-=======
      * Get job status code when asynchronous call initiated for VM related actions.
      *
      * @param instance json instance response.
@@ -1183,6 +1155,27 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             }
         }
         return (List<VmInstance>) virtualmachinerepository.findAllByExceptStatus(Status.EXPUNGING);
->>>>>>> ddf963b11ff0a99b2a6a8f3c56119804093f74a6
     }
+    
+    /**
+     * A method a set Custom storage values for instance.
+     *
+     * @param vmInstance Vm instance object
+     * @throws Exception error
+     */
+    public void customStorageForInstance(VmInstance vmInstance) throws Exception {
+        HashMap<String, String> instanceMap = new HashMap<>();
+            instanceMap.put(CloudStackConstants.CS_DISK_OFFERING_ID,
+            		convertEntityService.getStorageOfferById(vmInstance.getStorageOfferingId()).getUuid());
+            //Check the disk size not null validation and set the disk size
+            if (vmInstance.getDiskSize() != null) {
+                instanceMap.put(CloudStackConstants.CS_SIZE, vmInstance.getDiskSize().toString());
+            }
+            //Check the disk Iops (Max and Min) not null validation and set the disk iops
+            if (vmInstance.getDiskMaxIops() != null && vmInstance.getDiskMinIops() != null) {
+                instanceMap.put(CS_CUSTOM_DETAILS + CS_MAX_IOPS_DO,vmInstance.getDiskMaxIops().toString());
+                instanceMap.put(CS_CUSTOM_DETAILS + CS_MAX_IOPS_DO, vmInstance.getDiskMinIops().toString());
+            }
+       }     
+
 }
