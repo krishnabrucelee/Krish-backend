@@ -362,7 +362,7 @@ public class Template implements Serializable {
     /**
      * Set the type.
      *
-     * @param type - the String to set
+     * @param type - the template type to set
      */
     public void setType(TemplateType type) {
         this.type = type;
@@ -524,7 +524,7 @@ public class Template implements Serializable {
     /**
      * Set the root disk controller.
      *
-     * @param rootDiskController - the RootDiskController enum to set
+     * @param rootDiskController - the Root disk controller ENUM to set
      */
     public void setRootDiskController(RootDiskController rootDiskController) {
         this.rootDiskController = rootDiskController;
@@ -542,7 +542,7 @@ public class Template implements Serializable {
     /**
      * Set the NIC adapter.
      *
-     * @param nicAdapter - the NicAdapter enum to set
+     * @param nicAdapter - the Nic adapter ENUM to set
      */
     public void setNicAdapter(NicAdapter nicAdapter) {
         this.nicAdapter = nicAdapter;
@@ -560,7 +560,7 @@ public class Template implements Serializable {
     /**
      * Set the keyboard type.
      *
-     * @param keyboardType - the KeyboardType enum to set
+     * @param keyboardType - the Keyboard type ENUM to set
      */
     public void setKeyboardType(KeyboardType keyboardType) {
         this.keyboardType = keyboardType;
@@ -578,7 +578,7 @@ public class Template implements Serializable {
     /**
      * Set the format.
      *
-     * @param format - the Format enum to set
+     * @param format - the Format ENUM to set
      */
     public void setFormat(Format format) {
         this.format = format;
@@ -596,7 +596,7 @@ public class Template implements Serializable {
     /**
      * Set the OS category.
      *
-     * @param osCategory - the osCategory entity to set
+     * @param osCategory - the OS category entity to set
      */
     public void setOsCategory(OsCategory osCategory) {
         this.osCategory = osCategory;
@@ -614,7 +614,7 @@ public class Template implements Serializable {
     /**
      * Set the OS category id.
      *
-     * @param osCategoryId - the osCategory id to set
+     * @param osCategoryId - the OS category id to set
      */
     public void setOsCategoryId(Long osCategoryId) {
         this.osCategoryId = osCategoryId;
@@ -632,7 +632,7 @@ public class Template implements Serializable {
     /**
      * Set the OS type.
      *
-     * @param osType - the osType entity to set
+     * @param osType - the OS type entity to set
      */
     public void setOsType(OsType osType) {
         this.osType = osType;
@@ -650,7 +650,7 @@ public class Template implements Serializable {
     /**
      * Set the OS type id.
      *
-     * @param osTypeId - the osType id to set
+     * @param osTypeId - the OS type id to set
      */
     public void setOsTypeId(Long osTypeId) {
         this.osTypeId = osTypeId;
@@ -992,7 +992,7 @@ public class Template implements Serializable {
     /**
      * Set the created by.
      *
-     * @param createdBy - the User entity to set
+     * @param createdBy - the Long to set
      */
     public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
@@ -1010,7 +1010,7 @@ public class Template implements Serializable {
     /**
      * Set the updated by.
      *
-     * @param updatedBy - the User entity to set
+     * @param updatedBy - the Long to set
      */
     public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
@@ -1028,7 +1028,7 @@ public class Template implements Serializable {
     /**
      * Set the created date time.
      *
-     * @param createdDateTime - the DateTime to set
+     * @param createdDateTime - the Created date time to set
      */
     public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
@@ -1046,7 +1046,7 @@ public class Template implements Serializable {
     /**
      * Set the updated date time.
      *
-     * @param updatedDateTime - the DateTime to set
+     * @param updatedDateTime - the Updated date time to set
      */
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
@@ -1091,7 +1091,7 @@ public class Template implements Serializable {
     /**
      * Get the department id.
      *
-     * @return the departmentId of template.
+     * @return the department Id of template.
      */
     public Long getDepartmentId() {
         return departmentId;
@@ -1100,7 +1100,7 @@ public class Template implements Serializable {
     /**
      * Set the department id.
      *
-     * @param departmentId the departmentId to set.
+     * @param departmentId the department Id to set.
      */
     public void setDepartmentId(Long departmentId) {
         this.departmentId = departmentId;
@@ -1132,7 +1132,7 @@ public class Template implements Serializable {
     }
 
     /**
-     * @param isActive the isActive to set
+     * @param isActive the is active to set
      */
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;

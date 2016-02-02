@@ -382,7 +382,7 @@ public class TemplateServiceImpl implements TemplateService {
                         }
                     }
                 } catch (Exception e) {
-                    LOGGER.error("Error at template getting template status", e);
+                    LOGGER.error("Error at template getting template status : ", e.getMessage());
                 }
             } else {
                 allTemplate.add(template);
@@ -465,7 +465,7 @@ public class TemplateServiceImpl implements TemplateService {
                 cloudStackTemplateService.updateTemplatePermissions(template.getUuid(), CloudStackConstants.JSON, optional);
             }
         } catch (Exception e) {
-            LOGGER.error("Error at template update", e);
+            LOGGER.error("Error at template update : ", e.getMessage());
         }
     }
 
