@@ -69,7 +69,7 @@ public class Nic implements Serializable {
     private Boolean isActive;
 
     /** Secondary ipAddress of the Nic. */
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany
     private List<VmIpaddress> vmIpAddress;
 
     /** Network ip Address to establish a connection. */

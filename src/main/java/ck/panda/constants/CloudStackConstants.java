@@ -220,4 +220,133 @@ public class CloudStackConstants {
 
     /** Constant for resource name. */
     public static final String CS_DISPLAY_NAME = "displayname";
+
+    /** Constant for display vm. */
+    public static final String CS_DISPLAY_VM = "displayvm";
+
+    /** Constant for active vm. */
+    public static final String CS_ACTIVE_VM = "true";
+
+    /** Constant for keyboard type. */
+    public static final String CS_KEYBOARD_TYPE = "keyboard";
+
+    /** Constant for hypervisor type. */
+    public static final String CS_HYPERVISOR_TYPE = "hypervisor";
+
+    /** Constant for custom offering cpu number. */
+    public static final String CS_CUSTOM_CORE = ".cpuNumber";
+
+    /** Constant for custom offering cpu memory. */
+    public static final String CS_CUSTOM_MEMORY = ".memory";
+
+    /** Constant for custom offering minimum iops. */
+    public static final String CS_MIN_IOPS_REQUEST = ".minIops";
+
+    /** Constant for custom offering maximum iops. */
+    public static final String CS_MAX_IOPS_REQUEST = ".maxIops";
+
+    /** Constant for custom offering cpu speed. */
+    public static final String CS_CUSTOM_CPU = ".cpuSpeed";
+
+    /** Constant for response for cpu vm deploy. */
+    public static final String CS_VM_DEPLOY = "deployvirtualmachineresponse";
+
+    /** Constant for custom details. */
+    public static final String CS_CUSTOM_DETAILS = "details[0]";
+
+    /** Constant for resource count. */
+    public static final String CS_RESOURCE_COUNT = "resourcecount";
+
+    /** Constant for response vm array. */
+    public static final String CS_VM = "virtualmachine";
+
+    /** Constant used to contact cloud admin. */
+    public static final String CONTACT_CLOUD_ADMIN = "error.contact.cloud.admin";
+
+    /** Constant used to resource limit check in puplic pool. */
+    public static final String RESOURCE_CHECK = "resource.check";
+
+    /** Constant used for entity validation. */
+    public static final String ENTITY_VMINSTANCE = "vmInstance";
+
+    /** Constant used for network offering ids . */
+    public static final String CS_NETWORK_IDS = "networkids";
+
+    /** Constant used for keyboard type. */
+    public static final String KEYBOARD_VALUE = "us";
+
+    /** Constant used for vm stop response. */
+    public static final String CS_VM_STOP_RESPONSE = "stopvirtualmachineresponse";
+
+    /** Constant used for vm reboot response. */
+    public static final String CS_VM_REBOOT_RESPONSE = "rebootvirtualmachineresponse";
+
+    /** Constant used for vm restore response. */
+    public static final String CS_VM_RESTORE_RESPONSE = "restorevmresponse";
+
+    /** Constant used for vm destroy response. */
+    public static final String CS_VM_DESTROY_RESPONSE = "destroyvirtualmachineresponse";
+
+    /** Constant used for vm expunge request. */
+    public static final String CS_VM_ENPUNGE = "expunge";
+
+    /** Constant used for vm recover response. */
+    public static final String CS_VM_RECOVER_RESPONSE = "recovervirtualmachineresponse";
+
+    /** Constant used for vm start response. */
+    public static final String CS_VM_START_RESPONSE = "startvirtualmachineresponse";
+
+    /** Constant used for vm migrate response. */
+    public static final String CS_VM_MIGRATE_RESPONSE = "migratevirtualmachineresponse";
+
+    /** Constant used for vm attach iso response. */
+    public static final String CS_VM_ATTACHISO_RESPONSE = "attachisoresponse";
+
+    /** Constant used for vm detach iso response. */
+    public static final String CS_VM_DETACHISO_RESPONSE = "detachisoresponse";
+
+    /** Constant used for vm reset password response. */
+    public static final String CS_VM_RESET_PASSWORD_RESPONSE = "resetpasswordforvirtualmachineresponse";
+
+    /** Constant used for vm display name. */
+    public static final String CS_VM_DISPLAYNAME = "displayName";
+
+    /** Constant used for list capacity response. */
+    public static final String CS_CAPACITY_LIST_RESPONSE = "listcapacityresponse";
+
+    /** Constant used for resource capacity. */
+    public static final String CS_CAPACITY = "capacity";
+
+    /** Constant used for capacity type. */
+    public static final String CAPACITY_TYPE =  "type";
+
+    /** Constant used for capacity total. */
+    public static final String CS_CAPACITY_TOTAL = "capacitytotal";
+
+    /** Constant used for capacity total. */
+    public static final String CS_CAPACITY_USED = "capacityused";
+
+    /** Constant used for list of public ipaddress response. */
+    public static final String CS_PUBLIC_IPADDRESS_RESPONSE = "listpublicipaddressesresponse";
+
+    /** Constant used for capacity count. */
+    public static final String CS_CAPACITY_COUNT = "count";
+
+    /** Constant used for update resource count response. */
+    public static final String CS_UPDATE_RESOURCE_COUNT = "updateresourcecountresponse";
+
+    /** Constant used for capacity total. */
+    public static final String CS_RESOURCE_TYPE = "resourcetype";
+
+    /** Constant used for capacity total. */
+    public static final String CS_LIST_VM_RESPONSE = "listvirtualmachinesresponse";
+
+    /** Constant used for associate network id. */
+    public static final String CS_ASSOCIATE_NETWORK = "associatedNetworkId";
+
+    /** Constant used virtual network. */
+    public static final String CS_FOR_VM_NETWORK = "forvirtualnetwork";
+
+    /** Constant used scale vm response. */
+    public static final String SCALE_VM_RESPONSE = "scalevirtualmachineresponse";
 }
