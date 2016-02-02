@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -30,19 +31,11 @@ public interface DepartmentService extends CRUDService<Department> {
      * Find all the departments with active status.
      *
      * @param pagingAndSorting pagination and sorting values.
+     * @param userId user id of the department.
      * @return list of departments with pagination.
      * @throws Exception error occurs
      */
-    Page<Department> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
-
-    /**
-     * Find all the departments with active status.
-     *
-     * @param isActive department status Active/Inactive
-     * @return list of departments with active status
-     * @throws Exception error occurs.
-     */
-    List<Department> findAllByIsActive(Boolean isActive) throws Exception;
+    Page<Department> findAllByActive(PagingAndSorting pagingAndSorting, Long userId) throws Exception;
 
     /**
      * To get list of domains from cloudstack server.
@@ -50,7 +43,7 @@ public interface DepartmentService extends CRUDService<Department> {
      * @return domain list from server
      * @throws Exception unhandled errors.
      */
-    List<Department> findAllFromCSServerByDomain() throws Exception;
+    List<Department> findAllFromCSServer() throws Exception;
 
     /**
      * Find the departments based on the given Uuid and isActive status.
@@ -69,54 +62,27 @@ public interface DepartmentService extends CRUDService<Department> {
      * @param isActive department status Active/Inactive
      * @return department.
      */
-    List<Department> findByDomainAndIsActive(Long domainId, Boolean isActive);
+    List<Department> findByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception;
 
     /**
-     * Find the departments user name and isActive status.
+     * Find by username domain id and isActive status.
      *
-     * @param name department name.
+     * @param username department name.
+     * @param domainId domain id of the department.
      * @param isActive department status Active/Inactive
      * @return department.
      */
-    Department findByUsername(String name, Long domainId, Boolean isActive);
+    Department findByUsernameDomainAndIsActive(String username, Long domainId, Boolean isActive);
 
     /**
-     * Find the departments user name and domain and isActive status.
-     *
-     * @param name department name.
-     * @param domain of the department.
-     * @param isActive department status Active/Inactive
-     * @return department.
-     */
-    Department findByUsernameAndDomain(String name, Domain domain, Boolean isActive);
-
-    /**
-     * Find the departments based on the isActive status.
-     *
-     * @throws Exception error occurs.
-     * @return department.
-     */
-    List<Department> findByAll() throws Exception;
-
-    /**
-     * Find the departments based on the isActive status.
-     *
-     * @param id for domain.
-     * @param isActive department status Active/Inactive
-     * @throws Exception error occur
-     * @return departments.
-     */
-    List<Department> findDomainAndIsActive(Long id, Boolean isActive) throws Exception;
-
-    /**
-     * Find the departments based on the isActive status.
+     * Find the departments based on the account type and isActive status.
      *
      * @param types for each department.
      * @param isActive department status Active/Inactive
      * @throws Exception error occur
      * @return departments.
      */
-    List<Department> findDepartmentsByAccountTypesAndActive(List<AccountType> types, Boolean isActive) throws Exception;
+    List<Department> findByAccountTypesAndActive(List<AccountType> types, Boolean isActive) throws Exception;
 
     /**
      * Find all the departments for sync.
@@ -135,7 +101,7 @@ public interface DepartmentService extends CRUDService<Department> {
      * @throws Exception error occur
      * @return departments.
      */
-    List<Department> findDepartmentsByDomainAndAccountTypesAndActive(Long domainId, List<AccountType> types,
+    List<Department> findByDomainAndAccountTypesAndActive(Long domainId, List<AccountType> types,
             Boolean isActive) throws Exception;
 
     /**
@@ -146,5 +112,16 @@ public interface DepartmentService extends CRUDService<Department> {
      * @throws Exception unhandled errors.
      */
     Department findbyUUID(String uuid) throws Exception;
+
+
+    /**
+     * Save the department.
+     *
+     * @param department Department entity
+     * @param userId id of the user
+     * @return saved entity
+     * @throws Exception error occurs
+     */
+    Department save(Department department, Long userId) throws Exception;
 
 }

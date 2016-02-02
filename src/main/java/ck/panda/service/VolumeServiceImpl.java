@@ -275,9 +275,16 @@ public class VolumeServiceImpl implements VolumeService {
                 List<Volume.VolumeType> volumeType = new ArrayList<>();
                 volumeType.add(VolumeType.DATADISK);
                 volumeType.add(VolumeType.ROOT);
+<<<<<<< HEAD
                 if (projectService.findByUserAndIsActive(userId, true).size() > 0) {
                     List<Volume> allProjectList = new ArrayList<Volume>();
                     for (Project project : projectService.findByUserAndIsActive(userId, true)) {
+=======
+                User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
+                if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
+                    List<Volume> allProjectList = new ArrayList<Volume>();
+                    for (Project project : projectService.findAllByUserAndIsActive(user.getId(), true)) {
+>>>>>>> ddf963b11ff0a99b2a6a8f3c56119804093f74a6
                         List<Volume> allProjectTempList = volumeRepo.findByProjectAndVolumeType(project.getId(),
                                 convertEntityService.getOwnerById(userId).getDepartmentId(), volumeType, true);
                         allProjectList.addAll(allProjectTempList);
@@ -823,10 +830,27 @@ public class VolumeServiceImpl implements VolumeService {
                         .getAttachedCountByDomain(convertEntityService.getOwnerById(userId).getDomainId(), true).size();
                 return domainAttachedCount;
             } else {
+<<<<<<< HEAD
                 if (projectList.size() > 0) {
                     Integer projectAttachedCount = volumeRepo.getAttachedCountByProject(projectList,
                             convertEntityService.getOwnerById(userId).getDepartmentId(), volumeType, true).size();
                     return projectAttachedCount;
+=======
+                List<Volume.VolumeType> volumeType = new ArrayList<>();
+                volumeType.add(VolumeType.DATADISK);
+                volumeType.add(VolumeType.ROOT);
+                User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
+                int count = 0;
+                if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
+                    for (Project project : projectService.findAllByUserAndIsActive(user.getId(), true)) {
+                        for (Volume volume : volumeRepo.findByProjectAndVolumeTypeCount(project.getId(),
+                                Long.parseLong(tokenDetails.getTokenDetails("departmentid")), volumeType, true)) {
+                            if (volume.getVmInstanceId() != null) {
+                                count++;
+                            }
+                        }
+                    }
+>>>>>>> ddf963b11ff0a99b2a6a8f3c56119804093f74a6
                 } else {
                     Integer departmentAttachedCount = volumeRepo.getAttachedCountByDepartment(
                             convertEntityService.getOwnerById(userId).getDepartmentId(), volumeType, true).size();
@@ -852,10 +876,27 @@ public class VolumeServiceImpl implements VolumeService {
                         .getDetachedCountByDomain(convertEntityService.getOwnerById(userId).getDomainId(), true).size();
                 return domainDetachedCount;
             } else {
+<<<<<<< HEAD
                 if (projectList.size() > 0) {
                     Integer projectDetachedCount = volumeRepo.getDetachedCountByProject(projectList,
                             convertEntityService.getOwnerById(userId).getDepartmentId(), volumeType, true).size();
                     return projectDetachedCount;
+=======
+                List<Volume.VolumeType> volumeType = new ArrayList<>();
+                volumeType.add(VolumeType.DATADISK);
+                volumeType.add(VolumeType.ROOT);
+                User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
+                int count = 0;
+                if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
+                    for (Project project : projectService.findAllByUserAndIsActive(user.getId(), true)) {
+                        for (Volume volume : volumeRepo.findByProjectAndVolumeTypeCount(project.getId(),
+                                Long.parseLong(tokenDetails.getTokenDetails("departmentid")), volumeType, true)) {
+                            if (volume.getVmInstanceId() == null) {
+                                count++;
+                            }
+                        }
+                    }
+>>>>>>> ddf963b11ff0a99b2a6a8f3c56119804093f74a6
                 } else {
                     Integer departmentDetachedCount = volumeRepo.getDetachedCountByDepartment(
                             convertEntityService.getOwnerById(userId).getDepartmentId(), volumeType, true).size();

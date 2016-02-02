@@ -1,13 +1,27 @@
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> ddf963b11ff0a99b2a6a8f3c56119804093f74a6
 package ck.panda.util;
 
 import java.util.HashMap;
 
+<<<<<<< HEAD
 public class CloudStackOptionalUtil {
 
      /**
      * Update the Cloudstack API optional values.
+=======
+/**
+ * In order to handle optional values for ACS.
+ *
+ */
+public abstract class CloudStackOptionalUtil {
+
+     /**
+     * Update the Cloudstack API optional String values.
+>>>>>>> ddf963b11ff0a99b2a6a8f3c56119804093f74a6
      *
      * @param key of the property
      * @param value of the property
@@ -23,7 +37,11 @@ public class CloudStackOptionalUtil {
     }
 
     /**
+<<<<<<< HEAD
      * Update the Cloudstack API optional values.
+=======
+     * Update the Cloudstack API Integer optional values.
+>>>>>>> ddf963b11ff0a99b2a6a8f3c56119804093f74a6
      *
      * @param key of the property
      * @param value of the property
@@ -39,7 +57,11 @@ public class CloudStackOptionalUtil {
     }
 
     /**
+<<<<<<< HEAD
      * Update the Cloudstack API optional values.
+=======
+     * Update the Cloudstack API optional Boolean values.
+>>>>>>> ddf963b11ff0a99b2a6a8f3c56119804093f74a6
      *
      * @param key of the property
      * @param value of the property
@@ -55,4 +77,7 @@ public class CloudStackOptionalUtil {
     }
 
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> ddf963b11ff0a99b2a6a8f3c56119804093f74a6

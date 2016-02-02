@@ -509,7 +509,7 @@ public class ConvertEntityService {
      * @throws Exception unhandled exception.
      */
     public Project getProject(String uuid) throws Exception {
-        return projectService.findByUuidAndIsActive(uuid, true);
+        return projectService.findByUuid(uuid);
     }
 
     /**
@@ -688,8 +688,8 @@ public class ConvertEntityService {
      * @throws Exception unhandled exception.
      */
     public Long getDepartmentByUsername(String name, Long domainId) throws Exception {
-        if (departmentService.findByUsername(name, domainId, true) != null) {
-            return departmentService.findByUsername(name, domainId, true).getId();
+        if (departmentService.findByUsernameDomainAndIsActive(name, domainId, true) != null) {
+            return departmentService.findByUsernameDomainAndIsActive(name, domainId, true).getId();
         } else {
             return null;
         }
@@ -704,8 +704,9 @@ public class ConvertEntityService {
      * @throws Exception unhandled exception.
      */
     public Long getDepartmentByUsernameAndDomains(String name, Domain domain) throws Exception {
-        if (departmentService.findByUsernameAndDomain(name, domain, true) != null) {
-            return departmentService.findByUsernameAndDomain(name, domain, true).getId();
+        Department department = departmentService.findByUsernameDomainAndIsActive(name, domain.getId(), true);
+        if (department != null) {
+            return department.getId();
         } else {
             return null;
         }

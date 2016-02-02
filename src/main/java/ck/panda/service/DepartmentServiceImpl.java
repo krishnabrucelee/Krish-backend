@@ -8,10 +8,10 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.Domain;
@@ -20,12 +20,11 @@ import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
-import ck.panda.domain.repository.jpa.DepartmentReposiory;
+import ck.panda.domain.repository.jpa.DepartmentRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackAccountService;
 import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
-import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -46,27 +45,15 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     /** Department repository reference. */
     @Autowired
-    private DepartmentReposiory departmentRepo;
+    private DepartmentRepository departmentRepo;
 
     /** CloudStack account service reference. */
     @Autowired
     private CloudStackAccountService csAccountService;
 
-    /** CloudStack configuration reference. */
-    @Autowired
-    private ConfigUtil configServer;
-
-    /** Secret key for the user encryption. */
-    @Value(value = "${aes.salt.secretKey}")
-    private String secretKey;
-
     /** Reference of the convert entity service. */
     @Autowired
     private ConvertEntityService convertEntityService;
-
-    /** Autowired TokenDetails. */
-    @Autowired
-    private TokenDetails tokenDetails;
 
     /** Domain repository reference. */
     @Autowired
@@ -100,16 +87,17 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Autowired
     private UserService userService;
 
+    public static final String BAREMETAL_SYSTEM_ACCOUNT = "baremetal-system-account";
+
+
     @Override
     @PreAuthorize("hasPermission(#department.getSyncFlag(), 'ADD_DEPARTMENT')")
-    public Department save(Department department) throws Exception {
-
+    public Department save(Department department, Long userId) throws Exception {
         if (department.getSyncFlag()) {
-
+            User user = convertEntityService.getOwnerById(userId);
             // Check the user is not a root and admin and set the domain value from login detail
-
-            if (!String.valueOf(tokenDetails.getTokenDetails("usertype")).equals("ROOT_ADMIN")) {
-                department.setDomainId(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+            if (user.getType().equals(User.UserType.ROOT_ADMIN)) {
+                department.setDomainId(user.getDomainId());
             }
 
             // Validate department
@@ -145,7 +133,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     private void validateDepartment(Department department) throws Exception {
         Errors errors = validator.rejectIfNullEntity("department", department);
         errors = validator.validateEntity(department, errors);
-        Department dep = departmentRepo.findByNameAndDomainAndIsActive(department.getUserName(),
+        Department dep = departmentRepo.findByUsernameDomainAndIsActive(department.getUserName(),
                 department.getDomainId(), true);
         if (dep != null && department.getId() != dep.getId()) {
             errors.addFieldError("userName", "department.already.exist.for.same.domain");
@@ -162,7 +150,6 @@ public class DepartmentServiceImpl implements DepartmentService {
             // Validate department
             this.validateDepartment(department);
             Domain domain = domainService.find(department.getDomainId());
-
             Department departmentedit = departmentRepo.findOne(department.getId());
             department.setDomainId(department.getDomainId());
             config.setServer(1L);
@@ -195,11 +182,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Department> findDomainAndIsActive(Long id, Boolean isActive) throws Exception {
-        return departmentRepo.findDomainAndIsActive(id, true);
-    }
-
-    @Override
     public Page<Department> findAll(PagingAndSorting pagingAndSorting) throws Exception {
         return departmentRepo.findAll(pagingAndSorting.toPageRequest());
     }
@@ -210,23 +192,8 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Department> findByAll() throws Exception {
-        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if (domain != null && !domain.getName().equals("ROOT")) {
-            return (List<Department>) departmentRepo.findByDomainAndIsActive(domain.getId(), true, AccountType.USER);
-        }
-        return (List<Department>) departmentRepo.findAllByIsActive(true, AccountType.USER);
-    }
-
-    /**
-     * Find all the departments with pagination.
-     *
-     * @throws Exception application errors.
-     * @param pagingAndSorting do pagination with sorting for departments.
-     * @return list of departments.
-     */
-    public Page<Department> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
-        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+    public Page<Department> findAllByActive(PagingAndSorting pagingAndSorting, Long userId) throws Exception {
+        Domain domain = convertEntityService.getOwnerById(userId).getDomain();
         if (domain != null && !domain.getName().equals("ROOT")) {
             return departmentRepo.findByDomainAndIsActive(domain.getId(), true, pagingAndSorting.toPageRequest(),
                     AccountType.USER);
@@ -241,18 +208,19 @@ public class DepartmentServiceImpl implements DepartmentService {
         errors = validator.validateEntity(department, errors);
         config.setServer(1L);
         if (department.getSyncFlag()) {
-            List<Project> projectResponse = projectService.findByDepartmentAndIsActive(department.getId(), true);
-            List<VmInstance> vmResponse = vmService.findByDepartmentAndVmStatus(department.getId(),
-                    VmInstance.Status.Expunging);
+            List<Project> projectResponse = projectService.findAllByDepartmentAndIsActive(department.getId(), true);
+            List<VmInstance> vmResponse = vmService.findByDepartmentAndVmStatus(department.getId(), VmInstance.Status.Expunging);
             List<Role> roleResponse = roleService.findByDepartmentAndIsActive(department.getId(), true);
             List<Volume> volumeResponse = volumeService.findByDepartmentAndIsActive(department.getId(), true);
             List<User> userResponse = userService.findByDepartment(department.getId());
-            if (projectResponse.size() != 0 || vmResponse.size() != 0 || roleResponse.size() != 0
-                    || volumeResponse.size() != 0) {
-                errors.addGlobalError("You have following resources for this department: <br><ul><li>Project : "
-                        + projectResponse.size() + "</li><li>Instance : " + vmResponse.size() + "</li><li>Role : "
-                        + roleResponse.size() + "</li><li>Volume : " + volumeResponse.size() + "</li><li>User : "
-                        + userResponse.size() + "</li></ul><br>Kindly delete associated resources and try again");
+            if (projectResponse.size() != 0 || vmResponse.size() != 0
+                    || roleResponse.size() != 0 || volumeResponse.size() != 0) {
+                errors.addGlobalError(GenericConstants.PAGE_ERROR_SEPARATOR + GenericConstants.TOKEN_SEPARATOR +
+                        projectResponse.size() + GenericConstants.TOKEN_SEPARATOR +
+                        vmResponse.size() + GenericConstants.TOKEN_SEPARATOR +
+                        roleResponse.size() + GenericConstants.TOKEN_SEPARATOR +
+                        volumeResponse.size() + GenericConstants.TOKEN_SEPARATOR +
+                        userResponse.size());
 
             }
         }
@@ -271,24 +239,13 @@ public class DepartmentServiceImpl implements DepartmentService {
                 LOGGER.debug("Department deleted successfully" + department.getUserName());
             }
         }
-
         return departmentRepo.save(department);
     }
 
     @Override
-    public List<Department> findAllByIsActive(Boolean isActive) throws Exception {
-        // TODO :For Usage
-        // Step1: Get all the account details
-
-        // Step2: Get the usage response for each account from cloudstack
-        return departmentRepo.findAllByIsActive(true, AccountType.USER);
-    }
-
-    @Override
-    public List<Department> findAllFromCSServerByDomain() throws Exception {
+    public List<Department> findAllFromCSServer() throws Exception {
         List<Department> departmentList = new ArrayList<Department>();
         HashMap<String, String> departmentMap = new HashMap<String, String>();
-        // departmentMap.put("domainid", domainUuid);
         departmentMap.put("listall", "true");
 
         // 1. Get the list of accounts from CS server using CS connector
@@ -297,16 +254,13 @@ public class DepartmentServiceImpl implements DepartmentService {
         JSONObject responseObject = new JSONObject(response).getJSONObject("listaccountsresponse");
         if (responseObject.has("account")) {
             userListJSON = responseObject.getJSONArray("account");
-            // 2. Iterate the json list, convert the single json entity to user
+            // 2. Iterate the json list, convert the single json entity to department
             for (int i = 0, size = userListJSON.length(); i < size; i++) {
-                // 2.1 Call convert by passing JSONObject to Department entity
-                // and
-                // Add the converted Department entity to list
+                // 2.1 Call convert by passing JSONObject to department entity and
+                // Add the converted department entity to list
                 Department department = Department.convert(userListJSON.getJSONObject(i));
                 department.setDomainId(convertEntityService.getDomainId(department.getTransDomainId()));
-                // TODO : Need to get root admin account for role permission so you need to check the department where
-                // our you use.
-                if (!department.getUserName().equalsIgnoreCase("baremetal-system-account")) {
+                if (!department.getUserName().equalsIgnoreCase(BAREMETAL_SYSTEM_ACCOUNT)) {
                     departmentList.add(department);
                 }
             }
@@ -320,24 +274,23 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Department> findByDomainAndIsActive(Long domainId, Boolean isActive) {
+    public List<Department> findByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception {
+        Domain domain = domainService.find(domainId);
+        if (domain != null && !domain.getName().equals("ROOT")) {
+            return (List<Department>) departmentRepo.findByDomainAndIsActive(domain.getId(), isActive, AccountType.USER);
+        }
         return departmentRepo.findByDomainAndIsActive(domainId, isActive, AccountType.USER);
     }
 
     @Override
-    public Department findByUsername(String name, Long domainId, Boolean isActive) {
-        return (Department) departmentRepo.findByUsername(name, domainId, isActive);
+    public Department findByUsernameDomainAndIsActive(String username, Long domainId, Boolean isActive) {
+        return (Department) departmentRepo.findByUsernameDomainAndIsActive(username, domainId, isActive);
     }
 
     @Override
-    public Department findByUsernameAndDomain(String name, Domain domain, Boolean isActive) {
-        return (Department) departmentRepo.findByUsernameAndDomain(name, domain, isActive);
-    }
-
-    @Override
-    public List<Department> findDepartmentsByAccountTypesAndActive(List<AccountType> types, Boolean isActive)
+    public List<Department> findByAccountTypesAndActive(List<AccountType> types, Boolean isActive)
             throws Exception {
-        return (List<Department>) departmentRepo.findDepartmentsByAccountTypesAndActive(types, isActive);
+        return (List<Department>) departmentRepo.findByAccountTypesAndActive(types, isActive);
     }
 
     /**
@@ -351,15 +304,20 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<Department> findDepartmentsByDomainAndAccountTypesAndActive(Long domainId, List<AccountType> types,
+    public List<Department> findByDomainAndAccountTypesAndActive(Long domainId, List<AccountType> types,
             Boolean isActive) throws Exception {
-        return (List<Department>) departmentRepo.findDepartmentsByDomainAndAccountTypesAndActive(domainId, types,
+        return (List<Department>) departmentRepo.findByDomainAndAccountTypesAndActive(domainId, types,
                 isActive);
     }
 
     @Override
     public Department findbyUUID(String uuid) throws Exception {
         return departmentRepo.findByUuidAndIsActive(uuid, true);
+    }
+
+    @Override
+    public Department save(Department department) throws Exception {
+        return null;
     }
 
 }

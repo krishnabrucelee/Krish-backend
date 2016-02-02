@@ -144,6 +144,20 @@ public class AppValidator {
     }
 
     /**
+     * send global error from CS server with custom code.
+     *
+     * @param message error message.
+     * @param code error code.
+     * @return error is present,else new error object is returned.
+     * @throws Exception if error is present.
+     */
+    public Errors sendCustomGlobalError(String code, String message) throws Exception {
+        Errors errors = new Errors(messageSource);
+        errors.addGlobalError(message);
+        return errors;
+    }
+
+    /**
      * Create a new error entity.
      *
      * @return Errors entity

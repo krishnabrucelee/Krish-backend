@@ -1,5 +1,6 @@
 package ck.panda.domain.entity;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +35,8 @@ import ck.panda.util.JsonUtil;
 @Entity
 @Table(name = "ip_addresses")
 @EntityListeners(AuditingEntityListener.class)
-public class IpAddress {
+@SuppressWarnings("serial")
+public class IpAddress implements Serializable {
 
     /** Unique Id of the IP address. */
     @Id
@@ -52,7 +54,7 @@ public class IpAddress {
 
     /** public ip address vlan. */
     @Column(name = "vlan")
-    private String Vlan;
+    private String vlan;
 
     /** Ip address source nat. */
     @Column(name = "is_source_nat")
@@ -739,7 +741,7 @@ public class IpAddress {
      * @return vlan name.
      */
     public String getVlan() {
-        return Vlan;
+        return vlan;
     }
 
     /**
@@ -748,7 +750,7 @@ public class IpAddress {
      * @param vlan to set.
      */
     public void setVlan(String vlan) {
-        Vlan = vlan;
+        vlan = vlan;
     }
 
     /**
@@ -801,7 +803,7 @@ public class IpAddress {
     /**
      * Mapping entity object into list.
      *
-     * @param IpAddressList list of IpAddress.
+     * @param ipAddressList list of IpAddress.
      * @return IpAddress map
      */
     public static Map<String, IpAddress> convert(List<IpAddress> ipAddressList) {

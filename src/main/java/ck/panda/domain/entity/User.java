@@ -1,5 +1,6 @@
 package ck.panda.domain.entity;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +31,8 @@ import ck.panda.util.JsonUtil;
 @Entity
 @Table(name = "users")
 @EntityListeners(AuditingEntityListener.class)
-public class User {
+@SuppressWarnings("serial")
+public class User implements Serializable {
 
     /** Id of the user. */
     @Id

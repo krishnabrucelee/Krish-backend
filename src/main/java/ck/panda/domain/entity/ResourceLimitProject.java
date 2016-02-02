@@ -1,5 +1,6 @@
 package ck.panda.domain.entity;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +35,8 @@ import ck.panda.util.JsonUtil;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "resource_limit_projects")
-public class ResourceLimitProject {
+@SuppressWarnings("serial")
+public class ResourceLimitProject implements Serializable {
 
     /** Unique ID of the Resource limit. */
     @Id

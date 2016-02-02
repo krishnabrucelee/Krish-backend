@@ -3,6 +3,7 @@
  */
 package ck.panda.domain.entity;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +43,8 @@ import ck.panda.util.JsonValidator;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "volumes")
-public class Volume {
+@SuppressWarnings("serial")
+public class Volume implements Serializable {
 
     /** Unique ID of the volume. */
     @Id
