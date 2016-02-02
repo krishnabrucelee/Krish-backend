@@ -92,7 +92,7 @@ public class ActionListener implements MessageListener {
                 LOGGER.debug("Account sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
             } else {
                 syncService.syncUser();
-                if(eventObject.getEvent().equals(EventTypes.EVENT_USER_CREATE)) {
+                if (eventObject.getEvent().equals(EventTypes.EVENT_USER_CREATE)) {
                     syncService.syncUpdateUserRole();
                 }
             }
@@ -122,7 +122,10 @@ public class ActionListener implements MessageListener {
             syncService.syncOsTypes();
             break;
         case EventTypes.EVENT_ISO:
-            LOGGER.debug("ISO sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            if (!eventObject.getEvent().contains("ISO.DELETE")) {
+                LOGGER.debug("ISO sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+                syncService.syncTemplates();
+            }
             break;
         case EventTypes.EVENT_NETWORK:
             if (eventObject.getEvent().contains("OFFERING")) {

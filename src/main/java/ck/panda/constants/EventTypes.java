@@ -236,4 +236,10 @@ public class EventTypes {
 
     /** User Create Events. */
     public static final String EVENT_USER_CREATE = "USER.CREATE";
+
+    /** Template Delete Events. */
+    public static final String EVENT_TEMPLATE_DELETE = "TEMPLATE.DELETE";
+
+    /** ISO Template Delete Events. */
+    public static final String EVENT_ISO_TEMPLATE_DELETE = "ISO.DELETE";
 }

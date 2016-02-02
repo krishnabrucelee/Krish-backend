@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Domain;
@@ -175,7 +177,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         switch (commandText) {
         case EventTypes.EVENT_VM:
             LOGGER.debug("VM Sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
-                syncvirtualmachine(jobresult, eventObject);
+            syncVirtualMachine(jobresult, eventObject);
             break;
         case EventTypes.EVENT_NETWORK:
             if (!eventObject.getString("commandEventType").contains("OFFERING")) {
@@ -200,6 +202,11 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             break;
         case EventTypes.EVENT_TEMPLATE:
             LOGGER.debug("templates sync",
+                    eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+            asyncTemplates(eventObject);
+            break;
+        case EventTypes.EVENT_ISO:
+            LOGGER.debug("ISO sync",
                     eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
             asyncTemplates(eventObject);
             break;
@@ -232,7 +239,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      * @param eventObject network event object
      * @throws Exception cloudstack unhandled errors
      */
-    public void syncvirtualmachine(JSONObject jobresult, JSONObject eventObject) throws Exception {
+    public void syncVirtualMachine(JSONObject jobresult, JSONObject eventObject) throws Exception {
 
         if (jobresult.has("virtualmachine")) {
             VmInstance vmInstance = VmInstance.convert(jobresult.getJSONObject("virtualmachine"));
@@ -780,9 +787,15 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      */
     public void asyncTemplates(JSONObject eventObject) throws ApplicationException, Exception {
 
-        if (eventObject.getString("commandEventType").equals("TEMPLATE.DELETE")) {
-            JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
-            Template template = templateService.findByUUID(json.getString("id"));
+        if (eventObject.getString("commandEventType").equals(EventTypes.EVENT_TEMPLATE_DELETE)) {
+            JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
+            Template template = templateService.findByUUID(json.getString(CloudStackConstants.CS_ID));
+            template.setSyncFlag(false);
+            templateService.softDelete(template);
+        }
+        if (eventObject.getString("commandEventType").equals(EventTypes.EVENT_ISO_TEMPLATE_DELETE)) {
+            JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
+            Template template = templateService.findByUUID(json.getString(CloudStackConstants.CS_ID));
             template.setSyncFlag(false);
             templateService.softDelete(template);
         }

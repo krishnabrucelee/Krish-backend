@@ -134,4 +134,7 @@ public class CloudStackConstants {
 
     /** Constant for register user key response. */
     public static final String CS_REGISTER_KEY_RESPONSE = "registeruserkeysresponse";
+
+    /** Constant for command information. */
+    public static final String CS_CMD_INFO = "cmdInfo";
 }
