@@ -3,6 +3,7 @@
  */
 package ck.panda.domain.entity;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,7 +31,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "resource_limit_departments")
-public class ResourceLimitDepartment {
+@SuppressWarnings("serial")
+public class ResourceLimitDepartment implements Serializable {
 
     /** Unique ID of the Resource limit. */
     @Id

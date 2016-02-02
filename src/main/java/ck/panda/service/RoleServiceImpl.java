@@ -74,10 +74,6 @@ public class RoleServiceImpl implements RoleService {
     public Role update(Role role) throws Exception {
         Errors errors = validator.rejectIfNullEntity("role", role);
         errors = validator.validateEntity(role, errors);
-        // Role roleUnique = roleRepo.findUniqueness(role.getName(), role.getDepartmentId());
-        // if (roleUnique != null && role.getId() != roleUnique.getId()) {
-        // errors.addGlobalError("role.name.unique.error");
-        // }
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
@@ -139,7 +135,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Role findByName(String name, Long departmentId) throws Exception {
-        return roleRepo.findUniqueness(name, departmentId);
+        return roleRepo.findRoleWithPermissionsByNameAndDepartment(name, departmentId, true);
     }
 
     @Override

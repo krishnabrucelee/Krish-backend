@@ -8,7 +8,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Project;
-import ck.panda.domain.entity.Project.Status;
 
 /**
  * JPA repository for Project entity. Project related crud and pagination are handled by this Repository.
@@ -21,92 +20,80 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, L
      * @param department department object.
      * @param isActive true/false.
      * @param projectId project id.
-     * @return project name
+     * @return project.
      */
-    @Query(value = "select project from Project project where project.isActive IS :isactive AND project.name=:name AND project.department=:department AND project.id!=:projectId)")
+    @Query(value = "SELECT project FROM Project project WHERE project.isActive IS :isactive AND project.name = :name AND project.department = :department AND project.id <> :projectId)")
     Project findByNameAndDepartment(@Param("isactive") Boolean isActive, @Param("name") String name,
             @Param("department") Department department, @Param("projectId") Long projectId);
 
     /**
-     * find all the project with active status.
+     * Find all project by status.
      *
      * @param pageable pagination information.
      * @param isActive true/false.
-     * @param status of project.
      * @return list of project.
      */
-    @Query(value = "select project from Project project where project.isActive IS :isactive and project.status = :status ")
-    Page<Project> findAllByActive(Pageable pageable, @Param("isactive") Boolean isActive,
-            @Param("status") Status status);
+    @Query(value = "SELECT project FROM Project project WHERE project.isActive IS :isactive ")
+    Page<Project> findAllByStatus(Pageable pageable, @Param("isactive") Boolean isActive);
 
     /**
-     * find all the project with active status.
+     * Find all project by status.
      *
      * @param isActive true/false.
-     * @return list of active project.
+     * @return list of project.
      */
-    @Query(value = "select project from Project project where project.isActive IS :isactive ")
-    List<Project> findAllByActive(@Param("isactive") Boolean isActive);
+    @Query(value = "SELECT project FROM Project project WHERE project.isActive IS :isactive ")
+    List<Project> findAllByIsActive(@Param("isactive") Boolean isActive);
 
     /**
-     * Find all the projects with domainid.
+     * Find all project by domain and status.
      *
-     * @param id domain id.
-     * @return list of active project.
+     * @param domainId domain id.
+     * @param isActive true/false.
+     * @return list of project.
      */
-    @Query(value = "select project from Project project where project.isActive IS TRUE and project.domainId = :domain")
-    List<Project> findbyDomain(@Param("domain") Long id);
+    @Query(value = "SELECT project FROM Project project WHERE project.isActive IS :isactive AND project.domainId = :domain")
+    List<Project> findAllByDomain(@Param("domain") Long domainId, @Param("isactive") Boolean isActive);
 
     /**
-     * Find all the project using Uuid and IsActive Status.
-     *
-     * @param uuid of the project.
-     * @param isActive get Status of the project.
-     * @return Project.
-     */
-    @Query(value = "select project from Project project where project.isActive =:isActive AND project.uuid =:uuid")
-    Project findByUuidAndIsActive(@Param("uuid") String uuid, @Param("isActive") Boolean isActive);
-
-    /**
-     * Find all the project using Uuid.
+     * Find all project using Uuid.
      *
      * @param uuid of the project.
      * @return Project.
      */
-    @Query(value = "select project from Project project where  project.uuid =:uuid")
+    @Query(value = "SELECT project FROM Project project WHERE  project.uuid = :uuid")
     Project findByUuid(@Param("uuid") String uuid);
 
     /**
-     * Find all Projects from department.
+     * Find all project by department and status.
      *
      * @param departmentId department id.
-     * @param isActive get the department list based on active/inactive status.
-     * @return Project list.
+     * @param isActive active/inactive status.
+     * @return list of project.
      */
-    @Query(value = "select project from Project project where project.isActive =:isActive AND project.departmentId=:id")
-    List<Project> findByDepartmentAndIsActive(@Param("id") Long departmentId, @Param("isActive") Boolean isActive);
+    @Query(value = "SELECT project FROM Project project WHERE project.isActive = :isActive AND project.departmentId = :departmentId")
+    List<Project> findAllByDepartmentAndIsActive(@Param("departmentId") Long departmentId,
+            @Param("isActive") Boolean isActive);
 
     /**
-     * Find all projects from user.
+     * Find all project by user ans status.
      *
      * @param userId department id.
-     * @param isActive get the department list based on active/inactive status.
-     * @return Project list.
+     * @param isActive active/inactive status.
+     * @return list of project.
      */
-    @Query(value = "select DISTINCT project from Project project join project.userList users where project.isActive =:isActive AND users.id = :id")
-    List<Project> findByUserAndIsActive(@Param("id") Long userId, @Param("isActive") Boolean isActive);
+    @Query(value = "SELECT DISTINCT project FROM Project project JOIN project.userList users WHERE project.isActive = :isActive AND users.id = :id")
+    List<Project> findAllByUserAndIsActive(@Param("id") Long userId, @Param("isActive") Boolean isActive);
 
     /**
-     * Find all the project with active status.
+     * Find all project by domain with status.
      *
      * @param pageable pagination information.
      * @param domainId domain id.
      * @param isActive true/false.
-     * @param status of project.
      * @return list of project.
      */
-    @Query(value = "select project from Project project where project.isActive IS :isactive and project.domainId = :domainid and project.status = :status ")
-    Page<Project> findAllProjectByDomain(@Param("domainid") Long domainId, Pageable pageable,
-            @Param("isactive") Boolean isActive, @Param("status") Status status);
-
+    @Query(value = "SELECT project FROM Project project WHERE project.isActive IS :isActive AND project.domainId = :domainId ")
+    Page<Project> findAllByDomain(@Param("domainId") Long domainId, Pageable pageable,
+            @Param("isActive") Boolean isActive);
 }

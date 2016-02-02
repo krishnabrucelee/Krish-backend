@@ -14,6 +14,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -27,6 +28,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -65,18 +67,23 @@ public class SSHKey implements Serializable {
 
     /** Private key. */
     @Transient
-    private String privatekey;
+    private String privateKey;
 
     /** public Key. */
-    @Transient
+    @Column(name = "public_key")
     private String publicKey;
 
+    /** Domain of the SSH Key. */
+    @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Domain domain;
+
     /** Domain id of the SSH Key. */
-    @Transient
+    @Column(name = "domain_id")
     private Long domainId;
 
     /** Department of the SSH Key. */
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "department_id", referencedColumnName = "id", updatable = false, insertable = false)
     private Department department;
 
@@ -116,10 +123,6 @@ public class SSHKey implements Serializable {
     @Transient
     private String transDepartment;
 
-    /** Transient domain of the user. */
-    @Transient
-    private String transDomain;
-
     /** Created date and time. */
     @CreatedDate
     @Column(name = "created_date_time")
@@ -133,6 +136,10 @@ public class SSHKey implements Serializable {
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
+
+    /** Transient domain of the account. */
+    @Transient
+    private String transDomainId;
 
     /** Default constructor. */
     public SSHKey() {
@@ -196,37 +203,55 @@ public class SSHKey implements Serializable {
     /**
      * Get the private key.
      *
-     * @return privateKey
+     * @return the privateKey
      */
-    public String getPrivatekey() {
-        return privatekey;
+    public String getPrivateKey() {
+        return privateKey;
     }
 
     /**
      * Set the private key.
      *
-     * @param privatekey to set
+     * @param privateKey the privateKey to set
      */
-    public void setPrivatekey(String privatekey) {
-        this.privatekey = privatekey;
+    public void setPrivateKey(String privateKey) {
+        this.privateKey = privateKey;
     }
 
     /**
      * Get the public key.
      *
-     * @return publicKey
+     * @return the publicKey
      */
-    public String getPublickey() {
+    public String getPublicKey() {
         return publicKey;
     }
 
     /**
      * Set the public key.
      *
-     * @param publickey to set
+     * @param publicKey the publicKey to set
      */
-    public void setPublickey(String publickey) {
-        this.publicKey = publickey;
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    /**
+     * Get domain for SSH key.
+     *
+     * @return the domain
+     */
+    public Domain getDomain() {
+        return domain;
+    }
+
+    /**
+     * Set domain for SSH Key.
+     *
+     * @param domain domain to set.
+     */
+    public void setDomain(Domain domain) {
+        this.domain = domain;
     }
 
     /**
@@ -414,21 +439,21 @@ public class SSHKey implements Serializable {
     }
 
     /**
-     * Get the transient Domain.
+     * Get transient Domain Id.
      *
-     * @return the transDomain
+     * @return the transDomainId
      */
-    public String getTransDomain() {
-        return transDomain;
+    public String getTransDomainId() {
+        return transDomainId;
     }
 
     /**
-     * Set the transDomain.
+     * Set the transDomainId.
      *
-     * @param transDomain to set
+     * @param transDomainId to set
      */
-    public void setTransDomain(String transDomain) {
-        this.transDomain = transDomain;
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
     }
 
     /**
@@ -478,10 +503,10 @@ public class SSHKey implements Serializable {
     public static SSHKey convert(JSONObject jsonObject) throws Exception {
         SSHKey sshkey = new SSHKey();
         sshkey.setIsSyncFlag(false);
-        sshkey.setName(JsonUtil.getStringValue(jsonObject, "name"));
-        sshkey.setFingerPrint(JsonUtil.getStringValue(jsonObject, "fingerPrint"));
-        sshkey.setTransDepartment(JsonUtil.getStringValue(jsonObject, "account"));
-        sshkey.setTransDomain(JsonUtil.getStringValue(jsonObject, "domainid"));
+        sshkey.setName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_NAME));
+        sshkey.setFingerPrint(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_FINGER_PRINT));
+        sshkey.setTransDepartment(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ACCOUNT));
+        sshkey.setTransDomainId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DOMAIN_ID));
         sshkey.setIsActive(true);
         return sshkey;
     }
@@ -496,9 +521,8 @@ public class SSHKey implements Serializable {
         Map<String, SSHKey> sshkeyMap = new HashMap<String, SSHKey>();
 
         for (SSHKey sshkey : sshkeyList) {
-            sshkeyMap.put(sshkey.getName(), sshkey);
+            sshkeyMap.put(sshkey.getFingerPrint(), sshkey);
         }
         return sshkeyMap;
     }
-
 }

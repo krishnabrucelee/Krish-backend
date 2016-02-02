@@ -15,16 +15,15 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.Status;
 import ck.panda.domain.entity.User.UserType;
-import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.EncryptionUtil;
-import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -37,33 +36,29 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private AppValidator validator;
 
-    /** Autowired user repository object. */
+    /** User repository reference. */
     @Autowired
     private UserRepository userRepository;
 
-    /** Autowired CloudStackUserService object. */
+    /** CloudStack user service reference. */
     @Autowired
     private CloudStackUserService csUserService;
 
-    /** Inject departmentService business logic. */
+    /** Department service reference. */
     @Autowired
     private DepartmentService departmentService;
 
-    /** Cloud stack configuration utility class. */
+    /** Project service reference. */
+    @Autowired
+    private ProjectService projectService;
+
+    /** Cloud stack configuration utility for CS connector. */
     @Autowired
     private ConfigUtil config;
 
     /** Reference of the convert entity service. */
     @Autowired
     private ConvertEntityService convertEntityService;
-
-    /** Inject domain service business logic. */
-    @Autowired
-    private DomainRepository domainRepository;
-
-    /** Autowired TokenDetails. */
-    @Autowired
-    private TokenDetails tokenDetails;
 
     /** Reference of domain Service . */
     @Autowired
@@ -76,6 +71,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @PreAuthorize("hasPermission(#user.getSyncFlag(), 'CREATE_USER')")
     public User save(User user) throws Exception {
+        HashMap<String, String> userMap = new HashMap<String, String>();
+        List<User> users = new ArrayList<User>();
         if (user.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity("user", user);
             errors = validator.validateEntity(user, errors);
@@ -92,7 +89,6 @@ public class UserServiceImpl implements UserService {
                 String encryptedPassword = new String(EncryptionUtil.encrypt(user.getPassword(), originalKey));
                 user.setIsActive(true);
                 config.setServer(1L);
-                HashMap<String, String> userMap = new HashMap<String, String>();
                 userMap.put("domainid", user.getDomain().getUuid());
                 String cloudResponse = csUserService.createUser(user.getDepartment().getUserName(), user.getEmail(),
                         user.getFirstName(), user.getLastName(), user.getUserName(), user.getPassword(), "json",
@@ -106,7 +102,17 @@ public class UserServiceImpl implements UserService {
                 user.setUuid((String) userRes.get("id"));
                 user.setPassword(encryptedPassword);
                 user.setDomainId(user.getDomain().getId());
-                return userRepository.save(user);
+                user = userRepository.save(user);
+                if (!user.getProjectList().isEmpty()) {
+                    for (Project project : user.getProjectList()) {
+                        Project persistProject = projectService.find(project.getId());
+                        users = persistProject.getUserList();
+                        users.add(user);
+                        persistProject.setUserList(users);
+                        projectService.update(persistProject);
+                    }
+                }
+                return user;
             }
         } else {
             user.setStatus(Status.ACTIVE);
@@ -211,8 +217,7 @@ public class UserServiceImpl implements UserService {
             // 2. Iterate the json list, convert the single json entity to user
             for (int i = 0, size = userListJSON.length(); i < size; i++) {
                 // 2.1 Call convert by passing JSONObject to User entity and Add
-                // the converted User entity to list
-
+                // the converted User entity to list.
                 User user = User.convert(userListJSON.getJSONObject(i));
                 if (!user.getUserName().equalsIgnoreCase("baremetal-system-account")) {
                     user.setDepartmentId((convertEntityService.getDepartment(user.getTransDepartment()).getId()));
@@ -222,11 +227,6 @@ public class UserServiceImpl implements UserService {
             }
         }
         return userList;
-    }
-
-    @Override
-    public List<User> findByName(String query) throws Exception {
-        return userRepository.findAllByActive(query);
     }
 
     @Override
@@ -241,9 +241,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> findByDepartmentWithLoggedUser(Long departmentId) throws Exception {
+    public List<User> findByDepartmentWithLoggedUser(Long departmentId, Long userId) throws Exception {
         Department department = departmentService.find(departmentId);
-        User user = userRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("id")));
+        User user = userRepository.findOne(userId);
         if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
             if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
                 return userRepository.findByDepartment(department);
@@ -267,7 +267,7 @@ public class UserServiceImpl implements UserService {
         if (domain.equals("/")) {
             domain = "ROOT";
         }
-        User user = userRepository.findByUser(userName.trim(), domainRepository.findByName(domain), true);
+        User user = userRepository.findByUser(userName.trim(), domainService.findByName(domain), true);
         if (user != null && password != null) {
             String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
             byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
@@ -306,17 +306,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<User> findAllUserByDomain(PagingAndSorting pagingAndSorting) throws Exception {
-        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if (domain != null && !domain.getName().equals("ROOT")) {
-            return userRepository.findAllUserByDomain(pagingAndSorting.toPageRequest(), domain, true);
+    public Page<User> findAllUserByDomain(PagingAndSorting pagingAndSorting, Long userId) throws Exception {
+        User user = userRepository.findOne(userId);
+        if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
+            return userRepository.findAllUserByDomain(pagingAndSorting.toPageRequest(), user.getDomain(), true);
         }
         return userRepository.findAll(pagingAndSorting.toPageRequest());
     }
 
     @Override
-    public List<User> findAllUserByDomain() throws Exception {
-        Domain domain = domainRepository.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+    public List<User> findAllUserByDomain(Long userId) throws Exception {
+        Domain domain = domainService.find(userId);
         return userRepository.findAllUserByDomain(domain);
     }
 

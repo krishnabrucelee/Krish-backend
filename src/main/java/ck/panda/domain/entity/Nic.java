@@ -1,5 +1,6 @@
 package ck.panda.domain.entity;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +29,8 @@ import ck.panda.util.JsonUtil;
  */
 @Entity
 @Table(name = "nics")
-public class Nic {
+@SuppressWarnings("serial")
+public class Nic implements Serializable {
 
     /** ID of the nic. */
     @Id
@@ -482,7 +484,6 @@ public class Nic {
     public void setName(String name) {
         this.name = name;
     }
-
 
     /**
      * Get the secondaryIpAddress.

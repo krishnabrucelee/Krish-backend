@@ -1,5 +1,6 @@
 package ck.panda.domain.entity;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,10 +20,10 @@ import ck.panda.util.JsonUtil;
  * Secondary Vm IP Address.
  *
  */
-
 @Entity
 @Table(name = "vm_ipaddress")
-public class VmIpaddress {
+@SuppressWarnings("serial")
+public class VmIpaddress implements Serializable {
 
      /** Constant for nic uuid. */
     public static final String CS_NIC_UUID = "nicuuid";
@@ -75,7 +76,6 @@ public class VmIpaddress {
     @Transient
     private Boolean syncFlag;
 
-
     /**
      * Get the id of the vm Ip address.
      *
@@ -86,7 +86,7 @@ public class VmIpaddress {
     }
 
     /**
-     * Set the id of the  vm Ip address
+     * Set the id of the  vm Ip address.
      *
      * @param id the id to set
      */
@@ -203,6 +203,24 @@ public class VmIpaddress {
     }
 
     /**
+     * Get the primaryIpAddress.
+     *
+     * @return the primaryIpAddress
+     */
+    public String getPrimaryIpAddress() {
+        return primaryIpAddress;
+    }
+
+    /**
+     * Set the primaryIpAddress.
+     *
+     * @param primaryIpAddress  to set
+     */
+    public void setPrimaryIpAddress(String primaryIpAddress) {
+        this.primaryIpAddress = primaryIpAddress;
+    }
+
+    /**
      * Get the nic id.
      *
      * @return the nicId
@@ -255,23 +273,7 @@ public class VmIpaddress {
        this.syncFlag = syncFlag;
    }
 
-   /**
-    * Get the primary ip address .
-    *
-    * @return the primaryIpAddress
-    */
-   public String getPrimaryIpAddress() {
-      return primaryIpAddress;
-   }
 
-  /**
-   * Set the primary ip address.
-   *
-   * @param primaryIpAddress to set
-   */
-   public void setPrimaryIpAddress(String primaryIpAddress) {
-      this.primaryIpAddress = primaryIpAddress;
-   }
 
     /**
      * Convert JSONObject to vm ip address entity.
@@ -289,18 +291,20 @@ public class VmIpaddress {
         vm.setSyncFlag(false);
         return vm;
     }
-        /**
-         * Mapping entity object into list.
-         *
+
+    /**
+     * Mapping entity object into list.
+     *
          * @param vmIpaddressList of secondary ip address
          * @return vmIpaddressListMap secondary ip address.
-         */
+     */
     public static Map<String, VmIpaddress> convert(List<VmIpaddress> vmIpaddressList) {
         Map<String, VmIpaddress> vmIpaddressMap = new HashMap<String, VmIpaddress>();
 
         for (VmIpaddress vmIp : vmIpaddressList) {
             vmIpaddressMap.put(vmIp.getUuid(), vmIp);
         }
+
 
         return vmIpaddressMap;
     }

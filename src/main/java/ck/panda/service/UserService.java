@@ -23,13 +23,6 @@ public interface UserService extends CRUDService<User> {
     List<User> findAllFromCSServerByDomain() throws Exception;
 
     /**
-     * @param query search term.
-     * @return list of user.
-     * @throws Exception unhandled errors.
-     */
-    List<User> findByName(String query) throws Exception;
-
-    /**
      * To get list of users by department.
      *
      * @param departmentId department id.
@@ -42,10 +35,11 @@ public interface UserService extends CRUDService<User> {
      * To get list of users by department and logged in user.
      *
      * @param departmentId department id.
+     * @param userId user id.
      * @return list of user.
      * @throws Exception if error occurs.
      */
-    List<User> findByDepartmentWithLoggedUser(Long departmentId) throws Exception;
+    List<User> findByDepartmentWithLoggedUser(Long departmentId, Long userId) throws Exception;
 
     /**
      * Find the User already exist for the same domain.
@@ -91,18 +85,20 @@ public interface UserService extends CRUDService<User> {
      * Find all the user by domain.
      *
      * @param pagingAndSorting paging and sorting information.
+     * @param userId user id.
      * @return list of user.
      * @throws Exception if error occurs.
      */
-    Page<User> findAllUserByDomain(PagingAndSorting pagingAndSorting) throws Exception;
+    Page<User> findAllUserByDomain(PagingAndSorting pagingAndSorting, Long userId) throws Exception;
 
     /**
      * Find all the user by domain.
      *
+     * @param userId user id.
      * @return list of user.
      * @throws Exception if error occurs.
      */
-    List<User> findAllUserByDomain() throws Exception;
+    List<User> findAllUserByDomain(Long userId) throws Exception;
 
     /**
      * Find the user by domain.

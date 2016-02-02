@@ -24,6 +24,7 @@ import ck.panda.service.UserService;
 import ck.panda.util.CloudStackAuthenticationService;
 import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
+import ck.panda.util.error.MessageByLocaleService;
 
 /**
  * Database authentication manager to handle all the validation and authentication for login users.
@@ -106,7 +107,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
     private String buildNumber;
 
     @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException, BadCredentialsException {
         Optional<String> userName = (Optional) authentication.getPrincipal();
         Optional<String> password = (Optional) authentication.getCredentials();
 
@@ -136,7 +137,8 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
         try {
             user = userService.findByUser(userName.get(), password.get(), ROOT_DOMAIN_SYMBOL);
             if (user == null && domain.get().equals(BACKEND_ADMIN)) {
-                resultOfAuthentication = adminDefaultLoginAuthentication(userName, password, resultOfAuthentication, user);
+                resultOfAuthentication = adminDefaultLoginAuthentication(userName, password, resultOfAuthentication,
+                        user);
             } else {
                 Boolean authResponse = csLoginAuthentication(userName.get(), password.get(), domain.get());
                 if (authResponse) {
@@ -167,10 +169,10 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
      * @return admin default authentication token
      */
     public AuthenticationWithToken adminDefaultLoginAuthentication(Optional<String> userName, Optional<String> password,
-           AuthenticationWithToken resultOfAuthentication, User user) {
+            AuthenticationWithToken resultOfAuthentication, User user) {
         if (userName.get().equals(backendAdminUserName) && password.get().equals(backendAdminPassword)) {
-            resultOfAuthentication = externalServiceAuthenticator.authenticate(backendAdminUserName,
-                    backendAdminRole, null, null, buildNumber);
+            resultOfAuthentication = externalServiceAuthenticator.authenticate(backendAdminUserName, backendAdminRole,
+                    null, null, buildNumber);
             String newToken = null;
             try {
                 newToken = tokenService.generateNewToken(user, ROOT_DOMAIN);
@@ -242,7 +244,8 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
         } else {
             optional.put(CS_DOMAIN, domain);
         }
-        String loginResponse = cloudStackAuthenticationService.login(userName, password, CloudStackConstants.JSON, optional);
+        String loginResponse = cloudStackAuthenticationService.login(userName, password, CloudStackConstants.JSON,
+                optional);
         JSONObject userJSON = new JSONObject(loginResponse).getJSONObject(CloudStackConstants.CS_LOGIN_RESPONSE);
         if (userJSON.has(CloudStackConstants.CS_ERROR_CODE)) {
             return false;
@@ -255,7 +258,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
      * Create the API and Secret key for the login user.
      *
      * @param user to set
-     * @return API and Secret key status  true/false
+     * @return API and Secret key status true/false
      * @throws Exception unhandled exceptions.
      */
     private Boolean apiSecretKeyGeneration(User user) throws Exception {
@@ -263,7 +266,8 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
         HashMap<String, String> optional = new HashMap<String, String>();
         optional.put(CloudStackConstants.CS_ID, user.getUuid());
         String listUserByIdResponse = cloudStackUserService.listUsers(optional, CloudStackConstants.JSON);
-        JSONObject listUsersResponse = new JSONObject(listUserByIdResponse).getJSONObject(CloudStackConstants.CS_LIST_USER_RESPONSE);
+        JSONObject listUsersResponse = new JSONObject(listUserByIdResponse)
+                .getJSONObject(CloudStackConstants.CS_LIST_USER_RESPONSE);
         if (listUsersResponse.has(CloudStackConstants.CS_ERROR_CODE)) {
             return false;
         } else {
@@ -273,8 +277,10 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
                 user.setSecretKey(userJsonobject.getJSONObject(0).get(CloudStackConstants.CS_SECRET_KEY).toString());
                 return true;
             } else {
-                String keyValueResponse = cloudStackUserService.registerUserKeys(user.getUuid(), CloudStackConstants.JSON);
-                JSONObject keyValue = new JSONObject(keyValueResponse).getJSONObject(CloudStackConstants.CS_REGISTER_KEY_RESPONSE);
+                String keyValueResponse = cloudStackUserService.registerUserKeys(user.getUuid(),
+                        CloudStackConstants.JSON);
+                JSONObject keyValue = new JSONObject(keyValueResponse)
+                        .getJSONObject(CloudStackConstants.CS_REGISTER_KEY_RESPONSE);
                 if (keyValue.has(CloudStackConstants.CS_ERROR_CODE)) {
                     return false;
                 } else {

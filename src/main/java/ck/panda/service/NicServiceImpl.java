@@ -113,7 +113,6 @@ public class NicServiceImpl implements NicService {
             JSONObject addNicResponse = new JSONObject(createNicResponse)
                     .getJSONObject("addnictovirtualmachineresponse");
             if (addNicResponse.has("jobid")) {
-                Thread.sleep(5000);
                 String jobResponse = cloudStackInstanceService.queryAsyncJobResult(addNicResponse.getString("jobid"),
                         "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
@@ -135,7 +134,7 @@ public class NicServiceImpl implements NicService {
                  }
               }
               return nic;
-          } else {
+          }else {
               nic = nicRepo.save(nic);
               if (nic.getVmIpAddress() != null) {
                   updateNicToVmIpaddress(nic);
@@ -174,7 +173,7 @@ public class NicServiceImpl implements NicService {
         for (int i = 0; i < nicListJSON.length(); i++) {
             Nic nic = findbyUUID(nicListJSON.getJSONObject(i).getString("id"));
             if (nic == null) {
-                nic = new Nic();
+                 nic = new Nic();
             }
                 nic.setUuid(nicListJSON.getJSONObject(i).getString("id"));
                 nic.setVmInstanceId(
@@ -189,8 +188,10 @@ public class NicServiceImpl implements NicService {
                 if (nicRepo.findByUUID(nic.getUuid()) == null) {
                     nicRepo.save(nic);
                 }
+              }
             }
-        }
+
+
 
     /**
      * Check the nic CS error handling.
@@ -218,23 +219,22 @@ public class NicServiceImpl implements NicService {
                     instance.getUuid(), "json", optional);
             JSONObject defaultNicResponse = new JSONObject(updateNicResponse)
                     .getJSONObject("updatedefaultnicforvirtualmachineresponse");
-            Thread.sleep(6000);
             if (defaultNicResponse.has("jobid")) {
                 String jobResponse = cloudStackInstanceService
                         .queryAsyncJobResult(defaultNicResponse.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
-                if (jobresult.getString("jobstatus").equals("0")) {
-                    Thread.sleep(2000);
-                }
-                if (jobresult.getString("job	status").equals("1")) {
-                    Nic nicI = nicRepo.findByInstanceIdAndIsDefault(nic.getVmInstanceId(), true);
-                    nicI.setIsDefault(false);
+
+         
+                    if (jobresult.getString("jobstatus").equals("1")) {
+                    Thread.sleep(5000);
+                    Nic nicDefault = nicRepo.findByInstanceIdAndIsDefault(nic.getVmInstanceId(), true);
+                    nicDefault.setIsDefault(false);
+                    //JSONObject jobresponse = jobresult.getJSONObject("jobresult");
                     nic.setIsDefault(true);
-                } else {
-                    JSONObject jobresponse = jobresult.getJSONObject("jobresult");
-                    if (jobresult.getString("jobstatus").equals("2")) {
-                        if (jobresponse.has("errorcode")) {
-                            errors = this.validateEvent(errors, jobresponse.getString("errortext"));
+                    } else {
+                        if (jobresult.getString("jobstatus").equals("2")) {
+                            if (jobresult.has("errorcode")) {
+                            errors = this.validateEvent(errors, jobresult.getString("errortext"));
                             throw new ApplicationException(errors);
                         }
                     }
@@ -279,7 +279,7 @@ public class NicServiceImpl implements NicService {
     @Override
     @PreAuthorize("hasPermission(#nic.getSyncFlag(), 'DELETE_NETWORK_TO_VM')")
     public Nic softDelete(Nic nic) throws Exception {
-        nic.setIsActive(false);
+   nic.setIsActive(false);
         if (nic.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity(CS_NIC, nic);
             HashMap<String, String> optional = new HashMap<String, String>();
@@ -290,7 +290,6 @@ public class NicServiceImpl implements NicService {
             JSONObject deleteNicResponse = new JSONObject(removeNicResponse)
                     .getJSONObject(CS_REMOVE_NIC);
             if (deleteNicResponse.has(CloudStackConstants.CS_JOB_ID)) {
-                Thread.sleep(5000);
                 String jobResponse = cloudStackInstanceService.queryAsyncJobResult(deleteNicResponse.getString(CloudStackConstants.CS_JOB_ID),
                         CloudStackConstants.JSON);
                 JSONObject queryasyncjobresult = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
@@ -322,7 +321,7 @@ public class NicServiceImpl implements NicService {
 
     @Override
     public List<Nic> findAllFromCSServer() throws Exception {
-        List<VmInstance> vmInstanceList = vmService.findByVmStatus(VmInstance.Status.Expunging);
+        List<VmInstance> vmInstanceList = vmService.findAllByExceptStatus(VmInstance.Status.EXPUNGING);
         List<Nic> nicList = new ArrayList<Nic>();
         LOGGER.debug("VM size" + vmInstanceList.size());
         for (VmInstance vm : vmInstanceList) {
@@ -410,6 +409,7 @@ public class NicServiceImpl implements NicService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#nic.getSyncFlag(),'RELEASE_SECONDARY_IP_ADDRESS')")
     public Nic releaseSecondaryIP(Nic nic, Long vmIpaddressId)throws Exception {
          try {
              // Get vm ipaddress object by id.

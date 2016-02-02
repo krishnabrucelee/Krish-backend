@@ -24,6 +24,17 @@ public interface RoleReposiory extends PagingAndSortingRepository<Role, Long> {
     Page<Role> findAllByActive(Pageable pageable);
 
     /**
+     * Find role with permissions by name and department.
+     *
+     * @param name - name of the role
+     * @param departmentId - department id
+     * @param isActive - true/false.
+     * @return role.
+     */
+    @Query(value = "select DISTINCT(role) from Role role left join fetch role.permissionList where role.name = :name and role.departmentId = :departmentId and role.isActive = :isActive ")
+    Role findRoleWithPermissionsByNameAndDepartment(@Param("name") String name, @Param("departmentId") Long departmentId, @Param("isActive") Boolean isActive);
+
+    /**
      * Method to find name uniqueness from department in adding Roles.
      *
      * @param name - name of the role

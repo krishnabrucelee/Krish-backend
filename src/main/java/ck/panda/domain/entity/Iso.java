@@ -1,5 +1,6 @@
 package ck.panda.domain.entity;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +32,8 @@ import ck.panda.util.JsonUtil;
  */
 @Entity
 @Table(name = "isos")
-public class Iso {
+@SuppressWarnings("serial")
+public class Iso implements Serializable {
 
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(Iso.class);

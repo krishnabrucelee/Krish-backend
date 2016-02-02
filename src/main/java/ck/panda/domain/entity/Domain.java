@@ -1,5 +1,6 @@
 package ck.panda.domain.entity;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +30,7 @@ import ck.panda.util.JsonUtil;
  */
 @Entity
 @Table(name = "domains")
-public class Domain {
+public class Domain implements Serializable {
 
     /** Unique ID of the Domain. */
     @Id

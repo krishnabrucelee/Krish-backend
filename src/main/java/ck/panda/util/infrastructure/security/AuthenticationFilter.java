@@ -6,6 +6,7 @@ import com.google.common.base.Strings;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.RolePrincipal;
 import ck.panda.util.TokenDetails;
+import ck.panda.util.error.MessageByLocaleService;
 import ck.panda.util.web.ApiController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,6 +85,9 @@ public class AuthenticationFilter extends GenericFilterBean {
     /** Token details attribute. */
     private TokenDetails userTokenDetails;
 
+    /** Message properties service attribute. */
+    private MessageByLocaleService messageByLocaleService;
+
     /**
      * Parameterized constructor.
      *
@@ -91,14 +95,15 @@ public class AuthenticationFilter extends GenericFilterBean {
      * @param userTokenDetails to set
      */
     public AuthenticationFilter(DatabaseAuthenticationManager databaseAuthenticationManager,
-            TokenDetails userTokenDetails) {
+            TokenDetails userTokenDetails, MessageByLocaleService messageByLocaleService) {
         this.databaseAuthenticationManager = databaseAuthenticationManager;
         this.userTokenDetails = userTokenDetails;
+        this.messageByLocaleService = messageByLocaleService;
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+            throws IOException, ServletException  {
         HttpServletRequest httpRequest = asHttp(request);
         HttpServletResponse httpResponse = asHttp(response);
         Optional<String> userName = Optional.fromNullable(httpRequest.getHeader(XAUTH_USERNAME));
@@ -127,13 +132,13 @@ public class AuthenticationFilter extends GenericFilterBean {
             httpResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             httpResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
             httpResponse.setCharacterEncoding(GenericConstants.CHARACTER_ENCODING);
-            httpResponse.getWriter().write("{\"message\":\"" + internalAuthenticationServiceException.getMessage() + "\"}");
+            httpResponse.getWriter().write("{\"message\":\"" + messageByLocaleService.getMessage(internalAuthenticationServiceException.getMessage()) + "\"}");
         } catch (AuthenticationException authenticationException) {
             SecurityContextHolder.clearContext();
             httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             httpResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
             httpResponse.setCharacterEncoding(GenericConstants.CHARACTER_ENCODING);
-            httpResponse.getWriter().write("{\"message\":\"" + authenticationException.getMessage() + "\"}");
+            httpResponse.getWriter().write("{\"message\":\"" + messageByLocaleService.getMessage(authenticationException.getMessage()) + "\"}");
         } finally {
             MDC.remove(TOKEN_SESSION_KEY);
             MDC.remove(USER_SESSION_KEY);
@@ -216,7 +221,7 @@ public class AuthenticationFilter extends GenericFilterBean {
                 httpResponse.getWriter().print(rolePrincipal);
             }
         } catch (Exception e) {
-        	LOGGER.error("User name and password authentication exception");
+            LOGGER.error("User name and password authentication exception");
         }
     }
 
@@ -274,7 +279,7 @@ public class AuthenticationFilter extends GenericFilterBean {
         if (responseAuthentication == null || !responseAuthentication.isAuthenticated()) {
             LOGGER.debug("User authentication failed : " + httpRequest.getServletPath() + " : "
                     + dateFormat.format(new Date()));
-            throw new BadCredentialsException("error.unable.to.authenticate.domain.user");
+            throw new BadCredentialsException(messageByLocaleService.getMessage("error.unable.to.authenticate.domain.user"));
         }
         LOGGER.debug("User authentication success : " + httpRequest.getServletPath() + " : "
                 + dateFormat.format(new Date()));
