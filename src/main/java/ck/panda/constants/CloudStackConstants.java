@@ -201,7 +201,60 @@ public class CloudStackConstants {
 
     /** Constant for resource name. */
     public static final String CS_DISPLAY_NAME = "displayname";
-    
+
     /** Constant for command information. */
     public static final String CS_CMD_INFO = "cmdInfo";
+
+    /** Constant for is ready state. */
+    public static final String CS_READY_STATE = "isready";
+
+    /** Constant for template action. */
+    public static final String CS_VISIBILITY = "ispublic", CS_FEATURED = "isfeatured", CS_EXTRACTABLE = "isextractable",
+            CS_DYNAMIC_SCALABLE = "isdynamicallyscalable", CS_BOOTABLE = "bootable", CS_ROUTING = "isrouting",
+            CS_REQUIRES_HVM = "requireshvm";
+
+    /** Constant for generic OS type id. */
+    public static final String CS_OS_TYPEID = "ostypeid";
+
+    /** Constant for generic hypervisor. */
+    public static final String CS_HYPERVISOR = "hypervisor";
+
+    /** Constant for generic format. */
+    public static final String CS_FORMAT = "format";
+
+    /** Constant for generic templatetype. */
+    public static final String CS_TEMPLATE_TYPE = "templatetype";
+
+    /** Constant for generic system. */
+    public static final String CS_SYSTEM = "system";
+
+    /** Constant for template list response. */
+    public static final String CS_LIST_TEMPLATE_RESPONSE = "listtemplatesresponse";
+
+    /** Constant for ISO list response. */
+    public static final String CS_LIST_ISO_RESPONSE = "listisosresponse";
+
+    /** Constant for template response. */
+    public static final String CS_PREPARE_TEMPLATE_RESPONSE = "preparetemplateresponse";
+
+    /** Constant for register ISO response. */
+    public static final String CS_REGISTER_ISO_RESPONSE = "registerisoresponse";
+
+    /** Constant for register template response. */
+    public static final String CS_REGISTER_TEMPLATE_RESPONSE = "registertemplateresponse";
+
+    /** Constant for delete ISO response. */
+    public static final String CS_DELETE_ISO_RESPONSE = "deleteisoresponse";
+
+    /** Constant for delete template response. */
+    public static final String CS_DELETE_TEMPLATE_RESPONSE = "deletetemplateresponse";
+
+    /** Constant for template name. */
+    public static final String TEMPLATE_NAME = "template";
+
+    /** Constant for template ISO name. */
+    public static final String ISO_TEMPLATE_NAME = "iso";
+
+    /** Constant for asynchronous event type. */
+    public static final String CS_COMMAND_EVENT_TYPE = "commandEventType";
 }

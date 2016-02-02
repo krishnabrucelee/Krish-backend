@@ -150,6 +150,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /** Used for setting optional values for resource count. */
     HashMap<String, String> domainCountMap = new HashMap<String, String>();
 
+    /** Asynchronous job id. */
+    public static final String CS_ASYNC_JOB_ID = "jobId";
+
     /**
      * Sync with CloudStack server list via Asynchronous Job.
      *
@@ -162,73 +165,78 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
         server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
         cloudStackInstanceService.setServer(server);
-        String eventObjectResult = cloudStackInstanceService.queryAsyncJobResult(eventObject.getString("jobId"),
-                "json");
-        JSONObject jobresult = new JSONObject(eventObjectResult).getJSONObject("queryasyncjobresultresponse")
-                .getJSONObject("jobresult");
+        String eventObjectResult = cloudStackInstanceService.queryAsyncJobResult(eventObject.getString(CS_ASYNC_JOB_ID),
+        		CloudStackConstants.JSON);
+        JSONObject jobresult = new JSONObject(eventObjectResult).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE)
+                .getJSONObject(CloudStackConstants.CS_JOB_RESULT);
 
         String commandText = null;
-        if (eventObject.getString("commandEventType").contains(".")) {
-            commandText = eventObject.getString("commandEventType").substring(0,
-                    eventObject.getString("commandEventType").indexOf('.', 0)) + ".";
+        if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).contains(".")) {
+            commandText = eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).substring(0,
+                    eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).indexOf('.', 0)) + ".";
         } else {
-            commandText = eventObject.getString("commandEventType");
+            commandText = eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE);
         }
         switch (commandText) {
         case EventTypes.EVENT_VM:
-            LOGGER.debug("VM Sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+            LOGGER.debug("VM Sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
             syncVirtualMachine(jobresult, eventObject);
             break;
         case EventTypes.EVENT_NETWORK:
-            if (!eventObject.getString("commandEventType").contains("OFFERING")) {
-                LOGGER.debug("Network sync",
-                        eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+            if (!eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).contains("OFFERING")) {
+                LOGGER.debug("Network sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                    eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
                 asyncNetwork(jobresult, eventObject);
             }
             break;
         case EventTypes.EVENT_FIREWALL:
-            if (eventObject.getString("commandEventType").contains("FIREWALL")) {
-                LOGGER.debug("Firewall sync",
-                        eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+            if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).contains("FIREWALL")) {
+                LOGGER.debug("Firewall sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                    eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
                 asyncFirewall(jobresult, eventObject);
             }
             break;
         case EventTypes.EVENT_NAT:
-            if (eventObject.getString("commandEventType").contains("STATICNAT")) {
-                LOGGER.debug("Nat sync",
-                        eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+            if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).contains("STATICNAT")) {
+                LOGGER.debug("Nat sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                    eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
                 asyncNat(jobresult, eventObject);
             }
             break;
         case EventTypes.EVENT_TEMPLATE:
-            LOGGER.debug("templates sync",
-                    eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+            LOGGER.debug("templates sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
             asyncTemplates(eventObject);
             break;
         case EventTypes.EVENT_ISO:
-            LOGGER.debug("ISO sync",
-                    eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+            LOGGER.debug("ISO sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
             asyncTemplates(eventObject);
             break;
         case EventTypes.EVENT_VOLUME:
-            LOGGER.debug("Volume sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+            LOGGER.debug("Volume sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
             asyncVolume(jobresult, eventObject);
             break;
         case EventTypes.EVENT_NIC:
-            LOGGER.debug("NIC sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+            LOGGER.debug("NIC sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
             asyncNic(jobresult, eventObject);
             break;
         case EventTypes.EVENT_PORTFORWARDING:
-            LOGGER.debug("NET sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+            LOGGER.debug("NET sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
             asyncNet(jobresult, eventObject);
             break;
         case EventTypes.EVENT_LOADBALANCER:
-            LOGGER.debug("LB sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+            LOGGER.debug("LB sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
             asyncLb(jobresult, eventObject);
             break;
         default:
-            LOGGER.debug("No sync required",
-                    eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+            LOGGER.debug("No sync required", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
         }
     }
 
@@ -787,13 +795,13 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      */
     public void asyncTemplates(JSONObject eventObject) throws ApplicationException, Exception {
 
-        if (eventObject.getString("commandEventType").equals(EventTypes.EVENT_TEMPLATE_DELETE)) {
+        if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_TEMPLATE_DELETE)) {
             JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
             Template template = templateService.findByUUID(json.getString(CloudStackConstants.CS_ID));
             template.setSyncFlag(false);
             templateService.softDelete(template);
         }
-        if (eventObject.getString("commandEventType").equals(EventTypes.EVENT_ISO_TEMPLATE_DELETE)) {
+        if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_ISO_TEMPLATE_DELETE)) {
             JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
             Template template = templateService.findByUUID(json.getString(CloudStackConstants.CS_ID));
             template.setSyncFlag(false);

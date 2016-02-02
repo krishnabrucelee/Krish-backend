@@ -76,12 +76,6 @@ public class TemplateServiceImpl implements TemplateService {
     @Autowired
     private AppValidator validator;
 
-    /** Template name. */
-    public static final String TEMPLATE_NAME = "template";
-
-    /** ISO template name. */
-    public static final String ISO_TEMPLATE_NAME = "iso";
-
     /** List all template. */
     public static final String ALL_TEMPLATE = "ALL";
 
@@ -91,21 +85,40 @@ public class TemplateServiceImpl implements TemplateService {
     /** Windows template. */
     public static final String WINDOWS_TEMPLATE = "Windows";
 
-    /** Ready state. */
-    public static final String IS_READY = "isready";
+	/** Template architecture. */
+    public static final String TEMPLATE_ARCHITECTURE = "architecture";
 
-    /** Template size. */
-    public static final String TEMPLATE_SIZE = "size";
+    /** Template OS version. */
+    public static final String TEMPLATE_OSVERSION = "osVersion";
 
-    /** Template type. */
-    public static final String TEMPLATE_TYPE = "templatetype";
+    /** Template URL. */
+    public static final String TEMPLATE_URL = "url";
+
+    /** Template detailed description. */
+    public static final String TEMPLATE_DETAILED_DESC = "detailedDescription";
+
+    /** Template cost. */
+    public static final String TEMPLATE_COST = "cost";
+
+    /** Template minimum memory. */
+    public static final String TEMPLATE_MIN_MEMORY = "minimumMemory";
+
+    /** Template minimum core. */
+    public static final String TEMPLATE_MIN_CORE = "minimumCore";
+
+    /** Template OS category. */
+    public static final String TEMPLATE_OS_CATEGORY = "osCategory";
+
+    /** ISO and Template counts. */
+    public static final String WINDOWS_COUNT = "windowsCount", LINUX_COUNT = "linuxCount", TOTAL_COUNT = "totalCount",
+    		WINDOWS_ISO_COUNT = "windowsIsoCount", LINUX_ISO_COUNT = "linuxIsoCount", TOTAL_ISO_COUNT = "totalIsoCount";
 
     @Override
     @PreAuthorize("hasPermission(#template.getSyncFlag(), 'REGISTER_TEMPLATE')")
     public Template save(Template template) throws Exception {
         template.setIsActive(true);
         if (template.getSyncFlag()) {
-            Errors errors = validator.rejectIfNullEntity(TEMPLATE_NAME, template);
+            Errors errors = validator.rejectIfNullEntity(CloudStackConstants.TEMPLATE_NAME, template);
             errors = validator.validateEntity(template, errors);
             errors = customValidateEntity(template, errors, true);
 
@@ -126,7 +139,7 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     public Template update(Template template) throws Exception {
         if (template.getSyncFlag()) {
-            Errors errors = validator.rejectIfNullEntity(TEMPLATE_NAME, template);
+            Errors errors = validator.rejectIfNullEntity(CloudStackConstants.TEMPLATE_NAME, template);
             errors = validator.validateEntity(template, errors);
             errors = customValidateEntity(template, errors, false);
 
@@ -184,9 +197,9 @@ public class TemplateServiceImpl implements TemplateService {
         templateMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
         String response = cloudStackTemplateService.listTemplates(ALL_TEMPLATE.toLowerCase(), CloudStackConstants.JSON, templateMap);
         JSONArray templateListJSON = null;
-        JSONObject responseObject = new JSONObject(response).getJSONObject("listtemplatesresponse");
-        if (responseObject.has(TEMPLATE_NAME)) {
-            templateListJSON = responseObject.getJSONArray(TEMPLATE_NAME);
+        JSONObject responseObject = new JSONObject(response).getJSONObject(CloudStackConstants.CS_LIST_TEMPLATE_RESPONSE);
+        if (responseObject.has(CloudStackConstants.TEMPLATE_NAME)) {
+            templateListJSON = responseObject.getJSONArray(CloudStackConstants.TEMPLATE_NAME);
             for (int i = 0, size = templateListJSON.length(); i < size; i++) {
                 Template template = Template.convert(templateListJSON.getJSONObject(i));
                 OsType osType = osTypeService.findByUUID(template.getTransOsType());
@@ -220,9 +233,9 @@ public class TemplateServiceImpl implements TemplateService {
         //Getting the ISO template list from CS
         String isoResponse = cloudStackTemplateService.listIsos(ALL_TEMPLATE.toLowerCase(), CloudStackConstants.JSON, templateMap);
         JSONArray isoTemplateListJSON = null;
-        JSONObject isoResponseObject = new JSONObject(isoResponse).getJSONObject("listisosresponse");
-        if (isoResponseObject.has(ISO_TEMPLATE_NAME)) {
-            isoTemplateListJSON = isoResponseObject.getJSONArray(ISO_TEMPLATE_NAME);
+        JSONObject isoResponseObject = new JSONObject(isoResponse).getJSONObject(CloudStackConstants.CS_LIST_ISO_RESPONSE);
+        if (isoResponseObject.has(CloudStackConstants.ISO_TEMPLATE_NAME)) {
+            isoTemplateListJSON = isoResponseObject.getJSONArray(CloudStackConstants.ISO_TEMPLATE_NAME);
             for (int i = 0, size = isoTemplateListJSON.length(); i < size; i++) {
                 Template template = Template.convert(isoTemplateListJSON.getJSONObject(i));
                 OsType osType = osTypeService.findByUUID(template.getTransOsType());
@@ -322,7 +335,7 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    public String findTemplateCounts() throws Exception {
+    public HashMap<String, Integer> findTemplateCounts() throws Exception {
         List<Template> template = templateRepository.findTemplateCounts(TemplateType.SYSTEM, true);
         Integer windowsCount = 0, linuxCount = 0, totalCount = 0;
         Integer windowsIsoCount = 0, linuxIsoCount = 0, totalIsoCount = 0;
@@ -343,9 +356,16 @@ public class TemplateServiceImpl implements TemplateService {
                     totalCount++;
                 }
             }
-        return "{\"windowsCount\":" + windowsCount + ",\"linuxCount\":" + linuxCount + ",\"totalCount\":"
-            + totalCount + ",\"windowsIsoCount\":" + windowsIsoCount + ",\"linuxIsoCount\":"
-            + linuxIsoCount + ",\"totalIsoCount\":" + totalIsoCount + "}";
+
+        /** Template minimum core. */
+        HashMap<String, Integer> templateCount = new HashMap<String, Integer>();
+        templateCount.put(WINDOWS_COUNT, windowsCount);
+        templateCount.put(LINUX_COUNT, linuxCount);
+        templateCount.put(TOTAL_COUNT, totalCount);
+        templateCount.put(WINDOWS_ISO_COUNT, windowsIsoCount);
+        templateCount.put(LINUX_ISO_COUNT, linuxIsoCount);
+        templateCount.put(TOTAL_ISO_COUNT, totalIsoCount);
+        return templateCount;
     }
 
     /**
@@ -363,15 +383,15 @@ public class TemplateServiceImpl implements TemplateService {
                 String csResponse = cloudStackTemplateService.prepareTemplate(template.getUuid(),
                        zoneService.find(template.getZoneId()).getUuid(), CloudStackConstants.JSON);
                 try {
-                    JSONObject templateJSON = new JSONObject(csResponse).getJSONObject("preparetemplateresponse");
-                    if (templateJSON.has(TEMPLATE_NAME)) {
-                        JSONArray templateArray = (JSONArray) templateJSON.get(TEMPLATE_NAME);
+                    JSONObject templateJSON = new JSONObject(csResponse).getJSONObject(CloudStackConstants.CS_PREPARE_TEMPLATE_RESPONSE);
+                    if (templateJSON.has(CloudStackConstants.TEMPLATE_NAME)) {
+                        JSONArray templateArray = (JSONArray) templateJSON.get(CloudStackConstants.TEMPLATE_NAME);
                         for (int i = 0; i < templateArray.length(); i++) {
                             JSONObject jsonobject = templateArray.getJSONObject(i);
-                            if (jsonobject.getBoolean(IS_READY)) {
-                                if (template.getSize() == null) {
+                            if (jsonobject.getBoolean(CloudStackConstants.CS_READY_STATE)) {
+                                if (template.getSize() == 0L) {
                                     Template persistTemplate = templateRepository.findOne(template.getId());
-                                    persistTemplate.setSize(jsonobject.getLong(TEMPLATE_SIZE));
+                                    persistTemplate.setSize(jsonobject.getLong(CloudStackConstants.CS_SIZE));
                                     persistTemplate.setStatus(Status.ACTIVE);
                                     templateRepository.save(persistTemplate);
                                 }
@@ -409,39 +429,40 @@ public class TemplateServiceImpl implements TemplateService {
             optional.put("ostypeid", osTypeService.find(template.getOsTypeId()).getUuid());
             csResponse = cloudStackTemplateService.registerIso(template.getDescription(),
                     template.getName(), template.getUrl(), zoneService.find(template.getZoneId()).getUuid(), CloudStackConstants.JSON, optional);
-            templateJSON = new JSONObject(csResponse).getJSONObject("registerisoresponse");
+            templateJSON = new JSONObject(csResponse).getJSONObject(CloudStackConstants.CS_REGISTER_ISO_RESPONSE);
             if (templateJSON.has(CloudStackConstants.CS_ERROR_CODE)) {
                 errors = this.validateCSEvent(errors, templateJSON.getString(CloudStackConstants.CS_ERROR_TEXT));
                 throw new ApplicationException(errors);
             }
-            templateArray = (JSONArray) templateJSON.get(ISO_TEMPLATE_NAME);
+            templateArray = (JSONArray) templateJSON.get(CloudStackConstants.ISO_TEMPLATE_NAME);
         } else {
             csResponse = cloudStackTemplateService.registerTemplate(template.getDescription(),
                     template.getFormat().name(), hypervisorService.find(template.getHypervisorId()).getName(),
                     template.getName(), osTypeService.find(template.getOsTypeId()).getUuid(), template.getUrl(),
                     zoneService.find(template.getZoneId()).getUuid(), CloudStackConstants.JSON, optionalFieldValidation(template, optional));
-            templateJSON = new JSONObject(csResponse).getJSONObject("registertemplateresponse");
+            templateJSON = new JSONObject(csResponse).getJSONObject(CloudStackConstants.CS_REGISTER_TEMPLATE_RESPONSE);
             if (templateJSON.has(CloudStackConstants.CS_ERROR_CODE)) {
                 errors = this.validateCSEvent(errors, templateJSON.getString(CloudStackConstants.CS_ERROR_TEXT));
                 throw new ApplicationException(errors);
             }
-            templateArray = (JSONArray) templateJSON.get(TEMPLATE_NAME);
+            templateArray = (JSONArray) templateJSON.get(CloudStackConstants.TEMPLATE_NAME);
         }
         for (int i = 0; i < templateArray.length(); i++) {
             JSONObject jsonobject = templateArray.getJSONObject(i);
             template.setUuid(jsonobject.getString(CloudStackConstants.CS_ID));
-            if (jsonobject.getBoolean(IS_READY)) {
+            if (jsonobject.getBoolean(CloudStackConstants.CS_READY_STATE)) {
                 template.setStatus(Status.ACTIVE);
             } else {
                 template.setStatus(Status.INACTIVE);
             }
-            if (jsonobject.has(TEMPLATE_TYPE)) {
-                template.setType(TemplateType.valueOf(jsonobject.getString(TEMPLATE_TYPE)));
+            if (jsonobject.has(CloudStackConstants.CS_TEMPLATE_TYPE)) {
+                template.setType(TemplateType.valueOf(jsonobject.getString(CloudStackConstants.CS_TEMPLATE_TYPE)));
             } else {
                 template.setType(TemplateType.USER);
             }
         }
         template.setDisplayText(osTypeService.find(template.getOsTypeId()).getDescription());
+        template.setSize(0L);
     }
 
     /**
@@ -485,16 +506,16 @@ public class TemplateServiceImpl implements TemplateService {
             JSONObject templateJson = null;
             if (template.getFormat().equals(Template.Format.ISO)) {
                 templateResponse = cloudStackTemplateService.deleteIso(template.getUuid(), CloudStackConstants.JSON, optional);
-                templateJson = new JSONObject(templateResponse).getJSONObject("deleteisoresponse");
+                templateJson = new JSONObject(templateResponse).getJSONObject(CloudStackConstants.CS_DELETE_ISO_RESPONSE);
             } else {
                 templateResponse = cloudStackTemplateService.deleteTemplate(template.getUuid(), CloudStackConstants.JSON, optional);
-                templateJson = new JSONObject(templateResponse).getJSONObject("deletetemplateresponse");
+                templateJson = new JSONObject(templateResponse).getJSONObject(CloudStackConstants.CS_DELETE_TEMPLATE_RESPONSE);
             }
             if (templateJson.has(CloudStackConstants.CS_JOB_ID)) {
             	Thread.sleep(3000);
                 String templateJob = cloudStackTemplateService.queryAsyncJobResult(templateJson.getString(CloudStackConstants.CS_JOB_ID),
                        CloudStackConstants.JSON);
-                JSONObject jobresult = new JSONObject(templateJob).getJSONObject("queryasyncjobresultresponse");
+                JSONObject jobresult = new JSONObject(templateJob).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
                 if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS).equals("1")) {
                 	Thread.sleep(3000);
                 	return true;
@@ -521,28 +542,28 @@ public class TemplateServiceImpl implements TemplateService {
      */
     public Errors customValidateEntity(Template template, Errors errors, Boolean validstatus) throws Exception {
         if (template.getArchitecture() == null || template.getArchitecture().isEmpty()) {
-            errors.addFieldError("architecture", "template.architecture");
+            errors.addFieldError(TEMPLATE_ARCHITECTURE, "template.architecture");
         }
         if (template.getOsVersion() == null || template.getOsVersion().isEmpty()) {
-            errors.addFieldError("osVersion", "template.osversion.error");
+            errors.addFieldError(TEMPLATE_OSVERSION, "template.osversion.error");
         }
         if (template.getUrl() == null && validstatus) {
-            errors.addFieldError("url", "template.url.error");
+            errors.addFieldError(TEMPLATE_URL, "template.url.error");
         }
         if (template.getDetailedDescription() == null || template.getDetailedDescription().isEmpty()) {
-            errors.addFieldError("detailedDescription", "template.detaileddescription");
+            errors.addFieldError(TEMPLATE_DETAILED_DESC, "template.detaileddescription");
         }
         if (template.getTemplateCost() == null) {
-            errors.addFieldError("cost", "template.cost.error");
+            errors.addFieldError(TEMPLATE_COST, "template.cost.error");
         }
         if (template.getMinimumMemory() == null) {
-            errors.addFieldError("minimumMemory", "template.minimummemory.error");
+            errors.addFieldError(TEMPLATE_MIN_MEMORY, "template.minimummemory.error");
         }
         if (template.getMinimumCore() == null) {
-            errors.addFieldError("minimumCore", "template.minimumcore.error");
+            errors.addFieldError(TEMPLATE_MIN_CORE, "template.minimumcore.error");
         }
         if (template.getOsCategoryId() == null) {
-            errors.addFieldError("osCategory", "template.oscategory.error");
+            errors.addFieldError(TEMPLATE_OS_CATEGORY, "template.oscategory.error");
         }
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
@@ -559,30 +580,30 @@ public class TemplateServiceImpl implements TemplateService {
      */
     public HashMap<String, String> optionalFieldValidation(Template template, HashMap<String, String> optional) {
         if (template.getDynamicallyScalable() != null) {
-            optional.put("isdynamicallyscalable", template.getDynamicallyScalable().toString());
+            optional.put(CloudStackConstants.CS_DYNAMIC_SCALABLE, template.getDynamicallyScalable().toString());
         }
         if (template.getExtractable() != null) {
-            optional.put("isextractable", template.getExtractable().toString());
+            optional.put(CloudStackConstants.CS_EXTRACTABLE, template.getExtractable().toString());
         }
         if (template.getFeatured() != null) {
-            optional.put("isfeatured", template.getFeatured().toString());
+            optional.put(CloudStackConstants.CS_FEATURED, template.getFeatured().toString());
         }
         if (template.getShare() != null) {
-            optional.put("ispublic", template.getShare().toString());
+            optional.put(CloudStackConstants.CS_VISIBILITY, template.getShare().toString());
         }
         if (template.getRouting() != null) {
-            optional.put("isrouting", template.getRouting().toString());
+            optional.put(CloudStackConstants.CS_ROUTING, template.getRouting().toString());
         }
         if (template.getPasswordEnabled() != null) {
-            optional.put("passwordenabled", template.getPasswordEnabled().toString());
+            optional.put(CloudStackConstants.CS_PASSWORD_STATUS, template.getPasswordEnabled().toString());
         }
         if (template.getHvm() != null) {
-            optional.put("requireshvm", template.getHvm().toString());
+            optional.put(CloudStackConstants.CS_REQUIRES_HVM, template.getHvm().toString());
         }
         if (template.getBootable() != null) {
-            optional.put("bootable", template.getBootable().toString());
+            optional.put(CloudStackConstants.CS_BOOTABLE, template.getBootable().toString());
         } else {
-            optional.put("bootable", CloudStackConstants.STATUS_ACTIVE);
+            optional.put(CloudStackConstants.CS_BOOTABLE, CloudStackConstants.STATUS_ACTIVE);
         }
         return optional;
     }

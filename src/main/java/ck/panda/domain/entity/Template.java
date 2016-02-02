@@ -31,6 +31,8 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonValidator;
 
 /**
@@ -1306,35 +1308,37 @@ public class Template implements Serializable {
         Template template = new Template();
         template.setSyncFlag(false);
         try {
-            template.uuid = JsonValidator.jsonStringValidation(object, "id");
-            template.name = JsonValidator.jsonStringValidation(object, "name");
-            template.description = JsonValidator.jsonStringValidation(object, "displaytext");
-            template.share = JsonValidator.jsonBooleanValidation(object, "ispublic");
-            template.passwordEnabled = JsonValidator.jsonBooleanValidation(object, "passwordenabled");
-            template.featured = JsonValidator.jsonBooleanValidation(object, "isfeatured");
-            template.extractable = JsonValidator.jsonBooleanValidation(object, "isextractable");
-            template.dynamicallyScalable = JsonValidator.jsonBooleanValidation(object, "isdynamicallyscalable");
-            template.transOsType = JsonValidator.jsonStringValidation(object, "ostypeid");
-            template.transZone = JsonValidator.jsonStringValidation(object, "zoneid");
-            template.transHypervisor = JsonValidator.jsonStringValidation(object, "hypervisor");
+            template.uuid = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_ID);
+            template.name = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_NAME);
+            template.description = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_DISPLAY_TEXT);
+            template.share = JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_VISIBILITY);
+            template.passwordEnabled = JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_PASSWORD_STATUS);
+            template.featured = JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_FEATURED);
+            template.extractable = JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_EXTRACTABLE);
+            template.dynamicallyScalable = JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_DYNAMIC_SCALABLE);
+            template.transOsType = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_OS_TYPEID);
+            template.transZone = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_ZONE_ID);
+            template.transHypervisor = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_HYPERVISOR);
             template.setDepartmentId(null);
-            if (object.has("format")) {
-                template.setFormat(template.getFormat().valueOf(JsonValidator.jsonStringValidation(object, "format")));
-                template.setType(template.getType().valueOf(JsonValidator.jsonStringValidation(object, "templatetype")));
+            if (object.has(CloudStackConstants.CS_FORMAT)) {
+                template.setFormat(template.getFormat().valueOf(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_FORMAT)));
+                template.setType(template.getType().valueOf(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_TEMPLATE_TYPE)));
                 template.bootable = true;
             } else {
                 template.setFormat(Format.ISO);
-                template.bootable = JsonValidator.jsonBooleanValidation(object, "bootable");
-                if (object.has("account") && JsonValidator.jsonStringValidation(object, "account").equals("system")) {
+                template.bootable = JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_BOOTABLE);
+                if (object.has(CloudStackConstants.CS_ACCOUNT) &&
+                		JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_ACCOUNT).equals(CloudStackConstants.CS_SYSTEM)) {
                     template.setType(TemplateType.SYSTEM);
                 } else {
                     template.setType(TemplateType.USER);
                 }
             }
-            if (JsonValidator.jsonBooleanValidation(object, "isready")) {
+            template.setSize(0L);
+            if (JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_READY_STATE)) {
                 template.setStatus(Template.Status.ACTIVE);
-                if (object.has("size")) {
-                    template.setSize(Long.parseLong(JsonValidator.jsonStringValidation(object, "size")));
+                if (object.has(CloudStackConstants.CS_SIZE)) {
+                    template.setSize(Long.parseLong(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_SIZE)));
                 }
             } else {
                 template.setStatus(Template.Status.INACTIVE);

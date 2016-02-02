@@ -1,5 +1,6 @@
 package ck.panda.service;
 
+import java.util.HashMap;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -85,5 +86,5 @@ public interface TemplateService extends CRUDService<Template> {
      * @return template counts from server
      * @throws Exception unhandled errors.
      */
-    String findTemplateCounts() throws Exception;
+    HashMap<String, Integer> findTemplateCounts() throws Exception;
 }

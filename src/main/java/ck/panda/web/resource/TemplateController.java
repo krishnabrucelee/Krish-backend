@@ -1,5 +1,6 @@
 package ck.panda.web.resource;
 
+import java.util.HashMap;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -89,7 +90,7 @@ public class TemplateController extends CRUDController<Template> implements ApiC
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Template.class);
-        if (type.contains("template")) {
+        if (type.contains(CloudStackConstants.TEMPLATE_NAME)) {
             Page<Template> pageResponse = templateService.findAll(page);
             response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
             return pageResponse.getContent();
@@ -153,6 +154,9 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public String getTemplateCounts(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        return templateService.findTemplateCounts();
+    	HashMap<String, Integer> templateCount = templateService.findTemplateCounts();
+    	return "{\"windowsCount\":" + templateCount.get("windowsCount") + ",\"linuxCount\":" + templateCount.get("linuxCount") + ",\"totalCount\":"
+                + templateCount.get("totalCount") + ",\"windowsIsoCount\":" + templateCount.get("windowsIsoCount") + ",\"linuxIsoCount\":"
+                + templateCount.get("linuxIsoCount") + ",\"totalIsoCount\":" + templateCount.get("totalIsoCount") + "}";
     }
 }

@@ -242,4 +242,19 @@ public class EventTypes {
 
     /** ISO Template Delete Events. */
     public static final String EVENT_ISO_TEMPLATE_DELETE = "ISO.DELETE";
+
+    /** Volume Delete Events. */
+    public static final String EVENT_VOLUME_DELETE = "VOLUME.DELETE";
+
+    /** Network Create Events. */
+    public static final String EVENT_NETWORK_CREATE = "NETWORK.CREATE";
+
+    /** Network Offering Events. */
+    public static final String EVENT_NETWORK_OFFERING = "OFFERING";
+
+    /** Network Edit Events. */
+    public static final String EVENT_NETWORK_EDIT = "EDIT";
+
+    /** Network Delete Events. */
+    public static final String EVENT_NETWORK_DELETE = "DELETE";
 }
