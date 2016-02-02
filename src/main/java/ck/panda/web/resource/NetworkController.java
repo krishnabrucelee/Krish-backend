@@ -21,6 +21,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Network;
 import ck.panda.service.NetworkService;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -38,11 +39,15 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
     @Autowired
     private NetworkService networkService;
 
+    /** Token Detail Utilities. */
+    @Autowired
+    private TokenDetails tokenDetails;
+
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Network.", response = Network.class)
     @Override
     public Network create(@RequestBody Network network) throws Exception {
         network.setSyncFlag(true);
-        return networkService.save(network);
+        return networkService.save(network, Long.parseLong(tokenDetails.getTokenDetails("id")));
     }
 
     @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing Network.", response = Network.class)
@@ -81,14 +86,14 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Network.class);
-        Page<Network> pageResponse = networkService.findAllByActive(page);
+        Page<Network> pageResponse = networkService.findAllByActive(page, Long.parseLong(tokenDetails.getTokenDetails("id")));
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
 
     /**
      * list all network for instance.
-     * 
+     *
      * @return projects
      * @param deptartment department
      * @throws Exception Exception
@@ -102,7 +107,7 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
 
     /**
      * list all project related network for instance.
-     * 
+     *
      * @return networks
      * @param projectId project id
      * @throws Exception Exception
@@ -116,7 +121,7 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
 
     /**
      * List all network for instance.
-     * 
+     *
      * @return department
      * @param deptartment associated with network
      * @throws Exception Exception
@@ -130,7 +135,7 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
 
     /**
      * List all project related network for instance.
-     * 
+     *
      * @return networks
      * @param projectId project id
      * @throws Exception Exception

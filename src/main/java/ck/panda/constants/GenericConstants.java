@@ -55,7 +55,7 @@ public class GenericConstants {
     /** Constant for generic name. */
     public static final String NAME = "name";
 
-    /** Constant for AES encription. */
+    /** Constant for AES encryption. */
     public static final String ENCRYPT_ALGORITHM = "AES";
 
     /** Constant for character encoding. */

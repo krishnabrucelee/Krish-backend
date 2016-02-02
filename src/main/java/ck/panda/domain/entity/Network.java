@@ -26,6 +26,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -37,6 +39,9 @@ import ck.panda.util.JsonUtil;
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class Network implements Serializable {
+
+    /** Constant for network type. */
+    private static final String CS_TYPE = "type";
 
     /** Id of the Network. */
     @Id
@@ -74,7 +79,7 @@ public class Network implements Serializable {
     @Column(name = "zone_id")
     private Long zoneId;
 
-    /** Network project id. */
+    /** Project Object for the Network.. */
     @JoinColumn(name = "project_id", referencedColumnName = "id", updatable = false, insertable = false)
     @ManyToOne
     private Project project;
@@ -176,7 +181,7 @@ public class Network implements Serializable {
     @Transient
     private String transNetworkOfferingId;
 
-    /** Transient host of the instance. */
+    /** Transient project of the network. */
     @Transient
     private String transProjectId;
 
@@ -206,7 +211,7 @@ public class Network implements Serializable {
      */
     public enum Status {
 
-        /** Network will be in a Enabled State. */
+        /** Network will be in a Implemented State. */
         Implemented,
 
         /** Network will be in a Allocated State. */
@@ -275,7 +280,7 @@ public class Network implements Serializable {
     }
 
     /**
-     * get network project.
+     * Get network project.
      *
      * @return the project.
      */
@@ -284,7 +289,7 @@ public class Network implements Serializable {
     }
 
     /**
-     * set network project.
+     * Set network project.
      *
      * @param project to set.
      */
@@ -293,7 +298,7 @@ public class Network implements Serializable {
     }
 
     /**
-     * get network project id.
+     * Get network project id.
      *
      * @return the projectId.
      */
@@ -302,7 +307,7 @@ public class Network implements Serializable {
     }
 
     /**
-     * set network project id.
+     * Set network project id.
      *
      * @param projectId the project id to set.
      */
@@ -763,7 +768,7 @@ public class Network implements Serializable {
     }
 
     /**
-     * Get the Netmask of the Network.
+     * Get the netMask of the Network.
      *
      * @return the netMask
      */
@@ -772,7 +777,7 @@ public class Network implements Serializable {
     }
 
     /**
-     * Get the Netmask to the Network.
+     * Get the netMask to the Network.
      *
      * @param netMask the netMask to set
      */
@@ -801,14 +806,14 @@ public class Network implements Serializable {
     /**
      * Get the instance.
      *
-     * @return the vminstance
+     * @return the vmInstance
      */
     public VmInstance getVmInstance() {
         return vmInstance;
     }
 
     /**
-     * Set the vminstance.
+     * Set the vmInstance.
      *
      * @param vmInstance to set
      */
@@ -845,25 +850,23 @@ public class Network implements Serializable {
         Network network = new Network();
         network.setSyncFlag(false);
         try {
-            network.setName(JsonUtil.getStringValue(jsonObject, "name"));
-            network.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            network.setTransZoneId((JsonUtil.getStringValue(jsonObject, "zoneid")));
-            network.setTransDomainId((JsonUtil.getStringValue(jsonObject, "domainid")));
-            network.setNetworkType(NetworkType.valueOf(JsonUtil.getStringValue(jsonObject, "type")));
-            network.setTransNetworkOfferingId(JsonUtil.getStringValue(jsonObject, "networkofferingid"));
-            network.setcIDR(JsonUtil.getStringValue(jsonObject, "cidr"));
-            network.setDisplayText(JsonUtil.getStringValue(jsonObject, "displaytext"));
-            network.setGateway(JsonUtil.getStringValue(jsonObject, "gateway"));
-            network.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, "account"));
-            network.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
-            network.setNetMask(JsonUtil.getStringValue(jsonObject, "netmask"));
-            network.setNetworkDomain(JsonUtil.getStringValue(jsonObject, "networkdomain"));
-            network.setTransProjectId(JsonUtil.getStringValue(jsonObject, "projectid"));
-
+            network.setName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_NAME));
+            network.setUuid(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ID));
+            network.setTransZoneId((JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ZONE_ID)));
+            network.setTransDomainId((JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DOMAIN_ID)));
+            network.setNetworkType(NetworkType.valueOf(JsonUtil.getStringValue(jsonObject, CS_TYPE)));
+            network.setTransNetworkOfferingId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_NETWORK_OFFERING_ID));
+            network.setcIDR(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_CIDR));
+            network.setDisplayText(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DISPLAY_TEXT));
+            network.setGateway(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_GATEWAY));
+            network.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ACCOUNT));
+            network.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_STATE)));
+            network.setNetMask(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_NETMASK));
+            network.setNetworkDomain(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_NETWORK_DOMAIN));
+            network.setTransProjectId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_PROJECT_ID));
             network.setIsActive(true);
         } catch (Exception ex) {
             ex.printStackTrace();
-
         }
         return network;
     }
@@ -876,11 +879,9 @@ public class Network implements Serializable {
      */
     public static Map<String, Network> convert(List<Network> networkList) {
         Map<String, Network> networkMap = new HashMap<String, Network>();
-
         for (Network network : networkList) {
             networkMap.put(network.getUuid(), network);
         }
-
         return networkMap;
     }
 }
