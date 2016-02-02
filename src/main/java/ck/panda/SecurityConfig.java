@@ -16,6 +16,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import ck.panda.constants.GenericConstants;
 import ck.panda.util.TokenDetails;
+import ck.panda.util.error.MessageByLocaleService;
 import ck.panda.util.infrastructure.externalwebservice.SomeExternalServiceAuthenticator;
 import ck.panda.util.infrastructure.security.AuthenticationFilter;
 import ck.panda.util.infrastructure.security.DatabaseAuthenticationManager;
@@ -45,6 +46,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private TokenDetails userTokenDetails;
 
+    /** Message properties service attribute. */
+    @Autowired
+    private MessageByLocaleService messageByLocaleService;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
@@ -56,7 +61,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .deleteCookies(GenericConstants.COOKIES_NAME).invalidateHttpSession(true).and().anonymous().disable()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint());
 
-        http.addFilterBefore(new AuthenticationFilter(databaseAuthenticationManager, userTokenDetails),
+        http.addFilterBefore(new AuthenticationFilter(databaseAuthenticationManager, userTokenDetails, messageByLocaleService),
                 BasicAuthenticationFilter.class);
     }
 

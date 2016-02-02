@@ -127,8 +127,8 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             errors = validator.validateEntity(compute, errors);
             // set server for finding value in configuration
             cscomputeOffering.setServer(configServer.setServer(1L));
-            List<VmInstance> vmResponse = vmService.findByComputeOfferingIdAndVmStatus(compute.getId(),
-                    VmInstance.Status.Expunging);
+            List<VmInstance> vmResponse = vmService.findAllByComputeOfferingIdAndVmStatus(compute.getId(),
+                    VmInstance.Status.EXPUNGING);
             if (vmResponse.size() != 0) {
                 errors.addGlobalError("plan.delete.confirmation");
             }

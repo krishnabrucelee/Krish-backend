@@ -42,8 +42,9 @@ public class RolePermissionService implements PermissionEvaluator {
                     return true;
                 }
             }
-            Role role = roleReposiory.findUniqueness(tokenDetails.getTokenDetails("rolename"),
-                    Long.parseLong(tokenDetails.getTokenDetails("departmentid")));
+            Role role = roleReposiory.findRoleWithPermissionsByNameAndDepartment(
+                    tokenDetails.getTokenDetails("rolename"),
+                    Long.parseLong(tokenDetails.getTokenDetails("departmentid")), true);
             for (int i = 0; i < role.getPermissionList().size(); i++) {
                 if (role.getPermissionList().get(i).getActionKey().equals(permission.toString())) {
                     return true;

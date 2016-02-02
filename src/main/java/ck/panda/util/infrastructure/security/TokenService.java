@@ -78,9 +78,11 @@ public class TokenService {
     public String generateNewToken(User user, String domainName) throws Exception {
         String encryptedToken = null;
         try {
-            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes(GenericConstants.CHARACTER_ENCODING));
+            String strEncoded = Base64.getEncoder()
+                    .encodeToString(secretKey.getBytes(GenericConstants.CHARACTER_ENCODING));
             byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
-            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, GenericConstants.ENCRYPT_ALGORITHM);
+            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length,
+                    GenericConstants.ENCRYPT_ALGORITHM);
             encryptedToken = new String(
                     ck.panda.util.EncryptionUtil.encrypt(createTokenDetails(user, domainName).toString(), originalKey));
         } catch (UnsupportedEncodingException e) {

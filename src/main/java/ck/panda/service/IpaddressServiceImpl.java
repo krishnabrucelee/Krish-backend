@@ -128,9 +128,9 @@ public class IpaddressServiceImpl implements IpaddressService {
 
     @Override
     public IpAddress softDelete(IpAddress ipaddress) throws Exception {
-        if(!ipaddress.getSyncFlag()){
-        ipaddress.setIsActive(false);
-        ipaddress.setState(IpAddress.State.FREE);
+        if (!ipaddress.getSyncFlag()) {
+            ipaddress.setIsActive(false);
+            ipaddress.setState(IpAddress.State.FREE);
         } else {
             ipaddress = this.dissocitateIpAddress(ipaddress);
         }
@@ -227,9 +227,9 @@ public class IpaddressServiceImpl implements IpaddressService {
     public IpAddress enableStaticNat(Long ipAddressId, Long vmId, String ipAddress) throws Exception {
         IpAddress ipaddress = ipRepo.findOne(ipAddressId);
         String vmid = null;
-        if(convertEntityService.getVmInstanceById(vmId) != null) {
-        ipaddress.setVmInstanceId(vmId);
-        vmid = convertEntityService.getVmInstanceById(vmId).getUuid();
+        if (convertEntityService.getVmInstanceById(vmId) != null) {
+            ipaddress.setVmInstanceId(vmId);
+            vmid = convertEntityService.getVmInstanceById(vmId).getUuid();
         }
         try {
             HashMap<String, String> ipMap = new HashMap<String, String>();
@@ -272,7 +272,7 @@ public class IpaddressServiceImpl implements IpaddressService {
 
     @Override
     public List<IpAddress> findByStateAndActive(State state, Boolean isActive) throws Exception {
-       return ipRepo.findAllByIsActiveAndState(state, isActive);
+        return ipRepo.findAllByIsActiveAndState(state, isActive);
     }
 
 }

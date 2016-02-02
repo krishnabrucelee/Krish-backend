@@ -1,5 +1,9 @@
 package ck.panda.constants;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 /**
  * All the common constants for the application will go here.
  *
@@ -22,6 +26,28 @@ public class GenericConstants {
 
     /** Constant for default limit. */
     public static final Integer DEFAULTLIMIT = 10;
+
+    /** Constant for default job status. */
+    public static final String DEFAULT_JOB_STATUS = "10";
+
+    /** Constants for job status. */
+    public static final String ERROR_JOB_STATUS = "2", PROGRESS_JOB_STATUS = "0",  SUCCEEDED_JOB_STATUS = "1";
+
+    /** Constant for generic exception status code. */
+    public static final String NOT_IMPLEMENTED = "501";
+
+    /** Resource type constants values. */
+    public static final String RESOURCE_MEMORY = "0", RESOURCE_CPU = "1", RESOURCE_SECONDARY_STORAGE = "2",
+            RESOURCE_PRIMARY_STORAGE = "3", RESOURCE_IP_ADDRESS = "4";
+
+    /** Constant map for default resource types. */
+    public static final Map<String, String> RESOURCE_CAPACITY = Arrays
+            .stream(new String[][] {{"0", "9"},
+                {"1", "8"},
+                {"2", "11"},
+                {"3", "10"},
+                {"4", "1"}})
+            .collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
 
     /** Template architecture constant values. */
     public static final String[] TEMPLATE_ARCHITECTURE = {"32", "64"};
@@ -58,4 +84,4 @@ public class GenericConstants {
 
     /** Page error seperator constant. */
     public static final String PAGE_ERROR_SEPARATOR = "PAGE_ERROR";
-}
+   }

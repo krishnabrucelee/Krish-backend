@@ -27,6 +27,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -206,31 +208,31 @@ public class VmInstance implements Serializable {
     /** Enumeration status for instance. */
     public enum Status {
         /** Running status of instance. */
-        Running,
-        /** destroy status of instance. */
-        Destroy,
-        /** destroyed status of instance. */
-        Destroyed,
+        RUNNING,
+        /** Destroy status of instance. */
+        DESTROY,
+        /** Destroyed status of instance. */
+        DESTROYED,
         /** Stopped status of instance. */
-        Stopped,
-        /** Status of instance. */
-        Migrating,
-        /** after launch or start instance get status as starting. */
-        Starting,
-        /** after stop or destroy instance get status as stopping. */
-        Stopping,
-        /** after destroy or expunge instance get status as expunging. */
-        Expunging,
-        /** after destroy or expunge instance get status as expunged. */
-        Expunged,
-        /** while instance creation if get failure get status as Error. */
-        Error,
-        /** while instance creation if get status as creating. */
-        Creating,
-        /** while instance creation if get status as Implemented. */
-        Implemented,
-        /** after launch instance if get status as ready. */
-        Ready
+        STOPPED,
+        /** Status of instance when migrate from one to another. */
+        MIGRATING,
+        /** After launch or start instance get status as starting. */
+        STARTING,
+        /** After stop or destroy instance get status as stopping. */
+        STOPPING,
+        /** After destroy or expunge instance get status as expunging. */
+        EXPUNGING,
+        /** After destroy or expunge instance get status as expunged. */
+        EXPUNGED,
+        /** While instance creation if get failure get status as Error. */
+        ERROR,
+        /** While instance creation if get status as creating. */
+        CREATING,
+        /** While instance creation if get status as Implemented. */
+        IMPLEMENTED,
+        /** After launch instance if get status as ready. */
+        READY
     }
 
     /** Instance host. */
@@ -939,7 +941,7 @@ public class VmInstance implements Serializable {
 
     /**
      * Get the diskSize of the Instance.
-
+     *
      * @return the diskSize of Instance.
      */
     public Long getDiskSize() {
@@ -957,7 +959,7 @@ public class VmInstance implements Serializable {
 
     /**
      * Get the diskMaxIops of the Instance.
-
+     *
      * @return the diskMaxIops of Instance.
      */
     public Long getDiskMaxIops() {
@@ -975,7 +977,7 @@ public class VmInstance implements Serializable {
 
     /**
      * Get the diskMinIops of the Instance.
-
+     *
      * @return the diskMinIops of Instance.
      */
     public Long getDiskMinIops() {
@@ -1790,7 +1792,7 @@ public class VmInstance implements Serializable {
 
     /**
      * Get the hypervisor of the VmInstance.
-
+     *
      * @return the hypervisor of VmInstance.
      */
     public Hypervisor getHypervisor() {
@@ -1808,7 +1810,7 @@ public class VmInstance implements Serializable {
 
     /**
      * Get the hypervisorId of the VmInstance.
-
+     *
      * @return the hypervisorId of VmInstance.
      */
     public Long getHypervisorId() {
@@ -1826,7 +1828,7 @@ public class VmInstance implements Serializable {
 
     /**
      * Get the transHypervisor of the VmInstance.
-
+     *
      * @return the transHypervisor of VmInstance.
      */
     public String getTransHypervisor() {
@@ -1844,7 +1846,7 @@ public class VmInstance implements Serializable {
 
     /**
      * Get the transOwnerId of the VmInstance.
-
+     *
      * @return the transOwnerId of VmInstance.
      */
     public String getTransOwnerId() {
@@ -1922,39 +1924,42 @@ public class VmInstance implements Serializable {
         VmInstance vmInstance = new VmInstance();
         vmInstance.setSyncFlag(false);
         try {
-            vmInstance.setName(JsonUtil.getStringValue(jsonObject, "name"));
-            vmInstance.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            vmInstance.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
-            vmInstance.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
-            vmInstance.setTransZoneId(JsonUtil.getStringValue(jsonObject, "zoneid"));
-            vmInstance.setTransHostId(JsonUtil.getStringValue(jsonObject, "hostid"));
-            vmInstance.setTransDisplayName(JsonUtil.getStringValue(jsonObject, "displayname"));
-            vmInstance.setTransHostId(JsonUtil.getStringValue(jsonObject, "hostid"));
-            vmInstance.setTransTemplateId(JsonUtil.getStringValue(jsonObject, "templateid"));
-            vmInstance.setTransComputeOfferingId(JsonUtil.getStringValue(jsonObject, "serviceofferingid"));
-            vmInstance.setCpuCore(JsonUtil.getIntegerValue(jsonObject, "cpunumber"));
-            vmInstance.setCpuSpeed(JsonUtil.getIntegerValue(jsonObject, "cpuspeed"));
-            vmInstance.setMemory(JsonUtil.getIntegerValue(jsonObject, "memory"));
-            vmInstance.setCpuUsage(JsonUtil.getStringValue(jsonObject, "cpuused"));
-            vmInstance.setDiskIoRead(JsonUtil.getIntegerValue(jsonObject, "diskioread"));
-            vmInstance.setDiskIoWrite(JsonUtil.getIntegerValue(jsonObject, "diskiowrite"));
-            vmInstance.setDiskKbsRead(JsonUtil.getIntegerValue(jsonObject, "diskkbsread"));
-            vmInstance.setDiskKbsWrite(JsonUtil.getIntegerValue(jsonObject, "diskkbswrite"));
-            vmInstance.setNetworkKbsRead(JsonUtil.getIntegerValue(jsonObject, "networkkbsread"));
-            vmInstance.setNetworkKbsWrite(JsonUtil.getIntegerValue(jsonObject, "networkkbswrite"));
-            vmInstance.setPasswordEnabled(JsonUtil.getBooleanValue(jsonObject, "passwordenabled"));
-            vmInstance.setPassword(JsonUtil.getStringValue(jsonObject, "password"));
-            vmInstance.setIso(JsonUtil.getStringValue(jsonObject, "isoid"));
-            vmInstance.setIsoName(JsonUtil.getStringValue(jsonObject, "isoname"));
-            vmInstance.setTransIsoId(JsonUtil.getStringValue(jsonObject, "isoid"));
-            vmInstance.setDisplayName(JsonUtil.getStringValue(jsonObject, "displayname"));
-            JSONArray nicArray = jsonObject.getJSONArray("nic");
-            vmInstance.setIpAddress(JsonUtil.getStringValue(nicArray.getJSONObject(0), "ipaddress"));
-            vmInstance.setTransNetworkId(JsonUtil.getStringValue(nicArray.getJSONObject(0), "networkid"));
-            vmInstance.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, "account"));
-            vmInstance.setTransProjectId(JsonUtil.getStringValue(jsonObject, "projectid"));
-            vmInstance.setInstanceInternalName(JsonUtil.getStringValue(jsonObject, "instancename"));
-            vmInstance.setTransOwnerId(JsonUtil.getStringValue(jsonObject, "userid"));
+            vmInstance.setName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_NAME));
+            vmInstance.setUuid(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ID));
+            vmInstance.setTransDomainId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DOMAIN_ID));
+            vmInstance.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_STATE).toUpperCase()));
+            vmInstance.setTransZoneId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ZONE_ID));
+            vmInstance.setTransHostId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_HOST_ID));
+            vmInstance.setTransDisplayName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DISPLAY_NAME));
+            vmInstance.setTransTemplateId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_TEMPLATE_ID));
+            vmInstance.setTransComputeOfferingId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_SERVICE_OFFERING_ID));
+            vmInstance.setCpuCore(JsonUtil.getIntegerValue(jsonObject, CloudStackConstants.CS_CPU_NUMBER));
+            vmInstance.setCpuSpeed(JsonUtil.getIntegerValue(jsonObject, CloudStackConstants.CS_CPU_SPEED));
+            vmInstance.setMemory(JsonUtil.getIntegerValue(jsonObject, CloudStackConstants.CS_MEMORY));
+            vmInstance.setCpuUsage(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_CPU_USED));
+            vmInstance.setDiskIoRead(JsonUtil.getIntegerValue(jsonObject, CloudStackConstants.CS_DISK_IO_READ));
+            vmInstance.setDiskIoWrite(JsonUtil.getIntegerValue(jsonObject, CloudStackConstants.CS_DISK_IO_WRITE));
+            vmInstance.setDiskKbsRead(JsonUtil.getIntegerValue(jsonObject, CloudStackConstants.CS_DISK_KBS_READ));
+            vmInstance.setDiskKbsWrite(JsonUtil.getIntegerValue(jsonObject, CloudStackConstants.CS_DISK_KBS_WRITE));
+            vmInstance.setNetworkKbsRead(JsonUtil.getIntegerValue(jsonObject, CloudStackConstants.CS_NETWORK_KBS_READ));
+            vmInstance
+                    .setNetworkKbsWrite(JsonUtil.getIntegerValue(jsonObject, CloudStackConstants.CS_NETWORK_KBS_WRITE));
+            vmInstance.setPasswordEnabled(JsonUtil.getBooleanValue(jsonObject, CloudStackConstants.CS_PASSWORD_STATUS));
+            vmInstance.setPassword(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_PASSWORD));
+            vmInstance.setIso(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ISO_ID));
+            vmInstance.setIsoName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ISO_NAME));
+            vmInstance.setTransIsoId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ISO_ID));
+            vmInstance.setDisplayName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DISPLAY_NAME));
+            JSONArray nicArray = jsonObject.getJSONArray(CloudStackConstants.CS_NIC);
+            vmInstance.setIpAddress(
+                    JsonUtil.getStringValue(nicArray.getJSONObject(0), CloudStackConstants.CS_IP_ADDRESS));
+            vmInstance.setTransNetworkId(
+                    JsonUtil.getStringValue(nicArray.getJSONObject(0), CloudStackConstants.CS_NETWORK_ID));
+            vmInstance.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ACCOUNT));
+            vmInstance.setTransProjectId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_PROJECT_ID));
+            vmInstance
+                    .setInstanceInternalName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_INSTANCE_NAME));
+            vmInstance.setTransOwnerId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_USER_ID));
         } catch (Exception e) {
             e.printStackTrace();
         }

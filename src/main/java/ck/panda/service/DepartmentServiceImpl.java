@@ -208,7 +208,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         errors = validator.validateEntity(department, errors);
         config.setServer(1L);
         if (department.getSyncFlag()) {
-            List<Project> projectResponse = projectService.findByDepartmentAndIsActive(department.getId(), true);
+            List<Project> projectResponse = projectService.findAllByDepartmentAndIsActive(department.getId(), true);
             List<VmInstance> vmResponse = vmService.findByDepartmentAndVmStatus(department.getId(), VmInstance.Status.Expunging);
             List<Role> roleResponse = roleService.findByDepartmentAndIsActive(department.getId(), true);
             List<Volume> volumeResponse = volumeService.findByDepartmentAndIsActive(department.getId(), true);

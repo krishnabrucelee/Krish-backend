@@ -1296,12 +1296,12 @@ public class Template implements Serializable {
             template.transZone = JsonValidator.jsonStringValidation(object, "zoneid");
             template.transHypervisor = JsonValidator.jsonStringValidation(object, "hypervisor");
             template.setDepartmentId(null);
-            if(object.has("format")) {
+            if (object.has("format")) {
                 template.setFormat(template.getFormat().valueOf(JsonValidator.jsonStringValidation(object, "format")));
                 template.setType(template.getType().valueOf(JsonValidator.jsonStringValidation(object, "templatetype")));
             } else {
                 template.setFormat(Format.ISO);
-                if(object.has("account") && JsonValidator.jsonStringValidation(object, "account").equals("system")) {
+                if (object.has("account") && JsonValidator.jsonStringValidation(object, "account").equals("system")) {
                     template.setType(TemplateType.SYSTEM);
                 } else {
                     template.setType(TemplateType.USER);
