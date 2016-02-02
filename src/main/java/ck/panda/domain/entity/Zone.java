@@ -51,14 +51,11 @@ public class Zone implements Serializable {
     @Column(name = "uuid")
     private String uuid;
 
-    /** id for the Domain. */
-    // @OneToMany(mappedBy = "domain")
+    /** Domain id. */
     @Column(name = "domain_id")
     private Long domainId;
 
-    /** id for the Region. */
-    // @OneToOne
-    // @JoinColumn(name = "region_id", referencedColumnName = "id")
+    /** Region id. */
     @Column(name = "region_id")
     private Long regionId;
 

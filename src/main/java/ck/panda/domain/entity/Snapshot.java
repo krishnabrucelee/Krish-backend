@@ -1,5 +1,6 @@
 package ck.panda.domain.entity;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -35,12 +36,13 @@ import ck.panda.util.JsonValidator;
  */
 @Entity
 @Table(name = "snapshots")
-public class Snapshot {
+@SuppressWarnings("serial")
+public class Snapshot implements Serializable {
 
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(Snapshot.class);
 
-    /** Unique Id of the instance. */
+    /** Unique id of the instance. */
     @Id
     @GeneratedValue
     @Column(name = "id")

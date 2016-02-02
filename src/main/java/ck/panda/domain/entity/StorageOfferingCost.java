@@ -1,5 +1,6 @@
 package ck.panda.domain.entity;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 
 import javax.persistence.Column;
@@ -29,7 +30,8 @@ import ck.panda.domain.entity.StorageOffering.Status;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "storage_offerings_cost")
-public class StorageOfferingCost {
+@SuppressWarnings("serial")
+public class StorageOfferingCost implements Serializable {
 
     /**
      * Unique ID of the disk offering cost.

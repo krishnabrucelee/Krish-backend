@@ -16,46 +16,57 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 public interface SSHKeyService extends CRUDService<SSHKey> {
 
     /**
+     * Save the SSH Key.
+     *
+     * @param sshkey SSHKey entity
+     * @param id of the login user
+     * @return SSHKey
+     * @throws Exception error occurs
+     */
+    SSHKey save(SSHKey sshkey, Long id) throws Exception;
+
+    /**
      * To get list of SSH Key from cloudstack server.
      *
      * @return SSH Key list from server
-     * @throws Exception unhandled errors.
+     * @throws Exception unhandled errors
      */
     List<SSHKey> findAllFromCSServer() throws Exception;
 
     /**
+     * To get list of SSH Key.
+     *
+     * @param pagingAndSorting parameters
+     * @param id of the login user
+     * @return SSH Key list with pagination
+     * @throws Exception unhandled errors
+     */
+    Page<SSHKey> findAll(PagingAndSorting pagingAndSorting, Long id) throws Exception;
+
+    /**
+     * To get list of SSH Key.
+     *
+     * @param id of the login user
+     * @return SSH Key list
+     * @throws Exception unhandled errors
+     */
+    List<SSHKey> findAll(Long id) throws Exception;
+
+    /**
      * Delete the SSH Key.
      *
-     * @param sshkey SSHKey entity.
-     * @return SSHKey.
+     * @param sshkey SSHKey entity
+     * @param id of the login user
+     * @return SSHKey
      * @throws Exception error occurs
      */
-    SSHKey softDelete(SSHKey sshkey) throws Exception;
-
-    /**
-     * Find all the SSH keys with active status.
-     *
-     * @param pagingAndSorting pagination and sorting values.
-     * @return list of SSH Keys with pagination.
-     * @throws Exception error occurs
-     */
-    Page<SSHKey> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
-
-    /**
-     * Find all the SSH Keys with active status.
-     *
-     * @param isActive SSH Key status Active/Inactive
-     * @return list of SSH Keys with active status
-     * @throws Exception error occurs.
-     */
-    List<SSHKey> findAllByIsActive(Boolean isActive) throws Exception;
+    SSHKey softDelete(SSHKey sshkey, Long id) throws Exception;
 
     /**
      * Find all the SSH Keys for sync.
      *
      * @return list of SSH Keys with active status
-     * @throws Exception error occurs.
+     * @throws Exception error occurs
      */
     List<SSHKey> findAllBySync() throws Exception;
-
 }

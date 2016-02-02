@@ -22,8 +22,12 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Department.AccountType;
+import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.User;
+import ck.panda.service.ConvertEntityService;
 import ck.panda.service.DepartmentService;
 import ck.panda.service.DomainService;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -41,15 +45,19 @@ public class DepartmentController extends CRUDController<Department> implements 
     @Autowired
     private DepartmentService departmentService;
 
-    /** Service reference to Domain. */
+    /** Service reference to Convert Entity. */
     @Autowired
-    private DomainService domainService;
+    private ConvertEntityService convertEntityService;
+
+    /** Autowired TokenDetails. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Department.", response = Department.class)
     @Override
     public Department create(@RequestBody Department department) throws Exception {
         department.setSyncFlag(true);
-        return departmentService.save(department);
+        return departmentService.save(department, Long.parseLong(tokenDetails.getTokenDetails("id")));
     }
 
     @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing Department.", response = Department.class)
@@ -87,7 +95,7 @@ public class DepartmentController extends CRUDController<Department> implements 
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Department.class);
-        Page<Department> pageResponse = departmentService.findAllByActive(page);
+        Page<Department> pageResponse = departmentService.findAllByActive(page, Long.parseLong(tokenDetails.getTokenDetails("id")));
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
@@ -102,23 +110,24 @@ public class DepartmentController extends CRUDController<Department> implements 
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<Department> getDepartmentList() throws Exception {
-        return departmentService.findByAll();
+        Long domainId = convertEntityService.getOwnerById(Long.parseLong(tokenDetails.getTokenDetails("id"))).getDomainId();
+        return departmentService.findByDomainAndIsActive(domainId, true);
     }
 
     /**
-     * Find the list of active departments.
+     * Find the list of active departments based on the domain.
      *
-     * @param id department id.
+     * @param domainId domain id of the department.
      * @return projects project list.
      * @throws Exception error occurs.
      */
     @RequestMapping(value = "search", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected List<Department> getDepartmentListByDomain(@RequestParam("dept") Long id) throws Exception {
+    protected List<Department> getDepartmentListByDomain(@RequestParam("dept") Long domainId) throws Exception {
         List<AccountType> types = new ArrayList<AccountType>();
         types.add(Department.AccountType.USER);
-        return departmentService.findDepartmentsByDomainAndAccountTypesAndActive(id, types, true);
+        return departmentService.findByDomainAndAccountTypesAndActive(domainId, types, true);
     }
 
     /**

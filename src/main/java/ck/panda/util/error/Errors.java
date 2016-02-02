@@ -6,6 +6,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -28,7 +29,7 @@ public class Errors {
 
     /**
      * Parameterized constructor.
-     * 
+     *
      * @param messageSource to set
      */
     public Errors(MessageSource messageSource) {
@@ -37,7 +38,7 @@ public class Errors {
 
     /**
      * Get global error.
-     * 
+     *
      * @return error list
      */
     public List<String> getGlobalError() {
@@ -46,24 +47,23 @@ public class Errors {
 
     /**
      * Add global error.
-     * 
-     * @param errorMessage to set
+     *
+     * @param errorMessage to set.
      */
     public void addGlobalError(String errorMessage) {
         try {
-            errorMessage = messageSource.getMessage(errorMessage, new Object[] {}, LocaleContextHolder.getLocale());
+            errorMessage = messageSource.getMessage(errorMessage, null, LocaleContextHolder.getLocale());
         } catch (NoSuchMessageException ex) {
-            // Do nothing, the i18n key will be returned
+            this.globalError.add(errorMessage);
         } catch (NullPointerException ex) {
             // Do nothing, the i18n key will be returned
         }
-
         this.globalError.add(errorMessage);
     }
 
     /**
      * Get field errors.
-     * 
+     *
      * @return map of field errors
      */
     public HashMap<String, String> getFieldErrors() {
@@ -72,15 +72,16 @@ public class Errors {
 
     /**
      * Add field errors.
-     * 
+     *
      * @param field to set
      * @param errorMessage to set
      */
     public void addFieldError(String field, String errorMessage) {
         try {
-            errorMessage = messageSource.getMessage(errorMessage, new Object[] {}, LocaleContextHolder.getLocale());
+            errorMessage = messageSource.getMessage(errorMessage, null, LocaleContextHolder.getLocale());
         } catch (NoSuchMessageException ex) {
             // Do nothing, the i18n key will be returned
+            this.fieldErrors.put(field, errorMessage);
         } catch (NullPointerException ex) {
             // Do nothing, the i18n key will be returned
         }
@@ -89,7 +90,7 @@ public class Errors {
 
     /**
      * Set field errors.
-     * 
+     *
      * @param errorsMap to set
      */
     public void setFieldErrors(Map<String, String> errorsMap) {
@@ -98,7 +99,7 @@ public class Errors {
 
     /**
      * Check we have global and field errors.
-     * 
+     *
      * @return true/false
      */
     public Boolean hasErrors() {

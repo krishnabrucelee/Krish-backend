@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import ck.panda.util.BeanFactory;
 import ck.panda.util.error.Errors;
+import ck.panda.util.error.MessageByLocaleService;
 import ck.panda.util.error.exception.ApplicationException;
+import ck.panda.util.error.exception.CustomGenericException;
 import ck.panda.util.error.exception.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -25,6 +27,9 @@ public class ExceptionHandlingController {
     /** Message source attribute. */
     @Autowired
     private MessageSource messageSource;
+
+    @Autowired
+    MessageByLocaleService messageByLocaleService;
 
     /** Beanfactory attribute. */
     @Autowired
@@ -42,6 +47,21 @@ public class ExceptionHandlingController {
     Errors handleException(EntityNotFoundException ex) {
         Errors errors = new Errors(messageSource);
         errors.addGlobalError(ex.getMessage());
+        return errors;
+    }
+
+    /**
+     * Custom generic exception handler.
+     *
+     * @param ex the exception to be handle
+     * @return errors
+     */
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_IMPLEMENTED)
+    @ResponseBody
+    Errors handleException(CustomGenericException ex) {
+        Errors errors = new Errors(messageSource);
+        errors.addGlobalError(messageByLocaleService.getMessage(ex.getErrorMsg()));
         return errors;
     }
 
@@ -116,7 +136,6 @@ public class ExceptionHandlingController {
     @ResponseBody
     Errors handleException(Exception ex) {
         Errors errors = new Errors(messageSource);
-        ex.printStackTrace();
         errors.addGlobalError(ex.getMessage());
         return errors;
     }
@@ -132,8 +151,7 @@ public class ExceptionHandlingController {
     @ResponseBody
     Errors handleException(BadCredentialsException ex) {
         Errors errors = new Errors(messageSource);
-        ex.printStackTrace();
-        errors.addGlobalError(ex.getMessage());
+        errors.addGlobalError(messageByLocaleService.getMessage(ex.getMessage()));
         return errors;
     }
 

@@ -21,6 +21,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.SSHKey;
 import ck.panda.service.SSHKeyService;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -35,11 +36,15 @@ public class SSHKeyController extends CRUDController<SSHKey> implements ApiContr
     @Autowired
     private SSHKeyService sshkeyService;
 
+    /** Autowired TokenDetails. */
+    @Autowired
+    private TokenDetails tokenDetails;
+
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new sshkey.", response = SSHKey.class)
     @Override
     public SSHKey create(@RequestBody SSHKey sshkey) throws Exception {
         sshkey.setIsSyncFlag(true);
-        return sshkeyService.save(sshkey);
+        return sshkeyService.save(sshkey, Long.parseLong(tokenDetails.getTokenDetails("id")));
     }
 
     @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing sshkey.", response = SSHKey.class)
@@ -57,9 +62,9 @@ public class SSHKeyController extends CRUDController<SSHKey> implements ApiContr
     /**
      * Delete the SSH key.
      *
-     * @param sshkey reference of the SSH key.
-     * @param id SSH key id.
-     * @throws Exception error occurs.
+     * @param sshkey reference of the SSH key
+     * @param id SSH key id
+     * @throws Exception error occurs
      */
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing SSHKey.")
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = {
@@ -69,7 +74,7 @@ public class SSHKeyController extends CRUDController<SSHKey> implements ApiContr
         /** Doing Soft delete from the SSH key table. */
         sshkey = sshkeyService.find(id);
         sshkey.setIsSyncFlag(true);
-        sshkeyService.softDelete(sshkey);
+        sshkeyService.softDelete(sshkey, Long.parseLong(tokenDetails.getTokenDetails("id")));
     }
 
     @Override
@@ -77,7 +82,7 @@ public class SSHKeyController extends CRUDController<SSHKey> implements ApiContr
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, SSHKey.class);
-        Page<SSHKey> pageResponse = sshkeyService.findAllByActive(page);
+        Page<SSHKey> pageResponse = sshkeyService.findAll(page, Long.parseLong(tokenDetails.getTokenDetails("id")));
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
@@ -85,14 +90,13 @@ public class SSHKeyController extends CRUDController<SSHKey> implements ApiContr
     /**
      * Find the list of active SSH keys.
      *
-     * @return projects project list.
-     * @throws Exception error occurs.
+     * @return projects project list
+     * @throws Exception error occurs
      */
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<SSHKey> getSearch() throws Exception {
-        return sshkeyService.findAllByIsActive(true);
+        return sshkeyService.findAll(Long.parseLong(tokenDetails.getTokenDetails("id")));
     }
-
 }

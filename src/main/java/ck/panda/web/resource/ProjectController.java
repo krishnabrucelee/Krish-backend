@@ -21,6 +21,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Project;
 import ck.panda.service.ProjectService;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -35,6 +36,10 @@ public class ProjectController extends CRUDController<Project> implements ApiCon
     /** Service reference to project. */
     @Autowired
     private ProjectService projectService;
+
+    /** Autowired TokenDetails. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new project.", response = Project.class)
     @Override
@@ -57,7 +62,7 @@ public class ProjectController extends CRUDController<Project> implements ApiCon
     }
 
     /**
-     * soft delete apply for project.
+     * Delete the project.
      *
      * @param project project object.
      * @param id project id.
@@ -83,54 +88,43 @@ public class ProjectController extends CRUDController<Project> implements ApiCon
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Project.class);
-        Page<Project> pageResponse = projectService.findAllByActive(true, page);
+        Page<Project> pageResponse = projectService.findAllByActive(true, page,
+                Long.valueOf(tokenDetails.getTokenDetails("id")));
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
 
     /**
-     * list all active projects for an instance.
+     * Get the list of projects.
      *
-     * @return projects list of projects.
-     * @throws Exception if error occurs.
-     */
-    @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    protected List<Project> getActiveProjects() throws Exception {
-        return projectService.findByAll();
-    }
-
-    /**
-     * list all projects.
-     *
-     * @return projects list of projects.
+     * @return list of projects.
      * @throws Exception if error occurs.
      */
     @RequestMapping(value = "listall", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<Project> getAllProjects() throws Exception {
-        return projectService.findByAll();
+        return projectService.getAllProjects(Long.valueOf(tokenDetails.getTokenDetails("id")));
     }
 
     /**
-     * Get the department by Domain.
+     * Get the list of projects by department.
      *
      * @param id department id.
-     * @return department
+     * @return list of projects.
      * @throws Exception error occurs.
      */
     @RequestMapping(value = "/department/{id}", method = RequestMethod.GET, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
-    public List<Project> findByDepartmentAndIsActive(@PathVariable(PATH_ID) Long id) throws Exception {
-        return projectService.findByDepartmentAndIsActive(id, true);
+    public List<Project> findAllByDepartmentAndIsActive(@PathVariable(PATH_ID) Long id) throws Exception {
+        return projectService.findAllByDepartmentAndIsActive(id, true);
     }
 
     /**
-     * Remove user from project.
+     * Remove the user from project.
      *
+     * @param project project object.
      * @throws Exception if error occurs.
      * @return project.
      */
@@ -142,15 +136,15 @@ public class ProjectController extends CRUDController<Project> implements ApiCon
     }
 
     /**
-     * Get the project by department.
+     * Get the project list by user.
      *
      * @param id user id.
-     * @return project
+     * @return list of projects.
      * @throws Exception error occurs.
      */
     @RequestMapping(value = "/user/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
-    public List<Project> findByUserAndIsActive(@PathVariable(PATH_ID) Long id) throws Exception {
-        return projectService.findByUserAndIsActive(id, true);
+    public List<Project> findAllByUserAndIsActive(@PathVariable(PATH_ID) Long id) throws Exception {
+        return projectService.findAllByUserAndIsActive(id, true);
     }
 }

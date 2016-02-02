@@ -906,7 +906,6 @@ public class SyncServiceImpl implements SyncService {
                 csUserMap.remove(user.getUuid());
             } else {
                 userService.softDelete(user);
-
                 // 3.2 If not found, delete it from app db
                 // TODO clarify the business requirement, since it has impact in
                 // the application if it is used
@@ -1144,36 +1143,28 @@ public class SyncServiceImpl implements SyncService {
      */
     @Override
     public void syncDepartment() throws ApplicationException, Exception {
-
-        // 1. Get all the user objects from CS server as hash
-        List<Department> csAccountService = departmentService.findAllFromCSServerByDomain();
+        // 1. Get all the department objects from CS server as hash
+        List<Department> csAccountService = departmentService.findAllFromCSServer();
         HashMap<String, Department> csUserMap = (HashMap<String, Department>) Department.convert(csAccountService);
-
-        // 2. Get all the user objects from application
-        List<Department> appUserList = departmentService.findAllBySync();
-
-        // 3. Iterate application user list
-        for (Department department : appUserList) {
+        // 2. Get all the department objects from application
+        List<Department> appDepartmentList = departmentService.findAllBySync();
+        // 3. Iterate application department list
+        for (Department department : appDepartmentList) {
             department.setSyncFlag(false);
-            // 3.1 Find the corresponding CS server user object by finding it in
-            // a hash using uuid
+            // 3.1 Find the corresponding CS server user object by finding it in a hash using uuid
             if (csUserMap.containsKey(department.getUuid())) {
                 Department csUser = csUserMap.get(department.getUuid());
                 department.setUserName(csUser.getUserName());
-                // 3.2 If found, update the user object in app db
+                // 3.2 If found, update the department object in app db
                 departmentService.update(department);
-
-                // 3.3 Remove once updated, so that we can have the list of cs
-                // user which is not added in the app
+                // 3.3 Remove once updated, so that we can have the list of cs department which is not
+                // added in the app
                 csUserMap.remove(department.getUuid());
             } else {
                 departmentService.softDelete(department);
             }
-
         }
-        // 4. Get the remaining list of cs server hash user object, then iterate
-        // and
-        // add it to app db
+        // 4. Get the remaining list of cs server hash department object, then iterate and add it to app db
         for (String key : csUserMap.keySet()) {
             departmentService.save(csUserMap.get(key));
         }
@@ -1184,7 +1175,7 @@ public class SyncServiceImpl implements SyncService {
         List<AccountType> types = new ArrayList<AccountType>();
         types.add(AccountType.ROOT_ADMIN);
         types.add(AccountType.DOMAIN_ADMIN);
-        departmentList = departmentService.findDepartmentsByAccountTypesAndActive(types, true);
+        departmentList = departmentService.findByAccountTypesAndActive(types, true);
         createRole(departmentList, existPermissionList);
     }
 
@@ -1842,17 +1833,16 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.debug("Total rows updated : " + (appSSHKeyList.size()));
             // 3.1 Find the corresponding CS server region object by finding it
             // in a hash using uuid
-            if (csSSHkeyMap.containsKey(sshKey.getDepartmentId())) {
-                SSHKey csSSHKey = csSSHkeyMap.get(sshKey.getDepartment().getUuid());
+            if (csSSHkeyMap.containsKey(sshKey.getFingerPrint())) {
+                SSHKey csSSHKey = csSSHkeyMap.get(sshKey.getFingerPrint());
 
                 sshKey.setName(csSSHKey.getName());
-
                 // 3.2 If found, update the region object in app db
                 sshKeyService.update(sshKey);
 
                 // 3.3 Remove once updated, so that we can have the list of cs
                 // region which is not added in the app
-                csSSHkeyMap.remove(sshKey.getDepartment().getUuid());
+                csSSHkeyMap.remove(sshKey.getFingerPrint());
             } else {
                 sshKeyService.delete(sshKey);
             }

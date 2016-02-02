@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.data.auditing.DateTimeProvider;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
@@ -95,11 +96,12 @@ public class ApplicationConfig extends WebMvcConfigurerAdapter {
      *
      * @return MessageSource
      */
-    @Bean
-    public MessageSource messageSource() {
+    @Bean(name = "messageSource")
+    public ReloadableResourceBundleMessageSource getMessageSource() {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-        messageSource.setBasename("/i18n/messages");
+        messageSource.setBasename("classpath:i18n/messages/messages");
         messageSource.setDefaultEncoding("UTF-8");
+        messageSource.setCacheSeconds(1000);
         return messageSource;
     }
 
