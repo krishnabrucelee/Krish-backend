@@ -66,10 +66,11 @@ public interface VolumeService extends CRUDService<Volume> {
      * Upload volume from Url.
      *
      * @param volume volume
+     * @param userId user details
      * @return volume
      * @throws Exception Exception
      */
-    Volume uploadVolume(Volume volume) throws Exception;
+    Volume uploadVolume(Volume volume, Long userId) throws Exception;
 
     /**
      * SOft delete for volume.
@@ -84,27 +85,30 @@ public interface VolumeService extends CRUDService<Volume> {
      * Find all the Volumes with active status.
      *
      * @param page pagination and sorting values.
+     * @param userId user details
      * @return list of volumes with pagination.
      * @throws Exception error occurs
      */
-    Page<Volume> findAllByIsActive(PagingAndSorting page) throws Exception;
+    Page<Volume> findAllByIsActive(PagingAndSorting page, Long userId) throws Exception;
 
     /**
      * list by instance attached to volume.
      *
      * @param volume Volume
+     * @param userId user details
      * @return volume Volumes from instance.
      * @throws Exception exception
      */
-    List<Volume> findByInstanceAndIsActive(Long volume) throws Exception;
+    List<Volume> findByInstanceAndIsActive(Long volume, Long userId) throws Exception;
 
     /**
      * list by volumes by its volume type.
      *
+     * @param userId user details
      * @return Upload Volume
      * @throws Exception exception
      */
-    List<Volume> findByVolumeTypeAndIsActive() throws Exception;
+    List<Volume> findByVolumeTypeAndIsActive(Long userId) throws Exception;
 
     /**
      * List the volume with its instanceId, volume type and active status.
@@ -138,7 +142,7 @@ public interface VolumeService extends CRUDService<Volume> {
      *
      * @param projectId project id.
      * @param volumeType volume type.
-     * @return project
+     * @return volume
      */
     List<Volume> findByProjectAndVolumeType(Long projectId, List<VolumeType> volumeType);
 
@@ -146,7 +150,7 @@ public interface VolumeService extends CRUDService<Volume> {
      * Get the volumes based on department.
      *
      * @param departmentId department id.
-     * @return department
+     * @return volume
      * @param volumeType volume type.
      * @throws Exception error occurs.
      */
@@ -158,7 +162,7 @@ public interface VolumeService extends CRUDService<Volume> {
      * @param departmentId department id.
      * @param projectId project id.
      * @param volumeType volume type.
-     * @return department
+     * @return volume
      * @throws Exception error occurs.
      */
     List<Volume> findByDepartmentAndNotProjectAndVolumeType(Long departmentId, Long projectId,
@@ -167,20 +171,22 @@ public interface VolumeService extends CRUDService<Volume> {
     /**
      * Get the count of the volume based on the attached.
      *
-     * @return count
+     * @param userId user details
+     * @return volume count
      * @throws NumberFormatException Number format
      * @throws Exception error occurs
      */
-    Integer findAttachedCount() throws NumberFormatException, Exception;
+    Integer findAttachedCount(Long userId) throws NumberFormatException, Exception;
 
     /**
      * Get the count of the volume based on the detached.
      *
-     * @return count
+     * @param userId user details
+     * @return volume count
      * @throws NumberFormatException Number format
      * @throws Exception error occurs
      */
-    Integer findDetachedCount() throws NumberFormatException, Exception;
+    Integer findDetachedCount(Long userId) throws NumberFormatException, Exception;
 
     /**
      * list by instance attached to volume.
@@ -190,5 +196,15 @@ public interface VolumeService extends CRUDService<Volume> {
      * @throws Exception exception
      */
     List<Volume> findByInstanceForResourceState(Long volume) throws Exception;
+
+    /**
+     * Save method for volume creation.
+     *
+     * @param volume Volume
+     * @param userId user details
+     * @return volume
+     * @throws Exception exception
+     */
+    Volume saveVolume(Volume volume, Long userId) throws Exception;
 
 }

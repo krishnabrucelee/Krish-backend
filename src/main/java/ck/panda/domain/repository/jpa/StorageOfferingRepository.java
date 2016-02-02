@@ -1,14 +1,12 @@
 package ck.panda.domain.repository.jpa;
 
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import ck.panda.domain.entity.StorageOffering;
 
 /**
@@ -21,10 +19,11 @@ public interface StorageOfferingRepository extends PagingAndSortingRepository<St
      * method to find list of entities having active status.
      *
      * @param pageable storage offer page
+     * @param isActive true / false
      * @return lists Active state storage offerings
      */
-    @Query(value = "select storage from StorageOffering storage where storage.isActive IS TRUE")
-    Page<StorageOffering> findAllByActive(Pageable pageable);
+    @Query(value = "SELECT storage FROM StorageOffering storage WHERE storage.isActive = :isActive")
+    Page<StorageOffering> findAllByActive(Pageable pageable, @Param("isActive") Boolean isActive);
 
     /**
      * Get the Storage offer based on the uuid.
@@ -32,7 +31,7 @@ public interface StorageOfferingRepository extends PagingAndSortingRepository<St
      * @param uuid of the Storage offer.
      * @return Storage offer
      */
-    @Query(value = "select storage from StorageOffering storage where storage.uuid = :uuid")
+    @Query(value = "SELECT storage FROM StorageOffering storage WHERE storage.uuid = :uuid")
     StorageOffering findByUUID(@Param("uuid") String uuid);
 
     /**
@@ -41,7 +40,7 @@ public interface StorageOfferingRepository extends PagingAndSortingRepository<St
      * @param isActive of the Storage offer.
      * @return Storage offer tag storageTags
      */
-    @Query(value = "select distinct (storage.storageTags) from StorageOffering storage where storage.isActive = :isActive and (storage.storageTags) IS NOT NULL")
+    @Query(value = "SELECT DISTINCT (storage.storageTags) FROM StorageOffering storage WHERE storage.isActive = :isActive AND (storage.storageTags) IS NOT NULL")
     List<String> findByTags(@Param("isActive") Boolean isActive);
 
     /**
@@ -51,7 +50,7 @@ public interface StorageOfferingRepository extends PagingAndSortingRepository<St
      * @param isActive of the Storage offer.
      * @return list of Storage offer
      */
-    @Query(value = "select storage from StorageOffering storage where storage.storageTags = :storageTags OR 'ALL' = :storageTags and storage.isActive = :isActive")
+    @Query(value = "SELECT storage FROM StorageOffering storage WHERE storage.storageTags = :storageTags OR 'ALL' = :storageTags AND storage.isActive = :isActive")
     List<StorageOffering> findAllByTags(@Param("storageTags") String tags, @Param("isActive") Boolean isActive);
 
     /**
@@ -61,6 +60,6 @@ public interface StorageOfferingRepository extends PagingAndSortingRepository<St
      * @param isActive of the Storage
      * @return Storage offering
      */
-    @Query(value = "select storage from StorageOffering storage where storage.isActive =:isActive AND storage.name =:name")
+    @Query(value = "SELECT storage FROM StorageOffering storage WHERE storage.isActive = :isActive AND storage.name = :name")
     StorageOffering findByNameAndIsActive(@Param("name") String name, @Param("isActive") Boolean isActive);
 }

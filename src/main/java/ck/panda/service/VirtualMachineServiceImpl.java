@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EventTypes;
 import ck.panda.constants.GenericConstants;
@@ -47,6 +48,12 @@ import org.springframework.stereotype.Service;
 public class VirtualMachineServiceImpl implements VirtualMachineService {
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(VirtualMachineServiceImpl.class);
+
+    /** Constant for max io disk offering. */
+    public static final String CS_MAX_IOPS_DO = ".maxIopsDo";
+
+    /** Constant for min io disk offering. */
+    public static final String CS_MIN_IOPS_DO = ".minIopsDo";
 
     /** Validator attribute. */
     @Autowired
@@ -147,7 +154,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                                 convertEntityService.getDomainById(vmInstance.getDomainId()).getUuid());
                     }
                     if (vmInstance.getStorageOfferingId() != null) {
-                        convertEntityService.customStorageForInstance(vmInstance);
+                        this.customStorageForInstance(vmInstance);
                     }
                     if (vmInstance.getComputeOfferingId() != null) {
                         this.customComputeForInstance(vmInstance, optionalMap);
@@ -1122,4 +1129,26 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         }
         return (List<VmInstance>) virtualmachinerepository.findAllByExceptStatus(Status.EXPUNGING);
     }
+
+    /**
+     * A method a set Custom storage values for instance.
+     *
+     * @param vmInstance Vm instance object
+     * @throws Exception error
+     */
+    public void customStorageForInstance(VmInstance vmInstance) throws Exception {
+        HashMap<String, String> instanceMap = new HashMap<>();
+            instanceMap.put(CloudStackConstants.CS_DISK_OFFERING_ID,
+                    convertEntityService.getStorageOfferById(vmInstance.getStorageOfferingId()).getUuid());
+            //Check the disk size not null validation and set the disk size
+            if (vmInstance.getDiskSize() != null) {
+                instanceMap.put(CloudStackConstants.CS_SIZE, vmInstance.getDiskSize().toString());
+            }
+            //Check the disk Iops (Max and Min) not null validation and set the disk iops
+            if (vmInstance.getDiskMaxIops() != null && vmInstance.getDiskMinIops() != null) {
+                instanceMap.put(CloudStackConstants.CS_CUSTOM_DETAILS + CS_MAX_IOPS_DO,vmInstance.getDiskMaxIops().toString());
+                instanceMap.put(CloudStackConstants.CS_CUSTOM_DETAILS + CS_MAX_IOPS_DO, vmInstance.getDiskMinIops().toString());
+            }
+       }
+
 }

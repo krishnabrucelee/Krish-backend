@@ -41,6 +41,7 @@ import ck.panda.domain.entity.PortForwarding;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.Region;
 import ck.panda.domain.entity.ResourceLimitDomain;
+import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.SSHKey;
 import ck.panda.domain.entity.Snapshot;
@@ -843,25 +844,6 @@ public class SyncServiceImpl implements SyncService {
             // in a hash using uuid
             if (csStorageOfferingMap.containsKey(storageOffering.getUuid())) {
                 StorageOffering csStorageOffering = csStorageOfferingMap.get(storageOffering.getUuid());
-
-                storageOffering.setDescription(csStorageOffering.getDescription());
-                storageOffering.setDiskBytesReadRate(csStorageOffering.getDiskBytesReadRate());
-                storageOffering.setDiskBytesWriteRate(csStorageOffering.getDiskBytesWriteRate());
-                storageOffering.setDiskIopsReadRate(csStorageOffering.getDiskIopsReadRate());
-                storageOffering.setDiskIopsWriteRate(csStorageOffering.getDiskIopsWriteRate());
-                storageOffering.setDiskMaxIops(csStorageOffering.getDiskMaxIops());
-                storageOffering.setDiskMinIops(csStorageOffering.getDiskMinIops());
-                storageOffering.setDiskSize(csStorageOffering.getDiskSize());
-                storageOffering.setIsCustomDisk(csStorageOffering.getIsCustomDisk());
-                storageOffering.setIsCustomizedIops(csStorageOffering.getIsCustomizedIops());
-                storageOffering.setIsPublic(csStorageOffering.getIsPublic());
-                storageOffering.setName(csStorageOffering.getName());
-                storageOffering.setQosType(csStorageOffering.getQosType());
-                storageOffering.setStorageTags(csStorageOffering.getStorageTags());
-                storageOffering.setStorageType(csStorageOffering.getStorageType());
-                storageOffering.setDomain(csStorageOffering.getDomain());
-
-                // csOsType.setOsCategoryUuid(csOsType.getOsCategoryUuid());
 
                 // 3.2 If found, update the osType object in app db
                 storageService.update(storageOffering);
@@ -1712,6 +1694,11 @@ public class SyncServiceImpl implements SyncService {
         for (Domain domain : domains) {
             syncResourceLimitDomain(domain);
         }
+
+        List<Project> projects = projectService.findAllByActive(true);
+        for (Project project : projects) {
+            syncResourceLimitProject(project.getUuid());
+        }
     }
 
     @Override
@@ -1742,6 +1729,50 @@ public class SyncServiceImpl implements SyncService {
         // add it to app db
         for (String key : csResourceMap.keySet()) {
             resourceDomainService.save(csResourceMap.get(key));
+        }
+        LOGGER.debug("Total rows added", (csResourceMap.size()));
+    }
+
+    @Override
+    public void syncResourceLimitProject(String projectId) throws ApplicationException, Exception {
+
+        // 1. Get all the ResourceLimit objects from CS server as hash
+        List<ResourceLimitProject> csResourceList = resourceProjectService.findAllFromCSServerProject(projectId);
+               HashMap<String, ResourceLimitProject> csResourceMap = (HashMap<String, ResourceLimitProject>) ResourceLimitProject
+                .convert(csResourceList);
+
+        // 2. Get all the resource objects from application
+        List<ResourceLimitProject> appResourceList = resourceProjectService.findAll();
+
+        // 3. Iterate application resource list
+        LOGGER.debug("Total rows updated : " + (appResourceList.size()));
+        for (ResourceLimitProject resource : appResourceList) {
+            resource.setIsSyncFlag(false);
+            String resourceLimit = resource.getProjectId() + "-" + resource.getResourceType();
+            // 3.1 Find the corresponding CS server resource object by finding
+            // it in a hash using uuid
+            if (csResourceMap.containsKey(resourceLimit)) {
+                ResourceLimitProject csResource = csResourceMap.get(resourceLimit);
+                resource.setIsActive(true);
+                // resource.setName(csResource.getName());
+
+                // 3.2 If found, update the resource object in app db
+                resourceProjectService.update(resource);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // resource which is not added in the app
+                csResourceMap.remove(resourceLimit);
+            } else {
+                resourceProjectService.update(resource);
+            }
+        }
+        // 4. Get the remaining list of cs server hash resource object, then
+        // iterate and
+        // add it to app db
+        for (String key : csResourceMap.keySet()) {
+            LOGGER.debug("Syncservice resource Domain id:");
+            resourceProjectService.save(csResourceMap.get(key));
+
         }
         LOGGER.debug("Total rows added", (csResourceMap.size()));
     }
@@ -2303,7 +2334,7 @@ public class SyncServiceImpl implements SyncService {
                         true);
                 user.setRoleId(role.getId());
 
-                //Added the sync flag for update user role from sync job.
+                user.setSyncFlag(false);
                 user.setSyncFlag(false);
                 userService.update(user);
             }
