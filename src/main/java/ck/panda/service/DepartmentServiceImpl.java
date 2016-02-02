@@ -317,10 +317,10 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public Department save(Department department) throws Exception {
-         if (!department.getSyncFlag()) {
-             return departmentRepo.save(department);
-         }
-         return department;
+    	if (!department.getSyncFlag()) {
+    		return departmentRepo.save(department);
+    	}
+    	return department;
     }
 
 }

@@ -65,8 +65,7 @@ public class ActionListener implements MessageListener {
             eventResponse = mapper.readValue(new String(message.getBody()), ResponseEvent.class);
             this.handleActionEvent(eventResponse);
         } catch (Exception e) {
-            LOGGER.debug("Error on convert action event message", e);
-            e.printStackTrace();
+            LOGGER.debug("Error on convert action event message", e.getMessage());
         }
     }
 
@@ -87,11 +86,14 @@ public class ActionListener implements MessageListener {
         switch (eventObject.getEventStart()) {
         case EventTypes.EVENT_USER:
             LOGGER.debug("User sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
-            if (!eventObject.getEvent().equals(EventTypes.EVENT_USER_LOGIN)
+            if (eventObject.getEvent().equals(EventTypes.EVENT_USER_LOGIN)
                     || eventObject.getEvent().equals(EventTypes.EVENT_USER_LOGOUT)) {
                 LOGGER.debug("Account sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
             } else {
                 syncService.syncUser();
+                if (eventObject.getEvent().equals(EventTypes.EVENT_USER_CREATE)) {
+                    syncService.syncUpdateUserRole();
+                }
             }
             break;
         case EventTypes.EVENT_REGISTER_SSH:
@@ -119,17 +121,21 @@ public class ActionListener implements MessageListener {
             syncService.syncOsTypes();
             break;
         case EventTypes.EVENT_ISO:
-            LOGGER.debug("ISO sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            if (!eventObject.getEvent().contains(EventTypes.EVENT_ISO_TEMPLATE_DELETE)) {
+                LOGGER.debug("ISO sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+                syncService.syncTemplates();
+            }
             break;
         case EventTypes.EVENT_NETWORK:
-            if (eventObject.getEvent().contains("OFFERING")) {
+            if (eventObject.getEvent().contains(EventTypes.EVENT_NETWORK_OFFERING)) {
                 LOGGER.debug("Network Offering sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
-                if (eventObject.getEvent().contains("EDIT") || eventObject.getEvent().contains("DELETE")) {
+                if (eventObject.getEvent().contains(EventTypes.EVENT_NETWORK_EDIT) ||
+                		eventObject.getEvent().contains(EventTypes.EVENT_NETWORK_DELETE)) {
                     asyncService.asyncNetworkOffering(eventObject);
                 } else {
                     syncService.syncNetworkOffering();
                 }
-            } else if (eventObject.getEvent().contains("NETWORK.CREATE")) {
+            } else if (eventObject.getEvent().contains(EventTypes.EVENT_NETWORK_CREATE)) {
                 LOGGER.debug("Network sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
                 syncService.syncNetwork();
             }
@@ -157,13 +163,13 @@ public class ActionListener implements MessageListener {
             LOGGER.debug("Volume snapshot sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
             break;
         case EventTypes.EVENT_VOLUME:
-            if (eventObject.getEvent().contains("VOLUME.DELETE")) {
+            if (eventObject.getEvent().contains(EventTypes.EVENT_VOLUME_DELETE)) {
                 LOGGER.debug("Volume sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
                 asyncService.asyncVolume(eventObject);
             }
             break;
         case EventTypes.EVENT_TEMPLATE:
-            if (!eventObject.getEvent().contains("TEMPLATE.DELETE")) {
+            if (!eventObject.getEvent().contains(EventTypes.EVENT_TEMPLATE_DELETE)) {
                 LOGGER.debug("templates sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
                 syncService.syncTemplates();
             }

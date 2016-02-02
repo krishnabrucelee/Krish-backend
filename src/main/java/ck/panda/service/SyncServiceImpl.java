@@ -50,13 +50,11 @@ import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
-import ck.panda.domain.repository.jpa.VolumeRepository;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.domain.entity.Zone;
-import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.EncryptionUtil;
@@ -104,10 +102,6 @@ public class SyncServiceImpl implements SyncService {
     /** Reference of the convert entity service. */
     @Autowired
     private ConvertEntityService convertEntityService;
-
-    /** VolumeRepository repository reference. */
-    @Autowired
-    private VolumeRepository volumeRepo;
 
     /** Virtual Machine repository reference. */
     @Autowired
@@ -215,14 +209,6 @@ public class SyncServiceImpl implements SyncService {
     @Autowired
     private ResourceLimitDomainService resourceDomainService;
 
-    /** Resource Limit Service for listing resource limits. */
-    @Autowired
-    private ResourceLimitDepartmentService resourceDepartmentService;
-
-    /** Resource Limit Service for listing resource limits. */
-    @Autowired
-    private ResourceLimitProjectService resourceProjectService;
-
     /** SSH Key Service for listing ssh keys. */
     @Autowired
     private SSHKeyService sshKeyService;
@@ -250,6 +236,10 @@ public class SyncServiceImpl implements SyncService {
     /** Listing Port Forwarding details from cloudstack server. */
     @Autowired
     private PortForwardingService portForwardingService;
+
+    /** Listing resource limit project service. */
+    @Autowired
+    private ResourceLimitProjectService resourceProjectService;
 
     /** Listing Load Balancer details from cloudstack server. */
     @Autowired
@@ -315,9 +305,8 @@ public class SyncServiceImpl implements SyncService {
     @Value(value = "${permission.report}")
     private String report;
 
-    /** Validator attribute. */
-    @Autowired
-    private AppValidator validator;
+    /** Full permission for root and domain admin. */
+    public static final String ADMIN_PERMISSION = "FULL_PERMISSION";
 
     /** Message source attribute. */
     @Autowired
@@ -2320,17 +2309,15 @@ public class SyncServiceImpl implements SyncService {
         }
     }
 
-    /**
-     * Update user role.
-     */
-    void syncUpdateUserRole() {
+    @Override
+    public void syncUpdateUserRole() throws ApplicationException, Exception {
         List<UserType> types = new ArrayList<UserType>();
         types.add(UserType.ROOT_ADMIN);
         types.add(UserType.DOMAIN_ADMIN);
         try {
             List<User> userList = userService.findUsersByTypesAndActive(types, true);
             for (User user : userList) {
-                Role role = roleService.findByNameAndDepartmentIdAndIsActive("FULL_PERMISSION", user.getDepartmentId(),
+                Role role = roleService.findByNameAndDepartmentIdAndIsActive(ADMIN_PERMISSION, user.getDepartmentId(),
                         true);
                 user.setRoleId(role.getId());
 
@@ -2342,5 +2329,4 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.debug("syncUpdateUserRole" + e);
         }
     }
-
 }
