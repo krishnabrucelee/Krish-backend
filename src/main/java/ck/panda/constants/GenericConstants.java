@@ -87,4 +87,5 @@ public class GenericConstants {
 
     /** Full permission role constant. */
     public static final String FULL_PERMISSION = "FULL_PERMISSION";
+
    }
