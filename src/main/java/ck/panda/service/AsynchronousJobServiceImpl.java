@@ -947,10 +947,11 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                  vmIpaddress.setSyncFlag(false);
                  vmIpaddress.setUuid(csVmIpaddress.getUuid());
                  vmIpaddress.setGuestIpAddress(csVmIpaddress.getGuestIpAddress());
-                 Nic nic = nicService.findbyUUID(csVmIpaddress.getNic().getUuid());
+                 Nic nic = nicService.findbyUUID(csVmIpaddress.getTransNicId());
                  if (vmIpService.findByUUID(csVmIpaddress.getUuid()) == null) {
                      vmIpService.save(csVmIpaddress);
                  }
+                 nic.setSyncFlag(false);
                  nicService.update(nic);
              }
 
@@ -966,6 +967,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                          vmIpService.softDelete(vmIpAddress);
                          Nic nic = new Nic();
                          nicService.releaseSecondaryIP(nic, vmIpAddress.getId());
+                         nic.setSyncFlag(false);
                          nicService.update(nic);
                      }
                  }
