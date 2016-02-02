@@ -23,11 +23,11 @@ public interface EventNotificationRepository extends PagingAndSortingRepository<
     Event findById(@Param("id") Long id);
 
     /**
-     * Get event based on the uuid.
+     * Get event based on the jobId.
      *
-     * @param uuid of the event.
+     * @param jobId of the event.
      * @return event.
      */
-    @Query(value = "SELECT event FROM VmIpaddress Event event WHERE event.uuid = :uuid")
-    Event findByUUID(@Param("uuid") String uuid);
+    @Query(value = "SELECT event FROM Event event WHERE event.jobId = :jobId")
+    Event findByJobId(@Param("jobId") String jobId);
 }

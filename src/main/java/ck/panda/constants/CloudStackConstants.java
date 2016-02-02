@@ -138,38 +138,34 @@ public class CloudStackConstants {
 
     /** Constant for gateway of the network. */
     public static final String CS_GATEWAY = "gateway";
-    
+
     /** Constant for account type. */
     public static final String CS_ACCOUNT_TYPE = "accounttype";
 
     /** Constant for netMask of the network. */
     public static final String CS_NETMASK = "netmask";
-    
+
     /** Constant for nic id. */
     public static final String CS_NIC_ID = "nicid";
 
      /** Constant for create account response. */
     public static final String CS_ACCOUNT_RESPONSE = "createaccountresponse";
 
-
     /** Constants for jobs status. */
     public static final String ERROR_JOB_STATUS = "2", PROGRESS_JOB_STATUS = "0",  SUCCEEDED_JOB_STATUS = "1";
 
     /** Constant for CIDR. */
     public static final String CS_CIDR = "cidr";
-    
+
     /** Constant for domain. */
     public static final String CS_DOMAIN = "domain";
 
     /** Constant for network domain. */
     public static final String CS_NETWORK_DOMAIN = "networkdomain";
-    
+
     /** Constant for user name. */
     public static final String CS_USER_NAME = "username";
 
-    /** Constants for jobs status. */
-    public static final String ERROR_JOB_STATUS = "2", PROGRESS_JOB_STATUS = "0",  SUCCEEDED_JOB_STATUS = "1";
-    
     /** Constant for first name of the user. */
     public static final String CS_FIRST_NAME = "firstname";
 
