@@ -467,8 +467,7 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public Network save(Network network) throws Exception {
-        if(!network.getSyncFlag())
-        {
+        if (!network.getSyncFlag()) {
             return networkRepo.save(network);
         }
         return network;
