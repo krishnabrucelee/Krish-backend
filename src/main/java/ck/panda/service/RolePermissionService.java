@@ -8,7 +8,6 @@ import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import ck.panda.domain.entity.Role;
-import ck.panda.domain.repository.jpa.DepartmentReposiory;
 import ck.panda.domain.repository.jpa.RoleReposiory;
 import ck.panda.util.TokenDetails;
 
@@ -26,10 +25,6 @@ public class RolePermissionService implements PermissionEvaluator {
     /** Role repository reference. */
     @Autowired
     private RoleReposiory roleReposiory;
-
-    /** Department repository reference. */
-    @Autowired
-    private DepartmentReposiory departmentReposiory;
 
     /** Token details repository reference. */
     @Autowired
