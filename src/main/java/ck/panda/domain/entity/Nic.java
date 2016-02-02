@@ -485,7 +485,6 @@ public class Nic implements Serializable {
         this.name = name;
     }
 
-
     /**
      * Get the secondaryIpAddress.
      *

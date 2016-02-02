@@ -966,6 +966,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         return virtualmachinerepository.findByNetworkAndExceptStatus(networkId, status);
     }
 
+    @Override
+    public List<VmInstance> findByVmStatus(Status status) throws Exception {
+        return virtualmachinerepository.findAllByExceptStatus(status);
+    }
+
     /**
      * Convert encrypted password and update the password in existing instance entity.
      *

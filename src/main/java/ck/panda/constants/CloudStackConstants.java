@@ -145,8 +145,15 @@ public class CloudStackConstants {
     /** Constant for netMask of the network. */
     public static final String CS_NETMASK = "netmask";
     
-    /** Constant for create account response. */
+    /** Constant for nic id. */
+    public static final String CS_NIC_ID = "nicid";
+
+     /** Constant for create account response. */
     public static final String CS_ACCOUNT_RESPONSE = "createaccountresponse";
+
+
+    /** Constants for jobs status. */
+    public static final String ERROR_JOB_STATUS = "2", PROGRESS_JOB_STATUS = "0",  SUCCEEDED_JOB_STATUS = "1";
 
     /** Constant for CIDR. */
     public static final String CS_CIDR = "cidr";
