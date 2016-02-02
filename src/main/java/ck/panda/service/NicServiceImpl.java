@@ -173,22 +173,9 @@ public class NicServiceImpl implements NicService {
         JSONArray nicListJSON = new JSONObject(listNic).getJSONObject("listnicsresponse").getJSONArray("nic");
         for (int i = 0; i < nicListJSON.length(); i++) {
             Nic nic = findbyUUID(nicListJSON.getJSONObject(i).getString("id"));
-            if (nic != null) {
-                nic.setUuid(nicListJSON.getJSONObject(i).getString("id"));
-                nic.setVmInstanceId(
-                        vmService.findByUUID(nicListJSON.getJSONObject(i).getString("virtualmachineid")).getId());
-                nic.setNetworkId(
-                        networkService.findByUUID(nicListJSON.getJSONObject(i).getString("networkid")).getId());
-                nic.setNetMask(nicListJSON.getJSONObject(i).getString("netmask"));
-                nic.setGateway(nicListJSON.getJSONObject(i).getString("gateway"));
-                nic.setIpAddress(nicListJSON.getJSONObject(i).getString("ipaddress"));
-                nic.setIsDefault(nicListJSON.getJSONObject(i).getBoolean("isdefault"));
-                nic.setIsActive(true);
-                if (nicRepo.findByUUID(nic.getUuid()) == null) {
-                    nicRepo.save(nic);
-                }
-            } else {
+            if (nic == null) {
                 nic = new Nic();
+            }
                 nic.setUuid(nicListJSON.getJSONObject(i).getString("id"));
                 nic.setVmInstanceId(
                         vmService.findByUUID(nicListJSON.getJSONObject(i).getString("virtualmachineid")).getId());
@@ -204,7 +191,6 @@ public class NicServiceImpl implements NicService {
                 }
             }
         }
-     }
 
     /**
      * Check the nic CS error handling.
@@ -240,7 +226,7 @@ public class NicServiceImpl implements NicService {
                 if (jobresult.getString("jobstatus").equals("0")) {
                     Thread.sleep(2000);
                 }
-                if (jobresult.getString("jobstatus").equals("1")) {
+                if (jobresult.getString("job	status").equals("1")) {
                     Nic nicI = nicRepo.findByInstanceIdAndIsDefault(nic.getVmInstanceId(), true);
                     nicI.setIsDefault(false);
                     nic.setIsDefault(true);

@@ -131,7 +131,7 @@ public class VmIpaddress {
     }
 
     /**
-     * Get instance Id.
+     * Get the vm instance id.
      *
      * @return the vmInstanceId
      */
@@ -140,7 +140,7 @@ public class VmIpaddress {
     }
 
     /**
-     * Set the vmInstanceId .
+     * Set the vm instance id.
      *
      * @param vmInstanceId to set
      */
@@ -149,7 +149,7 @@ public class VmIpaddress {
     }
 
     /**
-     * Get the guestIpAddress.
+     * Get the guest ip address.
      *
      * @return the guestIpAddress
      */
@@ -158,7 +158,7 @@ public class VmIpaddress {
     }
 
     /**
-     * Set the guestIpAddress.
+     * Set the guest ip address.
      *
      * @param guestIpAddress to set
      */
@@ -185,7 +185,7 @@ public class VmIpaddress {
     }
 
     /**
-     *  Get the transient NicId .
+     *  Get the transient nic id .
      *
      * @return the transient NicId .
      */
@@ -194,7 +194,7 @@ public class VmIpaddress {
     }
 
     /**
-     * Set the transient NicId .
+     * Set the transient  nic id.
      *
      * @param transNicId to set
      */
@@ -203,7 +203,7 @@ public class VmIpaddress {
     }
 
     /**
-     * Get the nicId.
+     * Get the nic id.
      *
      * @return the nicId
      */
@@ -212,7 +212,7 @@ public class VmIpaddress {
     }
 
     /**
-     * Set the nicId.
+     * Set the  nic id.
      *
      * @param nicId  to set
      */
@@ -221,7 +221,7 @@ public class VmIpaddress {
     }
 
     /**
-     * Get the transvmInstanceId.
+     * Get the transient vminstance id.
      *
      * @return the transvmInstanceId
      */
@@ -230,7 +230,7 @@ public class VmIpaddress {
     }
 
     /**
-     * Set the transvmInstanceId.
+     * Set the transient vm instance id.
      *
      * @param transvmInstanceId  to set
      */
@@ -238,7 +238,7 @@ public class VmIpaddress {
         this.transvmInstanceId = transvmInstanceId;
     }
 
-   /** Get the syncFlag.
+   /** Get the sync flag.
     *
     * @return the syncFlag
     */
@@ -247,7 +247,7 @@ public class VmIpaddress {
    }
 
    /**
-    * Set the syncFlag.
+    * Set the sync flag.
     *
     * @param syncFlag to set
     */
@@ -256,7 +256,7 @@ public class VmIpaddress {
    }
 
    /**
-    * Get the primaryIpAddress .
+    * Get the primary ip address .
     *
     * @return the primaryIpAddress
     */
@@ -265,7 +265,7 @@ public class VmIpaddress {
    }
 
   /**
-   * Set the primaryIpAddress .
+   * Set the primary ip address.
    *
    * @param primaryIpAddress to set
    */
@@ -296,13 +296,13 @@ public class VmIpaddress {
          * @return vmIpaddressListMap secondary ip address.
          */
     public static Map<String, VmIpaddress> convert(List<VmIpaddress> vmIpaddressList) {
-        Map<String, VmIpaddress> vmIpaddressListMap = new HashMap<String, VmIpaddress>();
+        Map<String, VmIpaddress> vmIpaddressMap = new HashMap<String, VmIpaddress>();
 
         for (VmIpaddress vmIp : vmIpaddressList) {
-            vmIpaddressListMap.put(vmIp.getUuid(), vmIp);
+            vmIpaddressMap.put(vmIp.getUuid(), vmIp);
         }
 
-        return vmIpaddressListMap;
+        return vmIpaddressMap;
     }
 
 }
