@@ -1849,17 +1849,16 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.debug("Total rows updated : " + (appSSHKeyList.size()));
             // 3.1 Find the corresponding CS server region object by finding it
             // in a hash using uuid
-            if (csSSHkeyMap.containsKey(sshKey.getDepartmentId())) {
-                SSHKey csSSHKey = csSSHkeyMap.get(sshKey.getDepartment().getUuid());
+            if (csSSHkeyMap.containsKey(sshKey.getFingerPrint())) {
+                SSHKey csSSHKey = csSSHkeyMap.get(sshKey.getFingerPrint());
 
                 sshKey.setName(csSSHKey.getName());
-
                 // 3.2 If found, update the region object in app db
                 sshKeyService.update(sshKey);
 
                 // 3.3 Remove once updated, so that we can have the list of cs
                 // region which is not added in the app
-                csSSHkeyMap.remove(sshKey.getDepartment().getUuid());
+                csSSHkeyMap.remove(sshKey.getFingerPrint());
             } else {
                 sshKeyService.delete(sshKey);
             }
