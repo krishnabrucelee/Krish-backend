@@ -319,10 +319,10 @@ public class DomainServiceImpl implements DomainService {
         Errors errors = validator.rejectIfNullEntity("domain", domain);
         if (domain.getSyncFlag()) {
             domainService.setServer(configServer.setServer(1L));
-            List<Department> department = deptService.findDomainAndIsActive(domain.getId(), true);
+            List<Department> department = deptService.findByDomainAndIsActive(domain.getId(), true);
             if (department.size() != 0) {
                 errors.addGlobalError(
-                        "cannot.delete.domain");
+                        "domain.delete.confirmation");
             }
         }
         if (errors.hasErrors()) {
@@ -396,6 +396,11 @@ public class DomainServiceImpl implements DomainService {
      */
     public Page<Domain> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
         return domainRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
+    }
+
+    @Override
+    public Domain findByName(String name) throws Exception {
+        return domainRepo.findByName(name);
     }
 
 }

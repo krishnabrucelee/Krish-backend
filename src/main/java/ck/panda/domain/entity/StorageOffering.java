@@ -1,5 +1,6 @@
 package ck.panda.domain.entity;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +30,6 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import ck.panda.util.JsonUtil;
 
 /**
@@ -40,7 +40,8 @@ import ck.panda.util.JsonUtil;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "storage_offerings")
-public class StorageOffering {
+@SuppressWarnings("serial")
+public class StorageOffering implements Serializable {
     /**
      * Unique ID of the storage offering.
      */

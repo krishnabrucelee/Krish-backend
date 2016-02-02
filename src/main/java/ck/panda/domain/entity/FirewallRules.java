@@ -1,5 +1,6 @@
 package ck.panda.domain.entity;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +35,8 @@ import ck.panda.util.JsonUtil;
 @Entity
 @Table(name = "firewall_rules")
 @EntityListeners(AuditingEntityListener.class)
-public class FirewallRules {
+@SuppressWarnings("serial")
+public class FirewallRules implements Serializable {
 
     /** Unique Id of the Firewall Rule. */
     @Id

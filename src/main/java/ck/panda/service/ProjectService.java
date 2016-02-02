@@ -13,7 +13,7 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 @Service
 public interface ProjectService extends CRUDService<Project> {
     /**
-     * Method to soft delete project.
+     * Soft delete for project.
      *
      * @param project project object.
      * @return project.
@@ -31,17 +31,18 @@ public interface ProjectService extends CRUDService<Project> {
     Project removeUser(Project project) throws Exception;
 
     /**
-     * Find all the projects with active status.
+     * Find all project by active status.
      *
      * @param isActive true/false.
      * @param pagingAndSorting paging and sorting information.
+     * @param userId user id.
      * @return list of project.
      * @throws Exception if error occurs.
      */
-    Page<Project> findAllByActive(Boolean isActive, PagingAndSorting pagingAndSorting) throws Exception;
+    Page<Project> findAllByActive(Boolean isActive, PagingAndSorting pagingAndSorting, Long userId) throws Exception;
 
     /**
-     * Find all the projects with active status.
+     * Find all project by active status.
      *
      * @param isActive true/false.
      * @return list of active project.
@@ -50,26 +51,16 @@ public interface ProjectService extends CRUDService<Project> {
     List<Project> findAllByActive(Boolean isActive) throws Exception;
 
     /**
-     * Find all the projects with Domain.
+     * Find all project by Domain.
      *
      * @param id domain id .
      * @return list of domains in project.
      * @throws Exception if error occurs.
      */
-    List<Project> findbyDomain(Long id);
+    List<Project> findAllByDomain(Long id);
 
     /**
-     * Find by Uuid and IsActive status.
-     *
-     * @param uuid of the project.
-     * @param isActive status of the project.
-     * @return project.
-     * @throws Exception if error occurs.
-     */
-    Project findByUuidAndIsActive(String uuid, Boolean isActive) throws Exception;
-
-    /**
-     * Find by Uuid.
+     * Find project by Uuid.
      *
      * @param uuid of the project.
      * @return project.
@@ -78,7 +69,7 @@ public interface ProjectService extends CRUDService<Project> {
     Project findByUuid(String uuid) throws Exception;
 
     /**
-     * Find all the projects from cloud stack server.
+     * Get all project from cloud stack server.
      *
      * @return list of active project.
      * @throws Exception if error occurs.
@@ -86,31 +77,31 @@ public interface ProjectService extends CRUDService<Project> {
     List<Project> findAllFromCSServerByDomain() throws Exception;
 
     /**
-     * Find all the projects with department.
+     * Find all project by department.
      *
      * @param id department id .
      * @param isActive department status Active/Inactive
      * @return list of departments in project.
      * @throws Exception if error occurs.
      */
-    List<Project> findByDepartmentAndIsActive(Long id, Boolean isActive) throws Exception;
+    List<Project> findAllByDepartmentAndIsActive(Long id, Boolean isActive) throws Exception;
 
     /**
-     * Find all the projects with user.
+     * Find all project by user.
      *
      * @param id department id .
      * @param isActive department status Active/Inactive
      * @return list of departments in project.
      * @throws Exception if error occurs.
      */
-    List<Project> findByUserAndIsActive(Long id, Boolean isActive) throws Exception;
+    List<Project> findAllByUserAndIsActive(Long id, Boolean isActive) throws Exception;
 
     /**
-     * Find the projects based on the isActive status.
+     * Find all project.
      *
+     * @param userId user id.
      * @throws Exception if error occurs.
      * @return project.
      */
-    List<Project> findByAll() throws Exception;
-
+    List<Project> getAllProjects(Long userId) throws Exception;
 }

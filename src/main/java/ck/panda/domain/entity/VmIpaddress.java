@@ -1,5 +1,6 @@
 package ck.panda.domain.entity;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,10 +20,10 @@ import ck.panda.util.JsonUtil;
  * Secondary Vm IP Address.
  *
  */
-
 @Entity
 @Table(name = "vmIpaddress")
-public class VmIpaddress {
+@SuppressWarnings("serial")
+public class VmIpaddress implements Serializable {
 
     /** ID of the nic. */
     @Id
@@ -34,7 +35,7 @@ public class VmIpaddress {
     @Column(name = "uuid")
     private String uuid;
 
-    /** Nic for an instance  */
+    /** Nic for an instance.  */
     @ManyToOne
     private Nic nic;
 
@@ -74,7 +75,7 @@ public class VmIpaddress {
     }
 
     /**
-     * Set the id of the  vm Ip address
+     * Set the id of the  vm Ip address.
      *
      * @param id the id to set
      */
@@ -225,13 +226,13 @@ public class VmIpaddress {
          * @return nicMap nics.
          */
     public static Map<String, VmIpaddress> convert(List<VmIpaddress> vmIpaddressList) {
-    	Map<String, VmIpaddress> vmIpaddressListMap = new HashMap<String, VmIpaddress>();
+        Map<String, VmIpaddress> vmIpaddressListMap = new HashMap<String, VmIpaddress>();
 
-    	for (VmIpaddress nic : vmIpaddressList) {
-    		vmIpaddressListMap.put(nic.getUuid(), nic);
-    	}
+        for (VmIpaddress nic : vmIpaddressList) {
+            vmIpaddressListMap.put(nic.getUuid(), nic);
+        }
 
-    	return vmIpaddressListMap;
+        return vmIpaddressListMap;
     }
 
 }

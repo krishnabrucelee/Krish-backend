@@ -1,5 +1,6 @@
 package ck.panda.domain.entity;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +35,8 @@ import ck.panda.util.JsonValidator;
 @Entity
 @Table(name = "port_forwarding_rule")
 @EntityListeners(AuditingEntityListener.class)
-public class PortForwarding {
+@SuppressWarnings("serial")
+public class PortForwarding implements Serializable {
 
     /** Unique Id of the Port Forwarding. */
     @Id
