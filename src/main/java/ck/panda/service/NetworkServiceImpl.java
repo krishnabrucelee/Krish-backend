@@ -468,8 +468,12 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public Network save(Network t) throws Exception {
-        return null;
+    public Network save(Network network) throws Exception {
+        if(network.getSyncFlag())
+        {
+            return networkRepo.save(network);
+        }
+        return network;
     }
 
     @Override
