@@ -175,19 +175,19 @@ public class NicServiceImpl implements NicService {
             if (nic == null) {
                  nic = new Nic();
             }
-                nic.setUuid(nicListJSON.getJSONObject(i).getString("id"));
-                nic.setVmInstanceId(
+            nic.setUuid(nicListJSON.getJSONObject(i).getString("id"));
+            nic.setVmInstanceId(
                         vmService.findByUUID(nicListJSON.getJSONObject(i).getString("virtualmachineid")).getId());
-                nic.setNetworkId(
+            nic.setNetworkId(
                         networkService.findByUUID(nicListJSON.getJSONObject(i).getString("networkid")).getId());
-                nic.setNetMask(nicListJSON.getJSONObject(i).getString("netmask"));
-                nic.setGateway(nicListJSON.getJSONObject(i).getString("gateway"));
-                nic.setIpAddress(nicListJSON.getJSONObject(i).getString("ipaddress"));
-                nic.setIsDefault(nicListJSON.getJSONObject(i).getBoolean("isdefault"));
-                nic.setIsActive(true);
-                if (nicRepo.findByUUID(nic.getUuid()) == null) {
-                    nicRepo.save(nic);
-                }
+            nic.setNetMask(nicListJSON.getJSONObject(i).getString("netmask"));
+            nic.setGateway(nicListJSON.getJSONObject(i).getString("gateway"));
+            nic.setIpAddress(nicListJSON.getJSONObject(i).getString("ipaddress"));
+            nic.setIsDefault(nicListJSON.getJSONObject(i).getBoolean("isdefault"));
+            nic.setIsActive(true);
+            if (nicRepo.findByUUID(nic.getUuid()) == null) {
+                nicRepo.save(nic);
+            }
               }
             }
 
@@ -224,7 +224,7 @@ public class NicServiceImpl implements NicService {
                         .queryAsyncJobResult(defaultNicResponse.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
 
-         
+
                     if (jobresult.getString("jobstatus").equals("1")) {
                     Thread.sleep(5000);
                     Nic nicDefault = nicRepo.findByInstanceIdAndIsDefault(nic.getVmInstanceId(), true);
@@ -279,7 +279,7 @@ public class NicServiceImpl implements NicService {
     @Override
     @PreAuthorize("hasPermission(#nic.getSyncFlag(), 'DELETE_NETWORK_TO_VM')")
     public Nic softDelete(Nic nic) throws Exception {
-   nic.setIsActive(false);
+        nic.setIsActive(false);
         if (nic.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity(CS_NIC, nic);
             HashMap<String, String> optional = new HashMap<String, String>();
