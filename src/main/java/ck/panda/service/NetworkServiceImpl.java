@@ -42,16 +42,16 @@ public class NetworkServiceImpl implements NetworkService {
     private static final String CS_NETWORK = "network";
 
     /** Constant for cloudStack network create response. */
-    private static final String CS_CREATENETWORKRESPONSE = "createnetworkresponse";
+    private static final String CS_CREATE_NETWORK_RESPONSE = "createnetworkresponse";
 
     /** Constant for cloudStack network update response. */
-    private static final String CS_UPDATENETWORKRESPONSE = "updatenetworkresponse";
+    private static final String CS_UPDATE_NETWORK_RESPONSE = "updatenetworkresponse";
 
     /** Constant for cloudStack network delete response. */
-    private static final String CS_DELETENETWORKRESPONSE = "deletenetworkresponse";
+    private static final String CS_DELETE_NETWORK_RESPONSE = "LIST_NETWORK_RESPONSE";
 
     /** Constant for cloudStack network list response. */
-    private static final String CS_LISTNETWORKRESPONSE = "listnetworksresponse";
+    private static final String CS_LIST_NETWORK_RESPONSE = "listnetworksresponse";
 
     /** Constant for network type. */
     private static final String CS_TYPE = "type";
@@ -121,7 +121,7 @@ public class NetworkServiceImpl implements NetworkService {
                 Zone zoneObject = convertEntityService.getZoneById(network.getZoneId());
                 String networkOfferings = csNetwork.createNetwork(zoneObject.getUuid(), CloudStackConstants.JSON, optional(network, userId));
                 JSONObject createNetworkResponseJSON = new JSONObject(networkOfferings)
-                        .getJSONObject(CS_CREATENETWORKRESPONSE);
+                        .getJSONObject(CS_CREATE_NETWORK_RESPONSE);
                 if (createNetworkResponseJSON.has(CloudStackConstants.CS_ERROR_CODE)) {
                     errors = this.validateEvent(errors, createNetworkResponseJSON.getString(CloudStackConstants.CS_ERROR_TEXT));
                     throw new ApplicationException(errors);
@@ -195,7 +195,7 @@ public class NetworkServiceImpl implements NetworkService {
                 }
                 config.setUserServer();
                 String updateNetworkResponse = csNetwork.updateNetwork(network.getUuid(), optional, CloudStackConstants.JSON);
-                JSONObject jobId = new JSONObject(updateNetworkResponse).getJSONObject(CS_UPDATENETWORKRESPONSE);
+                JSONObject jobId = new JSONObject(updateNetworkResponse).getJSONObject(CS_UPDATE_NETWORK_RESPONSE);
                 Thread.sleep(5000);
                 if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
                     String jobResponse = csNetwork.networkJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
@@ -256,7 +256,7 @@ public class NetworkServiceImpl implements NetworkService {
             network.setStatus(Network.Status.Destroy);
             if (network.getSyncFlag()) {
                 String networkResponse = csNetwork.deleteNetwork(network.getUuid(), CloudStackConstants.JSON);
-                JSONObject jobId = new JSONObject(networkResponse).getJSONObject(CS_DELETENETWORKRESPONSE);
+                JSONObject jobId = new JSONObject(networkResponse).getJSONObject(CS_DELETE_NETWORK_RESPONSE);
                 if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
                     String jobResponse = csNetwork.networkJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
                     JSONObject jobresult = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
@@ -349,16 +349,14 @@ public class NetworkServiceImpl implements NetworkService {
         // 1. Get the list of domains from CS server using CS connector
         String response = csNetwork.listNetworks(CloudStackConstants.JSON, networkMap);
         JSONArray networkListJSON = null;
-        JSONObject responseObject = new JSONObject(response).getJSONObject(CS_LISTNETWORKRESPONSE);
+        JSONObject responseObject = new JSONObject(response).getJSONObject(CS_LIST_NETWORK_RESPONSE);
         if (responseObject.has(CS_NETWORK)) {
             networkListJSON = responseObject.getJSONArray(CS_NETWORK);
             // 2. Iterate the json list, convert the single json entity to
             // domain
             for (int i = 0, size = networkListJSON.length(); i < size; i++) {
                 // 2.1 Call convert by passing JSONObject to Domain entity
-                // and
-                // Add
-                // the converted Domain entity to list
+                // and Add the converted Domain entity to list
                 Network network = Network.convert(networkListJSON.getJSONObject(i));
                 network.setDomainId(convertEntityService.getDomainId(network.getTransDomainId()));
                 network.setZoneId(convertEntityService.getZoneId(network.getTransZoneId()));
