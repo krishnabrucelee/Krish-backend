@@ -12,7 +12,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.json.JSONObject;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 

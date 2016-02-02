@@ -21,6 +21,7 @@ import ck.panda.service.ConvertEntityService;
 import ck.panda.service.NetworkService;
 import ck.panda.service.NicService;
 import ck.panda.service.PortForwardingService;
+import ck.panda.service.SyncService;
 import ck.panda.service.VirtualMachineService;
 import ck.panda.service.VolumeService;
 import ck.panda.util.CloudStackResourceCapacity;
@@ -56,17 +57,22 @@ public class ResourceStateListener implements MessageListener {
     @Autowired
     private CloudStackResourceCapacity cloudStackResourceCapacity;
 
+    /** sync service reference. */
+    private SyncService sync;
+
     /**
      * Inject convert entity service.
      *
      * @param convertEntityService convertEntityService object.
+     * @param
      */
-    public ResourceStateListener(ConvertEntityService convertEntityService) {
+    public ResourceStateListener(ConvertEntityService convertEntityService, SyncService sync) {
         this.virtualmachineservice = convertEntityService.getInstanceService();
         this.volumeService = convertEntityService.getVolumeService();
         this.nicService = convertEntityService.getNicService();
         this.portForwardingService = convertEntityService.getPortForwardingService();
         this.networkService = convertEntityService.getNetworkService();
+        this.sync = sync;
     }
 
     @Override
@@ -150,6 +156,11 @@ public class ResourceStateListener implements MessageListener {
                             }
                             String csResponse = cloudStackResourceCapacity.updateResourceCount(vmInstance.getDomain().getUuid(), domainCountMap, "json");
                             convertEntityService.resourceCount(csResponse);
+                        }
+                        // if attaching network in stopped vm and while starting that vm instance update
+                        //the public ip address table in as same as in ACS.
+                        if (resourceEvent.getString(EventTypes.RESOURCE_STATE).equals("Starting")) {
+                                sync.syncIpAddress();
                         }
                     }
                 }
