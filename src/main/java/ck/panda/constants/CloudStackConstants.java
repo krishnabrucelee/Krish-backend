@@ -51,8 +51,9 @@ public class CloudStackConstants {
     /** Constant for uploaded volume. */
     public static final String CS_UPLOADED = "Uploaded";
 
-    /** Constant for disk offering id. */
-    public static final String CS_DISK_OFFERING_ID = "diskofferingid";
+    /** Constant for offerings id. */
+    public static final String CS_DISK_OFFERING_ID = "diskofferingid", CS_SERVICE_OFFERING_ID = "serviceofferingid",
+        CS_NETWORK_OFFERING_ID = "networkofferingid";
 
     /** Constant for resource's tags. */
     public static final String CS_TAGS = "tags";
@@ -134,4 +135,19 @@ public class CloudStackConstants {
 
     /** Constant for register user key response. */
     public static final String CS_REGISTER_KEY_RESPONSE = "registeruserkeysresponse";
+
+    /** Constant for gateway of the network. */
+    public static final String CS_GATEWAY = "gateway";
+
+    /** Constant for netMask of the network. */
+    public static final String CS_NETMASK = "netmask";
+
+    /** Constant for CIDR. */
+    public static final String CS_CIDR = "cidr";
+
+    /** Constant for network domain. */
+    public static final String CS_NETWORK_DOMAIN = "networkdomain";
+
+    /** Constants for jobs status. */
+    public static final String ERROR_JOB_STATUS = "2", PROGRESS_JOB_STATUS = "0",  SUCCEEDED_JOB_STATUS = "1";
 }
