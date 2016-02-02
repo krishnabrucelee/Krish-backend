@@ -128,7 +128,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
 
     @Override
     public Page<StorageOffering> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return storageOfferingRepo.findAllByActive(pagingAndSorting.toPageRequest());
+        return storageOfferingRepo.findAllByActive(pagingAndSorting.toPageRequest(), true);
     }
 
     @Override

@@ -19,10 +19,11 @@ public interface StorageOfferingRepository extends PagingAndSortingRepository<St
      * method to find list of entities having active status.
      *
      * @param pageable storage offer page
+     * @param isActive true / false
      * @return lists Active state storage offerings
      */
-    @Query(value = "SELECT storage FROM StorageOffering storage WHERE storage.isActive IS TRUE")
-    Page<StorageOffering> findAllByActive(Pageable pageable);
+    @Query(value = "SELECT storage FROM StorageOffering storage WHERE storage.isActive = :isActive")
+    Page<StorageOffering> findAllByActive(Pageable pageable, @Param("isActive") Boolean isActive);
 
     /**
      * Get the Storage offer based on the uuid.
