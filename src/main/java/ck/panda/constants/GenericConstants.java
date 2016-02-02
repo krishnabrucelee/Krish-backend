@@ -81,4 +81,7 @@ public class GenericConstants {
 
     /** Constant for cookie name. */
     public static final String COOKIES_NAME = "JSESSIONID";
+
+    /** Page error seperator constant. */
+    public static final String PAGE_ERROR_SEPARATOR = "PAGE_ERROR";
    }
