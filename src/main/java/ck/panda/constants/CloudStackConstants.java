@@ -97,6 +97,9 @@ public class CloudStackConstants {
     /** Constant for department id. */
     public static final String CS_DEPARTMENT_ID = "departmentid";
 
+    /** Constant for department. */
+    public static final String CS_DEPARTMENT = "department";
+
     /** Constant for project id. */
     public static final String CS_PROJECT_ID = "projectid";
 
@@ -117,6 +120,12 @@ public class CloudStackConstants {
 
     /** Constant for account name. */
     public static final String CS_ACCOUNT = "account";
+
+    /** Constant for delete account response. */
+    public static final String CS_DELETE_ACCOUNT_RESPONSE = "deleteaccountresponse";
+
+    /** Constant for lsit account response. */
+    public static final String CS_LIST_ACCOUNT_RESPONSE = "listaccountresponse";
 
     /** Constant for disk size. */
     public static final String CS_SIZE = "size";
@@ -165,6 +174,9 @@ public class CloudStackConstants {
 
     /** Constant for user name. */
     public static final String CS_USER_NAME = "username";
+
+    /** Constant for user . */
+    public static final String CS_USER = "user";
 
     /** Constant for first name of the user. */
     public static final String CS_FIRST_NAME = "firstname";
@@ -405,7 +417,7 @@ public class CloudStackConstants {
 
     /** Constant for asynchronous event type. */
     public static final String CS_COMMAND_EVENT_TYPE = "commandEventType";
-    
+
     /** Constant for volume type. */
     public static final String CS_VOLUME_TYPE = "type";
 

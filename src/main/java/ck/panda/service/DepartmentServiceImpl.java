@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Department.AccountType;
@@ -90,6 +92,9 @@ public class DepartmentServiceImpl implements DepartmentService {
     /** Baremetal system constant. */
     public static final String BAREMETAL_SYSTEM_ACCOUNT = "baremetal-system-account";
 
+    /** Username constant. */
+    public static final String USER_NAME = "userName";
+
     @Override
     @PreAuthorize("hasPermission(#department.getSyncFlag(), 'ADD_DEPARTMENT')")
     public Department save(Department department, Long userId) throws Exception {
@@ -109,16 +114,17 @@ public class DepartmentServiceImpl implements DepartmentService {
             department.setType(Department.AccountType.USER);
             config.setServer(1L);
             HashMap<String, String> accountMap = new HashMap<String, String>();
-            accountMap.put("domainid", String.valueOf(domain.getUuid()));
+            accountMap.put(CloudStackConstants.CS_DOMAIN_ID, String.valueOf(domain.getUuid()));
+            //TODO : This will be the hardcoded values for the dummy user after creating department it will remove from the cloudstack.
             String createAccountResponse = csAccountService.createAccount(
                     String.valueOf(department.getType().ordinal()), "test@test.com", "first", "last",
-                    department.getUserName(), "test", "json", accountMap);
+                    department.getUserName(), "test", CloudStackConstants.JSON, accountMap);
 
             JSONObject createAccountResponseJSON = new JSONObject(createAccountResponse)
-                    .getJSONObject("createaccountresponse").getJSONObject("account");
-            JSONObject userObj = createAccountResponseJSON.getJSONArray("user").getJSONObject(0);
-            csUserService.deleteUser(userObj.getString("id"), "json");
-            department.setUuid((String) createAccountResponseJSON.get("id"));
+                    .getJSONObject(CloudStackConstants.CS_ACCOUNT_RESPONSE).getJSONObject(CloudStackConstants.CS_ACCOUNT);
+            JSONObject userObj = createAccountResponseJSON.getJSONArray(CloudStackConstants.CS_USER).getJSONObject(0);
+            csUserService.deleteUser(userObj.getString(CloudStackConstants.CS_ID), CloudStackConstants.JSON);
+            department.setUuid((String) createAccountResponseJSON.get(CloudStackConstants.CS_ID));
             LOGGER.debug("Department created successfully" + department.getUserName());
         }
         return departmentRepo.save(department);
@@ -131,12 +137,12 @@ public class DepartmentServiceImpl implements DepartmentService {
      * @throws Exception error occurs
      */
     private void validateDepartment(Department department) throws Exception {
-        Errors errors = validator.rejectIfNullEntity("department", department);
+        Errors errors = validator.rejectIfNullEntity(CloudStackConstants.CS_DEPARTMENT, department);
         errors = validator.validateEntity(department, errors);
         Department dep = departmentRepo.findByUsernameDomainAndIsActive(department.getUserName(),
                 department.getDomainId(), true);
         if (dep != null && department.getId() != dep.getId()) {
-            errors.addFieldError("userName", "department.already.exist.for.same.domain");
+            errors.addFieldError(USER_NAME, "department.already.exist.for.same.domain");
         }
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
@@ -154,8 +160,8 @@ public class DepartmentServiceImpl implements DepartmentService {
             department.setDomainId(department.getDomainId());
             config.setServer(1L);
             HashMap<String, String> accountMap = new HashMap<String, String>();
-            accountMap.put("domainid", domain.getUuid());
-            accountMap.put("account", departmentedit.getUserName());
+            accountMap.put(CloudStackConstants.CS_DOMAIN_ID, domain.getUuid());
+            accountMap.put(CloudStackConstants.CS_ACCOUNT, departmentedit.getUserName());
             csAccountService.updateAccount(department.getUserName(), accountMap);
             LOGGER.debug("Department updated successfully" + department.getUserName());
         }
@@ -204,7 +210,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     @PreAuthorize("hasPermission(#department.getSyncFlag(), 'DELETE_DEPARTMENT')")
     public Department softDelete(Department department) throws Exception {
-        Errors errors = validator.rejectIfNullEntity("department", department);
+        Errors errors = validator.rejectIfNullEntity(CloudStackConstants.CS_DEPARTMENT, department);
         errors = validator.validateEntity(department, errors);
         config.setServer(1L);
         if (department.getSyncFlag()) {
@@ -230,11 +236,11 @@ public class DepartmentServiceImpl implements DepartmentService {
             department.setIsActive(false);
             department.setStatus(Department.Status.DELETED);
             if (department.getSyncFlag()) {
-                String departmentResponse = csAccountService.deleteAccount(department.getUuid(), "json");
-                JSONObject jobId = new JSONObject(departmentResponse).getJSONObject("deleteaccountresponse");
-                if (jobId.has("jobid")) {
-                    String jobResponse = csAccountService.accountJobResult(jobId.getString("jobid"), "json");
-                    JSONObject jobresults = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+                String departmentResponse = csAccountService.deleteAccount(department.getUuid(), CloudStackConstants.JSON);
+                JSONObject jobId = new JSONObject(departmentResponse).getJSONObject(CloudStackConstants.CS_DELETE_ACCOUNT_RESPONSE);
+                if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
+                    String jobResponse = csAccountService.accountJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
+                    JSONObject jobresults = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
                 }
                 LOGGER.debug("Department deleted successfully" + department.getUserName());
             }
@@ -246,14 +252,14 @@ public class DepartmentServiceImpl implements DepartmentService {
     public List<Department> findAllFromCSServer() throws Exception {
         List<Department> departmentList = new ArrayList<Department>();
         HashMap<String, String> departmentMap = new HashMap<String, String>();
-        departmentMap.put("listall", "true");
+        departmentMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
 
         // 1. Get the list of accounts from CS server using CS connector
-        String response = csAccountService.listAccounts("json", departmentMap);
+        String response = csAccountService.listAccounts(CloudStackConstants.JSON, departmentMap);
         JSONArray userListJSON = null;
-        JSONObject responseObject = new JSONObject(response).getJSONObject("listaccountsresponse");
-        if (responseObject.has("account")) {
-            userListJSON = responseObject.getJSONArray("account");
+        JSONObject responseObject = new JSONObject(response).getJSONObject(CloudStackConstants.CS_LIST_ACCOUNT_RESPONSE);
+        if (responseObject.has(CloudStackConstants.CS_ACCOUNT)) {
+            userListJSON = responseObject.getJSONArray(CloudStackConstants.CS_ACCOUNT);
             // 2. Iterate the json list, convert the single json entity to department
             for (int i = 0, size = userListJSON.length(); i < size; i++) {
                 // 2.1 Call convert by passing JSONObject to department entity and
