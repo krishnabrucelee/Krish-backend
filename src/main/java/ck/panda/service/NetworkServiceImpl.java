@@ -48,7 +48,7 @@ public class NetworkServiceImpl implements NetworkService {
     private static final String CS_UPDATE_NETWORK_RESPONSE = "updatenetworkresponse";
 
     /** Constant for cloudStack network delete response. */
-    private static final String CS_DELETE_NETWORK_RESPONSE = "LIST_NETWORK_RESPONSE";
+    private static final String CS_DELETE_NETWORK_RESPONSE = "deletenetworkresponse";
 
     /** Constant for cloudStack network list response. */
     private static final String CS_LIST_NETWORK_RESPONSE = "listnetworksresponse";
@@ -135,7 +135,7 @@ public class NetworkServiceImpl implements NetworkService {
                 network.setZoneId(zoneService.findByUUID(networkResponse.getString(CloudStackConstants.CS_ZONE_ID)).getId());
                 network.setNetworkOfferingId(
                 networkOfferingService.findByUUID(networkResponse.getString(CloudStackConstants.CS_NETWORK_OFFERING_ID)).getId());
-                network.setStatus(network.getStatus().valueOf(networkResponse.getString(CloudStackConstants.CS_STATE)));
+                network.setStatus(network.getStatus().valueOf(networkResponse.getString(CloudStackConstants.CS_STATE).toUpperCase()));
                 if (network.getProjectId() != null) {
                     network.setProjectId(convertEntityService.getProjectId(networkResponse.getString(CloudStackConstants.CS_PROJECT_ID)));
                 } else {
@@ -202,7 +202,7 @@ public class NetworkServiceImpl implements NetworkService {
                     Thread.sleep(2000);
                     JSONObject jobresults = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
                     if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.PROGRESS_JOB_STATUS)) {
-                        network.setStatus(Status.Allocated);
+                        network.setStatus(Status.ALLOCATED);
                         network.setIsActive(true);
                         network.setName(network.getName());
                         network.setDisplayText(network.getDisplayText());
@@ -253,7 +253,7 @@ public class NetworkServiceImpl implements NetworkService {
             throw new ApplicationException(errors);
         } else {
             network.setIsActive(false);
-            network.setStatus(Network.Status.Destroy);
+            network.setStatus(Network.Status.DESTROY);
             if (network.getSyncFlag()) {
                 String networkResponse = csNetwork.deleteNetwork(network.getUuid(), CloudStackConstants.JSON);
                 JSONObject jobId = new JSONObject(networkResponse).getJSONObject(CS_DELETE_NETWORK_RESPONSE);

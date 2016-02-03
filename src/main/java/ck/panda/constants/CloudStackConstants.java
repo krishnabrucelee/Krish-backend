@@ -124,8 +124,8 @@ public class CloudStackConstants {
     /** Constant for delete account response. */
     public static final String CS_DELETE_ACCOUNT_RESPONSE = "deleteaccountresponse";
 
-    /** Constant for lsit account response. */
-    public static final String CS_LIST_ACCOUNT_RESPONSE = "listaccountresponse";
+    /** Constant for list account response. */
+    public static final String CS_LIST_ACCOUNT_RESPONSE = "listaccountsresponse";
 
     /** Constant for disk size. */
     public static final String CS_SIZE = "size";
@@ -420,5 +420,18 @@ public class CloudStackConstants {
 
     /** Constant for volume type. */
     public static final String CS_VOLUME_TYPE = "type";
+
+    /** Constant for network type. */
+    public static final String CS_TYPE = "type";
+
+    /** Constant for network offering traffic type. */
+    public static final String CS_TRAFFIC_TYPE = "traffictype";
+
+    /** Constant for network offering guest Ip type. */
+    public static final String CS_GUEST_IP_TYPE = "guestiptype";
+
+    /** Constant for network offering availability. */
+    public static final String CS_AVAILABILITY = "availability";
+
 
 }

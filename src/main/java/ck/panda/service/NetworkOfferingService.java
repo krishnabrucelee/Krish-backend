@@ -40,10 +40,12 @@ public interface NetworkOfferingService extends CRUDService<NetworkOffering> {
 
     /**
      * To get list of Isolated network offering from cloudstack server.
+     * @param csRequired Availability
+     * @param csIsolated Isolated
      *
      * @return isolated network offering list from server
      * @throws Exception unhandled errors.
      */
-    List<NetworkOffering> findIsolated() throws Exception;
+    List<NetworkOffering> findByIsolatedAndRequired(String csIsolated, String csRequired) throws Exception;
 
 }

@@ -989,6 +989,11 @@ public class SyncServiceImpl implements SyncService {
                 network.setDomainId(csNetwork.getDomainId());
                 network.setZoneId(csNetwork.getZoneId());
                 network.setDisplayText(csNetwork.getDisplayText());
+                network.setStatus(csNetwork.getStatus());
+                network.setNetworkDomain(csNetwork.getNetworkDomain());
+                network.setNetMask(csNetwork.getNetMask());
+                network.setNetworkOfferingId(csNetwork.getNetworkOfferingId());
+                network.setIsActive(true);
 
                 // 3.2 If found, update the network object in app db
                 networkService.update(network);
