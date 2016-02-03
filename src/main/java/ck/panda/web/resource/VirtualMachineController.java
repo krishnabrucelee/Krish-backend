@@ -223,11 +223,9 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
         syncService.syncInstances();
         String token = null;
         VmInstance persistInstance = virtualmachineservice.find(vminstance.getId());
-        String host = persistInstance.getHost().getHostIpaddress(); // VM's the host's IP address
-        String instance = persistInstance.getInstanceInternalName(); // virtual machine instance name
-        String display = persistInstance.getDisplayName(); // Novnc display
-        String str = host + "|" + instance + "|" + display;
-        token = Base64.encodeBase64String(str.getBytes());
+        String hostUUID = persistInstance.getHost().getUuid(); // VM's the host's UUID
+        String instnaceUUID = persistInstance.getUuid(); // virtual machine UUID
+        token = hostUUID + instnaceUUID;
         LOGGER.debug("VNC Token" + token);
         return "{\"success\":" + "\"" + consoleProxy + "/console/?token=" + token + "\"}";
     }
