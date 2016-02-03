@@ -1,5 +1,6 @@
 package ck.panda.web.resource;
 
+import java.util.HashMap;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,9 +19,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Template;
 import ck.panda.service.TemplateService;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -34,6 +38,10 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     /** Service reference to Template. */
     @Autowired
     private TemplateService templateService;
+
+    /** Token details reference. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Template.", response = Template.class)
     @Override
@@ -64,7 +72,7 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     }
 
     /**
-     * List all Iso-Templates and Templates.
+     * List all the templates with pagination.
      *
      * @param sortBy ASC
      * @param type iso/template
@@ -82,7 +90,7 @@ public class TemplateController extends CRUDController<Template> implements ApiC
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Template.class);
-        if (type.contains("template")) {
+        if (type.contains(CloudStackConstants.TEMPLATE_NAME)) {
             Page<Template> pageResponse = templateService.findAll(page);
             response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
             return pageResponse.getContent();
@@ -94,7 +102,7 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     }
 
     /**
-     * Get the list of templates.
+     * Get all the templates.
      *
      * @return template list from server
      * @throws Exception raise if error
@@ -103,7 +111,7 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<Template> templateList() throws Exception {
-        return templateService.findByTemplate();
+        return templateService.findByTemplate(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
     }
 
     /**
@@ -117,11 +125,11 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<Template> findTemplateByFilters(@RequestBody Template template) throws Exception {
-        return templateService.findTemplateByFilters(template);
+        return templateService.findTemplateByFilters(template, Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
     }
 
     /**
-     * Find the list of iso by filters.
+     * Find the list of ISO by filters.
      *
      * @param templateIso the template iso object.
      * @return template list from server
@@ -131,7 +139,7 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<Template> findIsoByFilters(@RequestBody Template templateIso) throws Exception {
-        return templateService.findIsoByFilters(templateIso);
+        return templateService.findIsoByFilters(templateIso, Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
     }
 
     /**
@@ -146,6 +154,9 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public String getTemplateCounts(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        return templateService.findTemplateCounts();
+    	HashMap<String, Integer> templateCount = templateService.findTemplateCounts();
+    	return "{\"windowsCount\":" + templateCount.get("windowsCount") + ",\"linuxCount\":" + templateCount.get("linuxCount") + ",\"totalCount\":"
+                + templateCount.get("totalCount") + ",\"windowsIsoCount\":" + templateCount.get("windowsIsoCount") + ",\"linuxIsoCount\":"
+                + templateCount.get("linuxIsoCount") + ",\"totalIsoCount\":" + templateCount.get("totalIsoCount") + "}";
     }
 }

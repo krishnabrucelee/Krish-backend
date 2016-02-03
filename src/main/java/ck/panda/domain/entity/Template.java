@@ -31,6 +31,8 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonValidator;
 
 /**
@@ -87,78 +89,66 @@ public class Template implements Serializable {
     @Column(name = "reference_url")
     private String referenceUrl;
 
-    /** Zone object. */
+    /** Template zone. */
     @ManyToOne
     @JoinColumn(name = "zone_id", referencedColumnName = "id", updatable = false, insertable = false)
     private Zone zone;
 
-    /** Zone type id. */
+    /** Template zone id. */
     @Column(name = "zone_id")
     private Long zoneId;
 
-    /** Transient zone of the template. */
-    @Transient
-    private String transZone;
-
-    /** Hypervisor object. */
+    /** Template hypervisor. */
     @ManyToOne
     @JoinColumn(name = "hypervisor_type_id", referencedColumnName = "id", updatable = false, insertable = false)
     private Hypervisor hypervisor;
 
-    /** Hypervisor type id. */
+    /** Template hypervisor id. */
     @Column(name = "hypervisor_type_id")
     private Long hypervisorId;
 
-    /** Transient hypervisor of the template. */
-    @Transient
-    private String transHypervisor;
-
-    /** Original XS Version of the template. */
+    /** Original XS version of the template. */
     @Column(name = "xs_version", columnDefinition = "tinyint default 0")
     private Boolean xsVersion;
 
-    /** Root disk controller id. */
+    /** Root disk controller. */
     @Column(name = "root_disk_controller")
     @Enumerated(EnumType.STRING)
     private RootDiskController rootDiskController;
 
-    /** NIC adapter type id. */
+    /** NIC adapter type. */
     @Column(name = "nic_adapter")
     @Enumerated(EnumType.STRING)
     private NicAdapter nicAdapter;
 
-    /** Keyboard type id. */
+    /** Keyboard type. */
     @Column(name = "keyboard_type")
     @Enumerated(EnumType.STRING)
     private KeyboardType keyboardType;
 
-    /** Format id. */
+    /** Template format. */
     @NotNull
     @Column(name = "format")
     @Enumerated(EnumType.STRING)
     private Format format;
 
-    /** OS category object. */
+    /** Template OS category. */
     @ManyToOne
     @JoinColumn(name = "os_category", referencedColumnName = "id", updatable = false, insertable = false)
     private OsCategory osCategory;
 
-    /** Os category type id. */
+    /** Template OS category type id. */
     @Column(name = "os_category")
     private Long osCategoryId;
 
-    /** OS type object. */
+    /** Template OS type. */
     @ManyToOne
     @JoinColumn(name = "os_type", referencedColumnName = "id", updatable = false, insertable = false)
     private OsType osType;
 
-    /** OS type type id. */
+    /** Template OS type id. */
     @Column(name = "os_type")
     private Long osTypeId;
-
-    /** Transient OS type of the template. */
-    @Transient
-    private String transOsType;
 
     /** OS version of the template. */
     @Column(name = "os_version")
@@ -180,37 +170,41 @@ public class Template implements Serializable {
     @Column(name = "architecture")
     private String architecture;
 
-    /** Extractable of the template. */
+    /** Extractable template. */
     @Column(name = "extractable", columnDefinition = "tinyint default 0")
     private Boolean extractable;
 
-    /** Featured of the template. */
+    /** Featured template. */
     @Column(name = "featured", columnDefinition = "tinyint default 0")
     private Boolean featured;
 
-    /** Routing of the template. */
+    /** Routing template. */
     @Column(name = "routing", columnDefinition = "tinyint default 0")
     private Boolean routing;
 
-    /** Password Enabled of the template. */
+    /** Password enabled template. */
     @Column(name = "password_enabled", columnDefinition = "tinyint default 0")
     private Boolean passwordEnabled;
 
-    /** One time Chargeable of the template. */
+    /** Template one time chargeable. */
     @Column(name = "one_time_chargeable", columnDefinition = "tinyint default 0")
     private Boolean oneTimeChargeable;
 
-    /** Dynamically Scalable of the template. */
+    /** Dynamically scalable template. */
     @Column(name = "dynamically_scalable", columnDefinition = "tinyint default 0")
     private Boolean dynamicallyScalable;
 
-    /** HVM of the template. */
+    /** HVM template. */
     @Column(name = "hvm", columnDefinition = "tinyint default 0")
     private Boolean hvm;
 
-    /** Share of the template. */
+    /** Public template. */
     @Column(name = "share", columnDefinition = "tinyint default 0")
     private Boolean share;
+
+    /** Bootable template. */
+    @Column(name = "bootable", columnDefinition = "tinyint default 1")
+    private Boolean bootable;
 
     /** Detailed description of the template. */
     @Column(name = "detailed_description", columnDefinition = "TEXT")
@@ -254,25 +248,37 @@ public class Template implements Serializable {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
 
-    /** Share of the template. */
-    @Transient
-    private Boolean syncFlag;
-
     /** Display text of the template. */
     @Column(name = "display_text")
     private String displayText;
 
-    /** Display text of the template. */
+    /** Template department. */
     @Column(name = "department_id", insertable = false, updatable = false)
     private Department department;
 
-    /** Display text of the template. */
+    /** Template department id. */
     @Column(name = "department_id")
     private Long departmentId;
 
     /** IsActive attribute to verify Active or Inactive. */
     @Column(name = "is_active")
     private Boolean isActive;
+
+    /** Template zone transient. */
+    @Transient
+    private String transZone;
+
+    /** Template hypervisor transient. */
+    @Transient
+    private String transHypervisor;
+
+    /** Template OS type transient. */
+    @Transient
+    private String transOsType;
+
+    /** Template sync flag. */
+    @Transient
+    private Boolean syncFlag;
 
     /**
      * Get the id.
@@ -358,7 +364,7 @@ public class Template implements Serializable {
     /**
      * Set the type.
      *
-     * @param type - the String to set
+     * @param type - the template type to set
      */
     public void setType(TemplateType type) {
         this.type = type;
@@ -520,7 +526,7 @@ public class Template implements Serializable {
     /**
      * Set the root disk controller.
      *
-     * @param rootDiskController - the RootDiskController enum to set
+     * @param rootDiskController - the Root disk controller ENUM to set
      */
     public void setRootDiskController(RootDiskController rootDiskController) {
         this.rootDiskController = rootDiskController;
@@ -538,7 +544,7 @@ public class Template implements Serializable {
     /**
      * Set the NIC adapter.
      *
-     * @param nicAdapter - the NicAdapter enum to set
+     * @param nicAdapter - the Nic adapter ENUM to set
      */
     public void setNicAdapter(NicAdapter nicAdapter) {
         this.nicAdapter = nicAdapter;
@@ -556,7 +562,7 @@ public class Template implements Serializable {
     /**
      * Set the keyboard type.
      *
-     * @param keyboardType - the KeyboardType enum to set
+     * @param keyboardType - the Keyboard type ENUM to set
      */
     public void setKeyboardType(KeyboardType keyboardType) {
         this.keyboardType = keyboardType;
@@ -574,7 +580,7 @@ public class Template implements Serializable {
     /**
      * Set the format.
      *
-     * @param format - the Format enum to set
+     * @param format - the Format ENUM to set
      */
     public void setFormat(Format format) {
         this.format = format;
@@ -592,7 +598,7 @@ public class Template implements Serializable {
     /**
      * Set the OS category.
      *
-     * @param osCategory - the osCategory entity to set
+     * @param osCategory - the OS category entity to set
      */
     public void setOsCategory(OsCategory osCategory) {
         this.osCategory = osCategory;
@@ -610,7 +616,7 @@ public class Template implements Serializable {
     /**
      * Set the OS category id.
      *
-     * @param osCategoryId - the osCategory id to set
+     * @param osCategoryId - the OS category id to set
      */
     public void setOsCategoryId(Long osCategoryId) {
         this.osCategoryId = osCategoryId;
@@ -628,7 +634,7 @@ public class Template implements Serializable {
     /**
      * Set the OS type.
      *
-     * @param osType - the osType entity to set
+     * @param osType - the OS type entity to set
      */
     public void setOsType(OsType osType) {
         this.osType = osType;
@@ -646,7 +652,7 @@ public class Template implements Serializable {
     /**
      * Set the OS type id.
      *
-     * @param osTypeId - the osType id to set
+     * @param osTypeId - the OS type id to set
      */
     public void setOsTypeId(Long osTypeId) {
         this.osTypeId = osTypeId;
@@ -869,6 +875,24 @@ public class Template implements Serializable {
     }
 
     /**
+     * Get the bootable.
+     *
+     * @return bootable
+     */
+    public Boolean getBootable() {
+        return bootable;
+    }
+
+    /**
+     * Set the bootable.
+     *
+     * @param bootable - the Boolean to set
+     */
+    public void setBootable(Boolean bootable) {
+        this.bootable = bootable;
+    }
+
+    /**
      * Get the share.
      *
      * @return share
@@ -970,7 +994,7 @@ public class Template implements Serializable {
     /**
      * Set the created by.
      *
-     * @param createdBy - the User entity to set
+     * @param createdBy - the Long to set
      */
     public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
@@ -988,7 +1012,7 @@ public class Template implements Serializable {
     /**
      * Set the updated by.
      *
-     * @param updatedBy - the User entity to set
+     * @param updatedBy - the Long to set
      */
     public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;
@@ -1006,7 +1030,7 @@ public class Template implements Serializable {
     /**
      * Set the created date time.
      *
-     * @param createdDateTime - the DateTime to set
+     * @param createdDateTime - the Created date time to set
      */
     public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
@@ -1024,28 +1048,10 @@ public class Template implements Serializable {
     /**
      * Set the updated date time.
      *
-     * @param updatedDateTime - the DateTime to set
+     * @param updatedDateTime - the Updated date time to set
      */
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
-    }
-
-    /**
-     * Get the sync flag for temporary usage.
-     *
-     * @return syncFlag
-     */
-    public Boolean getSyncFlag() {
-        return syncFlag;
-    }
-
-    /**
-     * Set the sync flag for temporary usage.
-     *
-     * @param syncFlag - the Boolean to set
-     */
-    public void setSyncFlag(Boolean syncFlag) {
-        this.syncFlag = syncFlag;
     }
 
     /**
@@ -1087,7 +1093,7 @@ public class Template implements Serializable {
     /**
      * Get the department id.
      *
-     * @return the departmentId of template.
+     * @return the department Id of template.
      */
     public Long getDepartmentId() {
         return departmentId;
@@ -1096,10 +1102,42 @@ public class Template implements Serializable {
     /**
      * Set the department id.
      *
-     * @param departmentId the departmentId to set.
+     * @param departmentId the department Id to set.
      */
     public void setDepartmentId(Long departmentId) {
         this.departmentId = departmentId;
+    }
+
+    /**
+     * Get template size.
+     *
+     * @return the size
+     */
+    public Long getSize() {
+        return size;
+    }
+
+    /**
+     * Set template size.
+     *
+     * @param size the size to set
+     */
+    public void setSize(Long size) {
+        this.size = size;
+    }
+
+    /**
+     * @return the isActive
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    /**
+     * @param isActive the is active to set
+     */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
     }
 
     /**
@@ -1157,35 +1195,21 @@ public class Template implements Serializable {
     }
 
     /**
-     * Get template size.
+     * Get the sync flag for temporary usage.
      *
-     * @return the size
+     * @return syncFlag
      */
-    public Long getSize() {
-        return size;
+    public Boolean getSyncFlag() {
+        return syncFlag;
     }
 
     /**
-     * Set template size.
+     * Set the sync flag for temporary usage.
      *
-     * @param size the size to set
+     * @param syncFlag - the Boolean to set
      */
-    public void setSize(Long size) {
-        this.size = size;
-    }
-
-    /**
-     * @return the isActive
-     */
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    /**
-     * @param isActive the isActive to set
-     */
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
+    public void setSyncFlag(Boolean syncFlag) {
+        this.syncFlag = syncFlag;
     }
 
     /** RootDiskController enum type used to list the static root disk controller values. */
@@ -1284,34 +1308,40 @@ public class Template implements Serializable {
         Template template = new Template();
         template.setSyncFlag(false);
         try {
-            template.uuid = JsonValidator.jsonStringValidation(object, "id");
-            template.name = JsonValidator.jsonStringValidation(object, "name");
-            template.description = JsonValidator.jsonStringValidation(object, "displaytext");
-            template.share = JsonValidator.jsonBooleanValidation(object, "ispublic");
-            template.passwordEnabled = JsonValidator.jsonBooleanValidation(object, "passwordenabled");
-            template.featured = JsonValidator.jsonBooleanValidation(object, "isfeatured");
-            template.extractable = JsonValidator.jsonBooleanValidation(object, "isextractable");
-            template.dynamicallyScalable = JsonValidator.jsonBooleanValidation(object, "isdynamicallyscalable");
-            template.transOsType = JsonValidator.jsonStringValidation(object, "ostypeid");
-            template.transZone = JsonValidator.jsonStringValidation(object, "zoneid");
-            template.transHypervisor = JsonValidator.jsonStringValidation(object, "hypervisor");
+            template.uuid = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_ID);
+            template.name = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_NAME);
+            template.description = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_DISPLAY_TEXT);
+            template.share = JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_VISIBILITY);
+            template.passwordEnabled = JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_PASSWORD_STATUS);
+            template.featured = JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_FEATURED);
+            template.extractable = JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_EXTRACTABLE);
+            template.dynamicallyScalable = JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_DYNAMIC_SCALABLE);
+            template.transOsType = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_OS_TYPEID);
+            template.transZone = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_ZONE_ID);
+            template.transHypervisor = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_HYPERVISOR);
             template.setDepartmentId(null);
-            if (object.has("format")) {
-                template.setFormat(template.getFormat().valueOf(JsonValidator.jsonStringValidation(object, "format")));
-                template.setType(template.getType().valueOf(JsonValidator.jsonStringValidation(object, "templatetype")));
+            if (object.has(CloudStackConstants.CS_FORMAT)) {
+                template.setFormat(template.getFormat().valueOf(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_FORMAT)));
+                template.setType(template.getType().valueOf(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_TEMPLATE_TYPE)));
+                template.bootable = true;
             } else {
                 template.setFormat(Format.ISO);
-                if (object.has("account") && JsonValidator.jsonStringValidation(object, "account").equals("system")) {
+                template.bootable = JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_BOOTABLE);
+                if (object.has(CloudStackConstants.CS_ACCOUNT) &&
+                		JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_ACCOUNT).equals(CloudStackConstants.CS_SYSTEM)) {
                     template.setType(TemplateType.SYSTEM);
                 } else {
                     template.setType(TemplateType.USER);
                 }
             }
-            if (JsonValidator.jsonBooleanValidation(object, "isready")) {
-                template.setStatus(template.getStatus().valueOf("ACTIVE"));
-                template.setSize(object.has("size") ? Long.parseLong(JsonValidator.jsonStringValidation(object, "size")) : null);
+            template.setSize(0L);
+            if (JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_READY_STATE)) {
+                template.setStatus(Template.Status.ACTIVE);
+                if (object.has(CloudStackConstants.CS_SIZE)) {
+                    template.setSize(Long.parseLong(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_SIZE)));
+                }
             } else {
-                template.setStatus(template.getStatus().valueOf("INACTIVE"));
+                template.setStatus(Template.Status.INACTIVE);
             }
         } catch (Exception e) {
             e.printStackTrace();
