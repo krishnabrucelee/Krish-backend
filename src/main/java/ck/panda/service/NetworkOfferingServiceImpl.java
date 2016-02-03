@@ -10,7 +10,6 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.repository.jpa.NetworkOfferingRepository;
@@ -83,7 +82,7 @@ public class NetworkOfferingServiceImpl implements NetworkOfferingService {
 
     @Override
     public Page<NetworkOffering> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return networkRepo.findAllByIsolated(pagingAndSorting.toPageRequest());
+        return networkRepo.findAllByIsolated(pagingAndSorting.toPageRequest(), "Isolated");
     }
 
     @Override
@@ -122,7 +121,7 @@ public class NetworkOfferingServiceImpl implements NetworkOfferingService {
 
     @Override
     public List<NetworkOffering> findIsolated() throws Exception {
-        return networkRepo.findIsolated();
+        return networkRepo.findIsolated("Isolated", "Required");
     }
 
     @Override
