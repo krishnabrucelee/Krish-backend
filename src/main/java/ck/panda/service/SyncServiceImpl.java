@@ -41,6 +41,7 @@ import ck.panda.domain.entity.PortForwarding;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.Region;
 import ck.panda.domain.entity.ResourceLimitDomain;
+import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.SSHKey;
 import ck.panda.domain.entity.Snapshot;
@@ -49,13 +50,11 @@ import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
-import ck.panda.domain.repository.jpa.VolumeRepository;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.domain.entity.Zone;
-import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.EncryptionUtil;
@@ -103,10 +102,6 @@ public class SyncServiceImpl implements SyncService {
     /** Reference of the convert entity service. */
     @Autowired
     private ConvertEntityService convertEntityService;
-
-    /** VolumeRepository repository reference. */
-    @Autowired
-    private VolumeRepository volumeRepo;
 
     /** Virtual Machine repository reference. */
     @Autowired
@@ -214,14 +209,6 @@ public class SyncServiceImpl implements SyncService {
     @Autowired
     private ResourceLimitDomainService resourceDomainService;
 
-    /** Resource Limit Service for listing resource limits. */
-    @Autowired
-    private ResourceLimitDepartmentService resourceDepartmentService;
-
-    /** Resource Limit Service for listing resource limits. */
-    @Autowired
-    private ResourceLimitProjectService resourceProjectService;
-
     /** SSH Key Service for listing ssh keys. */
     @Autowired
     private SSHKeyService sshKeyService;
@@ -249,6 +236,10 @@ public class SyncServiceImpl implements SyncService {
     /** Listing Port Forwarding details from cloudstack server. */
     @Autowired
     private PortForwardingService portForwardingService;
+
+    /** Listing resource limit project service. */
+    @Autowired
+    private ResourceLimitProjectService resourceProjectService;
 
     /** Listing Load Balancer details from cloudstack server. */
     @Autowired
@@ -314,9 +305,8 @@ public class SyncServiceImpl implements SyncService {
     @Value(value = "${permission.report}")
     private String report;
 
-    /** Validator attribute. */
-    @Autowired
-    private AppValidator validator;
+    /** Full permission for root and domain admin. */
+    public static final String ADMIN_PERMISSION = "FULL_PERMISSION";
 
     /** Message source attribute. */
     @Autowired
@@ -843,25 +833,6 @@ public class SyncServiceImpl implements SyncService {
             // in a hash using uuid
             if (csStorageOfferingMap.containsKey(storageOffering.getUuid())) {
                 StorageOffering csStorageOffering = csStorageOfferingMap.get(storageOffering.getUuid());
-
-                storageOffering.setDescription(csStorageOffering.getDescription());
-                storageOffering.setDiskBytesReadRate(csStorageOffering.getDiskBytesReadRate());
-                storageOffering.setDiskBytesWriteRate(csStorageOffering.getDiskBytesWriteRate());
-                storageOffering.setDiskIopsReadRate(csStorageOffering.getDiskIopsReadRate());
-                storageOffering.setDiskIopsWriteRate(csStorageOffering.getDiskIopsWriteRate());
-                storageOffering.setDiskMaxIops(csStorageOffering.getDiskMaxIops());
-                storageOffering.setDiskMinIops(csStorageOffering.getDiskMinIops());
-                storageOffering.setDiskSize(csStorageOffering.getDiskSize());
-                storageOffering.setIsCustomDisk(csStorageOffering.getIsCustomDisk());
-                storageOffering.setIsCustomizedIops(csStorageOffering.getIsCustomizedIops());
-                storageOffering.setIsPublic(csStorageOffering.getIsPublic());
-                storageOffering.setName(csStorageOffering.getName());
-                storageOffering.setQosType(csStorageOffering.getQosType());
-                storageOffering.setStorageTags(csStorageOffering.getStorageTags());
-                storageOffering.setStorageType(csStorageOffering.getStorageType());
-                storageOffering.setDomain(csStorageOffering.getDomain());
-
-                // csOsType.setOsCategoryUuid(csOsType.getOsCategoryUuid());
 
                 // 3.2 If found, update the osType object in app db
                 storageService.update(storageOffering);
@@ -1708,9 +1679,14 @@ public class SyncServiceImpl implements SyncService {
 
     @Override
     public void syncResourceLimit() throws ApplicationException, Exception {
-        List<Domain> domains = domainService.findAll();
+        List<Domain> domains = domainService.findAllDomain();
         for (Domain domain : domains) {
             syncResourceLimitDomain(domain);
+        }
+
+        List<Project> projects = projectService.findAllByActive(true);
+        for (Project project : projects) {
+            syncResourceLimitProject(project.getUuid());
         }
     }
 
@@ -1742,6 +1718,50 @@ public class SyncServiceImpl implements SyncService {
         // add it to app db
         for (String key : csResourceMap.keySet()) {
             resourceDomainService.save(csResourceMap.get(key));
+        }
+        LOGGER.debug("Total rows added", (csResourceMap.size()));
+    }
+
+    @Override
+    public void syncResourceLimitProject(String projectId) throws ApplicationException, Exception {
+
+        // 1. Get all the ResourceLimit objects from CS server as hash
+        List<ResourceLimitProject> csResourceList = resourceProjectService.findAllFromCSServerProject(projectId);
+               HashMap<String, ResourceLimitProject> csResourceMap = (HashMap<String, ResourceLimitProject>) ResourceLimitProject
+                .convert(csResourceList);
+
+        // 2. Get all the resource objects from application
+        List<ResourceLimitProject> appResourceList = resourceProjectService.findAll();
+
+        // 3. Iterate application resource list
+        LOGGER.debug("Total rows updated : " + (appResourceList.size()));
+        for (ResourceLimitProject resource : appResourceList) {
+            resource.setIsSyncFlag(false);
+            String resourceLimit = resource.getProjectId() + "-" + resource.getResourceType();
+            // 3.1 Find the corresponding CS server resource object by finding
+            // it in a hash using uuid
+            if (csResourceMap.containsKey(resourceLimit)) {
+                ResourceLimitProject csResource = csResourceMap.get(resourceLimit);
+                resource.setIsActive(true);
+                // resource.setName(csResource.getName());
+
+                // 3.2 If found, update the resource object in app db
+                resourceProjectService.update(resource);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // resource which is not added in the app
+                csResourceMap.remove(resourceLimit);
+            } else {
+                resourceProjectService.update(resource);
+            }
+        }
+        // 4. Get the remaining list of cs server hash resource object, then
+        // iterate and
+        // add it to app db
+        for (String key : csResourceMap.keySet()) {
+            LOGGER.debug("Syncservice resource Domain id:");
+            resourceProjectService.save(csResourceMap.get(key));
+
         }
         LOGGER.debug("Total rows added", (csResourceMap.size()));
     }
@@ -1893,6 +1913,7 @@ public class SyncServiceImpl implements SyncService {
                 Nic csNic = csNicMap.get(nic.getUuid());
 
                 nic.setUuid(csNic.getUuid());
+                nic.setVmIpAddress(csNic.getVmIpAddress());
 
                 // 3.2 If found, update the nic object in app db
                 nicService.update(nic);
@@ -2040,7 +2061,10 @@ public class SyncServiceImpl implements SyncService {
 
                 ipAddress.setUuid(csNic.getUuid());
                 ipAddress.setPublicIpAddress(csNic.getPublicIpAddress());
-
+                ipAddress.setState(csNic.getState());
+                ipAddress.setIsSourcenat(csNic.getIsSourcenat());
+                ipAddress.setIsStaticnat(csNic.getIsStaticnat());
+                ipAddress.setNetworkId(csNic.getNetworkId());
                 // 3.2 If found, update the nic object in app db
                 ipAddressService.update(ipAddress);
 
@@ -2285,21 +2309,19 @@ public class SyncServiceImpl implements SyncService {
         }
     }
 
-    /**
-     * Update user role.
-     */
-    void syncUpdateUserRole() {
+    @Override
+    public void syncUpdateUserRole() throws ApplicationException, Exception {
         List<UserType> types = new ArrayList<UserType>();
         types.add(UserType.ROOT_ADMIN);
         types.add(UserType.DOMAIN_ADMIN);
         try {
             List<User> userList = userService.findUsersByTypesAndActive(types, true);
             for (User user : userList) {
-                Role role = roleService.findByNameAndDepartmentIdAndIsActive("FULL_PERMISSION", user.getDepartmentId(),
+                Role role = roleService.findByNameAndDepartmentIdAndIsActive(ADMIN_PERMISSION, user.getDepartmentId(),
                         true);
                 user.setRoleId(role.getId());
 
-                //Added the sync flag for update user role from sync job.
+                user.setSyncFlag(false);
                 user.setSyncFlag(false);
                 userService.update(user);
             }
@@ -2307,5 +2329,4 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.debug("syncUpdateUserRole" + e);
         }
     }
-
 }

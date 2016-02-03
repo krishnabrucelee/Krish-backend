@@ -3,7 +3,6 @@ package ck.panda.util.domain;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**

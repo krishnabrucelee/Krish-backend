@@ -209,7 +209,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         config.setServer(1L);
         if (department.getSyncFlag()) {
             List<Project> projectResponse = projectService.findAllByDepartmentAndIsActive(department.getId(), true);
-            List<VmInstance> vmResponse = vmService.findByDepartmentAndVmStatus(department.getId(), VmInstance.Status.Expunging);
+            List<VmInstance> vmResponse = vmService.findAllByDepartmentAndVmStatus(department.getId(), VmInstance.Status.EXPUNGING);
             List<Role> roleResponse = roleService.findByDepartmentAndIsActive(department.getId(), true);
             List<Volume> volumeResponse = volumeService.findByDepartmentAndIsActive(department.getId(), true);
             List<User> userResponse = userService.findByDepartment(department.getId());
@@ -317,7 +317,10 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public Department save(Department department) throws Exception {
-        return null;
+    	if (!department.getSyncFlag()) {
+    		return departmentRepo.save(department);
+    	}
+    	return department;
     }
 
 }

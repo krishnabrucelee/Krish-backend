@@ -1,0 +1,129 @@
+# Datasource Configuration
+spring:
+    datasource:
+        driverClassName: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/${DB_NAME:ckpanda}
+        username: ${DB_USERNAME}
+        password: ${DB_PASSWORD}
+
+    jpa:
+        hibernate.ddl-auto: create-drop
+
+        # Specify the DBMS
+        database: MYSQL
+
+        # Show or not log for each sql query
+        show-sql: true
+
+        # Hibernate settings are prefixed with spring.jpa.hibernate.*
+        hibernate:
+            ddl-auto: update
+            dialect: org.hibernate.dialect.MySQL5Dialect
+            naming_strategy: org.hibernate.cfg.ImprovedNamingStrategy
+            show_sql: true
+            format_sql: true
+
+    # RabbitMQ Properties
+    rabbit:
+        host: ${RABBITMQ_HOST}
+        vhost: /
+        username: ${RABBITMQ_USERNAME}
+        password: ${RABBITMQ_PASSWORD}
+        exchange:
+            name: ${RABBITMQ_EXCHANGE}
+
+
+
+    # CS server Routing key
+        server:
+            action:
+                pattern: "*.ActionEvent.*.*.*"
+                queue: ${RABBITMQ_ACTION_EVENT}
+            alert:
+                pattern: "*.AlertEvent.*.*.*"
+                queue: ${RABBITMQ_ALERT_EVENT}
+            usage:
+                pattern: "*.UsageEvent.*.*.*"
+                queue: ${RABBITMQ_CS_USAGE_EVENT}
+            asynchJob:
+                pattern: "*.AsyncJobEvent.*.*.*"
+                queue: ${RABBITMQ_CS_ASYNC_EVENT}
+            resource:
+                pattern: "*.ResourceStateEvent.*.*.*"
+                queue: ${RABBITMQ_RESOURCE_EVENT}
+
+
+---
+
+cloudstack:
+    url: ${CLOUDSTACK_URL}
+console:
+    proxy: ${CONSOLE_URL}
+
+---
+
+app:
+    buildversion: ${APP_BUILD_NUMBER}
+
+
+logging:
+    level:
+        org:
+            springframework.web: TRACE
+
+---
+
+server:
+    port: 8080
+    session-timeout: 60
+
+---
+
+security:
+    basic:
+        enabled: false
+
+---
+
+endpoints:
+    shutdown:
+        enabled: true
+
+---
+
+keystore:
+    file: src/main/resources/private/keystorejks
+    pass: password
+
+---
+
+backend:
+    admin:
+        userid: 1
+        username: ${BACKEND_ADMIN_USERNAME}
+        password: ${BACKEND_ADMIN_PASSWORD}
+        role: BACKEND_ADMIN
+        dominid: 1
+        departmentid: 1000
+        type: 1
+        userapikey: kUDWhIgso-UXTaAQulvgqidAbsC4gFCssPPFYWppiGsvSGbnO8_A2f4G8svqCnwyMcp6zCrrwvDQNVTtIqnTfA
+        usersecretkey: Lv2Fl5mc4C5g_qGYNWLCTprKUx1DDFBQiFwLg5JVYMamehm20IT3iPgk5CtUtzxMtcSdAgbZ1VFJWcX56R0iGw
+
+---
+
+error:
+    whitelabel:
+        enabled: false
+
+---
+
+#Pagination properties
+pagination:
+    limit: 10
+
+---
+
+#Mon Oct 26 09:13:02 IST 2015
+aes:
+    salt:
+        secretKey: DA97AA70B21ADCCA89708EFC05C7E2F2

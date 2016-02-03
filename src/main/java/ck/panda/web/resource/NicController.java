@@ -144,7 +144,7 @@ public class NicController extends CRUDController<Nic> implements ApiController 
     }
 
     /**
-     * Release Secondary Ip from Ip
+     * Release Secondary Ip from Ip.
      *
      * @param nic object for releasing ip.
      * @param vmIpaddressId of the secondary ip.

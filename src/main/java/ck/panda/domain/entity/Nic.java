@@ -69,7 +69,7 @@ public class Nic implements Serializable {
     private Boolean isActive;
 
     /** Secondary ipAddress of the Nic. */
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany
     private List<VmIpaddress> vmIpAddress;
 
     /** Network ip Address to establish a connection. */
@@ -484,7 +484,6 @@ public class Nic implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
-
 
     /**
      * Get the secondaryIpAddress.

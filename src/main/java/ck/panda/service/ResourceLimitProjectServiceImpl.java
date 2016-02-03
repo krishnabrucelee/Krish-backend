@@ -3,8 +3,10 @@
  */
 package ck.panda.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +15,10 @@ import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitProject;
+import ck.panda.domain.entity.ResourceLimitProject.ResourceType;
 import ck.panda.domain.repository.jpa.ResourceLimitProjectRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackResourceLimitService;
@@ -31,7 +35,22 @@ import ck.panda.util.error.exception.EntityNotFoundException;
 public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectService {
 
     /** Logger attribute. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceLimitDomainServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceLimitProjectServiceImpl.class);
+
+    /** Constant for resource limits. */
+    public static final String RESOUCE_LIMITS = "resourcelimits";
+
+    /** Constant for resource limit. */
+    public static final String CS_RESOUCE_LIMIT = "resourcelimit";
+
+    /** Constant for list resource limit. */
+    public static final String CS_LIST_RESOURCE_RESPONSE = "listresourcelimitsresponse";
+
+    /** Constant for update resource limit. */
+    public static final String CS_UPDATE_RESOURCE_RESPONSE = "updateresourcelimitresponse";
+
+    /** Constant for max resource limits. */
+    public static final String CS_MAX = "max";
 
     /** Validator attribute. */
     @Autowired
@@ -57,13 +76,15 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
     @Autowired
     private ResourceLimitDepartmentService resourceLimitDepartmentService;
 
+    /** Reference of the convert entity service. */
+    @Autowired
+    private ConvertEntityService convertEntityService;
+
     @Override
     public ResourceLimitProject save(ResourceLimitProject resource) throws Exception {
         if (resource.getIsSyncFlag()) {
-
-            Errors errors = validator.rejectIfNullEntity("resourcelimits", resource);
+            Errors errors = validator.rejectIfNullEntity(RESOUCE_LIMITS, resource);
             errors = validator.validateEntity(resource, errors);
-
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
@@ -77,9 +98,8 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
     @Override
     public ResourceLimitProject update(ResourceLimitProject resource) throws Exception {
         if (resource.getIsSyncFlag()) {
-            Errors errors = validator.rejectIfNullEntity("resourcelimits", resource);
+            Errors errors = validator.rejectIfNullEntity(RESOUCE_LIMITS, resource);
             errors = validator.validateEntity(resource, errors);
-
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
@@ -125,34 +145,55 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
      * @param resource optional resource limit values
      * @return optional values
      */
-    public HashMap<String, String> optional(ResourceLimitProject resource) {
-        HashMap<String, String> optional = new HashMap<String, String>();
-
+    public HashMap<String, String> optionalValues(ResourceLimitProject resource) {
+        HashMap<String, String> optionalMap = new HashMap<String, String>();
         if (resource.getProject() != null) {
-            optional.put("projectid", resource.getProject().getUuid());
+            optionalMap.put(CloudStackConstants.CS_PROJECT_ID, resource.getProject().getUuid());
         }
-
         if (resource.getMax() != null) {
-            optional.put("max", resource.getMax().toString());
+            optionalMap.put(CS_MAX, resource.getMax().toString());
         }
-        return optional;
+        return optionalMap;
+    }
+
+    @Override
+    public List<ResourceLimitProject> findAllFromCSServerProject(String projectId) throws Exception {
+        List<ResourceLimitProject> resourceList = new ArrayList<ResourceLimitProject>();
+        HashMap<String, String> resourceMap = new HashMap<String, String>();
+        resourceMap.put(CloudStackConstants.CS_PROJECT_ID, projectId);
+        // 1. Get the list of ResourceLimit from CS server using CS connector
+        String response = csResourceLimitService.listResourceLimits(CloudStackConstants.JSON, resourceMap);
+        JSONArray resourceListJSON = new JSONObject(response).getJSONObject(CS_LIST_RESOURCE_RESPONSE)
+                .getJSONArray(CS_RESOUCE_LIMIT);
+        // 2. Iterate the json list, convert the single json entity to
+        // Resource limit
+        for (int i = 0, size = resourceListJSON.length(); i < size; i++) {
+            // 2.1 Call convert by passing JSONObject to StorageOffering entity
+            // and Add the converted Resource limit entity to list
+            ResourceLimitProject resource = ResourceLimitProject.convert(resourceListJSON.getJSONObject(i));
+            resource.setProjectId(convertEntityService.getProject(resource.getTransProjectId()).getId());
+            resource.setUniqueSeperator(
+                    resource.getTransProjectId() + "-" + ResourceType.values()[(resource.getTransResourceType())]);
+            resourceList.add(resource);
+        }
+        return resourceList;
     }
 
     /**
      * updating resource limits for project.
      *
      * @param resource resource of project.
-     * @throws Exception error
+     * @throws Exception error at resource limit project
      */
     private void updateResourceProject(ResourceLimitProject resource) throws Exception {
         config.setServer(1L);
-        String resourceLimits = csResourceLimitService.updateResourceLimit(resource.getResourceType().ordinal(), "json",
-                optional(resource));
+        String resourceLimits = csResourceLimitService.updateResourceLimit(resource.getResourceType().ordinal(), CloudStackConstants.JSON,
+                optionalValues(resource));
         LOGGER.info("Resource limit project update response " + resourceLimits);
-        JSONObject resourceLimitsResponse = new JSONObject(resourceLimits).getJSONObject("updateresourcelimitresponse")
-                .getJSONObject("resourcelimit");
-        if (resourceLimitsResponse.has("errorcode")) {
-            LOGGER.debug("============= ERROR IN RESOURCE PROJECT =============");
+        JSONObject resourceLimitsResponse = new JSONObject(resourceLimits).getJSONObject(CS_UPDATE_RESOURCE_RESPONSE)
+                .getJSONObject(CS_RESOUCE_LIMIT);
+        if (resourceLimitsResponse.has(CloudStackConstants.CS_ERROR_CODE)) {
+            LOGGER.debug("ERROR IN RESOURCE PROJECT");
         } else {
             resource.setDomainId(resource.getDomain().getId());
             resource.setResourceType(resource.getResourceType());
@@ -163,7 +204,6 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
     @Override
     @PreAuthorize("hasPermission(null, 'PROJECT_QUOTA_EDIT')")
     public List<ResourceLimitProject> createResourceLimits(List<ResourceLimitProject> resourceLimits) throws Exception {
-
         Errors errors = this.validateResourceLimit(resourceLimits);
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
@@ -196,7 +236,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
      *
      * @param resourceLimits resource limits
      * @return if error with resource.
-     * @throws Exception error.
+     * @throws Exception error in resource limit project.
      */
     private Errors validateResourceLimit(List<ResourceLimitProject> resourceLimits) throws Exception {
         Errors errors = new Errors(messageSource);

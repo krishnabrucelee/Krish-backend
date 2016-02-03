@@ -165,7 +165,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             List<VmInstance> vmResponse = vmService.findAllByComputeOfferingIdAndVmStatus(compute.getId(),
                     VmInstance.Status.EXPUNGING);
             if (vmResponse.size() != 0) {
-                errors.addGlobalError("error.cannot.able.to.delete");
+                errors.addGlobalError("plan.delete.confirmation");
             }
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
