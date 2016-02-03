@@ -427,7 +427,7 @@ public class CloudStackConstants {
     /** Constant for network offering traffic type. */
     public static final String CS_TRAFFIC_TYPE = "traffictype";
 
-    /** Constant for network offering guest Ip Type type. */
+    /** Constant for network offering guest Ip type. */
     public static final String CS_GUEST_IP_TYPE = "guestiptype";
 
     /** Constant for network offering availability. */
