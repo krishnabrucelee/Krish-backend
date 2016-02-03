@@ -23,7 +23,7 @@ public interface RoleService extends CRUDService<Role> {
      * @param departmentId id of the department
      * @param isActive state of the role active/inactive
      * @return role name
-     * @throws Exception - if error occurs
+     * @throws Exception if error occurs
      */
     Role findWithPermissionsByNameDepartmentAndIsActive(String name, Long departmentId, Boolean isActive) throws Exception;
 
@@ -33,7 +33,7 @@ public interface RoleService extends CRUDService<Role> {
      * @param department reference of the department
      * @param isActive state of the role active/inactive
      * @return list of roles
-     * @throws Exception - if error occurs
+     * @throws Exception if error occurs
      */
     List<Role> findAllByDepartmentAndIsActiveExceptName(Department department, Boolean isActive, String name) throws Exception;
 
