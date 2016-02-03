@@ -291,4 +291,15 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      */
     @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.networkId = :id AND vm.status <> :status")
     List<VmInstance> findByNetworkAndExceptStatus(@Param("id") Long networkId, @Param("status") Status status);
+
+    /**
+     * Find all instance by status and associated with storage offering.
+     *
+     * @param storageOfferingId storageOffering id.
+     * @param status list of status.
+     * @return instance list.
+     */
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.storageOfferingId = :storageOfferingId AND vm.status <> :status")
+    List<VmInstance> findByStorageOfferingAndStatus(@Param("storageOfferingId") Long storageOfferingId,
+            @Param("status") Status status);
 }

@@ -919,6 +919,12 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     }
 
     @Override
+    public List<VmInstance> findAllByStorageOfferingIdAndVmStatus(Long storageOfferingId, Status status)
+            throws Exception {
+        return virtualmachinerepository.findByStorageOfferingAndStatus(storageOfferingId, status);
+    }
+
+    @Override
     public List<VmInstance> findAllByComputeOfferingIdAndVmStatus(Long computeOfferingId, Status status)
             throws Exception {
         return virtualmachinerepository.findByComputeOfferingAndStatus(computeOfferingId, status);

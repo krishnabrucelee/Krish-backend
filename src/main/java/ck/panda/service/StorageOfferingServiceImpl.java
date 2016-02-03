@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.StorageOffering;
+import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.repository.jpa.StorageOfferingRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackOptionalUtil;
@@ -59,6 +60,10 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     /** Reference of the convert entity service. */
     @Autowired
     private ConvertEntityService convertEntityService;
+
+    /** Virtual Machine service reference. */
+    @Autowired
+    private VirtualMachineService vmService;
 
     @Override
     public StorageOffering save(StorageOffering storage) throws Exception {
@@ -116,10 +121,6 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     @Override
     public StorageOffering find(Long id) throws Exception {
         StorageOffering storageOffering = storageOfferingRepo.findOne(id);
-
-        LOGGER.debug("Sample Debug Message");
-        LOGGER.trace("Sample Trace Message");
-
         if (storageOffering == null) {
             throw new EntityNotFoundException("error.storageOffering.not.found");
         }
@@ -304,8 +305,24 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
 
     @Override
     public StorageOffering softDelete(StorageOffering storage) throws Exception {
-        storage.setIsActive(false);
-        storage.setStatus(StorageOffering.Status.DISABLED);
-        return storageOfferingRepo.save(storage);
+    if (storage.getIsSyncFlag()) {
+        Errors errors = validator.rejectIfNullEntity(CloudStackConstants.CS_STORAGE_OFFERING, storage);
+        errors = validator.validateEntity(storage, errors);
+        // set server for finding value in configuration
+        config.setUserServer();
+        List<VmInstance> vmResponse = vmService.findAllByStorageOfferingIdAndVmStatus(storage.getId(),
+                VmInstance.Status.EXPUNGING);
+        if (vmResponse.size() != 0) {
+            errors.addGlobalError("plan.delete.confirmation");
+        }
+        if (errors.hasErrors()) {
+            throw new ApplicationException(errors);
+        } else {
+            storage.setIsActive(false);
+            // update compute offering in ACS.
+            csStorageService.deleteStorageOffering(storage.getUuid(), CloudStackConstants.JSON);
+        }
     }
+    return storageOfferingRepo.save(storage);
+}
 }
