@@ -31,6 +31,8 @@ public interface RoleRepository extends PagingAndSortingRepository<Role, Long> {
      * Method to find list of roles by department.
      *
      * @param department department entity
+     * @param isActive state of the role active/inactive.
+     * @param name of the role.
      * @return List of roles
      */
     @Query(value = "SELECT role FROM Role AS role WHERE role.department = :department AND role.isActive = :isActive AND role.name != :name")
@@ -44,7 +46,7 @@ public interface RoleRepository extends PagingAndSortingRepository<Role, Long> {
      * @param pageable pagination information.
      * @return List of roles
      */
-    @Query(value = "SELECT role FROM Role AS role WHERE role.department = :department AND role.isActive IS :isActive")
+    @Query(value = "SELECT role FROM Role AS role WHERE role.department = :department AND role.isActive = :isActive")
     Page<Role> findByDepartmentAndIsActive(@Param("department") Department department,
             @Param("isActive") Boolean isActive, Pageable pageable);
 
@@ -64,7 +66,7 @@ public interface RoleRepository extends PagingAndSortingRepository<Role, Long> {
      * @param isActive true/false.
      * @return vmInstance list.
      */
-    @Query(value = "SELECT role FROM Role role WHERE role.departmentId = :id AND role.isActive =:isActive ")
+    @Query(value = "SELECT role FROM Role role WHERE role.departmentId = :id AND role.isActive = :isActive ")
     List<Role> findByDepartmentAndIsActive(@Param("id") Long departmentId, @Param("isActive") Boolean isActive);
 
     /**
