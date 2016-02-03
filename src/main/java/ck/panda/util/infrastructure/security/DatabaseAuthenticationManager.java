@@ -209,7 +209,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
             Boolean authKeyResponse = apiSecretKeyGeneration(user);
             if (authKeyResponse) {
                 Department department = departmentService.find(user.getDepartment().getId());
-                Role role = roleService.findByName(user.getRole().getName(), department.getId());
+                Role role = roleService.findWithPermissionsByNameDepartmentAndIsActive(user.getRole().getName(), department.getId(), true);
                 resultOfAuthentication = externalServiceAuthenticator.authenticate(userName.get(),
                         user.getRole().getName(), role, user, buildNumber);
                 String newToken = null;
