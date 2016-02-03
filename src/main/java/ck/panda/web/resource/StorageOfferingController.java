@@ -20,6 +20,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.StorageOffering;
+import ck.panda.domain.entity.Volume;
 import ck.panda.service.StorageOfferingService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -59,10 +60,21 @@ public class StorageOfferingController extends CRUDController<StorageOffering> i
         return storageOfferingService.update(storage);
     }
 
-    @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing StorageOffering.")
-    @Override
-    public void delete(@PathVariable(PATH_ID) Long id) throws Exception {
-        storageOfferingService.delete(id);
+    /**
+     * Soft delete for storage.
+     *
+     * @param storage storage
+     * @param id volume id
+     * @throws Exception error
+     */
+    @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing storage.")
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void softDelete(@RequestBody StorageOffering storage, @PathVariable(PATH_ID) Long id) throws Exception {
+        /** Doing Soft delete from the storage table. */
+        storage.setIsSyncFlag(true);
+        storageOfferingService.softDelete(storage);
     }
 
     @Override
