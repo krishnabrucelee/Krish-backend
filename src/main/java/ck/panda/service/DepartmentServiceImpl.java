@@ -87,8 +87,8 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Autowired
     private UserService userService;
 
+    /** Baremetal system constant. */
     public static final String BAREMETAL_SYSTEM_ACCOUNT = "baremetal-system-account";
-
 
     @Override
     @PreAuthorize("hasPermission(#department.getSyncFlag(), 'ADD_DEPARTMENT')")
@@ -215,12 +215,12 @@ public class DepartmentServiceImpl implements DepartmentService {
             List<User> userResponse = userService.findByDepartment(department.getId());
             if (projectResponse.size() != 0 || vmResponse.size() != 0
                     || roleResponse.size() != 0 || volumeResponse.size() != 0) {
-                errors.addGlobalError(GenericConstants.PAGE_ERROR_SEPARATOR + GenericConstants.TOKEN_SEPARATOR +
-                        projectResponse.size() + GenericConstants.TOKEN_SEPARATOR +
-                        vmResponse.size() + GenericConstants.TOKEN_SEPARATOR +
-                        roleResponse.size() + GenericConstants.TOKEN_SEPARATOR +
-                        volumeResponse.size() + GenericConstants.TOKEN_SEPARATOR +
-                        userResponse.size());
+                errors.addGlobalError(GenericConstants.PAGE_ERROR_SEPARATOR + GenericConstants.TOKEN_SEPARATOR
+                        + projectResponse.size() + GenericConstants.TOKEN_SEPARATOR
+                        + vmResponse.size() + GenericConstants.TOKEN_SEPARATOR
+                        + roleResponse.size() + GenericConstants.TOKEN_SEPARATOR
+                        + volumeResponse.size() + GenericConstants.TOKEN_SEPARATOR
+                        + userResponse.size());
 
             }
         }
@@ -279,7 +279,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (domain != null && !domain.getName().equals("ROOT")) {
             return (List<Department>) departmentRepo.findByDomainAndIsActive(domain.getId(), isActive, AccountType.USER);
         }
-        return departmentRepo.findByDomainAndIsActive(domainId, isActive, AccountType.USER);
+        return departmentRepo.findAllByIsActive(isActive, AccountType.USER);
     }
 
     @Override
@@ -317,10 +317,10 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public Department save(Department department) throws Exception {
-    	if (!department.getSyncFlag()) {
-    		return departmentRepo.save(department);
-    	}
-    	return department;
+        if (!department.getSyncFlag()) {
+            return departmentRepo.save(department);
+        }
+        return department;
     }
 
 }
