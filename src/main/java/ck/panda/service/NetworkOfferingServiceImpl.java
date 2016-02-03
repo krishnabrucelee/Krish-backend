@@ -120,8 +120,8 @@ public class NetworkOfferingServiceImpl implements NetworkOfferingService {
     }
 
     @Override
-    public List<NetworkOffering> findIsolated() throws Exception {
-        return networkRepo.findIsolated("Isolated", "Required");
+    public List<NetworkOffering> findByIsolatedAndRequired(String csIsolated, String csRequired) throws Exception {
+        return networkRepo.findByIsolatedAndRequired(csIsolated, csRequired);
     }
 
     @Override

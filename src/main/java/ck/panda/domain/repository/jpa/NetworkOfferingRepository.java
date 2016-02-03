@@ -46,6 +46,6 @@ public interface NetworkOfferingRepository extends PagingAndSortingRepository<Ne
      * @return guestIpType
      */
     @Query(value = "SELECT networkOffer FROM NetworkOffering networkOffer WHERE networkOffer.guestIpType = :guestIpType AND networkOffer.availability = :availability")
-    List<NetworkOffering> findIsolated(@Param("guestIpType") String guestIpType, @Param("availability") String availability);
+    List<NetworkOffering> findByIsolatedAndRequired(@Param("guestIpType") String guestIpType, @Param("availability") String availability);
 
 }
