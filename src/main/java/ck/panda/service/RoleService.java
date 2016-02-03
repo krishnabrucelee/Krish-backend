@@ -19,8 +19,9 @@ public interface RoleService extends CRUDService<Role> {
     /**
      * Find role with permission list.
      *
-     * @param name - name of the role
-     * @param departmentId - department id
+     * @param name of the role
+     * @param departmentId id of the department
+     * @param isActive state of the role active/inactive
      * @return role name
      * @throws Exception - if error occurs
      */
@@ -29,7 +30,8 @@ public interface RoleService extends CRUDService<Role> {
     /**
      * Method to find list of roles by department.
      *
-     * @param department - department entity
+     * @param department reference of the department
+     * @param isActive state of the role active/inactive
      * @return list of roles
      * @throws Exception - if error occurs
      */
@@ -47,7 +49,7 @@ public interface RoleService extends CRUDService<Role> {
     /**
      * Soft delete for roles.
      *
-     * @param role role
+     * @param role reference of the role
      * @return role delete
      * @throws Exception if error occurs.
      */
@@ -56,23 +58,23 @@ public interface RoleService extends CRUDService<Role> {
     /**
      * Method to find role by name and department id and active.
      *
-     * @param name - name of the role
-     * @param departmentId - department id
-     * @param isActive - true
+     * @param name of the role
+     * @param departmentId id of the department
+     * @param isActive state of the role active/inactive
      * @return role
-     * @throws Exception - if error occurs
+     * @throws Exception if error occurs
      */
     Role findByNameAndDepartmentIdAndIsActive(String name, Long departmentId, Boolean isActive) throws Exception;
 
     /**
      * Find role by Department id.
      *
-     * @param id department id.
-     * @param isActive -true
+     * @param departmentId of the department.
+     * @param isActive state of the role active/inactive
      * @return role
      * @throws Exception if error occurs.
      */
-    List<Role> findByDepartmentAndIsActive(Long id, Boolean isActive) throws Exception;
+    List<Role> findByDepartmentAndIsActive(Long departmentId, Boolean isActive) throws Exception;
 
     /**
      * Find all the roles with user id.

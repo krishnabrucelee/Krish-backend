@@ -30,21 +30,21 @@ public interface RoleRepository extends PagingAndSortingRepository<Role, Long> {
     /**
      * Method to find list of roles by department.
      *
-     * @param department - department entity
+     * @param department department entity
      * @return List of roles
      */
-    @Query(value = "SELECT role FROM Role AS role WHERE role.department=:department AND role.isActive = :isActive AND role.name != :name")
+    @Query(value = "SELECT role FROM Role AS role WHERE role.department = :department AND role.isActive = :isActive AND role.name != :name")
     List<Role> findAllByDepartmentAndIsActiveExceptName(@Param("department") Department department, @Param("isActive") Boolean isActive, String name);
 
     /**
      * Method to find list of roles by department.
      *
-     * @param department - department entity
-     * @param isActive - true/false.
+     * @param department reference of the department
+     * @param isActive state of the role true/false.
      * @param pageable pagination information.
      * @return List of roles
      */
-    @Query(value = "SELECT role FROM Role AS role WHERE role.department=:department AND role.isActive IS :isActive")
+    @Query(value = "SELECT role FROM Role AS role WHERE role.department = :department AND role.isActive IS :isActive")
     Page<Role> findByDepartmentAndIsActive(@Param("department") Department department,
             @Param("isActive") Boolean isActive, Pageable pageable);
 
@@ -64,7 +64,7 @@ public interface RoleRepository extends PagingAndSortingRepository<Role, Long> {
      * @param isActive true/false.
      * @return vmInstance list.
      */
-    @Query(value = "SELECT role FROM Role role WHERE role.departmentId=:id AND role.isActive =:isActive ")
+    @Query(value = "SELECT role FROM Role role WHERE role.departmentId = :id AND role.isActive =:isActive ")
     List<Role> findByDepartmentAndIsActive(@Param("id") Long departmentId, @Param("isActive") Boolean isActive);
 
     /**
@@ -72,10 +72,10 @@ public interface RoleRepository extends PagingAndSortingRepository<Role, Long> {
      *
      * @param name of the role
      * @param departmentId department id
-     * @param isActive - true
+     * @param isActive state of the role true/false.
      * @return role
      */
-    @Query(value = "SELECT role FROM Role AS role WHERE role.name=:name AND role.departmentId=:departmentId AND role.isActive=:isActive")
+    @Query(value = "SELECT role FROM Role AS role WHERE role.name = :name AND role.departmentId = :departmentId AND role.isActive = :isActive")
     Role findByNameAndDepartmentIdAndIsActive(@Param("name") String name, @Param("departmentId") Long departmentId,
             @Param("isActive") Boolean isActive);
 
@@ -87,7 +87,7 @@ public interface RoleRepository extends PagingAndSortingRepository<Role, Long> {
      * @param pageable page
      * @return Role.
      */
-    @Query(value = "SELECT role FROM Role role WHERE role.isActive =:isActive AND role.domainId=:domainId AND role.name != 'FULL_PERMISSION'")
+    @Query(value = "SELECT role FROM Role role WHERE role.isActive = :isActive AND role.domainId = :domainId AND role.name != 'FULL_PERMISSION'")
     Page<Role> findByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive,
             Pageable pageable);
 

@@ -9,9 +9,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
-import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.Role.Status;
+import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.repository.jpa.RoleRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -118,9 +119,9 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Page<Role> findAllByUserId(PagingAndSorting pagingAndSorting, Long userId) throws Exception {
-        Domain domain = convertEntityService.getOwnerById(userId).getDomain();
-        if (domain != null && !domain.getName().equals("ROOT")) {
-            return roleRepo.findByDomainAndIsActive(domain.getId(), true, pagingAndSorting.toPageRequest());
+        User user = convertEntityService.getOwnerById(userId);
+        if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
+            return roleRepo.findByDomainAndIsActive(user.getDomainId(), true, pagingAndSorting.toPageRequest());
         } else {
             return findAllRolesWithoutFullPermissionAndActive(pagingAndSorting);
         }

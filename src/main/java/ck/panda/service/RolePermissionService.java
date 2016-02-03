@@ -30,6 +30,12 @@ public class RolePermissionService implements PermissionEvaluator {
     @Autowired
     private TokenDetails tokenDetails;
 
+    /** Role name constant for token details. */
+    public static final String ROLE_NAME = "rolename";
+
+    /** Department constant for token details. */
+    public static final String DEPARTMENT_ID = "departmentid";
+
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
         try {
@@ -42,9 +48,11 @@ public class RolePermissionService implements PermissionEvaluator {
                     return true;
                 }
             }
+
+            //TODO : We have to remove the token details from here
             Role role = roleRepository.findWithPermissionsByNameDepartmentAndIsActive(
-                    tokenDetails.getTokenDetails("rolename"),
-                    Long.parseLong(tokenDetails.getTokenDetails("departmentid")), true);
+                    tokenDetails.getTokenDetails(ROLE_NAME),
+                    Long.parseLong(tokenDetails.getTokenDetails(DEPARTMENT_ID)), true);
             for (int i = 0; i < role.getPermissionList().size(); i++) {
                 if (role.getPermissionList().get(i).getActionKey().equals(permission.toString())) {
                     return true;
