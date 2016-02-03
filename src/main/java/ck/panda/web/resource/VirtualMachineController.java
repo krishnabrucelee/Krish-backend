@@ -225,7 +225,7 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
         VmInstance persistInstance = virtualmachineservice.find(vminstance.getId());
         String hostUUID = persistInstance.getHost().getUuid(); // VM's the host's UUID
         String instanceUUID = persistInstance.getUuid(); // virtual machine UUID
-        token = hostUUID + instanceUUID;
+        token = hostUUID + "-" + instanceUUID;
         LOGGER.debug("VNC Token" + token);
         return "{\"success\":" + "\"" + consoleProxy + "/console/?token=" + token + "\"}";
     }
