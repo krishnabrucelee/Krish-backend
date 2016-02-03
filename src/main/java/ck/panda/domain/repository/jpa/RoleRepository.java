@@ -36,7 +36,7 @@ public interface RoleRepository extends PagingAndSortingRepository<Role, Long> {
      * @return List of roles
      */
     @Query(value = "SELECT role FROM Role AS role WHERE role.department = :department AND role.isActive = :isActive AND role.name != :name")
-    List<Role> findAllByDepartmentAndIsActiveExceptName(@Param("department") Department department, @Param("isActive") Boolean isActive, String name);
+    List<Role> findAllByDepartmentAndIsActiveExceptName(@Param("department") Department department, @Param("isActive") Boolean isActive, @Param("name") String name);
 
     /**
      * Method to find list of roles by department.

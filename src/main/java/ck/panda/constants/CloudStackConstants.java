@@ -125,7 +125,7 @@ public class CloudStackConstants {
     public static final String CS_DELETE_ACCOUNT_RESPONSE = "deleteaccountresponse";
 
     /** Constant for lsit account response. */
-    public static final String CS_LIST_ACCOUNT_RESPONSE = "listaccountresponse";
+    public static final String CS_LIST_ACCOUNT_RESPONSE = "listaccountsresponse";
 
     /** Constant for disk size. */
     public static final String CS_SIZE = "size";
