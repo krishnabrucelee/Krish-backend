@@ -103,7 +103,7 @@ public class UserServiceImpl implements UserService {
                 user.setPassword(encryptedPassword);
                 user.setDomainId(user.getDomain().getId());
                 user = userRepository.save(user);
-                if (!user.getProjectList().isEmpty()) {
+                if (user.getProjectList() != null) {
                     for (Project project : user.getProjectList()) {
                         Project persistProject = projectService.find(project.getId());
                         users = persistProject.getUserList();
