@@ -2261,7 +2261,7 @@ public class SyncServiceImpl implements SyncService {
                     permissionService.save(permission);
                 }
                 for (Department department : departmnetList) {
-                    Role role = roleService.findByName("FULL_PERMISSION", department.getId());
+                    Role role = roleService.findByNameAndDepartmentIdAndIsActive("FULL_PERMISSION", department.getId(), true);
                     if (role == null) {
                         Role newRole = new Role();
                         newRole.setName("FULL_PERMISSION");
@@ -2283,7 +2283,7 @@ public class SyncServiceImpl implements SyncService {
                 }
             } else {
                 for (Department department : departmnetList) {
-                    Role role = roleService.findByName("FULL_PERMISSION", department.getId());
+                    Role role = roleService.findByNameAndDepartmentIdAndIsActive("FULL_PERMISSION", department.getId(), true);
                     if (role != null) {
                         role.setName("FULL_PERMISSION");
                         role.setDepartmentId(department.getId());
