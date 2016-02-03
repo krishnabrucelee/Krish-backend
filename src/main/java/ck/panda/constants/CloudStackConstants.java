@@ -405,8 +405,21 @@ public class CloudStackConstants {
 
     /** Constant for asynchronous event type. */
     public static final String CS_COMMAND_EVENT_TYPE = "commandEventType";
-    
+
     /** Constant for volume type. */
     public static final String CS_VOLUME_TYPE = "type";
+
+    /** Constant for network type. */
+    public static final String CS_TYPE = "type";
+
+    /** Constant for network offering traffic type. */
+    public static final String CS_TRAFFIC_TYPE = "traffictype";
+
+    /** Constant for network offering guestIpType type. */
+    public static final String CS_GUEST_IP_TYPE = "guestiptype";
+
+    /** Constant for network offering availability. */
+    public static final String CS_AVAILABILITY = "availability";
+
 
 }

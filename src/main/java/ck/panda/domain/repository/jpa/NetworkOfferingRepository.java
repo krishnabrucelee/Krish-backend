@@ -15,37 +15,37 @@ public interface NetworkOfferingRepository extends PagingAndSortingRepository<Ne
 
     /**
      * Find NetworkOffering by the guestTpType is Isolated.
-     * 
+     *
      * @param pageable Isolated
      * @return guestIpType
      */
-    @Query(value = "select networkOffer from NetworkOffering networkOffer where networkOffer.guestIpType = 'Isolated'")
+    @Query(value = "SELECT networkOffer FROM NetworkOffering networkOffer WHERE networkOffer.guestIpType = 'Isolated'")
     Page<NetworkOffering> findAllByIsolated(Pageable pageable);
 
     /**
      * Find Network by uuid.
-     * 
+     *
      * @param uuid Network uuid.
      * @return uuid
      */
-    @Query(value = "select net from NetworkOffering net where net.uuid LIKE :uuid ")
+    @Query(value = "SELECT net FROM NetworkOffering net WHERE net.uuid LIKE :uuid ")
     NetworkOffering findByUUID(@Param("uuid") String uuid);
 
     /**
      * Find Network by id.
-     * 
+     *
      * @param id Network id.
      * @return id
      */
-    @Query(value = "select net from NetworkOffering net where net.id LIKE :id ")
+    @Query(value = "SELECT net FROM NetworkOffering net WHERE net.id LIKE :id ")
     NetworkOffering findById(@Param("id") Long id);
 
     /**
      * Find NetworkOffering by the guestTpType is Isolated without Pagination.
-     * 
+     *
      * @return guestIpType
      */
-    @Query(value = "select networkOffer from NetworkOffering networkOffer where networkOffer.guestIpType = 'Isolated' AND networkOffer.availability = 'Required'")
+    @Query(value = "SELECT networkOffer FROM NetworkOffering networkOffer WHERE networkOffer.guestIpType = 'Isolated' AND networkOffer.availability = 'Required'")
     List<NetworkOffering> findIsolated();
 
 }

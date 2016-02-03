@@ -11,6 +11,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,8 +20,9 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
+import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.constants.CloudStackConstants;
-import ck.panda.util.JsonValidator;
+import ck.panda.util.JsonUtil;
 
 /**
  * The CloudStack administrator can create any number of custom network offerings, in addition to the default network
@@ -30,15 +32,6 @@ import ck.panda.util.JsonValidator;
 @Table(name = "network_offerings")
 @SuppressWarnings("serial")
 public class NetworkOffering implements Serializable {
-
-    /** Constant for network offering traffic type. */
-    private static final String CS_TRAFFICTYPE = "traffictype";
-
-    /** Constant for network offering guestIpType type. */
-    private static final String CS_GUESTIPTYPE = "guestiptype";
-
-    /** Constant for network offering availability. */
-    private static final String CS_AVAILABILITY = "availability";
 
     /** Id of the NetworkOffering. */
     @Id
@@ -97,11 +90,15 @@ public class NetworkOffering implements Serializable {
     /** Created date and time. */
     @CreatedDate
     @Column(name = "created_date_time")
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private DateTime createdDateTime;
 
     /** Last modified date and time. */
     @LastModifiedDate
     @Column(name = "updated_date_time")
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private DateTime updatedDateTime;
 
     /**
@@ -377,17 +374,17 @@ public class NetworkOffering implements Serializable {
     public static NetworkOffering convert(JSONObject object) throws JSONException {
         NetworkOffering networkOffering = new NetworkOffering();
         try {
-            networkOffering.uuid = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_ID);
-            networkOffering.name = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_NAME);
-            networkOffering.trafficType = JsonValidator.jsonStringValidation(object, CS_TRAFFICTYPE);
-            networkOffering.guestIpType = JsonValidator.jsonStringValidation(object, CS_GUESTIPTYPE);
-            networkOffering.displayText = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_DISPLAY_TEXT);
-            networkOffering.availability = JsonValidator.jsonStringValidation(object, CS_AVAILABILITY);
+            networkOffering.uuid = JsonUtil.getStringValue(object, CloudStackConstants.CS_ID);
+            networkOffering.name = JsonUtil.getStringValue(object, CloudStackConstants.CS_NAME);
+            networkOffering.trafficType = JsonUtil.getStringValue(object, CloudStackConstants.CS_TRAFFIC_TYPE);
+            networkOffering.guestIpType = JsonUtil.getStringValue(object, CloudStackConstants.CS_GUEST_IP_TYPE);
+            networkOffering.displayText = JsonUtil.getStringValue(object, CloudStackConstants.CS_DISPLAY_TEXT);
+            networkOffering.availability = JsonUtil.getStringValue(object, CloudStackConstants.CS_AVAILABILITY);
+            networkOffering.status = Status.valueOf(JsonUtil.getStringValue(object, CloudStackConstants.CS_STATE).toUpperCase());
             networkOffering.setIsActive(true);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return networkOffering;
     }
 
@@ -399,11 +396,9 @@ public class NetworkOffering implements Serializable {
      */
     public static Map<String, NetworkOffering> convert(List<NetworkOffering> networkOfferingList) {
         Map<String, NetworkOffering> networkOfferingMap = new HashMap<String, NetworkOffering>();
-
         for (NetworkOffering networkOffering : networkOfferingList) {
             networkOfferingMap.put(networkOffering.getUuid(), networkOffering);
         }
-
         return networkOfferingMap;
     }
 }

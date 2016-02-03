@@ -392,7 +392,7 @@ public class SyncServiceImpl implements SyncService {
         } catch (Exception e) {
             LOGGER.error("ERROR AT sync Project", e);
         }
-        try {
+      /*  try {
             // 11. Sync OSCategory entity
             this.syncOsCategory();
         } catch (Exception e) {
@@ -403,7 +403,7 @@ public class SyncServiceImpl implements SyncService {
             this.syncOsTypes();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch OS Types", e);
-        }
+        }*/
         try {
             // 13. Sync Network offering entity
             this.syncNetworkOffering();

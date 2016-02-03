@@ -349,7 +349,8 @@ public class NicServiceImpl implements NicService {
                             // 2.2  Call convert by passing JSONObject to Vmipaddress entity and Add
                             // the converted vm ipaddress entity to list
                             VmIpaddress vmIp = VmIpaddress.convert(json);
-                            vmIpList.add(vmIp);
+                            VmIpaddress persistVmIp = vmIpService.save(vmIp);
+                            vmIpList.add(persistVmIp);
                         }
                 }
                 if (vmIpList.size() > 0) {
