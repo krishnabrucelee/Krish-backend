@@ -1364,7 +1364,7 @@ public class SyncServiceImpl implements SyncService {
                 if (volume.getDiskSize() != null) {
                     volume.setDiskSize(csvolume.getDiskSize());
                 } else {
-                    volume.setDiskSize(csvolume.getStorageOffering().getDiskSize());
+                    volume.setDiskSize(storageService.find(csvolume.getStorageOfferingId()).getDiskSize());
                 }
                 volume.setDiskSizeFlag(true);
                 if (volume.getProjectId() != null) {
