@@ -75,12 +75,12 @@ public interface IpaddressService extends CRUDService<IpAddress> {
      * @return ip address.
      * @throws Exception if error occurs.
      */
-    IpAddress dissocitateIpAddress(IpAddress ipAddress) throws Exception;
+    IpAddress dissocitateIpAddress(String ipUuid) throws Exception;
 
     /**
      * Enable static NAT for IP address.
      *
-     * @param ipAddress to be dissociated.
+     * @param ipAddressId to be enable static nat.
      * @param vmId virtual machine id.
      * @param ipaddress guest ipaddress.
      * @return ip address.
