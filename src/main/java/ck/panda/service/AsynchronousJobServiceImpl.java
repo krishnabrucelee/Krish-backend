@@ -212,7 +212,17 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         case EventTypes.EVENT_ISO:
             LOGGER.debug("ISO sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
                 eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
-            asyncTemplates(eventObject);
+            //Update attach/detach ISO
+            if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_ISO_ATTACH) ||
+                    eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_ISO_DETACH)) {
+                VmInstance vmInstance = VmInstance.convert(jobResult.getJSONObject(CloudStackConstants.CS_VM));
+                VmInstance instance = virtualMachineService.findByUUID(vmInstance.getUuid());
+                instance.setIsoName(vmInstance.getIsoName());
+                instance.setIsoId(convertEntityService.getIso(vmInstance.getIso()));
+                virtualMachineService.update(instance);
+            } else {
+                asyncTemplates(eventObject);
+            }
             break;
         case EventTypes.EVENT_VOLUME:
             LOGGER.debug("Volume sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
