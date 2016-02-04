@@ -449,7 +449,7 @@ public class VolumeServiceImpl implements VolumeService {
                     volume.setIsActive(true);
                     volume.setStorageOfferingId(volume.getStorageOfferingId());
                     if (volume.getDiskSize() != null) {
-                        volume.setDiskSize(volume.getDiskSize());
+                        volume.setDiskSize(volume.getDiskSize() * (1024*1024*1024));
                     } else {
                         StorageOffering store = storageService.find(volume.getStorageOfferingId());
                         volume.setDiskSize(store.getDiskSize());
