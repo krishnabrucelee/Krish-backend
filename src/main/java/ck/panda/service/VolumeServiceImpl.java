@@ -73,6 +73,9 @@ public class VolumeServiceImpl implements VolumeService {
     /** Constant for Cloud stack volume resize response. */
     public static final String CS_RESIZE_VOLUME_RESPONSE = "resizevolumeresponse";
 
+    /** Constant for Cloud stack volume conversation in GiB. */
+    public static final Integer CS_CONVERTION_GIB = 1024*1024*1024;
+
     /** Validator attribute. */
     @Autowired
     private AppValidator validator;
@@ -449,7 +452,7 @@ public class VolumeServiceImpl implements VolumeService {
                     volume.setIsActive(true);
                     volume.setStorageOfferingId(volume.getStorageOfferingId());
                     if (volume.getDiskSize() != null) {
-                        volume.setDiskSize(volume.getDiskSize() * (1024*1024*1024));
+                        volume.setDiskSize(volume.getDiskSize() * (CS_CONVERTION_GIB));
                     } else {
                         StorageOffering store = storageService.find(volume.getStorageOfferingId());
                         volume.setDiskSize(store.getDiskSize());
