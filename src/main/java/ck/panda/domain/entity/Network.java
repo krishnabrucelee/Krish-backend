@@ -26,7 +26,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 
@@ -40,8 +39,6 @@ import ck.panda.util.JsonUtil;
 @SuppressWarnings("serial")
 public class Network implements Serializable {
 
-    /** Constant for network type. */
-    private static final String CS_TYPE = "type";
 
     /** Id of the Network. */
     @Id
@@ -212,13 +209,19 @@ public class Network implements Serializable {
     public enum Status {
 
         /** Network will be in a Implemented State. */
-        Implemented,
+        IMPLEMENTED,
 
         /** Network will be in a Allocated State. */
-        Allocated,
+        ALLOCATED,
 
         /** Network will be in a destroyed State. */
-        Destroy
+        DESTROY,
+
+        /** Network will be in a Shutdown State. */
+        SHUTDOWN,
+
+        /** Network will be in a Setup State. */
+        SETUP
     }
 
     /** Set syncFlag. */
@@ -854,13 +857,13 @@ public class Network implements Serializable {
             network.setUuid(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ID));
             network.setTransZoneId((JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ZONE_ID)));
             network.setTransDomainId((JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DOMAIN_ID)));
-            network.setNetworkType(NetworkType.valueOf(JsonUtil.getStringValue(jsonObject, CS_TYPE)));
+            network.setNetworkType(NetworkType.valueOf(JsonUtil.getStringValue(jsonObject,CloudStackConstants.CS_TYPE)));
             network.setTransNetworkOfferingId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_NETWORK_OFFERING_ID));
             network.setcIDR(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_CIDR));
             network.setDisplayText(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DISPLAY_TEXT));
             network.setGateway(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_GATEWAY));
             network.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ACCOUNT));
-            network.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_STATE)));
+            network.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_STATE).toUpperCase()));
             network.setNetMask(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_NETMASK));
             network.setNetworkDomain(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_NETWORK_DOMAIN));
             network.setTransProjectId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_PROJECT_ID));

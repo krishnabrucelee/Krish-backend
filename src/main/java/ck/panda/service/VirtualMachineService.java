@@ -201,4 +201,14 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * @throws Exception if error occurs.
      */
     List<VmInstance> findByVmStatus(Status status) throws Exception;
+
+    /**
+     * Find all vm instances associated with storage offering.
+     *
+     * @param storageOfferingId of the storage offer.
+     * @param status status of vm.
+     * @return vm list.
+     * @throws Exception error occurs.
+     */
+    List<VmInstance> findAllByStorageOfferingIdAndVmStatus(Long storageOfferingId, Status expunging) throws Exception;
 }

@@ -166,7 +166,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
         cloudStackInstanceService.setServer(server);
         String eventObjectResult = cloudStackInstanceService.queryAsyncJobResult(eventObject.getString(CS_ASYNC_JOB_ID),
-        		CloudStackConstants.JSON);
+                CloudStackConstants.JSON);
         JSONObject jobResult = new JSONObject(eventObjectResult).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE)
                 .getJSONObject(CloudStackConstants.CS_JOB_RESULT);
 
@@ -389,7 +389,38 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     vmIn.setVolumeSize(volumeService.findByInstanceAndVolumeType(vmIn.getId()).getDiskSize());
                     vmIn = virtualMachineService.update(vmIn);
                 }
-
+                // Host update & internal name while create vm as user.
+                if (vmIn.getHostId() == null) {
+                    CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
+                    server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
+                    cloudStackInstanceService.setServer(server);
+                    HashMap<String, String> vmMap = new HashMap<String, String>();
+                    vmMap.put(CloudStackConstants.CS_ID, vmIn.getUuid());
+                    String response = cloudStackInstanceService.listVirtualMachines(CloudStackConstants.JSON, vmMap);
+                    JSONArray vmListJSON = null;
+                    JSONObject responseObject = new JSONObject(response)
+                            .getJSONObject(CloudStackConstants.CS_LIST_VM_RESPONSE);
+                    if (responseObject.has(CloudStackConstants.CS_VM)) {
+                        vmListJSON = responseObject.getJSONArray(CloudStackConstants.CS_VM);
+                        // 2. Iterate the json list, convert the single json
+                        // entity to vm.
+                        for (int i = 0, size = vmListJSON.length(); i < size; i++) {
+                            // 2.1 Call convert by passing JSONObject to vm
+                            // entity.
+                            VmInstance CsVmInstance = VmInstance.convert(vmListJSON.getJSONObject(i));
+                            // 2.2 Update vm host by transient variable.
+                            vmIn.setHostId(convertEntityService.getHostId(CsVmInstance.getTransHostId()));
+                            // 2.3 Update internal name.
+                            vmIn.setInstanceInternalName(CsVmInstance.getInstanceInternalName());
+                            if (vmIn.getHostId() != null) {
+                                vmIn.setPodId(convertEntityService
+                                        .getPodIdByHost(convertEntityService.getHostId(CsVmInstance.getTransHostId())));
+                            }
+                            // 3. Update vm for user vm creation.
+                            vmIn = virtualMachineService.update(vmIn);
+                        }
+                    }
+                }
             }
         }
     }

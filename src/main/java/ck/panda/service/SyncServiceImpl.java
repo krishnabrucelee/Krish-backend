@@ -989,6 +989,11 @@ public class SyncServiceImpl implements SyncService {
                 network.setDomainId(csNetwork.getDomainId());
                 network.setZoneId(csNetwork.getZoneId());
                 network.setDisplayText(csNetwork.getDisplayText());
+                network.setStatus(csNetwork.getStatus());
+                network.setNetworkDomain(csNetwork.getNetworkDomain());
+                network.setNetMask(csNetwork.getNetMask());
+                network.setNetworkOfferingId(csNetwork.getNetworkOfferingId());
+                network.setIsActive(true);
 
                 // 3.2 If found, update the network object in app db
                 networkService.update(network);
@@ -1328,54 +1333,54 @@ public class SyncServiceImpl implements SyncService {
      */
     public void syncVolume() throws ApplicationException, Exception {
 
-        // 1. Get all the StorageOffering objects from CS server as hash
+        // 1. Get all the volume objects from CS server as hash
         List<Volume> volumeList = volumeService.findAllFromCSServer();
         HashMap<String, Volume> csVolumeMap = (HashMap<String, Volume>) Volume.convert(volumeList);
 
-        // 2. Get all the osType objects from application
+        // 2. Get all the volume objects from application
         List<Volume> appvolumeServiceList = volumeService.findAll();
 
-        // 3. Iterate application osType list
+        // 3. Iterate application volume list
         for (Volume volume : appvolumeServiceList) {
             volume.setIsSyncFlag(false);
-            // 3.1 Find the corresponding CS server osType object by finding it
+            // 3.1 Find the corresponding CS server volume object by finding it
             // in a hash using uuid
             if (csVolumeMap.containsKey(volume.getUuid())) {
-                Volume csvolume = csVolumeMap.get(volume.getUuid());
-                volume.setName(csvolume.getName());
-                volume.setStorageOfferingId(csvolume.getStorageOfferingId());
-                volume.setZoneId(csvolume.getZoneId());
-                volume.setDomainId(csvolume.getDomainId());
-                volume.setDepartmentId(csvolume.getDepartmentId());
-                volume.setVmInstanceId(csvolume.getVmInstanceId());
-                volume.setVolumeType(csvolume.getVolumeType());
+                Volume csVolume = csVolumeMap.get(volume.getUuid());
+                volume.setName(csVolume.getName());
+                volume.setStorageOfferingId(csVolume.getStorageOfferingId());
+                volume.setZoneId(csVolume.getZoneId());
+                volume.setDomainId(csVolume.getDomainId());
+                volume.setDepartmentId(csVolume.getDepartmentId());
+                volume.setVmInstanceId(csVolume.getVmInstanceId());
+                volume.setVolumeType(csVolume.getVolumeType());
                 volume.setIsActive(true);
                 if (volume.getDiskSize() != null) {
-                    volume.setDiskSize(csvolume.getDiskSize());
+                    volume.setDiskSize(csVolume.getDiskSize());
                 } else {
-                    volume.setDiskSize(csvolume.getStorageOffering().getDiskSize());
+                    volume.setDiskSize(storageService.find(csVolume.getStorageOfferingId()).getDiskSize());
                 }
                 volume.setDiskSizeFlag(true);
                 if (volume.getProjectId() != null) {
-                    volume.setProjectId(csvolume.getProjectId());
+                    volume.setProjectId(csVolume.getProjectId());
                 }
-                volume.setChecksum(csvolume.getChecksum());
-                volume.setStatus(csvolume.getStatus());
-                volume.setDiskMaxIops(csvolume.getDiskMaxIops());
-                volume.setDiskMinIops(csvolume.getDiskMinIops());
-                volume.setCreatedDateTime(csvolume.getCreatedDateTime());
-                volume.setUpdatedDateTime(csvolume.getUpdatedDateTime());
-                // 3.2 If found, update the osType object in app db
+                volume.setChecksum(csVolume.getChecksum());
+                volume.setStatus(csVolume.getStatus());
+                volume.setDiskMaxIops(csVolume.getDiskMaxIops());
+                volume.setDiskMinIops(csVolume.getDiskMinIops());
+                volume.setCreatedDateTime(csVolume.getCreatedDateTime());
+                volume.setUpdatedDateTime(csVolume.getUpdatedDateTime());
+                // 3.2 If found, update the volume object in app db
                 volumeService.update(volume);
 
                 // 3.3 Remove once updated, so that we can have the list of cs
-                // osType which is not added in the app
+                // volume which is not added in the app
                 csVolumeMap.remove(volume.getUuid());
             } else {
                 volumeService.softDelete(volume);
             }
         }
-        // 4. Get the remaining list of cs server hash osType object, then
+        // 4. Get the remaining list of cs server hash volume object, then
         // iterate and
         // add it to app db
         for (String key : csVolumeMap.keySet()) {
@@ -2261,7 +2266,7 @@ public class SyncServiceImpl implements SyncService {
                     permissionService.save(permission);
                 }
                 for (Department department : departmnetList) {
-                    Role role = roleService.findByName("FULL_PERMISSION", department.getId());
+                    Role role = roleService.findByNameAndDepartmentIdAndIsActive("FULL_PERMISSION", department.getId(), true);
                     if (role == null) {
                         Role newRole = new Role();
                         newRole.setName("FULL_PERMISSION");
@@ -2283,7 +2288,7 @@ public class SyncServiceImpl implements SyncService {
                 }
             } else {
                 for (Department department : departmnetList) {
-                    Role role = roleService.findByName("FULL_PERMISSION", department.getId());
+                    Role role = roleService.findByNameAndDepartmentIdAndIsActive("FULL_PERMISSION", department.getId(), true);
                     if (role != null) {
                         role.setName("FULL_PERMISSION");
                         role.setDepartmentId(department.getId());
