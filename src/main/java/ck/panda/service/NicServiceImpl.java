@@ -410,7 +410,6 @@ public class NicServiceImpl implements NicService {
     }
 
     @Override
-    @PreAuthorize("hasPermission(#nic.getSyncFlag(),'RELEASE_SECONDARY_IP_ADDRESS')")
     public Nic releaseSecondaryIP(Nic nic, Long vmIpaddressId)throws Exception {
          try {
              // Get vm ipaddress object by id.
