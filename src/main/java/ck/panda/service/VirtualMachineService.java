@@ -140,6 +140,7 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * Find list of vm Instances with pagination.
      *
      * @param pagingAndSorting parameters.
+     * @param userId user id.
      * @return page result of intances.
      * @throws Exception if error occurs.
      */
@@ -148,6 +149,7 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
     /**
      * Find list of vm Instances without pagination.
      *
+     * @param userId user id.
      * @return result of instance.
      * @throws Exception if error occurs.
      */
@@ -206,9 +208,18 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * Find all vm instances associated with storage offering.
      *
      * @param storageOfferingId of the storage offer.
-     * @param status status of vm.
+     * @param expunging status of vm.
      * @return vm list.
      * @throws Exception error occurs.
      */
     List<VmInstance> findAllByStorageOfferingIdAndVmStatus(Long storageOfferingId, Status expunging) throws Exception;
+
+    /**
+     * Find vm instance with VNC password by id.
+     *
+     * @param id instance id.
+     * @return instance.
+     * @throws Exception error occurs.
+     */
+    VmInstance findByIdWithVncPassword(Long id) throws Exception;
 }
