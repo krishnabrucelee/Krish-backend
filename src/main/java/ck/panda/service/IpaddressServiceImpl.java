@@ -132,7 +132,7 @@ public class IpaddressServiceImpl implements IpaddressService {
             ipaddress.setIsActive(false);
             ipaddress.setState(IpAddress.State.FREE);
         } else {
-            ipaddress = this.dissocitateIpAddress(ipaddress);
+            ipaddress = this.dissocitateIpAddress(ipaddress.getUuid());
         }
         return ipRepo.save(ipaddress);
     }
@@ -195,12 +195,11 @@ public class IpaddressServiceImpl implements IpaddressService {
     }
 
     @Override
-    public IpAddress dissocitateIpAddress(IpAddress ipAddress) throws Exception {
+    public IpAddress dissocitateIpAddress(String ipUuid) throws Exception {
+        IpAddress ipAddress = findbyUUID(ipUuid);
         try {
-            ipAddress.setIsActive(false);
-            ipAddress.setState(State.FREE);
             configServer.setUserServer();
-            String deleteResponse = csipaddressService.disassociateIpAddress(ipAddress.getUuid(), "json");
+            String deleteResponse = csipaddressService.disassociateIpAddress(ipUuid, "json");
             JSONObject jobId = new JSONObject(deleteResponse).getJSONObject("disassociateipaddressresponse");
             if (jobId.has("errorcode")) {
                 Errors errors = validator.sendGlobalError(jobId.getString("errortext"));
@@ -212,6 +211,8 @@ public class IpaddressServiceImpl implements IpaddressService {
                 String jobResponse = csipaddressService.associatedJobResult(jobId.getString("jobid"), "json");
                 JSONObject jobresults = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
             }
+            ipAddress.setIsActive(false);
+            ipAddress.setState(State.FREE);
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException(e.getMessage());
         }
