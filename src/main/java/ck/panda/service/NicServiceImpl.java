@@ -221,13 +221,13 @@ public class NicServiceImpl implements NicService {
                     instance.getUuid(), "json", optional);
             JSONObject defaultNicResponse = new JSONObject(updateNicResponse)
                     .getJSONObject("updatedefaultnicforvirtualmachineresponse");
+            //TODO: temporarily adding thread to get asynchronous job status. This will be removed when web socket is done.
+            Thread.sleep(6000);
             if (defaultNicResponse.has("jobid")) {
                 String jobResponse = cloudStackInstanceService
                         .queryAsyncJobResult(defaultNicResponse.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("1")) {
-                    //TODO: temporarily adding thread to get asynchronous job status. This will be removed when socket is done.
-                    Thread.sleep(6000);
                     Nic nicDefault = nicRepo.findByInstanceIdAndIsDefault(nic.getVmInstanceId(), true);
                     nicDefault.setIsDefault(false);
                     //JSONObject jobresponse = jobresult.getJSONObject("jobresult");
@@ -290,6 +290,8 @@ public class NicServiceImpl implements NicService {
                     instance.getUuid(), optional, CloudStackConstants.JSON);
             JSONObject deleteNicResponse = new JSONObject(removeNicResponse)
                     .getJSONObject(CS_REMOVE_NIC);
+            //TODO: temporarily adding thread to get asynchronous job status. This will be removed when web socket is done.
+            Thread.sleep(6000);
             if (deleteNicResponse.has(CloudStackConstants.CS_JOB_ID)) {
                 String jobResponse = cloudStackInstanceService.queryAsyncJobResult(deleteNicResponse.getString(CloudStackConstants.CS_JOB_ID),
                         CloudStackConstants.JSON);
