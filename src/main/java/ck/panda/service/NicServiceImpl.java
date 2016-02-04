@@ -112,6 +112,8 @@ public class NicServiceImpl implements NicService {
                     nic.getVmInstance().getUuid(), optional, "json");
             JSONObject addNicResponse = new JSONObject(createNicResponse)
                     .getJSONObject("addnictovirtualmachineresponse");
+            //TODO: temporarily adding thread to get asynchronous job status. This will be removed when web socket is done.
+            Thread.sleep(6000);
             if (addNicResponse.has("jobid")) {
                 String jobResponse = cloudStackInstanceService.queryAsyncJobResult(addNicResponse.getString("jobid"),
                         "json");
@@ -223,10 +225,9 @@ public class NicServiceImpl implements NicService {
                 String jobResponse = cloudStackInstanceService
                         .queryAsyncJobResult(defaultNicResponse.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
-
-
                     if (jobresult.getString("jobstatus").equals("1")) {
-                    Thread.sleep(5000);
+                    //TODO: temporarily adding thread to get asynchronous job status. This will be removed when socket is done.
+                    Thread.sleep(6000);
                     Nic nicDefault = nicRepo.findByInstanceIdAndIsDefault(nic.getVmInstanceId(), true);
                     nicDefault.setIsDefault(false);
                     //JSONObject jobresponse = jobresult.getJSONObject("jobresult");
