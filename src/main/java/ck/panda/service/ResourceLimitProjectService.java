@@ -46,4 +46,13 @@ public interface ResourceLimitProjectService extends CRUDService<ResourceLimitPr
     Long findByResourceCountByProjectAndResourceType(Long departmentId, ResourceLimitProject.ResourceType resourceType,
             Long projectId, Boolean isActive) throws Exception;
 
+    /**
+     * To get list of Volume from cloudstack server.
+     *
+     * @param projectId project id.
+     * @return ResourceLimit list from server
+     * @throws Exception unhandled errors.
+     */
+    List<ResourceLimitProject> findAllFromCSServerProject(String projectId) throws Exception;
+
 }

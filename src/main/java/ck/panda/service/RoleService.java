@@ -17,23 +17,25 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 public interface RoleService extends CRUDService<Role> {
 
     /**
-     * Method to find name uniqueness from department in adding Roles.
+     * Find role with permission list.
      *
-     * @param name - name of the role
-     * @param departmentId - department id
+     * @param name of the role
+     * @param departmentId id of the department
+     * @param isActive state of the role active/inactive
      * @return role name
-     * @throws Exception - if error occurs
+     * @throws Exception if error occurs
      */
-    Role findByName(String name, Long departmentId) throws Exception;
+    Role findWithPermissionsByNameDepartmentAndIsActive(String name, Long departmentId, Boolean isActive) throws Exception;
 
     /**
      * Method to find list of roles by department.
      *
-     * @param department - department entity
+     * @param department reference of the department
+     * @param isActive state of the role active/inactive
      * @return list of roles
-     * @throws Exception - if error occurs
+     * @throws Exception if error occurs
      */
-    List<Role> getRolesByDepartment(Department department) throws Exception;
+    List<Role> findAllByDepartmentAndIsActiveExceptName(Department department, Boolean isActive, String name) throws Exception;
 
     /**
      * Find all the roles without full permission.
@@ -47,7 +49,7 @@ public interface RoleService extends CRUDService<Role> {
     /**
      * Soft delete for roles.
      *
-     * @param role role
+     * @param role reference of the role
      * @return role delete
      * @throws Exception if error occurs.
      */
@@ -56,21 +58,31 @@ public interface RoleService extends CRUDService<Role> {
     /**
      * Method to find role by name and department id and active.
      *
-     * @param name - name of the role
-     * @param departmentId - department id
-     * @param isActive - true
+     * @param name of the role
+     * @param departmentId id of the department
+     * @param isActive state of the role active/inactive
      * @return role
-     * @throws Exception - if error occurs
+     * @throws Exception if error occurs
      */
     Role findByNameAndDepartmentIdAndIsActive(String name, Long departmentId, Boolean isActive) throws Exception;
 
     /**
      * Find role by Department id.
      *
-     * @param id department id.
-     * @param isActive -true
+     * @param departmentId of the department.
+     * @param isActive state of the role active/inactive
      * @return role
      * @throws Exception if error occurs.
      */
-    List<Role> findByDepartmentAndIsActive(Long id, Boolean isActive) throws Exception;
+    List<Role> findByDepartmentAndIsActive(Long departmentId, Boolean isActive) throws Exception;
+
+    /**
+     * Find all the roles with user id.
+     *
+     * @param pagingAndSorting pagination reference
+     * @param userId id of the user
+     * @return roles list
+     * @throws Exception if error occurs.
+     */
+    Page<Role> findAllByUserId(PagingAndSorting pagingAndSorting, Long userId) throws Exception;
 }

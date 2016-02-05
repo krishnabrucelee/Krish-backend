@@ -14,38 +14,38 @@ import ck.panda.domain.entity.NetworkOffering;
 public interface NetworkOfferingRepository extends PagingAndSortingRepository<NetworkOffering, Long> {
 
     /**
-     * Find NetworkOffering by the guestTpType is Isolated.
-     * 
+     * Find NetworkOffering by the guest Ip Type is Isolated.
+     *
      * @param pageable Isolated
      * @return guestIpType
      */
-    @Query(value = "select networkOffer from NetworkOffering networkOffer where networkOffer.guestIpType = 'Isolated'")
-    Page<NetworkOffering> findAllByIsolated(Pageable pageable);
+    @Query(value = "SELECT networkOffer FROM NetworkOffering networkOffer WHERE networkOffer.guestIpType = :guestIpType")
+    Page<NetworkOffering> findAllByIsolated(Pageable pageable, @Param("guestIpType") String guestIpType );
 
     /**
      * Find Network by uuid.
-     * 
+     *
      * @param uuid Network uuid.
      * @return uuid
      */
-    @Query(value = "select net from NetworkOffering net where net.uuid LIKE :uuid ")
+    @Query(value = "SELECT net FROM NetworkOffering net WHERE net.uuid LIKE :uuid ")
     NetworkOffering findByUUID(@Param("uuid") String uuid);
 
     /**
      * Find Network by id.
-     * 
+     *
      * @param id Network id.
      * @return id
      */
-    @Query(value = "select net from NetworkOffering net where net.id LIKE :id ")
+    @Query(value = "SELECT net FROM NetworkOffering net WHERE net.id LIKE :id ")
     NetworkOffering findById(@Param("id") Long id);
 
     /**
      * Find NetworkOffering by the guestTpType is Isolated without Pagination.
-     * 
+     *
      * @return guestIpType
      */
-    @Query(value = "select networkOffer from NetworkOffering networkOffer where networkOffer.guestIpType = 'Isolated' AND networkOffer.availability = 'Required'")
-    List<NetworkOffering> findIsolated();
+    @Query(value = "SELECT networkOffer FROM NetworkOffering networkOffer WHERE networkOffer.guestIpType = :guestIpType AND networkOffer.availability = :availability")
+    List<NetworkOffering> findByIsolatedAndRequired(@Param("guestIpType") String guestIpType, @Param("availability") String availability);
 
 }

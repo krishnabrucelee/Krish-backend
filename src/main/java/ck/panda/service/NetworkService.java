@@ -63,10 +63,11 @@ public interface NetworkService extends CRUDService<Network> {
      * Paging and Sorting for displaying more number of elements in list which are active.
      *
      * @param page pagination
+     * @param userId id of the user
      * @return sorted values.
      * @throws Exception unhandled errors.
      */
-    Page<Network> findAllByActive(PagingAndSorting page) throws Exception;
+    Page<Network> findAllByActive(PagingAndSorting page, Long userId) throws Exception;
 
     /**
      * To get list of networks from project.
@@ -81,9 +82,20 @@ public interface NetworkService extends CRUDService<Network> {
     /**
      * To get active networks list.
      *
-     * @param network object to get list.
+     * @param isActive status of the network
      * @return network
      * @throws Exception if error occurs.
      */
     List<Network> findAllByActive(Boolean isActive) throws Exception;
+
+    /**
+     * Save method in which userId is passed for tokenDetails.
+     *
+     * @param network network
+     * @param userId id of the user
+     * @return network
+     * @throws Exception unHandled errors
+     */
+    Network save(Network network, Long userId) throws Exception;
+
 }

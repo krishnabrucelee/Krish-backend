@@ -39,13 +39,13 @@ import ck.panda.util.JsonUtil;
 @SuppressWarnings("serial")
 public class Department implements Serializable {
 
-    /** Id of the Department. */
+    /** Id of the department. */
     @Id
     @GeneratedValue
     @Column(name = "id")
     private Long id;
 
-    /** User uuid. */
+    /** Cloudstack's account uuid. */
     @Column(name = "uuid")
     private String uuid;
 
@@ -62,7 +62,7 @@ public class Department implements Serializable {
     @OneToMany
     private List<User> user;
 
-    /** Description of the Department. */
+    /** Description of the department. */
     @Column(name = "description")
     private String description;
 
@@ -70,19 +70,19 @@ public class Department implements Serializable {
     @Column(name = "user_name")
     private String userName;
 
-    /** Set syncFlag. */
+    /** Set sync status. */
     @Transient
     private Boolean syncFlag;
 
-    /** User type of the user. */
+    /** Type of the department. */
     @Column(name = "account_type")
     private AccountType type;
 
-    /** Check whether Department is in active state or in active state. */
+    /** Check whether department is active state or in active state. */
     @Column(name = "is_active")
     private Boolean isActive;
 
-    /** Status for Department, whether it is Deleted, Disabled etc . */
+    /** Status for department, whether it is Deleted, Disabled etc . */
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private Status status;
@@ -92,12 +92,12 @@ public class Department implements Serializable {
     @Column(name = "version")
     private Long version;
 
-    /** Created by user. */
+    /** Created user id. */
     @CreatedBy
     @Column(name = "created_user_id")
     private Long createdBy;
 
-    /** Last updated by user. */
+    /** Last updated user id. */
     @LastModifiedBy
     @Column(name = "upated_user_id")
     private Long updatedBy;
@@ -227,7 +227,7 @@ public class Department implements Serializable {
     }
 
     /**
-     * Get the createdBy.
+     * Get the created user id.
      *
      * @return createdBy
      */
@@ -236,7 +236,7 @@ public class Department implements Serializable {
     }
 
     /**
-     * Set the createdBy.
+     * Set the created user id.
      *
      * @param createdBy the User to set
      */
@@ -245,16 +245,7 @@ public class Department implements Serializable {
     }
 
     /**
-     * Set the createdBy.
-     *
-     * @param createdBy the User to set
-     */
-    /*
-     * public void setCreatedBy(User createdBy) { this.createdBy = createdBy.getId(); }
-     */
-
-    /**
-     * Get the updatedBy.
+     * Get the update user id.
      *
      * @return updatedBy
      */
@@ -263,7 +254,7 @@ public class Department implements Serializable {
     }
 
     /**
-     * Set the updatedBy.
+     * Set the update user id.
      *
      * @param updatedBy the User to set
      */
@@ -272,7 +263,7 @@ public class Department implements Serializable {
     }
 
     /**
-     * Get the createdDateTime.
+     * Get the created date and time.
      *
      * @return createdDateTime
      */
@@ -281,7 +272,7 @@ public class Department implements Serializable {
     }
 
     /**
-     * Set the createdDateTime.
+     * Set the created date and time.
      *
      * @param createdDateTime the DateTime to set
      */
@@ -290,7 +281,7 @@ public class Department implements Serializable {
     }
 
     /**
-     * Get the updatedDateTime.
+     * Get the updated date and time.
      *
      * @return updatedDateTime
      */
@@ -299,7 +290,7 @@ public class Department implements Serializable {
     }
 
     /**
-     * Set the updatedDateTime.
+     * Set the updated date and time.
      *
      * @param updatedDateTime the DateTime to set
      */
@@ -308,7 +299,7 @@ public class Department implements Serializable {
     }
 
     /**
-     * Get is Active state of the Department.
+     * Get state of the department.
      *
      * @return the isActive
      */
@@ -317,7 +308,7 @@ public class Department implements Serializable {
     }
 
     /**
-     * Set is Active state of the Department.
+     * Set state of the department.
      *
      * @param isActive the isActive to set
      */
@@ -398,6 +389,8 @@ public class Department implements Serializable {
     }
 
     /**
+     * Get the list of users of the department.
+     *
      * @return the user
      */
     public List<User> getUser() {
@@ -405,6 +398,8 @@ public class Department implements Serializable {
     }
 
     /**
+     * Set the list of users of the department.
+     *
      * @param user the user to set
      */
     public void setUser(List<User> user) {
@@ -412,13 +407,16 @@ public class Department implements Serializable {
     }
 
     /**
+     * Get the sync status.
+     *
      * @return the syncFlag
      */
     public Boolean getSyncFlag() {
         return syncFlag;
     }
 
-    /**
+    /** Set the sync status.
+     *
      * @param syncFlag the syncFlag to set
      */
     public void setSyncFlag(Boolean syncFlag) {
@@ -426,7 +424,7 @@ public class Department implements Serializable {
     }
 
     /**
-     * Get transient Domain Id.
+     * Get transient domain id.
      *
      * @return the transDomainId
      */
@@ -435,7 +433,7 @@ public class Department implements Serializable {
     }
 
     /**
-     * Set the transDomainId .
+     * Set the trans domain id .
      *
      * @param transDomainId to set
      */

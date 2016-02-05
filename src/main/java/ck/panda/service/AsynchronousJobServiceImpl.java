@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Domain;
@@ -148,6 +150,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /** Used for setting optional values for resource count. */
     HashMap<String, String> domainCountMap = new HashMap<String, String>();
 
+    /** Asynchronous job id. */
+    public static final String CS_ASYNC_JOB_ID = "jobId";
+
     /**
      * Sync with CloudStack server list via Asynchronous Job.
      *
@@ -160,82 +165,102 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
         server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
         cloudStackInstanceService.setServer(server);
-        String eventObjectResult = cloudStackInstanceService.queryAsyncJobResult(eventObject.getString("jobId"),
-                "json");
-        JSONObject jobresult = new JSONObject(eventObjectResult).getJSONObject("queryasyncjobresultresponse")
-                .getJSONObject("jobresult");
+        String eventObjectResult = cloudStackInstanceService.queryAsyncJobResult(eventObject.getString(CS_ASYNC_JOB_ID),
+                CloudStackConstants.JSON);
+        JSONObject jobResult = new JSONObject(eventObjectResult).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE)
+                .getJSONObject(CloudStackConstants.CS_JOB_RESULT);
 
         String commandText = null;
-        if (eventObject.getString("commandEventType").contains(".")) {
-            commandText = eventObject.getString("commandEventType").substring(0,
-                    eventObject.getString("commandEventType").indexOf('.', 0)) + ".";
+        if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).contains(".")) {
+            commandText = eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).substring(0,
+                    eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).indexOf('.', 0)) + ".";
         } else {
-            commandText = eventObject.getString("commandEventType");
+            commandText = eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE);
         }
         switch (commandText) {
         case EventTypes.EVENT_VM:
-            LOGGER.debug("VM Sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
-                syncvirtualmachine(jobresult, eventObject);
+            LOGGER.debug("VM Sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+            syncVirtualMachine(jobResult, eventObject);
             break;
         case EventTypes.EVENT_NETWORK:
-            if (!eventObject.getString("commandEventType").contains("OFFERING")) {
-                LOGGER.debug("Network sync",
-                        eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
-                asyncNetwork(jobresult, eventObject);
+            if (!eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).contains("OFFERING")) {
+                LOGGER.debug("Network sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                    eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+                asyncNetwork(jobResult, eventObject);
             }
             break;
         case EventTypes.EVENT_FIREWALL:
-            if (eventObject.getString("commandEventType").contains("FIREWALL")) {
-                LOGGER.debug("Firewall sync",
-                        eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
-                asyncFirewall(jobresult, eventObject);
+            if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).contains("FIREWALL")) {
+                LOGGER.debug("Firewall sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                    eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+                asyncFirewall(jobResult, eventObject);
             }
             break;
         case EventTypes.EVENT_NAT:
-            if (eventObject.getString("commandEventType").contains("STATICNAT")) {
-                LOGGER.debug("Nat sync",
-                        eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
-                asyncNat(jobresult, eventObject);
+            if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).contains("STATICNAT")) {
+                LOGGER.debug("Nat sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                    eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+                asyncNat(jobResult, eventObject);
             }
             break;
         case EventTypes.EVENT_TEMPLATE:
-            LOGGER.debug("templates sync",
-                    eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+            LOGGER.debug("templates sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
             asyncTemplates(eventObject);
             break;
+        case EventTypes.EVENT_ISO:
+            LOGGER.debug("ISO sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+            //Update attach/detach ISO
+            if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_ISO_ATTACH) ||
+                    eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_ISO_DETACH)) {
+                VmInstance vmInstance = VmInstance.convert(jobResult.getJSONObject(CloudStackConstants.CS_VM));
+                VmInstance instance = virtualMachineService.findByUUID(vmInstance.getUuid());
+                instance.setIsoName(vmInstance.getIsoName());
+                instance.setIsoId(convertEntityService.getIso(vmInstance.getIso()));
+                virtualMachineService.update(instance);
+            } else {
+                asyncTemplates(eventObject);
+            }
+            break;
         case EventTypes.EVENT_VOLUME:
-            LOGGER.debug("Volume sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
-            asyncVolume(jobresult, eventObject);
+            LOGGER.debug("Volume sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+            asyncVolume(jobResult, eventObject);
             break;
         case EventTypes.EVENT_NIC:
-            LOGGER.debug("NIC sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
-            asyncNic(jobresult, eventObject);
+            LOGGER.debug("NIC sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+            asyncNic(jobResult, eventObject);
             break;
         case EventTypes.EVENT_PORTFORWARDING:
-            LOGGER.debug("NET sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
-            asyncNet(jobresult, eventObject);
+            LOGGER.debug("NET sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+            asyncNet(jobResult, eventObject);
             break;
         case EventTypes.EVENT_LOADBALANCER:
-            LOGGER.debug("LB sync", eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
-            asyncLb(jobresult, eventObject);
+            LOGGER.debug("LB sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+            asyncLb(jobResult, eventObject);
             break;
         default:
-            LOGGER.debug("No sync required",
-                    eventObject.getString("jobId") + "===" + eventObject.getString("commandEventType"));
+            LOGGER.debug("No sync required", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
         }
     }
 
     /**
      * Sync with CloudStack server virtual machine.
      *
-     * @param jobresult job result
+     * @param jobResult job result
      * @param eventObject network event object
      * @throws Exception cloudstack unhandled errors
      */
-    public void syncvirtualmachine(JSONObject jobresult, JSONObject eventObject) throws Exception {
+    public void syncVirtualMachine(JSONObject jobResult, JSONObject eventObject) throws Exception {
 
-        if (jobresult.has("virtualmachine")) {
-            VmInstance vmInstance = VmInstance.convert(jobresult.getJSONObject("virtualmachine"));
+        if (jobResult.has("virtualmachine")) {
+            VmInstance vmInstance = VmInstance.convert(jobResult.getJSONObject("virtualmachine"));
             VmInstance instance = virtualMachineService.findByUUID(vmInstance.getUuid());
             VmInstance vmIn = null;
             if (instance != null) {
@@ -340,15 +365,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     }
                     // 3.2 If found, update the vm object in app db
                     vmIn = virtualMachineService.update(instance);
-
-                    // Resource count update for domain
-                    if (instance.getProjectId() != null) {
-                        domainCountMap.put("projectid",
-                                convertEntityService.getProjectById(instance.getProjectId()).getUuid());
-                    } else {
-                        domainCountMap.put("account",
-                                convertEntityService.getDepartmentUsernameById(instance.getDepartmentId()));
-                    }
+                    // Resource count for domain
                     String csResponse = cloudStackResourceCapacity.updateResourceCount(
                             convertEntityService.getDomainById(instance.getDomainId()).getUuid(), domainCountMap,
                             "json");
@@ -382,7 +399,38 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     vmIn.setVolumeSize(volumeService.findByInstanceAndVolumeType(vmIn.getId()).getDiskSize());
                     vmIn = virtualMachineService.update(vmIn);
                 }
-
+                // Host update & internal name while create vm as user.
+                if (vmIn.getHostId() == null) {
+                    CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
+                    server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
+                    cloudStackInstanceService.setServer(server);
+                    HashMap<String, String> vmMap = new HashMap<String, String>();
+                    vmMap.put(CloudStackConstants.CS_ID, vmIn.getUuid());
+                    String response = cloudStackInstanceService.listVirtualMachines(CloudStackConstants.JSON, vmMap);
+                    JSONArray vmListJSON = null;
+                    JSONObject responseObject = new JSONObject(response)
+                            .getJSONObject(CloudStackConstants.CS_LIST_VM_RESPONSE);
+                    if (responseObject.has(CloudStackConstants.CS_VM)) {
+                        vmListJSON = responseObject.getJSONArray(CloudStackConstants.CS_VM);
+                        // 2. Iterate the json list, convert the single json
+                        // entity to vm.
+                        for (int i = 0, size = vmListJSON.length(); i < size; i++) {
+                            // 2.1 Call convert by passing JSONObject to vm
+                            // entity.
+                            VmInstance CsVmInstance = VmInstance.convert(vmListJSON.getJSONObject(i));
+                            // 2.2 Update vm host by transient variable.
+                            vmIn.setHostId(convertEntityService.getHostId(CsVmInstance.getTransHostId()));
+                            // 2.3 Update internal name.
+                            vmIn.setInstanceInternalName(CsVmInstance.getInstanceInternalName());
+                            if (vmIn.getHostId() != null) {
+                                vmIn.setPodId(convertEntityService
+                                        .getPodIdByHost(convertEntityService.getHostId(CsVmInstance.getTransHostId())));
+                            }
+                            // 3. Update vm for user vm creation.
+                            vmIn = virtualMachineService.update(vmIn);
+                        }
+                    }
+                }
             }
         }
     }
@@ -474,15 +522,15 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with CloudStack server Network from Asynchronous Job.
      *
-     * @param jobresult job result
+     * @param jobResult job result
      * @param eventObject network event object
      * @throws ApplicationException unhandled application errors
      * @throws Exception cloudstack unhandled errors
      */
-    public void asyncNetwork(JSONObject jobresult, JSONObject eventObject) throws ApplicationException, Exception {
+    public void asyncNetwork(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
 
         if (eventObject.getString("commandEventType").equals("NETWORK.UPDATE")) {
-            Network csNetwork = Network.convert(jobresult.getJSONObject("network"));
+            Network csNetwork = Network.convert(jobResult.getJSONObject("network"));
             Network network = networkService.findByUUID(csNetwork.getUuid());
             network.setSyncFlag(false);
             if (csNetwork.getUuid().equals(network.getUuid())) {
@@ -502,13 +550,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 networkService.update(network);
 
                 // Resource count for domain
-                if (network.getProjectId() != null) {
-                    domainCountMap.put("projectid",
-                            convertEntityService.getProjectById(network.getProjectId()).getUuid());
-                } else {
-                    domainCountMap.put("account",
-                            convertEntityService.getDepartmentUsernameById(network.getDepartmentId()));
-                }
                 String csResponse = cloudStackResourceCapacity.updateResourceCount(
                         convertEntityService.getDomainById(network.getDomainId()).getUuid(), domainCountMap, "json");
                 convertEntityService.resourceCount(csResponse);
@@ -521,13 +562,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             networkService.softDelete(network);
 
             // Resource count for domain
-            if (network.getProjectId() != null) {
-                domainCountMap.put("projectid",
-                        convertEntityService.getProjectById(network.getProjectId()).getUuid());
-            } else {
-                domainCountMap.put("account",
-                        convertEntityService.getDepartmentUsernameById(network.getDepartmentId()));
-            }
             String csResponse = cloudStackResourceCapacity.updateResourceCount(
                     convertEntityService.getDomainById(network.getDomainId()).getUuid(), domainCountMap, "json");
             convertEntityService.resourceCount(csResponse);
@@ -537,14 +571,14 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with CloudStack server Firewall from Asynchronous Job.
      *
-     * @param jobresult job result
+     * @param jobResult job result
      * @param eventObject network event object
      * @throws ApplicationException unhandled application errors
      * @throws Exception cloudstack unhandled errors
      */
-    public void asyncFirewall(JSONObject jobresult, JSONObject eventObject) throws ApplicationException, Exception {
+    public void asyncFirewall(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
         if (eventObject.getString("commandEventType").equals("FIREWALL.EGRESS.OPEN")) {
-            FirewallRules csFirewallRule = FirewallRules.convert(jobresult.getJSONObject("firewallrule"),
+            FirewallRules csFirewallRule = FirewallRules.convert(jobResult.getJSONObject("firewallrule"),
                     FirewallRules.TrafficType.EGRESS, FirewallRules.Purpose.FIREWALL);
             FirewallRules egress = egressRuleService.findByUUID(csFirewallRule.getUuid());
             if (egress != null) {
@@ -606,7 +640,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             }
         }
         if (eventObject.getString("commandEventType").equals("FIREWALL.OPEN")) {
-            FirewallRules csFirewallRule = FirewallRules.convert(jobresult.getJSONObject("firewallrule"),
+            FirewallRules csFirewallRule = FirewallRules.convert(jobResult.getJSONObject("firewallrule"),
                     FirewallRules.TrafficType.INGRESS, FirewallRules.Purpose.FIREWALL);
             FirewallRules ingress = egressRuleService.findByUUID(csFirewallRule.getUuid());
             if (ingress != null) {
@@ -659,12 +693,12 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with CloudStack server Ip address for sourcenat from Asynchronous Job.
      *
-     * @param jobresult job result
+     * @param jobResult job result
      * @param eventObject network event object
      * @throws ApplicationException unhandled application errors
      * @throws Exception cloudstack unhandled errors
      */
-    public void asyncNat(JSONObject jobresult, JSONObject eventObject) throws ApplicationException, Exception {
+    public void asyncNat(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
         if (eventObject.getString("commandEventType").equals("STATICNAT.DISABLE")) {
             JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
             IpAddress ipAddress = ipService.findbyUUID(json.getString("ipaddressid"));
@@ -679,14 +713,14 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with CloudStack server Ip address from Asynchronous Job.
      *
-     * @param jobresult job result
+     * @param jobResult job result
      * @param eventObject network event object
      * @throws ApplicationException unhandled application errors
      * @throws Exception cloudstack unhandled errors
      */
-    public void asyncIpAddress(JSONObject jobresult, JSONObject eventObject) throws ApplicationException, Exception {
+    public void asyncIpAddress(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
         if (eventObject.getString("commandEventType").equals("NET.IPASSIGN")) {
-            IpAddress ipaddress = IpAddress.convert(jobresult.getJSONObject("ipaddress"));
+            IpAddress ipaddress = IpAddress.convert(jobResult.getJSONObject("ipaddress"));
             IpAddress persistIp = ipService.findbyUUID(ipaddress.getUuid());
             if (persistIp != null) {
                 persistIp.setSyncFlag(false);
@@ -716,14 +750,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                             .getDomainId());
                     ipService.update(persistIp);
 
-                 // Resource count for domain
-                    if (persistIp.getProjectId() != null) {
-                        domainCountMap.put("projectid",
-                                convertEntityService.getProjectById(persistIp.getProjectId()).getUuid());
-                    } else {
-                        domainCountMap.put("account",
-                                convertEntityService.getDepartmentUsernameById(persistIp.getDepartmentId()));
-                    }
+                    // Resource count for domain
                     String csResponse = cloudStackResourceCapacity.updateResourceCount(
                             convertEntityService.getDomainById(persistIp.getDomainId()).getUuid(), domainCountMap,
                             "json");
@@ -756,13 +783,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 ipService.softDelete(ipAddress);
 
                 // Resource count for domain
-                if (ipAddress.getProjectId() != null) {
-                    domainCountMap.put("projectid",
-                            convertEntityService.getProjectById(ipAddress.getProjectId()).getUuid());
-                } else {
-                    domainCountMap.put("account",
-                            convertEntityService.getDepartmentUsernameById(ipAddress.getDepartmentId()));
-                }
                 String csResponse = cloudStackResourceCapacity.updateResourceCount(
                         convertEntityService.getDomainById(ipAddress.getDomainId()).getUuid(), domainCountMap, "json");
                 convertEntityService.resourceCount(csResponse);
@@ -780,9 +800,15 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      */
     public void asyncTemplates(JSONObject eventObject) throws ApplicationException, Exception {
 
-        if (eventObject.getString("commandEventType").equals("TEMPLATE.DELETE")) {
-            JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
-            Template template = templateService.findByUUID(json.getString("id"));
+        if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_TEMPLATE_DELETE)) {
+            JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
+            Template template = templateService.findByUUID(json.getString(CloudStackConstants.CS_ID));
+            template.setSyncFlag(false);
+            templateService.softDelete(template);
+        }
+        if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_ISO_TEMPLATE_DELETE)) {
+            JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
+            Template template = templateService.findByUUID(json.getString(CloudStackConstants.CS_ID));
             template.setSyncFlag(false);
             templateService.softDelete(template);
         }
@@ -791,16 +817,16 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with Cloud Server Volume.
      *
-     * @param jobresult job result
+     * @param jobResult job result
      * @param eventObject volume event object
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    public void asyncVolume(JSONObject jobresult, JSONObject eventObject) throws ApplicationException, Exception {
+    public void asyncVolume(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
 
         if (eventObject.getString("commandEventType").equals("VOLUME.CREATE")
                 || eventObject.getString("commandEventType").equals("VOLUME.UPLOAD")) {
-            Volume volume = Volume.convert(jobresult.getJSONObject("volume"));
+            Volume volume = Volume.convert(jobResult.getJSONObject("volume"));
             volume.setIsSyncFlag(false);
             volume.setZoneId(convertEntityService.getZoneId(volume.getTransZoneId()));
             volume.setDomainId(convertEntityService.getDomainId(volume.getTransDomainId()));
@@ -819,18 +845,13 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             } else {
                 volume.setDiskSizeFlag(true);
             }
-            if (jobresult.getJSONObject("volume").getString("state").equalsIgnoreCase("ALLOCATED")) {
+            if (jobResult.getJSONObject("volume").getString("state").equalsIgnoreCase("ALLOCATED")) {
                 volume.setStatus(Status.ALLOCATED);
             }
             if (volumeService.findByUUID(volume.getUuid()) == null) {
                 volumeService.save(volume);
 
                 // Resource count update for domain
-                if (volume.getProjectId() != null) {
-                    domainCountMap.put("projectid", convertEntityService.getProjectById(volume.getProjectId()).getUuid());
-                } else {
-                    domainCountMap.put("account", convertEntityService.getDepartmentUsernameById(volume.getDepartmentId()));
-                }
                 String csResponse = cloudStackResourceCapacity.updateResourceCount(
                         convertEntityService.getDomainById(volume.getDomainId()).getUuid(), domainCountMap, "json");
                 convertEntityService.resourceCount(csResponse);
@@ -838,7 +859,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         }
         if (eventObject.getString("commandEventType").equals("VOLUME.ATTACH")
                 || eventObject.getString("commandEventType").equals("VOLUME.DETACH")) {
-            Volume csVolume = Volume.convert(jobresult.getJSONObject("volume"));
+            Volume csVolume = Volume.convert(jobResult.getJSONObject("volume"));
             Volume volume = volumeService.findByUUID(csVolume.getUuid());
             if (csVolume.getUuid().equals(volume.getUuid())) {
                 volume.setIsSyncFlag(false);
@@ -879,26 +900,26 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with Cloud Server Volume.
      *
-     * @param jobresult job result
+     * @param jobResult job result
      * @param eventObject volume event object
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    public void asyncNic(JSONObject jobresult, JSONObject eventObject) throws ApplicationException, Exception {
+    public void asyncNic(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
 
         if (eventObject.getString("commandEventType").equals("NIC.CREATE") || eventObject.getString("commandEventType").equals("NIC.UPDATE")
              || eventObject.getString("commandEventType").equals("NIC.DELETE")) {
 
-            JSONArray nicListJSON = jobresult.getJSONObject("virtualmachine").getJSONArray("nic");
+            JSONArray nicListJSON = jobResult.getJSONObject("virtualmachine").getJSONArray("nic");
             List<Nic> nicList = new ArrayList<Nic>();
             for (int i = 0, size = nicListJSON.length(); i < size; i++) {
                 Nic nic = Nic.convert(nicListJSON.getJSONObject(i));
-                nic.setVmInstanceId(convertEntityService.getVmInstanceId(JsonUtil.getStringValue(jobresult.getJSONObject("virtualmachine"), "id")));
+                nic.setVmInstanceId(convertEntityService.getVmInstanceId(JsonUtil.getStringValue(jobResult.getJSONObject("virtualmachine"), "id")));
                 nic.setNetworkId(convertEntityService.getNetworkId(nic.getTransNetworkId()));
                 nicList.add(nic);
             }
             HashMap<String, Nic> csNicMap = (HashMap<String, Nic>) Nic.convert(nicList);
-            List<Nic> appnicList = nicService.findByInstance(convertEntityService.getVmInstanceId(JsonUtil.getStringValue(jobresult.getJSONObject("virtualmachine"), "id")));
+            List<Nic> appnicList = nicService.findByInstance(convertEntityService.getVmInstanceId(JsonUtil.getStringValue(jobResult.getJSONObject("virtualmachine"), "id")));
 
             for (Nic nic : appnicList) {
                 nic.setSyncFlag(false);
@@ -921,7 +942,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         }
         if (eventObject.getString("commandEventType").equals("NIC.SECONDARY.IP.ASSIGN")) {
              if (eventObject.getString("commandEventType").equals("NIC.SECONDARY.IP.ASSIGN")) {
-                 VmIpaddress csVmIpaddress = VmIpaddress.convert(jobresult.getJSONObject("nicsecondaryip"));
+                 VmIpaddress csVmIpaddress = VmIpaddress.convert(jobResult.getJSONObject("nicsecondaryip"));
                  VmIpaddress vmIpaddress = vmIpService.findByUUID(csVmIpaddress.getUuid());
                  vmIpaddress.setSyncFlag(false);
                  vmIpaddress.setUuid(csVmIpaddress.getUuid());
@@ -958,21 +979,21 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with Cloud Server Network port forwarding.
      *
-     * @param jobresult job result
+     * @param jobResult job result
      * @param eventObject volume event object
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    public void asyncNet(JSONObject jobresult, JSONObject eventObject) throws ApplicationException, Exception {
+    public void asyncNet(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
 
         if (eventObject.getString("commandEventType").equals("NET.RULEADD")) {
-            PortForwarding portForwarding = PortForwarding.convert(jobresult.getJSONObject("portforwardingrule"));
+            PortForwarding portForwarding = PortForwarding.convert(jobResult.getJSONObject("portforwardingrule"));
             portForwarding.setVmInstanceId(convertEntityService.getVmInstanceId(portForwarding.getTransvmInstanceId()));
             portForwarding.setNetworkId(convertEntityService.getNetworkId(portForwarding.getTransNetworkId()));
             portForwarding.setIpAddressId(convertEntityService.getIpAddressId(portForwarding.getTransIpAddressId()));
             if (portForwardingService.findByUUID(portForwarding.getUuid()) == null) {
                 portForwardingService.save(portForwarding);
-                firewallRules(jobresult, FirewallRules.Purpose.PORTFORWARDING);
+                firewallRules(jobResult, FirewallRules.Purpose.PORTFORWARDING);
             }
         }
 
@@ -994,7 +1015,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
 
         if (eventObject.getString("commandEventType").equals("NET.IPASSIGN")
                 || eventObject.getString("commandEventType").equals("NET.IPRELEASE")) {
-            asyncIpAddress(jobresult, eventObject);
+            asyncIpAddress(jobResult, eventObject);
         }
 
     }
@@ -1002,23 +1023,23 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with Cloud Server Network Load Balancer.
      *
-     * @param jobresult job result
+     * @param jobResult job result
      * @param eventObject Load Balancer event object
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
     @SuppressWarnings("unused")
-    public void asyncLb(JSONObject jobresult, JSONObject eventObject) throws ApplicationException, Exception {
+    public void asyncLb(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
 
         if (eventObject.getString("commandEventType").equals("LB.CREATE")) {
-            LoadBalancerRule loadBalancerRule = LoadBalancerRule.convert(jobresult.getJSONObject("loadbalancer"));
+            LoadBalancerRule loadBalancerRule = LoadBalancerRule.convert(jobResult.getJSONObject("loadbalancer"));
             loadBalancerRule.setNetworkId(convertEntityService.getNetworkId(loadBalancerRule.getTransNetworkId()));
             loadBalancerRule.setIpAddressId(convertEntityService.getIpAddressId(loadBalancerRule.getTransIpAddressId()));
             loadBalancerRule.setZoneId(convertEntityService.getZoneId(loadBalancerRule.getTransZoneId()));
             loadBalancerRule.setDomainId(convertEntityService.getDomainId(loadBalancerRule.getTransDomainId()));
             if (loadBalancerService.findByUUID(loadBalancerRule.getUuid()) == null) {
                 loadBalancerService.save(loadBalancerRule);
-                firewallRules(jobresult, FirewallRules.Purpose.LOADBALANCING);
+                firewallRules(jobResult, FirewallRules.Purpose.LOADBALANCING);
             }
         }
 
@@ -1035,7 +1056,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         }
 
         if (eventObject.getString("commandEventType").equals("LB.UPDATE")) {
-            LoadBalancerRule csLoadBalancer = LoadBalancerRule.convert(jobresult.getJSONObject("loadbalancer"));
+            LoadBalancerRule csLoadBalancer = LoadBalancerRule.convert(jobResult.getJSONObject("loadbalancer"));
             LoadBalancerRule loadBalancer = loadBalancerService.findByUUID(csLoadBalancer.getUuid());
             loadBalancer.setSyncFlag(false);
             if (csLoadBalancer.getUuid().equals(loadBalancer.getUuid())) {
@@ -1096,18 +1117,18 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with Cloud Server Network Firewall Rules.
      *
-     * @param jobresult job result
+     * @param jobResult job result
      * @param purpose of the firewall
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    public void firewallRules(JSONObject jobresult, FirewallRules.Purpose purpose) throws ApplicationException, Exception {
+    public void firewallRules(JSONObject jobResult, FirewallRules.Purpose purpose) throws ApplicationException, Exception {
         FirewallRules csFirewallRule = null;
         if (purpose == Purpose.LOADBALANCING) {
-            csFirewallRule = FirewallRules.convert(jobresult.getJSONObject("loadbalancer"),
+            csFirewallRule = FirewallRules.convert(jobResult.getJSONObject("loadbalancer"),
                 null, purpose);
         } else {
-            csFirewallRule = FirewallRules.convert(jobresult.getJSONObject("portforwardingrule"),
+            csFirewallRule = FirewallRules.convert(jobResult.getJSONObject("portforwardingrule"),
                     null, purpose);
         }
         FirewallRules loadBalancer = egressRuleService.findByUUID(csFirewallRule.getUuid());
@@ -1172,14 +1193,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             volumeService.softDelete(volume);
 
             // Resource count update for domain
-            if (volume.getProjectId() != null) {
-                domainCountMap.put("projectid", convertEntityService.getProjectById(volume.getProjectId()).getUuid());
-            } else {
-                domainCountMap.put("account", convertEntityService.getDepartmentUsernameById(volume.getDepartmentId()));
-            }
             String csResponse = cloudStackResourceCapacity.updateResourceCount(
                     convertEntityService.getDomainById(volume.getDomainId()).getUuid(), domainCountMap, "json");
             convertEntityService.resourceCount(csResponse);
         }
     }
 }
+

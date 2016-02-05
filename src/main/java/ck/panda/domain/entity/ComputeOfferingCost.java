@@ -1,5 +1,7 @@
 package ck.panda.domain.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -21,7 +23,7 @@ import org.springframework.data.annotation.Version;
 @Entity
 @Table(name = "service_offerings_cost")
 @SuppressWarnings("serial")
-public class ComputeOfferingCost {
+public class ComputeOfferingCost implements Serializable {
 
     /** The id of the Compute offering Cost. */
     @Id

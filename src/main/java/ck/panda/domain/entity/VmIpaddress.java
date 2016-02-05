@@ -1,5 +1,6 @@
 package ck.panda.domain.entity;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,16 +13,20 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.json.JSONObject;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 
 /**
- * Secondary Vm IP Address from Nic.
+ * Secondary Vm IP Address.
  *
  */
-
 @Entity
-@Table(name = "vmIpaddress")
-public class VmIpaddress {
+@Table(name = "vm_ipaddress")
+@SuppressWarnings("serial")
+public class VmIpaddress implements Serializable {
+
+     /** Constant for nic uuid. */
+    public static final String CS_NIC_UUID = "nicuuid";
 
     /** ID of the nic. */
     @Id
@@ -65,6 +70,7 @@ public class VmIpaddress {
     /** Transient nic id. */
     @Transient
     private String transNicId;
+
 
     /** Temporary variable. */
     @Transient
@@ -125,7 +131,7 @@ public class VmIpaddress {
     }
 
     /**
-     * Get instance Id.
+     * Get the vm instance id.
      *
      * @return the vmInstanceId
      */
@@ -134,7 +140,7 @@ public class VmIpaddress {
     }
 
     /**
-     * Set the vmInstanceId .
+     * Set the vm instance id.
      *
      * @param vmInstanceId to set
      */
@@ -143,7 +149,7 @@ public class VmIpaddress {
     }
 
     /**
-     * Get the guestIpAddress.
+     * Get the guest ip address.
      *
      * @return the guestIpAddress
      */
@@ -152,7 +158,7 @@ public class VmIpaddress {
     }
 
     /**
-     * Set the guestIpAddress.
+     * Set the guest ip address.
      *
      * @param guestIpAddress to set
      */
@@ -178,7 +184,45 @@ public class VmIpaddress {
         this.isActive = isActive;
     }
 
-   /**
+    /**
+     *  Get the transient nic id .
+     *
+     * @return the transient NicId .
+     */
+    public String getTransNicId() {
+        return transNicId;
+    }
+
+    /**
+     * Set the transient  nic id.
+     *
+     * @param transNicId to set
+     */
+    public void setTransNicId(String transNicId) {
+        this.transNicId = transNicId;
+    }
+
+    /**
+     * Get the primaryIpAddress.
+     *
+     * @return the primaryIpAddress
+     */
+    public String getPrimaryIpAddress() {
+        return primaryIpAddress;
+    }
+
+    /**
+     * Set the primaryIpAddress.
+     *
+     * @param primaryIpAddress  to set
+     */
+    public void setPrimaryIpAddress(String primaryIpAddress) {
+        this.primaryIpAddress = primaryIpAddress;
+    }
+
+    /**
+     * Get the nic id.
+     *
      * @return the nicId
      */
     public Long getNicId() {
@@ -186,13 +230,17 @@ public class VmIpaddress {
     }
 
     /**
-     * @param nicId the nicId to set
+     * Set the  nic id.
+     *
+     * @param nicId  to set
      */
     public void setNicId(Long nicId) {
         this.nicId = nicId;
     }
 
-/**
+    /**
+     * Get the transient vminstance id.
+     *
      * @return the transvmInstanceId
      */
     public String getTransvmInstanceId() {
@@ -200,29 +248,15 @@ public class VmIpaddress {
     }
 
     /**
-     * @param transvmInstanceId the transvmInstanceId to set
+     * Set the transient vm instance id.
+     *
+     * @param transvmInstanceId  to set
      */
     public void setTransvmInstanceId(String transvmInstanceId) {
         this.transvmInstanceId = transvmInstanceId;
     }
 
-    /**
-     * @return the transNicId
-     */
-    public String getTransNicId() {
-        return transNicId;
-    }
-
-    /**
-     * Set the transNicId.
-     *
-     * @param transNicId  to set
-     */
-    public void setTransNicId(String transNicId) {
-        this.transNicId = transNicId;
-    }
-
-/** Get the syncFlag.
+   /** Get the sync flag.
     *
     * @return the syncFlag
     */
@@ -231,7 +265,7 @@ public class VmIpaddress {
    }
 
    /**
-    * Set the syncFlag.
+    * Set the sync flag.
     *
     * @param syncFlag to set
     */
@@ -239,23 +273,7 @@ public class VmIpaddress {
        this.syncFlag = syncFlag;
    }
 
-    /**
-     * Get the primaryIpAddress .
-     *
-     * @return the primaryIpAddress
-     */
-   public String getPrimaryIpAddress() {
-       return primaryIpAddress;
-   }
 
-   /**
-    * Set the primaryIpAddress .
-    *
-    * @param primaryIpAddress to set
-    */
-   public void setPrimaryIpAddress(String primaryIpAddress) {
-       this.primaryIpAddress = primaryIpAddress;
-   }
 
     /**
      * Convert JSONObject to vm ip address entity.
@@ -266,26 +284,29 @@ public class VmIpaddress {
      */
     public static VmIpaddress convert(JSONObject jsonObject) throws Exception {
         VmIpaddress vm = new VmIpaddress();
-        vm.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-        vm.setGuestIpAddress(JsonUtil.getStringValue(jsonObject, "ipaddress"));
-        vm.setTransNicId(JsonUtil.getStringValue(jsonObject, "nicuuid"));
-        vm.setTransvmInstanceId(JsonUtil.getStringValue(jsonObject, "nicuuid"));
+        vm.setUuid(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ID));
+        vm.setGuestIpAddress(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_IP_ADDRESS));
+        vm.setTransNicId(JsonUtil.getStringValue(jsonObject, CS_NIC_UUID));
         vm.setIsActive(true);
         vm.setSyncFlag(false);
         return vm;
     }
-        /**
-         * Mapping entity object into list.
-         *
-         * @param vmIpaddressList list of secondary ip address.
-         * @return vmIpaddressListMap secondary ip address.
-         */
-    public static Map<String, VmIpaddress> convert(List<VmIpaddress> vmIpaddressList) {
-        Map<String, VmIpaddress> vmIpaddressListMap = new HashMap<String, VmIpaddress>();
 
-        for (VmIpaddress nic : vmIpaddressList) {
-            vmIpaddressListMap.put(nic.getUuid(), nic);
+    /**
+     * Mapping entity object into list.
+     *
+         * @param vmIpaddressList of secondary ip address
+         * @return vmIpaddressListMap secondary ip address.
+     */
+    public static Map<String, VmIpaddress> convert(List<VmIpaddress> vmIpaddressList) {
+        Map<String, VmIpaddress> vmIpaddressMap = new HashMap<String, VmIpaddress>();
+
+        for (VmIpaddress vmIp : vmIpaddressList) {
+            vmIpaddressMap.put(vmIp.getUuid(), vmIp);
         }
-        return vmIpaddressListMap;
+
+
+        return vmIpaddressMap;
     }
+
 }

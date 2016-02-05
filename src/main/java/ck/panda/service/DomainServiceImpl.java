@@ -66,10 +66,6 @@ public class DomainServiceImpl implements DomainService {
     @Autowired
     private AppValidator validator;
 
-    /** Autowired TokenDetails. */
-    @Autowired
-    private TokenDetails tokenDetails;
-
     /** Reference of Cloud Stack Department service. */
     @Autowired
     private CloudStackAccountService departmentService;
@@ -93,6 +89,10 @@ public class DomainServiceImpl implements DomainService {
     /** Secret key for the user encryption. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
+
+    /** Autowired TokenDetails. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     @Override
     public Domain save(Domain domain) throws Exception {
@@ -319,10 +319,10 @@ public class DomainServiceImpl implements DomainService {
         Errors errors = validator.rejectIfNullEntity("domain", domain);
         if (domain.getSyncFlag()) {
             domainService.setServer(configServer.setServer(1L));
-            List<Department> department = deptService.findDomainAndIsActive(domain.getId(), true);
+            List<Department> department = deptService.findByDomainAndIsActive(domain.getId(), true);
             if (department.size() != 0) {
                 errors.addGlobalError(
-                        "cannot.delete.domain.before.deleting.please.make.sure.all.users.and.sub.domains.have.been.removed.from.the.domain");
+                        "domain.delete.confirmation");
             }
         }
         if (errors.hasErrors()) {
@@ -365,8 +365,8 @@ public class DomainServiceImpl implements DomainService {
     private void validateDomain(Domain domain) throws Exception {
         Errors errors = validator.rejectIfNullEntity("domain", domain);
         errors = validator.validateEntity(domain, errors);
-        Domain domaintest = domainRepo.findByName((domain.getName()));
-        if (domaintest != null && domain.getId() != domaintest.getId()) {
+        Domain validateDomain = domainRepo.findByName(domain.getName(), true);
+        if (validateDomain != null && domain.getId() != validateDomain.getId()) {
             errors.addFieldError("name", "domain.already.exist");
         }
         if (errors.hasErrors()) {
@@ -396,6 +396,16 @@ public class DomainServiceImpl implements DomainService {
      */
     public Page<Domain> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
         return domainRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
+    }
+
+    @Override
+    public Domain findByName(String domainName) {
+        return domainRepo.findByName(domainName, true);
+    }
+
+    @Override
+    public Domain findDomain() throws Exception {
+        return domainRepo.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
     }
 
 }

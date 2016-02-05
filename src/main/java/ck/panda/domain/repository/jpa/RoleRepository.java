@@ -12,46 +12,41 @@ import ck.panda.domain.entity.Role;
 /**
  * Jpa Repository for Role entity.
  */
-public interface RoleReposiory extends PagingAndSortingRepository<Role, Long> {
+public interface RoleRepository extends PagingAndSortingRepository<Role, Long> {
 
     /**
-     * Method to find list of entities having active status.
+     * Find role with permissions by name and department.
      *
-     * @param pageable size
-     * @return delete
+     * @param name of the role
+     * @param departmentId department id
+     * @param isActive state of the role active/inactive.
+     * @return role.
      */
-    @Query(value = "select role from Role role where role.isActive IS TRUE")
-    Page<Role> findAllByActive(Pageable pageable);
-
-    /**
-     * Method to find name uniqueness from department in adding Roles.
-     *
-     * @param name - name of the role
-     * @param departmentId - department id
-     * @param isActive
-     * @return role name
-     */
-    @Query(value = "SELECT role FROM Role AS role WHERE role.name=:name AND role.departmentId=:departmentId AND role.isActive IS TRUE")
-    Role findUniqueness(@Param("name") String name, @Param("departmentId") Long departmentId);
+    @Query(value = "SELECT DISTINCT(role) FROM Role role LEFT JOIN FETCH role.permissionList WHERE role.name = :name "
+            + "AND role.departmentId = :departmentId AND role.isActive = :isActive ")
+    Role findWithPermissionsByNameDepartmentAndIsActive(@Param("name") String name, @Param("departmentId") Long departmentId,
+            @Param("isActive") Boolean isActive);
 
     /**
      * Method to find list of roles by department.
      *
-     * @param department - department entity
+     * @param department department entity
+     * @param isActive state of the role active/inactive.
+     * @param name of the role.
      * @return List of roles
      */
-    @Query(value = "SELECT role FROM Role AS role WHERE role.department=:department AND role.isActive IS TRUE AND role.name != 'FULL_PERMISSION'")
-    List<Role> getRolesByDepartment(@Param("department") Department department);
+    @Query(value = "SELECT role FROM Role AS role WHERE role.department = :department AND role.isActive = :isActive AND role.name != :name")
+    List<Role> findAllByDepartmentAndIsActiveExceptName(@Param("department") Department department, @Param("isActive") Boolean isActive, @Param("name") String name);
 
     /**
      * Method to find list of roles by department.
      *
-     * @param department - department entity
-     * @param isActive - true/false.
+     * @param department reference of the department
+     * @param isActive state of the role true/false.
      * @param pageable pagination information.
      * @return List of roles
      */
-    @Query(value = "SELECT role FROM Role AS role WHERE role.department=:department AND role.isActive IS :isActive")
+    @Query(value = "SELECT role FROM Role AS role WHERE role.department = :department AND role.isActive = :isActive")
     Page<Role> findByDepartmentAndIsActive(@Param("department") Department department,
             @Param("isActive") Boolean isActive, Pageable pageable);
 
@@ -68,21 +63,21 @@ public interface RoleReposiory extends PagingAndSortingRepository<Role, Long> {
      * Find all roles from department.
      *
      * @param departmentId department id.
-     * @param isActive - true/false.
+     * @param isActive true/false.
      * @return vmInstance list.
      */
-    @Query(value = "select role from Role role where role.departmentId=:id and role.isActive =:isActive ")
+    @Query(value = "SELECT role FROM Role role WHERE role.departmentId = :id AND role.isActive = :isActive ")
     List<Role> findByDepartmentAndIsActive(@Param("id") Long departmentId, @Param("isActive") Boolean isActive);
 
     /**
      * Method to find role by name and department id and active.
      *
-     * @param name - name of the role
-     * @param departmentId - department id
-     * @param isActive - true
+     * @param name of the role
+     * @param departmentId department id
+     * @param isActive state of the role true/false.
      * @return role
      */
-    @Query(value = "SELECT role FROM Role AS role WHERE role.name=:name AND role.departmentId=:departmentId AND role.isActive=:isActive")
+    @Query(value = "SELECT role FROM Role AS role WHERE role.name = :name AND role.departmentId = :departmentId AND role.isActive = :isActive")
     Role findByNameAndDepartmentIdAndIsActive(@Param("name") String name, @Param("departmentId") Long departmentId,
             @Param("isActive") Boolean isActive);
 
@@ -94,7 +89,7 @@ public interface RoleReposiory extends PagingAndSortingRepository<Role, Long> {
      * @param pageable page
      * @return Role.
      */
-    @Query(value = "select role from Role role where role.isActive =:isActive AND role.domainId=:domainId AND role.name != 'FULL_PERMISSION'")
+    @Query(value = "SELECT role FROM Role role WHERE role.isActive = :isActive AND role.domainId = :domainId AND role.name != 'FULL_PERMISSION'")
     Page<Role> findByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive,
             Pageable pageable);
 

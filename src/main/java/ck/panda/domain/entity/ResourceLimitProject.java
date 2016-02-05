@@ -1,5 +1,6 @@
 package ck.panda.domain.entity;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +18,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 import org.hibernate.annotations.Type;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -24,13 +27,23 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import ck.panda.constants.CloudStackConstants;
+import ck.panda.util.JsonUtil;
+
 /**
  * Resource limit Project entity. *
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "resource_limit_projects")
-public class ResourceLimitProject {
+@SuppressWarnings("serial")
+public class ResourceLimitProject implements Serializable {
+
+    /** Constant for resource type. */
+    public static final String CS_RESOUCE_TYPE = "resourcetype";
+
+    /** Constant for max resource limits. */
+    public static final String CS_MAX = "max";
 
     /** Unique ID of the Resource limit. */
     @Id
@@ -572,6 +585,30 @@ public class ResourceLimitProject {
     public void setTransResourceType(Integer transResourceType) {
         this.transResourceType = transResourceType;
     }
+
+        /**
+         * Convert JSONObject to ResourceLimit entity.
+         *
+         * @param jsonObject json object
+         * @return ResourceLimit entity objects
+         * @throws JSONException unhandled json errors
+        */
+        @SuppressWarnings("static-access")
+        public static ResourceLimitProject convert(JSONObject jsonObject) throws JSONException {
+          ResourceLimitProject resource = new ResourceLimitProject();
+            resource.setIsSyncFlag(false);
+            try {
+               resource.setIsActive(true);
+                resource.setResourceType(ResourceType.values()[(JsonUtil.getIntegerValue(jsonObject, CS_RESOUCE_TYPE))]);
+                resource.setTransProjectId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_PROJECT_ID));
+                resource.setMax(resource.getMax().valueOf(JsonUtil.getIntegerValue(jsonObject, CS_MAX)));
+                resource.setTransResourceType(JsonUtil.getIntegerValue(jsonObject, CS_RESOUCE_TYPE));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return resource;
+         }
 
     /**
      * Mapping ResourceLimit entity object in list.

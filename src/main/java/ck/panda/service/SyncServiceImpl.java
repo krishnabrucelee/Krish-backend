@@ -41,6 +41,7 @@ import ck.panda.domain.entity.PortForwarding;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.Region;
 import ck.panda.domain.entity.ResourceLimitDomain;
+import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.SSHKey;
 import ck.panda.domain.entity.Snapshot;
@@ -49,14 +50,12 @@ import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
-import ck.panda.domain.repository.jpa.VolumeRepository;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.domain.entity.Zone;
-import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.EncryptionUtil;
@@ -104,10 +103,6 @@ public class SyncServiceImpl implements SyncService {
     /** Reference of the convert entity service. */
     @Autowired
     private ConvertEntityService convertEntityService;
-
-    /** VolumeRepository repository reference. */
-    @Autowired
-    private VolumeRepository volumeRepo;
 
     /** Virtual Machine repository reference. */
     @Autowired
@@ -215,14 +210,6 @@ public class SyncServiceImpl implements SyncService {
     @Autowired
     private ResourceLimitDomainService resourceDomainService;
 
-    /** Resource Limit Service for listing resource limits. */
-    @Autowired
-    private ResourceLimitDepartmentService resourceDepartmentService;
-
-    /** Resource Limit Service for listing resource limits. */
-    @Autowired
-    private ResourceLimitProjectService resourceProjectService;
-
     /** SSH Key Service for listing ssh keys. */
     @Autowired
     private SSHKeyService sshKeyService;
@@ -253,6 +240,10 @@ public class SyncServiceImpl implements SyncService {
     /** Listing Port Forwarding details from cloudstack server. */
     @Autowired
     private PortForwardingService portForwardingService;
+
+    /** Listing resource limit project service. */
+    @Autowired
+    private ResourceLimitProjectService resourceProjectService;
 
     /** Listing Load Balancer details from cloudstack server. */
     @Autowired
@@ -318,9 +309,8 @@ public class SyncServiceImpl implements SyncService {
     @Value(value = "${permission.report}")
     private String report;
 
-    /** Validator attribute. */
-    @Autowired
-    private AppValidator validator;
+    /** Full permission for root and domain admin. */
+    public static final String ADMIN_PERMISSION = "FULL_PERMISSION";
 
     /** Message source attribute. */
     @Autowired
@@ -848,25 +838,6 @@ public class SyncServiceImpl implements SyncService {
             if (csStorageOfferingMap.containsKey(storageOffering.getUuid())) {
                 StorageOffering csStorageOffering = csStorageOfferingMap.get(storageOffering.getUuid());
 
-                storageOffering.setDescription(csStorageOffering.getDescription());
-                storageOffering.setDiskBytesReadRate(csStorageOffering.getDiskBytesReadRate());
-                storageOffering.setDiskBytesWriteRate(csStorageOffering.getDiskBytesWriteRate());
-                storageOffering.setDiskIopsReadRate(csStorageOffering.getDiskIopsReadRate());
-                storageOffering.setDiskIopsWriteRate(csStorageOffering.getDiskIopsWriteRate());
-                storageOffering.setDiskMaxIops(csStorageOffering.getDiskMaxIops());
-                storageOffering.setDiskMinIops(csStorageOffering.getDiskMinIops());
-                storageOffering.setDiskSize(csStorageOffering.getDiskSize());
-                storageOffering.setIsCustomDisk(csStorageOffering.getIsCustomDisk());
-                storageOffering.setIsCustomizedIops(csStorageOffering.getIsCustomizedIops());
-                storageOffering.setIsPublic(csStorageOffering.getIsPublic());
-                storageOffering.setName(csStorageOffering.getName());
-                storageOffering.setQosType(csStorageOffering.getQosType());
-                storageOffering.setStorageTags(csStorageOffering.getStorageTags());
-                storageOffering.setStorageType(csStorageOffering.getStorageType());
-                storageOffering.setDomain(csStorageOffering.getDomain());
-
-                // csOsType.setOsCategoryUuid(csOsType.getOsCategoryUuid());
-
                 // 3.2 If found, update the osType object in app db
                 storageService.update(storageOffering);
 
@@ -925,7 +896,6 @@ public class SyncServiceImpl implements SyncService {
                 csUserMap.remove(user.getUuid());
             } else {
                 userService.softDelete(user);
-
                 // 3.2 If not found, delete it from app db
                 // TODO clarify the business requirement, since it has impact in
                 // the application if it is used
@@ -1023,6 +993,11 @@ public class SyncServiceImpl implements SyncService {
                 network.setDomainId(csNetwork.getDomainId());
                 network.setZoneId(csNetwork.getZoneId());
                 network.setDisplayText(csNetwork.getDisplayText());
+                network.setStatus(csNetwork.getStatus());
+                network.setNetworkDomain(csNetwork.getNetworkDomain());
+                network.setNetMask(csNetwork.getNetMask());
+                network.setNetworkOfferingId(csNetwork.getNetworkOfferingId());
+                network.setIsActive(true);
 
                 // 3.2 If found, update the network object in app db
                 networkService.update(network);
@@ -1163,36 +1138,28 @@ public class SyncServiceImpl implements SyncService {
      */
     @Override
     public void syncDepartment() throws ApplicationException, Exception {
-
-        // 1. Get all the user objects from CS server as hash
-        List<Department> csAccountService = departmentService.findAllFromCSServerByDomain();
+        // 1. Get all the department objects from CS server as hash
+        List<Department> csAccountService = departmentService.findAllFromCSServer();
         HashMap<String, Department> csUserMap = (HashMap<String, Department>) Department.convert(csAccountService);
-
-        // 2. Get all the user objects from application
-        List<Department> appUserList = departmentService.findAllBySync();
-
-        // 3. Iterate application user list
-        for (Department department : appUserList) {
+        // 2. Get all the department objects from application
+        List<Department> appDepartmentList = departmentService.findAllBySync();
+        // 3. Iterate application department list
+        for (Department department : appDepartmentList) {
             department.setSyncFlag(false);
-            // 3.1 Find the corresponding CS server user object by finding it in
-            // a hash using uuid
+            // 3.1 Find the corresponding CS server user object by finding it in a hash using uuid
             if (csUserMap.containsKey(department.getUuid())) {
                 Department csUser = csUserMap.get(department.getUuid());
                 department.setUserName(csUser.getUserName());
-                // 3.2 If found, update the user object in app db
+                // 3.2 If found, update the department object in app db
                 departmentService.update(department);
-
-                // 3.3 Remove once updated, so that we can have the list of cs
-                // user which is not added in the app
+                // 3.3 Remove once updated, so that we can have the list of cs department which is not
+                // added in the app
                 csUserMap.remove(department.getUuid());
             } else {
                 departmentService.softDelete(department);
             }
-
         }
-        // 4. Get the remaining list of cs server hash user object, then iterate
-        // and
-        // add it to app db
+        // 4. Get the remaining list of cs server hash department object, then iterate and add it to app db
         for (String key : csUserMap.keySet()) {
             departmentService.save(csUserMap.get(key));
         }
@@ -1203,7 +1170,7 @@ public class SyncServiceImpl implements SyncService {
         List<AccountType> types = new ArrayList<AccountType>();
         types.add(AccountType.ROOT_ADMIN);
         types.add(AccountType.DOMAIN_ADMIN);
-        departmentList = departmentService.findDepartmentsByAccountTypesAndActive(types, true);
+        departmentList = departmentService.findByAccountTypesAndActive(types, true);
         createRole(departmentList, existPermissionList);
     }
 
@@ -1370,54 +1337,54 @@ public class SyncServiceImpl implements SyncService {
      */
     public void syncVolume() throws ApplicationException, Exception {
 
-        // 1. Get all the StorageOffering objects from CS server as hash
+        // 1. Get all the volume objects from CS server as hash
         List<Volume> volumeList = volumeService.findAllFromCSServer();
         HashMap<String, Volume> csVolumeMap = (HashMap<String, Volume>) Volume.convert(volumeList);
 
-        // 2. Get all the osType objects from application
+        // 2. Get all the volume objects from application
         List<Volume> appvolumeServiceList = volumeService.findAll();
 
-        // 3. Iterate application osType list
+        // 3. Iterate application volume list
         for (Volume volume : appvolumeServiceList) {
             volume.setIsSyncFlag(false);
-            // 3.1 Find the corresponding CS server osType object by finding it
+            // 3.1 Find the corresponding CS server volume object by finding it
             // in a hash using uuid
             if (csVolumeMap.containsKey(volume.getUuid())) {
-                Volume csvolume = csVolumeMap.get(volume.getUuid());
-                volume.setName(csvolume.getName());
-                volume.setStorageOfferingId(csvolume.getStorageOfferingId());
-                volume.setZoneId(csvolume.getZoneId());
-                volume.setDomainId(csvolume.getDomainId());
-                volume.setDepartmentId(csvolume.getDepartmentId());
-                volume.setVmInstanceId(csvolume.getVmInstanceId());
-                volume.setVolumeType(csvolume.getVolumeType());
+                Volume csVolume = csVolumeMap.get(volume.getUuid());
+                volume.setName(csVolume.getName());
+                volume.setStorageOfferingId(csVolume.getStorageOfferingId());
+                volume.setZoneId(csVolume.getZoneId());
+                volume.setDomainId(csVolume.getDomainId());
+                volume.setDepartmentId(csVolume.getDepartmentId());
+                volume.setVmInstanceId(csVolume.getVmInstanceId());
+                volume.setVolumeType(csVolume.getVolumeType());
                 volume.setIsActive(true);
                 if (volume.getDiskSize() != null) {
-                    volume.setDiskSize(csvolume.getDiskSize());
+                    volume.setDiskSize(csVolume.getDiskSize());
                 } else {
-                    volume.setDiskSize(csvolume.getStorageOffering().getDiskSize());
+                    volume.setDiskSize(storageService.find(csVolume.getStorageOfferingId()).getDiskSize());
                 }
                 volume.setDiskSizeFlag(true);
                 if (volume.getProjectId() != null) {
-                    volume.setProjectId(csvolume.getProjectId());
+                    volume.setProjectId(csVolume.getProjectId());
                 }
-                volume.setChecksum(csvolume.getChecksum());
-                volume.setStatus(csvolume.getStatus());
-                volume.setDiskMaxIops(csvolume.getDiskMaxIops());
-                volume.setDiskMinIops(csvolume.getDiskMinIops());
-                volume.setCreatedDateTime(csvolume.getCreatedDateTime());
-                volume.setUpdatedDateTime(csvolume.getUpdatedDateTime());
-                // 3.2 If found, update the osType object in app db
+                volume.setChecksum(csVolume.getChecksum());
+                volume.setStatus(csVolume.getStatus());
+                volume.setDiskMaxIops(csVolume.getDiskMaxIops());
+                volume.setDiskMinIops(csVolume.getDiskMinIops());
+                volume.setCreatedDateTime(csVolume.getCreatedDateTime());
+                volume.setUpdatedDateTime(csVolume.getUpdatedDateTime());
+                // 3.2 If found, update the volume object in app db
                 volumeService.update(volume);
 
                 // 3.3 Remove once updated, so that we can have the list of cs
-                // osType which is not added in the app
+                // volume which is not added in the app
                 csVolumeMap.remove(volume.getUuid());
             } else {
                 volumeService.softDelete(volume);
             }
         }
-        // 4. Get the remaining list of cs server hash osType object, then
+        // 4. Get the remaining list of cs server hash volume object, then
         // iterate and
         // add it to app db
         for (String key : csVolumeMap.keySet()) {
@@ -1721,9 +1688,14 @@ public class SyncServiceImpl implements SyncService {
 
     @Override
     public void syncResourceLimit() throws ApplicationException, Exception {
-        List<Domain> domains = domainService.findAll();
+        List<Domain> domains = domainService.findAllDomain();
         for (Domain domain : domains) {
             syncResourceLimitDomain(domain);
+        }
+
+        List<Project> projects = projectService.findAllByActive(true);
+        for (Project project : projects) {
+            syncResourceLimitProject(project.getUuid());
         }
     }
 
@@ -1755,6 +1727,50 @@ public class SyncServiceImpl implements SyncService {
         // add it to app db
         for (String key : csResourceMap.keySet()) {
             resourceDomainService.save(csResourceMap.get(key));
+        }
+        LOGGER.debug("Total rows added", (csResourceMap.size()));
+    }
+
+    @Override
+    public void syncResourceLimitProject(String projectId) throws ApplicationException, Exception {
+
+        // 1. Get all the ResourceLimit objects from CS server as hash
+        List<ResourceLimitProject> csResourceList = resourceProjectService.findAllFromCSServerProject(projectId);
+               HashMap<String, ResourceLimitProject> csResourceMap = (HashMap<String, ResourceLimitProject>) ResourceLimitProject
+                .convert(csResourceList);
+
+        // 2. Get all the resource objects from application
+        List<ResourceLimitProject> appResourceList = resourceProjectService.findAll();
+
+        // 3. Iterate application resource list
+        LOGGER.debug("Total rows updated : " + (appResourceList.size()));
+        for (ResourceLimitProject resource : appResourceList) {
+            resource.setIsSyncFlag(false);
+            String resourceLimit = resource.getProjectId() + "-" + resource.getResourceType();
+            // 3.1 Find the corresponding CS server resource object by finding
+            // it in a hash using uuid
+            if (csResourceMap.containsKey(resourceLimit)) {
+                ResourceLimitProject csResource = csResourceMap.get(resourceLimit);
+                resource.setIsActive(true);
+                // resource.setName(csResource.getName());
+
+                // 3.2 If found, update the resource object in app db
+                resourceProjectService.update(resource);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // resource which is not added in the app
+                csResourceMap.remove(resourceLimit);
+            } else {
+                resourceProjectService.update(resource);
+            }
+        }
+        // 4. Get the remaining list of cs server hash resource object, then
+        // iterate and
+        // add it to app db
+        for (String key : csResourceMap.keySet()) {
+            LOGGER.debug("Syncservice resource Domain id:");
+            resourceProjectService.save(csResourceMap.get(key));
+
         }
         LOGGER.debug("Total rows added", (csResourceMap.size()));
     }
@@ -1861,17 +1877,16 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.debug("Total rows updated : " + (appSSHKeyList.size()));
             // 3.1 Find the corresponding CS server region object by finding it
             // in a hash using uuid
-            if (csSSHkeyMap.containsKey(sshKey.getDepartmentId())) {
-                SSHKey csSSHKey = csSSHkeyMap.get(sshKey.getDepartment().getUuid());
+            if (csSSHkeyMap.containsKey(sshKey.getFingerPrint())) {
+                SSHKey csSSHKey = csSSHkeyMap.get(sshKey.getFingerPrint());
 
                 sshKey.setName(csSSHKey.getName());
-
                 // 3.2 If found, update the region object in app db
                 sshKeyService.update(sshKey);
 
                 // 3.3 Remove once updated, so that we can have the list of cs
                 // region which is not added in the app
-                csSSHkeyMap.remove(sshKey.getDepartment().getUuid());
+                csSSHkeyMap.remove(sshKey.getFingerPrint());
             } else {
                 sshKeyService.delete(sshKey);
             }
@@ -2054,7 +2069,10 @@ public class SyncServiceImpl implements SyncService {
 
                 ipAddress.setUuid(csNic.getUuid());
                 ipAddress.setPublicIpAddress(csNic.getPublicIpAddress());
-
+                ipAddress.setState(csNic.getState());
+                ipAddress.setIsSourcenat(csNic.getIsSourcenat());
+                ipAddress.setIsStaticnat(csNic.getIsStaticnat());
+                ipAddress.setNetworkId(csNic.getNetworkId());
                 // 3.2 If found, update the nic object in app db
                 ipAddressService.update(ipAddress);
 
@@ -2251,7 +2269,7 @@ public class SyncServiceImpl implements SyncService {
                     permissionService.save(permission);
                 }
                 for (Department department : departmnetList) {
-                    Role role = roleService.findByName("FULL_PERMISSION", department.getId());
+                    Role role = roleService.findByNameAndDepartmentIdAndIsActive("FULL_PERMISSION", department.getId(), true);
                     if (role == null) {
                         Role newRole = new Role();
                         newRole.setName("FULL_PERMISSION");
@@ -2273,7 +2291,7 @@ public class SyncServiceImpl implements SyncService {
                 }
             } else {
                 for (Department department : departmnetList) {
-                    Role role = roleService.findByName("FULL_PERMISSION", department.getId());
+                    Role role = roleService.findByNameAndDepartmentIdAndIsActive("FULL_PERMISSION", department.getId(), true);
                     if (role != null) {
                         role.setName("FULL_PERMISSION");
                         role.setDepartmentId(department.getId());
@@ -2299,24 +2317,24 @@ public class SyncServiceImpl implements SyncService {
         }
     }
 
-    /**
-     * Update user role.
-     */
-    void syncUpdateUserRole() {
+    @Override
+    public void syncUpdateUserRole() throws ApplicationException, Exception {
         List<UserType> types = new ArrayList<UserType>();
         types.add(UserType.ROOT_ADMIN);
         types.add(UserType.DOMAIN_ADMIN);
         try {
             List<User> userList = userService.findUsersByTypesAndActive(types, true);
             for (User user : userList) {
-                Role role = roleService.findByNameAndDepartmentIdAndIsActive("FULL_PERMISSION", user.getDepartmentId(),
+                Role role = roleService.findByNameAndDepartmentIdAndIsActive(ADMIN_PERMISSION, user.getDepartmentId(),
                         true);
                 user.setRoleId(role.getId());
+
+                user.setSyncFlag(false);
+                user.setSyncFlag(false);
                 userService.update(user);
             }
         } catch (Exception e) {
             LOGGER.debug("syncUpdateUserRole" + e);
         }
     }
-
 }

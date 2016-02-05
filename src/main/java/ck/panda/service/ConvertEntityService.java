@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
@@ -33,6 +34,21 @@ import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
  */
 @Service
 public class ConvertEntityService {
+
+    /** Constant for resource type details. */
+    public static final String CS_INSTANCE = "0", CS_IP = "1", CS_VOLUME = "2", CS_SNAPSHOT = "3", CS_TEMPLATE = "4",
+            CS_PROJECT = "5", CS_NETWORK = "6", CS_VPC = "7", CS_CPU = "8", CS_MEMORY = "9", CS_PRIMARY_STORAGE = "10",
+            CS_SECONDARY_STORAGE = "11";
+
+    /** Constant for resource type. */
+    public static final String CS_RESOUCE_TYPE = "resourcetype";
+
+    /** Constant for resource count. */
+    public static final String CS_RESOUCE_COUNT = "resourcecount";
+
+    /** Constant for update resource count. */
+    public static final String CS_UPDATE_RESOURCE_RESPONSE = "updateresourcecountresponse";
+
     /** Domain Service for listing domains. */
     @Autowired
     private DomainService domainService;
@@ -138,9 +154,11 @@ public class ConvertEntityService {
     /**
      * Get domain id.
      *
-     * @param uuid uuid of domain.
+     * @param uuid
+     *            uuid of domain.
      * @return domain id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getDomainId(String uuid) throws Exception {
         if (domainService.findbyUUID(uuid) != null) {
@@ -153,9 +171,11 @@ public class ConvertEntityService {
     /**
      * Get domain by id.
      *
-     * @param id of domain.
+     * @param id
+     *            of domain.
      * @return domain.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Domain getDomainById(Long id) throws Exception {
         return domainService.find(id);
@@ -164,9 +184,11 @@ public class ConvertEntityService {
     /**
      * Get zone id.
      *
-     * @param uuid uuid of zone.
+     * @param uuid
+     *            uuid of zone.
      * @return zone id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getZoneId(String uuid) throws Exception {
         if (zoneService.findByUUID(uuid) != null) {
@@ -180,9 +202,11 @@ public class ConvertEntityService {
     /**
      * Get zone by id.
      *
-     * @param id of zone.
+     * @param id
+     *            of zone.
      * @return zone.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Zone getZoneById(Long id) throws Exception {
         return zoneService.find(id);
@@ -191,9 +215,11 @@ public class ConvertEntityService {
     /**
      * Get template id.
      *
-     * @param uuid uuid of template.
+     * @param uuid
+     *            uuid of template.
      * @return template id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getTemplateId(String uuid) throws Exception {
         if (templateService.findByUUID(uuid) != null) {
@@ -206,9 +232,11 @@ public class ConvertEntityService {
     /**
      * Get template by id.
      *
-     * @param id of template.
+     * @param id
+     *            of template.
      * @return template.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Template getTemplateById(Long id) throws Exception {
         return templateService.find(id);
@@ -217,9 +245,11 @@ public class ConvertEntityService {
     /**
      * Get compute offer id.
      *
-     * @param uuid uuid of service offering.
+     * @param uuid
+     *            uuid of service offering.
      * @return computer offer id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getComputeOfferId(String uuid) throws Exception {
         if (computeService.findByUUID(uuid) != null) {
@@ -232,9 +262,11 @@ public class ConvertEntityService {
     /**
      * Get compute offer by id.
      *
-     * @param id of service offering.
+     * @param id
+     *            of service offering.
      * @return computer offer .
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public ComputeOffering getComputeOfferById(Long id) throws Exception {
         return computeService.find(id);
@@ -243,9 +275,11 @@ public class ConvertEntityService {
     /**
      * Get the network id.
      *
-     * @param uuid uuid of nic network.
+     * @param uuid
+     *            uuid of nic network.
      * @return netwotk id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getNetworkId(String uuid) throws Exception {
         if (networkService.findByUUID(uuid) != null) {
@@ -258,9 +292,11 @@ public class ConvertEntityService {
     /**
      * Get the network id.
      *
-     * @param uuid uuid of nic network.
+     * @param uuid
+     *            uuid of nic network.
      * @return netwotk id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getNetworkByUuid(String uuid) throws Exception {
         if (networkService.findByUUID(uuid) != null) {
@@ -273,9 +309,11 @@ public class ConvertEntityService {
     /**
      * Get the networkoffering id.
      *
-     * @param uuid uuid of nic network.
+     * @param uuid
+     *            uuid of nic network.
      * @return netwotk id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getNetworkOfferingId(String uuid) throws Exception {
         if (networkOfferingService.findByUUID(uuid) != null) {
@@ -287,9 +325,11 @@ public class ConvertEntityService {
     /**
      * Get NetworkOffering object.
      *
-     * @param id of NetworkOffering
+     * @param id
+     *            of NetworkOffering
      * @return NetworkOffering.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public NetworkOffering getNetworkOfferingById(Long id) throws Exception {
         return networkOfferingService.findById(id);
@@ -298,9 +338,11 @@ public class ConvertEntityService {
     /**
      * Get the ostype id.
      *
-     * @param uuid uuid of nic network.
+     * @param uuid
+     *            uuid of nic network.
      * @return netwotk id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getOsTypeId(String uuid) throws Exception {
         if (osTypeService.findByUUID(uuid) != null) {
@@ -312,9 +354,11 @@ public class ConvertEntityService {
     /**
      * Get domain object.
      *
-     * @param uuid uuid of domain
+     * @param uuid
+     *            uuid of domain
      * @return domain.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Domain getDomain(String uuid) throws Exception {
         return domainService.findbyUUID(uuid);
@@ -323,9 +367,11 @@ public class ConvertEntityService {
     /**
      * Get Network object.
      *
-     * @param id of network
+     * @param id
+     *            of network
      * @return network.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Network getNetworkById(Long id) throws Exception {
         return networkService.findById(id);
@@ -334,9 +380,11 @@ public class ConvertEntityService {
     /**
      * Get Network object.
      *
-     * @param id of network
+     * @param id
+     *            of network
      * @return network.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Nic getNicById(Long id) throws Exception {
         return nicService.findById(id);
@@ -345,9 +393,11 @@ public class ConvertEntityService {
     /**
      * Get domain object.
      *
-     * @param uuid uuid of domain
+     * @param uuid
+     *            uuid of domain
      * @return domain.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Nic getNic(String uuid) throws Exception {
         return nicService.findbyUUID(uuid);
@@ -356,9 +406,11 @@ public class ConvertEntityService {
     /**
      * Get Vm Instance object.
      *
-     * @param id of vm instance
+     * @param id
+     *            of vm instance
      * @return network.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public VmInstance getVmInstanceById(Long id) throws Exception {
         return virtualMachineService.findById(id);
@@ -367,10 +419,13 @@ public class ConvertEntityService {
     /**
      * Get owner id.
      *
-     * @param name of account/user.
-     * @param domain domain.
+     * @param name
+     *            of account/user.
+     * @param domain
+     *            domain.
      * @return user id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getOwnerId(String name, Domain domain) throws Exception {
         if (userService.findByUserNameAndDomain(name, domain) != null) {
@@ -383,9 +438,11 @@ public class ConvertEntityService {
     /**
      * Get owner by id.
      *
-     * @param id of account/user.
+     * @param id
+     *            of account/user.
      * @return user.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public User getOwnerById(Long id) throws Exception {
         return userService.find(id);
@@ -394,9 +451,11 @@ public class ConvertEntityService {
     /**
      * Get owner by UUID.
      *
-     * @param uuid uuid of account/user.
+     * @param uuid
+     *            uuid of account/user.
      * @return user id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getOwnerByUuid(String uuid) throws Exception {
         if (userService.findByUuIdAndIsActive(uuid, true) != null) {
@@ -409,9 +468,11 @@ public class ConvertEntityService {
     /**
      * Get department object.
      *
-     * @param uuid uuid of department.
+     * @param uuid
+     *            uuid of department.
      * @return department.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Department getDepartment(String uuid) throws Exception {
         return departmentService.findByUuidAndIsActive(uuid, true);
@@ -420,9 +481,11 @@ public class ConvertEntityService {
     /**
      * Get department object.
      *
-     * @param id id of department.
+     * @param id
+     *            id of department.
      * @return department.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Department getDepartmentById(Long id) throws Exception {
         return departmentService.find(id);
@@ -431,9 +494,11 @@ public class ConvertEntityService {
     /**
      * Get department id.
      *
-     * @param uuid uuid of department.
+     * @param uuid
+     *            uuid of department.
      * @return department id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getDepartmentId(String uuid) throws Exception {
         if (departmentService.findbyUUID(uuid) != null) {
@@ -446,9 +511,11 @@ public class ConvertEntityService {
     /**
      * Get vm Ip address object.
      *
-     * @param id of ip address.
+     * @param id
+     *            of ip address.
      * @return vm ipaddress.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public VmIpaddress getVmIpaddressById(Long id) throws Exception {
         return vmIpAddressService.findById(id);
@@ -457,20 +524,24 @@ public class ConvertEntityService {
     /**
      * Get account object.
      *
-     * @param uuid uuid of account.
+     * @param uuid
+     *            uuid of account.
      * @return account.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Project getProject(String uuid) throws Exception {
-        return projectService.findByUuidAndIsActive(uuid, true);
+        return projectService.findByUuid(uuid);
     }
 
     /**
      * Get Project object by id.
      *
-     * @param id of project.
+     * @param id
+     *            of project.
      * @return project.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Project getProjectById(Long id) throws Exception {
         return projectService.find(id);
@@ -479,9 +550,11 @@ public class ConvertEntityService {
     /**
      * Get project id.
      *
-     * @param uuid uuid of account.
+     * @param uuid
+     *            uuid of account.
      * @return account.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getProjectId(String uuid) throws Exception {
         if (projectService.findByUuid(uuid) != null) {
@@ -493,9 +566,11 @@ public class ConvertEntityService {
     /**
      * Get pod id.
      *
-     * @param uuid of pod.
+     * @param uuid
+     *            of pod.
      * @return pod id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getPodId(String uuid) throws Exception {
         if (podService.findByUUID(uuid) != null) {
@@ -507,9 +582,11 @@ public class ConvertEntityService {
     /**
      * Get volume id.
      *
-     * @param uuid of pod.
+     * @param uuid
+     *            of pod.
      * @return pod id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getVolumeId(String uuid) throws Exception {
         if (volumeService.findByUUID(uuid) != null) {
@@ -521,9 +598,11 @@ public class ConvertEntityService {
     /**
      * Get instance id.
      *
-     * @param uuid of instance.
+     * @param uuid
+     *            of instance.
      * @return instance id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getVmInstanceId(String uuid) throws Exception {
         if (virtualMachineService.findByUUID(uuid) != null) {
@@ -536,9 +615,11 @@ public class ConvertEntityService {
     /**
      * Get Host id.
      *
-     * @param uuid of host.
+     * @param uuid
+     *            of host.
      * @return host id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getHostId(String uuid) throws Exception {
         if (hostService.findByUUID(uuid) != null) {
@@ -551,9 +632,11 @@ public class ConvertEntityService {
     /**
      * Get Storage object.
      *
-     * @param uuid uuid of department.
+     * @param uuid
+     *            uuid of department.
      * @return storage.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getStorageOfferId(String uuid) throws Exception {
         if (storageService.findUuid(uuid) != null) {
@@ -565,9 +648,11 @@ public class ConvertEntityService {
     /**
      * Get Storage object by id.
      *
-     * @param id of storage offer.
+     * @param id
+     *            of storage offer.
      * @return storage.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public StorageOffering getStorageOfferById(Long id) throws Exception {
         return storageService.find(id);
@@ -576,9 +661,11 @@ public class ConvertEntityService {
     /**
      * Get Vm id.
      *
-     * @param uuid of vm.
+     * @param uuid
+     *            of vm.
      * @return vm id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getVmId(String uuid) throws Exception {
         if (virtualMachineService.findByUUID(uuid) != null) {
@@ -591,9 +678,11 @@ public class ConvertEntityService {
     /**
      * Get Vm.
      *
-     * @param uuid of vm.
+     * @param uuid
+     *            of vm.
      * @return vm.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public VmInstance getVm(String uuid) throws Exception {
         if (virtualMachineService.findByUUID(uuid) != null) {
@@ -606,9 +695,11 @@ public class ConvertEntityService {
     /**
      * Get pod id.
      *
-     * @param hostId host id.
+     * @param hostId
+     *            host id.
      * @return pod id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getPodIdByHost(Long hostId) throws Exception {
         if (hostService.find(hostId) != null) {
@@ -621,9 +712,11 @@ public class ConvertEntityService {
     /**
      * Get domain id.
      *
-     * @param uuid uuid of domain.
+     * @param uuid
+     *            uuid of domain.
      * @return domain id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getDepartmentUuidId(String uuid) throws Exception {
         if (departmentService.findByUuidAndIsActive(uuid, true) != null) {
@@ -636,13 +729,15 @@ public class ConvertEntityService {
     /**
      * Get domain id.
      *
-     * @param name of the department.
+     * @param name
+     *            of the department.
      * @return domain id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getDepartmentByUsername(String name, Long domainId) throws Exception {
-        if (departmentService.findByUsername(name, domainId, true) != null) {
-            return departmentService.findByUsername(name, domainId, true).getId();
+        if (departmentService.findByUsernameDomainAndIsActive(name, domainId, true) != null) {
+            return departmentService.findByUsernameDomainAndIsActive(name, domainId, true).getId();
         } else {
             return null;
         }
@@ -651,14 +746,18 @@ public class ConvertEntityService {
     /**
      * Get department id.
      *
-     * @param name of the department.
-     * @param domain of the department.
+     * @param name
+     *            of the department.
+     * @param domain
+     *            of the department.
      * @return domain id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getDepartmentByUsernameAndDomains(String name, Domain domain) throws Exception {
-        if (departmentService.findByUsernameAndDomain(name, domain, true) != null) {
-            return departmentService.findByUsernameAndDomain(name, domain, true).getId();
+        Department department = departmentService.findByUsernameDomainAndIsActive(name, domain.getId(), true);
+        if (department != null) {
+            return department.getId();
         } else {
             return null;
         }
@@ -667,10 +766,13 @@ public class ConvertEntityService {
     /**
      * Get User id.
      *
-     * @param domain object.
-     * @param name of the user.
+     * @param domain
+     *            object.
+     * @param name
+     *            of the user.
      * @return user id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getUserIdByAccount(String name, Domain domain) throws Exception {
         User user = userService.findByUserNameAndDomain(name, domain);
@@ -683,9 +785,11 @@ public class ConvertEntityService {
     /**
      * Get state of resource.
      *
-     * @param state of the user.
+     * @param state
+     *            of the user.
      * @return true/false.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Boolean getState(String state) throws Exception {
         if (state.equalsIgnoreCase("Active")) {
@@ -697,9 +801,11 @@ public class ConvertEntityService {
     /**
      * Get status of resource.
      *
-     * @param status of the user.
+     * @param status
+     *            of the user.
      * @return status enum string.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Enum getStatus(String status) throws Exception {
         if (status.equalsIgnoreCase("Active")) {
@@ -712,7 +818,8 @@ public class ConvertEntityService {
      * Get secret key for generating token.
      *
      * @return original key.
-     * @throws UnsupportedEncodingException unhandled errors.
+     * @throws UnsupportedEncodingException
+     *             unhandled errors.
      */
     public SecretKey getSecretKey() throws UnsupportedEncodingException {
         String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
@@ -724,9 +831,11 @@ public class ConvertEntityService {
     /**
      * Get the osCategory.
      *
-     * @param uuid of osCategory.
+     * @param uuid
+     *            of osCategory.
      * @return osCategory id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public OsCategory getOsCategory(String uuid) throws Exception {
         return osCategoryService.findbyUUID(uuid);
@@ -735,9 +844,11 @@ public class ConvertEntityService {
     /**
      * Get the Iso.
      *
-     * @param uuid of Iso.
+     * @param uuid
+     *            of Iso.
      * @return Iso id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getIso(String uuid) throws Exception {
         if (isoService.findbyUUID(uuid) != null) {
@@ -750,9 +861,11 @@ public class ConvertEntityService {
     /**
      * Get the Iso.
      *
-     * @param uuid of Iso.
+     * @param uuid
+     *            of Iso.
      * @return Iso id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getClusterId(String uuid) throws Exception {
         if (clusterService.findByUUID(uuid) != null) {
@@ -765,10 +878,13 @@ public class ConvertEntityService {
     /**
      * Get the username.
      *
-     * @param owner of username.
-     * @param domain domain object..
+     * @param owner
+     *            of username.
+     * @param domain
+     *            domain object..
      * @return osCategory id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getUserByName(String owner, Domain domain) throws Exception {
         if (userService.findByNameAndDomain(owner, domain) != null) {
@@ -780,9 +896,11 @@ public class ConvertEntityService {
     /**
      * Get Storage Offering By Id.
      *
-     * @param storageOfferingId storageOffering Id.
+     * @param storageOfferingId
+     *            storageOffering Id.
      * @return storageOffering.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public String getStorageOfferingById(Long storageOfferingId) throws Exception {
         if (storageService.find(storageOfferingId) != null) {
@@ -794,9 +912,11 @@ public class ConvertEntityService {
     /**
      * Get Zone By Id.
      *
-     * @param zoneId Zone Id.
+     * @param zoneId
+     *            Zone Id.
      * @return Zone.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public String getZoneUuidById(Long zoneId) throws Exception {
         if (zoneService.find(zoneId) != null) {
@@ -809,9 +929,11 @@ public class ConvertEntityService {
     /**
      * Get Project By Id.
      *
-     * @param projectId Project Id.
+     * @param projectId
+     *            Project Id.
      * @return Project.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public String getProjectUuidById(Long projectId) throws Exception {
         if (projectService.find(projectId) != null) {
@@ -823,9 +945,11 @@ public class ConvertEntityService {
     /**
      * Get Department By Id.
      *
-     * @param departmentId Department Id.
+     * @param departmentId
+     *            Department Id.
      * @return Department.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public String getDepartmentUsernameById(Long departmentId) throws Exception {
         if (departmentService.find(departmentId) != null) {
@@ -838,9 +962,11 @@ public class ConvertEntityService {
     /**
      * Get the IP address id.
      *
-     * @param uuid uuid of IP address.
+     * @param uuid
+     *            uuid of IP address.
      * @return IP address id.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public Long getIpAddressId(String uuid) throws Exception {
         if (ipAddressService.findbyUUID(uuid) != null) {
@@ -853,9 +979,11 @@ public class ConvertEntityService {
     /**
      * Get IP address by id.
      *
-     * @param id of IP address.
+     * @param id
+     *            of IP address.
      * @return IP address.
-     * @throws Exception unhandled exception.
+     * @throws Exception
+     *             unhandled exception.
      */
     public IpAddress getIpAddress(Long id) throws Exception {
         return ipAddressService.find(id);
@@ -914,35 +1042,55 @@ public class ConvertEntityService {
      */
     public void resourceCount(String csResponse) throws Exception {
         JSONArray resourceCountArrayJSON = null;
-        //get cloud stack resource count response
-        JSONObject csCountJson = new JSONObject(csResponse).getJSONObject("updateresourcecountresponse");
-        //If json response has resource count object
-        if (csCountJson.has("resourcecount")) {
-            resourceCountArrayJSON = csCountJson.getJSONArray("resourcecount");
+        // get cloud stack resource count response
+        JSONObject csCountJson = new JSONObject(csResponse).getJSONObject(CS_UPDATE_RESOURCE_RESPONSE);
+        // If json response has resource count object
+        if (csCountJson.has(CS_RESOUCE_COUNT)) {
+            resourceCountArrayJSON = csCountJson.getJSONArray(CS_RESOUCE_COUNT);
             // Iterate resource count response from resource type
             for (int i = 0, size = resourceCountArrayJSON.length(); i < size; i++) {
-                //get resource count, type, domain and set in a variable for future use
-                String resourceCount = resourceCountArrayJSON.getJSONObject(i).getString("resourcecount");
-                String resourceType = resourceCountArrayJSON.getJSONObject(i).getString("resourcetype");
-                String domainId = resourceCountArrayJSON.getJSONObject(i).getString("domainid");
-                //check resource type other than 5(resource type of project) and allow to update
-                if (!resourceType.equals("5")) {
-                    //Map and get the resource count for current resource type value
+                // get resource count, type, domain and set in a variable for
+                // future use
+                String resourceCount = resourceCountArrayJSON.getJSONObject(i).getString(CS_RESOUCE_COUNT);
+                String resourceType = resourceCountArrayJSON.getJSONObject(i).getString(CS_RESOUCE_TYPE);
+                String domainId = resourceCountArrayJSON.getJSONObject(i)
+                        .getString(CloudStackConstants.CS_DOMAIN_ID);
+                // check resource type other than 5(resource type of project)
+                // and allow to update
+                if (!resourceType.equals(CS_PROJECT)) {
+                    // Map and get the resource count for current resource type
+                    // value
                     HashMap<String, String> resourceMap = getResourceTypeValue();
                     // checking null validation for resource map
                     if (resourceMap != null) {
-                        //update resource count in resource limit domain table
-                        ResourceLimitDomain resourceDomainCount = resourceLimitDomainService.findByDomainAndResourceCount(
-                                getDomainId(domainId), ResourceType.valueOf(resourceMap.get(resourceType)),
-                                true);
-                        //check the max value if not -1 and upadate the available value
+                        // update resource count in resource limit domain table
+                        ResourceLimitDomain resourceDomainCount = resourceLimitDomainService
+                                .findByDomainAndResourceCount(getDomainId(domainId),
+                                        ResourceType.valueOf(resourceMap.get(resourceType)), true);
+                        // check the max value if not -1 and upadate the
+                        // available value
                         if (resourceDomainCount.getMax() != -1) {
-                            resourceDomainCount.setAvailable(resourceDomainCount.getMax() - Long.valueOf(resourceCount));
+                            // Check resource type primary = 10 and secondary
+                            // storage = 11 and convert resource
+                            // count values GiB to MB.
+                            if (resourceType.equals(CS_PRIMARY_STORAGE) || resourceType.equals(CS_SECONDARY_STORAGE)) {
+                                // Convert and set Available resource count of
+                                // primary and secondary GiB to MB.
+                                resourceDomainCount.setAvailable(resourceDomainCount.getMax()
+                                        - (Long.valueOf(resourceCount) / (1024 * 1024 * 1024)));
+                                // Convert and set Used resource count of
+                                // primary and secondary GiB to MB.
+                                resourceDomainCount.setUsedLimit((Long.valueOf(resourceCount) / (1024 * 1024 * 1024)));
+                            } else {
+                                resourceDomainCount
+                                        .setAvailable(resourceDomainCount.getMax() - Long.valueOf(resourceCount));
+                                resourceDomainCount.setUsedLimit(Long.valueOf(resourceCount));
+                            }
                         } else {
                             resourceDomainCount.setAvailable(resourceDomainCount.getMax());
+                            resourceDomainCount.setUsedLimit(Long.valueOf(resourceCount));
                         }
-                        //Set used limit value
-                        resourceDomainCount.setUsedLimit(Long.valueOf(resourceCount));
+                        // Set used limit value
                         resourceDomainCount.setIsSyncFlag(false);
                         resourceLimitDomainService.update(resourceDomainCount);
                     }
@@ -958,39 +1106,19 @@ public class ConvertEntityService {
      */
     private HashMap<String, String> getResourceTypeValue() {
         HashMap<String, String> resourceMap = new HashMap<>();
-        //Map and get the resource count for current resource type value
-        resourceMap.put("0", String.valueOf(ResourceType.Instance));
-        resourceMap.put("1", String.valueOf(ResourceType.IP));
-        resourceMap.put("2", String.valueOf(ResourceType.Volume));
-        resourceMap.put("3", String.valueOf(ResourceType.Snapshot));
-        resourceMap.put("4", String.valueOf(ResourceType.Template));
-        resourceMap.put("6", String.valueOf(ResourceType.Network));
-        resourceMap.put("7", String.valueOf(ResourceType.VPC));
-        resourceMap.put("8", String.valueOf(ResourceType.CPU));
-        resourceMap.put("9", String.valueOf(ResourceType.Memory));
-        resourceMap.put("10", String.valueOf(ResourceType.PrimaryStorage));
-        resourceMap.put("11", String.valueOf(ResourceType.SecondaryStorage));
+        // Map and get the resource count for current resource type value
+        resourceMap.put(CS_INSTANCE, String.valueOf(ResourceType.Instance));
+        resourceMap.put(CS_IP, String.valueOf(ResourceType.IP));
+        resourceMap.put(CS_VOLUME, String.valueOf(ResourceType.Volume));
+        resourceMap.put(CS_SNAPSHOT, String.valueOf(ResourceType.Snapshot));
+        resourceMap.put(CS_TEMPLATE, String.valueOf(ResourceType.Template));
+        resourceMap.put(CS_NETWORK, String.valueOf(ResourceType.Network));
+        resourceMap.put(CS_VPC, String.valueOf(ResourceType.VPC));
+        resourceMap.put(CS_CPU, String.valueOf(ResourceType.CPU));
+        resourceMap.put(CS_MEMORY, String.valueOf(ResourceType.Memory));
+        resourceMap.put(CS_PRIMARY_STORAGE, String.valueOf(ResourceType.PrimaryStorage));
+        resourceMap.put(CS_SECONDARY_STORAGE, String.valueOf(ResourceType.SecondaryStorage));
         return resourceMap;
     }
 
-    /**
-     * A method a set Custom storage values for instance.
-     *
-     * @param vmInstance Vm instance object
-     * @throws Exception error
-     */
-    public void customStorageForInstance(VmInstance vmInstance) throws Exception {
-        HashMap<String, String> instanceMap = new HashMap<>();
-            instanceMap.put("diskofferingid",
-                    getStorageOfferById(vmInstance.getStorageOfferingId()).getUuid());
-            //Check the disk size not null validation and set the disk size
-            if (vmInstance.getDiskSize() != null) {
-                instanceMap.put("size", vmInstance.getDiskSize().toString());
-            }
-            //Check the disk Iops (Max and Min) not null validation and set the disk iops
-            if (vmInstance.getDiskMaxIops() != null && vmInstance.getDiskMinIops() != null) {
-                instanceMap.put("details[0].maxIopsDo",vmInstance.getDiskMaxIops().toString());
-                instanceMap.put("details[0].minIopsDo", vmInstance.getDiskMinIops().toString());
-            }
-    }
 }

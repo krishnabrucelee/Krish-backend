@@ -10,7 +10,6 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -32,6 +31,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -80,7 +81,7 @@ public class Project implements Serializable {
 
     /** Project domain id. */
     @JoinColumn(name = "domain_id", referencedColumnName = "id", updatable = false, insertable = false)
-    @ManyToOne(targetEntity = Domain.class, fetch = FetchType.EAGER)
+    @ManyToOne
     private Domain domain;
 
     /** Project domain id. */
@@ -90,7 +91,7 @@ public class Project implements Serializable {
 
     /** Project department id. */
     @JoinColumn(name = "department_id", referencedColumnName = "id", updatable = false, insertable = false)
-    @ManyToOne(fetch = FetchType.EAGER, targetEntity = Department.class)
+    @ManyToOne
     private Department department;
 
     /** Project department id. */
@@ -490,6 +491,8 @@ public class Project implements Serializable {
     }
 
     /**
+     * Get sync flag to identify the call.
+     *
      * @return the syncFlag
      */
     public Boolean getSyncFlag() {
@@ -497,6 +500,8 @@ public class Project implements Serializable {
     }
 
     /**
+     * Set sync flag to identify the call.
+     *
      * @param syncFlag the syncFlag to set
      */
     public void setSyncFlag(Boolean syncFlag) {
@@ -568,16 +573,15 @@ public class Project implements Serializable {
         Project project = new Project();
         project.setSyncFlag(false);
         try {
-            project.setName(JsonUtil.getStringValue(jsonObject, "name"));
-            project.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            project.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
-            project.setTransAccount(JsonUtil.getStringValue(jsonObject, "account"));
-            project.setTransState(JsonUtil.getStringValue(jsonObject, "state"));
-            project.setDescription(JsonUtil.getStringValue(jsonObject, "displaytext"));
+            project.setName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_NAME));
+            project.setUuid(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ID));
+            project.setTransDomainId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DOMAIN_ID));
+            project.setTransAccount(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ACCOUNT));
+            project.setTransState(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_STATE));
+            project.setDescription(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DISPLAY_TEXT));
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return project;
     }
 
@@ -589,11 +593,9 @@ public class Project implements Serializable {
      */
     public static Map<String, Project> convert(List<Project> projectList) {
         Map<String, Project> projectMap = new HashMap<String, Project>();
-
         for (Project project : projectList) {
             projectMap.put(project.getUuid(), project);
         }
-
         return projectMap;
     }
 }

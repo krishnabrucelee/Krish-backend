@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +28,7 @@ import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.service.SyncService;
 import ck.panda.service.VirtualMachineService;
 import ck.panda.util.CloudStackServer;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -43,6 +43,10 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     /** Service reference to Virtual Machine. */
     @Autowired
     private VirtualMachineService virtualmachineservice;
+
+    /** Autowired TokenDetails. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     /** Cloud stack server service. */
     @Autowired
@@ -95,7 +99,7 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     }
 
     /**
-     * Get vmlist.
+     * Get all vm instance list by status.
      *
      * @param sortBy asc/desc
      * @param status status of vm.
@@ -106,16 +110,17 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
      * @return vmlist.
      * @throws Exception unhandled exception.
      */
-    @RequestMapping(value = "listByStatus", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/listByStatus", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<VmInstance> listVmByStatus(@RequestParam String sortBy, @RequestParam String status,
             @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, VmInstance.class);
-        Page<VmInstance> pageResponse = virtualmachineservice.findAll(page);
+        Page<VmInstance> pageResponse = virtualmachineservice.findAllByUser(page, Long.valueOf(tokenDetails.getTokenDetails("id")));
         if (!status.equals("Expunging")) {
-            pageResponse = virtualmachineservice.findAllByStatus(page, status);
+            pageResponse = virtualmachineservice.findAllByStatus(page, Status.valueOf(status.toUpperCase()), Long.valueOf(tokenDetails.getTokenDetails("id")));
         }
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
@@ -130,32 +135,32 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
      * @return vm count.
      * @throws Exception unhandled errors.
      */
-    @RequestMapping(value = "vmCounts", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/vmCounts", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public String getVmCounts(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        Integer vmCount = virtualmachineservice.findAll().size();
-        Integer runningVmCount = virtualmachineservice.findCountByStatus(Status.Running);
-        Integer stoppedVmCount = virtualmachineservice.findCountByStatus(Status.Stopped);
+        Integer vmCount = virtualmachineservice.findAllByUser(Long.valueOf(tokenDetails.getTokenDetails("id"))).size();
+        Integer runningVmCount = virtualmachineservice.findCountByStatus(Status.RUNNING, Long.valueOf(tokenDetails.getTokenDetails("id")));
+        Integer stoppedVmCount = virtualmachineservice.findCountByStatus(Status.STOPPED, Long.valueOf(tokenDetails.getTokenDetails("id")));
         return "{\"runningVmCount\":" + runningVmCount + ",\"stoppedVmCount\":" + stoppedVmCount + ",\"totalCount\":"
                 + vmCount + "}";
     }
 
     /**
-     * get all instances.
+     * Get all vm instance list.
      *
      * @throws Exception if error occurs.
      * @return list of instances.
      */
-    @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<VmInstance> getSearch() throws Exception {
+    public List<VmInstance> getVmList() throws Exception {
         return virtualmachineservice.findAll();
     }
 
     /**
-     * get all instances.
+     * Get all instance list for network by network id.
      *
      * @param networkId network's id.
      * @throws Exception if error occurs.
@@ -164,61 +169,62 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     @RequestMapping(value = "/network", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<VmInstance> getListByNetwork(@RequestParam("networkId") Long networkId) throws Exception {
-        return virtualmachineservice.findByNetworkAndVmStatus(networkId, VmInstance.Status.Expunging);
+    public List<VmInstance> getVmListByNetwork(@RequestParam("networkId") Long networkId) throws Exception {
+        return virtualmachineservice.findAllByNetworkAndVmStatus(networkId, VmInstance.Status.EXPUNGING);
     }
 
     /**
-     * Get instance with latest state update.
+     * Get instance details after vm action.
      *
      * @param vm vm uuid.
      * @param event vm event type.
      * @throws Exception if error occurs.
-     * @return list of instances.
+     * @return instance.
      */
-    @RequestMapping(value = "event", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/handlevmevent", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public VmInstance handleVmEvent(@RequestParam("vm") String vm, @RequestParam("event") String event)
             throws Exception {
-        return virtualmachineservice.vmEventHandle(vm, event);
+        return virtualmachineservice.handleAsyncJobByEventName(vm, event);
     }
 
     /**
-     * Get instance with latest state update.
+     * Get instance details after vm action.
      *
      * @param vminstance vm object.
      * @throws Exception if error occurs.
-     * @return list of instances.
+     * @return instance.
      */
-    @RequestMapping(value = "/vm", method = RequestMethod.PUT, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/handleevent/vm", method = RequestMethod.PUT, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public VmInstance handleVmEventWithInstance(@RequestBody VmInstance vminstance) throws Exception {
         String event = vminstance.getEvent();
-        return virtualmachineservice.vmEventHandleWithVM(vminstance, event);
+        return virtualmachineservice.handleAsyncJobByVM(vminstance, event, Long.valueOf(tokenDetails.getTokenDetails("id")));
     }
 
     /**
-     * get all instances.
+     * Generate VNC console token and redirect to console proxy server.
      *
      * @param vminstance instance name.
      * @throws Exception if error occurs.
-     * @return list of instances.
+     * @return VNC token.
      */
     @RequestMapping(value = "/console", method = RequestMethod.PUT, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public String getVNC(@RequestBody VmInstance vminstance) throws Exception {
+        // TODO optimize/refactor this console code after completion of Kanaka NoVNC configuration.
         syncService.init(cloudStackServer);
         syncService.syncInstances();
         String token = null;
         VmInstance persistInstance = virtualmachineservice.find(vminstance.getId());
-        String host = persistInstance.getHost().getHostIpaddress(); // VM's the host's IP address
-        String instance = persistInstance.getInstanceInternalName(); // virtual machine instance name
-        String display = persistInstance.getDisplayName(); // Novnc display
-        String str = host + "|" + instance + "|" + display;
-        token = Base64.encodeBase64String(str.getBytes());
+        String hostUUID = persistInstance.getHost().getUuid(); // VM's the host's UUID
+        String instanceUUID = persistInstance.getUuid(); // virtual machine UUID
+        token = hostUUID + "-" + instanceUUID;
         LOGGER.debug("VNC Token" + token);
         return "{\"success\":" + "\"" + consoleProxy + "/console/?token=" + token + "\"}";
     }
@@ -238,36 +244,48 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     }
 
     /**
-     * Get the project.
+     * Get all vm instance list for volume by project.
      *
      * @param projectId project id.
-     * @return project
+     * @return list of instance.
      * @throws Exception error occurs.
      */
     @RequestMapping(value = "/volume/project/{id}", method = RequestMethod.GET, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
-    public List<VmInstance> findByProjectAndStatus(@PathVariable(PATH_ID) Long projectId) throws Exception {
+    public List<VmInstance> findAllByProjectAndStatus(@PathVariable(PATH_ID) Long projectId) throws Exception {
         List<VmInstance.Status> statusCode = new ArrayList<VmInstance.Status>();
-        statusCode.add(Status.Running);
-        statusCode.add(Status.Stopped);
-        return virtualmachineservice.findByProjectAndStatus(projectId, statusCode);
+        statusCode.add(Status.RUNNING);
+        statusCode.add(Status.STOPPED);
+        return virtualmachineservice.findAllByProjectAndStatus(projectId, statusCode);
     }
 
     /**
-     * Get the department.
+     * Get all vm instance list for volume by department.
      *
      * @param derpartmentId department id.
-     * @return department
+     * @return list of instance.
      * @throws Exception error occurs.
      */
     @RequestMapping(value = "/volume/department/{id}", method = RequestMethod.GET, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
-    public List<VmInstance> findByDepartmentAndStatus(@PathVariable(PATH_ID) Long derpartmentId) throws Exception {
+    public List<VmInstance> findAllByDepartmentAndStatus(@PathVariable(PATH_ID) Long derpartmentId) throws Exception {
         List<VmInstance.Status> statusCode = new ArrayList<VmInstance.Status>();
-        statusCode.add(Status.Running);
-        statusCode.add(Status.Stopped);
-        return virtualmachineservice.findByDepartmentAndStatus(derpartmentId, statusCode);
+        statusCode.add(Status.RUNNING);
+        statusCode.add(Status.STOPPED);
+        return virtualmachineservice.findAllByDepartmentAndStatus(derpartmentId, statusCode);
+    }
+
+    /**
+     * @param id instance id
+     * @return instance
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/getvncpassword/{id}", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public VmInstance findByIdWithVncPassword(@PathVariable(PATH_ID) Long id) throws Exception {
+        return virtualmachineservice.findByIdWithVncPassword(id);
     }
 }

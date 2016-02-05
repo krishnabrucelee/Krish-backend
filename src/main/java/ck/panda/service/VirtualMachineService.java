@@ -39,52 +39,83 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * @return instance.
      * @throws Exception if error occurs.
      */
-    VmInstance vmEventHandle(String vmId, String event) throws Exception;
+    VmInstance handleAsyncJobByEventName(String vmId, String event) throws Exception;
 
     /**
      * To get list of instance from cloudstack server.
      *
-     * @return domain list from server
+     * @return vm list.
      * @throws Exception unhandled errors.
      */
     List<VmInstance> findAllFromCSServer() throws Exception;
+
+    /**
+     * To get list of instance by except status.
+     *
+     * @param status of instance.
+     * @return vm list.
+     * @throws Exception unhandled errors.
+     */
+    List<VmInstance> findAllByExceptStatus(Status status) throws Exception;
 
     /**
      * VM related events are handled.
      *
      * @param vmInstance Virtual machine.
      * @param event event message.
+     * @param userId user id.
      * @return instance.
      * @throws Exception if error occurs.
      */
-    VmInstance vmEventHandleWithVM(VmInstance vmInstance, String event) throws Exception;
+    VmInstance handleAsyncJobByVM(VmInstance vmInstance, String event, Long userId) throws Exception;
 
     /**
-     * Upgrade/Downgrade VM offerings for created instance.
+     * Upgrade/Downgrade vm offerings for created instance.
      *
-     * @param vminstance Virtual machine
-     * @return instance
-     * @throws Exception if error occurs
+     * @param vminstance virtual machine.
+     * @return instance.
+     * @throws Exception if error occurs.
      */
     VmInstance upgradeDowngradeVM(VmInstance vminstance) throws Exception;
+
+    /**
+     * Find all the instance based on the given status and page request.
+     *
+     * @param pagingAndSorting page request.
+     * @param userId user id.
+     * @return instances.
+     * @throws Exception unhandled errors.
+     */
+    Page<VmInstance> findAllVM(PagingAndSorting pagingAndSorting, Long userId) throws Exception;
+
+    /**
+     * Find all the instance based on the given status.
+     *
+     * @param userId user id.
+     * @return instances.
+     * @throws Exception unhandled errors.
+     */
+    List<VmInstance> findAllVMList(Long userId) throws Exception;
 
     /**
      * Find all the instance based on the given status for paginated list.
      *
      * @param pagingAndSorting page request.
      * @param status status of vm.
+     * @param userId user id.
      * @return instances.
      * @throws Exception unhandled errors.
      */
-    Page<VmInstance> findAllByStatus(PagingAndSorting pagingAndSorting, String status) throws Exception;
+    Page<VmInstance> findAllByStatus(PagingAndSorting pagingAndSorting, Status status, Long userId) throws Exception;
 
     /**
      * Get the count of the instance based on the status.
      *
      * @param status status of vm.
+     * @param userId user id.
      * @return count.
      */
-    Integer findCountByStatus(Status status);
+    Integer findCountByStatus(Status status, Long userId);
 
     /**
      * Get the count of the instance based on the status.
@@ -96,52 +127,99 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
     VmInstance updateDisplayName(VmInstance vminstance) throws Exception;
 
     /**
-     * Find vm Instance associated with department.
+     * Find vm instance associated with department.
      *
      * @param departmentId of the department.
      * @return department
      * @param status status of vm.
      * @throws Exception unhandled errors.
      */
-    List<VmInstance> findByDepartmentAndVmStatus(Long departmentId, Status status) throws Exception;
+    List<VmInstance> findAllByDepartmentAndVmStatus(Long departmentId, Status status) throws Exception;
 
     /**
-     * Find vm Instance associated with project.
+     * Find list of vm Instances with pagination.
+     *
+     * @param pagingAndSorting parameters.
+     * @param userId user id.
+     * @return page result of intances.
+     * @throws Exception if error occurs.
+     */
+    Page<VmInstance> findAllByUser(PagingAndSorting pagingAndSorting, Long userId) throws Exception;
+
+    /**
+     * Find list of vm Instances without pagination.
+     *
+     * @param userId user id.
+     * @return result of instance.
+     * @throws Exception if error occurs.
+     */
+    List<VmInstance> findAllByUser(Long userId) throws Exception;
+
+    /**
+     * Find all vm instances associated with project.
      *
      * @param projectId of the project.
      * @param statusCode status of instance
-     * @return project
+     * @return vm list.
      * @throws Exception unhandled errors.
      */
-    List<VmInstance> findByProjectAndStatus(Long projectId, List<Status> statusCode) throws Exception;
+    List<VmInstance> findAllByProjectAndStatus(Long projectId, List<Status> statusCode) throws Exception;
 
     /**
-     * Find vm Instance associated with department.
+     * Find vm instance associated with department.
      *
      * @param departmentId of the department.
      * @param statusCode status of instance
-     * @return department
+     * @return vm list.
      * @throws Exception unhandled errors.
      */
-    List<VmInstance> findByDepartmentAndStatus(Long departmentId, List<Status> statusCode) throws Exception;
+    List<VmInstance> findAllByDepartmentAndStatus(Long departmentId, List<Status> statusCode) throws Exception;
 
     /**
-     * Find vm Instance assocaited with compute offering.
+     * Find all vm instances associated with compute offering.
      *
-     * @param computeOfferingId of the compute offer
-     * @return compute offering
+     * @param computeOfferingId of the compute offer.
      * @param status status of vm.
+     * @return vm list.
      * @throws Exception error occurs.
      */
-    List<VmInstance> findByComputeOfferingIdAndVmStatus(Long computeOfferingId, Status status) throws Exception;
+    List<VmInstance> findAllByComputeOfferingIdAndVmStatus(Long computeOfferingId, Status status) throws Exception;
 
     /**
-     * Find vm Instance associated with network.
+     * Find all vm instances associated with network.
      *
      * @param networkId of the instance.
      * @param status of instance
-     * @return network
+     * @return vm list.
      * @throws Exception error occurs.
      */
-    List<VmInstance> findByNetworkAndVmStatus(Long networkId, Status status) throws Exception;
+    List<VmInstance> findAllByNetworkAndVmStatus(Long networkId, Status status) throws Exception;
+
+    /**
+     * Find vm instance by status.
+     *
+     * @param status of the vm instance
+     * @return list of instances
+     * @throws Exception if error occurs.
+     */
+    List<VmInstance> findByVmStatus(Status status) throws Exception;
+
+    /**
+     * Find all vm instances associated with storage offering.
+     *
+     * @param storageOfferingId of the storage offer.
+     * @param expunging status of vm.
+     * @return vm list.
+     * @throws Exception error occurs.
+     */
+    List<VmInstance> findAllByStorageOfferingIdAndVmStatus(Long storageOfferingId, Status expunging) throws Exception;
+
+    /**
+     * Find vm instance with VNC password by id.
+     *
+     * @param id instance id.
+     * @return instance.
+     * @throws Exception error occurs.
+     */
+    VmInstance findByIdWithVncPassword(Long id) throws Exception;
 }

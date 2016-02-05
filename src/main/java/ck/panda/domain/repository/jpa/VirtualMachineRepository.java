@@ -27,17 +27,8 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      * @param uuid instance uuid.
      * @return instance.
      */
-    @Query(value = "select vm from VmInstance vm where vm.uuid LIKE :uuid ")
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.uuid LIKE :uuid ")
     VmInstance findByUUID(@Param("uuid") String uuid);
-
-    /**
-     * Find vm instance by id.
-     *
-     * @param id instance id.
-     * @return instance.
-     */
-    @Query(value = "select vm from VmInstance vm where vm.id LIKE :id ")
-    VmInstance findById(@Param("id") Long id);
 
     /**
      * Find vm instance by name and department.
@@ -47,276 +38,268 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      * @param department department object.
      * @return instance.
      */
-    @Query(value = "select vm from VmInstance vm where vm.name=:name AND vm.department=:department AND vm.status <> :status")
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.name = :name AND vm.department = :department AND vm.status <> :status")
     VmInstance findByNameAndDepartment(@Param("name") String name, @Param("department") Department department,
             @Param("status") Status status);
 
     /**
-     * Get the list of VMs by domain and status.
+     * Get the list of VMs by domain and status with pagination.
      *
-     * @param id of the domain
-     * @param status of the domain
-     * @param pageable page request
-     * @return instance list
+     * @param domainId of the domain.
+     * @param status of the domain.
+     * @param pageable page request.
+     * @return instance list.
      */
-    @Query(value = "select vm from VmInstance vm where vm.domainId=:id AND vm.status <>:status")
-    Page<VmInstance> findAllByDomainIsActive(@Param("id") Long id, @Param("status") Status status, Pageable pageable);
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.domainId= :domainId AND vm.status = :status")
+    Page<VmInstance> findAllByDomainAndStatusWithPageRequest(@Param("domainId") Long domainId,
+            @Param("status") Status status, Pageable pageable);
 
     /**
      * Get the list of VMs by domain and status.
      *
-     * @param id of the domain
-     * @param status of the domain
-     * @param pageable page request
-     * @return instance list
+     * @param domainId of the domain.
+     * @param status of the domain.
+     * @return instance list.
      */
-    @Query(value = "select vm from VmInstance vm where vm.domainId=:id AND vm.status =:status")
-    Page<VmInstance> findAllByDomainIsActiveAndStatus(@Param("id") Long id, @Param("status") Status status,
-            Pageable pageable);
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.domainId = :domainId AND vm.status = :status")
+    List<VmInstance> findAllByDomainAndStatus(@Param("domainId") Long domainId, @Param("status") Status status);
 
     /**
-     * Get the list of VMs by domain and status.
+     * Get the list of VMs by domain and except given status.
      *
-     * @param id of the domain
-     * @param status of the domain
-     * @return instance list
+     * @param id of the domain.
+     * @param status of the domain.
+     * @return instance list.
      */
-    @Query(value = "select vm from VmInstance vm where vm.domainId=:id AND vm.status =:status")
-    List<VmInstance> findAllByDomainIsActiveAndStatus(@Param("id") Long id, @Param("status") Status status);
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.domainId = :id AND vm.status <> :status")
+    List<VmInstance> findAllByDomainAndExceptStatus(@Param("id") Long id, @Param("status") Status status);
 
     /**
-     * Get the list of VMs by domain and status.
+     * Get the list of VMs by domain and except given status.
      *
-     * @param id of the domain
-     * @param status of the domain
-     * @return instance list
+     * @param id of the domain.
+     * @param status of the domain.
+     * @return instance list.
      */
-    @Query(value = "select vm from VmInstance vm where vm.domainId=:id AND vm.status <>:status")
-    List<VmInstance> findAllByDomainIsActive(@Param("id") Long id, @Param("status") Status status);
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.domainId = :id AND vm.status <> :status")
+    Page<VmInstance> findAllByDomainAndExceptStatus(@Param("id") Long id, @Param("status") Status status, Pageable pageable);
 
     /**
-     * Get the list of VMs by domain and status.
+     * Get the list of VMs by except given status with pagination.
      *
-     * @param id of the domain
-     * @param status of the domain
-     * @return instance list
+     * @param status of the status of VM.
+     * @param pageable page request.
+     * @return instance list.
      */
-    @Query(value = "select vm from VmInstance vm where vm.domainId=:id AND vm.status <>:status")
-    List<VmInstance> findAllByDomain(@Param("id") Long id, @Param("status") Status status);
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.status <> :status")
+    Page<VmInstance> findAllByExceptStatusWithPageRequest(@Param("status") Status status, Pageable pageable);
 
     /**
-     * Get the list of VMs by status.
+     * Get the list of VMs by except given status.
+     *
+     * @param status of the status of VM.
+     * @return instance list.
+     */
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.status <> :status")
+    List<VmInstance> findAllByExceptStatus(@Param("status") Status status);
+
+    /**
+     * Get the list of VMs by status with pagination.
      *
      * @param status of the status of VM.
      * @param pageable page request
      * @return instance list
      */
-    @Query(value = "select vm from VmInstance vm where vm.status <> :status")
-    Page<VmInstance> findAllByIsActive(@Param("status") Status status, Pageable pageable);
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.status = :status")
+    Page<VmInstance> findAllByStatusWithPageRequest(@Param("status") Status status, Pageable pageable);
 
     /**
-     * Get the list of VMs by status.
-     *
-     * @param status of the status of VM.
-     * @return instance list
-     */
-    @Query(value = "select vm from VmInstance vm where vm.status <> :status")
-    List<VmInstance> findAllByIsActive(@Param("status") Status status);
-
-    /**
-     * Get the list of VMs by status.
-     *
-     * @param status of the status of VM.
-     * @param pageable page request
-     * @return instance list
-     */
-    @Query(value = "select vm from VmInstance vm where vm.status = :status")
-    Page<VmInstance> findAllByStatus(@Param("status") Status status, Pageable pageable);
-
-    /**
-     * Get the list of VMs by status and user.
+     * Get the list of VMs by status and user with pagination.
      *
      * @param status of the status of VM.
      * @param pageable page request.
      * @param instanceOwner belongs to VM.
      * @return instance list
      */
-    @Query(value = "select vm from VmInstance vm where vm.status = :status and vm.instanceOwner = :user")
-    Page<VmInstance> findAllByUserIsActive(@Param("status") Status status, Pageable pageable,
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.status = :status AND vm.instanceOwner = :user")
+    Page<VmInstance> findAllByUserAndStatusWithPageRequest(@Param("status") Status status, Pageable pageable,
             @Param("user") User instanceOwner);
 
     /**
-     * VmInstance. Get the list of VMs by status and user.
+     * Get the list of VMs by user and except given status with pagination.
      *
      * @param status of the status of VM.
      * @param pageable page request.
      * @param instanceOwner belongs to VM.
-     * @return instance list
+     * @return instance list.
      */
-    @Query(value = "select vm from VmInstance vm where vm.status <> :status and vm.instanceOwner = :user")
-    Page<VmInstance> findAllByUserIsActiveAndStatus(@Param("status") Status status, Pageable pageable,
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.status <> :status AND vm.instanceOwner = :user")
+    Page<VmInstance> findAllByUserAndExceptStatusWithPageRequest(@Param("status") Status status, Pageable pageable,
             @Param("user") User instanceOwner);
 
     /**
-     * Get the list of VMs by status and user.
+     * Get the list of VMs by status and department.
      *
      * @param status of the status of VM.
      * @param department belongs to VM.
-     * @return instance list
+     * @return instance list.
      */
-    @Query(value = "select vm from VmInstance vm where vm.status = :status and vm.project is NULL and vm.department = :department")
-    List<VmInstance> findAllByDepartmentIsActive(@Param("status") Status status, @Param("department") Department department);
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.status = :status AND vm.project is NULL AND vm.department = :department")
+    List<VmInstance> findAllByDepartmentAndStatus(@Param("status") Status status,
+            @Param("department") Department department);
 
     /**
-     * Get the list of VMs by status and user.
+     * Get the list of VMs by except given status and user.
      *
      * @param status of the status of VM.
      * @param instanceOwner belongs to VM.
-     * @return instance list
+     * @return instance list.
      */
-    @Query(value = "select vm from VmInstance vm where vm.status<>:status and vm.instanceOwner = :user")
-    List<VmInstance> findAllByUserIsActiveAndStatus(@Param("status") Status status, @Param("user") User instanceOwner);
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.status <> :status AND vm.instanceOwner = :user")
+    List<VmInstance> findAllByUserAndExceptStatus(@Param("status") Status status, @Param("user") User instanceOwner);
 
     /**
-     * Get the list of VMs by status and user.
+     * Get the list of VMs by except given status and department.
      *
      * @param status of the status of VM.
      * @param department belongs to VM.
-     * @return instance list
+     * @return instance list.
      */
-    @Query(value = "select vm from VmInstance vm where vm.status <> :status and vm.project is NULL and vm.department = :department")
-    List<VmInstance> findAllByDepartment(@Param("status") Status status, @Param("department") Department department);
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.status <> :status AND vm.project IS NULL AND vm.department = :department")
+    List<VmInstance> findAllByDepartmentAndExceptStatus(@Param("status") Status status,
+            @Param("department") Department department);
 
     /**
-     * Get the list of VMs by status and user.
+     * Get the list of VMs by status and user with pagination .
      *
      * @param status of the status of VM.
      * @param department belongs to VM.
-     * @return instance list
+     * @param pageable page request.
+     * @return instance list.
      */
-    @Query(value = "select vm from VmInstance vm where vm.status = :status and vm.project is NULL and vm.department = :department")
-    Page<VmInstance> findAllByDepartmentAndStatus(@Param("status") Status status, @Param("department") Department department, Pageable pageable);
-
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.status = :status AND vm.project IS NULL AND vm.department = :department")
+    Page<VmInstance> findAllByDepartmentAndStatusWithPageRequest(@Param("status") Status status,
+            @Param("department") Department department, Pageable pageable);
 
     /**
-     * Get the list of VMs by status and user.
+     * Get the list of VMs by status and user belongs to department and project.
      *
      * @param status of the status of VM.
-     * @param instanceOwner belongs to VM.
+     * @param department belongs to VM.
      * @param project belongs to VM.
-     * @return instance list
+     * @return instance list.
      */
-    @Query(value = "select vm from VmInstance vm where vm.status = :status and (vm.instanceOwner = :user or vm.project = :project)")
-    List<VmInstance> findAllByUserAndProjectIsActive(@Param("status") Status status, @Param("user") User instanceOwner,
-            @Param("project") Project project);
-
-    /**
-     * Get the list of VMs by status and user.
-     *
-     * @param status of the status of VM.
-     * @param department belongs to VM.
-     * @param isActive check whether instance is removed or not.
-     * @param project belongs to VM.
-     * @return instance list
-     */
-    @Query(value = "select vm from VmInstance vm where vm.status = :status and (vm.project = :project or (vm.project is NULL and vm.department = :department))")
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.status = :status AND (vm.project = :project OR (vm.project IS NULL AND vm.department = :department))")
     List<VmInstance> findAllByDepartmentAndProjectAndStatus(@Param("status") Status status,
             @Param("department") Department department, @Param("project") Project project);
 
     /**
-     * Get the list of VMs by status and user.
+     * Get the list of VMs by except given status and user belongs to department and project.
      *
      * @param status of the status of VM.
      * @param department belongs to VM.
      * @param project belongs to VM.
-     * @return instance list
+     * @return instance list.
      */
-    @Query(value = "select vm from VmInstance vm where vm.status <> :status and (vm.project = :project or (vm.project is NULL and vm.department = :department))")
-    List<VmInstance> findAllByDepartmentAndProject(@Param("status") Status status,
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.status <> :status AND (vm.project = :project OR (vm.project IS NULL AND vm.department = :department))")
+    List<VmInstance> findAllByDepartmentAndProjectAndExceptStatus(@Param("status") Status status,
             @Param("department") Department department, @Param("project") Project project);
 
     /**
-     * Get the list of VMs by status and user.
+     * Get the list of VMs by status and user belongs to project.
      *
      * @param status of the status of VM.
      * @param instanceOwner belongs to VM.
      * @param project belongs to VM.
-     * @return instance list
+     * @return instance list.
      */
-    @Query(value = "select vm from VmInstance vm where vm.status = :status and (vm.instanceOwner = :user or vm.project = :project)")
-    List<VmInstance> findAllByUserAndProject(@Param("status") Status status, @Param("user") User instanceOwner,
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.status = :status AND (vm.instanceOwner = :user OR vm.project = :project)")
+    List<VmInstance> findAllByUserAndProjectAndStatus(@Param("status") Status status, @Param("user") User instanceOwner,
             @Param("project") Project project);
 
     /**
      * Get the instance count by status.
      *
      * @param status instnace status.
-     * @return Instance count.
+     * @return instance count.
      */
-    @Query(value = "select COUNT(vm.id) from VmInstance vm where vm.status = :status")
+    @Query(value = "SELECT COUNT(vm.id) FROM VmInstance vm WHERE vm.status = :status")
     Integer findCountByStatus(@Param("status") Status status);
 
     /**
-     * Find all vmInstance from department.
+     * Find all instance by department and status.
      *
      * @param departmentId department id.
      * @param status get the instance list based on current state.
-     * @return vmInstance list.
+     * @return instance list.
      */
-    @Query(value = "select vm from VmInstance vm where vm.departmentId=:id and vm.status <> :status ")
-    List<VmInstance> findByDepartment(@Param("id") Long departmentId, @Param("status") Status status);
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.departmentId = :departmentId AND vm.status <> :status")
+    List<VmInstance> findByDepartmentAndStatus(@Param("departmentId") Long departmentId,
+            @Param("status") Status status);
 
     /**
-     * Find all vmInstance from department with pagination.
+     * Find all instance by department and except given status with pagination.
      *
      * @param departmentId department id.
      * @param pageable page request.
      * @param status get the instance list based on current state.
-     * @return vmInstance list.
+     * @return instance list.
      */
-    @Query(value = "select vm from VmInstance vm where vm.project is NULL and vm.departmentId = :departmentId and vm.status <> :status ")
-    Page<VmInstance> findAllByDepartment(@Param("departmentId") Long departmentId, @Param("status") Status status, Pageable pageable);
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.project IS NULL AND vm.departmentId = :departmentId AND vm.status <> :status")
+    Page<VmInstance> findAllByDepartmentAndExceptStatusWithPageRequest(@Param("departmentId") Long departmentId,
+            @Param("status") Status status, Pageable pageable);
 
     /**
-     * Find all vmInstance associated with Compute offering.
+     * Find all instance by status and associated with compute offering.
      *
      * @param computeOfferingId computeOffering id.
-     * @param status get the instance list based on current state.
-     * @return vmInstance list.
+     * @param status list of status.
+     * @return instance list.
      */
-    @Query(value = "select vm from VmInstance vm where vm.computeOfferingId=:computeOfferingId and vm.status <> :status  ")
-    List<VmInstance> findByComputeOffering(@Param("computeOfferingId") Long computeOfferingId,
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.computeOfferingId = :computeOfferingId AND vm.status <> :status")
+    List<VmInstance> findByComputeOfferingAndStatus(@Param("computeOfferingId") Long computeOfferingId,
             @Param("status") Status status);
 
     /**
-     * Find all vmInstance from project.
+     * Find all instance by project and list of status.
      *
      * @param projectId project id.
      * @param statusCode get the project list based on status.
-     * @return project list.
+     * @return instance list.
      */
-    @Query(value = "select vm from VmInstance vm where vm.projectId=:projectId and vm.status in :statusCode")
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.projectId = :projectId AND vm.status IN :statusCode")
     List<VmInstance> findByProjectAndStatus(@Param("projectId") Long projectId,
             @Param("statusCode") List<Status> statusCode);
 
     /**
-     * Find all vmInstance from department.
+     * Find all instance by department and list of status.
      *
      * @param departmentId department id.
-     * @param statusCode get the department list based on status.
-     * @return department list.
+     * @param statusCode list of status.
+     * @return instance list.
      */
-    @Query(value = "select vm from VmInstance vm where vm.departmentId=:departmentId and vm.status in :statusCode")
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.departmentId = :departmentId AND vm.status IN :statusCode")
     List<VmInstance> findByDepartmentAndStatus(@Param("departmentId") Long departmentId,
             @Param("statusCode") List<Status> statusCode);
 
     /**
-     * Find all instance associated with network.
+     * Find all instance by status and associated with network.
      *
      * @param networkId of the network.
-     * @param status of the instance
-     * @return network.
+     * @param status of the instance.
+     * @return instance list.
      */
-    @Query(value = "select vm from VmInstance vm where vm.networkId=:id and vm.status <> :status ")
-    List<VmInstance> findByNetwork(@Param("id") Long networkId, @Param("status") Status status);
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.networkId = :id AND vm.status <> :status")
+    List<VmInstance> findByNetworkAndExceptStatus(@Param("id") Long networkId, @Param("status") Status status);
+
+    /**
+     * Find all instance by status and associated with storage offering.
+     *
+     * @param storageOfferingId storageOffering id.
+     * @param status list of status.
+     * @return instance list.
+     */
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.storageOfferingId = :storageOfferingId AND vm.status <> :status")
+    List<VmInstance> findByStorageOfferingAndStatus(@Param("storageOfferingId") Long storageOfferingId,
+            @Param("status") Status status);
 }
