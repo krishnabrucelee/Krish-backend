@@ -522,10 +522,10 @@ public class TemplateServiceImpl implements TemplateService {
                 String templateJob = cloudStackTemplateService.queryAsyncJobResult(templateJson.getString(CloudStackConstants.CS_JOB_ID),
                        CloudStackConstants.JSON);
                 JSONObject jobresult = new JSONObject(templateJob).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
-                if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS).equals("1")) {
+                if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.SUCCEEDED_JOB_STATUS)) {
                     Thread.sleep(3000);
                     return true;
-                } else if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS).equals("2")) {
+                } else if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.ERROR_JOB_STATUS)) {
                     errors = validator.sendGlobalError(jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
                              .getString(CloudStackConstants.CS_ERROR_TEXT));
                     throw new ApplicationException(errors);
@@ -628,15 +628,15 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-	public List<Template> findByTemplateCategory(OsCategory osCategory, String type) throws Exception {
-		List<Template> templates;
-    	if(type.equals("template")) {
+    public List<Template> findByTemplateCategory(OsCategory osCategory, String type) throws Exception {
+        List<Template> templates;
+        if (type.equals("template")) {
             templates = templateRepository.findByTemplateWithIsoCategory(TemplateType.SYSTEM,
                 Status.ACTIVE, osCategory, Format.ISO);
-    	} else {
-    		templates = templateRepository.findByTemplateWithoutIsoCategory(TemplateType.SYSTEM,
-                    Status.ACTIVE, osCategory, Format.ISO);
-    	}
-		return templates;
-	}
+        } else {
+            templates = templateRepository.findByTemplateWithoutIsoCategory(TemplateType.SYSTEM,
+                Status.ACTIVE, osCategory, Format.ISO);
+        }
+        return templates;
+    }
 }
