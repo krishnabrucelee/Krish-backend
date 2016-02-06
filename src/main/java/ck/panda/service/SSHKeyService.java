@@ -69,4 +69,14 @@ public interface SSHKeyService extends CRUDService<SSHKey> {
      * @throws Exception error occurs
      */
     List<SSHKey> findAllBySync() throws Exception;
+
+    /**
+     * Find all SSHKey by department.
+     *
+     * @param departmentId id of the department .
+     * @param isActive SSHKey status Active/Inactive
+     * @return list of SSHKey.
+     * @throws Exception if error occurs.
+     */
+    List<SSHKey> findAllByDepartmentAndIsActive(Long departmentId, Boolean isActive) throws Exception;
 }
