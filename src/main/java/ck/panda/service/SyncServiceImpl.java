@@ -1343,10 +1343,10 @@ public class SyncServiceImpl implements SyncService {
         HashMap<String, Volume> csVolumeMap = (HashMap<String, Volume>) Volume.convert(volumeList);
 
         // 2. Get all the volume objects from application
-        List<Volume> appvolumeServiceList = volumeService.findAll();
+        List<Volume> appVolumeServiceList = volumeService.findAll();
 
         // 3. Iterate application volume list
-        for (Volume volume : appvolumeServiceList) {
+        for (Volume volume : appVolumeServiceList) {
             volume.setIsSyncFlag(false);
             // 3.1 Find the corresponding CS server volume object by finding it
             // in a hash using uuid
