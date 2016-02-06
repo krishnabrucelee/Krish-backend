@@ -121,7 +121,18 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @param isActive user status Active/Inactive
      * @return users
      */
-    @Query(value = "select user from User user where user.roleId =:roleId AND user.isActive =:isActive")
+    @Query(value = "SELECT user FROM User user WHERE user.roleId = :roleId AND user.isActive = :isActive")
     List<User> findByRole(@Param("roleId") Long roleId, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find all user by department not belongs to project.
+     *
+     * @param departmentId department object.
+     * @param userList users list.
+     * @param isActive user status Active/Inactive.
+     * @return list of users.
+     */
+    @Query(value = "SELECT user FROM User user WHERE user.isActive IS :isActive AND user.departmentId = :departmentId AND user NOT IN :userList")
+    List<User> findAllByDepartmentAndIsActive(@Param("isActive") Boolean isActive, @Param("departmentId") Long departmentId, @Param("userList") List<User> userList);
 
 }

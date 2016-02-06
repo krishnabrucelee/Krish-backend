@@ -11,7 +11,6 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -93,7 +92,7 @@ public class User implements Serializable {
     private String lastName;
 
     /** List of projects for users. */
-    @ManyToMany
+    @Transient
     private List<Project> projectList;
 
     /** User uuid. */

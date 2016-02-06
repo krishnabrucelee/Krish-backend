@@ -182,6 +182,21 @@ public class UserController extends CRUDController<User> implements ApiControlle
     @ResponseBody
     public List<User> assignUserRoles(@RequestBody List<User> users) throws Exception {
         return userService.assignUserRoles(users);
-
     }
-}
+
+    /**
+     * Method to find list of users by project.
+     *
+     * @param projectId - project id
+     * @return list of users
+     * @throws Exception - if error occurs
+     */
+    @RequestMapping(value = "/project/{id}", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<User> getUsersByProject(@PathVariable(PATH_ID) Long projectId) throws Exception {
+        return userService.findAllByProject(projectId);
+    }
+
+  }
