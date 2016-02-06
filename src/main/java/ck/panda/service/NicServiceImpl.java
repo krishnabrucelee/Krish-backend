@@ -112,6 +112,8 @@ public class NicServiceImpl implements NicService {
                     nic.getVmInstance().getUuid(), optional, "json");
             JSONObject addNicResponse = new JSONObject(createNicResponse)
                     .getJSONObject("addnictovirtualmachineresponse");
+            //TODO: temporarily adding thread to get asynchronous job status. This will be removed when web socket is done.
+            Thread.sleep(6000);
             if (addNicResponse.has("jobid")) {
                 String jobResponse = cloudStackInstanceService.queryAsyncJobResult(addNicResponse.getString("jobid"),
                         "json");
@@ -219,14 +221,13 @@ public class NicServiceImpl implements NicService {
                     instance.getUuid(), "json", optional);
             JSONObject defaultNicResponse = new JSONObject(updateNicResponse)
                     .getJSONObject("updatedefaultnicforvirtualmachineresponse");
+            //TODO: temporarily adding thread to get asynchronous job status. This will be removed when web socket is done.
+            Thread.sleep(6000);
             if (defaultNicResponse.has("jobid")) {
                 String jobResponse = cloudStackInstanceService
                         .queryAsyncJobResult(defaultNicResponse.getString("jobid"), "json");
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
-
-
                     if (jobresult.getString("jobstatus").equals("1")) {
-                    Thread.sleep(5000);
                     Nic nicDefault = nicRepo.findByInstanceIdAndIsDefault(nic.getVmInstanceId(), true);
                     nicDefault.setIsDefault(false);
                     //JSONObject jobresponse = jobresult.getJSONObject("jobresult");
@@ -289,6 +290,8 @@ public class NicServiceImpl implements NicService {
                     instance.getUuid(), optional, CloudStackConstants.JSON);
             JSONObject deleteNicResponse = new JSONObject(removeNicResponse)
                     .getJSONObject(CS_REMOVE_NIC);
+            //TODO: temporarily adding thread to get asynchronous job status. This will be removed when web socket is done.
+            Thread.sleep(6000);
             if (deleteNicResponse.has(CloudStackConstants.CS_JOB_ID)) {
                 String jobResponse = cloudStackInstanceService.queryAsyncJobResult(deleteNicResponse.getString(CloudStackConstants.CS_JOB_ID),
                         CloudStackConstants.JSON);
@@ -349,7 +352,8 @@ public class NicServiceImpl implements NicService {
                             // 2.2  Call convert by passing JSONObject to Vmipaddress entity and Add
                             // the converted vm ipaddress entity to list
                             VmIpaddress vmIp = VmIpaddress.convert(json);
-                            vmIpList.add(vmIp);
+                            VmIpaddress persistVmIp = vmIpService.save(vmIp);
+                            vmIpList.add(persistVmIp);
                         }
                 }
                 if (vmIpList.size() > 0) {
@@ -409,7 +413,6 @@ public class NicServiceImpl implements NicService {
     }
 
     @Override
-    @PreAuthorize("hasPermission(#nic.getSyncFlag(),'RELEASE_SECONDARY_IP_ADDRESS')")
     public Nic releaseSecondaryIP(Nic nic, Long vmIpaddressId)throws Exception {
          try {
              // Get vm ipaddress object by id.

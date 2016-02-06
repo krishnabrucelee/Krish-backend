@@ -68,14 +68,13 @@ public class IpaddressController extends CRUDController<IpAddress> implements Ap
         return pageResponse.getContent();
     }
 
-    @RequestMapping(value = "dissociate/{id}", method = RequestMethod.POST, produces = {
+    @RequestMapping(value = "/dissociate", method = RequestMethod.GET, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected IpAddress detachIpAddress(@RequestBody IpAddress ipAddress, @PathVariable(PATH_ID) Long id)
+    protected IpAddress detachIpAddress(@RequestParam("ipuuid") String ipUuid)
             throws Exception {
-        ipAddress.setSyncFlag(true);
-        return ipAddressService.dissocitateIpAddress(ipAddress);
+        return ipAddressService.dissocitateIpAddress(ipUuid);
     }
 
     /**

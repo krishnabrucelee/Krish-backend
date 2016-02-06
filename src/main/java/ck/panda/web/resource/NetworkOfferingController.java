@@ -34,6 +34,12 @@ import ck.panda.util.web.CRUDController;
 @Api(value = "NetworkOffer", description = "Operations with NetworkOffer", produces = "application/json")
 public class NetworkOfferingController extends CRUDController<NetworkOffering> implements ApiController {
 
+    /** Constant for finger print. */
+    private static final String CS_ISOLATED = "Isolated";
+
+    /** Constant for created date and time. */
+    private static final String CS_REQUIRED = "Required";
+
     /** Service reference to Network Offering. */
     @Autowired
     private NetworkOfferingService networkOffer;
@@ -75,7 +81,7 @@ public class NetworkOfferingController extends CRUDController<NetworkOffering> i
 
     /**
      * list all Networks Offerings.
-     * 
+     *
      * @return NetworkOffering
      * @throws Exception Exception
      */
@@ -88,7 +94,7 @@ public class NetworkOfferingController extends CRUDController<NetworkOffering> i
 
     /**
      * list all isolated Networks Offerings.
-     * 
+     *
      * @return isolated Network Offerings
      * @throws Exception Exception
      */
@@ -96,6 +102,6 @@ public class NetworkOfferingController extends CRUDController<NetworkOffering> i
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<NetworkOffering> getIsolated() throws Exception {
-        return networkOffer.findIsolated();
+        return networkOffer.findByIsolatedAndRequired(CS_ISOLATED, CS_REQUIRED);
     }
 }

@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.repository.jpa.NetworkOfferingRepository;
 import ck.panda.util.AppValidator;
@@ -40,9 +41,15 @@ public class NetworkOfferingServiceImpl implements NetworkOfferingService {
     @Autowired
     private CloudStackNetworkOfferingService csNetworkOfferingService;
 
+    /** Constant for cloudStack networkOffering list response. */
+    private static final String CS_LIST_NETWORK_OFFERING_RESPONSE = "listnetworkofferingsresponse";
+
+    /** Constant for cloudStack networkOffering. */
+    private static final String CS_NETWORK_OFFERING = "networkoffering";
+
     @Override
     public NetworkOffering save(NetworkOffering network) throws Exception {
-        Errors errors = validator.rejectIfNullEntity("networkOffering", network);
+        Errors errors = validator.rejectIfNullEntity(CS_NETWORK_OFFERING, network);
         errors = validator.validateEntity(network, errors);
 
         if (errors.hasErrors()) {
@@ -75,7 +82,7 @@ public class NetworkOfferingServiceImpl implements NetworkOfferingService {
 
     @Override
     public Page<NetworkOffering> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return networkRepo.findAllByIsolated(pagingAndSorting.toPageRequest());
+        return networkRepo.findAllByIsolated(pagingAndSorting.toPageRequest(), "Isolated");
     }
 
     @Override
@@ -90,11 +97,11 @@ public class NetworkOfferingServiceImpl implements NetworkOfferingService {
         HashMap<String, String> networkOfferingMap = new HashMap<String, String>();
 
         // 1. Get the list of networkOffering from CS server using CS connector
-        String response = csNetworkOfferingService.listNetworkOfferings("json", networkOfferingMap);
+        String response = csNetworkOfferingService.listNetworkOfferings(CloudStackConstants.JSON, networkOfferingMap);
         JSONArray networkOfferingListJSON = null;
-        JSONObject responseObject = new JSONObject(response).getJSONObject("listnetworkofferingsresponse");
-        if (responseObject.has("networkoffering")) {
-            networkOfferingListJSON = responseObject.getJSONArray("networkoffering");
+        JSONObject responseObject = new JSONObject(response).getJSONObject(CS_LIST_NETWORK_OFFERING_RESPONSE);
+        if (responseObject.has(CS_NETWORK_OFFERING)) {
+            networkOfferingListJSON = responseObject.getJSONArray(CS_NETWORK_OFFERING);
             // 2. Iterate the json list, convert the single json entity to
             // domain
             for (int i = 0, size = networkOfferingListJSON.length(); i < size; i++) {
@@ -113,8 +120,8 @@ public class NetworkOfferingServiceImpl implements NetworkOfferingService {
     }
 
     @Override
-    public List<NetworkOffering> findIsolated() throws Exception {
-        return networkRepo.findIsolated();
+    public List<NetworkOffering> findByIsolatedAndRequired(String csIsolated, String csRequired) throws Exception {
+        return networkRepo.findByIsolatedAndRequired(csIsolated, csRequired);
     }
 
     @Override

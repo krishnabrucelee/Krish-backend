@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -223,11 +222,9 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
         syncService.syncInstances();
         String token = null;
         VmInstance persistInstance = virtualmachineservice.find(vminstance.getId());
-        String host = persistInstance.getHost().getHostIpaddress(); // VM's the host's IP address
-        String instance = persistInstance.getInstanceInternalName(); // virtual machine instance name
-        String display = persistInstance.getDisplayName(); // Novnc display
-        String str = host + "|" + instance + "|" + display;
-        token = Base64.encodeBase64String(str.getBytes());
+        String hostUUID = persistInstance.getHost().getUuid(); // VM's the host's UUID
+        String instanceUUID = persistInstance.getUuid(); // virtual machine UUID
+        token = hostUUID + "-" + instanceUUID;
         LOGGER.debug("VNC Token" + token);
         return "{\"success\":" + "\"" + consoleProxy + "/console/?token=" + token + "\"}";
     }
@@ -278,5 +275,17 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
         statusCode.add(Status.RUNNING);
         statusCode.add(Status.STOPPED);
         return virtualmachineservice.findAllByDepartmentAndStatus(derpartmentId, statusCode);
+    }
+
+    /**
+     * @param id instance id
+     * @return instance
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/getvncpassword/{id}", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public VmInstance findByIdWithVncPassword(@PathVariable(PATH_ID) Long id) throws Exception {
+        return virtualmachineservice.findByIdWithVncPassword(id);
     }
 }

@@ -1,5 +1,6 @@
 package ck.panda.service;
 
+import java.util.HashMap;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,7 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 public interface TemplateService extends CRUDService<Template> {
 
     /**
-     * To get list of template from cloudstack server.
+     * To get list of template from cloud stack server.
      *
      * @return template list from server
      * @throws Exception unhandled errors.
@@ -24,35 +25,38 @@ public interface TemplateService extends CRUDService<Template> {
     List<Template> findAllFromCSServer() throws Exception;
 
     /**
-     * To get list of templates without system type from cloudstack server.
+     * To get list of templates without system type from cloud stack server.
      *
+     * @param id login user id
      * @return template list from server
      * @throws Exception unhandled errors.
      */
-    List<Template> findByTemplate() throws Exception;
+    List<Template> findByTemplate(Long id) throws Exception;
 
     /**
      * To get list of templates by filters.
      *
      * @param template template object.
+     * @param id login user id
      * @return template list from server
      * @throws Exception unhandled errors.
      */
-    List<Template> findTemplateByFilters(Template template) throws Exception;
+    List<Template> findTemplateByFilters(Template template, Long id) throws Exception;
 
     /**
-     * To get list of iso by filters.
+     * To get list of ISO template by filters.
      *
      * @param templateIso template iso object.
-     * @return iso-template list from server
+     * @param id login user id
+     * @return ISO template list from server
      * @throws Exception unhandled errors.
      */
-    List<Template> findIsoByFilters(Template templateIso) throws Exception;
+    List<Template> findIsoByFilters(Template templateIso, Long id) throws Exception;
 
     /**
-     * To get template by uuid.
+     * To get template by UUID.
      *
-     * @param uuid uuid of template.
+     * @param uuid UUID of the template.
      * @return template.
      * @throws Exception unhandled errors.
      */
@@ -68,10 +72,10 @@ public interface TemplateService extends CRUDService<Template> {
     Template softDelete(Template template) throws Exception;
 
     /**
-     * Get all Iso templates.
+     * Get all ISO templates.
      *
      * @param pagingAndSorting page
-     * @return iso templates
+     * @return ISO templates
      * @throws Exception error
      */
     Page<Template> findAllIso(PagingAndSorting pagingAndSorting) throws Exception;
@@ -82,6 +86,5 @@ public interface TemplateService extends CRUDService<Template> {
      * @return template counts from server
      * @throws Exception unhandled errors.
      */
-    String findTemplateCounts() throws Exception;
-
+    HashMap<String, Integer> findTemplateCounts() throws Exception;
 }

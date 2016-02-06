@@ -9,12 +9,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
-import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.Role.Status;
-import ck.panda.domain.repository.jpa.RoleReposiory;
+import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.User.UserType;
+import ck.panda.domain.repository.jpa.RoleRepository;
 import ck.panda.util.AppValidator;
-import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -35,13 +35,13 @@ public class RoleServiceImpl implements RoleService {
 
     /** Role repository reference. */
     @Autowired
-    private RoleReposiory roleRepo;
+    private RoleRepository roleRepo;
 
     /** Domain Service reference. */
     @Autowired
     private DomainService domainService;
 
-    /** Department repository reference. */
+    /** User service reference. */
     @Autowired
     private UserService userService;
 
@@ -49,18 +49,16 @@ public class RoleServiceImpl implements RoleService {
     @Autowired
     private MessageSource messageSource;
 
-    /** Autowired TokenDetails. */
+    /** Reference of the convert entity service. */
     @Autowired
-    private TokenDetails tokenDetails;
+    private ConvertEntityService convertEntityService;
 
     @Override
     @PreAuthorize("hasPermission(#role.getSyncFlag(), 'CREATE_ROLE')")
     public Role save(Role role) throws Exception {
-        LOGGER.debug("Sample Debug Message");
         Errors errors = validator.rejectIfNullEntity("role", role);
         errors = validator.validateEntity(role, errors);
-        validateName(errors, role.getName(), role.getDepartmentId());
-
+        validateName(errors, role.getName(), role.getDepartmentId(), true);
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
@@ -108,10 +106,6 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public Role find(Long id) throws Exception {
         Role role = roleRepo.findOne(id);
-
-        LOGGER.debug("Sample Debug Message");
-        LOGGER.trace("Sample Trace Message");
-
         if (role == null) {
             throw new EntityNotFoundException("role.not.found");
         }
@@ -120,9 +114,14 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Page<Role> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if (domain != null && !domain.getName().equals("ROOT")) {
-            return roleRepo.findByDomainAndIsActive(domain.getId(), true, pagingAndSorting.toPageRequest());
+        return findAllRolesWithoutFullPermissionAndActive(pagingAndSorting);
+    }
+
+    @Override
+    public Page<Role> findAllByUserId(PagingAndSorting pagingAndSorting, Long userId) throws Exception {
+        User user = convertEntityService.getOwnerById(userId);
+        if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
+            return roleRepo.findByDomainAndIsActive(user.getDomainId(), true, pagingAndSorting.toPageRequest());
         } else {
             return findAllRolesWithoutFullPermissionAndActive(pagingAndSorting);
         }
@@ -134,13 +133,13 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public Role findByName(String name, Long departmentId) throws Exception {
-        return roleRepo.findRoleWithPermissionsByNameAndDepartment(name, departmentId, true);
+    public Role findWithPermissionsByNameDepartmentAndIsActive(String name, Long departmentId, Boolean isActive) throws Exception {
+        return roleRepo.findWithPermissionsByNameDepartmentAndIsActive(name, departmentId, isActive);
     }
 
     @Override
-    public List<Role> getRolesByDepartment(Department department) throws Exception {
-        return (List<Role>) roleRepo.getRolesByDepartment(department);
+    public List<Role> findAllByDepartmentAndIsActiveExceptName(Department department, Boolean isActive, String name) throws Exception {
+        return (List<Role>) roleRepo.findAllByDepartmentAndIsActiveExceptName(department, isActive, name);
     }
 
     @Override
@@ -154,17 +153,17 @@ public class RoleServiceImpl implements RoleService {
     }
 
     /**
-     * Validates the name and department field for roles.
+     * Validates the role.
      *
      * @param errors an error object
-     * @param name which is to be validated.
-     * @param departmentId which is to be validated.
+     * @param name of the role.
+     * @param departmentId id of the department.
+     * @param isActive role state either active/inactive.
      * @return error is present,else new error object is returned.
      * @throws Exception if error is present.
      */
-    public Errors validateName(Errors errors, String name, Long departmentId) throws Exception {
-
-        if (findByName(name, departmentId) != null) {
+    public Errors validateName(Errors errors, String name, Long departmentId, Boolean isActive) throws Exception {
+        if (findByNameAndDepartmentIdAndIsActive(name, departmentId, isActive) != null) {
             errors.addGlobalError("role.name.unique.error");
         }
         return errors;

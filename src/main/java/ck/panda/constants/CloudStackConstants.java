@@ -97,6 +97,9 @@ public class CloudStackConstants {
     /** Constant for department id. */
     public static final String CS_DEPARTMENT_ID = "departmentid";
 
+    /** Constant for department. */
+    public static final String CS_DEPARTMENT = "department";
+
     /** Constant for project id. */
     public static final String CS_PROJECT_ID = "projectid";
 
@@ -117,6 +120,12 @@ public class CloudStackConstants {
 
     /** Constant for account name. */
     public static final String CS_ACCOUNT = "account";
+
+    /** Constant for delete account response. */
+    public static final String CS_DELETE_ACCOUNT_RESPONSE = "deleteaccountresponse";
+
+    /** Constant for list account response. */
+    public static final String CS_LIST_ACCOUNT_RESPONSE = "listaccountsresponse";
 
     /** Constant for disk size. */
     public static final String CS_SIZE = "size";
@@ -165,6 +174,9 @@ public class CloudStackConstants {
 
     /** Constant for user name. */
     public static final String CS_USER_NAME = "username";
+
+    /** Constant for user . */
+    public static final String CS_USER = "user";
 
     /** Constant for first name of the user. */
     public static final String CS_FIRST_NAME = "firstname";
@@ -350,6 +362,76 @@ public class CloudStackConstants {
     /** Constant used scale vm response. */
     public static final String SCALE_VM_RESPONSE = "scalevirtualmachineresponse";
 
+    /** Constant for command information. */
+    public static final String CS_CMD_INFO = "cmdInfo";
+
+    /** Constant for is ready state. */
+    public static final String CS_READY_STATE = "isready";
+
+    /** Constant for template action. */
+    public static final String CS_VISIBILITY = "ispublic", CS_FEATURED = "isfeatured", CS_EXTRACTABLE = "isextractable",
+            CS_DYNAMIC_SCALABLE = "isdynamicallyscalable", CS_BOOTABLE = "bootable", CS_ROUTING = "isrouting",
+            CS_REQUIRES_HVM = "requireshvm";
+
+    /** Constant for generic OS type id. */
+    public static final String CS_OS_TYPEID = "ostypeid";
+
+    /** Constant for generic hypervisor. */
+    public static final String CS_HYPERVISOR = "hypervisor";
+
+    /** Constant for generic format. */
+    public static final String CS_FORMAT = "format";
+
+    /** Constant for generic templatetype. */
+    public static final String CS_TEMPLATE_TYPE = "templatetype";
+
+    /** Constant for generic system. */
+    public static final String CS_SYSTEM = "system";
+
+    /** Constant for template list response. */
+    public static final String CS_LIST_TEMPLATE_RESPONSE = "listtemplatesresponse";
+
+    /** Constant for ISO list response. */
+    public static final String CS_LIST_ISO_RESPONSE = "listisosresponse";
+
+    /** Constant for template response. */
+    public static final String CS_PREPARE_TEMPLATE_RESPONSE = "preparetemplateresponse";
+
+    /** Constant for register ISO response. */
+    public static final String CS_REGISTER_ISO_RESPONSE = "registerisoresponse";
+
+    /** Constant for register template response. */
+    public static final String CS_REGISTER_TEMPLATE_RESPONSE = "registertemplateresponse";
+
+    /** Constant for delete ISO response. */
+    public static final String CS_DELETE_ISO_RESPONSE = "deleteisoresponse";
+
+    /** Constant for delete template response. */
+    public static final String CS_DELETE_TEMPLATE_RESPONSE = "deletetemplateresponse";
+
+    /** Constant for template name. */
+    public static final String TEMPLATE_NAME = "template";
+
+    /** Constant for template ISO name. */
+    public static final String ISO_TEMPLATE_NAME = "iso";
+
+    /** Constant for asynchronous event type. */
+    public static final String CS_COMMAND_EVENT_TYPE = "commandEventType";
+
     /** Constant for volume type. */
     public static final String CS_VOLUME_TYPE = "type";
+
+    /** Constant for network type. */
+    public static final String CS_TYPE = "type";
+
+    /** Constant for network offering traffic type. */
+    public static final String CS_TRAFFIC_TYPE = "traffictype";
+
+    /** Constant for network offering guest Ip type. */
+    public static final String CS_GUEST_IP_TYPE = "guestiptype";
+
+    /** Constant for network offering availability. */
+    public static final String CS_AVAILABILITY = "availability";
+
+
 }

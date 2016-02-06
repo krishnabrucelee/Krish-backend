@@ -159,8 +159,15 @@ public class ResourceStateListener implements MessageListener {
                         }
                         // if attaching network in stopped vm and while starting that vm instance update
                         //the public ip address table in as same as in ACS.
-                        if (resourceEvent.getString(EventTypes.RESOURCE_STATE).equals("Starting")) {
+                        if (resourceEvent.getString(EventTypes.RESOURCE_STATE).equals(EventTypes.EVENT_STATUS_CREATE)) {
                                 sync.syncIpAddress();
+                        }
+                        //While vm stopping remove the host
+                        if (resourceEvent.getString(EventTypes.RESOURCE_STATE).equals(EventTypes.EVENT_STATUS_STOPPED)) {
+                            vmInstance.setHostId(null);
+                            vmInstance.setHost(null);
+                            vmInstance.setHostUuid(null);
+                            virtualmachineservice.update(vmInstance);
                         }
                     }
                 }

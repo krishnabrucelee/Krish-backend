@@ -119,11 +119,6 @@ public class TokenService {
      * @throws Exception unhandled exceptions.
      */
     public Authentication retrieve(String token) throws Exception {
-        CacheConfiguration config = REST_API_AUTH_TOKEN.getCacheConfiguration();
-
-        // Sets the time to idle for an element before it expires. This property can be modified dynamically while the
-        // cache is operating.
-        config.setTimeToIdleSeconds(FOUR_HOUR_IN_MILLISECONDS);
         return (Authentication) REST_API_AUTH_TOKEN.get(token).getObjectValue();
     }
 

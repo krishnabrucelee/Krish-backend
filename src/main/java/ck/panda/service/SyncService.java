@@ -256,4 +256,12 @@ public interface SyncService {
     */
     void syncLoadBalancer() throws ApplicationException, Exception;
 
+    /**
+    *
+    * Updated user role for root and domain admin.
+    *
+    * @throws ApplicationException unhandled application errors.
+    * @throws Exception unhandled errors.
+    */
+    void syncUpdateUserRole() throws ApplicationException, Exception;
 }

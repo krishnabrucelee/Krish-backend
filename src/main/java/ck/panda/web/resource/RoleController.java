@@ -24,6 +24,7 @@ import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Role;
 import ck.panda.service.DepartmentService;
 import ck.panda.service.RoleService;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -47,6 +48,10 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
     /** Autowired departmentService. */
     @Autowired
     private DepartmentService departmentService;
+
+    /** Autowired TokenDetails. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Role.", response = Role.class)
     @Override
@@ -89,7 +94,7 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
     public List<Role> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Role.class);
-        Page<Role> pageResponse = roleService.findAll(page);
+        Page<Role> pageResponse = roleService.findAllByUserId(page, Long.valueOf(tokenDetails.getTokenDetails("id")));
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
@@ -106,7 +111,7 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<Role> getRolesByDepartment(@PathVariable(PATH_ID) Long id) throws Exception {
-        return roleService.getRolesByDepartment(departmentService.find(id));
+        return roleService.findAllByDepartmentAndIsActiveExceptName(departmentService.find(id), true, GenericConstants.FULL_PERMISSION);
     }
 
 }
