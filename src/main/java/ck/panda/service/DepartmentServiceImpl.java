@@ -223,7 +223,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             List<Role> roleResponse = roleService.findByDepartmentAndIsActive(department.getId(), true);
             List<Volume> volumeResponse = volumeService.findByDepartmentAndIsActive(department.getId(), true);
             List<User> userResponse = userService.findByDepartment(department.getId());
-            List<SSHKey>sshkeyResponse = sshkeyService.findAllByDepartmentAndIsActive(department.getId(), true);
+            List<SSHKey> sshkeyResponse = sshkeyService.findAllByDepartmentAndIsActive(department.getId(), true);
             if (projectResponse.size() != 0 || vmResponse.size() != 0
                     || roleResponse.size() != 0 || volumeResponse.size() != 0 || sshkeyResponse.size()!= 0 ) {
                 errors.addGlobalError(GenericConstants.PAGE_ERROR_SEPARATOR + GenericConstants.TOKEN_SEPARATOR
