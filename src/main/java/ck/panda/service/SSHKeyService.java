@@ -3,6 +3,8 @@ package ck.panda.service;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.SSHKey;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -69,4 +71,14 @@ public interface SSHKeyService extends CRUDService<SSHKey> {
      * @throws Exception error occurs
      */
     List<SSHKey> findAllBySync() throws Exception;
+
+    /**
+     * Find all SSHKey by department.
+     *
+     * @param id SSHKey id .
+     * @param isActive SSHKey status Active/Inactive
+     * @return list of departments in SSHKey.
+     * @throws Exception if error occurs.
+     */
+    List<SSHKey> findAllByDepartmentAndIsActive(Long departmentId, Boolean isActive) throws Exception;
 }

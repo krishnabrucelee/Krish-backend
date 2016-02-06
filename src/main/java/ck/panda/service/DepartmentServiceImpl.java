@@ -18,6 +18,7 @@ import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.Role;
+import ck.panda.domain.entity.SSHKey;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
@@ -84,9 +85,13 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Autowired
     private CloudStackUserService csUserService;
 
-    /** User repository reference. */
+    /** User Service reference. */
     @Autowired
     private UserService userService;
+
+    /** sshkey service reference. */
+    @Autowired
+    private SSHKeyService sshkeyService;
 
     /** Baremetal system constant. */
     public static final String BAREMETAL_SYSTEM_ACCOUNT = "baremetal-system-account";
@@ -218,13 +223,15 @@ public class DepartmentServiceImpl implements DepartmentService {
             List<Role> roleResponse = roleService.findByDepartmentAndIsActive(department.getId(), true);
             List<Volume> volumeResponse = volumeService.findByDepartmentAndIsActive(department.getId(), true);
             List<User> userResponse = userService.findByDepartment(department.getId());
+            List<SSHKey>sshkeyResponse = sshkeyService.findAllByDepartmentAndIsActive(department.getId(), true);
             if (projectResponse.size() != 0 || vmResponse.size() != 0
-                    || roleResponse.size() != 0 || volumeResponse.size() != 0) {
+                    || roleResponse.size() != 0 || volumeResponse.size() != 0 || sshkeyResponse.size()!= 0 ) {
                 errors.addGlobalError(GenericConstants.PAGE_ERROR_SEPARATOR + GenericConstants.TOKEN_SEPARATOR
                         + projectResponse.size() + GenericConstants.TOKEN_SEPARATOR
                         + vmResponse.size() + GenericConstants.TOKEN_SEPARATOR
                         + roleResponse.size() + GenericConstants.TOKEN_SEPARATOR
                         + volumeResponse.size() + GenericConstants.TOKEN_SEPARATOR
+                        + sshkeyResponse.size() + GenericConstants.TOKEN_SEPARATOR
                         + userResponse.size());
 
             }
