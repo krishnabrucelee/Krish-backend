@@ -3,6 +3,7 @@ package ck.panda.rabbitmq.util;
 import java.util.HashMap;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,13 +11,16 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EventTypes;
+import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.PortForwarding;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.VolumeType;
+import ck.panda.service.CloudStackConfigurationService;
 import ck.panda.service.ConvertEntityService;
 import ck.panda.service.NetworkService;
 import ck.panda.service.NicService;
@@ -24,7 +28,9 @@ import ck.panda.service.PortForwardingService;
 import ck.panda.service.SyncService;
 import ck.panda.service.VirtualMachineService;
 import ck.panda.service.VolumeService;
+import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackResourceCapacity;
+import ck.panda.util.CloudStackServer;
 
 /**
  * Resource State listener will listen and update resource status to our App DB when an event directly/from application
@@ -48,6 +54,15 @@ public class ResourceStateListener implements MessageListener {
 
     /** Network Service references to update. */
     private NetworkService networkService;
+
+    /** CloudStack connector reference for instance. */
+    private CloudStackInstanceService cloudStackInstanceService;
+
+    /** CloudStack connector. */
+    private CloudStackServer server;
+
+    /** CloudStack configuration . */
+    private CloudStackConfigurationService cloudConfigService;
 
     /** Reference of the convert entity service. */
     @Autowired
@@ -73,6 +88,9 @@ public class ResourceStateListener implements MessageListener {
         this.portForwardingService = convertEntityService.getPortForwardingService();
         this.networkService = convertEntityService.getNetworkService();
         this.sync = sync;
+        this.cloudStackInstanceService = convertEntityService.getCSInstanceService();
+        this.server = convertEntityService.getCSConnecter();
+        this.cloudConfigService = convertEntityService.getCSConfig();
     }
 
     @Override
@@ -168,6 +186,40 @@ public class ResourceStateListener implements MessageListener {
                             vmInstance.setHost(null);
                             vmInstance.setHostUuid(null);
                             virtualmachineservice.update(vmInstance);
+                        }
+                        if (resourceEvent.getString(EventTypes.RESOURCE_STATE).equals(EventTypes.EVENT_STATUS_RUNNING)) {
+                        	// Host update & internal name while create vm as user.
+                            if (vmInstance.getHostId() == null) {
+                            	CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
+                                server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
+                                cloudStackInstanceService.setServer(server);
+                                HashMap<String, String> vmMap = new HashMap<String, String>();
+                                vmMap.put(CloudStackConstants.CS_ID, vmInstance.getUuid());
+                                String response = cloudStackInstanceService.listVirtualMachines(CloudStackConstants.JSON, vmMap);
+                                JSONArray vmListJSON = null;
+                                JSONObject responseObject = new JSONObject(response)
+                                        .getJSONObject(CloudStackConstants.CS_LIST_VM_RESPONSE);
+                                if (responseObject.has(CloudStackConstants.CS_VM)) {
+                                    vmListJSON = responseObject.getJSONArray(CloudStackConstants.CS_VM);
+                                    // 2. Iterate the json list, convert the single json
+                                    // entity to vm.
+                                    for (int i = 0, size = vmListJSON.length(); i < size; i++) {
+                                        // 2.1 Call convert by passing JSONObject to vm
+                                        // entity.
+                                        VmInstance CsVmInstance = VmInstance.convert(vmListJSON.getJSONObject(i));
+                                        // 2.2 Update vm host by transient variable.
+                                        vmInstance.setHostId(convertEntityService.getHostId(CsVmInstance.getTransHostId()));
+                                        // 2.3 Update internal name.
+                                        vmInstance.setInstanceInternalName(CsVmInstance.getInstanceInternalName());
+                                        if (vmInstance.getHostId() != null) {
+                                        	vmInstance.setPodId(convertEntityService
+                                                    .getPodIdByHost(convertEntityService.getHostId(CsVmInstance.getTransHostId())));
+                                        }
+                                        // 3. Update vm for user vm creation.
+                                        vmInstance = virtualmachineservice.update(vmInstance);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
