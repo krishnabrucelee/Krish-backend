@@ -16,6 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -31,7 +32,6 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonValidator;
 
@@ -215,6 +215,15 @@ public class Template implements Serializable {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    /** Template owner id. */
+    @JoinColumn(name = "template_owner_id", referencedColumnName = "id", updatable = false, insertable = false)
+    @OneToOne
+    private User templateOwner;
+
+    /** Template owner id. */
+    @Column(name = "template_owner_id")
+    private Long templateOwnerId;
+
     /** Template updated count. */
     @Column(name = "update_count")
     private Integer updateCount;
@@ -275,6 +284,14 @@ public class Template implements Serializable {
     /** Template OS type transient. */
     @Transient
     private String transOsType;
+
+    /** Template created user name transient. */
+    @Transient
+    private String transCreatedName;
+
+    /** Template domain transient. */
+    @Transient
+    private String transDomain;
 
     /** Template sync flag. */
     @Transient
@@ -947,6 +964,42 @@ public class Template implements Serializable {
     }
 
     /**
+     * Get the template owner id.
+     *
+     * @return templateOwnerId
+     */
+    public Long getTemplateOwnerId() {
+        return templateOwnerId;
+    }
+
+    /**
+     * Set the template owner id.
+     *
+     * @param templateOwnerId - the Long to set
+     */
+    public void setTemplateOwnerId(Long templateOwnerId) {
+        this.templateOwnerId = templateOwnerId;
+    }
+
+    /**
+     * Get the template owner.
+     *
+     * @return templateOwner
+     */
+    public User getTemplateOwner() {
+        return templateOwner;
+    }
+
+    /**
+     * Set the template owner.
+     *
+     * @param templateOwner - the User to set
+     */
+    public void setTemplateOwner(User templateOwner) {
+        this.templateOwner = templateOwner;
+    }
+
+    /**
      * Get the update count.
      *
      * @return updateCount
@@ -1195,6 +1248,42 @@ public class Template implements Serializable {
     }
 
     /**
+     * Get the Transient created user name.
+     *
+     * @return transCreatedName
+     */
+    public String getTransCreatedName() {
+        return transCreatedName;
+    }
+
+    /**
+     * Set the Transient created user name.
+     *
+     * @param transCreatedName the String to set
+     */
+    public void setTransCreatedName(String transCreatedName) {
+        this.transCreatedName = transCreatedName;
+    }
+
+    /**
+     * Get the Transient domain name.
+     *
+     * @return transDomain
+     */
+    public String getTransDomain() {
+        return transDomain;
+    }
+
+    /**
+     * Set the Transient domain name.
+     *
+     * @param transDomain the String to set
+     */
+    public void setTransDomain(String transDomain) {
+        this.transDomain = transDomain;
+    }
+
+    /**
      * Get the sync flag for temporary usage.
      *
      * @return syncFlag
@@ -1316,6 +1405,8 @@ public class Template implements Serializable {
             template.featured = JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_FEATURED);
             template.extractable = JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_EXTRACTABLE);
             template.dynamicallyScalable = JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_DYNAMIC_SCALABLE);
+            template.transCreatedName = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_ACCOUNT);
+            template.transDomain = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_DOMAIN_ID);
             template.transOsType = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_OS_TYPEID);
             template.transZone = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_ZONE_ID);
             template.transHypervisor = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_HYPERVISOR);
@@ -1327,8 +1418,8 @@ public class Template implements Serializable {
             } else {
                 template.setFormat(Format.ISO);
                 template.bootable = JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_BOOTABLE);
-                if (object.has(CloudStackConstants.CS_ACCOUNT) &&
-                		JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_ACCOUNT).equals(CloudStackConstants.CS_SYSTEM)) {
+                if (object.has(CloudStackConstants.CS_ACCOUNT)
+                        && JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_ACCOUNT).equals(CloudStackConstants.CS_SYSTEM)) {
                     template.setType(TemplateType.SYSTEM);
                 } else {
                     template.setType(TemplateType.USER);

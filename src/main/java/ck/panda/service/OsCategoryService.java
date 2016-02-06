@@ -13,27 +13,28 @@ import ck.panda.util.domain.CRUDService;
 public interface OsCategoryService extends CRUDService<OsCategory> {
 
     /**
-     * To get list of operating systems from cloudstack server.
+     * To get list of OS category from cloudstack server.
      *
-     * @return os list from server
+     * @return OS list from server.
      * @throws Exception unhandled errors.
      */
     List<OsCategory> findAllFromCSServer() throws Exception;
 
     /**
-     * Find osCategory by uuid.
+     * Find OS category by uuid.
      *
-     * @param uuid uuid of osCategory.
-     * @return osCategory object.
+     * @param uuid uuid of OS category.
+     * @return OS category.
      * @throws Exception unhandled errors.
      */
     OsCategory findbyUUID(String uuid) throws Exception;
 
     /**
-     * Find the list of Os categories in templates by filters.
+     * Find the list of OS categories in templates by type.
      *
-     * @return Os categories list from server
-     * @throws Exception raise if error
+     * @param type of the OS category
+     * @return OS categories list from server.
+     * @throws Exception unhandled errors.
      */
-    List<OsCategory> findByOsCategoryFilters();
+    List<OsCategory> findByOsCategoryFilters(String type) throws Exception;
 }

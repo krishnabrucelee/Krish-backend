@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Template;
@@ -47,6 +46,7 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     @Override
     public Template create(@RequestBody Template template) throws Exception {
         template.setSyncFlag(true);
+        template.setTemplateOwnerId(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
         return templateService.save(template);
     }
 
@@ -154,8 +154,8 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public String getTemplateCounts(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    	HashMap<String, Integer> templateCount = templateService.findTemplateCounts();
-    	return "{\"windowsCount\":" + templateCount.get("windowsCount") + ",\"linuxCount\":" + templateCount.get("linuxCount") + ",\"totalCount\":"
+        HashMap<String, Integer> templateCount = templateService.findTemplateCounts();
+        return "{\"windowsCount\":" + templateCount.get("windowsCount") + ",\"linuxCount\":" + templateCount.get("linuxCount") + ",\"totalCount\":"
                 + templateCount.get("totalCount") + ",\"windowsIsoCount\":" + templateCount.get("windowsIsoCount") + ",\"linuxIsoCount\":"
                 + templateCount.get("linuxIsoCount") + ",\"totalIsoCount\":" + templateCount.get("totalIsoCount") + "}";
     }
