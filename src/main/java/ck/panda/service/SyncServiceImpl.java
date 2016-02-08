@@ -56,6 +56,7 @@ import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.domain.entity.Zone;
 import ck.panda.util.CloudStackInstanceService;
+import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.EncryptionUtil;
 import ck.panda.util.error.Errors;
@@ -244,6 +245,10 @@ public class SyncServiceImpl implements SyncService {
     /** Listing Load Balancer details from cloudstack server. */
     @Autowired
     private LoadBalancerService loadBalancerService;
+
+    /** CloudStack Resource Capacity Service. */
+    @Autowired
+    private CloudStackResourceCapacity cloudStackResourceCapacity;
 
     /** Permission instance properties. */
     @Value(value = "${permission.instance}")
@@ -1338,10 +1343,10 @@ public class SyncServiceImpl implements SyncService {
         HashMap<String, Volume> csVolumeMap = (HashMap<String, Volume>) Volume.convert(volumeList);
 
         // 2. Get all the volume objects from application
-        List<Volume> appvolumeServiceList = volumeService.findAll();
+        List<Volume> appVolumeServiceList = volumeService.findAll();
 
         // 3. Iterate application volume list
-        for (Volume volume : appvolumeServiceList) {
+        for (Volume volume : appVolumeServiceList) {
             volume.setIsSyncFlag(false);
             // 3.1 Find the corresponding CS server volume object by finding it
             // in a hash using uuid
@@ -1685,8 +1690,14 @@ public class SyncServiceImpl implements SyncService {
     @Override
     public void syncResourceLimit() throws ApplicationException, Exception {
         List<Domain> domains = domainService.findAllDomain();
+        /** Used for setting optional values for resource count. */
+        HashMap<String, String> domainCountMap = new HashMap<String, String>();
         for (Domain domain : domains) {
             syncResourceLimitDomain(domain);
+            //Sync for resource count in domain
+            String csResponse = cloudStackResourceCapacity.updateResourceCount(domain.getUuid(), domainCountMap,
+                    "json");
+            convertEntityService.resourceCount(csResponse);
         }
 
         List<Project> projects = projectService.findAllByActive(true);
