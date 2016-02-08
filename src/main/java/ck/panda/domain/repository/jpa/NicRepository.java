@@ -7,8 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Nic;
 
 /**
@@ -66,4 +64,13 @@ public interface NicRepository extends PagingAndSortingRepository<Nic, Long> {
     @Query(value = "select nic from Nic nic where nic.id LIKE :id ")
     Nic findById(@Param("id") Long id);
 
+    /**
+     * List nic by Network.
+     *
+     * @param networkId for that network.
+     * @param isActive get the nic list based on active/inactive status.
+     * @return nics.
+     */
+    @Query(value = "select nic from Nic nic where  nic.networkId=:networkId AND nic.isActive =:isActive")
+    List<Nic> findByNetworkIdAndIsActive(@Param("networkId") Long networkId, @Param("isActive") Boolean isActive);
 }

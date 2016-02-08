@@ -17,6 +17,7 @@ import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
+import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.domain.repository.jpa.NicRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackInstanceService;
@@ -439,6 +440,11 @@ public class NicServiceImpl implements NicService {
                  throw new BadCredentialsException(e.getMessage());
          }
          return nic;
+    }
+
+    @Override
+    public List<Nic> findAllByNetworkAndIsActive(Long networkId, Boolean isActive) throws Exception {
+        return (List<Nic>) nicRepo.findByNetworkIdAndIsActive(networkId, true);
     }
 
     @Override
