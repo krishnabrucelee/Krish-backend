@@ -170,13 +170,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @PreAuthorize("hasPermission(#user.getSyncFlag(), 'DELETE_USER')")
     public void delete(User user) throws Exception {
-        if (user.getSyncFlag()) {
-            config.setServer(1L);
-            csUserService.deleteUser(user.getId().toString(), "json");
-            this.softDelete(user);
-        } else {
-            this.softDelete(user);
-        }
+		if (user.getSyncFlag()) {
+			config.setServer(1L);
+			csUserService.deleteUser(user.getId().toString(), "json");
+		} else {
+			// async call delete.
+			this.softDelete(user);
+		}
     }
 
     @Override
