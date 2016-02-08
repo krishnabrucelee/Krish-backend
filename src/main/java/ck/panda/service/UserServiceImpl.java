@@ -109,6 +109,7 @@ public class UserServiceImpl implements UserService {
                         users = persistProject.getUserList();
                         users.add(user);
                         persistProject.setUserList(users);
+                        persistProject.setSyncFlag(false);
                         projectService.update(persistProject);
                     }
                 }
@@ -346,6 +347,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> findByRole(Long roleId, Boolean isActive) throws Exception {
         return userRepository.findByRole(roleId, isActive);
+    }
+
+    @Override
+    public List<User> findAllByProject(Long projectId) throws Exception {
+        Project project = projectService.find(projectId);
+        List<User> projectUsers = project.getUserList();
+        if(projectUsers.size() > 0){
+            return userRepository.findAllByDepartmentAndIsActive(true, project.getDepartmentId(), projectUsers);
+        }
+        return userRepository.findByDepartment(project.getDepartment());
     }
 
 }

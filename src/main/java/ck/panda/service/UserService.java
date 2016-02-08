@@ -32,6 +32,15 @@ public interface UserService extends CRUDService<User> {
     List<User> findByDepartment(Long departmentId) throws Exception;
 
     /**
+     * To get list of users by project.
+     *
+     * @param projectId project id.
+     * @return list of user.
+     * @throws Exception if error occurs.
+     */
+    List<User> findAllByProject(Long projectId) throws Exception;
+
+    /**
      * To get list of users by department and logged in user.
      *
      * @param departmentId department id.

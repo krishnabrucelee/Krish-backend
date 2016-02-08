@@ -19,10 +19,21 @@ public class MessageByLocaleServiceImpl implements MessageByLocaleService {
 
     @Override
     public String getMessage(String id) {
-        try {
-            Locale locale = LocaleContextHolder.getLocale();
-            return messageSource.getMessage(id, null, locale);
-        } catch (NoSuchMessageException ex) {
+         try {
+             Locale locale = LocaleContextHolder.getLocale();
+             String message = "";
+             // split key and convert messages for current locale.
+             // For resource limit check while create new vm instance.
+             if (id.contains(" ")) {
+                 String[] errMsg = id.split(" ");
+                 for (String errKey : errMsg) {
+                     message += messageSource.getMessage(errKey, null, locale) + " ";
+                 }
+                 return message.trim();
+             }
+             // convert message for current locale.
+             return messageSource.getMessage(id, null, locale);
+         } catch (NoSuchMessageException ex) {
             // Do nothing, the i18n key will be returned
             return id;
         } catch (NullPointerException ex) {
