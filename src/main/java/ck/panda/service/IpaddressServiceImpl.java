@@ -152,7 +152,6 @@ public class IpaddressServiceImpl implements IpaddressService {
         List<IpAddress> ipList = new ArrayList<IpAddress>();
         HashMap<String, String> ipMap = new HashMap<String, String>();
         ipMap.put("listall", "true");
-        ipMap.put("allocatedonly", "false");
         // 1. Get the list of ipAddress from CS server using CS connector
         String response = csipaddressService.listPublicIpAddresses("json", ipMap);
         JSONArray ipAddressListJSON = null;
@@ -162,8 +161,6 @@ public class IpaddressServiceImpl implements IpaddressService {
             // 2. Iterate the json list, convert the single json entity to pod
             for (int i = 0, size = ipAddressListJSON.length(); i < size; i++) {
                 // 2.1 Call convert by passing JSONObject to ipAddress entity
-                // and
-                // Add
                 // the converted pod entity to list
                 IpAddress ipAddress = IpAddress.convert(ipAddressListJSON.getJSONObject(i));
                 ipAddress.setDomainId(convertEntityService.getDomainId(ipAddress.getTransDomainId()));
