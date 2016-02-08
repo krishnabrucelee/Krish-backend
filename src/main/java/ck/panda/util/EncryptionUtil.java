@@ -22,7 +22,7 @@ public class EncryptionUtil {
      * @return encrypted text
      * @throws Exception raise if error
      */
-    public static String encrypt(String plainText, SecretKey secretKey) throws Exception {
+    public static synchronized String encrypt(String plainText, SecretKey secretKey) throws Exception {
         cipher = Cipher.getInstance("AES");
         byte[] plainTextByte = plainText.getBytes();
         cipher.init(Cipher.ENCRYPT_MODE, secretKey);
@@ -40,7 +40,7 @@ public class EncryptionUtil {
      * @return encrypted text
      * @throws Exception raise if error
      */
-    public static String decrypt(String plainText, SecretKey secretKey) throws Exception {
+    public static synchronized String decrypt(String plainText, SecretKey secretKey) throws Exception {
         cipher = Cipher.getInstance("AES");
         Base64.Decoder decoder = Base64.getDecoder();
         byte[] encryptedTextByte = decoder.decode(plainText);
