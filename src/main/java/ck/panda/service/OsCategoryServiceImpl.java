@@ -5,17 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.Template;
-import ck.panda.domain.entity.Template.Status;
-import ck.panda.domain.entity.Template.TemplateType;
 import ck.panda.domain.repository.jpa.OsCategoryRepository;
-import ck.panda.domain.repository.jpa.TemplateRepository;
 import ck.panda.util.CloudStackOSService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
@@ -26,30 +22,31 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 @Service
 public class OsCategoryServiceImpl implements OsCategoryService {
 
-    /** Logger attribute. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(OsCategoryServiceImpl.class);
-
     /** OS category repository reference. */
     @Autowired
     private OsCategoryRepository osCategoryRepo;
 
-    /** Template repository reference. */
+    /** Template service reference. */
     @Autowired
-    private TemplateRepository templateRepository;
+    private TemplateService templateService;
 
-    /** CloudStack os categories service for connectivity with cloudstack. */
+    /** CloudStack OS categories service for connectivity with cloudstack. */
     @Autowired
     private CloudStackOSService osCategoryService;
 
+    /** Cloud stack list OS category response. */
+    public static final String LIST_OS_CATEGORIES_RESPONSE = "listoscategoriesresponse";
+
+    /** OS category response object. */
+    public static final String OS_CATEGORY = "oscategory";
+
     @Override
     public OsCategory save(OsCategory oscategory) throws Exception {
-        LOGGER.debug(oscategory.getUuid());
         return osCategoryRepo.save(oscategory);
     }
 
     @Override
     public OsCategory update(OsCategory oscategory) throws Exception {
-        LOGGER.debug(oscategory.getUuid());
         return osCategoryRepo.save(oscategory);
     }
 
@@ -70,7 +67,7 @@ public class OsCategoryServiceImpl implements OsCategoryService {
 
     @Override
     public Page<OsCategory> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return null;
+        return osCategoryRepo.findAll(pagingAndSorting.toPageRequest());
     }
 
     @Override
@@ -84,19 +81,18 @@ public class OsCategoryServiceImpl implements OsCategoryService {
     }
 
     @Override
-    public List<OsCategory> findByOsCategoryFilters() {
-        List<OsCategory> osCategory = (List<OsCategory>) osCategoryRepo.findAll();
-        List<OsCategory> osList = new ArrayList<OsCategory>();
-        if (!osCategory.isEmpty()) {
-            for (OsCategory os : osCategory) {
-                List<Template> templates = templateRepository.findByOsCategoryFilters(TemplateType.SYSTEM,
-                        Status.ACTIVE, os);
-                if (templates.size() > 0) {
-                    osList.add(os);
-                }
-            }
-        }
-        return osList;
+    public List<OsCategory> findByOsCategoryFilters(String type)  throws Exception {
+         List<OsCategory> osCategorys = (List<OsCategory>) osCategoryRepo.findAll();
+         List<OsCategory> osList = new ArrayList<OsCategory>();
+         if (!osCategorys.isEmpty()) {
+             for (OsCategory osCategory : osCategorys) {
+                 List<Template> templates = templateService.findByTemplateCategory(osCategory, type);
+                 if (templates.size() > 0) {
+                     osList.add(osCategory);
+                 }
+             }
+         }
+         return osList;
     }
 
     @Override
@@ -105,11 +101,11 @@ public class OsCategoryServiceImpl implements OsCategoryService {
         List<OsCategory> osCategoryList = new ArrayList<OsCategory>();
         HashMap<String, String> osCategoryMap = new HashMap<String, String>();
         // 1. Get the list of domains from CS server using CS connector
-        String response = osCategoryService.listOsCategories("json", osCategoryMap);
+        String response = osCategoryService.listOsCategories(CloudStackConstants.JSON, osCategoryMap);
         JSONArray osCategoryListJSON = null;
-        JSONObject responseObject = new JSONObject(response).getJSONObject("listoscategoriesresponse");
-        if (responseObject.has("oscategory")) {
-            osCategoryListJSON = responseObject.getJSONArray("oscategory");
+        JSONObject responseObject = new JSONObject(response).getJSONObject(LIST_OS_CATEGORIES_RESPONSE);
+        if (responseObject.has(OS_CATEGORY)) {
+            osCategoryListJSON = responseObject.getJSONArray(OS_CATEGORY);
             // 2. Iterate the json list, convert the single json entity to
             // domain
             for (int i = 0, size = osCategoryListJSON.length(); i < size; i++) {

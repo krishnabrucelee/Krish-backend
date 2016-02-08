@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.Template;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -87,4 +88,14 @@ public interface TemplateService extends CRUDService<Template> {
      * @throws Exception unhandled errors.
      */
     HashMap<String, Integer> findTemplateCounts() throws Exception;
+
+    /**
+     * To get list of ISO template by OS category and type.
+     *
+     * @param osCategory template OS category.
+     * @param type of the template.
+     * @return template list from server.
+     * @throws Exception unhandled errors.
+     */
+    List<Template> findByTemplateCategory(OsCategory osCategory, String type) throws Exception;
 }

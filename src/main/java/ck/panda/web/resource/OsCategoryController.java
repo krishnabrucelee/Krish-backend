@@ -31,7 +31,7 @@ import ck.panda.util.web.CRUDController;
 @Api(value = "OsCategorys", description = "Operations with oscategorys", produces = "application/json")
 public class OsCategoryController extends CRUDController<OsCategory> implements ApiController {
 
-    /** Service reference to OsCategory. */
+    /** OS category service reference. */
     @Autowired
     private OsCategoryService osCategoryService;
 
@@ -41,7 +41,6 @@ public class OsCategoryController extends CRUDController<OsCategory> implements 
                     throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, OsCategory.class);
         Page<OsCategory> pageResponse = osCategoryService.findAll(page);
-        System.out.println(pageResponse);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
@@ -49,8 +48,8 @@ public class OsCategoryController extends CRUDController<OsCategory> implements 
     /**
      * Get the list of OS category.
      *
-     * @return OS category list
-     * @throws Exception raise if error
+     * @return OS category list.
+     * @throws Exception unhandled errors.
      */
     @RequestMapping(value = "/list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
@@ -60,15 +59,16 @@ public class OsCategoryController extends CRUDController<OsCategory> implements 
     }
 
     /**
-     * Find the list of Os categories in templates by filters.
+     * Find the list of OS categories in templates by type.
      *
-     * @return Os categories list from server
-     * @throws Exception raise if error
+     * @param type of the OS category
+     * @return OS categories list from server.
+     * @throws Exception unhandled errors.
      */
     @RequestMapping(value = "/os", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<OsCategory> findByOsCategoryFilters() throws Exception {
-        return osCategoryService.findByOsCategoryFilters();
+    public List<OsCategory> findByOsCategoryFilters(@RequestParam String type) throws Exception {
+        return osCategoryService.findByOsCategoryFilters(type);
     }
 }

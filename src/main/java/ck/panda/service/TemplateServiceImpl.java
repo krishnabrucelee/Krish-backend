@@ -15,6 +15,7 @@ import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Hypervisor;
+import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.OsType;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.Template.Format;
@@ -85,7 +86,7 @@ public class TemplateServiceImpl implements TemplateService {
     /** Windows template. */
     public static final String WINDOWS_TEMPLATE = "Windows";
 
-	/** Template architecture. */
+    /** Template architecture. */
     public static final String TEMPLATE_ARCHITECTURE = "architecture";
 
     /** Template OS version. */
@@ -111,7 +112,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     /** ISO and Template counts. */
     public static final String WINDOWS_COUNT = "windowsCount", LINUX_COUNT = "linuxCount", TOTAL_COUNT = "totalCount",
-    		WINDOWS_ISO_COUNT = "windowsIsoCount", LINUX_ISO_COUNT = "linuxIsoCount", TOTAL_ISO_COUNT = "totalIsoCount";
+        WINDOWS_ISO_COUNT = "windowsIsoCount", LINUX_ISO_COUNT = "linuxIsoCount", TOTAL_ISO_COUNT = "totalIsoCount";
 
     @Override
     @PreAuthorize("hasPermission(#template.getSyncFlag(), 'REGISTER_TEMPLATE')")
@@ -215,6 +216,8 @@ public class TemplateServiceImpl implements TemplateService {
                 template.setZoneId(zone.getId());
                 Hypervisor hypervisor = hypervisorService.findByName(template.getTransHypervisor());
                 template.setHypervisorId(hypervisor.getId());
+                template.setTemplateOwnerId(convertEntityService.getUserByName(template.getTransCreatedName(),
+                    convertEntityService.getDomain(template.getTransDomain())));
                 templateList.add(template);
             }
         }
@@ -251,6 +254,8 @@ public class TemplateServiceImpl implements TemplateService {
                     template.setZoneId(zoneService.findByUUID(template.getTransZone()).getId());
                 }
                 template.setHypervisorId(8L);
+                template.setTemplateOwnerId(convertEntityService.getUserByName(template.getTransCreatedName(),
+                    convertEntityService.getDomain(template.getTransDomain())));
                 templateList.add(template);
             }
         }
@@ -325,7 +330,7 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     @PreAuthorize("hasPermission(#template.getSyncFlag(), 'DELETE_MY_TEMPLATE')")
     public Template softDelete(Template template) throws Exception {
-    	template.setIsActive(false);
+        template.setIsActive(false);
         template.setStatus(Template.Status.INACTIVE);
         if (template.getSyncFlag()) {
             csDeleteTemplate(template.getId());
@@ -494,6 +499,7 @@ public class TemplateServiceImpl implements TemplateService {
      * Delete template/ISO in CS.
      *
      * @param id template id
+     * @return deleted status
      * @throws Exception unhandled errors.
      */
     public Boolean csDeleteTemplate(Long id) throws Exception {
@@ -512,14 +518,14 @@ public class TemplateServiceImpl implements TemplateService {
                 templateJson = new JSONObject(templateResponse).getJSONObject(CloudStackConstants.CS_DELETE_TEMPLATE_RESPONSE);
             }
             if (templateJson.has(CloudStackConstants.CS_JOB_ID)) {
-            	Thread.sleep(3000);
+                Thread.sleep(3000);
                 String templateJob = cloudStackTemplateService.queryAsyncJobResult(templateJson.getString(CloudStackConstants.CS_JOB_ID),
                        CloudStackConstants.JSON);
                 JSONObject jobresult = new JSONObject(templateJob).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
-                if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS).equals("1")) {
-                	Thread.sleep(3000);
-                	return true;
-                } else if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS).equals("2")) {
+                if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.SUCCEEDED_JOB_STATUS)) {
+                    Thread.sleep(3000);
+                    return true;
+                } else if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.ERROR_JOB_STATUS)) {
                     errors = validator.sendGlobalError(jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
                              .getString(CloudStackConstants.CS_ERROR_TEXT));
                     throw new ApplicationException(errors);
@@ -619,5 +625,18 @@ public class TemplateServiceImpl implements TemplateService {
     private Errors validateCSEvent(Errors errors, String eMessage) throws Exception {
         errors.addGlobalError(eMessage);
         return errors;
+    }
+
+    @Override
+    public List<Template> findByTemplateCategory(OsCategory osCategory, String type) throws Exception {
+        List<Template> templates;
+        if (type.equals("template")) {
+            templates = templateRepository.findByTemplateWithIsoCategory(TemplateType.SYSTEM,
+                Status.ACTIVE, osCategory, Format.ISO);
+        } else {
+            templates = templateRepository.findByTemplateWithoutIsoCategory(TemplateType.SYSTEM,
+                Status.ACTIVE, osCategory, Format.ISO);
+        }
+        return templates;
     }
 }

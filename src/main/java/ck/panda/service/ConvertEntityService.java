@@ -28,6 +28,8 @@ import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
+import ck.panda.util.CloudStackInstanceService;
+import ck.panda.util.CloudStackServer;
 
 /**
  * Convert Util used to get entity object from CS server's resource uuid.
@@ -138,6 +140,18 @@ public class ConvertEntityService {
     /** Service reference to VmIpAddress. */
     @Autowired
     private VmIpaddressService vmIpAddressService;
+
+    /** CloudStack connector reference for instance. */
+    @Autowired
+    private CloudStackInstanceService cloudStackInstanceService;
+
+    /** CloudStack connector. */
+    @Autowired
+    private CloudStackServer server;
+
+    /** CloudStack configuration . */
+    @Autowired
+    private CloudStackConfigurationService cloudConfigService;
 
     /** Service reference to Port Forwarding. */
     @Autowired
@@ -1032,6 +1046,33 @@ public class ConvertEntityService {
      */
     public PortForwardingService getPortForwardingService() {
         return this.portForwardingService;
+    }
+
+    /**
+     * Get CloudStack instance service object.
+     *
+     * @return CloudStack instance service object
+     */
+    public CloudStackInstanceService getCSInstanceService() {
+        return this.cloudStackInstanceService;
+    }
+
+    /**
+     * Get Cloud Stack server object.
+     *
+     * @return  Cloud Stack server object.
+     */
+    public CloudStackServer getCSConnecter() {
+        return this.server;
+    }
+
+    /**
+     * Get CloudStack configuration object.
+     *
+     * @return CloudStack configuration object.
+     */
+    public CloudStackConfigurationService getCSConfig() {
+        return this.cloudConfigService;
     }
 
     /**
