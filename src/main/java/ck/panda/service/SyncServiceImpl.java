@@ -1258,6 +1258,7 @@ public class SyncServiceImpl implements SyncService {
                 }
                 if (csVm.getProjectId() != null) {
                     instance.setProjectId(csVm.getProjectId());
+                    instance.setDepartmentId(csVm.getDepartmentId());
                 }
                 if (csVm.getInstanceOwnerId() != null) {
                     instance.setInstanceOwnerId(csVm.getInstanceOwnerId());
