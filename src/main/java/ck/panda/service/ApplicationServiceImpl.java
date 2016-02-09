@@ -7,10 +7,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Application;
 import ck.panda.domain.entity.Application.Status;
-import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.repository.jpa.ApplicationRepository;
 import ck.panda.util.AppValidator;
-import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -28,13 +27,15 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Autowired
     private ApplicationRepository applicationRepo;
 
-    /** Autowired TokenDetails. */
+    /** Convert entity repository reference. */
     @Autowired
-    private TokenDetails tokenDetails;
+    private ConvertEntityService convertEntity;
 
-    /** Domain service reference. */
-    @Autowired
-    private DomainService domainService;
+    /** Constant for application. */
+    public static final String APPLICATION = "application";
+
+    /** Constant for application type. */
+    private static final String TYPE = "type";
 
     @Override
     @PreAuthorize("hasPermission(null, 'CREATE_APPLICATION_TYPE')")
@@ -49,16 +50,16 @@ public class ApplicationServiceImpl implements ApplicationService {
     /**
      * Validate the application.
      *
-     * @param application reference of the application.
-     * @throws Exception error occurs
+     * @param application reference of the application
+     * @throws Exception if error occurs
      */
     private void validateApplication(Application application) throws Exception {
-        Errors errors = validator.rejectIfNullEntity("application", application);
+        Errors errors = validator.rejectIfNullEntity(APPLICATION, application);
         errors = validator.validateEntity(application, errors);
         Application app = applicationRepo.findByTypeAndDomainAndIsActive(application.getType(),
-                application.getDomainId(), true, Status.ENABLED);
+            application.getDomainId(), true, Status.ENABLED);
         if (app != null && application.getId() != app.getId()) {
-            errors.addFieldError("type", "application.already.exist.for.same.domain");
+            errors.addFieldError(TYPE, "error.application.type.duplicate.check");
         }
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
@@ -86,37 +87,28 @@ public class ApplicationServiceImpl implements ApplicationService {
     public Application find(Long id) throws Exception {
         Application application = applicationRepo.findOne(id);
         if (application == null) {
-            throw new EntityNotFoundException("application.not.found");
+            throw new EntityNotFoundException("error.application.not.found");
         }
         return application;
     }
 
     @Override
-    public Page<Application> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if (domain != null && !domain.getName().equals("ROOT")) {
-            return applicationRepo.findAllByDomainIsActive(domain.getId(), true, pagingAndSorting.toPageRequest());
+    public Page<Application> findAll(PagingAndSorting pagingAndSorting, Long id) throws Exception {
+        if (((convertEntity.getOwnerById(id).getType()).equals(User.UserType.USER))
+            || ((convertEntity.getOwnerById(id).getType()).equals(User.UserType.DOMAIN_ADMIN))) {
+            return applicationRepo.findAllByDomainIsActive(convertEntity.getOwnerById(id).getDomainId(), true,
+                pagingAndSorting.toPageRequest());
         }
         return applicationRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
     }
 
     @Override
-    public List<Application> findAll() throws Exception {
-        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if (domain != null && !domain.getName().equals("ROOT")) {
-            return applicationRepo.findAllByDomainIsActive(domain.getId(), true);
+    public List<Application> findAll(Long id) throws Exception {
+        if (((convertEntity.getOwnerById(id).getType()).equals(User.UserType.USER))
+            || ((convertEntity.getOwnerById(id).getType()).equals(User.UserType.DOMAIN_ADMIN))) {
+            return applicationRepo.findAllByDomainIsActive(convertEntity.getOwnerById(id).getDomainId(), true);
         }
         return (List<Application>) applicationRepo.findAllByIsActive(true);
-    }
-
-    @Override
-    public Page<Application> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
-        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if (domain != null && !domain.getName().equals("ROOT")) {
-            return applicationRepo.findAllByDomainIsActiveAndStatus(domain.getId(), pagingAndSorting.toPageRequest(),
-                    true, Status.ENABLED);
-        }
-        return applicationRepo.findAllByIsActiveAndStatus(pagingAndSorting.toPageRequest(), true, Status.ENABLED);
     }
 
     @Override
@@ -128,12 +120,17 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public List<Application> findAllByIsActive(Boolean isActive) throws Exception {
-        Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
-        if (domain != null && !domain.getName().equals("ROOT")) {
-            return applicationRepo.findAllByIsActiveAndDomainAndStatus(domain.getId(), true, Status.ENABLED);
-        }
-        return applicationRepo.findAllByIsActiveAndStatus(true, Status.ENABLED);
+    public List<Application> findAllByDomain(Long domainId) throws Exception {
+        return applicationRepo.findAllByDomainAndIsActiveAndStatus(domainId, true, Status.ENABLED);
     }
 
+    @Override
+    public Page<Application> findAll(PagingAndSorting pagingAndSorting) throws Exception {
+        return null;
+    }
+
+    @Override
+    public List<Application> findAll() throws Exception {
+        return null;
+    }
 }
