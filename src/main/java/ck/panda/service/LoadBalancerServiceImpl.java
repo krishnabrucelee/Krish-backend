@@ -10,15 +10,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.LoadBalancerRule;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.LoadBalancerRule.SticknessMethod;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.repository.jpa.LoadBalancerRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackLoadBalancerService;
+import ck.panda.util.CloudStackOptionalUtil;
 import ck.panda.util.ConfigUtil;
-import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -61,118 +63,235 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     @Autowired
     private DomainService domainService;
 
-    /** Token Detail Utilities. */
-    @Autowired
-    private TokenDetails tokenDetails;
+    /** Constant for load balancer. */
+    private static final String CS_LOADBALANCER = "loadbalancer";
 
+    /** Constant for list load balancer. */
+    private static final String CS_LB_LIST = "listloadbalancerrulesresponse";
+
+    /** Constant for list load balancer rule instance response. */
+    private static final String CS_LB_LIST_INSTANCE = "listloadbalancerruleinstancesresponse";
+
+    /** Constant for load balancer rule. */
+    private static final String CS_LB_RULE = "loadbalancerrule";
+
+    /** Constant for create loadbalancer rule. */
+    private static final String CS_LB_CREATE = "createloadbalancerruleresponse";
+
+    /** Constant for delete load balancer rule. */
+    private static final String CS_LB_DELETE = "deleteloadbalancerruleresponse";
+
+    /** Constant for lb rule id. */
+    private static final String CS_LB_INSTANCE_ID = "lbrulevmidip";
+
+    /** Constant for load balancer rule instance. */
+    private static final String CS_LB_INSTANCE = "loadbalancerruleinstance";
+
+    /** Constant for method name. */
+    private static final String CS_METHOD_NAME = "methodname";
+
+    /** Constant for table size. */
+    private static final String CS_TABLE_SIZE = "tablesize";
+
+    /** Constant for cookie name. */
+    private static final String CS_COOKIE_NAME = "cookie-name";
+
+    /** Constant for length. */
+    private static final String CS_LENGTH = "length";
+
+    /** Constant for expires. */
+    private static final String CS_EXPIRES = "expires";
+
+    /** Constant for mode. */
+    private static final String CS_MODE = "mode";
+
+    /** Constant for request learn. */
+    private static final String CS_REQUEST_LEARN = "request-learn";
+
+    /** Constant for prefix. */
+    private static final String CS_PREFIX = "prefix";
+
+    /** Constant for indirect. */
+    private static final String CS_INDIRECT = "indirect";
+
+    /** Constant for nocache. */
+    private static final String CS_NO_CACHE = "nocahche";
+
+    /** Constant for post only. */
+    private static final String CS_POST_ONLY = "postonly";
+
+    /** Constant for hold time. */
+    private static final String CS_HOLD_TIME = "holdtime";
+
+    /** Constant for domain. */
+    private static final String CS_DOMAIN = "domain";
+
+    /** Constant for algorithm. */
+    private static final String CS_ALGORITHM = "algorithm";
+
+    /** Constant for parameters. */
+    private static final String CS_PARAMS = "params";
+
+    /** Constant for load balancer instance ip address. */
+    private static final String CS_LB_INSTANCE_IP = "lbvmips";
+
+    /** Constant for name. */
+    private static final String CS_NAME = ".name";
+
+    /** Constant for value. */
+    private static final String CS_VALUE = ".value";
+
+    /** Constant for param of array value zero. */
+    private static final String CS_PARAM_0 = "param[0]";
+
+    /** Constant for param of array value one. */
+    private static final String CS_PARAM_1 = "param[1]";
+
+    /** Constant for param of array value two. */
+    private static final String CS_PARAM_2 = "param[2]";
+
+    /** Constant for param of array value three. */
+    private static final String CS_PARAM_3 = "param[3]";
+
+    /** Constant for param of array value four. */
+    private static final String CS_PARAM_4 = "param[4]";
+
+    /** Constant for param of array value five. */
+    private static final String CS_PARAM_5 = "param[5]";
+
+    /** Constant for param of array value six. */
+    private static final String CS_PARAM_6 = "param[6]";
+
+    /** Constant for param of array value seven. */
+    private static final String CS_PARAM_7 = "param[7]";
+
+    /** Constant for param of array value eight. */
+    private static final String CS_PARAM_8 = "param[8]";
+
+    /** Constant for param of array value nine. */
+    private static final String CS_PARAM_9 = "param[9]";
+
+    /** Constant for param of array value ten. */
+    private static final String CS_PARAM_10 = "param[10]";
+
+    /** Constant for param of array value eleven. */
+    private static final String CS_PARAM_11 = "param[11]";
+
+    /** Constant for create lb stickiness policy. */
+    private static final String CS_CREATE_STICKY_POLICY = "createLBStickinessPolicy";
+
+    /** Constant for update load balancer rule response. */
+    private static final String CS_UPDATE_LB_RULE = "updateloadbalancerruleresponse";
 
     @Override
-    public LoadBalancerRule save(LoadBalancerRule loadBalancer) throws Exception {
+    public LoadBalancerRule save(LoadBalancerRule loadBalancer, Long userId) throws Exception {
         loadBalancer.setIsActive(true);
-        if (loadBalancer.getSyncFlag()) {
-            Errors errors = validator.rejectIfNullEntity("loadBalancer", loadBalancer);
-            errors = validator.validateEntity(loadBalancer, errors);
 
+            Errors errors = validator.rejectIfNullEntity(CS_LOADBALANCER, loadBalancer);
+            errors = validator.validateEntity(loadBalancer, errors);
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                LoadBalancerRule csLoadBalancer = csCreateLoadBalancerRule(loadBalancer, errors);
+                LoadBalancerRule csLoadBalancer = csCreateLoadBalancerRule(loadBalancer, errors, userId);
                 if (loadBalancerRepo.findByUUID(csLoadBalancer.getUuid(), true) == null) {
-                       loadBalancerRepo.save(csLoadBalancer);
+                    return loadBalancerRepo.save(csLoadBalancer);
                 }
+                    }
+            return loadBalancer;
 
-            }
-        }
-            return loadBalancerRepo.save(loadBalancer);
-        }
+              }
 
-    private LoadBalancerRule createStickinessPolicy(LoadBalancerRule loadBalancer) throws Exception {
-          if (loadBalancer.getStickinessMethod() != null) {
-              Errors errors = validator.rejectIfNullEntity("loadBalancer", loadBalancer);
-              errors = validator.validateEntity(loadBalancer, errors);
-              String createStickiness = cloudStackLoadBalancerService.createLBStickinessPolicy(loadBalancer.getUuid(), "json", addOptionalValues(loadBalancer));
+    @Override
+    public LoadBalancerRule createStickinessPolicy(LoadBalancerRule loadBalanceRule) throws Exception {
+          if (loadBalanceRule.getStickinessMethod() != null) {
+              Errors errors = validator.rejectIfNullEntity(CS_LOADBALANCER, loadBalanceRule);
+              errors = validator.validateEntity(loadBalanceRule, errors);
+              String createStickiness = cloudStackLoadBalancerService.createLBStickinessPolicy(loadBalanceRule.getUuid(), CloudStackConstants.JSON, addOptionalValues(loadBalanceRule));
                JSONObject csloadBalancerResponseJSON = new JSONObject(createStickiness)
-                       .getJSONObject("createLBStickinessPolicy");
+                       .getJSONObject(CS_CREATE_STICKY_POLICY);
                    if (errors.hasErrors()) {
                   throw new ApplicationException(errors);
                    }
-                       if (csloadBalancerResponseJSON.has("jobid")) {
+                       if (csloadBalancerResponseJSON.has(CloudStackConstants.CS_JOB_ID)) {
                            Thread.sleep(10000);
-                           String jobResponse = cloudStackLoadBalancerService.loadBalancerJobResult(csloadBalancerResponseJSON.getString("jobid"), "json");
-                           JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse").getJSONObject("jobresult");
-                           JSONArray stickyResult = jobresult.getJSONObject("stickinesspolicies").getJSONArray("stickinesspolicy");
+                           String jobResponse = cloudStackLoadBalancerService.loadBalancerJobResult(csloadBalancerResponseJSON.getString(CloudStackConstants.CS_JOB_ID),CloudStackConstants.JSON);
+                           JSONObject jobresult = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE).getJSONObject(CloudStackConstants.CS_JOB_RESULT);
+                           JSONArray stickyResult = jobresult.getJSONObject(CloudStackConstants.CS_STICKY_POLICIES).getJSONArray(CloudStackConstants.CS_STICKY_POLICY);
                           for (int j = 0, sizes = stickyResult.length(); j < sizes; j++) {
                               JSONObject json = (JSONObject)stickyResult.get(j);
-                              loadBalancer.setStickinessName((String) json.getString("name"));
-                              loadBalancer.setStickinessMethod(SticknessMethod.valueOf(json.getString("methodname")));
-                              loadBalancer.setStickyUuid((String) json.getString("id"));
-                              if (json.has("params")) {
-                                  JSONObject paramsResponse = json.getJSONObject("params");
-                                  if (paramsResponse.has("tablesize")) {
-                                      loadBalancer.setStickyTableSize((String) paramsResponse.getString("tablesize"));
+                              loadBalanceRule.setStickinessName((String) json.getString(CloudStackConstants.CS_NAME));
+                              loadBalanceRule.setStickinessMethod(SticknessMethod.valueOf(json.getString(CS_METHOD_NAME)));
+                              loadBalanceRule.setStickyUuid((String) json.getString(CloudStackConstants.CS_ID));
+                              if (json.has(CS_PARAMS)) {
+                                  JSONObject paramsResponse = json.getJSONObject(CS_PARAMS);
+                                  switch (CS_PARAMS) {
+                                  case CS_TABLE_SIZE :
+                                      loadBalanceRule.setStickyTableSize((String) paramsResponse.getString(CS_TABLE_SIZE));
+                                      break;
+                                  case CS_LENGTH :
+                                      loadBalanceRule.setStickyLength((String) paramsResponse.getString(CS_LENGTH));
+                                      break;
+                                  case CS_EXPIRES :
+                                      loadBalanceRule.setStickyExpires((String) paramsResponse.getString(CS_EXPIRES));
+                                      break;
+                                  case CS_MODE:
+                                      loadBalanceRule.setStickyMode((String) paramsResponse.getString(CS_MODE));
+                                      break;
+                                  case CS_PREFIX :
+                                      loadBalanceRule.setStickyPrefix((Boolean) paramsResponse.get(CS_PREFIX));
+                                      break;
+                                  case CS_REQUEST_LEARN :
+                                      loadBalanceRule.setStickyRequestLearn((Boolean) paramsResponse.get(CS_REQUEST_LEARN));
+                                      break;
+                                  case  CS_INDIRECT :
+                                      loadBalanceRule.setStickyIndirect((Boolean) paramsResponse.get(CS_INDIRECT));
+                                      break;
+                                  case CS_NO_CACHE :
+                                      loadBalanceRule.setStickyNoCache((Boolean) paramsResponse.get(CS_NO_CACHE));
+                                      break;
+                                  case CS_POST_ONLY :
+                                      loadBalanceRule.setStickyPostOnly((Boolean) paramsResponse.get(CS_POST_ONLY));
+                                      break;
+                                  case CS_HOLD_TIME :
+                                      loadBalanceRule.setStickyHoldTime((String) paramsResponse.getString(CS_HOLD_TIME));
+                                      break;
+                                  case CS_DOMAIN :
+                                      loadBalanceRule.setStickyCompany((String) paramsResponse.getString(CS_DOMAIN));
+                                      break;
+                                  default :
+                                      break;
                                   }
-                                  if (paramsResponse.has("length")) {
-                                      loadBalancer.setStickyLength((String) paramsResponse.getString("length"));
-                                  }
-                                  if (paramsResponse.has("expires")) {
-                                      loadBalancer.setStickyExpires((String) paramsResponse.getString("expires"));
-                                  }
-                                  if (paramsResponse.has("mode")) {
-                                      loadBalancer.setStickyMode((String) paramsResponse.getString("mode"));
-                                  }
-                                  if (paramsResponse.has("prefix")) {
-                                      loadBalancer.setStickyPrefix((Boolean) paramsResponse.get("prefix"));
-                                  }
-                                  if (paramsResponse.has("request-learn")) {
-                                      loadBalancer.setStickyRequestLearn((Boolean) paramsResponse.get("request-learn"));
-                                  }
-                                  if (paramsResponse.has("indirect")) {
-                                      loadBalancer.setStickyIndirect((Boolean) paramsResponse.get("indirect"));
-                                  }
-                                  if (paramsResponse.has("nocache")) {
-                                      loadBalancer.setStickyNoCache((Boolean) paramsResponse.get("nocache"));
-                                  }
-                                  if (paramsResponse.has("postonly")) {
-                                      loadBalancer.setStickyPostOnly((Boolean) paramsResponse.get("postonly"));
-                                  }
-                                  if (paramsResponse.has("holdtime")) {
-                                      loadBalancer.setStickyHoldTime((String) paramsResponse.getString("holdtime"));
-                                  }
-                                 if (paramsResponse.has("domain")) {
-                                     loadBalancer.setStickyCompany((String) paramsResponse.getString("domain"));
-                                 }
                               }
                           }
                        }
               }
-
-        return loadBalancer;
-
+        return loadBalanceRule;
     }
+
     @Override
     public LoadBalancerRule update(LoadBalancerRule loadBalancer) throws Exception {
          if (loadBalancer.getSyncFlag()) {
-             Errors errors = validator.rejectIfNullEntity("loadBalancer", loadBalancer);
+             Errors errors = validator.rejectIfNullEntity(CS_LOADBALANCER, loadBalancer);
              errors = validator.validateEntity(loadBalancer, errors);
              HashMap<String,String> optional = new HashMap<String, String>();
-             optional.put("algorithm", loadBalancer.getAlgorithm());
-             optional.put("name", loadBalancer.getName());
-             String csEditloadBalancer = cloudStackLoadBalancerService.updateLoadBalancerRule(loadBalancer.getUuid(), "json", optional);
+             optional.put(CS_ALGORITHM, loadBalancer.getAlgorithm());
+             optional.put(CloudStackConstants.CS_NAME, loadBalancer.getName());
+             String csEditloadBalancer = cloudStackLoadBalancerService.updateLoadBalancerRule(loadBalancer.getUuid(), CloudStackConstants.JSON, optional);
              JSONObject csloadBalancerResponseJSON = new JSONObject(csEditloadBalancer)
-                         .getJSONObject("updateloadbalancerruleresponse");
+                         .getJSONObject(CS_UPDATE_LB_RULE);
              this.createStickinessPolicy(loadBalancer);
              if (errors.hasErrors()) {
                     throw new ApplicationException(errors);
              }
-             if (csloadBalancerResponseJSON.has("jobid")) {
+             if (csloadBalancerResponseJSON.has(CloudStackConstants.CS_JOB_ID)) {
                 Thread.sleep(10000);
-                String jobResponse = cloudStackLoadBalancerService.loadBalancerJobResult(csloadBalancerResponseJSON.getString("jobid"), "json");
-                JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
-                if (jobresult.getString("jobstatus").equals("1")) {
-                     JSONObject loadBalancerResponse = jobresult.getJSONObject("loadbalancer");
-                     loadBalancer.setUuid((String) loadBalancerResponse.get("id"));
-                     loadBalancer.setName((String) loadBalancerResponse.get("name"));
-                     loadBalancer.setAlgorithm((String) loadBalancerResponse.get("algorithm"));
+                String jobResponse = cloudStackLoadBalancerService.loadBalancerJobResult(csloadBalancerResponseJSON.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
+                JSONObject jobresult = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+                if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.SUCCEEDED_JOB_STATUS)) {
+                     JSONObject loadBalancerResponse = jobresult.getJSONObject(CS_LOADBALANCER);
+                     loadBalancer.setUuid((String) loadBalancerResponse.get(CloudStackConstants.CS_ID));
+                     loadBalancer.setName((String) loadBalancerResponse.get(CloudStackConstants.CS_NAME));
+                     loadBalancer.setAlgorithm((String) loadBalancerResponse.get(CS_ALGORITHM));
                 }
             }
          }
@@ -208,27 +327,27 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     public List<LoadBalancerRule> findAllFromCSServer() throws Exception {
         List<LoadBalancerRule> loadBalancerList = new ArrayList<LoadBalancerRule>();
         HashMap<String, String> loadBalancerMap = new HashMap<String, String>();
-        loadBalancerMap.put("listall", "true");
-        String response = cloudStackLoadBalancerService.listLoadBalancerRules("json", loadBalancerMap);
+        loadBalancerMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
+        String response = cloudStackLoadBalancerService.listLoadBalancerRules(CloudStackConstants.JSON, loadBalancerMap);
         JSONArray loadBalancerListJSON = null;
-        JSONObject responseObject = new JSONObject(response).getJSONObject("listloadbalancerrulesresponse");
-        if (responseObject.has("loadbalancerrule")) {
-            loadBalancerListJSON = responseObject.getJSONArray("loadbalancerrule");
+        JSONObject responseObject = new JSONObject(response).getJSONObject(CS_LB_LIST);
+        if (responseObject.has(CS_LB_RULE)) {
+            loadBalancerListJSON = responseObject.getJSONArray(CS_LB_RULE);
             for (int i = 0, size = loadBalancerListJSON.length(); i < size; i++) {
                 LoadBalancerRule loadBalancer = LoadBalancerRule.convert(loadBalancerListJSON.getJSONObject(i));
                 if (loadBalancer != null) {
                     HashMap<String, String> loadBalancerInstanceMap = new HashMap<String, String>();
-                    loadBalancerInstanceMap.put("lbvmips", "true");
-                    loadBalancerInstanceMap.put("listall", "true");
-                    String responseCS = cloudStackLoadBalancerService.listLoadBalancerRuleInstances(loadBalancer.getUuid(), "json", loadBalancerInstanceMap);
+                    loadBalancerInstanceMap.put(CS_LB_INSTANCE_IP, CloudStackConstants.STATUS_ACTIVE);
+                    loadBalancerInstanceMap.put(CloudStackConstants.CS_LIST_ALL,CloudStackConstants.STATUS_ACTIVE);
+                    String responseCS = cloudStackLoadBalancerService.listLoadBalancerRuleInstances(loadBalancer.getUuid(), CloudStackConstants.JSON, loadBalancerInstanceMap);
                     JSONArray vmListJSON = null;
-                    JSONObject responseObjectCS = new JSONObject(responseCS).getJSONObject("listloadbalancerruleinstancesresponse");
-                    if (responseObjectCS.has("lbrulevmidip")) {
-                        vmListJSON = responseObjectCS.getJSONArray("lbrulevmidip");
+                    JSONObject responseObjectCS = new JSONObject(responseCS).getJSONObject(CS_LB_LIST_INSTANCE);
+                    if (responseObjectCS.has(CS_LB_INSTANCE_ID)) {
+                        vmListJSON = responseObjectCS.getJSONArray(CS_LB_INSTANCE_ID);
                         List<VmInstance> newVmInstance = new ArrayList<VmInstance>();
                         for (int k = 0; k < vmListJSON.length(); k++) {
                             VmInstance vmInstance = virtualMachineService.findByUUID(vmListJSON.getJSONObject(k).
-                                    getJSONObject("loadbalancerruleinstance").getString("id"));
+                                    getJSONObject(CS_LB_INSTANCE).getString(CloudStackConstants.CS_ID));
                             newVmInstance.add(vmInstance);
                         }
                         loadBalancer.setVmInstanceList(newVmInstance);
@@ -251,11 +370,11 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             configUtil.setServer(1L);
             LoadBalancerRule csLoadBalancer = loadBalancerRepo.findOne(loadBalancer.getId());
             try {
-                String loadBalancerDeleteResponse = cloudStackLoadBalancerService.deleteLoadBalancerRule(csLoadBalancer.getUuid(), "json");
-                JSONObject jobId = new JSONObject(loadBalancerDeleteResponse).getJSONObject("deleteloadbalancerruleresponse");
-                if (jobId.has("jobid")) {
-                    String jobResponse = cloudStackLoadBalancerService.loadBalancerJobResult(jobId.getString("jobid"), "json");
-                    JSONObject jobresults = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+                String loadBalancerDeleteResponse = cloudStackLoadBalancerService.deleteLoadBalancerRule(csLoadBalancer.getUuid(), CloudStackConstants.JSON);
+                JSONObject jobId = new JSONObject(loadBalancerDeleteResponse).getJSONObject(CS_LB_DELETE);
+                if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
+                    String jobResponse = cloudStackLoadBalancerService.loadBalancerJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
+                    JSONObject jobresults = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
                 }
             } catch (Exception e) {
                 LOGGER.error("ERROR AT Load Balancer DELETE", e);
@@ -273,37 +392,42 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     /**
      * @param loadBalancer entity object
      * @param errors object for validation
+     * @param userId of the user.
      * @throws Exception raise if error
      * @return loadBalancer details
      */
-    public LoadBalancerRule csCreateLoadBalancerRule(LoadBalancerRule loadBalancer, Errors errors) throws Exception {
+    public LoadBalancerRule csCreateLoadBalancerRule(LoadBalancerRule loadBalancer, Errors errors, Long userId) throws Exception {
+        User user = convertEntityService.getOwnerById(userId);
         configUtil.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
-        IpAddress vm = convertEntityService.getIpAddress(loadBalancer.getIpAddressId());
-        optional.put("domainid",domainService.find(Long.parseLong(tokenDetails.getTokenDetails("domainid"))).getUuid());
-
-        optional.put("publicipid", vm.getUuid());
-
+        IpAddress ipAddress = convertEntityService.getIpAddress(loadBalancer.getIpAddressId());
+        optional.put(CloudStackConstants.CS_DOMAIN_ID, domainService.find(user.getDomainId()).getUuid());
+        optional.put("publicipid", ipAddress.getUuid());
         String csResponse = cloudStackLoadBalancerService.createLoadBalancerRule(loadBalancer.getAlgorithm(), loadBalancer.getName(),
-        loadBalancer.getPrivatePort().toString(), loadBalancer.getPublicPort().toString(), "json", optional);
-            JSONObject loadBalancerJSON = new JSONObject(csResponse).getJSONObject("createloadbalancerruleresponse");
-            if (loadBalancerJSON.has("errorcode")) {
-                errors = this.validateEvent(errors, loadBalancerJSON.getString("errortext"));
+        loadBalancer.getPrivatePort().toString(), loadBalancer.getPublicPort().toString(), CloudStackConstants.JSON, optional);
+            JSONObject loadBalancerJSON = new JSONObject(csResponse).getJSONObject(CS_LB_CREATE);
+            if (loadBalancerJSON.has(CloudStackConstants.CS_ERROR_CODE)) {
+                errors = this.validateEvent(errors, loadBalancerJSON.getString(CloudStackConstants.CS_ERROR_TEXT));
                 throw new ApplicationException(errors);
             }
-                if (loadBalancerJSON.has("jobid")) {
+                if (loadBalancerJSON.has(CloudStackConstants.CS_JOB_ID)) {
                    Thread.sleep(10000);
-                   String eventObjectResult = cloudStackLoadBalancerService.loadBalancerRuleJobResult(loadBalancerJSON.getString("jobid"),
-                        "json");
+                   String eventObjectResult = cloudStackLoadBalancerService.loadBalancerRuleJobResult(loadBalancerJSON.getString(CloudStackConstants.CS_JOB_ID),
+                           CloudStackConstants.JSON);
                    Thread.sleep(5000);
-                   JSONObject jobresult = new JSONObject(eventObjectResult).getJSONObject("queryasyncjobresultresponse")
-                        .getJSONObject("jobresult");
-                   if (jobresult.has("loadbalancer")) {
-                       LoadBalancerRule loadBalancerRule = LoadBalancerRule.convert(jobresult.getJSONObject("loadbalancer"));
+                   JSONObject jobresult = new JSONObject(eventObjectResult).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE)
+                        .getJSONObject(CloudStackConstants.CS_JOB_RESULT);
+                   if (jobresult.has(CS_LOADBALANCER)) {
+                       LoadBalancerRule loadBalancerRule = LoadBalancerRule.convert(jobresult.getJSONObject(CS_LOADBALANCER));
                        loadBalancerRule.setNetworkId(convertEntityService.getNetworkId(loadBalancerRule.getTransNetworkId()));
                        loadBalancerRule.setIpAddressId(convertEntityService.getIpAddressId(loadBalancerRule.getTransIpAddressId()));
                        loadBalancerRule.setZoneId(convertEntityService.getZoneId(loadBalancerRule.getTransZoneId()));
                        loadBalancerRule.setDomainId(convertEntityService.getDomainId(loadBalancerRule.getTransDomainId()));
+                       loadBalancerRule.setStickinessName(loadBalancer.getStickinessName());
+                       loadBalancerRule.setStickinessMethod(loadBalancer.getStickinessMethod());
+                       loadBalancerRule.setAlgorithm(loadBalancer.getAlgorithm());
+                       loadBalancerRule.setStickyTableSize(loadBalancer.getStickyTableSize());
+                       loadBalancerRule.setCookieName(loadBalancer.getCookieName());
                        this.createStickinessPolicy(loadBalancerRule);
                        return loadBalancerRule;
                    }
@@ -329,78 +453,75 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         return loadBalancerRepo.findAllByIpaddressAndIsActive(ipAddressId, true);
     }
 
+    /**
+     * Optional values mapping to ACS.
+     *
+     * @param loadBalancer object
+     * @return optional values.
+     * @throws Exception if error occurs.
+     */
     public HashMap<String, String> addOptionalValues(LoadBalancerRule loadBalancer) throws Exception {
         HashMap<String, String> loadBalancerMap = new HashMap<String, String>();
 
-        if (loadBalancer.getStickinessName() != null) {
-            loadBalancerMap.put("name", loadBalancer.getStickinessName().toString());
-        }
-
-        if (loadBalancer.getStickinessMethod() != null) {
-            loadBalancerMap.put("methodname", loadBalancer.getStickinessMethod().toString());
-        }
-
-        if (loadBalancer.getStickyTableSize() != null) {
-            loadBalancerMap.put("param[0].name", "tablesize");
-            loadBalancerMap.put("param[0].value", loadBalancer.getStickyTableSize().toString());
-
-        }
-
-        if (loadBalancer.getCookieName() != null) {
-            loadBalancerMap.put("param[1].name", "cookie-name");
-            loadBalancerMap.put("param[1].value", loadBalancer.getCookieName().toString());
-        }
-
-        if (loadBalancer.getStickyLength() != null) {
-            loadBalancerMap.put("param[2].name", "length");
-            loadBalancerMap.put("param[2].value", loadBalancer.getStickyLength().toString());
-        }
-
-        if (loadBalancer.getStickyExpires() != null) {
-            loadBalancerMap.put("param[3].name", "expires");
-            loadBalancerMap.put("param[3].value", loadBalancer.getStickyExpires().toString());
-        }
-
-        if (loadBalancer.getStickyMode() != null) {
-            loadBalancerMap.put("param[4].name", "mode");
-            loadBalancerMap.put("param[4].value", loadBalancer.getStickyMode().toString());
-        }
-
-        if (loadBalancer.getStickyRequestLearn() != null) {
-            loadBalancerMap.put("param[5].name", "request-learn");
-            loadBalancerMap.put("param[5].value", loadBalancer.getStickyRequestLearn().toString());
-        }
-
-        if (loadBalancer.getStickyPrefix() != null) {
-            loadBalancerMap.put("param[6].name", "prefix");
-            loadBalancerMap.put("param[6].value", loadBalancer.getStickyPrefix().toString());
-        }
-
-        if (loadBalancer.getStickyIndirect() != null) {
-            loadBalancerMap.put("param[7].name", "indirect");
-            loadBalancerMap.put("param[7].value", loadBalancer.getStickyIndirect().toString());
-        }
-
-        if (loadBalancer.getStickyNoCache() != null) {
-            loadBalancerMap.put("param[8].name", "nocache");
-            loadBalancerMap.put("param[8].value", loadBalancer.getStickyNoCache().toString());
-        }
-
-        if (loadBalancer.getStickyPostOnly() != null) {
-            loadBalancerMap.put("param[9].name", "postonly");
-            loadBalancerMap.put("param[9].value", loadBalancer.getStickyPostOnly().toString());
-        }
-
-        if (loadBalancer.getStickyHoldTime() != null) {
-            loadBalancerMap.put("param[10].name", "holdtime");
-            loadBalancerMap.put("param[10].value", loadBalancer.getStickyHoldTime().toString());
-        }
-
-        if (loadBalancer.getStickyCompany() != null) {
-            loadBalancerMap.put("param[11].name", "domain");
-            loadBalancerMap.put("param[11].value", loadBalancer.getStickyCompany().toString());
-        }
-
-        return loadBalancerMap;
+            CloudStackOptionalUtil.updateOptionalStringValue(CloudStackConstants.CS_NAME, loadBalancer.getStickinessName().toString(),loadBalancerMap);
+            CloudStackOptionalUtil.updateOptionalStringValue(CS_METHOD_NAME, loadBalancer.getStickinessMethod().toString(),loadBalancerMap);
+            // Inorder to map values as same as ACS, checking not null condition for allowing only allocated values.
+            if (loadBalancer.getStickyTableSize() != null) {
+                CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_0 + CS_NAME,CS_TABLE_SIZE,loadBalancerMap);
+                CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_0 + CS_VALUE, loadBalancer.getStickyTableSize().toString(),loadBalancerMap);
+            }
+            if (loadBalancer.getCookieName() != null) {
+                CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_1 + CS_NAME, CS_COOKIE_NAME,loadBalancerMap);
+                CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_1 + CS_VALUE, loadBalancer.getCookieName().toString(),loadBalancerMap);
+            }
+            if (loadBalancer.getStickyLength() != null) {
+                CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_2 + CS_NAME, CS_LENGTH,loadBalancerMap);
+                CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_2 + CS_VALUE, loadBalancer.getStickyLength().toString(),loadBalancerMap);
+           }
+            if (loadBalancer.getStickyExpires() != null) {
+                 CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_3 + CS_NAME, CS_EXPIRES,loadBalancerMap);
+                 CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_3 + CS_VALUE, loadBalancer.getStickyExpires().toString(),loadBalancerMap);
+            }
+            if (loadBalancer.getStickyMode() != null) {
+                CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_4 + CS_NAME, CS_MODE,loadBalancerMap);
+                CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_4 + CS_VALUE, loadBalancer.getStickyMode().toString(),loadBalancerMap);
+            }
+            if (loadBalancer.getStickyRequestLearn() != null) {
+                 CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_5 + CS_NAME, CS_REQUEST_LEARN,loadBalancerMap);
+                 CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_5 + CS_VALUE, loadBalancer.getStickyRequestLearn().toString(),loadBalancerMap);
+            }
+            if (loadBalancer.getStickyPrefix() != null) {
+                 CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_6 + CS_NAME, CS_PREFIX,loadBalancerMap);
+                 CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_6 + CS_VALUE, loadBalancer.getStickyPrefix().toString(),loadBalancerMap);
+            }
+            if (loadBalancer.getStickyIndirect() != null) {
+                 CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_7 + CS_NAME, CS_INDIRECT,loadBalancerMap);
+                 CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_7 + CS_VALUE, loadBalancer.getStickyIndirect().toString(),loadBalancerMap);
+            }
+            if (loadBalancer.getStickyNoCache() != null) {
+                CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_8 + CS_NAME, CS_NO_CACHE,loadBalancerMap);
+                CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_8 + CS_VALUE, loadBalancer.getStickyNoCache().toString(),loadBalancerMap);
+            }
+            if (loadBalancer.getStickyPostOnly() != null) {
+                CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_9 + CS_NAME, CS_POST_ONLY,loadBalancerMap);
+                CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_9 + CS_VALUE, loadBalancer.getStickyPostOnly().toString(),loadBalancerMap);
+            }
+            if (loadBalancer.getStickyHoldTime() != null) {
+                CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_10 + CS_NAME, CS_HOLD_TIME,loadBalancerMap);
+                CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_10 + CS_VALUE, loadBalancer.getStickyHoldTime().toString(),loadBalancerMap);
+            }
+            if (loadBalancer.getDomain() != null) {
+                CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_11 + CS_NAME, CS_DOMAIN,loadBalancerMap);
+                CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_11 + CS_VALUE, loadBalancer.getDomain().toString(),loadBalancerMap);
+            }
+            return loadBalancerMap;
     }
+
+    @Override
+    public LoadBalancerRule save(LoadBalancerRule loadBalancer) throws Exception {
+          if (!loadBalancer.getSyncFlag()) {
+                return loadBalancerRepo.save(loadBalancer);
+            }
+            return loadBalancer;
+        }
 }

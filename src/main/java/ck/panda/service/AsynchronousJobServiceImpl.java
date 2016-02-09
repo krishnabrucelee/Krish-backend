@@ -21,6 +21,7 @@ import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.FirewallRules.Purpose;
+import ck.panda.domain.entity.LoadBalancerRule.SticknessMethod;
 import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.LoadBalancerRule;
 import ck.panda.domain.entity.Network;
@@ -1043,18 +1044,19 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             }
         }
 
-        if (eventObject.getString("commandEventType").equals(" LB.STICKINESSPOLICY.CREATE")) {
-            LoadBalancerRule csLoadBalancer = LoadBalancerRule.convert(jobresult.getJSONObject("stickinesspolicies"));
-            LoadBalancerRule loadBalancer = loadBalancerService.findByUUID(csLoadBalancer.getUuid());
-            if (csLoadBalancer.getUuid().equals(loadBalancer.getUuid())) {
-                LoadBalancerRule csLb = csLoadBalancer;
-            	loadBalancer.setStickinessName(csLb.getStickinessName());
-            	loadBalancer.setStickinessMethod(csLb.getStickinessMethod());
+        if (eventObject.getString("commandEventType").equals("LB.STICKINESSPOLICY.CREATE")) {
+            JSONObject stickyResult = jobResult.getJSONObject(CloudStackConstants.CS_STICKY_POLICIES);
+            JSONArray stickyPolicy = stickyResult.getJSONArray(CloudStackConstants.CS_STICKY_POLICY);
+            for (int j = 0, sizes = stickyResult.length(); j < sizes; j++) {
+                JSONObject json = (JSONObject)stickyPolicy.get(j);
+                LoadBalancerRule loadBalanceRule = loadBalancerService.findByUUID(stickyResult.getString(CloudStackConstants.CS_LB_RULE_ID));
+                loadBalanceRule.setStickyUuid(json.getString(CloudStackConstants.CS_ID));
+                loadBalanceRule.setStickinessMethod((SticknessMethod.valueOf(json.getString(CloudStackConstants.CS_METHOD_NAME))));
+                loadBalanceRule.setStickinessName(json.getString(CloudStackConstants.CS_NAME));
+                loadBalanceRule.setSyncFlag(false);
+               loadBalancerService.save(loadBalanceRule);
             }
-
-
         }
-
         if (eventObject.getString("commandEventType").equals("LB.UPDATE")) {
             LoadBalancerRule csLoadBalancer = LoadBalancerRule.convert(jobResult.getJSONObject("loadbalancer"));
             LoadBalancerRule loadBalancer = loadBalancerService.findByUUID(csLoadBalancer.getUuid());
