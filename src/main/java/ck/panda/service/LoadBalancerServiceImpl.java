@@ -21,7 +21,6 @@ import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackLoadBalancerService;
 import ck.panda.util.CloudStackOptionalUtil;
 import ck.panda.util.ConfigUtil;
-import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -87,12 +86,6 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
 
     /** Constant for load balancer rule instance. */
     private static final String CS_LB_INSTANCE = "loadbalancerruleinstance";
-
-    /** Constant for stickiness policies. */
-    private static final String CS_STICKY_POLICIES = "stickinesspolicies";
-
-    /** Constant for sticky policy. */
-    private static final String CS_STICKY_POLICY = "stickinesspolicy";
 
     /** Constant for method name. */
     private static final String CS_METHOD_NAME = "methodname";
@@ -204,7 +197,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                     return loadBalancerRepo.save(csLoadBalancer);
                 }
                     }
-            return loadBalancer ;
+            return loadBalancer;
 
               }
 
@@ -231,39 +224,43 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                               loadBalanceRule.setStickyUuid((String) json.getString(CloudStackConstants.CS_ID));
                               if (json.has(CS_PARAMS)) {
                                   JSONObject paramsResponse = json.getJSONObject(CS_PARAMS);
-                                  if (paramsResponse.has(CS_TABLE_SIZE)) {
+                                  switch (CS_PARAMS) {
+                                  case CS_TABLE_SIZE :
                                       loadBalanceRule.setStickyTableSize((String) paramsResponse.getString(CS_TABLE_SIZE));
-                                  }
-                                  if (paramsResponse.has(CS_LENGTH)) {
+                                      break;
+                                  case CS_LENGTH :
                                       loadBalanceRule.setStickyLength((String) paramsResponse.getString(CS_LENGTH));
-                                  }
-                                  if (paramsResponse.has(CS_EXPIRES)) {
+                                      break;
+                                  case CS_EXPIRES :
                                       loadBalanceRule.setStickyExpires((String) paramsResponse.getString(CS_EXPIRES));
-                                  }
-                                  if (paramsResponse.has(CS_MODE)) {
+                                      break;
+                                  case CS_MODE:
                                       loadBalanceRule.setStickyMode((String) paramsResponse.getString(CS_MODE));
-                                  }
-                                  if (paramsResponse.has(CS_PREFIX)) {
+                                      break;
+                                  case CS_PREFIX :
                                       loadBalanceRule.setStickyPrefix((Boolean) paramsResponse.get(CS_PREFIX));
-                                  }
-                                  if (paramsResponse.has(CS_REQUEST_LEARN)) {
+                                      break;
+                                  case CS_REQUEST_LEARN :
                                       loadBalanceRule.setStickyRequestLearn((Boolean) paramsResponse.get(CS_REQUEST_LEARN));
-                                  }
-                                  if (paramsResponse.has(CS_INDIRECT)) {
+                                      break;
+                                  case  CS_INDIRECT :
                                       loadBalanceRule.setStickyIndirect((Boolean) paramsResponse.get(CS_INDIRECT));
-                                  }
-                                  if (paramsResponse.has(CS_NO_CACHE)) {
+                                      break;
+                                  case CS_NO_CACHE :
                                       loadBalanceRule.setStickyNoCache((Boolean) paramsResponse.get(CS_NO_CACHE));
-                                  }
-                                  if (paramsResponse.has(CS_POST_ONLY)) {
+                                      break;
+                                  case CS_POST_ONLY :
                                       loadBalanceRule.setStickyPostOnly((Boolean) paramsResponse.get(CS_POST_ONLY));
-                                  }
-                                  if (paramsResponse.has(CS_HOLD_TIME)) {
+                                      break;
+                                  case CS_HOLD_TIME :
                                       loadBalanceRule.setStickyHoldTime((String) paramsResponse.getString(CS_HOLD_TIME));
+                                      break;
+                                  case CS_DOMAIN :
+                                      loadBalanceRule.setStickyCompany((String) paramsResponse.getString(CS_DOMAIN));
+                                      break;
+                                  default :
+                                      break;
                                   }
-                                 if (paramsResponse.has(CS_DOMAIN)) {
-                                     loadBalanceRule.setStickyCompany((String) paramsResponse.getString(CS_DOMAIN));
-                                 }
                               }
                           }
                        }
@@ -468,6 +465,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
 
             CloudStackOptionalUtil.updateOptionalStringValue(CloudStackConstants.CS_NAME, loadBalancer.getStickinessName().toString(),loadBalancerMap);
             CloudStackOptionalUtil.updateOptionalStringValue(CS_METHOD_NAME, loadBalancer.getStickinessMethod().toString(),loadBalancerMap);
+            // Inorder to map values as same as ACS, checking not null condition for allowing only allocated values.
             if (loadBalancer.getStickyTableSize() != null) {
                 CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_0 + CS_NAME,CS_TABLE_SIZE,loadBalancerMap);
                 CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_0 + CS_VALUE, loadBalancer.getStickyTableSize().toString(),loadBalancerMap);

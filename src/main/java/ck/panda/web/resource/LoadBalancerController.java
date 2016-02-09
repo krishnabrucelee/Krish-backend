@@ -85,18 +85,16 @@ public class LoadBalancerController extends CRUDController<LoadBalancerRule> imp
     }
 
     /**
-     *  List all Load balancer by ip address.
+     * List all Load balancer by ip address.
      *
-     * @param ipAddressId of the netowrk
-     * @return
-     * @throws Exception
+     * @param ipAddressId of the network.
+     * @return list of load balancer.
+     * @throws Exception if error occurs.
      */
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected List<LoadBalancerRule> getSearch(@RequestParam("ipAddressId") Long ipAddressId) throws Exception {
+    protected List<LoadBalancerRule> listbyIpddress(@RequestParam("ipAddressId") Long ipAddressId) throws Exception {
         return loadBalancerService.findByIpaddress(ipAddressId, true);
     }
-
 }
-
