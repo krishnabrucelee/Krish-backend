@@ -101,6 +101,16 @@ public interface NicService extends CRUDService<Nic> {
      * @return
      * @throws Exception if error occurs.
      */
-  	Nic releaseSecondaryIP(Nic nic, Long vmIpaddressId) throws Exception;
+      Nic releaseSecondaryIP(Nic nic, Long vmIpaddressId) throws Exception;
+
+      /**
+       * Find all the nic by network and is Active status.
+       *
+       * @param networkId of the network.
+       * @param isActive get the nic list based on active/inactive status.
+       * @return list of nics.
+       * @throws Exception if error occurs.
+       */
+    List<Nic> findAllByNetworkAndIsActive(Long networkId, Boolean isActive) throws Exception;
 
 }

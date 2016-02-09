@@ -1043,6 +1043,18 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             }
         }
 
+        if (eventObject.getString("commandEventType").equals(" LB.STICKINESSPOLICY.CREATE")) {
+            LoadBalancerRule csLoadBalancer = LoadBalancerRule.convert(jobresult.getJSONObject("stickinesspolicies"));
+            LoadBalancerRule loadBalancer = loadBalancerService.findByUUID(csLoadBalancer.getUuid());
+            if (csLoadBalancer.getUuid().equals(loadBalancer.getUuid())) {
+                LoadBalancerRule csLb = csLoadBalancer;
+            	loadBalancer.setStickinessName(csLb.getStickinessName());
+            	loadBalancer.setStickinessMethod(csLb.getStickinessMethod());
+            }
+
+
+        }
+
         if (eventObject.getString("commandEventType").equals("LB.UPDATE")) {
             LoadBalancerRule csLoadBalancer = LoadBalancerRule.convert(jobResult.getJSONObject("loadbalancer"));
             LoadBalancerRule loadBalancer = loadBalancerService.findByUUID(csLoadBalancer.getUuid());

@@ -19,6 +19,7 @@ import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.Network.Status;
 import ck.panda.domain.entity.NetworkOffering;
+import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.NetworkRepository;
@@ -89,6 +90,10 @@ public class NetworkServiceImpl implements NetworkService {
     /** Zone service reference. */
     @Autowired
     private ZoneService zoneService;
+
+    /** Nic service reference. */
+    @Autowired
+    private NicService nicService;
 
     /** NetworkOffering service reference. */
     @Autowired
@@ -245,7 +250,8 @@ public class NetworkServiceImpl implements NetworkService {
         if (network.getSyncFlag()) {
             List<VmInstance> vmResponse = vmService.findAllByNetworkAndVmStatus(network.getId(),
                     VmInstance.Status.EXPUNGING);
-            if (vmResponse.size() != 0) {
+            List<Nic> nicResponse = nicService.findAllByNetworkAndIsActive(network.getId(),true);
+            if (vmResponse.size() != 0 || nicResponse.size() != 0) {
                 errors.addGlobalError("Network is associated with Vm instances. You cannot delete this network");
             }
         }

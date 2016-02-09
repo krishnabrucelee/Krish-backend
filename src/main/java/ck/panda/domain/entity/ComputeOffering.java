@@ -1,3 +1,4 @@
+
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
