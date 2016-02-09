@@ -91,7 +91,7 @@ public class UserServiceImpl implements UserService {
                 String encryptedPassword = new String(EncryptionUtil.encrypt(user.getPassword(), originalKey));
                 user.setIsActive(true);
                 config.setServer(1L);
-                userMap.put("domainid", user.getDomain().getUuid());
+                userMap.put("domainid", convertEntityService.getDomainById(user.getDomainId()).getUuid());
                 String cloudResponse = csUserService.createUser(user.getDepartment().getUserName(), user.getEmail(),
                         user.getFirstName(), user.getLastName(), user.getUserName(), user.getPassword(), "json",
                         userMap);
@@ -103,7 +103,7 @@ public class UserServiceImpl implements UserService {
                 JSONObject userRes = createUserResponseJSON.getJSONObject("user");
                 user.setUuid((String) userRes.get("id"));
                 user.setPassword(encryptedPassword);
-                user.setDomainId(user.getDomain().getId());
+                user.setDomainId(user.getDomainId());
                 user = userRepository.save(user);
                 if (user.getProjectList() != null) {
                     for (Project project : user.getProjectList()) {
@@ -355,7 +355,7 @@ public class UserServiceImpl implements UserService {
     public List<User> findAllByProject(Long projectId) throws Exception {
         Project project = projectService.find(projectId);
         List<User> projectUsers = project.getUserList();
-        if(projectUsers.size() > 0){
+        if (projectUsers.size() > 0) {
             return userRepository.findAllByDepartmentAndIsActive(true, project.getDepartmentId(), projectUsers);
         }
         return userRepository.findByDepartment(project.getDepartment());
