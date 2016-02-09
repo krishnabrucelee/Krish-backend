@@ -1,5 +1,6 @@
 package ck.panda.rabbitmq.util;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
@@ -7,6 +8,7 @@ import org.springframework.amqp.core.MessageListener;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EventTypes;
 import ck.panda.service.AsynchronousJobService;
 import ck.panda.service.SyncService;
@@ -60,22 +62,34 @@ public class ActionListener implements MessageListener {
     /** Action event listener . */
     @Override
     public void onMessage(Message message) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            eventResponse = mapper.readValue(new String(message.getBody()), ResponseEvent.class);
-            this.handleActionEvent(eventResponse);
-        } catch (Exception e) {
-            LOGGER.debug("Error on convert action event message", e.getMessage());
-        }
+		try {
+			String eventName = "";
+			JSONObject eventObject = new JSONObject(new String(message.getBody()));
+			if (eventObject.has(CloudStackConstants.CS_EVENT_NAME)
+					&& eventObject.has(CloudStackConstants.CS_EVENT_STATUS)) {
+				if (eventObject.getString(CloudStackConstants.CS_EVENT_STATUS)
+						.equalsIgnoreCase(CloudStackConstants.CS_EVENT_COMPLETE)) {
+					if (eventObject.getString(CloudStackConstants.CS_EVENT_NAME) != null) {
+						eventName = eventObject.getString(CloudStackConstants.CS_EVENT_NAME);
+						String eventStart = eventName.substring(0, eventName.indexOf('.', 0)) + ".";
+						this.handleActionEvent(eventName, eventStart, new String(message.getBody()));
+					}
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.debug("Error on convert action event message", e.getMessage());
+		}
     }
 
     /**
      * Handling VM events and updated those in our application DB according to the type of events.
      *
-     * @param eventObject event object.
+     * @param eventName event name.
+     * @param eventStart event name start with.
+     * @param eventMessage event message.
      * @throws Exception exception.
      */
-    public void handleActionEvent(ResponseEvent eventObject) throws Exception {
+    public void handleActionEvent(String eventName, String eventStart, String eventMessage) throws Exception {
         syncService.init(cloudStackServer);
         ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
         AuthenticatedExternalWebService authenticatedExternalWebService = new AuthenticatedExternalWebService(
@@ -83,113 +97,116 @@ public class ActionListener implements MessageListener {
         authenticatedExternalWebService.setExternalWebService(externalWebService);
         SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);
         Thread.sleep(5000);
-        switch (eventObject.getEventStart()) {
+        switch (eventStart) {
         case EventTypes.EVENT_USER:
-            LOGGER.debug("User sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
-            if (eventObject.getEvent().equals(EventTypes.EVENT_USER_LOGIN)
-                    || eventObject.getEvent().equals(EventTypes.EVENT_USER_LOGOUT)) {
-                LOGGER.debug("Account sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
-            } else {
-                syncService.syncUser();
-                if (eventObject.getEvent().equals(EventTypes.EVENT_USER_CREATE)) {
-                    syncService.syncUpdateUserRole();
-                }
-            }
+			if (eventName.equals(EventTypes.EVENT_USER_LOGIN) || eventName.equals(EventTypes.EVENT_USER_LOGOUT)) {
+				LOGGER.debug("User sync", eventMessage);// TODO: Will do login event.
+			} else {
+				Thread.sleep(3000); // Delay sync call for user to get success CRUD.
+				syncService.syncUser();
+				if (eventName.equals(EventTypes.EVENT_USER_CREATE)) {
+					syncService.syncUpdateUserRole();
+				}
+			}
             break;
         case EventTypes.EVENT_REGISTER_SSH:
-            LOGGER.debug("Register SSH/API sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            LOGGER.debug("Register SSH/API sync", eventMessage);
             break;
         case EventTypes.EVENT_ACCOUNT:
-            LOGGER.debug("Account sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            LOGGER.debug("Account sync", eventMessage);
             syncService.syncDepartment();
             break;
         case EventTypes.EVENT_DISK:
-            LOGGER.debug("Storage offer sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            LOGGER.debug("Storage offer sync", eventMessage);
             syncService.syncStorageOffering();
             break;
         case EventTypes.EVENT_DOMAIN:
-            LOGGER.debug("Domain sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            LOGGER.debug("Domain sync", eventMessage);
             syncService.syncDomain();
             break;
         case EventTypes.EVENT_ZONE:
-            LOGGER.debug("Zone sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            LOGGER.debug("Zone sync", eventMessage);
             syncService.syncZone();
             break;
         case EventTypes.EVENT_GUEST:
-            LOGGER.debug("OSType sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            LOGGER.debug("OSType sync", eventMessage);
             syncService.syncOsCategory();
             syncService.syncOsTypes();
             break;
         case EventTypes.EVENT_ISO:
-            if (!eventObject.getEvent().contains(EventTypes.EVENT_ISO_TEMPLATE_DELETE)) {
-                LOGGER.debug("ISO sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            if (!eventName.contains(EventTypes.EVENT_ISO_TEMPLATE_DELETE)) {
+                LOGGER.debug("ISO sync", eventMessage);
                 syncService.syncTemplates();
             }
             break;
         case EventTypes.EVENT_NETWORK:
-            if (eventObject.getEvent().contains(EventTypes.EVENT_NETWORK_OFFERING)) {
-                LOGGER.debug("Network Offering sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
-                if (eventObject.getEvent().contains(EventTypes.EVENT_NETWORK_EDIT) ||
-                		eventObject.getEvent().contains(EventTypes.EVENT_NETWORK_DELETE)) {
-                    asyncService.asyncNetworkOffering(eventObject);
-                } else {
-                    syncService.syncNetworkOffering();
-                }
-            } else if (eventObject.getEvent().contains(EventTypes.EVENT_NETWORK_CREATE)) {
-                LOGGER.debug("Network sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+			if (eventName.contains(EventTypes.EVENT_NETWORK_OFFERING)) {
+				LOGGER.debug("Network Offering sync", eventMessage);
+				if (eventName.contains(EventTypes.EVENT_NETWORK_EDIT)
+						|| eventName.contains(EventTypes.EVENT_NETWORK_DELETE)) {
+					ObjectMapper mapper = new ObjectMapper();
+					eventResponse = mapper.readValue(eventMessage, ResponseEvent.class);
+					asyncService.asyncNetworkOffering(eventResponse);
+				} else {
+					syncService.syncNetworkOffering();
+				}
+            } else if (eventName.contains(EventTypes.EVENT_NETWORK_CREATE)) {
+                LOGGER.debug("Network sync", eventMessage);
                 syncService.syncNetwork();
             }
             break;
         case EventTypes.EVENT_PHYSICAL:
-            LOGGER.debug("Physical Network sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            LOGGER.debug("Physical Network sync", eventMessage);
             break;
         case EventTypes.EVENT_POD:
-            LOGGER.debug("POD sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            LOGGER.debug("POD sync", eventMessage);
             break;
         case EventTypes.EVENT_HOST:
-            LOGGER.debug("Host sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            LOGGER.debug("Host sync", eventMessage);
             break;
         case EventTypes.EVENT_PROXY:
-            LOGGER.debug("Proxy sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            LOGGER.debug("Proxy sync", eventMessage);
             break;
         case EventTypes.EVENT_ROUTER:
-            LOGGER.debug("Router sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            LOGGER.debug("Router sync", eventMessage);
             break;
         case EventTypes.EVENT_SERVICE:
-            LOGGER.debug("Compute Offering sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            LOGGER.debug("Compute Offering sync", eventMessage);
             syncService.syncComputeOffering();
             break;
         case EventTypes.EVENT_SNAPSHOT:
-            LOGGER.debug("Volume snapshot sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            LOGGER.debug("Volume snapshot sync", eventMessage);
             break;
         case EventTypes.EVENT_VOLUME:
-            if (eventObject.getEvent().contains(EventTypes.EVENT_VOLUME_DELETE)) {
-                LOGGER.debug("Volume sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
-                asyncService.asyncVolume(eventObject);
-            }
+			if (eventName.contains(EventTypes.EVENT_VOLUME_DELETE)) {
+				LOGGER.debug("Volume sync", eventMessage);
+				ObjectMapper mapper = new ObjectMapper();
+				eventResponse = mapper.readValue(eventMessage, ResponseEvent.class);
+				asyncService.asyncVolume(eventResponse);
+			}
             break;
         case EventTypes.EVENT_TEMPLATE:
-            if (!eventObject.getEvent().contains(EventTypes.EVENT_TEMPLATE_DELETE)) {
-                LOGGER.debug("templates sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
-                syncService.syncTemplates();
-            }
+			if (!eventName.contains(EventTypes.EVENT_TEMPLATE_DELETE)) {
+				LOGGER.debug("templates sync", eventMessage);
+				syncService.syncTemplates();
+			}
             break;
         case EventTypes.EVENT_VM_SNAPSHOT:
-            LOGGER.debug("VM snapshot sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            LOGGER.debug("VM snapshot sync", eventMessage);
             syncService.syncVmSnapshots();
             break;
         case EventTypes.EVENT_VNC:
-            LOGGER.debug("VNC sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            LOGGER.debug("VNC sync", eventMessage);
             break;
         case EventTypes.EVENT_PROJECT:
-            LOGGER.debug("VNC sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            LOGGER.debug("VNC sync", eventMessage);
             syncService.syncProject();
             break;
         case EventTypes.EVENT_VPC:
-            LOGGER.debug("VPC sync", eventObject.getEntityuuid() + "===" + eventObject.getId());
+            LOGGER.debug("VPC sync", eventMessage);
             break;
         default:
-            LOGGER.debug("No sync required", eventObject.getEvent());
+            LOGGER.debug("No sync required", eventMessage);
         }
     }
 }

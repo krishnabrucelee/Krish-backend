@@ -418,6 +418,15 @@ public class CloudStackConstants {
     /** Constant for asynchronous event type. */
     public static final String CS_COMMAND_EVENT_TYPE = "commandEventType";
 
+    /** Constant for action event status. */
+    public static final String CS_EVENT_STATUS = "status";
+
+    /** Constant for action event status as completed. */
+    public static final String CS_EVENT_COMPLETE = "Completed";
+
+    /** Constant for action event name. */
+    public static final String CS_EVENT_NAME = "event";
+
     /** Constant for volume type. */
     public static final String CS_VOLUME_TYPE = "type";
 

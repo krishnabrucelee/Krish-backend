@@ -63,7 +63,6 @@ public class ResourceStateListener implements MessageListener {
     private CloudStackConfigurationService cloudConfigService;
 
     /** Reference of the convert entity service. */
-    @Autowired
     private ConvertEntityService convertEntityService;
 
     /** CloudStack Resource Capacity Service. */
@@ -80,8 +79,9 @@ public class ResourceStateListener implements MessageListener {
      * @param
      */
     public ResourceStateListener(ConvertEntityService convertEntityService, SyncService sync) {
-        this.virtualmachineservice = convertEntityService.getInstanceService();
-        this.volumeService = convertEntityService.getVolumeService();
+		this.convertEntityService = convertEntityService;
+		this.virtualmachineservice = convertEntityService.getInstanceService();
+		this.volumeService = convertEntityService.getVolumeService();
         this.nicService = convertEntityService.getNicService();
         this.portForwardingService = convertEntityService.getPortForwardingService();
         this.networkService = convertEntityService.getNetworkService();

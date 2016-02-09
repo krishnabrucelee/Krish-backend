@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Project;
@@ -170,13 +172,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @PreAuthorize("hasPermission(#user.getSyncFlag(), 'DELETE_USER')")
     public void delete(User user) throws Exception {
-        if (user.getSyncFlag()) {
-            config.setServer(1L);
-            csUserService.deleteUser(user.getId().toString(), "json");
-            this.softDelete(user);
-        } else {
-            this.softDelete(user);
-        }
+		if (user.getSyncFlag()) {
+			config.setServer(1L);
+			csUserService.deleteUser(user.getId().toString(), CloudStackConstants.JSON);
+		} else {
+			// async call delete.
+			this.softDelete(user);
+		}
     }
 
     @Override
