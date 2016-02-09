@@ -47,4 +47,23 @@ public interface LoadBalancerService extends CRUDService<LoadBalancerRule> {
      */
     List<LoadBalancerRule> findByIpaddress(Long ipAddressId, Boolean isActive);
 
+    /**
+     * Save load balancer with user id.
+     *
+     * @param loadBalancer for creating lb rule.
+     * @param userId of the user from token.
+     * @return loadBalancerRule.
+     * @throws Exception if error occurs.
+     */
+    LoadBalancerRule save(LoadBalancerRule loadBalancer, Long userId) throws Exception;
+
+    /**
+     * Stickiness policy for Load balancer.
+     *
+     * @param loadBalanceRule object to create sticky policy.
+     * @return sticky policy.
+     * @throws Exception if error occurs.
+     */
+    LoadBalancerRule createStickinessPolicy(LoadBalancerRule loadBalanceRule) throws Exception;
+
 }

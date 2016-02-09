@@ -21,8 +21,8 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.LoadBalancerRule;
-import ck.panda.domain.entity.Volume;
 import ck.panda.service.LoadBalancerService;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -40,11 +40,15 @@ public class LoadBalancerController extends CRUDController<LoadBalancerRule> imp
     @Autowired
     private LoadBalancerService loadBalancerService;
 
+    /** Autowired TokenDetails. */
+    @Autowired
+    private TokenDetails tokenDetails;
+
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Load Balancer.", response = LoadBalancerRule.class)
     @Override
     public LoadBalancerRule create(@RequestBody LoadBalancerRule loadBalancer) throws Exception {
         loadBalancer.setSyncFlag(true);
-        return loadBalancerService.save(loadBalancer);
+        return loadBalancerService.save(loadBalancer, Long.parseLong(tokenDetails.getTokenDetails("id")));
     }
 
     @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing Load Balancer.", response = LoadBalancerRule.class)
@@ -80,15 +84,16 @@ public class LoadBalancerController extends CRUDController<LoadBalancerRule> imp
         return pageResponse.getContent();
     }
 
-   /**
-    * list all Volumes for instance.
-    *
-    * @return Volume service
-     * @throws Exception error
+    /**
+     *  List all Load balancer by ip address.
+     *
+     * @param ipAddressId of the netowrk
+     * @return
+     * @throws Exception
      */
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
-   @ResponseBody
+    @ResponseBody
     protected List<LoadBalancerRule> getSearch(@RequestParam("ipAddressId") Long ipAddressId) throws Exception {
         return loadBalancerService.findByIpaddress(ipAddressId, true);
     }
