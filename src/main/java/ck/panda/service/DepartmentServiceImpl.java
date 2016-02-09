@@ -105,7 +105,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (department.getSyncFlag()) {
             User user = convertEntityService.getOwnerById(userId);
             // Check the user is not a root and admin and set the domain value from login detail
-            if (user.getType().equals(User.UserType.ROOT_ADMIN)) {
+            if (!user.getType().equals(User.UserType.ROOT_ADMIN)) {
                 department.setDomainId(user.getDomainId());
             }
 
