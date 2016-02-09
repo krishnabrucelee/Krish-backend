@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.Application;
 import ck.panda.domain.entity.Application.Status;
 import ck.panda.domain.entity.User;
@@ -27,15 +28,12 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Autowired
     private ApplicationRepository applicationRepo;
 
-    /** Convert entity repository reference. */
+    /** Convert entity service reference. */
     @Autowired
     private ConvertEntityService convertEntity;
 
     /** Constant for application. */
     public static final String APPLICATION = "application";
-
-    /** Constant for application type. */
-    private static final String TYPE = "type";
 
     @Override
     @PreAuthorize("hasPermission(null, 'CREATE_APPLICATION_TYPE')")
@@ -59,7 +57,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         Application app = applicationRepo.findByTypeAndDomainAndIsActive(application.getType(),
             application.getDomainId(), true, Status.ENABLED);
         if (app != null && application.getId() != app.getId()) {
-            errors.addFieldError(TYPE, "error.application.type.duplicate.check");
+            errors.addFieldError(CloudStackConstants.CS_TYPE, "error.application.type.duplicate.check");
         }
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
@@ -126,11 +124,11 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public Page<Application> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return null;
+        return applicationRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
     }
 
     @Override
     public List<Application> findAll() throws Exception {
-        return null;
+        return (List<Application>) applicationRepo.findAll();
     }
 }

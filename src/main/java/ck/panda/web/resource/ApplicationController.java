@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.Application;
 import ck.panda.service.ApplicationService;
 import ck.panda.util.TokenDetails;
@@ -79,7 +80,7 @@ public class ApplicationController extends CRUDController<Application> implement
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Application.class);
-        Page<Application> pageResponse = applicationService.findAll(page, Long.parseLong(tokenDetails.getTokenDetails("id")));
+        Page<Application> pageResponse = applicationService.findAll(page, Long.parseLong(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
@@ -94,7 +95,7 @@ public class ApplicationController extends CRUDController<Application> implement
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<Application> getSearch() throws Exception {
-        return applicationService.findAll(Long.parseLong(tokenDetails.getTokenDetails("id")));
+        return applicationService.findAll(Long.parseLong(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
     }
 
     /**
