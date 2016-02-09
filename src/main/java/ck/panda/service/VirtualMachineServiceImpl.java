@@ -616,7 +616,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     }
 
     @Override
-    @PreAuthorize("hasPermission(null, 'UPGRADE_VM')")
+    @PreAuthorize("hasPermission(null, 'RESIZE')")
     public VmInstance upgradeDowngradeVM(VmInstance vmInstance) throws Exception {
         Errors errors = validator.rejectIfNullEntity(CloudStackConstants.ENTITY_VMINSTANCE, vmInstance);
         errors = validator.validateEntity(vmInstance, errors);
