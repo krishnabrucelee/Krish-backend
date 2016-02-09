@@ -439,7 +439,7 @@ public class CloudStackConstants {
     /** Constant for sticky policy. */
     public static final String CS_STICKY_POLICY = "stickinesspolicy";
 
-    /** Constant for sticky policy. */
+    /** Constant for load balancer rule id. */
     public static final String CS_LB_RULE_ID = "lbruleid";
 
     /** Constant for method name. */
