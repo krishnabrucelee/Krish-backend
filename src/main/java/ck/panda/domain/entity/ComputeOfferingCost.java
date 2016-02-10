@@ -1,21 +1,23 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
-
+import java.time.ZonedDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import org.joda.time.DateTime;
+import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  * Computer offerings cost for each Vcpu, iops and memory usage.
@@ -23,6 +25,7 @@ import org.springframework.data.annotation.Version;
 @Entity
 @Table(name = "service_offerings_cost")
 @SuppressWarnings("serial")
+@EntityListeners(AuditingEntityListener.class)
 public class ComputeOfferingCost implements Serializable {
 
     /** The id of the Compute offering Cost. */
@@ -40,60 +43,60 @@ public class ComputeOfferingCost implements Serializable {
     @Column(name = "zone_id")
     private Long zoneId;
 
-    /** Many cost for one compute offfering. */
-    @ManyToOne
-    private ComputeOffering computeOffering;
+    /** Id of the compute offering. */
+    @Column(name = "compute_id")
+    private Long computeId;
 
     /** The Setup Cost. */
     @Column(name = "setup_cost")
     private Double setupCost;
 
     /** Cost of Running Instance for vcpu. */
-    @Column(name = "instance_running_cost_per_vcpu")
+    @Column(name = "instance_running_cost_per_vcpu",columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceRunningCostPerVcpu;
 
     /** Cost of Running Instancefor memory. */
-    @Column(name = "instance_running_cost_per_mb")
+    @Column(name = "instance_running_cost_per_mb",columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceRunningCostPerMB;
 
     /** Cost of Running Instance for iops. */
-    @Column(name = "instance_running_cost_per_iops")
+    @Column(name = "instance_running_cost_per_iops",columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceRunningCostPerIops;
 
     /** Cost of Stoppage Instance for vcpu. */
-    @Column(name = "instance_stoppage_cost_per_vcpu")
+    @Column(name = "instance_stoppage_cost_per_vcpu",columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceStoppageCostPerVcpu;
 
     /** Cost of Stoppage Instance for memory. */
-    @Column(name = "instance_stoppage_cost_per_mb")
+    @Column(name = "instance_stoppage_cost_per_mb",columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceStoppageCostPerMB;
 
     /** Cost of Running Instance for vcpu. */
-    @Column(name = "instance_stoppage_cost_per_iops")
+    @Column(name = "instance_stoppage_cost_per_iops",columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceStoppageCostPerIops;
 
     /** Cost of Stoppage Instance for vcpu. */
-    @Column(name = "instance_running_cost_vcpu")
+    @Column(name = "instance_running_cost_vcpu",columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceRunningCostVcpu;
 
     /** Cost of Running Instancefor memory. */
-    @Column(name = "instance_running_cost_memory")
+    @Column(name = "instance_running_cost_memory",columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceRunningCostMemory;
 
     /** Cost of Running Instance for iops. */
-    @Column(name = "instance_running_cost_iops")
+    @Column(name = "instance_running_cost_iops",columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceRunningCostIops;
 
     /** Cost of Stoppage Instance for vcpu. */
-    @Column(name = "instance_stoppage_cost_vcpu")
+    @Column(name = "instance_stoppage_cost_vcpu",columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceStoppageCostVcpu;
 
     /** Cost of Stoppage Instance for memory. */
-    @Column(name = "instance_stoppage_cost_memory")
+    @Column(name = "instance_stoppage_cost_memory",columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceStoppageCostMemory;
 
     /** Cost of Stoppage Instance. for iops. */
-    @Column(name = "instance_stoppage_cost_iops")
+    @Column(name = "instance_stoppage_cost_iops",columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceStoppageCostIops;
 
     /** Created by user. */
@@ -108,11 +111,17 @@ public class ComputeOfferingCost implements Serializable {
 
     /** Created date and time. */
     @CreatedDate
-    private DateTime createdDateTime;
+    @Column(name = "created_date_time")
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime createdDateTime;
 
     /** Last modified date and time. */
     @LastModifiedDate
-    private DateTime lastModifiedDateTime;
+    @Column(name = "updated_date_time")
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime updatedDateTime;
 
     /** Version attribute to handle optimistic locking. */
     @Version
@@ -122,6 +131,10 @@ public class ComputeOfferingCost implements Serializable {
     /** Status attribute to verify Active or Inactive. */
     @Column(name = "status")
     private String status;
+
+    /** Total cost of the compute offering. */
+    @Column(name = "total_cost")
+    private Double totalCost;
 
     /**
      * @return the id
@@ -149,20 +162,6 @@ public class ComputeOfferingCost implements Serializable {
      */
     public Long getUpdatedBy() {
         return updatedBy;
-    }
-
-    /**
-     * @return the createdDateTime
-     */
-    public DateTime getCreatedDateTime() {
-        return createdDateTime;
-    }
-
-    /**
-     * @return the lastModifiedDateTime
-     */
-    public DateTime getLastModifiedDateTime() {
-        return lastModifiedDateTime;
     }
 
     /**
@@ -199,17 +198,17 @@ public class ComputeOfferingCost implements Serializable {
     }
 
     /**
-     * @return the computeOffering
+     * @return the computeId
      */
-    public ComputeOffering getComputeOffering() {
-        return computeOffering;
+    public Long getComputeId() {
+        return computeId;
     }
 
     /**
-     * @param computeOffering the computeOffering to set
+     * @param computeId the computeId to set
      */
-    public void setComputeOffering(ComputeOffering computeOffering) {
-        this.computeOffering = computeOffering;
+    public void setComputeId(Long computeId) {
+        this.computeId = computeId;
     }
 
     /**
@@ -402,20 +401,6 @@ public class ComputeOfferingCost implements Serializable {
     }
 
     /**
-     * @param createdDateTime the createdDateTime to set
-     */
-    public void setCreatedDateTime(DateTime createdDateTime) {
-        this.createdDateTime = createdDateTime;
-    }
-
-    /**
-     * @param lastModifiedDateTime the lastModifiedDateTime to set
-     */
-    public void setLastModifiedDateTime(DateTime lastModifiedDateTime) {
-        this.lastModifiedDateTime = lastModifiedDateTime;
-    }
-
-    /**
      * @return the version
      */
     public Long getVersion() {
@@ -441,6 +426,60 @@ public class ComputeOfferingCost implements Serializable {
      */
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    /**
+     * Get the total cost.
+     *
+     * @return the totalCost
+     */
+    public Double getTotalCost() {
+        return totalCost;
+    }
+
+    /**
+     * Set the totalCost.
+     *
+     * @param totalCost  to set
+     */
+    public void setTotalCost(Double totalCost) {
+        this.totalCost = totalCost;
+    }
+
+    /**
+     * Get the created date and time.
+     *
+     * @return createdDateTime
+     */
+    public ZonedDateTime getCreatedDateTime() {
+        return createdDateTime;
+    }
+
+    /**
+     * Set the created date and time.
+     *
+     * @param createdDateTime the DateTime to set
+     */
+    public void setCreatedDateTime(ZonedDateTime createdDateTime) {
+        this.createdDateTime = createdDateTime;
+    }
+
+    /**
+     * Get the updated date and time.
+     *
+     * @return updatedDateTime
+     */
+    public ZonedDateTime getUpdatedDateTime() {
+        return updatedDateTime;
+    }
+
+    /**
+     * Set the updated date and time.
+     *
+     * @param updatedDateTime the DateTime to set
+     */
+    public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
+        this.updatedDateTime = updatedDateTime;
     }
 
 }
