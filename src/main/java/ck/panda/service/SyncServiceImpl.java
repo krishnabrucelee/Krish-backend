@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1931,7 +1933,7 @@ public class SyncServiceImpl implements SyncService {
             // 3.1 Find the corresponding CS server ntService object by
             // finding it in a hash using uuid
             if (csNicMap.containsKey(nic.getUuid())) {
-            	Nic csNic = csNicMap.get(nic.getUuid());
+                Nic csNic = csNicMap.get(nic.getUuid());
                 nic.setUuid(csNic.getUuid());
                 nic.setVmIpAddress(csNic.getVmIpAddress());
 

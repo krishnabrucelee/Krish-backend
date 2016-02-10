@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Pod;
 import ck.panda.domain.repository.jpa.PodRepository;
 import ck.panda.util.CloudStackPodService;
+import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
@@ -36,6 +37,10 @@ public class PodServiceImpl implements PodService {
     /** Reference of the convert entity service. */
     @Autowired
     private ConvertEntityService convertEntityService;
+
+    /** object(server) created for CloudStackServer. */
+    @Autowired
+    private ConfigUtil configServer;
 
     @Override
     public Pod save(Pod pod) throws Exception {
@@ -84,6 +89,7 @@ public class PodServiceImpl implements PodService {
         String response = podService.listPods("json", podMap);
 
         JSONArray podListJSON = null;
+        configServer.setServer(1L);
         JSONObject responseObject = new JSONObject(response).getJSONObject("listpodsresponse");
         if (responseObject.has("pod")) {
             podListJSON = responseObject.getJSONArray("pod");

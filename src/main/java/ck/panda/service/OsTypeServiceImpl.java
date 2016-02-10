@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.OsType;
 import ck.panda.domain.repository.jpa.OsTypeRepository;
 import ck.panda.util.CloudStackOSService;
+import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
@@ -36,6 +37,10 @@ public class OsTypeServiceImpl implements OsTypeService {
     /** Reference of the convert entity service. */
     @Autowired
     private ConvertEntityService convertEntityService;
+
+    /** object(server) created for CloudStackServer. */
+    @Autowired
+    private ConfigUtil configServer;
 
     @Override
     public List<OsType> findAll() throws Exception {
@@ -78,7 +83,7 @@ public class OsTypeServiceImpl implements OsTypeService {
     public List<OsType> findAllFromCSServer() throws Exception {
         List<OsType> osTypeList = new ArrayList<OsType>();
         HashMap<String, String> osTypeMap = new HashMap<String, String>();
-
+        configServer.setServer(1L);
         // 1. Get the list of domains from CS server using CS connector
         String response = osTypeService.listOsTypes("json", osTypeMap);
         JSONArray osTypeListJSON = null;

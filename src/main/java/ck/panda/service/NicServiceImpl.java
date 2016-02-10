@@ -171,6 +171,7 @@ public class NicServiceImpl implements NicService {
     private void assignNicTovM(VmInstance vmInstance) throws Exception {
         HashMap<String, String> optional = new HashMap<String, String>();
         optional.put("virtualmachineid", vmInstance.getUuid());
+        configServer.setServer(1L);
         String listNic = cloudStackNicService.listNics(optional, "json");
         JSONArray nicListJSON = new JSONObject(listNic).getJSONObject("listnicsresponse").getJSONArray("nic");
         for (int i = 0; i < nicListJSON.length(); i++) {
@@ -332,6 +333,7 @@ public class NicServiceImpl implements NicService {
             HashMap<String, String> nicMap = new HashMap<String, String>();
             // Set virtual machine id to know nic belongs to which vm instance.
             nicMap.put(CloudStackConstants.CS_VIRTUAL_MACHINE_ID, vm.getUuid());
+            configServer.setServer(1L);
             // 1. Get the list of nics from CS server using CS connector
             String response = cloudStackNicService.listNics(nicMap, CloudStackConstants.JSON);
             JSONArray nicListJSON = new JSONObject(response).getJSONObject(CS_NIC_LIST).getJSONArray(CS_NIC);

@@ -4,19 +4,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import ck.panda.constants.CloudStackConstants;
+import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Region;
 import ck.panda.domain.repository.jpa.RegionRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackRegionService;
+import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
+import ck.panda.util.error.exception.CustomGenericException;
 
 /**
  * Region service implementation class.
@@ -31,6 +38,10 @@ public class RegionServiceImpl implements RegionService {
     @Autowired
     private RegionRepository regionRepo;
 
+    /** Message source attribute. */
+    @Autowired
+    private MessageSource messageSource;
+
     /** For connectivity with cloudstack region. */
     @Autowired
     private CloudStackRegionService regionService;
@@ -38,6 +49,10 @@ public class RegionServiceImpl implements RegionService {
     /** Validator attribute. */
     @Autowired
     private AppValidator validator;
+
+    /** object(server) created for CloudStackServer. */
+    @Autowired
+    private ConfigUtil configServer;
 
     @Override
     public Region save(Region region) throws Exception {
@@ -84,11 +99,13 @@ public class RegionServiceImpl implements RegionService {
         JSONArray regionListJSON = null;
         // 1. Get the list of Zones from CS server using CS connector
         String response = regionService.listRegions("json", regionMap);
+        try {
         JSONObject responseObject = new JSONObject(response).getJSONObject("listregionsresponse");
         if (responseObject != null) {
             if (responseObject.has("errorcode")) {
-                errors = this.validateEvent(errors, responseObject.getString("errortext"));
-                throw new ApplicationException(errors);
+                errors = new Errors(messageSource);
+                throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
+                        responseObject.getString("errortext"));
             }
             if (responseObject.has("region")) {
                 regionListJSON = responseObject.getJSONArray("region");
@@ -101,6 +118,14 @@ public class RegionServiceImpl implements RegionService {
                 }
             }
         }
+        } catch (JSONException e) {
+             errors = new Errors(messageSource);
+             errors.addGlobalError("error.url");
+             if (errors.hasErrors()) {
+                 throw new ApplicationException(errors);
+             }
+        }
+
         return regionList;
     }
 

@@ -276,6 +276,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
              HashMap<String,String> optional = new HashMap<String, String>();
              optional.put(CS_ALGORITHM, loadBalancer.getAlgorithm());
              optional.put(CloudStackConstants.CS_NAME, loadBalancer.getName());
+             configUtil.setUserServer();
              String csEditloadBalancer = cloudStackLoadBalancerService.updateLoadBalancerRule(loadBalancer.getUuid(), CloudStackConstants.JSON, optional);
              JSONObject csloadBalancerResponseJSON = new JSONObject(csEditloadBalancer)
                          .getJSONObject(CS_UPDATE_LB_RULE);
@@ -328,6 +329,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         List<LoadBalancerRule> loadBalancerList = new ArrayList<LoadBalancerRule>();
         HashMap<String, String> loadBalancerMap = new HashMap<String, String>();
         loadBalancerMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
+        configUtil.setServer(1L);
         String response = cloudStackLoadBalancerService.listLoadBalancerRules(CloudStackConstants.JSON, loadBalancerMap);
         JSONArray loadBalancerListJSON = null;
         JSONObject responseObject = new JSONObject(response).getJSONObject(CS_LB_LIST);
@@ -367,9 +369,9 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     @Override
     public LoadBalancerRule softDelete(LoadBalancerRule loadBalancer) throws Exception {
         if (loadBalancer.getSyncFlag()) {
-            configUtil.setServer(1L);
             LoadBalancerRule csLoadBalancer = loadBalancerRepo.findOne(loadBalancer.getId());
             try {
+                configUtil.setUserServer();
                 String loadBalancerDeleteResponse = cloudStackLoadBalancerService.deleteLoadBalancerRule(csLoadBalancer.getUuid(), CloudStackConstants.JSON);
                 JSONObject jobId = new JSONObject(loadBalancerDeleteResponse).getJSONObject(CS_LB_DELETE);
                 if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
