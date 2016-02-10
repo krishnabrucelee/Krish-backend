@@ -41,6 +41,14 @@ public class StorageOfferingCost implements Serializable {
     @Column(name = "id")
     private Long id;
 
+    /** Id of the storage offering. */
+    @Column(name = "storage_id")
+    private Long storageId;
+
+    /** Total cost of the storage offering. */
+    @Column(name = "total_cost")
+    private Double totalCost;
+
     /**
      * The Zone ID, this disk offering belongs to. Ignore this information as it is not currently applicable.
      */
@@ -345,4 +353,39 @@ public class StorageOfferingCost implements Serializable {
         this.isActive = isActive;
     }
 
+    /**
+     * Get the total cost.
+     *
+     * @return the totalCost
+     */
+    public Double getTotalCost() {
+        return totalCost;
+    }
+
+    /**
+     * Set the totalCost.
+     *
+     * @param totalCost  to set
+     */
+    public void setTotalCost(Double totalCost) {
+        this.totalCost = totalCost;
+    }
+
+    /**
+     * Get the storage offering id.
+     *
+     * @return the storageId
+     */
+    public Long getStorageId() {
+        return storageId;
+    }
+
+    /**
+     * Set the storage offering id.
+     *
+     * @param storageId  to set
+     */
+    public void setStorageId(Long storageId) {
+        this.storageId = storageId;
+    }
 }

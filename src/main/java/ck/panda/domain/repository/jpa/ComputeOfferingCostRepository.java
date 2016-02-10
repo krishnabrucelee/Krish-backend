@@ -10,12 +10,12 @@ import ck.panda.domain.entity.ComputeOfferingCost;
  */
 public interface ComputeOfferingCostRepository extends PagingAndSortingRepository<ComputeOfferingCost, Long> {
 
-      /**
-     * Find Network list by department.
+    /**
+     * Find Computeoffering cost by total cost and compute offering id.
      *
      * @param computeId compute offering id.
      * @param totalCost of the compute offering.
-     * @return network list.
+     * @return compute offering cost.
      */
     @Query(value = "SELECT cost FROM ComputeOfferingCost cost WHERE cost.computeId= :computeId AND cost.totalCost = :totalcost")
     ComputeOfferingCost findByComputeAndTotalCost(@Param("computeId") Long computeId,
