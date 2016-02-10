@@ -1853,15 +1853,13 @@ public class SyncServiceImpl implements SyncService {
             // finding it in a hash using uuid
             if (csProjectMap.containsKey(project.getUuid())) {
                 Project csProject = csProjectMap.get(project.getUuid());
-
                 project.setName(csProject.getName());
                 project.setDepartmentId(csProject.getDepartmentId());
                 project.setStatus(csProject.getStatus());
+                project.setName(csProject.getDescription());
                 project.setDomainId(csProject.getDomainId());
-
                 // 3.2 If found, update the project object in app db
                 projectService.update(project);
-
                 // 3.3 Remove once updated, so that we can have the list of cs
                 // project which is not added in the app
                 csProjectMap.remove(project.getUuid());
