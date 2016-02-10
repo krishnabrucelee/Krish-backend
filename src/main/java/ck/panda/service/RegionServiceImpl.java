@@ -120,8 +120,7 @@ public class RegionServiceImpl implements RegionService {
         }
         } catch (JSONException e) {
              errors = new Errors(messageSource);
-             errors.addGlobalError(
-                     "Your URL is wrong. please provide correct values and proceed ");
+             errors.addGlobalError("error.url");
              if (errors.hasErrors()) {
                  throw new ApplicationException(errors);
              }
