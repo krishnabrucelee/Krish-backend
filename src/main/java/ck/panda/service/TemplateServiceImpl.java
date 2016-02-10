@@ -135,9 +135,13 @@ public class TemplateServiceImpl implements TemplateService {
                     template.setBootable(true);
                 }
                 csRegisterTemplate(template, errors);
-                List<TemplateCost> templateCost = updateTemplateCost(template);
-                template.setTemplateCost(templateCost);
-                return templateRepository.save(template);
+                List<TemplateCost> templateCostList = saveTemplateCost(template);
+                template.setTemplateCost(templateCostList);
+                Template templateCS = templateRepository.save(template);
+                TemplateCost templateCost = templateCostService.find(templateCS.getTemplateCost().get(0).getId());
+                templateCost.setTemplateCostId(templateCS.getId());
+                templateCostService.save(templateCost);
+                return templateCS;
             }
         } else {
             return templateRepository.save(template);
@@ -156,8 +160,8 @@ public class TemplateServiceImpl implements TemplateService {
                 throw new ApplicationException(errors);
             } else {
                 csUpdateTemplate(template);
-                List<TemplateCost> templateCost = updateTemplateCost(template);
-                template.setTemplateCost(templateCost);
+                List<TemplateCost> templateCostList = updateTemplateCost(template);
+                template.setTemplateCost(templateCostList);
                 return templateRepository.save(template);
             }
         } else {
@@ -203,6 +207,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public List<Template> findAllFromCSServer() throws Exception {
+        configUtil.setServer(1L);
         List<Template> templateList = new ArrayList<Template>();
         HashMap<String, String> templateMap = new HashMap<String, String>();
         templateMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
@@ -434,7 +439,7 @@ public class TemplateServiceImpl implements TemplateService {
      * @throws Exception unhandled errors.
      */
     public void csRegisterTemplate(Template template, Errors errors) throws Exception {
-        configUtil.setServer(1L);
+        configUtil.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
         String csResponse = "";
         JSONObject templateJSON = null;
@@ -487,7 +492,7 @@ public class TemplateServiceImpl implements TemplateService {
      * @throws Exception unhandled errors.
      */
     public void csUpdateTemplate(Template template) throws Exception {
-        configUtil.setServer(1L);
+        configUtil.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
         optionalFieldValidation(template, optional);
         optional.put(CloudStackConstants.CS_NAME, template.getName());
@@ -513,7 +518,7 @@ public class TemplateServiceImpl implements TemplateService {
      * @throws Exception unhandled errors.
      */
     public Boolean csDeleteTemplate(Long id) throws Exception {
-        configUtil.setServer(1L);
+        configUtil.setUserServer();
         Errors errors = null;
         HashMap<String, String> optional = new HashMap<String, String>();
         Template template = templateRepository.findOne(id);
@@ -651,25 +656,41 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     /**
-     * Update more than one template cost.
+     * Add cost for newly created template.
+     *
+     * @param template entity object
+     * @return template cost list
+     * @throws Exception unhandled errors.
+     */
+    public List<TemplateCost> saveTemplateCost(Template template) throws Exception {
+        List<TemplateCost> templateCostList = new ArrayList<TemplateCost>();
+        Integer tempCost = template.getTemplateCost().get(0).getCost();
+        TemplateCost templatecost = new TemplateCost();
+        templatecost.setCost(tempCost);
+        templateCostList.add(templatecost);
+        return templateCostList;
+    }
+
+    /**
+     * Update cost for existing template.
      *
      * @param template entity object
      * @return template cost list
      * @throws Exception unhandled errors.
      */
     public List<TemplateCost> updateTemplateCost(Template template) throws Exception {
-        Template persistTemplate = find(template.getId());
-        List<TemplateCost> templateCost = new ArrayList<TemplateCost>();
+        List<TemplateCost> templateCostList = new ArrayList<TemplateCost>();
         Integer tempCost = template.getTemplateCost().get(0).getCost();
+        Template persistTemplate = find(template.getId());
         TemplateCost templatecost = templateCostService.findByTemplateCost(template.getId(), tempCost);
         if (templatecost == null) {
             templatecost = new TemplateCost();
             templatecost.setCost(tempCost);
             templatecost.setTemplateCostId(template.getId());
             templatecost = templateCostService.save(templatecost);
-            templateCost.add(templatecost);
-       }
-       templateCost.addAll(persistTemplate.getTemplateCost());
-       return templateCost;
+            templateCostList.add(templatecost);
+        }
+        templateCostList.addAll(persistTemplate.getTemplateCost());
+        return templateCostList;
     }
 }
