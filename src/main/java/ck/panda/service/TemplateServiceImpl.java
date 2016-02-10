@@ -193,6 +193,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public List<Template> findAllFromCSServer() throws Exception {
+    	configUtil.setServer(1L);
         List<Template> templateList = new ArrayList<Template>();
         HashMap<String, String> templateMap = new HashMap<String, String>();
         templateMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
@@ -424,7 +425,7 @@ public class TemplateServiceImpl implements TemplateService {
      * @throws Exception unhandled errors.
      */
     public void csRegisterTemplate(Template template, Errors errors) throws Exception {
-        configUtil.setServer(1L);
+        configUtil.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
         String csResponse = "";
         JSONObject templateJSON = null;
@@ -477,7 +478,7 @@ public class TemplateServiceImpl implements TemplateService {
      * @throws Exception unhandled errors.
      */
     public void csUpdateTemplate(Template template) throws Exception {
-        configUtil.setServer(1L);
+    	configUtil.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
         optionalFieldValidation(template, optional);
         optional.put(CloudStackConstants.CS_NAME, template.getName());
@@ -503,7 +504,7 @@ public class TemplateServiceImpl implements TemplateService {
      * @throws Exception unhandled errors.
      */
     public Boolean csDeleteTemplate(Long id) throws Exception {
-        configUtil.setServer(1L);
+    	configUtil.setUserServer();
         Errors errors = null;
         HashMap<String, String> optional = new HashMap<String, String>();
         Template template = templateRepository.findOne(id);

@@ -100,6 +100,7 @@ public class ProjectServiceImpl implements ProjectService {
                     users.add(convertEntityService.getOwnerById(project.getProjectOwnerId()));
                     // Give the access to project owner.
                     project.setUserList(users);
+                    config.setUserServer();
                     String instancePro = cloudStackProjectService.queryAsyncJobResult(
                             csProject.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
                     JSONObject resProject = new JSONObject(instancePro)
@@ -138,12 +139,12 @@ public class ProjectServiceImpl implements ProjectService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                config.setUserServer();
                 HashMap<String, String> optional = new HashMap<String, String>();
                 optional.put(CloudStackConstants.CS_DOMAIN_ID,
                         convertEntityService.getDomainById(project.getDomainId()).getUuid());
                 optional.put(CloudStackConstants.CS_ACCOUNT,
                         convertEntityService.getDepartmentById(project.getDepartmentId()).getUserName());
+                config.setUserServer();
                 // CS API call for update existing project.
                 String csResponse = cloudStackProjectService.updateProject(project.getUuid(), project.getDescription(),
                         CloudStackConstants.JSON, optional);
@@ -250,7 +251,6 @@ public class ProjectServiceImpl implements ProjectService {
         project.setIsActive(false);
         project.setStatus(Project.Status.DELETED);
         if (project.getSyncFlag()) {
-            config.setUserServer();
             statusCode.add(VmInstance.Status.RUNNING);
             statusCode.add(VmInstance.Status.STOPPED);
             statusCode.add(VmInstance.Status.STARTING);
@@ -263,6 +263,7 @@ public class ProjectServiceImpl implements ProjectService {
             HashMap<String, String> optional = new HashMap<String, String>();
             optional.put(CloudStackConstants.CS_DOMAIN_ID, project.getDepartment().getDomain().getUuid());
             optional.put(CloudStackConstants.CS_ACCOUNT, project.getDepartment().getUserName());
+            config.setUserServer();
             // CS API call for delete project.
             String csResponse = cloudStackProjectService.deleteProject(project.getUuid());
             JSONObject csProject = new JSONObject(csResponse).getJSONObject("deleteprojectresponse");
@@ -312,6 +313,7 @@ public class ProjectServiceImpl implements ProjectService {
         List<Project> projectList = new ArrayList<Project>();
         HashMap<String, String> projectMap = new HashMap<String, String>();
         projectMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
+        config.setServer(1L);
         // 1. Get the list of Project from CS server using CS connector
         String response = cloudStackProjectService.listProjects(CloudStackConstants.JSON, projectMap);
         JSONArray projectListJSON = null;

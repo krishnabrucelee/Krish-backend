@@ -161,7 +161,7 @@ public class SSHKeyServiceImpl implements SSHKeyService {
      * @throws Exception error
      */
     private void createSSHKey(SSHKey sshkey, Errors errors, Long id) throws Exception {
-        cloudStackSSHService.setServer(configServer.setServer(1L));
+    	configServer.setUserServer();
         String sshkeyResponse = cloudStackSSHService.createSSHKeyPair(sshkey.getName(), CloudStackConstants.JSON,
             optional(sshkey, id));
         JSONObject createSSHResponseJSON = new JSONObject(sshkeyResponse).getJSONObject(CS_CREATE_SSH_KEYPAIR);
@@ -193,7 +193,7 @@ public class SSHKeyServiceImpl implements SSHKeyService {
      * @throws Exception error
      */
     private void registerSSHKey(SSHKey sshkey, Errors errors, Long id) throws Exception {
-        cloudStackSSHService.setServer(configServer.setServer(1L));
+    	configServer.setUserServer();
         String sshkeyResponse = cloudStackSSHService.registerSSHKeyPair(sshkey.getName(), sshkey.getPublicKey(),
             CloudStackConstants.JSON, optional(sshkey, id));
         JSONObject registerSSHResponseJSON = new JSONObject(sshkeyResponse).getJSONObject(CS_REGISTER_SSH_KEYPAIR);
@@ -271,12 +271,12 @@ public class SSHKeyServiceImpl implements SSHKeyService {
         if (sshkey.getIsSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity(SSHKEY, sshkey);
             errors = validator.validateEntity(sshkey, errors);
-            cloudStackSSHService.setServer(configServer.setServer(1L));
             HashMap<String, String> optional = new HashMap<String, String>();
             optional.put(CloudStackConstants.CS_DOMAIN_ID, convertEntity.getDepartmentById(sshkey.getDepartmentId())
                 .getDomain().getUuid());
             optional.put(CloudStackConstants.CS_ACCOUNT, convertEntity.getDepartmentById(sshkey.getDepartmentId())
                 .getUserName());
+            configServer.setUserServer();
             String sshkeyResponse = cloudStackSSHService.deleteSSHKeyPair(sshkey.getName(), CloudStackConstants.JSON,
                 optional);
             // Get cloud stack SSHkey delete response
@@ -296,6 +296,7 @@ public class SSHKeyServiceImpl implements SSHKeyService {
         List<SSHKey> sshKeyList = new ArrayList<SSHKey>();
         HashMap<String, String> sshKeyMap = new HashMap<String, String>();
         sshKeyMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
+        configServer.setServer(1L);
         // 1. Get the list of SSH Key from CS server using CS connector
         String response = cloudStackSSHService.listSSHKeyPairs(CloudStackConstants.JSON, sshKeyMap);
         JSONArray sshKeyListJSON = null;

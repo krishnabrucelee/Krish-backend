@@ -50,6 +50,7 @@ import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.User.Status;
 import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.domain.entity.VmInstance;
@@ -895,6 +896,8 @@ public class SyncServiceImpl implements SyncService {
                 user.setLastName(csUser.getLastName());
                 user.setEmail(csUser.getEmail());
                 user.setUserName(csUser.getUserName());
+                user.setIsActive(true);
+                user.setStatus(Status.ACTIVE);
                 // 3.2 If found, update the user object in app db
                 userService.update(user);
 
