@@ -357,12 +357,10 @@ public class ProjectServiceImpl implements ProjectService {
     @PreAuthorize("hasPermission(#project.getSyncFlag(), 'EDIT_PROJECT')")
     public Project removeUser(Project project) throws Exception {
         List<User> users = new ArrayList<User>();
-        // Remove access for user.
+        // Remove user from project.
         if (project.getUserList().size() > 0) {
             for (User user : project.getUserList()) {
-                if (project.getProjectOwnerId() != user.getId()) {
-                    users.add(user);
-                }
+            	users.add(user);
             }
         }
         // Update project access list.
