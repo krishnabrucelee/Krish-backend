@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Cluster;
 import ck.panda.domain.repository.jpa.ClusterRepository;
 import ck.panda.util.CloudStackClusterService;
+import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
@@ -36,6 +37,11 @@ public class ClusterServiceImpl implements ClusterService {
     /** Reference of the convert entity service. */
     @Autowired
     private ConvertEntityService convertEntityService;
+
+    /** object(server) created for CloudStackServer. */
+    @Autowired
+    private ConfigUtil configServer;
+
 
     @Override
     public Cluster save(Cluster cluster) throws Exception {
@@ -79,7 +85,7 @@ public class ClusterServiceImpl implements ClusterService {
     public List<Cluster> findAllFromCSServer() throws Exception {
         List<Cluster> clusterList = new ArrayList<Cluster>();
         HashMap<String, String> clusterMap = new HashMap<String, String>();
-
+        configServer.setServer(1L);
         // 1. Get the list of cluster from CS server using CS connector
         String response = clusterService.listClusters("json", clusterMap);
         JSONArray clusterListJSON = null;

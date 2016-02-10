@@ -105,7 +105,7 @@ public class DomainServiceImpl implements DomainService {
                 throw new ApplicationException(errors);
             } else {
                 // set server for maintain session with configuration values
-                domainService.setServer(configServer.setServer(1L));
+                configServer.setServer(1L);
                 HashMap<String, String> optional = new HashMap<String, String>();
                 String domainResponse = domainService.createDomain(domain.getCompanyNameAbbreviation(), "json",
                         optional);
@@ -244,6 +244,8 @@ public class DomainServiceImpl implements DomainService {
             } else {
                 HashMap<String, String> domainMap = new HashMap<String, String>();
                 domainMap.put("name", domain.getCompanyNameAbbreviation());
+                // set server for maintain session with configuration values
+                configServer.setServer(1L);
                 String updateDomainResponse = domainService.updateDomain(domain.getUuid(), "json", domainMap);
                 JSONObject updateDomainResponseJSON = new JSONObject(updateDomainResponse)
                         .getJSONObject("updatedomainresponse");
@@ -318,7 +320,6 @@ public class DomainServiceImpl implements DomainService {
     public Domain softDelete(Domain domain) throws Exception {
         Errors errors = validator.rejectIfNullEntity("domain", domain);
         if (domain.getSyncFlag()) {
-            domainService.setServer(configServer.setServer(1L));
             List<Department> department = deptService.findByDomainAndIsActive(domain.getId(), true);
             if (department.size() != 0) {
                 errors.addGlobalError(
@@ -331,6 +332,7 @@ public class DomainServiceImpl implements DomainService {
             domain.setIsActive(false);
             domain.setStatus(Domain.Status.INACTIVE);
             if (domain.getSyncFlag()) {
+                configServer.setServer(1L);
                 String deleteResponse = domainService.deleteDomain(domain.getUuid(), "json");
                 JSONObject deleteJobId = new JSONObject(deleteResponse).getJSONObject("deletedomainresponse");
             }
@@ -343,9 +345,9 @@ public class DomainServiceImpl implements DomainService {
         List<Domain> domainList = new ArrayList<Domain>();
         HashMap<String, String> domainMap = new HashMap<String, String>();
         domainMap.put("listall", "true");
+        configServer.setServer(1L);
         // 1. Get the list of domains from CS server using CS connector
         String response = domainService.listDomains("json", domainMap);
-
         JSONArray domainListJSON = new JSONObject(response).getJSONObject("listdomainsresponse").getJSONArray("domain");
         // 2. Iterate the json list, convert the single json entity to domain
         for (int i = 0, size = domainListJSON.length(); i < size; i++) {

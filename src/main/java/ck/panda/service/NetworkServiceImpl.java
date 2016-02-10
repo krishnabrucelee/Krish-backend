@@ -261,6 +261,7 @@ public class NetworkServiceImpl implements NetworkService {
             network.setIsActive(false);
             network.setStatus(Network.Status.DESTROY);
             if (network.getSyncFlag()) {
+                config.setUserServer();
                 String networkResponse = csNetwork.deleteNetwork(network.getUuid(), CloudStackConstants.JSON);
                 JSONObject jobId = new JSONObject(networkResponse).getJSONObject(CS_DELETE_NETWORK_RESPONSE);
                 if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
@@ -351,7 +352,7 @@ public class NetworkServiceImpl implements NetworkService {
      * @throws Exception unHandled Exceptions
      */
     private List<Network> getNetworkList(HashMap<String, String> networkMap, List<Network> networkList) throws Exception {
-
+        config.setServer(1L);
         // 1. Get the list of domains from CS server using CS connector
         String response = csNetwork.listNetworks(CloudStackConstants.JSON, networkMap);
         JSONArray networkListJSON = null;
