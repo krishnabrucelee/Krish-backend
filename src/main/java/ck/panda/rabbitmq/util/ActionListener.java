@@ -195,6 +195,14 @@ public class ActionListener implements MessageListener {
             LOGGER.debug("VM snapshot sync", eventMessage);
             syncService.syncVmSnapshots();
             break;
+        case EventTypes.EVENT_VM:
+            LOGGER.debug("VM update sync", eventMessage);
+			if (eventName.contains(EventTypes.EVENT_VM_UPDATE)) {
+				ObjectMapper mapper = new ObjectMapper();
+				eventResponse = mapper.readValue(eventMessage, ResponseEvent.class);
+				asyncService.syncVMUpdate(eventResponse.getEntityuuid());
+			}
+            break;
         case EventTypes.EVENT_VNC:
             LOGGER.debug("VNC sync", eventMessage);
             break;

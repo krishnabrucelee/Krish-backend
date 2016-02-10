@@ -90,8 +90,8 @@ public class UserServiceImpl implements UserService {
                 SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
                 String encryptedPassword = new String(EncryptionUtil.encrypt(user.getPassword(), originalKey));
                 user.setIsActive(true);
-                config.setServer(1L);
                 userMap.put("domainid", convertEntityService.getDomainById(user.getDomainId()).getUuid());
+                config.setServer(1L);
                 String cloudResponse = csUserService.createUser(user.getDepartment().getUserName(), user.getEmail(),
                         user.getFirstName(), user.getLastName(), user.getUserName(), user.getPassword(), "json",
                         userMap);
@@ -150,10 +150,10 @@ public class UserServiceImpl implements UserService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                config.setServer(1L);
                 HashMap<String, String> optional = new HashMap<String, String>();
                 optional.put("domainid", user.getDomain().getUuid());
                 optional.put("username", user.getUserName());
+                config.setServer(1L);
                 csUserService.updateUser(user.getUuid(), optional, "json");
                 if (user.getType() == User.UserType.DOMAIN_ADMIN) {
                     Domain domain = user.getDomain();
@@ -212,6 +212,7 @@ public class UserServiceImpl implements UserService {
         // userMap.put("domainid", domainUuid);
         userMap.put("listall", "true");
         // 1. Get the list of users from CS server using CS connector
+        config.setServer(1L);
         String response = csUserService.listUsers(userMap, "json");
         JSONArray userListJSON = null;
         JSONObject responseObject = new JSONObject(response).getJSONObject("listusersresponse");
