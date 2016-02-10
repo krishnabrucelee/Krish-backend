@@ -21,6 +21,7 @@ import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.Template.Format;
 import ck.panda.domain.entity.Template.Status;
 import ck.panda.domain.entity.Template.TemplateType;
+import ck.panda.domain.entity.TemplateCost;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.TemplateRepository;
@@ -68,6 +69,10 @@ public class TemplateServiceImpl implements TemplateService {
     /** Hypervisor service reference. */
     @Autowired
     private HypervisorService hypervisorService;
+
+    /** Template cost service reference. */
+    @Autowired
+    private TemplateCostService templateCostService;
 
     /** Template repository reference. */
     @Autowired
@@ -130,6 +135,8 @@ public class TemplateServiceImpl implements TemplateService {
                     template.setBootable(true);
                 }
                 csRegisterTemplate(template, errors);
+                List<TemplateCost> templateCost = updateTemplateCost(template);
+                template.setTemplateCost(templateCost);
                 return templateRepository.save(template);
             }
         } else {
@@ -138,6 +145,7 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#template.getSyncFlag(), 'EDIT_TEMPLATE')")
     public Template update(Template template) throws Exception {
         if (template.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity(CloudStackConstants.TEMPLATE_NAME, template);
@@ -148,6 +156,8 @@ public class TemplateServiceImpl implements TemplateService {
                 throw new ApplicationException(errors);
             } else {
                 csUpdateTemplate(template);
+                List<TemplateCost> templateCost = updateTemplateCost(template);
+                template.setTemplateCost(templateCost);
                 return templateRepository.save(template);
             }
         } else {
@@ -638,5 +648,28 @@ public class TemplateServiceImpl implements TemplateService {
                 Status.ACTIVE, osCategory, Format.ISO);
         }
         return templates;
+    }
+
+    /**
+     * Update more than one template cost.
+     *
+     * @param template entity object
+     * @return template cost list
+     * @throws Exception unhandled errors.
+     */
+    public List<TemplateCost> updateTemplateCost(Template template) throws Exception {
+        Template persistTemplate = find(template.getId());
+        List<TemplateCost> templateCost = new ArrayList<TemplateCost>();
+        Integer tempCost = template.getTemplateCost().get(0).getCost();
+        TemplateCost templatecost = templateCostService.findByTemplateCost(template.getId(), tempCost);
+        if (templatecost == null) {
+            templatecost = new TemplateCost();
+            templatecost.setCost(tempCost);
+            templatecost.setTemplateCostId(template.getId());
+            templatecost = templateCostService.save(templatecost);
+            templateCost.add(templatecost);
+       }
+       templateCost.addAll(persistTemplate.getTemplateCost());
+       return templateCost;
     }
 }
