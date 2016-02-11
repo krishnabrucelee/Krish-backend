@@ -64,39 +64,39 @@ public class ComputeOfferingCost implements Serializable {
     private Double instanceRunningCostPerIops;
 
     /** Cost of Stoppage Instance for vcpu. */
-    @Column(name = "instance_stoppage_cost_per_vcpu",columnDefinition = "Decimal(10,2) default '0'")
+    @Column(name = "instance_stoppage_cost_per_vcpu", columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceStoppageCostPerVcpu;
 
     /** Cost of Stoppage Instance for memory. */
-    @Column(name = "instance_stoppage_cost_per_mb",columnDefinition = "Decimal(10,2) default '0'")
+    @Column(name = "instance_stoppage_cost_per_mb", columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceStoppageCostPerMB;
 
     /** Cost of Running Instance for vcpu. */
-    @Column(name = "instance_stoppage_cost_per_iops",columnDefinition = "Decimal(10,2) default '0'")
+    @Column(name = "instance_stoppage_cost_per_iops", columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceStoppageCostPerIops;
 
     /** Cost of Stoppage Instance for vcpu. */
-    @Column(name = "instance_running_cost_vcpu",columnDefinition = "Decimal(10,2) default '0'")
+    @Column(name = "instance_running_cost_vcpu", columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceRunningCostVcpu;
 
     /** Cost of Running Instancefor memory. */
-    @Column(name = "instance_running_cost_memory",columnDefinition = "Decimal(10,2) default '0'")
+    @Column(name = "instance_running_cost_memory", columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceRunningCostMemory;
 
     /** Cost of Running Instance for iops. */
-    @Column(name = "instance_running_cost_iops",columnDefinition = "Decimal(10,2) default '0'")
+    @Column(name = "instance_running_cost_iops", columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceRunningCostIops;
 
     /** Cost of Stoppage Instance for vcpu. */
-    @Column(name = "instance_stoppage_cost_vcpu",columnDefinition = "Decimal(10,2) default '0'")
+    @Column(name = "instance_stoppage_cost_vcpu", columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceStoppageCostVcpu;
 
     /** Cost of Stoppage Instance for memory. */
-    @Column(name = "instance_stoppage_cost_memory",columnDefinition = "Decimal(10,2) default '0'")
+    @Column(name = "instance_stoppage_cost_memory", columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceStoppageCostMemory;
 
     /** Cost of Stoppage Instance. for iops. */
-    @Column(name = "instance_stoppage_cost_iops",columnDefinition = "Decimal(10,2) default '0'")
+    @Column(name = "instance_stoppage_cost_iops", columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceStoppageCostIops;
 
     /** Created by user. */

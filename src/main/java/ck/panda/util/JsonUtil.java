@@ -75,7 +75,6 @@ public abstract class JsonUtil {
         return ZonedDateTime.ofInstant(date.toInstant(), systemDefault);
     }
 
-
     /**
      * To check not null validation for double values.
      *
@@ -86,7 +85,6 @@ public abstract class JsonUtil {
     public static Double getDoubleValue(Double value) throws Exception {
         if (value != null) {
             return value;
-
         } else {
             return 0.00;
         }
