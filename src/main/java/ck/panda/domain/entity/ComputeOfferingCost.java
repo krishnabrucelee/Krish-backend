@@ -8,7 +8,7 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.CreatedBy;
@@ -36,7 +36,7 @@ public class ComputeOfferingCost implements Serializable {
 
     /** Zone id for this offering. */
     @JoinColumn(name = "zone_id", referencedColumnName = "id")
-    @OneToOne
+    @ManyToOne
     private Zone zone;
 
     /** Id of the compute offering. */
