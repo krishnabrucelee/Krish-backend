@@ -1856,7 +1856,7 @@ public class SyncServiceImpl implements SyncService {
                 project.setName(csProject.getName());
                 project.setDepartmentId(csProject.getDepartmentId());
                 project.setStatus(csProject.getStatus());
-                project.setName(csProject.getDescription());
+                project.setDescription(csProject.getDescription());
                 project.setDomainId(csProject.getDomainId());
                 // 3.2 If found, update the project object in app db
                 projectService.update(project);
