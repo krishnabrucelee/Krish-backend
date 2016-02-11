@@ -18,28 +18,37 @@ public interface ApplicationService extends CRUDService<Application> {
     /**
      * Delete the application.
      *
-     * @param application Application entity.
-     * @return Application.
+     * @param application Application entity
+     * @return Application
      * @throws Exception error occurs
      */
     Application softDelete(Application application) throws Exception;
 
     /**
-     * Find all the applications with active status.
+     * Find all the applications with respect to domain.
      *
-     * @param pagingAndSorting pagination and sorting values.
-     * @return list of applications with pagination.
-     * @throws Exception error occurs
+     * @param domainId of the application
+     * @return list of applications with respect to domain
+     * @throws Exception if error occurs
      */
-    Page<Application> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
+    List<Application> findAllByDomain(Long domainId) throws Exception;
 
     /**
-     * Find all the applications with active status.
+     * To get list of application.
      *
-     * @param isActive application status Active/Inactive
-     * @return list of applications with active status
-     * @throws Exception error occurs.
+     * @param pagingAndSorting parameters
+     * @param id of the login user
+     * @return application list with pagination
+     * @throws Exception if error occurs
      */
-    List<Application> findAllByIsActive(Boolean isActive) throws Exception;
+    Page<Application> findAll(PagingAndSorting pagingAndSorting, Long id) throws Exception;
 
+    /**
+     * To get list of application.
+     *
+     * @param id of the login user
+     * @return application list
+     * @throws Exception if error occurs
+     */
+    List<Application> findAll(Long id) throws Exception;
 }

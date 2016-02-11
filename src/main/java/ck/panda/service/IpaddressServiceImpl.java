@@ -152,6 +152,7 @@ public class IpaddressServiceImpl implements IpaddressService {
         List<IpAddress> ipList = new ArrayList<IpAddress>();
         HashMap<String, String> ipMap = new HashMap<String, String>();
         ipMap.put("listall", "true");
+        configServer.setServer(1L);
         // 1. Get the list of ipAddress from CS server using CS connector
         String response = csipaddressService.listPublicIpAddresses("json", ipMap);
         JSONArray ipAddressListJSON = null;

@@ -420,6 +420,10 @@ public class VmInstance implements Serializable {
     @Transient
     private String transHypervisor;
 
+    /** Transient for forced stop. */
+    @Transient
+    private Boolean transForcedStop;
+
     /** Transient owner id of the instance. */
     @Transient
     private String transOwnerId;
@@ -1898,7 +1902,25 @@ public class VmInstance implements Serializable {
         this.computeMaxIops = computeMaxIops;
     }
 
-    @Override
+    /**
+     * Set transient force stop.
+     *
+	 * @return the transForcedStop.
+	 */
+	public Boolean getTransForcedStop() {
+		return transForcedStop;
+	}
+
+	/**
+	 * Get transient for forced stop.
+	 *
+	 * @param transForcedStop the transForcedStop to set.
+	 */
+	public void setTransForcedStop(Boolean transForcedStop) {
+		this.transForcedStop = transForcedStop;
+	}
+
+	@Override
     public String toString() {
         return "VmInstance [Id=" + id + ", name=" + name + ", uuid=" + uuid + ", vncPassword=" + vncPassword
                 + ", instanceOwner=" + instanceOwner + ", instanceOwnerId=" + instanceOwnerId + ", application="

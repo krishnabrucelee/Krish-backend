@@ -116,10 +116,10 @@ public class DepartmentServiceImpl implements DepartmentService {
             department.setIsActive(true);
             department.setStatus(Department.Status.ENABLED);
             department.setType(Department.AccountType.USER);
-            config.setServer(1L);
             HashMap<String, String> accountMap = new HashMap<String, String>();
             accountMap.put(CloudStackConstants.CS_DOMAIN_ID, String.valueOf(domain.getUuid()));
             //TODO : This will be the hardcoded values for the dummy user after creating department it will remove from the cloudstack.
+            config.setServer(1L);
             String createAccountResponse = csAccountService.createAccount(
                     String.valueOf(department.getType().ordinal()), "test@test.com", "first", "last",
                     department.getUserName(), "test", CloudStackConstants.JSON, accountMap);
@@ -127,6 +127,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             JSONObject createAccountResponseJSON = new JSONObject(createAccountResponse)
                     .getJSONObject(CloudStackConstants.CS_ACCOUNT_RESPONSE).getJSONObject(CloudStackConstants.CS_ACCOUNT);
             JSONObject userObj = createAccountResponseJSON.getJSONArray(CloudStackConstants.CS_USER).getJSONObject(0);
+            config.setServer(1L);
             csUserService.deleteUser(userObj.getString(CloudStackConstants.CS_ID), CloudStackConstants.JSON);
             department.setUuid((String) createAccountResponseJSON.get(CloudStackConstants.CS_ID));
             LOGGER.debug("Department created successfully" + department.getUserName());
@@ -162,10 +163,10 @@ public class DepartmentServiceImpl implements DepartmentService {
             Domain domain = domainService.find(department.getDomainId());
             Department departmentedit = departmentRepo.findOne(department.getId());
             department.setDomainId(department.getDomainId());
-            config.setServer(1L);
             HashMap<String, String> accountMap = new HashMap<String, String>();
             accountMap.put(CloudStackConstants.CS_DOMAIN_ID, domain.getUuid());
             accountMap.put(CloudStackConstants.CS_ACCOUNT, departmentedit.getUserName());
+            config.setServer(1L);
             csAccountService.updateAccount(department.getUserName(), accountMap);
             LOGGER.debug("Department updated successfully" + department.getUserName());
         }
@@ -216,7 +217,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     public Department softDelete(Department department) throws Exception {
         Errors errors = validator.rejectIfNullEntity(CloudStackConstants.CS_DEPARTMENT, department);
         errors = validator.validateEntity(department, errors);
-        config.setServer(1L);
         if (department.getSyncFlag()) {
             List<Project> projectResponse = projectService.findAllByDepartmentAndIsActive(department.getId(), true);
             List<VmInstance> vmResponse = vmService.findAllByDepartmentAndVmStatus(department.getId(), VmInstance.Status.EXPUNGING);
@@ -242,10 +242,12 @@ public class DepartmentServiceImpl implements DepartmentService {
             department.setIsActive(false);
             department.setStatus(Department.Status.DELETED);
             if (department.getSyncFlag()) {
+                config.setServer(1L);
                 String departmentResponse = csAccountService.deleteAccount(department.getUuid(), CloudStackConstants.JSON);
                 JSONObject jobId = new JSONObject(departmentResponse).getJSONObject(CloudStackConstants.CS_DELETE_ACCOUNT_RESPONSE);
                 if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
-                    String jobResponse = csAccountService.accountJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
+                    config.setServer(1L);
+                	String jobResponse = csAccountService.accountJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
                     JSONObject jobresults = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
                 }
                 LOGGER.debug("Department deleted successfully" + department.getUserName());
@@ -259,7 +261,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         List<Department> departmentList = new ArrayList<Department>();
         HashMap<String, String> departmentMap = new HashMap<String, String>();
         departmentMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
-
+        config.setServer(1L);
         // 1. Get the list of accounts from CS server using CS connector
         String response = csAccountService.listAccounts(CloudStackConstants.JSON, departmentMap);
         JSONArray userListJSON = null;

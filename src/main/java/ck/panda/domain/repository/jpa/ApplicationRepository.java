@@ -17,102 +17,68 @@ public interface ApplicationRepository extends PagingAndSortingRepository<Applic
     /**
      * Find the application for same domain with application type and is active status.
      *
-     * @param type type of the application.
-     * @param domainId Domain reference.
-     * @param isActive get the application list based on active/inactive status.
-     * @param status of the application.
-     * @return application type.
+     * @param type type of the application
+     * @param domainId Domain reference
+     * @param isActive get the application list based on active/inactive status
+     * @param status of the application
+     * @return application type
      */
-    @Query(value = "select app from Application app where app.type=:type AND  app.domainId =:domainId AND app.isActive =:isActive and app.status = :status")
+    @Query(value = "SELECT app FROM Application app WHERE app.type=:type AND  app.domainId =:domainId AND "
+        + "app.isActive =:isActive AND app.status = :status")
     Application findByTypeAndDomainAndIsActive(@Param("type") String type, @Param("domainId") Long domainId,
             @Param("isActive") Boolean isActive, @Param("status") Status status);
 
     /**
      * Find all the active or inactive applications with pagination.
      *
-     * @param pageable to get the list with pagination.
-     * @param isActive get the application list based on active/inactive status.
-     * @param status of the application.
-     * @return list of applications.
+     * @param pageable to get the list with pagination
+     * @param isActive get the application list based on active/inactive status
+     * @return list of applications
      */
-    @Query(value = "select app from Application app where app.isActive =:isActive and app.status = :status")
-    Page<Application> findAllByIsActiveAndStatus(Pageable pageable, @Param("isActive") Boolean isActive,
-            @Param("status") Status status);
-
-    /**
-     * Find all the active or inactive applications with pagination.
-     *
-     * @param pageable to get the list with pagination.
-     * @param isActive get the application list based on active/inactive status.
-     * @return list of applications.
-     */
-    @Query(value = "select app from Application app where app.isActive =:isActive")
+    @Query(value = "SELECT app FROM Application app WHERE app.isActive =:isActive")
     Page<Application> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
 
     /**
      * Find all the application with active status.
      *
-     * @param isActive get the application list based on active/inactive status.
-     * @param status of the application.
-     * @return list of applications.
+     * @param isActive get the application list based on active/inactive status
+     * @return list of applications
      */
-    @Query(value = "select app from Application app where app.isActive =:isActive and app.status = :status")
-    List<Application> findAllByIsActiveAndStatus(@Param("isActive") Boolean isActive, @Param("status") Status status);
-
-    /**
-     * Find all the application with active status.
-     *
-     * @param isActive get the application list based on active/inactive status.
-     * @return list of applications.
-     */
-    @Query(value = "select app from Application app where app.isActive =:isActive")
+    @Query(value = "SELECT app FROM Application app WHERE app.isActive =:isActive")
     List<Application> findAllByIsActive(@Param("isActive") Boolean isActive);
 
     /**
      * Find all the application with active status.
      *
-     * @param isActive get the application list based on active/inactive status.
-     * @param pageable to get the list with pagination.
-     * @param domainId of the application.
-     * @param status of the application.
-     * @return list of applications.
+     * @param isActive get the application list based on active/inactive status
+     * @param pageable to get the list with pagination
+     * @param domainId of the application
+     * @return list of applications
      */
-    @Query(value = "select app from Application app where app.domainId=:domainId and app.isActive =:isActive and app.status = :status")
-    Page<Application> findAllByDomainIsActiveAndStatus(@Param("domainId") Long domainId, Pageable pageable,
-            @Param("isActive") Boolean isActive, @Param("status") Status status);
-
-    /**
-     * Find all the application with active status.
-     *
-     * @param isActive get the application list based on active/inactive status.
-     * @param pageable to get the list with pagination.
-     * @param domainId of the application.
-     * @return list of applications.
-     */
-    @Query(value = "select app from Application app where app.domainId=:domainId and app.isActive =:isActive")
+    @Query(value = "SELECT app FROM Application app WHERE app.domainId=:domainId AND app.isActive =:isActive")
     Page<Application> findAllByDomainIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive,
             Pageable pageable);
 
     /**
      * Find all the application with active status.
      *
-     * @param isActive get the application list based on active/inactive status.
-     * @param domainId of the application.
-     * @return list of applications.
+     * @param isActive get the application list based on active/inactive status
+     * @param domainId of the application
+     * @return list of applications
      */
-    @Query(value = "select app from Application app where app.domainId=:domainId and app.isActive =:isActive")
+    @Query(value = "SELECT app FROM Application app WHERE app.domainId=:domainId AND app.isActive =:isActive")
     List<Application> findAllByDomainIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive);
 
     /**
      * Find all the application with active status.
      *
-     * @param id domain id.
-     * @param isActive get the application list based on active/inactive status.
-     * @param status of the application.
-     * @return list of applications.
+     * @param domainId of the application
+     * @param isActive get the application list based on active/inactive status
+     * @param status of the application
+     * @return list of applications
      */
-    @Query(value = "select app from Application app where app.domainId=:domainId and app.isActive =:isActive and app.status = :status")
-    List<Application> findAllByIsActiveAndDomainAndStatus(@Param("domainId") Long id,
+    @Query(value = "SELECT app FROM Application app WHERE app.domainId=:domainId AND app.isActive =:isActive AND "
+        + "app.status = :status")
+    List<Application> findAllByDomainAndIsActiveAndStatus(@Param("domainId") Long domainId,
             @Param("isActive") Boolean isActive, @Param("status") Status status);
-
 }

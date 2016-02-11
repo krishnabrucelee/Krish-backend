@@ -14,13 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EventTypes;
-import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.FirewallRules.Purpose;
+import ck.panda.domain.entity.LoadBalancerRule.SticknessMethod;
 import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.LoadBalancerRule;
 import ck.panda.domain.entity.Network;
@@ -38,8 +37,8 @@ import ck.panda.util.CloudStackLoadBalancerService;
 import ck.panda.util.CloudStackNetworkOfferingService;
 import ck.panda.util.CloudStackNicService;
 import ck.panda.util.CloudStackResourceCapacity;
-import ck.panda.util.CloudStackServer;
 import ck.panda.util.CloudStackVolumeService;
+import ck.panda.util.ConfigUtil;
 import ck.panda.util.EncryptionUtil;
 import ck.panda.util.JsonUtil;
 import ck.panda.util.error.exception.ApplicationException;
@@ -55,13 +54,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(SyncServiceImpl.class);
 
-    /** CloudStack connector. */
+    /** Cloud stack configuration reference. */
     @Autowired
-    private CloudStackServer server;
-
-    /** CloudStack configuration . */
-    @Autowired
-    private CloudStackConfigurationService cloudConfigService;
+    private ConfigUtil configUtil;
 
     /** Virtual machine Service for listing vms. */
     @Autowired
@@ -162,9 +157,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      */
     @Override
     public void syncResourceStatus(JSONObject eventObject) throws Exception {
-        CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
-        server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
-        cloudStackInstanceService.setServer(server);
+        configUtil.setServer(1L);
         String eventObjectResult = cloudStackInstanceService.queryAsyncJobResult(eventObject.getString(CS_ASYNC_JOB_ID),
                 CloudStackConstants.JSON);
         JSONObject jobResult = new JSONObject(eventObjectResult).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE)
@@ -366,6 +359,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     // 3.2 If found, update the vm object in app db
                     vmIn = virtualMachineService.update(instance);
                     // Resource count for domain
+                    configUtil.setServer(1L);
                     String csResponse = cloudStackResourceCapacity.updateResourceCount(
                             convertEntityService.getDomainById(instance.getDomainId()).getUuid(), domainCountMap,
                             "json");
@@ -401,11 +395,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 }
                 // Host update & internal name while create vm as user.
                 if (vmIn.getHostId() == null) {
-                    CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
-                    server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
-                    cloudStackInstanceService.setServer(server);
                     HashMap<String, String> vmMap = new HashMap<String, String>();
                     vmMap.put(CloudStackConstants.CS_ID, vmIn.getUuid());
+                    configUtil.setServer(1L);
                     String response = cloudStackInstanceService.listVirtualMachines(CloudStackConstants.JSON, vmMap);
                     JSONArray vmListJSON = null;
                     JSONObject responseObject = new JSONObject(response)
@@ -445,6 +437,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     public void assignNicTovM(VmInstance vmInstance) throws ApplicationException, Exception {
         HashMap<String,String> nicMap = new HashMap<String, String>();
         nicMap.put("virtualmachineid", vmInstance.getUuid());
+        configUtil.setServer(1L);
         String listNic = cloudStackNicService.listNics(nicMap, "json");
         JSONArray nicListJSON = new JSONObject(listNic).getJSONObject("listnicsresponse").getJSONArray("nic");
         for (int i = 0; i < nicListJSON.length(); i++) {
@@ -496,6 +489,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                volumeMap.put("domainid", convertEntityService.getDomainById(vmInstance.getDomainId()).getUuid());
                volumeMap.put("account", convertEntityService.getDepartmentUsernameById(vmInstance.getDepartmentId()));
            }
+           configUtil.setServer(1L);
            String listVolume = csVolumeService.listVolumes("json", volumeMap);
            JSONArray volumeListJSON = new JSONObject(listVolume).getJSONObject("listvolumesresponse").getJSONArray("volume");
            for (int i = 0; i < volumeListJSON.length(); i++) {
@@ -529,6 +523,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      */
     public void asyncNetwork(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
 
+    	configUtil.setServer(1L);
         if (eventObject.getString("commandEventType").equals("NETWORK.UPDATE")) {
             Network csNetwork = Network.convert(jobResult.getJSONObject("network"));
             Network network = networkService.findByUUID(csNetwork.getUuid());
@@ -719,6 +714,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      * @throws Exception cloudstack unhandled errors
      */
     public void asyncIpAddress(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
+    	configUtil.setServer(1L);
         if (eventObject.getString("commandEventType").equals("NET.IPASSIGN")) {
             IpAddress ipaddress = IpAddress.convert(jobResult.getJSONObject("ipaddress"));
             IpAddress persistIp = ipService.findbyUUID(ipaddress.getUuid());
@@ -852,6 +848,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 volumeService.save(volume);
 
                 // Resource count update for domain
+                configUtil.setServer(1L);
                 String csResponse = cloudStackResourceCapacity.updateResourceCount(
                         convertEntityService.getDomainById(volume.getDomainId()).getUuid(), domainCountMap, "json");
                 convertEntityService.resourceCount(csResponse);
@@ -1043,18 +1040,19 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             }
         }
 
-        if (eventObject.getString("commandEventType").equals(" LB.STICKINESSPOLICY.CREATE")) {
-            LoadBalancerRule csLoadBalancer = LoadBalancerRule.convert(jobresult.getJSONObject("stickinesspolicies"));
-            LoadBalancerRule loadBalancer = loadBalancerService.findByUUID(csLoadBalancer.getUuid());
-            if (csLoadBalancer.getUuid().equals(loadBalancer.getUuid())) {
-                LoadBalancerRule csLb = csLoadBalancer;
-            	loadBalancer.setStickinessName(csLb.getStickinessName());
-            	loadBalancer.setStickinessMethod(csLb.getStickinessMethod());
+        if (eventObject.getString("commandEventType").equals("LB.STICKINESSPOLICY.CREATE")) {
+            JSONObject stickyResult = jobResult.getJSONObject(CloudStackConstants.CS_STICKY_POLICIES);
+            JSONArray stickyPolicy = stickyResult.getJSONArray(CloudStackConstants.CS_STICKY_POLICY);
+            for (int j = 0, sizes = stickyResult.length(); j < sizes; j++) {
+                JSONObject json = (JSONObject)stickyPolicy.get(j);
+                LoadBalancerRule loadBalanceRule = loadBalancerService.findByUUID(stickyResult.getString(CloudStackConstants.CS_LB_RULE_ID));
+                loadBalanceRule.setStickyUuid(json.getString(CloudStackConstants.CS_ID));
+                loadBalanceRule.setStickinessMethod((SticknessMethod.valueOf(json.getString(CloudStackConstants.CS_METHOD_NAME))));
+                loadBalanceRule.setStickinessName(json.getString(CloudStackConstants.CS_NAME));
+                loadBalanceRule.setSyncFlag(false);
+               loadBalancerService.save(loadBalanceRule);
             }
-
-
         }
-
         if (eventObject.getString("commandEventType").equals("LB.UPDATE")) {
             LoadBalancerRule csLoadBalancer = LoadBalancerRule.convert(jobResult.getJSONObject("loadbalancer"));
             LoadBalancerRule loadBalancer = loadBalancerService.findByUUID(csLoadBalancer.getUuid());
@@ -1076,6 +1074,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 HashMap<String, String> loadBalancerInstanceMap = new HashMap<String, String>();
                 loadBalancerInstanceMap.put("lbvmips", "true");
                 loadBalancerInstanceMap.put("listall", "true");
+                configUtil.setServer(1L);
                 String response = cloudStackLoadBalancerService.listLoadBalancerRuleInstances(json.getString("id"), "json", loadBalancerInstanceMap);
                 JSONArray vmListJSON = null;
                 JSONObject responseObject = new JSONObject(response).getJSONObject("listloadbalancerruleinstancesresponse");
@@ -1160,6 +1159,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         if (eventObject.getEvent().equals("NETWORK.OFFERING.EDIT")) {
             HashMap<String, String> networkOfferingMap = new HashMap<String, String>();
             networkOfferingMap.put("id", eventObject.getEntityuuid());
+            configUtil.setServer(1L);
             String response = csNetworkOfferingService.listNetworkOfferings("json", networkOfferingMap);
             JSONArray networkOfferingListJSON = null;
             JSONObject responseObject = new JSONObject(response).getJSONObject("listnetworkofferingsresponse");
@@ -1193,10 +1193,36 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             volumeService.softDelete(volume);
 
             // Resource count update for domain
+            configUtil.setServer(1L);
             String csResponse = cloudStackResourceCapacity.updateResourceCount(
                     convertEntityService.getDomainById(volume.getDomainId()).getUuid(), domainCountMap, "json");
             convertEntityService.resourceCount(csResponse);
         }
     }
+
+	@Override
+	public void syncVMUpdate(String uuid) throws Exception {
+		VmInstance persistVm = virtualMachineService.findByUUID(uuid);
+		configUtil.setServer(1L);
+        HashMap<String, String> vmMap = new HashMap<String, String>();
+        vmMap.put(CloudStackConstants.CS_ID, persistVm.getUuid());
+        String response = cloudStackInstanceService.listVirtualMachines(CloudStackConstants.JSON, vmMap);
+        JSONArray vmListJSON = null;
+        JSONObject responseObject = new JSONObject(response)
+                .getJSONObject(CloudStackConstants.CS_LIST_VM_RESPONSE);
+        if (responseObject.has(CloudStackConstants.CS_VM)) {
+            vmListJSON = responseObject.getJSONArray(CloudStackConstants.CS_VM);
+            // 2. Iterate the json list, convert the single json
+            // entity to vm.
+            for (int i = 0, size = vmListJSON.length(); i < size; i++) {
+                // 2.1 Call convert by passing JSONObject to vm
+                // entity.
+                VmInstance CsVmInstance = VmInstance.convert(vmListJSON.getJSONObject(i));
+                persistVm.setDisplayName(CsVmInstance.getTransDisplayName());
+                // 3. Update vm for user vm creation.
+                virtualMachineService.update(persistVm);
+            }
+        }
+	}
 }
 

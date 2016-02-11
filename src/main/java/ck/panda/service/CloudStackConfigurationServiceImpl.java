@@ -46,8 +46,10 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
             throw new ApplicationException(errors);
         }
         server.setServer(config.getApiURL(), config.getSecretKey(), config.getApiKey());
+        syncService.syncRegion();
+        configRepo.save(config);
         syncService.sync();
-        return configRepo.save(config);
+        return config;
     }
 
     @Override

@@ -253,6 +253,7 @@ public class VolumeServiceImpl implements VolumeService {
                 HashMap<String, String> volumeMap = new HashMap<String, String>();
                 volumeMap.put(CloudStackConstants.CS_ID, activeVolume.get(k).getUuid());
                 JSONArray volumeListJSON = null;
+                config.setUserServer();
                 String response = csVolumeService.listVolumes(CloudStackConstants.JSON, volumeMap);
                 JSONObject responseObject = new JSONObject(response).getJSONObject(CS_LIST_VOLUME_RESPONSE);
                 if (responseObject.has(CS_VOLUME)) {
@@ -376,6 +377,7 @@ public class VolumeServiceImpl implements VolumeService {
                 volumeMap.put(CloudStackConstants.CS_PROJECT_ID, project.get(j).getUuid());
             }
             // 1. Get the list of Volume from CS server using CS connector
+            config.setServer(1L);
             String response = csVolumeService.listVolumes(CloudStackConstants.JSON, volumeMap);
             JSONArray volumeListJSON = null;
             JSONObject responseObject = new JSONObject(response).getJSONObject(CS_LIST_VOLUME_RESPONSE);
@@ -525,7 +527,6 @@ public class VolumeServiceImpl implements VolumeService {
      * @return volume
      */
     public Volume attach(Volume volume, Errors errors) throws Exception {
-        config.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
         if (volume.getVmInstanceId() != null) {
             VmInstance instance = virtualMachineService.find(volume.getVmInstanceId());
@@ -533,6 +534,7 @@ public class VolumeServiceImpl implements VolumeService {
         } else {
             optional.put(CloudStackConstants.CS_VIRTUAL_MACHINE_ID, volume.getVmInstance().getUuid());
         }
+        config.setUserServer();
         String volumeS = csVolumeService.attachVolume(volume.getUuid(), CloudStackConstants.JSON, optional);
         JSONObject jobId = new JSONObject(volumeS).getJSONObject(CS_ATTACH_VOLUME_RESPONSE);
 
@@ -580,9 +582,9 @@ public class VolumeServiceImpl implements VolumeService {
      * @return volume
      */
     public Volume detach(Volume volume, Errors errors) throws Exception {
-        config.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
         optional.put(CloudStackConstants.CS_ID, volume.getUuid());
+        config.setUserServer();
         String volumeS = csVolumeService.detachVolume(CloudStackConstants.JSON, optional);
         JSONObject jobId = new JSONObject(volumeS).getJSONObject(CS_DETACH_VOLUME_RESPONSE);
         if (jobId.has(CloudStackConstants.CS_ERROR_CODE)) {
@@ -623,7 +625,6 @@ public class VolumeServiceImpl implements VolumeService {
      * @return volume
      */
     public Volume resize(Volume volume, Errors errors) throws Exception {
-        config.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
         if (volume.getDiskSize() != null) {
             optional.put(CloudStackConstants.CS_SIZE, volume.getDiskSize().toString());
@@ -637,6 +638,7 @@ public class VolumeServiceImpl implements VolumeService {
         if (volume.getIsShrink() != null) {
             optional.put(CS_SHRINK_OK, volume.getIsShrink().toString());
         }
+        config.setUserServer();
         String volumeS = csVolumeService.resizeVolume(volume.getUuid(), volume.getStorageOffering().getUuid(),
                 CloudStackConstants.JSON, optional);
         JSONObject jobId = new JSONObject(volumeS).getJSONObject(CS_RESIZE_VOLUME_RESPONSE);
@@ -696,7 +698,6 @@ public class VolumeServiceImpl implements VolumeService {
      * @return volume
      */
     public Volume upload(Volume volume, Long domainId, Long userId, Errors errors) throws Exception {
-        config.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
 
         if (volume.getProjectId() != null) {
@@ -723,6 +724,7 @@ public class VolumeServiceImpl implements VolumeService {
         if (volume.getChecksum() != null) {
             optional.put(CS_CHECKSUM, volume.getChecksum().toString());
         }
+        config.setUserServer();
         String volumeS = csVolumeService.uploadVolume(volume.getName(), volume.getFormat().name(),
                 convertEntityService.getZoneUuidById(volume.getZoneId()), volume.getUrl(), CloudStackConstants.JSON,
                 optional);

@@ -19,8 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.Application;
 import ck.panda.service.ApplicationService;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -34,6 +36,10 @@ public class ApplicationController extends CRUDController<Application> implement
     /** Service reference to Application. */
     @Autowired
     private ApplicationService applicationService;
+
+    /** Autowired TokenDetails. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new application.", response = Application.class)
     @Override
@@ -56,9 +62,9 @@ public class ApplicationController extends CRUDController<Application> implement
     /**
      * Delete the application.
      *
-     * @param application reference of the application.
-     * @param id application id.
-     * @throws Exception error occurs.
+     * @param application reference of the application
+     * @param id application id
+     * @throws Exception error occurs
      */
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Application Type.")
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = {
@@ -74,7 +80,7 @@ public class ApplicationController extends CRUDController<Application> implement
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Application.class);
-        Page<Application> pageResponse = applicationService.findAll(page);
+        Page<Application> pageResponse = applicationService.findAll(page, Long.parseLong(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
@@ -82,14 +88,26 @@ public class ApplicationController extends CRUDController<Application> implement
     /**
      * Find the list of active applications.
      *
-     * @return projects project list.
-     * @throws Exception error occurs.
+     * @return projects project list
+     * @throws Exception error occurs
      */
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<Application> getSearch() throws Exception {
-        return applicationService.findAllByIsActive(true);
+        return applicationService.findAll(Long.parseLong(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
     }
 
+    /**
+     * Get all application list by domain.
+     *
+     * @param domainId domain id
+     * @return list of application
+     * @throws Exception error occurs
+     */
+    @RequestMapping(value = "/domain", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public List<Application> findAllByDomain(@RequestParam Long domainId) throws Exception {
+        return applicationService.findAllByDomain(domainId);
+    }
 }

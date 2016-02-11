@@ -433,6 +433,9 @@ public class CloudStackConstants {
     /** Constant for network type. */
     public static final String CS_TYPE = "type";
 
+    /** Constant for CS VM forced stop. */
+    public static final String CS_FORCED_STOP = "forced";
+
     /** Constant for network offering traffic type. */
     public static final String CS_TRAFFIC_TYPE = "traffictype";
 
@@ -441,6 +444,18 @@ public class CloudStackConstants {
 
     /** Constant for network offering availability. */
     public static final String CS_AVAILABILITY = "availability";
+
+    /** Constant for stickiness policies. */
+    public static final String CS_STICKY_POLICIES = "stickinesspolicies";
+
+    /** Constant for sticky policy. */
+    public static final String CS_STICKY_POLICY = "stickinesspolicy";
+
+    /** Constant for load balancer rule id. */
+    public static final String CS_LB_RULE_ID = "lbruleid";
+
+    /** Constant for method name. */
+    public static final String CS_METHOD_NAME = "methodname";
 
 
 }

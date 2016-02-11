@@ -126,7 +126,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     public void delete(Long id) throws Exception {
         StorageOffering storage = this.find(id);
         // set server for finding value in configuration
-        config.setServer(1L);
+        config.setUserServer();
         csStorageService.deleteStorageOffering(storage.getUuid(), CloudStackConstants.JSON);
         storageOfferingRepo.delete(id);
     }
@@ -199,6 +199,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
         HashMap<String, String> storageOfferingMap = new HashMap<String, String>();
         storageOfferingMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
         // 1. Get the list of StorageOffering from CS server using CS connector
+        config.setServer(1L);
         String response = csStorageService.listStorageOfferings(CloudStackConstants.JSON, storageOfferingMap);
         JSONArray storageOfferingListJSON = null;
         JSONObject responseObject = new JSONObject(response).getJSONObject(CS_LIST_DISK_RESPONSE);
@@ -225,7 +226,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
      * @throws Exception error at storage creation
      */
     private void createStorage(StorageOffering storage, Errors errors) throws Exception {
-        config.setServer(1L);
+    	config.setUserServer();
         String storageOfferings = csStorageService.createStorageOffering(CloudStackConstants.JSON, optional(storage));
         LOGGER.info("storage offer create response " + storageOfferings);
         JSONObject storageOfferingsResponse = new JSONObject(storageOfferings)
@@ -252,7 +253,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
      * @throws Exception error at update storage
      */
     private void updateStorageOffering(StorageOffering storage, Errors errors) throws Exception {
-        config.setServer(1L);
+    	config.setUserServer();
         String storageOfferings = csStorageService.updateStorageOffering(String.valueOf(storage.getUuid()), CloudStackConstants.JSON,
                 optional(storage));
         LOGGER.info("storage offer update response " + storageOfferings);
@@ -323,7 +324,6 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
         Errors errors = validator.rejectIfNullEntity(CloudStackConstants.CS_STORAGE_OFFERING, storage);
         errors = validator.validateEntity(storage, errors);
         // set server for finding value in configuration
-        config.setUserServer();
         List<VmInstance> vmResponse = vmService.findAllByStorageOfferingIdAndVmStatus(storage.getId(),
                 VmInstance.Status.EXPUNGING);
         if (vmResponse.size() != 0) {
@@ -334,6 +334,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
         } else {
             storage.setIsActive(false);
             // update compute offering in ACS.
+            config.setUserServer();
             csStorageService.deleteStorageOffering(storage.getUuid(), CloudStackConstants.JSON);
         }
     }

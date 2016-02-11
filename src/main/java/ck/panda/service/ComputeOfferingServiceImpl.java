@@ -257,6 +257,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
         HashMap<String, String> computeOfferingMap = new HashMap<String, String>();
         computeOfferingMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
         // 1. Get the list of ComputeOffering from CS server using CS connector
+        cscomputeOffering.setServer(configServer.setServer(1L));
         String response = cscomputeOffering.listComputeOfferings(CloudStackConstants.JSON, computeOfferingMap);
         JSONArray computeOfferingListJSON = null;
         JSONObject responseObject = new JSONObject(response).getJSONObject(CS_LIST_COMPUTEOFFERING);
