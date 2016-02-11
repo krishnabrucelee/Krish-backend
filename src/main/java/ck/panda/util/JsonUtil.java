@@ -91,8 +91,4 @@ public abstract class JsonUtil {
             return 0.00;
         }
     }
-
-
-
-
 }

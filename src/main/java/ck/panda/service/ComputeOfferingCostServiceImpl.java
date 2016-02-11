@@ -90,7 +90,7 @@ public class ComputeOfferingCostServiceImpl implements ComputeOfferingCostServic
 
     @Override
     public List<ComputeOfferingCost> findAll() throws Exception {
-        return null;
+        return (List<ComputeOfferingCost>) costRepo.findAll();
     }
 
     @Override

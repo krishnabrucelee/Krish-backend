@@ -127,7 +127,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
                 // storing in our DB.
                 cost.setTotalCost(totalCost);
                 cost.setComputeId(compute.getId());
-               return computeRepo.save(compute);
+                return computeRepo.save(compute);
             }
         } else {
             LOGGER.debug(compute.getUuid());
@@ -327,10 +327,10 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     private ComputeOffering costCalculation(ComputeOffering compute) throws Exception {
         List<ComputeOfferingCost> computeCost = new ArrayList<ComputeOfferingCost>();
         ComputeOffering persistCompute = find(compute.getId());
-         ComputeOfferingCost cost = compute.getComputeCost().get(0);
-         Double totalCost = costService.totalcost(cost);
-         ComputeOfferingCost computeOfferingcost = costService.findByCostAndId(compute.getId(),totalCost);
-         if (computeOfferingcost == null) {
+        ComputeOfferingCost cost = compute.getComputeCost().get(0);
+        Double totalCost = costService.totalcost(cost);
+        ComputeOfferingCost computeOfferingcost = costService.findByCostAndId(compute.getId(),totalCost);
+        if (computeOfferingcost == null) {
              computeOfferingcost = new ComputeOfferingCost();
              computeOfferingcost.setComputeId(compute.getId());
              computeOfferingcost.setInstanceRunningCostIops(cost.getInstanceRunningCostIops());
