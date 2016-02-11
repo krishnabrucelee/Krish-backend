@@ -25,6 +25,7 @@ import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.NetworkRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackNetworkService;
+import ck.panda.util.CloudStackOptionalUtil;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
@@ -54,8 +55,14 @@ public class NetworkServiceImpl implements NetworkService {
     /** Constant for cloudStack network list response. */
     private static final String CS_LIST_NETWORK_RESPONSE = "listnetworksresponse";
 
+    /** Constant for cloudstack response restart . */
+    private static final String CS_RESTART_NETWORK_RESPONSE ="restartnetworkresponse";
+
     /** Constant for network type. */
     private static final String CS_TYPE = "type";
+
+    /** Constant for clean up. */
+    private static final String CS_CLEAN_UP = "cleanup";
 
     /** Constant for network guestVmcidr. */
     private static final String CS_GUESTVMCIDR = "guestvmcidr";
@@ -267,6 +274,8 @@ public class NetworkServiceImpl implements NetworkService {
                 if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
                     String jobResponse = csNetwork.networkJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
                     JSONObject jobresult = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+                    if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.PROGRESS_JOB_STATUS)) {
+                    }
                 }
             }
         }
@@ -484,6 +493,57 @@ public class NetworkServiceImpl implements NetworkService {
     public Page<Network> findAll(PagingAndSorting pagingAndSorting) throws Exception {
         return networkRepo.findAll(pagingAndSorting.toPageRequest());
 
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#network.getSyncFlag(), 'RESTART_NETWORK')")
+    public Network restartNetwork(Network network) throws Exception {
+        Errors errors = validator.rejectIfNullEntity(NETWORK, network);
+        errors = validator.validateEntity(network, errors);
+        if (network.getSyncFlag()) {
+            // To check whether network is already attached to an instance.
+            List<VmInstance> vmResponse = vmService.findAllByNetworkAndVmStatus(network.getId(),
+                    VmInstance.Status.EXPUNGING);
+            List<Nic> nicResponse = nicService.findAllByNetworkAndIsActive(network.getId(),true);
+            if (vmResponse.size() != 0 || nicResponse.size() != 0) {
+                errors.addGlobalError("error.network.restart");
+            }
+        }
+        if (errors.hasErrors()) {
+            throw new ApplicationException(errors);
+        }
+        else {
+             if (network.getSyncFlag()) {
+                 HashMap<String,String> optionalParams = new HashMap<String, String>();
+                 // Mapping optional parameters.
+                 CloudStackOptionalUtil.updateOptionalBooleanValue(CS_CLEAN_UP, network.getCleanUpNetwork(), optionalParams);
+                 //Configuration value to ACS.
+                 config.setUserServer();
+                 // Restart network call to ACS
+                 String restartResponse = csNetwork.restartNetwork(network.getUuid(), optionalParams,CloudStackConstants.JSON);
+                 JSONObject jobId = new JSONObject(restartResponse).getJSONObject(CS_RESTART_NETWORK_RESPONSE);
+                 // Temporarily added thread, will be removed once web socket is done.
+                 Thread.sleep(4000);
+                 // Checking job id.
+                 if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
+                     String jobResponse = csNetwork.networkJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
+                     JSONObject jobresult = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+                     if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.PROGRESS_JOB_STATUS ) || (jobresult.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.PROGRESS_JOB_STATUS )))  {
+                         network.setNetworkRestart(true);
+                     }
+                     else {
+                         JSONObject jobresponse = jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT);
+                     if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.ERROR_JOB_STATUS)) {
+                         if (jobresponse.has(CloudStackConstants.CS_ERROR_CODE)) {
+                             errors = this.validateEvent(errors, jobresponse.getString(CloudStackConstants.CS_ERROR_TEXT));
+                             throw new ApplicationException(errors);
+                         }
+                     }
+                  }
+                 }
+             }
+        }
+        return networkRepo.save(network);
     }
 
   }

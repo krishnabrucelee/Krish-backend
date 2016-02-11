@@ -191,6 +191,14 @@ public class Network implements Serializable {
     @Column(name = "instance_id")
     private Long vmInstanceId;
 
+    /** Removing old elements of the networks. */
+    @Column(name = "clean_up")
+    private Boolean cleanUpNetwork;
+
+    /** If its true when network ins restarted . */
+    @Column(name = "network_restart")
+    private Boolean networkRestart;
+
     /**
      * Enum type for Network Type.
      *
@@ -840,6 +848,43 @@ public class Network implements Serializable {
      */
     public void setVmInstanceId(Long vmInstanceId) {
         this.vmInstanceId = vmInstanceId;
+    }
+
+    /**
+     * Get the network state.
+     *
+     * @return cleanUpNetwork
+     */
+    public Boolean getCleanUpNetwork() {
+        return cleanUpNetwork;
+    }
+
+    /**
+     * Set the network state.
+     *
+     * @param cleanUpNetwork to set.
+     */
+    public void setCleanUpNetwork(Boolean cleanUpNetwork) {
+        this.cleanUpNetwork = cleanUpNetwork;
+    }
+
+
+    /**
+     * Get the network to restart.
+     *
+     * @return the networkRestart
+     */
+    public Boolean getNetworkRestart() {
+        return networkRestart;
+    }
+
+    /**
+     * Set the network to restart.
+     *
+     * @param networkRestart to set
+     */
+    public void setNetworkRestart(Boolean networkRestart) {
+        this.networkRestart = networkRestart;
     }
 
     /**

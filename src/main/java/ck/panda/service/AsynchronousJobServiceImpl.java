@@ -523,7 +523,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      */
     public void asyncNetwork(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
 
-    	configUtil.setServer(1L);
+        configUtil.setServer(1L);
         if (eventObject.getString("commandEventType").equals("NETWORK.UPDATE")) {
             Network csNetwork = Network.convert(jobResult.getJSONObject("network"));
             Network network = networkService.findByUUID(csNetwork.getUuid());
@@ -560,6 +560,14 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             String csResponse = cloudStackResourceCapacity.updateResourceCount(
                     convertEntityService.getDomainById(network.getDomainId()).getUuid(), domainCountMap, "json");
             convertEntityService.resourceCount(csResponse);
+        }
+
+        if (eventObject.getString("commandEventType").equals("NETWORK.RESTART")) {
+            JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
+            Network network = networkService.findByUUID(json.getString("id"));
+            network.setSyncFlag(false);
+            network.setNetworkRestart(true);
+            networkService.update(network);
         }
     }
 
@@ -714,7 +722,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      * @throws Exception cloudstack unhandled errors
      */
     public void asyncIpAddress(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
-    	configUtil.setServer(1L);
+        configUtil.setServer(1L);
         if (eventObject.getString("commandEventType").equals("NET.IPASSIGN")) {
             IpAddress ipaddress = IpAddress.convert(jobResult.getJSONObject("ipaddress"));
             IpAddress persistIp = ipService.findbyUUID(ipaddress.getUuid());
@@ -1200,10 +1208,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         }
     }
 
-	@Override
-	public void syncVMUpdate(String uuid) throws Exception {
-		VmInstance persistVm = virtualMachineService.findByUUID(uuid);
-		configUtil.setServer(1L);
+    @Override
+    public void syncVMUpdate(String uuid) throws Exception {
+        VmInstance persistVm = virtualMachineService.findByUUID(uuid);
+        configUtil.setServer(1L);
         HashMap<String, String> vmMap = new HashMap<String, String>();
         vmMap.put(CloudStackConstants.CS_ID, persistVm.getUuid());
         String response = cloudStackInstanceService.listVirtualMachines(CloudStackConstants.JSON, vmMap);
@@ -1223,6 +1231,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 virtualMachineService.update(persistVm);
             }
         }
-	}
+    }
 }
 
