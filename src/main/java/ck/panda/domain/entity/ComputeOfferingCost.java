@@ -35,13 +35,9 @@ public class ComputeOfferingCost implements Serializable {
     private Long id;
 
     /** Zone id for this offering. */
-    @JoinColumn(name = "zone_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "zone_id", referencedColumnName = "id")
     @OneToOne
     private Zone zone;
-
-    /** Id of the zone. */
-    @Column(name = "zone_id")
-    private Long zoneId;
 
     /** Id of the compute offering. */
     @Column(name = "compute_id")
@@ -144,13 +140,6 @@ public class ComputeOfferingCost implements Serializable {
     }
 
     /**
-     * @return the zoneId
-     */
-    public Long getZoneId() {
-        return zoneId;
-    }
-
-    /**
      * @return the createdBy
      */
     public Long getCreatedBy() {
@@ -169,13 +158,6 @@ public class ComputeOfferingCost implements Serializable {
      */
     public void setId(Long id) {
         this.id = id;
-    }
-
-    /**
-     * @param zoneId the zoneId to set
-     */
-    public void setZoneId(Long zoneId) {
-        this.zoneId = zoneId;
     }
 
     /**
