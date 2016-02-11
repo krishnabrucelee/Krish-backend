@@ -11,12 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
-import ck.panda.domain.entity.ComputeOffering;
-import ck.panda.domain.entity.ComputeOfferingCost;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.StorageOfferingCost;
 import ck.panda.domain.entity.VmInstance;
-import ck.panda.domain.repository.jpa.StorageOfferingCostRepository;
 import ck.panda.domain.repository.jpa.StorageOfferingRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackOptionalUtil;
@@ -69,7 +66,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     @Autowired
     private VirtualMachineService vmService;
 
-    /** Storage offering cost repository for reference .*/
+    /** Storage offering cost service for reference .*/
     @Autowired
     private StorageOfferingCostService storageCostService;
 
@@ -103,12 +100,10 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
             this.validateVolumeUniqueness(storage);
             Errors errors = validator.rejectIfNullEntity(CloudStackConstants.CS_STORAGE_OFFERING, storage);
             errors = validator.validateEntity(storage, errors);
-
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
                 updateStorageOffering(storage, errors);
-
                 return storageOfferingRepo.save(storage);
             }
         } else {
@@ -226,7 +221,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
      * @throws Exception error at storage creation
      */
     private void createStorage(StorageOffering storage, Errors errors) throws Exception {
-    	config.setUserServer();
+        config.setUserServer();
         String storageOfferings = csStorageService.createStorageOffering(CloudStackConstants.JSON, optional(storage));
         LOGGER.info("storage offer create response " + storageOfferings);
         JSONObject storageOfferingsResponse = new JSONObject(storageOfferings)
@@ -253,7 +248,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
      * @throws Exception error at update storage
      */
     private void updateStorageOffering(StorageOffering storage, Errors errors) throws Exception {
-    	config.setUserServer();
+        config.setUserServer();
         String storageOfferings = csStorageService.updateStorageOffering(String.valueOf(storage.getUuid()), CloudStackConstants.JSON,
                 optional(storage));
         LOGGER.info("storage offer update response " + storageOfferings);
@@ -351,9 +346,9 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
         List<StorageOfferingCost> storageCost = new ArrayList<StorageOfferingCost>();
         StorageOffering persistStorage = find(storage.getId());
         StorageOfferingCost cost = storage.getStoragePrice().get(0);
-         Double totalCost = storageCostService.totalcost(cost);
-         StorageOfferingCost storageOfferingcost = storageCostService.findByCostAndId(storage.getId(),totalCost);
-         if (storageOfferingcost == null) {
+        Double totalCost = storageCostService.totalcost(cost);
+        StorageOfferingCost storageOfferingcost = storageCostService.findByCostAndId(storage.getId(),totalCost);
+        if (storageOfferingcost == null) {
              storageOfferingcost = new StorageOfferingCost();
              storageOfferingcost.setStorageId(storage.getId());
              storageOfferingcost.setCostGbPerMonth(cost.getCostGbPerMonth());

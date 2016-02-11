@@ -55,7 +55,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     @Autowired
     private VirtualMachineService vmService;
 
-    /** Virtual Machine service reference. */
+    /** Compute offering cost service reference. */
     @Autowired
     private ComputeOfferingCostService costService;
 

@@ -109,7 +109,6 @@ public class ComputeOfferingCostServiceImpl implements ComputeOfferingCostServic
             Double total = instanceRunningCostVcpu + instanceRunningCostMemory + instanceRunningCostPerIops + instanceRunningCostPerMB
                     + instanceRunningCostPerVcpu + instanceRunningCostIops
                     + instanceStoppageCostVcpu + instanceStoppageCostMemory + instanceStoppageCostIops + instanceStoppageCostPerIops + instanceStoppageCostPerVcpu;
-
             return total;
     }
 
