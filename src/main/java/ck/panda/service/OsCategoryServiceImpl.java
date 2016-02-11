@@ -13,6 +13,7 @@ import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.repository.jpa.OsCategoryRepository;
 import ck.panda.util.CloudStackOSService;
+import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
@@ -33,6 +34,10 @@ public class OsCategoryServiceImpl implements OsCategoryService {
     /** CloudStack OS categories service for connectivity with cloudstack. */
     @Autowired
     private CloudStackOSService osCategoryService;
+
+    /** object(server) created for CloudStackServer. */
+    @Autowired
+    private ConfigUtil configServer;
 
     /** Cloud stack list OS category response. */
     public static final String LIST_OS_CATEGORIES_RESPONSE = "listoscategoriesresponse";
@@ -100,6 +105,7 @@ public class OsCategoryServiceImpl implements OsCategoryService {
 
         List<OsCategory> osCategoryList = new ArrayList<OsCategory>();
         HashMap<String, String> osCategoryMap = new HashMap<String, String>();
+        configServer.setServer(1L);
         // 1. Get the list of domains from CS server using CS connector
         String response = osCategoryService.listOsCategories(CloudStackConstants.JSON, osCategoryMap);
         JSONArray osCategoryListJSON = null;

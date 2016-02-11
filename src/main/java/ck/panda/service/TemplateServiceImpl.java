@@ -492,7 +492,7 @@ public class TemplateServiceImpl implements TemplateService {
      * @throws Exception unhandled errors.
      */
     public void csUpdateTemplate(Template template) throws Exception {
-        configUtil.setUserServer();
+    	configUtil.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
         optionalFieldValidation(template, optional);
         optional.put(CloudStackConstants.CS_NAME, template.getName());
@@ -518,7 +518,7 @@ public class TemplateServiceImpl implements TemplateService {
      * @throws Exception unhandled errors.
      */
     public Boolean csDeleteTemplate(Long id) throws Exception {
-        configUtil.setUserServer();
+    	configUtil.setUserServer();
         Errors errors = null;
         HashMap<String, String> optional = new HashMap<String, String>();
         Template template = templateRepository.findOne(id);

@@ -20,6 +20,7 @@ import ck.panda.domain.repository.jpa.VmSnapshotRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.CloudStackSnapshotService;
+import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -61,6 +62,10 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
     @Autowired
     private CloudStackConfigurationService cloudConfigService;
 
+    /** Cloud stack configuration utility class. */
+    @Autowired
+    private ConfigUtil config;
+
     @Override
     public VmSnapshot save(VmSnapshot vmSnapshot) throws Exception {
         if (vmSnapshot.getSyncFlag()) {
@@ -71,8 +76,6 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
             } else {
                 HashMap<String, String> optional = new HashMap<String, String>();
                 CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
-                server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
-                csSnapshotService.setServer(server);
                 LOGGER.debug("Cloud stack connectivity at Snapshot", cloudConfig.getApiKey());
 
                 if (vmSnapshot.getSnapshotMemory()) {
@@ -85,6 +88,7 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                     errors.addGlobalError("Virtual machine may not be null");
                     throw new ApplicationException(errors);
                 }
+                config.setUserServer();
                 String csResponse = csSnapshotService.createVMSnapshot(vmInstance.getUuid(), optional);
                 JSONObject cssnapshot = new JSONObject(csResponse).getJSONObject("createvmsnapshotresponse");
                 if (cssnapshot.has("errorcode")) {
@@ -95,6 +99,7 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                     vmSnapshot.setZoneId(vmInstance.getZoneId());
                     vmSnapshot.setOwnerId(vmInstance.getInstanceOwnerId());
                     vmSnapshot.setIsRemoved(false);
+                    config.setUserServer();
                     String snapshotResponse = csSnapshotService.vmSnapshotJobResult(cssnapshot.getString("jobid"));
                     JSONObject snapshot = new JSONObject(snapshotResponse).getJSONObject("queryasyncjobresultresponse");
                     if (snapshot.getString("jobstatus").equals("2")) {
@@ -165,9 +170,11 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
         switch (event) {
         case EventTypes.EVENT_VM_SNAPSHOT_REVERT:
             try {
+            	config.setUserServer();
                 String snapshotResponse = csSnapshotService.revertToVMSnapshot(vmSnapshot.getUuid());
                 JSONObject snapshots = new JSONObject(snapshotResponse).getJSONObject("reverttovmsnapshotresponse");
                 if (snapshots.has("jobid")) {
+                	config.setUserServer();
                     String snapshot = csSnapshotService.vmSnapshotJobResult(snapshots.getString("jobid"));
                     JSONObject jobresult = new JSONObject(snapshot).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
@@ -183,9 +190,11 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
             break;
         case EventTypes.EVENT_VM_SNAPSHOT_DELETE:
             try {
+            	config.setUserServer();
                 String snapshotResponse = csSnapshotService.deleteVMSnapshot(vmSnapshot.getUuid());
                 JSONObject snapshots = new JSONObject(snapshotResponse).getJSONObject("deletevmsnapshotresponse");
                 if (snapshots.has("jobid")) {
+                	config.setUserServer();
                     String snapshot = csSnapshotService.vmSnapshotJobResult(snapshots.getString("jobid"));
                     JSONObject jobresult = new JSONObject(snapshot).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
@@ -210,6 +219,7 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
         List<VmSnapshot> vmsnapshotList = new ArrayList<VmSnapshot>();
         HashMap<String, String> vmsnapshotMap = new HashMap<String, String>();
         vmsnapshotMap.put("listall", "true");
+        config.setServer(1L);
         // 1. Get the list of vm snapshot from CS server using CS connector
         String response = csSnapshotService.listVMSnapshot(vmsnapshotMap);
         JSONArray vmSnapshotListJSON = null;

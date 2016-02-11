@@ -239,6 +239,7 @@ public class EgressRuleServiceImpl implements EgressRuleService {
             HashMap<String, String> ingressMap = new HashMap<String, String>();
             ingressMap.put("ipaddressid", net.getUuid());
             ingressMap.put("listall", "true");
+            configServer.setServer(1L);
             // 1. Get the list of firewalls from CS server using CS connector
             String response = csEgressService.listFirewallRules("json", ingressMap);
             JSONObject listJSON = new JSONObject(response).getJSONObject("listfirewallrulesresponse");

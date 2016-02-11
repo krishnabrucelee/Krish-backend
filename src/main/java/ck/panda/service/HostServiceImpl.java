@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Host;
 import ck.panda.domain.repository.jpa.HostRepository;
 import ck.panda.util.CloudStackHostService;
+import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
@@ -36,6 +37,10 @@ public class HostServiceImpl implements HostService {
     /** CloudStack Host service for getting host connectivity with cloudstack. */
     @Autowired
     private CloudStackHostService hostService;
+
+    /** object(server) created for CloudStackServer. */
+    @Autowired
+    private ConfigUtil configServer;
 
     @Override
     public Host save(Host host) throws Exception {
@@ -79,7 +84,7 @@ public class HostServiceImpl implements HostService {
     public List<Host> findAllFromCSServer() throws Exception {
         List<Host> hostList = new ArrayList<Host>();
         HashMap<String, String> hostMap = new HashMap<String, String>();
-
+        configServer.setServer(1L);
         // 1. Get the list of hosts from CS server using CS connector
         String response = hostService.listHosts("json", hostMap);
         JSONArray hostListJSON = null;

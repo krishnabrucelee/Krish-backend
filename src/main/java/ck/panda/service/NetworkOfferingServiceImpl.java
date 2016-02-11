@@ -15,6 +15,7 @@ import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.repository.jpa.NetworkOfferingRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackNetworkOfferingService;
+import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -40,6 +41,10 @@ public class NetworkOfferingServiceImpl implements NetworkOfferingService {
     /** CloudStack Network Offering service for connectivity with cloudstack. */
     @Autowired
     private CloudStackNetworkOfferingService csNetworkOfferingService;
+
+    /** object(server) created for CloudStackServer. */
+    @Autowired
+    private ConfigUtil configServer;
 
     /** Constant for cloudStack networkOffering list response. */
     private static final String CS_LIST_NETWORK_OFFERING_RESPONSE = "listnetworkofferingsresponse";
@@ -95,7 +100,7 @@ public class NetworkOfferingServiceImpl implements NetworkOfferingService {
 
         List<NetworkOffering> networkOfferingList = new ArrayList<NetworkOffering>();
         HashMap<String, String> networkOfferingMap = new HashMap<String, String>();
-
+        configServer.setServer(1L);
         // 1. Get the list of networkOffering from CS server using CS connector
         String response = csNetworkOfferingService.listNetworkOfferings(CloudStackConstants.JSON, networkOfferingMap);
         JSONArray networkOfferingListJSON = null;

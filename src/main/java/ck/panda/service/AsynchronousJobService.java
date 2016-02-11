@@ -21,6 +21,14 @@ public interface AsynchronousJobService {
     void syncResourceStatus(JSONObject eventObject) throws Exception;
 
     /**
+     * Sync with CloudStack server vm update via action listener Job.
+     *
+     * @param uuid vm uuid.
+     * @throws Exception cloudstack unhandled errors
+     */
+    void syncVMUpdate(String uuid) throws Exception;
+
+    /**
      * Sync with CloudStack server Network offering.
      *
      * @param eventObject network offering response event

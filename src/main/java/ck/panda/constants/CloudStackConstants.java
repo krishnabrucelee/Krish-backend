@@ -433,6 +433,9 @@ public class CloudStackConstants {
     /** Constant for network type. */
     public static final String CS_TYPE = "type";
 
+    /** Constant for CS VM forced stop. */
+    public static final String CS_FORCED_STOP = "forced";
+
     /** Constant for network offering traffic type. */
     public static final String CS_TRAFFIC_TYPE = "traffictype";
 
