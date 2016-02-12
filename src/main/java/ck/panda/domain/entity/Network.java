@@ -195,7 +195,7 @@ public class Network implements Serializable {
     @Column(name = "clean_up")
     private Boolean cleanUpNetwork;
 
-    /** If its true when network ins restarted . */
+    /** To check whether network is restarted . */
     @Column(name = "network_restart")
     private Boolean networkRestart;
 
