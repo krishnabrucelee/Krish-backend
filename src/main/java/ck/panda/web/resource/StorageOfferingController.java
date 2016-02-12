@@ -18,10 +18,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Volume;
 import ck.panda.service.StorageOfferingService;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -38,6 +41,10 @@ public class StorageOfferingController extends CRUDController<StorageOffering> i
     /** Service reference to StorageOffering. */
     @Autowired
     private StorageOfferingService storageOfferingService;
+
+    /** Autowired TokenDetails. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new StorageOffering.", response = StorageOffering.class)
     @Override
@@ -97,7 +104,8 @@ public class StorageOfferingController extends CRUDController<StorageOffering> i
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<StorageOffering> getSearch() throws Exception {
-        return storageOfferingService.findAll();
+        String tags = "";
+        return storageOfferingService.findAllByTags(tags, Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
     }
 
     /**
@@ -111,7 +119,7 @@ public class StorageOfferingController extends CRUDController<StorageOffering> i
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<StorageOffering> getFindByTags(@RequestParam String tags) throws Exception {
-        return storageOfferingService.findAllByTags(tags);
+        return storageOfferingService.findAllByTags(tags, Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
     }
 
     /**
@@ -124,6 +132,6 @@ public class StorageOfferingController extends CRUDController<StorageOffering> i
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<String> getStorageTags() throws Exception {
-        return storageOfferingService.findTags(true);
+        return storageOfferingService.findTags(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)), true);
     }
 }

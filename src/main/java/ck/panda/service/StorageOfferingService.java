@@ -31,19 +31,22 @@ public interface StorageOfferingService extends CRUDService<StorageOffering> {
 
     /**
      * To get Tags list of Storage Offer from cloudstack server.
-     *
+     * @param userId user id
      * @param isActive unique id.
      * @return storage tags
+     * @throws Exception unhandled errors
      */
-    List<String> findTags(Boolean isActive);
+    List<String> findTags(Long userId, Boolean isActive) throws Exception;
 
     /**
      * To get Tags list of Storage Offer from cloudstack server.
      *
      * @param tags tags.
+     * @param userId user id
      * @return storage tags
+     * @throws Exception unhandled errors
      */
-    List<StorageOffering> findAllByTags(String tags);
+    List<StorageOffering> findAllByTags(String tags, Long userId) throws Exception;
 
     /**
      * Soft delete for storage offering.

@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.StorageOffering;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.repository.jpa.StorageOfferingRepository;
 import ck.panda.util.AppValidator;
@@ -213,7 +214,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
      * @throws Exception error at storage creation
      */
     private void createStorage(StorageOffering storage, Errors errors) throws Exception {
-    	config.setUserServer();
+        config.setUserServer();
         String storageOfferings = csStorageService.createStorageOffering(CloudStackConstants.JSON, optional(storage));
         LOGGER.info("storage offer create response " + storageOfferings);
         JSONObject storageOfferingsResponse = new JSONObject(storageOfferings)
@@ -240,7 +241,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
      * @throws Exception error at update storage
      */
     private void updateStorageOffering(StorageOffering storage, Errors errors) throws Exception {
-    	config.setUserServer();
+        config.setUserServer();
         String storageOfferings = csStorageService.updateStorageOffering(String.valueOf(storage.getUuid()), CloudStackConstants.JSON,
                 optional(storage));
         LOGGER.info("storage offer update response " + storageOfferings);
@@ -273,17 +274,26 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     }
 
     @Override
-    public List<String> findTags(Boolean isActive) {
+    public List<String> findTags(Long userId, Boolean isActive) throws Exception {
+        if (!convertEntityService.getOwnerById(userId).getType().equals(User.UserType.ROOT_ADMIN)) {
+            return storageOfferingRepo.findTagsByDomain(convertEntityService.getOwnerById(userId).getDomainId(), isActive);
+            } else {
         return storageOfferingRepo.findByTags(isActive);
-
+        }
     }
 
     @Override
-    public List<StorageOffering> findAllByTags(String tags) {
+    public List<StorageOffering> findAllByTags(String tags, Long userId) throws Exception {
         if (tags.equals("") || tags == null) {
             tags = "ALL";
         }
-        return storageOfferingRepo.findAllByTags(tags, true);
+        if (!convertEntityService.getOwnerById(userId).getType().equals(User.UserType.ROOT_ADMIN)) {
+            return storageOfferingRepo.findAllByTags(tags, convertEntityService.getOwnerById(userId).getDomainId(), true);
+        } else {
+            return (List<StorageOffering>) storageOfferingRepo.findAll();
+        }
+
+
     }
 
     /**
