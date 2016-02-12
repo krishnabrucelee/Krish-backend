@@ -1854,7 +1854,14 @@ public class SyncServiceImpl implements SyncService {
             if (csProjectMap.containsKey(project.getUuid())) {
                 Project csProject = csProjectMap.get(project.getUuid());
                 project.setName(csProject.getName());
-                project.setDepartmentId(csProject.getDepartmentId());
+				// check existing department.
+				if (csProject.getDepartmentId() != project.getDepartmentId()) {
+					project.setDepartmentId(csProject.getDepartmentId());
+					// if department updated for project reset project owner.
+					project.setProjectOwnerId(null);
+					project.setProjectOwner(null);
+					project.setUserList(null);
+				}
                 project.setStatus(csProject.getStatus());
                 project.setDescription(csProject.getDescription());
                 project.setDomainId(csProject.getDomainId());
