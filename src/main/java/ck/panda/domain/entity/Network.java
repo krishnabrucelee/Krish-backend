@@ -39,7 +39,6 @@ import ck.panda.util.JsonUtil;
 @SuppressWarnings("serial")
 public class Network implements Serializable {
 
-
     /** Id of the Network. */
     @Id
     @GeneratedValue
@@ -76,7 +75,7 @@ public class Network implements Serializable {
     @Column(name = "zone_id")
     private Long zoneId;
 
-    /** Project Object for the Network.. */
+    /** Project Object for the Network. */
     @JoinColumn(name = "project_id", referencedColumnName = "id", updatable = false, insertable = false)
     @ManyToOne
     private Project project;
@@ -133,7 +132,7 @@ public class Network implements Serializable {
     @Column(name = "version")
     private Long version;
 
-    /** Status attribute to verify status of the Network . */
+    /** Status attribute to verify status of the Network. */
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private Status status;
@@ -195,14 +194,11 @@ public class Network implements Serializable {
     @Column(name = "clean_up")
     private Boolean cleanUpNetwork;
 
-    /** To check whether network is restarted . */
+    /** To check whether network is restarted. */
     @Column(name = "network_restart")
     private Boolean networkRestart;
 
-    /**
-     * Enum type for Network Type.
-     *
-     */
+    /** Enum type for Network Type. */
     public enum NetworkType {
         /** Network type be Shared. */
         Shared,
@@ -210,24 +206,16 @@ public class Network implements Serializable {
         Isolated,
     }
 
-    /**
-     * Enum type for Network Status.
-     *
-     */
+    /** Enum type for Network Status. */
     public enum Status {
-
         /** Network will be in a Implemented State. */
         IMPLEMENTED,
-
         /** Network will be in a Allocated State. */
         ALLOCATED,
-
         /** Network will be in a destroyed State. */
         DESTROY,
-
         /** Network will be in a Shutdown State. */
         SHUTDOWN,
-
         /** Network will be in a Setup State. */
         SETUP
     }
@@ -842,7 +830,7 @@ public class Network implements Serializable {
     }
 
     /**
-     * Set the vmInstanceId .
+     * Set the vmInstanceId.
      *
      * @param vmInstanceId to set
      */
@@ -867,7 +855,6 @@ public class Network implements Serializable {
     public void setCleanUpNetwork(Boolean cleanUpNetwork) {
         this.cleanUpNetwork = cleanUpNetwork;
     }
-
 
     /**
      * Get the network to restart.
