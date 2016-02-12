@@ -29,7 +29,7 @@ public class TokenService {
     private static final Cache REST_API_AUTH_TOKEN = CacheManager.getInstance().getCache("restApiAuthTokenCache");
 
     /** Scheduler time constant. */
-    public static final int FOUR_HOUR_IN_MILLISECONDS = 4 * 60 * 60 * 1000;
+    public static final int FOUR_HOUR_IN_MILLISECONDS = 15 * 60 * 1000;
 
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
