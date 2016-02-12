@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.ComputeOffering;
+import ck.panda.domain.entity.Network;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
@@ -57,11 +58,23 @@ public interface ComputeOfferingService extends CRUDService<ComputeOffering> {
     ComputeOffering findByName(String name);
 
     /**
-     * Find compute offering by isActive status.
+     * Find compute offering by isActive.
      *
-     * @param isActive offer
-     * @return compute offer
-     * @throws Exception unhandled errors.
+     * @param isActive status of the compute offer
+     * @param userId of the user.
+     * @return list of compute offering.
+     * @throws Exception if error occurs.
      */
-    List<ComputeOffering> findByIsActive(Boolean isActive) throws Exception;
-}
+    List<ComputeOffering> findByIsActive(Boolean isActive, Long userId) throws Exception;
+
+    /**
+     * List compute offering by domain.
+     *
+     * @param domainId of the domain.
+     * @param isActive status of the domain.
+     * @return compute offering list.
+     * @throws Exception if error occurs.
+     */
+    List<ComputeOffering> findByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception;
+
+   }

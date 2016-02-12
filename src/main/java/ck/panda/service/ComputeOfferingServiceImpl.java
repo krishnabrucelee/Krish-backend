@@ -14,6 +14,8 @@ import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.ComputeOfferingCost;
+import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.repository.jpa.ComputeOfferingRepository;
 import ck.panda.util.AppValidator;
@@ -58,6 +60,10 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     /** Compute offering cost service reference. */
     @Autowired
     private ComputeOfferingCostService costService;
+
+    /** Convert Entity service for reference. */
+    @Autowired
+    private ConvertEntityService convertEntityService;
 
     /** Constant for service offering id. */
     private static final String CS_SERVICE_OFFERING = "serviceoffering";
@@ -246,8 +252,11 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
          CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_MAX_IOPS, compute.getMaxIops(), computeMap);
          CloudStackOptionalUtil.updateOptionalIntegerValue(CS_NETWORK_RATE, compute.getNetworkRate(), computeMap);
          CloudStackOptionalUtil.updateOptionalBooleanValue(CS_OFFER_HA, compute.getIsHighAvailabilityEnabled(), computeMap);
-
-        return computeMap;
+         if (compute.getDomainId() != null) {
+             Domain domain = convertEntityService.getDomainById(compute.getDomainId());
+             CloudStackOptionalUtil.updateOptionalBooleanValue(domain.getUuid(), compute.getIsHighAvailabilityEnabled(), computeMap);
+         }
+         return computeMap;
     }
 
     @Override
@@ -288,6 +297,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
      */
     public Page<ComputeOffering> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
         return computeRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
+
     }
 
     /**
@@ -314,9 +324,14 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     }
 
     @Override
-    public List<ComputeOffering> findByIsActive(Boolean isActive) throws Exception {
-        return computeRepo.findByIsActive(true);
-    }
+    public List<ComputeOffering> findByIsActive(Boolean isActive, Long userId ) throws Exception {
+        User user = convertEntityService.getOwnerById(userId);
+        // Check the user is not a root and admin and set the domain value from login detail
+        if (user.getType().equals(User.UserType.ROOT_ADMIN)) {
+            return computeRepo.findByIsActive(true);
+        } else {
+            return computeRepo.findByDomainAndIsActive(user.getDomainId(), true);
+        }    }
 
     /**
      * Compute offering cost calculation base on different plans.
@@ -354,6 +369,11 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
          computeCost.addAll(persistCompute.getComputeCost());
          compute.setComputeCost(computeCost);
          return computeRepo.save(compute);
+    }
+
+    @Override
+    public List<ComputeOffering> findByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception {
+        return computeRepo.findByDomainAndIsActive(domainId, true);
     }
 
 }
