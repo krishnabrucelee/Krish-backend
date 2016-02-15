@@ -12,7 +12,7 @@ import ck.panda.util.domain.CRUDService;
 public interface StorageOfferingCostService extends CRUDService<StorageOfferingCost> {
 
     /**
-     * Find storage cost and storage offering id.
+     * Find Storage offering cost by passing total cost value and storage offering id.
      *
      * @param storageId of the offering.
      * @param totalCost for the plan
