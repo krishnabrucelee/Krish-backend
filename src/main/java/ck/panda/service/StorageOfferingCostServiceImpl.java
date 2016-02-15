@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.StorageOfferingCost;
 import ck.panda.domain.repository.jpa.StorageOfferingCostRepository;
-import ck.panda.util.AppValidator;
 import ck.panda.util.JsonUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
@@ -16,10 +15,6 @@ import ck.panda.util.domain.vo.PagingAndSorting;
  */
 @Service
 public class StorageOfferingCostServiceImpl implements StorageOfferingCostService {
-
-    /** Validator attribute. */
-    @Autowired
-    private AppValidator validator;
 
     /** Storage offering cost repository reference. */
     @Autowired
@@ -33,7 +28,6 @@ public class StorageOfferingCostServiceImpl implements StorageOfferingCostServic
     @Override
     public StorageOfferingCost update(StorageOfferingCost cost) throws Exception {
             return costRepo.save(cost);
-
     }
 
     @Override
@@ -64,7 +58,6 @@ public class StorageOfferingCostServiceImpl implements StorageOfferingCostServic
 
     @Override
     public Double totalcost(StorageOfferingCost storageCost) throws Exception {
-
             Double instanceStoppageCostIops = JsonUtil.getDoubleValue(storageCost.getCostPerIops());
             Double instanceStoppageCostPerIops = JsonUtil.getDoubleValue(storageCost.getCostPerMonth());
             Double instanceStoppageCostforGB = JsonUtil.getDoubleValue(storageCost.getCostGbPerMonth());

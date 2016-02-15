@@ -11,7 +11,7 @@ import ck.panda.domain.entity.StorageOfferingCost;
 public interface StorageOfferingCostRepository extends PagingAndSortingRepository<StorageOfferingCost, Long> {
 
     /**
-     * Find Storage offering cost by total cost and storage offering id.
+     * Find Storage offering cost by passing total cost value and storage offering id.
      *
      * @param storageId storage offering id.
      * @param totalCost of the storage offering.
