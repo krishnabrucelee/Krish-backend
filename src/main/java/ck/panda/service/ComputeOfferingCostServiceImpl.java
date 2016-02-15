@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.ComputeOfferingCost;
 import ck.panda.domain.repository.jpa.ComputeOfferingCostRepository;
 import ck.panda.util.AppValidator;
+import ck.panda.util.JsonUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -89,6 +90,30 @@ public class ComputeOfferingCostServiceImpl implements ComputeOfferingCostServic
 
     @Override
     public List<ComputeOfferingCost> findAll() throws Exception {
-        return null;
+        return (List<ComputeOfferingCost>) costRepo.findAll();
+    }
+
+    @Override
+    public Double totalcost(ComputeOfferingCost computecost) throws Exception {
+            Double instanceRunningCostVcpu = JsonUtil.getDoubleValue(computecost.getInstanceRunningCostVcpu());
+            Double instanceRunningCostMemory = JsonUtil.getDoubleValue(computecost.getInstanceRunningCostMemory());
+            Double instanceRunningCostPerIops = JsonUtil.getDoubleValue(computecost.getInstanceRunningCostPerIops());
+            Double instanceRunningCostPerMB =  JsonUtil.getDoubleValue(computecost.getInstanceRunningCostPerMB());
+            Double instanceRunningCostPerVcpu = JsonUtil.getDoubleValue(computecost.getInstanceRunningCostPerVcpu());
+            Double instanceRunningCostIops = JsonUtil.getDoubleValue(computecost.getInstanceStoppageCostIops());
+            Double instanceStoppageCostVcpu = JsonUtil.getDoubleValue(computecost.getInstanceStoppageCostVcpu());
+            Double instanceStoppageCostMemory = JsonUtil.getDoubleValue(computecost.getInstanceStoppageCostMemory());
+            Double instanceStoppageCostIops = JsonUtil.getDoubleValue(computecost.getInstanceStoppageCostIops());
+            Double instanceStoppageCostPerIops = JsonUtil.getDoubleValue(computecost.getInstanceStoppageCostPerIops());
+            Double instanceStoppageCostPerVcpu = JsonUtil.getDoubleValue(computecost.getInstanceStoppageCostPerVcpu());
+            Double total = instanceRunningCostVcpu + instanceRunningCostMemory + instanceRunningCostPerIops + instanceRunningCostPerMB
+                    + instanceRunningCostPerVcpu + instanceRunningCostIops
+                    + instanceStoppageCostVcpu + instanceStoppageCostMemory + instanceStoppageCostIops + instanceStoppageCostPerIops + instanceStoppageCostPerVcpu;
+            return total;
+    }
+
+    @Override
+    public ComputeOfferingCost findByCostAndId(Long computeId, Double totalCost) {
+        return costRepo.findByComputeAndTotalCost(computeId, totalCost);
     }
 }

@@ -13,6 +13,9 @@ import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.ComputeOffering;
+import ck.panda.domain.entity.ComputeOfferingCost;
+import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.repository.jpa.ComputeOfferingRepository;
 import ck.panda.util.AppValidator;
@@ -53,6 +56,14 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     /** Virtual Machine service reference. */
     @Autowired
     private VirtualMachineService vmService;
+
+    /** Compute offering cost service reference. */
+    @Autowired
+    private ComputeOfferingCostService costService;
+
+    /** Convert Entity service for reference. */
+    @Autowired
+    private ConvertEntityService convertEntityService;
 
     /** Constant for service offering id. */
     private static final String CS_SERVICE_OFFERING = "serviceoffering";
@@ -115,6 +126,13 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
                 JSONObject serviceOffering = createComputeResponseJSON.getJSONObject(CS_SERVICE_OFFERING);
                 compute.setUuid((String) serviceOffering.get(CloudStackConstants.CS_ID));
                 compute.setIsActive(true);
+                // Get compute offering cost.
+                ComputeOfferingCost cost = compute.getComputeCost().get(0);
+                // Get the total cost
+                Double totalCost = costService.totalcost(cost);
+                // storing in our DB.
+                cost.setTotalCost(totalCost);
+                cost.setComputeId(compute.getId());
                 return computeRepo.save(compute);
             }
         } else {
@@ -140,6 +158,8 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
                 // convert json string to json object
                 JSONObject editComputeJSON = new JSONObject(editComputeResponse)
                         .getJSONObject(CS_UPDATE_COMPUTEOFFERING).getJSONObject(CS_SERVICE_OFFERING);
+                //cost calculation for compute offering.
+                this.costCalculation(compute);
             }
         }
        return computeRepo.save(compute);
@@ -232,8 +252,11 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
          CloudStackOptionalUtil.updateOptionalIntegerValue(CloudStackConstants.CS_MAX_IOPS, compute.getMaxIops(), computeMap);
          CloudStackOptionalUtil.updateOptionalIntegerValue(CS_NETWORK_RATE, compute.getNetworkRate(), computeMap);
          CloudStackOptionalUtil.updateOptionalBooleanValue(CS_OFFER_HA, compute.getIsHighAvailabilityEnabled(), computeMap);
-
-        return computeMap;
+         if (compute.getDomainId() != null) {
+             Domain domain = convertEntityService.getDomainById(compute.getDomainId());
+             CloudStackOptionalUtil.updateOptionalBooleanValue(domain.getUuid(), compute.getIsHighAvailabilityEnabled(), computeMap);
+         }
+         return computeMap;
     }
 
     @Override
@@ -274,6 +297,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
      */
     public Page<ComputeOffering> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
         return computeRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
+
     }
 
     /**
@@ -300,8 +324,56 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     }
 
     @Override
-    public List<ComputeOffering> findByIsActive(Boolean isActive) throws Exception {
-        return computeRepo.findByIsActive(true);
+    public List<ComputeOffering> findByIsActive(Boolean isActive, Long userId ) throws Exception {
+        User user = convertEntityService.getOwnerById(userId);
+        // Check the user is not a root and admin and set the domain value from login detail
+        if (user.getType().equals(User.UserType.ROOT_ADMIN)) {
+            return computeRepo.findByIsActive(true);
+        } else {
+            return computeRepo.findByDomainAndIsActive(user.getDomainId(), true);
+        }    }
+
+    /**
+     * Compute offering cost calculation base on different plans.
+     *
+     * @param compute object of the compute offering.
+     * @return compute offering cost.
+     * @throws Exception if error occurs.
+     */
+    private ComputeOffering costCalculation(ComputeOffering compute) throws Exception {
+        List<ComputeOfferingCost> computeCost = new ArrayList<ComputeOfferingCost>();
+        ComputeOffering persistCompute = find(compute.getId());
+        ComputeOfferingCost cost = compute.getComputeCost().get(0);
+        Double totalCost = costService.totalcost(cost);
+        ComputeOfferingCost computeOfferingcost = costService.findByCostAndId(compute.getId(),totalCost);
+        if (computeOfferingcost == null) {
+             computeOfferingcost = new ComputeOfferingCost();
+             computeOfferingcost.setComputeId(compute.getId());
+             computeOfferingcost.setInstanceRunningCostIops(cost.getInstanceRunningCostIops());
+             computeOfferingcost.setInstanceRunningCostMemory(cost.getInstanceRunningCostMemory());
+             computeOfferingcost.setInstanceRunningCostVcpu(cost.getInstanceRunningCostVcpu());
+             computeOfferingcost.setInstanceStoppageCostVcpu(cost.getInstanceStoppageCostVcpu());
+             computeOfferingcost.setInstanceStoppageCostMemory(cost.getInstanceStoppageCostMemory());
+             computeOfferingcost.setInstanceStoppageCostIops(cost.getInstanceStoppageCostIops());
+             computeOfferingcost.setInstanceRunningCostPerMB(cost.getInstanceRunningCostPerMB());
+             computeOfferingcost.setInstanceRunningCostPerVcpu(cost.getInstanceRunningCostPerVcpu());
+             computeOfferingcost.setInstanceRunningCostPerIops(cost.getInstanceRunningCostPerIops());
+             computeOfferingcost.setInstanceStoppageCostPerIops(cost.getInstanceStoppageCostPerIops());
+             computeOfferingcost.setInstanceStoppageCostPerMB(cost.getInstanceStoppageCostPerMB());
+             computeOfferingcost.setInstanceStoppageCostPerVcpu(cost.getInstanceStoppageCostPerVcpu());
+             computeOfferingcost.setTotalCost(totalCost);
+             computeOfferingcost.setSetupCost(cost.getSetupCost());
+             computeOfferingcost = costService.save(computeOfferingcost);
+             computeCost.add(computeOfferingcost);
+         }
+         computeCost.addAll(persistCompute.getComputeCost());
+         compute.setComputeCost(computeCost);
+         return computeRepo.save(compute);
+    }
+
+    @Override
+    public List<ComputeOffering> findByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception {
+        return computeRepo.findByDomainAndIsActive(domainId, true);
     }
 
 }
