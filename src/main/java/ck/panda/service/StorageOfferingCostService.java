@@ -1,20 +1,18 @@
 package ck.panda.service;
 
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.ComputeOfferingCost;
 import ck.panda.domain.entity.StorageOfferingCost;
 import ck.panda.util.domain.CRUDService;
 
 /**
- * Service class for Compute Offering cost.
+ * Service class for Storage Offering cost.
  *
  */
 @Service
 public interface StorageOfferingCostService extends CRUDService<StorageOfferingCost> {
 
     /**
-     * Find storage cost and id.
+     * Find storage cost and storage offering id.
      *
      * @param storageId of the offering.
      * @param totalCost for the plan

@@ -17,7 +17,7 @@ public interface StorageOfferingCostRepository extends PagingAndSortingRepositor
      * @param totalCost of the storage offering.
      * @return storage offering cost.
      */
-    @Query(value = "SELECT cost FROM StorageOfferingCost cost WHERE cost.storageId= :storageId AND cost.totalCost = :totalcost")
+    @Query(value = "SELECT cost FROM StorageOfferingCost cost WHERE cost.storageId = :storageId AND cost.totalCost = :totalcost")
     StorageOfferingCost findByStorageAndTotalCost(@Param("storageId") Long storageId,
             @Param("totalcost") Double totalCost);
 }
