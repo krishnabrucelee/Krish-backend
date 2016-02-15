@@ -24,8 +24,11 @@ public class EventTypes {
     /** VM Events . */
     public static final String EVENT_VM_START = "VM.START";
 
-    /** VM Events . */
+    /** VM Project Events . */
     public static final String EVENT_PROJECT = "PROJECT.";
+
+    /** VM Project Update Events . */
+    public static final String EVENT_PROJECT_UPDATE = "PROJECT.UPDATE";
 
     /** VM Events . */
     public static final String EVENT_VM_STOP = "VM.STOP";

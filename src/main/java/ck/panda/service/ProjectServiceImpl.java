@@ -42,6 +42,12 @@ public class ProjectServiceImpl implements ProjectService {
     /** Constant used for project response. */
     public static final String RESPONSE_PROJECT = "project";
 
+    /** Constant used for project account response. */
+    public static final String RESPONSE_PROJECT_ACCOUNT = "projectaccount";
+
+    /** Constant used for project accounts list response. */
+    public static final String LIST_PROJECT_ACCOUNTS = "listprojectaccountsresponse";
+
     /** Validator attribute. */
     @Autowired
     private AppValidator validator;
@@ -146,15 +152,16 @@ public class ProjectServiceImpl implements ProjectService {
                         convertEntityService.getDepartmentById(project.getDepartmentId()).getUserName());
                 config.setUserServer();
                 // CS API call for update existing project.
-                String csResponse = cloudStackProjectService.updateProject(project.getUuid(), project.getDescription(),
-                        CloudStackConstants.JSON, optional);
-                JSONObject csProject = new JSONObject(csResponse).getJSONObject("updateprojectresponse");
-                // Check whether API response has error or not.
-                if (csProject.has(CloudStackConstants.CS_ERROR_CODE)) {
-                    throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
-                            csProject.getString(CloudStackConstants.CS_ERROR_TEXT));
-                }
-                // Project owner update.
+				String csResponse = cloudStackProjectService.updateProject(project.getUuid(), project.getDescription(),
+						CloudStackConstants.JSON, optional);
+				JSONObject csProject = new JSONObject(csResponse)
+						.getJSONObject(CloudStackConstants.CS_PROJECT_UPDATE_RESPONSE);
+				// Check whether API response has error or not.
+				if (csProject.has(CloudStackConstants.CS_ERROR_CODE)) {
+					throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
+							csProject.getString(CloudStackConstants.CS_ERROR_TEXT));
+				}
+			      // Project owner update.
                 if (project.getProjectOwnerId() != null) {
                     users.add(convertEntityService.getOwnerById(project.getProjectOwnerId()));
                 }
@@ -168,8 +175,20 @@ public class ProjectServiceImpl implements ProjectService {
                 }
                 project.setUserList(users);
             }
-
-        }
+			String response = cloudStackProjectService.listProjectAccounts(CloudStackConstants.JSON,
+					CloudStackConstants.CS_ACCOUNT_ROLE, project.getUuid());
+			JSONArray projectAccountListJSON = null;
+			JSONObject responseObject = new JSONObject(response).getJSONObject(LIST_PROJECT_ACCOUNTS);
+			if (responseObject.has(RESPONSE_PROJECT_ACCOUNT)) {
+				projectAccountListJSON = responseObject.getJSONArray(RESPONSE_PROJECT_ACCOUNT);
+				// 2. Iterate the json list, convert the single json entity to Project account.
+				for (int i = 0, size = projectAccountListJSON.length(); i < size; i++) {
+					String deleteResponse = cloudStackProjectService.deleteAccountFromProject(project.getUuid(),
+							projectAccountListJSON.getJSONObject(i).getString(CloudStackConstants.CS_ACCOUNT),
+							CloudStackConstants.JSON);
+				}
+			}
+		}
         // Update project entity.
         return projectRepository.save(project);
     }

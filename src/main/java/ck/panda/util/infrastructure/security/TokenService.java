@@ -14,11 +14,9 @@ import ck.panda.util.DateConvertUtil;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
-import net.sf.ehcache.config.CacheConfiguration;
 
 /**
  * Token Service.
- *
  */
 public class TokenService {
 
@@ -29,7 +27,8 @@ public class TokenService {
     private static final Cache REST_API_AUTH_TOKEN = CacheManager.getInstance().getCache("restApiAuthTokenCache");
 
     /** Scheduler time constant. */
-    public static final int FOUR_HOUR_IN_MILLISECONDS = 4 * 60 * 60 * 1000;
+    @Value(value = "${login.timeout.inmilliseconds}")
+    public static int LOGIN_TIMEOUT_IN_MILLISECONDS;
 
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
