@@ -665,11 +665,12 @@ public class TemplateServiceImpl implements TemplateService {
     public Page<Template> findAllByType(PagingAndSorting pagingAndSorting, String type, Boolean featured, Boolean shared) {
         Page<Template> templates = null;
          if (type.equals(TEMPLATE_FEATURED)) {
-             templates = templateRepository.findTemplateByFeatured(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), featured, shared, true);
+             templates = templateRepository.findTemplateByFeatured(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), featured, shared, Status.ACTIVE, true);
          } else if (type.equals(TEMPLATE_COMMUNITY)) {
-             templates = templateRepository.findTemplateByCommunity(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), shared, true);
+             templates = templateRepository.findTemplateByCommunity(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), shared, Status.ACTIVE, true);
          }
          return templates;
+    }
     /**
      * Add cost for newly created template.
      *

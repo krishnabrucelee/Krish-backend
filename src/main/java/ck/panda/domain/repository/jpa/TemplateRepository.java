@@ -211,10 +211,11 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param featured template type
      * @param share public type
      * @param isActive status
+     * @param status status of the template
      * @return template
      */
-    @Query(value = "SELECT template FROM Template template WHERE template.type <>:type AND template.featured =:featured AND template.share =:share AND template.isActive =:isActive")
-    Page<Template> findTemplateByFeatured(@Param("type") TemplateType type, Pageable pageable, @Param("featured") Boolean featured, @Param("share") Boolean share, @Param("isActive") Boolean isActive);
+    @Query(value = "SELECT template FROM Template template WHERE template.type <>:type AND template.featured =:featured AND template.share =:share AND template.status =:status AND template.isActive =:isActive")
+    Page<Template> findTemplateByFeatured(@Param("type") TemplateType type, Pageable pageable, @Param("featured") Boolean featured, @Param("share") Boolean share, @Param("status") Status status, @Param("isActive") Boolean isActive);
 
     /**
      * Get the template by the type community.
@@ -223,8 +224,9 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param pageable page
      * @param share public type
      * @param isActive status
+     * @param status status of the template
      * @return template
      */
-    @Query(value = "SELECT template FROM Template template WHERE template.type <>:type AND template.share =:share AND template.isActive =:isActive")
-    Page<Template> findTemplateByCommunity(@Param("type") TemplateType type, Pageable pageable, @Param("share") Boolean share, @Param("isActive") Boolean isActive);
+    @Query(value = "SELECT template FROM Template template WHERE template.type <>:type AND template.share =:share AND template.status =:status AND template.isActive =:isActive")
+    Page<Template> findTemplateByCommunity(@Param("type") TemplateType type, Pageable pageable, @Param("share") Boolean share, @Param("status") Status status, @Param("isActive") Boolean isActive);
 }
