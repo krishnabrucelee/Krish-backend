@@ -94,10 +94,14 @@ public class TemplateController extends CRUDController<Template> implements ApiC
             Page<Template> pageResponse = templateService.findAll(page);
             response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
             return pageResponse.getContent();
-        } else {
+        } else if (type.contains(CloudStackConstants.ISO_TEMPLATE_NAME)) {
             Page<Template> pageResponse = templateService.findAllIso(page);
             response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
             return pageResponse.getContent();
+        } else {
+             Page<Template> pageResponse = templateService.findAllByType(page, type, true, true);
+             response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+             return pageResponse.getContent();
         }
     }
 
