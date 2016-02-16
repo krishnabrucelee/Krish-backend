@@ -207,8 +207,10 @@ public class ActionListener implements MessageListener {
             LOGGER.debug("VNC sync", eventMessage);
             break;
         case EventTypes.EVENT_PROJECT:
-            LOGGER.debug("VNC sync", eventMessage);
-            syncService.syncProject();
+			LOGGER.debug("VNC sync", eventMessage);
+			if (eventName.contains(EventTypes.EVENT_PROJECT_UPDATE)) {
+				syncService.syncProject();
+			}
             break;
         case EventTypes.EVENT_VPC:
             LOGGER.debug("VPC sync", eventMessage);

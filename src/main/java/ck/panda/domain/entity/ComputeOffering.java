@@ -1,13 +1,14 @@
-
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
@@ -15,10 +16,11 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.joda.time.DateTime;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
@@ -26,6 +28,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -38,6 +42,7 @@ import ck.panda.util.JsonUtil;
 @Entity
 @Table(name = "service_offerings")
 @SuppressWarnings("serial")
+@EntityListeners(AuditingEntityListener.class)
 public class ComputeOffering implements Serializable {
 
     /** The id of the Compute offering table. */
@@ -168,11 +173,17 @@ public class ComputeOffering implements Serializable {
 
     /** Created date and time. */
     @CreatedDate
-    private DateTime createdDateTime;
+    @Column(name = "created_date_time")
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime createdDateTime;
 
     /** Last modified date and time. */
     @LastModifiedDate
-    private DateTime lastModifiedDateTime;
+    @Column(name = "updated_date_time")
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime updatedDateTime;
 
     /** Version attribute to handle optimistic locking. */
     @Version
@@ -189,8 +200,8 @@ public class ComputeOffering implements Serializable {
     private DiskIo diskIo;
 
     /** cost of the compute offering. */
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "compute_id")
+    @OneToMany(cascade = CascadeType.ALL)
+    @OrderBy("id DESC")
     private List<ComputeOfferingCost> computeCost;
 
     /**
@@ -606,41 +617,7 @@ public class ComputeOffering implements Serializable {
         this.diskIo = diskIo;
     }
 
-    /**
-     * Get created date time.
-     *
-     * @return the createdDateTime
-     */
-    public DateTime getCreatedDateTime() {
-        return createdDateTime;
-    }
 
-    /**
-     * Get last modified time.
-     *
-     * @return the lastModifiedDateTime
-     */
-    public DateTime getLastModifiedDateTime() {
-        return lastModifiedDateTime;
-    }
-
-    /**
-     * Set the createdDateTime .
-     *
-     * @param createdDateTime to set
-     */
-    public void setCreatedDateTime(DateTime createdDateTime) {
-        this.createdDateTime = createdDateTime;
-    }
-
-    /**
-     * Set the lastModifiedDateTime.
-     *
-     * @param lastModifiedDateTime to set
-     */
-    public void setLastModifiedDateTime(DateTime lastModifiedDateTime) {
-        this.lastModifiedDateTime = lastModifiedDateTime;
-    }
 
     /**
      * Set the status.
@@ -854,6 +831,42 @@ public class ComputeOffering implements Serializable {
      */
     public void setComputeCost(List<ComputeOfferingCost> computeCost) {
         this.computeCost = computeCost;
+    }
+
+    /**
+     * Get the created date and time.
+     *
+     * @return createdDateTime
+     */
+    public ZonedDateTime getCreatedDateTime() {
+        return createdDateTime;
+    }
+
+    /**
+     * Set the created date and time.
+     *
+     * @param createdDateTime the DateTime to set
+     */
+    public void setCreatedDateTime(ZonedDateTime createdDateTime) {
+        this.createdDateTime = createdDateTime;
+    }
+
+    /**
+     * Get the updated date and time.
+     *
+     * @return updatedDateTime
+     */
+    public ZonedDateTime getUpdatedDateTime() {
+        return updatedDateTime;
+    }
+
+    /**
+     * Set the updated date and time.
+     *
+     * @param updatedDateTime the DateTime to set
+     */
+    public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
+        this.updatedDateTime = updatedDateTime;
     }
 
     /**

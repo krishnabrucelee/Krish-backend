@@ -21,6 +21,7 @@ import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.Template.Format;
 import ck.panda.domain.entity.Template.Status;
 import ck.panda.domain.entity.Template.TemplateType;
+import ck.panda.domain.entity.TemplateCost;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.TemplateRepository;
@@ -68,6 +69,10 @@ public class TemplateServiceImpl implements TemplateService {
     /** Hypervisor service reference. */
     @Autowired
     private HypervisorService hypervisorService;
+
+    /** Template cost service reference. */
+    @Autowired
+    private TemplateCostService templateCostService;
 
     /** Template repository reference. */
     @Autowired
@@ -136,7 +141,13 @@ public class TemplateServiceImpl implements TemplateService {
                     template.setBootable(true);
                 }
                 csRegisterTemplate(template, errors);
-                return templateRepository.save(template);
+                List<TemplateCost> templateCostList = saveTemplateCost(template);
+                template.setTemplateCost(templateCostList);
+                Template templateCS = templateRepository.save(template);
+                TemplateCost templateCost = templateCostService.find(templateCS.getTemplateCost().get(0).getId());
+                templateCost.setTemplateCostId(templateCS.getId());
+                templateCostService.save(templateCost);
+                return templateCS;
             }
         } else {
             return templateRepository.save(template);
@@ -144,6 +155,7 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#template.getSyncFlag(), 'EDIT_TEMPLATE')")
     public Template update(Template template) throws Exception {
         if (template.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity(CloudStackConstants.TEMPLATE_NAME, template);
@@ -154,6 +166,8 @@ public class TemplateServiceImpl implements TemplateService {
                 throw new ApplicationException(errors);
             } else {
                 csUpdateTemplate(template);
+                List<TemplateCost> templateCostList = updateTemplateCost(template);
+                template.setTemplateCost(templateCostList);
                 return templateRepository.save(template);
             }
         } else {
@@ -656,5 +670,42 @@ public class TemplateServiceImpl implements TemplateService {
              templates = templateRepository.findTemplateByCommunity(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), shared, true);
          }
          return templates;
+    /**
+     * Add cost for newly created template.
+     *
+     * @param template entity object
+     * @return template cost list
+     * @throws Exception unhandled errors.
+     */
+    public List<TemplateCost> saveTemplateCost(Template template) throws Exception {
+        List<TemplateCost> templateCostList = new ArrayList<TemplateCost>();
+        Integer tempCost = template.getTemplateCost().get(0).getCost();
+        TemplateCost templatecost = new TemplateCost();
+        templatecost.setCost(tempCost);
+        templateCostList.add(templatecost);
+        return templateCostList;
+    }
+
+    /**
+     * Update cost for existing template.
+     *
+     * @param template entity object
+     * @return template cost list
+     * @throws Exception unhandled errors.
+     */
+    public List<TemplateCost> updateTemplateCost(Template template) throws Exception {
+        List<TemplateCost> templateCostList = new ArrayList<TemplateCost>();
+        Integer tempCost = template.getTemplateCost().get(0).getCost();
+        Template persistTemplate = find(template.getId());
+        TemplateCost templatecost = templateCostService.findByTemplateCost(template.getId(), tempCost);
+        if (templatecost == null) {
+            templatecost = new TemplateCost();
+            templatecost.setCost(tempCost);
+            templatecost.setTemplateCostId(template.getId());
+            templatecost = templateCostService.save(templatecost);
+            templateCostList.add(templatecost);
+        }
+        templateCostList.addAll(persistTemplate.getTemplateCost());
+        return templateCostList;
     }
 }

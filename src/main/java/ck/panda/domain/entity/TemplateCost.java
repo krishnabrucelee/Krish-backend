@@ -1,17 +1,21 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Version;
-import org.joda.time.DateTime;
+import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  * Template cost entity to set the cost of the individual template.
@@ -19,13 +23,19 @@ import org.springframework.data.annotation.LastModifiedDate;
  */
 @Entity
 @Table(name = "templatecosts")
+@EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class TemplateCost implements Serializable {
+
     /** Id of the template cost. */
     @Id
     @GeneratedValue
     @Column(name = "id")
     private Long id;
+
+    /** Id of the template. */
+    @Column(name = "template_cost_id")
+    private Long templateCostId;
 
     /** Cost of the template. */
     @Column(name = "cost")
@@ -38,23 +48,27 @@ public class TemplateCost implements Serializable {
 
     /** Created by user. */
     @CreatedBy
-    @Column(name = "created_by")
+    @Column(name = "created_user_id")
     private Long createdBy;
 
     /** Last updated by user. */
     @LastModifiedBy
-    @Column(name = "updated_by")
+    @Column(name = "updated_user_id")
     private Long updatedBy;
 
     /** Created date and time. */
     @CreatedDate
     @Column(name = "created_date_time")
-    private DateTime createdDateTime;
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime createdDateTime;
 
-    /** Last updated date and time. */
+    /** modified date and time. */
     @LastModifiedDate
     @Column(name = "updated_date_time")
-    private DateTime updatedDateTime;
+    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private ZonedDateTime updatedDateTime;
 
     /**
      * Get the id.
@@ -72,6 +86,24 @@ public class TemplateCost implements Serializable {
      */
     public void setId(Long id) {
         this.id = id;
+    }
+
+    /**
+     * Get the template cost id.
+     *
+     * @return templateCostId
+     */
+    public Long getTemplateCostId() {
+        return templateCostId;
+    }
+
+    /**
+     * Set the template cost id.
+     *
+     * @param templateCostId - the Long to set
+     */
+    public void setTemplateCostId(Long templateCostId) {
+        this.templateCostId = templateCostId;
     }
 
     /**
@@ -151,7 +183,7 @@ public class TemplateCost implements Serializable {
      *
      * @return the createdDateTime
      */
-    public DateTime getCreatedDateTime() {
+    public ZonedDateTime getCreatedDateTime() {
         return createdDateTime;
     }
 
@@ -160,7 +192,7 @@ public class TemplateCost implements Serializable {
      *
      * @param createdDateTime - the DateTime to set
      */
-    public void setCreatedDateTime(DateTime createdDateTime) {
+    public void setCreatedDateTime(ZonedDateTime createdDateTime) {
         this.createdDateTime = createdDateTime;
     }
 
@@ -169,7 +201,7 @@ public class TemplateCost implements Serializable {
      *
      * @return updatedDateTime
      */
-    public DateTime getUpdatedDateTime() {
+    public ZonedDateTime getUpdatedDateTime() {
         return updatedDateTime;
     }
 
@@ -178,8 +210,7 @@ public class TemplateCost implements Serializable {
      *
      * @param updatedDateTime - the DateTime to set
      */
-    public void setUpdatedDateTime(DateTime updatedDateTime) {
+    public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
-
 }

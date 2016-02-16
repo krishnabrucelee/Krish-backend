@@ -20,7 +20,9 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.ComputeOffering;
+import ck.panda.domain.entity.Network;
 import ck.panda.service.ComputeOfferingService;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -38,6 +40,10 @@ public class ComputeOfferingController extends CRUDController<ComputeOffering> i
     /** Service reference to ComputeOffering. */
     @Autowired
     private ComputeOfferingService computeService;
+
+    /** Token Detail Utilities. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new ComputeOffering.", response = ComputeOffering.class)
     @Override
@@ -89,7 +95,7 @@ public class ComputeOfferingController extends CRUDController<ComputeOffering> i
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<ComputeOffering> getSearch() throws Exception {
-        return computeService.findByIsActive(true);
+        return computeService.findByIsActive(true, Long.parseLong(tokenDetails.getTokenDetails("id")));
     }
 
     @Override
@@ -100,4 +106,19 @@ public class ComputeOfferingController extends CRUDController<ComputeOffering> i
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
-}
+
+    /**
+     * List compute offering by domain.
+     *
+     * @param domainId of the domain.
+     * @return list of compute offering.
+     * @throws Exception if erorr occurs.
+     */
+    @RequestMapping(value = "listbydomain", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<ComputeOffering> findByDomain(@RequestParam("domainId") Long domainId) throws Exception {
+        return computeService.findByDomainAndIsActive(domainId, true);
+    }
+
+  }
