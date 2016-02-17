@@ -202,4 +202,31 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      */
     @Query(value = "SELECT template FROM Template template WHERE template.type <>:type AND template.isActive =:isActive")
     List<Template> findTemplateCounts(@Param("type") TemplateType type, @Param("isActive") Boolean isActive);
+
+    /**
+     * Get the template by the type featured.
+     *
+     * @param type featured
+     * @param pageable page
+     * @param featured template type
+     * @param share public type
+     * @param isActive status
+     * @param status status of the template
+     * @return template
+     */
+    @Query(value = "SELECT template FROM Template template WHERE template.type <>:type AND template.featured =:featured AND template.share =:share AND template.status =:status AND template.isActive =:isActive")
+    Page<Template> findTemplateByFeatured(@Param("type") TemplateType type, Pageable pageable, @Param("featured") Boolean featured, @Param("share") Boolean share, @Param("status") Status status, @Param("isActive") Boolean isActive);
+
+    /**
+     * Get the template by the type community.
+     *
+     * @param type community
+     * @param pageable page
+     * @param share public type
+     * @param isActive status
+     * @param status status of the template
+     * @return template
+     */
+    @Query(value = "SELECT template FROM Template template WHERE template.type <>:type AND template.share =:share AND template.status =:status AND template.isActive =:isActive")
+    Page<Template> findTemplateByCommunity(@Param("type") TemplateType type, Pageable pageable, @Param("share") Boolean share, @Param("status") Status status, @Param("isActive") Boolean isActive);
 }
