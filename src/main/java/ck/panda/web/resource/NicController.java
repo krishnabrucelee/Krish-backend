@@ -159,10 +159,10 @@ public class NicController extends CRUDController<Nic> implements ApiController 
     }
 
     /**
-     * List instance by networks.
+     * List nics by network id.
      *
-     * @param networkId of the network.
-     * @return network.
+     * @param networkId of the network which to be attached.
+     * @return nic by network and isActive status.
      * @throws Exception if error occurs.
      */
     @RequestMapping(value = "listbynetwork", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
