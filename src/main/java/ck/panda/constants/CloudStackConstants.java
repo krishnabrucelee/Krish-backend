@@ -30,6 +30,33 @@ public class CloudStackConstants {
     /** Constant for created date and time. */
     public static final String CS_CREATED = "created";
 
+    /** Constant for project account role. */
+    public static final String CS_ACCOUNT_ROLE = "Regular";
+
+    /** Constant for CS response type. */
+    public static final String CS_RESPONSE = "response";
+
+    /** Constant for CS response project id. */
+    public static final String CS_PROJECT_RESPONSE_ID = "projectId";
+
+    /** Constant for CS role response. */
+    public static final String CS_PROJECT_ROLE = "role";
+
+    /** Constant for project  add account. */
+    public static final String CS_PROJECT_ADD_ACCOUNT = "addAccountToProject";
+
+    /** Constant for project delete account. */
+    public static final String CS_PROJECT_REMOVE_ACCOUNT = "deleteAccountFromProject";
+
+    /** Constant for project update. */
+    public static final String CS_PROJECT_UPDATE = "updateProject";
+
+    /** Constant for project update response. */
+    public static final String CS_PROJECT_UPDATE_RESPONSE = "updateprojectresponse";
+
+    /** Constant for project account list. */
+    public static final String CS_PROJECT_ACCOUNT_LIST = "listProjectAccounts";
+
     /** Constant for custom offering. */
     public static final String CS_CUSTOM_STATUS = "iscustomized";
 
@@ -457,5 +484,39 @@ public class CloudStackConstants {
     /** Constant for method name. */
     public static final String CS_METHOD_NAME = "methodname";
 
+    /** Constant for table size. */
+    public static final String CS_TABLE_SIZE = "tablesize";
 
-}
+    /** Constant for cookie name. */
+    public static final String CS_COOKIE_NAME = "cookie-name";
+
+    /** Constant for length. */
+    public static final String CS_LENGTH = "length";
+
+    /** Constant for expires. */
+    public static final String CS_EXPIRES = "expires";
+
+    /** Constant for mode. */
+    public static final String CS_MODE = "mode";
+
+    /** Constant for request learn. */
+    public static final String CS_REQUEST_LEARN = "request-learn";
+
+    /** Constant for prefix. */
+    public static final String CS_PREFIX = "prefix";
+
+    /** Constant for indirect. */
+    public static final String CS_INDIRECT = "indirect";
+
+    /** Constant for nocache. */
+    public static final String CS_NO_CACHE = "nocahche";
+
+    /** Constant for post only. */
+    public static final String CS_POST_ONLY = "postonly";
+
+    /** Constant for hold time. */
+    public static final String CS_HOLD_TIME = "holdtime";
+
+    /** Constant for parameters. */
+    public static final String CS_PARAMS = "params";
+   }

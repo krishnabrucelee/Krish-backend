@@ -20,6 +20,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Network;
+import ck.panda.domain.entity.Volume;
 import ck.panda.service.NetworkService;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -148,4 +149,19 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
         return networkService.findByProjectAndNetworkIsActive(projectId, true);
     }
 
+    /**
+     * Restart network for reapplying all port forwarding, lb rules and ip addresses.
+     *
+     * @param network to be restarted.
+     * @param id of the network.
+     * @return network.
+     * @throws Exception if error occurs.
+     */
+    @RequestMapping(value = "restart/{id}", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected Network restartNetwork(@RequestBody Network network, @PathVariable(PATH_ID) Long id) throws Exception {
+        network.setSyncFlag(true);
+        return networkService.restartNetwork(network);
+    }
 }

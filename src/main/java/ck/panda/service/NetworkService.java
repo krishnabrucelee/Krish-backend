@@ -98,4 +98,13 @@ public interface NetworkService extends CRUDService<Network> {
      */
     Network save(Network network, Long userId) throws Exception;
 
+    /**
+     * Restart network for reapplying all port forwarding, lb rules and ip addresses.
+     *
+     * @param network to be restarted.
+     * @return network.
+     * @throws Exception if error occurs.
+     */
+    Network restartNetwork(Network network) throws Exception;
+
 }

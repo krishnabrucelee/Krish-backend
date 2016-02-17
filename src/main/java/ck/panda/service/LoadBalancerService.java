@@ -66,4 +66,12 @@ public interface LoadBalancerService extends CRUDService<LoadBalancerRule> {
      */
     LoadBalancerRule createStickinessPolicy(LoadBalancerRule loadBalanceRule) throws Exception;
 
+    /**
+     * Find all stickiness policies.
+     *
+     * @return sticky policies
+     * @throws Exception if error occurs.
+     */
+    List<LoadBalancerRule> findAllFromCSServerStickyPolicies() throws Exception;
+
 }

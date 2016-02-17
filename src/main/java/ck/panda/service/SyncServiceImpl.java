@@ -452,12 +452,12 @@ public class SyncServiceImpl implements SyncService {
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Templates", e);
         }
-        try {
+       /* try {
             // 19. Sync ResourceLimit entity
             this.syncResourceLimit();
         } catch (Exception e) {
             LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
-        }
+        }*/
         try {
             // 20. Sync Instance entity
             this.syncInstances();
@@ -517,6 +517,13 @@ public class SyncServiceImpl implements SyncService {
         try {
             // 29. Sync Load Balancer entity
             this.syncLoadBalancer();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch LoadBalancer", e);
+        }
+
+       try {
+            // 29. Sync Load Balancer entity
+            this.syncLoadBalancerStickyPolicy();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch LoadBalancer", e);
         }
@@ -1854,9 +1861,16 @@ public class SyncServiceImpl implements SyncService {
             if (csProjectMap.containsKey(project.getUuid())) {
                 Project csProject = csProjectMap.get(project.getUuid());
                 project.setName(csProject.getName());
-                project.setDepartmentId(csProject.getDepartmentId());
+				// check existing department.
+				if (csProject.getDepartmentId() != project.getDepartmentId()) {
+					project.setDepartmentId(csProject.getDepartmentId());
+					// if department updated for project reset project owner.
+					project.setProjectOwnerId(null);
+					project.setProjectOwner(null);
+					project.setUserList(null);
+				}
                 project.setStatus(csProject.getStatus());
-                project.setName(csProject.getDescription());
+                project.setDescription(csProject.getDescription());
                 project.setDomainId(csProject.getDomainId());
                 // 3.2 If found, update the project object in app db
                 projectService.update(project);
@@ -2191,6 +2205,7 @@ public class SyncServiceImpl implements SyncService {
 
         // 1. Get all the LoadBalancer objects from CS server as hash
         List<LoadBalancerRule> csLoadBalancerList = loadBalancerService.findAllFromCSServer();
+
         HashMap<String, LoadBalancerRule> csLoadBalancerMap = (HashMap<String, LoadBalancerRule>) LoadBalancerRule.convert(csLoadBalancerList);
 
         // 2. Get all the LoadBalancer objects from application
@@ -2236,6 +2251,34 @@ public class SyncServiceImpl implements SyncService {
         }
     }
 
+   public void syncLoadBalancerStickyPolicy() throws ApplicationException, Exception {
+
+        // 1. Get all the LoadBalancer objects from CS server as hash
+        List<LoadBalancerRule> csLoadBalancerList = loadBalancerService.findAllFromCSServerStickyPolicies();
+        HashMap<String, LoadBalancerRule> csLoadBalancerMap = (HashMap<String, LoadBalancerRule>) LoadBalancerRule.convert(csLoadBalancerList);
+        List<LoadBalancerRule> appLoadBalancerList = loadBalancerService.findAll();
+        // 3. Iterate application LoadBalancer list
+        for (LoadBalancerRule loadBalancer : appLoadBalancerList) {
+            loadBalancer.setSyncFlag(false);
+            LOGGER.debug("Total rows updated : " + (csLoadBalancerList.size()));
+            // 3.1 Find the corresponding CS server ntService object by
+            // finding it in a hash using uuid
+            if (csLoadBalancerMap.containsKey(loadBalancer.getUuid())) {
+            LoadBalancerRule csLoadBalancer = csLoadBalancerMap.get(loadBalancer.getUuid());
+
+            loadBalancer.setStickyUuid(csLoadBalancer.getStickyUuid());
+            loadBalancer.setStickinessName(csLoadBalancer.getStickinessName());
+            loadBalancer.setStickinessMethod(csLoadBalancer.getStickinessMethod());
+                // 3.2 If found, update the LoadBalancer object in app db
+                loadBalancerService.update(loadBalancer);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // nic which is not added in the app
+            }
+        }
+        }
+
+
     /**
      * Sync with Cloud Server Network Firewall Rules.
      *
@@ -2251,7 +2294,6 @@ public class SyncServiceImpl implements SyncService {
             csFirewallRule.setUuid(loadBalancerRule.getUuid());
             csFirewallRule.setDisplay(loadBalancerRule.getDisplay());
             csFirewallRule.setSourceCIDR(loadBalancerRule.getSourceCIDR());
-            csFirewallRule.setState(State.valueOf(loadBalancerRule.getState().name()));
             csFirewallRule.setStartPort(loadBalancerRule.getPrivatePort());
             csFirewallRule.setEndPort(loadBalancerRule.getPublicPort());
             csFirewallRule.setIsActive(true);

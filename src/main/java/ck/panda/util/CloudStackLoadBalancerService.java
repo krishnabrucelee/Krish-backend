@@ -179,19 +179,17 @@ public class CloudStackLoadBalancerService {
     /**
      * Lists LBStickiness policies.
      *
-     * @param lbRuleId list of load balancer rules
      * @param optional values to CS.
      * @param response json or xml.
      * @return lst load balancer stickiness policy.
      * @throws Exception if error occurs.
      */
-    public String listLBStickinessPolicies(String lbRuleId, String response,
+    public String listLBStickinessPolicies(String response,
             HashMap<String, String> optional)
             throws Exception {
 
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("listLBStickinessPolicies", optional);
-        arguments.add(new NameValuePair("lbruleid", lbRuleId));
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
         return responseDocument;

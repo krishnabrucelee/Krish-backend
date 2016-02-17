@@ -113,6 +113,14 @@ public class NicController extends CRUDController<Nic> implements ApiController 
         return nicOfferingService.findByInstance(instanceId);
     }
 
+    @RequestMapping(value = "listbynetwork", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Nic> listByNetwork(@RequestParam("networkid") Long networkId) throws Exception {
+        return nicOfferingService.findAllByNetworkAndIsActive(networkId, true);
+    }
+
     /**
      * List by instance attached to nic.
      *

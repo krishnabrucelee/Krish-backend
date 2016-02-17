@@ -17,6 +17,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -156,6 +157,7 @@ public class Template implements Serializable {
 
     /** Cost of the template. */
     @OneToMany(cascade = CascadeType.ALL)
+    @OrderBy("id DESC")
     private List<TemplateCost> templateCost;
 
     /** Minimum core of the template. */

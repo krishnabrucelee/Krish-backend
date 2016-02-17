@@ -6,6 +6,8 @@ import org.apache.commons.httpclient.NameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import ck.panda.constants.CloudStackConstants;
+
 /**
  * CloudStack Region Service for cloud Stack connectivity with Region.
  */
@@ -76,10 +78,43 @@ public class CloudStackProjectService {
     }
 
     /**
+     * Add account to the project.
+     *
+     * @param projectId the id of the project.
+     * @param account account name.
+     * @param response response type.
+     * @throws Exception unhandled exceptions.
+     */
+    public String addAccountToProject(String projectId, String account, String response) throws Exception {
+		LinkedList<NameValuePair> arguments = server.getDefaultQuery(CloudStackConstants.CS_PROJECT_ADD_ACCOUNT, null);
+		arguments.add(new NameValuePair(CloudStackConstants.CS_PROJECT_RESPONSE_ID, projectId));
+		arguments.add(new NameValuePair(CloudStackConstants.CS_RESPONSE, response));
+		arguments.add(new NameValuePair(CloudStackConstants.CS_ACCOUNT, account));
+		return server.request(arguments);
+    }
+
+    /**
+     * Delete account from project.
+     *
+     * @param projectId the id of the project.
+     * @param account account name.
+     * @param response response type.
+     * @throws Exception unhandled exceptions.
+     */
+    public String deleteAccountFromProject(String projectId, String account, String response) throws Exception {
+		LinkedList<NameValuePair> arguments = server.getDefaultQuery(CloudStackConstants.CS_PROJECT_REMOVE_ACCOUNT,
+				null);
+		arguments.add(new NameValuePair(CloudStackConstants.CS_PROJECT_RESPONSE_ID, projectId));
+		arguments.add(new NameValuePair(CloudStackConstants.CS_RESPONSE, response));
+		arguments.add(new NameValuePair(CloudStackConstants.CS_ACCOUNT, account));
+		return server.request(arguments);
+    }
+
+    /**
      * Updates a project.
      *
-     * @param projectId the id of the project to be modified
-     * @param optional optional parameters
+     * @param projectId the id of the project to be modified.
+     * @param optional optional parameters.
      * @param displaytext description.
      * @param response response type.
      * @return json response.
@@ -87,11 +122,16 @@ public class CloudStackProjectService {
      */
     public String updateProject(String projectId, String displaytext, String response, HashMap<String, String> optional)
             throws Exception {
-        LinkedList<NameValuePair> arguments = server.getDefaultQuery("updateProject", optional);
-        arguments.add(new NameValuePair("id", projectId));
-        arguments.add(new NameValuePair("displaytext", displaytext));
-        arguments.add(new NameValuePair("response", response));
-        return server.request(arguments);
+		// Add account to project.
+		if (optional.containsKey(CloudStackConstants.CS_ACCOUNT)) {
+			addAccountToProject(projectId, optional.get(CloudStackConstants.CS_ACCOUNT), response);
+		}
+		// Update project owner and description.
+		LinkedList<NameValuePair> arguments = server.getDefaultQuery(CloudStackConstants.CS_PROJECT_UPDATE, optional);
+		arguments.add(new NameValuePair(CloudStackConstants.CS_ID, projectId));
+		arguments.add(new NameValuePair(CloudStackConstants.CS_DISPLAY_TEXT, displaytext));
+		arguments.add(new NameValuePair(CloudStackConstants.CS_RESPONSE, response));
+		return server.request(arguments);
     }
 
     /**
@@ -136,9 +176,25 @@ public class CloudStackProjectService {
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("listProjects", optional);
         arguments.add(new NameValuePair("response", response));
         String listResponse = server.request(arguments);
-
         return listResponse;
+    }
 
+    /**
+     * Lists the project accounts.
+     *
+     * @param roleType role type.
+     * @param projectId project id.
+     * @param response json.
+     * @return json response.
+     * @throws Exception unhandled exceptions..
+     */
+    public String listProjectAccounts(String response, String roleType, String projectId) throws Exception {
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery(CloudStackConstants.CS_PROJECT_ACCOUNT_LIST, null);
+        arguments.add(new NameValuePair(CloudStackConstants.CS_RESPONSE, response));
+        arguments.add(new NameValuePair(CloudStackConstants.CS_PROJECT_RESPONSE_ID, projectId));
+        arguments.add(new NameValuePair(CloudStackConstants.CS_PROJECT_ROLE, roleType));
+        String listResponse = server.request(arguments);
+        return listResponse;
     }
 
     /**

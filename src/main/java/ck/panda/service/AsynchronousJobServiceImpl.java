@@ -523,7 +523,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      */
     public void asyncNetwork(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
 
-    	configUtil.setServer(1L);
+        configUtil.setServer(1L);
         if (eventObject.getString("commandEventType").equals("NETWORK.UPDATE")) {
             Network csNetwork = Network.convert(jobResult.getJSONObject("network"));
             Network network = networkService.findByUUID(csNetwork.getUuid());
@@ -560,6 +560,14 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             String csResponse = cloudStackResourceCapacity.updateResourceCount(
                     convertEntityService.getDomainById(network.getDomainId()).getUuid(), domainCountMap, "json");
             convertEntityService.resourceCount(csResponse);
+        }
+
+        if (eventObject.getString("commandEventType").equals("NETWORK.RESTART")) {
+            JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
+            Network network = networkService.findByUUID(json.getString("id"));
+            network.setSyncFlag(false);
+            network.setNetworkRestart(true);
+            networkService.update(network);
         }
     }
 
@@ -714,7 +722,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      * @throws Exception cloudstack unhandled errors
      */
     public void asyncIpAddress(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
-    	configUtil.setServer(1L);
+        configUtil.setServer(1L);
         if (eventObject.getString("commandEventType").equals("NET.IPASSIGN")) {
             IpAddress ipaddress = IpAddress.convert(jobResult.getJSONObject("ipaddress"));
             IpAddress persistIp = ipService.findbyUUID(ipaddress.getUuid());
@@ -1043,13 +1051,53 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         if (eventObject.getString("commandEventType").equals("LB.STICKINESSPOLICY.CREATE")) {
             JSONObject stickyResult = jobResult.getJSONObject(CloudStackConstants.CS_STICKY_POLICIES);
             JSONArray stickyPolicy = stickyResult.getJSONArray(CloudStackConstants.CS_STICKY_POLICY);
-            for (int j = 0, sizes = stickyResult.length(); j < sizes; j++) {
+            for (int j = 0, sizes = stickyPolicy.length(); j < sizes; j++) {
                 JSONObject json = (JSONObject)stickyPolicy.get(j);
                 LoadBalancerRule loadBalanceRule = loadBalancerService.findByUUID(stickyResult.getString(CloudStackConstants.CS_LB_RULE_ID));
                 loadBalanceRule.setStickyUuid(json.getString(CloudStackConstants.CS_ID));
                 loadBalanceRule.setStickinessMethod((SticknessMethod.valueOf(json.getString(CloudStackConstants.CS_METHOD_NAME))));
                 loadBalanceRule.setStickinessName(json.getString(CloudStackConstants.CS_NAME));
                 loadBalanceRule.setSyncFlag(false);
+                if (json.has(CloudStackConstants.CS_PARAMS)) {
+                    JSONObject paramsResponse = json.getJSONObject(CloudStackConstants.CS_PARAMS);
+                    switch (CloudStackConstants.CS_PARAMS) {
+                    case CloudStackConstants.CS_TABLE_SIZE :
+                        loadBalanceRule.setStickyTableSize((String) paramsResponse.getString(CloudStackConstants.CS_TABLE_SIZE));
+                        break;
+                    case CloudStackConstants.CS_LENGTH :
+                        loadBalanceRule.setStickyLength((String) paramsResponse.getString(CloudStackConstants.CS_LENGTH));
+                        break;
+                    case CloudStackConstants.CS_EXPIRES :
+                        loadBalanceRule.setStickyExpires((String) paramsResponse.getString(CloudStackConstants.CS_EXPIRES));
+                        break;
+                    case CloudStackConstants.CS_MODE:
+                        loadBalanceRule.setStickyMode((String) paramsResponse.getString(CloudStackConstants.CS_MODE));
+                        break;
+                    case CloudStackConstants.CS_PREFIX :
+                        loadBalanceRule.setStickyPrefix((Boolean) paramsResponse.get(CloudStackConstants.CS_PREFIX));
+                        break;
+                    case CloudStackConstants.CS_REQUEST_LEARN :
+                        loadBalanceRule.setStickyRequestLearn((Boolean) paramsResponse.get(CloudStackConstants.CS_REQUEST_LEARN));
+                        break;
+                    case  CloudStackConstants.CS_INDIRECT :
+                        loadBalanceRule.setStickyIndirect((Boolean) paramsResponse.get(CloudStackConstants.CS_INDIRECT));
+                        break;
+                    case CloudStackConstants.CS_NO_CACHE :
+                        loadBalanceRule.setStickyNoCache((Boolean) paramsResponse.get(CloudStackConstants.CS_NO_CACHE));
+                        break;
+                    case CloudStackConstants.CS_POST_ONLY :
+                        loadBalanceRule.setStickyPostOnly((Boolean) paramsResponse.get(CloudStackConstants.CS_POST_ONLY));
+                        break;
+                    case CloudStackConstants.CS_HOLD_TIME :
+                        loadBalanceRule.setStickyHoldTime((String) paramsResponse.getString(CloudStackConstants.CS_HOLD_TIME));
+                        break;
+                    case CloudStackConstants.CS_DOMAIN :
+                        loadBalanceRule.setStickyCompany((String) paramsResponse.getString(CloudStackConstants.CS_DOMAIN));
+                        break;
+                    default :
+                        break;
+                    }
+                }
                loadBalancerService.save(loadBalanceRule);
             }
         }
@@ -1200,10 +1248,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         }
     }
 
-	@Override
-	public void syncVMUpdate(String uuid) throws Exception {
-		VmInstance persistVm = virtualMachineService.findByUUID(uuid);
-		configUtil.setServer(1L);
+    @Override
+    public void syncVMUpdate(String uuid) throws Exception {
+        VmInstance persistVm = virtualMachineService.findByUUID(uuid);
+        configUtil.setServer(1L);
         HashMap<String, String> vmMap = new HashMap<String, String>();
         vmMap.put(CloudStackConstants.CS_ID, persistVm.getUuid());
         String response = cloudStackInstanceService.listVirtualMachines(CloudStackConstants.JSON, vmMap);
@@ -1223,6 +1271,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 virtualMachineService.update(persistVm);
             }
         }
-	}
+    }
 }
 

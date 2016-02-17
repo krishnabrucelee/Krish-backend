@@ -26,6 +26,9 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import ck.panda.constants.CloudStackConstants;
+import ck.panda.domain.entity.Network.Status;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -1230,7 +1233,9 @@ public class LoadBalancerRule implements Serializable {
         loadBalancer.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
         loadBalancer.setDisplay(JsonUtil.getBooleanValue(jsonObject, "fordisplay"));
         loadBalancer.setSourceCIDR(JsonUtil.getStringValue(jsonObject,"cidrlist"));
+        if (loadBalancer.getState() != null) {
         loadBalancer.setState(State.valueOf(JsonUtil.getStringValue(jsonObject,"state").toUpperCase()));
+        }
         loadBalancer.setName(JsonUtil.getStringValue(jsonObject, "name"));
         loadBalancer.setPrivatePort(JsonUtil.getIntegerValue(jsonObject, "privateport"));
         loadBalancer.setPublicPort(JsonUtil.getIntegerValue(jsonObject, "publicport"));
@@ -1240,6 +1245,27 @@ public class LoadBalancerRule implements Serializable {
         loadBalancer.setTransZoneId(JsonUtil.getStringValue(jsonObject, "zoneid"));
         loadBalancer.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
         loadBalancer.setIsActive(true);
+        if (loadBalancer.getStickinessMethod() != null) {
+        loadBalancer.setStickinessMethod(SticknessMethod.valueOf(JsonUtil.getStringValue(jsonObject, "methodname").toUpperCase()));
+        }
+        if (loadBalancer.getStickinessName() != null) {
+            loadBalancer.setStickinessName(JsonUtil.getStringValue(jsonObject, "name"));
+        }
+        if (loadBalancer.getCookieName() != null) {
+        loadBalancer.setCookieName(JsonUtil.getStringValue(jsonObject, "cookiename"));
+        }
+        if (loadBalancer.getStickyUuid() != null) {
+            loadBalancer.setStickyUuid(JsonUtil.getStringValue(jsonObject, "id"));
+         }
+        if (loadBalancer.getStickyExpires() != null) {
+            loadBalancer.setStickyExpires(JsonUtil.getStringValue(jsonObject,"expires"));
+        }
+        if (loadBalancer.getStickyNoCache() != null) {
+            loadBalancer.setStickyNoCache(JsonUtil.getBooleanValue(jsonObject,"nocache"));
+        }
+        if (loadBalancer.getStickyTableSize() != null) {
+            loadBalancer.setStickyTableSize(JsonUtil.getStringValue(jsonObject,"tablesize"));
+        }
         return loadBalancer;
     }
 
