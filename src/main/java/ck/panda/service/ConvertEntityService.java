@@ -28,7 +28,9 @@ import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
+import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.util.CloudStackInstanceService;
+import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.CloudStackServer;
 
 /**
@@ -160,6 +162,18 @@ public class ConvertEntityService {
     /** Resource Limit Domain Service. */
     @Autowired
     private ResourceLimitDomainService resourceLimitDomainService;
+
+    /** Resource Limit Project Service. */
+    @Autowired
+    private ResourceLimitProjectService resourceLimitProjectService;
+
+    /** CloudStack Resource Capacity Service. */
+    @Autowired
+    private CloudStackResourceCapacity cloudStackResourceCapacity;
+
+    /** Sync Service reference. */
+    @Autowired
+    private AsynchronousJobService asyncService;
 
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
@@ -1049,12 +1063,21 @@ public class ConvertEntityService {
     }
 
     /**
-     * Get CloudStack instance service object.
+     * Get CloudStack Resource Capacity service object.
      *
-     * @return CloudStack instance service object
+     * @return CloudStack Resource Capacity service object
      */
-    public CloudStackInstanceService getCSInstanceService() {
-        return this.cloudStackInstanceService;
+    public CloudStackResourceCapacity getCloudStackResourceCapacityService() {
+        return this.cloudStackResourceCapacity;
+    }
+
+    /**
+     * Get Asynchronous Job service object.
+     *
+     * @return AsynchronousJob service object
+     */
+    public AsynchronousJobService getasyncService() {
+        return this.asyncService;
     }
 
     /**
@@ -1075,6 +1098,14 @@ public class ConvertEntityService {
         return this.cloudConfigService;
     }
 
+    /**
+     * Get CloudStack instance service object.
+     *
+     * @return CloudStack instance service object
+     */
+    public CloudStackInstanceService getCSInstanceService() {
+        return this.cloudStackInstanceService;
+    }
     /**
      * Update the resource count for current resource type.
      *
@@ -1103,7 +1134,7 @@ public class ConvertEntityService {
                     // value
                     HashMap<String, String> resourceMap = getResourceTypeValue();
                     // checking null validation for resource map
-                    if (resourceMap != null) {
+                    if (resourceMap != null && !resourceCountArrayJSON.getJSONObject(i).has("project")) {
                         // update resource count in resource limit domain table
                         ResourceLimitDomain resourceDomainCount = resourceLimitDomainService
                                 .findByDomainAndResourceCount(getDomainId(domainId),
@@ -1134,6 +1165,39 @@ public class ConvertEntityService {
                         // Set used limit value
                         resourceDomainCount.setIsSyncFlag(false);
                         resourceLimitDomainService.update(resourceDomainCount);
+                    } else {
+                        String projectId = resourceCountArrayJSON.getJSONObject(i)
+                                .getString(CloudStackConstants.CS_PROJECT_ID);
+                        // update resource count in resource limit domain table
+                        ResourceLimitProject resourceProjectCount = resourceLimitProjectService.
+                                findResourceByProjectAndResourceType(getProjectId(projectId), ResourceLimitProject.ResourceType.valueOf(resourceMap.get(resourceType)), true);
+
+                        // check the max value if not -1 and upadate the
+                        // available value
+                        if (resourceProjectCount.getMax() != -1) {
+                            // Check resource type primary = 10 and secondary
+                            // storage = 11 and convert resource
+                            // count values GiB to MB.
+                            if (resourceType.equals(CS_PRIMARY_STORAGE) || resourceType.equals(CS_SECONDARY_STORAGE)) {
+                                // Convert and set Available resource count of
+                                // primary and secondary GiB to MB.
+                                resourceProjectCount.setAvailable(resourceProjectCount.getMax()
+                                        - (Long.valueOf(resourceCount) / (1024 * 1024 * 1024)));
+                                // Convert and set Used resource count of
+                                // primary and secondary GiB to MB.
+                                resourceProjectCount.setUsedLimit((Long.valueOf(resourceCount) / (1024 * 1024 * 1024)));
+                            } else {
+                                resourceProjectCount
+                                        .setAvailable(resourceProjectCount.getMax() - Long.valueOf(resourceCount));
+                                resourceProjectCount.setUsedLimit(Long.valueOf(resourceCount));
+                            }
+                        } else {
+                            resourceProjectCount.setAvailable(resourceProjectCount.getMax());
+                            resourceProjectCount.setUsedLimit(Long.valueOf(resourceCount));
+                        }
+                        // Set used limit value
+                        resourceProjectCount.setIsSyncFlag(false);
+                        resourceLimitProjectService.update(resourceProjectCount);
                     }
                 }
             }
@@ -1145,7 +1209,7 @@ public class ConvertEntityService {
      *
      * @return resourceMap resource count mapped values for resource type.
      */
-    private HashMap<String, String> getResourceTypeValue() {
+    public HashMap<String, String> getResourceTypeValue() {
         HashMap<String, String> resourceMap = new HashMap<>();
         // Map and get the resource count for current resource type value
         resourceMap.put(CS_INSTANCE, String.valueOf(ResourceType.Instance));

@@ -68,11 +68,11 @@ public class ResourceLimitDepartment implements Serializable {
     private Long max;
 
     /** Available Resource limit usage for Department. */
-    @Column(name = "available_limit")
+    @Column(name = "available_limit", columnDefinition = "bigint(20) default 0")
     private Long available;
 
     /** Resource limit usage for Department. */
-    @Column(name = "used_limit")
+    @Column(name = "used_limit", columnDefinition = "bigint(20) default 0")
     private Long usedLimit;
 
     /** Status attribute to verify status of the resource limit. */

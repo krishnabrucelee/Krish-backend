@@ -9,30 +9,37 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EventTypes;
+import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Project;
+import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
+import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
+import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.Volume.Format;
 import ck.panda.domain.entity.Volume.Status;
 import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.domain.repository.jpa.VolumeRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackOptionalUtil;
+import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.CloudStackVolumeService;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.JsonValidator;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
+import ck.panda.util.error.exception.CustomGenericException;
 
 /**
  * Volume Service Implementation.
@@ -74,7 +81,7 @@ public class VolumeServiceImpl implements VolumeService {
     public static final String CS_RESIZE_VOLUME_RESPONSE = "resizevolumeresponse";
 
     /** Constant for Cloud stack volume conversation in GiB. */
-    public static final Integer CS_CONVERTION_GIB = 1024*1024*1024;
+    public static final Integer CS_CONVERTION_GIB = 1024 * 1024 * 1024;
 
     /** Validator attribute. */
     @Autowired
@@ -116,6 +123,30 @@ public class VolumeServiceImpl implements VolumeService {
     @Autowired
     private StorageOfferingService storageService;
 
+    /** Resource Limit Department service reference. */
+    @Autowired
+    private ResourceLimitDepartmentService resourceLimitDepartmentService;
+
+    /** Resource Limit Project service reference. */
+    @Autowired
+    private ResourceLimitProjectService resourceLimitProjectService;
+
+    /** Sync Service reference. */
+    @Autowired
+    private SyncService syncService;
+
+    /** Sync Service reference. */
+    @Autowired
+    private AsynchronousJobService asyncService;
+
+    /** Message source attribute. */
+    @Autowired
+    private MessageSource messageSource;
+
+    /** CloudStack connector reference for resource capacity. */
+    @Autowired
+    private CloudStackResourceCapacity cloudStackResourceCapacity;
+
     @Override
     @PreAuthorize("hasPermission(#volume.getIsSyncFlag(), 'ADD_VOLUME')")
     public Volume saveVolume(Volume volume, Long userId) throws Exception {
@@ -126,15 +157,152 @@ public class VolumeServiceImpl implements VolumeService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                Volume volumeCS = createVolume(volume, userId, errors);
-                if (volumeRepo.findByUUID(volumeCS.getUuid()) == null) {
-                    volume = volumeRepo.save(volumeCS);
+                HashMap<String, String> optionalMap = new HashMap<String, String>();
+                optionalMap.put(CloudStackConstants.CS_ZONE_ID,
+                        convertEntityService.getZoneById(volume.getZoneId()).getUuid());
+                // check department and project quota validation.
+                ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
+                        .findByDepartmentAndResourceType(volume.getDepartmentId(), ResourceType.Instance, true);
+
+                if (departmentLimit != null) {
+                    if (volume.getProjectId() != null) {
+                        syncService
+                                .syncResourceLimitProject(convertEntityService.getProjectById(volume.getProjectId()));
+                    }
+                    // 3. Check the resource availability to deploy new vm.
+                    String isAvailable = isResourceAvailable(volume, optionalMap);
+                    if (isAvailable != null) {
+                        // 3.1 throws error message about resource shortage.
+                        throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, isAvailable);
+                    } else {
+                        updateResourceForVolumeCreation(volume, errors);
+                        Volume volumeCS = createVolume(volume, userId, errors);
+                        if (errors.hasErrors()) {
+                            asyncService.updateResourceForVolumeDeletion(volume);
+                            throw new ApplicationException(errors);
+                        }
+                        if (volumeRepo.findByUUID(volumeCS.getUuid()) == null) {
+                            volume = volumeRepo.save(volumeCS);
+                        }
+                    }
+                } else {
+                    errors.addGlobalError(
+                            "Resource limit for department has not been set. Please update department quota");
+                    throw new ApplicationException(errors);
                 }
             }
             return volume;
         } else {
             return volumeRepo.save(volume);
         }
+    }
+
+    /**
+     *
+     * @param volume
+     * @param errors
+     * @return
+     * @throws Exception
+     */
+    private Volume updateResourceForVolumeCreation(Volume volume, Errors errors) throws Exception {
+        HashMap<String, String> resourceMap = convertEntityService.getResourceTypeValue();
+        String r = null;
+        try {
+            for (int i = 0; i < resourceMap.size(); i++) {
+                if (i == 2) {
+                    r = r.valueOf(i);
+                    ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                            .findByDepartmentAndResourceType(volume.getDepartmentId(),
+                                    ResourceType.valueOf(resourceMap.get(r)), true);
+                    if (departmentMax.getUsedLimit() == null) {
+                        departmentMax.setUsedLimit(0L + 1);
+                    } else if (departmentMax.getMax() != departmentMax.getUsedLimit()) {
+                        departmentMax.setUsedLimit(departmentMax.getUsedLimit() + 1);
+                    } else {
+                        errors.addGlobalError("quota for creating volume" + " ' " + volume.getName() + " ' "
+                                + "not exists. Please update department resource quota first to continue creating.");
+                        throw new ApplicationException(errors);
+                    }
+                    departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                    resourceLimitDepartmentService.update(departmentMax);
+                    if (volume.getProjectId() != null) {
+                        ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                                volume.getProjectId(), ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                true);
+                        if (projectMax.getUsedLimit() == null) {
+                            projectMax.setUsedLimit(0L + 1);
+                        } else if (projectMax.getMax() != projectMax.getUsedLimit()) {
+                            projectMax.setUsedLimit(projectMax.getUsedLimit() + 1);
+                        } else {
+                            errors.addGlobalError("quota for creating volume" + " ' " + volume.getName() + " ' "
+                                    + "not exists. Please update project resource quota first to continue creating.");
+                            throw new ApplicationException(errors);
+                        }
+                        projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                        projectMax.setIsSyncFlag(false);
+                        resourceLimitProjectService.update(projectMax);
+                    }
+                }
+                if (i == 10) {
+                    r = r.valueOf(i);
+                    ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                            .findByDepartmentAndResourceType(volume.getDepartmentId(),
+                                    ResourceType.valueOf(resourceMap.get(r)), true);
+                    if (departmentMax.getUsedLimit() == null) {
+                        if (volume.getDiskSize() != null) {
+                            departmentMax.setUsedLimit(0L + volume.getDiskSize());
+                        } else {
+                            departmentMax.setUsedLimit(0L + convertEntityService
+                                    .getStorageOfferById(volume.getStorageOfferingId()).getDiskSize());
+                        }
+                    } else if (departmentMax.getMax() != departmentMax.getUsedLimit()) {
+                        if (volume.getDiskSize() != null) {
+                            departmentMax.setUsedLimit(departmentMax.getUsedLimit() + volume.getDiskSize());
+                        } else {
+                            departmentMax.setUsedLimit(departmentMax.getUsedLimit() + convertEntityService
+                                    .getStorageOfferById(volume.getStorageOfferingId()).getDiskSize());
+                        }
+                    } else {
+                        errors.addGlobalError("quota for creating volume" + " ' " + volume.getName() + " ' "
+                                + "not exists. Please update department resource quota first to continue creating.");
+                        throw new ApplicationException(errors);
+                    }
+                    departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                    resourceLimitDepartmentService.update(departmentMax);
+                    if (volume.getProjectId() != null) {
+                        ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                                volume.getProjectId(), ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                true);
+                        if (projectMax.getUsedLimit() == null) {
+                            if (volume.getDiskSize() != null) {
+                                projectMax.setUsedLimit(0L + volume.getDiskSize());
+                            } else {
+                                projectMax.setUsedLimit(0L + convertEntityService
+                                        .getStorageOfferById(volume.getStorageOfferingId()).getDiskSize());
+                            }
+                        } else if (projectMax.getMax() != projectMax.getUsedLimit()) {
+                            if (volume.getDiskSize() != null) {
+                                projectMax.setUsedLimit(projectMax.getUsedLimit() + volume.getDiskSize());
+                            } else {
+                                projectMax.setUsedLimit(projectMax.getUsedLimit() + convertEntityService
+                                        .getStorageOfferById(volume.getStorageOfferingId()).getDiskSize());
+                            }
+                        } else {
+                            errors.addGlobalError("quota for creating volume" + " ' " + volume.getName() + " ' "
+                                    + "not exists. Please update project resource quota first to continue creating.");
+                            throw new ApplicationException(errors);
+                        }
+                        projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                        projectMax.setIsSyncFlag(false);
+                        resourceLimitProjectService.update(projectMax);
+                    }
+                }
+            }
+        } catch (ApplicationException e) {
+            asyncService.updateResourceForVolumeDeletion(volume);
+            throw new ApplicationException(e.getErrors());
+        }
+        return volume;
     }
 
     @Override
@@ -215,12 +383,80 @@ public class VolumeServiceImpl implements VolumeService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                Volume volumeCS = upload(volume, convertEntityService.getOwnerById(userId).getDomainId(), userId,
-                        errors);
-                return volumeCS;
+                HashMap<String, String> optionalMap = new HashMap<String, String>();
+                optionalMap.put(CloudStackConstants.CS_ZONE_ID,
+                        convertEntityService.getZoneById(volume.getZoneId()).getUuid());
+                // check department and project quota validation.
+                ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
+                        .findByDepartmentAndResourceType(volume.getDepartmentId(), ResourceType.Instance, true);
+                if (departmentLimit != null) {
+                    if (volume.getProjectId() != null) {
+                        syncService
+                                .syncResourceLimitProject(convertEntityService.getProjectById(volume.getProjectId()));
+                    }
+                    // 3. Check the resource availability to deploy new vm.
+                    String isAvailable = isResourceAvailable(volume, optionalMap);
+                    if (isAvailable != null) {
+                        // 3.1 throws error message about resource shortage.
+                        throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, isAvailable);
+                    } else {
+                        updateResourceForUploadVolumeCreation(volume, errors);
+                        Volume volumeCS = upload(volume, convertEntityService.getOwnerById(userId).getDomainId(),
+                                userId, errors);
+                        if (errors.hasErrors()) {
+                            asyncService.updateResourceForUploadVolumeDeletion(volume);
+                            throw new ApplicationException(errors);
+                        }
+                        return volumeCS;
+                    }
+                } else {
+                    errors.addGlobalError(
+                            "Resource limit for department has not been set. Please update department quota");
+                    throw new ApplicationException(errors);
+                }
             }
         } else {
             return volumeRepo.save(volume);
+        }
+    }
+
+    private void updateResourceForUploadVolumeCreation(Volume volume, Errors errors) throws Exception {
+        HashMap<String, String> resourceMap = convertEntityService.getResourceTypeValue();
+        String r = null;
+        for (int i = 0; i < resourceMap.size(); i++) {
+            if (i == 2) {
+                r = r.valueOf(i);
+                ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                        .findByDepartmentAndResourceType(volume.getDepartmentId(),
+                                ResourceType.valueOf(resourceMap.get(r)), true);
+                if (departmentMax.getUsedLimit() == null) {
+                    departmentMax.setUsedLimit(0L + 1);
+                } else if (departmentMax.getMax() != departmentMax.getUsedLimit()) {
+                    departmentMax.setUsedLimit(departmentMax.getUsedLimit() + 1);
+                } else {
+                    errors.addGlobalError("quota for creating volume"+" ' "+volume.getName()+" ' " +"not exists. Please update department resource quota first to continue creating." );
+                    throw new ApplicationException(errors);
+                }
+                departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                resourceLimitDepartmentService.update(departmentMax);
+                if (volume.getProjectId() != null) {
+                    ResourceLimitProject projectMax = resourceLimitProjectService
+                            .findByProjectAndResourceType(volume.getProjectId(),
+                                    ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                    true);
+                    if (projectMax.getUsedLimit() == null) {
+                        projectMax.setUsedLimit(0L + 1);
+                    } else if (projectMax.getMax() != projectMax.getUsedLimit()){
+                        projectMax.setUsedLimit(projectMax.getUsedLimit() + 1);
+                    } else {
+                        errors.addGlobalError("quota for creating volume"+" ' "+volume.getName()+" ' " +"not exists. Please update project resource quota first to continue creating." );
+                        throw new ApplicationException(errors);
+                    }
+                    projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                    projectMax.setIsSyncFlag(false);
+                    resourceLimitProjectService.update(projectMax);
+                }
+            }
         }
     }
 
@@ -437,6 +673,7 @@ public class VolumeServiceImpl implements VolumeService {
                 volume.setUuid((String) jobId.get(CloudStackConstants.CS_ID));
                 if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
                     Thread.sleep(5000);
+                    config.setUserServer();
                     String jobResponse = csVolumeService.volumeJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
                             CloudStackConstants.JSON);
                     JSONObject jobresult = new JSONObject(jobResponse)
@@ -445,7 +682,6 @@ public class VolumeServiceImpl implements VolumeService {
                             .has(CloudStackConstants.CS_ERROR_CODE)) {
                         errors = this.validateEvent(errors, jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
                                 .getString(CloudStackConstants.CS_ERROR_TEXT));
-                        throw new ApplicationException(errors);
                     }
                     if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
                             .equals(CloudStackConstants.PROGRESS_JOB_STATUS)) {
@@ -474,6 +710,7 @@ public class VolumeServiceImpl implements VolumeService {
             }
         } catch (ApplicationException e) {
             LOGGER.error("ERROR AT VOLUME CREATION", e);
+            asyncService.updateResourceForVolumeDeletion(volume);
             throw new ApplicationException(e.getErrors());
         }
         return volume;
@@ -549,6 +786,7 @@ public class VolumeServiceImpl implements VolumeService {
             }
             if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
                 Thread.sleep(10000);
+                config.setUserServer();
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
                         CloudStackConstants.JSON);
                 JSONObject jobresult = new JSONObject(jobResponse)
@@ -594,6 +832,7 @@ public class VolumeServiceImpl implements VolumeService {
             volume.setVmInstanceId(null);
             if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
                 Thread.sleep(5000);
+                config.setUserServer();
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
                         CloudStackConstants.JSON);
                 JSONObject jobresult = new JSONObject(jobResponse)
@@ -648,6 +887,7 @@ public class VolumeServiceImpl implements VolumeService {
         } else {
             if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
                 Thread.sleep(5000);
+                config.setUserServer();
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
                         CloudStackConstants.JSON);
                 JSONObject jobresult = new JSONObject(jobResponse)
@@ -676,13 +916,29 @@ public class VolumeServiceImpl implements VolumeService {
     public Volume softDelete(Volume volume) throws Exception {
         volume.setIsActive(false);
         volume.setStatus(Volume.Status.DESTROY);
+        Errors errors = new Errors(messageSource);
+     // TODO //check department and project quota validation.
+        ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
+                .findByDepartmentAndResourceType(volume.getDepartmentId(), ResourceType.Instance, true);
+
+        if (departmentLimit != null) {
+            if (volume.getProjectId() != null) {
+                syncService.syncResourceLimitProject(
+                        convertEntityService.getProjectById(volume.getProjectId()));
+            }
         if (volume.getIsSyncFlag()) {
             // set server for finding value in configuration
             config.setUserServer();
             csVolumeService.deleteVolume(volume.getUuid(), CloudStackConstants.JSON);
+        } if (errors.hasErrors()) {
+            throw new ApplicationException(errors);
         }
         if (volumeRepo.findByUUID(volume.getUuid()).getIsActive()) {
             return volumeRepo.save(volume);
+        }
+        } else {
+            errors.addGlobalError("Resource limit for department has not been set. Please update department quota");
+            throw new ApplicationException(errors);
         }
         return volume;
     }
@@ -728,6 +984,7 @@ public class VolumeServiceImpl implements VolumeService {
         String volumeS = csVolumeService.uploadVolume(volume.getName(), volume.getFormat().name(),
                 convertEntityService.getZoneUuidById(volume.getZoneId()), volume.getUrl(), CloudStackConstants.JSON,
                 optional);
+        try {
         JSONObject jobId = new JSONObject(volumeS).getJSONObject(CS_UPLOAD_VOLUME_RESPONSE);
         if (jobId.has(CloudStackConstants.CS_ERROR_CODE)) {
             errors = this.validateEvent(errors, jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
@@ -735,6 +992,7 @@ public class VolumeServiceImpl implements VolumeService {
         } else {
             if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
                 Thread.sleep(10000);
+                config.setUserServer();
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
                         CloudStackConstants.JSON);
 
@@ -744,7 +1002,6 @@ public class VolumeServiceImpl implements VolumeService {
                         .equals(CloudStackConstants.ERROR_JOB_STATUS)) {
                     errors = this.validateEvent(errors, jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
                             .getString(CloudStackConstants.CS_ERROR_TEXT));
-                    throw new ApplicationException(errors);
                 }
                 if (jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT).has(CS_VOLUME)) {
                     volume.setUuid((String) jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
@@ -760,6 +1017,11 @@ public class VolumeServiceImpl implements VolumeService {
                 }
             }
         }
+    } catch (ApplicationException e) {
+        LOGGER.error("ERROR AT UPLOAD VOLUME CREATION", e);
+        asyncService.updateResourceForVolumeDeletion(volume);
+        throw new ApplicationException(e.getErrors());
+    }
         return volume;
     }
 
@@ -881,4 +1143,60 @@ public class VolumeServiceImpl implements VolumeService {
         return volume;
     }
 
+    /**
+     * Check resouce capacity to create new Volume.
+     *
+     * @param volume Volume.
+     * @param optionalMap arguments.
+     * @return error message.
+     * @throws Exception unhandled errors.
+     */
+    public String isResourceAvailable(Volume volume, HashMap<String, String> optionalMap) throws Exception {
+        Long resourceUsage = 0L, tempCount = 0L;
+        String errMessage = null;
+        // 1. Initiate CS server connection as ROOT admin.
+        config.setServer(1L);
+        // 2. List capacity CS API call.
+        String csResponse = cloudStackResourceCapacity.listCapacity(optionalMap, CloudStackConstants.JSON);
+        JSONObject csCapacity = new JSONObject(csResponse).getJSONObject(CloudStackConstants.CS_CAPACITY_LIST_RESPONSE);
+        if (csCapacity.has(CloudStackConstants.CS_CAPACITY)) {
+            JSONArray capacityArrayJSON = csCapacity.getJSONArray(CloudStackConstants.CS_CAPACITY);
+            for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
+                String resourceType = capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CAPACITY_TYPE);
+                // 2.1 Total capacity in public pool for each resource type.
+                Long tempTotalCapacity = Long
+                        .valueOf(capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CS_CAPACITY_TOTAL));
+                // 2.2 Used capacity in public pool for each resource type.
+                Long tempCapacityUsed = Long
+                        .valueOf(capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CS_CAPACITY_USED));
+                if (GenericConstants.RESOURCE_CAPACITY.containsKey(resourceType)) {
+                    // 3.1 Total available resource in public pool for each
+                    // resource type.
+                    resourceUsage = tempTotalCapacity - tempCapacityUsed;
+                    // 4. Check whether resource is available to create new Volume
+                    // with resource type.
+                    switch (resourceType) {
+                    // 4.3 Check secondary storage availability.
+                    case GenericConstants.RESOURCE_PRIMARY_STORAGE:
+                        if (volume.getDiskSize() != null) {
+                            if (resourceUsage < volume.getDiskSize()) {
+                                errMessage = CloudStackConstants.RESOURCE_CHECK + " primary.storage.available "
+                                        + CloudStackConstants.CONTACT_CLOUD_ADMIN;
+                            }
+                        } else if (resourceUsage < convertEntityService
+                                .getStorageOfferById(volume.getStorageOfferingId()).getDiskSize()) {
+                            errMessage = CloudStackConstants.RESOURCE_CHECK + " primary.storage.available "
+                                    + CloudStackConstants.CONTACT_CLOUD_ADMIN;
+                        }
+                        break;
+                    default:
+                        LOGGER.debug("No Resource ", resourceType);
+                    }
+                }
+            }
+        }
+        // 5. If any resource shortage then return error message otherwise
+        // return empty string.
+        return errMessage;
+    }
 }

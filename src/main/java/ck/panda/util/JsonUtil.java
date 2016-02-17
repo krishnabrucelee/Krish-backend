@@ -75,17 +75,18 @@ public abstract class JsonUtil {
         return ZonedDateTime.ofInstant(date.toInstant(), systemDefault);
     }
 
-    // /**
-    // * @param object JSON array
-    // * @param key value
-    // * @return string value
-    // * @throws Exception raise if error
-    // */
-    // public static String getEnumValue(JSONObject object, String key) throws Exception {
-    // if (object.has(key)) {
-    // return object.optString(key);
-    // } else {
-    // return null;
-    // }
-    // }
+    /**
+     * To check not null validation for double values.
+     *
+     * @param value of the plan.
+     * @return values.
+     * @throws Exception if error occurs.
+     */
+    public static Double getDoubleValue(Double value) throws Exception {
+        if (value != null) {
+            return value;
+        } else {
+            return 0.00;
+        }
+    }
 }

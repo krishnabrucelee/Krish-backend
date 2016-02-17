@@ -14,17 +14,24 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
+import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Project;
+import ck.panda.domain.entity.ResourceLimitDepartment;
+import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.Network.Status;
+import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.NetworkRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackNetworkService;
+import ck.panda.util.CloudStackOptionalUtil;
+import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
@@ -39,7 +46,7 @@ public class NetworkServiceImpl implements NetworkService {
     /** Constant for network entity. */
     private static final String NETWORK = "Network";
 
-    /** Constant for cloudStack network . */
+    /** Constant for cloudStack network. */
     private static final String CS_NETWORK = "network";
 
     /** Constant for cloudStack network create response. */
@@ -54,8 +61,11 @@ public class NetworkServiceImpl implements NetworkService {
     /** Constant for cloudStack network list response. */
     private static final String CS_LIST_NETWORK_RESPONSE = "listnetworksresponse";
 
-    /** Constant for network type. */
-    private static final String CS_TYPE = "type";
+    /** Constant for cloudstack response restart. */
+    private static final String CS_RESTART_NETWORK_RESPONSE = "restartnetworkresponse";
+
+    /** Constant for clean up. */
+    private static final String CS_CLEAN_UP = "cleanup";
 
     /** Constant for network guestVmcidr. */
     private static final String CS_GUESTVMCIDR = "guestvmcidr";
@@ -111,10 +121,29 @@ public class NetworkServiceImpl implements NetworkService {
     @Autowired
     private VirtualMachineService vmService;
 
+    /** Resource Limit Department service reference. */
+    @Autowired
+    private ResourceLimitDepartmentService resourceLimitDepartmentService;
+
+    /** Resource Limit Project service reference. */
+    @Autowired
+    private ResourceLimitProjectService resourceLimitProjectService;
+
+    /** Sync Service reference. */
+    @Autowired
+    private SyncService syncService;
+
+    /** Sync Service reference. */
+    @Autowired
+    private AsynchronousJobService asyncService;
+
+    /** CloudStack connector reference for resource capacity. */
+    @Autowired
+    private CloudStackResourceCapacity cloudStackResourceCapacity;
+
     @Override
     @PreAuthorize("hasPermission(#network.getSyncFlag(), 'ADD_ISOLATED_NETWORK')")
     public Network save(Network network, Long userId) throws Exception {
-
         if (network.getSyncFlag()) {
             User user = convertEntityService.getOwnerById(userId);
             Errors errors = validator.rejectIfNullEntity(NETWORK, network);
@@ -122,41 +151,73 @@ public class NetworkServiceImpl implements NetworkService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                config.setUserServer();
-                Zone zoneObject = convertEntityService.getZoneById(network.getZoneId());
-                String networkOfferings = csNetwork.createNetwork(zoneObject.getUuid(), CloudStackConstants.JSON, optional(network, userId));
-                JSONObject createNetworkResponseJSON = new JSONObject(networkOfferings)
-                        .getJSONObject(CS_CREATE_NETWORK_RESPONSE);
-                if (createNetworkResponseJSON.has(CloudStackConstants.CS_ERROR_CODE)) {
-                    errors = this.validateEvent(errors, createNetworkResponseJSON.getString(CloudStackConstants.CS_ERROR_TEXT));
+                /** Used for setting optional values for resource count. */
+                HashMap<String, String> domainCountMap = new HashMap<String, String>();
+                //check department and project quota validation.
+                ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
+                        .findByDepartmentAndResourceType(network.getDepartmentId(), ResourceType.Instance, true);
+                if (departmentLimit != null) {
+                    if (network.getProjectId() != null) {
+                        syncService.syncResourceLimitProject(convertEntityService.getProjectById(network.getProjectId()));
+                    }
+                    updateResourceForNetworkCreation(network, errors);
+                    try {
+                        config.setUserServer();
+                        Zone zoneObject = convertEntityService.getZoneById(network.getZoneId());
+                        String networkOfferings = csNetwork.createNetwork(zoneObject.getUuid(),
+                                CloudStackConstants.JSON, optional(network, userId));
+                        JSONObject createNetworkResponseJSON = new JSONObject(networkOfferings)
+                                .getJSONObject(CS_CREATE_NETWORK_RESPONSE);
+                        if (createNetworkResponseJSON.has(CloudStackConstants.CS_ERROR_CODE)) {
+                            errors = this.validateEvent(errors,
+                                    createNetworkResponseJSON.getString(CloudStackConstants.CS_ERROR_TEXT));
+                            throw new ApplicationException(errors);
+                        }
+                        JSONObject networkResponse = createNetworkResponseJSON.getJSONObject(CS_NETWORK);
+                        network.setUuid(networkResponse.getString(CloudStackConstants.CS_ID));
+                network.setNetworkType(network.getNetworkType().valueOf(networkResponse.getString(CloudStackConstants.CS_TYPE)));
+                        network.setDisplayText(networkResponse.getString(CloudStackConstants.CS_DISPLAY_TEXT));
+                        network.setcIDR(networkResponse.getString(CloudStackConstants.CS_CIDR));
+                        network.setDomainId(domainService
+                                .findbyUUID(networkResponse.getString(CloudStackConstants.CS_DOMAIN_ID)).getId());
+                        network.setZoneId(zoneService
+                                .findByUUID(networkResponse.getString(CloudStackConstants.CS_ZONE_ID)).getId());
+                        network.setNetworkOfferingId(networkOfferingService
+                                .findByUUID(networkResponse.getString(CloudStackConstants.CS_NETWORK_OFFERING_ID))
+                                .getId());
+                        network.setStatus(network.getStatus()
+                                .valueOf(networkResponse.getString(CloudStackConstants.CS_STATE).toUpperCase()));
+                        if (network.getProjectId() != null) {
+                            network.setProjectId(convertEntityService
+                                    .getProjectId(networkResponse.getString(CloudStackConstants.CS_PROJECT_ID)));
+                        } else {
+                            if (network.getDepartmentId() != null) {
+                                network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
+                                        departmentService.find(network.getDepartmentId()).getUserName(),
+                                        domainService.find(network.getDomainId())));
+                            } else {
+                        network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
+                                departmentService.find(user.getDepartmentId()).getUserName(),
+                                        domainService.find(network.getDomainId())));
+                            }
+                        }
+                        network.setGateway(networkResponse.getString(CloudStackConstants.CS_GATEWAY));
+                        network.setIsActive(true);
+                    } catch (ApplicationException e) {
+                        LOGGER.error("ERROR AT NETWORK CREATION", e);
+                        asyncService.updateResourceForNetworkDeletion(network);
+                        throw new ApplicationException(e.getErrors());
+                    }
+                    // Resource count for domain
+                    String csResponse = cloudStackResourceCapacity.updateResourceCount(
+                            convertEntityService.getDomainById(network.getDomainId()).getUuid(), domainCountMap, "json");
+                    convertEntityService.resourceCount(csResponse);
+                    return networkRepo.save(network);
+                } else {
+                    errors.addGlobalError(
+                            "Resource limit for department has not been set. Please update department quota");
                     throw new ApplicationException(errors);
                 }
-                JSONObject networkResponse = createNetworkResponseJSON.getJSONObject(CS_NETWORK);
-                network.setUuid(networkResponse.getString(CloudStackConstants.CS_ID));
-                network.setNetworkType(network.getNetworkType().valueOf(networkResponse.getString(CS_TYPE)));
-                network.setDisplayText(networkResponse.getString(CloudStackConstants.CS_DISPLAY_TEXT));
-                network.setcIDR(networkResponse.getString(CloudStackConstants.CS_CIDR));
-                network.setDomainId(domainService.findbyUUID(networkResponse.getString(CloudStackConstants.CS_DOMAIN_ID)).getId());
-                network.setZoneId(zoneService.findByUUID(networkResponse.getString(CloudStackConstants.CS_ZONE_ID)).getId());
-                network.setNetworkOfferingId(
-                networkOfferingService.findByUUID(networkResponse.getString(CloudStackConstants.CS_NETWORK_OFFERING_ID)).getId());
-                network.setStatus(network.getStatus().valueOf(networkResponse.getString(CloudStackConstants.CS_STATE).toUpperCase()));
-                if (network.getProjectId() != null) {
-                    network.setProjectId(convertEntityService.getProjectId(networkResponse.getString(CloudStackConstants.CS_PROJECT_ID)));
-                } else {
-                    if (network.getDepartmentId() != null) {
-                        network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
-                                departmentService.find(network.getDepartmentId()).getUserName(),
-                                domainService.find(network.getDomainId())));
-                    } else {
-                        network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(departmentService
-                                .find(user.getDepartmentId()).getUserName(),
-                                domainService.find(network.getDomainId())));
-                    }
-                }
-                network.setGateway(networkResponse.getString(CloudStackConstants.CS_GATEWAY));
-                network.setIsActive(true);
-                return networkRepo.save(network);
             }
         } else {
             // To check Network UUID while Syncing Network.
@@ -164,6 +225,54 @@ public class NetworkServiceImpl implements NetworkService {
             network.setIsActive(true);
             return networkRepo.save(network);
         }
+    }
+
+    private Network updateResourceForNetworkCreation(Network network, Errors errors) throws Exception {
+        HashMap<String, String> resourceMap = convertEntityService.getResourceTypeValue();
+        String r = null;
+        try {
+            for (int i = 0; i < resourceMap.size(); i++) {
+                if (i == 6) {
+                    r = r.valueOf(i);
+                    ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                            .findByDepartmentAndResourceType(network.getDepartmentId(),
+                                    ResourceType.valueOf(resourceMap.get(r)), true);
+                    if (departmentMax.getUsedLimit() == null) {
+                        departmentMax.setUsedLimit(0L + 1);
+                    } else if (departmentMax.getMax() != departmentMax.getUsedLimit()) {
+                        departmentMax.setUsedLimit(departmentMax.getUsedLimit() + 1);
+                    } else {
+                        errors.addGlobalError("quota for creating Network" + " ' " + network.getName() + " ' "
+                                + "not exists. Please update department resource quota first to continue creating.");
+                        throw new ApplicationException(errors);
+                    }
+                    departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                    resourceLimitDepartmentService.update(departmentMax);
+                    if (network.getProjectId() != null) {
+                        ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                                network.getProjectId(), ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                true);
+                        if (projectMax.getUsedLimit() == null) {
+                            projectMax.setUsedLimit(0L + 1);
+                        } else if (projectMax.getMax() != projectMax.getUsedLimit()) {
+                            projectMax.setUsedLimit(projectMax.getUsedLimit() + 1);
+                        } else {
+                            errors.addGlobalError("quota for creating Network" + " ' " + network.getName() + " ' "
+                                    + "not exists. Please update project resource quota first to continue creating.");
+                            throw new ApplicationException(errors);
+                        }
+                        projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                        projectMax.setIsSyncFlag(false);
+                        resourceLimitProjectService.update(projectMax);
+                    }
+                }
+            }
+        } catch (ApplicationException e) {
+            asyncService.updateResourceForNetworkDeletion(network);
+            throw new ApplicationException(e.getErrors());
+        }
+        return network;
+
     }
 
     @Override
@@ -247,6 +356,17 @@ public class NetworkServiceImpl implements NetworkService {
         Errors errors = validator.rejectIfNullEntity(NETWORK, network);
         errors = validator.validateEntity(network, errors);
         network.setIsActive(false);
+
+        // TODO //check department and project quota validation.
+        ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
+                .findByDepartmentAndResourceType(network.getDepartmentId(), ResourceType.Instance, true);
+
+        if (departmentLimit != null) {
+            if (network.getProjectId() != null) {
+                syncService.syncResourceLimitProject(
+                        convertEntityService.getProjectById(network.getProjectId()));
+            }
+
         if (network.getSyncFlag()) {
             List<VmInstance> vmResponse = vmService.findAllByNetworkAndVmStatus(network.getId(),
                     VmInstance.Status.EXPUNGING);
@@ -269,6 +389,10 @@ public class NetworkServiceImpl implements NetworkService {
                     JSONObject jobresult = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
                 }
             }
+        }
+        } else {
+            errors.addGlobalError("Resource limit for department has not been set. Please update department quota");
+            throw new ApplicationException(errors);
         }
         return networkRepo.save(network);
     }
@@ -304,21 +428,21 @@ public class NetworkServiceImpl implements NetworkService {
      * @throws Exception exception
      */
     private Page<Network> getNetworkListByUser(PagingAndSorting pagingAndSorting, Long userId) throws  Exception {
-                User user = convertEntityService.getOwnerById(userId);
-                 if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
-                List<Network> networkList = new ArrayList<Network>();
-                for (Project project : projectService.findAllByUserAndIsActive(user.getId(), true)) {
-                    List<Network> projectNetwork = networkRepo.findByProjectDepartmentAndNetwork(project.getId(),
-                            user.getDepartmentId(), true);
-                    networkList.addAll(projectNetwork);
-                }
-                List<Network> networks = networkList.stream().distinct().collect(Collectors.toList());
-                Page<Network> listingNetworksWithPagination = new PageImpl<Network>(networks);
-                return (Page<Network>) listingNetworksWithPagination;
-            } else {
-                return networkRepo.findByDepartmentAndPagination(user.getDepartmentId(), true,
-                    pagingAndSorting.toPageRequest());
+        User user = convertEntityService.getOwnerById(userId);
+        if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
+            List<Network> networkList = new ArrayList<Network>();
+            for (Project project : projectService.findAllByUserAndIsActive(user.getId(), true)) {
+                List<Network> projectNetwork = networkRepo.findByProjectDepartmentAndNetwork(project.getId(),
+                        user.getDepartmentId(), true);
+                networkList.addAll(projectNetwork);
             }
+            List<Network> networks = networkList.stream().distinct().collect(Collectors.toList());
+            Page<Network> listingNetworksWithPagination = new PageImpl<Network>(networks);
+            return (Page<Network>) listingNetworksWithPagination;
+        } else {
+            return networkRepo.findByDepartmentAndPagination(user.getDepartmentId(), true,
+                    pagingAndSorting.toPageRequest());
+        }
     }
 
     @Override
@@ -381,7 +505,6 @@ public class NetworkServiceImpl implements NetworkService {
             }
         }
         return networkList;
-
     }
 
     @Override
@@ -423,10 +546,10 @@ public class NetworkServiceImpl implements NetworkService {
             optional.put(CloudStackConstants.CS_NETWORK_DOMAIN, network.getNetworkDomain());
         }
         if (network.getDomainId() != null) {
-            optional.put(CloudStackConstants.CS_DOMAIN_ID, convertEntityService.getDomainById(network.getDomainId()).getUuid());
-        } else {
             optional.put(CloudStackConstants.CS_DOMAIN_ID,
-                    domainService.find(user.getDomainId()).getUuid());
+                    convertEntityService.getDomainById(network.getDomainId()).getUuid());
+        } else {
+            optional.put(CloudStackConstants.CS_DOMAIN_ID, domainService.find(user.getDomainId()).getUuid());
         }
         if (network.getName() != null && network.getName().trim() != "") {
             optional.put(CloudStackConstants.CS_NAME, network.getName());
@@ -439,14 +562,16 @@ public class NetworkServiceImpl implements NetworkService {
                     convertEntityService.getNetworkOfferingById(network.getNetworkOfferingId()).getUuid());
         }
         if (network.getProjectId() != null) {
-            optional.put(CloudStackConstants.CS_PROJECT_ID, convertEntityService.getProjectById(network.getProjectId()).getUuid());
+            optional.put(CloudStackConstants.CS_PROJECT_ID,
+                    convertEntityService.getProjectById(network.getProjectId()).getUuid());
 
         } else {
             if (network.getDepartmentId() != null) {
-                optional.put(CloudStackConstants.CS_ACCOUNT, departmentService.find(network.getDepartmentId()).getUserName());
+                optional.put(CloudStackConstants.CS_ACCOUNT,
+                        departmentService.find(network.getDepartmentId()).getUserName());
             } else {
-                optional.put(CloudStackConstants.CS_ACCOUNT, departmentService
-                        .find(user.getDepartmentId()).getUserName());
+                optional.put(CloudStackConstants.CS_ACCOUNT,
+                        departmentService.find(user.getDepartmentId()).getUserName());
             }
         }
         return optional;
@@ -483,7 +608,95 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public Page<Network> findAll(PagingAndSorting pagingAndSorting) throws Exception {
         return networkRepo.findAll(pagingAndSorting.toPageRequest());
-
+    }
+    @Override
+    @PreAuthorize("hasPermission(#network.getSyncFlag(), 'RESTART_NETWORK')")
+    public Network restartNetwork(Network network) throws Exception {
+        Errors errors = validator.rejectIfNullEntity(NETWORK, network);
+        errors = validator.validateEntity(network, errors);
+        if (network.getSyncFlag()) {
+            HashMap<String, String> optionalParams = new HashMap<String, String>();
+            // Mapping optional parameters.
+            CloudStackOptionalUtil.updateOptionalBooleanValue(CS_CLEAN_UP, network.getCleanUpNetwork(), optionalParams);
+            // Configuration value to ACS.
+            config.setUserServer();
+            // Restart network call to ACS
+            String restartResponse = csNetwork.restartNetwork(network.getUuid(), optionalParams,
+                    CloudStackConstants.JSON);
+            JSONObject jobId = new JSONObject(restartResponse).getJSONObject(CS_RESTART_NETWORK_RESPONSE);
+            // Temporarily added thread, will be removed once web socket is
+            // done.
+            Thread.sleep(5000);
+            // Checking job id.
+            if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
+                String jobResponse = csNetwork.networkJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
+                        CloudStackConstants.JSON);
+                JSONObject jobresult = new JSONObject(jobResponse)
+                        .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+                if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
+                        .equals(CloudStackConstants.PROGRESS_JOB_STATUS)
+                        || (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
+                                .equals(CloudStackConstants.PROGRESS_JOB_STATUS))) {
+                    network.setNetworkRestart(true);
+                } else {
+                    JSONObject jobresponse = jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT);
+                    if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
+                            .equals(CloudStackConstants.ERROR_JOB_STATUS)) {
+                        if (jobresponse.has(CloudStackConstants.CS_ERROR_CODE)) {
+                            errors = this.validateEvent(errors,
+                                    jobresponse.getString(CloudStackConstants.CS_ERROR_TEXT));
+                            throw new ApplicationException(errors);
+                        }
+                    }
+                }
+            }
+        }
+        return networkRepo.save(network);
     }
 
+
+    @Override
+    @PreAuthorize("hasPermission(#network.getSyncFlag(), 'RESTART_NETWORK')")
+    public Network restartNetwork(Network network) throws Exception {
+        Errors errors = validator.rejectIfNullEntity(NETWORK, network);
+        errors = validator.validateEntity(network, errors);
+        if (network.getSyncFlag()) {
+            HashMap<String, String> optionalParams = new HashMap<String, String>();
+            // Mapping optional parameters.
+            CloudStackOptionalUtil.updateOptionalBooleanValue(CS_CLEAN_UP, network.getCleanUpNetwork(), optionalParams);
+            // Configuration value to ACS.
+            config.setUserServer();
+            // Restart network call to ACS
+            String restartResponse = csNetwork.restartNetwork(network.getUuid(), optionalParams,
+                    CloudStackConstants.JSON);
+            JSONObject jobId = new JSONObject(restartResponse).getJSONObject(CS_RESTART_NETWORK_RESPONSE);
+            // Temporarily added thread, will be removed once web socket is
+            // done.
+            Thread.sleep(5000);
+            // Checking job id.
+            if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
+                String jobResponse = csNetwork.networkJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
+                        CloudStackConstants.JSON);
+                JSONObject jobresult = new JSONObject(jobResponse)
+                        .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+                if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
+                        .equals(CloudStackConstants.PROGRESS_JOB_STATUS)
+                        || (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
+                                .equals(CloudStackConstants.PROGRESS_JOB_STATUS))) {
+                    network.setNetworkRestart(true);
+                } else {
+                    JSONObject jobresponse = jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT);
+                    if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
+                            .equals(CloudStackConstants.ERROR_JOB_STATUS)) {
+                        if (jobresponse.has(CloudStackConstants.CS_ERROR_CODE)) {
+                            errors = this.validateEvent(errors,
+                                    jobresponse.getString(CloudStackConstants.CS_ERROR_TEXT));
+                            throw new ApplicationException(errors);
+                        }
+                    }
+                }
+            }
+        }
+        return networkRepo.save(network);
+    }
   }

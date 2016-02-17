@@ -131,4 +131,22 @@ public class CloudStackNetworkService {
         return jobResponse;
     }
 
+    /**
+     * Restarts the network; includes 1) restarting network elements - virtual routers, dhcp servers .
+     * 2) reapplying all public ips 3) reapplying loadBalancing/portForwarding rules
+     *
+     * @param networkId the network id to restart
+     * @param optional values mapping to ACS.
+     * @param response response
+     * @return network.
+     * @throws Exception if error occurs.
+     */
+    public String restartNetwork(String networkId, HashMap<String, String> optional, String response) throws Exception {
+
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("restartNetwork", optional);
+        arguments.add(new NameValuePair("id", networkId));
+        arguments.add(new NameValuePair("response", response));
+        String responseDocument = server.request(arguments);
+        return responseDocument;
+    }
 }

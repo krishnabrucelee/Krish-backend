@@ -50,4 +50,14 @@ public interface ComputeOfferingRepository extends PagingAndSortingRepository<Co
      */
     @Query(value = "SELECT compute FROM ComputeOffering compute WHERE compute.isActive = :isActive")
     List<ComputeOffering> findByIsActive(@Param("isActive") Boolean isActive);
+
+    /**
+     * List compute offering by domain.
+     *
+     * @param domainId of the domain.
+     * @param isActive status of the domain.
+     * @return compute offering.
+     */
+    @Query(value = "SELECT compute FROM ComputeOffering compute WHERE compute.isActive = :isActive AND ( compute.domainId = :domainId OR compute.domainId IS NULL )")
+    List<ComputeOffering> findByDomainAndIsActive(@Param("domainId") Long domainId,@Param("isActive") Boolean isActive);
 }

@@ -30,6 +30,33 @@ public class CloudStackConstants {
     /** Constant for created date and time. */
     public static final String CS_CREATED = "created";
 
+    /** Constant for project account role. */
+    public static final String CS_ACCOUNT_ROLE = "Regular";
+
+    /** Constant for CS response type. */
+    public static final String CS_RESPONSE = "response";
+
+    /** Constant for CS response project id. */
+    public static final String CS_PROJECT_RESPONSE_ID = "projectId";
+
+    /** Constant for CS role response. */
+    public static final String CS_PROJECT_ROLE = "role";
+
+    /** Constant for project  add account. */
+    public static final String CS_PROJECT_ADD_ACCOUNT = "addAccountToProject";
+
+    /** Constant for project delete account. */
+    public static final String CS_PROJECT_REMOVE_ACCOUNT = "deleteAccountFromProject";
+
+    /** Constant for project update. */
+    public static final String CS_PROJECT_UPDATE = "updateProject";
+
+    /** Constant for project update response. */
+    public static final String CS_PROJECT_UPDATE_RESPONSE = "updateprojectresponse";
+
+    /** Constant for project account list. */
+    public static final String CS_PROJECT_ACCOUNT_LIST = "listProjectAccounts";
+
     /** Constant for custom offering. */
     public static final String CS_CUSTOM_STATUS = "iscustomized";
 

@@ -17,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.ResourceLimitDepartment;
+import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.ResourceLimitProject.ResourceType;
 import ck.panda.domain.repository.jpa.ResourceLimitProjectRepository;
@@ -79,6 +80,10 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
     /** Reference of the convert entity service. */
     @Autowired
     private ConvertEntityService convertEntityService;
+
+    /** Reference of the Sync service. */
+    @Autowired
+    private SyncService syncService;
 
     @Override
     public ResourceLimitProject save(ResourceLimitProject resource) throws Exception {
@@ -223,7 +228,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
      *
      * @param projectId project.
      */
-    private void deleteResourceLimitByProject(Long projectId) {
+    public void deleteResourceLimitByProject(Long projectId) {
         List<ResourceLimitProject> resourceLimits = resourceLimitProjectRepo.findAllByProjectIdAndIsActive(projectId,
                 true);
         for (ResourceLimitProject resource : resourceLimits) {
@@ -271,7 +276,22 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
     }
 
     @Override
-    public List<ResourceLimitProject> findAllByProjectIdAndIsActive(Long projectId, Boolean isActive) {
+    public List<ResourceLimitProject> findAllByProjectIdAndIsActive(Long projectId, Boolean isActive) throws ApplicationException, Exception {
+//        //This call is for update resource limit form ACS.
+//        syncService.syncResourceLimitProject(convertEntityService.getProjectById(projectId));
         return (List<ResourceLimitProject>) resourceLimitProjectRepo.findAllByProjectIdAndIsActive(projectId, isActive);
     }
+
+    @Override
+    public ResourceLimitProject findByProjectAndResourceType(Long projectId, ResourceType resourceType,
+            Boolean isActive) throws Exception {
+        return resourceLimitProjectRepo.findByProjectAndResourceType(projectId, resourceType, isActive);
+    }
+
+    @Override
+    public ResourceLimitProject findResourceByProjectAndResourceType(Long projectId, ResourceType resourceType,
+            Boolean isActive) throws Exception {
+        return resourceLimitProjectRepo.findResourceByProjectAndResourceType(projectId, resourceType, isActive);
+    }
+
 }

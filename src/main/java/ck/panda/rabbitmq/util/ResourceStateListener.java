@@ -14,10 +14,14 @@ import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.PortForwarding;
+import ck.panda.domain.entity.ResourceLimitDepartment;
+import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.domain.entity.Volume;
+import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
 import ck.panda.domain.entity.Volume.VolumeType;
+import ck.panda.service.AsynchronousJobService;
 import ck.panda.service.CloudStackConfigurationService;
 import ck.panda.service.ConvertEntityService;
 import ck.panda.service.NetworkService;
@@ -66,11 +70,13 @@ public class ResourceStateListener implements MessageListener {
     private ConvertEntityService convertEntityService;
 
     /** CloudStack Resource Capacity Service. */
-    @Autowired
     private CloudStackResourceCapacity cloudStackResourceCapacity;
 
     /** sync service reference. */
     private SyncService sync;
+
+    /** Sync Service reference. */
+    private AsynchronousJobService asyncService;
 
     /**
      * Inject convert entity service.
@@ -79,9 +85,9 @@ public class ResourceStateListener implements MessageListener {
      * @param
      */
     public ResourceStateListener(ConvertEntityService convertEntityService, SyncService sync) {
-		this.convertEntityService = convertEntityService;
-		this.virtualmachineservice = convertEntityService.getInstanceService();
-		this.volumeService = convertEntityService.getVolumeService();
+        this.convertEntityService = convertEntityService;
+        this.virtualmachineservice = convertEntityService.getInstanceService();
+        this.volumeService = convertEntityService.getVolumeService();
         this.nicService = convertEntityService.getNicService();
         this.portForwardingService = convertEntityService.getPortForwardingService();
         this.networkService = convertEntityService.getNetworkService();
@@ -89,6 +95,8 @@ public class ResourceStateListener implements MessageListener {
         this.cloudStackInstanceService = convertEntityService.getCSInstanceService();
         this.server = convertEntityService.getCSConnecter();
         this.cloudConfigService = convertEntityService.getCSConfig();
+        this.cloudStackResourceCapacity = convertEntityService.getCloudStackResourceCapacityService();
+        this.asyncService = convertEntityService.getasyncService();
     }
 
     @Override
@@ -160,7 +168,7 @@ public class ResourceStateListener implements MessageListener {
                                 portForwarding.setSyncFlag(false);
                                 portForwardingService.update(portForwarding);
                             }
-
+                            asyncService.updateResourceForVmExpunging(vmInstance);
                             // Resource count for domain
                             HashMap<String, String> domainCountMap = new HashMap<String, String>();
                             if (vmInstance.getProjectId() != null) {
@@ -185,10 +193,14 @@ public class ResourceStateListener implements MessageListener {
                             vmInstance.setHostUuid(null);
                             virtualmachineservice.update(vmInstance);
                         }
+                        if (resourceEvent.getString(EventTypes.OLD_RESOURCE_STATE).equals(EventTypes.EVENT_STATUS_DESTROYED) &&
+                                resourceEvent.getString(EventTypes.RESOURCE_STATE).equals(EventTypes.EVENT_STATUS_STOPPED)) {
+                            asyncService.updateResourceForVmRestore(vmInstance);
+                        }
                         if (resourceEvent.getString(EventTypes.RESOURCE_STATE).equals(EventTypes.EVENT_STATUS_RUNNING)) {
-                        	// Host update & internal name while create vm as user.
+                            // Host update & internal name while create vm as user.
                             if (vmInstance.getHostId() == null) {
-                            	CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
+                                CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
                                 server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(), cloudConfig.getApiKey());
                                 cloudStackInstanceService.setServer(server);
                                 HashMap<String, String> vmMap = new HashMap<String, String>();
@@ -210,7 +222,7 @@ public class ResourceStateListener implements MessageListener {
                                         // 2.3 Update internal name.
                                         vmInstance.setInstanceInternalName(CsVmInstance.getInstanceInternalName());
                                         if (vmInstance.getHostId() != null) {
-                                        	vmInstance.setPodId(convertEntityService
+                                            vmInstance.setPodId(convertEntityService
                                                     .getPodIdByHost(convertEntityService.getHostId(CsVmInstance.getTransHostId())));
                                         }
                                         // 3. Update vm for user vm creation.
@@ -239,4 +251,5 @@ public class ResourceStateListener implements MessageListener {
             }
         }
     }
+
 }

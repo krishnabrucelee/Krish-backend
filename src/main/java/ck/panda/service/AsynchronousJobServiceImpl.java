@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
@@ -20,12 +21,15 @@ import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.FirewallRules.Purpose;
 import ck.panda.domain.entity.LoadBalancerRule.SticknessMethod;
+import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
 import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.LoadBalancerRule;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.PortForwarding;
+import ck.panda.domain.entity.ResourceLimitDepartment;
+import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
@@ -41,6 +45,7 @@ import ck.panda.util.CloudStackVolumeService;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.EncryptionUtil;
 import ck.panda.util.JsonUtil;
+import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 
 /**
@@ -52,7 +57,7 @@ import ck.panda.util.error.exception.ApplicationException;
 public class AsynchronousJobServiceImpl implements AsynchronousJobService {
 
     /** Logger attribute. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(SyncServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AsynchronousJobServiceImpl.class);
 
     /** Cloud stack configuration reference. */
     @Autowired
@@ -138,6 +143,26 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     @Autowired
     private CloudStackResourceCapacity cloudStackResourceCapacity;
 
+    /** Resource Limit Department service reference. */
+    @Autowired
+    private ResourceLimitDepartmentService resourceLimitDepartmentService;
+
+    /** Resource Limit Project service reference. */
+    @Autowired
+    private ResourceLimitProjectService resourceLimitProjectService;
+
+    /** Sync Service reference. */
+    @Autowired
+    private SyncService syncService;
+
+    /** Message source attribute. */
+    @Autowired
+    private MessageSource messageSource;
+
+    /** Message source attribute. */
+    @Autowired
+    private IpaddressService ipaddressService;
+
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
@@ -174,12 +199,20 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         case EventTypes.EVENT_VM:
             LOGGER.debug("VM Sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
                 eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+            if (eventObject.getString(CloudStackConstants.CS_EVENT_STATUS).equals("FAILED")) {
+                VmInstance vmInstance = VmInstance.convert(jobResult.getJSONObject("VirtualMachine"));
+                updateResourceForVmDeletion(vmInstance);
+            }
             syncVirtualMachine(jobResult, eventObject);
             break;
         case EventTypes.EVENT_NETWORK:
             if (!eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).contains("OFFERING")) {
                 LOGGER.debug("Network sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
                     eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+                if (eventObject.getString(CloudStackConstants.CS_EVENT_STATUS).equals("FAILED")) {
+                    Network network = Network.convert(jobResult.getJSONObject("network"));
+                    updateResourceForNetworkDeletion(network);
+                }
                 asyncNetwork(jobResult, eventObject);
             }
             break;
@@ -220,6 +253,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         case EventTypes.EVENT_VOLUME:
             LOGGER.debug("Volume sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
                 eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+            if (eventObject.getString(CloudStackConstants.CS_EVENT_STATUS).equals("FAILED")) {
+                Volume volume = Volume.convert(jobResult.getJSONObject("volume"));
+                updateResourceForVolumeDeletion(volume);
+            }
             asyncVolume(jobResult, eventObject);
             break;
         case EventTypes.EVENT_NIC:
@@ -358,6 +395,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     }
                     // 3.2 If found, update the vm object in app db
                     vmIn = virtualMachineService.update(instance);
+
+                    //check if error in instance
+                        // if error -> increase proj and department resource limit 1
+                        // no error -> proceed to update count.
                     // Resource count for domain
                     configUtil.setServer(1L);
                     String csResponse = cloudStackResourceCapacity.updateResourceCount(
@@ -387,6 +428,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 vmIn = virtualMachineService.update(vmInstance);
             }
             if (eventObject.getString("commandEventType").equals(EventTypes.EVENT_VM_CREATE)) {
+                Errors errors = new Errors(messageSource);
                 this.assignNicTovM(vmIn);
                 this.assignVolumeTovM(vmIn);
                 if (volumeService.findByInstanceAndVolumeType(vmIn.getId()) != null) {
@@ -418,6 +460,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                                 vmIn.setPodId(convertEntityService
                                         .getPodIdByHost(convertEntityService.getHostId(CsVmInstance.getTransHostId())));
                             }
+                            updateResourceForVmCreation(vmInstance, errors);
                             // 3. Update vm for user vm creation.
                             vmIn = virtualMachineService.update(vmIn);
                         }
@@ -523,7 +566,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      */
     public void asyncNetwork(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
 
-    	configUtil.setServer(1L);
+        configUtil.setServer(1L);
         if (eventObject.getString("commandEventType").equals("NETWORK.UPDATE")) {
             Network csNetwork = Network.convert(jobResult.getJSONObject("network"));
             Network network = networkService.findByUUID(csNetwork.getUuid());
@@ -554,12 +597,38 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
             Network network = networkService.findByUUID(json.getString("id"));
             network.setSyncFlag(false);
-            networkService.softDelete(network);
+            Errors errors = new Errors(messageSource);
+            // TODO //check department and project quota validation.
+            ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
+                    .findByDepartmentAndResourceType(network.getDepartmentId(), ResourceType.Instance, true);
 
+            if (departmentLimit != null) {
+                if (network.getProjectId() != null) {
+                    syncService
+                            .syncResourceLimitProject(convertEntityService.getProjectById(network.getProjectId()));
+                }
+            networkService.softDelete(network);
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
+            } else {
+                updateResourceForNetworkDeletion(network);
+            }
+            } else {
+                errors.addGlobalError("Resource limit for department has not been set. Please update department quota");
+                throw new ApplicationException(errors);
+            }
             // Resource count for domain
             String csResponse = cloudStackResourceCapacity.updateResourceCount(
                     convertEntityService.getDomainById(network.getDomainId()).getUuid(), domainCountMap, "json");
             convertEntityService.resourceCount(csResponse);
+        }
+
+        if (eventObject.getString("commandEventType").equals("NETWORK.RESTART")) {
+            JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
+            Network network = networkService.findByUUID(json.getString("id"));
+            network.setSyncFlag(false);
+            network.setNetworkRestart(true);
+            networkService.update(network);
         }
     }
 
@@ -714,7 +783,8 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      * @throws Exception cloudstack unhandled errors
      */
     public void asyncIpAddress(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
-    	configUtil.setServer(1L);
+        Errors errors = null;
+        configUtil.setServer(1L);
         if (eventObject.getString("commandEventType").equals("NET.IPASSIGN")) {
             IpAddress ipaddress = IpAddress.convert(jobResult.getJSONObject("ipaddress"));
             IpAddress persistIp = ipService.findbyUUID(ipaddress.getUuid());
@@ -745,7 +815,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                             .getNetworkById(convertEntityService.getNetworkByUuid(csIp.getTransNetworkId()))
                             .getDomainId());
                     ipService.update(persistIp);
-
+                    updateResourceForIpCreation(convertEntityService.getNetworkById(persistIp.getNetworkId()), errors);
                     // Resource count for domain
                     String csResponse = cloudStackResourceCapacity.updateResourceCount(
                             convertEntityService.getDomainById(persistIp.getDomainId()).getUuid(), domainCountMap,
@@ -838,21 +908,25 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             }
             if (eventObject.getString("commandEventType").equals("VOLUME.UPLOAD")) {
                 volume.setDiskSizeFlag(false);
+                volume.setIsActive(true);
+                //volume.setDiskSize(diskSize);
             } else {
                 volume.setDiskSizeFlag(true);
             }
             if (jobResult.getJSONObject("volume").getString("state").equalsIgnoreCase("ALLOCATED")) {
                 volume.setStatus(Status.ALLOCATED);
             }
+            if (eventObject.getString("commandEventType").equals("VOLUME.UPLOAD")) {
+                Errors errors = null;
+                updateResourceForUploadVolumeCreation(volume, errors);
+            }
             if (volumeService.findByUUID(volume.getUuid()) == null) {
                 volumeService.save(volume);
-
-                // Resource count update for domain
-                configUtil.setServer(1L);
-                String csResponse = cloudStackResourceCapacity.updateResourceCount(
-                        convertEntityService.getDomainById(volume.getDomainId()).getUuid(), domainCountMap, "json");
-                convertEntityService.resourceCount(csResponse);
             }
+            // Resource count update for domain
+            String csResponse = cloudStackResourceCapacity.updateResourceCount(
+                    convertEntityService.getDomainById(volume.getDomainId()).getUuid(), domainCountMap, "json");
+            convertEntityService.resourceCount(csResponse);
         }
         if (eventObject.getString("commandEventType").equals("VOLUME.ATTACH")
                 || eventObject.getString("commandEventType").equals("VOLUME.DETACH")) {
@@ -891,6 +965,62 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 volumeService.update(volume);
 
             }
+        }
+    }
+
+    private void updateResourceForUploadVolumeCreation(Volume volume, Errors errors) throws Exception {
+        HashMap<String, String> resourceMap = convertEntityService.getResourceTypeValue();
+        String r = null;
+        for (int i = 0; i < resourceMap.size(); i++) {
+        if (i == 10) {
+            r = r.valueOf(i);
+            ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                    .findByDepartmentAndResourceType(volume.getDepartmentId(),
+                            ResourceType.valueOf(resourceMap.get(r)), true);
+            if (departmentMax.getUsedLimit() == null) {
+                if (volume.getDiskSize() != null) {
+                    departmentMax.setUsedLimit(0L + volume.getDiskSize());
+                } else {
+                    departmentMax.setUsedLimit(0L + convertEntityService.getStorageOfferById(volume.getStorageOfferingId()).getDiskSize());
+                }
+            } else if (departmentMax.getMax() != departmentMax.getUsedLimit()) {
+                if (volume.getDiskSize() != null) {
+                    departmentMax.setUsedLimit(departmentMax.getUsedLimit() + volume.getDiskSize());
+                } else {
+                    departmentMax.setUsedLimit(departmentMax.getUsedLimit() + convertEntityService.getStorageOfferById(volume.getStorageOfferingId()).getDiskSize());
+                }
+            } else {
+                errors.addGlobalError("quota for creating volume"+" ' "+volume.getName()+" ' " +"not exists. Please update department resource quota first to continue creating." );
+                throw new ApplicationException(errors);
+            }
+            departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+            resourceLimitDepartmentService.update(departmentMax);
+            if (volume.getProjectId() != null) {
+                ResourceLimitProject projectMax = resourceLimitProjectService
+                        .findByProjectAndResourceType(volume.getProjectId(),
+                                ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                true);
+                if (projectMax.getUsedLimit() == null) {
+                    if (volume.getDiskSize() != null) {
+                        projectMax.setUsedLimit(0L + volume.getDiskSize());
+                    } else {
+                        projectMax.setUsedLimit(0L + convertEntityService.getStorageOfferById(volume.getStorageOfferingId()).getDiskSize());
+                    }
+                } else if (projectMax.getMax() != projectMax.getUsedLimit()) {
+                    if (volume.getDiskSize() != null) {
+                        projectMax.setUsedLimit(projectMax.getUsedLimit() + volume.getDiskSize());
+                    } else {
+                        projectMax.setUsedLimit(projectMax.getUsedLimit() + convertEntityService.getStorageOfferById(volume.getStorageOfferingId()).getDiskSize());
+                    }
+                } else {
+                    errors.addGlobalError("quota for creating volume"+" ' "+volume.getName()+" ' " +"not exists. Please update project resource quota first to continue creating." );
+                    throw new ApplicationException(errors);
+                }
+                projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                projectMax.setIsSyncFlag(false);
+                resourceLimitProjectService.update(projectMax);
+            }
+        }
         }
     }
 
@@ -1190,20 +1320,141 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         if (eventObject.getEvent().contains("VOLUME.DELETE")) {
             Volume volume = volumeService.findByUUID(eventObject.getEntityuuid());
             volume.setIsSyncFlag(false);
-            volumeService.softDelete(volume);
+            Errors errors = new Errors(messageSource);
+            // TODO //check department and project quota validation.
+            ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
+                    .findByDepartmentAndResourceType(volume.getDepartmentId(), ResourceType.Instance, true);
+
+            if (departmentLimit != null) {
+                if (volume.getProjectId() != null) {
+                    syncService
+                            .syncResourceLimitProject(convertEntityService.getProjectById(volume.getProjectId()));
+                }
+                volumeService.softDelete(volume);
+                if (errors.hasErrors()) {
+                    throw new ApplicationException(errors);
+                } else {
+                    updateResourceForVolumeDeletion(volume);
+                }
+            } else {
+                errors.addGlobalError("Resource limit for department has not been set. Please update department quota");
+                throw new ApplicationException(errors);
+            }
 
             // Resource count update for domain
-            configUtil.setServer(1L);
             String csResponse = cloudStackResourceCapacity.updateResourceCount(
                     convertEntityService.getDomainById(volume.getDomainId()).getUuid(), domainCountMap, "json");
             convertEntityService.resourceCount(csResponse);
         }
     }
 
-	@Override
-	public void syncVMUpdate(String uuid) throws Exception {
-		VmInstance persistVm = virtualMachineService.findByUUID(uuid);
-		configUtil.setServer(1L);
+    public Volume updateResourceForVolumeDeletion(Volume volume) throws Exception {
+    HashMap<String, String> resourceMap = convertEntityService.getResourceTypeValue();
+    String r = null;
+    for (int i = 0; i < resourceMap.size(); i++) {
+        if (i == 2) {
+            r = r.valueOf(i);
+            ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                    .findByDepartmentAndResourceType(volume.getDepartmentId(),
+                            ResourceType.valueOf(resourceMap.get(r)), true);
+            if (departmentMax.getUsedLimit() == null) {
+                departmentMax.setUsedLimit(0L);
+            } else if (departmentMax.getUsedLimit() != 0) {
+                departmentMax.setUsedLimit(departmentMax.getUsedLimit() - 1);
+            }
+            departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+            resourceLimitDepartmentService.update(departmentMax);
+            if (volume.getProjectId() != null) {
+                ResourceLimitProject projectMax = resourceLimitProjectService
+                        .findByProjectAndResourceType(volume.getProjectId(),
+                                ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                true);
+                if (projectMax.getUsedLimit() == null) {
+                    projectMax.setUsedLimit(0L);
+                } else if (departmentMax.getUsedLimit() != 0) {
+                    projectMax.setUsedLimit(projectMax.getUsedLimit() - 1);
+                }
+                projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                projectMax.setIsSyncFlag(false);
+                resourceLimitProjectService.update(projectMax);
+            }
+        }
+        if (i == 10) {
+            r = r.valueOf(i);
+            ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                    .findByDepartmentAndResourceType(volume.getDepartmentId(),
+                            ResourceType.valueOf(resourceMap.get(r)), true);
+            if (departmentMax.getUsedLimit() == null) {
+                departmentMax.setUsedLimit(0L);
+            } else if (departmentMax.getUsedLimit() != 0) {
+                if (volume.getDiskSize() != null) {
+                    departmentMax.setUsedLimit(0L - volume.getDiskSize());
+                } else {
+                    departmentMax.setUsedLimit(0L - convertEntityService.getStorageOfferById(volume.getStorageOfferingId()).getDiskSize());
+                }
+            }
+            departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+            resourceLimitDepartmentService.update(departmentMax);
+            if (volume.getProjectId() != null) {
+                ResourceLimitProject projectMax = resourceLimitProjectService
+                        .findByProjectAndResourceType(volume.getProjectId(),
+                                ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                true);
+                if (projectMax.getUsedLimit() == null) {
+                    projectMax.setUsedLimit(0L);
+                } else if (departmentMax.getUsedLimit() != 0) {
+                    if (volume.getDiskSize() != null) {
+                        projectMax.setUsedLimit(0L - volume.getDiskSize());
+                    } else {
+                        projectMax.setUsedLimit(0L - convertEntityService.getStorageOfferById(volume.getStorageOfferingId()).getDiskSize());
+                    }
+                }
+                projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                projectMax.setIsSyncFlag(false);
+                resourceLimitProjectService.update(projectMax);
+            }
+        }
+    }
+    return volume;
+
+    }
+
+    public Volume updateResourceForUploadVolumeDeletion(Volume volume) throws Exception {
+        HashMap<String, String> resourceMap = convertEntityService.getResourceTypeValue();
+        String r = null;
+        for (int i = 0; i < resourceMap.size(); i++) {
+            if (i == 2) {
+                r = r.valueOf(i);
+                ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                        .findByDepartmentAndResourceType(volume.getDepartmentId(),
+                                ResourceType.valueOf(resourceMap.get(r)), true);
+                if (departmentMax.getUsedLimit() != null) {
+                    departmentMax.setUsedLimit(departmentMax.getUsedLimit() - 1);
+                    departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                }
+                resourceLimitDepartmentService.update(departmentMax);
+                if (volume.getProjectId() != null) {
+                    ResourceLimitProject projectMax = resourceLimitProjectService
+                            .findByProjectAndResourceType(volume.getProjectId(),
+                                    ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                    true);
+                    if (projectMax.getUsedLimit() == null) {
+                        projectMax.setUsedLimit(0L - 1);
+                    } else {
+                        projectMax.setUsedLimit(projectMax.getUsedLimit() - 1);
+                    }
+                    projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                    projectMax.setIsSyncFlag(false);
+                    resourceLimitProjectService.update(projectMax);
+                }
+            }
+        }
+        return volume;
+    }
+    @Override
+    public void syncVMUpdate(String uuid) throws Exception {
+        VmInstance persistVm = virtualMachineService.findByUUID(uuid);
+        configUtil.setServer(1L);
         HashMap<String, String> vmMap = new HashMap<String, String>();
         vmMap.put(CloudStackConstants.CS_ID, persistVm.getUuid());
         String response = cloudStackInstanceService.listVirtualMachines(CloudStackConstants.JSON, vmMap);
@@ -1223,6 +1474,987 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 virtualMachineService.update(persistVm);
             }
         }
-	}
+    }
+
+    @Override
+    public Network updateResourceForNetworkDeletion(Network network) throws Exception {
+        HashMap<String, String> resourceMap = convertEntityService.getResourceTypeValue();
+        String r = null;
+        for (int i = 0; i < resourceMap.size(); i++) {
+            if (i == 6) {
+                r = r.valueOf(i);
+                ResourceLimitDepartment departmentMax = resourceLimitDepartmentService.findByDepartmentAndResourceType(
+                        network.getDepartmentId(), ResourceType.valueOf(resourceMap.get(r)), true);
+                if (departmentMax.getUsedLimit() == null) {
+                    departmentMax.setUsedLimit(0L);
+                } else if (departmentMax.getUsedLimit() != 0) {
+                    departmentMax.setUsedLimit(departmentMax.getUsedLimit() - 1);
+                }
+                departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                resourceLimitDepartmentService.update(departmentMax);
+                if (network.getProjectId() != null) {
+                    ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                            network.getProjectId(), ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                            true);
+                    if (projectMax.getUsedLimit() == null) {
+                        projectMax.setUsedLimit(0L);
+                    } else if (departmentMax.getUsedLimit() != 0) {
+                        projectMax.setUsedLimit(projectMax.getUsedLimit() - 1);
+                    }
+                    projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                    projectMax.setIsSyncFlag(false);
+                    resourceLimitProjectService.update(projectMax);
+                }
+            }
+        }
+        return network;
+    }
+
+
+    private VmInstance updateResourceForVmCreation(VmInstance vmInstance, Errors errors) throws Exception {
+
+        HashMap<String, String> resourceMap = convertEntityService.getResourceTypeValue();
+        String r = null;
+        try {
+            for (int i = 0; i < resourceMap.size(); i++) {
+                if (i == 0) {
+                    r = r.valueOf(i);
+                    ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                            .findByDepartmentAndResourceType(vmInstance.getDepartmentId(),
+                                    ResourceType.valueOf(resourceMap.get(r)), true);
+                    if (departmentMax.getUsedLimit() == null) {
+                        departmentMax.setUsedLimit(0L + 1);
+                    } else if (departmentMax.getMax() != departmentMax.getUsedLimit()) {
+                        departmentMax.setUsedLimit(departmentMax.getUsedLimit() + 1);
+                    } else {
+                        errors.addGlobalError("quota for creating Instance" + " ' " + vmInstance.getName() + " ' "
+                                + "not exists. Please update department resource quota first to continue creating.");
+                        throw new ApplicationException(errors);
+                    }
+                    departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                    resourceLimitDepartmentService.update(departmentMax);
+                    if (vmInstance.getProjectId() != null) {
+                        ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                                vmInstance.getProjectId(), ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                true);
+                        if (projectMax.getUsedLimit() == null) {
+                            projectMax.setUsedLimit(0L + 1);
+                        } else if (projectMax.getMax() != projectMax.getUsedLimit()) {
+                            projectMax.setUsedLimit(projectMax.getUsedLimit() + 1);
+                        } else {
+                            errors.addGlobalError("quota for creating Instance" + " ' " + vmInstance.getName() + " ' "
+                                    + "not exists. Please update project resource quota first to continue creating.");
+                            throw new ApplicationException(errors);
+                        }
+                        projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                        projectMax.setIsSyncFlag(false);
+                        resourceLimitProjectService.update(projectMax);
+                    }
+                }
+
+                if (i == 2) {
+                    r = r.valueOf(i);
+                    ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                            .findByDepartmentAndResourceType(vmInstance.getDepartmentId(),
+                                    ResourceType.valueOf(resourceMap.get(r)), true);
+                    if (departmentMax.getUsedLimit() == null) {
+                        departmentMax.setUsedLimit(0L + 1);
+                    } else if (departmentMax.getMax() != departmentMax.getUsedLimit()) {
+                        departmentMax.setUsedLimit(departmentMax.getUsedLimit() + 1);
+                    } else {
+                        errors.addGlobalError("quota for creating volume" + " ' " + vmInstance.getName() + " ' "
+                                + "not exists. Please update department resource quota first to continue creating.");
+                        throw new ApplicationException(errors);
+                    }
+                    departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                    resourceLimitDepartmentService.update(departmentMax);
+                    if (vmInstance.getProjectId() != null) {
+                        ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                                vmInstance.getProjectId(), ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                true);
+                        if (projectMax.getUsedLimit() == null) {
+                            projectMax.setUsedLimit(0L + 1);
+                        } else if (projectMax.getMax() != projectMax.getUsedLimit()) {
+                            projectMax.setUsedLimit(projectMax.getUsedLimit() + 1);
+                        } else {
+                            errors.addGlobalError("quota for creating volume" + " ' " + vmInstance.getName() + " ' "
+                                    + "not exists. Please update project resource quota first to continue creating.");
+                            throw new ApplicationException(errors);
+                        }
+                        projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                        projectMax.setIsSyncFlag(false);
+                        resourceLimitProjectService.update(projectMax);
+                    }
+                }
+
+                if (i == 8) {
+                    r = r.valueOf(i);
+                    ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                            .findByDepartmentAndResourceType(vmInstance.getDepartmentId(),
+                                    ResourceType.valueOf(resourceMap.get(r)), true);
+                    if (departmentMax.getUsedLimit() == null) {
+                        departmentMax.setUsedLimit(0L + 1);
+                    } else if (departmentMax.getMax() != departmentMax.getUsedLimit()) {
+                        departmentMax.setUsedLimit(departmentMax.getUsedLimit() + 1);
+                    } else {
+                        errors.addGlobalError("quota for creating Network" + " ' " + vmInstance.getName() + " ' "
+                                + "not exists. Please update department resource quota first to continue creating.");
+                        throw new ApplicationException(errors);
+                    }
+                    departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                    resourceLimitDepartmentService.update(departmentMax);
+                    if (vmInstance.getProjectId() != null) {
+                        ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                                vmInstance.getProjectId(), ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                true);
+                        if (projectMax.getUsedLimit() == null) {
+                            projectMax.setUsedLimit(0L + 1);
+                        } else if (projectMax.getMax() != projectMax.getUsedLimit()) {
+                            projectMax.setUsedLimit(projectMax.getUsedLimit() + 1);
+                        } else {
+                            errors.addGlobalError("quota for creating Network" + " ' " + vmInstance.getName() + " ' "
+                                    + "not exists. Please update project resource quota first to continue creating.");
+                            throw new ApplicationException(errors);
+                        }
+                        projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                        projectMax.setIsSyncFlag(false);
+                        resourceLimitProjectService.update(projectMax);
+                    }
+                }
+
+                if (i == 9) {
+                    r = r.valueOf(i);
+                    ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                            .findByDepartmentAndResourceType(vmInstance.getDepartmentId(),
+                                    ResourceType.valueOf(resourceMap.get(r)), true);
+                    if (departmentMax.getUsedLimit() == null) {
+                        if (vmInstance.getMemory() != null) {
+                            departmentMax.setUsedLimit(0L + vmInstance.getMemory());
+                        }
+                    } else if (departmentMax.getMax() != departmentMax.getUsedLimit()) {
+                        if (vmInstance.getMemory() != null) {
+                            departmentMax.setUsedLimit(departmentMax.getUsedLimit() + vmInstance.getMemory());
+                        }
+                    } else {
+                        errors.addGlobalError("quota for creating Memory" + " ' " + vmInstance.getName() + " ' "
+                                + "not exists. Please update department resource quota first to continue creating.");
+                        throw new ApplicationException(errors);
+                    }
+                    departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                    resourceLimitDepartmentService.update(departmentMax);
+                    if (vmInstance.getProjectId() != null) {
+                        ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                                vmInstance.getProjectId(), ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                true);
+                        if (projectMax.getUsedLimit() == null) {
+                            if (vmInstance.getMemory() != null) {
+                                projectMax.setUsedLimit(0L + vmInstance.getMemory());
+                            }
+                        } else if (projectMax.getMax() != projectMax.getUsedLimit()) {
+                            if (vmInstance.getMemory() != null) {
+                                projectMax.setUsedLimit(projectMax.getUsedLimit() + vmInstance.getMemory());
+                            }
+                        } else {
+                            errors.addGlobalError("quota for creating Memory" + " ' " + vmInstance.getName() + " ' "
+                                    + "not exists. Please update project resource quota first to continue creating.");
+                            throw new ApplicationException(errors);
+                        }
+                        projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                        projectMax.setIsSyncFlag(false);
+                        resourceLimitProjectService.update(projectMax);
+                    }
+                }
+
+                if (i == 10) {
+                    r = r.valueOf(i);
+                    ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                            .findByDepartmentAndResourceType(vmInstance.getDepartmentId(),
+                                    ResourceType.valueOf(resourceMap.get(r)), true);
+                    if (departmentMax.getUsedLimit() == null) {
+                        if (vmInstance.getDiskSize() != null) {
+                            departmentMax.setUsedLimit(0L + vmInstance.getDiskSize());
+                        } else {
+                            departmentMax.setUsedLimit(0L + convertEntityService
+                                    .getStorageOfferById(vmInstance.getStorageOfferingId()).getDiskSize());
+                        }
+                    } else if (departmentMax.getMax() != departmentMax.getUsedLimit()) {
+                        if (vmInstance.getDiskSize() != null) {
+                            departmentMax.setUsedLimit(departmentMax.getUsedLimit() + vmInstance.getDiskSize());
+                        }
+                    } else {
+                        errors.addGlobalError("quota for creating Primary Storage" + " ' " + vmInstance.getName() + " ' "
+                                + "not exists. Please update department resource quota first to continue creating.");
+                        throw new ApplicationException(errors);
+                    }
+                    departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                    resourceLimitDepartmentService.update(departmentMax);
+                    if (vmInstance.getProjectId() != null) {
+                        ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                                vmInstance.getProjectId(), ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                true);
+                        if (projectMax.getUsedLimit() == null) {
+                            if (vmInstance.getDiskSize() != null) {
+                                projectMax.setUsedLimit(0L + vmInstance.getDiskSize());
+                            }
+                        } else if (projectMax.getMax() != projectMax.getUsedLimit()) {
+                            if (vmInstance.getDiskSize() != null) {
+                                projectMax.setUsedLimit(projectMax.getUsedLimit() + vmInstance.getDiskSize());
+                            }
+                        } else {
+                            errors.addGlobalError("quota for creating Primary Storage" + " ' " + vmInstance.getName() + " ' "
+                                    + "not exists. Please update project resource quota first to continue creating.");
+                            throw new ApplicationException(errors);
+                        }
+                        projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                        projectMax.setIsSyncFlag(false);
+                        resourceLimitProjectService.update(projectMax);
+                    }
+                }
+
+                if (i == 11) {
+                    r = r.valueOf(i);
+                    ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                            .findByDepartmentAndResourceType(vmInstance.getDepartmentId(),
+                                    ResourceType.valueOf(resourceMap.get(r)), true);
+                    if (departmentMax.getUsedLimit() == null) {
+                        if (convertEntityService.getTemplateById(vmInstance.getTemplateId()).getSize() != null) {
+                            departmentMax.setUsedLimit(0L + convertEntityService.getTemplateById(vmInstance.getTemplateId()).getSize());
+                        }
+                    } else if (departmentMax.getMax() != departmentMax.getUsedLimit()) {
+                        if (convertEntityService.getTemplateById(vmInstance.getTemplateId()).getSize() != null) {
+                            departmentMax.setUsedLimit(departmentMax.getUsedLimit() + convertEntityService.getTemplateById(vmInstance.getTemplateId()).getSize());
+                        } else {
+                            departmentMax.setUsedLimit(departmentMax.getUsedLimit() + convertEntityService.getTemplateById(vmInstance.getTemplateId()).getSize());
+                        }
+                    } else {
+                        errors.addGlobalError("quota for creating Secondary Storage" + " ' " + vmInstance.getName() + " ' "
+                                + "not exists. Please update department resource quota first to continue creating.");
+                        throw new ApplicationException(errors);
+                    }
+                    departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                    resourceLimitDepartmentService.update(departmentMax);
+                    if (vmInstance.getProjectId() != null) {
+                        ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                                vmInstance.getProjectId(), ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                true);
+                        if (projectMax.getUsedLimit() == null) {
+                            if (convertEntityService.getTemplateById(vmInstance.getTemplateId()).getSize() != null) {
+                                projectMax.setUsedLimit(0L + convertEntityService.getTemplateById(vmInstance.getTemplateId()).getSize());
+                            }
+                        } else if (projectMax.getMax() != projectMax.getUsedLimit()) {
+                            if (convertEntityService.getTemplateById(vmInstance.getTemplateId()).getSize() != null) {
+                                projectMax.setUsedLimit(projectMax.getUsedLimit() + convertEntityService.getTemplateById(vmInstance.getTemplateId()).getSize());
+                            }
+                        } else {
+                            errors.addGlobalError("quota for creating Secondary Storage" + " ' " + vmInstance.getName() + " ' "
+                                    + "not exists. Please update project resource quota first to continue creating.");
+                            throw new ApplicationException(errors);
+                        }
+                        projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                        projectMax.setIsSyncFlag(false);
+                        resourceLimitProjectService.update(projectMax);
+                    }
+                }
+
+            }
+        } catch (ApplicationException e) {
+            updateResourceForVmDeletion(vmInstance);
+            throw new ApplicationException(e.getErrors());
+        }
+        return vmInstance;
+
+    }
+
+    @Override
+    public VmInstance updateResourceForVmDeletion(VmInstance vmInstance) throws Exception {
+        HashMap<String, String> resourceMap = convertEntityService.getResourceTypeValue();
+        String r = null;
+        for (int i = 0; i < resourceMap.size(); i++) {
+            if (i == 0) {
+                r = r.valueOf(i);
+                ResourceLimitDepartment departmentMax = resourceLimitDepartmentService.findByDepartmentAndResourceType(
+                        vmInstance.getDepartmentId(), ResourceType.valueOf(resourceMap.get(r)), true);
+                if (departmentMax.getUsedLimit() == null) {
+                    departmentMax.setUsedLimit(0L);
+                } else if (departmentMax.getUsedLimit() != 0) {
+                    departmentMax.setUsedLimit(departmentMax.getUsedLimit() - 1);
+                }
+                departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                resourceLimitDepartmentService.update(departmentMax);
+                if (vmInstance.getProjectId() != null) {
+                    ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                            vmInstance.getProjectId(), ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                            true);
+                    if (projectMax.getUsedLimit() == null) {
+                        projectMax.setUsedLimit(0L);
+                    } else if (departmentMax.getUsedLimit() != 0) {
+                        projectMax.setUsedLimit(projectMax.getUsedLimit() - 1);
+                    }
+                    projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                    projectMax.setIsSyncFlag(false);
+                    resourceLimitProjectService.update(projectMax);
+                }
+            }
+
+            if (i == 1) {
+                r = r.valueOf(i);
+                ResourceLimitDepartment departmentMax = resourceLimitDepartmentService.findByDepartmentAndResourceType(
+                        vmInstance.getDepartmentId(), ResourceType.valueOf(resourceMap.get(r)), true);
+                if (departmentMax.getUsedLimit() == null) {
+                    departmentMax.setUsedLimit(0L);
+                } else if (departmentMax.getUsedLimit() != 0) {
+                    departmentMax.setUsedLimit(departmentMax.getUsedLimit() - 1);
+                }
+                departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                resourceLimitDepartmentService.update(departmentMax);
+                if (vmInstance.getProjectId() != null) {
+                    ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                            vmInstance.getProjectId(), ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                            true);
+                    if (projectMax.getUsedLimit() == null) {
+                        projectMax.setUsedLimit(0L);
+                    } else if (departmentMax.getUsedLimit() != 0) {
+                        projectMax.setUsedLimit(projectMax.getUsedLimit() - 1);
+                    }
+                    projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                    projectMax.setIsSyncFlag(false);
+                    resourceLimitProjectService.update(projectMax);
+                }
+            }
+
+            if (i == 2) {
+                r = r.valueOf(i);
+                ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                        .findByDepartmentAndResourceType(vmInstance.getDepartmentId(),
+                                ResourceType.valueOf(resourceMap.get(r)), true);
+                if (departmentMax.getUsedLimit() != null) {
+                    departmentMax.setUsedLimit(departmentMax.getUsedLimit() - 1);
+                    departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                }
+                resourceLimitDepartmentService.update(departmentMax);
+                if (vmInstance.getProjectId() != null) {
+                    ResourceLimitProject projectMax = resourceLimitProjectService
+                            .findByProjectAndResourceType(vmInstance.getProjectId(),
+                                    ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                    true);
+                    if (projectMax.getUsedLimit() == null) {
+                        projectMax.setUsedLimit(0L - 1);
+                    } else {
+                        projectMax.setUsedLimit(projectMax.getUsedLimit() - 1);
+                    }
+                    projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                    projectMax.setIsSyncFlag(false);
+                    resourceLimitProjectService.update(projectMax);
+                }
+            }
+
+            if (i == 6) {
+                r = r.valueOf(i);
+                ResourceLimitDepartment departmentMax = resourceLimitDepartmentService.findByDepartmentAndResourceType(
+                        vmInstance.getDepartmentId(), ResourceType.valueOf(resourceMap.get(r)), true);
+                if (departmentMax.getUsedLimit() == null) {
+                    departmentMax.setUsedLimit(0L);
+                } else if (departmentMax.getUsedLimit() != 0) {
+                    departmentMax.setUsedLimit(departmentMax.getUsedLimit() - 1);
+                }
+                departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                resourceLimitDepartmentService.update(departmentMax);
+                if (vmInstance.getProjectId() != null) {
+                    ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                            vmInstance.getProjectId(), ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                            true);
+                    if (projectMax.getUsedLimit() == null) {
+                        projectMax.setUsedLimit(0L);
+                    } else if (departmentMax.getUsedLimit() != 0) {
+                        projectMax.setUsedLimit(projectMax.getUsedLimit() - 1);
+                    }
+                    projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                    projectMax.setIsSyncFlag(false);
+                    resourceLimitProjectService.update(projectMax);
+                }
+            }
+
+            if (i == 8) {
+                r = r.valueOf(i);
+                ResourceLimitDepartment departmentMax = resourceLimitDepartmentService.findByDepartmentAndResourceType(
+                        vmInstance.getDepartmentId(), ResourceType.valueOf(resourceMap.get(r)), true);
+                if (departmentMax.getUsedLimit() == null) {
+                    departmentMax.setUsedLimit(0L);
+                } else if (departmentMax.getUsedLimit() != 0) {
+                    departmentMax.setUsedLimit(departmentMax.getUsedLimit() - 1);
+                }
+                departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                resourceLimitDepartmentService.update(departmentMax);
+                if (vmInstance.getProjectId() != null) {
+                    ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                            vmInstance.getProjectId(), ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                            true);
+                    if (projectMax.getUsedLimit() == null) {
+                        projectMax.setUsedLimit(0L);
+                    } else if (departmentMax.getUsedLimit() != 0) {
+                        projectMax.setUsedLimit(projectMax.getUsedLimit() - 1);
+                    }
+                    projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                    projectMax.setIsSyncFlag(false);
+                    resourceLimitProjectService.update(projectMax);
+                }
+            }
+
+            if (i == 9) {
+                r = r.valueOf(i);
+                ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                        .findByDepartmentAndResourceType(vmInstance.getDepartmentId(),
+                                ResourceType.valueOf(resourceMap.get(r)), true);
+                if (departmentMax.getUsedLimit() == null) {
+                    departmentMax.setUsedLimit(0L);
+                } else if (departmentMax.getUsedLimit() != 0) {
+                    if (vmInstance.getMemory() != null) {
+                        departmentMax.setUsedLimit(0L - vmInstance.getMemory());
+                    }
+                }
+                departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                resourceLimitDepartmentService.update(departmentMax);
+                if (vmInstance.getProjectId() != null) {
+                    ResourceLimitProject projectMax = resourceLimitProjectService
+                            .findByProjectAndResourceType(vmInstance.getProjectId(),
+                                    ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                    true);
+                    if (projectMax.getUsedLimit() == null) {
+                        projectMax.setUsedLimit(0L);
+                    } else if (departmentMax.getUsedLimit() != 0) {
+                        if (vmInstance.getMemory() != null) {
+                            projectMax.setUsedLimit(0L - vmInstance.getMemory());
+                        }
+                    }
+                    projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                    projectMax.setIsSyncFlag(false);
+                    resourceLimitProjectService.update(projectMax);
+                }
+            }
+
+            if (i == 10) {
+                r = r.valueOf(i);
+                ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                        .findByDepartmentAndResourceType(vmInstance.getDepartmentId(),
+                                ResourceType.valueOf(resourceMap.get(r)), true);
+                if (departmentMax.getUsedLimit() == null) {
+                    departmentMax.setUsedLimit(0L);
+                } else if (departmentMax.getUsedLimit() != 0) {
+                    if (vmInstance.getDiskSize() != null) {
+                        departmentMax.setUsedLimit(0L - vmInstance.getDiskSize());
+                    } else {
+                        departmentMax.setUsedLimit(0L - convertEntityService.getStorageOfferById(vmInstance.getStorageOfferingId()).getDiskSize());
+                    }
+                }
+                departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                resourceLimitDepartmentService.update(departmentMax);
+                if (vmInstance.getProjectId() != null) {
+                    ResourceLimitProject projectMax = resourceLimitProjectService
+                            .findByProjectAndResourceType(vmInstance.getProjectId(),
+                                    ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                    true);
+                    if (projectMax.getUsedLimit() == null) {
+                        projectMax.setUsedLimit(0L);
+                    } else if (departmentMax.getUsedLimit() != 0) {
+                        if (vmInstance.getDiskSize() != null) {
+                            projectMax.setUsedLimit(0L - vmInstance.getDiskSize());
+                        } else {
+                            projectMax.setUsedLimit(0L - convertEntityService.getStorageOfferById(vmInstance.getStorageOfferingId()).getDiskSize());
+                        }
+                    }
+                    projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                    projectMax.setIsSyncFlag(false);
+                    resourceLimitProjectService.update(projectMax);
+                }
+            }
+
+            if (i == 11) {
+                r = r.valueOf(i);
+                ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                        .findByDepartmentAndResourceType(vmInstance.getDepartmentId(),
+                                ResourceType.valueOf(resourceMap.get(r)), true);
+                if (departmentMax.getUsedLimit() == null) {
+                    departmentMax.setUsedLimit(0L);
+                } else if (departmentMax.getUsedLimit() != 0) {
+                    if (convertEntityService.getTemplateById(vmInstance.getTemplateId()).getSize() != null) {
+                        departmentMax.setUsedLimit(0L - convertEntityService.getTemplateById(vmInstance.getTemplateId()).getSize());
+                    }
+                }
+                departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                resourceLimitDepartmentService.update(departmentMax);
+                if (vmInstance.getProjectId() != null) {
+                    ResourceLimitProject projectMax = resourceLimitProjectService
+                            .findByProjectAndResourceType(vmInstance.getProjectId(),
+                                    ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                    true);
+                    if (projectMax.getUsedLimit() == null) {
+                        projectMax.setUsedLimit(0L);
+                    } else if (departmentMax.getUsedLimit() != 0) {
+                        if (convertEntityService.getTemplateById(vmInstance.getTemplateId()).getSize() != null) {
+                            projectMax.setUsedLimit(0L - convertEntityService.getTemplateById(vmInstance.getTemplateId()).getSize());
+                        }
+                    }
+                    projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                    projectMax.setIsSyncFlag(false);
+                    resourceLimitProjectService.update(projectMax);
+                }
+            }
+
+        }
+        return vmInstance;
+    }
+
+    private Network updateResourceForIpCreation(Network network, Errors errors) throws Exception {
+        HashMap<String, String> resourceMap = convertEntityService.getResourceTypeValue();
+        String r = null;
+        try {
+            for (int i = 0; i < resourceMap.size(); i++) {
+                if (i == 1) {
+                    r = r.valueOf(i);
+                    ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                            .findByDepartmentAndResourceType(network.getDepartmentId(),
+                                    ResourceType.valueOf(resourceMap.get(r)), true);
+                    if (departmentMax.getUsedLimit() == null) {
+                        departmentMax.setUsedLimit(0L + 1);
+                    } else if (departmentMax.getMax() != departmentMax.getUsedLimit()) {
+                        departmentMax.setUsedLimit(departmentMax.getUsedLimit() + 1);
+                    } else {
+                        errors.addGlobalError("quota for creating Ip" + " ' " + network.getName() + " ' "
+                                + "not exists. Please update department resource quota first to continue creating.");
+                        throw new ApplicationException(errors);
+                    }
+                    departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                    resourceLimitDepartmentService.update(departmentMax);
+                    if (network.getProjectId() != null) {
+                        ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                                network.getProjectId(), ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                true);
+                        if (projectMax.getUsedLimit() == null) {
+                            projectMax.setUsedLimit(0L + 1);
+                        } else if (projectMax.getMax() != projectMax.getUsedLimit()) {
+                            projectMax.setUsedLimit(projectMax.getUsedLimit() + 1);
+                        } else {
+                            errors.addGlobalError("quota for creating Ip" + " ' " + network.getName() + " ' "
+                                    + "not exists. Please update project resource quota first to continue creating.");
+                            throw new ApplicationException(errors);
+                        }
+                        projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                        projectMax.setIsSyncFlag(false);
+                        resourceLimitProjectService.update(projectMax);
+                    }
+                }
+            }
+        } catch (ApplicationException e) {
+            updateResourceForIpDeletion(network);
+            throw new ApplicationException(e.getErrors());
+        }
+        return network;
+
+    }
+
+    @Override
+    public Network updateResourceForIpDeletion(Network network) throws Exception {
+        HashMap<String, String> resourceMap = convertEntityService.getResourceTypeValue();
+        String r = null;
+        for (int i = 0; i < resourceMap.size(); i++) {
+            if (i == 1) {
+                r = r.valueOf(i);
+                ResourceLimitDepartment departmentMax = resourceLimitDepartmentService.findByDepartmentAndResourceType(
+                        network.getDepartmentId(), ResourceType.valueOf(resourceMap.get(r)), true);
+                if (departmentMax.getUsedLimit() == null) {
+                    departmentMax.setUsedLimit(0L);
+                } else if (departmentMax.getUsedLimit() != 0) {
+                    departmentMax.setUsedLimit(departmentMax.getUsedLimit() - 1);
+                }
+                departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                resourceLimitDepartmentService.update(departmentMax);
+                if (network.getProjectId() != null) {
+                    ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                            network.getProjectId(), ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                            true);
+                    if (projectMax.getUsedLimit() == null) {
+                        projectMax.setUsedLimit(0L);
+                    } else if (departmentMax.getUsedLimit() != 0) {
+                        projectMax.setUsedLimit(projectMax.getUsedLimit() - 1);
+                    }
+                    projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                    projectMax.setIsSyncFlag(false);
+                    resourceLimitProjectService.update(projectMax);
+                }
+            }
+        }
+        return network;
+    }
+
+    @Override
+    public VmInstance updateResourceForVmExpunging(VmInstance vmInstance) throws Exception {
+        HashMap<String, String> resourceMap = convertEntityService.getResourceTypeValue();
+        String r = null;
+        for (int i = 0; i < resourceMap.size(); i++) {
+            if (i == 0) {
+                r = r.valueOf(i);
+                ResourceLimitDepartment departmentMax = resourceLimitDepartmentService.findByDepartmentAndResourceType(
+                        vmInstance.getDepartmentId(), ResourceType.valueOf(resourceMap.get(r)), true);
+                if (departmentMax.getUsedLimit() == null) {
+                    departmentMax.setUsedLimit(0L);
+                } else if (departmentMax.getUsedLimit() != 0) {
+                    departmentMax.setUsedLimit(departmentMax.getUsedLimit() - 1);
+                }
+                departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                resourceLimitDepartmentService.update(departmentMax);
+                if (vmInstance.getProjectId() != null) {
+                    ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                            vmInstance.getProjectId(), ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                            true);
+                    if (projectMax.getUsedLimit() == null) {
+                        projectMax.setUsedLimit(0L);
+                    } else if (departmentMax.getUsedLimit() != 0) {
+                        projectMax.setUsedLimit(projectMax.getUsedLimit() - 1);
+                    }
+                    projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                    projectMax.setIsSyncFlag(false);
+                    resourceLimitProjectService.update(projectMax);
+                }
+            }
+            if (i == 2) {
+                r = r.valueOf(i);
+                ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                        .findByDepartmentAndResourceType(vmInstance.getDepartmentId(),
+                                ResourceType.valueOf(resourceMap.get(r)), true);
+                if (departmentMax.getUsedLimit() != null) {
+                    departmentMax.setUsedLimit(departmentMax.getUsedLimit() - 1);
+                    departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                }
+                resourceLimitDepartmentService.update(departmentMax);
+                if (vmInstance.getProjectId() != null) {
+                    ResourceLimitProject projectMax = resourceLimitProjectService
+                            .findByProjectAndResourceType(vmInstance.getProjectId(),
+                                    ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                    true);
+                    if (projectMax.getUsedLimit() == null) {
+                        projectMax.setUsedLimit(0L - 1);
+                    } else {
+                        projectMax.setUsedLimit(projectMax.getUsedLimit() - 1);
+                    }
+                    projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                    projectMax.setIsSyncFlag(false);
+                    resourceLimitProjectService.update(projectMax);
+                }
+            }
+
+            if (i == 8) {
+                r = r.valueOf(i);
+                ResourceLimitDepartment departmentMax = resourceLimitDepartmentService.findByDepartmentAndResourceType(
+                        vmInstance.getDepartmentId(), ResourceType.valueOf(resourceMap.get(r)), true);
+                if (departmentMax.getUsedLimit() == null) {
+                    departmentMax.setUsedLimit(0L);
+                } else if (departmentMax.getUsedLimit() != 0) {
+                    departmentMax.setUsedLimit(departmentMax.getUsedLimit() - 1);
+                }
+                departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                resourceLimitDepartmentService.update(departmentMax);
+                if (vmInstance.getProjectId() != null) {
+                    ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                            vmInstance.getProjectId(), ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                            true);
+                    if (projectMax.getUsedLimit() == null) {
+                        projectMax.setUsedLimit(0L);
+                    } else if (departmentMax.getUsedLimit() != 0) {
+                        projectMax.setUsedLimit(projectMax.getUsedLimit() - 1);
+                    }
+                    projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                    projectMax.setIsSyncFlag(false);
+                    resourceLimitProjectService.update(projectMax);
+                }
+            }
+
+            if (i == 9) {
+                r = r.valueOf(i);
+                ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                        .findByDepartmentAndResourceType(vmInstance.getDepartmentId(),
+                                ResourceType.valueOf(resourceMap.get(r)), true);
+                if (departmentMax.getUsedLimit() == null) {
+                    departmentMax.setUsedLimit(0L);
+                } else if (departmentMax.getUsedLimit() != 0) {
+                    if (vmInstance.getMemory() != null) {
+                        departmentMax.setUsedLimit(0L - vmInstance.getMemory());
+                    }
+                }
+                departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                resourceLimitDepartmentService.update(departmentMax);
+                if (vmInstance.getProjectId() != null) {
+                    ResourceLimitProject projectMax = resourceLimitProjectService
+                            .findByProjectAndResourceType(vmInstance.getProjectId(),
+                                    ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                    true);
+                    if (projectMax.getUsedLimit() == null) {
+                        projectMax.setUsedLimit(0L);
+                    } else if (departmentMax.getUsedLimit() != 0) {
+                        if (vmInstance.getMemory() != null) {
+                            projectMax.setUsedLimit(0L - vmInstance.getMemory());
+                        }
+                    }
+                    projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                    projectMax.setIsSyncFlag(false);
+                    resourceLimitProjectService.update(projectMax);
+                }
+            }
+
+            if (i == 10) {
+                r = r.valueOf(i);
+                ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                        .findByDepartmentAndResourceType(vmInstance.getDepartmentId(),
+                                ResourceType.valueOf(resourceMap.get(r)), true);
+                if (departmentMax.getUsedLimit() == null) {
+                    departmentMax.setUsedLimit(0L);
+                } else if (departmentMax.getUsedLimit() != 0) {
+                    if (vmInstance.getDiskSize() != null) {
+                        departmentMax.setUsedLimit(0L - vmInstance.getDiskSize());
+                    } else {
+                        departmentMax.setUsedLimit(0L - convertEntityService.getStorageOfferById(vmInstance.getStorageOfferingId()).getDiskSize());
+                    }
+                }
+                departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                resourceLimitDepartmentService.update(departmentMax);
+                if (vmInstance.getProjectId() != null) {
+                    ResourceLimitProject projectMax = resourceLimitProjectService
+                            .findByProjectAndResourceType(vmInstance.getProjectId(),
+                                    ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                    true);
+                    if (projectMax.getUsedLimit() == null) {
+                        projectMax.setUsedLimit(0L);
+                    } else if (departmentMax.getUsedLimit() != 0) {
+                        if (vmInstance.getDiskSize() != null) {
+                            projectMax.setUsedLimit(0L - vmInstance.getDiskSize());
+                        } else {
+                            projectMax.setUsedLimit(0L - convertEntityService.getStorageOfferById(vmInstance.getStorageOfferingId()).getDiskSize());
+                        }
+                    }
+                    projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                    projectMax.setIsSyncFlag(false);
+                    resourceLimitProjectService.update(projectMax);
+                }
+            }
+
+        }
+        return vmInstance;
+
+    }
+
+    @Override
+    public VmInstance updateResourceForVmDestroy(VmInstance vmInstance) throws Exception {
+        HashMap<String, String> resourceMap = convertEntityService.getResourceTypeValue();
+        String r = null;
+        for (int i = 0; i < resourceMap.size(); i++) {
+            if (i == 0) {
+                r = r.valueOf(i);
+                ResourceLimitDepartment departmentMax = resourceLimitDepartmentService.findByDepartmentAndResourceType(
+                        vmInstance.getDepartmentId(), ResourceType.valueOf(resourceMap.get(r)), true);
+                if (departmentMax.getUsedLimit() == null) {
+                    departmentMax.setUsedLimit(0L);
+                } else if (departmentMax.getUsedLimit() != 0) {
+                    departmentMax.setUsedLimit(departmentMax.getUsedLimit() - 1);
+                }
+                departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                resourceLimitDepartmentService.update(departmentMax);
+                if (vmInstance.getProjectId() != null) {
+                    ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                            vmInstance.getProjectId(), ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                            true);
+                    if (projectMax.getUsedLimit() == null) {
+                        projectMax.setUsedLimit(0L);
+                    } else if (departmentMax.getUsedLimit() != 0) {
+                        projectMax.setUsedLimit(projectMax.getUsedLimit() - 1);
+                    }
+                    projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                    projectMax.setIsSyncFlag(false);
+                    resourceLimitProjectService.update(projectMax);
+                }
+            }
+
+            if (i == 8) {
+                r = r.valueOf(i);
+                ResourceLimitDepartment departmentMax = resourceLimitDepartmentService.findByDepartmentAndResourceType(
+                        vmInstance.getDepartmentId(), ResourceType.valueOf(resourceMap.get(r)), true);
+                if (departmentMax.getUsedLimit() == null) {
+                    departmentMax.setUsedLimit(0L);
+                } else if (departmentMax.getUsedLimit() != 0) {
+                    departmentMax.setUsedLimit(departmentMax.getUsedLimit() - 1);
+                }
+                departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                resourceLimitDepartmentService.update(departmentMax);
+                if (vmInstance.getProjectId() != null) {
+                    ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                            vmInstance.getProjectId(), ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                            true);
+                    if (projectMax.getUsedLimit() == null) {
+                        projectMax.setUsedLimit(0L);
+                    } else if (departmentMax.getUsedLimit() != 0) {
+                        projectMax.setUsedLimit(projectMax.getUsedLimit() - 1);
+                    }
+                    projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                    projectMax.setIsSyncFlag(false);
+                    resourceLimitProjectService.update(projectMax);
+                }
+            }
+
+            if (i == 9) {
+                r = r.valueOf(i);
+                ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                        .findByDepartmentAndResourceType(vmInstance.getDepartmentId(),
+                                ResourceType.valueOf(resourceMap.get(r)), true);
+                if (departmentMax.getUsedLimit() == null) {
+                    departmentMax.setUsedLimit(0L);
+                } else if (departmentMax.getUsedLimit() != 0) {
+                    if (vmInstance.getMemory() != null) {
+                        departmentMax.setUsedLimit(0L - vmInstance.getMemory());
+                    }
+                }
+                departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                resourceLimitDepartmentService.update(departmentMax);
+                if (vmInstance.getProjectId() != null) {
+                    ResourceLimitProject projectMax = resourceLimitProjectService
+                            .findByProjectAndResourceType(vmInstance.getProjectId(),
+                                    ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
+                                    true);
+                    if (projectMax.getUsedLimit() == null) {
+                        projectMax.setUsedLimit(0L);
+                    } else if (departmentMax.getUsedLimit() != 0) {
+                        if (vmInstance.getMemory() != null) {
+                            projectMax.setUsedLimit(0L - vmInstance.getMemory());
+                        }
+                    }
+                    projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                    projectMax.setIsSyncFlag(false);
+                    resourceLimitProjectService.update(projectMax);
+                }
+            }
+
+        }
+        return vmInstance;
+
+    }
+
+    @Override
+    public VmInstance updateResourceForVmRestore(VmInstance vmInstance) throws Exception {
+        Errors errors = null;
+        HashMap<String, String> resourceMap = convertEntityService.getResourceTypeValue();
+        String r = null;
+            for (int i = 0; i < resourceMap.size(); i++) {
+                if (i == 0) {
+                    r = r.valueOf(i);
+                    ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                            .findByDepartmentAndResourceType(vmInstance.getDepartmentId(),
+                                    ResourceType.valueOf(resourceMap.get(r)), true);
+                    if (departmentMax.getUsedLimit() == null) {
+                        departmentMax.setUsedLimit(0L + 1);
+                    } else if (departmentMax.getMax() != departmentMax.getUsedLimit()) {
+                        departmentMax.setUsedLimit(departmentMax.getUsedLimit() + 1);
+                    } else {
+                        errors.addGlobalError("quota for creating Instance" + " ' " + vmInstance.getName() + " ' "
+                                + "not exists. Please update department resource quota first to continue creating.");
+                        throw new ApplicationException(errors);
+                    }
+                    departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                    resourceLimitDepartmentService.update(departmentMax);
+                    if (vmInstance.getProjectId() != null) {
+                        ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                                vmInstance.getProjectId(),
+                                ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)), true);
+                        if (projectMax.getUsedLimit() == null) {
+                            projectMax.setUsedLimit(0L + 1);
+                        } else if (projectMax.getMax() != projectMax.getUsedLimit()) {
+                            projectMax.setUsedLimit(projectMax.getUsedLimit() + 1);
+                        } else {
+                            errors.addGlobalError("quota for creating Instance" + " ' " + vmInstance.getName() + " ' "
+                                    + "not exists. Please update project resource quota first to continue creating.");
+                            throw new ApplicationException(errors);
+                        }
+                        projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                        projectMax.setIsSyncFlag(false);
+                        resourceLimitProjectService.update(projectMax);
+                    }
+                }
+                if (i == 8) {
+                    r = r.valueOf(i);
+                    ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                            .findByDepartmentAndResourceType(vmInstance.getDepartmentId(),
+                                    ResourceType.valueOf(resourceMap.get(r)), true);
+                    if (departmentMax.getUsedLimit() == null) {
+                        departmentMax.setUsedLimit(0L + 1);
+                    } else if (departmentMax.getMax() != departmentMax.getUsedLimit()) {
+                        departmentMax.setUsedLimit(departmentMax.getUsedLimit() + 1);
+                    } else {
+                        errors.addGlobalError("quota for creating Network" + " ' " + vmInstance.getName() + " ' "
+                                + "not exists. Please update department resource quota first to continue creating.");
+                        throw new ApplicationException(errors);
+                    }
+                    departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                    resourceLimitDepartmentService.update(departmentMax);
+                    if (vmInstance.getProjectId() != null) {
+                        ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                                vmInstance.getProjectId(),
+                                ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)), true);
+                        if (projectMax.getUsedLimit() == null) {
+                            projectMax.setUsedLimit(0L + 1);
+                        } else if (projectMax.getMax() != projectMax.getUsedLimit()) {
+                            projectMax.setUsedLimit(projectMax.getUsedLimit() + 1);
+                        } else {
+                            errors.addGlobalError("quota for creating Network" + " ' " + vmInstance.getName() + " ' "
+                                    + "not exists. Please update project resource quota first to continue creating.");
+                            throw new ApplicationException(errors);
+                        }
+                        projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                        projectMax.setIsSyncFlag(false);
+                        resourceLimitProjectService.update(projectMax);
+                    }
+                }
+
+                if (i == 9) {
+                    r = r.valueOf(i);
+                    ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
+                            .findByDepartmentAndResourceType(vmInstance.getDepartmentId(),
+                                    ResourceType.valueOf(resourceMap.get(r)), true);
+                    if (departmentMax.getUsedLimit() == null) {
+                        if (vmInstance.getMemory() != null) {
+                            departmentMax.setUsedLimit(0L + vmInstance.getMemory());
+                        }
+                    } else if (departmentMax.getMax() != departmentMax.getUsedLimit()) {
+                        if (vmInstance.getMemory() != null) {
+                            departmentMax.setUsedLimit(departmentMax.getUsedLimit() + vmInstance.getMemory());
+                        }
+                    } else {
+                        errors.addGlobalError("quota for creating Memory" + " ' " + vmInstance.getName() + " ' "
+                                + "not exists. Please update department resource quota first to continue creating.");
+                        throw new ApplicationException(errors);
+                    }
+                    departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
+                    resourceLimitDepartmentService.update(departmentMax);
+                    if (vmInstance.getProjectId() != null) {
+                        ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
+                                vmInstance.getProjectId(),
+                                ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)), true);
+                        if (projectMax.getUsedLimit() == null) {
+                            if (vmInstance.getMemory() != null) {
+                                projectMax.setUsedLimit(0L + vmInstance.getMemory());
+                            }
+                        } else if (projectMax.getMax() != projectMax.getUsedLimit()) {
+                            if (vmInstance.getMemory() != null) {
+                                projectMax.setUsedLimit(projectMax.getUsedLimit() + vmInstance.getMemory());
+                            }
+                        } else {
+                            errors.addGlobalError("quota for creating Memory" + " ' " + vmInstance.getName() + " ' "
+                                    + "not exists. Please update project resource quota first to continue creating.");
+                            throw new ApplicationException(errors);
+                        }
+                        projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
+                        projectMax.setIsSyncFlag(false);
+                        resourceLimitProjectService.update(projectMax);
+                    }
+                }
+
+            }
+        return vmInstance;
+    }
 }
 

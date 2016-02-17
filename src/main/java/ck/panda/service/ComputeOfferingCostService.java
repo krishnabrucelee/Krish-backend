@@ -12,6 +12,21 @@ import ck.panda.util.domain.CRUDService;
 @Service
 public interface ComputeOfferingCostService extends CRUDService<ComputeOfferingCost> {
 
-    /* void save(ComputeOfferingAndPrice compute); */
+    /**
+     * Find compute cost and id.
+     *
+     * @param computeId of the offering.
+     * @param totalCost for the plan
+     * @return computeoffering cost.
+     */
+    ComputeOfferingCost findByCostAndId(Long computeId, Double totalCost);
 
+    /**
+     * Calculate total cost of the compute offering.
+     *
+     * @param computecost for the particular offering
+     * @return compute offering cost.
+     * @throws Exception if error occurs.
+     */
+    Double totalcost(ComputeOfferingCost computecost) throws Exception;
 }

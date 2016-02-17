@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.StorageOfferingCost;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.repository.jpa.StorageOfferingRepository;
 import ck.panda.util.AppValidator;
@@ -66,6 +67,10 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     @Autowired
     private VirtualMachineService vmService;
 
+    /** Storage offering cost service for reference .*/
+    @Autowired
+    private StorageOfferingCostService storageCostService;
+
     @Override
     public StorageOffering save(StorageOffering storage) throws Exception {
         if (storage.getIsSyncFlag()) {
@@ -77,6 +82,10 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
                 throw new ApplicationException(errors);
             } else {
                 createStorage(storage, errors);
+                StorageOfferingCost cost = storage.getStoragePrice().get(0);
+                Double totalCost = storageCostService.totalcost(cost);
+                cost.setTotalCost(totalCost);
+                cost.setStorageId(storage.getId());
                 return storageOfferingRepo.save(storage);
             }
         } else {
@@ -92,7 +101,6 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
             this.validateVolumeUniqueness(storage);
             Errors errors = validator.rejectIfNullEntity(CloudStackConstants.CS_STORAGE_OFFERING, storage);
             errors = validator.validateEntity(storage, errors);
-
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
@@ -247,6 +255,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
         LOGGER.info("storage offer update response " + storageOfferings);
         JSONObject storageOfferingsResponse = new JSONObject(storageOfferings)
                 .getJSONObject(CS_UPDATE_DISK_RESPONSE).getJSONObject(CloudStackConstants.CS_DISK_OFFERING);
+        this.costCalculation(storage);
         if (storageOfferingsResponse.has(CloudStackConstants.CS_ERROR_CODE)) {
             errors = this.validateEvent(errors, storageOfferingsResponse.getString(CloudStackConstants.CS_ERROR_TEXT));
             throw new ApplicationException(errors);
@@ -336,4 +345,32 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     }
     return storageOfferingRepo.save(storage);
 }
+    /**
+     * Storage offering cost calculation for different plans.
+     *
+     * @param storage offering id.
+     * @return storage offering.
+     * @throws Exception if error occurs.
+     */
+    private StorageOffering costCalculation(StorageOffering storage) throws Exception {
+        List<StorageOfferingCost> storageCost = new ArrayList<StorageOfferingCost>();
+        StorageOffering persistStorage = find(storage.getId());
+        StorageOfferingCost cost = storage.getStoragePrice().get(0);
+        Double totalCost = storageCostService.totalcost(cost);
+        StorageOfferingCost storageOfferingcost = storageCostService.findByCostAndId(storage.getId(),totalCost);
+        if (storageOfferingcost == null) {
+             storageOfferingcost = new StorageOfferingCost();
+             storageOfferingcost.setStorageId(storage.getId());
+             storageOfferingcost.setCostGbPerMonth(cost.getCostGbPerMonth());
+             storageOfferingcost.setCostIopsPerMonth(cost.getCostIopsPerMonth());
+             storageOfferingcost.setCostPerMonth(cost.getCostPerMonth());
+             storageOfferingcost.setCostPerIops(cost.getCostPerIops());
+             storageOfferingcost.setTotalCost(totalCost);
+             storageOfferingcost = storageCostService.save(storageOfferingcost);
+             storageCost.add(storageOfferingcost);
+         }
+         storageCost.addAll(persistStorage.getStoragePrice());
+         storage.setStoragePrice(storageCost);
+         return storage;
+    }
 }

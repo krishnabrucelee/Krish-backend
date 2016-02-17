@@ -62,23 +62,23 @@ public class ActionListener implements MessageListener {
     /** Action event listener . */
     @Override
     public void onMessage(Message message) {
-		try {
-			String eventName = "";
-			JSONObject eventObject = new JSONObject(new String(message.getBody()));
-			if (eventObject.has(CloudStackConstants.CS_EVENT_NAME)
-					&& eventObject.has(CloudStackConstants.CS_EVENT_STATUS)) {
-				if (eventObject.getString(CloudStackConstants.CS_EVENT_STATUS)
-						.equalsIgnoreCase(CloudStackConstants.CS_EVENT_COMPLETE)) {
-					if (eventObject.getString(CloudStackConstants.CS_EVENT_NAME) != null) {
-						eventName = eventObject.getString(CloudStackConstants.CS_EVENT_NAME);
-						String eventStart = eventName.substring(0, eventName.indexOf('.', 0)) + ".";
-						this.handleActionEvent(eventName, eventStart, new String(message.getBody()));
-					}
-				}
-			}
-		} catch (Exception e) {
-			LOGGER.debug("Error on convert action event message", e.getMessage());
-		}
+        try {
+            String eventName = "";
+            JSONObject eventObject = new JSONObject(new String(message.getBody()));
+            if (eventObject.has(CloudStackConstants.CS_EVENT_NAME)
+                    && eventObject.has(CloudStackConstants.CS_EVENT_STATUS)) {
+                if (eventObject.getString(CloudStackConstants.CS_EVENT_STATUS)
+                        .equalsIgnoreCase(CloudStackConstants.CS_EVENT_COMPLETE)) {
+                    if (eventObject.getString(CloudStackConstants.CS_EVENT_NAME) != null) {
+                        eventName = eventObject.getString(CloudStackConstants.CS_EVENT_NAME);
+                        String eventStart = eventName.substring(0, eventName.indexOf('.', 0)) + ".";
+                        this.handleActionEvent(eventName, eventStart, new String(message.getBody()));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.debug("Error on convert action event message", e.getMessage());
+        }
     }
 
     /**
@@ -99,15 +99,15 @@ public class ActionListener implements MessageListener {
         Thread.sleep(5000);
         switch (eventStart) {
         case EventTypes.EVENT_USER:
-			if (eventName.equals(EventTypes.EVENT_USER_LOGIN) || eventName.equals(EventTypes.EVENT_USER_LOGOUT)) {
-				LOGGER.debug("User sync", eventMessage);// TODO: Will do login event.
-			} else {
-				Thread.sleep(3000); // Delay sync call for user to get success CRUD.
-				syncService.syncUser();
-				if (eventName.equals(EventTypes.EVENT_USER_CREATE)) {
-					syncService.syncUpdateUserRole();
-				}
-			}
+            if (eventName.equals(EventTypes.EVENT_USER_LOGIN) || eventName.equals(EventTypes.EVENT_USER_LOGOUT)) {
+                LOGGER.debug("User sync", eventMessage);// TODO: Will do login event.
+            } else {
+                Thread.sleep(3000); // Delay sync call for user to get success CRUD.
+                syncService.syncUser();
+                if (eventName.equals(EventTypes.EVENT_USER_CREATE)) {
+                    syncService.syncUpdateUserRole();
+                }
+            }
             break;
         case EventTypes.EVENT_REGISTER_SSH:
             LOGGER.debug("Register SSH/API sync", eventMessage);
@@ -123,6 +123,11 @@ public class ActionListener implements MessageListener {
         case EventTypes.EVENT_DOMAIN:
             LOGGER.debug("Domain sync", eventMessage);
             syncService.syncDomain();
+            if(eventName.equals(EventTypes.EVENT_DOMAIN_UPDATE)) {
+                ObjectMapper mapper = new ObjectMapper();
+                eventResponse = mapper.readValue(eventMessage, ResponseEvent.class);
+                syncService.syncResourceLimitActionEvent(eventResponse);
+            }
             break;
         case EventTypes.EVENT_ZONE:
             LOGGER.debug("Zone sync", eventMessage);
@@ -140,16 +145,16 @@ public class ActionListener implements MessageListener {
             }
             break;
         case EventTypes.EVENT_NETWORK:
-			if (eventName.contains(EventTypes.EVENT_NETWORK_OFFERING)) {
-				LOGGER.debug("Network Offering sync", eventMessage);
-				if (eventName.contains(EventTypes.EVENT_NETWORK_EDIT)
-						|| eventName.contains(EventTypes.EVENT_NETWORK_DELETE)) {
-					ObjectMapper mapper = new ObjectMapper();
-					eventResponse = mapper.readValue(eventMessage, ResponseEvent.class);
-					asyncService.asyncNetworkOffering(eventResponse);
-				} else {
-					syncService.syncNetworkOffering();
-				}
+            if (eventName.contains(EventTypes.EVENT_NETWORK_OFFERING)) {
+                LOGGER.debug("Network Offering sync", eventMessage);
+                if (eventName.contains(EventTypes.EVENT_NETWORK_EDIT)
+                        || eventName.contains(EventTypes.EVENT_NETWORK_DELETE)) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    eventResponse = mapper.readValue(eventMessage, ResponseEvent.class);
+                    asyncService.asyncNetworkOffering(eventResponse);
+                } else {
+                    syncService.syncNetworkOffering();
+                }
             } else if (eventName.contains(EventTypes.EVENT_NETWORK_CREATE)) {
                 LOGGER.debug("Network sync", eventMessage);
                 syncService.syncNetwork();
@@ -178,18 +183,18 @@ public class ActionListener implements MessageListener {
             LOGGER.debug("Volume snapshot sync", eventMessage);
             break;
         case EventTypes.EVENT_VOLUME:
-			if (eventName.contains(EventTypes.EVENT_VOLUME_DELETE)) {
-				LOGGER.debug("Volume sync", eventMessage);
-				ObjectMapper mapper = new ObjectMapper();
-				eventResponse = mapper.readValue(eventMessage, ResponseEvent.class);
-				asyncService.asyncVolume(eventResponse);
-			}
+            if (eventName.contains(EventTypes.EVENT_VOLUME_DELETE)) {
+                LOGGER.debug("Volume sync", eventMessage);
+                ObjectMapper mapper = new ObjectMapper();
+                eventResponse = mapper.readValue(eventMessage, ResponseEvent.class);
+                asyncService.asyncVolume(eventResponse);
+            }
             break;
         case EventTypes.EVENT_TEMPLATE:
-			if (!eventName.contains(EventTypes.EVENT_TEMPLATE_DELETE)) {
-				LOGGER.debug("templates sync", eventMessage);
-				syncService.syncTemplates();
-			}
+            if (!eventName.contains(EventTypes.EVENT_TEMPLATE_DELETE)) {
+                LOGGER.debug("templates sync", eventMessage);
+                syncService.syncTemplates();
+            }
             break;
         case EventTypes.EVENT_VM_SNAPSHOT:
             LOGGER.debug("VM snapshot sync", eventMessage);
@@ -207,8 +212,10 @@ public class ActionListener implements MessageListener {
             LOGGER.debug("VNC sync", eventMessage);
             break;
         case EventTypes.EVENT_PROJECT:
-            LOGGER.debug("VNC sync", eventMessage);
-            syncService.syncProject();
+			LOGGER.debug("VNC sync", eventMessage);
+			if (eventName.contains(EventTypes.EVENT_PROJECT_UPDATE)) {
+				syncService.syncProject();
+			}
             break;
         case EventTypes.EVENT_VPC:
             LOGGER.debug("VPC sync", eventMessage);

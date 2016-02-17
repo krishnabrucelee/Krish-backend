@@ -24,8 +24,11 @@ public class EventTypes {
     /** VM Events . */
     public static final String EVENT_VM_START = "VM.START";
 
-    /** VM Events . */
+    /** VM Project Events . */
     public static final String EVENT_PROJECT = "PROJECT.";
+
+    /** VM Project Update Events . */
+    public static final String EVENT_PROJECT_UPDATE = "PROJECT.UPDATE";
 
     /** VM Events . */
     public static final String EVENT_VM_STOP = "VM.STOP";
@@ -257,4 +260,10 @@ public class EventTypes {
 
     /** Network Delete Events. */
     public static final String EVENT_NETWORK_DELETE = "DELETE";
+
+    /** Domain event update     */
+    public static final Object EVENT_DOMAIN_UPDATE = "DOMAIN.UPDATE";
+
+    /** State of resources. */
+    public static final String OLD_RESOURCE_STATE = "old-state";
 }
