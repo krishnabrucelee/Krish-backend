@@ -324,14 +324,15 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     }
 
     @Override
-    public List<ComputeOffering> findByIsActive(Boolean isActive, Long userId ) throws Exception {
+    public List<ComputeOffering> findByIsActive(Boolean isActive, Long userId) throws Exception {
         User user = convertEntityService.getOwnerById(userId);
         // Check the user is not a root and admin and set the domain value from login detail
         if (user.getType().equals(User.UserType.ROOT_ADMIN)) {
             return computeRepo.findByIsActive(true);
         } else {
             return computeRepo.findByDomainAndIsActive(user.getDomainId(), true);
-        }    }
+        }
+    }
 
     /**
      * Compute offering cost calculation base on different plans.
@@ -361,6 +362,8 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
              computeOfferingcost.setInstanceStoppageCostPerIops(cost.getInstanceStoppageCostPerIops());
              computeOfferingcost.setInstanceStoppageCostPerMB(cost.getInstanceStoppageCostPerMB());
              computeOfferingcost.setInstanceStoppageCostPerVcpu(cost.getInstanceStoppageCostPerVcpu());
+             computeOfferingcost.setInstanceStoppageCostPerMhz(cost.getInstanceStoppageCostPerMhz());
+             computeOfferingcost.setInstanceRunningCostPerMhz(cost.getInstanceRunningCostPerMhz());
              computeOfferingcost.setTotalCost(totalCost);
              computeOfferingcost.setSetupCost(cost.getSetupCost());
              computeOfferingcost = costService.save(computeOfferingcost);
@@ -375,5 +378,4 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     public List<ComputeOffering> findByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception {
         return computeRepo.findByDomainAndIsActive(domainId, true);
     }
-
 }
