@@ -26,6 +26,7 @@ import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.PortForwarding;
+import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
@@ -129,6 +130,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /** Service reference to Load Balancer. */
     @Autowired
     private LoadBalancerService loadBalancerService;
+
+    /** Service reference to Snapshot. */
+    @Autowired
+    private SnapshotService snapShotService;
 
     /** Cloud stack firewall service. */
     @Autowired
@@ -234,6 +239,11 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             break;
         case EventTypes.EVENT_LOADBALANCER:
             LOGGER.debug("LB sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+            asyncLb(jobResult, eventObject);
+            break;
+        case EventTypes.EVENT_SNAPSHOT:
+            LOGGER.debug("Snapshot sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
                 eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
             asyncLb(jobResult, eventObject);
             break;
@@ -1023,6 +1033,24 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             asyncIpAddress(jobResult, eventObject);
         }
 
+    }
+
+    @SuppressWarnings("unused")
+    public void asyncSnapshot(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
+
+         if (eventObject.getString("commandEventType").equals("SNAPSHOT.CREATE") || eventObject.getString("commandEventType").equals("SNAPSHOT.REVERT")) {
+             Snapshot snapShot = Snapshot.convert(jobResult.getJSONObject("snapshot"));
+             snapShot.setZoneId(convertEntityService.getZoneId(snapShot.getTransZoneId()));
+             snapShot.setDomainId(convertEntityService.getDomainId(snapShot.getTransDomainId()));
+             snapShot.setDepartmentId(
+                     convertEntityService.getDepartmentByUsernameAndDomains(snapShot.getTransDepartmentId(),
+                             convertEntityService.getDomain(snapShot.getTransDomainId())));
+             snapShot.setSyncFlag(false);
+             if(snapShotService.findByUUID(snapShot.getUuid()) == null) {
+                 snapShotService.save(snapShot);
+             }
+
+         }
     }
 
     /**

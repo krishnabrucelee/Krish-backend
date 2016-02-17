@@ -19,7 +19,7 @@ public class CloudStackSnapshotService {
 
     /**
      * sets api key , secret key and url.
-     * 
+     *
      * @param server sets these values.
      */
     public void setServer(CloudStackServer server) {
@@ -219,6 +219,22 @@ public class CloudStackSnapshotService {
         arguments.add(new NameValuePair("response", "json"));
         String responseDocument = server.request(arguments);
 
+        return responseDocument;
+    }
+
+    /**
+     * Revert VM from a vmsnapshot.
+     *
+     * @param vmsnapshotid for vmsnapshot.
+     * @return response.
+     * @throws Exception unhandled errors.
+     */
+    public String revertSnapshot(String snapshotid, String response) throws Exception {
+
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("revertSnapshot", null);
+        arguments.add(new NameValuePair("snapshotid", snapshotid));
+        arguments.add(new NameValuePair("response", "json"));
+        String responseDocument = server.request(arguments);
         return responseDocument;
     }
 

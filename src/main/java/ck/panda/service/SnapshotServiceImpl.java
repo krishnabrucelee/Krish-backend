@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EventTypes;
+import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.StorageOffering;
@@ -274,8 +275,6 @@ public class SnapshotServiceImpl implements SnapshotService {
         return snapshotRepo.save(snapshot);
     }
 
-
-
     /**
      * Check the Snapshot CS error handling.
      *
@@ -324,7 +323,7 @@ public class SnapshotServiceImpl implements SnapshotService {
      *             error occurs
      */
     private void validateVolumeUniqueness(Snapshot snapshot, Long domainId, Long userId) throws Exception {
-        Errors errors = validator.rejectIfNullEntity(CS_VOLUMES, snapshot);
+        Errors errors = validator.rejectIfNullEntity("snapshot", snapshot);
         errors = validator.validateEntity(snapshot, errors);
         Volume validateVolume = volumeService.findByNameAndIsActive(snapshot.getTransVolumeName(), domainId, userId, true);
         if (validateVolume != null && snapshot.getId() != validateVolume.getId()) {
@@ -333,5 +332,29 @@ public class SnapshotServiceImpl implements SnapshotService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         }
+    }
+
+    @Override
+    public Snapshot findByUUID(String uuid) throws Exception {
+        return snapshotRepo.findByUUID(uuid);
+    }
+
+    public Snapshot revertSnapshot(Snapshot snapshot) throws Exception {
+         Errors errors = validator.rejectIfNullEntity("snapshot", snapshot);
+         errors = validator.validateEntity(snapshot, errors);
+         if (errors.hasErrors()) {
+             throw new ApplicationException(errors);
+         } else {
+             Snapshot snapshotObject = convertEntityService.getSnapshotById(snapshot.getId());
+             configServer.setUserServer();
+             String snapResponse = snapshotService.revertSnapshot(snapshotObject.getUuid(),"json");
+             JSONObject jobId = new JSONObject(snapResponse).getJSONObject("revertsnapshotresponse");
+             if (jobId.has("errorcode")) {
+                 errors = this.validateEvent(errors, jobId.getString("errortext"));
+                 throw new ApplicationException(errors);
+             }
+             snapshot = this.updateSnapshotByJobResponse(snapshot, jobId, errors);
+         }
+        return snapshot;
     }
 }

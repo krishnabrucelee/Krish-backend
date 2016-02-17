@@ -25,6 +25,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 import ck.panda.util.JsonValidator;
 
@@ -56,9 +58,14 @@ public class Snapshot implements Serializable {
     @Column(name = "name")
     private String name;
 
-    /** Name of the account associated with volume. */
-    @Column(name = "account")
-    private String account;
+    /** Department Object for the Network. */
+    @JoinColumn(name = "department_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Department department;
+
+    /** id for the Department. */
+    @Column(name = "department_id")
+    private Long departmentId;
 
     /** Instance domain id. */
     @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
@@ -108,6 +115,10 @@ public class Snapshot implements Serializable {
     /** Set syncFlag. */
     @Transient
     private Boolean syncFlag;
+
+    /** Transient department of the network. */
+    @Transient
+    private String transDepartmentId;
 
     /** Created by user. */
     @CreatedBy
@@ -216,22 +227,43 @@ public class Snapshot implements Serializable {
     }
 
     /**
-     * Set Account.
+     * Get the Department object.
      *
-     * @return the account
+     * @return the department
      */
-    public String getAccount() {
-        return account;
+    public Department getDepartment() {
+        return department;
     }
 
     /**
-     * Set the account.
+     * Set the Department object.
      *
-     * @param account to set
+     * @param department the department to set
      */
-    public void setAccount(String account) {
-        this.account = account;
+
+    public void setDepartment(Department department) {
+        this.department = department;
     }
+
+    /**
+     * Get the department Id.
+     *
+     * @return the departmentId
+     */
+
+    public Long getDepartmentId() {
+        return departmentId;
+    }
+
+    /**
+     * Set the Department Id.
+     *
+     * @param departmentId the departmentId to set
+     */
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
+    }
+
 
     /**
      * Get Domain.
@@ -432,6 +464,25 @@ public class Snapshot implements Serializable {
     }
 
     /**
+     * Get the Department Id.
+     *
+     * @return the transDepartmentId
+     */
+    public String getTransDepartmentId() {
+        return transDepartmentId;
+    }
+
+    /**
+     * Set the department Id.
+     *
+     * @param transDepartmentId the transDepartmentId to set
+     */
+    public void setTransDepartmentId(String transDepartmentId) {
+        this.transDepartmentId = transDepartmentId;
+    }
+
+
+    /**
      * Get the created user id.
      *
      * @return the createdBy
@@ -592,9 +643,8 @@ public class Snapshot implements Serializable {
             snapshot.setTransVolumeId(JsonUtil.getStringValue(jsonObject, "volumeid"));
             snapshot.setSnapshotType(JsonUtil.getStringValue(jsonObject, "snapshottype"));
             snapshot.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state").toUpperCase()));
-            snapshot.account = JsonValidator.jsonStringValidation(jsonObject, "account");
-            snapshot.intervalType = JsonValidator.jsonStringValidation(jsonObject, "intervaltype");
-
+            snapshot.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, "account"));
+            snapshot.setIntervalType(JsonUtil.getStringValue(jsonObject, "intervaltype"));
         } catch (Exception ex) {
             LOGGER.error("Snapshot-convert", ex);
         }

@@ -126,6 +126,15 @@ public class EventTypes {
     /** Snapshots. */
     public static final String EVENT_SNAPSHOT = "SNAPSHOT.";
 
+    /** Snapshot Events. */
+    public static final String EVENT_SNAPSHOT_CREATE = "SNAPSHOT.CREATE";
+
+    /** Snapshot delete Events. */
+    public static final String EVENT_SNAPSHOT_DELETE = "SNAPSHOT.DELETE";
+
+    /** Snapshot revert Events . */
+    public static final String EVENT_SNAPSHOT_REVERT = "SNAPSHOT.REVERT";
+
     /** ISO. */
     public static final String EVENT_ISO = "ISO.";
 
