@@ -26,8 +26,10 @@ import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
+import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
+import ck.panda.domain.entity.Snapshot;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackServer;
 
@@ -160,6 +162,10 @@ public class ConvertEntityService {
     /** Resource Limit Domain Service. */
     @Autowired
     private ResourceLimitDomainService resourceLimitDomainService;
+
+    /** Snapshot service for reference . */
+    @Autowired
+    private SnapshotService snapshotService;
 
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
@@ -428,6 +434,21 @@ public class ConvertEntityService {
      */
     public VmInstance getVmInstanceById(Long id) throws Exception {
         return virtualMachineService.findById(id);
+    }
+
+    /**
+     * Get snapshot object.
+     *
+     * @param id of the snapshot
+     * @return snapshot
+     * @throws Exception if error occurs.
+     */
+    public Snapshot getSnapshotById(Long id) throws Exception {
+        return snapshotService.findById(id);
+    }
+
+    public Volume getVolumeById(Long id) throws Exception {
+        return volumeService.find(id);
     }
 
     /**

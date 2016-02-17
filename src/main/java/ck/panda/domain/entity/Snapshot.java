@@ -145,6 +145,10 @@ public class Snapshot implements Serializable {
     @Transient
     private String transVolumeId;
 
+    /** Transient volume name of the snapshot. */
+    @Transient
+    private String transVolumeName;
+
     /** Status for snapshot. */
     public enum Status {
 
@@ -547,6 +551,25 @@ public class Snapshot implements Serializable {
      */
     public void setTransVolumeId(String transVolumeId) {
         this.transVolumeId = transVolumeId;
+    }
+
+
+    /**
+     * Get the the transVolumeName .
+     *
+     * @return the transVolumeName
+     */
+    public String getTransVolumeName() {
+        return transVolumeName;
+    }
+
+    /**
+     * Set the transVolumeName .
+     *
+     * @param transVolumeName to set
+     */
+    public void setTransVolumeName(String transVolumeName) {
+        this.transVolumeName = transVolumeName;
     }
 
     /**

@@ -13,14 +13,19 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Snapshot;
+import ck.panda.domain.entity.Volume;
 import ck.panda.service.SnapshotService;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -36,6 +41,10 @@ public class SnapshotController extends CRUDController<Snapshot> implements ApiC
     /** Service reference to Snapshot. */
     @Autowired
     private SnapshotService snapshotService;
+
+    /** Autowired TokenDetails. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new snapshot.", response = Domain.class)
     @Override
@@ -81,5 +90,12 @@ public class SnapshotController extends CRUDController<Snapshot> implements ApiC
         /** Doing Soft delete from the snapshot table. */
         snapshot.setSyncFlag(true);
         snapshotService.softDelete(snapshot);
+    }
+
+    @RequestMapping(value = "volumesnap", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected Snapshot createVolumefromSnapshot(@RequestBody Snapshot snapshot) throws Exception {
+        return snapshotService.createVolume(snapshot, Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
     }
 }

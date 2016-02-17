@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Snapshot;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
+import ck.panda.util.error.Errors;
 
 /**
  * Service class for Snapshot. This service provides basic CRUD and essential api's for snapshot actions.
@@ -40,4 +41,9 @@ public interface SnapshotService extends CRUDService<Snapshot> {
      * @throws Exception unhandled errors.
      */
     Page<Snapshot> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
+
+
+    Snapshot createVolume(Snapshot snapshot, Long userId) throws Exception;
+
+    Snapshot findById(Long id);
 }

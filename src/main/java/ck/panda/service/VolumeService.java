@@ -7,6 +7,8 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.util.domain.CRUDService;
@@ -206,5 +208,16 @@ public interface VolumeService extends CRUDService<Volume> {
      * @throws Exception exception
      */
     Volume saveVolume(Volume volume, Long userId) throws Exception;
+
+    /**
+     * Find volume by name and is Active status.
+     *
+     * @param volume object.
+     * @param domainId of the domain.
+     * @param userId of the user.
+     * @param isActive status of the volume.
+     * @return volume
+     */
+    Volume findByNameAndIsActive(String volume, Long domainId, Long userId, Boolean isActive);
 
 }
