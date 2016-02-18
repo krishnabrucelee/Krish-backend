@@ -47,11 +47,12 @@ public interface StorageOfferingRepository extends PagingAndSortingRepository<St
      * Get the List of Storage offer based on the tags.
      *
      * @param tags of the Storage offer.
+     * @param domainId domain id.
      * @param isActive of the Storage offer.
      * @return list of Storage offer
      */
-    @Query(value = "SELECT storage FROM StorageOffering storage WHERE storage.storageTags = :storageTags OR 'ALL' = :storageTags AND storage.isActive = :isActive")
-    List<StorageOffering> findAllByTags(@Param("storageTags") String tags, @Param("isActive") Boolean isActive);
+    @Query(value = "SELECT storage FROM StorageOffering storage WHERE (storage.storageTags = :storageTags OR 'ALL' = :storageTags) AND (storage.domainId = :domainId OR storage.domainId IS NULL) AND storage.isActive = :isActive")
+    List<StorageOffering> findAllByTags(@Param("storageTags") String tags, @Param("domainId") Long domainId, @Param("isActive") Boolean isActive);
 
     /**
      * Get the Storage offering based on the name.
@@ -62,4 +63,14 @@ public interface StorageOfferingRepository extends PagingAndSortingRepository<St
      */
     @Query(value = "SELECT storage FROM StorageOffering storage WHERE storage.isActive = :isActive AND storage.name = :name")
     StorageOffering findByNameAndIsActive(@Param("name") String name, @Param("isActive") Boolean isActive);
+
+    /**
+     * Get the Storage offer Tags based on the domain.
+     *
+     * @param isActive of the Storage offer.
+     * @param domainId domain id
+     * @return Storage offer tag storageTags
+     */
+    @Query(value = "SELECT DISTINCT (storage.storageTags) FROM StorageOffering storage WHERE storage.isActive = :isActive AND (storage.storageTags) IS NOT NULL AND (storage.domainId = :domainId OR storage.domainId IS NULL)")
+    List<String> findTagsByDomain(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive);
 }

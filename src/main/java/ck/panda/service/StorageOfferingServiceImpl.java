@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.StorageOfferingCost;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.repository.jpa.StorageOfferingRepository;
 import ck.panda.util.AppValidator;
@@ -282,17 +283,32 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     }
 
     @Override
-    public List<String> findTags(Boolean isActive) {
+    public List<String> findTags(Long userId, Boolean isActive) throws Exception {
+        if (!convertEntityService.getOwnerById(userId).getType().equals(User.UserType.ROOT_ADMIN)) {
+            return storageOfferingRepo.findTagsByDomain(convertEntityService.getOwnerById(userId).getDomainId(), isActive);
+            } else {
         return storageOfferingRepo.findByTags(isActive);
-
+        }
     }
 
     @Override
-    public List<StorageOffering> findAllByTags(String tags) {
+    public List<StorageOffering> findAllByTags(String tags, Long userId) throws Exception {
         if (tags.equals("") || tags == null) {
             tags = "ALL";
         }
-        return storageOfferingRepo.findAllByTags(tags, true);
+        if (!convertEntityService.getOwnerById(userId).getType().equals(User.UserType.ROOT_ADMIN)) {
+            return storageOfferingRepo.findAllByTags(tags, convertEntityService.getOwnerById(userId).getDomainId(), true);
+        } else {
+            return (List<StorageOffering>) storageOfferingRepo.findAll();
+        }
+    }
+
+    @Override
+    public List<StorageOffering> findByDomain(String tags, Long domainId) throws Exception {
+        if (tags.equals("") || tags == null) {
+            tags = "ALL";
+        }
+        return storageOfferingRepo.findAllByTags(tags, domainId, true);
     }
 
     /**
