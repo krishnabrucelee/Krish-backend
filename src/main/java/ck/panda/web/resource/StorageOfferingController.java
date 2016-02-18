@@ -112,14 +112,15 @@ public class StorageOfferingController extends CRUDController<StorageOffering> i
      * list all storage service for instance.
      *
      * @param tags tags.
+     * @param domainId of the storage offering
      * @return storage service
      * @throws Exception error
      */
     @RequestMapping(value = "storagesort", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected List<StorageOffering> getFindByTags(@RequestParam String tags) throws Exception {
-        return storageOfferingService.findAllByTags(tags, Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
+    protected List<StorageOffering> getFindByTags(@RequestParam("tags") String tags, @RequestParam("domainId") Long domainId) throws Exception {
+        return storageOfferingService.findByDomain(tags, domainId);
     }
 
     /**
