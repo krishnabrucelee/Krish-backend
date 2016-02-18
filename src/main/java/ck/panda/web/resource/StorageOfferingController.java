@@ -18,10 +18,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.StorageOffering;
-import ck.panda.domain.entity.Volume;
 import ck.panda.service.StorageOfferingService;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -38,6 +39,13 @@ public class StorageOfferingController extends CRUDController<StorageOffering> i
     /** Service reference to StorageOffering. */
     @Autowired
     private StorageOfferingService storageOfferingService;
+
+    /** Autowired TokenDetails. */
+    @Autowired
+    private TokenDetails tokenDetails;
+
+    /** Storage tag default value. */
+    private static final String DEFAULT_TAG = "";
 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new StorageOffering.", response = StorageOffering.class)
     @Override
@@ -97,21 +105,22 @@ public class StorageOfferingController extends CRUDController<StorageOffering> i
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<StorageOffering> getSearch() throws Exception {
-        return storageOfferingService.findAll();
+        return storageOfferingService.findAllByTags(DEFAULT_TAG, Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
     }
 
     /**
      * list all storage service for instance.
      *
      * @param tags tags.
+     * @param domainId of the storage offering
      * @return storage service
      * @throws Exception error
      */
     @RequestMapping(value = "storagesort", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected List<StorageOffering> getFindByTags(@RequestParam String tags) throws Exception {
-        return storageOfferingService.findAllByTags(tags);
+    protected List<StorageOffering> getFindByTags(@RequestParam("tags") String tags, @RequestParam("domainId") Long domainId) throws Exception {
+        return storageOfferingService.findByDomain(tags, domainId);
     }
 
     /**
@@ -124,6 +133,20 @@ public class StorageOfferingController extends CRUDController<StorageOffering> i
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<String> getStorageTags() throws Exception {
-        return storageOfferingService.findTags(true);
+        return storageOfferingService.findTags(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)), true);
+    }
+
+    /**
+     * list domain based storage service for instance.
+     *
+     * @param domainId domain id
+     * @return storage service
+     * @throws Exception error
+     */
+    @RequestMapping(value = "listbydomain", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<StorageOffering> getSearchByDomain(@RequestParam("domainId") Long domainId) throws Exception {
+        return storageOfferingService.findByDomain(DEFAULT_TAG, domainId);
     }
 }
