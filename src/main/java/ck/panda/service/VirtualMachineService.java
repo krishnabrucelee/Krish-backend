@@ -196,6 +196,15 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
     List<VmInstance> findAllByNetworkAndVmStatus(Long networkId, Status status) throws Exception;
 
     /**
+     * Find all vm instances associated with network nic.
+     *
+     * @param networkId of network
+     * @return vm list.
+     * @throws Exception error occurs.
+     */
+    List<VmInstance> findAllByNic(Long networkId) throws Exception;
+
+    /**
      * Find vm instance by status.
      *
      * @param status of the vm instance

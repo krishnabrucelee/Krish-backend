@@ -12,6 +12,7 @@ import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EventTypes;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
@@ -106,6 +107,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     /** Hypervisor service reference. */
     @Autowired
     private HypervisorService hypervisorService;
+
+    /** Nic service reference. */
+    @Autowired
+    private NicService nicService;
 
     @Override
     @PreAuthorize("hasPermission(#vmInstance.getSyncFlag(), 'CREATE_VM')")
@@ -1195,4 +1200,15 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         }
         return vmInstance;
     }
+
+	@Override
+	public List<VmInstance> findAllByNic(Long networkId) throws Exception {
+		// TODO Auto-generated method stub
+		List<VmInstance> vmList = new ArrayList<VmInstance>();
+		List<Nic> nicList = nicService.findAllByNetworkAndIsActive(networkId, true);
+		for (Nic nic : nicList) {
+			vmList.add(nic.getVmInstance());
+		}
+		return vmList;
+	}
 }
