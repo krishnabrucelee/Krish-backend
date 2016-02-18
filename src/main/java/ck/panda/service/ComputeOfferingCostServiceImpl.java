@@ -109,10 +109,11 @@ public class ComputeOfferingCostServiceImpl implements ComputeOfferingCostServic
             Double instanceStoppageCostPerIops = JsonUtil.getDoubleValue(computecost.getInstanceStoppageCostPerIops());
             Double instanceStoppageCostPerVcpu = JsonUtil.getDoubleValue(computecost.getInstanceStoppageCostPerVcpu());
             Double instanceStoppageCostPerMB =  JsonUtil.getDoubleValue(computecost.getInstanceStoppageCostPerMB());
+            Double setUpCost = JsonUtil.getDoubleValue(computecost.getSetupCost());
             Double total = instanceRunningCostVcpu + instanceRunningCostMemory + instanceRunningCostPerIops
                 + instanceRunningCostPerMB + instanceRunningCostPerVcpu + instanceRunningCostIops + instanceRunningCostPerMhz
                 + instanceStoppageCostPerMhz + instanceStoppageCostVcpu + instanceStoppageCostMemory + instanceStoppageCostIops
-                + instanceStoppageCostPerIops + instanceStoppageCostPerVcpu + instanceStoppageCostPerMB;
+                + instanceStoppageCostPerIops + instanceStoppageCostPerVcpu + instanceStoppageCostPerMB + setUpCost;
             return total;
     }
 
