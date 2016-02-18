@@ -286,8 +286,8 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     public List<String> findTags(Long userId, Boolean isActive) throws Exception {
         if (!convertEntityService.getOwnerById(userId).getType().equals(User.UserType.ROOT_ADMIN)) {
             return storageOfferingRepo.findTagsByDomain(convertEntityService.getOwnerById(userId).getDomainId(), isActive);
-            } else {
-        return storageOfferingRepo.findByTags(isActive);
+        } else {
+            return storageOfferingRepo.findByTags(isActive);
         }
     }
 
