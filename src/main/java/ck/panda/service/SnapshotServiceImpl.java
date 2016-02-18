@@ -59,29 +59,9 @@ public class SnapshotServiceImpl implements SnapshotService {
     @Autowired
     private CloudStackVolumeService csVolumeService;
 
-    /** Domain Service reference. */
-    @Autowired
-    private DomainService domainService;
-
-    /** Department Service reference. */
-    @Autowired
-    private DepartmentService departmentService;
-
-    /** Autowired Project Service. */
-    @Autowired
-    private ProjectService projectService;
-
-    /** Autowired TokenDetails. */
-    @Autowired
-    private VirtualMachineService virtualMachineService;
-
     /** Autowired TokenDetails. */
     @Autowired
     private VolumeService volumeService;
-
-    /** Autowired Storage Offering Service. */
-    @Autowired
-    private StorageOfferingService storageService;
 
     /** CloudStack Domain service for connectivity with cloudstack. */
     @Autowired
@@ -93,32 +73,8 @@ public class SnapshotServiceImpl implements SnapshotService {
     /** Constant for Cloud stack volume. */
     public static final String CS_VOLUME = "volume";
 
-    /** Constant for Cloud stack shrink volume. */
-    public static final String CS_SHRINK_OK = "shrinkok";
-
-    /** Constant for Cloud stack check sum volume. */
-    public static final String CS_CHECKSUM = "checksum";
-
-    /** Constant for Cloud stack volume list response. */
-    public static final String CS_LIST_VOLUME_RESPONSE =  "listvolumesresponse";
-
     /** Constant for Cloud stack volume create response. */
     public static final String CS_CREATE_VOLUME_RESPONSE = "createvolumeresponse";
-
-    /** Constant for Cloud stack volume upload response. */
-    public static final String CS_UPLOAD_VOLUME_RESPONSE = "uploadvolumeresponse";
-
-    /** Constant for Cloud stack volume attach response. */
-    public static final String CS_ATTACH_VOLUME_RESPONSE = "attachvolumeresponse";
-
-    /** Constant for Cloud stack volume detach response. */
-    public static final String CS_DETACH_VOLUME_RESPONSE = "detachvolumeresponse";
-
-    /** Constant for Cloud stack volume resize response. */
-    public static final String CS_RESIZE_VOLUME_RESPONSE = "resizevolumeresponse";
-
-    /** Constant for Cloud stack volume conversation in GiB. */
-    public static final Integer CS_CONVERTION_GIB = 1024*1024*1024;
 
     @Override
     public Snapshot save(Snapshot snapshot) throws Exception {
@@ -250,7 +206,9 @@ public class SnapshotServiceImpl implements SnapshotService {
             errors.addGlobalError(jobId.getString("errortext"));
             throw new ApplicationException(errors);
         } else {
+            if(jobId.has("id")) {
             snapshot.setUuid((String) jobId.get("id"));
+            }
             if (jobId.has("jobid")) {
                 String jobResponse = snapshotService.snapshotJobResult(jobId.getString("jobid"), "json");
 
@@ -339,6 +297,7 @@ public class SnapshotServiceImpl implements SnapshotService {
         return snapshotRepo.findByUUID(uuid);
     }
 
+    @Override
     public Snapshot revertSnapshot(Snapshot snapshot) throws Exception {
          Errors errors = validator.rejectIfNullEntity("snapshot", snapshot);
          errors = validator.validateEntity(snapshot, errors);
@@ -357,4 +316,24 @@ public class SnapshotServiceImpl implements SnapshotService {
          }
         return snapshot;
     }
+
+ /*  @Override
+    public Snapshot recurringSnapshot(Snapshot snapshot) throws Exception {
+         Errors errors = validator.rejectIfNullEntity("snapshot", snapshot);
+         errors = validator.validateEntity(snapshot, errors);
+         if (errors.hasErrors()) {
+             throw new ApplicationException(errors);
+         } else {
+             Snapshot snapshotObject = convertEntityService.getSnapshotById(snapshot.getId());
+             configServer.setUserServer();
+             String snapResponse = snapshotService.createSnapshotPolicy(snapshotPolicyIntervalType, snapshotPolicyMaxSnaps, snapshotPolicySchedule, snapshotPolicyTimeZone, diskvolumeId)
+             JSONObject jobId = new JSONObject(snapResponse).getJSONObject("revertsnapshotresponse");
+             if (jobId.has("errorcode")) {
+                 errors = this.validateEvent(errors, jobId.getString("errortext"));
+                 throw new ApplicationException(errors);
+             }
+             snapshot = this.updateSnapshotByJobResponse(snapshot, jobId, errors);
+         }
+        return snapshot;
+    }*/
 }

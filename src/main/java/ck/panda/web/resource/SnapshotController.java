@@ -103,6 +103,6 @@ public class SnapshotController extends CRUDController<Snapshot> implements ApiC
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected Snapshot revertSnapshot(@RequestBody Snapshot snapshot) throws Exception {
-        return snapshotService.createVolume(snapshot, Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
+        return snapshotService.revertSnapshot(snapshot);
     }
 }

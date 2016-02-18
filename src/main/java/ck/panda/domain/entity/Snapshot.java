@@ -99,9 +99,21 @@ public class Snapshot implements Serializable {
     @Column(name = "snapshottype")
     private String snapshotType;
 
+    /** Snapshot month */
+    @Column(name = "schedule_month")
+    private Integer scheduleMonth;
+
+    /** Maximum number of snapshots. */
+    @Column(name = "max_snaps")
+    private Integer maximumSnapshots;
+
+    /** Snapshot policy time zone */
+    @Column(name = "snapshot_policy_time_zone")
+    private Integer snapshotPolicyTimeZone;
+
     /** Interval type. */
     @Column(name = "interval_type")
-    private String intervalType;
+    private IntervalType intervalType;
 
     /** state of the snapshot. */
     @Column(name = "status")
@@ -173,7 +185,26 @@ public class Snapshot implements Serializable {
         READY,
 
         /** When snapshot gets destroyed. */
-        DESTROYED
+        DESTROYED,
+
+        /** When snapshot gets Allocated . */
+        ALLOCATED
+    }
+
+    /** Snapshot interval types */
+    public enum IntervalType {
+
+        /** Hourly snaphshot back up. */
+        HOURLY,
+
+        /** Weekly  snaphsot back up .*/
+        WEEKLY,
+
+        /** Daily snapshot back up. */
+        DAILY,
+
+        /** Monthly snapshot back up. */
+        MONTHLY
     }
 
     /**
@@ -392,20 +423,20 @@ public class Snapshot implements Serializable {
     }
 
     /**
-     * Get intervaltype.
+     * Get the snapshot interval type.
      *
      * @return the intervalType
      */
-    public String getIntervalType() {
+    public IntervalType getIntervalType() {
         return intervalType;
     }
 
     /**
-     * Set the intervalType.
+     * Set the snapshot interval type.
      *
      * @param intervalType to set
      */
-    public void setIntervalType(String intervalType) {
+    public void setIntervalType(IntervalType intervalType) {
         this.intervalType = intervalType;
     }
 
@@ -624,6 +655,48 @@ public class Snapshot implements Serializable {
     }
 
     /**
+     * @return the scheduleMonth
+     */
+    public Integer getScheduleMonth() {
+        return scheduleMonth;
+    }
+
+    /**
+     * @param scheduleMonth the scheduleMonth to set
+     */
+    public void setScheduleMonth(Integer scheduleMonth) {
+        this.scheduleMonth = scheduleMonth;
+    }
+
+    /**
+     * @return the maximumSnapshots
+     */
+    public Integer getMaximumSnapshots() {
+        return maximumSnapshots;
+    }
+
+    /**
+     * @param maximumSnapshots the maximumSnapshots to set
+     */
+    public void setMaximumSnapshots(Integer maximumSnapshots) {
+        this.maximumSnapshots = maximumSnapshots;
+    }
+
+    /**
+     * @return the snapshotPolicyTimeZone
+     */
+    public Integer getSnapshotPolicyTimeZone() {
+        return snapshotPolicyTimeZone;
+    }
+
+    /**
+     * @param snapshotPolicyTimeZone the snapshotPolicyTimeZone to set
+     */
+    public void setSnapshotPolicyTimeZone(Integer snapshotPolicyTimeZone) {
+        this.snapshotPolicyTimeZone = snapshotPolicyTimeZone;
+    }
+
+    /**
      * Convert JSONObject to domain entity.
      *
      * @param jsonObject json object
@@ -644,7 +717,7 @@ public class Snapshot implements Serializable {
             snapshot.setSnapshotType(JsonUtil.getStringValue(jsonObject, "snapshottype"));
             snapshot.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state").toUpperCase()));
             snapshot.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, "account"));
-            snapshot.setIntervalType(JsonUtil.getStringValue(jsonObject, "intervaltype"));
+            snapshot.setIntervalType(IntervalType.valueOf(JsonUtil.getStringValue(jsonObject, "intervaltype").toUpperCase()));
         } catch (Exception ex) {
             LOGGER.error("Snapshot-convert", ex);
         }

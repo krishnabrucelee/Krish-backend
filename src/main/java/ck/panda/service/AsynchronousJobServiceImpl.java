@@ -245,7 +245,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         case EventTypes.EVENT_SNAPSHOT:
             LOGGER.debug("Snapshot sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
                 eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
-            asyncLb(jobResult, eventObject);
+            asyncSnapshot(jobResult, eventObject);
             break;
         default:
             LOGGER.debug("No sync required", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
@@ -1042,6 +1042,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
              Snapshot snapShot = Snapshot.convert(jobResult.getJSONObject("snapshot"));
              snapShot.setZoneId(convertEntityService.getZoneId(snapShot.getTransZoneId()));
              snapShot.setDomainId(convertEntityService.getDomainId(snapShot.getTransDomainId()));
+             snapShot.setVolumeId(convertEntityService.getVolumeId(snapShot.getTransVolumeId()));
              snapShot.setDepartmentId(
                      convertEntityService.getDepartmentByUsernameAndDomains(snapShot.getTransDepartmentId(),
                              convertEntityService.getDomain(snapShot.getTransDomainId())));

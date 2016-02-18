@@ -232,7 +232,7 @@ public class CloudStackSnapshotService {
     public String revertSnapshot(String snapshotid, String response) throws Exception {
 
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("revertSnapshot", null);
-        arguments.add(new NameValuePair("snapshotid", snapshotid));
+        arguments.add(new NameValuePair("id", snapshotid));
         arguments.add(new NameValuePair("response", "json"));
         String responseDocument = server.request(arguments);
         return responseDocument;

@@ -48,4 +48,6 @@ public interface SnapshotService extends CRUDService<Snapshot> {
     Snapshot createVolume(Snapshot snapshot, Long userId) throws Exception;
 
     Snapshot findById(Long id);
+
+    Snapshot revertSnapshot(Snapshot snapshot) throws Exception;
 }
