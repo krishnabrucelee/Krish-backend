@@ -20,7 +20,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
- * Computer offerings cost for each Vcpu, iops and memory usage.
+ * Computer offerings cost for each Vcpu, iops, speed and memory usage.
  */
 @Entity
 @Table(name = "service_offerings_cost")
@@ -51,13 +51,17 @@ public class ComputeOfferingCost implements Serializable {
     @Column(name = "instance_running_cost_per_vcpu",columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceRunningCostPerVcpu;
 
-    /** Cost of Running Instancefor memory. */
+    /** Cost of Running Instance for memory. */
     @Column(name = "instance_running_cost_per_mb",columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceRunningCostPerMB;
 
     /** Cost of Running Instance for iops. */
     @Column(name = "instance_running_cost_per_iops",columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceRunningCostPerIops;
+
+    /** Cost of Running Instance for speed. */
+    @Column(name = "instance_running_cost_per_mhz",columnDefinition = "Decimal(10,2) default '0'")
+    private Double instanceRunningCostPerMhz;
 
     /** Cost of Stoppage Instance for vcpu. */
     @Column(name = "instance_stoppage_cost_per_vcpu", columnDefinition = "Decimal(10,2) default '0'")
@@ -71,11 +75,15 @@ public class ComputeOfferingCost implements Serializable {
     @Column(name = "instance_stoppage_cost_per_iops", columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceStoppageCostPerIops;
 
+    /** Cost of Running Instance for speed. */
+    @Column(name = "instance_stoppage_cost_per_mhz", columnDefinition = "Decimal(10,2) default '0'")
+    private Double instanceStoppageCostPerMhz;
+
     /** Cost of Stoppage Instance for vcpu. */
     @Column(name = "instance_running_cost_vcpu", columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceRunningCostVcpu;
 
-    /** Cost of Running Instancefor memory. */
+    /** Cost of Running Instance for memory. */
     @Column(name = "instance_running_cost_memory", columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceRunningCostMemory;
 
@@ -91,7 +99,7 @@ public class ComputeOfferingCost implements Serializable {
     @Column(name = "instance_stoppage_cost_memory", columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceStoppageCostMemory;
 
-    /** Cost of Stoppage Instance. for iops. */
+    /** Cost of Stoppage Instance for iops. */
     @Column(name = "instance_stoppage_cost_iops", columnDefinition = "Decimal(10,2) default '0'")
     private Double instanceStoppageCostIops;
 
@@ -191,6 +199,20 @@ public class ComputeOfferingCost implements Serializable {
      */
     public void setComputeId(Long computeId) {
         this.computeId = computeId;
+    }
+
+    /**
+     * @return the instanceStoppageCostPerMhz
+     */
+    public Double getInstanceStoppageCostPerMhz() {
+        return instanceStoppageCostPerMhz;
+    }
+
+    /**
+     * @param instanceStoppageCostPerMhz the instanceStoppageCostPerMhz to set
+     */
+    public void setInstanceStoppageCostPerMhz(Double instanceStoppageCostPerMhz) {
+        this.instanceStoppageCostPerMhz = instanceStoppageCostPerMhz;
     }
 
     /**
@@ -324,6 +346,20 @@ public class ComputeOfferingCost implements Serializable {
      */
     public void setInstanceRunningCostPerIops(Double instanceRunningCostPerIops) {
         this.instanceRunningCostPerIops = instanceRunningCostPerIops;
+    }
+
+    /**
+     * @return the instanceRunningCostPerMhz
+     */
+    public Double getInstanceRunningCostPerMhz() {
+        return instanceRunningCostPerMhz;
+    }
+
+    /**
+     * @param instanceRunningCostPerMhz the instanceRunningCostPerMhz to set
+     */
+    public void setInstanceRunningCostPerMhz(Double instanceRunningCostPerMhz) {
+        this.instanceRunningCostPerMhz = instanceRunningCostPerMhz;
     }
 
     /**
@@ -463,5 +499,4 @@ public class ComputeOfferingCost implements Serializable {
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
-
 }
