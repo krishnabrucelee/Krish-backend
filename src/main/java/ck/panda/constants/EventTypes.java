@@ -126,6 +126,9 @@ public class EventTypes {
     /** Snapshots. */
     public static final String EVENT_SNAPSHOT = "SNAPSHOT.";
 
+    /** Snapshot unknown type. */
+    public static final String EVENT_UNKNOWN = "unknown";
+
     /** Snapshot Events. */
     public static final String EVENT_SNAPSHOT_CREATE = "SNAPSHOT.CREATE";
 

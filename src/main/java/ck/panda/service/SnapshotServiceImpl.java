@@ -1,6 +1,9 @@
 package ck.panda.service;
 
 import java.util.List;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.json.JSONArray;
@@ -10,14 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
 import ck.panda.constants.CloudStackConstants;
-import ck.panda.constants.EventTypes;
-import ck.panda.domain.entity.Network;
-import ck.panda.domain.entity.Project;
+import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Snapshot;
-import ck.panda.domain.entity.StorageOffering;
-import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Snapshot.Status;
 import ck.panda.domain.repository.jpa.SnapshotRepository;
@@ -28,6 +26,7 @@ import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
+import ck.panda.util.error.exception.CustomGenericException;
 
 /**
  * Snapshot service implementation class.
@@ -67,11 +66,8 @@ public class SnapshotServiceImpl implements SnapshotService {
     @Autowired
     private CloudStackSnapshotService snapshotService;
 
-    /** Constant for Cloud stack volumes. */
-    public static final String CS_VOLUMES = "volumes";
-
-    /** Constant for Cloud stack volume. */
-    public static final String CS_VOLUME = "volume";
+    /** Constant for snapshot. */
+    public static final String CS_SNAPSHOT = "snapshot";
 
     /** Constant for Cloud stack volume create response. */
     public static final String CS_CREATE_VOLUME_RESPONSE = "createvolumeresponse";
@@ -159,6 +155,15 @@ public class SnapshotServiceImpl implements SnapshotService {
     public Page<Snapshot> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
         return snapshotRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
     }
+    @Override
+    public List<Snapshot> findAllByActive(Boolean isActive) throws Exception {
+        return snapshotRepo.findAllByIsActive(true);
+    }
+
+    @Override
+    public List<Snapshot> findAllByActive(Long volumeId, Boolean isActive) throws Exception {
+        return snapshotRepo.findByVolumeAndIsActive(volumeId, true);
+    }
 
     @Override
     public List<Snapshot> findAll() throws Exception {
@@ -202,18 +207,18 @@ public class SnapshotServiceImpl implements SnapshotService {
      * @throws Exception unhandled errors.
      */
     private Snapshot updateSnapshotByJobResponse(Snapshot snapshot, JSONObject jobId, Errors errors) throws Exception {
-        if (jobId.has("errorcode")) {
-            errors.addGlobalError(jobId.getString("errortext"));
+        if (jobId.has(CloudStackConstants.CS_ERROR_CODE)) {
+            errors.addGlobalError(jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
             throw new ApplicationException(errors);
         } else {
-            if(jobId.has("id")) {
-            snapshot.setUuid((String) jobId.get("id"));
+            if(jobId.has(CloudStackConstants.CS_ID)) {
+            snapshot.setUuid((String) jobId.get(CloudStackConstants.CS_ID));
             }
-            if (jobId.has("jobid")) {
-                String jobResponse = snapshotService.snapshotJobResult(jobId.getString("jobid"), "json");
+            if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
+                String jobResponse = snapshotService.snapshotJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),CloudStackConstants.JSON);
 
-                JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
-                if (jobresult.getString("jobstatus").equals("0")) {
+                JSONObject jobresult = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+                if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.PROGRESS_JOB_STATUS)) {
                     snapshot.setStatus(Status.BACKEDUP);
                 }
             }
@@ -228,7 +233,7 @@ public class SnapshotServiceImpl implements SnapshotService {
         if (snapshot.getSyncFlag()) {
             // set server for finding value in configuration
             snapshotService.setServer(configServer.setServer(1L));
-            snapshotService.deleteSnapshot("json", snapshot.getUuid());
+            snapshotService.deleteSnapshot(CloudStackConstants.JSON, snapshot.getUuid());
         }
         return snapshotRepo.save(snapshot);
     }
@@ -249,7 +254,7 @@ public class SnapshotServiceImpl implements SnapshotService {
     @Override
     public Snapshot createVolume(Snapshot snapshot, Long userId) throws Exception {
         this.validateVolumeUniqueness(snapshot, convertEntityService.getOwnerById(userId).getDomainId(), userId);
-        Errors errors = validator.rejectIfNullEntity(CS_VOLUMES, snapshot);
+        Errors errors = validator.rejectIfNullEntity(CS_SNAPSHOT, snapshot);
         errors = validator.validateEntity(snapshot, errors);
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
@@ -259,7 +264,7 @@ public class SnapshotServiceImpl implements SnapshotService {
         HashMap<String,String> optional = new HashMap<String, String>();
         optional.put("snapshotid", snapshotObject.getUuid());
         configServer.setUserServer();
-        String volumeResponse = csVolumeService.createVolume(snapshot.getTransVolumeName(), convertEntityService.getZoneUuidById(volume.getZoneId()), "json", optional);
+        String volumeResponse = csVolumeService.createVolume(snapshot.getTransVolumeName(), convertEntityService.getZoneUuidById(volume.getZoneId()), CloudStackConstants.JSON, optional);
         return snapshot;
     }
 
@@ -281,7 +286,7 @@ public class SnapshotServiceImpl implements SnapshotService {
      *             error occurs
      */
     private void validateVolumeUniqueness(Snapshot snapshot, Long domainId, Long userId) throws Exception {
-        Errors errors = validator.rejectIfNullEntity("snapshot", snapshot);
+        Errors errors = validator.rejectIfNullEntity(CS_SNAPSHOT, snapshot);
         errors = validator.validateEntity(snapshot, errors);
         Volume validateVolume = volumeService.findByNameAndIsActive(snapshot.getTransVolumeName(), domainId, userId, true);
         if (validateVolume != null && snapshot.getId() != validateVolume.getId()) {
@@ -299,17 +304,17 @@ public class SnapshotServiceImpl implements SnapshotService {
 
     @Override
     public Snapshot revertSnapshot(Snapshot snapshot) throws Exception {
-         Errors errors = validator.rejectIfNullEntity("snapshot", snapshot);
+         Errors errors = validator.rejectIfNullEntity(CS_SNAPSHOT, snapshot);
          errors = validator.validateEntity(snapshot, errors);
          if (errors.hasErrors()) {
              throw new ApplicationException(errors);
          } else {
              Snapshot snapshotObject = convertEntityService.getSnapshotById(snapshot.getId());
              configServer.setUserServer();
-             String snapResponse = snapshotService.revertSnapshot(snapshotObject.getUuid(),"json");
+             String snapResponse = snapshotService.revertSnapshot(snapshotObject.getUuid(),CloudStackConstants.JSON);
              JSONObject jobId = new JSONObject(snapResponse).getJSONObject("revertsnapshotresponse");
-             if (jobId.has("errorcode")) {
-                 errors = this.validateEvent(errors, jobId.getString("errortext"));
+             if (jobId.has(CloudStackConstants.CS_ERROR_CODE)) {
+                 errors = this.validateEvent(errors, jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
                  throw new ApplicationException(errors);
              }
              snapshot = this.updateSnapshotByJobResponse(snapshot, jobId, errors);
@@ -317,23 +322,65 @@ public class SnapshotServiceImpl implements SnapshotService {
         return snapshot;
     }
 
- /*  @Override
+   @Override
     public Snapshot recurringSnapshot(Snapshot snapshot) throws Exception {
-         Errors errors = validator.rejectIfNullEntity("snapshot", snapshot);
+         Errors errors = validator.rejectIfNullEntity(CS_SNAPSHOT, snapshot);
          errors = validator.validateEntity(snapshot, errors);
          if (errors.hasErrors()) {
              throw new ApplicationException(errors);
          } else {
-             Snapshot snapshotObject = convertEntityService.getSnapshotById(snapshot.getId());
+             Volume volume = convertEntityService.getVolumeById(snapshot.getVolumeId());
              configServer.setUserServer();
-             String snapResponse = snapshotService.createSnapshotPolicy(snapshotPolicyIntervalType, snapshotPolicyMaxSnaps, snapshotPolicySchedule, snapshotPolicyTimeZone, diskvolumeId)
-             JSONObject jobId = new JSONObject(snapResponse).getJSONObject("revertsnapshotresponse");
-             if (jobId.has("errorcode")) {
-                 errors = this.validateEvent(errors, jobId.getString("errortext"));
+             HashMap<String, String> optional = new HashMap<String,String>();
+             if(snapshot.getIntervalType() != null ) {
+               switch(snapshot.getIntervalType()) {
+               case HOURLY :
+                   String scheduleHour = snapshot.getMinutes();
+                   snapshot.setScheduletime(scheduleHour);
+                   break;
+               case DAILY :
+                   String scheduleTime = snapshot.getHours()+ ':' + snapshot.getMinutes();
+                   snapshot.setScheduletime(scheduleTime);
+                   break;
+               case MONTHLY :
+                   String scheduleMonth = snapshot.getHours()+ ':' + snapshot.getMinutes() + ':' + snapshot.getDayOfMonth();
+                   snapshot.setScheduletime(scheduleMonth);
+                   break;
+               case WEEKLY :
+                   String scheduleWeekly = snapshot.getHours()+ ':' + snapshot.getMinutes() + ':' + snapshot.getDayOfWeek();
+                   snapshot.setScheduletime(scheduleWeekly);
+                   break;
+               }
+              }
+             optional.put("schedule", snapshot.getScheduletime());
+             String snapResponse = snapshotService.createSnapshotPolicy(String.valueOf(snapshot.getIntervalType()).toLowerCase(), snapshot.getMaximumSnapshots().toString(), snapshot.getTimeZone(), volume.getUuid(),CloudStackConstants.JSON,optional);
+             JSONObject createSnapolicyResponse = new JSONObject(snapResponse).getJSONObject("createsnapshotpolicyresponse");
+             if (createSnapolicyResponse.has(CloudStackConstants.CS_ERROR_CODE)) {
+                 errors = this.validateEvent(errors, createSnapolicyResponse.getString(CloudStackConstants.CS_ERROR_TEXT));
                  throw new ApplicationException(errors);
              }
-             snapshot = this.updateSnapshotByJobResponse(snapshot, jobId, errors);
+             JSONObject snapPolicy = createSnapolicyResponse.getJSONObject("snapshotpolicy");
+             snapshot.setSnapshotPolicyUuid((String) snapPolicy.get(CloudStackConstants.CS_ID));
          }
-        return snapshot;
-    }*/
+        return snapshotRepo.save(snapshot);
+    }
+
+   @Override
+   public Snapshot deleteRecurringSnapshot(Snapshot snapshot, Long id) throws Exception {
+            Snapshot snapshotObject = convertEntityService.getSnapshotById(id);
+            configServer.setUserServer();
+            String deleteSnapResponse = snapshotService.deleteSnapshotPolicies(snapshotObject.getSnapshotPolicyUuid(), CloudStackConstants.JSON);
+            JSONObject deleteSnapolicyResponse = new JSONObject(deleteSnapResponse).getJSONObject("deletesnapshotpoliciesresponse");
+            if (deleteSnapolicyResponse.has(CloudStackConstants.CS_ERROR_CODE)) {
+                throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, deleteSnapolicyResponse.getString(CloudStackConstants.CS_ERROR_TEXT));
+            }
+            snapshotObject.setIsActive(false);
+       return snapshotRepo.save(snapshotObject);
+   }
+
+@Override
+public Snapshot deleteRecurringSnapshot(Snapshot snapshot) throws Exception {
+    // TODO Auto-generated method stub
+    return null;
+}
 }

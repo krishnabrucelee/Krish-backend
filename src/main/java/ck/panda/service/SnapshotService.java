@@ -3,8 +3,6 @@ package ck.panda.service;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Snapshot;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -42,12 +40,56 @@ public interface SnapshotService extends CRUDService<Snapshot> {
      */
     Page<Snapshot> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
 
+    /**
+     * Find snapshot by Uuid
+     *
+     * @param uuid of the snapshot.
+     * @return snapshot.
+     * @throws Exception if error occurs.
+     */
     Snapshot findByUUID(String uuid) throws Exception;
 
-
+    /**
+     * Create volume from snapshot.
+     *
+     * @param snapshot object which is used to create volume.
+     * @param userId id of the user.
+     * @return snapshot with created volume.
+     * @throws Exception if error occurs.
+     */
     Snapshot createVolume(Snapshot snapshot, Long userId) throws Exception;
 
+    /**
+     * Find snapshot by id.
+     *
+     * @param id of the snapshot.
+     * @return snapshot.
+     */
     Snapshot findById(Long id);
 
+    /**
+     * Revert snapshot to its inital state.
+     *
+     * @param snapshot to be reverted
+     * @return snapshot.
+     * @throws Exception if error occurs.
+     */
     Snapshot revertSnapshot(Snapshot snapshot) throws Exception;
+
+    /**
+     * Recurring snapshot based on hourly,monthly and daily basis.
+     *
+     * @param snapshot object.
+     * @return snapshot.
+     * @throws Exception if error occurs.
+     */
+    Snapshot recurringSnapshot(Snapshot snapshot) throws Exception;
+
+    Snapshot deleteRecurringSnapshot(Snapshot snapshot) throws Exception;
+
+    List<Snapshot> findAllByActive(Long volumeId, Boolean isActive) throws Exception;
+
+    List<Snapshot> findAllByActive(Boolean isActive) throws Exception;
+
+    Snapshot deleteRecurringSnapshot(Snapshot snapshot, Long id) throws Exception;
 }

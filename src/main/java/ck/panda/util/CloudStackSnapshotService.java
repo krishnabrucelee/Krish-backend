@@ -92,17 +92,14 @@ public class CloudStackSnapshotService {
      * @throws Exception unhandled errors.
      */
     public String createSnapshotPolicy(String snapshotPolicyIntervalType, String snapshotPolicyMaxSnaps,
-            String snapshotPolicySchedule, String snapshotPolicyTimeZone, String diskvolumeId) throws Exception {
-
-        LinkedList<NameValuePair> arguments = server.getDefaultQuery("createSnapshotPolicy", null);
+             String snapshotPolicyTimeZone, String diskvolumeId, String response, HashMap<String, String> optional) throws Exception {
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("createSnapshotPolicy", optional);
         arguments.add(new NameValuePair("intervaltype", snapshotPolicyIntervalType));
         arguments.add(new NameValuePair("maxsnaps", snapshotPolicyMaxSnaps));
-        arguments.add(new NameValuePair("schedule", snapshotPolicySchedule));
         arguments.add(new NameValuePair("timezone", snapshotPolicyTimeZone));
         arguments.add(new NameValuePair("volumeid", diskvolumeId));
-
+        arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
-
         return responseDocument;
     }
 
@@ -113,9 +110,11 @@ public class CloudStackSnapshotService {
      * @return response Document.
      * @throws Exception unhandled errors.
      */
-    public String deleteSnapshotPolicies(HashMap<String, String> optional) throws Exception {
+    public String deleteSnapshotPolicies(String snapshotPolicyUuid, String response) throws Exception {
 
-        LinkedList<NameValuePair> arguments = server.getDefaultQuery("deleteSnapshotPolicies", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("deleteSnapshotPolicies", null);
+        arguments.add(new NameValuePair("id", snapshotPolicyUuid));
+        arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
         return responseDocument;
     }

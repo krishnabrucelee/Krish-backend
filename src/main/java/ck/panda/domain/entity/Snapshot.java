@@ -25,10 +25,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
-
-import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
-import ck.panda.util.JsonValidator;
 
 /**
  * Snapshots are a point-in-time capture of virtual machine disks. Memory and CPU states are not captured. If you are
@@ -53,6 +50,10 @@ public class Snapshot implements Serializable {
     /** Cloudstack's volume snapshot uuid. */
     @Column(name = "uuid")
     private String uuid;
+
+    /** Cloudstack's volume snapshot policy uuid. */
+    @Column(name = "snapshot_policy_uuid")
+    private String snapshotPolicyUuid;
 
     /** Name of the snapshot. */
     @Column(name = "name")
@@ -90,7 +91,6 @@ public class Snapshot implements Serializable {
     @ManyToOne
     private Volume volume;
 
-    // Todo relational mapping to be done with volume.
     /** Id of the volume. */
     @Column(name = "volume_id")
     private Long volumeId;
@@ -99,9 +99,11 @@ public class Snapshot implements Serializable {
     @Column(name = "snapshottype")
     private String snapshotType;
 
-    /** Snapshot month */
-    @Column(name = "schedule_month")
-    private Integer scheduleMonth;
+    @Transient
+    private Integer dayOfMonth;
+
+    @Transient
+    private String dayOfWeek;
 
     /** Maximum number of snapshots. */
     @Column(name = "max_snaps")
@@ -109,7 +111,17 @@ public class Snapshot implements Serializable {
 
     /** Snapshot policy time zone */
     @Column(name = "snapshot_policy_time_zone")
-    private Integer snapshotPolicyTimeZone;
+    private String timeZone;
+
+    /** Snapshot policy time zone */
+    @Column(name = "shedule_time")
+    private String scheduletime;
+
+    @Transient
+    private String minutes;
+
+    @Transient
+    private String hours;
 
     /** Interval type. */
     @Column(name = "interval_type")
@@ -655,20 +667,22 @@ public class Snapshot implements Serializable {
     }
 
     /**
-     * @return the scheduleMonth
+     * @return the dayOfMonth
      */
-    public Integer getScheduleMonth() {
-        return scheduleMonth;
+    public Integer getDayOfMonth() {
+        return dayOfMonth;
     }
 
     /**
-     * @param scheduleMonth the scheduleMonth to set
+     * @param dayOfMonth the dayOfMonth to set
      */
-    public void setScheduleMonth(Integer scheduleMonth) {
-        this.scheduleMonth = scheduleMonth;
+    public void setDayOfMonth(Integer dayOfMonth) {
+        this.dayOfMonth = dayOfMonth;
     }
 
     /**
+     * Get the maximum number of snapshots.
+     *
      * @return the maximumSnapshots
      */
     public Integer getMaximumSnapshots() {
@@ -676,24 +690,106 @@ public class Snapshot implements Serializable {
     }
 
     /**
-     * @param maximumSnapshots the maximumSnapshots to set
+     * Set the maximum number of snapshots.
+     *
+     * @param maximumSnapshots  to set
      */
     public void setMaximumSnapshots(Integer maximumSnapshots) {
         this.maximumSnapshots = maximumSnapshots;
     }
 
     /**
+     * Get snapshot policy time zone.
+     *
      * @return the snapshotPolicyTimeZone
      */
-    public Integer getSnapshotPolicyTimeZone() {
-        return snapshotPolicyTimeZone;
+    public String getTimeZone() {
+        return timeZone;
     }
 
     /**
-     * @param snapshotPolicyTimeZone the snapshotPolicyTimeZone to set
+     * Set snapshot policy time zone.
+     *
+     * @param snapshotPolicyTimeZone  to set
      */
-    public void setSnapshotPolicyTimeZone(Integer snapshotPolicyTimeZone) {
-        this.snapshotPolicyTimeZone = snapshotPolicyTimeZone;
+    public void setTimeZone(String timeZone) {
+        this.timeZone = timeZone;
+    }
+
+    /**
+     * @return the minutes
+     */
+    public String getMinutes() {
+        return minutes;
+    }
+
+    /**
+     * @param minutes the minutes to set
+     */
+    public void setMinutes(String minutes) {
+        this.minutes = minutes;
+    }
+
+    /**
+     * @return the hours
+     */
+    public String getHours() {
+        return hours;
+    }
+
+    /**
+     * @param hours the hours to set
+     */
+    public void setHours(String hours) {
+        this.hours = hours;
+    }
+
+
+    /**
+     * Get snapshot policy uuid.
+     *
+     * @return the snapshotPolicyUuid
+     */
+    public String getSnapshotPolicyUuid() {
+        return snapshotPolicyUuid;
+    }
+
+    /**
+     * Set snapshot policy uuid.
+     *
+     * @param snapshotPolicyUuid to set
+     */
+    public void setSnapshotPolicyUuid(String snapshotPolicyUuid) {
+        this.snapshotPolicyUuid = snapshotPolicyUuid;
+    }
+
+    /**
+     * @return the scheduletime
+     */
+    public String getScheduletime() {
+        return scheduletime;
+    }
+
+    /**
+     * @param scheduletime the scheduletime to set
+     */
+    public void setScheduletime(String scheduletime) {
+        this.scheduletime = scheduletime;
+    }
+
+
+    /**
+     * @return the dayOfWeek
+     */
+    public String getDayOfWeek() {
+        return dayOfWeek;
+    }
+
+    /**
+     * @param dayOfWeek the dayOfWeek to set
+     */
+    public void setDayOfWeek(String dayOfWeek) {
+        this.dayOfWeek = dayOfWeek;
     }
 
     /**
