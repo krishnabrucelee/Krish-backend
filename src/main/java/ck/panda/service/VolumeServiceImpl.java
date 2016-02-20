@@ -926,4 +926,8 @@ public class VolumeServiceImpl implements VolumeService {
         return volumeRepo.findByNameAndIsActive(volume, domainId, userId, true);
     }
 
+    @Override
+    public List<Volume> findAllByIsActive(Boolean isActive) throws Exception {
+        return (List<Volume>) volumeRepo.findAllByIsActive(true);
+    }
 }

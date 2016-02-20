@@ -49,10 +49,7 @@ public interface SnapshotRepository extends PagingAndSortingRepository<Snapshot,
     @Query(value = "SELECT snap FROM Snapshot snap WHERE snap.uuid LIKE :uuid ")
     Snapshot findByUUID(@Param("uuid") String uuid);
 
-    @Query(value = "select snap from Snapshot snap where snap.volumeId = :volumeId AND snap.isActive = :isActive")
-    List<Snapshot> findByVolumeAndIsActive(@Param("volumeId") Long volumeId, @Param("isActive") Boolean isActive);
-
-    @Query(value = "select snap from Snapshot snap where snap.isActive = :isActive")
+    @Query(value = "select snap from Snapshot snap where snap.policyIsActive = :isActive")
     List<Snapshot> findAllByIsActive(@Param("isActive") Boolean isActive);
 
 }

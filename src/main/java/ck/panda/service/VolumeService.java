@@ -220,4 +220,12 @@ public interface VolumeService extends CRUDService<Volume> {
      */
     Volume findByNameAndIsActive(String volume, Long domainId, Long userId, Boolean isActive);
 
+    /**
+     * Find all volumes by isActive.
+     *
+     * @param isActive status of the volume.
+     * @return volume.
+     */
+    List<Volume> findAllByIsActive(Boolean isActive) throws Exception;
+
 }

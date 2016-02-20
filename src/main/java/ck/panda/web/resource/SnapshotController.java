@@ -119,35 +119,6 @@ public class SnapshotController extends CRUDController<Snapshot> implements ApiC
         return snapshotService.revertSnapshot(snapshot);
     }
 
-    /**
-     * Recurring snapshot based on hourly,monthly and daily basis.
-     *
-     * @param snapshot object.
-     * @return snapshot.
-     * @throws Exception if error occurs.
-     */
-    @RequestMapping(value = "reccuringsnap", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    protected Snapshot reccuringSnapshot(@RequestBody Snapshot snapshot) throws Exception {
-        return snapshotService.recurringSnapshot(snapshot);
-    }
-
-    @RequestMapping(value = "deletepolicy/{id}", method = RequestMethod.DELETE, produces = {
-            MediaType.APPLICATION_JSON_VALUE })
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteRecurringSnapshot(@RequestBody Snapshot snapshot, @PathVariable(PATH_ID) Long id) throws Exception {
-        /** Doing Soft delete from the snapshot table. */
-        snapshotService.deleteRecurringSnapshot(snapshot,id);
-    }
-
-  /*  @RequestMapping(value = "listbyvolume", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    protected List<Snapshot> listByVolume(@RequestParam("volumeid") Long volumeId) throws Exception {
-        return snapshotService.findAllByActive(volumeId, true);
-   }*/
-
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody

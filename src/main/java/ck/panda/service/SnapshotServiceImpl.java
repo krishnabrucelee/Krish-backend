@@ -1,9 +1,6 @@
 package ck.panda.service;
 
 import java.util.List;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.json.JSONArray;
@@ -158,11 +155,6 @@ public class SnapshotServiceImpl implements SnapshotService {
     @Override
     public List<Snapshot> findAllByActive(Boolean isActive) throws Exception {
         return snapshotRepo.findAllByIsActive(true);
-    }
-
-    @Override
-    public List<Snapshot> findAllByActive(Long volumeId, Boolean isActive) throws Exception {
-        return snapshotRepo.findByVolumeAndIsActive(volumeId, true);
     }
 
     @Override
@@ -321,66 +313,4 @@ public class SnapshotServiceImpl implements SnapshotService {
          }
         return snapshot;
     }
-
-   @Override
-    public Snapshot recurringSnapshot(Snapshot snapshot) throws Exception {
-         Errors errors = validator.rejectIfNullEntity(CS_SNAPSHOT, snapshot);
-         errors = validator.validateEntity(snapshot, errors);
-         if (errors.hasErrors()) {
-             throw new ApplicationException(errors);
-         } else {
-             Volume volume = convertEntityService.getVolumeById(snapshot.getVolumeId());
-             configServer.setUserServer();
-             HashMap<String, String> optional = new HashMap<String,String>();
-             if(snapshot.getIntervalType() != null ) {
-               switch(snapshot.getIntervalType()) {
-               case HOURLY :
-                   String scheduleHour = snapshot.getMinutes();
-                   snapshot.setScheduletime(scheduleHour);
-                   break;
-               case DAILY :
-                   String scheduleTime = snapshot.getHours()+ ':' + snapshot.getMinutes();
-                   snapshot.setScheduletime(scheduleTime);
-                   break;
-               case MONTHLY :
-                   String scheduleMonth = snapshot.getHours()+ ':' + snapshot.getMinutes() + ':' + snapshot.getDayOfMonth();
-                   snapshot.setScheduletime(scheduleMonth);
-                   break;
-               case WEEKLY :
-                   String scheduleWeekly = snapshot.getHours()+ ':' + snapshot.getMinutes() + ':' + snapshot.getDayOfWeek();
-                   snapshot.setScheduletime(scheduleWeekly);
-                   break;
-               }
-              }
-             optional.put("schedule", snapshot.getScheduletime());
-             String snapResponse = snapshotService.createSnapshotPolicy(String.valueOf(snapshot.getIntervalType()).toLowerCase(), snapshot.getMaximumSnapshots().toString(), snapshot.getTimeZone(), volume.getUuid(),CloudStackConstants.JSON,optional);
-             JSONObject createSnapolicyResponse = new JSONObject(snapResponse).getJSONObject("createsnapshotpolicyresponse");
-             if (createSnapolicyResponse.has(CloudStackConstants.CS_ERROR_CODE)) {
-                 errors = this.validateEvent(errors, createSnapolicyResponse.getString(CloudStackConstants.CS_ERROR_TEXT));
-                 throw new ApplicationException(errors);
-             }
-             JSONObject snapPolicy = createSnapolicyResponse.getJSONObject("snapshotpolicy");
-             snapshot.setSnapshotPolicyUuid((String) snapPolicy.get(CloudStackConstants.CS_ID));
-         }
-        return snapshotRepo.save(snapshot);
-    }
-
-   @Override
-   public Snapshot deleteRecurringSnapshot(Snapshot snapshot, Long id) throws Exception {
-            Snapshot snapshotObject = convertEntityService.getSnapshotById(id);
-            configServer.setUserServer();
-            String deleteSnapResponse = snapshotService.deleteSnapshotPolicies(snapshotObject.getSnapshotPolicyUuid(), CloudStackConstants.JSON);
-            JSONObject deleteSnapolicyResponse = new JSONObject(deleteSnapResponse).getJSONObject("deletesnapshotpoliciesresponse");
-            if (deleteSnapolicyResponse.has(CloudStackConstants.CS_ERROR_CODE)) {
-                throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, deleteSnapolicyResponse.getString(CloudStackConstants.CS_ERROR_TEXT));
-            }
-            snapshotObject.setIsActive(false);
-       return snapshotRepo.save(snapshotObject);
-   }
-
-@Override
-public Snapshot deleteRecurringSnapshot(Snapshot snapshot) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
-}
 }

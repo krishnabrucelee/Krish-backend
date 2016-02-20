@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
@@ -24,6 +25,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonUtil;
 
@@ -36,6 +38,7 @@ import ck.panda.util.JsonUtil;
 @Entity
 @Table(name = "snapshots")
 @SuppressWarnings("serial")
+@EntityListeners(AuditingEntityListener.class)
 public class Snapshot implements Serializable {
 
     /** Logger attribute. */
@@ -99,42 +102,18 @@ public class Snapshot implements Serializable {
     @Column(name = "snapshottype")
     private String snapshotType;
 
-    @Transient
-    private Integer dayOfMonth;
-
-    @Transient
-    private String dayOfWeek;
-
-    /** Maximum number of snapshots. */
-    @Column(name = "max_snaps")
-    private Integer maximumSnapshots;
-
-    /** Snapshot policy time zone */
-    @Column(name = "snapshot_policy_time_zone")
-    private String timeZone;
-
-    /** Snapshot policy time zone */
-    @Column(name = "shedule_time")
-    private String scheduletime;
-
-    @Transient
-    private String minutes;
-
-    @Transient
-    private String hours;
-
-    /** Interval type. */
-    @Column(name = "interval_type")
-    private IntervalType intervalType;
-
     /** state of the snapshot. */
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    /** */
+    /** IsActive status of snapshot.*/
     @Column(name = "is_active")
     private Boolean isActive;
+
+    /** IsActive status of snapshot policy.*/
+    @Column(name = "policy_is_active")
+    private Boolean policyIsActive;
 
     /** Set syncFlag. */
     @Transient
@@ -203,21 +182,7 @@ public class Snapshot implements Serializable {
         ALLOCATED
     }
 
-    /** Snapshot interval types */
-    public enum IntervalType {
 
-        /** Hourly snaphshot back up. */
-        HOURLY,
-
-        /** Weekly  snaphsot back up .*/
-        WEEKLY,
-
-        /** Daily snapshot back up. */
-        DAILY,
-
-        /** Monthly snapshot back up. */
-        MONTHLY
-    }
 
     /**
      * @return the id
@@ -434,23 +399,6 @@ public class Snapshot implements Serializable {
         this.snapshotType = snapshotType;
     }
 
-    /**
-     * Get the snapshot interval type.
-     *
-     * @return the intervalType
-     */
-    public IntervalType getIntervalType() {
-        return intervalType;
-    }
-
-    /**
-     * Set the snapshot interval type.
-     *
-     * @param intervalType to set
-     */
-    public void setIntervalType(IntervalType intervalType) {
-        this.intervalType = intervalType;
-    }
 
     /**
      * Get Status.
@@ -666,83 +614,7 @@ public class Snapshot implements Serializable {
         this.transVolumeName = transVolumeName;
     }
 
-    /**
-     * @return the dayOfMonth
-     */
-    public Integer getDayOfMonth() {
-        return dayOfMonth;
-    }
 
-    /**
-     * @param dayOfMonth the dayOfMonth to set
-     */
-    public void setDayOfMonth(Integer dayOfMonth) {
-        this.dayOfMonth = dayOfMonth;
-    }
-
-    /**
-     * Get the maximum number of snapshots.
-     *
-     * @return the maximumSnapshots
-     */
-    public Integer getMaximumSnapshots() {
-        return maximumSnapshots;
-    }
-
-    /**
-     * Set the maximum number of snapshots.
-     *
-     * @param maximumSnapshots  to set
-     */
-    public void setMaximumSnapshots(Integer maximumSnapshots) {
-        this.maximumSnapshots = maximumSnapshots;
-    }
-
-    /**
-     * Get snapshot policy time zone.
-     *
-     * @return the snapshotPolicyTimeZone
-     */
-    public String getTimeZone() {
-        return timeZone;
-    }
-
-    /**
-     * Set snapshot policy time zone.
-     *
-     * @param snapshotPolicyTimeZone  to set
-     */
-    public void setTimeZone(String timeZone) {
-        this.timeZone = timeZone;
-    }
-
-    /**
-     * @return the minutes
-     */
-    public String getMinutes() {
-        return minutes;
-    }
-
-    /**
-     * @param minutes the minutes to set
-     */
-    public void setMinutes(String minutes) {
-        this.minutes = minutes;
-    }
-
-    /**
-     * @return the hours
-     */
-    public String getHours() {
-        return hours;
-    }
-
-    /**
-     * @param hours the hours to set
-     */
-    public void setHours(String hours) {
-        this.hours = hours;
-    }
 
 
     /**
@@ -764,32 +636,17 @@ public class Snapshot implements Serializable {
     }
 
     /**
-     * @return the scheduletime
+     * @return the policyIsActive
      */
-    public String getScheduletime() {
-        return scheduletime;
+    public Boolean getPolicyIsActive() {
+        return policyIsActive;
     }
 
     /**
-     * @param scheduletime the scheduletime to set
+     * @param policyIsActive the policyIsActive to set
      */
-    public void setScheduletime(String scheduletime) {
-        this.scheduletime = scheduletime;
-    }
-
-
-    /**
-     * @return the dayOfWeek
-     */
-    public String getDayOfWeek() {
-        return dayOfWeek;
-    }
-
-    /**
-     * @param dayOfWeek the dayOfWeek to set
-     */
-    public void setDayOfWeek(String dayOfWeek) {
-        this.dayOfWeek = dayOfWeek;
+    public void setPolicyIsActive(Boolean policyIsActive) {
+        this.policyIsActive = policyIsActive;
     }
 
     /**
@@ -813,7 +670,6 @@ public class Snapshot implements Serializable {
             snapshot.setSnapshotType(JsonUtil.getStringValue(jsonObject, "snapshottype"));
             snapshot.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state").toUpperCase()));
             snapshot.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, "account"));
-            snapshot.setIntervalType(IntervalType.valueOf(JsonUtil.getStringValue(jsonObject, "intervaltype").toUpperCase()));
         } catch (Exception ex) {
             LOGGER.error("Snapshot-convert", ex);
         }

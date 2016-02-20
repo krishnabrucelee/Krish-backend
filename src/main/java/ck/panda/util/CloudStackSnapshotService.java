@@ -122,16 +122,15 @@ public class CloudStackSnapshotService {
     /**
      * Lists snapshot policies.
      *
-     * @param diskvolumeId the ID of the disk volume
      * @param optional values from cloud Stack.
+     * @param response json or xml.
      * @return response Document.
      * @throws Exception unhandled errors.
      */
-    public String listSnapshotPolicies(String diskvolumeId, HashMap<String, String> optional) throws Exception {
+    public String listSnapshotPolicies(String response,HashMap<String, String> optional) throws Exception {
 
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("listSnapshotPolicies", optional);
-
-        arguments.add(new NameValuePair("volumeid", diskvolumeId));
+        arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
         return responseDocument;
     }

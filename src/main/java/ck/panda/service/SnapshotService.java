@@ -77,19 +77,11 @@ public interface SnapshotService extends CRUDService<Snapshot> {
     Snapshot revertSnapshot(Snapshot snapshot) throws Exception;
 
     /**
-     * Recurring snapshot based on hourly,monthly and daily basis.
+     * Find all snapshot by active .
      *
-     * @param snapshot object.
+     * @param isActive status of the snapshot.
      * @return snapshot.
      * @throws Exception if error occurs.
      */
-    Snapshot recurringSnapshot(Snapshot snapshot) throws Exception;
-
-    Snapshot deleteRecurringSnapshot(Snapshot snapshot) throws Exception;
-
-    List<Snapshot> findAllByActive(Long volumeId, Boolean isActive) throws Exception;
-
     List<Snapshot> findAllByActive(Boolean isActive) throws Exception;
-
-    Snapshot deleteRecurringSnapshot(Snapshot snapshot, Long id) throws Exception;
 }

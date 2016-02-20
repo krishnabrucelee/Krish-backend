@@ -30,6 +30,7 @@ import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
 import ck.panda.domain.entity.Snapshot;
+import ck.panda.domain.entity.SnapshotPolicy;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackServer;
 
@@ -166,6 +167,10 @@ public class ConvertEntityService {
     /** Snapshot service for reference . */
     @Autowired
     private SnapshotService snapshotService;
+
+    /** snapshot Policy Service service for reference . */
+    @Autowired
+    private SnapshotPolicyService snapshotPolicyService;
 
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
@@ -408,6 +413,17 @@ public class ConvertEntityService {
      */
     public Nic getNicById(Long id) throws Exception {
         return nicService.findById(id);
+    }
+
+    /**
+     * Get snapshot policy object.
+     *
+     * @param id of the snapshot policy.
+     * @return snapshot policy.
+     * @throws Exception if error occurs.
+     */
+    public SnapshotPolicy getSnapshotPolicyById(Long id) throws Exception {
+        return snapshotPolicyService.find(id);
     }
 
     /**
