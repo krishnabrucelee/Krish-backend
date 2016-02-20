@@ -47,11 +47,11 @@ public interface StorageOfferingRepository extends PagingAndSortingRepository<St
      * Get the List of Storage offer based on the tags.
      *
      * @param tags of the Storage offer.
-     * @param domainId domain id
+     * @param domainId domain id.
      * @param isActive of the Storage offer.
      * @return list of Storage offer
      */
-    @Query(value = "SELECT storage FROM StorageOffering storage WHERE (storage.storageTags = :storageTags OR 'ALL' = :storageTags) AND storage.isActive = :isActive AND (storage.domainId = :domainId OR storage.domainId IS NULL)")
+    @Query(value = "SELECT storage FROM StorageOffering storage WHERE (storage.storageTags = :storageTags OR 'ALL' = :storageTags) AND (storage.domainId = :domainId OR storage.domainId IS NULL) AND storage.isActive = :isActive")
     List<StorageOffering> findAllByTags(@Param("storageTags") String tags, @Param("domainId") Long domainId, @Param("isActive") Boolean isActive);
 
     /**

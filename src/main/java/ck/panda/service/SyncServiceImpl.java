@@ -47,6 +47,7 @@ import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.SSHKey;
 import ck.panda.domain.entity.Snapshot;
+import ck.panda.domain.entity.SnapshotPolicy;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
@@ -178,6 +179,11 @@ public class SyncServiceImpl implements SyncService {
     /** For listing snapshots in cloudstack server. */
     @Autowired
     private SnapshotService snapshotService;
+
+
+    /** For listing snapshots policies in cloudstack server. */
+    @Autowired
+    private SnapshotPolicyService snapshotPolicyService;
 
     /** For listing snapshots in cloudstack server. */
     @Autowired
@@ -514,6 +520,12 @@ public class SyncServiceImpl implements SyncService {
             this.syncPortForwarding();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch PortForwarding", e);
+        }
+        try {
+            // 29. Sync SnapshotPolicy entity
+            this.syncSnapshotPolicy();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch SnapshotPolicy", e);
         }
         try {
             // 29. Sync Load Balancer entity
@@ -1267,7 +1279,7 @@ public class SyncServiceImpl implements SyncService {
                 }
                 if (csVm.getProjectId() != null) {
                     instance.setProjectId(csVm.getProjectId());
-                    instance.setDepartmentId(csVm.getDepartmentId());
+                    instance.setDepartmentId(convertEntityService.getProjectById(csVm.getProjectId()).getDepartmentId());
                 }
                 if (csVm.getInstanceOwnerId() != null) {
                     instance.setInstanceOwnerId(csVm.getInstanceOwnerId());
@@ -1552,6 +1564,50 @@ public class SyncServiceImpl implements SyncService {
     }
 
     /**
+     * Sync with Cloud Server Cluster.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    private void syncSnapshotPolicy() throws ApplicationException, Exception {
+
+        // 1. Get all the cluster objects from CS server as hash
+        List<SnapshotPolicy> csClusterService = snapshotPolicyService.findAllFromCSServer();
+        HashMap<String, SnapshotPolicy> csPolicyMap = (HashMap<String, SnapshotPolicy>) SnapshotPolicy.convert(csClusterService);
+
+        // 2. Get all the cluster objects from application
+        List<SnapshotPolicy> appPolicyList = snapshotPolicyService.findAll();
+
+        // 3. Iterate application cluster list
+        for (SnapshotPolicy snapPolicy : appPolicyList) {
+            // 3.1 Find the corresponding CS server host object by finding it in
+            // a hash using uuid
+            if (csPolicyMap.containsKey(snapPolicy.getUuid())) {
+                SnapshotPolicy csCluster = csPolicyMap.get(snapPolicy.getUuid());
+                // 3.2 If found, update the cluster object in app db
+                snapshotPolicyService.update(snapPolicy);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // cluster which is not added in the app
+                csPolicyMap.remove(snapPolicy.getUuid());
+            } else {
+                snapshotPolicyService.delete(snapPolicy);
+                // 3.2 If not found, delete it from app db
+                // TODO clarify the business requirement, since it has impact in
+                // the application if it is used
+                // TODO clarify is this a soft or hard delete
+            }
+        }
+        // 4. Get the remaining list of cs server hash user object, then iterate
+        // and
+        // add it to app db
+        for (String key : csPolicyMap.keySet()) {
+            snapshotPolicyService.save(csPolicyMap.get(key));
+        }
+    }
+
+
+    /**
      * Sync with Cloud Server Instance snapshots.
      *
      * @throws ApplicationException unhandled application errors.
@@ -1727,15 +1783,22 @@ public class SyncServiceImpl implements SyncService {
 
         // 3. Iterate Domain resource list
         LOGGER.debug("Total rows updated : " + (appResourceList.size()));
-        int i = 0;
         for (ResourceLimitDomain resource : appResourceList) {
-            i++;
             LOGGER.debug("NEW DOMAIN ID " + resource.getDomainId());
-            if (i == 1) {
-                resourceDomainService.deleteResourceLimitByDomain(resource.getDomainId());
+            if (csResourceMap.containsKey(resource.getDomainId() + resource.getResourceType().toString())) {
+                if (resource != null) {
+                    resource.setMax(
+                            csResourceMap.get(resource.getDomainId() + resource.getResourceType().toString()).getMax());
+                    resource.setIsActive(true);
+                    resource.setIsSyncFlag(false);
+                    resourceDomainService.update(resource);
+                }
+                csResourceMap.remove(resource.getDomainId() + resource.getResourceType().toString());
+            } else {
+                resource.setIsActive(false);
+                resource.setIsSyncFlag(false);
+                resourceDomainService.update(resource);
             }
-            resource.setIsSyncFlag(false);
-            csResourceMap.remove(resource.getDomainId());
         }
         // 4. Get the remaining list of cs server hash resource object, then
         // iterate and
@@ -1746,9 +1809,8 @@ public class SyncServiceImpl implements SyncService {
         LOGGER.debug("Total rows added", (csResourceMap.size()));
         // Used for setting optional values for resource count.
         HashMap<String, String> domainCountMap = new HashMap<String, String>();
-        //Sync for resource count in domain
-        String csResponse = cloudStackResourceCapacity.updateResourceCount(domain.getUuid(), domainCountMap,
-                "json");
+        // Sync for resource count in domain
+        String csResponse = cloudStackResourceCapacity.updateResourceCount(domain.getUuid(), domainCountMap, "json");
         convertEntityService.resourceCount(csResponse);
     }
 
@@ -1765,15 +1827,24 @@ public class SyncServiceImpl implements SyncService {
 
         // 3. Iterate application resource list
         LOGGER.debug("Total rows updated : " + (appResourceList.size()));
-        int i = 0;
         for (ResourceLimitProject resource : appResourceList) {
-            i++;
+
             LOGGER.debug("NEW PROJECT ID " + resource.getProjectId());
-            if (i == 1) {
-                resourceProjectService.deleteResourceLimitByProject(resource.getProjectId());
+            if (csResourceMap.containsKey(resource.getProjectId() + resource.getResourceType().toString())) {
+                if (resource != null) {
+                    ResourceLimitProject resourceData = csResourceMap.get(resource.getProjectId() + resource.getResourceType().toString());
+                    resource.setMax(resourceData.getMax());
+                    resource.setDepartmentId(resourceData.getDepartmentId());
+                    resource.setIsActive(true);
+                    resource.setIsSyncFlag(false);
+                    resourceProjectService.update(resource);
+                }
+                csResourceMap.remove(resource.getProjectId() + resource.getResourceType().toString());
+            } else {
+                resource.setIsActive(false);
+                resource.setIsSyncFlag(false);
+                resourceProjectService.update(resource);
             }
-            resource.setIsSyncFlag(false);
-            csResourceMap.remove(resource.getProjectId());
         }
         // 4. Get the remaining list of cs server hash resource object, then
         // iterate and
@@ -1855,14 +1926,14 @@ public class SyncServiceImpl implements SyncService {
             if (csProjectMap.containsKey(project.getUuid())) {
                 Project csProject = csProjectMap.get(project.getUuid());
                 project.setName(csProject.getName());
-				// check existing department.
-				if (csProject.getDepartmentId() != project.getDepartmentId()) {
-					project.setDepartmentId(csProject.getDepartmentId());
-					// if department updated for project reset project owner.
-					project.setProjectOwnerId(null);
-					project.setProjectOwner(null);
-					project.setUserList(null);
-				}
+                // check existing department.
+                if (csProject.getDepartmentId() != project.getDepartmentId()) {
+                    project.setDepartmentId(csProject.getDepartmentId());
+                    // if department updated for project reset project owner.
+                    project.setProjectOwnerId(null);
+                    project.setProjectOwner(null);
+                    project.setUserList(null);
+                }
                 project.setStatus(csProject.getStatus());
                 project.setDescription(csProject.getDescription());
                 project.setDomainId(csProject.getDomainId());

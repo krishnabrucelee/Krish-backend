@@ -170,7 +170,7 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<VmInstance> getVmListByNetwork(@RequestParam("networkId") Long networkId) throws Exception {
-        return virtualmachineservice.findAllByNetworkAndVmStatus(networkId, VmInstance.Status.EXPUNGING);
+        return virtualmachineservice.findAllByNic(networkId);
     }
 
     /**

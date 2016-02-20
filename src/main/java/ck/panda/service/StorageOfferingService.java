@@ -1,7 +1,6 @@
 package ck.panda.service;
 
 import java.util.List;
-
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.util.domain.CRUDService;
@@ -32,6 +31,7 @@ public interface StorageOfferingService extends CRUDService<StorageOffering> {
     /**
      * To get Tags list of Storage Offer from cloudstack server.
      * @param userId user id
+     * @param userId user id.
      * @param isActive unique id.
      * @return storage tags
      * @throws Exception unhandled errors
@@ -56,5 +56,15 @@ public interface StorageOfferingService extends CRUDService<StorageOffering> {
      * @throws Exception unhandled errors.
      */
     StorageOffering softDelete(StorageOffering storage) throws Exception;
+
+    /**
+     * To get Tags list of Storage Offer by domain.
+     *
+     * @param tags tags.
+     * @param domainId domain id
+     * @return storage tags
+     * @throws Exception unhandled errors
+     */
+    List<StorageOffering> findByDomain(String tags, Long domainId) throws Exception;
 
 }

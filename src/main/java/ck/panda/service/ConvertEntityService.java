@@ -26,9 +26,12 @@ import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
+import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
 import ck.panda.domain.entity.ResourceLimitProject;
+import ck.panda.domain.entity.Snapshot;
+import ck.panda.domain.entity.SnapshotPolicy;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.CloudStackServer;
@@ -171,9 +174,21 @@ public class ConvertEntityService {
     @Autowired
     private CloudStackResourceCapacity cloudStackResourceCapacity;
 
+    /** Snapshot service for reference . */
+    @Autowired
+    private SnapshotService snapshotService;
+
+    /** snapshot Policy Service service for reference . */
+    @Autowired
+    private SnapshotPolicyService snapshotPolicyService;
+
     /** Sync Service reference. */
     @Autowired
     private AsynchronousJobService asyncService;
+
+    /** Update Resource Count Service reference. */
+    @Autowired
+    private UpdateResourceCountService updateResourceCountService;
 
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
@@ -419,6 +434,17 @@ public class ConvertEntityService {
     }
 
     /**
+     * Get snapshot policy object.
+     *
+     * @param id of the snapshot policy.
+     * @return snapshot policy.
+     * @throws Exception if error occurs.
+     */
+    public SnapshotPolicy getSnapshotPolicyById(Long id) throws Exception {
+        return snapshotPolicyService.find(id);
+    }
+
+    /**
      * Get domain object.
      *
      * @param uuid
@@ -442,6 +468,21 @@ public class ConvertEntityService {
      */
     public VmInstance getVmInstanceById(Long id) throws Exception {
         return virtualMachineService.findById(id);
+    }
+
+    /**
+     * Get snapshot object.
+     *
+     * @param id of the snapshot
+     * @return snapshot
+     * @throws Exception if error occurs.
+     */
+    public Snapshot getSnapshotById(Long id) throws Exception {
+        return snapshotService.findById(id);
+    }
+
+    public Volume getVolumeById(Long id) throws Exception {
+        return volumeService.find(id);
     }
 
     /**
@@ -1106,6 +1147,17 @@ public class ConvertEntityService {
     public CloudStackInstanceService getCSInstanceService() {
         return this.cloudStackInstanceService;
     }
+
+    /**
+     * Get Update Resource Count service object.
+     *
+     * @return Update Resource Count service object
+     */
+    public UpdateResourceCountService getUpdateResourceCountService() {
+        // TODO Auto-generated method stub
+        return this.updateResourceCountService;
+    }
+
     /**
      * Update the resource count for current resource type.
      *

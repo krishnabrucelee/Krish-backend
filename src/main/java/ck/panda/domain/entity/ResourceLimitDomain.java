@@ -498,6 +498,7 @@ public class ResourceLimitDomain implements Serializable {
             resource.setTransDomainId((JsonUtil.getStringValue(object, "domainid")));
             resource.setMax(resource.getMax().valueOf(JsonUtil.getIntegerValue(object, "max")));
             resource.setTransResourceType(JsonUtil.getIntegerValue(object, "resourcetype"));
+            resource.setUniqueSeperator(resource.getTransDomainId() + resource.getTransResourceType());
             resource.setIsActive(true);
 
         } catch (Exception e) {

@@ -179,6 +179,9 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
             resource.setProjectId(convertEntityService.getProject(resource.getTransProjectId()).getId());
             resource.setUniqueSeperator(
                     resource.getTransProjectId() + "-" + ResourceType.values()[(resource.getTransResourceType())]);
+            resource.setDomainId(convertEntityService.getDomainId(resource.getTransDomainId()));
+            resource.setDepartmentId(convertEntityService.getProjectById(resource.getProjectId()).getDepartmentId());
+            resource.setUniqueSeperator(resource.getProjectId() + resource.getResourceType().toString());
             resourceList.add(resource);
         }
         return resourceList;
@@ -213,11 +216,18 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-            this.deleteResourceLimitByProject(resourceLimits.get(0).getProjectId());
             for (ResourceLimitProject resource : resourceLimits) {
-                resource.setIsActive(true);
-                updateResourceProject(resource);
-                resourceLimitProjectRepo.save(resource);
+                if (resource.getId() != null) {
+                    ResourceLimitProject resourceData = resourceLimitProjectRepo.findOne(resource.getId());
+                    resourceData.setMax(resource.getMax());
+                    resourceData.setIsActive(true);
+                    updateResourceProject(resourceData);
+                    resourceLimitProjectRepo.save(resourceData);
+                } else {
+                    updateResourceProject(resource);
+                    resource.setIsActive(true);
+                    resourceLimitProjectRepo.save(resource);
+                }
             }
         }
         return (List<ResourceLimitProject>) resourceLimitProjectRepo.findAll();

@@ -18,6 +18,7 @@ import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
+import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.Network.Status;
@@ -27,6 +28,7 @@ import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Zone;
+import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.repository.jpa.NetworkRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackNetworkService;
@@ -36,6 +38,7 @@ import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
+import ck.panda.util.error.exception.CustomGenericException;
 
 /**
  * Service implementation for Network entity.
@@ -73,6 +76,10 @@ public class NetworkServiceImpl implements NetworkService {
     /** Network repository reference. */
     @Autowired
     private NetworkRepository networkRepo;
+
+    /** Quota limit validation reference. */
+    @Autowired
+    QuotaValidationService quotaLimitValidation;
 
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkServiceImpl.class);
@@ -141,6 +148,14 @@ public class NetworkServiceImpl implements NetworkService {
     @Autowired
     private CloudStackResourceCapacity cloudStackResourceCapacity;
 
+    /** Resource Limit Department service reference. */
+    @Autowired
+    private ResourceLimitDomainService resourceLimitDomainService;
+
+    /** Update Resource Count service reference. */
+    @Autowired
+    private UpdateResourceCountService updateResourceCountService;
+
     @Override
     @PreAuthorize("hasPermission(#network.getSyncFlag(), 'ADD_ISOLATED_NETWORK')")
     public Network save(Network network, Long userId) throws Exception {
@@ -148,19 +163,34 @@ public class NetworkServiceImpl implements NetworkService {
             User user = convertEntityService.getOwnerById(userId);
             Errors errors = validator.rejectIfNullEntity(NETWORK, network);
             errors = validator.validateEntity(network, errors);
+            HashMap<String, String> optionalMap = new HashMap<String, String>();
+            optionalMap.put(CloudStackConstants.CS_ZONE_ID,
+                    convertEntityService.getZoneById(network.getZoneId()).getUuid());
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
                 /** Used for setting optional values for resource count. */
                 HashMap<String, String> domainCountMap = new HashMap<String, String>();
-                //check department and project quota validation.
+                // check department and project quota validation.
                 ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
                         .findByDepartmentAndResourceType(network.getDepartmentId(), ResourceType.Instance, true);
-                if (departmentLimit != null) {
+                if (departmentLimit != null && convertEntityService.getDepartmentById(network.getDepartmentId()).getType()
+                        .equals(AccountType.USER)) {
                     if (network.getProjectId() != null) {
-                        syncService.syncResourceLimitProject(convertEntityService.getProjectById(network.getProjectId()));
+                        syncService
+                                .syncResourceLimitProject(convertEntityService.getProjectById(network.getProjectId()));
+                        quotaLimitValidation.QuotaLimitCheckByResourceObject(network, NETWORK,
+                                network.getProjectId(), "Project");
                     }
-                    updateResourceForNetworkCreation(network, errors);
+
+                    if (network.getDepartmentId() != null) {
+                        quotaLimitValidation.QuotaLimitCheckByResourceObject(network, NETWORK,
+                                network.getDepartmentId(), "Department");
+                    }
+                    if (network.getDomainId() != null) {
+                        quotaLimitValidation.QuotaLimitCheckByResourceObject(network, NETWORK,
+                                network.getDomainId(), "Domain");
+                    }
                     try {
                         config.setUserServer();
                         Zone zoneObject = convertEntityService.getZoneById(network.getZoneId());
@@ -175,7 +205,7 @@ public class NetworkServiceImpl implements NetworkService {
                         }
                         JSONObject networkResponse = createNetworkResponseJSON.getJSONObject(CS_NETWORK);
                         network.setUuid(networkResponse.getString(CloudStackConstants.CS_ID));
-                network.setNetworkType(network.getNetworkType().valueOf(networkResponse.getString(CloudStackConstants.CS_TYPE)));
+                        network.setNetworkType(network.getNetworkType().valueOf(networkResponse.getString(CloudStackConstants.CS_TYPE)));
                         network.setDisplayText(networkResponse.getString(CloudStackConstants.CS_DISPLAY_TEXT));
                         network.setcIDR(networkResponse.getString(CloudStackConstants.CS_CIDR));
                         network.setDomainId(domainService
@@ -205,14 +235,27 @@ public class NetworkServiceImpl implements NetworkService {
                         network.setIsActive(true);
                     } catch (ApplicationException e) {
                         LOGGER.error("ERROR AT NETWORK CREATION", e);
-                        asyncService.updateResourceForNetworkDeletion(network);
                         throw new ApplicationException(e.getErrors());
                     }
-                    // Resource count for domain
-                    String csResponse = cloudStackResourceCapacity.updateResourceCount(
-                            convertEntityService.getDomainById(network.getDomainId()).getUuid(), domainCountMap, "json");
-                    convertEntityService.resourceCount(csResponse);
+                    if (!convertEntityService.getDepartmentById(network.getDepartmentId()).getType().equals(AccountType.USER)) {
+                        updateResourceCountService.QuotaUpdateByResourceObject(network, NETWORK, network.getDomainId(),
+                                "Domain", "update");
+                    } else {
+                        if (network.getProjectId() != null) {
+                            updateResourceCountService.QuotaUpdateByResourceObject(network, NETWORK, network.getProjectId(),
+                                    "Project", "update");
+                        }
+                        if (network.getDepartmentId() != null) {
+                            updateResourceCountService.QuotaUpdateByResourceObject(network, NETWORK,
+                                    network.getDepartmentId(), "Department", "update");
+                        }
+                        if (network.getDomainId() != null) {
+                            updateResourceCountService.QuotaUpdateByResourceObject(network, NETWORK, network.getDomainId(),
+                                    "Domain", "update");
+                        }
+                    }
                     return networkRepo.save(network);
+
                 } else {
                     errors.addGlobalError(
                             "Resource limit for department has not been set. Please update department quota");
@@ -225,54 +268,6 @@ public class NetworkServiceImpl implements NetworkService {
             network.setIsActive(true);
             return networkRepo.save(network);
         }
-    }
-
-    private Network updateResourceForNetworkCreation(Network network, Errors errors) throws Exception {
-        HashMap<String, String> resourceMap = convertEntityService.getResourceTypeValue();
-        String r = null;
-        try {
-            for (int i = 0; i < resourceMap.size(); i++) {
-                if (i == 6) {
-                    r = r.valueOf(i);
-                    ResourceLimitDepartment departmentMax = resourceLimitDepartmentService
-                            .findByDepartmentAndResourceType(network.getDepartmentId(),
-                                    ResourceType.valueOf(resourceMap.get(r)), true);
-                    if (departmentMax.getUsedLimit() == null) {
-                        departmentMax.setUsedLimit(0L + 1);
-                    } else if (departmentMax.getMax() != departmentMax.getUsedLimit()) {
-                        departmentMax.setUsedLimit(departmentMax.getUsedLimit() + 1);
-                    } else {
-                        errors.addGlobalError("quota for creating Network" + " ' " + network.getName() + " ' "
-                                + "not exists. Please update department resource quota first to continue creating.");
-                        throw new ApplicationException(errors);
-                    }
-                    departmentMax.setAvailable(departmentMax.getMax() - departmentMax.getUsedLimit());
-                    resourceLimitDepartmentService.update(departmentMax);
-                    if (network.getProjectId() != null) {
-                        ResourceLimitProject projectMax = resourceLimitProjectService.findByProjectAndResourceType(
-                                network.getProjectId(), ResourceLimitProject.ResourceType.valueOf(resourceMap.get(r)),
-                                true);
-                        if (projectMax.getUsedLimit() == null) {
-                            projectMax.setUsedLimit(0L + 1);
-                        } else if (projectMax.getMax() != projectMax.getUsedLimit()) {
-                            projectMax.setUsedLimit(projectMax.getUsedLimit() + 1);
-                        } else {
-                            errors.addGlobalError("quota for creating Network" + " ' " + network.getName() + " ' "
-                                    + "not exists. Please update project resource quota first to continue creating.");
-                            throw new ApplicationException(errors);
-                        }
-                        projectMax.setAvailable(projectMax.getMax() - projectMax.getUsedLimit());
-                        projectMax.setIsSyncFlag(false);
-                        resourceLimitProjectService.update(projectMax);
-                    }
-                }
-            }
-        } catch (ApplicationException e) {
-            asyncService.updateResourceForNetworkDeletion(network);
-            throw new ApplicationException(e.getErrors());
-        }
-        return network;
-
     }
 
     @Override
@@ -356,40 +351,38 @@ public class NetworkServiceImpl implements NetworkService {
         Errors errors = validator.rejectIfNullEntity(NETWORK, network);
         errors = validator.validateEntity(network, errors);
         network.setIsActive(false);
-
-        // TODO //check department and project quota validation.
+        // check department and project quota validation.
         ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
                 .findByDepartmentAndResourceType(network.getDepartmentId(), ResourceType.Instance, true);
-
         if (departmentLimit != null) {
             if (network.getProjectId() != null) {
-                syncService.syncResourceLimitProject(
-                        convertEntityService.getProjectById(network.getProjectId()));
+                syncService.syncResourceLimitProject(convertEntityService.getProjectById(network.getProjectId()));
             }
-
-        if (network.getSyncFlag()) {
-            List<VmInstance> vmResponse = vmService.findAllByNetworkAndVmStatus(network.getId(),
-                    VmInstance.Status.EXPUNGING);
-            List<Nic> nicResponse = nicService.findAllByNetworkAndIsActive(network.getId(),true);
-            if (vmResponse.size() != 0 || nicResponse.size() != 0) {
-                errors.addGlobalError("Network is associated with Vm instances. You cannot delete this network");
-            }
-        }
-        if (errors.hasErrors()) {
-            throw new ApplicationException(errors);
-        } else {
-            network.setIsActive(false);
-            network.setStatus(Network.Status.DESTROY);
             if (network.getSyncFlag()) {
-                config.setUserServer();
-                String networkResponse = csNetwork.deleteNetwork(network.getUuid(), CloudStackConstants.JSON);
-                JSONObject jobId = new JSONObject(networkResponse).getJSONObject(CS_DELETE_NETWORK_RESPONSE);
-                if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
-                    String jobResponse = csNetwork.networkJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
-                    JSONObject jobresult = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+                List<VmInstance> vmResponse = vmService.findAllByNetworkAndVmStatus(network.getId(),
+                        VmInstance.Status.EXPUNGING);
+                List<Nic> nicResponse = nicService.findAllByNetworkAndIsActive(network.getId(), true);
+                if (vmResponse.size() != 0 || nicResponse.size() != 0) {
+                    errors.addGlobalError("Network is associated with Vm instances. You cannot delete this network");
                 }
             }
-        }
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
+            } else {
+                network.setIsActive(false);
+                network.setStatus(Network.Status.DESTROY);
+                if (network.getSyncFlag()) {
+                    config.setUserServer();
+                    String networkResponse = csNetwork.deleteNetwork(network.getUuid(), CloudStackConstants.JSON);
+                    JSONObject jobId = new JSONObject(networkResponse).getJSONObject(CS_DELETE_NETWORK_RESPONSE);
+                    if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
+                        String jobResponse = csNetwork.networkJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
+                                CloudStackConstants.JSON);
+                        JSONObject jobresult = new JSONObject(jobResponse)
+                                .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+                    }
+                }
+            }
         } else {
             errors.addGlobalError("Resource limit for department has not been set. Please update department quota");
             throw new ApplicationException(errors);
@@ -609,51 +602,6 @@ public class NetworkServiceImpl implements NetworkService {
     public Page<Network> findAll(PagingAndSorting pagingAndSorting) throws Exception {
         return networkRepo.findAll(pagingAndSorting.toPageRequest());
     }
-    @Override
-    @PreAuthorize("hasPermission(#network.getSyncFlag(), 'RESTART_NETWORK')")
-    public Network restartNetwork(Network network) throws Exception {
-        Errors errors = validator.rejectIfNullEntity(NETWORK, network);
-        errors = validator.validateEntity(network, errors);
-        if (network.getSyncFlag()) {
-            HashMap<String, String> optionalParams = new HashMap<String, String>();
-            // Mapping optional parameters.
-            CloudStackOptionalUtil.updateOptionalBooleanValue(CS_CLEAN_UP, network.getCleanUpNetwork(), optionalParams);
-            // Configuration value to ACS.
-            config.setUserServer();
-            // Restart network call to ACS
-            String restartResponse = csNetwork.restartNetwork(network.getUuid(), optionalParams,
-                    CloudStackConstants.JSON);
-            JSONObject jobId = new JSONObject(restartResponse).getJSONObject(CS_RESTART_NETWORK_RESPONSE);
-            // Temporarily added thread, will be removed once web socket is
-            // done.
-            Thread.sleep(5000);
-            // Checking job id.
-            if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
-                String jobResponse = csNetwork.networkJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
-                        CloudStackConstants.JSON);
-                JSONObject jobresult = new JSONObject(jobResponse)
-                        .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
-                if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
-                        .equals(CloudStackConstants.PROGRESS_JOB_STATUS)
-                        || (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
-                                .equals(CloudStackConstants.PROGRESS_JOB_STATUS))) {
-                    network.setNetworkRestart(true);
-                } else {
-                    JSONObject jobresponse = jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT);
-                    if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
-                            .equals(CloudStackConstants.ERROR_JOB_STATUS)) {
-                        if (jobresponse.has(CloudStackConstants.CS_ERROR_CODE)) {
-                            errors = this.validateEvent(errors,
-                                    jobresponse.getString(CloudStackConstants.CS_ERROR_TEXT));
-                            throw new ApplicationException(errors);
-                        }
-                    }
-                }
-            }
-        }
-        return networkRepo.save(network);
-    }
-
 
     @Override
     @PreAuthorize("hasPermission(#network.getSyncFlag(), 'RESTART_NETWORK')")
@@ -699,4 +647,66 @@ public class NetworkServiceImpl implements NetworkService {
         }
         return networkRepo.save(network);
     }
-  }
+
+    /**
+     * Check resouce capacity to create new Volume.
+     *
+     * @param volume Volume.
+     * @param optionalMap arguments.
+     * @return error message.
+     * @throws Exception unhandled errors.
+     */
+    public String isResourceAvailable(Network network, HashMap<String, String> optionalMap) throws Exception {
+        Long resourceUsage = 0L, tempCount = 0L;
+        String errMessage = null;
+        // 1. Initiate CS server connection as ROOT admin.
+        config.setServer(1L);
+        // 2. List capacity CS API call.
+        String csResponse = cloudStackResourceCapacity.listCapacity(optionalMap, CloudStackConstants.JSON);
+        JSONObject csCapacity = new JSONObject(csResponse).getJSONObject(CloudStackConstants.CS_CAPACITY_LIST_RESPONSE);
+        if (csCapacity.has(CloudStackConstants.CS_CAPACITY)) {
+            JSONArray capacityArrayJSON = csCapacity.getJSONArray(CloudStackConstants.CS_CAPACITY);
+            for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
+                String resourceType = capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CAPACITY_TYPE);
+                // 2.1 Total capacity in public pool for each resource type.
+                Long tempTotalCapacity = Long
+                        .valueOf(capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CS_CAPACITY_TOTAL));
+                // 2.2 Used capacity in public pool for each resource type.
+                Long tempCapacityUsed = Long
+                        .valueOf(capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CS_CAPACITY_USED));
+                if (GenericConstants.RESOURCE_CAPACITY.containsKey(resourceType)) {
+                    // 3.1 Total available resource in public pool for each
+                    // resource type.
+                    resourceUsage = tempTotalCapacity - tempCapacityUsed;
+                    // 4. Check whether resource is available to create new
+                    // Volume
+                    // with resource type.
+                    switch (resourceType) {
+                    // 4.5 Check public ip address availability.
+                    case GenericConstants.RESOURCE_IP_ADDRESS:
+                        optionalMap.put(CloudStackConstants.CS_ASSOCIATE_NETWORK, network.getUuid());
+                        optionalMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
+                        optionalMap.put(CloudStackConstants.CS_FOR_VM_NETWORK, CloudStackConstants.STATUS_ACTIVE);
+                        config.setServer(1L);
+                        String csIpResponse = cloudStackResourceCapacity.listPublicIpAddress(optionalMap,
+                                CloudStackConstants.JSON);
+                        JSONObject csIpCapacity = new JSONObject(csIpResponse)
+                                .getJSONObject(CloudStackConstants.CS_PUBLIC_IPADDRESS_RESPONSE);
+                        if (csIpCapacity.has(CloudStackConstants.CS_CAPACITY_COUNT)) {
+                            LOGGER.debug("Already IP address acquired ", resourceType);
+                        } else if (resourceUsage < 1) {
+                            errMessage = CloudStackConstants.RESOURCE_CHECK + " public.ip.available "
+                                    + CloudStackConstants.CONTACT_CLOUD_ADMIN;
+                        }
+                        break;
+                    default:
+                        LOGGER.debug("No Resource ", resourceType);
+                    }
+                }
+            }
+        }
+        // 5. If any resource shortage then return error message otherwise
+        // return empty string.
+        return errMessage;
+    }
+}

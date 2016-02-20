@@ -1,11 +1,16 @@
 package ck.panda.domain.repository.jpa;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.Network;
+import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.Snapshot;
 
 /**
@@ -34,5 +39,17 @@ public interface SnapshotRepository extends PagingAndSortingRepository<Snapshot,
      */
     @Query(value = "select snap from Snapshot snap where snap.name=:name AND snap.isActive =:isActive")
     Snapshot findByNameAndIsActive(@Param("name") String name, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find Snapshot by uuid.
+     *
+     * @param uuid snapshot uuid.
+     * @return uuid of the snapshot.
+     */
+    @Query(value = "SELECT snap FROM Snapshot snap WHERE snap.uuid LIKE :uuid ")
+    Snapshot findByUUID(@Param("uuid") String uuid);
+
+    @Query(value = "select snap from Snapshot snap where snap.policyIsActive = :isActive")
+    List<Snapshot> findAllByIsActive(@Param("isActive") Boolean isActive);
 
 }

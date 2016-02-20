@@ -11,6 +11,7 @@ import org.springframework.amqp.core.MessageListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EventTypes;
+import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.PortForwarding;
@@ -19,6 +20,7 @@ import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.domain.entity.Volume;
+import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
 import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.service.AsynchronousJobService;
@@ -28,11 +30,13 @@ import ck.panda.service.NetworkService;
 import ck.panda.service.NicService;
 import ck.panda.service.PortForwardingService;
 import ck.panda.service.SyncService;
+import ck.panda.service.UpdateResourceCountService;
 import ck.panda.service.VirtualMachineService;
 import ck.panda.service.VolumeService;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.CloudStackServer;
+import ck.panda.util.error.exception.CustomGenericException;
 
 /**
  * Resource State listener will listen and update resource status to our App DB when an event directly/from application
@@ -75,9 +79,10 @@ public class ResourceStateListener implements MessageListener {
     /** sync service reference. */
     private SyncService sync;
 
-    /** Sync Service reference. */
-    private AsynchronousJobService asyncService;
+    /** Update Resource Count service reference. */
+    private UpdateResourceCountService updateResourceCountService;
 
+    private int count = 0;
     /**
      * Inject convert entity service.
      *
@@ -96,7 +101,7 @@ public class ResourceStateListener implements MessageListener {
         this.server = convertEntityService.getCSConnecter();
         this.cloudConfigService = convertEntityService.getCSConfig();
         this.cloudStackResourceCapacity = convertEntityService.getCloudStackResourceCapacityService();
-        this.asyncService = convertEntityService.getasyncService();
+        this.updateResourceCountService = convertEntityService.getUpdateResourceCountService();
     }
 
     @Override
@@ -136,7 +141,18 @@ public class ResourceStateListener implements MessageListener {
                     if (vmInstance != null) {
                         if (resourceEvent.getString(EventTypes.RESOURCE_STATE).equals("Error")) {
                             vmInstance.setStatus(Status.valueOf(resourceEvent.getString(EventTypes.RESOURCE_STATE).toUpperCase()));
-                            vmInstance.setEventMessage(resourceEvent.getString(EventTypes.RESOURCE_STATE) + "occured");
+                            vmInstance.setSyncFlag(false);
+                            String instanceResponse = cloudStackInstanceService.queryAsyncJobResult(
+                                    vmInstance.getEventMessage(), CloudStackConstants.JSON);
+                            JSONObject instance = new JSONObject(instanceResponse)
+                                    .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+                            if (instance.getString(CloudStackConstants.CS_JOB_STATUS)
+                                    .equals(GenericConstants.ERROR_JOB_STATUS)) {
+                                vmInstance.setEventMessage(instance.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
+                                        .getString(CloudStackConstants.CS_ERROR_TEXT));
+                            }
+                            virtualmachineservice.update(vmInstance);
+                            throw new Exception(vmInstance.getEventMessage());
                         }
                         LOGGER.info("VM event message", resourceEvent);
                         if (resourceEvent != null) {
@@ -147,6 +163,7 @@ public class ResourceStateListener implements MessageListener {
                         virtualmachineservice.update(vmInstance);
 
                         // Detach the instance from volume
+                        if (!resourceEvent.getString(EventTypes.RESOURCE_STATE).equals(resourceEvent.getString(EventTypes.OLD_RESOURCE_STATE)))  {
                         if (resourceEvent.getString(EventTypes.RESOURCE_STATE).equals("Expunging")) {
                             List<Volume> volumeList = volumeService.findByInstanceForResourceState(vmInstance.getId());
                             for (Volume volume : volumeList) {
@@ -168,18 +185,6 @@ public class ResourceStateListener implements MessageListener {
                                 portForwarding.setSyncFlag(false);
                                 portForwardingService.update(portForwarding);
                             }
-                            asyncService.updateResourceForVmExpunging(vmInstance);
-                            // Resource count for domain
-                            HashMap<String, String> domainCountMap = new HashMap<String, String>();
-                            if (vmInstance.getProjectId() != null) {
-                                domainCountMap.put("projectid",
-                                        convertEntityService.getProjectById(vmInstance.getProjectId()).getUuid());
-                            } else {
-                                domainCountMap.put("account",
-                                        convertEntityService.getDepartmentUsernameById(vmInstance.getDepartmentId()));
-                            }
-                            String csResponse = cloudStackResourceCapacity.updateResourceCount(vmInstance.getDomain().getUuid(), domainCountMap, "json");
-                            convertEntityService.resourceCount(csResponse);
                         }
                         // if attaching network in stopped vm and while starting that vm instance update
                         //the public ip address table in as same as in ACS.
@@ -192,10 +197,31 @@ public class ResourceStateListener implements MessageListener {
                             vmInstance.setHost(null);
                             vmInstance.setHostUuid(null);
                             virtualmachineservice.update(vmInstance);
+                            // Resource count for domain
+                            HashMap<String, String> domainCountMap = new HashMap<String, String>();
+                            String csResponse = cloudStackResourceCapacity.updateResourceCount(vmInstance.getDomain().getUuid(), domainCountMap, "json");
+                            convertEntityService.resourceCount(csResponse);
                         }
                         if (resourceEvent.getString(EventTypes.OLD_RESOURCE_STATE).equals(EventTypes.EVENT_STATUS_DESTROYED) &&
                                 resourceEvent.getString(EventTypes.RESOURCE_STATE).equals(EventTypes.EVENT_STATUS_STOPPED)) {
-                            asyncService.updateResourceForVmRestore(vmInstance);
+                            if (!convertEntityService.getDepartmentById(vmInstance.getDepartmentId()).getType()
+                                    .equals(AccountType.USER)) {
+                                updateResourceCountService.QuotaUpdateByResourceObject(vmInstance, "RestoreInstance", vmInstance.getDomainId(),
+                                        "Domain", "Update");
+                            } else {
+                                if (vmInstance.getProjectId() != null) {
+                                    updateResourceCountService.QuotaUpdateByResourceObject(vmInstance, "RestoreInstance", vmInstance.getProjectId(),
+                                            "Project", "Update");
+                                }
+                                if (vmInstance.getDepartmentId() != null) {
+                                    updateResourceCountService.QuotaUpdateByResourceObject(vmInstance, "RestoreInstance",
+                                            vmInstance.getDepartmentId(), "Department", "Update");
+                                }
+                                if (vmInstance.getDomainId() != null) {
+                                    updateResourceCountService.QuotaUpdateByResourceObject(vmInstance, "RestoreInstance", vmInstance.getDomainId(),
+                                            "Domain", "Update");
+                                }
+                            }
                         }
                         if (resourceEvent.getString(EventTypes.RESOURCE_STATE).equals(EventTypes.EVENT_STATUS_RUNNING)) {
                             // Host update & internal name while create vm as user.
@@ -231,6 +257,7 @@ public class ResourceStateListener implements MessageListener {
                                 }
                             }
                         }
+                      }
                     }
                 }
                 break;

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
@@ -24,9 +25,9 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.util.JsonUtil;
-import ck.panda.util.JsonValidator;
 
 /**
  * Snapshots are a point-in-time capture of virtual machine disks. Memory and CPU states are not captured. If you are
@@ -37,6 +38,7 @@ import ck.panda.util.JsonValidator;
 @Entity
 @Table(name = "snapshots")
 @SuppressWarnings("serial")
+@EntityListeners(AuditingEntityListener.class)
 public class Snapshot implements Serializable {
 
     /** Logger attribute. */
@@ -52,13 +54,22 @@ public class Snapshot implements Serializable {
     @Column(name = "uuid")
     private String uuid;
 
+    /** Cloudstack's volume snapshot policy uuid. */
+    @Column(name = "snapshot_policy_uuid")
+    private String snapshotPolicyUuid;
+
     /** Name of the snapshot. */
     @Column(name = "name")
     private String name;
 
-    /** Name of the account associated with volume. */
-    @Column(name = "account")
-    private String account;
+    /** Department Object for the Network. */
+    @JoinColumn(name = "department_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Department department;
+
+    /** id for the Department. */
+    @Column(name = "department_id")
+    private Long departmentId;
 
     /** Instance domain id. */
     @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
@@ -83,7 +94,6 @@ public class Snapshot implements Serializable {
     @ManyToOne
     private Volume volume;
 
-    // Todo relational mapping to be done with volume.
     /** Id of the volume. */
     @Column(name = "volume_id")
     private Long volumeId;
@@ -92,22 +102,26 @@ public class Snapshot implements Serializable {
     @Column(name = "snapshottype")
     private String snapshotType;
 
-    /** Interval type. */
-    @Column(name = "interval_type")
-    private String intervalType;
-
     /** state of the snapshot. */
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    /** */
+    /** IsActive status of snapshot.*/
     @Column(name = "is_active")
     private Boolean isActive;
+
+    /** IsActive status of snapshot policy.*/
+    @Column(name = "policy_is_active")
+    private Boolean policyIsActive;
 
     /** Set syncFlag. */
     @Transient
     private Boolean syncFlag;
+
+    /** Transient department of the network. */
+    @Transient
+    private String transDepartmentId;
 
     /** Created by user. */
     @CreatedBy
@@ -145,6 +159,10 @@ public class Snapshot implements Serializable {
     @Transient
     private String transVolumeId;
 
+    /** Transient volume name of the snapshot. */
+    @Transient
+    private String transVolumeName;
+
     /** Status for snapshot. */
     public enum Status {
 
@@ -158,8 +176,13 @@ public class Snapshot implements Serializable {
         READY,
 
         /** When snapshot gets destroyed. */
-        DESTROYED
+        DESTROYED,
+
+        /** When snapshot gets Allocated . */
+        ALLOCATED
     }
+
+
 
     /**
      * @return the id
@@ -212,22 +235,43 @@ public class Snapshot implements Serializable {
     }
 
     /**
-     * Set Account.
+     * Get the Department object.
      *
-     * @return the account
+     * @return the department
      */
-    public String getAccount() {
-        return account;
+    public Department getDepartment() {
+        return department;
     }
 
     /**
-     * Set the account.
+     * Set the Department object.
      *
-     * @param account to set
+     * @param department the department to set
      */
-    public void setAccount(String account) {
-        this.account = account;
+
+    public void setDepartment(Department department) {
+        this.department = department;
     }
+
+    /**
+     * Get the department Id.
+     *
+     * @return the departmentId
+     */
+
+    public Long getDepartmentId() {
+        return departmentId;
+    }
+
+    /**
+     * Set the Department Id.
+     *
+     * @param departmentId the departmentId to set
+     */
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
+    }
+
 
     /**
      * Get Domain.
@@ -355,23 +399,6 @@ public class Snapshot implements Serializable {
         this.snapshotType = snapshotType;
     }
 
-    /**
-     * Get intervaltype.
-     *
-     * @return the intervalType
-     */
-    public String getIntervalType() {
-        return intervalType;
-    }
-
-    /**
-     * Set the intervalType.
-     *
-     * @param intervalType to set
-     */
-    public void setIntervalType(String intervalType) {
-        this.intervalType = intervalType;
-    }
 
     /**
      * Get Status.
@@ -426,6 +453,25 @@ public class Snapshot implements Serializable {
     public void setSyncFlag(Boolean syncFlag) {
         this.syncFlag = syncFlag;
     }
+
+    /**
+     * Get the Department Id.
+     *
+     * @return the transDepartmentId
+     */
+    public String getTransDepartmentId() {
+        return transDepartmentId;
+    }
+
+    /**
+     * Set the department Id.
+     *
+     * @param transDepartmentId the transDepartmentId to set
+     */
+    public void setTransDepartmentId(String transDepartmentId) {
+        this.transDepartmentId = transDepartmentId;
+    }
+
 
     /**
      * Get the created user id.
@@ -549,6 +595,60 @@ public class Snapshot implements Serializable {
         this.transVolumeId = transVolumeId;
     }
 
+
+    /**
+     * Get the the transVolumeName .
+     *
+     * @return the transVolumeName
+     */
+    public String getTransVolumeName() {
+        return transVolumeName;
+    }
+
+    /**
+     * Set the transVolumeName .
+     *
+     * @param transVolumeName to set
+     */
+    public void setTransVolumeName(String transVolumeName) {
+        this.transVolumeName = transVolumeName;
+    }
+
+
+
+
+    /**
+     * Get snapshot policy uuid.
+     *
+     * @return the snapshotPolicyUuid
+     */
+    public String getSnapshotPolicyUuid() {
+        return snapshotPolicyUuid;
+    }
+
+    /**
+     * Set snapshot policy uuid.
+     *
+     * @param snapshotPolicyUuid to set
+     */
+    public void setSnapshotPolicyUuid(String snapshotPolicyUuid) {
+        this.snapshotPolicyUuid = snapshotPolicyUuid;
+    }
+
+    /**
+     * @return the policyIsActive
+     */
+    public Boolean getPolicyIsActive() {
+        return policyIsActive;
+    }
+
+    /**
+     * @param policyIsActive the policyIsActive to set
+     */
+    public void setPolicyIsActive(Boolean policyIsActive) {
+        this.policyIsActive = policyIsActive;
+    }
+
     /**
      * Convert JSONObject to domain entity.
      *
@@ -569,9 +669,7 @@ public class Snapshot implements Serializable {
             snapshot.setTransVolumeId(JsonUtil.getStringValue(jsonObject, "volumeid"));
             snapshot.setSnapshotType(JsonUtil.getStringValue(jsonObject, "snapshottype"));
             snapshot.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state").toUpperCase()));
-            snapshot.account = JsonValidator.jsonStringValidation(jsonObject, "account");
-            snapshot.intervalType = JsonValidator.jsonStringValidation(jsonObject, "intervaltype");
-
+            snapshot.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, "account"));
         } catch (Exception ex) {
             LOGGER.error("Snapshot-convert", ex);
         }

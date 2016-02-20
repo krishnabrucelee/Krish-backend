@@ -325,9 +325,18 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      * @param isActive true/false
      * @return volume detached Count
      */
-	@Query(value = "SELECT volume FROM Volume volume WHERE (volume.project in :project OR volume.departmentId = :departmentId) AND volume.volumeType in :volumeType AND volume.isActive = :isActive AND volume.vmInstanceId IS NULL")
-	List<Volume> getDetachedCountByProject(@Param("project") List<Project> project,
-			@Param("departmentId") Long departmentId, @Param("volumeType") List<VolumeType> volumeType,
-			@Param("isActive") Boolean isActive);
+    @Query(value = "SELECT volume FROM Volume volume WHERE (volume.project in :project OR volume.departmentId = :departmentId) AND volume.volumeType in :volumeType AND volume.isActive = :isActive AND volume.vmInstanceId IS NULL")
+    List<Volume> getDetachedCountByProject(@Param("project") List<Project> project,
+            @Param("departmentId") Long departmentId, @Param("volumeType") List<VolumeType> volumeType,
+            @Param("isActive") Boolean isActive);
+
+    /**
+     * Find all volumes by isActive.
+     *
+     * @param isActive status of the volume.
+     * @return volume.
+     */
+    @Query(value = "SELECT volume FROM Volume volume WHERE volume.isActive = :isActive")
+    List<Volume> findAllByIsActive(@Param("isActive") Boolean isActive);
 
 }

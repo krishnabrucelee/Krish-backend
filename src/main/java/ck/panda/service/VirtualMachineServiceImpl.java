@@ -7,17 +7,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EventTypes;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
-import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
@@ -86,6 +86,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Autowired
     private ConfigUtil config;
 
+    /** Quota limit validation reference. */
+    @Autowired
+    QuotaValidationService quotaLimitValidation;
+
     /** CloudStack connector reference for instance. */
     @Autowired
     private CloudStackInstanceService cloudStackInstanceService;
@@ -114,17 +118,13 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Autowired
     private ResourceLimitDepartmentService resourceLimitDepartmentService;
 
-    /** Resource Limit Project service reference. */
-    @Autowired
-    private ResourceLimitProjectService resourceLimitProjectService;
-
     /** Sync Service reference. */
     @Autowired
     private SyncService syncService;
 
-    /** Sync Service reference. */
+    /** Nic service reference. */
     @Autowired
-    private AsynchronousJobService asyncService;
+    private NicService nicService;
 
     @Override
     @PreAuthorize("hasPermission(#vmInstance.getSyncFlag(), 'CREATE_VM')")
@@ -143,88 +143,104 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 optionalMap.put(CloudStackConstants.CS_ZONE_ID,
                         convertEntityService.getZoneById(vmInstance.getZoneId()).getUuid());
 
-   //TODO       //check department and project quota validation.
-                ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService.findByDepartmentAndResourceType
-                        (vmInstance.getDepartmentId(), ResourceType.Instance, true);
-
-                if(departmentLimit != null) {
+                // check department and project quota validation.
+                ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
+                        .findByDepartmentAndResourceType(vmInstance.getDepartmentId(), ResourceType.valueOf("Instance"),
+                                true);
+                if (departmentLimit != null && convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
+                        .getType().equals(AccountType.USER)) {
                     if (vmInstance.getProjectId() != null) {
-                        syncService
-                                .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
+                        syncService.syncResourceLimitProject(
+                                convertEntityService.getProjectById(vmInstance.getProjectId()));
+                        quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
+                                vmInstance.getProjectId(), "Project");
                     }
-
-                // 3. Check the resource availability to deploy new vm.
-                String isAvailable = isResourceAvailable(vmInstance, optionalMap);
-                if (isAvailable != null) {
-                    // 3.1 throws error message about resource shortage.
-                    throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, isAvailable);
-                } else {
-                    // 4. set optionalMap arguments for deploy vm API call.
-                    optionalMap.clear();
-                    vmInstance.setDisplayName(vmInstance.getName());
-                    optionalMap.put(CloudStackConstants.CS_NAME, vmInstance.getName());
-                    vmInstance.setNetworkId(convertEntityService.getNetworkByUuid(vmInstance.getNetworkUuid()));
-                    optionalMap.put(CloudStackConstants.CS_NETWORK_IDS, vmInstance.getNetworkUuid());
-                    optionalMap.put(CloudStackConstants.CS_DISPLAY_VM, CloudStackConstants.CS_ACTIVE_VM);
-                    optionalMap.put(CloudStackConstants.CS_KEYBOARD_TYPE, CloudStackConstants.KEYBOARD_VALUE);
-                    optionalMap.put(CloudStackConstants.CS_NAME, vmInstance.getName());
-                    if (vmInstance.getHypervisorId() != null) {
-                        optionalMap.put(CloudStackConstants.CS_HYPERVISOR_TYPE,
-                                hypervisorService.find(vmInstance.getHypervisorId()).getName());
+                    if (vmInstance.getDepartmentId() != null) {
+                        quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
+                                vmInstance.getDepartmentId(), "Department");
                     }
-                    if (vmInstance.getProjectId() != null) {
-                        optionalMap.put(CloudStackConstants.CS_PROJECT_ID,
-                                convertEntityService.getProjectById(vmInstance.getProjectId()).getUuid());
+                    if (vmInstance.getDomainId() != null) {
+                        quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
+                                vmInstance.getDomainId(), "Domain");
+                    }
+                    // 3. Check the resource availability to deploy new vm.
+                    String isAvailable = isResourceAvailable(vmInstance, optionalMap);
+                    if (isAvailable != null) {
+                        // 3.1 throws error message about resource shortage.
+                        throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, isAvailable);
                     } else {
-                        optionalMap.put(CloudStackConstants.CS_ACCOUNT,
-                                convertEntityService.getDepartmentById(vmInstance.getDepartmentId()).getUserName());
-                        optionalMap.put(CloudStackConstants.CS_DOMAIN_ID,
-                                convertEntityService.getDomainById(vmInstance.getDomainId()).getUuid());
-                    }
-                    if (vmInstance.getStorageOfferingId() != null) {
-                        this.customStorageForInstance(vmInstance);
-                    }
-                    if (vmInstance.getComputeOfferingId() != null) {
-                        this.customComputeForInstance(vmInstance, optionalMap);
-                    }
-                    config.setUserServer();
-                    // 5. Get response from CS for new deploy vm API call.
-                    String csResponse = cloudStackInstanceService.deployVirtualMachine(
-                            convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getUuid(),
-                            convertEntityService.getTemplateById(vmInstance.getTemplateId()).getUuid(),
-                            convertEntityService.getZoneById(vmInstance.getZoneId()).getUuid(),
-                            CloudStackConstants.JSON, optionalMap);
-                    JSONObject csInstance = new JSONObject(csResponse).getJSONObject(CloudStackConstants.CS_VM_DEPLOY);
-                    if (csInstance.has(CloudStackConstants.CS_ERROR_CODE)) {
-                        errors = this.validateEvent(errors, csInstance.getString(CloudStackConstants.CS_ERROR_TEXT));
-                        throw new ApplicationException(errors);
-                    } else {
-                        LOGGER.debug("VM UUID", csInstance.getString(CloudStackConstants.CS_ID));
-                        vmInstance.setUuid(csInstance.getString(CloudStackConstants.CS_ID));
-                        config.setUserServer();
-                        String instanceResponse = cloudStackInstanceService.queryAsyncJobResult(
-                                csInstance.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
-                        JSONObject instance = new JSONObject(instanceResponse)
-                                .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
-                        if (instance.getString(CloudStackConstants.CS_JOB_STATUS)
-                                .equals(GenericConstants.ERROR_JOB_STATUS)) {
-                            vmInstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR.toUpperCase()));
-                            vmInstance.setEventMessage(csInstance.getJSONObject(CloudStackConstants.CS_ERROR_TEXT)
-                                    .getString(CloudStackConstants.CS_ERROR_TEXT));
+                        // 4. set optionalMap arguments for deploy vm API call.
+                        optionalMap.clear();
+                        vmInstance.setDisplayName(vmInstance.getName());
+                        optionalMap.put(CloudStackConstants.CS_NAME, vmInstance.getName());
+                        vmInstance.setNetworkId(convertEntityService.getNetworkByUuid(vmInstance.getNetworkUuid()));
+                        optionalMap.put(CloudStackConstants.CS_NETWORK_IDS, vmInstance.getNetworkUuid());
+                        optionalMap.put(CloudStackConstants.CS_DISPLAY_VM, CloudStackConstants.CS_ACTIVE_VM);
+                        optionalMap.put(CloudStackConstants.CS_KEYBOARD_TYPE, CloudStackConstants.KEYBOARD_VALUE);
+                        optionalMap.put(CloudStackConstants.CS_NAME, vmInstance.getName());
+                        if (vmInstance.getHypervisorId() != null) {
+                            optionalMap.put(CloudStackConstants.CS_HYPERVISOR_TYPE,
+                                    hypervisorService.find(vmInstance.getHypervisorId()).getName());
+                        }
+                        if (vmInstance.getProjectId() != null) {
+                            optionalMap.put(CloudStackConstants.CS_PROJECT_ID,
+                                    convertEntityService.getProjectById(vmInstance.getProjectId()).getUuid());
                         } else {
-                            vmInstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_CREATE.toUpperCase()));
-                            vmInstance.setEventMessage("Started creating VM on Server");
+                            optionalMap.put(CloudStackConstants.CS_ACCOUNT,
+                                    convertEntityService.getDepartmentById(vmInstance.getDepartmentId()).getUserName());
+                            optionalMap.put(CloudStackConstants.CS_DOMAIN_ID,
+                                    convertEntityService.getDomainById(vmInstance.getDomainId()).getUuid());
+                        }
+                        if (vmInstance.getStorageOfferingId() != null) {
+                            this.customStorageForInstance(vmInstance);
+                        }
+                        if (vmInstance.getComputeOfferingId() != null) {
+                            this.customComputeForInstance(vmInstance, optionalMap);
+                        }
+                        config.setUserServer();
+                        // 5. Get response from CS for new deploy vm API call.
+                        String csResponse = cloudStackInstanceService.deployVirtualMachine(
+                                convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getUuid(),
+                                convertEntityService.getTemplateById(vmInstance.getTemplateId()).getUuid(),
+                                convertEntityService.getZoneById(vmInstance.getZoneId()).getUuid(),
+                                CloudStackConstants.JSON, optionalMap);
+                        JSONObject csInstance = new JSONObject(csResponse)
+                                .getJSONObject(CloudStackConstants.CS_VM_DEPLOY);
+                        if (csInstance.has(CloudStackConstants.CS_ERROR_CODE)) {
+                            errors = this.validateEvent(errors,
+                                    csInstance.getString(CloudStackConstants.CS_ERROR_TEXT));
+                            throw new ApplicationException(errors);
+                        } else {
+                            LOGGER.debug("VM UUID", csInstance.getString(CloudStackConstants.CS_ID));
+                            vmInstance.setUuid(csInstance.getString(CloudStackConstants.CS_ID));
+                            config.setUserServer();
+                            String instanceResponse = cloudStackInstanceService.queryAsyncJobResult(
+                                    csInstance.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
+                            JSONObject instance = new JSONObject(instanceResponse)
+                                    .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+                            vmInstance.setEventMessage(csInstance.getString(CloudStackConstants.CS_JOB_ID));
+                            if (instance.getString(CloudStackConstants.CS_JOB_STATUS)
+                                    .equals(GenericConstants.ERROR_JOB_STATUS)) {
+                                vmInstance.setStatus(Status.valueOf(EventTypes.EVENT_ERROR.toUpperCase()));
+                                vmInstance.setEventMessage(csInstance.getString(CloudStackConstants.CS_JOB_ID));
+                                virtualmachinerepository.save(convertEncryptPassword(vmInstance));
+                                // 3.1 throws error message about resource
+                                // shortage.
+                                throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
+                                        instance.getString(CloudStackConstants.CS_ERROR_TEXT));
+
+                            } else {
+                                vmInstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_CREATE.toUpperCase()));
+                            }
                         }
                     }
+                    // 5.4 Save entity with CS response.
+                    return virtualmachinerepository.save(convertEncryptPassword(vmInstance));
+                } else {
+                    errors.addGlobalError(
+                            "Resource limit for department has not been set. Please update department quota");
+                    throw new ApplicationException(errors);
                 }
-                // 5.4 Save entity with CS response.
-                return virtualmachinerepository.save(convertEncryptPassword(vmInstance));
-         //TODO       //decrease resource limit for department and project.
-            }
-            else {
-                 errors.addGlobalError("quota.for.department.has.been.not.set");
-                 throw new ApplicationException(errors);
-            }
             }
 
         } else {
@@ -338,15 +354,6 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             break;
         // Re-install a virtual machine.
         case EventTypes.EVENT_VM_RESTORE:
-            // TODO //check department and project quota validation.
-            ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
-                    .findByDepartmentAndResourceType(vmInstance.getDepartmentId(), ResourceType.Instance, true);
-
-            if (departmentLimit != null) {
-                if (vmInstance.getProjectId() != null) {
-                    syncService
-                            .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
-                }
                 config.setUserServer();
                 instanceResponse = cloudStackInstanceService.restoreVirtualMachine(vmInstance.getUuid(),
                         CloudStackConstants.JSON);
@@ -357,10 +364,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     vmInstance.setEventMessage("Re-installed");
                     vmInstance.setStatus(Status.STOPPING);
                 }
-            } else {
-                errors.addGlobalError("Resource limit for department has not been set. Please update department quota");
-                throw new ApplicationException(errors);
-            }
+
             break;
         // Destroys a virtual machine.
         case EventTypes.EVENT_VM_DESTROY:
@@ -368,12 +372,12 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             ResourceLimitDepartment departmentsLimit = resourceLimitDepartmentService
                     .findByDepartmentAndResourceType(vmInstance.getDepartmentId(), ResourceType.Instance, true);
 
-            if (departmentsLimit != null) {
+            if (departmentsLimit != null && convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
+                    .getType().equals(AccountType.USER)) {
                 if (vmInstance.getProjectId() != null) {
                     syncService
                             .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
                 }
-                asyncService.updateResourceForVmDestroy(vmInstance);
                 config.setUserServer();
                 instanceResponse = cloudStackInstanceService.destroyVirtualMachine(vmInstance.getUuid(),
                         CloudStackConstants.JSON, optionalMap);
@@ -394,7 +398,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             ResourceLimitDepartment departmentLimits = resourceLimitDepartmentService
                     .findByDepartmentAndResourceType(vmInstance.getDepartmentId(), ResourceType.Instance, true);
 
-            if (departmentLimits != null) {
+            if (departmentLimits != null && convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
+                    .getType().equals(AccountType.USER)) {
                 if (vmInstance.getProjectId() != null) {
                     syncService
                             .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
@@ -416,21 +421,52 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             break;
         // Creates a virtual machine.
         case EventTypes.EVENT_VM_CREATE:
-            config.setUserServer();
-            instanceResponse = cloudStackInstanceService.recoverVirtualMachine(vmInstance.getUuid(),
-                    CloudStackConstants.JSON);
-            instance = new JSONObject(instanceResponse).getJSONObject(CloudStackConstants.CS_VM_RECOVER_RESPONSE);
-            if (instance.has(CloudStackConstants.CS_ERROR_CODE)) {
-                vmInstance.setEventMessage(instance.getString(CloudStackConstants.CS_ERROR_TEXT));
-                virtualmachinerepository.save(convertEncryptPassword(vmInstance));
-                errors = validator.sendGlobalError(instance.getString(CloudStackConstants.CS_ERROR_TEXT));
-                if (errors.hasErrors()) {
-                    throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
-                            instance.getString(CloudStackConstants.CS_ERROR_TEXT));
+            // check department and project quota validation.
+            ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService.findByDepartmentAndResourceType(
+                    vmInstance.getDepartmentId(), ResourceType.valueOf("Instance"), true);
+            if (departmentLimit != null && convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
+                    .getType().equals(AccountType.USER)) {
+                if (vmInstance.getProjectId() != null) {
+                    syncService
+                            .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
+                    quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "RestoreInstance",
+                            vmInstance.getProjectId(), "Project");
+                }
+                if (vmInstance.getDepartmentId() != null) {
+                    quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "RestoreInstance",
+                            vmInstance.getDepartmentId(), "Department");
+                }
+                if (vmInstance.getDomainId() != null) {
+                    quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "RestoreInstance",
+                            vmInstance.getDomainId(), "Domain");
+                }
+                // 3. Check the resource availability to deploy new vm.
+                String isAvailable = isResourceAvailable(vmInstance, optionalMap);
+                if (isAvailable != null) {
+                    // 3.1 throws error message about resource shortage.
+                    throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, isAvailable);
+                } else {
+                    config.setUserServer();
+                    instanceResponse = cloudStackInstanceService.recoverVirtualMachine(vmInstance.getUuid(),
+                            CloudStackConstants.JSON);
+                    instance = new JSONObject(instanceResponse)
+                            .getJSONObject(CloudStackConstants.CS_VM_RECOVER_RESPONSE);
+                    if (instance.has(CloudStackConstants.CS_ERROR_CODE)) {
+                        vmInstance.setEventMessage(instance.getString(CloudStackConstants.CS_ERROR_TEXT));
+                        virtualmachinerepository.save(convertEncryptPassword(vmInstance));
+                        errors = validator.sendGlobalError(instance.getString(CloudStackConstants.CS_ERROR_TEXT));
+                        if (errors.hasErrors()) {
+                            throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
+                                    instance.getString(CloudStackConstants.CS_ERROR_TEXT));
+                        }
+                    } else {
+                        vmInstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_CREATE.toUpperCase()));
+                        vmInstance.setEventMessage("VM Recover");
+                    }
                 }
             } else {
-                vmInstance.setStatus(Status.valueOf(EventTypes.EVENT_STATUS_CREATE.toUpperCase()));
-                vmInstance.setEventMessage("VM Recover");
+                errors.addGlobalError("Resource limit for department has not been set. Please update department quota");
+                throw new ApplicationException(errors);
             }
             break;
         default:
@@ -927,21 +963,25 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                             errMessage = CloudStackConstants.RESOURCE_CHECK + " cpu.available " + CloudStackConstants.CONTACT_CLOUD_ADMIN;
                         }
                         break;
-                    // 4.3 Check secondary storage availability.
-                    case GenericConstants.RESOURCE_SECONDARY_STORAGE:
-                        if (resourceUsage < convertEntityService.getStorageOfferById(vm.getStorageOfferingId()).getDiskSize()) {
-                            errMessage = CloudStackConstants.RESOURCE_CHECK + " secondary.storage.available " + CloudStackConstants.CONTACT_CLOUD_ADMIN;
-                        }
-                        break;
                     // 4.4 Check primary storage availability.
                     case GenericConstants.RESOURCE_PRIMARY_STORAGE:
-                        if (resourceUsage < convertEntityService.getTemplateById(vm.getTemplateId()).getSize()) {
-                            errMessage = CloudStackConstants.RESOURCE_CHECK + " primary.storage.available " + CloudStackConstants.CONTACT_CLOUD_ADMIN;
+                        if(vm.getStorageOfferingId() != null) {
+                            if(convertEntityService.getStorageOfferById(vm.getStorageOfferingId()).getIsCustomDisk()) {
+                                if(resourceUsage < vm.getDiskSize() + convertEntityService.getTemplateById(vm.getTemplateId()).getSize()) {
+                                    errMessage = CloudStackConstants.RESOURCE_CHECK + " primary.storage.available " + CloudStackConstants.CONTACT_CLOUD_ADMIN;
+                                }
+                            } else if (resourceUsage < convertEntityService.getStorageOfferById(vm.getStorageOfferingId()).getDiskSize() + convertEntityService.getTemplateById(vm.getTemplateId()).getSize()) {
+                                errMessage = CloudStackConstants.RESOURCE_CHECK + " primary.storage.available " + CloudStackConstants.CONTACT_CLOUD_ADMIN;
+                            }
+                        } else {
+                            if (resourceUsage < convertEntityService.getTemplateById(vm.getTemplateId()).getSize()) {
+                                errMessage = CloudStackConstants.RESOURCE_CHECK + " primary.storage.available " + CloudStackConstants.CONTACT_CLOUD_ADMIN;
+                            }
                         }
                         break;
                     // 4.5 Check public ip address availability.
                     case GenericConstants.RESOURCE_IP_ADDRESS:
-                        optionalMap.put(CloudStackConstants.CS_ASSOCIATE_NETWORK, vm.getNetworkUuid());
+                        optionalMap.put(CloudStackConstants.CS_ASSOCIATE_NETWORK, convertEntityService.getNetworkById(vm.getNetworkId()).getUuid());
                         optionalMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
                         optionalMap.put(CloudStackConstants.CS_FOR_VM_NETWORK, CloudStackConstants.STATUS_ACTIVE);
                         config.setServer(1L);
@@ -1227,5 +1267,16 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             vmInstance.setVncPassword(decryptPassword);
         }
         return vmInstance;
+    }
+
+    @Override
+    public List<VmInstance> findAllByNic(Long networkId) throws Exception {
+        // TODO Auto-generated method stub
+        List<VmInstance> vmList = new ArrayList<VmInstance>();
+        List<Nic> nicList = nicService.findAllByNetworkAndIsActive(networkId, true);
+        for (Nic nic : nicList) {
+            vmList.add(nic.getVmInstance());
+        }
+        return vmList;
     }
 }

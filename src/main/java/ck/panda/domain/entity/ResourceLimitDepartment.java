@@ -135,7 +135,6 @@ public class ResourceLimitDepartment implements Serializable {
 
     /** Enum type for Resource Limit. */
     public enum ResourceType {
-
         /** Number of instances a user can create. */
         Instance,
         /** Number of public IP addresses a user can own. */
