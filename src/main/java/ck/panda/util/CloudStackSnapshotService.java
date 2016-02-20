@@ -19,7 +19,7 @@ public class CloudStackSnapshotService {
 
     /**
      * sets api key , secret key and url.
-     * 
+     *
      * @param server sets these values.
      */
     public void setServer(CloudStackServer server) {
@@ -92,17 +92,14 @@ public class CloudStackSnapshotService {
      * @throws Exception unhandled errors.
      */
     public String createSnapshotPolicy(String snapshotPolicyIntervalType, String snapshotPolicyMaxSnaps,
-            String snapshotPolicySchedule, String snapshotPolicyTimeZone, String diskvolumeId) throws Exception {
-
-        LinkedList<NameValuePair> arguments = server.getDefaultQuery("createSnapshotPolicy", null);
+             String snapshotPolicyTimeZone, String diskvolumeId, String response, HashMap<String, String> optional) throws Exception {
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("createSnapshotPolicy", optional);
         arguments.add(new NameValuePair("intervaltype", snapshotPolicyIntervalType));
         arguments.add(new NameValuePair("maxsnaps", snapshotPolicyMaxSnaps));
-        arguments.add(new NameValuePair("schedule", snapshotPolicySchedule));
         arguments.add(new NameValuePair("timezone", snapshotPolicyTimeZone));
         arguments.add(new NameValuePair("volumeid", diskvolumeId));
-
+        arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
-
         return responseDocument;
     }
 
@@ -113,9 +110,11 @@ public class CloudStackSnapshotService {
      * @return response Document.
      * @throws Exception unhandled errors.
      */
-    public String deleteSnapshotPolicies(HashMap<String, String> optional) throws Exception {
+    public String deleteSnapshotPolicies(String snapshotPolicyUuid, String response) throws Exception {
 
-        LinkedList<NameValuePair> arguments = server.getDefaultQuery("deleteSnapshotPolicies", optional);
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("deleteSnapshotPolicies", null);
+        arguments.add(new NameValuePair("id", snapshotPolicyUuid));
+        arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
         return responseDocument;
     }
@@ -123,16 +122,15 @@ public class CloudStackSnapshotService {
     /**
      * Lists snapshot policies.
      *
-     * @param diskvolumeId the ID of the disk volume
      * @param optional values from cloud Stack.
+     * @param response json or xml.
      * @return response Document.
      * @throws Exception unhandled errors.
      */
-    public String listSnapshotPolicies(String diskvolumeId, HashMap<String, String> optional) throws Exception {
+    public String listSnapshotPolicies(String response,HashMap<String, String> optional) throws Exception {
 
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("listSnapshotPolicies", optional);
-
-        arguments.add(new NameValuePair("volumeid", diskvolumeId));
+        arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
         return responseDocument;
     }
@@ -219,6 +217,22 @@ public class CloudStackSnapshotService {
         arguments.add(new NameValuePair("response", "json"));
         String responseDocument = server.request(arguments);
 
+        return responseDocument;
+    }
+
+    /**
+     * Revert VM from a vmsnapshot.
+     *
+     * @param vmsnapshotid for vmsnapshot.
+     * @return response.
+     * @throws Exception unhandled errors.
+     */
+    public String revertSnapshot(String snapshotid, String response) throws Exception {
+
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("revertSnapshot", null);
+        arguments.add(new NameValuePair("id", snapshotid));
+        arguments.add(new NameValuePair("response", "json"));
+        String responseDocument = server.request(arguments);
         return responseDocument;
     }
 

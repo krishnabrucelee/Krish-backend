@@ -17,6 +17,7 @@ import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Project;
+import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
@@ -56,7 +57,7 @@ public class VolumeServiceImpl implements VolumeService {
     public static final String CS_CHECKSUM = "checksum";
 
     /** Constant for Cloud stack volume list response. */
-    public static final String CS_LIST_VOLUME_RESPONSE =  "listvolumesresponse";
+    public static final String CS_LIST_VOLUME_RESPONSE = "listvolumesresponse";
 
     /** Constant for Cloud stack volume create response. */
     public static final String CS_CREATE_VOLUME_RESPONSE = "createvolumeresponse";
@@ -74,7 +75,7 @@ public class VolumeServiceImpl implements VolumeService {
     public static final String CS_RESIZE_VOLUME_RESPONSE = "resizevolumeresponse";
 
     /** Constant for Cloud stack volume conversation in GiB. */
-    public static final Integer CS_CONVERTION_GIB = 1024*1024*1024;
+    public static final Integer CS_CONVERTION_GIB = 1024 * 1024 * 1024;
 
     /** Validator attribute. */
     @Autowired
@@ -236,7 +237,7 @@ public class VolumeServiceImpl implements VolumeService {
 
     @Override
     public Volume find(Long id) throws Exception {
-        return null;
+        return volumeRepo.findOne(id);
     }
 
     @Override
@@ -258,11 +259,14 @@ public class VolumeServiceImpl implements VolumeService {
                 JSONObject responseObject = new JSONObject(response).getJSONObject(CS_LIST_VOLUME_RESPONSE);
                 if (responseObject.has(CS_VOLUME)) {
                     volumeListJSON = responseObject.getJSONArray(CS_VOLUME);
-                    if (JsonValidator.jsonStringValidation(volumeListJSON.getJSONObject(0), CloudStackConstants.CS_STATE)
+                    if (JsonValidator
+                            .jsonStringValidation(volumeListJSON.getJSONObject(0), CloudStackConstants.CS_STATE)
                             .equals(CloudStackConstants.CS_UPLOADED)) {
-                        activeVolume.get(k).setDiskSize(volumeListJSON.getJSONObject(0).getLong(CloudStackConstants.CS_SIZE));
+                        activeVolume.get(k)
+                                .setDiskSize(volumeListJSON.getJSONObject(0).getLong(CloudStackConstants.CS_SIZE));
                         activeVolume.get(k).setDiskSizeFlag(true);
-                    } else if (JsonValidator.jsonStringValidation(volumeListJSON.getJSONObject(0), CloudStackConstants.CS_STATE)
+                    } else if (JsonValidator
+                            .jsonStringValidation(volumeListJSON.getJSONObject(0), CloudStackConstants.CS_STATE)
                             .equals(CloudStackConstants.CS_UPLOAD_ERROR)) {
                         activeVolume.get(k).setDiskSizeFlag(true);
                     }
@@ -332,19 +336,24 @@ public class VolumeServiceImpl implements VolumeService {
     /**
      * To set optional values by validating null and empty parameters.
      *
-     * @param volume optional storage offering values
-     * @param userId user details
+     * @param volume
+     *            optional storage offering values
+     * @param userId
+     *            user details
      * @return optional values
-     * @throws Exception error at option values
+     * @throws Exception
+     *             error at option values
      */
     public HashMap<String, String> optionalValuesToMap(Volume volume, Long userId) throws Exception {
         HashMap<String, String> volumeMap = new HashMap<String, String>();
-        CloudStackOptionalUtil.updateOptionalLongValue(CloudStackConstants.CS_SIZE,
-                volume.getDiskSize(), volumeMap);
-        CloudStackOptionalUtil.updateOptionalLongValue(CloudStackConstants.CS_MIN_IOPS,
-                volume.getDiskMinIops(), volumeMap);
-        CloudStackOptionalUtil.updateOptionalLongValue(CloudStackConstants.CS_MAX_IOPS,
-                volume.getDiskMaxIops(), volumeMap);
+        CloudStackOptionalUtil.updateOptionalLongValue(CloudStackConstants.CS_SIZE, volume.getDiskSize(), volumeMap);
+        CloudStackOptionalUtil.updateOptionalLongValue(CloudStackConstants.CS_MIN_IOPS, volume.getDiskMinIops(),
+                volumeMap);
+        CloudStackOptionalUtil.updateOptionalLongValue(CloudStackConstants.CS_MAX_IOPS, volume.getDiskMaxIops(),
+                volumeMap);
+        CloudStackOptionalUtil.updateOptionalStringValue("diskofferingid",
+                convertEntityService.getStorageOfferingById(volume.getStorageOfferingId()), volumeMap);
+
         if (volume.getProjectId() != null) {
             volumeMap.put(CloudStackConstants.CS_PROJECT_ID,
                     convertEntityService.getProjectUuidById(volume.getProjectId()));
@@ -399,7 +408,8 @@ public class VolumeServiceImpl implements VolumeService {
                         volume.setProjectId(convertEntityService.getProjectId(volume.getTransProjectId()));
                         volume.setDepartmentId(projectService.find(volume.getProjectId()).getDepartmentId());
                     } else {
-                        // departmentRepository.findByUuidAndIsActive(volume.getTransDepartmentId(), true);
+                        // departmentRepository.findByUuidAndIsActive(volume.getTransDepartmentId(),
+                        // true);
                         Domain domain = domainService.find(volume.getDomainId());
                         volume.setDepartmentId(convertEntityService
                                 .getDepartmentByUsernameAndDomains(volume.getTransDepartmentId(), domain));
@@ -414,16 +424,20 @@ public class VolumeServiceImpl implements VolumeService {
     /**
      * Cloud stack create Volume.
      *
-     * @param volume Volume
-     * @param userId user details
-     * @param errors global error and field errors
-     * @throws Exception error for creating volume
+     * @param volume
+     *            Volume
+     * @param userId
+     *            user details
+     * @param errors
+     *            global error and field errors
+     * @throws Exception
+     *             error for creating volume
      * @return Volumes
      */
     private Volume createVolume(Volume volume, Long userId, Errors errors) throws Exception {
         config.setUserServer();
         String volumeS = csVolumeService.createVolume(volume.getName(),
-                convertEntityService.getStorageOfferingById(volume.getStorageOfferingId()),
+
                 convertEntityService.getZoneUuidById(volume.getZoneId()), CloudStackConstants.JSON,
                 optionalValuesToMap(volume, userId));
         LOGGER.info("Volume create response " + volumeS);
@@ -482,10 +496,13 @@ public class VolumeServiceImpl implements VolumeService {
     /**
      * Check the Storage offering CS error handling.
      *
-     * @param errors error creating status.
-     * @param errMessage error message.
+     * @param errors
+     *            error creating status.
+     * @param errMessage
+     *            error message.
      * @return errors.
-     * @throws Exception error for validation
+     * @throws Exception
+     *             error for validation
      */
     private Errors validateEvent(Errors errors, String errMessage) throws Exception {
         errors.addGlobalError(errMessage);
@@ -495,16 +512,19 @@ public class VolumeServiceImpl implements VolumeService {
     /**
      * Validate the Volume.
      *
-     * @param volume reference of the Volume.
-     * @param userId user details
-     * @param domainId domain details
-     * @throws Exception error occurs
+     * @param volume
+     *            reference of the Volume.
+     * @param userId
+     *            user details
+     * @param domainId
+     *            domain details
+     * @throws Exception
+     *             error occurs
      */
     private void validateVolumeUniqueness(Volume volume, Long domainId, Long userId) throws Exception {
         Errors errors = validator.rejectIfNullEntity(CS_VOLUMES, volume);
         errors = validator.validateEntity(volume, errors);
-        Volume validateVolume = volumeRepo.findByNameAndIsActive(volume.getName(),
-                domainId, userId, true);
+        Volume validateVolume = volumeRepo.findByNameAndIsActive(volume.getName(), domainId, userId, true);
         if (validateVolume != null && volume.getId() != validateVolume.getId()) {
             errors.addGlobalError("error.volume.already.exist");
         }
@@ -521,9 +541,12 @@ public class VolumeServiceImpl implements VolumeService {
     /**
      * Attach volume to an instance.
      *
-     * @param volume volume
-     * @param errors errors
-     * @throws Exception error for attach volume
+     * @param volume
+     *            volume
+     * @param errors
+     *            errors
+     * @throws Exception
+     *             error for attach volume
      * @return volume
      */
     public Volume attach(Volume volume, Errors errors) throws Exception {
@@ -576,9 +599,12 @@ public class VolumeServiceImpl implements VolumeService {
     /**
      * Detach volume to an instance.
      *
-     * @param volume volume
-     * @param errors errors
-     * @throws Exception error for deatch volume
+     * @param volume
+     *            volume
+     * @param errors
+     *            errors
+     * @throws Exception
+     *             error for deatch volume
      * @return volume
      */
     public Volume detach(Volume volume, Errors errors) throws Exception {
@@ -619,9 +645,12 @@ public class VolumeServiceImpl implements VolumeService {
     /**
      * Resize volume to an instance.
      *
-     * @param volume volume
-     * @param errors errors
-     * @throws Exception error for resize volume
+     * @param volume
+     *            volume
+     * @param errors
+     *            errors
+     * @throws Exception
+     *             error for resize volume
      * @return volume
      */
     public Volume resize(Volume volume, Errors errors) throws Exception {
@@ -690,11 +719,16 @@ public class VolumeServiceImpl implements VolumeService {
     /**
      * Upload volume to an instance.
      *
-     * @param volume volume
-     * @param userId user details
-     * @param domainId domain details
-     * @param errors errors
-     * @throws Exception error for upload volume
+     * @param volume
+     *            volume
+     * @param userId
+     *            user details
+     * @param domainId
+     *            domain details
+     * @param errors
+     *            errors
+     * @throws Exception
+     *             error for upload volume
      * @return volume
      */
     public Volume upload(Volume volume, Long domainId, Long userId, Errors errors) throws Exception {
@@ -766,8 +800,10 @@ public class VolumeServiceImpl implements VolumeService {
     /**
      * To set response values from cloud stack.
      *
-     * @param volume volume response.
-     * @throws Exception error at upload volume
+     * @param volume
+     *            volume response.
+     * @throws Exception
+     *             error at upload volume
      */
     private void setUploadVolume(Volume volume) throws Exception {
         String uuid = volume.getUuid();
@@ -829,8 +865,10 @@ public class VolumeServiceImpl implements VolumeService {
                 return domainAttachedCount;
             } else {
                 if (projectList.size() > 0) {
-                    Integer projectAttachedCount = volumeRepo.getAttachedCountByProject(projectList,
-                            convertEntityService.getOwnerById(userId).getDepartmentId(), volumeType, true).size();
+                    Integer projectAttachedCount = volumeRepo
+                            .getAttachedCountByProject(projectList,
+                                    convertEntityService.getOwnerById(userId).getDepartmentId(), volumeType, true)
+                            .size();
                     return projectAttachedCount;
                 } else {
                     Integer departmentAttachedCount = volumeRepo.getAttachedCountByDepartment(
@@ -858,8 +896,10 @@ public class VolumeServiceImpl implements VolumeService {
                 return domainDetachedCount;
             } else {
                 if (projectList.size() > 0) {
-                    Integer projectDetachedCount = volumeRepo.getDetachedCountByProject(projectList,
-                            convertEntityService.getOwnerById(userId).getDepartmentId(), volumeType, true).size();
+                    Integer projectDetachedCount = volumeRepo
+                            .getDetachedCountByProject(projectList,
+                                    convertEntityService.getOwnerById(userId).getDepartmentId(), volumeType, true)
+                            .size();
                     return projectDetachedCount;
                 } else {
                     Integer departmentDetachedCount = volumeRepo.getDetachedCountByDepartment(
@@ -881,4 +921,13 @@ public class VolumeServiceImpl implements VolumeService {
         return volume;
     }
 
+    @Override
+    public Volume findByNameAndIsActive(String volume, Long domainId, Long userId, Boolean isActive) {
+        return volumeRepo.findByNameAndIsActive(volume, domainId, userId, true);
+    }
+
+    @Override
+    public List<Volume> findAllByIsActive(Boolean isActive) throws Exception {
+        return (List<Volume>) volumeRepo.findAllByIsActive(true);
+    }
 }
