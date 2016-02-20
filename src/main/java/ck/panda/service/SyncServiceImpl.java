@@ -54,6 +54,7 @@ import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.Status;
 import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
+import ck.panda.rabbitmq.util.ResponseEvent;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.entity.VmSnapshot;
@@ -857,6 +858,9 @@ public class SyncServiceImpl implements SyncService {
             // in a hash using uuid
             if (csStorageOfferingMap.containsKey(storageOffering.getUuid())) {
                 StorageOffering csStorageOffering = csStorageOfferingMap.get(storageOffering.getUuid());
+                if (csStorageOffering.getTransDomainId() != null){
+                    storageOffering.setDomainId(convertEntityService.getDomain(csStorageOffering.getTransDomainId()).getId());
+                }
 
                 // 3.2 If found, update the osType object in app db
                 storageService.update(storageOffering);
@@ -1275,7 +1279,7 @@ public class SyncServiceImpl implements SyncService {
                 }
                 if (csVm.getProjectId() != null) {
                     instance.setProjectId(csVm.getProjectId());
-                    instance.setDepartmentId(csVm.getDepartmentId());
+                    instance.setDepartmentId(convertEntityService.getProjectById(csVm.getProjectId()).getDepartmentId());
                 }
                 if (csVm.getInstanceOwnerId() != null) {
                     instance.setInstanceOwnerId(csVm.getInstanceOwnerId());
@@ -1756,19 +1760,13 @@ public class SyncServiceImpl implements SyncService {
     @Override
     public void syncResourceLimit() throws ApplicationException, Exception {
         List<Domain> domains = domainService.findAllDomain();
-        /** Used for setting optional values for resource count. */
-        HashMap<String, String> domainCountMap = new HashMap<String, String>();
         for (Domain domain : domains) {
             syncResourceLimitDomain(domain);
-            //Sync for resource count in domain
-            String csResponse = cloudStackResourceCapacity.updateResourceCount(domain.getUuid(), domainCountMap,
-                    "json");
-            convertEntityService.resourceCount(csResponse);
         }
 
         List<Project> projects = projectService.findAllByActive(true);
         for (Project project : projects) {
-            syncResourceLimitProject(project.getUuid());
+            syncResourceLimitProject(project);
         }
     }
 
@@ -1785,15 +1783,22 @@ public class SyncServiceImpl implements SyncService {
 
         // 3. Iterate Domain resource list
         LOGGER.debug("Total rows updated : " + (appResourceList.size()));
-        int i = 0;
         for (ResourceLimitDomain resource : appResourceList) {
-            i++;
             LOGGER.debug("NEW DOMAIN ID " + resource.getDomainId());
-            if (i == 1) {
-                resourceDomainService.deleteResourceLimitByDomain(resource.getDomainId());
+            if (csResourceMap.containsKey(resource.getDomainId() + resource.getResourceType().toString())) {
+                if (resource != null) {
+                    resource.setMax(
+                            csResourceMap.get(resource.getDomainId() + resource.getResourceType().toString()).getMax());
+                    resource.setIsActive(true);
+                    resource.setIsSyncFlag(false);
+                    resourceDomainService.update(resource);
+                }
+                csResourceMap.remove(resource.getDomainId() + resource.getResourceType().toString());
+            } else {
+                resource.setIsActive(false);
+                resource.setIsSyncFlag(false);
+                resourceDomainService.update(resource);
             }
-            resource.setIsSyncFlag(false);
-            csResourceMap.remove(resource.getDomainId());
         }
         // 4. Get the remaining list of cs server hash resource object, then
         // iterate and
@@ -1802,38 +1807,42 @@ public class SyncServiceImpl implements SyncService {
             resourceDomainService.save(csResourceMap.get(key));
         }
         LOGGER.debug("Total rows added", (csResourceMap.size()));
+        // Used for setting optional values for resource count.
+        HashMap<String, String> domainCountMap = new HashMap<String, String>();
+        // Sync for resource count in domain
+        String csResponse = cloudStackResourceCapacity.updateResourceCount(domain.getUuid(), domainCountMap, "json");
+        convertEntityService.resourceCount(csResponse);
     }
 
     @Override
-    public void syncResourceLimitProject(String projectId) throws ApplicationException, Exception {
+    public void syncResourceLimitProject(Project project) throws ApplicationException, Exception {
 
         // 1. Get all the ResourceLimit objects from CS server as hash
-        List<ResourceLimitProject> csResourceList = resourceProjectService.findAllFromCSServerProject(projectId);
+        List<ResourceLimitProject> csResourceList = resourceProjectService.findAllFromCSServerProject(project.getUuid());
                HashMap<String, ResourceLimitProject> csResourceMap = (HashMap<String, ResourceLimitProject>) ResourceLimitProject
                 .convert(csResourceList);
 
         // 2. Get all the resource objects from application
-        List<ResourceLimitProject> appResourceList = resourceProjectService.findAll();
+        List<ResourceLimitProject> appResourceList = resourceProjectService.findAllByProjectIdAndIsActive(project.getId(), true);
 
         // 3. Iterate application resource list
         LOGGER.debug("Total rows updated : " + (appResourceList.size()));
         for (ResourceLimitProject resource : appResourceList) {
-            resource.setIsSyncFlag(false);
-            String resourceLimit = resource.getProjectId() + "-" + resource.getResourceType();
-            // 3.1 Find the corresponding CS server resource object by finding
-            // it in a hash using uuid
-            if (csResourceMap.containsKey(resourceLimit)) {
-                ResourceLimitProject csResource = csResourceMap.get(resourceLimit);
-                resource.setIsActive(true);
-                // resource.setName(csResource.getName());
 
-                // 3.2 If found, update the resource object in app db
-                resourceProjectService.update(resource);
-
-                // 3.3 Remove once updated, so that we can have the list of cs
-                // resource which is not added in the app
-                csResourceMap.remove(resourceLimit);
+            LOGGER.debug("NEW PROJECT ID " + resource.getProjectId());
+            if (csResourceMap.containsKey(resource.getProjectId() + resource.getResourceType().toString())) {
+                if (resource != null) {
+                    ResourceLimitProject resourceData = csResourceMap.get(resource.getProjectId() + resource.getResourceType().toString());
+                    resource.setMax(resourceData.getMax());
+                    resource.setDepartmentId(resourceData.getDepartmentId());
+                    resource.setIsActive(true);
+                    resource.setIsSyncFlag(false);
+                    resourceProjectService.update(resource);
+                }
+                csResourceMap.remove(resource.getProjectId() + resource.getResourceType().toString());
             } else {
+                resource.setIsActive(false);
+                resource.setIsSyncFlag(false);
                 resourceProjectService.update(resource);
             }
         }
@@ -1841,11 +1850,18 @@ public class SyncServiceImpl implements SyncService {
         // iterate and
         // add it to app db
         for (String key : csResourceMap.keySet()) {
-            LOGGER.debug("Syncservice resource Domain id:");
+            LOGGER.debug("Syncservice resource Project id:");
             resourceProjectService.save(csResourceMap.get(key));
 
         }
         LOGGER.debug("Total rows added", (csResourceMap.size()));
+        // Used for setting optional values for resource count.
+        HashMap<String, String> projectCountMap = new HashMap<String, String>();
+        projectCountMap.put("projectid", project.getUuid());
+        //Sync for resource count in domain
+        String csResponse = cloudStackResourceCapacity.updateResourceCount(
+                convertEntityService.getDomainById(project.getDomainId()).getUuid(), projectCountMap, "json");
+        convertEntityService.resourceCount(csResponse);
     }
 
     /**
@@ -2414,5 +2430,11 @@ public class SyncServiceImpl implements SyncService {
         } catch (Exception e) {
             LOGGER.debug("syncUpdateUserRole" + e);
         }
+    }
+
+    @Override
+    public void syncResourceLimitActionEvent(ResponseEvent eventObject) throws ApplicationException, Exception {
+        Domain domain = domainService.findbyUUID(eventObject.getEntityuuid());
+        syncResourceLimitDomain(domain);
     }
 }

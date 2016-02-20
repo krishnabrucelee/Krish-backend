@@ -135,8 +135,9 @@ public class ExceptionHandlingController {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
     Errors handleException(Exception ex) {
+        ex.printStackTrace();
         Errors errors = new Errors(messageSource);
-        errors.addGlobalError(ex.getMessage());
+        errors.addGlobalError(messageByLocaleService.getMessage(ex.getMessage()));
         return errors;
     }
 

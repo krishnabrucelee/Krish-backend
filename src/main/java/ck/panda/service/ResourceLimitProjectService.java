@@ -5,8 +5,12 @@ package ck.panda.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitProject;
+import ck.panda.domain.entity.ResourceLimitProject.ResourceType;
 import ck.panda.util.domain.CRUDService;
+import ck.panda.util.error.exception.ApplicationException;
 
 /**
  * Resource Limit Project Service.
@@ -30,8 +34,9 @@ public interface ResourceLimitProjectService extends CRUDService<ResourceLimitPr
      * @param isActive true/false
      * @return project
      * @throws Exception error
+     * @throws ApplicationException application error
      */
-    List<ResourceLimitProject> findAllByProjectIdAndIsActive(Long projectId, Boolean isActive);
+    List<ResourceLimitProject> findAllByProjectIdAndIsActive(Long projectId, Boolean isActive) throws ApplicationException, Exception;
 
     /**
      * Find by resource count by project and resourceType.
@@ -43,7 +48,7 @@ public interface ResourceLimitProjectService extends CRUDService<ResourceLimitPr
      * @return department resource count.
      * @throws Exception error
      */
-    Long findByResourceCountByProjectAndResourceType(Long departmentId, ResourceLimitProject.ResourceType resourceType,
+    Long findByResourceCountByProjectAndResourceType(Long departmentId, ResourceType resourceType,
             Long projectId, Boolean isActive) throws Exception;
 
     /**
@@ -54,5 +59,30 @@ public interface ResourceLimitProjectService extends CRUDService<ResourceLimitPr
      * @throws Exception unhandled errors.
      */
     List<ResourceLimitProject> findAllFromCSServerProject(String projectId) throws Exception;
+
+    /**
+     * Find resourceType by project.
+     *
+     * @param projectId project
+     * @param isActive true/false
+     * @param resourceType resource type.
+     * @throws Exception error
+     */
+    ResourceLimitProject findByProjectAndResourceType(Long projectId,
+            ResourceLimitProject.ResourceType resourceType, Boolean isActive) throws Exception;
+
+    void deleteResourceLimitByProject(Long projectId);
+
+    /**
+     * Find resource by project and resourceType.
+     *
+     * @param projectId project id.
+     * @param isActive true/false
+     * @param resourceType resource type.
+     * @return project resource count.
+     * @throws Exception error
+     */
+    ResourceLimitProject findResourceByProjectAndResourceType(Long projectId,
+            ResourceType resourceType, Boolean isActive) throws Exception;
 
 }

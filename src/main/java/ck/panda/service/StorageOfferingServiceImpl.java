@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.StorageOffering;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.StorageOfferingCost;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
@@ -290,7 +291,6 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
             return storageOfferingRepo.findByTags(isActive);
         }
     }
-
     @Override
     public List<StorageOffering> findAllByTags(String tags, Long userId) throws Exception {
         if (tags.equals("") || tags == null) {

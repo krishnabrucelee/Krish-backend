@@ -5,27 +5,42 @@ import java.util.HashMap;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
+
+import ck.panda.constants.CloudStackConstants;
+import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.IpAddress.State;
+import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
 import ck.panda.domain.entity.Network;
+import ck.panda.domain.entity.ResourceLimitDepartment;
+import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.repository.jpa.IpaddressRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackAddressService;
+import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
+import ck.panda.util.error.exception.ApplicationException;
+import ck.panda.util.error.exception.CustomGenericException;
 
 /**
  * IpAddress service implementation class.
  */
 @Service
 public class IpaddressServiceImpl implements IpaddressService {
+
+    /** Logger attribute. */
+    private static final Logger LOGGER = LoggerFactory.getLogger(IpaddressServiceImpl.class);
 
     /** Department repository reference. */
     @Autowired
@@ -47,47 +62,110 @@ public class IpaddressServiceImpl implements IpaddressService {
     @Autowired
     private ConfigUtil configServer;
 
-    /** Token Detail Utilities. */
-    @Autowired
-    private TokenDetails tokenDetails;
-
-    /** Domain service reference. */
-    @Autowired
-    private DomainService domainService;
-
     /** Department service reference. */
     @Autowired
     private DepartmentService departmentService;
 
+    /** Resource Limit Department service reference. */
+    @Autowired
+    private ResourceLimitDepartmentService resourceLimitDepartmentService;
+
+    /** Resource Limit Project service reference. */
+    @Autowired
+    private ResourceLimitProjectService resourceLimitProjectService;
+
+    /** Sync Service reference. */
+    @Autowired
+    private SyncService syncService;
+
+    /** Sync Service reference. */
+    @Autowired
+    private AsynchronousJobService asyncService;
+
+    /** CloudStack connector reference for resource capacity. */
+    @Autowired
+    private CloudStackResourceCapacity cloudStackResourceCapacity;
+
+    /** Cloud stack configuration utility class. */
+    @Autowired
+    private ConfigUtil config;
+
+    /** Quota limit validation reference. */
+    @Autowired
+    QuotaValidationService quotaLimitValidation;
+
     @Override
     public List<IpAddress> acquireIP(Long networkId) throws Exception {
         Errors errors = null;
-        configServer.setUserServer();
-        Network network = convertEntityService.getNetworkById(networkId);
-        HashMap<String, String> ipMap = new HashMap<String, String>();
-        ipMap.put("domainid", network.getDomain().getUuid());
-        if (network.getProjectId() != null) {
-            ipMap.put("projectid", convertEntityService.getProjectById(network.getProjectId()).getUuid());
-        } else {
-            ipMap.put("account", departmentService
-                    .find(convertEntityService.getDepartmentById(network.getDepartmentId()).getId()).getUserName());
-        }
-        ipMap.put("zoneid", network.getZone().getUuid());
-        ipMap.put("networkid", network.getUuid());
-        String associatedResponse = csipaddressService.associateIpAddress("json", ipMap);
-        JSONObject csassociatedIPResponseJSON = new JSONObject(associatedResponse)
-                .getJSONObject("associateipaddressresponse");
-        if (csassociatedIPResponseJSON.has("errorcode")) {
-            errors = validator.sendGlobalError(csassociatedIPResponseJSON.getString("errortext"));
-            if (errors.hasErrors()) {
-                throw new BadCredentialsException(csassociatedIPResponseJSON.getString("errortext"));
+        HashMap<String, String> optionalMap = new HashMap<String, String>();
+        optionalMap.put(CloudStackConstants.CS_ZONE_ID,
+                convertEntityService.getZoneById(convertEntityService.getNetworkById(networkId).getZoneId()).getUuid());
+        // check department and project quota validation.
+        ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService.findByDepartmentAndResourceType(
+                convertEntityService.getNetworkById(networkId).getDepartmentId(), ResourceType.Instance, true);
+        if (departmentLimit != null && convertEntityService
+                .getDepartmentById(convertEntityService.getNetworkById(networkId).getDepartmentId()).getType()
+                .equals(AccountType.USER)) {
+            if (convertEntityService.getNetworkById(networkId).getProjectId() != null) {
+                syncService.syncResourceLimitProject(convertEntityService
+                        .getProjectById(convertEntityService.getNetworkById(networkId).getProjectId()));
+                quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getNetworkById(networkId),
+                        "IP", convertEntityService.getNetworkById(networkId).getProjectId(), "Project");
             }
-        } else if (csassociatedIPResponseJSON.has("jobid")) {
-            String jobResponse = csipaddressService.associatedJobResult(csassociatedIPResponseJSON.getString("jobid"),
-                    "json");
-            JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+            if (convertEntityService.getNetworkById(networkId).getDepartmentId() != null) {
+                quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getNetworkById(networkId),
+                        "IP", convertEntityService.getNetworkById(networkId).getDepartmentId(), "Department");
+            }
+            if (convertEntityService.getNetworkById(networkId).getDomainId() != null) {
+                quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getNetworkById(networkId),
+                        "IP", convertEntityService.getNetworkById(networkId).getDomainId(), "Domain");
+            }
+            // 3. Check the resource availability to acquire new ip.
+            String isAvailable = isResourceAvailable(convertEntityService.getNetworkById(networkId), optionalMap);
+            if (isAvailable != null) {
+                // 3.1 throws error message about resource shortage.
+                throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, isAvailable);
+            } else {
+                try {
+                    // updateResourceForIpCreation(convertEntityService.getNetworkById(networkId),
+                    // errors);
+                    configServer.setUserServer();
+                    Network network = convertEntityService.getNetworkById(networkId);
+                    HashMap<String, String> ipMap = new HashMap<String, String>();
+                    ipMap.put("domainid", network.getDomain().getUuid());
+                    if (network.getProjectId() != null) {
+                        ipMap.put("projectid", convertEntityService.getProjectById(network.getProjectId()).getUuid());
+                    } else {
+                        ipMap.put("account",
+                                departmentService
+                                        .find(convertEntityService.getDepartmentById(network.getDepartmentId()).getId())
+                                        .getUserName());
+                    }
+                    ipMap.put("zoneid", network.getZone().getUuid());
+                    ipMap.put("networkid", network.getUuid());
+                    String associatedResponse = csipaddressService.associateIpAddress("json", ipMap);
+                    JSONObject csassociatedIPResponseJSON = new JSONObject(associatedResponse)
+                            .getJSONObject("associateipaddressresponse");
+                    if (csassociatedIPResponseJSON.has("errorcode")) {
+                        errors = validator.sendGlobalError(csassociatedIPResponseJSON.getString("errortext"));
+                        if (errors.hasErrors()) {
+                            throw new BadCredentialsException(csassociatedIPResponseJSON.getString("errortext"));
+                        }
+                    } else if (csassociatedIPResponseJSON.has("jobid")) {
+                        String jobResponse = csipaddressService
+                                .associatedJobResult(csassociatedIPResponseJSON.getString("jobid"), "json");
+                        JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+                    }
+                    return (List<IpAddress>) ipRepo.findByNetwork(networkId, IpAddress.State.ALLOCATED);
+                } catch (ApplicationException e) {
+                    LOGGER.error("ERROR AT IP AQUIRE", e);
+                    throw new ApplicationException(e.getErrors());
+                }
+            }
+        } else {
+            errors.addGlobalError("Resource limit for department has not been set. Please update department quota");
+            throw new ApplicationException(errors);
         }
-        return (List<IpAddress>) ipRepo.findByNetwork(networkId, IpAddress.State.ALLOCATED);
     }
 
     @Override
@@ -194,13 +272,24 @@ public class IpaddressServiceImpl implements IpaddressService {
 
     @Override
     public IpAddress dissocitateIpAddress(String ipUuid) throws Exception {
+        Errors errors = null;
         IpAddress ipAddress = findbyUUID(ipUuid);
+        // TODO //check department and project quota validation.
+        ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
+                .findByDepartmentAndResourceType(convertEntityService.getNetworkById(ipAddress.getNetworkId()).getDepartmentId(), ResourceType.Instance, true);
+
+        if (departmentLimit != null) {
+            if (convertEntityService.getNetworkById(ipAddress.getNetworkId()).getProjectId() != null) {
+                syncService.syncResourceLimitProject(
+                        convertEntityService.getProjectById(convertEntityService.getNetworkById(ipAddress.getNetworkId()).getProjectId()));
+            }
+
         try {
             configServer.setUserServer();
             String deleteResponse = csipaddressService.disassociateIpAddress(ipUuid, "json");
             JSONObject jobId = new JSONObject(deleteResponse).getJSONObject("disassociateipaddressresponse");
             if (jobId.has("errorcode")) {
-                Errors errors = validator.sendGlobalError(jobId.getString("errortext"));
+                errors = validator.sendGlobalError(jobId.getString("errortext"));
                 if (errors.hasErrors()) {
                     throw new BadCredentialsException(jobId.getString("errortext"));
                 }
@@ -215,6 +304,10 @@ public class IpaddressServiceImpl implements IpaddressService {
             throw new BadCredentialsException(e.getMessage());
         }
         return ipRepo.save(ipAddress);
+        } else {
+            errors.addGlobalError("Resource limit for department has not been set. Please update department quota");
+            throw new ApplicationException(errors);
+        }
     }
 
     @Override
@@ -274,4 +367,63 @@ public class IpaddressServiceImpl implements IpaddressService {
         return ipRepo.findAllByIsActiveAndState(state, isActive);
     }
 
+    /**
+     * Check resouce capacity to create new Network.
+     *
+     * @param network Network.
+     * @param optionalMap arguments.
+     * @return error message.
+     * @throws Exception unhandled errors.
+     */
+    public String isResourceAvailable(Network network, HashMap<String, String> optionalMap) throws Exception {
+        Long resourceUsage = 0L, tempCount = 0L;
+        String errMessage = null;
+        // 1. Initiate CS server connection as ROOT admin.
+        config.setServer(1L);
+        // 2. List capacity CS API call.
+        String csResponse = cloudStackResourceCapacity.listCapacity(optionalMap, CloudStackConstants.JSON);
+        JSONObject csCapacity = new JSONObject(csResponse).getJSONObject(CloudStackConstants.CS_CAPACITY_LIST_RESPONSE);
+        if (csCapacity.has(CloudStackConstants.CS_CAPACITY)) {
+            JSONArray capacityArrayJSON = csCapacity.getJSONArray(CloudStackConstants.CS_CAPACITY);
+            for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
+                String resourceType = capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CAPACITY_TYPE);
+                // 2.1 Total capacity in public pool for each resource type.
+                Long tempTotalCapacity = Long
+                        .valueOf(capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CS_CAPACITY_TOTAL));
+                // 2.2 Used capacity in public pool for each resource type.
+                Long tempCapacityUsed = Long
+                        .valueOf(capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CS_CAPACITY_USED));
+                if (GenericConstants.RESOURCE_CAPACITY.containsKey(resourceType)) {
+                    // 3.1 Total available resource in public pool for each
+                    // resource type.
+                    resourceUsage = tempTotalCapacity - tempCapacityUsed;
+                    // 4. Check whether resource is available to acquire new ip
+                    // with resource type.
+                    switch (resourceType) {
+                    // 4.5 Check public ip address availability.
+                    case GenericConstants.RESOURCE_IP_ADDRESS:
+                        optionalMap.put(CloudStackConstants.CS_ASSOCIATE_NETWORK, network.getUuid());
+                        optionalMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
+                        optionalMap.put(CloudStackConstants.CS_FOR_VM_NETWORK, CloudStackConstants.STATUS_ACTIVE);
+                        config.setServer(1L);
+                        String csIpResponse = cloudStackResourceCapacity.listPublicIpAddress(optionalMap,
+                                CloudStackConstants.JSON);
+                        JSONObject csIpCapacity = new JSONObject(csIpResponse)
+                                .getJSONObject(CloudStackConstants.CS_PUBLIC_IPADDRESS_RESPONSE);
+                        if (csIpCapacity.has(CloudStackConstants.CS_CAPACITY_COUNT)) {
+                            LOGGER.debug("Already IP address acquired ", resourceType);
+                        } else if (resourceUsage < 1) {
+                            errMessage = CloudStackConstants.RESOURCE_CHECK + " public.ip.available " + CloudStackConstants.CONTACT_CLOUD_ADMIN;
+                        }
+                        break;
+                    default:
+                        LOGGER.debug("No Resource ", resourceType);
+                    }
+                }
+            }
+        }
+        // 5. If any resource shortage then return error message otherwise
+        // return empty string.
+        return errMessage;
+    }
 }
