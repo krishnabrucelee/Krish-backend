@@ -981,7 +981,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         break;
                     // 4.5 Check public ip address availability.
                     case GenericConstants.RESOURCE_IP_ADDRESS:
-                        optionalMap.put(CloudStackConstants.CS_ASSOCIATE_NETWORK, convertEntityService.getNetworkById(vm.getNetworkId()).getUuid());
+                        if (vm.getNetworkUuid() != null) {
+                            optionalMap.put(CloudStackConstants.CS_ASSOCIATE_NETWORK, vm.getNetworkUuid());
+                        } else {
+                            optionalMap.put(CloudStackConstants.CS_ASSOCIATE_NETWORK, convertEntityService.getNetworkById(vm.getNetworkId()).getUuid());
+                        }
                         optionalMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
                         optionalMap.put(CloudStackConstants.CS_FOR_VM_NETWORK, CloudStackConstants.STATUS_ACTIVE);
                         config.setServer(1L);
