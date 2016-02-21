@@ -986,6 +986,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         } else {
                             optionalMap.put(CloudStackConstants.CS_ASSOCIATE_NETWORK, convertEntityService.getNetworkById(vm.getNetworkId()).getUuid());
                         }
+                        if(vm.getProjectId() != null) {
+                            optionalMap.put("projectid", convertEntityService.getProjectById(vm.getProjectId()).getUuid());
+                        }
                         optionalMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
                         optionalMap.put(CloudStackConstants.CS_FOR_VM_NETWORK, CloudStackConstants.STATUS_ACTIVE);
                         config.setServer(1L);
