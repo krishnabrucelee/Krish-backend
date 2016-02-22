@@ -6,7 +6,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+
+import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitProject;
+import ck.panda.domain.entity.ResourceLimitProject.ResourceType;
 
 /**
  * Jpa Repository for ResourceLimit project entity.
@@ -46,5 +49,31 @@ public interface ResourceLimitProjectRepository extends PagingAndSortingReposito
     Long findByResourceCountByProjectAndResourceType(@Param("departmentId") Long departmentId,
             @Param("resourceType") ResourceLimitProject.ResourceType resourceType, @Param("projectId") Long projectId,
             @Param("isActive") Boolean isActive);
+
+    /**
+     * Find all the active resource limits based on the project id.
+     *
+     * @param projectId project id.
+     * @param resourceType resource type
+     * @param isActive true/false.
+     * @return project resource type.
+     */
+    @Query(value = "select resource from ResourceLimitProject resource where resource.isActive =:isActive AND resource.projectId =:projectId AND resource.resourceType =:resourceType")
+    ResourceLimitProject findByProjectAndResourceType(@Param("projectId") Long projectId,
+            @Param("resourceType") ResourceType resourceType, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find resource by project and resourceType.
+     *
+     * @param projectId project id.
+     * @param isActive true/false
+     * @param resourceType resource type.
+     * @return project resource count.
+     * @throws Exception error
+     */
+    @Query(value = "select resource from ResourceLimitProject resource where resource.isActive =:isActive AND resource.projectId =:projectId AND resource.resourceType in :resourceType")
+    ResourceLimitProject findResourceByProjectAndResourceType(@Param("projectId") Long projectId,
+            @Param("resourceType") ResourceLimitProject.ResourceType resourceType, @Param("isActive") Boolean isActive);
+
 
 }

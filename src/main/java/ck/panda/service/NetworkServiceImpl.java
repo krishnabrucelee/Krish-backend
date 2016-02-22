@@ -14,22 +14,31 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
+import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Project;
+import ck.panda.domain.entity.ResourceLimitDepartment;
+import ck.panda.domain.entity.ResourceLimitDomain;
+import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.Network.Status;
+import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Zone;
+import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.repository.jpa.NetworkRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackNetworkService;
 import ck.panda.util.CloudStackOptionalUtil;
+import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
+import ck.panda.util.error.exception.CustomGenericException;
 
 /**
  * Service implementation for Network entity.
@@ -67,6 +76,10 @@ public class NetworkServiceImpl implements NetworkService {
     /** Network repository reference. */
     @Autowired
     private NetworkRepository networkRepo;
+
+    /** Quota limit validation reference. */
+    @Autowired
+    QuotaValidationService quotaLimitValidation;
 
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkServiceImpl.class);
@@ -115,6 +128,34 @@ public class NetworkServiceImpl implements NetworkService {
     @Autowired
     private VirtualMachineService vmService;
 
+    /** Resource Limit Department service reference. */
+    @Autowired
+    private ResourceLimitDepartmentService resourceLimitDepartmentService;
+
+    /** Resource Limit Project service reference. */
+    @Autowired
+    private ResourceLimitProjectService resourceLimitProjectService;
+
+    /** Sync Service reference. */
+    @Autowired
+    private SyncService syncService;
+
+    /** Sync Service reference. */
+    @Autowired
+    private AsynchronousJobService asyncService;
+
+    /** CloudStack connector reference for resource capacity. */
+    @Autowired
+    private CloudStackResourceCapacity cloudStackResourceCapacity;
+
+    /** Resource Limit Department service reference. */
+    @Autowired
+    private ResourceLimitDomainService resourceLimitDomainService;
+
+    /** Update Resource Count service reference. */
+    @Autowired
+    private UpdateResourceCountService updateResourceCountService;
+
     @Override
     @PreAuthorize("hasPermission(#network.getSyncFlag(), 'ADD_ISOLATED_NETWORK')")
     public Network save(Network network, Long userId) throws Exception {
@@ -122,44 +163,104 @@ public class NetworkServiceImpl implements NetworkService {
             User user = convertEntityService.getOwnerById(userId);
             Errors errors = validator.rejectIfNullEntity(NETWORK, network);
             errors = validator.validateEntity(network, errors);
+            HashMap<String, String> optionalMap = new HashMap<String, String>();
+            optionalMap.put(CloudStackConstants.CS_ZONE_ID,
+                    convertEntityService.getZoneById(network.getZoneId()).getUuid());
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                config.setUserServer();
-                Zone zoneObject = convertEntityService.getZoneById(network.getZoneId());
-                String networkOfferings = csNetwork.createNetwork(zoneObject.getUuid(), CloudStackConstants.JSON, optional(network, userId));
-                JSONObject createNetworkResponseJSON = new JSONObject(networkOfferings)
-                        .getJSONObject(CS_CREATE_NETWORK_RESPONSE);
-                if (createNetworkResponseJSON.has(CloudStackConstants.CS_ERROR_CODE)) {
-                    errors = this.validateEvent(errors, createNetworkResponseJSON.getString(CloudStackConstants.CS_ERROR_TEXT));
-                    throw new ApplicationException(errors);
-                }
-                JSONObject networkResponse = createNetworkResponseJSON.getJSONObject(CS_NETWORK);
-                network.setUuid(networkResponse.getString(CloudStackConstants.CS_ID));
-                network.setNetworkType(network.getNetworkType().valueOf(networkResponse.getString(CloudStackConstants.CS_TYPE)));
-                network.setDisplayText(networkResponse.getString(CloudStackConstants.CS_DISPLAY_TEXT));
-                network.setcIDR(networkResponse.getString(CloudStackConstants.CS_CIDR));
-                network.setDomainId(domainService.findbyUUID(networkResponse.getString(CloudStackConstants.CS_DOMAIN_ID)).getId());
-                network.setZoneId(zoneService.findByUUID(networkResponse.getString(CloudStackConstants.CS_ZONE_ID)).getId());
-                network.setNetworkOfferingId(
-                networkOfferingService.findByUUID(networkResponse.getString(CloudStackConstants.CS_NETWORK_OFFERING_ID)).getId());
-                network.setStatus(network.getStatus().valueOf(networkResponse.getString(CloudStackConstants.CS_STATE).toUpperCase()));
-                if (network.getProjectId() != null) {
-                    network.setProjectId(convertEntityService.getProjectId(networkResponse.getString(CloudStackConstants.CS_PROJECT_ID)));
-                } else {
+                /** Used for setting optional values for resource count. */
+                HashMap<String, String> domainCountMap = new HashMap<String, String>();
+                // check department and project quota validation.
+                ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
+                        .findByDepartmentAndResourceType(network.getDepartmentId(), ResourceType.Instance, true);
+                if (departmentLimit != null && convertEntityService.getDepartmentById(network.getDepartmentId()).getType()
+                        .equals(AccountType.USER)) {
+                    if (network.getProjectId() != null) {
+                        syncService
+                                .syncResourceLimitProject(convertEntityService.getProjectById(network.getProjectId()));
+                        quotaLimitValidation.QuotaLimitCheckByResourceObject(network, NETWORK,
+                                network.getProjectId(), "Project");
+                    }
+
                     if (network.getDepartmentId() != null) {
-                        network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
-                                departmentService.find(network.getDepartmentId()).getUserName(),
-                                domainService.find(network.getDomainId())));
-                    } else {
+                        quotaLimitValidation.QuotaLimitCheckByResourceObject(network, NETWORK,
+                                network.getDepartmentId(), "Department");
+                    }
+                    if (network.getDomainId() != null) {
+                        quotaLimitValidation.QuotaLimitCheckByResourceObject(network, NETWORK,
+                                network.getDomainId(), "Domain");
+                    }
+                    try {
+                        config.setUserServer();
+                        Zone zoneObject = convertEntityService.getZoneById(network.getZoneId());
+                        String networkOfferings = csNetwork.createNetwork(zoneObject.getUuid(),
+                                CloudStackConstants.JSON, optional(network, userId));
+                        JSONObject createNetworkResponseJSON = new JSONObject(networkOfferings)
+                                .getJSONObject(CS_CREATE_NETWORK_RESPONSE);
+                        if (createNetworkResponseJSON.has(CloudStackConstants.CS_ERROR_CODE)) {
+                            errors = this.validateEvent(errors,
+                                    createNetworkResponseJSON.getString(CloudStackConstants.CS_ERROR_TEXT));
+                            throw new ApplicationException(errors);
+                        }
+                        JSONObject networkResponse = createNetworkResponseJSON.getJSONObject(CS_NETWORK);
+                        network.setUuid(networkResponse.getString(CloudStackConstants.CS_ID));
+                        network.setNetworkType(network.getNetworkType().valueOf(networkResponse.getString(CloudStackConstants.CS_TYPE)));
+                        network.setDisplayText(networkResponse.getString(CloudStackConstants.CS_DISPLAY_TEXT));
+                        network.setcIDR(networkResponse.getString(CloudStackConstants.CS_CIDR));
+                        network.setDomainId(domainService
+                                .findbyUUID(networkResponse.getString(CloudStackConstants.CS_DOMAIN_ID)).getId());
+                        network.setZoneId(zoneService
+                                .findByUUID(networkResponse.getString(CloudStackConstants.CS_ZONE_ID)).getId());
+                        network.setNetworkOfferingId(networkOfferingService
+                                .findByUUID(networkResponse.getString(CloudStackConstants.CS_NETWORK_OFFERING_ID))
+                                .getId());
+                        network.setStatus(network.getStatus()
+                                .valueOf(networkResponse.getString(CloudStackConstants.CS_STATE).toUpperCase()));
+                        if (network.getProjectId() != null) {
+                            network.setProjectId(convertEntityService
+                                    .getProjectId(networkResponse.getString(CloudStackConstants.CS_PROJECT_ID)));
+                        } else {
+                            if (network.getDepartmentId() != null) {
+                                network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
+                                        departmentService.find(network.getDepartmentId()).getUserName(),
+                                        domainService.find(network.getDomainId())));
+                            } else {
                         network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
                                 departmentService.find(user.getDepartmentId()).getUserName(),
-                                domainService.find(network.getDomainId())));
+                                        domainService.find(network.getDomainId())));
+                            }
+                        }
+                        network.setGateway(networkResponse.getString(CloudStackConstants.CS_GATEWAY));
+                        network.setIsActive(true);
+                    } catch (ApplicationException e) {
+                        LOGGER.error("ERROR AT NETWORK CREATION", e);
+                        throw new ApplicationException(e.getErrors());
                     }
+                    if (!convertEntityService.getDepartmentById(network.getDepartmentId()).getType().equals(AccountType.USER)) {
+                        updateResourceCountService.QuotaUpdateByResourceObject(network, NETWORK, network.getDomainId(),
+                                "Domain", "update");
+                    } else {
+                        if (network.getProjectId() != null) {
+                            updateResourceCountService.QuotaUpdateByResourceObject(network, NETWORK, network.getProjectId(),
+                                    "Project", "update");
+                        }
+                        if (network.getDepartmentId() != null) {
+                            updateResourceCountService.QuotaUpdateByResourceObject(network, NETWORK,
+                                    network.getDepartmentId(), "Department", "update");
+                        }
+                        if (network.getDomainId() != null) {
+                            updateResourceCountService.QuotaUpdateByResourceObject(network, NETWORK, network.getDomainId(),
+                                    "Domain", "update");
+                        }
+                    }
+                    return networkRepo.save(network);
+
+                } else {
+                    errors.addGlobalError(
+                            "Resource limit for department has not been set. Please update department quota");
+                    throw new ApplicationException(errors);
                 }
-                network.setGateway(networkResponse.getString(CloudStackConstants.CS_GATEWAY));
-                network.setIsActive(true);
-                return networkRepo.save(network);
             }
         } else {
             // To check Network UUID while Syncing Network.
@@ -250,28 +351,41 @@ public class NetworkServiceImpl implements NetworkService {
         Errors errors = validator.rejectIfNullEntity(NETWORK, network);
         errors = validator.validateEntity(network, errors);
         network.setIsActive(false);
-        if (network.getSyncFlag()) {
-            List<VmInstance> vmResponse = vmService.findAllByNetworkAndVmStatus(network.getId(),
-                    VmInstance.Status.EXPUNGING);
-            List<Nic> nicResponse = nicService.findAllByNetworkAndIsActive(network.getId(),true);
-            if (vmResponse.size() != 0 || nicResponse.size() != 0) {
-                errors.addGlobalError("Network is associated with Vm instances. You cannot delete this network");
+        // check department and project quota validation.
+        ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
+                .findByDepartmentAndResourceType(network.getDepartmentId(), ResourceType.Instance, true);
+        if (departmentLimit != null) {
+            if (network.getProjectId() != null) {
+                syncService.syncResourceLimitProject(convertEntityService.getProjectById(network.getProjectId()));
             }
-        }
-        if (errors.hasErrors()) {
-            throw new ApplicationException(errors);
-        } else {
-            network.setIsActive(false);
-            network.setStatus(Network.Status.DESTROY);
             if (network.getSyncFlag()) {
-                config.setUserServer();
-                String networkResponse = csNetwork.deleteNetwork(network.getUuid(), CloudStackConstants.JSON);
-                JSONObject jobId = new JSONObject(networkResponse).getJSONObject(CS_DELETE_NETWORK_RESPONSE);
-                if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
-                    String jobResponse = csNetwork.networkJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
-                    JSONObject jobresult = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+                List<VmInstance> vmResponse = vmService.findAllByNetworkAndVmStatus(network.getId(),
+                        VmInstance.Status.EXPUNGING);
+                List<Nic> nicResponse = nicService.findAllByNetworkAndIsActive(network.getId(), true);
+                if (vmResponse.size() != 0 || nicResponse.size() != 0) {
+                    errors.addGlobalError("Network is associated with Vm instances. You cannot delete this network");
                 }
             }
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
+            } else {
+                network.setIsActive(false);
+                network.setStatus(Network.Status.DESTROY);
+                if (network.getSyncFlag()) {
+                    config.setUserServer();
+                    String networkResponse = csNetwork.deleteNetwork(network.getUuid(), CloudStackConstants.JSON);
+                    JSONObject jobId = new JSONObject(networkResponse).getJSONObject(CS_DELETE_NETWORK_RESPONSE);
+                    if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
+                        String jobResponse = csNetwork.networkJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
+                                CloudStackConstants.JSON);
+                        JSONObject jobresult = new JSONObject(jobResponse)
+                                .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+                    }
+                }
+            }
+        } else {
+            errors.addGlobalError("Resource limit for department has not been set. Please update department quota");
+            throw new ApplicationException(errors);
         }
         return networkRepo.save(network);
     }
@@ -533,4 +647,66 @@ public class NetworkServiceImpl implements NetworkService {
         }
         return networkRepo.save(network);
     }
-  }
+
+    /**
+     * Check resouce capacity to create new Volume.
+     *
+     * @param volume Volume.
+     * @param optionalMap arguments.
+     * @return error message.
+     * @throws Exception unhandled errors.
+     */
+    public String isResourceAvailable(Network network, HashMap<String, String> optionalMap) throws Exception {
+        Long resourceUsage = 0L, tempCount = 0L;
+        String errMessage = null;
+        // 1. Initiate CS server connection as ROOT admin.
+        config.setServer(1L);
+        // 2. List capacity CS API call.
+        String csResponse = cloudStackResourceCapacity.listCapacity(optionalMap, CloudStackConstants.JSON);
+        JSONObject csCapacity = new JSONObject(csResponse).getJSONObject(CloudStackConstants.CS_CAPACITY_LIST_RESPONSE);
+        if (csCapacity.has(CloudStackConstants.CS_CAPACITY)) {
+            JSONArray capacityArrayJSON = csCapacity.getJSONArray(CloudStackConstants.CS_CAPACITY);
+            for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
+                String resourceType = capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CAPACITY_TYPE);
+                // 2.1 Total capacity in public pool for each resource type.
+                Long tempTotalCapacity = Long
+                        .valueOf(capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CS_CAPACITY_TOTAL));
+                // 2.2 Used capacity in public pool for each resource type.
+                Long tempCapacityUsed = Long
+                        .valueOf(capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CS_CAPACITY_USED));
+                if (GenericConstants.RESOURCE_CAPACITY.containsKey(resourceType)) {
+                    // 3.1 Total available resource in public pool for each
+                    // resource type.
+                    resourceUsage = tempTotalCapacity - tempCapacityUsed;
+                    // 4. Check whether resource is available to create new
+                    // Volume
+                    // with resource type.
+                    switch (resourceType) {
+                    // 4.5 Check public ip address availability.
+                    case GenericConstants.RESOURCE_IP_ADDRESS:
+                        optionalMap.put(CloudStackConstants.CS_ASSOCIATE_NETWORK, network.getUuid());
+                        optionalMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
+                        optionalMap.put(CloudStackConstants.CS_FOR_VM_NETWORK, CloudStackConstants.STATUS_ACTIVE);
+                        config.setServer(1L);
+                        String csIpResponse = cloudStackResourceCapacity.listPublicIpAddress(optionalMap,
+                                CloudStackConstants.JSON);
+                        JSONObject csIpCapacity = new JSONObject(csIpResponse)
+                                .getJSONObject(CloudStackConstants.CS_PUBLIC_IPADDRESS_RESPONSE);
+                        if (csIpCapacity.has(CloudStackConstants.CS_CAPACITY_COUNT)) {
+                            LOGGER.debug("Already IP address acquired ", resourceType);
+                        } else if (resourceUsage < 1) {
+                            errMessage = CloudStackConstants.RESOURCE_CHECK + " public.ip.available "
+                                    + CloudStackConstants.CONTACT_CLOUD_ADMIN;
+                        }
+                        break;
+                    default:
+                        LOGGER.debug("No Resource ", resourceType);
+                    }
+                }
+            }
+        }
+        // 5. If any resource shortage then return error message otherwise
+        // return empty string.
+        return errMessage;
+    }
+}

@@ -272,4 +272,10 @@ public class EventTypes {
 
     /** Network Delete Events. */
     public static final String EVENT_NETWORK_DELETE = "DELETE";
+
+    /** Domain event update     */
+    public static final Object EVENT_DOMAIN_UPDATE = "DOMAIN.UPDATE";
+
+    /** State of resources. */
+    public static final String OLD_RESOURCE_STATE = "old-state";
 }

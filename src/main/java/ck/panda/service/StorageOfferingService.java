@@ -30,7 +30,7 @@ public interface StorageOfferingService extends CRUDService<StorageOffering> {
 
     /**
      * To get Tags list of Storage Offer from cloudstack server.
-     *
+     * @param userId user id
      * @param userId user id.
      * @param isActive unique id.
      * @return storage tags

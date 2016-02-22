@@ -37,14 +37,14 @@ public class GenericConstants {
     public static final String NOT_IMPLEMENTED = "501";
 
     /** Resource type constants values. */
-    public static final String RESOURCE_MEMORY = "0", RESOURCE_CPU = "1", RESOURCE_SECONDARY_STORAGE = "2",
+    public static final String RESOURCE_MEMORY = "0", RESOURCE_CPU = "1", RESOURCE_SECONDARY_STORAGE = "6",
             RESOURCE_PRIMARY_STORAGE = "3", RESOURCE_IP_ADDRESS = "4";
 
     /** Constant map for default resource types. */
     public static final Map<String, String> RESOURCE_CAPACITY = Arrays
             .stream(new String[][] {{"0", "9"},
                 {"1", "8"},
-                {"2", "11"},
+                {"6", "11"},
                 {"3", "10"},
                 {"4", "1"}})
             .collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));

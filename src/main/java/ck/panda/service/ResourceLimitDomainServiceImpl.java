@@ -16,9 +16,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitDomain;
+import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
 import ck.panda.domain.repository.jpa.ResourceLimitDomainRepository;
 import ck.panda.util.AppValidator;
@@ -28,6 +32,7 @@ import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
+import ck.panda.util.error.exception.CustomGenericException;
 import ck.panda.util.error.exception.EntityNotFoundException;
 
 /**
@@ -74,6 +79,10 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
     /** Autowired TokenDetails. */
     @Autowired
     private TokenDetails tokenDetails;
+
+    /** Department Service reference. */
+    @Autowired
+    private DepartmentService departmentService;
 
     @Override
     public ResourceLimitDomain save(ResourceLimitDomain resource) throws Exception {
@@ -180,6 +189,7 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
             resource.setDomainId(convertEntityService.getDomainId(resource.getTransDomainId()));
             resource.setUniqueSeperator(
                     resource.getTransDomainId() + "-" + ResourceType.values()[(resource.getTransResourceType())]);
+            resource.setUniqueSeperator(resource.getDomainId() + resource.getResourceType().toString());
             resourceList.add(resource);
         }
         return resourceList;
@@ -193,17 +203,27 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                this.deleteResourceLimitByDomain(resourceLimits.get(0).getDomain().getId());
+                String isError = updateResourceDomain(resourceLimits.get(0), errors);
+                if (isError != null) {
+                    throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, isError);
+                }
                 for (ResourceLimitDomain resource : resourceLimits) {
-                    updateResourceDomain(resource);
-                    resource.setIsActive(true);
-                    resource.setDomainId(resource.getDomain().getId());
-                    resourceLimitDomainRepo.save(resource);
+                    if (resource.getId() != null) {
+                        ResourceLimitDomain resourceData = resourceLimitDomainRepo.findOne(resource.getId());
+                        resourceData.setMax(resource.getMax());
+                        resourceData.setIsActive(true);
+                        resourceData.setDomainId(resource.getDomain().getId());
+                        resourceLimitDomainRepo.save(resourceData);
+                    } else {
+                        updateResourceDomain(resource, errors);
+                        resource.setIsActive(true);
+                        resourceLimitDomainRepo.save(resource);
+                    }
                 }
             }
-            return (List<ResourceLimitDomain>) resourceLimitDomainRepo.findAll();
+            return (List<ResourceLimitDomain>) resourceLimitDomainRepo.findAllByDomainIdAndIsActive(resourceLimits.get(0).getDomain().getId(), true);
         } else {
-            return (List<ResourceLimitDomain>) resourceLimitDomainRepo.findAll();
+            return (List<ResourceLimitDomain>) resourceLimitDomainRepo.findAllByDomainIdAndIsActive(resourceLimits.get(0).getDomain().getId(), true);
         }
     }
 
@@ -228,12 +248,14 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
      */
     private Errors validateResourceLimit(List<ResourceLimitDomain> resourceLimits) throws Exception {
         Errors errors = new Errors(messageSource);
+
         for (ResourceLimitDomain resourceLimit : resourceLimits) {
+
             Long departmentResourceCount = resourceLimitDepartmentService
                     .findByResourceCountByDepartmentAndResourceType(resourceLimit.getDomainId(),
                             ResourceLimitDepartment.ResourceType.valueOf(resourceLimit.getResourceType().name()), 0L,
                             true);
-            if (resourceLimit.getMax() < departmentResourceCount) {
+            if (resourceLimit.getMax() < departmentResourceCount && resourceLimit.getMax() != -1) {
                 errors.addFieldError(resourceLimit.getResourceType().toString(),
                         departmentResourceCount + " " + resourceLimit.getResourceType().toString()
                                 + " already.allocated.to.departments.of.this.domain");
@@ -248,16 +270,17 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
      * @param resource resource of Domain.
      * @throws Exception error
      */
-    private void updateResourceDomain(ResourceLimitDomain resource) throws Exception {
+    private String updateResourceDomain(ResourceLimitDomain resource, Errors errors) throws Exception {
+        String errMessage = null;
         config.setServer(1L);
         String resourceLimits = csResourceLimitService.updateResourceLimit(resource.getResourceType().ordinal(), "json",
                 optional(resource));
         LOGGER.info("Resource limit update response " + resourceLimits);
-        JSONObject resourceLimitsResponse = new JSONObject(resourceLimits).getJSONObject("updateresourcelimitresponse")
-                .getJSONObject("resourcelimit");
+        JSONObject resourceLimitsResponse = new JSONObject(resourceLimits).getJSONObject("updateresourcelimitresponse");
         if (resourceLimitsResponse.has("errorcode")) {
-            System.out.println("=========== +" + "============= ERROR IN RESOURCE DOMAIN");
+            errMessage = resourceLimitsResponse.getString("errortext");
         }
+        return errMessage;
     }
 
     @Override
