@@ -81,6 +81,10 @@ public class SnapshotPolicy {
     @Transient
     private String hours;
 
+    /** Meridian for snapshot policy. */
+    @Column(name = "meridian")
+    private String meridian;
+
     /** Interval type. */
     @Column(name = "interval_type")
     private IntervalType intervalType;
@@ -482,7 +486,6 @@ public class SnapshotPolicy {
         this.scheduleTime = scheduleTime;
     }
 
-
     /**
      * Get the transient volume id.
      *
@@ -502,10 +505,28 @@ public class SnapshotPolicy {
     }
 
     /**
-     * Convert JSONObject to domain entity.
+     * Get the meridian time.
+     *
+     * @return the meridian
+     */
+    public String getMeridian() {
+        return meridian;
+    }
+
+    /**
+     * Set the meridian.
+     *
+     * @param meridian to set
+     */
+    public void setMeridian(String meridian) {
+        this.meridian = meridian;
+    }
+
+    /**
+     * Convert JSONObject to snapshot policy entity.
      *
      * @param jsonObject json object
-     * @return domain entity object.
+     * @return snapshot policy entity object.
      * @throws JSONException handles json exception.
      */
     public static SnapshotPolicy convert(JSONObject jsonObject) throws JSONException {
@@ -517,6 +538,9 @@ public class SnapshotPolicy {
             snapshot.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
             snapshot.setTransVolumeId(JsonUtil.getStringValue(jsonObject, "volumeid"));
             snapshot.setIntervalType(IntervalType.values()[(JsonUtil.getIntegerValue(jsonObject, "intervaltype"))]);
+            snapshot.setTimeZone(JsonUtil.getStringValue(jsonObject, "timezone"));
+            snapshot.setMaximumSnapshots((JsonUtil.getIntegerValue(jsonObject, "maxsnaps")));
+            snapshot.setScheduleTime((JsonUtil.getStringValue(jsonObject, "schedule")));
         } catch (Exception ex) {
             LOGGER.error("SnapshotPolicy-convert", ex);
         }
@@ -537,6 +561,4 @@ public class SnapshotPolicy {
         }
         return snapshotMap;
     }
-
-
 }

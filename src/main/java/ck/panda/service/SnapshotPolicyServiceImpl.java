@@ -82,15 +82,15 @@ public class SnapshotPolicyServiceImpl implements SnapshotPolicyService {
                   snapshot.setScheduleTime(scheduleHour);
                   break;
               case DAILY :
-                  String scheduleTime = snapshot.getHours()+ ':' + snapshot.getMinutes();
+                  String scheduleTime = snapshot.getMinutes() + ':' +  snapshot.getHours() ;
                   snapshot.setScheduleTime(scheduleTime);
                   break;
               case MONTHLY :
-                  String scheduleMonth = snapshot.getHours()+ ':' + snapshot.getMinutes() + ':' + snapshot.getDayOfMonth();
+                  String scheduleMonth = snapshot.getMinutes()+ ':' + snapshot.getHours() + ':' + snapshot.getDayOfMonth();
                   snapshot.setScheduleTime(scheduleMonth);
                   break;
               case WEEKLY :
-                  String scheduleWeekly = snapshot.getHours()+ ':' + snapshot.getMinutes() + ':' + snapshot.getDayOfWeek();
+                  String scheduleWeekly = snapshot.getMinutes()+ ':' + snapshot.getHours() + ':' + snapshot.getDayOfWeek().ordinal();
                   snapshot.setScheduleTime(scheduleWeekly);
                   break;
               }
@@ -117,8 +117,8 @@ public class SnapshotPolicyServiceImpl implements SnapshotPolicyService {
 
     @Override
     public void delete(SnapshotPolicy snapshot) throws Exception {
-
-        policyRepo.delete(snapshot);
+        snapshot.setIsActive(false);
+        policyRepo.save(snapshot);
     }
 
     @Override

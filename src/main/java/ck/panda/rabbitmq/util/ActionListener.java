@@ -182,6 +182,12 @@ public class ActionListener implements MessageListener {
         case EventTypes.EVENT_SNAPSHOT:
             LOGGER.debug("Volume snapshot sync", eventMessage);
             break;
+        case EventTypes.EVENT_SNAPSHOT_POLICY:
+             if(eventName.equals(EventTypes.EVENT_SNAPSHOT_POLICY_CREATE)) {
+            LOGGER.debug("Volume snapshot policy sync", eventMessage);
+            syncService.syncSnapshotPolicy();
+             }
+            break;
         case EventTypes.EVENT_VOLUME:
             if (eventName.contains(EventTypes.EVENT_VOLUME_DELETE)) {
                 LOGGER.debug("Volume sync", eventMessage);
@@ -202,20 +208,20 @@ public class ActionListener implements MessageListener {
             break;
         case EventTypes.EVENT_VM:
             LOGGER.debug("VM update sync", eventMessage);
-			if (eventName.contains(EventTypes.EVENT_VM_UPDATE)) {
-				ObjectMapper mapper = new ObjectMapper();
-				eventResponse = mapper.readValue(eventMessage, ResponseEvent.class);
-				asyncService.syncVMUpdate(eventResponse.getEntityuuid());
-			}
+            if (eventName.contains(EventTypes.EVENT_VM_UPDATE)) {
+                ObjectMapper mapper = new ObjectMapper();
+                eventResponse = mapper.readValue(eventMessage, ResponseEvent.class);
+                asyncService.syncVMUpdate(eventResponse.getEntityuuid());
+            }
             break;
         case EventTypes.EVENT_VNC:
             LOGGER.debug("VNC sync", eventMessage);
             break;
         case EventTypes.EVENT_PROJECT:
-			LOGGER.debug("VNC sync", eventMessage);
-			if (eventName.contains(EventTypes.EVENT_PROJECT_UPDATE)) {
-				syncService.syncProject();
-			}
+            LOGGER.debug("VNC sync", eventMessage);
+            if (eventName.contains(EventTypes.EVENT_PROJECT_UPDATE)) {
+                syncService.syncProject();
+            }
             break;
         case EventTypes.EVENT_VPC:
             LOGGER.debug("VPC sync", eventMessage);

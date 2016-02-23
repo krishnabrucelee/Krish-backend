@@ -30,6 +30,7 @@ import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.PortForwarding;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.Snapshot;
+import ck.panda.domain.entity.SnapshotPolicy;
 import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.Template;
@@ -150,6 +151,11 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /** Service reference to Snapshot. */
     @Autowired
     private SnapshotService snapShotService;
+
+    /** Snapshot policy Service reference to Snapshot. */
+    @Autowired
+    private SnapshotPolicyService snapShotPolicyService;
+
 
     /** Cloud stack firewall service. */
     @Autowired
@@ -1250,6 +1256,14 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
 
     }
 
+    /**
+     * Sync with Cloud Server snapshot.
+     *
+     * @param jobResult from ACS.
+     * @param eventObject snapshot event object.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception ACS unhandled errors.
+     */
     @SuppressWarnings("unused")
     public void asyncSnapshot(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
 
@@ -1266,6 +1280,14 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                  snapShotService.save(snapShot);
              }
 
+         }
+         if (eventObject.getString("commandEventType").equals("SNAPSHOT.DELETE")) {
+             JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
+             Snapshot snapshot = snapShotService.findByUUID(json.getString("id"));
+             if (snapshot != null) {
+                 snapshot.setSyncFlag(false);
+                 snapShotService.softDelete(snapshot);
+             }
          }
     }
 
