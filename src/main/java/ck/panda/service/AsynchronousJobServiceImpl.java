@@ -1302,8 +1302,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
              vmSnapshotService.save(vmsnapshot);
 
              List<VmSnapshot> vmSnapshotList = vmSnapshotService.findByVmInstance(vmsnapshot.getVmId(), false);
-             for (int i = 1; i <= vmSnapshotList.size(); i++) {
-                 if (vmSnapshotList.size() == i) {
+             for (int i = 0; i < vmSnapshotList.size(); i++) {
+            	 int j = i + 1;
+                 if (vmSnapshotList.size() == j) {
                      vmSnapshotList.get(i).setIsCurrent(true);
                      vmSnapshotList.get(i).setSyncFlag(false);
                      vmSnapshotService.save(vmSnapshotList.get(i));
