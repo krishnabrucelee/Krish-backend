@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
@@ -65,6 +66,7 @@ public class SnapshotPolicyServiceImpl implements SnapshotPolicyService {
     private ConfigUtil configServer;
 
     @Override
+    @PreAuthorize("hasPermission(#snapshot.getSyncFlag(), 'RECURRING_SNAPSHOT')")
     public SnapshotPolicy save(SnapshotPolicy snapshot) throws Exception {
         if(snapshot.getSyncFlag()) {
         Errors errors = validator.rejectIfNullEntity(CS_SNAPSHOT, snapshot);

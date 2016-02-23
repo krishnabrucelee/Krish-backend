@@ -9,9 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
-import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Snapshot.Status;
@@ -23,7 +23,6 @@ import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
-import ck.panda.util.error.exception.CustomGenericException;
 
 /**
  * Snapshot service implementation class.
@@ -70,6 +69,7 @@ public class SnapshotServiceImpl implements SnapshotService {
     public static final String CS_CREATE_VOLUME_RESPONSE = "createvolumeresponse";
 
     @Override
+    @PreAuthorize("hasPermission(#snapshot.getSyncFlag(), 'DISK_SNAPSHOT')")
     public Snapshot save(Snapshot snapshot) throws Exception {
         if (snapshot.getSyncFlag()) {
             this.validateSnapshot(snapshot);
