@@ -176,14 +176,6 @@ public class VmSnapshot implements Serializable {
     @Transient
     private String transvmInstanceId;
 
-    /** Transient network of the instance. */
-    @Transient
-    private String transZoneId;
-
-    /** Transient owner of the instance. */
-    @Transient
-    private String transOwnerId;
-
     /** Transient domain of the instance. */
     @Transient
     private String transDomainId;
@@ -657,20 +649,6 @@ public class VmSnapshot implements Serializable {
     }
 
     /**
-     * @return the transZoneId
-     */
-    public String getTransZoneId() {
-        return transZoneId;
-    }
-
-    /**
-     * @param transZoneId the transZoneId to set
-     */
-    public void setTransZoneId(String transZoneId) {
-        this.transZoneId = transZoneId;
-    }
-
-    /**
      * @return the transDisplayName
      */
     public String getTransDisplayName() {
@@ -696,20 +674,6 @@ public class VmSnapshot implements Serializable {
      */
     public void setTransDomainId(String transDomainId) {
         this.transDomainId = transDomainId;
-    }
-
-    /**
-     * @return the transOwnerId
-     */
-    public String getTransOwnerId() {
-        return transOwnerId;
-    }
-
-    /**
-     * @param transOwnerId the transOwnerId to set
-     */
-    public void setTransOwnerId(String transOwnerId) {
-        this.transOwnerId = transOwnerId;
     }
 
     @Override
@@ -771,19 +735,16 @@ public class VmSnapshot implements Serializable {
         VmSnapshot vmSnapshot = new VmSnapshot();
         vmSnapshot.setSyncFlag(false);
         try {
-            String owner = JsonUtil.getStringValue(jsonObject, "displayname");
             vmSnapshot.setIsRemoved(false);
-            vmSnapshot.setName(JsonUtil.getStringValue(jsonObject, "displayname"));
-            vmSnapshot.setDescription(JsonUtil.getStringValue(jsonObject, "description"));
-            vmSnapshot.setParent(JsonUtil.getStringValue(jsonObject, "parent"));
-            vmSnapshot.setIsCurrent(JsonUtil.getBooleanValue(jsonObject, "current"));
             vmSnapshot.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            vmSnapshot.setTransDomainId(JsonUtil.getStringValue(jsonObject, "virtualmachineid"));
-            vmSnapshot.setTransvmInstanceId(JsonUtil.getStringValue(jsonObject, "virtualmachineid"));
             vmSnapshot.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
+            vmSnapshot.setDescription(JsonUtil.getStringValue(jsonObject, "description"));
+            vmSnapshot.setName(JsonUtil.getStringValue(jsonObject, "displayname"));
+            vmSnapshot.setIsCurrent(JsonUtil.getBooleanValue(jsonObject, "current"));
             vmSnapshot.setType(SnapshotType.valueOf(JsonUtil.getStringValue(jsonObject, "type")));
-            vmSnapshot.setTransZoneId(JsonUtil.getStringValue(jsonObject, "virtualmachineid"));
-            vmSnapshot.setTransOwnerId(JsonUtil.getStringValue(jsonObject, "virtualmachineid"));
+            vmSnapshot.setParent(JsonUtil.getStringValue(jsonObject, "parent"));
+            vmSnapshot.setTransvmInstanceId(JsonUtil.getStringValue(jsonObject, "virtualmachineid"));
+            vmSnapshot.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
         } catch (Exception e) {
             e.printStackTrace();
         }

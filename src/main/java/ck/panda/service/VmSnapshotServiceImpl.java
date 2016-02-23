@@ -170,11 +170,11 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
         switch (event) {
         case EventTypes.EVENT_VM_SNAPSHOT_REVERT:
             try {
-            	config.setUserServer();
+                config.setUserServer();
                 String snapshotResponse = csSnapshotService.revertToVMSnapshot(vmSnapshot.getUuid());
                 JSONObject snapshots = new JSONObject(snapshotResponse).getJSONObject("reverttovmsnapshotresponse");
                 if (snapshots.has("jobid")) {
-                	config.setUserServer();
+                    config.setUserServer();
                     String snapshot = csSnapshotService.vmSnapshotJobResult(snapshots.getString("jobid"));
                     JSONObject jobresult = new JSONObject(snapshot).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
@@ -190,11 +190,11 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
             break;
         case EventTypes.EVENT_VM_SNAPSHOT_DELETE:
             try {
-            	config.setUserServer();
+                config.setUserServer();
                 String snapshotResponse = csSnapshotService.deleteVMSnapshot(vmSnapshot.getUuid());
                 JSONObject snapshots = new JSONObject(snapshotResponse).getJSONObject("deletevmsnapshotresponse");
                 if (snapshots.has("jobid")) {
-                	config.setUserServer();
+                    config.setUserServer();
                     String snapshot = csSnapshotService.vmSnapshotJobResult(snapshots.getString("jobid"));
                     JSONObject jobresult = new JSONObject(snapshot).getJSONObject("queryasyncjobresultresponse");
                     if (jobresult.getString("jobstatus").equals("2")) {
@@ -234,9 +234,8 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                 // the converted vm snapshot entity to list
                 VmSnapshot vmSnapshot = VmSnapshot.convert(vmSnapshotListJSON.getJSONObject(i));
                 vmSnapshot.setVmId(convertEntityService.getVmInstanceId(vmSnapshot.getTransvmInstanceId()));
-                vmSnapshot.setDomainId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getDomainId());
-                vmSnapshot
-                        .setOwnerId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getInstanceOwnerId());
+                vmSnapshot.setDomainId(convertEntityService.getDomainId(vmSnapshot.getTransDomainId()));
+                vmSnapshot.setOwnerId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getInstanceOwnerId());
                 vmSnapshot.setZoneId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getZoneId());
 
                 vmsnapshotList.add(vmSnapshot);
