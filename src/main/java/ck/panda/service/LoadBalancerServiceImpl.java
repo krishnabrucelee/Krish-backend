@@ -534,7 +534,6 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         for (LoadBalancerRule lbRule: listresponse) {
             HashMap<String, String> lbMap = new HashMap<String, String>();
             lbMap.put("lbruleid", lbRule.getUuid());
-            lbMap.put("listall", "true");
             configUtil.setServer(1L);
             String csStickyResponse = cloudStackLoadBalancerService.listLBStickinessPolicies(CloudStackConstants.JSON, lbMap);
             JSONObject listStickyJSON = new JSONObject(csStickyResponse).getJSONObject("listlbstickinesspoliciesresponse");
