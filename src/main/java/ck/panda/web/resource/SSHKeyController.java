@@ -90,7 +90,7 @@ public class SSHKeyController extends CRUDController<SSHKey> implements ApiContr
     /**
      * Find the list of active SSH keys.
      *
-     * @return projects project list
+     * @return  SSH Key list
      * @throws Exception error occurs
      */
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
