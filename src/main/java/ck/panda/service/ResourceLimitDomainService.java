@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
 import ck.panda.util.domain.CRUDService;
+import ck.panda.util.error.Errors;
 
 /**
  * Resource Limit Service.
@@ -18,7 +19,7 @@ import ck.panda.util.domain.CRUDService;
 public interface ResourceLimitDomainService extends CRUDService<ResourceLimitDomain> {
 
     /**
-     * To get list of Volume from cloudstack server.
+     * To get list of Volume from cloud stack server.
      *
      * @param domainId domain id.
      * @return ResourceLimit list from server
@@ -48,13 +49,13 @@ public interface ResourceLimitDomainService extends CRUDService<ResourceLimitDom
     /**
      * Find all resource type by domain id.
      *
-     * @param id domain
+     * @param domainId domain id
      * @param isActive true/false
      * @param resourceType resource type.
      * @return domain resource count.
      * @throws Exception error
      */
-    ResourceLimitDomain findByDomainAndResourceType(Long id, ResourceLimitDomain.ResourceType resourceType,
+    ResourceLimitDomain findByDomainAndResourceType(Long domainId, ResourceLimitDomain.ResourceType resourceType,
             Boolean isActive) throws Exception;
 
     /**
@@ -73,7 +74,7 @@ public interface ResourceLimitDomainService extends CRUDService<ResourceLimitDom
     ResourceLimitDomain findAllByResourceType(Long domainId);
 
     /**
-     * Get ResourceCount.
+     * Get Resource count of domain.
      *
      * @param domainId domain id
      * @param resource resource type count
@@ -85,9 +86,15 @@ public interface ResourceLimitDomainService extends CRUDService<ResourceLimitDom
     /**
      * List current domain for resource count.
      *
-     * @return domain
+     * @return Resource limit domain
      * @throws Exception error
      */
     List<ResourceLimitDomain> findCurrentLoginDomain() throws Exception;
 
+    /**
+     * Update resource limit for domain quota.
+     *
+     * @throws Exception unhandled error
+     */
+    void asyncResourceDomain(Long domainId) throws Exception;
 }

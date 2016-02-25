@@ -202,23 +202,27 @@ public class ActionListener implements MessageListener {
             break;
         case EventTypes.EVENT_VM:
             LOGGER.debug("VM update sync", eventMessage);
-			if (eventName.contains(EventTypes.EVENT_VM_UPDATE)) {
-				ObjectMapper mapper = new ObjectMapper();
-				eventResponse = mapper.readValue(eventMessage, ResponseEvent.class);
-				asyncService.syncVMUpdate(eventResponse.getEntityuuid());
-			}
+            if (eventName.contains(EventTypes.EVENT_VM_UPDATE)) {
+                ObjectMapper mapper = new ObjectMapper();
+                eventResponse = mapper.readValue(eventMessage, ResponseEvent.class);
+                asyncService.syncVMUpdate(eventResponse.getEntityuuid());
+            }
             break;
         case EventTypes.EVENT_VNC:
             LOGGER.debug("VNC sync", eventMessage);
             break;
         case EventTypes.EVENT_PROJECT:
-			LOGGER.debug("VNC sync", eventMessage);
-			if (eventName.contains(EventTypes.EVENT_PROJECT_UPDATE)) {
-				syncService.syncProject();
-			}
+            LOGGER.debug("VNC sync", eventMessage);
+            if (eventName.contains(EventTypes.EVENT_PROJECT_UPDATE)) {
+                syncService.syncProject();
+            }
             break;
         case EventTypes.EVENT_VPC:
             LOGGER.debug("VPC sync", eventMessage);
+            break;
+        case EventTypes.EVENT_STATIC_NAT:
+            LOGGER.debug("Static nat sync", eventMessage);
+            syncService.syncIpAddress();
             break;
         default:
             LOGGER.debug("No sync required", eventMessage);

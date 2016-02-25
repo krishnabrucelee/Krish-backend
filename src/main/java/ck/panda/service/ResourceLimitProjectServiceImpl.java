@@ -269,7 +269,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
             if (projectLimit != null) {
                 if (projectLimit.getMax() < totalCount) {
                     errors.addFieldError(resourceLimit.getResourceType().toString(),
-                            totalCount + " " + resourceLimit.getResourceType().toString() + "resource.limit.exceed");
+                            projectLimit.getMax() + " in " + resourceLimit.getResourceType().toString() + " " + " for resource limit department exceeded");
                 }
             } else {
                 errors.addGlobalError("update.department.quota.first");
@@ -287,8 +287,6 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
 
     @Override
     public List<ResourceLimitProject> findAllByProjectIdAndIsActive(Long projectId, Boolean isActive) throws ApplicationException, Exception {
-//        //This call is for update resource limit form ACS.
-//        syncService.syncResourceLimitProject(convertEntityService.getProjectById(projectId));
         return (List<ResourceLimitProject>) resourceLimitProjectRepo.findAllByProjectIdAndIsActive(projectId, isActive);
     }
 
@@ -304,4 +302,10 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
         return resourceLimitProjectRepo.findResourceByProjectAndResourceType(projectId, resourceType, isActive);
     }
 
+    @Override
+    public List<ResourceLimitProject> findAllByProjectAndIsActive(Long projectId, Boolean isActive) throws ApplicationException, Exception {
+        //This call is for update resource limit form ACS.
+        syncService.syncResourceLimitProject(convertEntityService.getProjectById(projectId));
+        return (List<ResourceLimitProject>) resourceLimitProjectRepo.findAllByProjectIdAndIsActive(projectId, isActive);
+    }
 }

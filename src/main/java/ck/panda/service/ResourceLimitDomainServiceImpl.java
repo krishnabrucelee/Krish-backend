@@ -18,11 +18,8 @@ import org.springframework.stereotype.Service;
 
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Domain;
-import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitDomain;
-import ck.panda.domain.entity.Department;
-import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
 import ck.panda.domain.repository.jpa.ResourceLimitDomainRepository;
 import ck.panda.util.AppValidator;
@@ -80,9 +77,9 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
     @Autowired
     private TokenDetails tokenDetails;
 
-    /** Department Service reference. */
+    /** Cloud stack sync service. */
     @Autowired
-    private DepartmentService departmentService;
+    private SyncService syncService;
 
     @Override
     public ResourceLimitDomain save(ResourceLimitDomain resource) throws Exception {
@@ -203,11 +200,11 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                String isError = updateResourceDomain(resourceLimits.get(0), errors);
+            for (ResourceLimitDomain resource : resourceLimits) {
+                String isError = updateResourceDomain(resource, errors);
                 if (isError != null) {
                     throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, isError);
-                }
-                for (ResourceLimitDomain resource : resourceLimits) {
+                } else {
                     if (resource.getId() != null) {
                         ResourceLimitDomain resourceData = resourceLimitDomainRepo.findOne(resource.getId());
                         resourceData.setMax(resource.getMax());
@@ -219,6 +216,7 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
                         resource.setIsActive(true);
                         resourceLimitDomainRepo.save(resource);
                     }
+            }
                 }
             }
             return (List<ResourceLimitDomain>) resourceLimitDomainRepo.findAllByDomainIdAndIsActive(resourceLimits.get(0).getDomain().getId(), true);
@@ -257,8 +255,8 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
                             true);
             if (resourceLimit.getMax() < departmentResourceCount && resourceLimit.getMax() != -1) {
                 errors.addFieldError(resourceLimit.getResourceType().toString(),
-                        departmentResourceCount + " " + resourceLimit.getResourceType().toString()
-                                + " already.allocated.to.departments.of.this.domain");
+                        departmentResourceCount + " in " + resourceLimit.getResourceType().toString() + " "
+                                + "already allocated to departments of this domain");
             }
         }
         return errors;
@@ -308,6 +306,11 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
     public List<ResourceLimitDomain> findCurrentLoginDomain() throws NumberFormatException, Exception {
         Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         return (List<ResourceLimitDomain>) resourceLimitDomainRepo.findAllByDomainIdAndIsActive(domain.getId(), true);
+    }
+
+    @Override
+    public void asyncResourceDomain(Long domainId) throws Exception {
+        syncService.syncResourceLimitDomain(convertEntityService.getDomainById(domainId));
     }
 
 }
