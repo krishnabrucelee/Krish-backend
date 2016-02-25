@@ -192,7 +192,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                                     convertEntityService.getDomainById(vmInstance.getDomainId()).getUuid());
                         }
                         if (vmInstance.getStorageOfferingId() != null) {
-                            this.customStorageForInstance(vmInstance);
+                            this.customStorageForInstance(vmInstance, optionalMap);
                         }
                         if (vmInstance.getComputeOfferingId() != null) {
                             this.customComputeForInstance(vmInstance, optionalMap);
@@ -1147,14 +1147,14 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 vmInstance.setZoneId(convertEntityService.getZoneId(vmInstance.getTransZoneId()));
                 vmInstance.setNetworkId(convertEntityService.getNetworkId(vmInstance.getTransNetworkId()));
                 vmInstance.setProjectId(convertEntityService.getProjectId(vmInstance.getTransProjectId()));
+                vmInstance.setDepartmentId(
+                        convertEntityService.getDepartmentByUsernameAndDomains(vmInstance.getTransDepartmentId(),
+                                convertEntityService.getDomain(vmInstance.getTransDomainId())));
                 if (vmInstance.getTransProjectId() != null) {
                     vmInstance.setDepartmentId(convertEntityService.getProject(vmInstance.getTransProjectId()).getDepartmentId());
                 }
                 vmInstance.setHostId(convertEntityService.getHostId(vmInstance.getTransHostId()));
                 vmInstance.setInstanceOwnerId(convertEntityService.getOwnerByUuid(vmInstance.getTransOwnerId()));
-                vmInstance.setDepartmentId(
-                        convertEntityService.getDepartmentByUsernameAndDomains(vmInstance.getTransDepartmentId(),
-                                convertEntityService.getDomain(vmInstance.getTransDomainId())));
                 vmInstance.setTemplateId(convertEntityService.getTemplateId(vmInstance.getTransTemplateId()));
                 vmInstance.setComputeOfferingId(
                         convertEntityService.getComputeOfferId(vmInstance.getTransComputeOfferingId()));
@@ -1246,8 +1246,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
      * @param vmInstance Vm instance object
      * @throws Exception error
      */
-    public void customStorageForInstance(VmInstance vmInstance) throws Exception {
-        HashMap<String, String> instanceMap = new HashMap<>();
+    public HashMap<String, String> customStorageForInstance(VmInstance vmInstance, HashMap<String, String> instanceMap) throws Exception {
             instanceMap.put(CloudStackConstants.CS_DISK_OFFERING_ID,
                     convertEntityService.getStorageOfferById(vmInstance.getStorageOfferingId()).getUuid());
             //Check the disk size not null validation and set the disk size
@@ -1259,6 +1258,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 instanceMap.put(CloudStackConstants.CS_CUSTOM_DETAILS + CS_MAX_IOPS_DO,vmInstance.getDiskMaxIops().toString());
                 instanceMap.put(CloudStackConstants.CS_CUSTOM_DETAILS + CS_MAX_IOPS_DO, vmInstance.getDiskMinIops().toString());
             }
+            return instanceMap;
        }
 
     @Override

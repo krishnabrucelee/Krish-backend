@@ -85,4 +85,15 @@ public interface ResourceLimitProjectService extends CRUDService<ResourceLimitPr
     ResourceLimitProject findResourceByProjectAndResourceType(Long projectId,
             ResourceType resourceType, Boolean isActive) throws Exception;
 
+    /**
+     * Find the quota limit for Project.
+     *
+     * @param projectId project id.
+     * @param isActive true/false
+     * @return project quota
+     * @throws Exception error
+     * @throws ApplicationException application error
+     */
+    List<ResourceLimitProject> findAllByProjectAndIsActive(Long projectId, Boolean isActive) throws ApplicationException, Exception;
+
 }
