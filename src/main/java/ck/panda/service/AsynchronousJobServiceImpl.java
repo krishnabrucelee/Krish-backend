@@ -1254,14 +1254,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with Cloud Server VM snapshot.
      *
-     * @param jobResult
-     *            job result
-     * @param eventObject
-     *            volume event object
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @param jobResult job result
+     * @param eventObject VM snapshot event object
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     public void asyncVMSnapshot(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
 
