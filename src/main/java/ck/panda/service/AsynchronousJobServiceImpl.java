@@ -1265,8 +1265,8 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      */
     public void asyncVMSnapshot(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
 
-         if (eventObject.getString("commandEventType").equals(EventTypes.EVENT_VM_SNAPSHOT_CREATE)) {
-             VmSnapshot vmSnapshot = VmSnapshot.convert(jobResult.getJSONObject("vmsnapshot"));
+         if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VM_SNAPSHOT_CREATE)) {
+             VmSnapshot vmSnapshot = VmSnapshot.convert(jobResult.getJSONObject(CloudStackConstants.CS_VM_SNAPSHOT));
              vmSnapshot.setVmId(convertEntityService.getVmInstanceId(vmSnapshot.getTransvmInstanceId()));
              vmSnapshot.setDomainId(convertEntityService.getDomainId(vmSnapshot.getTransDomainId()));
              vmSnapshot.setOwnerId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getInstanceOwnerId());
@@ -1277,9 +1277,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
              }
          }
 
-         if (eventObject.getString("commandEventType").equals(EventTypes.EVENT_VM_SNAPSHOT_REVERT)) {
-             JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
-             VmSnapshot vmsnapshot = vmSnapshotService.findByUUID(json.getString("vmsnapshotid"));
+         if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VM_SNAPSHOT_REVERT)) {
+             JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
+             VmSnapshot vmsnapshot = vmSnapshotService.findByUUID(json.getString(CloudStackConstants.CS_VM_SNAPSHOT_ID));
              List<VmSnapshot> vmSnapshotList = vmSnapshotService.findByVmInstance(vmsnapshot.getVmId(), false);
              for (VmSnapshot vmSnap : vmSnapshotList) {
                  if (vmSnap.getIsCurrent()) {
@@ -1294,9 +1294,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
              vmSnapshotService.save(vmsnapshot);
          }
 
-         if (eventObject.getString("commandEventType").equals(EventTypes.EVENT_VM_SNAPSHOT_DELETE)) {
-             JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
-             VmSnapshot vmsnapshot = vmSnapshotService.findByUUID(json.getString("vmsnapshotid"));
+         if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VM_SNAPSHOT_DELETE)) {
+             JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
+             VmSnapshot vmsnapshot = vmSnapshotService.findByUUID(json.getString(CloudStackConstants.CS_VM_SNAPSHOT_ID));
              vmsnapshot.setIsRemoved(true);
              vmsnapshot.setSyncFlag(false);
              vmSnapshotService.save(vmsnapshot);

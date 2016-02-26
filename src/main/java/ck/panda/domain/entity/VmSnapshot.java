@@ -26,6 +26,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -736,15 +738,15 @@ public class VmSnapshot implements Serializable {
         vmSnapshot.setSyncFlag(false);
         try {
             vmSnapshot.setIsRemoved(false);
-            vmSnapshot.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            vmSnapshot.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
-            vmSnapshot.setDescription(JsonUtil.getStringValue(jsonObject, "description"));
-            vmSnapshot.setName(JsonUtil.getStringValue(jsonObject, "displayname"));
-            vmSnapshot.setIsCurrent(JsonUtil.getBooleanValue(jsonObject, "current"));
-            vmSnapshot.setType(SnapshotType.valueOf(JsonUtil.getStringValue(jsonObject, "type")));
-            vmSnapshot.setParent(JsonUtil.getStringValue(jsonObject, "parent"));
-            vmSnapshot.setTransvmInstanceId(JsonUtil.getStringValue(jsonObject, "virtualmachineid"));
-            vmSnapshot.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
+            vmSnapshot.setUuid(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ID));
+            vmSnapshot.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_STATE)));
+            vmSnapshot.setDescription(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DESCRIPTION));
+            vmSnapshot.setName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DISPLAY_NAME));
+            vmSnapshot.setIsCurrent(JsonUtil.getBooleanValue(jsonObject, CloudStackConstants.CS_CURRENT));
+            vmSnapshot.setType(SnapshotType.valueOf(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_TYPE)));
+            vmSnapshot.setParent(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_PARENT));
+            vmSnapshot.setTransvmInstanceId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_VIRTUAL_MACHINE_ID));
+            vmSnapshot.setTransDomainId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DOMAIN_ID));
         } catch (Exception e) {
             e.printStackTrace();
         }
