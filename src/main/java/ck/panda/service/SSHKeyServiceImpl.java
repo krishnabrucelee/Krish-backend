@@ -395,4 +395,9 @@ public class SSHKeyServiceImpl implements SSHKeyService {
     public List<SSHKey> findAllByDepartmentAndIsActive(Long departmentId, Boolean isActive) throws Exception {
         return sshkeyRepo.findAllByDepartmentAndIsActive(departmentId, true);
     }
+
+    @Override
+    public List<SSHKey> findAllByProjectAndIsActive(Long projectId, Boolean isActive) throws Exception {
+        return sshkeyRepo.findAllByProjectAndIsActive(projectId, true);
+    }
 }
