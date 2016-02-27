@@ -125,6 +125,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
 
     @Override
     public LoadBalancerRule update(LoadBalancerRule loadBalancer) throws Exception {
+        LoadBalancerRule lbRule = convertEntityService.getLoadBalancer(loadBalancer.getId());
          if (loadBalancer.getSyncFlag()) {
              Errors errors = validator.rejectIfNullEntity(CS_LOADBALANCER, loadBalancer);
              errors = validator.validateEntity(loadBalancer, errors);
@@ -132,7 +133,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
              optional.put(CS_ALGORITHM, loadBalancer.getAlgorithm());
              optional.put(CloudStackConstants.CS_NAME, loadBalancer.getName());
              configUtil.setUserServer();
-             String csEditloadBalancer = cloudStackLoadBalancerService.updateLoadBalancerRule(loadBalancer.getUuid(), CloudStackConstants.JSON, optional);
+             String csEditloadBalancer = cloudStackLoadBalancerService.updateLoadBalancerRule(lbRule.getUuid(), CloudStackConstants.JSON, optional);
              JSONObject csloadBalancerResponseJSON = new JSONObject(csEditloadBalancer)
                          .getJSONObject(CS_UPDATE_LB_RULE);
              if(loadBalancer.getLbPolicy() != null) {
@@ -150,7 +151,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
              }
          }
-        return loadBalancerRepo.save(loadBalancer);
+        return loadBalancerRepo.save(lbRule);
     }
 
     @Override
@@ -285,14 +286,14 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         configUtil.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
         List<VmIpaddress> vmlist = loadbalancer.getVmIpAddress();
-        for(int j=0 ; j< vmlist.size(); j++) {
-        VmInstance vmId = convertEntityService.getVmInstanceById(loadbalancer.getVmIpAddress().get(j).getVmInstanceId());
+        LoadBalancerRule lbRule = convertEntityService.getLoadBalancer(loadbalancer.getId());
         for(int i=0; i<vmlist.size(); i++ ){
+            VmInstance vmId = convertEntityService.getVmInstanceById(loadbalancer.getVmIpAddress().get(i).getVmInstanceId());
             optional.put("vmidipmap[" + i + "].vmid", vmId.getUuid());
             optional.put("vmidipmap["+ i + "].vmip", loadbalancer.getVmIpAddress().get(i).getGuestIpAddress());
         }
-        }
-        String assignResponse = cloudStackLoadBalancerService.assignToLoadBalancerRule(loadbalancer.getUuid(), "json", optional);
+
+        String assignResponse = cloudStackLoadBalancerService.assignToLoadBalancerRule(lbRule.getUuid(), "json", optional);
         loadbalancer.setRuleIsActive(true);
         return loadbalancer;
 
@@ -302,20 +303,19 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     public LoadBalancerRule removeLoadBalancerRule(LoadBalancerRule loadBalancer) throws Exception {
         configUtil.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
-        List<VmIpaddress> vmTest = vmIpService.findAllLoadBalancer(loadBalancer.getId());
-        List<VmIpaddress> vmlist = loadBalancer.getVmIpAddress();
-        VmInstance vmId = convertEntityService.getVmInstanceById(loadBalancer.getVmIpAddress().get(0).getVmInstanceId());
-        for(int i=0; i<vmlist.size(); i++ ){
+       VmIpaddress vmIpAddress = loadBalancer.getVmIpAddress().get(0);
+        VmInstance vmId = convertEntityService.getVmInstanceById(vmIpAddress.getVmInstanceId());
         optional.put("vmidipmap[0].vmid", vmId.getUuid());
-        optional.put("vmidipmap[0].vmip", loadBalancer.getVmIpAddress().get(i).getGuestIpAddress());
+        optional.put("vmidipmap[0].vmip", vmIpAddress.getGuestIpAddress());
+        cloudStackLoadBalancerService.removeFromLoadBalancerRule(loadBalancer.getUuid(), "json", optional);
+        LoadBalancerRule lbRule = convertEntityService.getLoadBalancer(loadBalancer.getId());
+        List<VmIpaddress> vmList = new ArrayList<VmIpaddress>();
+        for(VmIpaddress vmIp : lbRule.getVmIpAddress() ){
+            if(vmIpAddress.getId() != vmIp.getId())
+                vmList.add(vmIp);
         }
-        String removeResponse = cloudStackLoadBalancerService.removeFromLoadBalancerRule(loadBalancer.getUuid(), "json", optional);
-       if(loadBalancer.getVmIpAddress().size() > 0) {
-               for(VmIpaddress vmIp : vmlist ){
-                   vmTest.add(vmIp);
-               }
-           }
-        loadBalancer.setVmIpAddress(vmTest);
+        loadBalancer.setVmIpAddress(vmList);
+        loadBalancerRepo.save(loadBalancer);
         return loadBalancer;
 
     }
