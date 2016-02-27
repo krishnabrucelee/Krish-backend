@@ -13,7 +13,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
-import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.SnapshotPolicy;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.repository.jpa.SnapshotPolicyRepository;
@@ -39,7 +38,6 @@ public class SnapshotPolicyServiceImpl implements SnapshotPolicyService {
     @Autowired
     private SnapshotPolicyRepository policyRepo;
 
-
     /** Reference of the convert entity service. */
     @Autowired
     private ConvertEntityService convertEntityService;
@@ -47,7 +45,6 @@ public class SnapshotPolicyServiceImpl implements SnapshotPolicyService {
     /** CloudStack Domain service for connectivity with cloudstack. */
     @Autowired
     private CloudStackSnapshotService snapshotService;
-
 
     /** Validator attribute. */
     @Autowired
@@ -59,6 +56,15 @@ public class SnapshotPolicyServiceImpl implements SnapshotPolicyService {
 
     /** Constant for snapshot. */
     public static final String CS_SNAPSHOT = "snapshot";
+
+    /** Constant for snapshot policy. */
+    public static final String CS_SNAPSHOT_POLICY = "snapshotpolicy";
+
+    /** Constant for  list snapshot policy response. */
+    public static final String CS_LIST_SNAPSHOT = "listsnapshotpoliciesresponse";
+
+    /** Constant for delete snapshot. */
+    public static final String CS_DELETE_SNAPSHOT = "deletesnapshotpoliciesresponse";
 
 
     /** object(server) created for CloudStackServer. */
@@ -153,10 +159,10 @@ public class SnapshotPolicyServiceImpl implements SnapshotPolicyService {
             policyMap.put("volumeid", volume.getUuid());
             configServer.setServer(1L);
             // 1. Get the list of pods from CS server using CS connector
-            String response = snapshotService.listSnapshotPolicies("json",policyMap);
-            JSONObject responseObject = new JSONObject(response).getJSONObject("listsnapshotpoliciesresponse");
-            if (response!= null && responseObject.has("snapshotpolicy")) {
-            JSONArray policyListJSON = responseObject.getJSONArray("snapshotpolicy");
+            String response = snapshotService.listSnapshotPolicies(CloudStackConstants.JSON,policyMap);
+            JSONObject responseObject = new JSONObject(response).getJSONObject(CS_LIST_SNAPSHOT);
+            if (response!= null && responseObject.has(CS_SNAPSHOT_POLICY)) {
+            JSONArray policyListJSON = responseObject.getJSONArray(CS_SNAPSHOT_POLICY);
             // 2. Iterate the json list, convert the single json entity to snapshot
             for (int i = 0, size = policyListJSON.length(); i < size; i++) {
                 // 2.1 Call convert by passing JSONObject to snapshot poicy entity and add
@@ -180,7 +186,7 @@ public class SnapshotPolicyServiceImpl implements SnapshotPolicyService {
           SnapshotPolicy snapshotObject = convertEntityService.getSnapshotPolicyById(id);
           configServer.setUserServer();
           String deleteSnapResponse = snapshotService.deleteSnapshotPolicies(snapshotObject.getUuid(), CloudStackConstants.JSON);
-          JSONObject deleteSnapolicyResponse = new JSONObject(deleteSnapResponse).getJSONObject("deletesnapshotpoliciesresponse");
+          JSONObject deleteSnapolicyResponse = new JSONObject(deleteSnapResponse).getJSONObject(CS_DELETE_SNAPSHOT);
           if (deleteSnapolicyResponse.has(CloudStackConstants.CS_ERROR_CODE)) {
               throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, deleteSnapolicyResponse.getString(CloudStackConstants.CS_ERROR_TEXT));
           }

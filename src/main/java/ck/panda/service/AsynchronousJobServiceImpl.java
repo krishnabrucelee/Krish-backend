@@ -1269,6 +1269,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                  snapshot.setSyncFlag(false);
                  snapShotService.softDelete(snapshot);
              }
+          }
     }
 
     /**
