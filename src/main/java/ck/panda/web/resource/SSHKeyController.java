@@ -90,7 +90,7 @@ public class SSHKeyController extends CRUDController<SSHKey> implements ApiContr
     /**
      * Find the list of active SSH keys.
      *
-     * @return projects project list
+     * @return  SSH Key list
      * @throws Exception error occurs
      */
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -98,5 +98,33 @@ public class SSHKeyController extends CRUDController<SSHKey> implements ApiContr
     @ResponseBody
     protected List<SSHKey> getSearch() throws Exception {
         return sshkeyService.findAll(Long.parseLong(tokenDetails.getTokenDetails("id")));
+    }
+
+    /**
+     * Find the list of active SSH keys based on the departmentId.
+     *
+     * @param departmentId department id of the SSH key
+     * @return  SSH Key list
+     * @throws Exception if error occurs
+     */
+    @RequestMapping(value = "search/department", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<SSHKey> getSSHKeyListByDepartment(@RequestParam("dept") Long departmentId) throws Exception {
+        return sshkeyService.findAllByDepartmentAndIsActive(departmentId, true);
+    }
+
+    /**
+     * Find the list of active SSH keys based on the projectId.
+     *
+     * @param projectId project id of the SSH key
+     * @return  SSH Key list
+     * @throws Exception if error occurs
+     */
+    @RequestMapping(value = "search/project", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<SSHKey> getSSHKeyListByProject(@RequestParam("project") Long projectId) throws Exception {
+        return sshkeyService.findAllByProjectAndIsActive(projectId, true);
     }
 }

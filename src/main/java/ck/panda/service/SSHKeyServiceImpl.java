@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
+import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.SSHKey;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.repository.jpa.SSHKeyRepository;
@@ -53,6 +54,10 @@ public class SSHKeyServiceImpl implements SSHKeyService {
     /** Domain service reference. */
     @Autowired
     private DomainService domainService;
+
+    /** Project service reference. */
+    @Autowired
+    private ProjectService projectService;
 
     /** Constant for SSH key. */
     public static final String SSHKEY = "sshkey";
@@ -135,19 +140,24 @@ public class SSHKeyServiceImpl implements SSHKeyService {
      */
     public HashMap<String, String> optional(SSHKey sshkey, Long id) throws NumberFormatException, Exception {
         HashMap<String, String> optional = new HashMap<String, String>();
-        // If Usertype is root admin or domain admin, then get the optional values from user input or else from
-        // token details
-        if (((convertEntity.getOwnerById(id).getType()).equals(User.UserType.ROOT_ADMIN))
-              || ((convertEntity.getOwnerById(id).getType()).equals(User.UserType.DOMAIN_ADMIN))) {
-              optional.put(CloudStackConstants.CS_ACCOUNT, (convertEntity.getDepartmentById(sshkey.getDepartmentId())
-                  .getUserName()));
-              optional.put(CloudStackConstants.CS_DOMAIN_ID, (convertEntity.getDomainById(sshkey.getDomainId())
-                  .getUuid()));
+        //If projectId is not null, then optional values will be projectId and domainId else optional values
+        //will be account and domainId
+        if (sshkey.getProjectId() != null) {
+            optional.put(CloudStackConstants.CS_PROJECT_ID, convertEntity.getProjectUuidById(sshkey.getProjectId()));
+        }
+        if (sshkey.getProjectId() == null && !(convertEntity.getOwnerById(id).getType()).equals(User.UserType.USER)) {
+            optional.put(CloudStackConstants.CS_ACCOUNT, (convertEntity.getDepartmentById(sshkey.getDepartmentId())
+              .getUserName()));
+        } else if (sshkey.getProjectId() == null && (convertEntity.getOwnerById(id).getType()).equals(User.UserType.USER)) {
+            optional.put(CloudStackConstants.CS_ACCOUNT, departmentService.find(convertEntity.getOwnerById(id)
+                    .getDepartmentId()).getUserName());
+        }
+        if ((convertEntity.getOwnerById(id).getType()).equals(User.UserType.ROOT_ADMIN)) {
+            optional.put(CloudStackConstants.CS_DOMAIN_ID, (convertEntity.getDomainById(sshkey.getDomainId())
+                .getUuid()));
         } else {
-              optional.put(CloudStackConstants.CS_DOMAIN_ID, departmentService.find(convertEntity.getOwnerById(id)
-                  .getDepartmentId()).getDomain().getUuid());
-              optional.put(CloudStackConstants.CS_ACCOUNT, departmentService.find(convertEntity.getOwnerById(id)
-                  .getDepartmentId()).getUserName());
+            optional.put(CloudStackConstants.CS_DOMAIN_ID, departmentService.find(convertEntity.getOwnerById(id)
+                    .getDepartmentId()).getDomain().getUuid());
         }
         return optional;
     }
@@ -161,7 +171,7 @@ public class SSHKeyServiceImpl implements SSHKeyService {
      * @throws Exception error
      */
     private void createSSHKey(SSHKey sshkey, Errors errors, Long id) throws Exception {
-    	configServer.setUserServer();
+        configServer.setUserServer();
         String sshkeyResponse = cloudStackSSHService.createSSHKeyPair(sshkey.getName(), CloudStackConstants.JSON,
             optional(sshkey, id));
         JSONObject createSSHResponseJSON = new JSONObject(sshkeyResponse).getJSONObject(CS_CREATE_SSH_KEYPAIR);
@@ -178,8 +188,10 @@ public class SSHKeyServiceImpl implements SSHKeyService {
         sshkey.setFingerPrint((String) sshkeypair.get(CloudStackConstants.CS_FINGER_PRINT));
         sshkey.setPrivateKey((String) sshkeypair.get(CS_PRIVATE_KEY));
         sshkey.setIsActive(true);
-        if ((convertEntity.getOwnerById(id).getType()).equals(User.UserType.USER)) {
+        if (!(convertEntity.getOwnerById(id).getType()).equals(User.UserType.ROOT_ADMIN)) {
             sshkey.setDomainId(convertEntity.getOwnerById(id).getDomainId());
+        }
+        if ((convertEntity.getOwnerById(id).getType()).equals(User.UserType.USER)) {
             sshkey.setDepartmentId(convertEntity.getOwnerById(id).getDepartmentId());
         }
     }
@@ -193,7 +205,7 @@ public class SSHKeyServiceImpl implements SSHKeyService {
      * @throws Exception error
      */
     private void registerSSHKey(SSHKey sshkey, Errors errors, Long id) throws Exception {
-    	configServer.setUserServer();
+        configServer.setUserServer();
         String sshkeyResponse = cloudStackSSHService.registerSSHKeyPair(sshkey.getName(), sshkey.getPublicKey(),
             CloudStackConstants.JSON, optional(sshkey, id));
         JSONObject registerSSHResponseJSON = new JSONObject(sshkeyResponse).getJSONObject(CS_REGISTER_SSH_KEYPAIR);
@@ -209,8 +221,10 @@ public class SSHKeyServiceImpl implements SSHKeyService {
         sshkey.setName((String) sshkeypair.get(CloudStackConstants.CS_NAME));
         sshkey.setFingerPrint((String) sshkeypair.get(CloudStackConstants.CS_FINGER_PRINT));
         sshkey.setIsActive(true);
-        if ((convertEntity.getOwnerById(id).getType()).equals(User.UserType.USER)) {
+        if (!(convertEntity.getOwnerById(id).getType()).equals(User.UserType.ROOT_ADMIN)) {
             sshkey.setDomainId(convertEntity.getOwnerById(id).getDomainId());
+        }
+        if ((convertEntity.getOwnerById(id).getType()).equals(User.UserType.USER)) {
             sshkey.setDepartmentId(convertEntity.getOwnerById(id).getDepartmentId());
         }
     }
@@ -272,10 +286,14 @@ public class SSHKeyServiceImpl implements SSHKeyService {
             Errors errors = validator.rejectIfNullEntity(SSHKEY, sshkey);
             errors = validator.validateEntity(sshkey, errors);
             HashMap<String, String> optional = new HashMap<String, String>();
+            if (sshkey.getProjectId() != null) {
+                optional.put(CloudStackConstants.CS_PROJECT_ID, convertEntity.getProjectUuidById(sshkey.getProjectId()));
+            } else {
+                optional.put(CloudStackConstants.CS_ACCOUNT, (convertEntity.getDepartmentById(sshkey.getDepartmentId())
+                  .getUserName()));
+            }
             optional.put(CloudStackConstants.CS_DOMAIN_ID, convertEntity.getDepartmentById(sshkey.getDepartmentId())
-                .getDomain().getUuid());
-            optional.put(CloudStackConstants.CS_ACCOUNT, convertEntity.getDepartmentById(sshkey.getDepartmentId())
-                .getUserName());
+                    .getDomain().getUuid());
             configServer.setUserServer();
             String sshkeyResponse = cloudStackSSHService.deleteSSHKeyPair(sshkey.getName(), CloudStackConstants.JSON,
                 optional);
@@ -293,9 +311,15 @@ public class SSHKeyServiceImpl implements SSHKeyService {
 
     @Override
     public List<SSHKey> findAllFromCSServer() throws Exception {
+        List<Project> project = projectService.findAllByActive(true);
         List<SSHKey> sshKeyList = new ArrayList<SSHKey>();
-        HashMap<String, String> sshKeyMap = new HashMap<String, String>();
-        sshKeyMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
+        for (int j = 0; j <= project.size(); j++) {
+            HashMap<String, String> sshKeyMap = new HashMap<String, String>();
+            if (j == project.size()) {
+                sshKeyMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
+            } else {
+                sshKeyMap.put(CloudStackConstants.CS_PROJECT_ID, project.get(j).getUuid());
+            }
         configServer.setServer(1L);
         // 1. Get the list of SSH Key from CS server using CS connector
         String response = cloudStackSSHService.listSSHKeyPairs(CloudStackConstants.JSON, sshKeyMap);
@@ -311,8 +335,13 @@ public class SSHKeyServiceImpl implements SSHKeyService {
                 sshkey.setDomainId(convertEntity.getDomainId(sshkey.getTransDomainId()));
                 sshkey.setDepartmentId(convertEntity.getDepartmentByUsername(sshkey.getTransDepartment(),
                     domainService.findbyUUID(sshkey.getTransDomainId()).getId()));
+                if (j != project.size()) {
+                    sshkey.setProjectId(project.get(j).getId());
+                    sshkey.setDepartmentId(projectService.find(sshkey.getProjectId()).getDepartmentId());
+                }
                 sshKeyList.add(sshkey);
             }
+        }
         }
         return sshKeyList;
     }
@@ -346,10 +375,10 @@ public class SSHKeyServiceImpl implements SSHKeyService {
 
     @Override
     public SSHKey update(SSHKey sshkey) throws Exception {
-         if (!sshkey.getIsSyncFlag()) {
-             return sshkeyRepo.save(sshkey);
-         }
-         return sshkey;
+        if (!sshkey.getIsSyncFlag()) {
+            return sshkeyRepo.save(sshkey);
+        }
+        return sshkey;
     }
 
     @Override
@@ -364,6 +393,11 @@ public class SSHKeyServiceImpl implements SSHKeyService {
 
     @Override
     public List<SSHKey> findAllByDepartmentAndIsActive(Long departmentId, Boolean isActive) throws Exception {
-        return sshkeyRepo.findAllByDepartmentAndIsActive(departmentId, isActive);
+        return sshkeyRepo.findAllByDepartmentAndIsActive(departmentId, true);
+    }
+
+    @Override
+    public List<SSHKey> findAllByProjectAndIsActive(Long projectId, Boolean isActive) throws Exception {
+        return sshkeyRepo.findAllByProjectAndIsActive(projectId, true);
     }
 }
