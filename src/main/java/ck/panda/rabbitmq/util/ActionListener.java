@@ -182,6 +182,12 @@ public class ActionListener implements MessageListener {
         case EventTypes.EVENT_SNAPSHOT:
             LOGGER.debug("Volume snapshot sync", eventMessage);
             break;
+        case EventTypes.EVENT_SNAPSHOT_POLICY:
+             if(eventName.equals(EventTypes.EVENT_SNAPSHOT_POLICY_CREATE)) {
+            LOGGER.debug("Volume snapshot policy sync", eventMessage);
+            syncService.syncSnapshotPolicy();
+             }
+            break;
         case EventTypes.EVENT_VOLUME:
             if (eventName.contains(EventTypes.EVENT_VOLUME_DELETE)) {
                 LOGGER.debug("Volume sync", eventMessage);

@@ -26,6 +26,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.ResourceLimitProject.ResourceType;
 import ck.panda.util.JsonUtil;
 
@@ -37,6 +38,21 @@ public class SnapshotPolicy {
 
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(SnapshotPolicy.class);
+
+    /** Constant for snapshot. */
+    public static final String CS_MAX_SNAPSHOT = "maxsnaps";
+
+    /** Constant for snapshot. */
+    public static final String CS_SCHEDULE = "schedule";
+
+    /** Constant for snapshot. */
+    public static final String CS_TIME_ZONE = "timezone";
+
+    /** Constant for snapshot. */
+    public static final String CS_VOLUME = "volumeid";
+
+    /** Constant for snapshot. */
+    public static final String CS_INTERVALTYPE = "intervaltype";
 
      /** Unique id of the instance. */
     @Id
@@ -80,6 +96,10 @@ public class SnapshotPolicy {
 
     @Transient
     private String hours;
+
+    /** Meridian for snapshot policy. */
+    @Column(name = "meridian")
+    private String meridian;
 
     /** Interval type. */
     @Column(name = "interval_type")
@@ -482,7 +502,6 @@ public class SnapshotPolicy {
         this.scheduleTime = scheduleTime;
     }
 
-
     /**
      * Get the transient volume id.
      *
@@ -502,21 +521,41 @@ public class SnapshotPolicy {
     }
 
     /**
-     * Convert JSONObject to domain entity.
+     * Get the meridian time.
+     *
+     * @return the meridian
+     */
+    public String getMeridian() {
+        return meridian;
+    }
+
+    /**
+     * Set the meridian.
+     *
+     * @param meridian to set
+     */
+    public void setMeridian(String meridian) {
+        this.meridian = meridian;
+    }
+
+    /**
+     * Convert JSONObject to snapshot policy entity.
      *
      * @param jsonObject json object
-     * @return domain entity object.
+     * @return snapshot policy entity object.
      * @throws JSONException handles json exception.
      */
     public static SnapshotPolicy convert(JSONObject jsonObject) throws JSONException {
         SnapshotPolicy snapshot = new SnapshotPolicy();
         snapshot.setSyncFlag(false);
-
         try {
             snapshot.setIsActive(true);
-            snapshot.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            snapshot.setTransVolumeId(JsonUtil.getStringValue(jsonObject, "volumeid"));
-            snapshot.setIntervalType(IntervalType.values()[(JsonUtil.getIntegerValue(jsonObject, "intervaltype"))]);
+            snapshot.setUuid(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ID));
+            snapshot.setTransVolumeId(JsonUtil.getStringValue(jsonObject, CS_VOLUME));
+            snapshot.setIntervalType(IntervalType.values()[(JsonUtil.getIntegerValue(jsonObject, CS_INTERVALTYPE))]);
+            snapshot.setTimeZone(JsonUtil.getStringValue(jsonObject, CS_TIME_ZONE));
+            snapshot.setMaximumSnapshots((JsonUtil.getIntegerValue(jsonObject, CS_MAX_SNAPSHOT)));
+            snapshot.setScheduleTime((JsonUtil.getStringValue(jsonObject,CS_SCHEDULE)));
         } catch (Exception ex) {
             LOGGER.error("SnapshotPolicy-convert", ex);
         }
@@ -537,6 +576,4 @@ public class SnapshotPolicy {
         }
         return snapshotMap;
     }
-
-
 }

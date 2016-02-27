@@ -274,4 +274,12 @@ public interface SyncService {
      * @throws Exception cloudstack unhandled errors
      */
     void syncResourceLimitActionEvent(ResponseEvent eventObject) throws ApplicationException, Exception;
+
+    /**
+     * Sync with CloudStack server snapshot policy
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    void syncSnapshotPolicy() throws ApplicationException, Exception;
 }

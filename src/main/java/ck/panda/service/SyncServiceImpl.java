@@ -81,6 +81,7 @@ import ck.panda.util.error.exception.ApplicationException;
  */
 @PropertySource(value = "classpath:permission.properties")
 @Service
+@SuppressWarnings("PMD.CyclomaticComplexity")
 public class SyncServiceImpl implements SyncService {
 
     /** Domain Service for listing domains. */
@@ -1569,7 +1570,8 @@ public class SyncServiceImpl implements SyncService {
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    private void syncSnapshotPolicy() throws ApplicationException, Exception {
+    @Override
+    public void syncSnapshotPolicy() throws ApplicationException, Exception {
 
         // 1. Get all the cluster objects from CS server as hash
         List<SnapshotPolicy> csClusterService = snapshotPolicyService.findAllFromCSServer();
