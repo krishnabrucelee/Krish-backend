@@ -26,6 +26,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.ResourceLimitProject.ResourceType;
 import ck.panda.util.JsonUtil;
 
@@ -37,6 +38,21 @@ public class SnapshotPolicy {
 
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(SnapshotPolicy.class);
+
+    /** Constant for snapshot. */
+    public static final String CS_MAX_SNAPSHOT = "maxsnaps";
+
+    /** Constant for snapshot. */
+    public static final String CS_SCHEDULE = "schedule";
+
+    /** Constant for snapshot. */
+    public static final String CS_TIME_ZONE = "timezone";
+
+    /** Constant for snapshot. */
+    public static final String CS_VOLUME = "volumeid";
+
+    /** Constant for snapshot. */
+    public static final String CS_INTERVALTYPE = "intervaltype";
 
      /** Unique id of the instance. */
     @Id
@@ -532,15 +548,14 @@ public class SnapshotPolicy {
     public static SnapshotPolicy convert(JSONObject jsonObject) throws JSONException {
         SnapshotPolicy snapshot = new SnapshotPolicy();
         snapshot.setSyncFlag(false);
-
         try {
             snapshot.setIsActive(true);
-            snapshot.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            snapshot.setTransVolumeId(JsonUtil.getStringValue(jsonObject, "volumeid"));
-            snapshot.setIntervalType(IntervalType.values()[(JsonUtil.getIntegerValue(jsonObject, "intervaltype"))]);
-            snapshot.setTimeZone(JsonUtil.getStringValue(jsonObject, "timezone"));
-            snapshot.setMaximumSnapshots((JsonUtil.getIntegerValue(jsonObject, "maxsnaps")));
-            snapshot.setScheduleTime((JsonUtil.getStringValue(jsonObject, "schedule")));
+            snapshot.setUuid(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ID));
+            snapshot.setTransVolumeId(JsonUtil.getStringValue(jsonObject, CS_VOLUME));
+            snapshot.setIntervalType(IntervalType.values()[(JsonUtil.getIntegerValue(jsonObject, CS_INTERVALTYPE))]);
+            snapshot.setTimeZone(JsonUtil.getStringValue(jsonObject, CS_TIME_ZONE));
+            snapshot.setMaximumSnapshots((JsonUtil.getIntegerValue(jsonObject, CS_MAX_SNAPSHOT)));
+            snapshot.setScheduleTime((JsonUtil.getStringValue(jsonObject,CS_SCHEDULE)));
         } catch (Exception ex) {
             LOGGER.error("SnapshotPolicy-convert", ex);
         }
