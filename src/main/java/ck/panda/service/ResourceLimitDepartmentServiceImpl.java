@@ -237,7 +237,7 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
             if (domainLimit != null) {
                 if (domainLimit.getMax() != -1 && domainLimit.getMax() < totalCount) {
                     errors.addFieldError(resourceLimit.getResourceType().toString(),
-                            totalCount + " " + resourceLimit.getResourceType().toString() + "resource.limit.exceed");
+                            domainLimit.getMax() + " in " + resourceLimit.getResourceType().toString() + " " + " for resource limit domain exceeded");
 
                 }
             } else {
@@ -250,8 +250,8 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
                         0L, true);
                 if (resourceLimit.getMax() < projectResourceCount) {
                     errors.addFieldError(resourceLimit.getResourceType().toString(),
-                            projectResourceCount + " " + resourceLimit.getResourceType().toString()
-                                    + " already allocated to projects of this department");
+                            projectResourceCount + " in " + resourceLimit.getResourceType().toString()
+                                    + "already allocated to projects of this department");
                 }
         }
         return errors;

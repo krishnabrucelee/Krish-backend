@@ -26,6 +26,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -175,14 +176,6 @@ public class VmSnapshot implements Serializable {
     /** Transient network of the instance. */
     @Transient
     private String transvmInstanceId;
-
-    /** Transient network of the instance. */
-    @Transient
-    private String transZoneId;
-
-    /** Transient owner of the instance. */
-    @Transient
-    private String transOwnerId;
 
     /** Transient domain of the instance. */
     @Transient
@@ -657,20 +650,6 @@ public class VmSnapshot implements Serializable {
     }
 
     /**
-     * @return the transZoneId
-     */
-    public String getTransZoneId() {
-        return transZoneId;
-    }
-
-    /**
-     * @param transZoneId the transZoneId to set
-     */
-    public void setTransZoneId(String transZoneId) {
-        this.transZoneId = transZoneId;
-    }
-
-    /**
      * @return the transDisplayName
      */
     public String getTransDisplayName() {
@@ -696,20 +675,6 @@ public class VmSnapshot implements Serializable {
      */
     public void setTransDomainId(String transDomainId) {
         this.transDomainId = transDomainId;
-    }
-
-    /**
-     * @return the transOwnerId
-     */
-    public String getTransOwnerId() {
-        return transOwnerId;
-    }
-
-    /**
-     * @param transOwnerId the transOwnerId to set
-     */
-    public void setTransOwnerId(String transOwnerId) {
-        this.transOwnerId = transOwnerId;
     }
 
     @Override
@@ -771,19 +736,16 @@ public class VmSnapshot implements Serializable {
         VmSnapshot vmSnapshot = new VmSnapshot();
         vmSnapshot.setSyncFlag(false);
         try {
-            String owner = JsonUtil.getStringValue(jsonObject, "displayname");
             vmSnapshot.setIsRemoved(false);
-            vmSnapshot.setName(JsonUtil.getStringValue(jsonObject, "displayname"));
-            vmSnapshot.setDescription(JsonUtil.getStringValue(jsonObject, "description"));
-            vmSnapshot.setParent(JsonUtil.getStringValue(jsonObject, "parent"));
-            vmSnapshot.setIsCurrent(JsonUtil.getBooleanValue(jsonObject, "current"));
-            vmSnapshot.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            vmSnapshot.setTransDomainId(JsonUtil.getStringValue(jsonObject, "virtualmachineid"));
-            vmSnapshot.setTransvmInstanceId(JsonUtil.getStringValue(jsonObject, "virtualmachineid"));
-            vmSnapshot.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, "state")));
-            vmSnapshot.setType(SnapshotType.valueOf(JsonUtil.getStringValue(jsonObject, "type")));
-            vmSnapshot.setTransZoneId(JsonUtil.getStringValue(jsonObject, "virtualmachineid"));
-            vmSnapshot.setTransOwnerId(JsonUtil.getStringValue(jsonObject, "virtualmachineid"));
+            vmSnapshot.setUuid(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ID));
+            vmSnapshot.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_STATE)));
+            vmSnapshot.setDescription(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DESCRIPTION));
+            vmSnapshot.setName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DISPLAY_NAME));
+            vmSnapshot.setIsCurrent(JsonUtil.getBooleanValue(jsonObject, CloudStackConstants.CS_CURRENT));
+            vmSnapshot.setType(SnapshotType.valueOf(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_TYPE)));
+            vmSnapshot.setParent(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_PARENT));
+            vmSnapshot.setTransvmInstanceId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_VIRTUAL_MACHINE_ID));
+            vmSnapshot.setTransDomainId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DOMAIN_ID));
         } catch (Exception e) {
             e.printStackTrace();
         }

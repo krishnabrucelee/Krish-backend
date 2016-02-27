@@ -284,4 +284,6 @@ public class EventTypes {
 
     /** State of resources. */
     public static final String OLD_RESOURCE_STATE = "old-state";
+
+    public static final String EVENT_STATIC_NAT = "STATICNAT.";
 }

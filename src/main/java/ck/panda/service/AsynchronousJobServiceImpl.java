@@ -21,21 +21,18 @@ import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.FirewallRules.Purpose;
 import ck.panda.domain.entity.LoadBalancerRule.SticknessMethod;
-import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
 import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.LoadBalancerRule;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.PortForwarding;
-import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.SnapshotPolicy;
-import ck.panda.domain.entity.ResourceLimitDomain;
-import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
+import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.Volume.Status;
@@ -44,7 +41,6 @@ import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackLoadBalancerService;
 import ck.panda.util.CloudStackNetworkOfferingService;
 import ck.panda.util.CloudStackNicService;
-import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.CloudStackVolumeService;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.EncryptionUtil;
@@ -157,33 +153,16 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     private SnapshotPolicyService snapShotPolicyService;
 
 
+    @Autowired
+    private VmSnapshotService vmSnapshotService;
+
     /** Cloud stack firewall service. */
     @Autowired
     private CloudStackLoadBalancerService cloudStackLoadBalancerService;
 
-    /** CloudStack Resource Capacity Service. */
-    @Autowired
-    private CloudStackResourceCapacity cloudStackResourceCapacity;
-
-    /** Resource Limit Department service reference. */
-    @Autowired
-    private ResourceLimitDepartmentService resourceLimitDepartmentService;
-
-    /** Resource Limit Project service reference. */
-    @Autowired
-    private ResourceLimitProjectService resourceLimitProjectService;
-
-    /** Sync Service reference. */
-    @Autowired
-    private SyncService syncService;
-
     /** Message source attribute. */
     @Autowired
     private MessageSource messageSource;
-
-    /** Resource Limit Department service reference. */
-    @Autowired
-    private ResourceLimitDomainService resourceLimitDomainService;
 
     /** Update Resource Count service reference. */
     @Autowired
@@ -193,13 +172,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
 
-    /** Used for setting optional values for resource count. */
-    HashMap<String, String> domainCountMap = new HashMap<String, String>();
-
     /** Asynchronous job id. */
     public static final String CS_ASYNC_JOB_ID = "jobId";
 
-    /** Command type */
+    /** Command type. */
     public static final String CS_COMMAND = "command";
 
     /**
@@ -315,6 +291,11 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
             asyncSnapshot(jobResult, eventObject);
             }
+            break;
+        case EventTypes.EVENT_VM_SNAPSHOT:
+            LOGGER.debug("VM snapshot sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+            asyncVMSnapshot(jobResult, eventObject);
             break;
         default:
             LOGGER.debug("No sync required", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
@@ -1281,12 +1262,73 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
              }
 
          }
-         if (eventObject.getString("commandEventType").equals("SNAPSHOT.DELETE")) {
+          if (eventObject.getString("commandEventType").equals("SNAPSHOT.DELETE")) {
              JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
              Snapshot snapshot = snapShotService.findByUUID(json.getString("id"));
              if (snapshot != null) {
                  snapshot.setSyncFlag(false);
                  snapShotService.softDelete(snapshot);
+             }
+    }
+
+    /**
+     * Sync with Cloud Server VM snapshot.
+     *
+     * @param jobResult job result
+     * @param eventObject VM snapshot event object
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    public void asyncVMSnapshot(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
+
+         if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VM_SNAPSHOT_CREATE)) {
+             VmSnapshot vmSnapshot = VmSnapshot.convert(jobResult.getJSONObject(CloudStackConstants.CS_VM_SNAPSHOT));
+             vmSnapshot.setVmId(convertEntityService.getVmInstanceId(vmSnapshot.getTransvmInstanceId()));
+             vmSnapshot.setDomainId(convertEntityService.getDomainId(vmSnapshot.getTransDomainId()));
+             vmSnapshot.setOwnerId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getInstanceOwnerId());
+             vmSnapshot.setZoneId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getZoneId());
+             vmSnapshot.setSyncFlag(false);
+             if (vmSnapshotService.findByUUID(vmSnapshot.getUuid()) == null) {
+                 vmSnapshotService.save(vmSnapshot);
+             }
+         }
+
+         if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VM_SNAPSHOT_REVERT)) {
+             JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
+             VmSnapshot vmsnapshot = vmSnapshotService.findByUUID(json.getString(CloudStackConstants.CS_VM_SNAPSHOT_ID));
+             List<VmSnapshot> vmSnapshotList = vmSnapshotService.findByVmInstance(vmsnapshot.getVmId(), false);
+             for (VmSnapshot vmSnap : vmSnapshotList) {
+                 if (vmSnap.getIsCurrent()) {
+                     vmSnap.setIsCurrent(false);
+                     vmSnap.setSyncFlag(false);
+                     vmSnapshotService.save(vmSnap);
+                 }
+             }
+             vmsnapshot.setStatus(ck.panda.domain.entity.VmSnapshot.Status.valueOf(EventTypes.EVENT_READY));
+             vmsnapshot.setIsCurrent(true);
+             vmsnapshot.setSyncFlag(false);
+             vmSnapshotService.save(vmsnapshot);
+         }
+
+         if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VM_SNAPSHOT_DELETE)) {
+             JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
+             VmSnapshot vmsnapshot = vmSnapshotService.findByUUID(json.getString(CloudStackConstants.CS_VM_SNAPSHOT_ID));
+             vmsnapshot.setIsRemoved(true);
+             vmsnapshot.setSyncFlag(false);
+             vmSnapshotService.save(vmsnapshot);
+
+             List<VmSnapshot> vmSnapshotList = vmSnapshotService.findByVmInstance(vmsnapshot.getVmId(), false);
+             for (int i = 0; i < vmSnapshotList.size(); i++) {
+                 int j = i + 1;
+                 if (vmSnapshotList.size() == j) {
+                     vmSnapshotList.get(i).setIsCurrent(true);
+                     vmSnapshotList.get(i).setSyncFlag(false);
+                     vmSnapshotService.save(vmSnapshotList.get(i));
+                 } else if (vmSnapshotList.get(i).getIsCurrent()) {
+                     vmSnapshotList.get(i).setIsCurrent(false);
+                     vmSnapshotList.get(i).setSyncFlag(false);
+                     vmSnapshotService.save(vmSnapshotList.get(i));
+                 }
              }
          }
     }

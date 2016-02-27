@@ -226,6 +226,10 @@ public class ActionListener implements MessageListener {
         case EventTypes.EVENT_VPC:
             LOGGER.debug("VPC sync", eventMessage);
             break;
+        case EventTypes.EVENT_STATIC_NAT:
+            LOGGER.debug("Static nat sync", eventMessage);
+            syncService.syncIpAddress();
+            break;
         default:
             LOGGER.debug("No sync required", eventMessage);
         }
