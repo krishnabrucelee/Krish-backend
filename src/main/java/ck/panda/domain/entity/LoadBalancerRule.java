@@ -5,6 +5,8 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -15,6 +17,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -78,6 +81,14 @@ public class LoadBalancerRule implements Serializable {
     @Column(name = "zone_id")
     private Long zoneId;
 
+    /** Zone for Firewall Rule. */
+    @OneToOne(cascade = CascadeType.ALL)
+    private LbStickinessPolicy lbPolicy;
+
+    /** Zone id for Firewall Rule. */
+    @Column(name = "lb_policy_id")
+    private Long lbPolicyId;
+
     /** List of instance Class for an Load balancer. */
     @ManyToMany
     private List<VmInstance> vmInstanceList;
@@ -100,6 +111,10 @@ public class LoadBalancerRule implements Serializable {
     @Column(name = "ipaddress_id")
     private Long ipAddressId;
 
+    /** Secondary ipAddress of the Nic. */
+    @ManyToMany
+    private List<VmIpaddress> vmIpAddress;
+
     /** Private port of the firewall rule. */
     @Column(name = "private_port")
     private Integer privatePort;
@@ -120,57 +135,11 @@ public class LoadBalancerRule implements Serializable {
     @Column(name = "vpc")
     private String vpc;
 
-    /** Stickiness policy name of LB. */
-    @Column(name = "stickiness_name")
-    private String stickinessName;
 
     /** Cookie name for LB. */
-    @Column(name = "cookie_name")
-    private String cookieName;
+    @Column(name = "guest_ip")
+    private String guestIpAddrress;
 
-    /** Stickiness policy table size. */
-    @Column(name = "sticky_table_size")
-    private String stickyTableSize;
-
-    /** Stickiness policy expires time for LB. */
-    @Column(name = "sticky_expires")
-    private String stickyExpires;
-
-    /** Stickiness policy mode. */
-    @Column(name = "sticky_mode")
-    private String stickyMode;
-
-    /** Stickiness policy Length. */
-    @Column(name = "sticky_length")
-    private String stickyLength;
-
-    /** Stickiness policy hold time for LB. */
-    @Column(name = "sticky_hold_time")
-    private String stickyHoldTime;
-
-    /** Request to learn for LB. */
-    @Column(name = "sticky_request_learn")
-    private Boolean stickyRequestLearn;
-
-    /** Request to learn for LB. */
-    @Column(name = "sticky_prefix")
-    private Boolean stickyPrefix;
-
-    /** Request to learn for LB. */
-    @Column(name = "sticky_no_cache")
-    private Boolean stickyNoCache;
-
-    /** Request to learn for LB. */
-    @Column(name = "sticky_indirect")
-    private Boolean stickyIndirect;
-
-    /** Request to learn for LB. */
-    @Column(name = "sticky_post_only")
-    private Boolean stickyPostOnly;
-
-    /** Stickiness company for LB. */
-    @Column(name = "sticky_company")
-    private String stickyCompany;
 
     /** The source cidr list to forward traffic . */
     @Column(name = "source_cidr")
@@ -179,6 +148,10 @@ public class LoadBalancerRule implements Serializable {
     /** Is the rule for display to the regular user. */
     @Column(name = "display")
     private Boolean display;
+
+    /** Is the rule for display to the regular user. */
+    @Column(name = "rule_is_active")
+    private Boolean ruleIsActive;
 
     /** Rule state . */
     @Column(name = "state")
@@ -199,10 +172,7 @@ public class LoadBalancerRule implements Serializable {
     @Enumerated(EnumType.STRING)
     private TrafficType trafficType;
 
-    /** Stickiness policy's method name  . */
-    @Column(name = "method_name")
-    @Enumerated(EnumType.STRING)
-    private SticknessMethod stickinessMethod;
+
 
     /** Cloudstack's Firewall Rule algorithm. */
     @Column(name = "algorithm")
@@ -306,22 +276,6 @@ public class LoadBalancerRule implements Serializable {
 
         /** Load Balance rule in ADD state. */
         ADD
-    }
-
-    /** Types of methods for stickiness policy . */
-    public enum SticknessMethod {
-
-        /** None of the stickiness policy is added . */
-        None,
-
-        /** Source based stickiness policy. */
-        SourceBased,
-
-        /** App based stickiness policy .*/
-        AppCookie,
-
-        /** Load balancer cookie policy. */
-        LbCookie
     }
 
     /**
@@ -884,240 +838,6 @@ public class LoadBalancerRule implements Serializable {
 
 
     /**
-     * Get the stickinessName.
-     *
-     * @return the stickinessName
-     */
-    public String getStickinessName() {
-        return stickinessName;
-    }
-
-    /**
-     * Set the stickinessName.
-     *
-     * @param stickinessName  to set
-     */
-    public void setStickinessName(String stickinessName) {
-        this.stickinessName = stickinessName;
-    }
-
-    /**
-     * Get the cookieName.
-     *
-     * @return the cookieName
-     */
-    public String getCookieName() {
-        return cookieName;
-    }
-
-    /**
-     * Set the cookieName.
-     *
-     * @param cookieName  to set
-     */
-    public void setCookieName(String cookieName) {
-        this.cookieName = cookieName;
-    }
-
-    /**
-     * Get the stickyTableSize.
-     *
-     * @return the stickyTableSize
-     */
-    public String getStickyTableSize() {
-        return stickyTableSize;
-    }
-
-    /**
-     * Set the stickyTableSize.
-     *
-     * @param stickyTableSize  to set
-     */
-    public void setStickyTableSize(String stickyTableSize) {
-        this.stickyTableSize = stickyTableSize;
-    }
-
-    /**
-     * Get the stickyExpires.
-     *
-     * @return the stickyExpires
-     */
-    public String getStickyExpires() {
-        return stickyExpires;
-    }
-
-    /**
-     * Set the stickyExpires.
-     *
-     * @param stickyExpires  to set
-     */
-    public void setStickyExpires(String stickyExpires) {
-        this.stickyExpires = stickyExpires;
-    }
-
-    /**
-     * Get the stickyMode.
-     *
-     * @return the stickyMode
-     */
-    public String getStickyMode() {
-        return stickyMode;
-    }
-
-    /**
-     * Set the stickyMode.
-     *
-     * @param stickyMode  to set
-     */
-    public void setStickyMode(String stickyMode) {
-        this.stickyMode = stickyMode;
-    }
-
-    /**
-     * Get the stickyLength.
-     *
-     * @return the stickyLength
-     */
-    public String getStickyLength() {
-        return stickyLength;
-    }
-
-    /**
-     * Set the stickyLength.
-     *
-     * @param stickyLength  to set
-     */
-    public void setStickyLength(String stickyLength) {
-        this.stickyLength = stickyLength;
-    }
-
-    /**
-     * Set the stickyHoldTime.
-     *
-     * @return the stickyHoldTime
-     */
-    public String getStickyHoldTime() {
-        return stickyHoldTime;
-    }
-
-    /**
-     * Set the stickyHoldTime.
-     *
-     * @param stickyHoldTime  to set
-     */
-    public void setStickyHoldTime(String stickyHoldTime) {
-        this.stickyHoldTime = stickyHoldTime;
-    }
-
-    /**
-     * Get the stickyRequestLearn.
-     *
-     * @return the stickyRequestLearn
-     */
-    public Boolean getStickyRequestLearn() {
-        return stickyRequestLearn;
-    }
-
-    /**
-     * Set the stickyRequestLearn.
-     *
-     * @param stickyRequestLearn  to set
-     */
-    public void setStickyRequestLearn(Boolean stickyRequestLearn) {
-        this.stickyRequestLearn = stickyRequestLearn;
-    }
-
-    /**
-     * Get the stickyPrefix.
-     *
-     * @return the stickyPrefix
-     */
-    public Boolean getStickyPrefix() {
-        return stickyPrefix;
-    }
-
-    /**
-     * Set the stickyPrefix.
-     *
-     * @param stickyPrefix  to set
-     */
-    public void setStickyPrefix(Boolean stickyPrefix) {
-        this.stickyPrefix = stickyPrefix;
-    }
-
-    /**
-     * Get the stickyNoCache .
-     *
-     * @return the stickyNoCache
-     */
-    public Boolean getStickyNoCache() {
-        return stickyNoCache;
-    }
-
-    /**
-     * Set the stickyNoCache .
-     *
-     * @param stickyNoCache to set
-     */
-    public void setStickyNoCache(Boolean stickyNoCache) {
-        this.stickyNoCache = stickyNoCache;
-    }
-
-    /**
-     * Set the stickyIndirect.
-     *
-     * @return the stickyIndirect
-     */
-    public Boolean getStickyIndirect() {
-        return stickyIndirect;
-    }
-
-    /**
-     * Set the stickyIndirect.
-     *
-     * @param stickyIndirect  to set
-     */
-    public void setStickyIndirect(Boolean stickyIndirect) {
-        this.stickyIndirect = stickyIndirect;
-    }
-
-    /**
-     * Get the stickyPostOnly.
-     *
-     * @return the stickyPostOnly
-     */
-    public Boolean getStickyPostOnly() {
-        return stickyPostOnly;
-    }
-
-    /**
-     * Set the stickyPostOnly.
-     *
-     * @param stickyPostOnly  to set
-     */
-    public void setStickyPostOnly(Boolean stickyPostOnly) {
-        this.stickyPostOnly = stickyPostOnly;
-    }
-
-    /**
-     * Get the stickyCompany .
-     *
-     * @return the stickyCompany
-     */
-    public String getStickyCompany() {
-        return stickyCompany;
-    }
-
-    /**
-     * Set the stickyCompany .
-     *
-     * @param stickyCompany to set
-     */
-    public void setStickyCompany(String stickyCompany) {
-        this.stickyCompany = stickyCompany;
-    }
-
-    /**
      * @return the stickyUuid
      */
     public String getStickyUuid() {
@@ -1205,19 +925,75 @@ public class LoadBalancerRule implements Serializable {
         this.updatedDateTime = updatedDateTime;
     }
 
-
     /**
-     * @return the stickinessMethod
+     * @return the vmIpAddress
      */
-    public SticknessMethod getStickinessMethod() {
-        return stickinessMethod;
+    public List<VmIpaddress> getVmIpAddress() {
+        return vmIpAddress;
     }
 
     /**
-     * @param stickinessMethod the stickinessMethod to set
+     * @param vmIpAddress the vmIpAddress to set
      */
-    public void setStickinessMethod(SticknessMethod stickinessMethod) {
-        this.stickinessMethod = stickinessMethod;
+    public void setVmIpAddress(List<VmIpaddress> vmIpAddress) {
+        this.vmIpAddress = vmIpAddress;
+    }
+
+    /**
+     * @return the guestIpAddrress
+     */
+    public String getGuestIpAddrress() {
+        return guestIpAddrress;
+    }
+
+    /**
+     * @param guestIpAddrress the guestIpAddrress to set
+     */
+    public void setGuestIpAddrress(String guestIpAddrress) {
+        this.guestIpAddrress = guestIpAddrress;
+    }
+
+
+    /**
+     * @return the lbPolicy
+     */
+    public LbStickinessPolicy getLbPolicy() {
+        return lbPolicy;
+    }
+
+    /**
+     * @param lbPolicy the lbPolicy to set
+     */
+    public void setLbPolicy(LbStickinessPolicy lbPolicy) {
+        this.lbPolicy = lbPolicy;
+    }
+
+    /**
+     * @return the ruleIsActive
+     */
+    public Boolean getRuleIsActive() {
+        return ruleIsActive;
+    }
+
+    /**
+     * @param ruleIsActive the ruleIsActive to set
+     */
+    public void setRuleIsActive(Boolean ruleIsActive) {
+        this.ruleIsActive = ruleIsActive;
+    }
+
+    /**
+     * @return the lbPolicyId
+     */
+    public Long getLbPolicyId() {
+        return lbPolicyId;
+    }
+
+    /**
+     * @param lbPolicyId the lbPolicyId to set
+     */
+    public void setLbPolicyId(Long lbPolicyId) {
+        this.lbPolicyId = lbPolicyId;
     }
 
     /**
@@ -1245,7 +1021,7 @@ public class LoadBalancerRule implements Serializable {
         loadBalancer.setTransZoneId(JsonUtil.getStringValue(jsonObject, "zoneid"));
         loadBalancer.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
         loadBalancer.setIsActive(true);
-        if (loadBalancer.getStickinessMethod() != null) {
+       /* if (loadBalancer.getStickinessMethod() != null) {
         loadBalancer.setStickinessMethod(SticknessMethod.valueOf(JsonUtil.getStringValue(jsonObject, "methodname").toUpperCase()));
         }
         if (loadBalancer.getStickinessName() != null) {
@@ -1265,7 +1041,7 @@ public class LoadBalancerRule implements Serializable {
         }
         if (loadBalancer.getStickyTableSize() != null) {
             loadBalancer.setStickyTableSize(JsonUtil.getStringValue(jsonObject,"tablesize"));
-        }
+        }*/
         return loadBalancer;
     }
 

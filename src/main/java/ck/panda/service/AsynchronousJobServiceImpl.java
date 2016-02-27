@@ -19,8 +19,9 @@ import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.FirewallRules.Purpose;
-import ck.panda.domain.entity.LoadBalancerRule.SticknessMethod;
 import ck.panda.domain.entity.IpAddress;
+import ck.panda.domain.entity.LbStickinessPolicy;
+import ck.panda.domain.entity.LbStickinessPolicy.StickinessMethod;
 import ck.panda.domain.entity.LoadBalancerRule;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
@@ -129,6 +130,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /** Service reference to Load Balancer. */
     @Autowired
     private LoadBalancerService loadBalancerService;
+
+    /** Service reference to Load Balancer. */
+    @Autowired
+    private LbStickinessPolicyService lbPolicyService;
 
     /** Cloud stack firewall service. */
     @Autowired
@@ -1053,52 +1058,27 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             JSONArray stickyPolicy = stickyResult.getJSONArray(CloudStackConstants.CS_STICKY_POLICY);
             for (int j = 0, sizes = stickyPolicy.length(); j < sizes; j++) {
                 JSONObject json = (JSONObject)stickyPolicy.get(j);
-                LoadBalancerRule loadBalanceRule = loadBalancerService.findByUUID(stickyResult.getString(CloudStackConstants.CS_LB_RULE_ID));
-                loadBalanceRule.setStickyUuid(json.getString(CloudStackConstants.CS_ID));
-                loadBalanceRule.setStickinessMethod((SticknessMethod.valueOf(json.getString(CloudStackConstants.CS_METHOD_NAME))));
+                LbStickinessPolicy loadBalanceRule = lbPolicyService.findByUUID(stickyResult.getString(CloudStackConstants.CS_LB_RULE_ID));
+                loadBalanceRule.setUuid(json.getString(CloudStackConstants.CS_ID));
+                loadBalanceRule.setStickinessMethod(StickinessMethod.valueOf(json.getString(CloudStackConstants.CS_METHOD_NAME)));
                 loadBalanceRule.setStickinessName(json.getString(CloudStackConstants.CS_NAME));
                 loadBalanceRule.setSyncFlag(false);
                 if (json.has(CloudStackConstants.CS_PARAMS)) {
                     JSONObject paramsResponse = json.getJSONObject(CloudStackConstants.CS_PARAMS);
-                    switch (CloudStackConstants.CS_PARAMS) {
-                    case CloudStackConstants.CS_TABLE_SIZE :
                         loadBalanceRule.setStickyTableSize((String) paramsResponse.getString(CloudStackConstants.CS_TABLE_SIZE));
-                        break;
-                    case CloudStackConstants.CS_LENGTH :
                         loadBalanceRule.setStickyLength((String) paramsResponse.getString(CloudStackConstants.CS_LENGTH));
-                        break;
-                    case CloudStackConstants.CS_EXPIRES :
                         loadBalanceRule.setStickyExpires((String) paramsResponse.getString(CloudStackConstants.CS_EXPIRES));
-                        break;
-                    case CloudStackConstants.CS_MODE:
                         loadBalanceRule.setStickyMode((String) paramsResponse.getString(CloudStackConstants.CS_MODE));
-                        break;
-                    case CloudStackConstants.CS_PREFIX :
                         loadBalanceRule.setStickyPrefix((Boolean) paramsResponse.get(CloudStackConstants.CS_PREFIX));
-                        break;
-                    case CloudStackConstants.CS_REQUEST_LEARN :
                         loadBalanceRule.setStickyRequestLearn((Boolean) paramsResponse.get(CloudStackConstants.CS_REQUEST_LEARN));
-                        break;
-                    case  CloudStackConstants.CS_INDIRECT :
                         loadBalanceRule.setStickyIndirect((Boolean) paramsResponse.get(CloudStackConstants.CS_INDIRECT));
-                        break;
-                    case CloudStackConstants.CS_NO_CACHE :
                         loadBalanceRule.setStickyNoCache((Boolean) paramsResponse.get(CloudStackConstants.CS_NO_CACHE));
-                        break;
-                    case CloudStackConstants.CS_POST_ONLY :
                         loadBalanceRule.setStickyPostOnly((Boolean) paramsResponse.get(CloudStackConstants.CS_POST_ONLY));
-                        break;
-                    case CloudStackConstants.CS_HOLD_TIME :
                         loadBalanceRule.setStickyHoldTime((String) paramsResponse.getString(CloudStackConstants.CS_HOLD_TIME));
-                        break;
-                    case CloudStackConstants.CS_DOMAIN :
                         loadBalanceRule.setStickyCompany((String) paramsResponse.getString(CloudStackConstants.CS_DOMAIN));
-                        break;
-                    default :
-                        break;
-                    }
-                }
-               loadBalancerService.save(loadBalanceRule);
+
+                   }
+                lbPolicyService.save(loadBalanceRule);
             }
         }
         if (eventObject.getString("commandEventType").equals("LB.UPDATE")) {

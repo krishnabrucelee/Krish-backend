@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmIpaddress;
 
 /**
@@ -41,4 +43,8 @@ public interface VmIpaddressRepository extends PagingAndSortingRepository<VmIpad
      */
     @Query(value = "select vmIpaddress from VmIpaddress vmIpaddress where  vmIpaddress.vmInstanceId=:vmInstanceId AND vmIpaddress.isActive =:isActive")
     List<VmIpaddress> findByVMInstanceAndIsActive(@Param("vmInstanceId") Long vmInstanceId, @Param("isActive") Boolean isActive);
+
+    @Query(value = "SELECT vmIpaddress FROM VmIpaddress vmIpaddress WHERE vmIpaddress.isActive IS :isActive AND vmIpaddress NOT IN :vmIpAddress")
+    List<VmIpaddress> findAllByVmIpaddressAndIsActive(@Param("isActive") Boolean isActive, @Param("vmIpAddress") List<VmIpaddress> vmIpAddress);
+
 }

@@ -97,4 +97,11 @@ public class LoadBalancerController extends CRUDController<LoadBalancerRule> imp
     protected List<LoadBalancerRule> listbyIpddress(@RequestParam("ipAddressId") Long ipAddressId) throws Exception {
         return loadBalancerService.findByIpaddress(ipAddressId, true);
     }
+
+    @RequestMapping(value = "removerule", method = RequestMethod.PUT, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected LoadBalancerRule removeLoadBalancerRule(@RequestBody LoadBalancerRule loadBalancer) throws Exception {
+        return loadBalancerService.removeLoadBalancerRule(loadBalancer);
+    }
 }

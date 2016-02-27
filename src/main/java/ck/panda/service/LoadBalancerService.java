@@ -39,6 +39,14 @@ public interface LoadBalancerService extends CRUDService<LoadBalancerRule> {
     LoadBalancerRule findByUUID(String uuid);
 
     /**
+     * List loadbalancer rule by isActive status
+     *
+     * @param isActive status of the load balancer.
+     * @return load balancer.
+     */
+    List<LoadBalancerRule> findByIsActive(Boolean isActive);
+
+    /**
      * List load balancer by ip address.
      *
      * @param ipAddressId of the load balancer.
@@ -57,21 +65,5 @@ public interface LoadBalancerService extends CRUDService<LoadBalancerRule> {
      */
     LoadBalancerRule save(LoadBalancerRule loadBalancer, Long userId) throws Exception;
 
-    /**
-     * Stickiness policy for Load balancer.
-     *
-     * @param loadBalanceRule object to create sticky policy.
-     * @return sticky policy.
-     * @throws Exception if error occurs.
-     */
-    LoadBalancerRule createStickinessPolicy(LoadBalancerRule loadBalanceRule) throws Exception;
-
-    /**
-     * Find all stickiness policies.
-     *
-     * @return sticky policies
-     * @throws Exception if error occurs.
-     */
-    List<LoadBalancerRule> findAllFromCSServerStickyPolicies() throws Exception;
-
+    LoadBalancerRule removeLoadBalancerRule(LoadBalancerRule loadbalancer) throws Exception;
 }

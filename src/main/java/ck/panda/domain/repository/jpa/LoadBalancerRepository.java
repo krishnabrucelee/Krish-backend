@@ -35,6 +35,15 @@ public interface LoadBalancerRepository extends PagingAndSortingRepository<LoadB
     Page<LoadBalancerRule> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
 
     /**
+     *  Find all the active or inactive load balancer.
+     *
+     * @param isActive get the load balancer list based on active/inactive status.
+     * @return list of load balancer.
+     */
+    @Query(value = "select lb from LoadBalancerRule lb where lb.isActive =:isActive")
+    List<LoadBalancerRule> findByIsActive(@Param("isActive") Boolean isActive);
+
+    /**
      * Find all by network and status active or inactive with pagination.
      *
      * @param pageable to get the list with pagination.

@@ -85,12 +85,11 @@ public class CloudStackLoadBalancerService {
      * @return remove load balancer.
      * @throws Exception if error occurs.
      */
-    public String removeFromLoadBalancerRule(String loadBalancerRuleId, String virtualMachineIds, String response) throws Exception {
+    public String removeFromLoadBalancerRule(String loadBalancerRuleId, String response, HashMap<String, String> optional) throws Exception {
 
         LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("removeFromLoadBalancerRule", null);
+                = server.getDefaultQuery("removeFromLoadBalancerRule", optional);
         arguments.add(new NameValuePair("id", loadBalancerRuleId));
-        arguments.add(new NameValuePair("virtualmachineids", virtualMachineIds));
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
         return  responseDocument;
@@ -106,12 +105,11 @@ public class CloudStackLoadBalancerService {
      * @return assign to load Balancer.
      * @throws Exception if error occurs.
      */
-    public String assignToLoadBalancerRule(String loadBalancerRuleId, String virtualMachineIds, String response) throws Exception {
+    public String assignToLoadBalancerRule(String loadBalancerRuleId, String response, HashMap<String, String> optional) throws Exception {
 
         LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("assignToLoadBalancerRule", null);
+                = server.getDefaultQuery("assignToLoadBalancerRule", optional);
         arguments.add(new NameValuePair("id", loadBalancerRuleId));
-        arguments.add(new NameValuePair("virtualmachineids", virtualMachineIds));
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
         return  responseDocument;

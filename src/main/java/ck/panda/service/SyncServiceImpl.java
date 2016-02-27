@@ -31,6 +31,7 @@ import ck.panda.domain.entity.Host;
 import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.Iso;
+import ck.panda.domain.entity.LbStickinessPolicy;
 import ck.panda.domain.entity.LoadBalancerRule;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
@@ -131,6 +132,10 @@ public class SyncServiceImpl implements SyncService {
     /** OSCategoryService for listing operating sytem in cloudstack server. */
     @Autowired
     private OsTypeService osTypeService;
+
+    /** Service reference to Load Balancer. */
+    @Autowired
+    private LbStickinessPolicyService lbPolicyService;
 
     /** Storage offering service for listing storage offers. */
     @Autowired
@@ -1861,14 +1866,14 @@ public class SyncServiceImpl implements SyncService {
             if (csProjectMap.containsKey(project.getUuid())) {
                 Project csProject = csProjectMap.get(project.getUuid());
                 project.setName(csProject.getName());
-				// check existing department.
-				if (csProject.getDepartmentId() != project.getDepartmentId()) {
-					project.setDepartmentId(csProject.getDepartmentId());
-					// if department updated for project reset project owner.
-					project.setProjectOwnerId(null);
-					project.setProjectOwner(null);
-					project.setUserList(null);
-				}
+                // check existing department.
+                if (csProject.getDepartmentId() != project.getDepartmentId()) {
+                    project.setDepartmentId(csProject.getDepartmentId());
+                    // if department updated for project reset project owner.
+                    project.setProjectOwnerId(null);
+                    project.setProjectOwner(null);
+                    project.setUserList(null);
+                }
                 project.setStatus(csProject.getStatus());
                 project.setDescription(csProject.getDescription());
                 project.setDomainId(csProject.getDomainId());
@@ -1950,6 +1955,7 @@ public class SyncServiceImpl implements SyncService {
             if (csNicMap.containsKey(nic.getUuid())) {
                 Nic csNic = csNicMap.get(nic.getUuid());
                 nic.setUuid(csNic.getUuid());
+                nic.setIpAddress(csNic.getIpAddress());
                 nic.setVmIpAddress(csNic.getVmIpAddress());
 
                 // 3.2 If found, update the nic object in app db
@@ -2254,30 +2260,38 @@ public class SyncServiceImpl implements SyncService {
    public void syncLoadBalancerStickyPolicy() throws ApplicationException, Exception {
 
         // 1. Get all the LoadBalancer objects from CS server as hash
-        List<LoadBalancerRule> csLoadBalancerList = loadBalancerService.findAllFromCSServerStickyPolicies();
-        HashMap<String, LoadBalancerRule> csLoadBalancerMap = (HashMap<String, LoadBalancerRule>) LoadBalancerRule.convert(csLoadBalancerList);
-        List<LoadBalancerRule> appLoadBalancerList = loadBalancerService.findAll();
+        List<LbStickinessPolicy> csLoadBalancerList = lbPolicyService.findAllFromCSServer();
+        HashMap<String, LbStickinessPolicy> csLoadBalancerMap = (HashMap<String, LbStickinessPolicy>) LbStickinessPolicy.convert(csLoadBalancerList);
+        List<LbStickinessPolicy> appLoadBalancerList = lbPolicyService.findAll();
         // 3. Iterate application LoadBalancer list
-        for (LoadBalancerRule loadBalancer : appLoadBalancerList) {
+        for (LbStickinessPolicy loadBalancer : appLoadBalancerList) {
             loadBalancer.setSyncFlag(false);
             LOGGER.debug("Total rows updated : " + (csLoadBalancerList.size()));
             // 3.1 Find the corresponding CS server ntService object by
             // finding it in a hash using uuid
             if (csLoadBalancerMap.containsKey(loadBalancer.getUuid())) {
-            LoadBalancerRule csLoadBalancer = csLoadBalancerMap.get(loadBalancer.getUuid());
+                LbStickinessPolicy csLoadBalancer = csLoadBalancerMap.get(loadBalancer.getUuid());
 
-            loadBalancer.setStickyUuid(csLoadBalancer.getStickyUuid());
-            loadBalancer.setStickinessName(csLoadBalancer.getStickinessName());
-            loadBalancer.setStickinessMethod(csLoadBalancer.getStickinessMethod());
+            loadBalancer.setUuid(csLoadBalancer.getUuid());
+            //loadBalancer.setStickinessName(csLoadBalancer.getStickinessName());
+           // loadBalancer.setStickinessMethod(csLoadBalancer.getStickinessMethod());
                 // 3.2 If found, update the LoadBalancer object in app db
-                loadBalancerService.update(loadBalancer);
+            lbPolicyService.update(loadBalancer);
 
                 // 3.3 Remove once updated, so that we can have the list of cs
                 // nic which is not added in the app
+            }else {
+                lbPolicyService.softDelete(loadBalancer);
             }
         }
+        // 4. Get the remaining list of cs server hash NetworkOffering object,
+        // then iterate and
+        // add it to app db
+        for (String key : csLoadBalancerMap.keySet()) {
+            LOGGER.debug("Syncservice Load Balancer uuid:");
+            lbPolicyService.save(csLoadBalancerMap.get(key));
         }
-
+   }
 
     /**
      * Sync with Cloud Server Network Firewall Rules.
