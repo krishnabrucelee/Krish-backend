@@ -51,12 +51,6 @@ public class VpnUserServiceImpl implements VpnUserService {
     @Autowired
     private CloudStackAddressService csipaddressService;
 
-    /** Constant for action event running status. */
-    public static final String CS_EVENT_RUNNING = "VPN remote access configuration in progress";
-
-    /** Constant for action event running status. */
-    public static final String CS_EVENT_REMOVE = "VPN remote access reset in progress";
-
     @Override
     public VpnUser save(VpnUser vpnUser) throws Exception {
         vpnUser.setIsActive(true);
@@ -154,11 +148,6 @@ public class VpnUserServiceImpl implements VpnUserService {
                     if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.SUCCEEDED_JOB_STATUS)) {
                         vpnUser.setIsActive(false);
                         return vpnUserRepository.save(vpnUser);
-                    } else if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.PROGRESS_JOB_STATUS)) {
-                        errors = validator.sendGlobalError(CS_EVENT_REMOVE);
-                        if (errors.hasErrors()) {
-                            throw new BadCredentialsException(CS_EVENT_REMOVE);
-                        }
                     } else if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.ERROR_JOB_STATUS)) {
                         if (jobresults.has(CloudStackConstants.CS_JOB_RESULT)) {
                             errors = validator.sendGlobalError(jobresults.getJSONObject(CloudStackConstants.CS_JOB_RESULT).getString(CloudStackConstants.CS_ERROR_TEXT));
@@ -228,11 +217,6 @@ public class VpnUserServiceImpl implements VpnUserService {
                     vpnUser.setUuid(jobresultReponse.getString(CloudStackConstants.CS_ID));
                     if (vpnUserRepository.findByUUID(vpnUser.getUuid()) == null) {
                         vpnUserRepository.save(vpnUser);
-                    }
-                } else if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.PROGRESS_JOB_STATUS)) {
-                    errors = validator.sendGlobalError(CS_EVENT_RUNNING);
-                    if (errors.hasErrors()) {
-                        throw new BadCredentialsException(CS_EVENT_RUNNING);
                     }
                 } else if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.ERROR_JOB_STATUS)) {
                     if (jobresults.has(CloudStackConstants.CS_JOB_RESULT)) {
