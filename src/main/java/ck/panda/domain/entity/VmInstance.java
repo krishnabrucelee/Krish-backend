@@ -27,7 +27,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 
@@ -343,6 +342,15 @@ public class VmInstance implements Serializable {
     @Column(name = "min_iops")
     private Long diskMinIops;
 
+    /** Instance ssh key. */
+    @OneToOne
+    @JoinColumn(name = "ssh_key_id", referencedColumnName = "id", updatable = false, insertable = false)
+    private SSHKey keypair;
+
+    /** Instance ssh key id. */
+    @Column(name = "ssh_key_id")
+    private Long keypairId;
+
     /** Version attribute to handle optimistic locking. */
     @Version
     @Column(name = "version")
@@ -427,6 +435,10 @@ public class VmInstance implements Serializable {
     /** Transient owner id of the instance. */
     @Transient
     private String transOwnerId;
+
+    /** Transient keypair name of the instance. */
+    @Transient
+    private String transKeypairName;
 
     /**
      * Get sync status.
@@ -995,6 +1007,42 @@ public class VmInstance implements Serializable {
      */
     public void setDiskMinIops(Long diskMinIops) {
         this.diskMinIops = diskMinIops;
+    }
+
+    /**
+     * Get the keypair of the instance.
+     *
+     * @return the keypair.
+     */
+    public SSHKey getKeypair() {
+        return keypair;
+    }
+
+    /**
+     * set the keypair of the instance.
+     *
+     * @param keypair to set.
+     */
+    public void setKeypair(SSHKey keypair) {
+        this.keypair = keypair;
+    }
+
+    /**
+     * Get the keypairId of the instance.
+     *
+     * @return the keypairId.
+     */
+    public Long getKeypairId() {
+        return keypairId;
+    }
+
+    /**
+     * set the keypairId of the instance.
+     *
+     * @param keypairId to set.
+     */
+    public void setKeypairId(Long keypairId) {
+        this.keypairId = keypairId;
     }
 
     /**
@@ -1920,6 +1968,24 @@ public class VmInstance implements Serializable {
 		this.transForcedStop = transForcedStop;
 	}
 
+	 /**
+     * Get transient keypair name.
+     *
+     * @return the transKeypairName
+     */
+    public String getTransKeypairName() {
+        return transKeypairName;
+    }
+
+    /**
+     * Set the transient Keypair name.
+     *
+     * @param transKeypairName to set
+     */
+    public void setTransKeypairName(String transKeypairName) {
+        this.transKeypairName = transKeypairName;
+    }
+
 	@Override
     public String toString() {
         return "VmInstance [Id=" + id + ", name=" + name + ", uuid=" + uuid + ", vncPassword=" + vncPassword
@@ -1982,6 +2048,7 @@ public class VmInstance implements Serializable {
             vmInstance
                     .setInstanceInternalName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_INSTANCE_NAME));
             vmInstance.setTransOwnerId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_USER_ID));
+            vmInstance.setTransKeypairName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_KEYPAIR));
         } catch (Exception e) {
             e.printStackTrace();
         }

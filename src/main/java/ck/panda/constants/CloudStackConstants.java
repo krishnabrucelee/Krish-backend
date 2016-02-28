@@ -499,4 +499,9 @@ public class CloudStackConstants {
     /** Constant for parent ID of the vm snapshot. */
     public static final String CS_PARENT = "parent";
 
+    /** Constant for keypair of the vm. */
+    public static final String CS_KEYPAIR = "keypair";
+
+    /** Constant for reset ssh key pair response. */
+    public static final String CS_RESET_KEYPAIR_RESPONSE = "resetSSHKeyforvirtualmachineresponse";
 }

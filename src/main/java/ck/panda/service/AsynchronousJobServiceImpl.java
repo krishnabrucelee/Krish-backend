@@ -343,6 +343,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                             csVm.getTransDepartmentId(), convertEntityService.getDomain(csVm.getTransDomainId())));
                     csVm.setTemplateId(convertEntityService.getTemplateId(csVm.getTransTemplateId()));
                     csVm.setComputeOfferingId(convertEntityService.getComputeOfferId(csVm.getTransComputeOfferingId()));
+                    if (csVm.getTransKeypairName() != null) {
+                    	instance.setKeypairId(convertEntityService.getSSHKeyByNameAndDepartment(csVm.getTransKeypairName(), csVm.getDepartmentId()).getId());
+                    }
                     if (csVm.getHostId() != null) {
                         csVm.setPodId(convertEntityService
                                 .getPodIdByHost(convertEntityService.getHostId(csVm.getTransHostId())));
@@ -440,6 +443,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 if (vmInstance.getHostId() != null) {
                     vmInstance.setPodId(convertEntityService
                             .getPodIdByHost(convertEntityService.getHostId(vmInstance.getTransHostId())));
+                }
+                if (vmInstance.getTransKeypairName() != null) {
+                    vmInstance.setKeypairId(convertEntityService.getSSHKeyByNameAndDepartment(vmInstance.getTransKeypairName(), vmInstance.getDepartmentId()).getId());
                 }
 
                 vmIn = virtualMachineService.update(vmInstance);

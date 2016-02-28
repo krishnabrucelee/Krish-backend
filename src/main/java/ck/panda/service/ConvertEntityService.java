@@ -35,6 +35,7 @@ import ck.panda.domain.entity.SnapshotPolicy;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.CloudStackServer;
+import ck.panda.domain.entity.SSHKey;
 
 /**
  * Convert Util used to get entity object from CS server's resource uuid.
@@ -190,6 +191,10 @@ public class ConvertEntityService {
     @Autowired
     private UpdateResourceCountService updateResourceCountService;
 
+    /** SSHKey Service for listing ssh key. */
+    @Autowired
+    private SSHKeyService sshKeyService;
+
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
@@ -283,6 +288,29 @@ public class ConvertEntityService {
      */
     public Template getTemplateById(Long id) throws Exception {
         return templateService.find(id);
+    }
+
+    /**
+     * Get ssh key by id.
+     *
+     * @param id of ssh key.
+     * @return ssh key.
+     * @throws Exception unhandled exception.
+     */
+    public SSHKey getSSHKeyById(Long id) throws Exception {
+        return sshKeyService.find(id);
+    }
+
+    /**
+     * Get ssh key by name and departmentId.
+     *
+     * @param name of ssh key
+     * @param departmentId of ssh key.
+     * @return ssh key.
+     * @throws Exception unhandled exception.
+     */
+    public SSHKey getSSHKeyByNameAndDepartment(String name, Long departmentId) throws Exception {
+        return sshKeyService.findAllByDepartmentAndKeypairAndIsActive(departmentId, name, true);
     }
 
     /**
@@ -1007,6 +1035,20 @@ public class ConvertEntityService {
     public String getProjectUuidById(Long projectId) throws Exception {
         if (projectService.find(projectId) != null) {
             return projectService.find(projectId).getUuid();
+        }
+        return null;
+    }
+
+    /**
+     * Get Domain UUID By domain id.
+     *
+     * @param domainId domain Id.
+     * @return domain.
+     * @throws Exception unhandled exception.
+     */
+    public String getDomainUuidById(Long domainId) throws Exception {
+        if (domainService.find(domainId) != null) {
+            return domainService.find(domainId).getUuid();
         }
         return null;
     }
