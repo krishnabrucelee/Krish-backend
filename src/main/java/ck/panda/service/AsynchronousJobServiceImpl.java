@@ -1478,26 +1478,26 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             JSONArray stickyPolicy = stickyResult.getJSONArray(CloudStackConstants.CS_STICKY_POLICY);
             for (int j = 0, sizes = stickyPolicy.length(); j < sizes; j++) {
                 JSONObject json = (JSONObject) stickyPolicy.get(j);
-                LbStickinessPolicy loadBalanceRule = lbPolicyService.findByUUID(stickyResult.getString(CloudStackConstants.CS_LB_RULE_ID));
+                LoadBalancerRule lbRule = loadBalancerService.findByUUID(stickyResult.getString(CloudStackConstants.CS_LB_RULE_ID));
+                LbStickinessPolicy loadBalanceRule = lbPolicyService.find(lbRule.getLbPolicyId());
                 loadBalanceRule.setUuid(json.getString(CloudStackConstants.CS_ID));
                 loadBalanceRule.setStickinessMethod(StickinessMethod.valueOf(json.getString(CloudStackConstants.CS_METHOD_NAME)));
                 loadBalanceRule.setStickinessName(json.getString(CloudStackConstants.CS_NAME));
                 loadBalanceRule.setSyncFlag(false);
                 if (json.has(CloudStackConstants.CS_PARAMS)) {
                     JSONObject paramsResponse = json.getJSONObject(CloudStackConstants.CS_PARAMS);
-                        loadBalanceRule.setStickyTableSize((String) paramsResponse.getString(CloudStackConstants.CS_TABLE_SIZE));
-                        loadBalanceRule.setStickyLength((String) paramsResponse.getString(CloudStackConstants.CS_LENGTH));
-                        loadBalanceRule.setStickyExpires((String) paramsResponse.getString(CloudStackConstants.CS_EXPIRES));
-                        loadBalanceRule.setStickyMode((String) paramsResponse.getString(CloudStackConstants.CS_MODE));
-                        loadBalanceRule.setStickyPrefix((Boolean) paramsResponse.get(CloudStackConstants.CS_PREFIX));
-                        loadBalanceRule.setStickyRequestLearn((Boolean) paramsResponse.get(CloudStackConstants.CS_REQUEST_LEARN));
-                        loadBalanceRule.setStickyIndirect((Boolean) paramsResponse.get(CloudStackConstants.CS_INDIRECT));
-                        loadBalanceRule.setStickyNoCache((Boolean) paramsResponse.get(CloudStackConstants.CS_NO_CACHE));
-                        loadBalanceRule.setStickyPostOnly((Boolean) paramsResponse.get(CloudStackConstants.CS_POST_ONLY));
-                        loadBalanceRule.setStickyHoldTime((String) paramsResponse.getString(CloudStackConstants.CS_HOLD_TIME));
-                        loadBalanceRule.setStickyCompany((String) paramsResponse.getString(CloudStackConstants.CS_DOMAIN));
-
-                   }
+                    loadBalanceRule.setStickyTableSize(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_TABLE_SIZE));
+                    loadBalanceRule.setStickyLength(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_LENGTH));
+                    loadBalanceRule.setStickyExpires(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_EXPIRES));
+                    loadBalanceRule.setStickyMode(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_MODE));
+                    loadBalanceRule.setStickyPrefix(JsonUtil.getBooleanValue(paramsResponse, CloudStackConstants.CS_PREFIX));
+                    loadBalanceRule.setStickyRequestLearn(JsonUtil.getBooleanValue(paramsResponse, CloudStackConstants.CS_REQUEST_LEARN));
+                    loadBalanceRule.setStickyIndirect(JsonUtil.getBooleanValue(paramsResponse, CloudStackConstants.CS_INDIRECT));
+                    loadBalanceRule.setStickyNoCache(JsonUtil.getBooleanValue(paramsResponse, CloudStackConstants.CS_NO_CACHE));
+                    loadBalanceRule.setStickyPostOnly(JsonUtil.getBooleanValue(paramsResponse, CloudStackConstants.CS_POST_ONLY));
+                    loadBalanceRule.setStickyHoldTime(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_HOLD_TIME));
+                    loadBalanceRule.setStickyCompany(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_DOMAIN));
+                }
                 lbPolicyService.save(loadBalanceRule);
             }
         }
