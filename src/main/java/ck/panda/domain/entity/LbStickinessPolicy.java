@@ -100,6 +100,10 @@ public class LbStickinessPolicy {
     @Column(name = "is_active")
     private Boolean isActive;
 
+    /** Cloudstack's LB Rule uuid. */
+    @Transient
+    private String lbUuid;
+
     /** Temporary variable. */
     @Transient
     private Boolean syncFlag;
@@ -541,6 +545,24 @@ public class LbStickinessPolicy {
     }
 
     /**
+     * Get Loadbalancer uuid.
+     *
+     * @return the lbUuid
+     */
+    public String getLbUuid() {
+        return lbUuid;
+    }
+
+    /**
+     * Set Get Loadbalancer uuid.
+     *
+     * @param lbUuid  to set
+     */
+    public void setLbUuid(String lbUuid) {
+        this.lbUuid = lbUuid;
+    }
+
+    /**
      * Convert JSONObject to lbstickinesspolicy entity.
      *
      * @param jsonObject json object
@@ -552,7 +574,10 @@ public class LbStickinessPolicy {
         loadBalancer.setSyncFlag(false);
         loadBalancer.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
         loadBalancer.setIsActive(true);
-        loadBalancer.setStickinessMethod(StickinessMethod.valueOf(JsonUtil.getStringValue(jsonObject, "methodname")));
+        loadBalancer.setLbUuid(JsonUtil.getStringValue(jsonObject,"lbruleid"));
+        if (JsonUtil.getStringValue(jsonObject, "methodname") != null) {
+            loadBalancer.setStickinessMethod(StickinessMethod.valueOf(JsonUtil.getStringValue(jsonObject, "methodname")));
+        }
         loadBalancer.setStickinessName(JsonUtil.getStringValue(jsonObject, "name"));
         loadBalancer.setCookieName(JsonUtil.getStringValue(jsonObject, "cookiename"));
         loadBalancer.setStickyExpires(JsonUtil.getStringValue(jsonObject,"expires"));

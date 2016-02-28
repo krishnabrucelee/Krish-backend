@@ -144,11 +144,11 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /** Service reference to Load Balancer. */
     @Autowired
     private LoadBalancerService loadBalancerService;
- 
+
     /** Service reference to Load Balancer. */
     @Autowired
     private LbStickinessPolicyService lbPolicyService;
-    
+
     /** Service reference to Snapshot. */
     @Autowired
     private SnapshotService snapShotService;
@@ -1383,7 +1383,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 LbStickinessPolicy loadBalanceRule = lbPolicyService.findByUUID(stickyResult.getString(CloudStackConstants.CS_LB_RULE_ID));
                 loadBalanceRule.setUuid(json.getString(CloudStackConstants.CS_ID));
                 loadBalanceRule.setStickinessMethod(StickinessMethod.valueOf(json.getString(CloudStackConstants.CS_METHOD_NAME)));
-                        (SticknessMethod.valueOf(json.getString(CloudStackConstants.CS_METHOD_NAME))));
                 loadBalanceRule.setStickinessName(json.getString(CloudStackConstants.CS_NAME));
                 loadBalanceRule.setSyncFlag(false);
                 if (json.has(CloudStackConstants.CS_PARAMS)) {

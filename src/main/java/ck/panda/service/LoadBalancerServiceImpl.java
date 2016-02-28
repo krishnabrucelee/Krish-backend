@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.LoadBalancerRule;
+import ck.panda.domain.entity.LoadBalancerRule.State;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
@@ -113,11 +114,11 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             } else {
                 LoadBalancerRule csLoadBalancer = csCreateLoadBalancerRule(loadBalancer, errors, userId);
                 if(loadBalancer.getVmIpAddress() != null){
-                    this.AssignLoadBalancerRule(loadBalancer, errors);
-                }
+                   this.createLoadBalancerRule(loadBalancer, errors);
+              }
                if (loadBalancerRepo.findByUUID(csLoadBalancer.getUuid(), true) == null) {
-                  return loadBalancerRepo.save(csLoadBalancer);
-               }
+                   return loadBalancerRepo.save(csLoadBalancer);
+                }
                   }
             return loadBalancer;
 
@@ -151,6 +152,8 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
              }
          }
+         lbRule.setAlgorithm(loadBalancer.getAlgorithm());
+         lbRule.setName(loadBalancer.getName());
         return loadBalancerRepo.save(lbRule);
     }
 
@@ -285,8 +288,8 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     private LoadBalancerRule AssignLoadBalancerRule(LoadBalancerRule loadbalancer, Errors errors) throws Exception {
         configUtil.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
-        List<VmIpaddress> vmlist = loadbalancer.getVmIpAddress();
         LoadBalancerRule lbRule = convertEntityService.getLoadBalancer(loadbalancer.getId());
+        List<VmIpaddress> vmlist = loadbalancer.getVmIpAddress();
         for(int i=0; i<vmlist.size(); i++ ){
             VmInstance vmId = convertEntityService.getVmInstanceById(loadbalancer.getVmIpAddress().get(i).getVmInstanceId());
             optional.put("vmidipmap[" + i + "].vmid", vmId.getUuid());
@@ -352,6 +355,23 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     @Override
     public List<LoadBalancerRule> findByIsActive(Boolean isActive) {
         return loadBalancerRepo.findAllByIsActive(true);
+    }
+
+    private LoadBalancerRule createLoadBalancerRule(LoadBalancerRule loadbalancer, Errors errors) throws Exception {
+        configUtil.setUserServer();
+        HashMap<String, String> optional = new HashMap<String, String>();
+        List<VmIpaddress> vmlist = loadbalancer.getVmIpAddress();
+        for(int i=0; i<vmlist.size(); i++ ){
+            VmInstance vmId = convertEntityService.getVmInstanceById(loadbalancer.getVmIpAddress().get(i).getVmInstanceId());
+            optional.put("vmidipmap[" + i + "].vmid", vmId.getUuid());
+            optional.put("vmidipmap["+ i + "].vmip", loadbalancer.getVmIpAddress().get(i).getGuestIpAddress());
+        }
+
+        cloudStackLoadBalancerService.assignToLoadBalancerRule(loadbalancer.getUuid(), "json", optional);
+        loadbalancer.setVmIpAddress(vmlist);
+        loadBalancerRepo.save(loadbalancer);
+        return loadbalancer;
+
     }
 
    }

@@ -18,7 +18,6 @@ import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.entity.VmIpaddress.IpType;
-import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.domain.repository.jpa.NicRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackInstanceService;

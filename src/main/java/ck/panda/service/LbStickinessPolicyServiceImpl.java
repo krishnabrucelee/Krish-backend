@@ -44,6 +44,10 @@ public class LbStickinessPolicyServiceImpl implements LbStickinessPolicyService 
     @Autowired
     private LoadBalancerService loadBalancerService;
 
+    /** Virtual machine Service for listing vms. */
+    @Autowired
+    private ConvertEntityService convertEntityService;
+
     /** object(server) created for CloudStackServer. */
     @Autowired
     private ConfigUtil configServer;
@@ -213,6 +217,7 @@ public class LbStickinessPolicyServiceImpl implements LbStickinessPolicyService 
                  JSONArray stickyPolicyJSON = stickinessJSON.getJSONObject(0).getJSONArray(CS_STICKY_POLICY);
                  for (int i = 0, size = stickyPolicyJSON.length(); i < size; i++) {
                      LbStickinessPolicy lbPolicy = LbStickinessPolicy.convert(stickyPolicyJSON.getJSONObject(i));
+                     lbPolicy.setLbUuid(stickinessJSON.getJSONObject(0).getString("lbruleid"));
                      loadBalancerList.add(lbPolicy);
                  }
               }
@@ -308,8 +313,18 @@ public class LbStickinessPolicyServiceImpl implements LbStickinessPolicyService 
     @Override
     public LbStickinessPolicy save(LbStickinessPolicy stickyPolicy) throws Exception {
          if (!stickyPolicy.getSyncFlag()) {
-             return policyRepo.save(stickyPolicy);
-         }
+             stickyPolicy = policyRepo.save(stickyPolicy);
+             if(stickyPolicy.getLbUuid() != null) {
+                 this.updateLoadBalancer(stickyPolicy);
+             }
+        }
          return stickyPolicy;
+    }
+
+    private void updateLoadBalancer(LbStickinessPolicy stickyPolicy) throws Exception {
+            LoadBalancerRule loadBalancer = loadBalancerService.findByUUID(stickyPolicy.getLbUuid());
+            loadBalancer.setSyncFlag(false);
+            loadBalancer.setLbPolicyId(stickyPolicy.getId());
+            loadBalancerService.update(loadBalancer);
     }
 }
