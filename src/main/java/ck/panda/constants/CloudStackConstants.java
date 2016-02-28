@@ -483,6 +483,10 @@ public class CloudStackConstants {
 
     /** Constant for method name. */
     public static final String CS_METHOD_NAME = "methodname";
+    
+     /** Constant for table size. */
+    public static final String CS_TABLE_SIZE = "tablesize";
+
 
     /** Constant for VM snapshot id. */
     public static final String CS_VM_SNAPSHOT_ID = "vmsnapshotid";
@@ -546,5 +550,39 @@ public class CloudStackConstants {
 
     /** Constant for remove VPN public ip. */
     public static final String CS_PUBLIC_IP_ID = "publicipid";
+    
+     /** Constant for cookie name. */
+    public static final String CS_COOKIE_NAME = "cookie-name";
 
-}
+    /** Constant for length. */
+    public static final String CS_LENGTH = "length";
+
+    /** Constant for expires. */
+    public static final String CS_EXPIRES = "expires";
+
+    /** Constant for mode. */
+    public static final String CS_MODE = "mode";
+
+    /** Constant for request learn. */
+    public static final String CS_REQUEST_LEARN = "request-learn";
+
+    /** Constant for prefix. */
+    public static final String CS_PREFIX = "prefix";
+
+    /** Constant for indirect. */
+    public static final String CS_INDIRECT = "indirect";
+
+    /** Constant for nocache. */
+    public static final String CS_NO_CACHE = "nocahche";
+
+    /** Constant for post only. */
+    public static final String CS_POST_ONLY = "postonly";
+
+    /** Constant for hold time. */
+    public static final String CS_HOLD_TIME = "holdtime";
+
+    /** Constant for parameters. */
+    public static final String CS_PARAMS = "params";
+
+
+   }

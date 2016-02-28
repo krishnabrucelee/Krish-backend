@@ -602,7 +602,6 @@ public class NetworkServiceImpl implements NetworkService {
     public Page<Network> findAll(PagingAndSorting pagingAndSorting) throws Exception {
         return networkRepo.findAll(pagingAndSorting.toPageRequest());
     }
-
     @Override
     @PreAuthorize("hasPermission(#network.getSyncFlag(), 'RESTART_NETWORK')")
     public Network restartNetwork(Network network) throws Exception {

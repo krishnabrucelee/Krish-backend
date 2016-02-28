@@ -6,6 +6,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.LoadBalancerRule;
+import ck.panda.domain.entity.Project;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.repository.jpa.VmIpaddressRepository;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -23,6 +27,8 @@ public class VmIpaddressServiceImpl implements VmIpaddressService {
     @Autowired
     private VmIpaddressRepository ipaddressRepo;
 
+    @Autowired
+    private LoadBalancerService lbService;
     @Override
     public VmIpaddress save(VmIpaddress ipaddress) throws Exception {
         LOGGER.debug(ipaddress.getUuid());
@@ -80,5 +86,15 @@ public class VmIpaddressServiceImpl implements VmIpaddressService {
     @Override
     public List<VmIpaddress> findByVMInstance(Long nic) throws Exception {
         return ipaddressRepo.findByVMInstanceAndIsActive(nic, true);
+    }
+
+    @Override
+    public List<VmIpaddress> findAllLoadBalancer(Long lbId) throws Exception {
+        LoadBalancerRule loadBalancer = lbService.find(lbId);
+        List<VmIpaddress> vmIp = loadBalancer.getVmIpAddress();
+        if (vmIp.size() > 0) {
+            return ipaddressRepo.findAllByVmIpaddressAndIsActive(true, vmIp);
+        }
+        return vmIp;
     }
 }
