@@ -321,6 +321,12 @@ public class LbStickinessPolicyServiceImpl implements LbStickinessPolicyService 
          return stickyPolicy;
     }
 
+    /**
+     * Update loadbalancer stickiness policy in load balancer.
+     *
+     * @param stickyPolicy of the load balancer.
+     * @throws Exception if error occurs.
+     */
     private void updateLoadBalancer(LbStickinessPolicy stickyPolicy) throws Exception {
             LoadBalancerRule loadBalancer = loadBalancerService.findByUUID(stickyPolicy.getLbUuid());
             loadBalancer.setSyncFlag(false);

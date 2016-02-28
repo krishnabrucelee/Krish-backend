@@ -130,12 +130,6 @@ public class LoadBalancerRule implements Serializable {
     @Column(name = "vpc")
     private String vpc;
 
-
-    /** Cookie name for LB. */
-    @Column(name = "guest_ip")
-    private String guestIpAddrress;
-
-
     /** The source cidr list to forward traffic . */
     @Column(name = "source_cidr")
     private String sourceCIDR;
@@ -933,21 +927,8 @@ public class LoadBalancerRule implements Serializable {
     }
 
     /**
-     * @return the guestIpAddrress
-     */
-    public String getGuestIpAddrress() {
-        return guestIpAddrress;
-    }
-
-    /**
-     * @param guestIpAddrress the guestIpAddrress to set
-     */
-    public void setGuestIpAddrress(String guestIpAddrress) {
-        this.guestIpAddrress = guestIpAddrress;
-    }
-
-
-    /**
+     * Get the loadbalancer policy.
+     *
      * @return the lbPolicy
      */
     public LbStickinessPolicy getLbPolicy() {
@@ -955,6 +936,8 @@ public class LoadBalancerRule implements Serializable {
     }
 
     /**
+     * Set load balancer policy.
+     *
      * @param lbPolicy the lbPolicy to set
      */
     public void setLbPolicy(LbStickinessPolicy lbPolicy) {
@@ -962,6 +945,8 @@ public class LoadBalancerRule implements Serializable {
     }
 
     /**
+     * Get isActive status of the rule.
+     *
      * @return the ruleIsActive
      */
     public Boolean getRuleIsActive() {
@@ -969,13 +954,17 @@ public class LoadBalancerRule implements Serializable {
     }
 
     /**
-     * @param ruleIsActive the ruleIsActive to set
+     * Set isActive status of the rule.
+     *
+     * @param ruleIsActive to set
      */
     public void setRuleIsActive(Boolean ruleIsActive) {
         this.ruleIsActive = ruleIsActive;
     }
 
     /**
+     * Get load balancer policy id.
+     *
      * @return the lbPolicyId
      */
     public Long getLbPolicyId() {
@@ -983,17 +972,19 @@ public class LoadBalancerRule implements Serializable {
     }
 
     /**
-     * @param lbPolicyId the lbPolicyId to set
+     * Set load balancer policy id.
+     *
+     * @param lbPolicyId to set
      */
     public void setLbPolicyId(Long lbPolicyId) {
         this.lbPolicyId = lbPolicyId;
     }
 
     /**
-     * Convert JSONObject to nic entity.
+     * Convert JSONObject to LoadBalancerRule entity.
      *
      * @param jsonObject json object
-     * @return nic entity object.
+     * @return LoadBalancerRule entity object.
      * @throws Exception unhandled errors.
      */
     public static LoadBalancerRule convert(JSONObject jsonObject) throws Exception {
@@ -1022,11 +1013,11 @@ public class LoadBalancerRule implements Serializable {
      * @return egressMap egress.
      */
     public static Map<String, LoadBalancerRule> convert(List<LoadBalancerRule> loadBalancerList) {
-        Map<String, LoadBalancerRule> egressMap = new HashMap<String, LoadBalancerRule>();
+        Map<String, LoadBalancerRule> lbMap = new HashMap<String, LoadBalancerRule>();
 
         for (LoadBalancerRule nic : loadBalancerList) {
-            egressMap.put(nic.getUuid(), nic);
+            lbMap.put(nic.getUuid(), nic);
         }
-        return egressMap;
+        return lbMap;
     }
 }
