@@ -23,6 +23,7 @@ import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.Volume;
+import ck.panda.service.ConvertEntityService;
 import ck.panda.service.ResourceLimitDepartmentService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -40,6 +41,10 @@ public class ResourceLimitDepartmentController extends CRUDController<ResourceLi
     /** Service reference to resource. */
     @Autowired
     private ResourceLimitDepartmentService resourceLimitService;
+
+    /** Convert Entity Service reference to resource. */
+    @Autowired
+    private ConvertEntityService convertEntityService;
 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new resource.", response = ResourceLimitDepartment.class)
     @Override
@@ -149,4 +154,16 @@ public class ResourceLimitDepartmentController extends CRUDController<ResourceLi
         return resourceLimitService.getResourceLimitsOfProject(projectId);
     }
 
+    /**
+     * Get resource limits of Project.
+     *
+     * @param projectId domain id
+     * @return max values of resources
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/quotaprojectId/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public HashMap<String, String> findByProjectQuotaDepartmentResource(@PathVariable(PATH_ID) Long projectId) throws Exception {
+        return resourceLimitService.getResourceLimitsOfProject(convertEntityService.getProjectById(projectId).getDepartmentId());
+    }
 }
