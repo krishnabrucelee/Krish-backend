@@ -314,11 +314,11 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
     }
 
     @Override
-    public HashMap<String, String> getResourceLimitsOfDomain(Long departmentId) {
+    public HashMap<String, String> getResourceLimitsOfDomain(Long domainId) {
         HashMap<String, String> resourceTypeMap = convertEntityService.getResourceTypeValue();
         HashMap<String, String> resourceMaxCount = new HashMap<String, String>();
         for(String name : resourceTypeMap.keySet()) {
-            Long resourceDomainCount = resourceLimitDomainRepo.findTotalCountOfResourceDomain(departmentId, ResourceLimitDomain.ResourceType.valueOf(resourceTypeMap.get(name)), true);
+            Long resourceDomainCount = resourceLimitDomainRepo.findTotalCountOfResourceDomain(domainId, ResourceLimitDomain.ResourceType.valueOf(resourceTypeMap.get(name)), true);
             if (resourceDomainCount != null) {
             resourceMaxCount.put(resourceTypeMap.get(name), resourceDomainCount.toString());
             }
@@ -331,11 +331,11 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
     }
 
     @Override
-    public HashMap<String, String> getResourceLimitsOfProject(Long projectId) {
+    public HashMap<String, String> getResourceLimitsOfProject(Long domainId) {
         HashMap<String, String> resourceTypeMap = convertEntityService.getResourceTypeValue();
         HashMap<String, String> resourceMaxCount = new HashMap<String, String>();
         for(String name : resourceTypeMap.keySet()) {
-            Long resourceDomainCount = resourceLimitDomainRepo.findTotalCountOfResourceProject(projectId, ResourceLimitDomain.ResourceType.valueOf(resourceTypeMap.get(name)), true);
+            Long resourceDomainCount = resourceLimitDomainRepo.findTotalCountOfResourceProject(domainId, ResourceLimitDomain.ResourceType.valueOf(resourceTypeMap.get(name)), true);
             if (resourceDomainCount != null) {
             resourceMaxCount.put(resourceTypeMap.get(name), resourceDomainCount.toString());
             }
