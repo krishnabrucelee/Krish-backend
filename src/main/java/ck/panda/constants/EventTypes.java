@@ -279,11 +279,28 @@ public class EventTypes {
     /** Network Delete Events. */
     public static final String EVENT_NETWORK_DELETE = "DELETE";
 
-    /** Domain event update     */
+    /** Domain event update.     */
     public static final Object EVENT_DOMAIN_UPDATE = "DOMAIN.UPDATE";
 
     /** State of resources. */
     public static final String OLD_RESOURCE_STATE = "old-state";
 
+    /** Static event nat. */
     public static final String EVENT_STATIC_NAT = "STATICNAT.";
+    
+    /** VPN events. */
+    public static final String EVENT_VPN = "VPN.";
+
+    /** VPN Remote Access Create Events. */
+    public static final String EVENT_REMOTE_ACCESS_CREATE = "VPN.REMOTE.ACCESS.CREATE";
+
+    /** VPN Remote Access Destroy Events. */
+    public static final String EVENT_REMOTE_ACCESS_DESTROY = "VPN.REMOTE.ACCESS.DESTROY";
+
+    /** VPN Remote Access User Create Events. */
+    public static final String EVENT_VPN_USER_ADD = "VPN.USER.ADD";
+
+    /** VPN Remote Access User Remove Events. */
+    public static final String EVENT_VPN_USER_REMOVE = "VPN.USER.REMOVE";
+
 }

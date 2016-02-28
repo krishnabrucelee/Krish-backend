@@ -45,7 +45,6 @@ public class VmSnapshot implements Serializable {
     private Long id;
 
     /** Name of the snapshot. */
-    @NotEmpty
     @Column(name = "name", nullable = false)
     private String name;
 
@@ -93,7 +92,6 @@ public class VmSnapshot implements Serializable {
     private Domain domain;
 
     /** Instance domain id. */
-    @NotNull
     @Column(name = "domain_id")
     private Long domainId;
 

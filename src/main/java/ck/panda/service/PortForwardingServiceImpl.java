@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.PortForwarding;
 import ck.panda.domain.repository.jpa.PortForwardingRepository;
 import ck.panda.util.AppValidator;
@@ -154,6 +155,7 @@ public class PortForwardingServiceImpl implements PortForwardingService {
         optional.put("privateendport", portForwarding.getPrivateStartPort().toString());
         optional.put("publicendport", portForwarding.getPublicEndPort().toString());
         optional.put("vmguestip", portForwarding.getvmGuestIp());
+        optional.put("openfirewall", CloudStackConstants.STATUS_INACTIVE);
         String csResponse = cloudStackFirewallService.createPortForwardingRule(convertEntityService.getIpAddress(portForwarding.getIpAddressId()).getUuid(),
                 portForwarding.getPrivateStartPort().toString(), portForwarding.getProtocolType().toString(),
                 portForwarding.getPublicStartPort().toString(), convertEntityService.getVmInstanceById(portForwarding.getVmInstanceId()).getUuid(),

@@ -26,6 +26,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -113,40 +114,26 @@ public class IpAddress implements Serializable {
     @Enumerated(EnumType.STRING)
     private State state;
 
-    /** Set syncFlag. */
-    @Transient
-    private Boolean syncFlag;
+    /** public VPN uuid. */
+    @Column(name = "vpn_uuid")
+    private String vpnUuid;
 
-    /** Transient domain of the ip Address. */
-    @Transient
-    private String transDomainId;
+    /** public VPN IP range. */
+    @Column(name = "vpn_ip_range")
+    private String vpnIpRange;
 
-    /** Transient host of the ip Address. */
-    @Transient
-    private String transProjectId;
+    /** public VPN Preshared Key. */
+    @Column(name = "vpn_preshared_key")
+    private String vpnPresharedKey;
 
-    /** Transient network of the ip Address. */
-    @Transient
-    private String transNetworkId;
+    /** public VPN state. */
+    @Column(name = "vpn_state")
+    @Enumerated(EnumType.STRING)
+    private VpnState vpnState;
 
-    /** Transient department id of the ip Address. */
-    @Transient
-    private String transDepartmentId;
-
-    /** Transient zone of the instance. */
-    @Transient
-    private String transZoneId;
-
-    /**
-     * Enumeration state for ipaddress.
-     */
-    public enum State {
-        /** Allocated status for already acquired/assigned to network. */
-        ALLOCATED,
-
-        /** Free status for available public ips. */
-        FREE
-    }
+    /** public VPN display. */
+    @Column(name = "vpn_for_display")
+    private Boolean vpnForDisplay;
 
     /** The Zone Id. */
     @JoinColumn(name = "zone_id", referencedColumnName = "Id", updatable = false, insertable = false)
@@ -194,6 +181,52 @@ public class IpAddress implements Serializable {
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
+
+    /** Set syncFlag. */
+    @Transient
+    private Boolean syncFlag;
+
+    /** Transient domain of the ip Address. */
+    @Transient
+    private String transDomainId;
+
+    /** Transient host of the ip Address. */
+    @Transient
+    private String transProjectId;
+
+    /** Transient network of the ip Address. */
+    @Transient
+    private String transNetworkId;
+
+    /** Transient department id of the ip Address. */
+    @Transient
+    private String transDepartmentId;
+
+    /** Transient zone of the instance. */
+    @Transient
+    private String transZoneId;
+
+    /**
+     * Enumeration state for ipaddress.
+     */
+    public enum State {
+        /** Allocated status for already acquired/assigned to network. */
+        ALLOCATED,
+
+        /** Free status for available public ips. */
+        FREE
+    }
+
+    /**
+     * Enumeration VPN state for ipaddress.
+     */
+    public enum VpnState {
+        /** Allocated status for VPN state. */
+        RUNNING,
+
+        /** Disabled status for VPN state. */
+        DISABLED
+    }
 
     /**
      * Get the id.
@@ -484,6 +517,96 @@ public class IpAddress implements Serializable {
     }
 
     /**
+     * Get the uuid for VPN.
+     *
+     * @return the vpnUuid
+     */
+    public String getVpnUuid() {
+        return vpnUuid;
+    }
+
+    /**
+     * Set the uuid for VPN.
+     *
+     * @param vpnUuid the vpnUuid to set
+     */
+    public void setVpnUuid(String vpnUuid) {
+        this.vpnUuid = vpnUuid;
+    }
+
+    /**
+     * Get the range for VPN.
+     *
+     * @return the vpnIpRange
+     */
+    public String getVpnIpRange() {
+        return vpnIpRange;
+    }
+
+    /**
+     * Set the range for VPN.
+     *
+     * @param vpnIpRange the vpnIpRange to set
+     */
+    public void setVpnIpRange(String vpnIpRange) {
+        this.vpnIpRange = vpnIpRange;
+    }
+
+    /**
+     * Get the preshared key for VPN.
+     *
+     * @return the vpnPresharedKey
+     */
+    public String getVpnPresharedKey() {
+        return vpnPresharedKey;
+    }
+
+    /**
+     * Set the preshared key for VPN.
+     *
+     * @param vpnPresharedKey the vpnPresharedKey to set
+     */
+    public void setVpnPresharedKey(String vpnPresharedKey) {
+        this.vpnPresharedKey = vpnPresharedKey;
+    }
+
+    /**
+     * Get the state for VPN.
+     *
+     * @return the vpnState
+     */
+    public VpnState getVpnState() {
+        return vpnState;
+    }
+
+    /**
+     * Set the state for VPN.
+     *
+     * @param vpnState the vpnState to set
+     */
+    public void setVpnState(VpnState vpnState) {
+        this.vpnState = vpnState;
+    }
+
+    /**
+     * Get the state for display.
+     *
+     * @return the vpnForDisplay
+     */
+    public Boolean getVpnForDisplay() {
+        return vpnForDisplay;
+    }
+
+    /**
+     * Set the state for display.
+     *
+     * @param vpnForDisplay the vpnForDisplay to set
+     */
+    public void setVpnForDisplay(Boolean vpnForDisplay) {
+        this.vpnForDisplay = vpnForDisplay;
+    }
+
+    /**
      * Get the version.
      *
      * @return the version.
@@ -750,7 +873,7 @@ public class IpAddress implements Serializable {
      * @param vlan to set.
      */
     public void setVlan(String vlan) {
-        vlan = vlan;
+        this.vlan = vlan;
     }
 
     /**
@@ -780,18 +903,18 @@ public class IpAddress implements Serializable {
     public static IpAddress convert(JSONObject jsonObject) {
         IpAddress ipAddress = new IpAddress();
         try {
-            ipAddress.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            ipAddress.setIsStaticnat(JsonUtil.getBooleanValue(jsonObject, "isstaticnat"));
-            ipAddress.setVlan(JsonUtil.getStringValue(jsonObject, "vlanname"));
-            ipAddress.setTransZoneId((JsonUtil.getStringValue(jsonObject, "zoneid")));
-            ipAddress.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
-            ipAddress.setTransNetworkId(JsonUtil.getStringValue(jsonObject,"associatednetworkid"));
-            ipAddress.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, "account"));
-            ipAddress.setTransProjectId(JsonUtil.getStringValue(jsonObject, "projectid"));
-            ipAddress.setPublicIpAddress(JsonUtil.getStringValue(jsonObject,"ipaddress"));
-            ipAddress.setDisplay(JsonUtil.getBooleanValue(jsonObject, "fordisplay"));
-            ipAddress.setIsSourcenat(JsonUtil.getBooleanValue(jsonObject,"issourcenat"));
-            ipAddress.setState(State.valueOf(JsonUtil.getStringValue(jsonObject, "state").toUpperCase()));
+            ipAddress.setUuid(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ID));
+            ipAddress.setIsStaticnat(JsonUtil.getBooleanValue(jsonObject, CloudStackConstants.CS_IS_STATIC_NAT));
+            ipAddress.setVlan(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_VLAN_NAME));
+            ipAddress.setTransZoneId((JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ZONE_ID)));
+            ipAddress.setTransDomainId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DOMAIN_ID));
+            ipAddress.setTransNetworkId(JsonUtil.getStringValue(jsonObject,CloudStackConstants.CS_ASSOCIATED_NETWORK_ID));
+            ipAddress.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ACCOUNT));
+            ipAddress.setTransProjectId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_PROJECT_ID));
+            ipAddress.setPublicIpAddress(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_IP_ADDRESS));
+            ipAddress.setDisplay(JsonUtil.getBooleanValue(jsonObject, CloudStackConstants.CS_FOR_DISPLAY));
+            ipAddress.setIsSourcenat(JsonUtil.getBooleanValue(jsonObject, CloudStackConstants.CS_IS_SOURCE_NAT));
+            ipAddress.setState(State.valueOf(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_STATE).toUpperCase()));
             ipAddress.setIsActive(true);
             ipAddress.setSyncFlag(false);
         } catch (Exception ex) {
