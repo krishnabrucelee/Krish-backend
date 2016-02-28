@@ -294,7 +294,8 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         }
 
         String assignResponse = cloudStackLoadBalancerService.assignToLoadBalancerRule(lbRule.getUuid(), "json", optional);
-        loadbalancer.setRuleIsActive(true);
+        lbRule.setVmIpAddress(vmlist);
+        loadBalancerRepo.save(lbRule);
         return loadbalancer;
 
     }
