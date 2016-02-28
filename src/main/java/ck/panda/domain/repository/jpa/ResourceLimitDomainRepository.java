@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+
+import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
 
@@ -72,5 +74,23 @@ public interface ResourceLimitDomainRepository extends PagingAndSortingRepositor
     @Query(value = "select resource from ResourceLimitDomain resource where resource.isActive =:isActive AND resource.domainId =:domainId AND resource.resourceType in :resourceType")
     ResourceLimitDomain findByDomainAndResourceCount(@Param("domainId") Long id,
             @Param("resourceType") ResourceType resourceType, @Param("isActive") Boolean isActive);
+
+    /**
+     * @param departmentId Deparment id
+     * @param resourceType
+     * @param isActive
+     * @return
+     */
+    @Query(value = "select sum(resource.max) from ResourceLimitDomain resource where resource.isActive = :isActive AND resource.domainId = :domainId AND resource.resourceType = :resourceType ")
+    Long findTotalCountOfResourceDomain(@Param("domainId") Long domainId, @Param("resourceType") ResourceLimitDomain.ResourceType resourceType, @Param("isActive") Boolean isActive);
+
+    /**
+     * @param departmentId Deparment id
+     * @param resourceType
+     * @param isActive
+     * @return
+     */
+    @Query(value = "select sum(resource.max) from ResourceLimitDomain resource where resource.isActive = :isActive AND resource.domainId = :domainId AND resource.resourceType = :resourceType ")
+    Long findTotalCountOfResourceProject(@Param("domainId") Long domainId, @Param("resourceType") ResourceLimitDomain.ResourceType resourceType, @Param("isActive") Boolean isActive);
 
 }

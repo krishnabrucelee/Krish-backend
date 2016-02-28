@@ -3,6 +3,7 @@
  */
 package ck.panda.service;
 
+import java.util.HashMap;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.ResourceLimitDepartment;
@@ -57,4 +58,18 @@ public interface ResourceLimitDepartmentService extends CRUDService<ResourceLimi
      */
     ResourceLimitDepartment findByDepartmentAndResourceType(Long departmentId,
             ResourceLimitDepartment.ResourceType resourceType, Boolean isActive);
+
+    /**
+     * Get resource limits of department.
+     *
+     * @param domainId domain id
+     * @return max values of resources
+     */
+    HashMap<String, String> getResourceLimitsOfDepartment(Long domainId);
+
+    /**
+     * @param projectId
+     * @return
+     */
+    HashMap<String, String> getResourceLimitsOfProject(Long projectId);
 }

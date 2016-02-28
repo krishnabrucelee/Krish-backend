@@ -75,5 +75,22 @@ public interface ResourceLimitProjectRepository extends PagingAndSortingReposito
     ResourceLimitProject findResourceByProjectAndResourceType(@Param("projectId") Long projectId,
             @Param("resourceType") ResourceLimitProject.ResourceType resourceType, @Param("isActive") Boolean isActive);
 
+    /**
+     * @param domainId
+     * @param resourceType
+     * @param isActive
+     * @return
+     */
+    @Query(value = "select sum(resource.max) from ResourceLimitProject resource where resource.isActive = :isActive AND resource.domainId = :domainId AND resource.resourceType = :resourceType ")
+    Long findTotalCountOfResourceProject(@Param("domainId") Long domainId, @Param("resourceType") ResourceLimitProject.ResourceType resourceType, @Param("isActive") Boolean isActive);
+
+    /**
+     * @param domainId
+     * @param resourceType
+     * @param isActive
+     * @return
+     */
+    @Query(value = "select sum(resource.max) from ResourceLimitProject resource where resource.isActive = :isActive AND resource.departmentId = :departmentId AND resource.resourceType = :resourceType ")
+    Long findTotalCountOfResourceDepartment(@Param("departmentId") Long departmentId, @Param("resourceType") ResourceLimitProject.ResourceType resourceType, @Param("isActive") Boolean isActive);
 
 }

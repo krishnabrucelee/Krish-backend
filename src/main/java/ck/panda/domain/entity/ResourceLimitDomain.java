@@ -54,6 +54,14 @@ public class ResourceLimitDomain implements Serializable {
     @Column(name = "domain_id")
     private Long domainId;
 
+    /** Resource limit for domain id. */
+    @Column(name = "department_id")
+    private Long departmentId;
+
+    /** Resource limit for domain id. */
+    @Column(name = "project_id")
+    private Long projectId;
+
     /** Type of resource. */
     @Column(name = "resource_type", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -480,6 +488,37 @@ public class ResourceLimitDomain implements Serializable {
      */
     public void setTransResourceType(Integer transResourceType) {
         this.transResourceType = transResourceType;
+    }
+
+
+    /**
+     * @return the departmentId
+     */
+    public Long getDepartmentId() {
+        return departmentId;
+    }
+
+
+
+    /**
+     * @return the projectId
+     */
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    /**
+     * @param projectId the projectId to set
+     */
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
+    }
+
+    /**
+     * @param departmentId the departmentId to set
+     */
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
     }
 
     /**

@@ -3,6 +3,7 @@
  */
 package ck.panda.web.resource;
 
+import java.util.HashMap;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -134,5 +135,31 @@ public class ResourceLimitDomainController extends CRUDController<ResourceLimitD
     @ResponseBody
     protected List<ResourceLimitDomain> getDomainSearch() throws Exception {
         return resourceLimitDomainService.findCurrentLoginDomain();
+    }
+
+    /**
+     * Get resource limits of department.
+     *
+     * @param domainId domain id
+     * @return max values of resources
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/departmentId/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public HashMap<String, String> findByDepartmentResource(@PathVariable(PATH_ID) Long departmentId) throws Exception {
+        return resourceLimitDomainService.getResourceLimitsOfDomain(departmentId);
+    }
+
+    /**
+     * Get resource limits of Domain.
+     *
+     * @param domainId domain id
+     * @return max values of resources
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/projectId/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public HashMap<String, String> findByDomainResource(@PathVariable(PATH_ID) Long projectId) throws Exception {
+        return resourceLimitDomainService.getResourceLimitsOfProject(projectId);
     }
 }
