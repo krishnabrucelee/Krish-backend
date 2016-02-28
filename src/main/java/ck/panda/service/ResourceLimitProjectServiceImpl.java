@@ -308,4 +308,33 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
         syncService.syncResourceLimitProject(convertEntityService.getProjectById(projectId));
         return (List<ResourceLimitProject>) resourceLimitProjectRepo.findAllByProjectIdAndIsActive(projectId, isActive);
     }
+
+    @Override
+    public HashMap<String, String> getResourceLimitsOfProject(Long domainId) {
+        HashMap<String, String> resourceTypeMap = convertEntityService.getResourceTypeValue();
+        HashMap<String, String> resourceMaxCount = new HashMap<String, String>();
+        for(String name : resourceTypeMap.keySet()) {
+            Long resourceProjectCount = resourceLimitProjectRepo.findTotalCountOfResourceProject(domainId, ResourceLimitProject.ResourceType.valueOf(resourceTypeMap.get(name)), true);
+            if (resourceProjectCount != null) {
+                resourceMaxCount.put(resourceTypeMap.get(name), resourceProjectCount.toString());
+            }
+        }
+
+        return resourceMaxCount;
+    }
+
+    @Override
+    public HashMap<String, String> getResourceLimitsOfDepartment(Long departmentId) {
+        HashMap<String, String> resourceTypeMap = convertEntityService.getResourceTypeValue();
+        HashMap<String, String> resourceMaxCount = new HashMap<String, String>();
+        for(String name : resourceTypeMap.keySet()) {
+            Long resourceProjectCount = resourceLimitProjectRepo.findTotalCountOfResourceDepartment(departmentId, ResourceLimitProject.ResourceType.valueOf(resourceTypeMap.get(name)), true);
+            if (resourceProjectCount != null) {
+                resourceMaxCount.put(resourceTypeMap.get(name), resourceProjectCount.toString());
+            }
+        }
+
+        return resourceMaxCount;
+    }
+
 }

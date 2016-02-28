@@ -3,6 +3,7 @@
  */
 package ck.panda.service;
 
+import java.util.HashMap;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
@@ -97,4 +98,20 @@ public interface ResourceLimitDomainService extends CRUDService<ResourceLimitDom
      * @throws Exception unhandled error
      */
     void asyncResourceDomain(Long domainId) throws Exception;
+
+    /**
+     * Get resource limits of domain.
+     *
+     * @param departmentId department id
+     * @return max values of resources
+     */
+    HashMap<String, String> getResourceLimitsOfDomain(Long departmentId);
+
+    /**
+     * @param projectId
+     * @return
+     */
+    HashMap<String, String> getResourceLimitsOfProject(Long projectId);
+
+
 }

@@ -1,5 +1,6 @@
 package ck.panda.web.resource;
 
+import java.util.HashMap;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
+import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.Volume;
 import ck.panda.service.ResourceLimitDepartmentService;
@@ -119,6 +121,32 @@ public class ResourceLimitDepartmentController extends CRUDController<ResourceLi
     protected List<ResourceLimitDepartment> getResourceLimitByDepartment(@PathVariable(PATH_ID) Long departmentId)
             throws Exception {
         return resourceLimitService.findAllByDepartmentIdAndIsActive(departmentId, true);
+    }
+
+    /**
+     * Get resource limits of department.
+     *
+     * @param domainId domain id
+     * @return max values of resources
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/domainId/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public HashMap<String, String> findByDomainResource(@PathVariable(PATH_ID) Long domainId) throws Exception {
+        return resourceLimitService.getResourceLimitsOfDepartment(domainId);
+    }
+
+    /**
+     * Get resource limits of department.
+     *
+     * @param domainId domain id
+     * @return max values of resources
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/projectId/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public HashMap<String, String> findByDepartmentResource(@PathVariable(PATH_ID) Long projectId) throws Exception {
+        return resourceLimitService.getResourceLimitsOfProject(projectId);
     }
 
 }

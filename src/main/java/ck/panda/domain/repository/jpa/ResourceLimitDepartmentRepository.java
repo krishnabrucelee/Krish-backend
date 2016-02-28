@@ -31,7 +31,7 @@ public interface ResourceLimitDepartmentRepository extends PagingAndSortingRepos
      * @param isActive true/false
      * @return department.
      */
-    @Query(value = "select resource from ResourceLimitDepartment resource where resource.isActive =:isActive AND resource.departmentId =:departmentId")
+    @Query(value = "select resource from ResourceLimitDepartment resource where resource.isActive = :isActive AND resource.departmentId = :departmentId")
     List<ResourceLimitDepartment> findAllByDepartmentIdAndIsActive(@Param("departmentId") Long departmentId,
             @Param("isActive") Boolean isActive);
 
@@ -44,7 +44,7 @@ public interface ResourceLimitDepartmentRepository extends PagingAndSortingRepos
      * @param resourceType resource type.
      * @return resource count.
      */
-    @Query(value = "select coalesce(sum(resource.max),0) from ResourceLimitDepartment resource where resource.isActive =:isActive AND resource.domainId =:domainId AND resource.resourceType =:resourceType AND resource.departmentId !=:departmentId ")
+    @Query(value = "select coalesce(sum(resource.max),0) from ResourceLimitDepartment resource where resource.isActive = :isActive AND resource.domainId = :domainId AND resource.resourceType = :resourceType AND resource.departmentId != :departmentId ")
     Long findByResourceCountByDepartmentAndResourceType(@Param("domainId") Long domainId,
             @Param("resourceType") ResourceLimitDepartment.ResourceType resourceType,
             @Param("departmentId") Long departmentId, @Param("isActive") Boolean isActive);
@@ -60,5 +60,23 @@ public interface ResourceLimitDepartmentRepository extends PagingAndSortingRepos
     @Query(value = "select resource from ResourceLimitDepartment resource where resource.isActive = :isActive AND resource.departmentId = :departmentId AND resource.resourceType = :resourceType")
     ResourceLimitDepartment findByDepartmentAndResourceType(@Param("departmentId") Long departmentId,
             @Param("resourceType") ResourceLimitDepartment.ResourceType resourceType, @Param("isActive") Boolean isActive);
+
+    /**
+     * @param domainId
+     * @param resourceType
+     * @param isActive
+     * @return
+     */
+    @Query(value = "select sum(resource.max) from ResourceLimitDepartment resource where resource.isActive = :isActive AND resource.domainId = :domainId AND resource.resourceType = :resourceType ")
+    Long findTotalCountOfResourceDepartment(@Param("domainId") Long domainId, @Param("resourceType") ResourceLimitDepartment.ResourceType resourceType, @Param("isActive") Boolean isActive);
+
+    /**
+     * @param projectId
+     * @param resourceType
+     * @param isActive
+     * @return
+     */
+    @Query(value = "select sum(resource.max) from ResourceLimitDepartment resource where resource.isActive = :isActive AND resource.departmentId = :departmentId AND resource.resourceType = :resourceType ")
+    Long findTotalCountOfResourceProject(@Param("departmentId") Long departmentId, @Param("resourceType") ResourceLimitDepartment.ResourceType resourceType, @Param("isActive") Boolean isActive);
 
 }
