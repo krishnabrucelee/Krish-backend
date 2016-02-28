@@ -1153,6 +1153,12 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 vmInstance.setZoneId(convertEntityService.getZoneId(vmInstance.getTransZoneId()));
                 vmInstance.setNetworkId(convertEntityService.getNetworkId(vmInstance.getTransNetworkId()));
                 vmInstance.setProjectId(convertEntityService.getProjectId(vmInstance.getTransProjectId()));
+                if (vmInstance.getTransHypervisor() != null) {
+					if (hypervisorService.findByName(vmInstance.getTransHypervisor()) != null) {
+						vmInstance
+								.setHypervisorId(hypervisorService.findByName(vmInstance.getTransHypervisor()).getId());
+					}
+				}
                 vmInstance.setDepartmentId(
                         convertEntityService.getDepartmentByUsernameAndDomains(vmInstance.getTransDepartmentId(),
                                 convertEntityService.getDomain(vmInstance.getTransDomainId())));

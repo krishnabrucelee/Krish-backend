@@ -362,6 +362,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                             convertEntityService.getDomain(csVm.getTransDomainId())));
                     csVm.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
                             csVm.getTransDepartmentId(), convertEntityService.getDomain(csVm.getTransDomainId())));
+                    if (csVm.getTransProjectId() != null) {
+                    	csVm.setDepartmentId(convertEntityService.getProject(csVm.getTransProjectId()).getDepartmentId());
+                    }
                     csVm.setTemplateId(convertEntityService.getTemplateId(csVm.getTransTemplateId()));
                     csVm.setComputeOfferingId(convertEntityService.getComputeOfferId(csVm.getTransComputeOfferingId()));
                     if (csVm.getTransKeypairName() != null) {
@@ -401,6 +404,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                         instance.setCpuUsage(csVm.getCpuUsage());
                     }
                     instance.setDiskIoRead(csVm.getDiskIoRead());
+                    instance.setHypervisorId(csVm.getHypervisorId());
                     instance.setDiskIoWrite(csVm.getDiskIoWrite());
                     instance.setDiskKbsRead(csVm.getDiskKbsRead());
                     instance.setDiskKbsWrite(csVm.getDiskKbsWrite());
