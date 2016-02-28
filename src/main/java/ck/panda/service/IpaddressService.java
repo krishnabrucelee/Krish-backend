@@ -71,7 +71,7 @@ public interface IpaddressService extends CRUDService<IpAddress> {
     /**
      * Dissociate IP address.
      *
-     * @param ipAddress to be dissociated.
+     * @param ipUuid of the IP address.
      * @return ip address.
      * @throws Exception if error occurs.
      */
@@ -91,7 +91,7 @@ public interface IpaddressService extends CRUDService<IpAddress> {
     /**
      * Disable static NAT for IP address.
      *
-     * @param ipAddress to be dissociated.
+     * @param ipAddressId for network.
      * @return ip address.
      * @throws Exception if error occurs.
      */
@@ -100,7 +100,7 @@ public interface IpaddressService extends CRUDService<IpAddress> {
     /**
      * Acquire IP address.
      *
-     * @param ipAddress to be associate with network.
+     * @param networkId for network.
      * @return ip address.
      * @throws Exception if error occurs.
      */
@@ -116,4 +116,30 @@ public interface IpaddressService extends CRUDService<IpAddress> {
      */
     Page<IpAddress> findByNetwork(Long networkId, PagingAndSorting pagingAndSorting) throws Exception;
 
+    /**
+     * Enable remote access VPN for IP address.
+     *
+     * @param uuid of the IP address.
+     * @return IP address.
+     * @throws Exception if error occurs.
+     */
+    IpAddress enableRemoteAccessVpn(String uuid) throws Exception;
+
+    /**
+     * Disable remote access VPN for IP address.
+     *
+     * @param uuid of the IP address.
+     * @return IP address.
+     * @throws Exception if error occurs.
+     */
+    IpAddress disableRemoteAccessVpn(String uuid) throws Exception;
+
+    /**
+     * Get the VPN pre-shared key.
+     *
+     * @param id for ip address.
+     * @return ip address.
+     * @throws Exception if error occurs.
+     */
+    IpAddress findByVpnKey(Long id) throws Exception;
 }

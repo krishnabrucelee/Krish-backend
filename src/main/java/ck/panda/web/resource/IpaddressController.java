@@ -20,7 +20,6 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.IpAddress;
-import ck.panda.domain.entity.Network;
 import ck.panda.service.IpaddressService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -68,6 +67,13 @@ public class IpaddressController extends CRUDController<IpAddress> implements Ap
         return pageResponse.getContent();
     }
 
+    /**
+     * Get the detached IP address by uuid.
+     *
+     * @param ipUuid of the ip address
+     * @return ip address
+     * @throws Exception unhandled exception.
+     */
     @RequestMapping(value = "/dissociate", method = RequestMethod.GET, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
@@ -104,9 +110,9 @@ public class IpaddressController extends CRUDController<IpAddress> implements Ap
     /**
      * Get new ip from zone for current network.
      *
-     * @param network network's id.
+     * @param networkId network id.
      * @throws Exception if error occurs.
-     * @return ipaddress list.
+     * @return ip address list.
      */
     @RequestMapping(value = "/acquireip", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
@@ -121,8 +127,9 @@ public class IpaddressController extends CRUDController<IpAddress> implements Ap
      * @param ipaddressId ipaddress's id.
      * @param vmId virtual machine's id.
      * @param guestip guest ipaddress.
-     * @throws Exception if error occurs.
-     * @return ipaddress.
+     * @param type of the network.
+     * @throws Exception unhandled exception.
+     * @return ip address.
      */
     @RequestMapping(value = "/nat", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
@@ -134,6 +141,51 @@ public class IpaddressController extends CRUDController<IpAddress> implements Ap
         } else {
             return ipAddressService.disableStaticNat(ipaddressId);
         }
+    }
+
+    /**
+     * Enable the remote VPN access.
+     *
+     * @param uuid of the ip address
+     * @return ip address
+     * @throws Exception unhandled exception.
+     */
+    @RequestMapping(value = "/enablevpn", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected IpAddress enableVpnAccess(@RequestParam("uuid") String uuid) throws Exception {
+        return ipAddressService.enableRemoteAccessVpn(uuid);
+    }
+
+    /**
+     * Disable the remote VPN access.
+     *
+     * @param uuid of the ip address
+     * @return ip address
+     * @throws Exception unhandled exception.
+     */
+    @RequestMapping(value = "/disablevpn", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected IpAddress disableVpnAccess(@RequestParam("uuid") String uuid) throws Exception {
+        return ipAddressService.disableRemoteAccessVpn(uuid);
+    }
+
+    /**
+     * Get the VPN pre-shared key.
+     *
+     * @param id of the ip address.
+     * @throws Exception if error occurs.
+     * @return project.
+     */
+    @RequestMapping(value = "getvpnkey", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public IpAddress getVpnKey(@RequestParam("id") Long id) throws Exception {
+        return ipAddressService.findByVpnKey(id);
     }
 
 }

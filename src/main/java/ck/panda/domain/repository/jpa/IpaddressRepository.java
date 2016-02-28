@@ -7,8 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.IpAddress;
 
 /**
@@ -23,7 +21,7 @@ public interface IpaddressRepository extends PagingAndSortingRepository<IpAddres
      * @param uuid of ipaddress.
      * @return ipaddress object.
      */
-    @Query(value = "select ip from IpAddress ip where ip.uuid = :uuid")
+    @Query(value = "SELECT ip FROM IpAddress ip WHERE ip.uuid = :uuid")
     IpAddress findByUUID(@Param("uuid") String uuid);
 
     /**
@@ -33,7 +31,7 @@ public interface IpaddressRepository extends PagingAndSortingRepository<IpAddres
      * @param networkId from ipaddress
      * @return ipaddress list.
      */
-    @Query(value = "select ip from IpAddress ip where  ip.networkId=:networkId AND ip.state =:state")
+    @Query(value = "SELECT ip FROM IpAddress ip WHERE ip.networkId=:networkId AND ip.state =:state")
     List<IpAddress> findByNetwork(@Param("networkId") Long networkId, @Param("state") IpAddress.State state);
 
     /**
@@ -44,7 +42,7 @@ public interface IpaddressRepository extends PagingAndSortingRepository<IpAddres
      * @param networkId from ipaddress
      * @return ipaddress list.
      */
-    @Query(value = "select ip from IpAddress ip where  ip.networkId=:networkId AND ip.state =:state")
+    @Query(value = "SELECT ip FROM IpAddress ip WHERE ip.networkId=:networkId AND ip.state =:state")
     Page<IpAddress> findByNetwork(Pageable pageable, @Param("networkId") Long networkId, @Param("state") IpAddress.State state);
 
     /**
@@ -54,7 +52,7 @@ public interface IpaddressRepository extends PagingAndSortingRepository<IpAddres
      * @param state get the ipaddress list based on state.
      * @return list of ipaddresses.
      */
-    @Query(value = "select ip from IpAddress ip where ip.state =:state")
+    @Query(value = "SELECT ip FROM IpAddress ip WHERE ip.state =:state")
     Page<IpAddress> findAllByIsActive(Pageable pageable, @Param("state") IpAddress.State state);
 
     /**
@@ -64,7 +62,7 @@ public interface IpaddressRepository extends PagingAndSortingRepository<IpAddres
      * @param isActive get the ipaddress list based on active/inactive status.
      * @return list of ipaddress.
      */
-    @Query(value = "select ip from IpAddress ip where ip.isActive =:isActive")
+    @Query(value = "SELECT ip FROM IpAddress ip WHERE ip.isActive =:isActive")
     Page<IpAddress> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
 
     /**
@@ -74,7 +72,7 @@ public interface IpaddressRepository extends PagingAndSortingRepository<IpAddres
      * @param isActive get the ipaddress list based on active/inactive status.
      * @return list of ipaddress.
      */
-    @Query(value = "select ip from IpAddress ip where ip.isActive =:isActive and ip.state =:state")
+    @Query(value = "SELECT ip FROM IpAddress ip WHERE ip.isActive =:isActive AND ip.state =:state")
     List<IpAddress> findAllByIsActiveAndState(@Param("state") IpAddress.State state, @Param("isActive") Boolean isActive);
 
 }

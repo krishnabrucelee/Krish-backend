@@ -499,4 +499,52 @@ public class CloudStackConstants {
     /** Constant for parent ID of the vm snapshot. */
     public static final String CS_PARENT = "parent";
 
+    /** Constant for static NAT IP addresses. */
+    public static final String CS_IS_STATIC_NAT = "isstaticnat";
+
+    /** Constant for source NAT IP addresses. */
+    public static final String CS_IS_SOURCE_NAT = "issourcenat";
+
+    /** Constant for VLAN associated with the IP address. */
+    public static final String CS_VLAN_NAME = "vlanname";
+
+    /** Constant for network associated IP addresses. */
+    public static final String CS_ASSOCIATED_NETWORK_ID = "associatednetworkid";
+
+    /** Constant for display flag. */
+    public static final String CS_FOR_DISPLAY = "fordisplay";
+
+    /** Constant for create remote access VPN response. */
+    public static final String CS_CREATE_REMOTE_ACCESS_VPN = "createremoteaccessvpnresponse";
+
+    /** Constant for remote access VPN. */
+    public static final String CS_REMOTE_ACCESS_VPN = "remoteaccessvpn";
+
+    /** Constant for VPN ipsec preshared key. */
+    public static final String CS_PRESHARED_KEY = "presharedkey";
+
+    /** Constant for add VPN user response. */
+    public static final String CS_ADD_VPN_USER_RESPONSE = "addvpnuserresponse";
+
+    /** Constant for VPN user. */
+    public static final String CS_VPN_USER = "vpnuser";
+
+    /** Constant for remote access VPN response. */
+    public static final String CS_REMOTE_ACCESS_VPN_RESPONSE = "listremoteaccessvpnsresponse";
+
+    /** Constant for list VPN user response. */
+    public static final String CS_LIST_VPN_USERS_RESPONSE = "listvpnusersresponse";
+
+    /** Constant for public ip address. */
+    public static final String CS_PUBLIC_IP_ADDRESS = "publicipaddress";
+
+    /** Constant for delete remote access VPN response. */
+    public static final String CS_DELETE_REMOTE_ACCESS_VPN = "deleteremoteaccessvpnresponse";
+
+    /** Constant for remove VPN user response. */
+    public static final String CS_REMOVE_VPN_USER_RESPONSE = "removevpnuserresponse";
+
+    /** Constant for remove VPN public ip. */
+    public static final String CS_PUBLIC_IP_ID = "publicipid";
+
 }
