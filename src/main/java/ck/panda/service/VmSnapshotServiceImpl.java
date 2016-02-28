@@ -234,7 +234,7 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                 // the converted vm snapshot entity to list
                 VmSnapshot vmSnapshot = VmSnapshot.convert(vmSnapshotListJSON.getJSONObject(i));
                 vmSnapshot.setVmId(convertEntityService.getVmInstanceId(vmSnapshot.getTransvmInstanceId()));
-                vmSnapshot.setDomainId(convertEntityService.getDomainId(vmSnapshot.getTransDomainId()));
+                vmSnapshot.setDomainId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getDomainId());
                 vmSnapshot.setOwnerId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getInstanceOwnerId());
                 vmSnapshot.setZoneId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getZoneId());
 

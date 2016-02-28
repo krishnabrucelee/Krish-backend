@@ -483,6 +483,10 @@ public class CloudStackConstants {
 
     /** Constant for method name. */
     public static final String CS_METHOD_NAME = "methodname";
+    
+     /** Constant for table size. */
+    public static final String CS_TABLE_SIZE = "tablesize";
+
 
     /** Constant for VM snapshot id. */
     public static final String CS_VM_SNAPSHOT_ID = "vmsnapshotid";
@@ -504,4 +508,88 @@ public class CloudStackConstants {
 
     /** Constant for reset ssh key pair response. */
     public static final String CS_RESET_KEYPAIR_RESPONSE = "resetSSHKeyforvirtualmachineresponse";
-}
+    
+    /** Constant for static NAT IP addresses. */
+    public static final String CS_IS_STATIC_NAT = "isstaticnat";
+
+    /** Constant for source NAT IP addresses. */
+    public static final String CS_IS_SOURCE_NAT = "issourcenat";
+
+
+    /** Constant for VLAN associated with the IP address. */
+    public static final String CS_VLAN_NAME = "vlanname";
+
+    /** Constant for network associated IP addresses. */
+    public static final String CS_ASSOCIATED_NETWORK_ID = "associatednetworkid";
+
+    /** Constant for display flag. */
+    public static final String CS_FOR_DISPLAY = "fordisplay";
+
+    /** Constant for create remote access VPN response. */
+    public static final String CS_CREATE_REMOTE_ACCESS_VPN = "createremoteaccessvpnresponse";
+
+    /** Constant for remote access VPN. */
+    public static final String CS_REMOTE_ACCESS_VPN = "remoteaccessvpn";
+
+    /** Constant for VPN ipsec preshared key. */
+    public static final String CS_PRESHARED_KEY = "presharedkey";
+
+    /** Constant for add VPN user response. */
+    public static final String CS_ADD_VPN_USER_RESPONSE = "addvpnuserresponse";
+
+    /** Constant for VPN user. */
+    public static final String CS_VPN_USER = "vpnuser";
+
+    /** Constant for remote access VPN response. */
+    public static final String CS_REMOTE_ACCESS_VPN_RESPONSE = "listremoteaccessvpnsresponse";
+
+    /** Constant for list VPN user response. */
+    public static final String CS_LIST_VPN_USERS_RESPONSE = "listvpnusersresponse";
+
+    /** Constant for public ip address. */
+    public static final String CS_PUBLIC_IP_ADDRESS = "publicipaddress";
+
+    /** Constant for delete remote access VPN response. */
+    public static final String CS_DELETE_REMOTE_ACCESS_VPN = "deleteremoteaccessvpnresponse";
+
+    /** Constant for remove VPN user response. */
+    public static final String CS_REMOVE_VPN_USER_RESPONSE = "removevpnuserresponse";
+
+    /** Constant for remove VPN public ip. */
+    public static final String CS_PUBLIC_IP_ID = "publicipid";
+    
+     /** Constant for cookie name. */
+    public static final String CS_COOKIE_NAME = "cookie-name";
+
+    /** Constant for length. */
+    public static final String CS_LENGTH = "length";
+
+    /** Constant for expires. */
+    public static final String CS_EXPIRES = "expires";
+
+    /** Constant for mode. */
+    public static final String CS_MODE = "mode";
+
+    /** Constant for request learn. */
+    public static final String CS_REQUEST_LEARN = "request-learn";
+
+    /** Constant for prefix. */
+    public static final String CS_PREFIX = "prefix";
+
+    /** Constant for indirect. */
+    public static final String CS_INDIRECT = "indirect";
+
+    /** Constant for nocache. */
+    public static final String CS_NO_CACHE = "nocahche";
+
+    /** Constant for post only. */
+    public static final String CS_POST_ONLY = "postonly";
+
+    /** Constant for hold time. */
+    public static final String CS_HOLD_TIME = "holdtime";
+
+    /** Constant for parameters. */
+    public static final String CS_PARAMS = "params";
+
+
+   }

@@ -4,7 +4,7 @@
     <!-- 14400 == 4 hours No disk storage Unlimited memory for elements Elements
     are evicted by Spring scheduled task by default run every 30 minutes -->
     <cache name="restApiAuthTokenCache" eternal="false"
-        maxElementsInMemory="0" overflowToDisk="false" timeToIdleSeconds="900"
+        maxElementsInMemory="0" overflowToDisk="false" timeToIdleSeconds="14400"
         memoryStoreEvictionPolicy="LRU">
         <persistence strategy="none" />
     </cache>

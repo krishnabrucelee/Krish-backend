@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -14,6 +16,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.json.JSONObject;
 import ck.panda.constants.CloudStackConstants;
+import ck.panda.domain.entity.Network.Status;
+import ck.panda.domain.entity.VmIpaddress.IpType;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -38,13 +42,10 @@ public class VmIpaddress implements Serializable {
     @Column(name = "uuid")
     private String uuid;
 
+
     /** Nic id . */
     @Column(name = "nic_id")
     private Long nicId;
-
-    /** Network ip Address to establish a connection. */
-    @Column(name = "primary_ip_address")
-    private String primaryIpAddress;
 
     /** Net mask value of Network . */
     @Column(name = "guest_ipaddress")
@@ -63,6 +64,10 @@ public class VmIpaddress implements Serializable {
     @Column(name = "is_Active")
     private Boolean isActive;
 
+    @Column(name = "ip_type")
+    @Enumerated(EnumType.STRING)
+    private IpType ipType;
+
     /** Transient network of the instance. */
     @Transient
     private String transvmInstanceId;
@@ -75,6 +80,14 @@ public class VmIpaddress implements Serializable {
     /** Temporary variable. */
     @Transient
     private Boolean syncFlag;
+
+    public enum IpType {
+       /** Primary ip address. */
+        primaryIpAddress,
+
+        /** Secondary Ip address . */
+        secondaryIpAddress
+    }
 
     /**
      * Get the id of the vm Ip address.
@@ -203,24 +216,6 @@ public class VmIpaddress implements Serializable {
     }
 
     /**
-     * Get the primaryIpAddress.
-     *
-     * @return the primaryIpAddress
-     */
-    public String getPrimaryIpAddress() {
-        return primaryIpAddress;
-    }
-
-    /**
-     * Set the primaryIpAddress.
-     *
-     * @param primaryIpAddress  to set
-     */
-    public void setPrimaryIpAddress(String primaryIpAddress) {
-        this.primaryIpAddress = primaryIpAddress;
-    }
-
-    /**
      * Get the nic id.
      *
      * @return the nicId
@@ -273,7 +268,19 @@ public class VmIpaddress implements Serializable {
        this.syncFlag = syncFlag;
    }
 
+    /**
+     * @return the ipType
+     */
+   public IpType getIpType() {
+    return ipType;
+}
 
+   /**
+    * @param ipType the ipType to set
+    */
+   public void setIpType(IpType ipType) {
+       this.ipType = ipType;
+   }
 
     /**
      * Convert JSONObject to vm ip address entity.
@@ -286,6 +293,7 @@ public class VmIpaddress implements Serializable {
         VmIpaddress vm = new VmIpaddress();
         vm.setUuid(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ID));
         vm.setGuestIpAddress(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_IP_ADDRESS));
+        vm.setIpType(IpType.secondaryIpAddress);
         vm.setTransNicId(JsonUtil.getStringValue(jsonObject, CS_NIC_UUID));
         vm.setIsActive(true);
         vm.setSyncFlag(false);

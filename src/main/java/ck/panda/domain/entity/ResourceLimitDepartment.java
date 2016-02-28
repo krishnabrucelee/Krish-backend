@@ -58,6 +58,10 @@ public class ResourceLimitDepartment implements Serializable {
     @Column(name = "department_id")
     private Long departmentId;
 
+    /** Resource limit for department id. */
+    @Column(name = "project_id")
+    private Long projectId;
+
     /** Type of resource. */
     @Column(name = "resource_type", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -529,5 +533,21 @@ public class ResourceLimitDepartment implements Serializable {
     public void setTransDepartment(String transDepartment) {
         this.transDepartment = transDepartment;
     }
+
+    /**
+     * @return the projectId
+     */
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    /**
+     * @param projectId the projectId to set
+     */
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
+    }
+
+
 
 }

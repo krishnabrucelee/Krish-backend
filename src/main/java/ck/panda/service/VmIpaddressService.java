@@ -47,4 +47,6 @@ public interface VmIpaddressService extends CRUDService<VmIpaddress> {
      * @throws Exception if error occurs.
      */
     List<VmIpaddress> findByVMInstance(Long nic) throws Exception;
+
+    List<VmIpaddress> findAllLoadBalancer(Long lbId) throws Exception;
 }

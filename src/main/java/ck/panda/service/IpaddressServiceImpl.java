@@ -1,33 +1,37 @@
 package ck.panda.service;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.IpAddress.State;
+import ck.panda.domain.entity.IpAddress.VpnState;
 import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.ResourceLimitDepartment;
-import ck.panda.domain.entity.ResourceLimitProject;
-import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.repository.jpa.IpaddressRepository;
 import ck.panda.util.AppValidator;
+import ck.panda.util.CSVPNService;
 import ck.panda.util.CloudStackAddressService;
 import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.ConfigUtil;
-import ck.panda.util.TokenDetails;
+import ck.panda.util.EncryptionUtil;
+import ck.panda.util.JsonUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -46,9 +50,13 @@ public class IpaddressServiceImpl implements IpaddressService {
     @Autowired
     private IpaddressRepository ipRepo;
 
-    /** CloudStack Domain service for connectivity with cloudstack. */
+    /** CloudStack IP address service for connectivity with cloudstack. */
     @Autowired
     private CloudStackAddressService csipaddressService;
+
+    /** CloudStack VPN service for connectivity with cloudstack. */
+    @Autowired
+    private CSVPNService csVPNService;
 
     /** Reference of the convert entity service. */
     @Autowired
@@ -70,17 +78,9 @@ public class IpaddressServiceImpl implements IpaddressService {
     @Autowired
     private ResourceLimitDepartmentService resourceLimitDepartmentService;
 
-    /** Resource Limit Project service reference. */
-    @Autowired
-    private ResourceLimitProjectService resourceLimitProjectService;
-
     /** Sync Service reference. */
     @Autowired
     private SyncService syncService;
-
-    /** Sync Service reference. */
-    @Autowired
-    private AsynchronousJobService asyncService;
 
     /** CloudStack connector reference for resource capacity. */
     @Autowired
@@ -92,7 +92,11 @@ public class IpaddressServiceImpl implements IpaddressService {
 
     /** Quota limit validation reference. */
     @Autowired
-    QuotaValidationService quotaLimitValidation;
+    private QuotaValidationService quotaLimitValidation;
+
+    /** Secret key value is append. */
+    @Value(value = "${aes.salt.secretKey}")
+    private String secretKey;
 
     @Override
     public List<IpAddress> acquireIP(Long networkId) throws Exception {
@@ -229,15 +233,15 @@ public class IpaddressServiceImpl implements IpaddressService {
     public List<IpAddress> findAllFromCSServer() throws Exception {
         List<IpAddress> ipList = new ArrayList<IpAddress>();
         HashMap<String, String> ipMap = new HashMap<String, String>();
-        ipMap.put("listall", "true");
+        ipMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
         ipMap.put("allocatedonly", "false");
         configServer.setServer(1L);
         // 1. Get the list of ipAddress from CS server using CS connector
-        String response = csipaddressService.listPublicIpAddresses("json", ipMap);
+        String response = csipaddressService.listPublicIpAddresses(CloudStackConstants.JSON, ipMap);
         JSONArray ipAddressListJSON = null;
-        JSONObject responseObject = new JSONObject(response).getJSONObject("listpublicipaddressesresponse");
-        if (responseObject.has("publicipaddress")) {
-            ipAddressListJSON = responseObject.getJSONArray("publicipaddress");
+        JSONObject responseObject = new JSONObject(response).getJSONObject(CloudStackConstants.CS_PUBLIC_IPADDRESS_RESPONSE);
+        if (responseObject.has(CloudStackConstants.CS_PUBLIC_IP_ADDRESS)) {
+            ipAddressListJSON = responseObject.getJSONArray(CloudStackConstants.CS_PUBLIC_IP_ADDRESS);
             // 2. Iterate the json list, convert the single json entity to pod
             for (int i = 0, size = ipAddressListJSON.length(); i < size; i++) {
                 // 2.1 Call convert by passing JSONObject to ipAddress entity
@@ -247,6 +251,22 @@ public class IpaddressServiceImpl implements IpaddressService {
                 ipAddress.setZoneId(convertEntityService.getZoneId(ipAddress.getTransZoneId()));
                 ipAddress.setNetworkId(convertEntityService.getNetworkId(ipAddress.getTransNetworkId()));
                 ipAddress.setProjectId(convertEntityService.getProjectId(ipAddress.getTransProjectId()));
+
+                //Get all the VPN details
+                HashMap<String, String> vpnOptional = new HashMap<String, String>();
+                vpnOptional.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
+                String vpnResponse = csVPNService.listRemoteAccessVpns(ipAddress.getUuid(), vpnOptional, CloudStackConstants.JSON);
+                JSONArray vpnRemoteListJSON = null;
+                JSONObject responseVpnObject = new JSONObject(vpnResponse).getJSONObject(CloudStackConstants.CS_REMOTE_ACCESS_VPN_RESPONSE);
+                if (responseVpnObject.has(CloudStackConstants.CS_REMOTE_ACCESS_VPN)) {
+                    vpnRemoteListJSON = responseVpnObject.getJSONArray(CloudStackConstants.CS_REMOTE_ACCESS_VPN);
+                    for (int j = 0; j < vpnRemoteListJSON.length(); j++) {
+                        ipAddress.setVpnUuid(JsonUtil.getStringValue(vpnRemoteListJSON.getJSONObject(j), CloudStackConstants.CS_ID));
+                        ipAddress.setVpnPresharedKey(convertEncryptedKey(JsonUtil.getStringValue(vpnRemoteListJSON.getJSONObject(j), CloudStackConstants.CS_PRESHARED_KEY)));
+                        ipAddress.setVpnState(VpnState.valueOf(JsonUtil.getStringValue(vpnRemoteListJSON.getJSONObject(j), CloudStackConstants.CS_STATE).toUpperCase()));
+                        ipAddress.setVpnForDisplay(JsonUtil.getBooleanValue(vpnRemoteListJSON.getJSONObject(j), CloudStackConstants.CS_FOR_DISPLAY));
+                    }
+                }
                 ipList.add(ipAddress);
             }
         }
@@ -426,5 +446,112 @@ public class IpaddressServiceImpl implements IpaddressService {
         // 5. If any resource shortage then return error message otherwise
         // return empty string.
         return errMessage;
+    }
+
+    @Override
+    public IpAddress enableRemoteAccessVpn(String uuid) throws Exception {
+        Errors errors = null;
+        IpAddress ipAddress = findbyUUID(uuid);
+        try {
+            configServer.setUserServer();
+            HashMap<String, String> optional = new HashMap<String, String>();
+            optional.put(CloudStackConstants.CS_DOMAIN_ID, convertEntityService.getDomainById(ipAddress.getDomainId()).getUuid());
+            optional.put(CloudStackConstants.CS_ACCOUNT, ipAddress.getNetwork().getDepartment().getUserName());
+
+            String createRemoteAccess = csVPNService.createRemoteAccessVpn(ipAddress.getUuid(), optional, CloudStackConstants.JSON);
+            JSONObject jobId = new JSONObject(createRemoteAccess).getJSONObject(CloudStackConstants.CS_CREATE_REMOTE_ACCESS_VPN);
+            if (jobId.has(CloudStackConstants.CS_ERROR_CODE)) {
+                errors = validator.sendGlobalError(jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
+                if (errors.hasErrors()) {
+                    throw new BadCredentialsException(jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
+                }
+            }
+            if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
+                Thread.sleep(20000);
+                String jobResponse = csipaddressService.associatedJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
+                JSONObject jobresults = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+
+                if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS)
+                        .equals(CloudStackConstants.SUCCEEDED_JOB_STATUS)) {
+                    JSONObject jobresultReponse = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE)
+                        .getJSONObject(CloudStackConstants.CS_JOB_RESULT).getJSONObject(CloudStackConstants.CS_REMOTE_ACCESS_VPN);
+
+                    ipAddress.setVpnUuid(jobresultReponse.getString(CloudStackConstants.CS_ID));
+                    ipAddress.setVpnPresharedKey(convertEncryptedKey(jobresultReponse.getString(CloudStackConstants.CS_PRESHARED_KEY)));
+                    ipAddress.setVpnState(VpnState.valueOf(jobresultReponse.getString(CloudStackConstants.CS_STATE).toUpperCase()));
+                    ipAddress.setVpnForDisplay(jobresultReponse.getBoolean(CloudStackConstants.CS_FOR_DISPLAY));
+                }
+
+            }
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException(e.getMessage());
+        }
+        return ipRepo.save(ipAddress);
+    }
+
+    @Override
+    public IpAddress disableRemoteAccessVpn(String uuid) throws Exception {
+        Errors errors = null;
+        IpAddress ipAddress = findbyUUID(uuid);
+        try {
+            configServer.setUserServer();
+
+            String createRemoteAccess = csVPNService.deleteRemoteAccessVpn(ipAddress.getUuid(), CloudStackConstants.JSON);
+            JSONObject jobId = new JSONObject(createRemoteAccess).getJSONObject(CloudStackConstants.CS_DELETE_REMOTE_ACCESS_VPN);
+            if (jobId.has(CloudStackConstants.CS_ERROR_CODE)) {
+                errors = validator.sendGlobalError(jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
+                if (errors.hasErrors()) {
+                    throw new BadCredentialsException(jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
+                }
+            }
+            if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
+                Thread.sleep(20000);
+                String jobResponse = csipaddressService.associatedJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
+                JSONObject jobresults = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+
+                if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS)
+                        .equals(CloudStackConstants.SUCCEEDED_JOB_STATUS)) {
+                    ipAddress.setVpnState(VpnState.DISABLED);
+                }
+
+            }
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException(e.getMessage());
+        }
+        return ipRepo.save(ipAddress);
+    }
+
+    /**
+     * Convert key value as encrypted format.
+     *
+     * @param value secret value.
+     * @return encrypted value
+     * @throws Exception unhandled errors.
+     */
+    private String convertEncryptedKey(String value) throws Exception {
+        // Set password from CS for an instance with AES encryption.
+        String encryptedValue = "";
+        if (value != null) {
+            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes(GenericConstants.CHARACTER_ENCODING));
+            byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, GenericConstants.ENCRYPT_ALGORITHM);
+            encryptedValue = new String(EncryptionUtil.encrypt(value, originalKey));
+        }
+        return encryptedValue;
+    }
+
+    @Override
+    public IpAddress findByVpnKey(Long id) throws Exception {
+        IpAddress ipAddress = ipRepo.findOne(id);
+        if (ipAddress.getVpnPresharedKey() != null) {
+            String strEncoded = Base64.getEncoder()
+                    .encodeToString(secretKey.getBytes(GenericConstants.CHARACTER_ENCODING));
+            byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length,
+                    GenericConstants.ENCRYPT_ALGORITHM);
+            String decryptPassword = new String(EncryptionUtil.decrypt(ipAddress.getVpnPresharedKey(), originalKey));
+            ipAddress.setVpnPresharedKey(decryptPassword);
+        }
+        return ipAddress;
     }
 }

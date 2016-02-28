@@ -17,11 +17,14 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EventTypes;
+import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.FirewallRules.Purpose;
-import ck.panda.domain.entity.LoadBalancerRule.SticknessMethod;
+import ck.panda.domain.entity.IpAddress.VpnState;
 import ck.panda.domain.entity.IpAddress;
+import ck.panda.domain.entity.LbStickinessPolicy;
+import ck.panda.domain.entity.LbStickinessPolicy.StickinessMethod;
 import ck.panda.domain.entity.LoadBalancerRule;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
@@ -34,6 +37,7 @@ import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
+import ck.panda.domain.entity.VpnUser;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.Volume.Status;
 import ck.panda.rabbitmq.util.ResponseEvent;
@@ -144,6 +148,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     @Autowired
     private LoadBalancerService loadBalancerService;
 
+    /** Service reference to Load Balancer. */
+    @Autowired
+    private LbStickinessPolicyService lbPolicyService;
+
     /** Service reference to Snapshot. */
     @Autowired
     private SnapshotService snapShotService;
@@ -167,6 +175,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /** Update Resource Count service reference. */
     @Autowired
     private UpdateResourceCountService updateResourceCountService;
+
+    /** For listing VPN user list from cloudstack server. */
+    @Autowired
+    private VpnUserService vpnUserService;
 
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
@@ -193,9 +205,13 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         configUtil.setServer(1L);
         String eventObjectResult = cloudStackInstanceService.queryAsyncJobResult(eventObject.getString(CS_ASYNC_JOB_ID),
                 CloudStackConstants.JSON);
-        JSONObject jobResult = new JSONObject(eventObjectResult)
-                .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE)
-                .getJSONObject(CloudStackConstants.CS_JOB_RESULT);
+
+        JSONObject jobResultResponse = new JSONObject(eventObjectResult)
+                .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+        JSONObject jobResult = null;
+        if (jobResultResponse.has(CloudStackConstants.CS_JOB_RESULT)) {
+            jobResult = jobResultResponse.getJSONObject(CloudStackConstants.CS_JOB_RESULT);
+        }
 
         String commandText = null;
         if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).contains(".")) {
@@ -296,6 +312,11 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             LOGGER.debug("VM snapshot sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
                 eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
             asyncVMSnapshot(jobResult, eventObject);
+            break;
+        case EventTypes.EVENT_VPN:
+            LOGGER.debug("VPN sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+            asyncVpn(jobResult, eventObject);
             break;
         default:
             LOGGER.debug("No sync required", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
@@ -687,6 +708,14 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                             CS_Domain, Delete);
                 }
             }
+        }
+
+        if (eventObject.getString("commandEventType").equals("NETWORK.RESTART")) {
+            JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
+            Network network = networkService.findByUUID(json.getString("id"));
+            network.setSyncFlag(false);
+            network.setNetworkRestart(true);
+            networkService.update(network);
         }
 
         if (eventObject.getString("commandEventType").equals("NETWORK.RESTART")) {
@@ -1291,7 +1320,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
          if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VM_SNAPSHOT_CREATE)) {
              VmSnapshot vmSnapshot = VmSnapshot.convert(jobResult.getJSONObject(CloudStackConstants.CS_VM_SNAPSHOT));
              vmSnapshot.setVmId(convertEntityService.getVmInstanceId(vmSnapshot.getTransvmInstanceId()));
-             vmSnapshot.setDomainId(convertEntityService.getDomainId(vmSnapshot.getTransDomainId()));
+             vmSnapshot.setDomainId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getDomainId());
              vmSnapshot.setOwnerId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getInstanceOwnerId());
              vmSnapshot.setZoneId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getZoneId());
              vmSnapshot.setSyncFlag(false);
@@ -1341,6 +1370,82 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     }
 
     /**
+     * Sync VPN details from the Cloud Server.
+     *
+     * @param jobResult job result
+     * @param eventObject VM snapshot event object
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    public void asyncVpn(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
+
+         if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_REMOTE_ACCESS_CREATE)) {
+             JSONObject jobresultReponse = jobResult.getJSONObject(CloudStackConstants.CS_REMOTE_ACCESS_VPN);
+             IpAddress ipAddress = ipService.findbyUUID(jobresultReponse.getString(CloudStackConstants.CS_PUBLIC_IP_ID));
+             ipAddress.setVpnUuid(jobresultReponse.getString(CloudStackConstants.CS_ID));
+             ipAddress.setVpnPresharedKey(convertEncryptedKey(jobresultReponse.getString(CloudStackConstants.CS_PRESHARED_KEY)));
+             ipAddress.setVpnState(VpnState.valueOf(jobresultReponse.getString(CloudStackConstants.CS_STATE).toUpperCase()));
+             ipAddress.setVpnForDisplay(jobresultReponse.getBoolean(CloudStackConstants.CS_FOR_DISPLAY));
+             ipAddress.setSyncFlag(false);
+             ipService.save(ipAddress);
+         }
+
+         if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_REMOTE_ACCESS_DESTROY)) {
+             JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
+             IpAddress ipAddress = ipService.findbyUUID(json.getString(CloudStackConstants.CS_PUBLIC_IP_ID));
+             ipAddress.setVpnState(VpnState.DISABLED);
+             ipAddress.setSyncFlag(false);
+             ipService.save(ipAddress);
+         }
+
+         if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VPN_USER_ADD)) {
+             JSONObject jobresultReponse = jobResult.getJSONObject(CloudStackConstants.CS_VPN_USER);
+             VpnUser vpnUser = new VpnUser();
+             vpnUser.setUuid(jobresultReponse.getString(CloudStackConstants.CS_ID));
+             vpnUser.setUserName(jobresultReponse.getString(CloudStackConstants.CS_USER_NAME));
+             vpnUser.setDomainId(convertEntityService.getDomainId(jobresultReponse.getString(CloudStackConstants.CS_DOMAIN_ID)));
+             vpnUser.setDepartmentId(convertEntityService.getDepartmentByUsername(jobresultReponse.getString(CloudStackConstants.CS_ACCOUNT), vpnUser.getDomainId()));
+             if (jobresultReponse.has(CloudStackConstants.CS_PROJECT_ID)) {
+                 vpnUser.setProjectId(convertEntityService.getProjectId(jobresultReponse.getString(CloudStackConstants.CS_PROJECT_ID)));
+             }
+             if (vpnUserService.findbyUUID(vpnUser.getUuid()) == null) {
+                 vpnUser.setSyncFlag(false);
+                 vpnUserService.save(vpnUser);
+             }
+         }
+
+         if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VPN_USER_REMOVE)) {
+             JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
+             VpnUser vpnUser = vpnUserService.findbyDomainWithAccountAndUser(json.getString(CloudStackConstants.CS_USER_NAME),
+                 json.getString(CloudStackConstants.CS_ACCOUNT),
+                 json.getString(CloudStackConstants.CS_DOMAIN_ID));
+             if (vpnUser != null) {
+                 vpnUser.setSyncFlag(false);
+                 vpnUserService.softDelete(vpnUser);
+             }
+         }
+    }
+
+    /**
+     * Convert key value as encrypted format.
+     *
+     * @param value secret value.
+     * @return encrypted value
+     * @throws Exception unhandled errors.
+     */
+    private String convertEncryptedKey(String value) throws Exception {
+        // Set password from CS for an instance with AES encryption.
+        String encryptedValue = "";
+        if (value != null) {
+            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes(GenericConstants.CHARACTER_ENCODING));
+            byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, GenericConstants.ENCRYPT_ALGORITHM);
+            encryptedValue = new String(EncryptionUtil.encrypt(value, originalKey));
+        }
+        return encryptedValue;
+    }
+
+    /**
      * Sync with Cloud Server Network Load Balancer.
      *
      * @param jobResult
@@ -1371,16 +1476,29 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         if (eventObject.getString("commandEventType").equals("LB.STICKINESSPOLICY.CREATE")) {
             JSONObject stickyResult = jobResult.getJSONObject(CloudStackConstants.CS_STICKY_POLICIES);
             JSONArray stickyPolicy = stickyResult.getJSONArray(CloudStackConstants.CS_STICKY_POLICY);
-            for (int j = 0, sizes = stickyResult.length(); j < sizes; j++) {
+            for (int j = 0, sizes = stickyPolicy.length(); j < sizes; j++) {
                 JSONObject json = (JSONObject) stickyPolicy.get(j);
-                LoadBalancerRule loadBalanceRule = loadBalancerService
-                        .findByUUID(stickyResult.getString(CloudStackConstants.CS_LB_RULE_ID));
-                loadBalanceRule.setStickyUuid(json.getString(CloudStackConstants.CS_ID));
-                loadBalanceRule.setStickinessMethod(
-                        (SticknessMethod.valueOf(json.getString(CloudStackConstants.CS_METHOD_NAME))));
+                LbStickinessPolicy loadBalanceRule = lbPolicyService.findByUUID(stickyResult.getString(CloudStackConstants.CS_LB_RULE_ID));
+                loadBalanceRule.setUuid(json.getString(CloudStackConstants.CS_ID));
+                loadBalanceRule.setStickinessMethod(StickinessMethod.valueOf(json.getString(CloudStackConstants.CS_METHOD_NAME)));
                 loadBalanceRule.setStickinessName(json.getString(CloudStackConstants.CS_NAME));
                 loadBalanceRule.setSyncFlag(false);
-                loadBalancerService.save(loadBalanceRule);
+                if (json.has(CloudStackConstants.CS_PARAMS)) {
+                    JSONObject paramsResponse = json.getJSONObject(CloudStackConstants.CS_PARAMS);
+                        loadBalanceRule.setStickyTableSize((String) paramsResponse.getString(CloudStackConstants.CS_TABLE_SIZE));
+                        loadBalanceRule.setStickyLength((String) paramsResponse.getString(CloudStackConstants.CS_LENGTH));
+                        loadBalanceRule.setStickyExpires((String) paramsResponse.getString(CloudStackConstants.CS_EXPIRES));
+                        loadBalanceRule.setStickyMode((String) paramsResponse.getString(CloudStackConstants.CS_MODE));
+                        loadBalanceRule.setStickyPrefix((Boolean) paramsResponse.get(CloudStackConstants.CS_PREFIX));
+                        loadBalanceRule.setStickyRequestLearn((Boolean) paramsResponse.get(CloudStackConstants.CS_REQUEST_LEARN));
+                        loadBalanceRule.setStickyIndirect((Boolean) paramsResponse.get(CloudStackConstants.CS_INDIRECT));
+                        loadBalanceRule.setStickyNoCache((Boolean) paramsResponse.get(CloudStackConstants.CS_NO_CACHE));
+                        loadBalanceRule.setStickyPostOnly((Boolean) paramsResponse.get(CloudStackConstants.CS_POST_ONLY));
+                        loadBalanceRule.setStickyHoldTime((String) paramsResponse.getString(CloudStackConstants.CS_HOLD_TIME));
+                        loadBalanceRule.setStickyCompany((String) paramsResponse.getString(CloudStackConstants.CS_DOMAIN));
+
+                   }
+                lbPolicyService.save(loadBalanceRule);
             }
         }
         if (eventObject.getString("commandEventType").equals("LB.UPDATE")) {

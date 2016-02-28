@@ -3,6 +3,7 @@
  */
 package ck.panda.web.resource;
 
+import java.util.HashMap;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,6 +25,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.Volume;
+import ck.panda.service.ConvertEntityService;
 import ck.panda.service.ResourceLimitDomainService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -40,6 +42,10 @@ public class ResourceLimitDomainController extends CRUDController<ResourceLimitD
     /** Service reference to resource. */
     @Autowired
     private ResourceLimitDomainService resourceLimitDomainService;
+
+    /** Convert Entity Service reference to resource. */
+    @Autowired
+    private ConvertEntityService convertEntityService;
 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new resource.", response = ResourceLimitDomain.class)
     @Override
@@ -134,5 +140,58 @@ public class ResourceLimitDomainController extends CRUDController<ResourceLimitD
     @ResponseBody
     protected List<ResourceLimitDomain> getDomainSearch() throws Exception {
         return resourceLimitDomainService.findCurrentLoginDomain();
+    }
+
+    /**
+     * Get resource limits of department.
+     *
+     * @param domainId domain id
+     * @return max values of resources
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/departmentId/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public HashMap<String, String> findByDepartmentResource(@PathVariable(PATH_ID) Long domainId) throws Exception {
+        return resourceLimitDomainService.getResourceLimitsOfDomain(domainId);
+    }
+
+    /**
+     * Get resource limits of Domain.
+     *
+     * @param domainId domain id
+     * @return max values of resources
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/projectId/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public HashMap<String, String> findByDomainResource(@PathVariable(PATH_ID) Long domainId) throws Exception {
+        return resourceLimitDomainService.getResourceLimitsOfProject(domainId);
+    }
+
+
+    /**
+     * Get resource limits of department.
+     *
+     * @param departmentId department id
+     * @return max values of resources
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/quotadepartmentId/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public HashMap<String, String> findByDepartmentQuotaDomainResource(@PathVariable(PATH_ID) Long departmentId) throws Exception {
+        return resourceLimitDomainService.getResourceLimitsOfDomain(convertEntityService.getDepartmentById(departmentId).getDomainId());
+    }
+
+    /**
+     * Get resource limits of Domain.
+     *
+     * @param domainId domain id
+     * @return max values of resources
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/quotaprojectId/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public HashMap<String, String> findByProjectQuotaDomainResource(@PathVariable(PATH_ID) Long projectId) throws Exception {
+        return resourceLimitDomainService.getResourceLimitsOfProject(convertEntityService.getProjectById(projectId).getDomainId());
     }
 }

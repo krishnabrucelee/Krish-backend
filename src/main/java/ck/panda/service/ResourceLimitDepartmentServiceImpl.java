@@ -62,9 +62,9 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
     @Autowired
     private ResourceLimitProjectService resourceLimitProjectService;
 
-    /** Resource limit project service reference. */
+    /** Convert Entity service reference. */
     @Autowired
-    private ProjectService projectService;
+    private ConvertEntityService convertEntityService;
 
     @Override
     public ResourceLimitDepartment save(ResourceLimitDepartment resource) throws Exception {
@@ -275,6 +275,38 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
     public ResourceLimitDepartment findByDepartmentAndResourceType(Long departmentId,
             ResourceLimitDepartment.ResourceType resourceType, Boolean isActive) {
         return resourceLimitDepartmentRepo.findByDepartmentAndResourceType(departmentId, resourceType, isActive);
+    }
+
+    @Override
+    public HashMap<String, String> getResourceLimitsOfDepartment(Long domainId) {
+        HashMap<String, String> resourceTypeMap = convertEntityService.getResourceTypeValue();
+        HashMap<String, String> resourceMaxCount = new HashMap<String, String>();
+        for(String name : resourceTypeMap.keySet()) {
+            Long resourceDepartmentCount = resourceLimitDepartmentRepo.findTotalCountOfResourceDepartment(domainId, ResourceLimitDepartment.ResourceType.valueOf(resourceTypeMap.get(name)), true);
+            if (resourceDepartmentCount != null) {
+            resourceMaxCount.put(resourceTypeMap.get(name), resourceDepartmentCount.toString());
+            }
+        }
+        //pass domain id to resource departments and get the departments list
+
+                //iterate and get the resource max values
+
+        return resourceMaxCount;
+    }
+
+    @Override
+    public HashMap<String, String> getResourceLimitsOfProject(Long projectId) {
+        HashMap<String, String> resourceTypeMap = convertEntityService.getResourceTypeValue();
+        HashMap<String, String> resourceMaxCount = new HashMap<String, String>();
+        for(String name : resourceTypeMap.keySet()) {
+            Long resourceDepartmentCount = resourceLimitDepartmentRepo.findTotalCountOfResourceProject(projectId, ResourceLimitDepartment.ResourceType.valueOf(resourceTypeMap.get(name)), true);
+            if (resourceDepartmentCount != null) {
+            resourceMaxCount.put(resourceTypeMap.get(name), resourceDepartmentCount.toString());
+            }
+        }
+
+        return resourceMaxCount;
+
     }
 
 }

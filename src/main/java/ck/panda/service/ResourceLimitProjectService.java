@@ -3,6 +3,7 @@
  */
 package ck.panda.service;
 
+import java.util.HashMap;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
@@ -95,5 +96,17 @@ public interface ResourceLimitProjectService extends CRUDService<ResourceLimitPr
      * @throws ApplicationException application error
      */
     List<ResourceLimitProject> findAllByProjectAndIsActive(Long projectId, Boolean isActive) throws ApplicationException, Exception;
+
+    /**
+     * @param domainId
+     * @return
+     */
+    HashMap<String, String> getResourceLimitsOfProject(Long domainId);
+
+    /**
+     * @param departmentId
+     * @return
+     */
+    HashMap<String, String> getResourceLimitsOfDepartment(Long departmentId);
 
 }

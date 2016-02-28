@@ -313,4 +313,34 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
         syncService.syncResourceLimitDomain(convertEntityService.getDomainById(domainId));
     }
 
+    @Override
+    public HashMap<String, String> getResourceLimitsOfDomain(Long domainId) {
+        HashMap<String, String> resourceTypeMap = convertEntityService.getResourceTypeValue();
+        HashMap<String, String> resourceMaxCount = new HashMap<String, String>();
+        for(String name : resourceTypeMap.keySet()) {
+            Long resourceDomainCount = resourceLimitDomainRepo.findTotalCountOfResourceDomain(domainId, ResourceLimitDomain.ResourceType.valueOf(resourceTypeMap.get(name)), true);
+            if (resourceDomainCount != null) {
+            resourceMaxCount.put(resourceTypeMap.get(name), resourceDomainCount.toString());
+            }
+        }
+        //pass domain id to resource departments and get the departments list
+
+                //iterate and get the resource max values
+
+        return resourceMaxCount;
+    }
+
+    @Override
+    public HashMap<String, String> getResourceLimitsOfProject(Long domainId) {
+        HashMap<String, String> resourceTypeMap = convertEntityService.getResourceTypeValue();
+        HashMap<String, String> resourceMaxCount = new HashMap<String, String>();
+        for(String name : resourceTypeMap.keySet()) {
+            Long resourceDomainCount = resourceLimitDomainRepo.findTotalCountOfResourceProject(domainId, ResourceLimitDomain.ResourceType.valueOf(resourceTypeMap.get(name)), true);
+            if (resourceDomainCount != null) {
+            resourceMaxCount.put(resourceTypeMap.get(name), resourceDomainCount.toString());
+            }
+        }
+        return resourceMaxCount;
+    }
+
 }

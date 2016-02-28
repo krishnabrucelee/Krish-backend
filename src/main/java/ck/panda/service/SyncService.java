@@ -182,7 +182,7 @@ public interface SyncService {
     /**
      * Sync with Cloud Server Account.
      *
-     * @param projectId project
+     * @param project for resource limit.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
@@ -270,16 +270,26 @@ public interface SyncService {
     /**
      * Sync with CloudStack server ResourceLimit Action event.
      *
+     * @param eventObject for resource limit.
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors
      */
     void syncResourceLimitActionEvent(ResponseEvent eventObject) throws ApplicationException, Exception;
 
     /**
-     * Sync with CloudStack server snapshot policy
+     * Sync with CloudStack server snapshot policy.
      *
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
     void syncSnapshotPolicy() throws ApplicationException, Exception;
+
+    /**
+     *
+     * Sync with Cloud Server VPN user list.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception unhandled errors.
+     */
+    void syncVpnUser() throws ApplicationException, Exception;
 }

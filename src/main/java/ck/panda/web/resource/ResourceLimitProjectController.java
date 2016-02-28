@@ -1,5 +1,6 @@
 package ck.panda.web.resource;
 
+import java.util.HashMap;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,6 +23,7 @@ import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.Volume;
+import ck.panda.service.ConvertEntityService;
 import ck.panda.service.ResourceLimitProjectService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -119,4 +121,31 @@ public class ResourceLimitProjectController extends CRUDController<ResourceLimit
             throws Exception {
         return resourceLimitService.findAllByProjectAndIsActive(projectId, true);
     }
+
+    /**
+     * Get resource limits of project.
+     *
+     * @param domainId domain id
+     * @return max values of resources
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/domainId/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public HashMap<String, String> findByDomainResource(@PathVariable(PATH_ID) Long domainId) throws Exception {
+        return resourceLimitService.getResourceLimitsOfProject(domainId);
+    }
+
+    /**
+     * Get resource limits of project.
+     *
+     * @param domainId domain id
+     * @return max values of resources
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/departmentId/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public HashMap<String, String> findByDepartmentResource(@PathVariable(PATH_ID) Long departmentId) throws Exception {
+        return resourceLimitService.getResourceLimitsOfDepartment(departmentId);
+    }
+
 }

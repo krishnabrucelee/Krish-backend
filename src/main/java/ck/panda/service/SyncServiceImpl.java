@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +29,7 @@ import ck.panda.domain.entity.Host;
 import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.Iso;
+import ck.panda.domain.entity.LbStickinessPolicy;
 import ck.panda.domain.entity.LoadBalancerRule;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
@@ -56,10 +55,10 @@ import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.rabbitmq.util.ResponseEvent;
 import ck.panda.domain.entity.VmInstance;
-import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.VolumeType;
+import ck.panda.domain.entity.VpnUser;
 import ck.panda.domain.entity.Zone;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackResourceCapacity;
@@ -134,6 +133,10 @@ public class SyncServiceImpl implements SyncService {
     /** OSCategoryService for listing operating sytem in cloudstack server. */
     @Autowired
     private OsTypeService osTypeService;
+
+    /** Service reference to Load Balancer. */
+    @Autowired
+    private LbStickinessPolicyService lbPolicyService;
 
     /** Storage offering service for listing storage offers. */
     @Autowired
@@ -332,6 +335,10 @@ public class SyncServiceImpl implements SyncService {
     @Autowired
     private MessageSource messageSource;
 
+    /** For listing VPN user list from cloudstack server. */
+    @Autowired
+    private VpnUserService vpnUserService;
+
     @Override
     public void init(CloudStackServer server) throws Exception {
         CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
@@ -460,12 +467,12 @@ public class SyncServiceImpl implements SyncService {
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Templates", e);
         }
-        try {
+       /* try {
             // 19. Sync ResourceLimit entity
             this.syncResourceLimit();
         } catch (Exception e) {
             LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
-        }
+        }*/
         try {
             // 20. Sync Instance entity
             this.syncInstances();
@@ -534,19 +541,33 @@ public class SyncServiceImpl implements SyncService {
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch LoadBalancer", e);
         }
+
+       try {
+            // 29. Sync Load Balancer entity
+            this.syncLoadBalancerStickyPolicy();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch LoadBalancer", e);
+        }
         try {
             // 30. Sync SSHKey entity
             this.syncSSHKey();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch SSH Key", e);
         }
-
         try {
             // 31. Sync for update role in user entity
             this.syncUpdateUserRole();
         } catch (Exception e) {
             LOGGER.error("ERROR AT Sync for update role in user entity", e);
         }
+        try {
+            // 32. Sync VPN user entity
+            this.syncVpnUser();
+            LOGGER.debug("ipAddress");
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Ip Address", e);
+        }
+
     }
 
     /**
@@ -2020,6 +2041,7 @@ public class SyncServiceImpl implements SyncService {
             if (csNicMap.containsKey(nic.getUuid())) {
                 Nic csNic = csNicMap.get(nic.getUuid());
                 nic.setUuid(csNic.getUuid());
+                nic.setIpAddress(csNic.getIpAddress());
                 nic.setVmIpAddress(csNic.getVmIpAddress());
 
                 // 3.2 If found, update the nic object in app db
@@ -2164,14 +2186,19 @@ public class SyncServiceImpl implements SyncService {
             // 3.1 Find the corresponding CS server ntService object by
             // finding it in a hash using uuid
             if (csIpMap.containsKey(ipAddress.getUuid())) {
-                IpAddress csNic = csIpMap.get(ipAddress.getUuid());
+                IpAddress csIp = csIpMap.get(ipAddress.getUuid());
 
-                ipAddress.setUuid(csNic.getUuid());
-                ipAddress.setPublicIpAddress(csNic.getPublicIpAddress());
-                ipAddress.setState(csNic.getState());
-                ipAddress.setIsSourcenat(csNic.getIsSourcenat());
-                ipAddress.setIsStaticnat(csNic.getIsStaticnat());
-                ipAddress.setNetworkId(csNic.getNetworkId());
+                ipAddress.setUuid(csIp.getUuid());
+                ipAddress.setPublicIpAddress(csIp.getPublicIpAddress());
+                ipAddress.setState(csIp.getState());
+                ipAddress.setIsSourcenat(csIp.getIsSourcenat());
+                ipAddress.setIsStaticnat(csIp.getIsStaticnat());
+                ipAddress.setNetworkId(csIp.getNetworkId());
+                ipAddress.setVpnUuid(csIp.getVpnUuid());
+                ipAddress.setVpnPresharedKey(csIp.getVpnPresharedKey());
+                ipAddress.setVpnState(csIp.getVpnState());
+                ipAddress.setVpnForDisplay(csIp.getVpnForDisplay());
+
                 // 3.2 If found, update the nic object in app db
                 ipAddressService.update(ipAddress);
 
@@ -2275,6 +2302,7 @@ public class SyncServiceImpl implements SyncService {
 
         // 1. Get all the LoadBalancer objects from CS server as hash
         List<LoadBalancerRule> csLoadBalancerList = loadBalancerService.findAllFromCSServer();
+
         HashMap<String, LoadBalancerRule> csLoadBalancerMap = (HashMap<String, LoadBalancerRule>) LoadBalancerRule.convert(csLoadBalancerList);
 
         // 2. Get all the LoadBalancer objects from application
@@ -2320,6 +2348,42 @@ public class SyncServiceImpl implements SyncService {
         }
     }
 
+   public void syncLoadBalancerStickyPolicy() throws ApplicationException, Exception {
+
+        // 1. Get all the LoadBalancer objects from CS server as hash
+        List<LbStickinessPolicy> csLoadBalancerList = lbPolicyService.findAllFromCSServer();
+        HashMap<String, LbStickinessPolicy> csLoadBalancerMap = (HashMap<String, LbStickinessPolicy>) LbStickinessPolicy.convert(csLoadBalancerList);
+        List<LbStickinessPolicy> appLoadBalancerList = lbPolicyService.findAll();
+        // 3. Iterate application LoadBalancer list
+        for (LbStickinessPolicy loadBalancer : appLoadBalancerList) {
+            loadBalancer.setSyncFlag(false);
+            LOGGER.debug("Total rows updated : " + (csLoadBalancerList.size()));
+            // 3.1 Find the corresponding CS server ntService object by
+            // finding it in a hash using uuid
+            if (csLoadBalancerMap.containsKey(loadBalancer.getUuid())) {
+                LbStickinessPolicy csLoadBalancer = csLoadBalancerMap.get(loadBalancer.getUuid());
+
+            loadBalancer.setUuid(csLoadBalancer.getUuid());
+            //loadBalancer.setStickinessName(csLoadBalancer.getStickinessName());
+           // loadBalancer.setStickinessMethod(csLoadBalancer.getStickinessMethod());
+                // 3.2 If found, update the LoadBalancer object in app db
+            lbPolicyService.update(loadBalancer);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // nic which is not added in the app
+            }else {
+                lbPolicyService.softDelete(loadBalancer);
+            }
+        }
+        // 4. Get the remaining list of cs server hash NetworkOffering object,
+        // then iterate and
+        // add it to app db
+        for (String key : csLoadBalancerMap.keySet()) {
+            LOGGER.debug("Syncservice Load Balancer uuid:");
+            lbPolicyService.save(csLoadBalancerMap.get(key));
+        }
+   }
+
     /**
      * Sync with Cloud Server Network Firewall Rules.
      *
@@ -2335,7 +2399,6 @@ public class SyncServiceImpl implements SyncService {
             csFirewallRule.setUuid(loadBalancerRule.getUuid());
             csFirewallRule.setDisplay(loadBalancerRule.getDisplay());
             csFirewallRule.setSourceCIDR(loadBalancerRule.getSourceCIDR());
-            csFirewallRule.setState(State.valueOf(loadBalancerRule.getState().name()));
             csFirewallRule.setStartPort(loadBalancerRule.getPrivatePort());
             csFirewallRule.setEndPort(loadBalancerRule.getPublicPort());
             csFirewallRule.setIsActive(true);
@@ -2434,6 +2497,47 @@ public class SyncServiceImpl implements SyncService {
             }
         } catch (Exception e) {
             LOGGER.debug("syncUpdateUserRole" + e);
+        }
+    }
+
+    @Override
+    public void syncVpnUser() throws ApplicationException, Exception {
+
+        // 1. Get all the VPN user objects from CS server as hash
+        List<VpnUser> csVpnList = vpnUserService.findAllFromCSServer();
+        HashMap<String, VpnUser> csVpnMap = (HashMap<String, VpnUser>) VpnUser.convert(csVpnList);
+
+        // 2. Get all the VPN user objects from application
+        List<VpnUser> appVpnList = vpnUserService.findAll();
+
+        // 3. Iterate application VPN user list
+        for (VpnUser vpnUser : appVpnList) {
+            vpnUser.setSyncFlag(false);
+            LOGGER.debug("Total rows updated : " + (appVpnList.size()));
+            // 3.1 Find the corresponding CS server with Service object by
+            // finding it in a hash using uuid
+            if (csVpnMap.containsKey(vpnUser.getUuid())) {
+                VpnUser csVpn = csVpnMap.get(vpnUser.getUuid());
+
+                vpnUser.setUuid(csVpn.getUuid());
+                vpnUser.setUserName(csVpn.getUserName());
+
+                // 3.2 If found, update the VPN user object in app db
+                vpnUserService.update(vpnUser);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // VPN user which is not added in the app
+                csVpnMap.remove(vpnUser.getUuid());
+            } else {
+                vpnUserService.softDelete(vpnUser);
+            }
+        }
+        // 4. Get the remaining list of cs server hash NetworkOffering object,
+        // then iterate and
+        // add it to app db
+        for (String key : csVpnMap.keySet()) {
+            LOGGER.debug("Sync service VPN user uuid:");
+            vpnUserService.save(csVpnMap.get(key));
         }
     }
 

@@ -17,7 +17,7 @@ import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
-import ck.panda.domain.entity.VmInstance.Status;
+import ck.panda.domain.entity.VmIpaddress.IpType;
 import ck.panda.domain.repository.jpa.NicRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackInstanceService;
@@ -157,7 +157,6 @@ public class NicServiceImpl implements NicService {
         for (VmIpaddress vmIp :  nic.getVmIpAddress()) {
             vmIp.setNicId(nic.getId());
             vmIp.setVmInstanceId(convertEntityService.getNic(nic.getUuid()).getVmInstanceId());
-            vmIp.setPrimaryIpAddress(nic.getIpAddress());
             vmIpService.update(vmIp);
         }
     }
@@ -245,7 +244,11 @@ public class NicServiceImpl implements NicService {
                 }
             }
         }
-        return nicRepo.save(nic);
+        if (nic.getVmIpAddress() != null) {
+            updateNicToVmIpaddress(nic);
+        }
+        nic = nicRepo.save(nic);
+        return nic;
     }
 
     @Override
@@ -340,13 +343,21 @@ public class NicServiceImpl implements NicService {
             // 2. Iterate the json list, convert the single json entity to nic
             for (int i = 0, size = nicListJSON.length(); i < size; i++) {
                  List<VmIpaddress> vmIpList = new ArrayList<VmIpaddress>();
+                 if(nicListJSON.getJSONObject(i).has("ipaddress")) {
+                     VmIpaddress vms = new VmIpaddress();
+                      vms.setGuestIpAddress(nicListJSON.getJSONObject(i).getString("ipaddress"));
+                      vms.setIpType(IpType.primaryIpAddress);
+                      vms.setUuid(nicListJSON.getJSONObject(i).getString("id"));
+                      vms.setIsActive(true);
+                      vmIpList.add(vmIpService.save(vms));
+                 }
                 // 2.1 Call convert by passing JSONObject to nic entity and Add
                 // the converted nic entity to list
                  Nic nic = Nic.convert(nicListJSON.getJSONObject(i));
                  nic.setVmInstanceId(convertEntityService.getVmInstanceId(nic.getTransvmInstanceId()));
                  nic.setNetworkId(convertEntityService.getNetworkId(nic.getTransNetworkId()));
                  // Get secondary ip address from nic.
-                 if (nicListJSON.getJSONObject(i).has(CS_NIC_SECONDARYIP)) {
+                  if (nicListJSON.getJSONObject(i).has(CS_NIC_SECONDARYIP)) {
                         // Get JSON array secondary ip.
                         JSONArray secondaryIpJSON = nicListJSON.getJSONObject(i).getJSONArray(CS_NIC_SECONDARYIP);
                         for (int j = 0, sizes = secondaryIpJSON.length(); j < sizes; j++) {
@@ -355,8 +366,8 @@ public class NicServiceImpl implements NicService {
                             // 2.2  Call convert by passing JSONObject to Vmipaddress entity and Add
                             // the converted vm ipaddress entity to list
                             VmIpaddress vmIp = VmIpaddress.convert(json);
-                            VmIpaddress persistVmIp = vmIpService.save(vmIp);
-                            vmIpList.add(persistVmIp);
+                                VmIpaddress persistVmIp = vmIpService.save(vmIp);
+                                vmIpList.add(persistVmIp);
                         }
                 }
                 if (vmIpList.size() > 0) {

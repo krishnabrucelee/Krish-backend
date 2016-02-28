@@ -15,6 +15,7 @@ import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.IpAddress;
+import ck.panda.domain.entity.LoadBalancerRule;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.Nic;
@@ -146,6 +147,10 @@ public class ConvertEntityService {
     /** Service reference to VmIpAddress. */
     @Autowired
     private VmIpaddressService vmIpAddressService;
+
+    /** Service reference to LoadBalancer. */
+    @Autowired
+    private LoadBalancerService lbService;
 
     /** CloudStack connector reference for instance. */
     @Autowired
@@ -1098,6 +1103,17 @@ public class ConvertEntityService {
      */
     public IpAddress getIpAddress(Long id) throws Exception {
         return ipAddressService.find(id);
+    }
+
+    /**
+     * Get load Balancer by id
+     *
+     * @param id of the load balancer.
+     * @return load balancer rule
+     * @throws Exception if error occurs.
+     */
+    public LoadBalancerRule getLoadBalancer(Long id) throws Exception {
+        return lbService.find(id);
     }
 
     /**
