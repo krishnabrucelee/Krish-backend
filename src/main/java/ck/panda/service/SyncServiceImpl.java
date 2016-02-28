@@ -1278,6 +1278,7 @@ public class SyncServiceImpl implements SyncService {
                 instance.setNetworkKbsRead(csVm.getNetworkKbsRead());
                 instance.setNetworkKbsWrite(csVm.getNetworkKbsWrite());
                 instance.setPasswordEnabled(csVm.getPasswordEnabled());
+                instance.setHypervisorId(csVm.getHypervisorId());
                 if (csVm.getPassword() != null) {
                     instance.setPassword(csVm.getPassword());
                 }

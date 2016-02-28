@@ -1946,6 +1946,7 @@ public class VmInstance implements Serializable {
         VmInstance vmInstance = new VmInstance();
         vmInstance.setSyncFlag(false);
         try {
+        	vmInstance.setTransHypervisor(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_HYPERVISOR_TYPE));
             vmInstance.setName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_NAME));
             vmInstance.setUuid(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ID));
             vmInstance.setTransDomainId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DOMAIN_ID));
