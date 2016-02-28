@@ -151,7 +151,7 @@ public class LbStickinessPolicyServiceImpl implements LbStickinessPolicyService 
 
     @Override
     public LbStickinessPolicy save(LbStickinessPolicy lbStickinessPolicy, String loadbalancer) throws Exception {
-
+    	lbStickinessPolicy.setIsActive(true);
          Errors errors = validator.rejectIfNullEntity("lbStickinessPolicy", lbStickinessPolicy);
          errors = validator.validateEntity(lbStickinessPolicy, errors);
          String createStickiness = cloudStackLoadBalancerService.createLBStickinessPolicy(loadbalancer, CloudStackConstants.JSON, addOptionalValues(lbStickinessPolicy));

@@ -480,8 +480,14 @@ public class IpaddressServiceImpl implements IpaddressService {
                     ipAddress.setVpnPresharedKey(convertEncryptedKey(jobresultReponse.getString(CloudStackConstants.CS_PRESHARED_KEY)));
                     ipAddress.setVpnState(VpnState.valueOf(jobresultReponse.getString(CloudStackConstants.CS_STATE).toUpperCase()));
                     ipAddress.setVpnForDisplay(jobresultReponse.getBoolean(CloudStackConstants.CS_FOR_DISPLAY));
+                } else if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.ERROR_JOB_STATUS)) {
+                    if (jobresults.has(CloudStackConstants.CS_JOB_RESULT)) {
+                        errors = validator.sendGlobalError(jobresults.getJSONObject(CloudStackConstants.CS_JOB_RESULT).getString(CloudStackConstants.CS_ERROR_TEXT));
+                        if (errors.hasErrors()) {
+                            throw new BadCredentialsException(jobresults.getJSONObject(CloudStackConstants.CS_JOB_RESULT).getString(CloudStackConstants.CS_ERROR_TEXT));
+                        }
+                    }
                 }
-
             }
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException(e.getMessage());
@@ -509,11 +515,16 @@ public class IpaddressServiceImpl implements IpaddressService {
                 String jobResponse = csipaddressService.associatedJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
                 JSONObject jobresults = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
 
-                if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS)
-                        .equals(CloudStackConstants.SUCCEEDED_JOB_STATUS)) {
+                if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.SUCCEEDED_JOB_STATUS)) {
                     ipAddress.setVpnState(VpnState.DISABLED);
+                } else if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.ERROR_JOB_STATUS)) {
+                    if (jobresults.has(CloudStackConstants.CS_JOB_RESULT)) {
+                        errors = validator.sendGlobalError(jobresults.getJSONObject(CloudStackConstants.CS_JOB_RESULT).getString(CloudStackConstants.CS_ERROR_TEXT));
+                        if (errors.hasErrors()) {
+                            throw new BadCredentialsException(jobresults.getJSONObject(CloudStackConstants.CS_JOB_RESULT).getString(CloudStackConstants.CS_ERROR_TEXT));
+                        }
+                    }
                 }
-
             }
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException(e.getMessage());
