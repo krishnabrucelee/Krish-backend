@@ -231,4 +231,13 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * @throws Exception error occurs.
      */
     VmInstance findByIdWithVncPassword(Long id) throws Exception;
+
+    /**
+     * Reset SSH Key in created instance.
+     *
+     * @param vminstance virtual machine.
+     * @return instance.
+     * @throws Exception if error occurs.
+     */
+    VmInstance resetSSHKey(VmInstance vminstance) throws Exception;
 }

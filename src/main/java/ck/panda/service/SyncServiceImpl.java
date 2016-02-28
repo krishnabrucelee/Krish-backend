@@ -1271,6 +1271,9 @@ public class SyncServiceImpl implements SyncService {
                 if (csVm.getCpuUsage() != null) {
                     instance.setCpuUsage(csVm.getCpuUsage());
                 }
+                if (csVm.getTransKeypairName() != null) {
+                    instance.setKeypairId(convertEntityService.getSSHKeyByNameAndDepartment(csVm.getTransKeypairName(), csVm.getDepartmentId()).getId());
+                }
                 instance.setDiskIoRead(csVm.getDiskIoRead());
                 instance.setDiskIoWrite(csVm.getDiskIoWrite());
                 instance.setDiskKbsRead(csVm.getDiskKbsRead());
