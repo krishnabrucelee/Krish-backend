@@ -149,12 +149,12 @@ public class VpnUserServiceImpl implements VpnUserService {
                         vpnUser.setIsActive(false);
                         return vpnUserRepository.save(vpnUser);
                     } else if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.ERROR_JOB_STATUS)) {
-                    	if(jobresults.has(CloudStackConstants.CS_JOB_RESULT)) {
-                    		errors = validator.sendGlobalError(jobresults.getJSONObject(CloudStackConstants.CS_JOB_RESULT).getString(CloudStackConstants.CS_ERROR_TEXT));
+                        if (jobresults.has(CloudStackConstants.CS_JOB_RESULT)) {
+                            errors = validator.sendGlobalError(jobresults.getJSONObject(CloudStackConstants.CS_JOB_RESULT).getString(CloudStackConstants.CS_ERROR_TEXT));
                             if (errors.hasErrors()) {
                                 throw new BadCredentialsException(jobresults.getJSONObject(CloudStackConstants.CS_JOB_RESULT).getString(CloudStackConstants.CS_ERROR_TEXT));
                             }
-                    	}
+                        }
                     }
                 }
             } catch (BadCredentialsException e) {
@@ -219,12 +219,12 @@ public class VpnUserServiceImpl implements VpnUserService {
                         vpnUserRepository.save(vpnUser);
                     }
                 } else if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.ERROR_JOB_STATUS)) {
-                	if(jobresults.has(CloudStackConstants.CS_JOB_RESULT)) {
-                		errors = validator.sendGlobalError(jobresults.getJSONObject(CloudStackConstants.CS_JOB_RESULT).getString(CloudStackConstants.CS_ERROR_TEXT));
+                    if (jobresults.has(CloudStackConstants.CS_JOB_RESULT)) {
+                        errors = validator.sendGlobalError(jobresults.getJSONObject(CloudStackConstants.CS_JOB_RESULT).getString(CloudStackConstants.CS_ERROR_TEXT));
                         if (errors.hasErrors()) {
                             throw new BadCredentialsException(jobresults.getJSONObject(CloudStackConstants.CS_JOB_RESULT).getString(CloudStackConstants.CS_ERROR_TEXT));
                         }
-                	}
+                    }
                 }
             }
         } catch (BadCredentialsException e) {
