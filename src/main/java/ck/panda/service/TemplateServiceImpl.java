@@ -115,6 +115,12 @@ public class TemplateServiceImpl implements TemplateService {
     /** Template OS category. */
     public static final String TEMPLATE_OS_CATEGORY = "osCategory";
 
+    /** Template of type featured. */
+    public static final String TEMPLATE_FEATURED = "featured";
+
+    /** Template of type community. */
+    public static final String TEMPLATE_COMMUNITY = "community";
+
     /** ISO and Template counts. */
     public static final String WINDOWS_COUNT = "windowsCount", LINUX_COUNT = "linuxCount", TOTAL_COUNT = "totalCount",
         WINDOWS_ISO_COUNT = "windowsIsoCount", LINUX_ISO_COUNT = "linuxIsoCount", TOTAL_ISO_COUNT = "totalIsoCount";
@@ -492,7 +498,7 @@ public class TemplateServiceImpl implements TemplateService {
      * @throws Exception unhandled errors.
      */
     public void csUpdateTemplate(Template template) throws Exception {
-    	configUtil.setUserServer();
+        configUtil.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
         optionalFieldValidation(template, optional);
         optional.put(CloudStackConstants.CS_NAME, template.getName());
@@ -518,7 +524,7 @@ public class TemplateServiceImpl implements TemplateService {
      * @throws Exception unhandled errors.
      */
     public Boolean csDeleteTemplate(Long id) throws Exception {
-    	configUtil.setUserServer();
+        configUtil.setUserServer();
         Errors errors = null;
         HashMap<String, String> optional = new HashMap<String, String>();
         Template template = templateRepository.findOne(id);
@@ -645,7 +651,7 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     public List<Template> findByTemplateCategory(OsCategory osCategory, String type) throws Exception {
         List<Template> templates;
-        if (type.equals("template")) {
+        if (type.equals(CloudStackConstants.TEMPLATE_NAME)) {
             templates = templateRepository.findByTemplateWithIsoCategory(TemplateType.SYSTEM,
                 Status.ACTIVE, osCategory, Format.ISO);
         } else {
@@ -655,6 +661,16 @@ public class TemplateServiceImpl implements TemplateService {
         return templates;
     }
 
+    @Override
+    public Page<Template> findAllByType(PagingAndSorting pagingAndSorting, String type, Boolean featured, Boolean shared) {
+        Page<Template> templates = null;
+         if (type.equals(TEMPLATE_FEATURED)) {
+             templates = templateRepository.findTemplateByFeatured(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), featured, shared, Status.ACTIVE, true);
+         } else if (type.equals(TEMPLATE_COMMUNITY)) {
+             templates = templateRepository.findTemplateByCommunity(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), shared, Status.ACTIVE, true);
+         }
+         return templates;
+    }
     /**
      * Add cost for newly created template.
      *

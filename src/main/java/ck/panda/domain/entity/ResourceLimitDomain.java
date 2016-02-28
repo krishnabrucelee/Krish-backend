@@ -64,11 +64,11 @@ public class ResourceLimitDomain implements Serializable {
     private Long max;
 
     /** Available Resource limit usage for Domain. */
-    @Column(name = "available_limit")
+    @Column(name = "available_limit", columnDefinition = "bigint(20) default 0")
     private Long available;
 
     /** Resource limit usage for Domain. */
-    @Column(name = "used_limit")
+    @Column(name = "used_limit", columnDefinition = "bigint(20) default 0")
     private Long usedLimit;
 
     /** Status attribute to verify status of the resource limit. */
@@ -498,6 +498,7 @@ public class ResourceLimitDomain implements Serializable {
             resource.setTransDomainId((JsonUtil.getStringValue(object, "domainid")));
             resource.setMax(resource.getMax().valueOf(JsonUtil.getIntegerValue(object, "max")));
             resource.setTransResourceType(JsonUtil.getIntegerValue(object, "resourcetype"));
+            resource.setUniqueSeperator(resource.getTransDomainId() + resource.getTransResourceType());
             resource.setIsActive(true);
 
         } catch (Exception e) {

@@ -117,6 +117,6 @@ public class ResourceLimitProjectController extends CRUDController<ResourceLimit
     @ResponseBody
     protected List<ResourceLimitProject> getResourceLimitByProject(@PathVariable(PATH_ID) Long projectId)
             throws Exception {
-        return resourceLimitService.findAllByProjectIdAndIsActive(projectId, true);
+        return resourceLimitService.findAllByProjectAndIsActive(projectId, true);
     }
 }

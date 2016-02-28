@@ -483,9 +483,25 @@ public class CloudStackConstants {
 
     /** Constant for method name. */
     public static final String CS_METHOD_NAME = "methodname";
-
-    /** Constant for table size. */
+    
+     /** Constant for table size. */
     public static final String CS_TABLE_SIZE = "tablesize";
+
+
+    /** Constant for VM snapshot id. */
+    public static final String CS_VM_SNAPSHOT_ID = "vmsnapshotid";
+
+    /** Constant for VM snapshot. */
+    public static final String CS_VM_SNAPSHOT = "vmsnapshot";
+
+    /** Constant for description. */
+    public static final String CS_DESCRIPTION = "description";
+
+    /** Constant for current snapshot. */
+    public static final String CS_CURRENT = "current";
+
+    /** Constant for parent ID of the vm snapshot. */
+    public static final String CS_PARENT = "parent";
 
     /** Constant for cookie name. */
     public static final String CS_COOKIE_NAME = "cookie-name";

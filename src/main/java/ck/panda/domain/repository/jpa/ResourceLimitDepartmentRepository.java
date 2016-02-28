@@ -26,7 +26,7 @@ public interface ResourceLimitDepartmentRepository extends PagingAndSortingRepos
 
     /**
      * Find all the active resource limits based on the department id.
-     * 
+     *
      * @param departmentId department id.
      * @param isActive true/false
      * @return department.
@@ -57,8 +57,8 @@ public interface ResourceLimitDepartmentRepository extends PagingAndSortingRepos
      * @param isActive true/false.
      * @return department resource type.
      */
-    @Query(value = "select resource from ResourceLimitDepartment resource where resource.isActive =:isActive AND resource.departmentId =:departmentId AND resource.resourceType =:resourceType")
+    @Query(value = "select resource from ResourceLimitDepartment resource where resource.isActive = :isActive AND resource.departmentId = :departmentId AND resource.resourceType = :resourceType")
     ResourceLimitDepartment findByDepartmentAndResourceType(@Param("departmentId") Long departmentId,
-            @Param("resourceType") ResourceType resourceType, @Param("isActive") Boolean isActive);
+            @Param("resourceType") ResourceLimitDepartment.ResourceType resourceType, @Param("isActive") Boolean isActive);
 
 }

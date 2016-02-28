@@ -41,12 +41,11 @@ public class CloudStackVolumeService {
      * @return created response
      * @throws Exception error
      */
-    public String createVolume(String diskVolumeName, String diskOffering, String zone, String response,
+    public String createVolume(String diskVolumeName, String zone, String response,
             HashMap<String, String> optional) throws Exception {
 
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("createVolume", optional);
         arguments.add(new NameValuePair("name", diskVolumeName));
-        arguments.add(new NameValuePair("diskofferingid", diskOffering));
         arguments.add(new NameValuePair("zoneid", zone));
         arguments.add(new NameValuePair("response", response));
 

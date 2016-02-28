@@ -166,5 +166,18 @@ public class NicController extends CRUDController<Nic> implements ApiController 
         return nicOfferingService.releaseSecondaryIP(nic, vmIpaddressId);
     }
 
+    /**
+     * List nics by network id.
+     *
+     * @param networkId of the network which to be attached.
+     * @return nic by network and isActive status.
+     * @throws Exception if error occurs.
+     */
+    @RequestMapping(value = "listbynetwork", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Nic> listByNetwork(@RequestParam("networkid") Long networkId) throws Exception {
+        return nicOfferingService.findAllByNetworkAndIsActive(networkId, true);
+    }
  }
 

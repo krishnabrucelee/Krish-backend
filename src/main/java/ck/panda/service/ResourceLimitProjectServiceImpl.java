@@ -17,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.ResourceLimitDepartment;
+import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.ResourceLimitProject.ResourceType;
 import ck.panda.domain.repository.jpa.ResourceLimitProjectRepository;
@@ -79,6 +80,10 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
     /** Reference of the convert entity service. */
     @Autowired
     private ConvertEntityService convertEntityService;
+
+    /** Reference of the Sync service. */
+    @Autowired
+    private SyncService syncService;
 
     @Override
     public ResourceLimitProject save(ResourceLimitProject resource) throws Exception {
@@ -174,6 +179,9 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
             resource.setProjectId(convertEntityService.getProject(resource.getTransProjectId()).getId());
             resource.setUniqueSeperator(
                     resource.getTransProjectId() + "-" + ResourceType.values()[(resource.getTransResourceType())]);
+            resource.setDomainId(convertEntityService.getDomainId(resource.getTransDomainId()));
+            resource.setDepartmentId(convertEntityService.getProjectById(resource.getProjectId()).getDepartmentId());
+            resource.setUniqueSeperator(resource.getProjectId() + resource.getResourceType().toString());
             resourceList.add(resource);
         }
         return resourceList;
@@ -208,11 +216,18 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-            this.deleteResourceLimitByProject(resourceLimits.get(0).getProjectId());
             for (ResourceLimitProject resource : resourceLimits) {
-                resource.setIsActive(true);
-                updateResourceProject(resource);
-                resourceLimitProjectRepo.save(resource);
+                if (resource.getId() != null) {
+                    ResourceLimitProject resourceData = resourceLimitProjectRepo.findOne(resource.getId());
+                    resourceData.setMax(resource.getMax());
+                    resourceData.setIsActive(true);
+                    updateResourceProject(resourceData);
+                    resourceLimitProjectRepo.save(resourceData);
+                } else {
+                    updateResourceProject(resource);
+                    resource.setIsActive(true);
+                    resourceLimitProjectRepo.save(resource);
+                }
             }
         }
         return (List<ResourceLimitProject>) resourceLimitProjectRepo.findAll();
@@ -223,7 +238,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
      *
      * @param projectId project.
      */
-    private void deleteResourceLimitByProject(Long projectId) {
+    public void deleteResourceLimitByProject(Long projectId) {
         List<ResourceLimitProject> resourceLimits = resourceLimitProjectRepo.findAllByProjectIdAndIsActive(projectId,
                 true);
         for (ResourceLimitProject resource : resourceLimits) {
@@ -254,7 +269,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
             if (projectLimit != null) {
                 if (projectLimit.getMax() < totalCount) {
                     errors.addFieldError(resourceLimit.getResourceType().toString(),
-                            totalCount + " " + resourceLimit.getResourceType().toString() + "resource.limit.exceed");
+                            projectLimit.getMax() + " in " + resourceLimit.getResourceType().toString() + " " + " for resource limit department exceeded");
                 }
             } else {
                 errors.addGlobalError("update.department.quota.first");
@@ -271,7 +286,26 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
     }
 
     @Override
-    public List<ResourceLimitProject> findAllByProjectIdAndIsActive(Long projectId, Boolean isActive) {
+    public List<ResourceLimitProject> findAllByProjectIdAndIsActive(Long projectId, Boolean isActive) throws ApplicationException, Exception {
+        return (List<ResourceLimitProject>) resourceLimitProjectRepo.findAllByProjectIdAndIsActive(projectId, isActive);
+    }
+
+    @Override
+    public ResourceLimitProject findByProjectAndResourceType(Long projectId, ResourceType resourceType,
+            Boolean isActive) throws Exception {
+        return resourceLimitProjectRepo.findByProjectAndResourceType(projectId, resourceType, isActive);
+    }
+
+    @Override
+    public ResourceLimitProject findResourceByProjectAndResourceType(Long projectId, ResourceType resourceType,
+            Boolean isActive) throws Exception {
+        return resourceLimitProjectRepo.findResourceByProjectAndResourceType(projectId, resourceType, isActive);
+    }
+
+    @Override
+    public List<ResourceLimitProject> findAllByProjectAndIsActive(Long projectId, Boolean isActive) throws ApplicationException, Exception {
+        //This call is for update resource limit form ACS.
+        syncService.syncResourceLimitProject(convertEntityService.getProjectById(projectId));
         return (List<ResourceLimitProject>) resourceLimitProjectRepo.findAllByProjectIdAndIsActive(projectId, isActive);
     }
 }

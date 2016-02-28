@@ -126,6 +126,24 @@ public class EventTypes {
     /** Snapshots. */
     public static final String EVENT_SNAPSHOT = "SNAPSHOT.";
 
+    /** Snapshots. */
+    public static final String EVENT_SNAPSHOT_POLICY = "SNAPSHOTPOLICY.";
+
+    /** Snapshots. */
+    public static final String EVENT_SNAPSHOT_POLICY_CREATE = "SNAPSHOTPOLICY.CREATE";
+
+    /** Snapshot unknown type. */
+    public static final String EVENT_UNKNOWN = "unknown";
+
+    /** Snapshot Events. */
+    public static final String EVENT_SNAPSHOT_CREATE = "SNAPSHOT.CREATE";
+
+    /** Snapshot delete Events. */
+    public static final String EVENT_SNAPSHOT_DELETE = "SNAPSHOT.DELETE";
+
+    /** Snapshot revert Events . */
+    public static final String EVENT_SNAPSHOT_REVERT = "SNAPSHOT.REVERT";
+
     /** ISO. */
     public static final String EVENT_ISO = "ISO.";
 
@@ -260,4 +278,12 @@ public class EventTypes {
 
     /** Network Delete Events. */
     public static final String EVENT_NETWORK_DELETE = "DELETE";
+
+    /** Domain event update     */
+    public static final Object EVENT_DOMAIN_UPDATE = "DOMAIN.UPDATE";
+
+    /** State of resources. */
+    public static final String OLD_RESOURCE_STATE = "old-state";
+
+    public static final String EVENT_STATIC_NAT = "STATICNAT.";
 }

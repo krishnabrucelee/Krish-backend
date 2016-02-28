@@ -91,6 +91,15 @@ public class SSHKey implements Serializable {
     @Column(name = "department_id")
     private Long departmentId;
 
+    /** Project of the SSH key. */
+    @JoinColumn(name = "project_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Project project;
+
+    /** Project id of the SSH key. */
+    @Column(name = "project_id")
+    private Long projectId;
+
     /** Update status when delete an entity. */
     @Column(name = "is_active")
     private Boolean isActive;
@@ -308,6 +317,42 @@ public class SSHKey implements Serializable {
      */
     public void setDepartmentId(Long departmentId) {
         this.departmentId = departmentId;
+    }
+
+    /**
+     * Get the project of the SSH Key.
+     *
+     * @return the project of SSH Key.
+     */
+    public Project getProject() {
+        return project;
+    }
+
+    /**
+     * Set the project of the SSH Key.
+     *
+     * @param project to set
+     */
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    /**
+     * Get the projectId of the SSH Key.
+     *
+     * @return the projectId of SSH Key.
+     */
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    /**
+     * Set the projectId of the SSH Key.
+     *
+     * @param projectId to set
+     */
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
     }
 
     /**

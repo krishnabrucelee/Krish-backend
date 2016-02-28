@@ -2,6 +2,8 @@ package ck.panda.service;
 
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.Project;
+import ck.panda.rabbitmq.util.ResponseEvent;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.error.exception.ApplicationException;
 
@@ -184,7 +186,7 @@ public interface SyncService {
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    void syncResourceLimitProject(String projectId) throws ApplicationException, Exception;
+    void syncResourceLimitProject(Project project) throws ApplicationException, Exception;
 
     /**
      * Sync with Cloud Server Account.
@@ -264,4 +266,20 @@ public interface SyncService {
     * @throws Exception unhandled errors.
     */
     void syncUpdateUserRole() throws ApplicationException, Exception;
+
+    /**
+     * Sync with CloudStack server ResourceLimit Action event.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
+     */
+    void syncResourceLimitActionEvent(ResponseEvent eventObject) throws ApplicationException, Exception;
+
+    /**
+     * Sync with CloudStack server snapshot policy
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    void syncSnapshotPolicy() throws ApplicationException, Exception;
 }

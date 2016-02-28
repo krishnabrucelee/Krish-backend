@@ -1,7 +1,6 @@
 package ck.panda.service;
 
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Snapshot;
@@ -40,4 +39,49 @@ public interface SnapshotService extends CRUDService<Snapshot> {
      * @throws Exception unhandled errors.
      */
     Page<Snapshot> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception;
+
+    /**
+     * Find snapshot by Uuid
+     *
+     * @param uuid of the snapshot.
+     * @return snapshot.
+     * @throws Exception if error occurs.
+     */
+    Snapshot findByUUID(String uuid) throws Exception;
+
+    /**
+     * Create volume from snapshot.
+     *
+     * @param snapshot object which is used to create volume.
+     * @param userId id of the user.
+     * @return snapshot with created volume.
+     * @throws Exception if error occurs.
+     */
+    Snapshot createVolume(Snapshot snapshot, Long userId) throws Exception;
+
+    /**
+     * Find snapshot by id.
+     *
+     * @param id of the snapshot.
+     * @return snapshot.
+     */
+    Snapshot findById(Long id);
+
+    /**
+     * Revert snapshot to its inital state.
+     *
+     * @param snapshot to be reverted
+     * @return snapshot.
+     * @throws Exception if error occurs.
+     */
+    Snapshot revertSnapshot(Snapshot snapshot) throws Exception;
+
+    /**
+     * Find all snapshot by active .
+     *
+     * @param isActive status of the snapshot.
+     * @return snapshot.
+     * @throws Exception if error occurs.
+     */
+    List<Snapshot> findAllByActive(Boolean isActive) throws Exception;
 }

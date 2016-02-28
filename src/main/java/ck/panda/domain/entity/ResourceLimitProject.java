@@ -88,11 +88,11 @@ public class ResourceLimitProject implements Serializable {
     private Long max;
 
     /** Available Resource limit usage for Project. */
-    @Column(name = "available_limit")
+    @Column(name = "available_limit", columnDefinition = "bigint(20) default 0")
     private Long available;
 
     /** Resource limit usage for Project. */
-    @Column(name = "used_limit")
+    @Column(name = "used_limit", columnDefinition = "bigint(20) default 0")
     private Long usedLimit;
 
     /** Status attribute to verify status of the resource limit. */
@@ -145,6 +145,14 @@ public class ResourceLimitProject implements Serializable {
     /** Transient resource type of the resource limit domain. */
     @Transient
     private Integer transResourceType;
+
+    /** Transient domain of the account. */
+    @Transient
+    private String transDomainId;
+
+    /** Transient domain of the account. */
+    @Transient
+    private String transAccount;
 
     /**
      * isSyncFlag field is not to be serialized, whereas JPA's @Transient annotation is used to indicate that a field is
@@ -586,6 +594,42 @@ public class ResourceLimitProject implements Serializable {
         this.transResourceType = transResourceType;
     }
 
+    /**
+     * Get the transient domain id.
+     *
+     * @return the transDomainId
+     */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
+
+    /**
+     * Set the transient domain id..
+     *
+     * @param transDomainId to set
+     */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
+
+    /**
+     * Get the transient account.
+     *
+     * @return the transAccount
+     */
+    public String getTransAccount() {
+        return transAccount;
+    }
+
+    /**
+     * Set the transient Account.
+     *
+     * @param transAccount to set
+     */
+    public void setTransAccount(String transAccount) {
+        this.transAccount = transAccount;
+    }
+
         /**
          * Convert JSONObject to ResourceLimit entity.
          *
@@ -598,11 +642,13 @@ public class ResourceLimitProject implements Serializable {
           ResourceLimitProject resource = new ResourceLimitProject();
             resource.setIsSyncFlag(false);
             try {
-               resource.setIsActive(true);
+                resource.setIsActive(true);
                 resource.setResourceType(ResourceType.values()[(JsonUtil.getIntegerValue(jsonObject, CS_RESOUCE_TYPE))]);
                 resource.setTransProjectId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_PROJECT_ID));
                 resource.setMax(resource.getMax().valueOf(JsonUtil.getIntegerValue(jsonObject, CS_MAX)));
                 resource.setTransResourceType(JsonUtil.getIntegerValue(jsonObject, CS_RESOUCE_TYPE));
+                resource.setTransDomainId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DOMAIN_ID));
+                resource.setUniqueSeperator(resource.getTransProjectId() + resource.getTransResourceType());
             } catch (Exception e) {
                 e.printStackTrace();
             }

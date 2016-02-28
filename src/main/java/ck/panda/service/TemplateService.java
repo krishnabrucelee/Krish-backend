@@ -98,4 +98,15 @@ public interface TemplateService extends CRUDService<Template> {
      * @throws Exception unhandled errors.
      */
     List<Template> findByTemplateCategory(OsCategory osCategory, String type) throws Exception;
+
+    /**
+     * To get list of template by Community and Featured Templates.
+     *
+     * @param pagingAndSorting page
+     * @param type template type
+     * @param featured template
+     * @param shared template
+     * @return type of the template
+     */
+    Page<Template> findAllByType(PagingAndSorting pagingAndSorting, String type, Boolean featured, Boolean shared);
 }
