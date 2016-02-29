@@ -1146,9 +1146,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     }
                 }
                 // 2.2 update vm entity by transient variable.
-                if (vmInstance.getTransKeypairName() != null) {
-                    vmInstance.setKeypairId(convertEntityService.getSSHKeyByNameAndDepartment(vmInstance.getTransKeypairName(), vmInstance.getDepartmentId()).getId());
-                }
+
                 vmInstance.setDomainId(convertEntityService.getDomainId(vmInstance.getTransDomainId()));
                 vmInstance.setZoneId(convertEntityService.getZoneId(vmInstance.getTransZoneId()));
                 vmInstance.setNetworkId(convertEntityService.getNetworkId(vmInstance.getTransNetworkId()));
@@ -1173,6 +1171,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 if (vmInstance.getHostId() != null) {
                     vmInstance.setPodId(convertEntityService
                             .getPodIdByHost(convertEntityService.getHostId(vmInstance.getTransHostId())));
+                }
+                if (vmInstance.getTransKeypairName() != null) {
+                    vmInstance.setKeypairId(convertEntityService.getSSHKeyByNameAndDepartment(vmInstance.getTransKeypairName(), vmInstance.getDepartmentId()).getId());
                 }
                 // 2.3 and the converted vm entity to list.
                 vmList.add(vmInstance);

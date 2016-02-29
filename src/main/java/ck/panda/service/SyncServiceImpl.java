@@ -467,6 +467,12 @@ public class SyncServiceImpl implements SyncService {
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Templates", e);
         }
+        try {
+            // 30. Sync SSHKey entity
+            this.syncSSHKey();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch SSH Key", e);
+        }
        /* try {
             // 19. Sync ResourceLimit entity
             this.syncResourceLimit();
@@ -547,12 +553,6 @@ public class SyncServiceImpl implements SyncService {
             this.syncLoadBalancerStickyPolicy();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch LoadBalancer", e);
-        }
-        try {
-            // 30. Sync SSHKey entity
-            this.syncSSHKey();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch SSH Key", e);
         }
         try {
             // 31. Sync for update role in user entity
