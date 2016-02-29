@@ -228,6 +228,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             break;
         case EventTypes.EVENT_NETWORK:
             if (!eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).contains("OFFERING")) {
+
                 LOGGER.debug("Network sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
                         + eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
                 if (eventObject.getString(CloudStackConstants.CS_EVENT_STATUS).equals("FAILED")) {
@@ -693,6 +694,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
             Network network = networkService.findByUUID(json.getString("id"));
             network.setSyncFlag(false);
+            network.setIsActive(false);
             Errors errors = new Errors(messageSource);
             networkService.softDelete(network);
             if (!convertEntityService.getDepartmentById(network.getDepartmentId()).getType().equals(AccountType.USER)) {
@@ -1652,6 +1654,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         if (eventObject.getEvent().contains("VOLUME.DELETE")) {
             Volume volume = volumeService.findByUUID(eventObject.getEntityuuid());
             volume.setIsSyncFlag(false);
+            volume.setIsActive(false);
             Errors errors = new Errors(messageSource);
             volumeService.softDelete(volume);
             //Resource count delete for volume.

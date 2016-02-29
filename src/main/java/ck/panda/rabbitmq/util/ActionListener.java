@@ -155,7 +155,7 @@ public class ActionListener implements MessageListener {
                 } else {
                     syncService.syncNetworkOffering();
                 }
-            } else if (eventName.contains(EventTypes.EVENT_NETWORK_CREATE)) {
+            } else if (eventName.contains(EventTypes.EVENT_NETWORK_CREATE) && eventName.contains(EventTypes.EVENT_NETWORK_DELETE)) {
                 LOGGER.debug("Network sync", eventMessage);
                 syncService.syncNetwork();
             }
@@ -219,9 +219,7 @@ public class ActionListener implements MessageListener {
             break;
         case EventTypes.EVENT_PROJECT:
 			LOGGER.debug("VNC sync", eventMessage);
-            if (eventName.contains(EventTypes.EVENT_PROJECT_UPDATE)) {
                 syncService.syncProject();
-            }
             break;
         case EventTypes.EVENT_VPC:
             LOGGER.debug("VPC sync", eventMessage);
