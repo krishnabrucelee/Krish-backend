@@ -427,10 +427,6 @@ public class VmInstance implements Serializable {
     @Transient
     private String transOwnerId;
 
-    /** Transient keypair name of the instance. */
-    @Transient
-    private String transKeypairName;
-
     /**
      * Get sync status.
      *
@@ -1923,24 +1919,6 @@ public class VmInstance implements Serializable {
 		this.transForcedStop = transForcedStop;
 	}
 
-	 /**
-     * Get transient keypair name.
-     *
-     * @return the transKeypairName
-     */
-    public String getTransKeypairName() {
-        return transKeypairName;
-    }
-
-    /**
-     * Set the transient Keypair name.
-     *
-     * @param transKeypairName to set
-     */
-    public void setTransKeypairName(String transKeypairName) {
-        this.transKeypairName = transKeypairName;
-    }
-
 	@Override
     public String toString() {
         return "VmInstance [Id=" + id + ", name=" + name + ", uuid=" + uuid + ", vncPassword=" + vncPassword
@@ -2004,7 +1982,6 @@ public class VmInstance implements Serializable {
             vmInstance
                     .setInstanceInternalName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_INSTANCE_NAME));
             vmInstance.setTransOwnerId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_USER_ID));
-            vmInstance.setTransKeypairName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_KEYPAIR));
         } catch (Exception e) {
             e.printStackTrace();
         }
