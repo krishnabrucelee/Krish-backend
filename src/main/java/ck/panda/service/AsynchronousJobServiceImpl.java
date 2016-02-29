@@ -229,17 +229,12 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         case EventTypes.EVENT_NETWORK:
             if (!eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).contains("OFFERING")) {
 
-
-            	System.out.println("==================================================");
-
-
-
-                /*LOGGER.debug("Network sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
+                LOGGER.debug("Network sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
                         + eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
                 if (eventObject.getString(CloudStackConstants.CS_EVENT_STATUS).equals("FAILED")) {
                     Network network = Network.convert(jobResult.getJSONObject("network"));
 
-                }*/
+                }
                 asyncNetwork(jobResult, eventObject);
             }
             break;
