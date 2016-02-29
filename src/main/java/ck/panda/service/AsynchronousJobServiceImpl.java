@@ -106,6 +106,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     @Autowired
     private EgressRuleService egressRuleService;
 
+    /** Hypervisor service reference. */
+    @Autowired
+    private HypervisorService hypervisorService;
+
     /**
      * NetworkOfferingService for listing network offers in cloudstack server.
      */
@@ -372,6 +376,11 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                         csVm.setPodId(convertEntityService
                                 .getPodIdByHost(convertEntityService.getHostId(csVm.getTransHostId())));
                     }
+                    if (csVm.getTransHypervisor() != null) {
+    					if (hypervisorService.findByName(csVm.getTransHypervisor()) != null) {
+    						csVm.setHypervisorId(hypervisorService.findByName(csVm.getTransHypervisor()).getId());
+    					}
+    				}
                     instance.setName(csVm.getName());
                     if (csVm.getCpuCore() != null) {
                         instance.setCpuCore(csVm.getCpuCore());
@@ -457,6 +466,11 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 vmInstance.setHostId(convertEntityService.getHostId(vmInstance.getTransHostId()));
                 vmInstance.setInstanceOwnerId(convertEntityService.getUserByName(vmInstance.getTransDisplayName(),
                         convertEntityService.getDomain(vmInstance.getTransDomainId())));
+                if (vmInstance.getTransHypervisor() != null) {
+					if (hypervisorService.findByName(vmInstance.getTransHypervisor()) != null) {
+						vmInstance.setHypervisorId(hypervisorService.findByName(vmInstance.getTransHypervisor()).getId());
+					}
+				}
                 vmInstance.setDepartmentId(
                         convertEntityService.getDepartmentByUsernameAndDomains(vmInstance.getTransDepartmentId(),
                                 convertEntityService.getDomain(vmInstance.getTransDomainId())));
