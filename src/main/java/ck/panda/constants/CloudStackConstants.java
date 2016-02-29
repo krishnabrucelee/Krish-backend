@@ -483,7 +483,7 @@ public class CloudStackConstants {
 
     /** Constant for method name. */
     public static final String CS_METHOD_NAME = "methodname";
-    
+
      /** Constant for table size. */
     public static final String CS_TABLE_SIZE = "tablesize";
 
@@ -550,7 +550,7 @@ public class CloudStackConstants {
 
     /** Constant for remove VPN public ip. */
     public static final String CS_PUBLIC_IP_ID = "publicipid";
-    
+
      /** Constant for cookie name. */
     public static final String CS_COOKIE_NAME = "cookie-name";
 
@@ -558,7 +558,7 @@ public class CloudStackConstants {
     public static final String CS_LENGTH = "length";
 
     /** Constant for expires. */
-    public static final String CS_EXPIRES = "expires";
+    public static final String CS_EXPIRE = "expire";
 
     /** Constant for mode. */
     public static final String CS_MODE = "mode";
@@ -583,6 +583,9 @@ public class CloudStackConstants {
 
     /** Constant for parameters. */
     public static final String CS_PARAMS = "params";
+
+    /** Constant for parameters. */
+    public static final String CS_COOKIE = "cookie-name";
 
 
    }

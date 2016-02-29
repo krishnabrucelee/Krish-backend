@@ -14,12 +14,11 @@ import ck.panda.domain.entity.LbStickinessPolicy;
 public interface LbStickinessPolicyRepository extends PagingAndSortingRepository<LbStickinessPolicy, Long> {
 
     /**
-     * Get the pod based on the uuid.
+     * Get the LbStickinessPolicy based on the uuid.
      *
-     * @param uuid of the zone
-     * @return zone
+     * @param uuid of the LbStickinessPolicy
+     * @return LbStickinessPolicy
      */
     @Query(value = "select lb from LbStickinessPolicy lb where lb.uuid = :uuid")
     LbStickinessPolicy findByUUID(@Param("uuid") String uuid);
-
 }

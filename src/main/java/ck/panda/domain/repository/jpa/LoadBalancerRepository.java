@@ -72,4 +72,14 @@ public interface LoadBalancerRepository extends PagingAndSortingRepository<LoadB
      */
     @Query(value = "select lb from LoadBalancerRule lb where lb.isActive =:isActive")
     List<LoadBalancerRule> findAllByIsActive(@Param("isActive") Boolean isActive);
+
+    /**
+     * List all load balancer by is LB policy id and Active status.
+     *
+     * @param isActive status of the load balancer.
+     * @param lbPolicyId of the load balancer.
+     * @return list of load balancer.
+     */
+    @Query(value = "select lb from LoadBalancerRule lb where lb.lbPolicyId =:lbPolicyId AND lb.isActive =:isActive")
+    LoadBalancerRule findByLbIdAndIsActive(@Param("lbPolicyId") Long lbPolicyId, @Param("isActive") Boolean isActive);
 }

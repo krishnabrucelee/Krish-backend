@@ -72,7 +72,7 @@ public class LbStickinessPolicyServiceImpl implements LbStickinessPolicyService 
     private static final String CS_LENGTH = "length";
 
     /** Constant for expires. */
-    private static final String CS_EXPIRES = "expires";
+    private static final String CS_EXPIRES = "expire";
 
     /** Constant for mode. */
     private static final String CS_MODE = "mode";
@@ -151,7 +151,7 @@ public class LbStickinessPolicyServiceImpl implements LbStickinessPolicyService 
 
     @Override
     public LbStickinessPolicy save(LbStickinessPolicy lbStickinessPolicy, String loadbalancer) throws Exception {
-    	lbStickinessPolicy.setIsActive(true);
+        lbStickinessPolicy.setIsActive(true);
          Errors errors = validator.rejectIfNullEntity("lbStickinessPolicy", lbStickinessPolicy);
          errors = validator.validateEntity(lbStickinessPolicy, errors);
          String createStickiness = cloudStackLoadBalancerService.createLBStickinessPolicy(loadbalancer, CloudStackConstants.JSON, addOptionalValues(lbStickinessPolicy));
@@ -163,17 +163,32 @@ public class LbStickinessPolicyServiceImpl implements LbStickinessPolicyService 
           }
           lbStickinessPolicy.setUuid((String) csloadBalancerResponseJSON.get("id"));
                   if (csloadBalancerResponseJSON.has(CloudStackConstants.CS_JOB_ID)) {
-                      Thread.sleep(1000);
                       String jobResponse = cloudStackLoadBalancerService.loadBalancerJobResult(csloadBalancerResponseJSON.getString(CloudStackConstants.CS_JOB_ID),CloudStackConstants.JSON);
                       JSONObject jobresult = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
 
-        }        return policyRepo.save(lbStickinessPolicy);
+        }
+        return policyRepo.save(lbStickinessPolicy);
 
     }
 
     @Override
     public LbStickinessPolicy update(LbStickinessPolicy lbStickinessPolicy) throws Exception {
-        return policyRepo.save(lbStickinessPolicy);
+
+        Errors errors = validator.rejectIfNullEntity("lbStickinessPolicy", lbStickinessPolicy);
+        LoadBalancerRule listresponse = loadBalancerService.findByLbId(lbStickinessPolicy.getId());
+        String createStickiness = cloudStackLoadBalancerService.createLBStickinessPolicy(listresponse.getUuid(), CloudStackConstants.JSON, addOptionalValues(lbStickinessPolicy));
+        JSONObject csloadBalancerResponseJSON = new JSONObject(createStickiness)
+                .getJSONObject(CS_CREATE_STICKY_POLICY);
+        if (csloadBalancerResponseJSON.has(CloudStackConstants.CS_ERROR_CODE)) {
+            errors = this.validateEvent(errors, csloadBalancerResponseJSON.getString(CloudStackConstants.CS_ERROR_TEXT));
+            throw new ApplicationException(errors);
+        }
+        lbStickinessPolicy.setUuid(csloadBalancerResponseJSON.getString("id"));
+
+        if (policyRepo.findByUUID(lbStickinessPolicy.getUuid()) == null) {
+            return policyRepo.save(lbStickinessPolicy);
+        }
+        return lbStickinessPolicy;
     }
 
     @Override
@@ -282,23 +297,23 @@ public class LbStickinessPolicyServiceImpl implements LbStickinessPolicyService 
                 CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_4 + CS_NAME, CS_MODE,loadBalancerMap);
                 CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_4 + CS_VALUE, lbStickinessPolicy.getStickyMode().toString(),loadBalancerMap);
             }
-            if (lbStickinessPolicy.getStickyRequestLearn() != null) {
+            if (lbStickinessPolicy.getStickyRequestLearn() != null && lbStickinessPolicy.getStickyRequestLearn()) {
                  CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_5 + CS_NAME, CS_REQUEST_LEARN,loadBalancerMap);
                  CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_5 + CS_VALUE, lbStickinessPolicy.getStickyRequestLearn().toString(),loadBalancerMap);
             }
-            if (lbStickinessPolicy.getStickyPrefix() != null) {
+            if (lbStickinessPolicy.getStickyPrefix() != null && lbStickinessPolicy.getStickyPrefix()) {
                  CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_6 + CS_NAME, CS_PREFIX,loadBalancerMap);
                  CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_6 + CS_VALUE, lbStickinessPolicy.getStickyPrefix().toString(),loadBalancerMap);
             }
-            if (lbStickinessPolicy.getStickyIndirect() != null) {
+            if (lbStickinessPolicy.getStickyIndirect() != null && lbStickinessPolicy.getStickyIndirect()) {
                  CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_7 + CS_NAME, CS_INDIRECT,loadBalancerMap);
                  CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_7 + CS_VALUE, lbStickinessPolicy.getStickyIndirect().toString(),loadBalancerMap);
             }
-            if (lbStickinessPolicy.getStickyNoCache() != null) {
+            if (lbStickinessPolicy.getStickyNoCache() != null && lbStickinessPolicy.getStickyNoCache()) {
                 CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_8 + CS_NAME, CS_NO_CACHE,loadBalancerMap);
                 CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_8 + CS_VALUE, lbStickinessPolicy.getStickyNoCache().toString(),loadBalancerMap);
             }
-            if (lbStickinessPolicy.getStickyPostOnly() != null) {
+            if (lbStickinessPolicy.getStickyPostOnly() != null && lbStickinessPolicy.getStickyPostOnly()) {
                 CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_9 + CS_NAME, CS_POST_ONLY,loadBalancerMap);
                 CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_9 + CS_VALUE, lbStickinessPolicy.getStickyPostOnly().toString(),loadBalancerMap);
             }
@@ -312,9 +327,10 @@ public class LbStickinessPolicyServiceImpl implements LbStickinessPolicyService 
 
     @Override
     public LbStickinessPolicy save(LbStickinessPolicy stickyPolicy) throws Exception {
+        stickyPolicy.setIsActive(true);
          if (!stickyPolicy.getSyncFlag()) {
              stickyPolicy = policyRepo.save(stickyPolicy);
-             if(stickyPolicy.getLbUuid() != null) {
+             if (stickyPolicy.getLbUuid() != null) {
                  this.updateLoadBalancer(stickyPolicy);
              }
         }

@@ -137,7 +137,7 @@ public class NicServiceImpl implements NicService {
                  }
               }
               return nic;
-          }else {
+          } else {
               nic = nicRepo.save(nic);
               if (nic.getVmIpAddress() != null) {
                   updateNicToVmIpaddress(nic);
@@ -343,13 +343,25 @@ public class NicServiceImpl implements NicService {
             // 2. Iterate the json list, convert the single json entity to nic
             for (int i = 0, size = nicListJSON.length(); i < size; i++) {
                  List<VmIpaddress> vmIpList = new ArrayList<VmIpaddress>();
-                 if(nicListJSON.getJSONObject(i).has("ipaddress")) {
+                 if (nicListJSON.getJSONObject(i).has("ipaddress")) {
                      VmIpaddress vms = new VmIpaddress();
                       vms.setGuestIpAddress(nicListJSON.getJSONObject(i).getString("ipaddress"));
                       vms.setIpType(IpType.primaryIpAddress);
                       vms.setUuid(nicListJSON.getJSONObject(i).getString("id"));
                       vms.setIsActive(true);
-                      vmIpList.add(vmIpService.save(vms));
+                      vms.setSyncFlag(false);
+                      if (vmIpService.findByUUID(vms.getUuid()) == null) {
+                          vmIpList.add(vmIpService.save(vms));
+                      } else {
+                        VmIpaddress vmObject = vmIpService.findByUUID(vms.getUuid());
+                          vmObject.setUuid(vms.getUuid());
+                          vmObject.setGuestIpAddress(vms.getGuestIpAddress());
+                          vmObject.setIpType(vms.getIpType());
+                          vmObject.setTransNicId(vms.getTransNicId());
+                          vmObject.setIsActive(true);
+                          vmObject.setSyncFlag(false);
+                          vmIpList.add(vmIpService.save(vmObject));
+                      }
                  }
                 // 2.1 Call convert by passing JSONObject to nic entity and Add
                 // the converted nic entity to list
@@ -366,8 +378,20 @@ public class NicServiceImpl implements NicService {
                             // 2.2  Call convert by passing JSONObject to Vmipaddress entity and Add
                             // the converted vm ipaddress entity to list
                             VmIpaddress vmIp = VmIpaddress.convert(json);
+                            if (vmIpService.findByUUID(vmIp.getUuid()) == null) {
                                 VmIpaddress persistVmIp = vmIpService.save(vmIp);
                                 vmIpList.add(persistVmIp);
+                            } else {
+                                VmIpaddress vmObject = vmIpService.findByUUID(vmIp.getUuid());
+                                vmObject.setUuid(vmIp.getUuid());
+                                vmObject.setGuestIpAddress(vmIp.getGuestIpAddress());
+                                vmObject.setIpType(vmIp.getIpType());
+                                vmObject.setTransNicId(vmIp.getTransNicId());
+                                vmObject.setIsActive(vmIp.getIsActive());
+                                vmObject.setSyncFlag(vmIp.getSyncFlag());
+                                vmIpService.update(vmObject);
+                            }
+
                         }
                 }
                 if (vmIpList.size() > 0) {

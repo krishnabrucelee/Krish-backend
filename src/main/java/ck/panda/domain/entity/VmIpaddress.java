@@ -16,8 +16,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.json.JSONObject;
 import ck.panda.constants.CloudStackConstants;
-import ck.panda.domain.entity.Network.Status;
-import ck.panda.domain.entity.VmIpaddress.IpType;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -30,7 +28,7 @@ import ck.panda.util.JsonUtil;
 public class VmIpaddress implements Serializable {
 
      /** Constant for nic uuid. */
-    public static final String CS_NIC_UUID = "nicuuid";
+    public static final String CS_NIC_UUID = "nicid";
 
     /** ID of the nic. */
     @Id
@@ -64,6 +62,7 @@ public class VmIpaddress implements Serializable {
     @Column(name = "is_Active")
     private Boolean isActive;
 
+    /** Types of Ip Adddress .*/
     @Column(name = "ip_type")
     @Enumerated(EnumType.STRING)
     private IpType ipType;
@@ -81,8 +80,10 @@ public class VmIpaddress implements Serializable {
     @Transient
     private Boolean syncFlag;
 
+    /** Types of Ip Adddress .*/
     public enum IpType {
-       /** Primary ip address. */
+
+    	/** Primary ip address. */
         primaryIpAddress,
 
         /** Secondary Ip address . */
