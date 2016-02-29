@@ -65,7 +65,7 @@ public class StorageOfferingCost implements Serializable {
     /**
      * Cost for 1 Gb per month usage.
      */
-    @Column(name = "cost_gb_per_month", columnDefinition = "bigint(20) default 0")
+    @Column(name = "cost_gb_per_month")
     private Double costGbPerMonth;
 
     /**
@@ -77,7 +77,7 @@ public class StorageOfferingCost implements Serializable {
     /**
      * Cost for 1 Iops per month usage.
      */
-    @Column(name = "cost_iops_per_month", columnDefinition = "bigint(20) default 0")
+    @Column(name = "cost_iops_per_month")
     private Double costIopsPerMonth;
 
     /** Status attribute to verify status of the Storage offering. */
