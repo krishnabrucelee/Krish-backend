@@ -342,15 +342,6 @@ public class VmInstance implements Serializable {
     @Column(name = "min_iops")
     private Long diskMinIops;
 
-    /** Instance ssh key. */
-    @OneToOne
-    @JoinColumn(name = "ssh_key_id", referencedColumnName = "id", updatable = false, insertable = false)
-    private SSHKey keypair;
-
-    /** Instance ssh key id. */
-    @Column(name = "ssh_key_id")
-    private Long keypairId;
-
     /** Version attribute to handle optimistic locking. */
     @Version
     @Column(name = "version")
@@ -1007,42 +998,6 @@ public class VmInstance implements Serializable {
      */
     public void setDiskMinIops(Long diskMinIops) {
         this.diskMinIops = diskMinIops;
-    }
-
-    /**
-     * Get the keypair of the instance.
-     *
-     * @return the keypair.
-     */
-    public SSHKey getKeypair() {
-        return keypair;
-    }
-
-    /**
-     * set the keypair of the instance.
-     *
-     * @param keypair to set.
-     */
-    public void setKeypair(SSHKey keypair) {
-        this.keypair = keypair;
-    }
-
-    /**
-     * Get the keypairId of the instance.
-     *
-     * @return the keypairId.
-     */
-    public Long getKeypairId() {
-        return keypairId;
-    }
-
-    /**
-     * set the keypairId of the instance.
-     *
-     * @param keypairId to set.
-     */
-    public void setKeypairId(Long keypairId) {
-        this.keypairId = keypairId;
     }
 
     /**

@@ -288,18 +288,4 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     public VmInstance findByIdWithVncPassword(@PathVariable(PATH_ID) Long id) throws Exception {
         return virtualmachineservice.findByIdWithVncPassword(id);
     }
-
-    /**
-     * Reset SSH Key in created instance.
-     *
-     * @param vminstance object.
-     * @return instance
-     * @throws Exception if error occurs.
-     */
-    @RequestMapping(value = "/reset", method = RequestMethod.PUT, produces = { MediaType.APPLICATION_JSON_VALUE })
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    protected VmInstance resetSSHKey(@RequestBody VmInstance vminstance) throws Exception {
-        return virtualmachineservice.resetSSHKey(vminstance);
-    }
 }
