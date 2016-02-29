@@ -380,4 +380,24 @@ public class CloudStackInstanceService {
         arguments.add(new NameValuePair("response", "json"));
         return server.request(arguments);
     }
+
+    /**
+     * Reset the existing SSH Key for a virtual machine. The virtual machine must be in a "Stopped" state for this
+     * command to take effect.
+     *
+     * @param virtualMachineId The ID of the virtual machine
+     * @param keypair the keypair to apply to the virtual machine
+     * @param response type.
+     * @param optional optional arguments.
+     * @return json response.
+     * @throws Exception unhandled exceptions.
+     */
+    public String resetSSHKeyForVirtualMachine(String virtualMachineId, String response, String keypair,
+            HashMap<String, String> optional) throws Exception {
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("resetSSHKeyForVirtualMachine", optional);
+        arguments.add(new NameValuePair("id", virtualMachineId));
+        arguments.add(new NameValuePair("response", response));
+        arguments.add(new NameValuePair("keypair", keypair));
+        return server.request(arguments);
+    }
 }

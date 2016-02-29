@@ -227,6 +227,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             break;
         case EventTypes.EVENT_NETWORK:
             if (!eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).contains("OFFERING")) {
+
                 LOGGER.debug("Network sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
                         + eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
                 if (eventObject.getString(CloudStackConstants.CS_EVENT_STATUS).equals("FAILED")) {
@@ -366,6 +367,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     }
                     csVm.setTemplateId(convertEntityService.getTemplateId(csVm.getTransTemplateId()));
                     csVm.setComputeOfferingId(convertEntityService.getComputeOfferId(csVm.getTransComputeOfferingId()));
+                    if (csVm.getTransKeypairName() != null) {
+                    	instance.setKeypairId(convertEntityService.getSSHKeyByNameAndDepartment(csVm.getTransKeypairName(), csVm.getDepartmentId()).getId());
+                    }
                     if (csVm.getHostId() != null) {
                         csVm.setPodId(convertEntityService
                                 .getPodIdByHost(convertEntityService.getHostId(csVm.getTransHostId())));
@@ -464,6 +468,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 if (vmInstance.getHostId() != null) {
                     vmInstance.setPodId(convertEntityService
                             .getPodIdByHost(convertEntityService.getHostId(vmInstance.getTransHostId())));
+                }
+                if (vmInstance.getTransKeypairName() != null) {
+                    vmInstance.setKeypairId(convertEntityService.getSSHKeyByNameAndDepartment(vmInstance.getTransKeypairName(), vmInstance.getDepartmentId()).getId());
                 }
 
                 vmIn = virtualMachineService.update(vmInstance);
@@ -686,6 +693,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
             Network network = networkService.findByUUID(json.getString("id"));
             network.setSyncFlag(false);
+            network.setIsActive(false);
             Errors errors = new Errors(messageSource);
             networkService.softDelete(network);
             if (!convertEntityService.getDepartmentById(network.getDepartmentId()).getType().equals(AccountType.USER)) {
@@ -1672,6 +1680,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         if (eventObject.getEvent().contains("VOLUME.DELETE")) {
             Volume volume = volumeService.findByUUID(eventObject.getEntityuuid());
             volume.setIsSyncFlag(false);
+            volume.setIsActive(false);
             Errors errors = new Errors(messageSource);
             volumeService.softDelete(volume);
             //Resource count delete for volume.
