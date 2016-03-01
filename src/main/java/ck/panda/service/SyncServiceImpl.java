@@ -473,12 +473,12 @@ public class SyncServiceImpl implements SyncService {
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch SSH Key", e);
         }
-       /* try {
+        try {
             // 19. Sync ResourceLimit entity
             this.syncResourceLimit();
         } catch (Exception e) {
             LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
-        }*/
+        }
         try {
             // 20. Sync Instance entity
             this.syncInstances();
