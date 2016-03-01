@@ -123,7 +123,7 @@ public class ActionListener implements MessageListener {
         case EventTypes.EVENT_DOMAIN:
             LOGGER.debug("Domain sync", eventMessage);
             syncService.syncDomain();
-            if(eventName.equals(EventTypes.EVENT_DOMAIN_UPDATE)) {
+            if(eventName.equals(EventTypes.EVENT_DOMAIN_CREATE) || eventName.equals(EventTypes.EVENT_DOMAIN_UPDATE)) {
                 ObjectMapper mapper = new ObjectMapper();
                 eventResponse = mapper.readValue(eventMessage, ResponseEvent.class);
                 syncService.syncResourceLimitActionEvent(eventResponse);
@@ -218,8 +218,13 @@ public class ActionListener implements MessageListener {
             LOGGER.debug("VNC sync", eventMessage);
             break;
         case EventTypes.EVENT_PROJECT:
-			LOGGER.debug("VNC sync", eventMessage);
+			LOGGER.debug("Project", eventMessage);
                 syncService.syncProject();
+                if(eventName.equals(EventTypes.EVENT_PROJECT_CREATE)) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    eventResponse = mapper.readValue(eventMessage, ResponseEvent.class);
+                    syncService.syncResourceLimitActionEventProject(eventResponse);
+                }
             break;
         case EventTypes.EVENT_VPC:
             LOGGER.debug("VPC sync", eventMessage);

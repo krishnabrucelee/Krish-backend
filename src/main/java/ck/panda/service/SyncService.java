@@ -292,4 +292,13 @@ public interface SyncService {
      * @throws Exception unhandled errors.
      */
     void syncVpnUser() throws ApplicationException, Exception;
+
+    /**
+     * Sync with CloudStack server ResourceLimit Action event Project.
+     *
+     * @param eventResponse for resource limit.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
+     */
+	void syncResourceLimitActionEventProject(ResponseEvent eventResponse) throws ApplicationException, Exception;
 }

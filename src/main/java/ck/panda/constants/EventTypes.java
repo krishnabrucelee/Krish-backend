@@ -287,7 +287,7 @@ public class EventTypes {
 
     /** Static event nat. */
     public static final String EVENT_STATIC_NAT = "STATICNAT.";
-    
+
     /** VPN events. */
     public static final String EVENT_VPN = "VPN.";
 
@@ -302,5 +302,11 @@ public class EventTypes {
 
     /** VPN Remote Access User Remove Events. */
     public static final String EVENT_VPN_USER_REMOVE = "VPN.USER.REMOVE";
+
+    /** Domain event create.     */
+	public static final Object EVENT_DOMAIN_CREATE = "DOMAIN.CREATE";
+
+	/** Project event create.     */
+	public static final Object EVENT_PROJECT_CREATE = "PROJECT.CREATE";
 
 }
