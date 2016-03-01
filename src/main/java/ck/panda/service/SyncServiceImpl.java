@@ -2544,4 +2544,11 @@ public class SyncServiceImpl implements SyncService {
         Domain domain = domainService.findbyUUID(eventObject.getEntityuuid());
         syncResourceLimitDomain(domain);
     }
+
+    @Override
+    public void syncResourceLimitActionEventProject(ResponseEvent eventObject) throws ApplicationException, Exception {
+        Project project = projectService.findByUuid(eventObject.getEntityuuid());
+        syncResourceLimitProject(project);
+    }
+
 }
