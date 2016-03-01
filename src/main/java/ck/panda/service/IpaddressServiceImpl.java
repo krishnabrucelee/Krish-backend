@@ -460,7 +460,7 @@ public class IpaddressServiceImpl implements IpaddressService {
         try {
             configServer.setUserServer();
             HashMap<String, String> optional = new HashMap<String, String>();
-            optional.put(CloudStackConstants.CS_DOMAIN_ID, convertEntityService.getDomainById(ipAddress.getDomainId()).getUuid());
+            optional.put(CloudStackConstants.CS_DOMAIN_ID, ipAddress.getNetwork().getDomain().getUuid());
             optional.put(CloudStackConstants.CS_ACCOUNT, ipAddress.getNetwork().getDepartment().getUserName());
 
             String createRemoteAccess = csVPNService.createRemoteAccessVpn(ipAddress.getUuid(), optional, CloudStackConstants.JSON);
