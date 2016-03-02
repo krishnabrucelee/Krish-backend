@@ -42,6 +42,9 @@ public class CloudStackConstants {
     /** Constant for CS role response. */
     public static final String CS_PROJECT_ROLE = "role";
 
+    /** Constant for CS template name. */
+    public static final String CS_TEMPLATE_NAME = "templatename";
+
     /** Constant for project  add account. */
     public static final String CS_PROJECT_ADD_ACCOUNT = "addAccountToProject";
 
@@ -483,7 +486,7 @@ public class CloudStackConstants {
 
     /** Constant for method name. */
     public static final String CS_METHOD_NAME = "methodname";
-    
+
      /** Constant for table size. */
     public static final String CS_TABLE_SIZE = "tablesize";
 
@@ -508,7 +511,7 @@ public class CloudStackConstants {
 
     /** Constant for reset ssh key pair response. */
     public static final String CS_RESET_KEYPAIR_RESPONSE = "resetSSHKeyforvirtualmachineresponse";
-    
+
     /** Constant for static NAT IP addresses. */
     public static final String CS_IS_STATIC_NAT = "isstaticnat";
 
@@ -557,7 +560,7 @@ public class CloudStackConstants {
 
     /** Constant for remove VPN public ip. */
     public static final String CS_PUBLIC_IP_ID = "publicipid";
-    
+
      /** Constant for cookie name. */
     public static final String CS_COOKIE_NAME = "cookie-name";
 

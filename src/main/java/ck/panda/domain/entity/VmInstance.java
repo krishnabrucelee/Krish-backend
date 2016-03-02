@@ -142,6 +142,14 @@ public class VmInstance implements Serializable {
     @Column(name = "template_id")
     private Long templateId;
 
+    /** Instance template os type. */
+    @Column(name = "template_ostype")
+    private String osType;
+
+    /** Instance template name. */
+    @Column(name = "template_name")
+    private String templateName;
+
     /** Instance domain id. */
     @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
@@ -1203,6 +1211,36 @@ public class VmInstance implements Serializable {
         this.computeOffering = computeOffering;
     }
 
+	/**
+	 * @return the osType
+	 */
+	public String getOsType() {
+		return osType;
+	}
+
+	/**
+	 * @param osType
+	 *            the osType to set
+	 */
+	public void setOsType(String osType) {
+		this.osType = osType;
+	}
+
+
+    /**
+     * @return the templateName
+     */
+    public String getTemplateName() {
+        return templateName;
+    }
+
+    /**
+     * @param templateName the templateName to set
+     */
+    public void setTemplateName(String templateName) {
+        this.templateName = templateName;
+    }
+
     /**
      * Get the application list.
      *
@@ -1982,6 +2020,7 @@ public class VmInstance implements Serializable {
             vmInstance
                     .setInstanceInternalName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_INSTANCE_NAME));
             vmInstance.setTransOwnerId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_USER_ID));
+            vmInstance.setTemplateName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_TEMPLATE_NAME));
         } catch (Exception e) {
             e.printStackTrace();
         }

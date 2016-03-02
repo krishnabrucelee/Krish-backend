@@ -146,6 +146,15 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      */
     Page<VmInstance> findAllByUser(PagingAndSorting pagingAndSorting, Long userId) throws Exception;
 
+	/**
+	 * To get list of instance by status.
+	 *
+	 * @param status status.
+	 * @return vm list.
+	 * @throws Exception unhandled errors.
+	 */
+	Page<VmInstance> findAllBySort(PagingAndSorting pagingAndSorting, Status status) throws Exception;
+
     /**
      * Find list of vm Instances without pagination.
      *

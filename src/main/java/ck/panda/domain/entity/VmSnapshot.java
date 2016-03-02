@@ -135,11 +135,11 @@ public class VmSnapshot implements Serializable {
     }
 
     /** Check snapshot available or not. */
-    @Column(name = "is_removed")
+    @Column(name = "is_removed", columnDefinition = "tinyint default 0")
     private Boolean isRemoved;
 
     /** Check snapshot is revert as current. */
-    @Column(name = "is_current")
+    @Column(name = "is_current", columnDefinition = "tinyint default 0")
     private Boolean isCurrent;
 
     /** Version attribute to handle optimistic locking. */

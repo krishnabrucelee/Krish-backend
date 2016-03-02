@@ -7,6 +7,11 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import ck.panda.constants.CloudStackConstants;
+import ck.panda.constants.EventTypes;
 import ck.panda.service.AsynchronousJobService;
 import ck.panda.service.SyncService;
 import ck.panda.util.CloudStackServer;
@@ -84,6 +89,15 @@ public class AsynchronousJobListener implements MessageListener {
                 authenticatedExternalWebService.setExternalWebService(externalWebService);
                 SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);
                 asyncService.syncResourceStatus(eventObject);
+            } else if (eventObject.getString("status").equalsIgnoreCase("FAILED") ||
+            		eventObject.getString("status").equalsIgnoreCase("IN_PROGRESS")) {
+            	switch (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)) {
+                case EventTypes.EVENT_VM_SNAPSHOT_CREATE:
+                    syncService.syncVmSnapshots();
+                    break;
+                default:
+                    LOGGER.debug("No async required");
+                }
             }
         }
     }

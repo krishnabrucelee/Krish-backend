@@ -194,9 +194,22 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         if (vmInstance.getStorageOfferingId() != null) {
                             this.customStorageForInstance(vmInstance, optionalMap);
                         }
-                        if (vmInstance.getComputeOfferingId() != null) {
-                            this.customComputeForInstance(vmInstance, optionalMap);
-                        }
+						if (vmInstance.getComputeOfferingId() != null) {
+							this.customComputeForInstance(vmInstance, optionalMap);
+							if (!convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId())
+									.getCustomized()) {
+								vmInstance.setMemory(convertEntityService
+										.getComputeOfferById(vmInstance.getComputeOfferingId()).getMemory());
+								vmInstance.setCpuCore(convertEntityService
+										.getComputeOfferById(vmInstance.getComputeOfferingId()).getNumberOfCores());
+								vmInstance.setCpuSpeed(convertEntityService
+										.getComputeOfferById(vmInstance.getComputeOfferingId()).getClockSpeed());
+							}
+						}
+						vmInstance.setOsType(
+								convertEntityService.getTemplateById(vmInstance.getTemplateId()).getDisplayText());
+						vmInstance.setTemplateName(
+								convertEntityService.getTemplateById(vmInstance.getTemplateId()).getName());
                         config.setUserServer();
                         // 5. Get response from CS for new deploy vm API call.
                         String csResponse = cloudStackInstanceService.deployVirtualMachine(
@@ -628,7 +641,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     @Override
     public VmInstance find(Long id) throws Exception {
-        return virtualmachinerepository.findOne(id);
+        return virtualmachinerepository.findVMByID(id);
     }
 
     @Override
@@ -1169,11 +1182,19 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     vmInstance.setPodId(convertEntityService
                             .getPodIdByHost(convertEntityService.getHostId(vmInstance.getTransHostId())));
                 }
+                if(vmInstance.getTemplateId() != null){
+                    vmInstance.setOsType(convertEntityService.getTemplateById(vmInstance.getTemplateId()).getDisplayText());
+                }
                 // 2.3 and the converted vm entity to list.
                 vmList.add(vmInstance);
             }
         }
         return vmList;
+    }
+
+    @Override
+    public Page<VmInstance> findAllBySort(PagingAndSorting pagingAndSorting, Status status) throws Exception {
+        return virtualmachinerepository.findAllByStatus(pagingAndSorting.toPageRequest(), status);
     }
 
     @Override

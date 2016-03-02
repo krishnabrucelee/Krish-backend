@@ -93,7 +93,7 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, VmInstance.class);
-        Page<VmInstance> pageResponse = virtualmachineservice.findAll(page);
+        Page<VmInstance> pageResponse = virtualmachineservice.findAllBySort(page, Status.EXPUNGING);;
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }

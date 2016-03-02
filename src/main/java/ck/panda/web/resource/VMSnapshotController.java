@@ -18,7 +18,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
+import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.service.VmSnapshotService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -109,4 +112,5 @@ public class VMSnapshotController extends CRUDController<VmSnapshot> implements 
             throws Exception {
         return snapshotService.vmSnapshotEventHandle(vm, event);
     }
+
 }
