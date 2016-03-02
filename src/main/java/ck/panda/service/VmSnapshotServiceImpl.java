@@ -93,8 +93,11 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                 String csResponse = csSnapshotService.createVMSnapshot(vmInstance.getUuid(), optional);
                 JSONObject cssnapshot = new JSONObject(csResponse).getJSONObject("createvmsnapshotresponse");
                 if (cssnapshot.has("errorcode")) {
-                    errors = this.validateEvent(errors, cssnapshot.getString("errortext"));
-                    throw new ApplicationException(errors);
+                	if (cssnapshot.has("errortext")) {
+                        errors = this.validateEvent(errors, cssnapshot.getString("errortext"));
+                   } else {
+                        errors = this.validateEvent(errors, "Something went wrong");
+                    }
                 } else {
                     vmSnapshot.setDomainId(vmInstance.getDomainId());
                     vmSnapshot.setZoneId(vmInstance.getZoneId());
