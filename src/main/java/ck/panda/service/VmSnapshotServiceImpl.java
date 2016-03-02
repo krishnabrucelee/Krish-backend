@@ -13,6 +13,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.CloudStackConfiguration;
+import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.VmSnapshot.Status;
@@ -100,19 +101,23 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                     vmSnapshot.setOwnerId(vmInstance.getInstanceOwnerId());
                     vmSnapshot.setIsRemoved(false);
                     config.setUserServer();
+                    Thread.sleep(5000);
                     String snapshotResponse = csSnapshotService.vmSnapshotJobResult(cssnapshot.getString("jobid"));
                     JSONObject snapshot = new JSONObject(snapshotResponse).getJSONObject("queryasyncjobresultresponse");
                     if (snapshot.getString("jobstatus").equals("2")) {
                         vmSnapshot.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
                     } else if (snapshot.getString("jobstatus").equals("0")) {
+                    	vmSnapshot.setIsCurrent(true);
                         vmSnapshot.setStatus(Status.valueOf(EventTypes.EVENT_CREATE));
                     } else {
+                    	vmSnapshot.setIsCurrent(true);
                         vmSnapshot.setStatus(Status.valueOf(EventTypes.EVENT_READY));
+                        return vmSnapshotRepository.save(vmSnapshot);
                     }
                 }
             }
 
-            return vmSnapshotRepository.save(vmSnapshot);
+            return vmSnapshot;
         } else {
             return vmSnapshotRepository.save(vmSnapshot);
         }
@@ -131,7 +136,9 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
 
     @Override
     public void delete(VmSnapshot vmSnapshot) throws Exception {
-        vmSnapshotRepository.delete(vmSnapshot);
+    	vmSnapshot.setIsRemoved(true);
+    	vmSnapshot.setStatus(Status.Expunging);
+        vmSnapshotRepository.save(vmSnapshot);
     }
 
     @Override
@@ -150,7 +157,7 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
 
     @Override
     public Page<VmSnapshot> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return vmSnapshotRepository.findAllByActive(pagingAndSorting.toPageRequest(), false);
+        return vmSnapshotRepository.findAllByActiveAndExpunging(pagingAndSorting.toPageRequest(), false, Status.Expunging);
     }
 
     @Override
@@ -193,6 +200,7 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                 config.setUserServer();
                 String snapshotResponse = csSnapshotService.deleteVMSnapshot(vmSnapshot.getUuid());
                 JSONObject snapshots = new JSONObject(snapshotResponse).getJSONObject("deletevmsnapshotresponse");
+                Thread.sleep(3000);
                 if (snapshots.has("jobid")) {
                     config.setUserServer();
                     String snapshot = csSnapshotService.vmSnapshotJobResult(snapshots.getString("jobid"));
@@ -200,6 +208,7 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                     if (jobresult.getString("jobstatus").equals("2")) {
                         throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
+                    	vmSnapshot.setStatus(Status.Expunging);
                         vmSnapshot.setIsRemoved(true);
                     }
                 }

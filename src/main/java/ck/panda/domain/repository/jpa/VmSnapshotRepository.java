@@ -8,6 +8,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ck.panda.domain.entity.VmSnapshot;
+import ck.panda.domain.entity.VmSnapshot.Status;
 
 /**
  * Jpa Repository for VmSnapshot entity.
@@ -34,13 +35,14 @@ public interface VmSnapshotRepository extends PagingAndSortingRepository<VmSnaps
     List<VmSnapshot> findByVmInstance(@Param("vmId") Long vmId, @Param("isRemoved") Boolean isRemoved);
 
     /**
-     * Find all vm snapshot by active.
+     * Find all vm snapshot without expunging status by active.
      *
      * @param pageable paging and sorting.
+     * @param status of the snapshot
      * @param isRemoved check whether removed or not.
      * @return Vm snapshot.
      */
-    @Query(value = "select snapshot from VmSnapshot snapshot where snapshot.isRemoved IS :isRemoved )")
-    Page<VmSnapshot> findAllByActive(Pageable pageable, @Param("isRemoved") Boolean isRemoved);
+    @Query(value = "select snapshot from VmSnapshot snapshot where snapshot.isRemoved IS :isRemoved AND snapshot.status <>:status)")
+    Page<VmSnapshot> findAllByActiveAndExpunging(Pageable pageable, @Param("isRemoved") Boolean isRemoved, @Param("status") Status status);
 
 }

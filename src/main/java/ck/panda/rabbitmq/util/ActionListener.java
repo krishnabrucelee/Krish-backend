@@ -204,7 +204,7 @@ public class ActionListener implements MessageListener {
             break;
         case EventTypes.EVENT_VM_SNAPSHOT:
             LOGGER.debug("VM snapshot sync", eventMessage);
-            syncService.syncVmSnapshots();
+            //syncService.syncVmSnapshots();
             break;
         case EventTypes.EVENT_VM:
             LOGGER.debug("VM update sync", eventMessage);

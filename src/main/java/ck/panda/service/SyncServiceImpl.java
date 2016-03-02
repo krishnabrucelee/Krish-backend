@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
+
+import ck.panda.constants.EventTypes;
 import ck.panda.constants.PermissionUtil;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Cluster;
@@ -1307,6 +1309,10 @@ public class SyncServiceImpl implements SyncService {
                 if (csVm.getInstanceOwnerId() != null) {
                     instance.setInstanceOwnerId(csVm.getInstanceOwnerId());
                 }
+                if(instance.getTemplateId() != null) {
+                    instance.setOsType(convertEntityService.getTemplateById(instance.getTemplateId()).getDisplayText());
+                }
+                instance.setTemplateName(csVm.getTemplateName());
                 LOGGER.debug("sync VM for ASYNC");
                 // VNC password set.
                 if (csVm.getPassword() != null) {
@@ -1653,7 +1659,19 @@ public class SyncServiceImpl implements SyncService {
             if (csSnapshotMap.containsKey(snapshot.getUuid())) {
                 VmSnapshot snaps = csSnapshotMap.get(snapshot.getUuid());
 
-                snapshot.setName(snaps.getName());
+                List<VmSnapshot> vmSnapshotList = vmsnapshotService.findByVmInstance(snaps.getVmId(), false);
+                for (VmSnapshot vmSnap : vmSnapshotList) {
+                    if (vmSnap.getIsCurrent() && snaps.getStatus() == ck.panda.domain.entity.VmSnapshot.Status.Ready) {
+                        vmSnap.setIsCurrent(false);
+                        vmSnap.setSyncFlag(false);
+                        vmsnapshotService.save(vmSnap);
+                    }
+                }
+                snapshot.setStatus(snaps.getStatus());
+                if (snaps.getStatus() == ck.panda.domain.entity.VmSnapshot.Status.Ready) {
+                    snapshot.setIsCurrent(true);
+                }
+                snapshot.setSyncFlag(false);
 
                 // 3.2 If found, update the vm snapshot object in app db
                 vmsnapshotService.update(snapshot);
@@ -1662,6 +1680,7 @@ public class SyncServiceImpl implements SyncService {
                 // vm snapshot which is not added in the app
                 csSnapshotMap.remove(snapshot.getUuid());
             } else {
+            	snapshot.setSyncFlag(false);
                 vmsnapshotService.delete(snapshot);
                 // 3.2 If not found, delete it from app db
                 // TODO clarify the business requirement, since it has impact in

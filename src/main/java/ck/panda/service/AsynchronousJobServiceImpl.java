@@ -446,6 +446,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     if (csVm.getInstanceOwnerId() != null) {
                         instance.setInstanceOwnerId(csVm.getInstanceOwnerId());
                     }
+                    if(instance.getTemplateId() != null) {
+                        instance.setOsType(convertEntityService.getTemplateById(instance.getTemplateId()).getDisplayText());
+                    }
+                    instance.setTemplateName(csVm.getTemplateName());
                     LOGGER.debug("sync VM for ASYNC");
                     // VNC password set.
                     if (csVm.getPassword() != null) {
@@ -481,6 +485,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     vmInstance.setPodId(convertEntityService
                             .getPodIdByHost(convertEntityService.getHostId(vmInstance.getTransHostId())));
                 }
+                if(vmInstance.getTemplateId() != null) {
+                    vmInstance.setOsType(convertEntityService.getTemplateById(vmInstance.getTemplateId()).getDisplayText());
+                }
+                vmInstance.setTemplateName(vmInstance.getTemplateName());
 
                 vmIn = virtualMachineService.update(vmInstance);
             }
@@ -1366,20 +1374,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
              vmsnapshot.setIsRemoved(true);
              vmsnapshot.setSyncFlag(false);
              vmSnapshotService.save(vmsnapshot);
-
-             List<VmSnapshot> vmSnapshotList = vmSnapshotService.findByVmInstance(vmsnapshot.getVmId(), false);
-             for (int i = 0; i < vmSnapshotList.size(); i++) {
-                 int j = i + 1;
-                 if (vmSnapshotList.size() == j) {
-                     vmSnapshotList.get(i).setIsCurrent(true);
-                     vmSnapshotList.get(i).setSyncFlag(false);
-                     vmSnapshotService.save(vmSnapshotList.get(i));
-                 } else if (vmSnapshotList.get(i).getIsCurrent()) {
-                     vmSnapshotList.get(i).setIsCurrent(false);
-                     vmSnapshotList.get(i).setSyncFlag(false);
-                     vmSnapshotService.save(vmSnapshotList.get(i));
-                 }
-             }
          }
     }
 
