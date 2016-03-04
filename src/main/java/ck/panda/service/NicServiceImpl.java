@@ -137,7 +137,7 @@ public class NicServiceImpl implements NicService {
                  }
               }
               return nic;
-          }else {
+          } else {
               nic = nicRepo.save(nic);
               if (nic.getVmIpAddress() != null) {
                   updateNicToVmIpaddress(nic);

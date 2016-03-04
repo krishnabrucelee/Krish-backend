@@ -27,6 +27,9 @@ public class CloudStackConstants {
     /** Constant for finger print. */
     public static final String CS_FINGER_PRINT = "fingerprint";
 
+    /** Constant for finger print. */
+    public static final String CS_TEMPLATE_NAME = "templatename";
+
     /** Constant for created date and time. */
     public static final String CS_CREATED = "created";
 
@@ -568,7 +571,7 @@ public class CloudStackConstants {
     public static final String CS_LENGTH = "length";
 
     /** Constant for expires. */
-    public static final String CS_EXPIRES = "expires";
+    public static final String CS_EXPIRE = "expire";
 
     /** Constant for mode. */
     public static final String CS_MODE = "mode";
@@ -593,6 +596,9 @@ public class CloudStackConstants {
 
     /** Constant for parameters. */
     public static final String CS_PARAMS = "params";
+
+    /** Constant for parameters. */
+    public static final String CS_COOKIE = "cookie-name";
 
 
    }

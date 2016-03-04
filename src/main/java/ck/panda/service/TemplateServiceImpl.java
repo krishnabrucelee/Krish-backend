@@ -680,7 +680,7 @@ public class TemplateServiceImpl implements TemplateService {
      */
     public List<TemplateCost> saveTemplateCost(Template template) throws Exception {
         List<TemplateCost> templateCostList = new ArrayList<TemplateCost>();
-        Integer tempCost = template.getTemplateCost().get(0).getCost();
+        Double tempCost = template.getTemplateCost().get(0).getCost();
         TemplateCost templatecost = new TemplateCost();
         templatecost.setCost(tempCost);
         templateCostList.add(templatecost);
@@ -696,7 +696,7 @@ public class TemplateServiceImpl implements TemplateService {
      */
     public List<TemplateCost> updateTemplateCost(Template template) throws Exception {
         List<TemplateCost> templateCostList = new ArrayList<TemplateCost>();
-        Integer tempCost = template.getTemplateCost().get(0).getCost();
+        Double tempCost = template.getTemplateCost().get(0).getCost();
         Template persistTemplate = find(template.getId());
         TemplateCost templatecost = templateCostService.findByTemplateCost(template.getId(), tempCost);
         if (templatecost == null) {

@@ -32,7 +32,7 @@ public interface LbStickinessPolicyService extends CRUDService<LbStickinessPolic
     /**
      * Soft delete for stickiness policy .
      *
-     * @param stickiness policy  object
+     * @param lbStickinessPolicy object
      * @return stickiness policy.
      * @throws Exception unhandled errors.
      */

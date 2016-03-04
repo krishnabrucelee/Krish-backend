@@ -97,4 +97,9 @@ public class VmIpaddressServiceImpl implements VmIpaddressService {
         }
         return vmIp;
     }
+
+	@Override
+	public VmIpaddress findByIPAddress(String guestIpAddress, Long vmInstanceId) throws Exception {
+		return ipaddressRepo.findAllByVmIpaddressAndvmInstanceId(guestIpAddress, vmInstanceId);
+	}
 }
