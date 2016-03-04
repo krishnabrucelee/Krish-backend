@@ -95,6 +95,9 @@ public class LbStickinessPolicyServiceImpl implements LbStickinessPolicyService 
     /** Constant for hold time. */
     private static final String CS_HOLD_TIME = "holdtime";
 
+    /** Constant for hold time. */
+    private static final String CS_DOMAIN = "domain";
+
     /** Constant for algorithm. */
     private static final String CS_ALGORITHM = "algorithm";
 
@@ -137,6 +140,9 @@ public class LbStickinessPolicyServiceImpl implements LbStickinessPolicyService 
     /** Constant for param of array value ten. */
     private static final String CS_PARAM_10 = "param[10]";
 
+    /** Constant for param of array value eleven. */
+    private static final String CS_PARAM_11 = "param[11]";
+
     /** Constant for create lb stickiness policy. */
     private static final String CS_CREATE_STICKY_POLICY = "createLBStickinessPolicy";
 
@@ -168,12 +174,11 @@ public class LbStickinessPolicyServiceImpl implements LbStickinessPolicyService 
 
         }
         return policyRepo.save(lbStickinessPolicy);
-
     }
 
     @Override
     public LbStickinessPolicy update(LbStickinessPolicy lbStickinessPolicy) throws Exception {
-
+        if(lbStickinessPolicy.getSyncFlag()) {
         Errors errors = validator.rejectIfNullEntity("lbStickinessPolicy", lbStickinessPolicy);
         LoadBalancerRule listresponse = loadBalancerService.findByLbId(lbStickinessPolicy.getId());
         String createStickiness = cloudStackLoadBalancerService.createLBStickinessPolicy(listresponse.getUuid(), CloudStackConstants.JSON, addOptionalValues(lbStickinessPolicy));
@@ -189,6 +194,9 @@ public class LbStickinessPolicyServiceImpl implements LbStickinessPolicyService 
             return policyRepo.save(lbStickinessPolicy);
         }
         return lbStickinessPolicy;
+
+        }
+        return policyRepo.save(lbStickinessPolicy);
     }
 
     @Override
@@ -320,6 +328,10 @@ public class LbStickinessPolicyServiceImpl implements LbStickinessPolicyService 
             if (lbStickinessPolicy.getStickyHoldTime() != null) {
                 CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_10 + CS_NAME, CS_HOLD_TIME,loadBalancerMap);
                 CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_10 + CS_VALUE, lbStickinessPolicy.getStickyHoldTime().toString(),loadBalancerMap);
+            }
+            if (lbStickinessPolicy.getStickyCompany() != null) {
+                CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_11 + CS_NAME, CS_DOMAIN,loadBalancerMap);
+                CloudStackOptionalUtil.updateOptionalStringValue(CS_PARAM_11 + CS_VALUE, lbStickinessPolicy.getStickyCompany().toString(),loadBalancerMap);
             }
 
             return loadBalancerMap;

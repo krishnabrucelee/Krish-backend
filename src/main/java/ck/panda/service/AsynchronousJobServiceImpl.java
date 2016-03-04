@@ -26,6 +26,7 @@ import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.LbStickinessPolicy;
 import ck.panda.domain.entity.LbStickinessPolicy.StickinessMethod;
 import ck.panda.domain.entity.LoadBalancerRule;
+import ck.panda.domain.entity.LoadBalancerRule.State;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.Nic;
@@ -363,12 +364,12 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     csVm.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
                             csVm.getTransDepartmentId(), convertEntityService.getDomain(csVm.getTransDomainId())));
                     if (csVm.getTransProjectId() != null) {
-                    	csVm.setDepartmentId(convertEntityService.getProject(csVm.getTransProjectId()).getDepartmentId());
+                        csVm.setDepartmentId(convertEntityService.getProject(csVm.getTransProjectId()).getDepartmentId());
                     }
                     csVm.setTemplateId(convertEntityService.getTemplateId(csVm.getTransTemplateId()));
                     csVm.setComputeOfferingId(convertEntityService.getComputeOfferId(csVm.getTransComputeOfferingId()));
                     if (csVm.getTransKeypairName() != null) {
-                    	instance.setKeypairId(convertEntityService.getSSHKeyByNameAndDepartment(csVm.getTransKeypairName(), csVm.getDepartmentId()).getId());
+                        instance.setKeypairId(convertEntityService.getSSHKeyByNameAndDepartment(csVm.getTransKeypairName(), csVm.getDepartmentId()).getId());
                     }
                     if (csVm.getHostId() != null) {
                         csVm.setPodId(convertEntityService
@@ -439,6 +440,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     if (csVm.getInstanceOwnerId() != null) {
                         instance.setInstanceOwnerId(csVm.getInstanceOwnerId());
                     }
+                    if(instance.getTemplateId() != null) {
+                        instance.setOsType(convertEntityService.getTemplateById(instance.getTemplateId()).getDisplayText());
+                    }
                     LOGGER.debug("sync VM for ASYNC");
                     // VNC password set.
                     if (csVm.getPassword() != null) {
@@ -472,7 +476,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 if (vmInstance.getTransKeypairName() != null) {
                     vmInstance.setKeypairId(convertEntityService.getSSHKeyByNameAndDepartment(vmInstance.getTransKeypairName(), vmInstance.getDepartmentId()).getId());
                 }
-
+                if(vmInstance.getTemplateId() != null) {
+                    vmInstance.setOsType(convertEntityService.getTemplateById(vmInstance.getTemplateId()).getDisplayText());
+                }
                 vmIn = virtualMachineService.update(vmInstance);
             }
             if (eventObject.getString("commandEventType").equals(EventTypes.EVENT_VM_CREATE)) {
@@ -1479,7 +1485,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         if (eventObject.getString("commandEventType").equals("LB.STICKINESSPOLICY.CREATE")) {
             JSONObject stickyResult = jobResult.getJSONObject(CloudStackConstants.CS_STICKY_POLICIES);
             JSONArray stickyPolicy = stickyResult.getJSONArray(CloudStackConstants.CS_STICKY_POLICY);
-            Thread.sleep(4000);
             for (int j = 0, sizes = stickyPolicy.length(); j < sizes; j++) {
                 JSONObject json = (JSONObject) stickyPolicy.get(j);
                 LoadBalancerRule lbRule = loadBalancerService.findByUUID(stickyResult.getString(CloudStackConstants.CS_LB_RULE_ID));
@@ -1487,8 +1492,11 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 LbStickinessPolicy loadBalanceRule = null;
                 if (lbRule.getLbPolicyId() != null) {
                     loadBalanceRule = lbPolicyService.find(lbRule.getLbPolicyId());
-                } else {
-                	loadBalanceRule = new LbStickinessPolicy();
+                }  else if(lbPolicyService.findByUUID(json.getString(CloudStackConstants.CS_ID)) != null) {
+                    loadBalanceRule = lbPolicyService.findByUUID(json.getString(CloudStackConstants.CS_ID));
+                }
+                else {
+                    loadBalanceRule = new LbStickinessPolicy();
                 }
                 loadBalanceRule.setUuid(json.getString(CloudStackConstants.CS_ID));
                 loadBalanceRule.setStickinessMethod(StickinessMethod.valueOf(json.getString(CloudStackConstants.CS_METHOD_NAME)));
@@ -1509,13 +1517,22 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     loadBalanceRule.setStickyCompany(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_DOMAIN));
                     loadBalanceRule.setCookieName(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_COOKIE));
                 }
-                LbStickinessPolicy lbPolicy = lbPolicyService.save(loadBalanceRule);
-
-                //Assign lb policy to rule
-                lbRule.setLbPolicyId(lbPolicy.getId());
-                lbRule.setLbPolicy(lbPolicy);
-                lbRule.setSyncFlag(false);
-                loadBalancerService.save(lbRule);
+                if (lbPolicyService.findByUUID(loadBalanceRule.getUuid()) == null) {
+                        LbStickinessPolicy lbPolicy = lbPolicyService.save(loadBalanceRule);
+                         lbRule.setLbPolicyId(lbPolicy.getId());
+                         lbRule.setLbPolicy(lbPolicy);
+                         lbRule.setSyncFlag(false);
+                         loadBalancerService.save(lbRule);
+                }
+                else {
+                    loadBalanceRule.setSyncFlag(false);
+                    LbStickinessPolicy lbPolicy = lbPolicyService.update(loadBalanceRule);
+                     //Assign lb policy to rule
+                    lbRule.setLbPolicyId(lbPolicy.getId());
+                    lbRule.setLbPolicy(lbPolicy);
+                    lbRule.setSyncFlag(false);
+                    loadBalancerService.save(lbRule);
+                }
 
             }
         }
@@ -1537,19 +1554,20 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
 
             LoadBalancerRule loadBalancer = loadBalancerService.findByUUID(json.getString("id"));
             if (loadBalancer != null) {
-            	List<VmIpaddress> vmList = new ArrayList<VmIpaddress>();
-				for (int i = 0; i < i + 1; i++) {
-					if (json.has("vmidipmap[" + i + "].vmip")) {
-						VmInstance vmId = convertEntityService.getVm(json.getString("vmidipmap[" + i + "].vmid"));
-						VmIpaddress vmIp = vmIpService.findByIPAddress(json.getString("vmidipmap[" + i + "].vmip"),
-								vmId.getId());
-						vmIp.setGuestIpAddress(json.getString("vmidipmap[" + i + "].vmip"));
-						vmIp.setVmInstanceId(vmId.getId());
-						vmList.add(vmIp);
-					}
-				}
-    		loadBalancer.setVmIpAddress(vmList);
-    		loadBalancer.setSyncFlag(false);
+                List<VmIpaddress> vmList = new ArrayList<VmIpaddress>();
+                for (int i = 0; i < i + 1; i++) {
+                    if (json.has("vmidipmap[" + i + "].vmip")) {
+                        VmInstance vmId = convertEntityService.getVm(json.getString("vmidipmap[" + i + "].vmid"));
+                        VmIpaddress vmIp = vmIpService.findByIPAddress(json.getString("vmidipmap[" + i + "].vmip"),
+                                vmId.getId());
+                        vmIp.setGuestIpAddress(json.getString("vmidipmap[" + i + "].vmip"));
+                        vmIp.setVmInstanceId(vmId.getId());
+                        vmList.add(vmIp);
+                    }
+                }
+            loadBalancer.setVmIpAddress(vmList);
+            loadBalancer.setSyncFlag(false);
+            loadBalancer.setState(State.ACTIVE);
             loadBalancerService.save(loadBalancer);
                 HashMap<String, String> loadBalancerInstanceMap = new HashMap<String, String>();
                 loadBalancerInstanceMap.put("lbvmips", "true");

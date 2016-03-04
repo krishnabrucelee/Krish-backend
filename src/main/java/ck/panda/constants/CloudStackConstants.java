@@ -27,6 +27,9 @@ public class CloudStackConstants {
     /** Constant for finger print. */
     public static final String CS_FINGER_PRINT = "fingerprint";
 
+    /** Constant for finger print. */
+    public static final String CS_TEMPLATE_NAME = "templatename";
+
     /** Constant for created date and time. */
     public static final String CS_CREATED = "created";
 
@@ -508,7 +511,7 @@ public class CloudStackConstants {
 
     /** Constant for reset ssh key pair response. */
     public static final String CS_RESET_KEYPAIR_RESPONSE = "resetSSHKeyforvirtualmachineresponse";
-    
+
     /** Constant for static NAT IP addresses. */
     public static final String CS_IS_STATIC_NAT = "isstaticnat";
 
