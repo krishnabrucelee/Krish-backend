@@ -177,6 +177,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
 
     @Override
     public ComputeOffering softDelete(ComputeOffering compute) throws Exception {
+        compute.setIsActive(false);
         if (compute.getIsSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity(CS_COMPUTE, compute);
             errors = validator.validateEntity(compute, errors);

@@ -45,9 +45,6 @@ public class CloudStackConstants {
     /** Constant for CS role response. */
     public static final String CS_PROJECT_ROLE = "role";
 
-    /** Constant for CS template name. */
-    public static final String CS_TEMPLATE_NAME = "templatename";
-
     /** Constant for project  add account. */
     public static final String CS_PROJECT_ADD_ACCOUNT = "addAccountToProject";
 
