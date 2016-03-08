@@ -377,10 +377,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                                 .getPodIdByHost(convertEntityService.getHostId(csVm.getTransHostId())));
                     }
                     if (csVm.getTransHypervisor() != null) {
-    					if (hypervisorService.findByName(csVm.getTransHypervisor()) != null) {
-    						csVm.setHypervisorId(hypervisorService.findByName(csVm.getTransHypervisor()).getId());
-    					}
-    				}
+                        if (hypervisorService.findByName(csVm.getTransHypervisor()) != null) {
+                            csVm.setHypervisorId(hypervisorService.findByName(csVm.getTransHypervisor()).getId());
+                        }
+                    }
                     instance.setName(csVm.getName());
                     if (csVm.getCpuCore() != null) {
                         instance.setCpuCore(csVm.getCpuCore());
@@ -471,10 +471,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 vmInstance.setInstanceOwnerId(convertEntityService.getUserByName(vmInstance.getTransDisplayName(),
                         convertEntityService.getDomain(vmInstance.getTransDomainId())));
                 if (vmInstance.getTransHypervisor() != null) {
-					if (hypervisorService.findByName(vmInstance.getTransHypervisor()) != null) {
-						vmInstance.setHypervisorId(hypervisorService.findByName(vmInstance.getTransHypervisor()).getId());
-					}
-				}
+                    if (hypervisorService.findByName(vmInstance.getTransHypervisor()) != null) {
+                        vmInstance.setHypervisorId(hypervisorService.findByName(vmInstance.getTransHypervisor()).getId());
+                    }
+                }
                 vmInstance.setDepartmentId(
                         convertEntityService.getDepartmentByUsernameAndDomains(vmInstance.getTransDepartmentId(),
                                 convertEntityService.getDomain(vmInstance.getTransDomainId())));
@@ -489,7 +489,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     vmInstance.setOsType(convertEntityService.getTemplateById(vmInstance.getTemplateId()).getDisplayText());
                 }
                 vmInstance.setTemplateName(vmInstance.getTemplateName());
-                   
+
                 vmIn = virtualMachineService.update(vmInstance);
             }
             if (eventObject.getString("commandEventType").equals(EventTypes.EVENT_VM_CREATE)) {
@@ -702,7 +702,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 network.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
                         csNet.getTransDepartmentId(), domainService.find(network.getDomainId())));
                 network.setProjectId(convertEntityService.getProjectId(csNet.getTransProjectId()));
-
                 networkService.update(network);
             }
         }
@@ -713,6 +712,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             network.setIsActive(false);
             Errors errors = new Errors(messageSource);
             networkService.softDelete(network);
+            networkService.ipRelease(network);
             if (!convertEntityService.getDepartmentById(network.getDepartmentId()).getType().equals(AccountType.USER)) {
                 updateResourceCountService.QuotaUpdateByResourceObject(network, CS_Network, network.getDomainId(),
                         CS_Domain, Delete);
