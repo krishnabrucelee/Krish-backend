@@ -146,14 +146,14 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      */
     Page<VmInstance> findAllByUser(PagingAndSorting pagingAndSorting, Long userId) throws Exception;
 
-	/**
-	 * To get list of instance by status.
-	 *
-	 * @param status status.
-	 * @return vm list.
-	 * @throws Exception unhandled errors.
-	 */
-	Page<VmInstance> findAllBySort(PagingAndSorting pagingAndSorting, Status status) throws Exception;
+    /**
+     * To get list of instance by status.
+     *
+     * @param status status.
+     * @return vm list.
+     * @throws Exception unhandled errors.
+     */
+    Page<VmInstance> findAllBySort(PagingAndSorting pagingAndSorting, Status status) throws Exception;
 
     /**
      * Find list of vm Instances without pagination.
@@ -240,4 +240,14 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * @throws Exception error occurs.
      */
     VmInstance findByIdWithVncPassword(Long id) throws Exception;
+
+    /**
+     * Find domain based list of vm Instances with pagination.
+     *
+     * @param pagingAndSorting parameters.
+     * @param domainId domain id.
+     * @return page result of intances.
+     * @throws Exception if error occurs.
+     */
+    Page<VmInstance> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
 }

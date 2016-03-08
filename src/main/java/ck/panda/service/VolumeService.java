@@ -225,7 +225,18 @@ public interface VolumeService extends CRUDService<Volume> {
      *
      * @param isActive status of the volume.
      * @return volume.
+     * @throws Exception error occurs
      */
     List<Volume> findAllByIsActive(Boolean isActive) throws Exception;
+
+    /**
+     * Find all the domain based Volume list.
+     *
+     * @param domainId domain id of the volume
+     * @param page pagination and sorting values.
+     * @return list of volumes with pagination.
+     * @throws Exception error occurs
+     */
+    Page<Volume> findAllByDomainId(Long domainId, PagingAndSorting page) throws Exception;
 
 }

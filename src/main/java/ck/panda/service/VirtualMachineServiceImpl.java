@@ -194,22 +194,22 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         if (vmInstance.getStorageOfferingId() != null) {
                             this.customStorageForInstance(vmInstance, optionalMap);
                         }
-						if (vmInstance.getComputeOfferingId() != null) {
-							this.customComputeForInstance(vmInstance, optionalMap);
-							if (!convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId())
-									.getCustomized()) {
-								vmInstance.setMemory(convertEntityService
-										.getComputeOfferById(vmInstance.getComputeOfferingId()).getMemory());
-								vmInstance.setCpuCore(convertEntityService
-										.getComputeOfferById(vmInstance.getComputeOfferingId()).getNumberOfCores());
-								vmInstance.setCpuSpeed(convertEntityService
-										.getComputeOfferById(vmInstance.getComputeOfferingId()).getClockSpeed());
-							}
-						}
-						vmInstance.setOsType(
-								convertEntityService.getTemplateById(vmInstance.getTemplateId()).getDisplayText());
-						vmInstance.setTemplateName(
-								convertEntityService.getTemplateById(vmInstance.getTemplateId()).getName());
+                        if (vmInstance.getComputeOfferingId() != null) {
+                            this.customComputeForInstance(vmInstance, optionalMap);
+                            if (!convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId())
+                                    .getCustomized()) {
+                                vmInstance.setMemory(convertEntityService
+                                        .getComputeOfferById(vmInstance.getComputeOfferingId()).getMemory());
+                                vmInstance.setCpuCore(convertEntityService
+                                        .getComputeOfferById(vmInstance.getComputeOfferingId()).getNumberOfCores());
+                                vmInstance.setCpuSpeed(convertEntityService
+                                        .getComputeOfferById(vmInstance.getComputeOfferingId()).getClockSpeed());
+                            }
+                        }
+                        vmInstance.setOsType(
+                                convertEntityService.getTemplateById(vmInstance.getTemplateId()).getDisplayText());
+                        vmInstance.setTemplateName(
+                                convertEntityService.getTemplateById(vmInstance.getTemplateId()).getName());
                         config.setUserServer();
                         // 5. Get response from CS for new deploy vm API call.
                         String csResponse = cloudStackInstanceService.deployVirtualMachine(
@@ -1162,11 +1162,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 vmInstance.setNetworkId(convertEntityService.getNetworkId(vmInstance.getTransNetworkId()));
                 vmInstance.setProjectId(convertEntityService.getProjectId(vmInstance.getTransProjectId()));
                 if (vmInstance.getTransHypervisor() != null) {
-					if (hypervisorService.findByName(vmInstance.getTransHypervisor()) != null) {
-						vmInstance
-								.setHypervisorId(hypervisorService.findByName(vmInstance.getTransHypervisor()).getId());
-					}
-				}
+                    if (hypervisorService.findByName(vmInstance.getTransHypervisor()) != null) {
+                        vmInstance
+                                .setHypervisorId(hypervisorService.findByName(vmInstance.getTransHypervisor()).getId());
+                    }
+                }
                 vmInstance.setDepartmentId(
                         convertEntityService.getDepartmentByUsernameAndDomains(vmInstance.getTransDepartmentId(),
                                 convertEntityService.getDomain(vmInstance.getTransDomainId())));
@@ -1313,5 +1313,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             vmList.add(nic.getVmInstance());
         }
         return vmList;
+    }
+
+    @Override
+    public Page<VmInstance> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
+        return virtualmachinerepository.findAllByDomainAndExceptStatusWithPageRequest(Status.EXPUNGING, domainId, pagingAndSorting.toPageRequest());
     }
 }

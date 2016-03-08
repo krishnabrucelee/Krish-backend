@@ -110,4 +110,15 @@ public interface SSHKeyRepository extends PagingAndSortingRepository<SSHKey, Lon
     @Query(value = "SELECT ssh FROM SSHKey ssh WHERE ssh.projectId=:projectId AND ssh.isActive =:isActive")
     List<SSHKey> findAllByProjectAndIsActive(@Param("projectId") Long projectId,
             @Param("isActive") Boolean isActive);
+
+    /**
+     * Find all the domain based active or inactive SSH Keys with pagination.
+     *
+     * @param domainId domain id of the SSH key
+     * @param isActive get the SSH Key list based on active/inactive status
+     * @param pageable to get the list with pagination
+     * @return list of SSH Keys
+     */
+    @Query(value = "SELECT ssh FROM SSHKey ssh WHERE ssh.domainId =:domainId AND ssh.isActive =:isActive")
+    Page<SSHKey> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, Pageable pageable);
 }

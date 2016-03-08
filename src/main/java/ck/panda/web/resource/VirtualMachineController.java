@@ -288,4 +288,29 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     public VmInstance findByIdWithVncPassword(@PathVariable(PATH_ID) Long id) throws Exception {
         return virtualmachineservice.findByIdWithVncPassword(id);
     }
+
+    /**
+     * Get all vm instance list by domain.
+     *
+     * @param sortBy asc/desc
+     * @param domainId domain id of vm.
+     * @param range pagination range.
+     * @param limit per page limit.
+     * @param request page request.
+     * @param response response content.
+     * @return vmlist.
+     * @throws Exception unhandled exception.
+     */
+    @RequestMapping(value = "/listByDomain", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<VmInstance> listVmByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
+            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, VmInstance.class);
+        Page<VmInstance> pageResponse = virtualmachineservice.findAllByDomainId(domainId, page);
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
+    }
 }

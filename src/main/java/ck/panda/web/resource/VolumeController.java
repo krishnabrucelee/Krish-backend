@@ -295,4 +295,29 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
         return "{\"attachedCount\":" + attachedCount + ",\"detachedCount\":" + detachedCount + "}";
     }
 
+    /**
+     * Get all volume list by domain.
+     *
+     * @param sortBy asc/desc
+     * @param domainId domain id of volume.
+     * @param range pagination range.
+     * @param limit per page limit.
+     * @param request page request.
+     * @param response response content.
+     * @return volume list.
+     * @throws Exception unhandled exception.
+     */
+    @RequestMapping(value = "/listByDomain", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Volume> listVolumeByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
+            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Volume.class);
+        Page<Volume> pageResponse = volumeService.findAllByDomainId(domainId, page);
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
+    }
+
 }

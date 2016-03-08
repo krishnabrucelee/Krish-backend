@@ -155,4 +155,14 @@ public interface UserService extends CRUDService<User> {
      * @throws Exception errors
      */
     List<User> findByRole(Long roleId, Boolean isActive) throws Exception;
+
+    /**
+     * Find all the user by domain.
+     *
+     * @param domainId domain id of the user.
+     * @param pagingAndSorting paging and sorting information.
+     * @return list of user.
+     * @throws Exception if error occurs.
+     */
+    Page<User> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
 }

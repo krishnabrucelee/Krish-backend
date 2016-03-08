@@ -172,13 +172,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @PreAuthorize("hasPermission(#user.getSyncFlag(), 'DELETE_USER')")
     public void delete(User user) throws Exception {
-		if (user.getSyncFlag()) {
-			config.setServer(1L);
-			csUserService.deleteUser(user.getId().toString(), CloudStackConstants.JSON);
-		} else {
-			// async call delete.
-			this.softDelete(user);
-		}
+        if (user.getSyncFlag()) {
+            config.setServer(1L);
+            csUserService.deleteUser(user.getId().toString(), CloudStackConstants.JSON);
+        } else {
+            // async call delete.
+            this.softDelete(user);
+        }
     }
 
     @Override
@@ -360,6 +360,11 @@ public class UserServiceImpl implements UserService {
             return userRepository.findAllByDepartmentAndIsActive(true, project.getDepartmentId(), projectUsers);
         }
         return userRepository.findByDepartment(project.getDepartment());
+    }
+
+    @Override
+    public Page<User> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
+        return userRepository.findAllByDomainId(domainId, pagingAndSorting.toPageRequest());
     }
 
 }

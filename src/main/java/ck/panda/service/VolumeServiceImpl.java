@@ -948,34 +948,34 @@ public class VolumeServiceImpl implements VolumeService {
     }
 
     @Override
-	public Volume softDelete(Volume volume) throws Exception {
-		volume.setIsActive(false);
-		volume.setStatus(Volume.Status.DESTROY);
-		Errors errors = new Errors(messageSource);
-		if (volume.getIsSyncFlag()) {
-			//check department and project quota validation.
-			ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
-					.findByDepartmentAndResourceType(volume.getDepartmentId(), ResourceType.Instance, true);
-			if (departmentLimit != null) {
-				if (volume.getProjectId() != null) {
-					syncService.syncResourceLimitProject(convertEntityService.getProjectById(volume.getProjectId()));
-				}
-				// set server for finding value in configuration
-				config.setUserServer();
-				csVolumeService.deleteVolume(volume.getUuid(), CloudStackConstants.JSON);
-			} else {
-				errors.addGlobalError("Resource limit for department has not been set. Please update department quota");
-				throw new ApplicationException(errors);
-			}
-			if (errors.hasErrors()) {
-				throw new ApplicationException(errors);
-			}
-			if (volumeRepo.findByUUID(volume.getUuid()).getIsActive()) {
-				return volumeRepo.save(volume);
-			}
-		}
-		return volumeRepo.save(volume);
-	}
+    public Volume softDelete(Volume volume) throws Exception {
+        volume.setIsActive(false);
+        volume.setStatus(Volume.Status.DESTROY);
+        Errors errors = new Errors(messageSource);
+        if (volume.getIsSyncFlag()) {
+            //check department and project quota validation.
+            ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
+                    .findByDepartmentAndResourceType(volume.getDepartmentId(), ResourceType.Instance, true);
+            if (departmentLimit != null) {
+                if (volume.getProjectId() != null) {
+                    syncService.syncResourceLimitProject(convertEntityService.getProjectById(volume.getProjectId()));
+                }
+                // set server for finding value in configuration
+                config.setUserServer();
+                csVolumeService.deleteVolume(volume.getUuid(), CloudStackConstants.JSON);
+            } else {
+                errors.addGlobalError("Resource limit for department has not been set. Please update department quota");
+                throw new ApplicationException(errors);
+            }
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
+            }
+            if (volumeRepo.findByUUID(volume.getUuid()).getIsActive()) {
+                return volumeRepo.save(volume);
+            }
+        }
+        return volumeRepo.save(volume);
+    }
 
     /**
      * Upload volume to an instance.
@@ -1252,5 +1252,10 @@ public class VolumeServiceImpl implements VolumeService {
         // 5. If any resource shortage then return error message otherwise
         // return empty string.
         return errMessage;
+    }
+
+    @Override
+    public Page<Volume> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
+        return volumeRepo.findAllByDomainAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
     }
 }

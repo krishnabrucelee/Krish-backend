@@ -147,4 +147,29 @@ public class ProjectController extends CRUDController<Project> implements ApiCon
     public List<Project> findAllByUserAndIsActive(@PathVariable(PATH_ID) Long id) throws Exception {
         return projectService.findAllByUserAndIsActive(id, true);
     }
+
+    /**
+     * Get all project list by domain.
+     *
+     * @param sortBy asc/desc
+     * @param domainId domain id of project.
+     * @param range pagination range.
+     * @param limit per page limit.
+     * @param request page request.
+     * @param response response content.
+     * @return project list.
+     * @throws Exception unhandled exception.
+     */
+    @RequestMapping(value = "/listByDomain", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Project> listProjectByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
+            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Project.class);
+        Page<Project> pageResponse = projectService.findAllByDomainId(domainId, page);
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
+    }
 }

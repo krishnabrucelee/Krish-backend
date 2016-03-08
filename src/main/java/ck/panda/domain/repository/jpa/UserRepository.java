@@ -135,4 +135,14 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     @Query(value = "SELECT user FROM User user WHERE user.isActive IS :isActive AND user.departmentId = :departmentId AND user NOT IN :userList")
     List<User> findAllByDepartmentAndIsActive(@Param("isActive") Boolean isActive, @Param("departmentId") Long departmentId, @Param("userList") List<User> userList);
 
+    /**
+     * find all the user by domain.
+     *
+     * @param domainId domain id of the user.
+     * @param pageable pagination information.
+     * @return list of user.
+     */
+    @Query(value = "select user from User user where user.domainId =:domainId")
+    Page<User> findAllByDomainId(@Param("domainId") Long domainId, Pageable pageable);
+
 }

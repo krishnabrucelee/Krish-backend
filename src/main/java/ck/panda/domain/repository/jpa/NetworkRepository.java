@@ -118,4 +118,15 @@ public interface NetworkRepository extends PagingAndSortingRepository<Network, L
     Page<Network> findByDepartmentAndPagination(@Param("departmentId") Long departmentId,
             @Param("isActive") Boolean isActive, Pageable pageable);
 
+    /**
+     * Find all the domain based active or inactive network with pagination.
+     *
+     * @param domainId get the id of the domain
+     * @param isActive get the network list based on active/inactive status.
+     * @param pageable to get the list with pagination.
+     * @return list of snapshots.
+     */
+    @Query(value = "SELECT net FROM Network net WHERE net.domainId =:domainId AND net.isActive =:isActive")
+    Page<Network> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, Pageable pageable);
+
 }

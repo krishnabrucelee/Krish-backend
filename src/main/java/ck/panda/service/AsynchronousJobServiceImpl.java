@@ -160,11 +160,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     @Autowired
     private SnapshotService snapShotService;
 
-    /** Snapshot policy Service reference to Snapshot. */
-    @Autowired
-    private SnapshotPolicyService snapShotPolicyService;
-
-
+    /** Service reference to VM snapshot. */
     @Autowired
     private VmSnapshotService vmSnapshotService;
 
@@ -368,7 +364,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     csVm.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
                             csVm.getTransDepartmentId(), convertEntityService.getDomain(csVm.getTransDomainId())));
                     if (csVm.getTransProjectId() != null) {
-                    	csVm.setDepartmentId(convertEntityService.getProject(csVm.getTransProjectId()).getDepartmentId());
+                        csVm.setDepartmentId(convertEntityService.getProject(csVm.getTransProjectId()).getDepartmentId());
                     }
                     csVm.setTemplateId(convertEntityService.getTemplateId(csVm.getTransTemplateId()));
                     csVm.setComputeOfferingId(convertEntityService.getComputeOfferId(csVm.getTransComputeOfferingId()));
@@ -377,10 +373,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                                 .getPodIdByHost(convertEntityService.getHostId(csVm.getTransHostId())));
                     }
                     if (csVm.getTransHypervisor() != null) {
-    					if (hypervisorService.findByName(csVm.getTransHypervisor()) != null) {
-    						csVm.setHypervisorId(hypervisorService.findByName(csVm.getTransHypervisor()).getId());
-    					}
-    				}
+                        if (hypervisorService.findByName(csVm.getTransHypervisor()) != null) {
+                            csVm.setHypervisorId(hypervisorService.findByName(csVm.getTransHypervisor()).getId());
+                        }
+                    }
                     instance.setName(csVm.getName());
                     if (csVm.getCpuCore() != null) {
                         instance.setCpuCore(csVm.getCpuCore());
@@ -471,10 +467,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 vmInstance.setInstanceOwnerId(convertEntityService.getUserByName(vmInstance.getTransDisplayName(),
                         convertEntityService.getDomain(vmInstance.getTransDomainId())));
                 if (vmInstance.getTransHypervisor() != null) {
-					if (hypervisorService.findByName(vmInstance.getTransHypervisor()) != null) {
-						vmInstance.setHypervisorId(hypervisorService.findByName(vmInstance.getTransHypervisor()).getId());
-					}
-				}
+                    if (hypervisorService.findByName(vmInstance.getTransHypervisor()) != null) {
+                        vmInstance.setHypervisorId(hypervisorService.findByName(vmInstance.getTransHypervisor()).getId());
+                    }
+                }
                 vmInstance.setDepartmentId(
                         convertEntityService.getDepartmentByUsernameAndDomains(vmInstance.getTransDepartmentId(),
                                 convertEntityService.getDomain(vmInstance.getTransDomainId())));
@@ -1345,6 +1341,15 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
              vmSnapshot.setDomainId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getDomainId());
              vmSnapshot.setOwnerId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getInstanceOwnerId());
              vmSnapshot.setZoneId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getZoneId());
+             List<VmSnapshot> vmSnapshotList = vmSnapshotService.findByVmInstance(vmSnapshot.getVmId(), false);
+             for (VmSnapshot vmSnap : vmSnapshotList) {
+                 if (vmSnap.getIsCurrent()) {
+                     vmSnap.setIsCurrent(false);
+                     vmSnap.setSyncFlag(false);
+                     vmSnapshotService.save(vmSnap);
+                 }
+             }
+
              vmSnapshot.setSyncFlag(false);
              if (vmSnapshotService.findByUUID(vmSnapshot.getUuid()) == null) {
                  vmSnapshotService.save(vmSnapshot);
@@ -1372,6 +1377,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
              JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
              VmSnapshot vmsnapshot = vmSnapshotService.findByUUID(json.getString(CloudStackConstants.CS_VM_SNAPSHOT_ID));
              vmsnapshot.setIsRemoved(true);
+             vmsnapshot.setStatus(ck.panda.domain.entity.VmSnapshot.Status.Expunging);
              vmsnapshot.setSyncFlag(false);
              vmSnapshotService.save(vmsnapshot);
          }

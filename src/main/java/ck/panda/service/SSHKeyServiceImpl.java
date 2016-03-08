@@ -405,4 +405,9 @@ public class SSHKeyServiceImpl implements SSHKeyService {
     public SSHKey findAllByDepartmentAndKeypairAndIsActive(Long departmentId, String name, Boolean isActive) throws Exception {
         return sshkeyRepo.findByNameAndDepartmentAndIsActive(name, departmentId, true);
     }
+
+    @Override
+    public Page<SSHKey> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
+        return sshkeyRepo.findAllByDomainIdAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
+    }
 }

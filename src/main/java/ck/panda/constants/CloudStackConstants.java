@@ -594,5 +594,16 @@ public class CloudStackConstants {
     /** Constant for parameters. */
     public static final String CS_PARAMS = "params";
 
+    /** Constant for revert VM snapshot response. */
+    public static final String CS_REVERT_VM_SNAPSHOT_RESPONSE = "reverttovmsnapshotresponse";
 
-   }
+    /** Constant for create VM snapshot response. */
+    public static final String CS_CREATE_VM_SNAPSHOT_RESPONSE = "createvmsnapshotresponse";
+
+    /** Constant for delete VM snapshot response. */
+    public static final String CS_DELETE_VM_SNAPSHOT_RESPONSE = "deletevmsnapshotresponse";
+
+    /** Constant for list VM snapshot response. */
+    public static final String CS_LIST_VM_SNAPSHOT_RESPONSE = "listvmsnapshotresponse";
+
+}

@@ -354,15 +354,15 @@ public class NetworkServiceImpl implements NetworkService {
                         VmInstance.Status.EXPUNGING);
                 List<Nic> nicResponse = nicService.findAllByNetworkAndIsActive(network.getId(), true);
                 if (vmResponse.size() != 0 || nicResponse.size() != 0) {
-                	throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,"Network is associated with Vm instances. You cannot delete this network");
+                    throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,"Network is associated with Vm instances. You cannot delete this network");
                   }
 
                 Errors errors = validator.rejectIfNullEntity(NETWORK, network);
                 errors = validator.validateEntity(network, errors);
-           	 if (errors.hasErrors()) {
+                if (errors.hasErrors()) {
                     throw new ApplicationException(errors);
                 }
-           	 // check department and project quota validation.
+                // check department and project quota validation.
                ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
                        .findByDepartmentAndResourceType(network.getDepartmentId(), ResourceType.Instance, true);
                if (departmentLimit != null) {
@@ -707,5 +707,10 @@ public class NetworkServiceImpl implements NetworkService {
         // 5. If any resource shortage then return error message otherwise
         // return empty string.
         return errMessage;
+    }
+
+    @Override
+    public Page<Network> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
+        return networkRepo.findAllByDomainIdAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
     }
 }

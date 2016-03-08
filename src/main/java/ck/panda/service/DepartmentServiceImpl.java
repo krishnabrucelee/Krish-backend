@@ -247,7 +247,7 @@ public class DepartmentServiceImpl implements DepartmentService {
                 JSONObject jobId = new JSONObject(departmentResponse).getJSONObject(CloudStackConstants.CS_DELETE_ACCOUNT_RESPONSE);
                 if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
                     config.setServer(1L);
-                	String jobResponse = csAccountService.accountJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
+                    String jobResponse = csAccountService.accountJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
                     JSONObject jobresults = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
                 }
                 LOGGER.debug("Department deleted successfully" + department.getUserName());
@@ -335,6 +335,11 @@ public class DepartmentServiceImpl implements DepartmentService {
             return departmentRepo.save(department);
         }
         return department;
+    }
+
+    @Override
+    public Page<Department> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
+        return departmentRepo.findAllByDomainIdAndIsActive(domainId, true, AccountType.USER, pagingAndSorting.toPageRequest());
     }
 
 }
