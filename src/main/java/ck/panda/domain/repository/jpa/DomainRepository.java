@@ -1,6 +1,9 @@
 package ck.panda.domain.repository.jpa;
 
 import ck.panda.domain.entity.Domain;
+
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -39,6 +42,15 @@ public interface DomainRepository extends PagingAndSortingRepository<Domain, Lon
      * @param isActive get the Domain list based on active/inactive status.
      * @return list of Domains.
      */
-    @Query(value = "SELECT domain FROM Domain domain WHERE domain.isActive =:isActive")
+    @Query(value = "SELECT domain FROM Domain domain WHERE domain.isActive = :isActive")
     Page<Domain> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find all the active or inactive domains.
+     *
+     * @param isActive get the Domain list based on active/inactive status.
+     * @return list of Domains.
+     */
+    @Query(value = "SELECT domain FROM Domain domain WHERE domain.isActive = :isActive")
+    List<Domain> findAllByDomainAndIsActive(@Param("isActive") Boolean isActive);
 }
