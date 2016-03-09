@@ -26,6 +26,7 @@ import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.EncryptionUtil;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -65,6 +66,10 @@ public class UserServiceImpl implements UserService {
     /** Reference of domain Service . */
     @Autowired
     private DomainService domainService;
+
+    /** Reference of Token Details Util. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
@@ -153,6 +158,7 @@ public class UserServiceImpl implements UserService {
                 HashMap<String, String> optional = new HashMap<String, String>();
                 optional.put("domainid", user.getDomain().getUuid());
                 optional.put("username", user.getUserName());
+                optional.put("password", user.getPassword());
                 config.setServer(1L);
                 csUserService.updateUser(user.getUuid(), optional, "json");
                 if (user.getType() == User.UserType.DOMAIN_ADMIN) {
@@ -172,13 +178,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @PreAuthorize("hasPermission(#user.getSyncFlag(), 'DELETE_USER')")
     public void delete(User user) throws Exception {
-		if (user.getSyncFlag()) {
-			config.setServer(1L);
-			csUserService.deleteUser(user.getId().toString(), CloudStackConstants.JSON);
-		} else {
-			// async call delete.
-			this.softDelete(user);
-		}
+        if (user.getSyncFlag()) {
+            config.setServer(1L);
+            csUserService.deleteUser(user.getId().toString(), CloudStackConstants.JSON);
+        } else {
+            // async call delete.
+            this.softDelete(user);
+        }
     }
 
     @Override
@@ -360,6 +366,53 @@ public class UserServiceImpl implements UserService {
             return userRepository.findAllByDepartmentAndIsActive(true, project.getDepartmentId(), projectUsers);
         }
         return userRepository.findByDepartment(project.getDepartment());
+    }
+
+    @Override
+    public User updatePassword(User user) throws Exception {
+        if (user.getSyncFlag()) {
+            Errors errors = validator.rejectIfNullEntity("user", user);
+            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+            byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+            if (user.getPassword() != null) {
+                User validateUser = userRepository.findOne(user.getId());
+                String validatePassword = new String(EncryptionUtil.encrypt(user.getPassword(), originalKey));
+                if (!validateUser.getPassword().equals(validatePassword)) {
+                    errors.addGlobalError("Old password didnot match. Please re-enter old password");
+                }
+            }
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
+            } else {
+                HashMap<String, String> optional = new HashMap<String, String>();
+                optional.put("password", user.getConfirmPassword());
+                config.setServer(1L);
+                csUserService.updateUser(user.getUuid(), optional, "json");
+                if (user.getType() == User.UserType.DOMAIN_ADMIN) {
+                    Domain domain = user.getDomain();
+                    domain.setPortalUserName(user.getUserName());
+                    domain.setSyncFlag(false);
+                    domainService.update(domain);
+                }
+                String encryptedPassword = new String(EncryptionUtil.encrypt(user.getConfirmPassword(), originalKey));
+                user.setPassword(encryptedPassword);
+            }
+            return userRepository.save(user);
+        } else {
+            user.setStatus(Status.ACTIVE);
+            return userRepository.save(user);
+        }
+    }
+
+    @Override
+    public User findByUserValidList(Long id) throws Exception {
+        userRepository.findOne(id);
+        User user = convertEntityService.getOwnerById(id);
+        user.setApiKey(tokenDetails.getTokenDetails("apikey"));
+        user.setSecretKey(tokenDetails.getTokenDetails("secretkey"));
+        user.setPassword(null);
+        return user;
     }
 
 }

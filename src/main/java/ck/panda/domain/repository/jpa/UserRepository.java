@@ -9,7 +9,9 @@ import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.User.UserType;
+import ck.panda.domain.entity.VmInstance.Status;
 
 /** JPA repository for user CRUD operations. */
 public interface UserRepository extends PagingAndSortingRepository<User, Long> {
@@ -135,4 +137,12 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     @Query(value = "SELECT user FROM User user WHERE user.isActive IS :isActive AND user.departmentId = :departmentId AND user NOT IN :userList")
     List<User> findAllByDepartmentAndIsActive(@Param("isActive") Boolean isActive, @Param("departmentId") Long departmentId, @Param("userList") List<User> userList);
 
+    /**
+     *get list of required parameter of user.
+     *
+     * @param id user id.
+     * @return user.
+     */
+    @Query(value = "SELECT new map(user.id as id, user.userName as userName, user.email as email, user.type as type, user.firstName as firstName, user.lastName as lastName, user.uuid as uuid, user.status as status, user.domain as domain, user.role as role) FROM User user WHERE user.id = :id")
+    User findByUserValidList(@Param("id") Long id);
 }

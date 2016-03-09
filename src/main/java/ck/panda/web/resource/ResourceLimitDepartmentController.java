@@ -144,7 +144,7 @@ public class ResourceLimitDepartmentController extends CRUDController<ResourceLi
     /**
      * Get resource limits of department.
      *
-     * @param domainId domain id
+     * @param projectId project id
      * @return max values of resources
      * @throws Exception error occurs.
      */
@@ -157,7 +157,7 @@ public class ResourceLimitDepartmentController extends CRUDController<ResourceLi
     /**
      * Get resource limits of Project.
      *
-     * @param projectId domain id
+     * @param projectId department id
      * @return max values of resources
      * @throws Exception error occurs.
      */
@@ -165,5 +165,18 @@ public class ResourceLimitDepartmentController extends CRUDController<ResourceLi
     @ResponseStatus(HttpStatus.OK)
     public HashMap<String, String> findByProjectQuotaDepartmentResource(@PathVariable(PATH_ID) Long projectId) throws Exception {
         return resourceLimitService.getResourceLimitsOfProject(convertEntityService.getProjectById(projectId).getDepartmentId());
+    }
+
+    /**
+     * Get resource limits of Department.
+     *
+     * @param departmentId department id
+     * @return max values of resources
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/quotadepartmentId/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public HashMap<String, String> findQuotaDepartmentResource(@PathVariable(PATH_ID) Long departmentId) throws Exception {
+        return resourceLimitService.getResourceLimitsOfDepartment(convertEntityService.getDepartmentById(departmentId).getDomainId());
     }
 }
