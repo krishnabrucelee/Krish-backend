@@ -258,4 +258,29 @@ public class UserController extends CRUDController<User> implements ApiControlle
         return userService.disableUser(userId);
     }
 
+    /**
+     * Get all user list by domain.
+     *
+     * @param sortBy asc/desc
+     * @param domainId domain id of user.
+     * @param range pagination range.
+     * @param limit per page limit.
+     * @param request page request.
+     * @param response response content.
+     * @return user list.
+     * @throws Exception unhandled exception.
+     */
+    @RequestMapping(value = "/listByUserDomain", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<User> listUserByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
+            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, User.class);
+        Page<User> pageResponse = userService.findAllByDomainId(domainId, page);
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
+    }
+
   }

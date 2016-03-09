@@ -85,4 +85,14 @@ public interface RoleService extends CRUDService<Role> {
      * @throws Exception if error occurs.
      */
     Page<Role> findAllByUserId(PagingAndSorting pagingAndSorting, Long userId) throws Exception;
+
+    /**
+     * Find all the roles by domain.
+     *
+     * @param domainId domain id of the roles
+     * @param pagingAndSorting pagination reference
+     * @return roles list
+     * @throws Exception if error occurs.
+     */
+    Page<Role> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
 }

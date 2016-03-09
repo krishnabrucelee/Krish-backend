@@ -121,4 +121,17 @@ public interface DepartmentRepository extends PagingAndSortingRepository<Departm
             + "AND dpt.type in (:types)")
     List<Department> findByDomainAndAccountTypesAndActive(@Param("domainId") Long domainId,
             @Param("types") List<AccountType> types, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find all the departments with pagination based on the domain, active/inactive state and type.
+     *
+     * @param domainId domain id of the department.
+     * @param isActive get the department list based on active/inactive status.
+     * @param type for account type.
+     * @param pageable to get the list with pagination.
+     * @return list of departments.
+     */
+    @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.domainId = :domainId AND dpt.isActive = :isActive AND dpt.type = :type")
+    Page<Department> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive,
+            @Param("type") AccountType type, Pageable pageable);
 }

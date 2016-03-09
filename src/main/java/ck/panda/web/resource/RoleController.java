@@ -114,4 +114,29 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
         return roleService.findAllByDepartmentAndIsActiveExceptName(departmentService.find(id), true, GenericConstants.FULL_PERMISSION);
     }
 
+    /**
+     * Get all role list by domain.
+     *
+     * @param sortBy asc/desc
+     * @param domainId domain id of role.
+     * @param range pagination range.
+     * @param limit per page limit.
+     * @param request page request.
+     * @param response response content.
+     * @return role list.
+     * @throws Exception unhandled exception.
+     */
+    @RequestMapping(value = "/listByDomain", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Role> listRoleByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
+            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Role.class);
+        Page<Role> pageResponse = roleService.findAllByDomainId(domainId, page);
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
+    }
+
 }

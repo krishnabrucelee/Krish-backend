@@ -408,5 +408,11 @@ public class UserServiceImpl implements UserService {
         }
         return userRepository.save(user);
     }
+    
+    @Override
+    public Page<User> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
+        return userRepository.findAllByDomainId(domainId, pagingAndSorting.toPageRequest());
+    }
+
 
 }

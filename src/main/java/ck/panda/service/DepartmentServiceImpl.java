@@ -345,10 +345,14 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    public Page<Department> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
+        return departmentRepo.findAllByDomainIdAndIsActive(domainId, true, AccountType.USER, pagingAndSorting.toPageRequest());
+    }
+
+    @Override
     public List<Department> findAllByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception {
         return (List<Department>) departmentRepo.findByDomainAndIsActive(domainId, isActive, AccountType.USER);
     }
-
 
     @Override
     public List<Department> findAllByDomainAccountTypeAndIsActive(Long domainId, Boolean isActive, AccountType domainAdmin) throws Exception {

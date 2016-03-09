@@ -100,4 +100,14 @@ public interface SSHKeyService extends CRUDService<SSHKey> {
      * @throws Exception if error occurs.
      */
     SSHKey findAllByDepartmentAndKeypairAndIsActive(Long departmentId, String name, Boolean isActive) throws Exception;
+
+    /**
+     * To get list of SSH Key based on the domain.
+     *
+     * @param domainId domain id of the SSH key
+     * @param pagingAndSorting pagination and sorting SSH key.
+     * @return list of SSH key with pagination.
+     * @throws Exception error occurs
+     */
+    Page<SSHKey> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
 }

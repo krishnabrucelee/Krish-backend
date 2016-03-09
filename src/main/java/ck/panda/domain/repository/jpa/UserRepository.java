@@ -145,4 +145,14 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     @Query(value = "SELECT user FROM User user WHERE user.status <> :status")
     Page<User> findAllUserByStatus(Pageable pageable,@Param("status") Status status);
 
+    /**
+     * find all the user by domain.
+     *
+     * @param domainId domain id of the user.
+     * @param pageable pagination information.
+     * @return list of user.
+     */
+    @Query(value = "select user from User user where user.domainId =:domainId")
+    Page<User> findAllByDomainId(@Param("domainId") Long domainId, Pageable pageable);
+
 }

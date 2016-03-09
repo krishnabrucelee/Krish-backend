@@ -164,16 +164,11 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     @Autowired
     private SnapshotService snapShotService;
 
-    /** Snapshot policy Service reference to Snapshot. */
-    @Autowired
-    private SnapshotPolicyService snapShotPolicyService;
-
     /**
      *  Service reference to User.
      */
     @Autowired
     private UserService userService;
-
     /**
      *  Service reference to vmSnapshot Sevice.
      */
@@ -1385,6 +1380,15 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
              vmSnapshot.setDomainId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getDomainId());
              vmSnapshot.setOwnerId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getInstanceOwnerId());
              vmSnapshot.setZoneId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getZoneId());
+             List<VmSnapshot> vmSnapshotList = vmSnapshotService.findByVmInstance(vmSnapshot.getVmId(), false);
+             for (VmSnapshot vmSnap : vmSnapshotList) {
+                 if (vmSnap.getIsCurrent()) {
+                     vmSnap.setIsCurrent(false);
+                     vmSnap.setSyncFlag(false);
+                     vmSnapshotService.save(vmSnap);
+                 }
+             }
+
              vmSnapshot.setSyncFlag(false);
              if (vmSnapshotService.findByUUID(vmSnapshot.getUuid()) == null) {
                  vmSnapshotService.save(vmSnapshot);
@@ -1412,6 +1416,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
              JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
              VmSnapshot vmsnapshot = vmSnapshotService.findByUUID(json.getString(CloudStackConstants.CS_VM_SNAPSHOT_ID));
              vmsnapshot.setIsRemoved(true);
+             vmsnapshot.setStatus(ck.panda.domain.entity.VmSnapshot.Status.Expunging);
              vmsnapshot.setSyncFlag(false);
              vmSnapshotService.save(vmsnapshot);
          }

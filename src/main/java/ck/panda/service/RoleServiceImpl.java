@@ -175,4 +175,9 @@ public class RoleServiceImpl implements RoleService {
         return roleRepo.findByNameAndDepartmentIdAndIsActive(name, departmentId, isActive);
     }
 
+    @Override
+    public Page<Role> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
+        return roleRepo.findAllByDomainIdAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
+    }
+
 }
