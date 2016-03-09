@@ -439,13 +439,20 @@ public class NicServiceImpl implements NicService {
              String jobResponse = cloudStackNicService.AcquireIpJobResult(csacquireIPResponseJSON.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
              JSONObject jobresult = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE).getJSONObject(CloudStackConstants.CS_JOB_RESULT);
              JSONObject secondaryIP = jobresult.getJSONObject(CS_SECONDARYIP);
+             List<VmIpaddress> vmIpList = new ArrayList<VmIpaddress>();
                  VmIpaddress vm = new VmIpaddress();
                  vm.setUuid((String) secondaryIP.get(CloudStackConstants.CS_ID));
                  vm.setGuestIpAddress(((String) secondaryIP.get(CloudStackConstants.CS_IP_ADDRESS)));
                  vm.setNicId(convertEntityService.getNic(secondaryIP.getString(CloudStackConstants.CS_NIC_ID)).getId());
                  vm.setVmInstanceId(convertEntityService.getNic(secondaryIP.getString(CloudStackConstants.CS_NIC_ID)).getVmInstanceId());
                  vm.setIsActive(true);
-                 vmIpService.save(vm);
+                 vm.setIpType(IpType.secondaryIpAddress);
+                 VmIpaddress persistVmIP = vmIpService.save(vm);
+                 nics.setSyncFlag(false);
+                 vmIpList = nics.getVmIpAddress();
+                 vmIpList.add(persistVmIP);
+                 nics.setVmIpAddress(vmIpList);
+                 nicRepo.save(nics);
          }
         return nic;
     }

@@ -331,7 +331,8 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
 
     @Override
     public StorageOffering softDelete(StorageOffering storage) throws Exception {
-    if (storage.getIsSyncFlag()) {
+        storage.setIsActive(false);
+        if (storage.getIsSyncFlag()) {
         Errors errors = validator.rejectIfNullEntity(CloudStackConstants.CS_STORAGE_OFFERING, storage);
         errors = validator.validateEntity(storage, errors);
         // set server for finding value in configuration

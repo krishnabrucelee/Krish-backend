@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.LoadBalancerRule;
+import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
@@ -70,6 +71,10 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     @Autowired
     private DomainService domainService;
 
+    /** Project service reference. */
+    @Autowired
+    private ProjectService projectService;
+
     /** Constant for load balancer. */
     private static final String CS_LOADBALANCER = "loadbalancer";
 
@@ -105,6 +110,8 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
 
     /** Constant for update load balancer rule response. */
     private static final String CS_UPDATE_LB_RULE = "updateloadbalancerruleresponse";
+
+    private static final String CS_FORDISPLAY = "fordisplay";
 
     @Override
     public LoadBalancerRule save(LoadBalancerRule loadBalancer, Long userId) throws Exception {
@@ -189,10 +196,18 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
 
     @Override
     public List<LoadBalancerRule> findAllFromCSServer() throws Exception {
+        List<Project> projectList = projectService.findAllByActive(true);
         List<LoadBalancerRule> loadBalancerList = new ArrayList<LoadBalancerRule>();
+        for (int j = 0; j <= projectList.size(); j++) {
         HashMap<String, String> loadBalancerMap = new HashMap<String, String>();
-        loadBalancerMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
-        loadBalancerMap.put("fordisplay", "true");
+        if (j == projectList.size()) {
+            loadBalancerMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
+            loadBalancerMap.put(CS_FORDISPLAY, CloudStackConstants.STATUS_ACTIVE);
+        }
+        else {
+            loadBalancerMap.put(CloudStackConstants.CS_PROJECT_ID, projectList.get(j).getUuid());
+            loadBalancerMap.put(CS_FORDISPLAY, CloudStackConstants.STATUS_ACTIVE);
+        }
         configUtil.setServer(1L);
         String response = cloudStackLoadBalancerService.listLoadBalancerRules(CloudStackConstants.JSON, loadBalancerMap);
         JSONArray loadBalancerListJSON = null;
@@ -236,6 +251,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                         .getDomainId());
                 loadBalancerList.add(loadBalancer);
             }
+         }
         }
         return loadBalancerList;
     }
