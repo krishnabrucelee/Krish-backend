@@ -288,6 +288,10 @@ public class VmInstance implements Serializable {
     @Column(name = "instance_private_ip")
     private String ipAddress;
 
+    /** instance public ip address. */
+    @Column(name = "instance_public_ip")
+    private String publicIpAddress;
+
     /** The number of CPU cores needed. */
     @Column(name = "cpu_cores")
     private Integer cpuCore;
@@ -1955,6 +1959,24 @@ public class VmInstance implements Serializable {
 	 */
 	public void setTransForcedStop(Boolean transForcedStop) {
 		this.transForcedStop = transForcedStop;
+	}
+
+	/**
+	 * Get the public ip address.
+	 *
+	 * @return the publicIpAddress
+	 */
+	public String getPublicIpAddress() {
+		return publicIpAddress;
+	}
+
+	/**
+	 * Set the public ip address.
+	 *
+	 * @param publicIpAddress the publicIpAddress to set
+	 */
+	public void setPublicIpAddress(String publicIpAddress) {
+		this.publicIpAddress = publicIpAddress;
 	}
 
 	@Override
