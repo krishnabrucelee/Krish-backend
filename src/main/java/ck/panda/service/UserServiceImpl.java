@@ -383,7 +383,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @PreAuthorize("hasPermission(#user.getSyncFlag(), 'ENABLE_USER')")
+    @PreAuthorize("hasPermission(null, 'ENABLE_USER')")
     public User enableUser(Long userId) throws Exception {
         Errors errors = null;
         User user = userRepository.findOne(userId);
@@ -405,7 +405,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @PreAuthorize("hasPermission(#user.getSyncFlag(), 'DISABLE_USER')")
+    @PreAuthorize("hasPermission(null, 'DISABLE_USER')")
     public User disableUser(Long userId) throws Exception {
         Errors errors = null;
         User user = userRepository.findOne(userId);

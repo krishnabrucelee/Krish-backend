@@ -41,7 +41,10 @@ public class SortingUtil {
         }
 
         if (fields.length > 0) {
-            return fields[0].getName();
+            if (field.contains("-")) {
+        	    return field.substring(1,field.length());
+        	}
+        	return field;
         }
 
         return null;
@@ -69,6 +72,9 @@ public class SortingUtil {
             }
         }
 
+       	 if (field.contains("-")) {
+       		 return Sort.Direction.DESC;
+       	 }
         return Sort.Direction.ASC;
     }
 
