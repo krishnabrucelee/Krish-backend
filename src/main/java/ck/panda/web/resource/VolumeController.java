@@ -320,4 +320,19 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
         return pageResponse.getContent();
     }
 
+    /**
+     * Get the domain based volume counts for attached, detached and total count.
+     *
+     * @param domainId domain id of the volume
+     * @return attached/detached count
+     * @throws Exception error
+     */
+    @RequestMapping(value = "volumeCountsByDomain", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public String getVolumeCountsByDomain(@RequestParam("domainId") Long domainId) throws Exception {
+        Integer attachedCount = volumeService.findAttachedCountByDomain(domainId);
+        return "{\"attachedCount\":" + attachedCount + "}";
+    }
+
 }

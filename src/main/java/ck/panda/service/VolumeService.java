@@ -239,4 +239,14 @@ public interface VolumeService extends CRUDService<Volume> {
      */
     Page<Volume> findAllByDomainId(Long domainId, PagingAndSorting page) throws Exception;
 
+    /**
+     * Get the count of the volume based on the attached.
+     *
+     * @param domainId user details
+     * @return volume count
+     * @throws NumberFormatException Number format
+     * @throws Exception error occurs
+     */
+    Integer findAttachedCountByDomain(Long domainId) throws NumberFormatException, Exception;
+
 }

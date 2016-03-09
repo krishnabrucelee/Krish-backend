@@ -294,6 +294,7 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
      *
      * @param sortBy asc/desc
      * @param domainId domain id of vm.
+     * @param status status of vm.
      * @param range pagination range.
      * @param limit per page limit.
      * @param request page request.
@@ -305,12 +306,37 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<VmInstance> listVmByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
+    public List<VmInstance> listVmByDomainId(@RequestParam String sortBy, @RequestParam Long domainId, @RequestParam String status,
             @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, VmInstance.class);
-        Page<VmInstance> pageResponse = virtualmachineservice.findAllByDomainId(domainId, page);
+        Page<VmInstance> pageResponse = null;
+        if (!status.equals("Expunging")) {
+            pageResponse = virtualmachineservice.findAllByStatusAndDomain(page, Status.valueOf(status.toUpperCase()), domainId);
+        } else {
+            pageResponse = virtualmachineservice.findAllByDomainId(domainId, page);
+        }
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
+
+    /**
+     * Get the vm counts for stopped, running and total count based on the domain filter.
+     *
+     * @param domainId domain id of vm.
+     * @return vm count.
+     * @throws Exception unhandled errors.
+     */
+    @RequestMapping(value = "/vmCountsByDomain", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public String getVmCounts(@RequestParam("domainId") Long domainId) throws Exception {
+        Integer vmCount = virtualmachineservice.findAllByDomain(domainId).size();
+        Integer runningVmCount = virtualmachineservice.findCountByStatusAndDomain(Status.RUNNING, domainId);
+        Integer stoppedVmCount = virtualmachineservice.findCountByStatusAndDomain(Status.STOPPED, domainId);
+        return "{\"runningVmCount\":" + runningVmCount + ",\"stoppedVmCount\":" + stoppedVmCount + ",\"totalCount\":"
+        + vmCount + "}";
+    }
+
+
 }

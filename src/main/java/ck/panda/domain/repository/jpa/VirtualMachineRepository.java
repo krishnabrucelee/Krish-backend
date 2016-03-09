@@ -397,4 +397,15 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      */
     @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.name as name, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize, vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm LEFT JOIN vm.instanceOwner owner WHERE vm.status <> :status AND vm.domainId = :domainId")
     Page<VmInstance> findAllByDomainAndExceptStatusWithPageRequest(@Param("status") Status status, @Param("domainId") Long domainId, Pageable pageable);
+
+    /**
+     * Get the list of VMs by status and domain with pagination.
+     *
+     * @param status of the status of VM.
+     * @param domainId of the domain.
+     * @param pageable page request
+     * @return instance list
+     */
+    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.name as name, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm LEFT JOIN vm.instanceOwner owner WHERE vm.status = :status AND vm.domainId = :domainId")
+    Page<VmInstance> findAllByStatusAndDomainWithPageRequest(@Param("status") Status status, @Param("domainId") Long domainId, Pageable pageable);
 }

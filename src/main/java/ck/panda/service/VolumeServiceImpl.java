@@ -1258,4 +1258,10 @@ public class VolumeServiceImpl implements VolumeService {
     public Page<Volume> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
         return volumeRepo.findAllByDomainAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
     }
+
+    @Override
+    public Integer findAttachedCountByDomain(Long domainId) throws NumberFormatException, Exception {
+        Integer adminAttachedCount = volumeRepo.getAttachedCountByDomainAndIsActive(domainId, true).size();
+        return adminAttachedCount;
+    }
 }
