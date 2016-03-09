@@ -339,4 +339,25 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
     @Query(value = "SELECT volume FROM Volume volume WHERE volume.isActive = :isActive")
     List<Volume> findAllByIsActive(@Param("isActive") Boolean isActive);
 
+    /**
+     * Find all the domain based active or inactive departments with pagination.
+     *
+     * @param domainId domain id of the volume
+     * @param isActive get the department list based on active/inactive status.
+     * @param pageable to get the list with pagination.
+     * @return list of volumes.
+     */
+    @Query(value = "SELECT volume FROM Volume volume WHERE volume.domainId = :domainId AND volume.isActive = :isActive")
+    Page<Volume> findAllByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, Pageable pageable);
+
+    /**
+     * Get the attached volume count based on domain.
+     *
+     * @param domainId domain id of the volume
+     * @param isActive true/false
+     * @return volume attached count
+     */
+    @Query(value = "SELECT volume FROM Volume volume WHERE volume.domainId = :domainId AND volume.isActive = :isActive AND volume.vmInstanceId IS NOT NULL")
+    List<Volume> getAttachedCountByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive);
+
 }

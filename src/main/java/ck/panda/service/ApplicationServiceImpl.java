@@ -131,4 +131,9 @@ public class ApplicationServiceImpl implements ApplicationService {
     public List<Application> findAll() throws Exception {
         return (List<Application>) applicationRepo.findAll();
     }
+
+    @Override
+    public Page<Application> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
+        return applicationRepo.findAllByDomainIdAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
+    }
 }

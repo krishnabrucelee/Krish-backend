@@ -22,11 +22,8 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Department.AccountType;
-import ck.panda.domain.entity.Domain;
-import ck.panda.domain.entity.User;
 import ck.panda.service.ConvertEntityService;
 import ck.panda.service.DepartmentService;
-import ck.panda.service.DomainService;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -142,4 +139,30 @@ public class DepartmentController extends CRUDController<Department> implements 
     public List<Department> findByDomain(@PathVariable(PATH_ID) Long id) throws Exception {
         return departmentService.findByDomainAndIsActive(id, true);
     }
+
+    /**
+     * Get all department list by domain.
+     *
+     * @param sortBy asc/desc
+     * @param domainId domain id of department.
+     * @param range pagination range.
+     * @param limit per page limit.
+     * @param request page request.
+     * @param response response content.
+     * @return department list.
+     * @throws Exception unhandled exception.
+     */
+    @RequestMapping(value = "/listByDomain", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Department> listDepartmentByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
+            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Department.class);
+        Page<Department> pageResponse = departmentService.findAllByDomainId(domainId, page);
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
+    }
+
 }

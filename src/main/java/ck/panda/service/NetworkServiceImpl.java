@@ -730,4 +730,9 @@ public class NetworkServiceImpl implements NetworkService {
         // return empty string.
         return errMessage;
     }
+
+    @Override
+    public Page<Network> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
+        return networkRepo.findAllByDomainIdAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
+    }
 }

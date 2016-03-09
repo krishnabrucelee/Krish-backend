@@ -1318,4 +1318,25 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         }
         return vmList;
     }
+
+    @Override
+    public Page<VmInstance> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
+        return virtualmachinerepository.findAllByDomainAndExceptStatusWithPageRequest(Status.EXPUNGING, domainId, pagingAndSorting.toPageRequest());
+    }
+
+    @Override
+    public Page<VmInstance> findAllByStatusAndDomain(PagingAndSorting pagingAndSorting, Status status, Long domainId)
+            throws Exception {
+        return virtualmachinerepository.findAllByStatusAndDomainWithPageRequest(status, domainId, pagingAndSorting.toPageRequest());
+    }
+
+    @Override
+    public Integer findCountByStatusAndDomain(Status status, Long domainId) {
+        return virtualmachinerepository.findAllByDomainAndStatus(domainId, status).size();
+    }
+
+    @Override
+    public List<VmInstance> findAllByDomain(Long domainId) throws Exception {
+        return (List<VmInstance>) virtualmachinerepository.findAllByDomainAndExceptStatus(domainId, Status.EXPUNGING);
+    }
 }

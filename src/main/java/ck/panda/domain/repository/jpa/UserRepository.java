@@ -9,10 +9,8 @@ import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
-import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.User.Status;
 import ck.panda.domain.entity.User.UserType;
-import ck.panda.domain.entity.VmInstance.Status;
 
 /** JPA repository for user CRUD operations. */
 public interface UserRepository extends PagingAndSortingRepository<User, Long> {
@@ -148,6 +146,16 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     Page<User> findAllUserByStatus(Pageable pageable,@Param("status") Status status);
 
     /**
+     * find all the user by domain.
+     *
+     * @param domainId domain id of the user.
+     * @param pageable pagination information.
+     * @return list of user.
+     */
+    @Query(value = "select user from User user where user.domainId =:domainId")
+    Page<User> findAllByDomainId(@Param("domainId") Long domainId, Pageable pageable);
+
+    /**
      * Get list of required parameter of user.
      *
      * @param id user id.
@@ -155,4 +163,5 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      */
     @Query(value = "SELECT new map(user.id as id, user.userName as userName, user.email as email, user.type as type, user.firstName as firstName, user.lastName as lastName, user.uuid as uuid, user.status as status, user.domain as domain, user.role as role) FROM User user WHERE user.id = :id")
     User findByUserValidList(@Param("id") Long id);
+
 }

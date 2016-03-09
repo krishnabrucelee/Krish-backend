@@ -20,7 +20,6 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Network;
-import ck.panda.domain.entity.Volume;
 import ck.panda.service.NetworkService;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -163,5 +162,30 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
     protected Network restartNetwork(@RequestBody Network network, @PathVariable(PATH_ID) Long id) throws Exception {
         network.setSyncFlag(true);
         return networkService.restartNetwork(network);
+    }
+
+    /**
+     * Get all volume list by domain.
+     *
+     * @param sortBy asc/desc
+     * @param domainId domain id of network.
+     * @param range pagination range.
+     * @param limit per page limit.
+     * @param request page request.
+     * @param response response content.
+     * @return network list.
+     * @throws Exception unhandled exception.
+     */
+    @RequestMapping(value = "/listByDomain", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Network> listNetworkByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
+            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Network.class);
+        Page<Network> pageResponse = networkService.findAllByDomainId(domainId, page);
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
     }
 }

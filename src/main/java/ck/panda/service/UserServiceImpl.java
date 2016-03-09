@@ -77,7 +77,6 @@ public class UserServiceImpl implements UserService {
     private TokenDetails tokenDetails;
 
     /** Reference of cloudStack Constants. */
-    @Autowired
     private CloudStackConstants cloudStackConstants;
 
     /** Constant for generic UTF. */
@@ -382,7 +381,7 @@ public class UserServiceImpl implements UserService {
         }
         return userRepository.findByDepartment(project.getDepartment());
     }
-    
+
     @Override
     @PreAuthorize("hasPermission(#user.getSyncFlag(), 'ENABLE_USER')")
     public User enableUser(Long userId) throws Exception {
@@ -424,7 +423,6 @@ public class UserServiceImpl implements UserService {
         }
         return userRepository.save(user);
       }
-    }
 
     @Override
     public User updatePassword(User user) throws Exception {
@@ -472,5 +470,11 @@ public class UserServiceImpl implements UserService {
         user.setPassword(null);
         return user;
     }
+
+    @Override
+    public Page<User> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
+        return userRepository.findAllByDomainId(domainId, pagingAndSorting.toPageRequest());
+    }
+
 
 }
