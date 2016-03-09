@@ -161,6 +161,10 @@ public class User implements Serializable {
     @Transient
     private String secretKey;
 
+    /** Confirm Password of the user. */
+    @Transient
+    private String confirmPassword;
+
     /** Define user type. */
     public enum UserType {
         /** Define type constant. */
@@ -657,6 +661,24 @@ public class User implements Serializable {
      */
     public void setSecretKey(String secretKey) {
         this.secretKey = secretKey;
+    }
+
+    /**
+     * Get the confirm password.
+     *
+     * @return the confirmPassword
+     */
+    public String getConfirmPassword() {
+        return confirmPassword;
+    }
+
+    /**
+     * Set the confirm password.
+     *
+     * @param confirmPassword the confirm password to set
+     */
+    public void setConfirmPassword(String confirmPassword) {
+        this.confirmPassword = confirmPassword;
     }
 
     /**

@@ -259,6 +259,35 @@ public class UserController extends CRUDController<User> implements ApiControlle
     }
 
     /**
+     * Update password of user.
+     *
+     * @param users user.
+     * @return users.
+     * @throws Exception error
+     */
+    @RequestMapping(value = "updatePassword", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public User updatePassword(@RequestBody User user) throws Exception {
+        user.setSyncFlag(true);
+        return userService.updatePassword(user);
+    }
+
+    /**
+     * Method to get list of required parameter of user.
+     *
+     * @param id user id
+     * @return users
+     * @throws Exception if error occurs
+     */
+    @RequestMapping(value = "/uservalidlist/{id}", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public User getUserValidList(@PathVariable(PATH_ID) Long id) throws Exception {
+        return userService.findByUserValidList(id);
+    }
+
+    /**
      * Get all user list by domain.
      *
      * @param sortBy asc/desc
@@ -282,5 +311,5 @@ public class UserController extends CRUDController<User> implements ApiControlle
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
-
+    
   }

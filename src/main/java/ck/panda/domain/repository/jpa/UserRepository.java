@@ -155,4 +155,13 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     @Query(value = "select user from User user where user.domainId =:domainId")
     Page<User> findAllByDomainId(@Param("domainId") Long domainId, Pageable pageable);
 
+    /**
+     * Get list of required parameter of user.
+     *
+     * @param id user id.
+     * @return user.
+     */
+    @Query(value = "SELECT new map(user.id as id, user.userName as userName, user.email as email, user.type as type, user.firstName as firstName, user.lastName as lastName, user.uuid as uuid, user.status as status, user.domain as domain, user.role as role) FROM User user WHERE user.id = :id")
+    User findByUserValidList(@Param("id") Long id);
+
 }

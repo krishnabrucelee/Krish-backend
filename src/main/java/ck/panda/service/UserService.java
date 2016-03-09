@@ -187,4 +187,22 @@ public interface UserService extends CRUDService<User> {
     Page<User> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
 
 
+    /**
+     * Update password of user.
+     *
+     * @param users user.
+     * @return users.
+     * @throws Exception error
+     */
+    User updatePassword(User user) throws Exception;
+
+    /**
+     * Method to get list of required parameter of user.
+     *
+     * @param id user id
+     * @return users
+     * @throws Exception if error occurs
+     */
+    User findByUserValidList(Long id) throws Exception;
+
 }
