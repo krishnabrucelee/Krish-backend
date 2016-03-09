@@ -39,7 +39,7 @@ public class TemplateCost implements Serializable {
 
     /** Cost of the template. */
     @Column(name = "cost")
-    private Integer cost;
+    private Double cost;
 
     /** Version attribute to handle optimistic locking. */
     @Version
@@ -111,7 +111,7 @@ public class TemplateCost implements Serializable {
      *
      * @return cost
      */
-    public Integer getCost() {
+    public Double getCost() {
         return cost;
     }
 
@@ -120,7 +120,7 @@ public class TemplateCost implements Serializable {
      *
      * @param cost - the Integer to set
      */
-    public void setCost(Integer cost) {
+    public void setCost(Double cost) {
         this.cost = cost;
     }
 

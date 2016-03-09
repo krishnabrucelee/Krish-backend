@@ -21,8 +21,14 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 
+/**
+ * Stickiness policy for load balancer where we can choose different policies for load balancer rule in network.
+ *
+ */
 @Entity
 @Table(name = "lb_sticky_policy")
 @EntityListeners(AuditingEntityListener.class)
@@ -579,10 +585,21 @@ public class LbStickinessPolicy {
             loadBalancer.setStickinessMethod(StickinessMethod.valueOf(JsonUtil.getStringValue(jsonObject, "methodname")));
         }
         loadBalancer.setStickinessName(JsonUtil.getStringValue(jsonObject, "name"));
-        loadBalancer.setCookieName(JsonUtil.getStringValue(jsonObject, "cookiename"));
-        loadBalancer.setStickyExpires(JsonUtil.getStringValue(jsonObject,"expires"));
-        loadBalancer.setStickyNoCache(JsonUtil.getBooleanValue(jsonObject,"nocache"));
-        loadBalancer.setStickyTableSize(JsonUtil.getStringValue(jsonObject,"tablesize"));
+        if (jsonObject.has(CloudStackConstants.CS_PARAMS)) {
+            JSONObject paramsResponse = jsonObject.getJSONObject(CloudStackConstants.CS_PARAMS);
+            loadBalancer.setStickyTableSize(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_TABLE_SIZE));
+            loadBalancer.setStickyLength(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_LENGTH));
+            loadBalancer.setStickyExpires(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_EXPIRE));
+            loadBalancer.setStickyMode(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_MODE));
+            loadBalancer.setStickyPrefix(JsonUtil.getBooleanValue(paramsResponse, CloudStackConstants.CS_PREFIX));
+            loadBalancer.setStickyRequestLearn(JsonUtil.getBooleanValue(paramsResponse, CloudStackConstants.CS_REQUEST_LEARN));
+            loadBalancer.setStickyIndirect(JsonUtil.getBooleanValue(paramsResponse, CloudStackConstants.CS_INDIRECT));
+            loadBalancer.setStickyNoCache(JsonUtil.getBooleanValue(paramsResponse, CloudStackConstants.CS_NO_CACHE));
+            loadBalancer.setStickyPostOnly(JsonUtil.getBooleanValue(paramsResponse, CloudStackConstants.CS_POST_ONLY));
+            loadBalancer.setStickyHoldTime(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_HOLD_TIME));
+            loadBalancer.setStickyCompany(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_DOMAIN));
+            loadBalancer.setCookieName(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_COOKIE));
+        }
         return loadBalancer;
     }
 

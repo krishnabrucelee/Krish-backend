@@ -78,10 +78,11 @@ public class LoadBalancerRule implements Serializable {
 
     /** Zone for Firewall Rule. */
     @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "lbPolicy", referencedColumnName = "Id", updatable = false, insertable = false)
     private LbStickinessPolicy lbPolicy;
 
     /** Zone id for Firewall Rule. */
-    @Column(name = "lb_policy_id")
+    @Column(name = "lbPolicy")
     private Long lbPolicyId;
 
     /** List of instance Class for an Load balancer. */
