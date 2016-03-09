@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
@@ -82,7 +84,7 @@ public class UserController extends CRUDController<User> implements ApiControlle
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, User.class);
-        Page<User> pageResponse = userService.findAllUserByDomain(page, Long.valueOf(tokenDetails.getTokenDetails("id")),Status.DELETED);
+        Page<User> pageResponse = userService.findAllUserByDomain(page, Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)),Status.DELETED);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }

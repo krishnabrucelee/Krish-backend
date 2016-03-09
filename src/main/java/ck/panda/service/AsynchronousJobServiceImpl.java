@@ -62,7 +62,7 @@ import ck.panda.util.error.exception.ApplicationException;
 public class AsynchronousJobServiceImpl implements AsynchronousJobService {
 
       /** Constant for user entity. */
-    private static final String USERDISABLE = "USER.DISABLE";
+    private static final String USER_DISABLE = "USER.DISABLE";
 
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(AsynchronousJobServiceImpl.class);
@@ -768,28 +768,28 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
 
     /**
      * Sync function for the User.
+     *
      * @param jobResult result
      * @param eventObject events
      * @throws ApplicationException exception
      * @throws Exception exception
      */
     public void asyncUser(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
-
         configUtil.setServer(1L);
-        if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(USERDISABLE)) {
-                User csUser = User.convert(jobResult.getJSONObject(CloudStackConstants.CS_USER));
-                User user = userService.findByUuIdAndIsActive(csUser.getUuid(),true);
+        if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(USER_DISABLE)) {
+            User csUser = User.convert(jobResult.getJSONObject(CloudStackConstants.CS_USER));
+            User user = userService.findByUuIdAndIsActive(csUser.getUuid(), true);
             if (csUser.getUuid().equals(user.getUuid())) {
                 User csUserResponse = csUser;
                 user.setDomainId(convertEntityService.getDomainId(csUserResponse.getTransDomainId()));
                 user.setDepartmentId(convertEntityService.getDepartmentId(csUserResponse.getTransDepartment()));
-                 user.setSyncFlag(false);
+                user.setSyncFlag(false);
                 user.setStatus(csUserResponse.getStatus());
                 userService.update(user);
             }
 
-         }
         }
+    }
 
     /**
      * Sync with CloudStack server Firewall from Asynchronous Job.

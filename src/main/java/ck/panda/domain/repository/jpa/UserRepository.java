@@ -21,7 +21,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @param query for user name
      * @return user list
      */
-    @Query(value = "select user from User user where user.isActive IS TRUE and lower(user.userName) LIKE '%' || lower(:query) || '%' ")
+    @Query(value = "SELECT user FROM User user WHERE user.isActive IS TRUE AND lower(user.userName) LIKE '%' || lower(:query) || '%' ")
     List<User> findAllByActive(@Param("query") String query);
 
     /**
@@ -31,7 +31,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @param domain domain of the user
      * @return user
      */
-    @Query(value = "select user from User user where user.userName=:userName AND user.domain=:domain")
+    @Query(value = "SELECT user FROM User user WHERE user.userName=:userName AND user.domain=:domain")
     User findByUserNameAndDomain(@Param("userName") String userName, @Param("domain") Domain domain);
 
     /**
@@ -40,7 +40,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @param department department object.
      * @return list of users.
      */
-    @Query(value = "select user from User user where user.isActive IS TRUE AND user.department=:department")
+    @Query(value = "SELECT user FROM User user WHERE user.isActive IS TRUE AND user.department=:department")
     List<User> findByDepartment(@Param("department") Department department);
 
     /**
@@ -51,7 +51,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @param isActive active users
      * @return user details
      */
-    @Query(value = "select user from User user where user.userName = :userName AND user.domain=:domain AND user.isActive =:isActive")
+    @Query(value = "SELECT user FROM User user WHERE user.userName = :userName AND user.domain=:domain AND user.isActive =:isActive")
     User findByUser(@Param("userName") String userName, @Param("domain") Domain domain,
             @Param("isActive") Boolean isActive);
 
@@ -63,7 +63,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @param status status of the user
      * @return list of user.
      */
-    @Query(value = "select user from User user where user.domain =:domain AND user.status <> :status")
+    @Query(value = "SELECT user FROM User user WHERE user.domain =:domain AND user.status <> :status")
     Page<User> findAllUserByDomain(Pageable pageable, @Param("domain") Domain domain, @Param("status") Status status);
 
     /**
@@ -72,7 +72,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @param domain domain object.
      * @return list of user.
      */
-    @Query(value = "select user from User user where user.domain =:domain ")
+    @Query(value = "SELECT user FROM User user WHERE user.domain =:domain ")
     List<User> findAllUserByDomain(@Param("domain") Domain domain);
 
     /**
@@ -82,7 +82,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @param domain domain object.
      * @return user.
      */
-    @Query(value = "select user from User user where user.domain =:domain and user.userName =:userName ")
+    @Query(value = "SELECT user FROM User user WHERE user.domain =:domain AND user.userName =:userName ")
     User findAllByActiveAndName(@Param("userName") String userName, @Param("domain") Domain domain);
 
     /**
@@ -91,7 +91,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @param type user type.
      * @return list of user.
      */
-    @Query(value = "select user from User user where user.type =:type ")
+    @Query(value = "SELECT user FROM User user WHERE user.type =:type ")
     List<User> findAllRootAdminUser(@Param("type") UserType type);
 
     /**
@@ -101,7 +101,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @param isActive get the user list based on active/inactive status.
      * @return user list.
      */
-    @Query(value = "select user from User user where user.isActive =:isActive AND user.type in (:types)")
+    @Query(value = "SELECT user FROM User user WHERE user.isActive =:isActive AND user.type in (:types)")
     List<User> findUsersByTypesAndActive(@Param("types") List<UserType> types, @Param("isActive") Boolean isActive);
 
     /**
@@ -111,7 +111,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @param isActive status of the user.
      * @return user.
      */
-    @Query(value = "select user from User user where user.uuid =:uuId AND user.isActive =:isActive")
+    @Query(value = "SELECT user FROM User user WHERE user.uuid =:uuId AND user.isActive =:isActive")
     User findByUuIdAndIsActive(@Param("uuId") String uuId, @Param("isActive") Boolean isActive);
 
     /**
@@ -142,7 +142,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @param status status of the user
      * @return list of users
      */
-    @Query(value = "select user from User user where user.status <> :status")
+    @Query(value = "SELECT user FROM User user WHERE user.status <> :status")
     Page<User> findAllUserByStatus(Pageable pageable,@Param("status") Status status);
 
 }

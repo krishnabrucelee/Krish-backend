@@ -33,11 +33,11 @@ import ck.panda.util.error.exception.ApplicationException;
 @Service
 public class UserServiceImpl implements UserService {
 
-      /** Constant for user disable response. */
-    private static final String DISABLEUSER = "disableuserresponse";
+    /** Constant for user disable response. */
+    private static final String DISABLE_USER = "disableuserresponse";
 
     /** Constant for user enable response. */
-    private static final String ENABLEUSER = "enableuserresponse";
+    private static final String ENABLE_USER = "enableuserresponse";
 
     /** Validator attribute. */
     @Autowired
@@ -376,7 +376,7 @@ public class UserServiceImpl implements UserService {
         config.setServer(1L);
         String csUserResponse = csUserService.enableUser(user.getUuid(), CloudStackConstants.JSON);
         JSONObject createComputeResponseJSON = new JSONObject(csUserResponse)
-                .getJSONObject(ENABLEUSER);
+                .getJSONObject(ENABLE_USER);
         if (createComputeResponseJSON.has(CloudStackConstants.CS_ERROR_CODE)) {
             errors = this.validateEvent(errors, createComputeResponseJSON.getString(CloudStackConstants.CS_ERROR_TEXT));
             throw new ApplicationException(errors);
@@ -398,7 +398,7 @@ public class UserServiceImpl implements UserService {
         config.setServer(1L);
         String csUserResponse = csUserService.disableUser(user.getUuid(), CloudStackConstants.JSON);
         JSONObject jobResponse = new JSONObject(csUserResponse)
-                .getJSONObject(DISABLEUSER);
+                .getJSONObject(DISABLE_USER);
         if (jobResponse.has(CloudStackConstants.CS_JOB_ID)) {
             String csJobResponse = csUserService.associatedJobResult(jobResponse.getString(CloudStackConstants.CS_JOB_ID),
                     CloudStackConstants.JSON);

@@ -216,7 +216,10 @@ public class CloudStackUserService {
 
     }
 
-  /** @param asychronousJobid the ID of the asychronous job
+   /**
+     * Retrieves the current status of asynchronous job for user.
+    *
+    * @param asychronousJobid the ID of the asychronous job
     * @param response json or xml.
     * @return response.
     * @throws Exception if error occurs.
