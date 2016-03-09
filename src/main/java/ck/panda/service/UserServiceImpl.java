@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
@@ -104,6 +103,8 @@ public class UserServiceImpl implements UserService {
                 user.setUuid((String) userRes.get("id"));
                 user.setPassword(encryptedPassword);
                 user.setDomainId(user.getDomainId());
+                user.setStatus(user.getStatus()
+                        .valueOf(userRes.getString(CloudStackConstants.CS_STATE).toUpperCase()));
                 user = userRepository.save(user);
                 if (user.getProjectList() != null) {
                     for (Project project : user.getProjectList()) {
@@ -118,7 +119,6 @@ public class UserServiceImpl implements UserService {
                 return user;
             }
         } else {
-            user.setStatus(Status.ACTIVE);
             return userRepository.save(user);
         }
     }
@@ -164,7 +164,6 @@ public class UserServiceImpl implements UserService {
                 return userRepository.save(user);
             }
         } else {
-            user.setStatus(Status.ACTIVE);
             return userRepository.save(user);
         }
     }
@@ -172,13 +171,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @PreAuthorize("hasPermission(#user.getSyncFlag(), 'DELETE_USER')")
     public void delete(User user) throws Exception {
-		if (user.getSyncFlag()) {
-			config.setServer(1L);
-			csUserService.deleteUser(user.getId().toString(), CloudStackConstants.JSON);
-		} else {
-			// async call delete.
-			this.softDelete(user);
-		}
+        if (user.getSyncFlag()) {
+            config.setServer(1L);
+            csUserService.deleteUser(user.getId().toString(), CloudStackConstants.JSON);
+        } else {
+            // async call delete.
+            this.softDelete(user);
+        }
     }
 
     @Override
@@ -310,12 +309,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<User> findAllUserByDomain(PagingAndSorting pagingAndSorting, Long userId) throws Exception {
+    public Page<User> findAllUserByDomain(PagingAndSorting pagingAndSorting, Long userId, Status status) throws Exception {
         User user = userRepository.findOne(userId);
         if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
-            return userRepository.findAllUserByDomain(pagingAndSorting.toPageRequest(), user.getDomain(), true);
+            return userRepository.findAllUserByDomain(pagingAndSorting.toPageRequest(), user.getDomain(), status);
         }
-        return userRepository.findAll(pagingAndSorting.toPageRequest());
+        return userRepository.findAllUserByStatus(pagingAndSorting.toPageRequest(), status);
     }
 
     @Override
@@ -360,6 +359,46 @@ public class UserServiceImpl implements UserService {
             return userRepository.findAllByDepartmentAndIsActive(true, project.getDepartmentId(), projectUsers);
         }
         return userRepository.findByDepartment(project.getDepartment());
+    }
+
+    @Override
+    public User enableUser(Long userId) throws Exception {
+        Errors errors = null;
+        User user = userRepository.findOne(userId);
+        HashMap<String, String> optional = new HashMap<String, String>();
+        config.setServer(1L);
+        String csUserResponse = csUserService.enableUser(user.getUuid(), "json");
+        JSONObject createComputeResponseJSON = new JSONObject(csUserResponse)
+                .getJSONObject("enableuserresponse");
+        if (createComputeResponseJSON.has(CloudStackConstants.CS_ERROR_CODE)) {
+            errors = this.validateEvent(errors, createComputeResponseJSON.getString(CloudStackConstants.CS_ERROR_TEXT));
+            throw new ApplicationException(errors);
+        }
+        JSONObject enableUserResponse = createComputeResponseJSON.getJSONObject("user");
+        user.setUuid((String) enableUserResponse.get(CloudStackConstants.CS_ID));
+        user.setIsActive(true);
+        user.setStatus(user.getStatus()
+                .valueOf(enableUserResponse.getString(CloudStackConstants.CS_STATE).toUpperCase()));
+        return userRepository.save(user);
+    }
+
+    @Override
+    public User disableUser(Long userId) throws Exception {
+        Errors errors = null;
+        User user = userRepository.findOne(userId);
+        HashMap<String, String> optional = new HashMap<String, String>();
+        config.setServer(1L);
+        String csUserResponse = csUserService.disableUser(user.getUuid(), "json");
+        JSONObject jobResponse = new JSONObject(csUserResponse)
+                .getJSONObject("disableuserresponse");
+        if (jobResponse.has(CloudStackConstants.CS_JOB_ID)) {
+            String csJobResponse = csUserService.associatedJobResult(jobResponse.getString(CloudStackConstants.CS_JOB_ID),
+                    CloudStackConstants.JSON);
+            JSONObject jobresult = new JSONObject(csJobResponse)
+                    .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+            user.setStatus(Status.DISABLED);
+        }
+        return userRepository.save(user);
     }
 
 }

@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.User.Status;
 import ck.panda.domain.entity.User.UserType;
 
 /** JPA repository for user CRUD operations. */
@@ -59,12 +60,11 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      *
      * @param pageable pagination information.
      * @param domain domain object.
-     * @param isActive true/false
+     * @param status status of the user
      * @return list of user.
      */
-    @Query(value = "select user from User user where user.domain =:domain AND user.isActive =:isActive")
-    Page<User> findAllUserByDomain(Pageable pageable, @Param("domain") Domain domain,
-            @Param("isActive") Boolean isActive);
+    @Query(value = "select user from User user where user.domain =:domain AND user.status <> :status")
+    Page<User> findAllUserByDomain(Pageable pageable, @Param("domain") Domain domain, @Param("status") Status status);
 
     /**
      * find all the user by domain.
@@ -134,5 +134,15 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      */
     @Query(value = "SELECT user FROM User user WHERE user.isActive IS :isActive AND user.departmentId = :departmentId AND user NOT IN :userList")
     List<User> findAllByDepartmentAndIsActive(@Param("isActive") Boolean isActive, @Param("departmentId") Long departmentId, @Param("userList") List<User> userList);
+
+    /**
+     * Find all user by status .
+     *
+     * @param pageable pagination
+     * @param status status of the user
+     * @return list of users
+     */
+    @Query(value = "select user from User user where user.status <> :status")
+    Page<User> findAllUserByStatus(Pageable pageable,@Param("status") Status status);
 
 }

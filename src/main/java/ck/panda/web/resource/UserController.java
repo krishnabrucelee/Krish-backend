@@ -20,6 +20,8 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.User.Status;
 import ck.panda.service.UserService;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -80,9 +82,23 @@ public class UserController extends CRUDController<User> implements ApiControlle
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, User.class);
-        Page<User> pageResponse = userService.findAllUserByDomain(page, Long.valueOf(tokenDetails.getTokenDetails("id")));
+        Page<User> pageResponse = userService.findAllUserByDomain(page, Long.valueOf(tokenDetails.getTokenDetails("id")),Status.DELETED);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
+    }
+
+    @RequestMapping(value = "/listall", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<User> listAllUser(@RequestParam String sortBy,
+            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, VmInstance.class);
+        Page<User> pageResponse = userService.findAll(page);
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
+
     }
 
     /**
@@ -197,6 +213,29 @@ public class UserController extends CRUDController<User> implements ApiControlle
     @ResponseBody
     public List<User> getUsersByProject(@PathVariable(PATH_ID) Long projectId) throws Exception {
         return userService.findAllByProject(projectId);
+    }
+
+    /**
+     * Method to Enable the User.
+     *
+     * @param projectId - project id
+     * @return list of users
+     * @throws Exception - if error occurs
+     */
+    @RequestMapping(value = "/enable/{id}", method = RequestMethod.PUT, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public User enableUser(@PathVariable(PATH_ID) Long userId) throws Exception {
+        return userService.enableUser(userId);
+    }
+
+    @RequestMapping(value = "/disable/{id}", method = RequestMethod.PUT, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public User disableUser(@PathVariable(PATH_ID) Long userId) throws Exception {
+        return userService.disableUser(userId);
     }
 
   }

@@ -33,6 +33,7 @@ import ck.panda.domain.entity.PortForwarding;
 import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.SnapshotPolicy;
 import ck.panda.domain.entity.Template;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.entity.VmSnapshot;
@@ -164,6 +165,8 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     @Autowired
     private SnapshotPolicyService snapShotPolicyService;
 
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private VmSnapshotService vmSnapshotService;
@@ -322,6 +325,11 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             LOGGER.debug("VPN sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
                 eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
             asyncVpn(jobResult, eventObject);
+            break;
+        case EventTypes.EVENT_USER:
+            LOGGER.debug("User sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+            asyncUser(jobResult, eventObject);
             break;
         default:
             LOGGER.debug("No sync required", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
@@ -748,6 +756,24 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             networkService.update(network);
         }
     }
+
+    public void asyncUser(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
+
+        configUtil.setServer(1L);
+        if (eventObject.getString("commandEventType").equals("USER.DISABLE")) {
+            	User csUser = User.convert(jobResult.getJSONObject("user"));
+                User user = userService.findByUuIdAndIsActive(csUser.getUuid(),true);
+            if (csUser.getUuid().equals(user.getUuid())) {
+                User csUserResponse = csUser;
+                user.setDomainId(convertEntityService.getDomainId(csUserResponse.getTransDomainId()));
+                user.setDepartmentId(convertEntityService.getDepartmentId(csUserResponse.getTransDepartment()));
+                 user.setSyncFlag(false);
+                user.setStatus(csUserResponse.getStatus());
+                userService.update(user);
+            }
+
+         }
+        }
 
     /**
      * Sync with CloudStack server Firewall from Asynchronous Job.

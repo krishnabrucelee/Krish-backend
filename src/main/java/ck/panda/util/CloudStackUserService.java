@@ -7,9 +7,16 @@ import org.apache.commons.httpclient.NameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * CloudStack User service for connectivity with CloudStack server.
+ *
+ */
 @Service
 public class CloudStackUserService {
 
+    /**
+     * Cloudstack server for connectivity.
+     */
     @Autowired
     private CloudStackServer server;
 
@@ -23,7 +30,7 @@ public class CloudStackUserService {
     }
 
     /**
-     * Creates a user for an account that already exists
+     * Creates a user for an account that already exists.
      *
      * @param accountName Creates the user under the specified account. If no account is specified, the username will be
      *            used as the account name.
@@ -34,7 +41,7 @@ public class CloudStackUserService {
      * @param password Hashed password (Default is MD5). If you wish to use any other hashing algorithm, you would need
      *            to write a custom authentication adapter See Docs section.
      * @param optional
-     * @return
+     * @return user
      * @throws Exception
      */
     public String createUser(String accountName, String emailId, String firstName, String lastName, String userName,
@@ -54,11 +61,12 @@ public class CloudStackUserService {
     }
 
     /**
-     * delete user from the account
+     * Delete user from the account.
      *
-     * @param accountId account id of the user
-     * @return
-     * @throws Exception
+     * @param userId user id
+     * @param response response
+     * @return deleted user
+     * @throws Exception exception
      */
     public String deleteUser(String userId, String response) throws Exception {
 
@@ -72,12 +80,13 @@ public class CloudStackUserService {
     }
 
     /**
-     * Updates a user account
+     * Updates a user account.
      *
      * @param userId the User id
-     * @param optional
-     * @return
-     * @throws Exception
+     * @param optional values
+     * @param response response
+     * @return response response
+     * @throws Exception exception
      */
     public String updateUser(String userId, HashMap<String, String> optional, String response) throws Exception {
 
@@ -90,12 +99,14 @@ public class CloudStackUserService {
     }
 
     /**
-     * Lists user accounts
+     * Lists user accounts.
      *
-     * @param optional
-     * @return
-     * @throws Exception
+     * @param optional values
+     * @param response response
+     * @return user
+     * @throws Exception exception
      */
+
     public String listUsers(HashMap<String, String> optional, String response) throws Exception {
 
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("listUsers", optional);
@@ -106,12 +117,14 @@ public class CloudStackUserService {
     }
 
     /**
-     * Locks user
+     * Locks user.
      *
      * @param userId the user id
-     * @return
-     * @throws Exception
+     * @param response responser
+     * @return user
+     * @throws Exception exception
      */
+
     public String lockUser(String userId, String response) throws Exception {
 
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("lockUser", null);
@@ -124,12 +137,14 @@ public class CloudStackUserService {
     }
 
     /**
-     * Disables user
+     * Disables user.
      *
      * @param userId the user id
-     * @return
-     * @throws Exception
+     * @param response response
+     * @return user
+     * @throws Exception exception
      */
+
     public String disableUser(String userId, String response) throws Exception {
 
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("disableUser", null);
@@ -142,13 +157,14 @@ public class CloudStackUserService {
     }
 
     /**
-     * Enables User
+     * Enables User.
      *
      * @param userId the user id
-     * @return
-     * @throws Exception
+     * @return enabled user
+     * @param response response
+     * @throws Exception exception
      */
-    public String enableUser(String userId, String response) throws Exception {
+     public String enableUser(String userId, String response) throws Exception {
 
         LinkedList<NameValuePair> arguments = server.getDefaultQuery("enableUser", null);
         arguments.add(new NameValuePair("id", userId));
@@ -160,11 +176,12 @@ public class CloudStackUserService {
     }
 
     /**
-     * Finds user account by API key
+     * Finds user account by API key.
      *
      * @param userApiKey the user api key
-     * @return
-     * @throws Exception
+     * @return user
+     * @param response response
+     * @throws Exception exception
      */
     public String GetUser(String userApiKey, String response) throws Exception {
 
@@ -184,8 +201,9 @@ public class CloudStackUserService {
      * integration API request. Both secret key and API key should be returned to the user
      *
      * @param userId The user id
-     * @return
-     * @throws Exception
+     * @return user
+     * @param response response
+     * @throws Exception exception
      */
     public String registerUserKeys(String userId, String response) throws Exception {
 
@@ -197,4 +215,20 @@ public class CloudStackUserService {
         return responseDocument;
 
     }
+
+  /** @param asychronousJobid the ID of the asychronous job
+    * @param response json or xml.
+    * @return response.
+    * @throws Exception if error occurs.
+    */
+   public String associatedJobResult(String asychronousJobid, String response)
+           throws Exception {
+
+       LinkedList<NameValuePair> arguments
+               = server.getDefaultQuery("queryAsyncJobResult", null);
+       arguments.add(new NameValuePair("jobid", asychronousJobid));
+        arguments.add(new NameValuePair("response",response));
+       String responseDocument = server.request(arguments);
+       return responseDocument;
+   }
 }
