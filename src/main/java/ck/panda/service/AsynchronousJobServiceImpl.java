@@ -61,6 +61,9 @@ import ck.panda.util.error.exception.ApplicationException;
 @Service
 public class AsynchronousJobServiceImpl implements AsynchronousJobService {
 
+      /** Constant for user entity. */
+    private static final String USERDISABLE = "USER.DISABLE";
+
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(AsynchronousJobServiceImpl.class);
 
@@ -165,9 +168,15 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     @Autowired
     private SnapshotPolicyService snapShotPolicyService;
 
+    /**
+     *  Service reference to User.
+     */
     @Autowired
     private UserService userService;
 
+    /**
+     *  Service reference to vmSnapshot Sevice.
+     */
     @Autowired
     private VmSnapshotService vmSnapshotService;
 
@@ -376,7 +385,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     csVm.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
                             csVm.getTransDepartmentId(), convertEntityService.getDomain(csVm.getTransDomainId())));
                     if (csVm.getTransProjectId() != null) {
-                    	csVm.setDepartmentId(convertEntityService.getProject(csVm.getTransProjectId()).getDepartmentId());
+                        csVm.setDepartmentId(convertEntityService.getProject(csVm.getTransProjectId()).getDepartmentId());
                     }
                     csVm.setTemplateId(convertEntityService.getTemplateId(csVm.getTransTemplateId()));
                     csVm.setComputeOfferingId(convertEntityService.getComputeOfferId(csVm.getTransComputeOfferingId()));
@@ -385,10 +394,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                                 .getPodIdByHost(convertEntityService.getHostId(csVm.getTransHostId())));
                     }
                     if (csVm.getTransHypervisor() != null) {
-    					if (hypervisorService.findByName(csVm.getTransHypervisor()) != null) {
-    						csVm.setHypervisorId(hypervisorService.findByName(csVm.getTransHypervisor()).getId());
-    					}
-    				}
+                        if (hypervisorService.findByName(csVm.getTransHypervisor()) != null) {
+                            csVm.setHypervisorId(hypervisorService.findByName(csVm.getTransHypervisor()).getId());
+                        }
+                    }
                     instance.setName(csVm.getName());
                     if (csVm.getCpuCore() != null) {
                         instance.setCpuCore(csVm.getCpuCore());
@@ -479,10 +488,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 vmInstance.setInstanceOwnerId(convertEntityService.getUserByName(vmInstance.getTransDisplayName(),
                         convertEntityService.getDomain(vmInstance.getTransDomainId())));
                 if (vmInstance.getTransHypervisor() != null) {
-					if (hypervisorService.findByName(vmInstance.getTransHypervisor()) != null) {
-						vmInstance.setHypervisorId(hypervisorService.findByName(vmInstance.getTransHypervisor()).getId());
-					}
-				}
+                    if (hypervisorService.findByName(vmInstance.getTransHypervisor()) != null) {
+                        vmInstance.setHypervisorId(hypervisorService.findByName(vmInstance.getTransHypervisor()).getId());
+                    }
+                }
                 vmInstance.setDepartmentId(
                         convertEntityService.getDepartmentByUsernameAndDomains(vmInstance.getTransDepartmentId(),
                                 convertEntityService.getDomain(vmInstance.getTransDomainId())));
@@ -757,11 +766,18 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         }
     }
 
+    /**
+     * Sync function for the User.
+     * @param jobResult result
+     * @param eventObject events
+     * @throws ApplicationException exception
+     * @throws Exception exception
+     */
     public void asyncUser(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
 
         configUtil.setServer(1L);
-        if (eventObject.getString("commandEventType").equals("USER.DISABLE")) {
-            	User csUser = User.convert(jobResult.getJSONObject("user"));
+        if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(USERDISABLE)) {
+                User csUser = User.convert(jobResult.getJSONObject(CloudStackConstants.CS_USER));
                 User user = userService.findByUuIdAndIsActive(csUser.getUuid(),true);
             if (csUser.getUuid().equals(user.getUuid())) {
                 User csUserResponse = csUser;

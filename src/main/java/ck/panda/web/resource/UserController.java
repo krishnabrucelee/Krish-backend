@@ -87,6 +87,17 @@ public class UserController extends CRUDController<User> implements ApiControlle
         return pageResponse.getContent();
     }
 
+    /**
+     * To list all the users.
+     *
+     * @param sortBy user
+     * @param range range
+     * @param limit pagelimit
+     * @param request request
+     * @param response response
+     * @return users
+     * @throws Exception exceptions
+     */
     @RequestMapping(value = "/listall", method = RequestMethod.GET, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
@@ -218,7 +229,7 @@ public class UserController extends CRUDController<User> implements ApiControlle
     /**
      * Method to Enable the User.
      *
-     * @param projectId - project id
+     * @param userId id of the user
      * @return list of users
      * @throws Exception - if error occurs
      */
@@ -230,6 +241,13 @@ public class UserController extends CRUDController<User> implements ApiControlle
         return userService.enableUser(userId);
     }
 
+    /**
+     * Method to Disable the User.
+     *
+     * @param userId id of the user
+     * @return disabled users
+     * @throws Exception exception
+     */
     @RequestMapping(value = "/disable/{id}", method = RequestMethod.PUT, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)

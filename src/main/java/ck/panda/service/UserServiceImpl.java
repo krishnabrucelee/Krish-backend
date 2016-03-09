@@ -33,6 +33,12 @@ import ck.panda.util.error.exception.ApplicationException;
 @Service
 public class UserServiceImpl implements UserService {
 
+      /** Constant for user disable response. */
+    private static final String DISABLEUSER = "disableuserresponse";
+
+    /** Constant for user enable response. */
+    private static final String ENABLEUSER = "enableuserresponse";
+
     /** Validator attribute. */
     @Autowired
     private AppValidator validator;
@@ -362,19 +368,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#user.getSyncFlag(), 'ENABLE_USER')")
     public User enableUser(Long userId) throws Exception {
         Errors errors = null;
         User user = userRepository.findOne(userId);
         HashMap<String, String> optional = new HashMap<String, String>();
         config.setServer(1L);
-        String csUserResponse = csUserService.enableUser(user.getUuid(), "json");
+        String csUserResponse = csUserService.enableUser(user.getUuid(), CloudStackConstants.JSON);
         JSONObject createComputeResponseJSON = new JSONObject(csUserResponse)
-                .getJSONObject("enableuserresponse");
+                .getJSONObject(ENABLEUSER);
         if (createComputeResponseJSON.has(CloudStackConstants.CS_ERROR_CODE)) {
             errors = this.validateEvent(errors, createComputeResponseJSON.getString(CloudStackConstants.CS_ERROR_TEXT));
             throw new ApplicationException(errors);
         }
-        JSONObject enableUserResponse = createComputeResponseJSON.getJSONObject("user");
+        JSONObject enableUserResponse = createComputeResponseJSON.getJSONObject(CloudStackConstants.CS_USER);
         user.setUuid((String) enableUserResponse.get(CloudStackConstants.CS_ID));
         user.setIsActive(true);
         user.setStatus(user.getStatus()
@@ -383,14 +390,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#user.getSyncFlag(), 'DISABLE_USER')")
     public User disableUser(Long userId) throws Exception {
         Errors errors = null;
         User user = userRepository.findOne(userId);
         HashMap<String, String> optional = new HashMap<String, String>();
         config.setServer(1L);
-        String csUserResponse = csUserService.disableUser(user.getUuid(), "json");
+        String csUserResponse = csUserService.disableUser(user.getUuid(), CloudStackConstants.JSON);
         JSONObject jobResponse = new JSONObject(csUserResponse)
-                .getJSONObject("disableuserresponse");
+                .getJSONObject(DISABLEUSER);
         if (jobResponse.has(CloudStackConstants.CS_JOB_ID)) {
             String csJobResponse = csUserService.associatedJobResult(jobResponse.getString(CloudStackConstants.CS_JOB_ID),
                     CloudStackConstants.JSON);
