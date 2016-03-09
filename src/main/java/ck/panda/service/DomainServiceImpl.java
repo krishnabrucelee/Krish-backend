@@ -14,7 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Domain.Status;
 import ck.panda.domain.entity.Role;
@@ -68,7 +71,7 @@ public class DomainServiceImpl implements DomainService {
 
     /** Reference of Cloud Stack Department service. */
     @Autowired
-    private CloudStackAccountService departmentService;
+    private CloudStackAccountService csAccountService;
 
     /** Reference of the convert entity service. */
     @Autowired
@@ -183,7 +186,7 @@ public class DomainServiceImpl implements DomainService {
         department.setType(Department.AccountType.DOMAIN_ADMIN);
         department.setIsActive(true);
         optional.put("domainid", String.valueOf(persistedDomain.getUuid()));
-        String accountresponse = departmentService.createAccount(String.valueOf(department.getType().ordinal()),
+        String accountresponse = csAccountService.createAccount(String.valueOf(department.getType().ordinal()),
                 persistedDomain.getEmail(), persistedDomain.getPrimaryFirstName(), persistedDomain.getLastName(),
                 department.getUserName(), persistedDomain.getPassword(), "json", optional);
         JSONObject createAccountResponseJSON = new JSONObject(accountresponse).getJSONObject("createaccountresponse");
@@ -304,7 +307,7 @@ public class DomainServiceImpl implements DomainService {
     public List<Domain> findAll() throws Exception {
         Domain domain = domainRepo.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         if (domain != null && domain.getName().equals("ROOT")) {
-            return (List<Domain>) domainRepo.findAll();
+            return (List<Domain>) domainRepo.findAllByDomainAndIsActive(true);
         }
         List<Domain> domains = new ArrayList<Domain>();
         domains.add(deptService.find(Long.parseLong(tokenDetails.getTokenDetails("departmentid"))).getDomain());
@@ -320,10 +323,11 @@ public class DomainServiceImpl implements DomainService {
     public Domain softDelete(Domain domain) throws Exception {
         Errors errors = validator.rejectIfNullEntity("domain", domain);
         if (domain.getSyncFlag()) {
-            List<Department> department = deptService.findByDomainAndIsActive(domain.getId(), true);
+            // checking whether department belong to that domain has resource.
+            List<Department> department = deptService.findAllByDomainAndIsActive(domain.getId(), true);
             if (department.size() != 0) {
                 errors.addGlobalError(
-                        "domain.delete.confirmation");
+                        "error.domain.delete.confirmation");
             }
         }
         if (errors.hasErrors()) {
@@ -333,8 +337,26 @@ public class DomainServiceImpl implements DomainService {
             domain.setStatus(Domain.Status.INACTIVE);
             if (domain.getSyncFlag()) {
                 configServer.setServer(1L);
-                String deleteResponse = domainService.deleteDomain(domain.getUuid(), "json");
+                // Deleting default department with its user while before deleting a domain.
+                List<Department> departmentList = deptService.findAllByDomainAccountTypeAndIsActive(domain.getId(), true, AccountType.DOMAIN_ADMIN);
+                for (Department department : departmentList) {
+                    String departmentResponse = csAccountService.deleteAccount(department.getUuid(), CloudStackConstants.JSON);
+                    JSONObject jobId = new JSONObject(departmentResponse).getJSONObject(CloudStackConstants.CS_DELETE_ACCOUNT_RESPONSE);
+                    if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
+                        String jobResponse = csAccountService.accountJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
+                        JSONObject jobresult = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+                    }
+                    department.setIsActive(false);
+                    department.setStatus(Department.Status.DELETED);
+                    department.setSyncFlag(false);
+                    deptService.save(department);
+               }
+                // After deleting all the resources going to delete domain.
+                String deleteResponse = domainService.deleteDomain(domain.getUuid(),CloudStackConstants.JSON);
                 JSONObject deleteJobId = new JSONObject(deleteResponse).getJSONObject("deletedomainresponse");
+                domain.setIsActive(false);
+                domain.setSyncFlag(false);
+                domain.setStatus(Status.INACTIVE);
             }
         }
         return domainRepo.save(domain);
@@ -367,9 +389,9 @@ public class DomainServiceImpl implements DomainService {
     private void validateDomain(Domain domain) throws Exception {
         Errors errors = validator.rejectIfNullEntity("domain", domain);
         errors = validator.validateEntity(domain, errors);
-        Domain validateDomain = domainRepo.findByName(domain.getName(), true);
+        Domain validateDomain = domainRepo.findByName(domain.getCompanyNameAbbreviation(), true);
         if (validateDomain != null && domain.getId() != validateDomain.getId()) {
-            errors.addFieldError("name", "domain.already.exist");
+            errors.addFieldError("companyNameAbbreviation", "domain.already.exist");
         }
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
@@ -409,5 +431,4 @@ public class DomainServiceImpl implements DomainService {
     public Domain findDomain() throws Exception {
         return domainRepo.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
     }
-
 }
