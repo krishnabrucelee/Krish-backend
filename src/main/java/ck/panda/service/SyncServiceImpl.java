@@ -886,6 +886,7 @@ public class SyncServiceImpl implements SyncService {
                 // osType which is not added in the app
                 csStorageOfferingMap.remove(storageOffering.getUuid());
             } else {
+                storageOffering.setIsSyncFlag(false);
                 storageService.softDelete(storageOffering);
             }
         }
@@ -1099,6 +1100,7 @@ public class SyncServiceImpl implements SyncService {
                 // compute offering which is not added in the app
                 csComputeOfferingMap.remove(computeOffering.getUuid());
             } else {
+                computeOffering.setIsSyncFlag(false);
                 computeService.softDelete(computeOffering);
             }
         }

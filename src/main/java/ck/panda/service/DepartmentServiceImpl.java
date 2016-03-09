@@ -16,6 +16,7 @@ import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.SSHKey;
@@ -92,6 +93,10 @@ public class DepartmentServiceImpl implements DepartmentService {
     /** sshkey service reference. */
     @Autowired
     private SSHKeyService sshkeyService;
+
+    /** Network Service reference .*/
+    @Autowired
+    private NetworkService networkService;
 
     /** Baremetal system constant. */
     public static final String BAREMETAL_SYSTEM_ACCOUNT = "baremetal-system-account";
@@ -224,6 +229,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             List<Volume> volumeResponse = volumeService.findByDepartmentAndIsActive(department.getId(), true);
             List<User> userResponse = userService.findByDepartment(department.getId());
             List<SSHKey> sshkeyResponse = sshkeyService.findAllByDepartmentAndIsActive(department.getId(), true);
+            List<Network> networkResponse = networkService.findByDepartmentAndNetworkIsActive(department.getId(), true);
             if (projectResponse.size() != 0 || vmResponse.size() != 0
                     || roleResponse.size() != 0 || volumeResponse.size() != 0 || sshkeyResponse.size()!= 0 ) {
                 errors.addGlobalError(GenericConstants.PAGE_ERROR_SEPARATOR + GenericConstants.TOKEN_SEPARATOR
@@ -232,6 +238,7 @@ public class DepartmentServiceImpl implements DepartmentService {
                         + roleResponse.size() + GenericConstants.TOKEN_SEPARATOR
                         + volumeResponse.size() + GenericConstants.TOKEN_SEPARATOR
                         + sshkeyResponse.size() + GenericConstants.TOKEN_SEPARATOR
+                        + networkResponse.size() + GenericConstants.TOKEN_SEPARATOR
                         + userResponse.size());
 
             }
