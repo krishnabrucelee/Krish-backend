@@ -1,9 +1,7 @@
 package ck.panda.domain.repository.jpa;
 
 import ck.panda.domain.entity.Domain;
-
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
