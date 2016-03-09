@@ -266,7 +266,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      *            belongs to VM.
      * @return instance list.
      */
-    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.status <> :status AND (vm.project = :project OR (vm.project IS NULL AND vm.department = :department))")
+	@Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.name as name, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm LEFT JOIN vm.instanceOwner owner WHERE vm.status <> :status AND (vm.project = :project OR (vm.project IS NULL AND vm.department = :department))")
     List<VmInstance> findAllByDepartmentAndProjectAndExceptStatus(@Param("status") Status status,
             @Param("department") Department department, @Param("project") Project project);
 

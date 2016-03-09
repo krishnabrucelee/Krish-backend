@@ -930,7 +930,7 @@ public class SyncServiceImpl implements SyncService {
                 user.setEmail(csUser.getEmail());
                 user.setUserName(csUser.getUserName());
                 user.setIsActive(true);
-                user.setStatus(Status.ACTIVE);
+                user.setStatus(csUser.getStatus());
                 // 3.2 If found, update the user object in app db
                 userService.update(user);
 
