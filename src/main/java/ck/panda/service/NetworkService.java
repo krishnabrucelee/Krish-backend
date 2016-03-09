@@ -108,6 +108,15 @@ public interface NetworkService extends CRUDService<Network> {
     Network restartNetwork(Network network) throws Exception;
 
     /**
+     * Release ip from Network
+     *
+     * @param network object
+     * @return network
+     * @throws Exception if error occurs.
+     */
+    Network ipRelease(Network network) throws Exception;
+    
+    /**
      * Find all the domain based Network list.
      *
      * @param domainId domain id of the network

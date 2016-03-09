@@ -2363,13 +2363,14 @@ public class SyncServiceImpl implements SyncService {
                 LbStickinessPolicy csLoadBalancer = csLoadBalancerMap.get(loadBalancer.getUuid());
 
             loadBalancer.setUuid(csLoadBalancer.getUuid());
-            //loadBalancer.setStickinessName(csLoadBalancer.getStickinessName());
-           // loadBalancer.setStickinessMethod(csLoadBalancer.getStickinessMethod());
+            loadBalancer.setStickinessName(csLoadBalancer.getStickinessName());
+            loadBalancer.setStickinessMethod(csLoadBalancer.getStickinessMethod());
                 // 3.2 If found, update the LoadBalancer object in app db
             lbPolicyService.update(loadBalancer);
 
                 // 3.3 Remove once updated, so that we can have the list of cs
                 // nic which is not added in the app
+            csLoadBalancerMap.remove(loadBalancer.getUuid());
             }else {
                 lbPolicyService.softDelete(loadBalancer);
             }

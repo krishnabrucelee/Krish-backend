@@ -29,6 +29,8 @@ import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.entity.Department.AccountType;
+import ck.panda.domain.entity.IpAddress;
+import ck.panda.domain.entity.IpAddress.State;
 import ck.panda.domain.repository.jpa.NetworkRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackNetworkService;
@@ -155,6 +157,9 @@ public class NetworkServiceImpl implements NetworkService {
     /** Update Resource Count service reference. */
     @Autowired
     private UpdateResourceCountService updateResourceCountService;
+
+    @Autowired
+    private IpaddressService ipService;
 
     @Override
     @PreAuthorize("hasPermission(#network.getSyncFlag(), 'ADD_ISOLATED_NETWORK')")
@@ -380,6 +385,7 @@ public class NetworkServiceImpl implements NetworkService {
                                CloudStackConstants.JSON);
                        JSONObject jobresult = new JSONObject(jobResponse)
                                .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+                       this.ipRelease(network);
                    }
                }
            }
@@ -388,6 +394,22 @@ public class NetworkServiceImpl implements NetworkService {
                }
             }
         return networkRepo.save(network);
+    }
+
+    @Override
+    public Network ipRelease(Network network) throws Exception {
+        List<IpAddress> ipList = ipService.findByNetwork(network.getId());
+        for(IpAddress ip : ipList) {
+            ip.setIsActive(false);
+            ip.setState(State.FREE);
+            ip.setNetworkId(null);
+            ip.setDomainId(null);
+            ip.setIsSourcenat(false);
+            ip.setIsStaticnat(false);
+            ip.setSyncFlag(false);
+            ipService.update(ip);
+        }
+        return network;
     }
 
     @Override

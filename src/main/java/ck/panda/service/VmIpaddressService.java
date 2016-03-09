@@ -22,6 +22,15 @@ public interface VmIpaddressService extends CRUDService<VmIpaddress> {
     VmIpaddress findById(Long id) throws Exception;
 
     /**
+     * Find vm instance secondary address by id.
+     *
+     * @param id of the vm instance.
+     * @return vm Ipaddress.
+     * @throws Exception if error occurs.
+     */
+    VmIpaddress findByIPAddress(String guestIpAddress, Long vmInstanceId) throws Exception;
+
+    /**
      * To get VmIpaddress from cloudstack server.
      *
      * @param uuid uuid of VmIpaddress.
@@ -48,5 +57,12 @@ public interface VmIpaddressService extends CRUDService<VmIpaddress> {
      */
     List<VmIpaddress> findByVMInstance(Long nic) throws Exception;
 
+    /**
+     *  List all Load balancer by id.
+     *
+     * @param lbId of the load balancer.
+     * @return load balancer.
+     * @throws Exception if error occurs.
+     */
     List<VmIpaddress> findAllLoadBalancer(Long lbId) throws Exception;
 }

@@ -39,7 +39,7 @@ public interface LoadBalancerService extends CRUDService<LoadBalancerRule> {
     LoadBalancerRule findByUUID(String uuid);
 
     /**
-     * List loadbalancer rule by isActive status
+     * List loadbalancer rule by isActive status.
      *
      * @param isActive status of the load balancer.
      * @return load balancer.
@@ -65,5 +65,20 @@ public interface LoadBalancerService extends CRUDService<LoadBalancerRule> {
      */
     LoadBalancerRule save(LoadBalancerRule loadBalancer, Long userId) throws Exception;
 
+    /**
+     * Remove load balancer from IpAddress.
+     *
+     * @param loadbalancer object to be removed.
+     * @return loadbalancer rule.
+     * @throws Exception if error occurs.
+     */
     LoadBalancerRule removeLoadBalancerRule(LoadBalancerRule loadbalancer) throws Exception;
+
+    /**
+     * List loadbalancer rule by LB policy id.
+     *
+     * @param lbPolicyId status of the load balancer.
+     * @return load balancer.
+     */
+    LoadBalancerRule findByLbId(Long lbPolicyId);
 }
