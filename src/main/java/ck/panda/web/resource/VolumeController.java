@@ -295,4 +295,44 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
         return "{\"attachedCount\":" + attachedCount + ",\"detachedCount\":" + detachedCount + "}";
     }
 
+    /**
+     * Get all volume list by domain.
+     *
+     * @param sortBy asc/desc
+     * @param domainId domain id of volume.
+     * @param range pagination range.
+     * @param limit per page limit.
+     * @param request page request.
+     * @param response response content.
+     * @return volume list.
+     * @throws Exception unhandled exception.
+     */
+    @RequestMapping(value = "/listByDomain", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Volume> listVolumeByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
+            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Volume.class);
+        Page<Volume> pageResponse = volumeService.findAllByDomainId(domainId, page);
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
+    }
+
+    /**
+     * Get the domain based volume counts for attached, detached and total count.
+     *
+     * @param domainId domain id of the volume
+     * @return attached/detached count
+     * @throws Exception error
+     */
+    @RequestMapping(value = "volumeCountsByDomain", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public String getVolumeCountsByDomain(@RequestParam("domainId") Long domainId) throws Exception {
+        Integer attachedCount = volumeService.findAttachedCountByDomain(domainId);
+        return "{\"attachedCount\":" + attachedCount + "}";
+    }
+
 }

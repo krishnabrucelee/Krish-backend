@@ -51,4 +51,14 @@ public interface ApplicationService extends CRUDService<Application> {
      * @throws Exception if error occurs
      */
     List<Application> findAll(Long id) throws Exception;
+
+    /**
+     * To get list of application by domain.
+     *
+     * @param domainId domain id of the application
+     * @param pagingAndSorting parameters
+     * @return application list with pagination
+     * @throws Exception if error occurs
+     */
+    Page<Application> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
 }

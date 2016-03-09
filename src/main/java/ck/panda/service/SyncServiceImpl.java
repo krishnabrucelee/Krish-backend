@@ -14,8 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
-
-import ck.panda.constants.EventTypes;
 import ck.panda.constants.PermissionUtil;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Cluster;
@@ -23,7 +21,6 @@ import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.FirewallRules.Protocol;
-import ck.panda.domain.entity.FirewallRules.State;
 import ck.panda.domain.entity.FirewallRules.TrafficType;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.FirewallRules;
@@ -186,7 +183,6 @@ public class SyncServiceImpl implements SyncService {
     @Autowired
     private SnapshotService snapshotService;
 
-
     /** For listing snapshots policies in cloudstack server. */
     @Autowired
     private SnapshotPolicyService snapshotPolicyService;
@@ -246,9 +242,6 @@ public class SyncServiceImpl implements SyncService {
     /** Autowired permission service. */
     @Autowired
     private PermissionService permissionService;
-
-    @Autowired
-    private VmIpaddressService vmIpService;
 
     /** Autowired roleService. */
     @Autowired
@@ -893,6 +886,7 @@ public class SyncServiceImpl implements SyncService {
                 // osType which is not added in the app
                 csStorageOfferingMap.remove(storageOffering.getUuid());
             } else {
+                storageOffering.setIsSyncFlag(false);
                 storageService.softDelete(storageOffering);
             }
         }
@@ -937,7 +931,7 @@ public class SyncServiceImpl implements SyncService {
                 user.setEmail(csUser.getEmail());
                 user.setUserName(csUser.getUserName());
                 user.setIsActive(true);
-                user.setStatus(Status.ACTIVE);
+                user.setStatus(csUser.getStatus());
                 // 3.2 If found, update the user object in app db
                 userService.update(user);
 
@@ -1106,6 +1100,7 @@ public class SyncServiceImpl implements SyncService {
                 // compute offering which is not added in the app
                 csComputeOfferingMap.remove(computeOffering.getUuid());
             } else {
+                computeOffering.setIsSyncFlag(false);
                 computeService.softDelete(computeOffering);
             }
         }
@@ -1658,20 +1653,9 @@ public class SyncServiceImpl implements SyncService {
             // it in a hash using uuid
             if (csSnapshotMap.containsKey(snapshot.getUuid())) {
                 VmSnapshot snaps = csSnapshotMap.get(snapshot.getUuid());
-
-                List<VmSnapshot> vmSnapshotList = vmsnapshotService.findByVmInstance(snaps.getVmId(), false);
-                for (VmSnapshot vmSnap : vmSnapshotList) {
-                    if (vmSnap.getIsCurrent() && snaps.getStatus() == ck.panda.domain.entity.VmSnapshot.Status.Ready) {
-                        vmSnap.setIsCurrent(false);
-                        vmSnap.setSyncFlag(false);
-                        vmsnapshotService.save(vmSnap);
-                    }
-                }
-                snapshot.setStatus(snaps.getStatus());
-                if (snaps.getStatus() == ck.panda.domain.entity.VmSnapshot.Status.Ready) {
-                    snapshot.setIsCurrent(true);
-                }
                 snapshot.setSyncFlag(false);
+                snapshot.setStatus(snaps.getStatus());
+                snapshot.setIsCurrent(snaps.getIsCurrent());
 
                 // 3.2 If found, update the vm snapshot object in app db
                 vmsnapshotService.update(snapshot);
@@ -1680,7 +1664,7 @@ public class SyncServiceImpl implements SyncService {
                 // vm snapshot which is not added in the app
                 csSnapshotMap.remove(snapshot.getUuid());
             } else {
-            	snapshot.setSyncFlag(false);
+                snapshot.setSyncFlag(false);
                 vmsnapshotService.delete(snapshot);
                 // 3.2 If not found, delete it from app db
                 // TODO clarify the business requirement, since it has impact in
@@ -2381,13 +2365,14 @@ public class SyncServiceImpl implements SyncService {
                 LbStickinessPolicy csLoadBalancer = csLoadBalancerMap.get(loadBalancer.getUuid());
 
             loadBalancer.setUuid(csLoadBalancer.getUuid());
-            //loadBalancer.setStickinessName(csLoadBalancer.getStickinessName());
-           // loadBalancer.setStickinessMethod(csLoadBalancer.getStickinessMethod());
+            loadBalancer.setStickinessName(csLoadBalancer.getStickinessName());
+            loadBalancer.setStickinessMethod(csLoadBalancer.getStickinessMethod());
                 // 3.2 If found, update the LoadBalancer object in app db
             lbPolicyService.update(loadBalancer);
 
                 // 3.3 Remove once updated, so that we can have the list of cs
                 // nic which is not added in the app
+            csLoadBalancerMap.remove(loadBalancer.getUuid());
             }else {
                 lbPolicyService.softDelete(loadBalancer);
             }

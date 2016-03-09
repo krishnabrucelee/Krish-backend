@@ -104,4 +104,14 @@ public interface ProjectService extends CRUDService<Project> {
      * @return project.
      */
     List<Project> getAllProjects(Long userId) throws Exception;
+
+    /**
+     * Find all project by domain.
+     *
+     * @param domainId domain id of the project
+     * @param pagingAndSorting paging and sorting information.
+     * @return list of project.
+     * @throws Exception if error occurs.
+     */
+    Page<Project> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
 }

@@ -18,5 +18,5 @@ public interface TemplateCostService extends CRUDService<TemplateCost> {
      * @param cost of the template
      * @return template cost
      */
-    TemplateCost findByTemplateCost(Long templateId, Integer cost);
+    TemplateCost findByTemplateCost(Long templateId, Double cost);
 }

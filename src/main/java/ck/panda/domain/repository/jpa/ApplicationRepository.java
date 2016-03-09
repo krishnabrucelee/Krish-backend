@@ -81,4 +81,15 @@ public interface ApplicationRepository extends PagingAndSortingRepository<Applic
         + "app.status = :status")
     List<Application> findAllByDomainAndIsActiveAndStatus(@Param("domainId") Long domainId,
             @Param("isActive") Boolean isActive, @Param("status") Status status);
+
+    /**
+     * Find all the domain based active or inactive applications with pagination.
+     *
+     * @param domainId domain id of the application
+     * @param isActive get the application list based on active/inactive status
+     * @param pageable to get the list with pagination
+     * @return list of applications
+     */
+    @Query(value = "SELECT app FROM Application app WHERE app.domainId =:domainId AND app.isActive =:isActive")
+    Page<Application> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, Pageable pageable);
 }

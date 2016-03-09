@@ -107,4 +107,23 @@ public interface NetworkService extends CRUDService<Network> {
      */
     Network restartNetwork(Network network) throws Exception;
 
+    /**
+     * Release ip from Network
+     *
+     * @param network object
+     * @return network
+     * @throws Exception if error occurs.
+     */
+    Network ipRelease(Network network) throws Exception;
+    
+    /**
+     * Find all the domain based Network list.
+     *
+     * @param domainId domain id of the network
+     * @param page pagination and sorting values.
+     * @return list of network with pagination.
+     * @throws Exception unhandled errors.
+     */
+    Page<Network> findAllByDomainId(Long domainId, PagingAndSorting page) throws Exception;
+
 }

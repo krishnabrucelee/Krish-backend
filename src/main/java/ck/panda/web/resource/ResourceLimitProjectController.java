@@ -41,6 +41,10 @@ public class ResourceLimitProjectController extends CRUDController<ResourceLimit
     @Autowired
     private ResourceLimitProjectService resourceLimitService;
 
+    /** Convert Entity Service reference to resource. */
+    @Autowired
+    private ConvertEntityService convertEntityService;
+
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new resource.", response = ResourceLimitDomain.class)
     @Override
     public ResourceLimitProject create(@RequestBody ResourceLimitProject resource) throws Exception {
@@ -146,6 +150,19 @@ public class ResourceLimitProjectController extends CRUDController<ResourceLimit
     @ResponseStatus(HttpStatus.OK)
     public HashMap<String, String> findByDepartmentResource(@PathVariable(PATH_ID) Long departmentId) throws Exception {
         return resourceLimitService.getResourceLimitsOfDepartment(departmentId);
+    }
+
+    /**
+     * Get resource limits of Project.
+     *
+     * @param projectId project id
+     * @return max values of resources
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/quotaprojectId/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public HashMap<String, String> findByProjectQuotaDepartmentResource(@PathVariable(PATH_ID) Long projectId) throws Exception {
+        return resourceLimitService.getResourceLimitsOfDepartment(convertEntityService.getProjectById(projectId).getDepartmentId());
     }
 
 }

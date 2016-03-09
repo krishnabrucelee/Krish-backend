@@ -601,6 +601,19 @@ public class ConvertEntityService {
     }
 
     /**
+     * Get vm Ip address object.
+     *
+     * @param id
+     *            of ip address.
+     * @return vm ipaddress.
+     * @throws Exception
+     *             unhandled exception.
+     */
+  /*  public VmIpaddress getVmIpaddressByIpaddress(String ipaddress) throws Exception {
+        return vmIpAddressService.findById(id);
+    }*/
+
+    /**
      * Get account object.
      *
      * @param uuid

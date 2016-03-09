@@ -18,5 +18,5 @@ public interface TemplateCostRepository extends PagingAndSortingRepository<Templ
      * @return template cost
      */
     @Query(value = "SELECT templateCost FROM TemplateCost templateCost WHERE templateCost.templateCostId = :templateCostId AND templateCost.cost = :cost")
-    TemplateCost findByTemplateCost(@Param("templateCostId") Long templateCostId, @Param("cost") Integer cost);
+    TemplateCost findByTemplateCost(@Param("templateCostId") Long templateCostId, @Param("cost") Double cost);
 }

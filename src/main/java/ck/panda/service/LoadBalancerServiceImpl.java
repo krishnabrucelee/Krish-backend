@@ -13,14 +13,13 @@ import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.LoadBalancerRule;
-import ck.panda.domain.entity.LoadBalancerRule.State;
+import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.repository.jpa.LoadBalancerRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackLoadBalancerService;
-import ck.panda.util.CloudStackOptionalUtil;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
@@ -56,9 +55,11 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     @Autowired
     private VirtualMachineService virtualMachineService;
 
+    /** Load balancer stickiness policy service for reference. */
     @Autowired
     private LbStickinessPolicyService stickyService;
 
+    /** VmIpAddress service for reference. */
     @Autowired
     private VmIpaddressService vmIpService;
 
@@ -69,6 +70,10 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     /** Domain Service reference. */
     @Autowired
     private DomainService domainService;
+
+    /** Project service reference. */
+    @Autowired
+    private ProjectService projectService;
 
     /** Constant for load balancer. */
     private static final String CS_LOADBALANCER = "loadbalancer";
@@ -81,6 +86,9 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
 
     /** Constant for load balancer rule. */
     private static final String CS_LB_RULE = "loadbalancerrule";
+
+    /** Constant for load balancer rule. */
+    private static final String CS_LB_IP = "lbvmipaddresses";
 
     /** Constant for create loadbalancer rule. */
     private static final String CS_LB_CREATE = "createloadbalancerruleresponse";
@@ -103,26 +111,30 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     /** Constant for update load balancer rule response. */
     private static final String CS_UPDATE_LB_RULE = "updateloadbalancerruleresponse";
 
+    private static final String CS_FORDISPLAY = "fordisplay";
+
     @Override
     public LoadBalancerRule save(LoadBalancerRule loadBalancer, Long userId) throws Exception {
         loadBalancer.setIsActive(true);
-
+        if (loadBalancer.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity(CS_LOADBALANCER, loadBalancer);
             errors = validator.validateEntity(loadBalancer, errors);
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
                 LoadBalancerRule csLoadBalancer = csCreateLoadBalancerRule(loadBalancer, errors, userId);
-                if(loadBalancer.getVmIpAddress() != null){
+                if (loadBalancer.getVmIpAddress() != null) {
                    this.createLoadBalancerRule(loadBalancer, errors);
-              }
-               if (loadBalancerRepo.findByUUID(csLoadBalancer.getUuid(), true) == null) {
+                }
+                if (loadBalancerRepo.findByUUID(csLoadBalancer.getUuid(), true) == null) {
                    return loadBalancerRepo.save(csLoadBalancer);
                 }
-                  }
+            }
             return loadBalancer;
-
-              }
+        } else {
+            return loadBalancerRepo.save(loadBalancer);
+        }
+    }
 
     @Override
     public LoadBalancerRule update(LoadBalancerRule loadBalancer) throws Exception {
@@ -137,11 +149,11 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
              String csEditloadBalancer = cloudStackLoadBalancerService.updateLoadBalancerRule(lbRule.getUuid(), CloudStackConstants.JSON, optional);
              JSONObject csloadBalancerResponseJSON = new JSONObject(csEditloadBalancer)
                          .getJSONObject(CS_UPDATE_LB_RULE);
-             if(loadBalancer.getLbPolicy() != null) {
+             if (loadBalancer.getLbPolicy() != null) {
                  stickyService.save(loadBalancer.getLbPolicy(),loadBalancer.getUuid());
              }
-             if(loadBalancer.getVmIpAddress() != null) {
-                 this.AssignLoadBalancerRule(loadBalancer, errors);
+             if (loadBalancer.getVmIpAddress() != null) {
+                 this.assignLoadBalancerRule(loadBalancer, errors);
              }
              if (errors.hasErrors()) {
                     throw new ApplicationException(errors);
@@ -184,10 +196,18 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
 
     @Override
     public List<LoadBalancerRule> findAllFromCSServer() throws Exception {
+        List<Project> projectList = projectService.findAllByActive(true);
         List<LoadBalancerRule> loadBalancerList = new ArrayList<LoadBalancerRule>();
+        for (int j = 0; j <= projectList.size(); j++) {
         HashMap<String, String> loadBalancerMap = new HashMap<String, String>();
-        loadBalancerMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
-        loadBalancerMap.put("fordisplay", "true");
+        if (j == projectList.size()) {
+            loadBalancerMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
+            loadBalancerMap.put(CS_FORDISPLAY, CloudStackConstants.STATUS_ACTIVE);
+        }
+        else {
+            loadBalancerMap.put(CloudStackConstants.CS_PROJECT_ID, projectList.get(j).getUuid());
+            loadBalancerMap.put(CS_FORDISPLAY, CloudStackConstants.STATUS_ACTIVE);
+        }
         configUtil.setServer(1L);
         String response = cloudStackLoadBalancerService.listLoadBalancerRules(CloudStackConstants.JSON, loadBalancerMap);
         JSONArray loadBalancerListJSON = null;
@@ -199,7 +219,6 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                 if (loadBalancer != null) {
                     HashMap<String, String> loadBalancerInstanceMap = new HashMap<String, String>();
                     loadBalancerInstanceMap.put(CS_LB_INSTANCE_IP, CloudStackConstants.STATUS_ACTIVE);
-                    loadBalancerInstanceMap.put(CloudStackConstants.CS_LIST_ALL,CloudStackConstants.STATUS_ACTIVE);
                     String responseCS = cloudStackLoadBalancerService.listLoadBalancerRuleInstances(loadBalancer.getUuid(), CloudStackConstants.JSON, loadBalancerInstanceMap);
                     JSONArray vmListJSON = null;
                     JSONObject responseObjectCS = new JSONObject(responseCS).getJSONObject(CS_LB_LIST_INSTANCE);
@@ -210,8 +229,19 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                             VmInstance vmInstance = virtualMachineService.findByUUID(vmListJSON.getJSONObject(k).
                                     getJSONObject(CS_LB_INSTANCE).getString(CloudStackConstants.CS_ID));
                             newVmInstance.add(vmInstance);
+                            JSONArray responseObjectIPCS = vmListJSON.getJSONObject(k).getJSONArray(CS_LB_IP);
+                           List<VmIpaddress> ipaddresses =  new ArrayList<VmIpaddress>();
+                            for (int  m = 0; m < responseObjectIPCS.length(); m++) {
+                                String lbIpAddress = responseObjectIPCS.get(m).toString();
+                                    VmIpaddress vmList = vmIpService.findByIPAddress(lbIpAddress, vmInstance.getId());
+                                    vmList.setGuestIpAddress(lbIpAddress);
+                                    vmList.setVmInstanceId(vmInstance.getId());
+                                    ipaddresses.add(vmList);
+                                }
+                            loadBalancer.setVmIpAddress(ipaddresses);
                         }
                         loadBalancer.setVmInstanceList(newVmInstance);
+
                     }
                 }
                 loadBalancer.setNetworkId(convertEntityService.getNetworkId(loadBalancer.getTransNetworkId()));
@@ -221,6 +251,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                         .getDomainId());
                 loadBalancerList.add(loadBalancer);
             }
+         }
         }
         return loadBalancerList;
     }
@@ -277,7 +308,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                    String eventObjectResult = cloudStackLoadBalancerService.loadBalancerRuleJobResult(loadBalancerJSON.getString(CloudStackConstants.CS_JOB_ID),
                            CloudStackConstants.JSON);
                    JSONObject jobresult = new JSONObject(eventObjectResult).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
-                   if(loadBalancer.getLbPolicy().getStickinessMethod() != null) {
+                   if (loadBalancer.getLbPolicy().getStickinessMethod() != null) {
                    stickyService.save(loadBalancer.getLbPolicy(),loadBalancer.getUuid());
                    }
                        return loadBalancer;
@@ -285,15 +316,23 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                 return loadBalancer;
     }
 
-    private LoadBalancerRule AssignLoadBalancerRule(LoadBalancerRule loadbalancer, Errors errors) throws Exception {
+    /**
+     * Assign rule for load balancer.
+     *
+     * @param loadbalancer object.
+     * @param errors for unhandled errors.
+     * @return load balancer.
+     * @throws Exception if error occurs.
+     */
+    private LoadBalancerRule assignLoadBalancerRule(LoadBalancerRule loadbalancer, Errors errors) throws Exception {
         configUtil.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
         LoadBalancerRule lbRule = convertEntityService.getLoadBalancer(loadbalancer.getId());
         List<VmIpaddress> vmlist = loadbalancer.getVmIpAddress();
-        for(int i=0; i<vmlist.size(); i++ ){
+        for (int i = 0; i < vmlist.size(); i++) {
             VmInstance vmId = convertEntityService.getVmInstanceById(loadbalancer.getVmIpAddress().get(i).getVmInstanceId());
             optional.put("vmidipmap[" + i + "].vmid", vmId.getUuid());
-            optional.put("vmidipmap["+ i + "].vmip", loadbalancer.getVmIpAddress().get(i).getGuestIpAddress());
+            optional.put("vmidipmap[" + i + "].vmip", loadbalancer.getVmIpAddress().get(i).getGuestIpAddress());
         }
 
         String assignResponse = cloudStackLoadBalancerService.assignToLoadBalancerRule(lbRule.getUuid(), "json", optional);
@@ -314,9 +353,10 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         cloudStackLoadBalancerService.removeFromLoadBalancerRule(loadBalancer.getUuid(), "json", optional);
         LoadBalancerRule lbRule = convertEntityService.getLoadBalancer(loadBalancer.getId());
         List<VmIpaddress> vmList = new ArrayList<VmIpaddress>();
-        for(VmIpaddress vmIp : lbRule.getVmIpAddress() ){
-            if(vmIpAddress.getId() != vmIp.getId())
+        for (VmIpaddress vmIp : lbRule.getVmIpAddress()) {
+            if (vmIpAddress.getId() != vmIp.getId()) {
                 vmList.add(vmIp);
+                }
         }
         loadBalancer.setVmIpAddress(vmList);
         loadBalancerRepo.save(loadBalancer);
@@ -357,21 +397,32 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         return loadBalancerRepo.findAllByIsActive(true);
     }
 
+    /**
+     *  Create load balancer rule for an IpAddress.
+     *
+     * @param loadbalancer object.
+     * @param errors if error occurs.
+     * @return loadbalancer rule.
+     * @throws Exception if error occurs.
+     */
     private LoadBalancerRule createLoadBalancerRule(LoadBalancerRule loadbalancer, Errors errors) throws Exception {
         configUtil.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
         List<VmIpaddress> vmlist = loadbalancer.getVmIpAddress();
-        for(int i=0; i<vmlist.size(); i++ ){
+        for (int i = 0; i < vmlist.size(); i++) {
             VmInstance vmId = convertEntityService.getVmInstanceById(loadbalancer.getVmIpAddress().get(i).getVmInstanceId());
             optional.put("vmidipmap[" + i + "].vmid", vmId.getUuid());
-            optional.put("vmidipmap["+ i + "].vmip", loadbalancer.getVmIpAddress().get(i).getGuestIpAddress());
+            optional.put("vmidipmap[" + i + "].vmip", loadbalancer.getVmIpAddress().get(i).getGuestIpAddress());
         }
-
         cloudStackLoadBalancerService.assignToLoadBalancerRule(loadbalancer.getUuid(), "json", optional);
         loadbalancer.setVmIpAddress(vmlist);
-        loadBalancerRepo.save(loadbalancer);
-        return loadbalancer;
+         return loadbalancer;
 
+    }
+
+    @Override
+    public LoadBalancerRule findByLbId(Long lbPolicyId) {
+        return loadBalancerRepo.findByLbIdAndIsActive(lbPolicyId, true);
     }
 
    }

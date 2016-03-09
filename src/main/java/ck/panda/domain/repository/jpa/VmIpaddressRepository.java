@@ -5,8 +5,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmIpaddress;
 
 /**
@@ -44,7 +42,23 @@ public interface VmIpaddressRepository extends PagingAndSortingRepository<VmIpad
     @Query(value = "select vmIpaddress from VmIpaddress vmIpaddress where  vmIpaddress.vmInstanceId=:vmInstanceId AND vmIpaddress.isActive =:isActive")
     List<VmIpaddress> findByVMInstanceAndIsActive(@Param("vmInstanceId") Long vmInstanceId, @Param("isActive") Boolean isActive);
 
+    /**
+     * Find all Secondary ip Address and is Active status.
+     *
+     * @param isActive status of the vm ip Address.
+     * @param vmIpAddress of the load balancer.
+     * @return vm ipaddress.
+     */
     @Query(value = "SELECT vmIpaddress FROM VmIpaddress vmIpaddress WHERE vmIpaddress.isActive IS :isActive AND vmIpaddress NOT IN :vmIpAddress")
     List<VmIpaddress> findAllByVmIpaddressAndIsActive(@Param("isActive") Boolean isActive, @Param("vmIpAddress") List<VmIpaddress> vmIpAddress);
 
+    /**
+     * Find all Secondary ip Address and vm instance id.
+     *
+     * @param guestIpAddress of the Vmipaddress.
+     * @param vmInstanceId of the virtual Machine.
+     * @return vm ipaddress.
+     */
+    @Query(value = "SELECT vmIpaddress FROM VmIpaddress vmIpaddress WHERE vmIpaddress.guestIpAddress =:guestIpAddress AND vmIpaddress.vmInstanceId =:vmInstanceId")
+    VmIpaddress findAllByVmIpaddressAndvmInstanceId(@Param("guestIpAddress") String guestIpAddress, @Param("vmInstanceId") Long vmInstanceId);
 }

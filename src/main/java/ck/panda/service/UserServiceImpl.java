@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
@@ -26,6 +25,7 @@ import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.EncryptionUtil;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -33,6 +33,12 @@ import ck.panda.util.error.exception.ApplicationException;
 /** UserService implementation class. */
 @Service
 public class UserServiceImpl implements UserService {
+
+    /** Constant for user disable response. */
+    private static final String DISABLE_USER = "disableuserresponse";
+
+    /** Constant for user enable response. */
+    private static final String ENABLE_USER = "enableuserresponse";
 
     /** Validator attribute. */
     @Autowired
@@ -66,6 +72,19 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private DomainService domainService;
 
+    /** Reference of Token Details Util. */
+    @Autowired
+    private TokenDetails tokenDetails;
+
+    /** Reference of cloudStack Constants. */
+    private CloudStackConstants cloudStackConstants;
+
+    /** Constant for generic UTF. */
+    public static final String CS_UTF = "utf-8";
+
+    /** Constant for generic AES. */
+    public static final String CS_AES = "AES";
+
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
@@ -76,7 +95,7 @@ public class UserServiceImpl implements UserService {
         HashMap<String, String> userMap = new HashMap<String, String>();
         List<User> users = new ArrayList<User>();
         if (user.getSyncFlag()) {
-            Errors errors = validator.rejectIfNullEntity("user", user);
+            Errors errors = validator.rejectIfNullEntity(cloudStackConstants.CS_USER, user);
             errors = validator.validateEntity(user, errors);
             errors = this.validateName(errors, user.getUserName(), user.getDomain());
             if (errors.hasErrors()) {
@@ -85,25 +104,27 @@ public class UserServiceImpl implements UserService {
                 user.setType(User.UserType.USER);
                 user.setStatus(Status.ACTIVE);
                 user.setRoleId(user.getRole().getId());
-                String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+                String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes(CS_UTF));
                 byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
-                SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+                SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, CS_AES);
                 String encryptedPassword = new String(EncryptionUtil.encrypt(user.getPassword(), originalKey));
                 user.setIsActive(true);
-                userMap.put("domainid", convertEntityService.getDomainById(user.getDomainId()).getUuid());
+                userMap.put(cloudStackConstants.CS_DOMAIN_ID, convertEntityService.getDomainById(user.getDomainId()).getUuid());
                 config.setServer(1L);
                 String cloudResponse = csUserService.createUser(user.getDepartment().getUserName(), user.getEmail(),
-                        user.getFirstName(), user.getLastName(), user.getUserName(), user.getPassword(), "json",
+                        user.getFirstName(), user.getLastName(), user.getUserName(), user.getPassword(), cloudStackConstants.JSON,
                         userMap);
                 JSONObject createUserResponseJSON = new JSONObject(cloudResponse).getJSONObject("createuserresponse");
-                if (createUserResponseJSON.has("errorcode")) {
-                    errors.addFieldError("username", "user.already.exist.for.same.domain");
+                if (createUserResponseJSON.has(cloudStackConstants.CS_ERROR_CODE)) {
+                    errors.addFieldError(cloudStackConstants.CS_USER_NAME, "user.already.exist.for.same.domain");
                     throw new ApplicationException(errors);
                 }
-                JSONObject userRes = createUserResponseJSON.getJSONObject("user");
-                user.setUuid((String) userRes.get("id"));
+                JSONObject userRes = createUserResponseJSON.getJSONObject(cloudStackConstants.CS_USER);
+                user.setUuid((String) userRes.get(cloudStackConstants.CS_ID));
                 user.setPassword(encryptedPassword);
                 user.setDomainId(user.getDomainId());
+                user.setStatus(user.getStatus()
+                        .valueOf(userRes.getString(CloudStackConstants.CS_STATE).toUpperCase()));
                 user = userRepository.save(user);
                 if (user.getProjectList() != null) {
                     for (Project project : user.getProjectList()) {
@@ -118,7 +139,6 @@ public class UserServiceImpl implements UserService {
                 return user;
             }
         } else {
-            user.setStatus(Status.ACTIVE);
             return userRepository.save(user);
         }
     }
@@ -135,7 +155,7 @@ public class UserServiceImpl implements UserService {
     private Errors validateName(Errors errors, String name, Domain domain) throws Exception {
         User user = userRepository.findByUserNameAndDomain(name, domain);
         if (user != null && user.getStatus() != User.Status.DELETED) {
-            errors.addFieldError("username", "user.already.exist.for.same.domain");
+            errors.addFieldError(cloudStackConstants.CS_USER_NAME, "user.already.exist.for.same.domain");
         }
         return errors;
     }
@@ -144,17 +164,18 @@ public class UserServiceImpl implements UserService {
     @PreAuthorize("hasPermission(#user.getSyncFlag(), 'EDIT_USER')")
     public User update(User user) throws Exception {
         if (user.getSyncFlag()) {
-            Errors errors = validator.rejectIfNullEntity("user", user);
+            Errors errors = validator.rejectIfNullEntity(cloudStackConstants.CS_USER, user);
             errors = validator.validateEntity(user, errors);
             errors = this.validateName(errors, user.getUserName(), user.getDomain());
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
                 HashMap<String, String> optional = new HashMap<String, String>();
-                optional.put("domainid", user.getDomain().getUuid());
-                optional.put("username", user.getUserName());
+                optional.put(cloudStackConstants.CS_DOMAIN_ID, user.getDomain().getUuid());
+                optional.put(cloudStackConstants.CS_USER_NAME, user.getUserName());
+                optional.put(cloudStackConstants.CS_PASSWORD, user.getPassword());
                 config.setServer(1L);
-                csUserService.updateUser(user.getUuid(), optional, "json");
+                csUserService.updateUser(user.getUuid(), optional, cloudStackConstants.JSON);
                 if (user.getType() == User.UserType.DOMAIN_ADMIN) {
                     Domain domain = user.getDomain();
                     domain.setPortalUserName(user.getUserName());
@@ -164,7 +185,6 @@ public class UserServiceImpl implements UserService {
                 return userRepository.save(user);
             }
         } else {
-            user.setStatus(Status.ACTIVE);
             return userRepository.save(user);
         }
     }
@@ -172,13 +192,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @PreAuthorize("hasPermission(#user.getSyncFlag(), 'DELETE_USER')")
     public void delete(User user) throws Exception {
-		if (user.getSyncFlag()) {
-			config.setServer(1L);
-			csUserService.deleteUser(user.getId().toString(), CloudStackConstants.JSON);
-		} else {
-			// async call delete.
-			this.softDelete(user);
-		}
+        if (user.getSyncFlag()) {
+            config.setServer(1L);
+            csUserService.deleteUser(user.getId().toString(), CloudStackConstants.JSON);
+        } else {
+            // async call delete.
+            this.softDelete(user);
+        }
     }
 
     @Override
@@ -186,7 +206,7 @@ public class UserServiceImpl implements UserService {
     public void delete(Long id) throws Exception {
         User user = userRepository.findOne(id);
         config.setServer(1L);
-        csUserService.deleteUser(user.getUuid(), "json");
+        csUserService.deleteUser(user.getUuid(), cloudStackConstants.JSON);
         this.softDelete(user);
     }
 
@@ -210,14 +230,14 @@ public class UserServiceImpl implements UserService {
         List<User> userList = new ArrayList<User>();
         HashMap<String, String> userMap = new HashMap<String, String>();
         // userMap.put("domainid", domainUuid);
-        userMap.put("listall", "true");
+        userMap.put(cloudStackConstants.CS_LIST_ALL, "true");
         // 1. Get the list of users from CS server using CS connector
         config.setServer(1L);
-        String response = csUserService.listUsers(userMap, "json");
+        String response = csUserService.listUsers(userMap, cloudStackConstants.JSON);
         JSONArray userListJSON = null;
         JSONObject responseObject = new JSONObject(response).getJSONObject("listusersresponse");
-        if (responseObject.has("user")) {
-            userListJSON = responseObject.getJSONArray("user");
+        if (responseObject.has(cloudStackConstants.CS_USER)) {
+            userListJSON = responseObject.getJSONArray(cloudStackConstants.CS_USER);
             // 2. Iterate the json list, convert the single json entity to user
             for (int i = 0, size = userListJSON.length(); i < size; i++) {
                 // 2.1 Call convert by passing JSONObject to User entity and Add
@@ -273,9 +293,9 @@ public class UserServiceImpl implements UserService {
         }
         User user = userRepository.findByUser(userName.trim(), domainService.findByName(domain), true);
         if (user != null && password != null) {
-            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes(CS_UTF));
             byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
-            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, CS_AES);
             String encryptedPassword = new String(EncryptionUtil.encrypt(password, originalKey));
             user.setPassword(encryptedPassword);
             userRepository.save(user);
@@ -291,7 +311,7 @@ public class UserServiceImpl implements UserService {
         if (user.getSyncFlag()) {
             // set server for finding value in configuration
             config.setServer(1L);
-            csUserService.deleteUser((user.getUuid()), "json");
+            csUserService.deleteUser((user.getUuid()), cloudStackConstants.JSON);
         }
         return userRepository.save(user);
     }
@@ -310,12 +330,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<User> findAllUserByDomain(PagingAndSorting pagingAndSorting, Long userId) throws Exception {
+    public Page<User> findAllUserByDomain(PagingAndSorting pagingAndSorting, Long userId, Status status) throws Exception {
         User user = userRepository.findOne(userId);
         if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
-            return userRepository.findAllUserByDomain(pagingAndSorting.toPageRequest(), user.getDomain(), true);
+            return userRepository.findAllUserByDomain(pagingAndSorting.toPageRequest(), user.getDomain(), status);
         }
-        return userRepository.findAll(pagingAndSorting.toPageRequest());
+        return userRepository.findAllUserByStatus(pagingAndSorting.toPageRequest(), status);
     }
 
     @Override
@@ -361,5 +381,100 @@ public class UserServiceImpl implements UserService {
         }
         return userRepository.findByDepartment(project.getDepartment());
     }
+
+    @Override
+    @PreAuthorize("hasPermission(null, 'ENABLE_USER')")
+    public User enableUser(Long userId) throws Exception {
+        Errors errors = null;
+        User user = userRepository.findOne(userId);
+        HashMap<String, String> optional = new HashMap<String, String>();
+        config.setServer(1L);
+        String csUserResponse = csUserService.enableUser(user.getUuid(), CloudStackConstants.JSON);
+        JSONObject createComputeResponseJSON = new JSONObject(csUserResponse)
+                .getJSONObject(ENABLE_USER);
+        if (createComputeResponseJSON.has(CloudStackConstants.CS_ERROR_CODE)) {
+            errors = this.validateEvent(errors, createComputeResponseJSON.getString(CloudStackConstants.CS_ERROR_TEXT));
+            throw new ApplicationException(errors);
+        }
+        JSONObject enableUserResponse = createComputeResponseJSON.getJSONObject(CloudStackConstants.CS_USER);
+        user.setUuid((String) enableUserResponse.get(CloudStackConstants.CS_ID));
+        user.setIsActive(true);
+        user.setStatus(user.getStatus()
+                .valueOf(enableUserResponse.getString(CloudStackConstants.CS_STATE).toUpperCase()));
+        return userRepository.save(user);
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(null, 'DISABLE_USER')")
+    public User disableUser(Long userId) throws Exception {
+        Errors errors = null;
+        User user = userRepository.findOne(userId);
+        HashMap<String, String> optional = new HashMap<String, String>();
+        config.setServer(1L);
+        String csUserResponse = csUserService.disableUser(user.getUuid(), CloudStackConstants.JSON);
+        JSONObject jobResponse = new JSONObject(csUserResponse)
+                .getJSONObject(DISABLE_USER);
+        if (jobResponse.has(CloudStackConstants.CS_JOB_ID)) {
+            String csJobResponse = csUserService.associatedJobResult(jobResponse.getString(CloudStackConstants.CS_JOB_ID),
+                    CloudStackConstants.JSON);
+            JSONObject jobresult = new JSONObject(csJobResponse)
+                    .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+            user.setStatus(Status.DISABLED);
+        }
+        return userRepository.save(user);
+      }
+
+    @Override
+    public User updatePassword(User user) throws Exception {
+        if (user.getSyncFlag()) {
+            Errors errors = validator.rejectIfNullEntity(cloudStackConstants.CS_USER, user);
+            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes(CS_UTF));
+            byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, CS_AES);
+            if (user.getPassword() != null) {
+                User validateUser = userRepository.findOne(user.getId());
+                String validatePassword = new String(EncryptionUtil.encrypt(user.getPassword(), originalKey));
+                if (!validateUser.getPassword().equals(validatePassword)) {
+                    errors.addGlobalError("Old password didnot match. Please re-enter old password");
+                }
+            }
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
+            } else {
+                HashMap<String, String> optional = new HashMap<String, String>();
+                optional.put(cloudStackConstants.CS_PASSWORD, user.getConfirmPassword());
+                config.setServer(1L);
+                csUserService.updateUser(user.getUuid(), optional, cloudStackConstants.JSON);
+                if (user.getType() == User.UserType.DOMAIN_ADMIN) {
+                    Domain domain = user.getDomain();
+                    domain.setPortalUserName(user.getUserName());
+                    domain.setSyncFlag(false);
+                    domainService.update(domain);
+                }
+                String encryptedPassword = new String(EncryptionUtil.encrypt(user.getConfirmPassword(), originalKey));
+                user.setPassword(encryptedPassword);
+            }
+            return userRepository.save(user);
+        } else {
+            user.setStatus(Status.ACTIVE);
+            return userRepository.save(user);
+        }
+    }
+
+    @Override
+    public User findByUserValidList(Long id) throws Exception {
+        userRepository.findOne(id);
+        User user = convertEntityService.getOwnerById(id);
+        user.setApiKey(tokenDetails.getTokenDetails(cloudStackConstants.CS_API_KEY));
+        user.setSecretKey(tokenDetails.getTokenDetails(cloudStackConstants.CS_SECRET_KEY));
+        user.setPassword(null);
+        return user;
+    }
+
+    @Override
+    public Page<User> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
+        return userRepository.findAllByDomainId(domainId, pagingAndSorting.toPageRequest());
+    }
+
 
 }

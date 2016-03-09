@@ -124,4 +124,36 @@ public interface DepartmentService extends CRUDService<Department> {
      */
     Department save(Department department, Long userId) throws Exception;
 
+    /**
+     * Find all department by domain id and isActive status of the department.
+     *
+     * @param domainId of the domain
+     * @param isActive status of the deparmtent.
+     * @return list of departments.
+     * @throws Exception if error occurs.
+     */
+    List<Department> findAllByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception;
+
+    /**
+     * Find all Department by domain id, Account type and status of the user .
+     *
+     * @param domainId of the user.
+     * @param isActive status of the user.
+     * @param domainAdmin  type of the user.
+     * @return users
+     * @throws Exception if error occurs.
+     */
+    List<Department> findAllByDomainAccountTypeAndIsActive(Long domainId, Boolean isActive, AccountType domainAdmin)
+            throws Exception;
+            
+    /**
+     * Find all the domain based department with active status.
+     *
+     * @param domainId domain id of the department.
+     * @param pagingAndSorting pagination and sorting values.
+     * @return list of departments with pagination.
+     * @throws Exception error occurs
+     */
+    Page<Department> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
+
 }
