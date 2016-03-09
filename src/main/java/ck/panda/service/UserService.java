@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.User.Status;
 import ck.panda.domain.entity.User.UserType;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -95,10 +96,11 @@ public interface UserService extends CRUDService<User> {
      *
      * @param pagingAndSorting paging and sorting information.
      * @param userId user id.
+     * @param status user status
      * @return list of user.
      * @throws Exception if error occurs.
      */
-    Page<User> findAllUserByDomain(PagingAndSorting pagingAndSorting, Long userId) throws Exception;
+    Page<User> findAllUserByDomain(PagingAndSorting pagingAndSorting, Long userId, Status status) throws Exception;
 
     /**
      * Find all the user by domain.
@@ -157,6 +159,24 @@ public interface UserService extends CRUDService<User> {
     List<User> findByRole(Long roleId, Boolean isActive) throws Exception;
 
     /**
+     * Enable the User.
+     *
+     * @param userId id of the user
+     * @return users
+     * @throws Exception exceptions
+     */
+    User enableUser(Long userId) throws Exception;
+
+    /**
+     * Disable the User.
+     *
+     * @param userId id of the user
+     * @return users
+     * @throws Exception exceptions
+     */
+    User disableUser(Long userId) throws Exception;
+
+    /**
      * Update password of user.
      *
      * @param users user.
@@ -173,4 +193,5 @@ public interface UserService extends CRUDService<User> {
      * @throws Exception if error occurs
      */
     User findByUserValidList(Long id) throws Exception;
+
 }

@@ -893,6 +893,7 @@ public class SyncServiceImpl implements SyncService {
                 // osType which is not added in the app
                 csStorageOfferingMap.remove(storageOffering.getUuid());
             } else {
+                storageOffering.setIsSyncFlag(false);
                 storageService.softDelete(storageOffering);
             }
         }
@@ -937,7 +938,7 @@ public class SyncServiceImpl implements SyncService {
                 user.setEmail(csUser.getEmail());
                 user.setUserName(csUser.getUserName());
                 user.setIsActive(true);
-                user.setStatus(Status.ACTIVE);
+                user.setStatus(csUser.getStatus());
                 // 3.2 If found, update the user object in app db
                 userService.update(user);
 
@@ -1106,6 +1107,7 @@ public class SyncServiceImpl implements SyncService {
                 // compute offering which is not added in the app
                 csComputeOfferingMap.remove(computeOffering.getUuid());
             } else {
+                computeOffering.setIsSyncFlag(false);
                 computeService.softDelete(computeOffering);
             }
         }
@@ -1680,7 +1682,7 @@ public class SyncServiceImpl implements SyncService {
                 // vm snapshot which is not added in the app
                 csSnapshotMap.remove(snapshot.getUuid());
             } else {
-            	snapshot.setSyncFlag(false);
+                snapshot.setSyncFlag(false);
                 vmsnapshotService.delete(snapshot);
                 // 3.2 If not found, delete it from app db
                 // TODO clarify the business requirement, since it has impact in

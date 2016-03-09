@@ -93,7 +93,7 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                 String csResponse = csSnapshotService.createVMSnapshot(vmInstance.getUuid(), optional);
                 JSONObject cssnapshot = new JSONObject(csResponse).getJSONObject("createvmsnapshotresponse");
                 if (cssnapshot.has("errorcode")) {
-                	if (cssnapshot.has("errortext")) {
+                    if (cssnapshot.has("errortext")) {
                         errors = this.validateEvent(errors, cssnapshot.getString("errortext"));
                    } else {
                         errors = this.validateEvent(errors, "Something went wrong");
@@ -110,10 +110,10 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                     if (snapshot.getString("jobstatus").equals("2")) {
                         vmSnapshot.setStatus(Status.valueOf(EventTypes.EVENT_ERROR));
                     } else if (snapshot.getString("jobstatus").equals("0")) {
-                    	vmSnapshot.setIsCurrent(true);
+                        vmSnapshot.setIsCurrent(true);
                         vmSnapshot.setStatus(Status.valueOf(EventTypes.EVENT_CREATE));
                     } else {
-                    	vmSnapshot.setIsCurrent(true);
+                        vmSnapshot.setIsCurrent(true);
                         vmSnapshot.setStatus(Status.valueOf(EventTypes.EVENT_READY));
                         return vmSnapshotRepository.save(vmSnapshot);
                     }
@@ -139,8 +139,8 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
 
     @Override
     public void delete(VmSnapshot vmSnapshot) throws Exception {
-    	vmSnapshot.setIsRemoved(true);
-    	vmSnapshot.setStatus(Status.Expunging);
+        vmSnapshot.setIsRemoved(true);
+        vmSnapshot.setStatus(Status.Expunging);
         vmSnapshotRepository.save(vmSnapshot);
     }
 
@@ -211,7 +211,7 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                     if (jobresult.getString("jobstatus").equals("2")) {
                         throw new BadCredentialsException(jobresult.getJSONObject("jobresult").getString("errortext"));
                     } else {
-                    	vmSnapshot.setStatus(Status.Expunging);
+                        vmSnapshot.setStatus(Status.Expunging);
                         vmSnapshot.setIsRemoved(true);
                     }
                 }
@@ -245,11 +245,12 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                 // and Add
                 // the converted vm snapshot entity to list
                 VmSnapshot vmSnapshot = VmSnapshot.convert(vmSnapshotListJSON.getJSONObject(i));
-                vmSnapshot.setVmId(convertEntityService.getVmInstanceId(vmSnapshot.getTransvmInstanceId()));
-                vmSnapshot.setDomainId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getDomainId());
-                vmSnapshot.setOwnerId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getInstanceOwnerId());
-                vmSnapshot.setZoneId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getZoneId());
-
+                if (vmSnapshot.getTransvmInstanceId() != null) {
+                    vmSnapshot.setVmId(convertEntityService.getVmInstanceId(vmSnapshot.getTransvmInstanceId()));
+                    vmSnapshot.setDomainId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getDomainId());
+                    vmSnapshot.setOwnerId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getInstanceOwnerId());
+                    vmSnapshot.setZoneId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getZoneId());
+                }
                 vmsnapshotList.add(vmSnapshot);
             }
         }

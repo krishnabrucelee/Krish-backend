@@ -33,6 +33,7 @@ import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.PortForwarding;
 import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.Template;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.entity.VmSnapshot;
@@ -59,6 +60,9 @@ import ck.panda.util.error.exception.ApplicationException;
 @PropertySource(value = "classpath:permission.properties")
 @Service
 public class AsynchronousJobServiceImpl implements AsynchronousJobService {
+
+      /** Constant for user entity. */
+    private static final String USER_DISABLE = "USER.DISABLE";
 
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(AsynchronousJobServiceImpl.class);
@@ -164,7 +168,15 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     @Autowired
     private SnapshotPolicyService snapShotPolicyService;
 
+    /**
+     *  Service reference to User.
+     */
+    @Autowired
+    private UserService userService;
 
+    /**
+     *  Service reference to vmSnapshot Sevice.
+     */
     @Autowired
     private VmSnapshotService vmSnapshotService;
 
@@ -322,6 +334,11 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             LOGGER.debug("VPN sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
                 eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
             asyncVpn(jobResult, eventObject);
+            break;
+        case EventTypes.EVENT_USER:
+            LOGGER.debug("User sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
+                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+            asyncUser(jobResult, eventObject);
             break;
         default:
             LOGGER.debug("No sync required", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
@@ -746,6 +763,31 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             network.setSyncFlag(false);
             network.setNetworkRestart(true);
             networkService.update(network);
+        }
+    }
+
+    /**
+     * Sync function for the User.
+     *
+     * @param jobResult result
+     * @param eventObject events
+     * @throws ApplicationException exception
+     * @throws Exception exception
+     */
+    public void asyncUser(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
+        configUtil.setServer(1L);
+        if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(USER_DISABLE)) {
+            User csUser = User.convert(jobResult.getJSONObject(CloudStackConstants.CS_USER));
+            User user = userService.findByUuIdAndIsActive(csUser.getUuid(), true);
+            if (csUser.getUuid().equals(user.getUuid())) {
+                User csUserResponse = csUser;
+                user.setDomainId(convertEntityService.getDomainId(csUserResponse.getTransDomainId()));
+                user.setDepartmentId(convertEntityService.getDepartmentId(csUserResponse.getTransDepartment()));
+                user.setSyncFlag(false);
+                user.setStatus(csUserResponse.getStatus());
+                userService.update(user);
+            }
+
         }
     }
 

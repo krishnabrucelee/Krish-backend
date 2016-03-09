@@ -24,6 +24,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 
 /** User entity. */
@@ -173,7 +174,7 @@ public class User implements Serializable {
     /** Define status. */
     public enum Status {
         /** Define status constant. */
-        ACTIVE, DELETED, BLOCKED;
+        ACTIVE, DELETED, BLOCKED, ENABLED, DISABLED;
     }
 
     /**
@@ -724,6 +725,7 @@ public class User implements Serializable {
         user.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
         user.setTransDepartment(JsonUtil.getStringValue(jsonObject, "accountid"));
         user.setIsActive(true);
+        user.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_STATE).toUpperCase()));
         return user;
     }
 
@@ -735,11 +737,9 @@ public class User implements Serializable {
      */
     public static Map<String, User> convert(List<User> userList) {
         Map<String, User> userMap = new HashMap<String, User>();
-
         for (User user : userList) {
             userMap.put(user.getUuid(), user);
         }
-
         return userMap;
     }
 }

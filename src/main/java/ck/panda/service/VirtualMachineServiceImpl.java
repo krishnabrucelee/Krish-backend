@@ -194,22 +194,22 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         if (vmInstance.getStorageOfferingId() != null) {
                             this.customStorageForInstance(vmInstance, optionalMap);
                         }
-						if (vmInstance.getComputeOfferingId() != null) {
-							this.customComputeForInstance(vmInstance, optionalMap);
-							if (!convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId())
-									.getCustomized()) {
-								vmInstance.setMemory(convertEntityService
-										.getComputeOfferById(vmInstance.getComputeOfferingId()).getMemory());
-								vmInstance.setCpuCore(convertEntityService
-										.getComputeOfferById(vmInstance.getComputeOfferingId()).getNumberOfCores());
-								vmInstance.setCpuSpeed(convertEntityService
-										.getComputeOfferById(vmInstance.getComputeOfferingId()).getClockSpeed());
-							}
-						}
-						vmInstance.setOsType(
-								convertEntityService.getTemplateById(vmInstance.getTemplateId()).getDisplayText());
-						vmInstance.setTemplateName(
-								convertEntityService.getTemplateById(vmInstance.getTemplateId()).getName());
+                        if (vmInstance.getComputeOfferingId() != null) {
+                            this.customComputeForInstance(vmInstance, optionalMap);
+                            if (!convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId())
+                                    .getCustomized()) {
+                                vmInstance.setMemory(convertEntityService
+                                        .getComputeOfferById(vmInstance.getComputeOfferingId()).getMemory());
+                                vmInstance.setCpuCore(convertEntityService
+                                        .getComputeOfferById(vmInstance.getComputeOfferingId()).getNumberOfCores());
+                                vmInstance.setCpuSpeed(convertEntityService
+                                        .getComputeOfferById(vmInstance.getComputeOfferingId()).getClockSpeed());
+                            }
+                        }
+                        vmInstance.setOsType(
+                                convertEntityService.getTemplateById(vmInstance.getTemplateId()).getDisplayText());
+                        vmInstance.setTemplateName(
+                                convertEntityService.getTemplateById(vmInstance.getTemplateId()).getName());
                         config.setUserServer();
                         // 5. Get response from CS for new deploy vm API call.
                         String csResponse = cloudStackInstanceService.deployVirtualMachine(
@@ -783,6 +783,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         String scaleVm = cloudStackInstanceService.scaleVirtualMachine(vmInstance.getUuid(),
                 vmInstance.getComputeOffering().getUuid(), CloudStackConstants.JSON, optionalMap);
         JSONObject jobId = new JSONObject(scaleVm).getJSONObject(CloudStackConstants.SCALE_VM_RESPONSE);
+        Thread.sleep(2000);
         if (jobId.has(CloudStackConstants.CS_ERROR_CODE)) {
             errors = this.validateEvent(errors, jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
             throw new ApplicationException(errors);
@@ -790,12 +791,13 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             String jobState = jobStatus(jobId, vmInstance);
             if (!jobState.equals(GenericConstants.DEFAULT_JOB_STATUS)
                     && !jobState.equals(GenericConstants.ERROR_JOB_STATUS)) {
+            }
                 if (jobState.equals(GenericConstants.SUCCEEDED_JOB_STATUS)
                         || jobState.equals(GenericConstants.PROGRESS_JOB_STATUS)) {
                     vmInstance.setComputeOfferingId(vmInstance.getComputeOffering().getId());
                 }
                 virtualmachinerepository.save(convertEncryptPassword(vmInstance));
-            }
+
         }
         return vmInstance;
     }
@@ -1099,11 +1101,13 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         .getString(CloudStackConstants.CS_ERROR_TEXT));
                 vmInstance.setEventMessage(jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
                         .getString(CloudStackConstants.CS_ERROR_TEXT));
-                virtualmachinerepository.save(convertEncryptPassword(vmInstance));
                 if (errors.hasErrors()) {
                     throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
                             jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
                                     .getString(CloudStackConstants.CS_ERROR_TEXT));
+                }
+                else {
+                    virtualmachinerepository.save(convertEncryptPassword(vmInstance));
                 }
             } else {
                 return jobresult.getString(CloudStackConstants.CS_JOB_STATUS);
@@ -1162,11 +1166,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 vmInstance.setNetworkId(convertEntityService.getNetworkId(vmInstance.getTransNetworkId()));
                 vmInstance.setProjectId(convertEntityService.getProjectId(vmInstance.getTransProjectId()));
                 if (vmInstance.getTransHypervisor() != null) {
-					if (hypervisorService.findByName(vmInstance.getTransHypervisor()) != null) {
-						vmInstance
-								.setHypervisorId(hypervisorService.findByName(vmInstance.getTransHypervisor()).getId());
-					}
-				}
+                    if (hypervisorService.findByName(vmInstance.getTransHypervisor()) != null) {
+                        vmInstance
+                                .setHypervisorId(hypervisorService.findByName(vmInstance.getTransHypervisor()).getId());
+                    }
+                }
                 vmInstance.setDepartmentId(
                         convertEntityService.getDepartmentByUsernameAndDomains(vmInstance.getTransDepartmentId(),
                                 convertEntityService.getDomain(vmInstance.getTransDomainId())));
