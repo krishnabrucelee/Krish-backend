@@ -111,6 +111,8 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     /** Constant for update load balancer rule response. */
     private static final String CS_UPDATE_LB_RULE = "updateloadbalancerruleresponse";
 
+    private static final String CS_FORDISPLAY = "fordisplay";
+
     @Override
     public LoadBalancerRule save(LoadBalancerRule loadBalancer, Long userId) throws Exception {
         loadBalancer.setIsActive(true);
@@ -200,11 +202,11 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         HashMap<String, String> loadBalancerMap = new HashMap<String, String>();
         if (j == projectList.size()) {
             loadBalancerMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
-            loadBalancerMap.put("fordisplay", "true");
+            loadBalancerMap.put(CS_FORDISPLAY, CloudStackConstants.STATUS_ACTIVE);
         }
         else {
             loadBalancerMap.put(CloudStackConstants.CS_PROJECT_ID, projectList.get(j).getUuid());
-            loadBalancerMap.put("fordisplay", "true");
+            loadBalancerMap.put(CS_FORDISPLAY, CloudStackConstants.STATUS_ACTIVE);
         }
         configUtil.setServer(1L);
         String response = cloudStackLoadBalancerService.listLoadBalancerRules(CloudStackConstants.JSON, loadBalancerMap);
