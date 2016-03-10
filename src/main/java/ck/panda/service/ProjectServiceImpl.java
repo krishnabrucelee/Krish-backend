@@ -308,10 +308,7 @@ public class ProjectServiceImpl implements ProjectService {
                         isActive);
             } else {
                 // Find all active projects by department.
-                projects = projectRepository.findAllByDepartmentAndIsActive(user.getDepartmentId(), isActive);
-                Page<Project> allProjectLists = new PageImpl<Project>(projects, pagingAndSorting.toPageRequest(),
-                        pagingAndSorting.getPageSize());
-                return allProjectLists;
+                return projectRepository.findAllByDepartmentAndIsActiveAndPage(user.getDepartmentId(), isActive, pagingAndSorting.toPageRequest());
             }
         }
         return projectRepository.findAllByStatus(pagingAndSorting.toPageRequest(), isActive);

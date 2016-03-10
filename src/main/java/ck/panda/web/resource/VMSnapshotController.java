@@ -109,4 +109,29 @@ public class VMSnapshotController extends CRUDController<VmSnapshot> implements 
             throws Exception {
         return snapshotService.vmSnapshotEventHandle(vm, event);
     }
+
+    /**
+     * Get all application list by domain.
+     *
+     * @param sortBy asc/desc
+     * @param domainId domain id of application.
+     * @param range pagination range.
+     * @param limit per page limit.
+     * @param request page request.
+     * @param response response content.
+     * @return application list.
+     * @throws Exception unhandled exception.
+     */
+    @RequestMapping(value = "/listByDomain", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<VmSnapshot> listSnapshotByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
+            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, VmSnapshot.class);
+        Page<VmSnapshot> pageResponse = snapshotService.findAllByDomainId(domainId, page);
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
+    }
 }

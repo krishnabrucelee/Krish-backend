@@ -340,8 +340,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> findAllUserByDomain(Long userId) throws Exception {
-        Domain domain = domainService.find(userId);
-        return userRepository.findAllUserByDomain(domain);
+        User user = userRepository.findOne(userId);
+        return userRepository.findAllUserByDomain(user.getDomain());
     }
 
     @Override
