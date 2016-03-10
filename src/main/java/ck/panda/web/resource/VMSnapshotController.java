@@ -111,15 +111,15 @@ public class VMSnapshotController extends CRUDController<VmSnapshot> implements 
     }
 
     /**
-     * Get all application list by domain.
+     * Get all vm snapshot list by domain.
      *
      * @param sortBy asc/desc
-     * @param domainId domain id of application.
+     * @param domainId domain id of vm snapshot.
      * @param range pagination range.
      * @param limit per page limit.
      * @param request page request.
      * @param response response content.
-     * @return application list.
+     * @return vm snapshot list.
      * @throws Exception unhandled exception.
      */
     @RequestMapping(value = "/listByDomain", method = RequestMethod.GET, produces = {

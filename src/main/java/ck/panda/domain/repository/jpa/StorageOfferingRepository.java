@@ -75,7 +75,7 @@ public interface StorageOfferingRepository extends PagingAndSortingRepository<St
     List<String> findTagsByDomain(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive);
 
     /**
-     * method to find list of domain based storage offer list.
+     * Method to find list of domain based storage offer list.
      *
      * @param domainId domain id
      * @param isActive true / false
