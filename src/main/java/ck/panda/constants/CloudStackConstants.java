@@ -609,4 +609,10 @@ public class CloudStackConstants {
     /** Constant for list VM snapshot response. */
     public static final String CS_LIST_VM_SNAPSHOT_RESPONSE = "listvmsnapshotresponse";
 
+    /** Constant for list router response. */
+    public static final String CS_LIST_ROUTER_RESPONSE = "listroutersresponse";
+
+    /** Constant for router. */
+    public static final String CS_ROUTER = "router";
+
 }
