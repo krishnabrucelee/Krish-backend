@@ -153,7 +153,7 @@ public class UserServiceImpl implements UserService {
      * @throws Exception unhandled errors.
      */
     private Errors validateName(Errors errors, String name, Domain domain) throws Exception {
-        User user = userRepository.findByUserNameAndDomain(name, domain);
+        User user = userRepository.findByUserNameAndDomainAndActive(name, domain, true);
         if (user != null && user.getStatus() != User.Status.DELETED) {
             errors.addFieldError(cloudStackConstants.CS_USER_NAME, "user.already.exist.for.same.domain");
         }
@@ -282,7 +282,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findByUserNameAndDomain(String userName, Domain domain) throws Exception {
-        return userRepository.findByUserNameAndDomain(userName, domain);
+        return userRepository.findByUserNameAndDomainAndActive(userName, domain, true);
     }
 
     @Override
@@ -340,8 +340,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> findAllUserByDomain(Long userId) throws Exception {
-        Domain domain = domainService.find(userId);
-        return userRepository.findAllUserByDomain(domain);
+        User user = userRepository.findOne(userId);
+        return userRepository.findAllUserByDomain(user.getDomain());
     }
 
     @Override

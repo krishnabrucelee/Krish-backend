@@ -395,4 +395,31 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      */
     @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.network as network, vm.displayName as displayName, publicIP.publicIpAddress as publicIpAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.status = :status AND vm.domainId = :domainId AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE")
     Page<VmInstance> findAllByStatusAndDomainWithPageRequest(@Param("status") Status status, @Param("domainId") Long domainId, Pageable pageable);
+
+    /**
+     * Get the list of VMs by except given status and user belongs to department
+     * and project list with pagination.
+     *
+     * @param status of the status of VM.
+     * @param department belongs to VM.
+     * @param projectList belongs to VM.
+     * @param pageable page request
+     * @return instance list.
+     */
+    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.ipAddress as ipAddress, vm.network as network, vm.displayName as displayName, publicIP.publicIpAddress as publicIpAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize, vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.status <> :status AND  vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE AND (vm.project in :projectList OR (vm.project IS NULL AND vm.department = :department))")
+    Page<VmInstance> findAllByDepartmentAndProjectAndExceptStatusAndPage(@Param("status") Status status,
+            @Param("department") Department department, @Param("projectList") List<Project> projectList, Pageable pageable);
+
+    /**
+     * Get the list of VMs by status and user belongs to department and project list.
+     *
+     * @param status of the status of VM.
+     * @param department belongs to VM.
+     * @param projectList belongs to VM.
+     * @param pageable page request
+     * @return instance list.
+     */
+    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.ipAddress as ipAddress, vm.network as network, vm.displayName as displayName, publicIP.publicIpAddress as publicIpAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize, vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.status = :status AND  vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE AND (vm.project in :projectList OR (vm.project IS NULL AND vm.department = :department))")
+    Page<VmInstance> findAllByDepartmentAndProjectAndStatusAndPage(@Param("status") Status status,
+            @Param("department") Department department, @Param("projectList") List<Project> projectList, Pageable pageable);
 }

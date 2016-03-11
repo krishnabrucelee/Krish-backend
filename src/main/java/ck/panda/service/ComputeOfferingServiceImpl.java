@@ -379,4 +379,10 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     public List<ComputeOffering> findByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception {
         return computeRepo.findByDomainAndIsActive(domainId, true);
     }
+
+    @Override
+    public Page<ComputeOffering> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
+        return computeRepo.findAllByDomainIdAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
+
+    }
 }

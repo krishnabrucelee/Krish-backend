@@ -492,4 +492,21 @@ public class CSVPNService {
         return server.request(arguments);
     }
 
+    /**
+     * List virtual routers.
+     *
+     * @param optional additional parameters
+     * @param response format
+     * @return response string.
+     * @throws Exception unhandled exceptions.
+     */
+    public String listRouters(HashMap<String, String> optional, String response)
+            throws Exception {
+
+        LinkedList<NameValuePair> arguments
+                = server.getDefaultQuery("listRouters", optional);
+        arguments.add(new NameValuePair("response", response));
+        return server.request(arguments);
+    }
+
 }

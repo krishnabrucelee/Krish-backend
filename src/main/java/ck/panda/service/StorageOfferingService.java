@@ -1,9 +1,11 @@
 package ck.panda.service;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.util.domain.CRUDService;
+import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
  * Service class for Storage Offering. This service provides basic CRUD and essential api's for Storage Offering related
@@ -31,7 +33,6 @@ public interface StorageOfferingService extends CRUDService<StorageOffering> {
     /**
      * To get Tags list of Storage Offer from cloudstack server.
      * @param userId user id
-     * @param userId user id.
      * @param isActive unique id.
      * @return storage tags
      * @throws Exception unhandled errors
@@ -66,5 +67,15 @@ public interface StorageOfferingService extends CRUDService<StorageOffering> {
      * @throws Exception unhandled errors
      */
     List<StorageOffering> findByDomain(String tags, Long domainId) throws Exception;
+
+    /**
+     * Paging and Sorting for displaying more number of elements in list.
+     *
+     * @param domainId of the domain.
+     * @param pagingAndSorting sortable method.
+     * @return sorted values.
+     * @throws Exception unhandled errors.
+     */
+    Page<StorageOffering> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
 
 }

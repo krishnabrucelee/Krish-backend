@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.Network;
+import ck.panda.domain.entity.Project;
 
 /**
  * JPA repository for Network entity.
@@ -128,5 +129,19 @@ public interface NetworkRepository extends PagingAndSortingRepository<Network, L
      */
     @Query(value = "SELECT net FROM Network net WHERE net.domainId =:domainId AND net.isActive =:isActive")
     Page<Network> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, Pageable pageable);
+
+    /**
+     * Find all networks by project and deparment with pagination.
+     *
+     * @param allProjectList project list.
+     * @param departmentId of the network.
+     * @param isActive status of the network.
+     * @param pageable to get the list with pagination.
+     * @return list of networks.
+     */
+    @Query(value = "SELECT net FROM Network net WHERE (net.project in :allProjectList OR net.departmentId=:departmentId ) AND net.isActive =:isActive")
+    Page<Network> findByProjectDepartmentAndIsActive(@Param("allProjectList") List<Project> allProjectList,
+            @Param("departmentId") Long departmentId,
+            @Param("isActive") Boolean isActive, Pageable pageable);
 
 }

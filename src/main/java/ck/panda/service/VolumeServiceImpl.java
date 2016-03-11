@@ -3,7 +3,6 @@ package ck.panda.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -11,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
@@ -21,7 +19,6 @@ import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
-import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
@@ -527,15 +524,13 @@ public class VolumeServiceImpl implements VolumeService {
                 volumeType.add(VolumeType.DATADISK);
                 volumeType.add(VolumeType.ROOT);
                 if (projectService.findAllByUserAndIsActive(userId, true).size() > 0) {
-                    List<Volume> allProjectList = new ArrayList<Volume>();
+                    List<Project> allProjectList = new ArrayList<Project>();
                     for (Project project : projectService.findAllByUserAndIsActive(userId, true)) {
-                        List<Volume> allProjectTempList = volumeRepo.findByProjectAndVolumeType(project.getId(),
-                                convertEntityService.getOwnerById(userId).getDepartmentId(), volumeType, true);
-                        allProjectList.addAll(allProjectTempList);
+                        allProjectList.add(project);
                     }
-                    List<Volume> volumes = allProjectList.stream().distinct().collect(Collectors.toList());
-                    Page<Volume> allProjectLists = new PageImpl<Volume>(volumes);
-                    return (Page<Volume>) allProjectLists;
+                    Page<Volume> allProjectTempList = volumeRepo.findByProjectAndVolumeTypeAndPage(allProjectList,
+                            convertEntityService.getOwnerById(userId).getDepartmentId(), volumeType, true, pagingAndSorting.toPageRequest());
+                    return allProjectTempList;
                 } else {
                     return volumeRepo.findByDepartmentAndVolumeTypeAndPage(
                             convertEntityService.getOwnerById(userId).getDepartmentId(), volumeType, true,

@@ -20,7 +20,6 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.ComputeOffering;
-import ck.panda.domain.entity.Network;
 import ck.panda.service.ComputeOfferingService;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -55,7 +54,6 @@ public class ComputeOfferingController extends CRUDController<ComputeOffering> i
     @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing ComputeOffering.", response = ComputeOffering.class)
     @Override
     public ComputeOffering read(@PathVariable(PATH_ID) Long id) throws Exception {
-        System.out.println(id + "======================================");
         return computeService.find(id);
     }
 
@@ -119,6 +117,31 @@ public class ComputeOfferingController extends CRUDController<ComputeOffering> i
     @ResponseBody
     protected List<ComputeOffering> findByDomain(@RequestParam("domainId") Long domainId) throws Exception {
         return computeService.findByDomainAndIsActive(domainId, true);
+    }
+
+    /**
+     * Get all compute offering list by domain.
+     *
+     * @param sortBy asc/desc
+     * @param domainId domain id of compute.
+     * @param range pagination range.
+     * @param limit per page limit.
+     * @param request page request.
+     * @param response response content.
+     * @return compute list.
+     * @throws Exception unhandled exception.
+     */
+    @RequestMapping(value = "/listComputeByDomain", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<ComputeOffering> listComputeByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
+            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, ComputeOffering.class);
+        Page<ComputeOffering> pageResponse = computeService.findAllByDomainId(domainId, page);
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
     }
 
   }

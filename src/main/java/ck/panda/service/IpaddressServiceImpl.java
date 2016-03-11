@@ -98,11 +98,17 @@ public class IpaddressServiceImpl implements IpaddressService {
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
 
-    /** Constant for action event running status. */
+    /** Constant for action event configuration in progress. */
     public static final String CS_EVENT_RUNNING = "VPN remote access configuration in progress";
 
-    /** Constant for action event running status. */
+    /** Constant for action event reset in progress. */
     public static final String CS_EVENT_REMOVE = "VPN remote access reset in progress";
+
+    /** Constant for virtual router stopped error message. */
+    public static final String CS_ROUTER_STOPPED_ERROR = "Failed to start remote access VPN: router not in right state Stopped";
+
+    /** Constant for action event running status. */
+    public static final String CS_RUNNING_STATE = "Running";
 
     @Override
     public List<IpAddress> acquireIP(Long networkId) throws Exception {
@@ -173,7 +179,7 @@ public class IpaddressServiceImpl implements IpaddressService {
                 }
             }
         } else {
-        	throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Resource limit for department has not been set. Please update department quota");
+            throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Resource limit for department has not been set. Please update department quota");
         }
     }
 
@@ -459,50 +465,84 @@ public class IpaddressServiceImpl implements IpaddressService {
         IpAddress ipAddress = findbyUUID(uuid);
         try {
             configServer.setUserServer();
-            HashMap<String, String> optional = new HashMap<String, String>();
-            optional.put(CloudStackConstants.CS_DOMAIN_ID, ipAddress.getNetwork().getDomain().getUuid());
-            optional.put(CloudStackConstants.CS_ACCOUNT, ipAddress.getNetwork().getDepartment().getUserName());
+            Boolean routerStatus = virtualRoutersStatusCheck(ipAddress.getNetwork().getDomain().getUuid(),
+                    ipAddress.getNetwork().getDepartment().getUserName(), ipAddress.getNetwork().getUuid());
 
-            String createRemoteAccess = csVPNService.createRemoteAccessVpn(ipAddress.getUuid(), optional, CloudStackConstants.JSON);
-            JSONObject jobId = new JSONObject(createRemoteAccess).getJSONObject(CloudStackConstants.CS_CREATE_REMOTE_ACCESS_VPN);
-            if (jobId.has(CloudStackConstants.CS_ERROR_CODE)) {
-                errors = validator.sendGlobalError(jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
-                if (errors.hasErrors()) {
-                    throw new BadCredentialsException(jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
-                }
-            }
-            if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
-                Thread.sleep(20000);
-                String jobResponse = csipaddressService.associatedJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
-                JSONObject jobresults = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+            if (routerStatus) {
+                HashMap<String, String> optional = new HashMap<String, String>();
+                optional.put(CloudStackConstants.CS_DOMAIN_ID, ipAddress.getNetwork().getDomain().getUuid());
+                optional.put(CloudStackConstants.CS_ACCOUNT, ipAddress.getNetwork().getDepartment().getUserName());
 
-                if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS)
-                        .equals(CloudStackConstants.SUCCEEDED_JOB_STATUS)) {
-                    JSONObject jobresultReponse = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE)
-                        .getJSONObject(CloudStackConstants.CS_JOB_RESULT).getJSONObject(CloudStackConstants.CS_REMOTE_ACCESS_VPN);
-
-                    ipAddress.setVpnUuid(jobresultReponse.getString(CloudStackConstants.CS_ID));
-                    ipAddress.setVpnPresharedKey(convertEncryptedKey(jobresultReponse.getString(CloudStackConstants.CS_PRESHARED_KEY)));
-                    ipAddress.setVpnState(VpnState.valueOf(jobresultReponse.getString(CloudStackConstants.CS_STATE).toUpperCase()));
-                    ipAddress.setVpnForDisplay(jobresultReponse.getBoolean(CloudStackConstants.CS_FOR_DISPLAY));
-                } else if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.PROGRESS_JOB_STATUS)) {
-                    errors = validator.sendGlobalError(CS_EVENT_RUNNING);
+                String createRemoteAccess = csVPNService.createRemoteAccessVpn(ipAddress.getUuid(), optional, CloudStackConstants.JSON);
+                JSONObject jobId = new JSONObject(createRemoteAccess).getJSONObject(CloudStackConstants.CS_CREATE_REMOTE_ACCESS_VPN);
+                if (jobId.has(CloudStackConstants.CS_ERROR_CODE)) {
+                    errors = validator.sendGlobalError(jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
                     if (errors.hasErrors()) {
-                        throw new BadCredentialsException(CS_EVENT_RUNNING);
+                        throw new BadCredentialsException(jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
                     }
-                } else if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.ERROR_JOB_STATUS)) {
-                    if (jobresults.has(CloudStackConstants.CS_JOB_RESULT)) {
-                        errors = validator.sendGlobalError(jobresults.getJSONObject(CloudStackConstants.CS_JOB_RESULT).getString(CloudStackConstants.CS_ERROR_TEXT));
+                }
+                if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
+                    Thread.sleep(20000);
+                    String jobResponse = csipaddressService.associatedJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
+                    JSONObject jobresults = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+
+                    if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS)
+                            .equals(CloudStackConstants.SUCCEEDED_JOB_STATUS)) {
+                        JSONObject jobresultReponse = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE)
+                            .getJSONObject(CloudStackConstants.CS_JOB_RESULT).getJSONObject(CloudStackConstants.CS_REMOTE_ACCESS_VPN);
+
+                        ipAddress.setVpnUuid(jobresultReponse.getString(CloudStackConstants.CS_ID));
+                        ipAddress.setVpnPresharedKey(convertEncryptedKey(jobresultReponse.getString(CloudStackConstants.CS_PRESHARED_KEY)));
+                        ipAddress.setVpnState(VpnState.valueOf(jobresultReponse.getString(CloudStackConstants.CS_STATE).toUpperCase()));
+                        ipAddress.setVpnForDisplay(jobresultReponse.getBoolean(CloudStackConstants.CS_FOR_DISPLAY));
+                    } else if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.PROGRESS_JOB_STATUS)) {
+                        errors = validator.sendGlobalError(CS_EVENT_RUNNING);
                         if (errors.hasErrors()) {
-                            throw new BadCredentialsException(jobresults.getJSONObject(CloudStackConstants.CS_JOB_RESULT).getString(CloudStackConstants.CS_ERROR_TEXT));
+                            throw new BadCredentialsException(CS_EVENT_RUNNING);
+                        }
+                    } else if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.ERROR_JOB_STATUS)) {
+                        if (jobresults.has(CloudStackConstants.CS_JOB_RESULT)) {
+                            errors = validator.sendGlobalError(jobresults.getJSONObject(CloudStackConstants.CS_JOB_RESULT).getString(CloudStackConstants.CS_ERROR_TEXT));
+                            if (errors.hasErrors()) {
+                                throw new BadCredentialsException(jobresults.getJSONObject(CloudStackConstants.CS_JOB_RESULT).getString(CloudStackConstants.CS_ERROR_TEXT));
+                            }
                         }
                     }
                 }
+            } else {
+                throw new BadCredentialsException(CS_ROUTER_STOPPED_ERROR);
             }
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException(e.getMessage());
         }
         return ipRepo.save(ipAddress);
+    }
+
+    /**
+     * Check the virtual router is running/stopped.
+     *
+     * @param domainId domain id of the router
+     * @param accountName account name of the router
+     * @param networkId network id of the router
+     * @return encrypted value
+     * @throws Exception unhandled errors.
+     */
+    private Boolean virtualRoutersStatusCheck(String domainId, String accountName, String networkId) throws Exception {
+        Boolean routerState = false;
+        JSONArray routerListJSON = null;
+        HashMap<String, String> routerOptional = new HashMap<String, String>();
+        routerOptional.put(CloudStackConstants.CS_DOMAIN_ID, domainId);
+        routerOptional.put(CloudStackConstants.CS_ACCOUNT, accountName);
+        routerOptional.put(CloudStackConstants.CS_NETWORK_ID, networkId);
+        String listRouters = csVPNService.listRouters(routerOptional, CloudStackConstants.JSON);
+        JSONObject responseObject = new JSONObject(listRouters).getJSONObject(CloudStackConstants.CS_LIST_ROUTER_RESPONSE);
+        if (responseObject.has(CloudStackConstants.CS_ROUTER)) {
+            routerListJSON = responseObject.getJSONArray(CloudStackConstants.CS_ROUTER);
+            if (JsonUtil.getStringValue(routerListJSON.getJSONObject(0), CloudStackConstants.CS_STATE).equals(CS_RUNNING_STATE)) {
+                routerState = true;
+            }
+        }
+        return routerState;
     }
 
     @Override

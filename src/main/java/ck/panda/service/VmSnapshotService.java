@@ -1,9 +1,11 @@
 package ck.panda.service;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.util.domain.CRUDService;
+import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
  * Service class for Virtual Machine Snapshot. This service provides Take VM snapshot, Restore Snapshot related actions.
@@ -44,5 +46,15 @@ public interface VmSnapshotService extends CRUDService<VmSnapshot> {
      * @return Vm snapshot.
      */
     List<VmSnapshot> findByVmInstance(Long vmId, Boolean isRemoved);
+
+    /**
+     * Find vm snapshot by domain id.
+     *
+     * @param domainId domain id of the vm snapshot
+     * @param pagingAndSorting parameters
+     * @return Vm snapshot
+     * @throws Exception if error occurs
+     */
+    Page<VmSnapshot> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
 
 }

@@ -4,7 +4,6 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.ComputeOffering;
-import ck.panda.domain.entity.Network;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
@@ -76,5 +75,15 @@ public interface ComputeOfferingService extends CRUDService<ComputeOffering> {
      * @throws Exception if error occurs.
      */
     List<ComputeOffering> findByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception;
+
+    /**
+     * Paging and Sorting for displaying more number of elements in list.
+     *
+     * @param domainId of the domain.
+     * @param pagingAndSorting sortable method.
+     * @return sorted values.
+     * @throws Exception unhandled errors.
+     */
+    Page<ComputeOffering> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
 
    }

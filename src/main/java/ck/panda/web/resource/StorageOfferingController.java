@@ -90,7 +90,6 @@ public class StorageOfferingController extends CRUDController<StorageOffering> i
             @RequestParam Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, StorageOffering.class);
         Page<StorageOffering> pageResponse = storageOfferingService.findAll(page);
-        System.out.println(pageResponse);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
@@ -148,5 +147,30 @@ public class StorageOfferingController extends CRUDController<StorageOffering> i
     @ResponseBody
     protected List<StorageOffering> getSearchByDomain(@RequestParam("domainId") Long domainId) throws Exception {
         return storageOfferingService.findByDomain(DEFAULT_TAG, domainId);
+    }
+
+    /**
+     * Get all storage offering list by domain.
+     *
+     * @param sortBy asc/desc
+     * @param domainId domain id of storage.
+     * @param range pagination range.
+     * @param limit per page limit.
+     * @param request page request.
+     * @param response response content.
+     * @return storage list.
+     * @throws Exception unhandled exception.
+     */
+    @RequestMapping(value = "/listStorageByDomain", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<StorageOffering> listStorageByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
+            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, StorageOffering.class);
+         Page<StorageOffering> pageResponse = storageOfferingService.findAllByDomainId(domainId, page);
+         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+         return pageResponse.getContent();
     }
 }

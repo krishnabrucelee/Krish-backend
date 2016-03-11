@@ -14,7 +14,6 @@ import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.StorageOfferingCost;
-import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.repository.jpa.StorageOfferingRepository;
 import ck.panda.util.AppValidator;
@@ -379,5 +378,10 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
          storageCost.addAll(persistStorage.getStoragePrice());
          storage.setStoragePrice(storageCost);
          return storage;
+    }
+
+    @Override
+    public Page<StorageOffering> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
+        return storageOfferingRepo.findAllByDomainIdAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
     }
 }
