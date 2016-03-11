@@ -39,7 +39,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -658,19 +657,15 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             } else {
                 // Get active project list for current user.
                 if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
-                    List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
+                    List<Project> projectList = new ArrayList<Project>();
                     for (Project project : projectService.findAllByUserAndIsActive(user.getId(), true)) {
                         // List all Vms are not in expunging state by project and/or department.
-                        List<VmInstance> allInstanceTempList = virtualmachinerepository
-                                .findAllByDepartmentAndProjectAndExceptStatus(Status.EXPUNGING, user.getDepartment(),
-                                        project);
-                        allInstanceList.addAll(allInstanceTempList);
+                        projectList.add(project);
                     }
-                    List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
-                    // List all Vms are not in expunging state by current user, belongs to department and project.
-                    Page<VmInstance> allInstanceLists = new PageImpl<VmInstance>(instances,
-                            pagingAndSorting.toPageRequest(), pagingAndSorting.getPageSize());
-                    return (Page<VmInstance>) allInstanceLists;
+                    Page<VmInstance> allInstanceTempList = virtualmachinerepository
+                            .findAllByDepartmentAndProjectAndExceptStatusAndPage(Status.EXPUNGING, user.getDepartment(),
+                                    projectList, pagingAndSorting.toPageRequest());
+                    return (Page<VmInstance>) allInstanceTempList;
                 } else {
                     // List all Vms are not in expunging state for ROOT admin.
                     Page<VmInstance> allInstanceLists = virtualmachinerepository
@@ -698,18 +693,15 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             } else {
                 // Get active project list for current user.
                 if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
-                    List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
+                    List<Project> projectList = new ArrayList<Project>();
                     for (Project project : projectService.findAllByUserAndIsActive(user.getId(), true)) {
                         // List all Vms for the current user by status and project and/or department.
-                        List<VmInstance> allInstanceTempList = virtualmachinerepository
-                                .findAllByDepartmentAndProjectAndStatus(status, user.getDepartment(), project);
-                        allInstanceList.addAll(allInstanceTempList);
+                        projectList.add(project);
                     }
-                    List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
-                    // List all Vms by status for the current user, belongs to department and project.
-                    Page<VmInstance> allInstanceLists = new PageImpl<VmInstance>(instances,
-                            pagingAndSorting.toPageRequest(), pagingAndSorting.getPageSize());
-                    return (Page<VmInstance>) allInstanceLists;
+                    Page<VmInstance> allInstanceList = virtualmachinerepository
+                            .findAllByDepartmentAndProjectAndStatusAndPage(status, user.getDepartment(), projectList,
+                                    pagingAndSorting.toPageRequest());
+                    return (Page<VmInstance>) allInstanceList;
                 } else {
                     // List all Vms by status for ROOT admin.
                     Page<VmInstance> allInstanceLists = virtualmachinerepository
@@ -1213,18 +1205,14 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             } else {
                 // Get active project list for current user.
                 if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
-                    List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
+                    List<Project> projectList = new ArrayList<Project>();
                     for (Project project : projectService.findAllByUserAndIsActive(user.getId(), true)) {
                         // List all Vms for the current user by status and project and/or department.
-                        List<VmInstance> allInstanceTempList = virtualmachinerepository
-                                .findAllByDepartmentAndProjectAndExceptStatus(Status.EXPUNGING, user.getDepartment(),
-                                        project);
-                        allInstanceList.addAll(allInstanceTempList);
+                        projectList.add(project);
                     }
-                    List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
-                    // List all Vms by status for the current user, belongs to department and project.
-                    Page<VmInstance> allInstanceLists = new PageImpl<VmInstance>(instances,
-                            pagingAndSorting.toPageRequest(), pagingAndSorting.getPageSize());
+                    Page<VmInstance> allInstanceLists = virtualmachinerepository
+                            .findAllByDepartmentAndProjectAndExceptStatusAndPage(Status.EXPUNGING, user.getDepartment(),
+                                    projectList, pagingAndSorting.toPageRequest());
                     return (Page<VmInstance>) allInstanceLists;
                 } else {
                     // List all Vms by status for ROOT admin.

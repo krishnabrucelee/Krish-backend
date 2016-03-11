@@ -3,14 +3,12 @@ package ck.panda.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
@@ -18,15 +16,12 @@ import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
-import ck.panda.domain.entity.ResourceLimitDomain;
-import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.Network.Status;
 import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.VmInstance;
-import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.IpAddress;
@@ -445,15 +440,13 @@ public class NetworkServiceImpl implements NetworkService {
     private Page<Network> getNetworkListByUser(PagingAndSorting pagingAndSorting, Long userId) throws  Exception {
         User user = convertEntityService.getOwnerById(userId);
         if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
-            List<Network> networkList = new ArrayList<Network>();
+            List<Project> allProjectList = new ArrayList<Project>();
             for (Project project : projectService.findAllByUserAndIsActive(user.getId(), true)) {
-                List<Network> projectNetwork = networkRepo.findByProjectDepartmentAndNetwork(project.getId(),
-                        user.getDepartmentId(), true);
-                networkList.addAll(projectNetwork);
+                allProjectList.add(project);
             }
-            List<Network> networks = networkList.stream().distinct().collect(Collectors.toList());
-            Page<Network> listingNetworksWithPagination = new PageImpl<Network>(networks);
-            return (Page<Network>) listingNetworksWithPagination;
+            Page<Network> projectNetwork = networkRepo.findByProjectDepartmentAndIsActive(allProjectList,
+                    user.getDepartmentId(), true, pagingAndSorting.toPageRequest());
+            return projectNetwork;
         } else {
             return networkRepo.findByDepartmentAndPagination(user.getDepartmentId(), true,
                     pagingAndSorting.toPageRequest());
