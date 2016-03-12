@@ -296,6 +296,29 @@ public class ConvertEntityService {
     }
 
     /**
+     * Get ssh key by id.
+     *
+     * @param id of ssh key.
+     * @return ssh key.
+     * @throws Exception unhandled exception.
+     */
+    public SSHKey getSSHKeyById(Long id) throws Exception {
+        return sshKeyService.find(id);
+    }
+
+    /**
+     * Get ssh key by name and departmentId.
+     *
+     * @param name of ssh key
+     * @param departmentId of ssh key.
+     * @return ssh key.
+     * @throws Exception unhandled exception.
+     */
+    public SSHKey getSSHKeyByNameAndDepartment(String name, Long departmentId) throws Exception {
+        return sshKeyService.findAllByDepartmentAndKeypairAndIsActive(departmentId, name, true);
+    }
+
+    /**
      * Get compute offer id.
      *
      * @param uuid
