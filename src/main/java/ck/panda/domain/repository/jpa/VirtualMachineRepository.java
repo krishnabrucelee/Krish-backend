@@ -138,8 +138,8 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      * Get the list of VMs by status with pagination.
      *
      * @param status of the status of VM.
-     * @param pageable page request
-     * @return instance list
+     * @param pageable page request.
+     * @return instance list.
      */
     @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.network as network, vm.displayName as displayName, publicIP.publicIpAddress as publicIpAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.status = :status AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE")
     Page<VmInstance> findAllByStatusWithPageRequest(@Param("status") Status status, Pageable pageable);
