@@ -244,8 +244,7 @@ public class ResourceStateListener implements MessageListener {
 							}
 							if (resourceEvent.getString(EventTypes.RESOURCE_STATE)
 									.equals(EventTypes.EVENT_STATUS_RUNNING)) {
-								// Host update & internal name while create vm
-								// as user.
+								// Host update & internal name while create vm as user.
 								if (vmInstance.getHostId() == null) {
 									CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
 									server.setServer(cloudConfig.getApiURL(), cloudConfig.getSecretKey(),

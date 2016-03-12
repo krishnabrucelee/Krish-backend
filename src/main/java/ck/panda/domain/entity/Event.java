@@ -48,7 +48,7 @@ public class Event implements Serializable {
     @Column(name = "resource_uuid")
     private String resourceUuid;
 
-    /** Eevent type. */
+    /** Event type. */
     @Column(name = "event")
     private String event;
 

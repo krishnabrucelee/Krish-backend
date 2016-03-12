@@ -95,20 +95,21 @@ public class ActionListener implements MessageListener {
      * @throws Exception exception.
      */
     public void handleActionEvent(String eventName, String eventStart, String eventMessage) throws Exception {
-        syncService.init(cloudStackServer);
-        ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
-        AuthenticatedExternalWebService authenticatedExternalWebService = new AuthenticatedExternalWebService(
-                backendAdminUsername, null, AuthorityUtils.commaSeparatedStringToAuthorityList(backendAdminRole));
-        authenticatedExternalWebService.setExternalWebService(externalWebService);
-        SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);
-        JSONObject eventObject = new JSONObject(eventMessage);
-        Thread.sleep(5000);
-     // Event record from action listener call.		        switch (eventStart) {
-        ObjectMapper eventmapper = new ObjectMapper();
+		syncService.init(cloudStackServer);
+		ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
+		AuthenticatedExternalWebService authenticatedExternalWebService = new AuthenticatedExternalWebService(
+				backendAdminUsername, null, AuthorityUtils.commaSeparatedStringToAuthorityList(backendAdminRole));
+		authenticatedExternalWebService.setExternalWebService(externalWebService);
+		SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);
+		JSONObject eventObject = new JSONObject(eventMessage);
+		Thread.sleep(5000);
+		// Event record from action listener call.
+		ObjectMapper eventmapper = new ObjectMapper();
 		eventResponse = eventmapper.readValue(eventMessage, ResponseEvent.class);
 		Event actionEvent = new Event();
 		actionEvent.setEvent(eventResponse.getEvent());
-		actionEvent.setEventDateTime(convertEntityService.getTimeService().convertDateAndTime(eventResponse.getEventDateTime()));
+		actionEvent.setEventDateTime(
+				convertEntityService.getTimeService().convertDateAndTime(eventResponse.getEventDateTime()));
 		actionEvent.setEventOwnerId(convertEntityService.getOwnerByUuid(eventResponse.getUser()));
 		actionEvent.setEventType(EventType.ACTION);
 		actionEvent.setResourceUuid(eventResponse.getEntityuuid());
@@ -123,8 +124,8 @@ public class ActionListener implements MessageListener {
 		}
 		// save the event get from action listener.
 		convertEntityService.getWebsocketService().handleEventAction(actionEvent);
-        if (eventObject.getString(CloudStackConstants.CS_EVENT_STATUS)
-                .equalsIgnoreCase(CloudStackConstants.CS_EVENT_COMPLETE)) {
+		if (eventObject.getString(CloudStackConstants.CS_EVENT_STATUS)
+				.equalsIgnoreCase(CloudStackConstants.CS_EVENT_COMPLETE)) {
 			switch (eventStart) {
 			case EventTypes.EVENT_USER:
 				if (eventName.equals(EventTypes.EVENT_USER_LOGIN) || eventName.equals(EventTypes.EVENT_USER_LOGOUT)) {

@@ -221,62 +221,64 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      * @throws Exception
      *             cloudstack unhandled errors.
      */
-    @Override
-    public void syncResourceStatus(JSONObject eventObject) throws Exception {
-    	Event asyncJobEvent = new Event();
+	@Override
+	public void syncResourceStatus(JSONObject eventObject) throws Exception {
+		Event asyncJobEvent = new Event();
 		// Event record.
-        configUtil.setServer(1L);
-        String eventObjectResult = cloudStackInstanceService.queryAsyncJobResult(eventObject.getString(CS_ASYNC_JOB_ID),
-                CloudStackConstants.JSON);
+		configUtil.setServer(1L);
+		String eventObjectResult = cloudStackInstanceService.queryAsyncJobResult(eventObject.getString(CS_ASYNC_JOB_ID),
+				CloudStackConstants.JSON);
 
-        JSONObject jobResultResponse = new JSONObject(eventObjectResult)
-                .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
-        JSONObject jobResult = null;
-        if (jobResultResponse.has(CloudStackConstants.CS_JOB_RESULT)) {
-            jobResult = jobResultResponse.getJSONObject(CloudStackConstants.CS_JOB_RESULT);
-        }
+		JSONObject jobResultResponse = new JSONObject(eventObjectResult)
+				.getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+		JSONObject jobResult = null;
+		if (jobResultResponse.has(CloudStackConstants.CS_JOB_RESULT)) {
+			jobResult = jobResultResponse.getJSONObject(CloudStackConstants.CS_JOB_RESULT);
+		}
 
-        String commandText = null;
-        if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).contains(".")) {
-            commandText = eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).substring(0,
-                    eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).indexOf('.', 0)) + ".";
-        } else {
-            commandText = eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE);
-        }
-     // Event record for async call.
-     		asyncJobEvent.setEvent(eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
-     		asyncJobEvent.setEventDateTime(convertEntityService.getTimeService().getCurrentDateAndTime());
-     		asyncJobEvent.setEventOwnerId(convertEntityService.getOwnerByUuid(eventObject.getString(CloudStackConstants.CS_USER)));
-     		asyncJobEvent.setEventType(EventType.ASYNC);
-     		JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
-     		if (eventObject.getString(CloudStackConstants.CS_STATUS).equalsIgnoreCase(CloudStackConstants.CS_STATUS_FAILED)) {
-     			asyncJobEvent.setMessage(jobResult.getString(CloudStackConstants.CS_ERROR_TEXT));
-     			asyncJobEvent.setStatus(Event.Status.FAILED);
-     			if(json.has(CloudStackConstants.CS_UUID)) {
-     			asyncJobEvent.setResourceUuid(json.getString(CloudStackConstants.CS_UUID));
-     			}
-     			switch (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)) {
-                case EventTypes.EVENT_VM_SNAPSHOT_CREATE:
-                    syncService.syncVmSnapshots();
-                    break;
-                default:
-                    LOGGER.debug("No async required");
-                }
-     		} else {
-     			if (eventObject.has(CloudStackConstants.CS_INSTANCE_UUID)) {
-     				asyncJobEvent.setResourceUuid(eventObject.getString(CloudStackConstants.CS_INSTANCE_UUID));
-     			} else {
-     				asyncJobEvent.setResourceUuid(json.getString(CloudStackConstants.CS_UUID));
-     			}
-     			asyncJobEvent.setStatus(Event.Status.valueOf(eventObject.getString(CloudStackConstants.CS_STATUS).toUpperCase()));
-     		}
-     		asyncJobEvent.setEventStartId(json.getString(CloudStackConstants.CS_EVENT_ID));
-     		asyncJobEvent.setJobId(eventObject.getString(CloudStackConstants.CS_ASYNC_JOB_ID));
-     		// websocket record for async call.
-     		websocketService.handleEventAction(asyncJobEvent);
+		String commandText = null;
+		if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).contains(".")) {
+			commandText = eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).substring(0,
+					eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).indexOf('.', 0)) + ".";
+		} else {
+			commandText = eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE);
+		}
+		// Event record for async call.
+		asyncJobEvent.setEvent(eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+		asyncJobEvent.setEventDateTime(convertEntityService.getTimeService().getCurrentDateAndTime());
+		asyncJobEvent.setEventOwnerId(
+				convertEntityService.getOwnerByUuid(eventObject.getString(CloudStackConstants.CS_USER)));
+		asyncJobEvent.setEventType(EventType.ASYNC);
+		JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
+		if (eventObject.getString(CloudStackConstants.CS_STATUS)
+				.equalsIgnoreCase(CloudStackConstants.CS_STATUS_FAILED)) {
+			asyncJobEvent.setMessage(jobResult.getString(CloudStackConstants.CS_ERROR_TEXT));
+			asyncJobEvent.setStatus(Event.Status.FAILED);
+			if (json.has(CloudStackConstants.CS_UUID)) {
+				asyncJobEvent.setResourceUuid(json.getString(CloudStackConstants.CS_UUID));
+			}
+			switch (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)) {
+			case EventTypes.EVENT_VM_SNAPSHOT_CREATE:
+				syncService.syncVmSnapshots();
+				break;
+			default:
+				LOGGER.debug("No async required");
+			}
+		} else {
+			if (eventObject.has(CloudStackConstants.CS_INSTANCE_UUID)) {
+				asyncJobEvent.setResourceUuid(eventObject.getString(CloudStackConstants.CS_INSTANCE_UUID));
+			} else {
+				asyncJobEvent.setResourceUuid(json.getString(CloudStackConstants.CS_UUID));
+			}
+			asyncJobEvent.setStatus(
+					Event.Status.valueOf(eventObject.getString(CloudStackConstants.CS_STATUS).toUpperCase()));
+		}
+		asyncJobEvent.setEventStartId(json.getString(CloudStackConstants.CS_EVENT_ID));
+		asyncJobEvent.setJobId(eventObject.getString(CloudStackConstants.CS_ASYNC_JOB_ID));
+		// websocket record for async call.
+		websocketService.handleEventAction(asyncJobEvent);
 		if (eventObject.getString(CloudStackConstants.CS_STATUS)
 				.equalsIgnoreCase(CloudStackConstants.CS_STATUS_SUCCEEDED) && jobResult != null) {
-
 			switch (commandText) {
 			case EventTypes.EVENT_VM:
 				LOGGER.debug("VM Sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
@@ -385,7 +387,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
 						+ eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
 			}
 		}
-    }
+	}
 
     /**
      * Sync with CloudStack server virtual machine.
