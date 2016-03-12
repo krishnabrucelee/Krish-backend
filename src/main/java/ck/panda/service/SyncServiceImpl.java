@@ -463,100 +463,100 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.error("ERROR AT synch Templates", e);
         }
         try {
-            // 30. Sync SSHKey entity
+            // 19. Sync SSHKey entity
             this.syncSSHKey();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch SSH Key", e);
         }
         try {
-            // 19. Sync ResourceLimit entity
+            // 20. Sync ResourceLimit entity
             this.syncResourceLimit();
         } catch (Exception e) {
             LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
         }
         try {
-            // 20. Sync Instance entity
+            // 21. Sync Instance entity
             this.syncInstances();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Instance", e);
         }
         try {
-            // 21. Sync Volume entity
+            // 22. Sync Volume entity
             this.syncVolume();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Volume", e);
         }
         try {
-            // 22. Sync VmSnapshot entity
+            // 23. Sync VmSnapshot entity
             this.syncVmSnapshots();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch vm snapshots", e);
         }
         try {
-            // 23. Sync Snapshot entity
+            // 24. Sync Snapshot entity
             this.syncSnapshot();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Snapshot", e);
         }
         try {
-            // 24. Sync Nic entity
+            // 25. Sync Nic entity
             this.syncNic();
             LOGGER.debug("nic");
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Nic", e);
         }
         try {
-            // 25. Sync IP address entity
+            // 26. Sync IP address entity
             this.syncIpAddress();
             LOGGER.debug("ipAddress");
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Ip Address", e);
         }
         try {
-            // 26. Sync Egress firewall rules entity
+            // 27. Sync Egress firewall rules entity
             this.syncEgressFirewallRules();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch EgressRule", e);
         }
         try {
-            // 27. Sync Ingress firewall rules entity
+            // 28. Sync Ingress firewall rules entity
             this.syncIngressFirewallRules();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch EgressRule", e);
         }
         try {
-            // 28. Sync Port Forwarding entity
+            // 29. Sync Port Forwarding entity
             this.syncPortForwarding();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch PortForwarding", e);
         }
         try {
-            // 29. Sync SnapshotPolicy entity
+            // 30. Sync SnapshotPolicy entity
             this.syncSnapshotPolicy();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch SnapshotPolicy", e);
         }
         try {
-            // 29. Sync Load Balancer entity
+            // 31. Sync Load Balancer entity
             this.syncLoadBalancer();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch LoadBalancer", e);
         }
 
        try {
-            // 29. Sync Load Balancer entity
+            // 32. Sync Load Balancer entity
             this.syncLoadBalancerStickyPolicy();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch LoadBalancer", e);
         }
         try {
-            // 31. Sync for update role in user entity
+            // 33. Sync for update role in user entity
             this.syncUpdateUserRole();
         } catch (Exception e) {
             LOGGER.error("ERROR AT Sync for update role in user entity", e);
         }
         try {
-            // 32. Sync VPN user entity
+            // 34. Sync VPN user entity
             this.syncVpnUser();
             LOGGER.debug("ipAddress");
         } catch (Exception e) {
@@ -1268,6 +1268,9 @@ public class SyncServiceImpl implements SyncService {
                 if (csVm.getCpuUsage() != null) {
                     instance.setCpuUsage(csVm.getCpuUsage());
                 }
+                if (csVm.getTransKeypairName() != null) {
+                    instance.setKeypairId(convertEntityService.getSSHKeyByNameAndDepartment(csVm.getTransKeypairName(), csVm.getDepartmentId()).getId());
+                }
                 instance.setDiskIoRead(csVm.getDiskIoRead());
                 instance.setDiskIoWrite(csVm.getDiskIoWrite());
                 instance.setDiskKbsRead(csVm.getDiskKbsRead());
@@ -1304,7 +1307,7 @@ public class SyncServiceImpl implements SyncService {
                 if (csVm.getInstanceOwnerId() != null) {
                     instance.setInstanceOwnerId(csVm.getInstanceOwnerId());
                 }
-                if(instance.getTemplateId() != null) {
+                if (instance.getTemplateId() != null) {
                     instance.setOsType(convertEntityService.getTemplateById(instance.getTemplateId()).getDisplayText());
                 }
                 instance.setTemplateName(csVm.getTemplateName());

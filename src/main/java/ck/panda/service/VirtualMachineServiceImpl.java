@@ -1166,8 +1166,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     vmInstance.setPodId(convertEntityService
                             .getPodIdByHost(convertEntityService.getHostId(vmInstance.getTransHostId())));
                 }
-                if(vmInstance.getTemplateId() != null){
+                if (vmInstance.getTemplateId() != null) {
                     vmInstance.setOsType(convertEntityService.getTemplateById(vmInstance.getTemplateId()).getDisplayText());
+                }
+                if (vmInstance.getTransKeypairName() != null) {
+                    vmInstance.setKeypairId(convertEntityService.getSSHKeyByNameAndDepartment(vmInstance.getTransKeypairName(), vmInstance.getDepartmentId()).getId());
                 }
                 // 2.3 and the converted vm entity to list.
                 vmList.add(vmInstance);
@@ -1314,5 +1317,36 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Override
     public List<VmInstance> findAllByDomain(Long domainId) throws Exception {
         return (List<VmInstance>) virtualmachinerepository.findAllByDomainAndExceptStatus(domainId, Status.EXPUNGING);
+    }
+
+    @Override
+    public VmInstance resetSSHKey(VmInstance vmInstance) throws Exception {
+        Errors errors = validator.rejectIfNullEntity(CloudStackConstants.ENTITY_VMINSTANCE, vmInstance);
+        errors = validator.validateEntity(vmInstance, errors);
+        HashMap<String, String> optionalMap = new HashMap<String, String>();
+        optionalMap.put(CloudStackConstants.CS_DOMAIN_ID, convertEntityService.getDomainUuidById(vmInstance.getDomainId()));
+        if (vmInstance.getProjectId() == null) {
+            optionalMap.put(CloudStackConstants.CS_ACCOUNT, (convertEntityService.getDepartmentById(vmInstance.getDepartmentId()).getUserName()));
+        } else if (vmInstance.getProjectId() != null) {
+            optionalMap.put(CloudStackConstants.CS_PROJECT_ID, convertEntityService.getProjectUuidById(vmInstance.getProjectId()));
+        }
+        // CS API call to reset the ssh key of an instance.
+        config.setUserServer();
+        String resetSSHKey = cloudStackInstanceService.resetSSHKeyForVirtualMachine(vmInstance.getUuid(),
+            CloudStackConstants.JSON, convertEntityService.getSSHKeyById(vmInstance.getKeypairId()).getName(), optionalMap);
+        JSONObject jobId = new JSONObject(resetSSHKey).getJSONObject(CloudStackConstants.CS_RESET_KEYPAIR_RESPONSE);
+        if (jobId.has(CloudStackConstants.CS_ERROR_CODE)) {
+            errors = this.validateEvent(errors, jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
+            throw new ApplicationException(errors);
+        } else {
+            String jobState = jobStatus(jobId, vmInstance);
+            if (jobState.equals(GenericConstants.ERROR_JOB_STATUS)) {
+                errors = this.validateEvent(errors, jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
+                throw new ApplicationException(errors);
+            } else {
+                virtualmachinerepository.save(convertEncryptPassword(vmInstance));
+            }
+        }
+        return vmInstance;
     }
 }
