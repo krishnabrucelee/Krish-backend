@@ -82,10 +82,6 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Autowired
     private ProjectService projectService;
 
-    /** Event notification service for tracking.*/
-	@Autowired
-	private EventNotificationService eventNotificationService;
-
     /** Cloud stack configuration utility class. */
     @Autowired
     private ConfigUtil config;
