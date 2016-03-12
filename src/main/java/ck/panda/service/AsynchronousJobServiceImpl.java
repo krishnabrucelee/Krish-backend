@@ -384,6 +384,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     }
                     csVm.setTemplateId(convertEntityService.getTemplateId(csVm.getTransTemplateId()));
                     csVm.setComputeOfferingId(convertEntityService.getComputeOfferId(csVm.getTransComputeOfferingId()));
+                    if (csVm.getTransKeypairName() != null) {
+                        instance.setKeypairId(convertEntityService.getSSHKeyByNameAndDepartment(csVm.getTransKeypairName(), csVm.getDepartmentId()).getId());
+                    }
                     if (csVm.getHostId() != null) {
                         csVm.setPodId(convertEntityService
                                 .getPodIdByHost(convertEntityService.getHostId(csVm.getTransHostId())));
@@ -458,7 +461,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     if (csVm.getInstanceOwnerId() != null) {
                         instance.setInstanceOwnerId(csVm.getInstanceOwnerId());
                     }
-                    if(instance.getTemplateId() != null) {
+                    if (instance.getTemplateId() != null) {
                         instance.setOsType(convertEntityService.getTemplateById(instance.getTemplateId()).getDisplayText());
                     }
                     instance.setTemplateName(csVm.getTemplateName());
@@ -497,7 +500,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     vmInstance.setPodId(convertEntityService
                             .getPodIdByHost(convertEntityService.getHostId(vmInstance.getTransHostId())));
                 }
-                if(vmInstance.getTemplateId() != null) {
+                if (vmInstance.getTransKeypairName() != null) {
+                    vmInstance.setKeypairId(convertEntityService.getSSHKeyByNameAndDepartment(vmInstance.getTransKeypairName(), vmInstance.getDepartmentId()).getId());
+                }
+                if (vmInstance.getTemplateId() != null) {
                     vmInstance.setOsType(convertEntityService.getTemplateById(vmInstance.getTemplateId()).getDisplayText());
                 }
                 vmInstance.setTemplateName(vmInstance.getTemplateName());

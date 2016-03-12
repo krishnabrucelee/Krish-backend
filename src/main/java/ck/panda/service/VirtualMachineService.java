@@ -279,4 +279,13 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * @throws Exception if error occurs.
      */
     List<VmInstance> findAllByDomain(Long domainId) throws Exception;
+
+    /**
+     * Reset SSH Key in created instance.
+     *
+     * @param vminstance virtual machine.
+     * @return instance.
+     * @throws Exception if error occurs.
+     */
+    VmInstance resetSSHKey(VmInstance vminstance) throws Exception;
 }
