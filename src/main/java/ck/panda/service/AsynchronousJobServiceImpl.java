@@ -19,6 +19,8 @@ import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EventTypes;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.Event;
+import ck.panda.domain.entity.Event.EventType;
 import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.FirewallRules.Purpose;
 import ck.panda.domain.entity.IpAddress.VpnState;
@@ -140,6 +142,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     @Autowired
     private NicService nicService;
 
+    /** Websocket service reference. */
+	@Autowired
+	private WebsocketService websocketService;
+
     /** CloudStack connector reference for instance. */
     @Autowired
     private CloudStackNicService cloudStackNicService;
@@ -187,6 +193,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     @Autowired
     private UpdateResourceCountService updateResourceCountService;
 
+    /** Sync service. */
+    @Autowired
+    private SyncService syncService;
+
     /** For listing VPN user list from cloudstack server. */
     @Autowired
     private VpnUserService vpnUserService;
@@ -213,6 +223,8 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      */
     @Override
     public void syncResourceStatus(JSONObject eventObject) throws Exception {
+    	Event asyncJobEvent = new Event();
+		// Event record.
         configUtil.setServer(1L);
         String eventObjectResult = cloudStackInstanceService.queryAsyncJobResult(eventObject.getString(CS_ASYNC_JOB_ID),
                 CloudStackConstants.JSON);
@@ -231,114 +243,148 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         } else {
             commandText = eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE);
         }
-        switch (commandText) {
-        case EventTypes.EVENT_VM:
-            LOGGER.debug("VM Sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
-                    + eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
-            syncVirtualMachine(jobResult, eventObject);
-            break;
-        case EventTypes.EVENT_NETWORK:
-            if (!eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).contains("OFFERING")) {
-
-                LOGGER.debug("Network sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
-                        + eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
-                if (eventObject.getString(CloudStackConstants.CS_EVENT_STATUS).equals("FAILED")) {
-                    Network network = Network.convert(jobResult.getJSONObject("network"));
-
+     // Event record for async call.
+     		asyncJobEvent.setEvent(eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+     		asyncJobEvent.setEventDateTime(convertEntityService.getTimeService().getCurrentDateAndTime());
+     		asyncJobEvent.setEventOwnerId(convertEntityService.getOwnerByUuid(eventObject.getString(CloudStackConstants.CS_USER)));
+     		asyncJobEvent.setEventType(EventType.ASYNC);
+     		JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
+     		if (eventObject.getString(CloudStackConstants.CS_STATUS).equalsIgnoreCase(CloudStackConstants.CS_STATUS_FAILED)) {
+     			asyncJobEvent.setMessage(jobResult.getString(CloudStackConstants.CS_ERROR_TEXT));
+     			asyncJobEvent.setStatus(Event.Status.FAILED);
+     			if(json.has(CloudStackConstants.CS_UUID)) {
+     			asyncJobEvent.setResourceUuid(json.getString(CloudStackConstants.CS_UUID));
+     			}
+     			switch (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)) {
+                case EventTypes.EVENT_VM_SNAPSHOT_CREATE:
+                    syncService.syncVmSnapshots();
+                    break;
+                default:
+                    LOGGER.debug("No async required");
                 }
-                asyncNetwork(jobResult, eventObject);
-            }
-            break;
-        case EventTypes.EVENT_FIREWALL:
-            if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).contains("FIREWALL")) {
-                LOGGER.debug("Firewall sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
-                        + eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
-                asyncFirewall(jobResult, eventObject);
-            }
-            break;
-        case EventTypes.EVENT_NAT:
-            if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).contains("STATICNAT")) {
-                LOGGER.debug("Nat sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
-                        + eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
-                asyncNat(jobResult, eventObject);
-            }
-            break;
-        case EventTypes.EVENT_TEMPLATE:
-            LOGGER.debug("templates sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
-                    + eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
-            asyncTemplates(eventObject);
-            break;
-        case EventTypes.EVENT_ISO:
-            LOGGER.debug("ISO sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
-                    + eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
-            // Update attach/detach ISO
-            if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_ISO_ATTACH)
-                    || eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
-                            .equals(EventTypes.EVENT_ISO_DETACH)) {
-                VmInstance vmInstance = VmInstance.convert(jobResult.getJSONObject(CloudStackConstants.CS_VM));
-                VmInstance instance = virtualMachineService.findByUUID(vmInstance.getUuid());
-                instance.setIsoName(vmInstance.getIsoName());
-                instance.setIsoId(convertEntityService.getIso(vmInstance.getIso()));
-                virtualMachineService.update(instance);
-            } else {
-                asyncTemplates(eventObject);
-            }
-            break;
-        case EventTypes.EVENT_VOLUME:
-            LOGGER.debug("Volume sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
-                    + eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
-            if (eventObject.getString(CloudStackConstants.CS_EVENT_STATUS).equals("FAILED")) {
-                Volume volume = Volume.convert(jobResult.getJSONObject("volume"));
-            }
-            asyncVolume(jobResult, eventObject);
-            break;
-        case EventTypes.EVENT_NIC:
-            LOGGER.debug("NIC sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
-                    + eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
-            asyncNic(jobResult, eventObject);
-            break;
-        case EventTypes.EVENT_PORTFORWARDING:
-            LOGGER.debug("NET sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
-                    + eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
-            asyncNet(jobResult, eventObject);
-            break;
-        case EventTypes.EVENT_LOADBALANCER:
-            LOGGER.debug("LB sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
-                    + eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
-            asyncLb(jobResult, eventObject);
-            break;
-        case EventTypes.EVENT_SNAPSHOT:
-            LOGGER.debug("Snapshot sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
-                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
-            asyncSnapshot(jobResult, eventObject);
-            break;
-        case EventTypes.EVENT_UNKNOWN:
-            String event = eventObject.getString(CS_COMMAND);
-             if (event.contains(CS_COMMAND)) {
-            LOGGER.debug("Snapshot sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
-                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
-            asyncSnapshot(jobResult, eventObject);
-            }
-            break;
-        case EventTypes.EVENT_VM_SNAPSHOT:
-            LOGGER.debug("VM snapshot sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
-                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
-            asyncVMSnapshot(jobResult, eventObject);
-            break;
-        case EventTypes.EVENT_VPN:
-            LOGGER.debug("VPN sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
-                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
-            asyncVpn(jobResult, eventObject);
-            break;
-        case EventTypes.EVENT_USER:
-            LOGGER.debug("User sync", eventObject.getString(CS_ASYNC_JOB_ID) + "===" +
-                eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
-            asyncUser(jobResult, eventObject);
-            break;
-        default:
-            LOGGER.debug("No sync required", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
-                    + eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
-        }
+     		} else {
+     			if (eventObject.has(CloudStackConstants.CS_INSTANCE_UUID)) {
+     				asyncJobEvent.setResourceUuid(eventObject.getString(CloudStackConstants.CS_INSTANCE_UUID));
+     			} else {
+     				asyncJobEvent.setResourceUuid(json.getString(CloudStackConstants.CS_UUID));
+     			}
+     			asyncJobEvent.setStatus(Event.Status.valueOf(eventObject.getString(CloudStackConstants.CS_STATUS).toUpperCase()));
+     		}
+     		asyncJobEvent.setEventStartId(json.getString(CloudStackConstants.CS_EVENT_ID));
+     		asyncJobEvent.setJobId(eventObject.getString(CloudStackConstants.CS_ASYNC_JOB_ID));
+     		// websocket record for async call.
+     		websocketService.handleEventAction(asyncJobEvent);
+		if (eventObject.getString(CloudStackConstants.CS_STATUS)
+				.equalsIgnoreCase(CloudStackConstants.CS_STATUS_SUCCEEDED) && jobResult != null) {
+
+			switch (commandText) {
+			case EventTypes.EVENT_VM:
+				LOGGER.debug("VM Sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
+						+ eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+				syncVirtualMachine(jobResult, eventObject);
+				break;
+			case EventTypes.EVENT_NETWORK:
+				if (!eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).contains("OFFERING")) {
+
+					LOGGER.debug("Network sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
+							+ eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+					if (eventObject.getString(CloudStackConstants.CS_EVENT_STATUS).equals("FAILED")) {
+						Network network = Network.convert(jobResult.getJSONObject("network"));
+					}
+					asyncNetwork(jobResult, eventObject);
+				}
+				break;
+			case EventTypes.EVENT_FIREWALL:
+				if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).contains("FIREWALL")) {
+					LOGGER.debug("Firewall sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
+							+ eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+					asyncFirewall(jobResult, eventObject);
+				}
+				break;
+			case EventTypes.EVENT_NAT:
+				if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).contains("STATICNAT")) {
+					LOGGER.debug("Nat sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
+							+ eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+					asyncNat(jobResult, eventObject);
+				}
+				break;
+			case EventTypes.EVENT_TEMPLATE:
+				LOGGER.debug("templates sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
+						+ eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+				asyncTemplates(eventObject);
+				break;
+			case EventTypes.EVENT_ISO:
+				LOGGER.debug("ISO sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
+						+ eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+				// Update attach/detach ISO
+				if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_ISO_ATTACH)
+						|| eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
+								.equals(EventTypes.EVENT_ISO_DETACH)) {
+					VmInstance vmInstance = VmInstance.convert(jobResult.getJSONObject(CloudStackConstants.CS_VM));
+					VmInstance instance = virtualMachineService.findByUUID(vmInstance.getUuid());
+					instance.setIsoName(vmInstance.getIsoName());
+					instance.setIsoId(convertEntityService.getIso(vmInstance.getIso()));
+					virtualMachineService.update(instance);
+				} else {
+					asyncTemplates(eventObject);
+				}
+				break;
+			case EventTypes.EVENT_VOLUME:
+				LOGGER.debug("Volume sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
+						+ eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+				if (eventObject.getString(CloudStackConstants.CS_EVENT_STATUS).equals("FAILED")) {
+					Volume volume = Volume.convert(jobResult.getJSONObject("volume"));
+				}
+				asyncVolume(jobResult, eventObject);
+				break;
+			case EventTypes.EVENT_NIC:
+				LOGGER.debug("NIC sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
+						+ eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+				asyncNic(jobResult, eventObject);
+				break;
+			case EventTypes.EVENT_PORTFORWARDING:
+				LOGGER.debug("NET sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
+						+ eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+				asyncNet(jobResult, eventObject);
+				break;
+			case EventTypes.EVENT_LOADBALANCER:
+				LOGGER.debug("LB sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
+						+ eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+				asyncLb(jobResult, eventObject);
+				break;
+			case EventTypes.EVENT_SNAPSHOT:
+				LOGGER.debug("Snapshot sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
+						+ eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+				asyncSnapshot(jobResult, eventObject);
+				break;
+			case EventTypes.EVENT_UNKNOWN:
+				String event = eventObject.getString(CS_COMMAND);
+				if (event.contains(CS_COMMAND)) {
+					LOGGER.debug("Snapshot sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
+							+ eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+					asyncSnapshot(jobResult, eventObject);
+				}
+				break;
+			case EventTypes.EVENT_VM_SNAPSHOT:
+				LOGGER.debug("VM snapshot sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
+						+ eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+				asyncVMSnapshot(jobResult, eventObject);
+				break;
+			case EventTypes.EVENT_VPN:
+				LOGGER.debug("VPN sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
+						+ eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+				asyncVpn(jobResult, eventObject);
+				break;
+			case EventTypes.EVENT_USER:
+				LOGGER.debug("User sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
+						+ eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+				asyncUser(jobResult, eventObject);
+				break;
+			default:
+				LOGGER.debug("No sync required", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
+						+ eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+			}
+		}
     }
 
     /**
@@ -560,6 +606,29 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                                 CS_Domain, Update);
                     }
                 }
+                Event asyncJobEvent = new Event();
+				// Event record for async call.
+				asyncJobEvent.setEvent(eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+				asyncJobEvent.setEventDateTime(convertEntityService.getTimeService().getCurrentDateAndTime());
+				asyncJobEvent.setEventOwnerId(convertEntityService.getOwnerByUuid(eventObject.getString(CloudStackConstants.CS_USER)));
+				asyncJobEvent.setEventType(EventType.ASYNC);
+				JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
+				if (eventObject.getString(CloudStackConstants.CS_STATUS).equalsIgnoreCase(CloudStackConstants.CS_STATUS_FAILED)) {
+					asyncJobEvent.setMessage(jobResult.getString(CloudStackConstants.CS_ERROR_TEXT));
+					asyncJobEvent.setStatus(Event.Status.FAILED);
+					asyncJobEvent.setResourceUuid(json.getString(CloudStackConstants.CS_UUID));
+				} else {
+					if (eventObject.has(CloudStackConstants.CS_INSTANCE_UUID)) {
+						asyncJobEvent.setResourceUuid(eventObject.getString(CloudStackConstants.CS_INSTANCE_UUID));
+					} else {
+						asyncJobEvent.setResourceUuid(json.getString(CloudStackConstants.CS_UUID));
+					}
+					asyncJobEvent.setStatus(Event.Status.valueOf(eventObject.getString(CloudStackConstants.CS_STATUS).toUpperCase()));
+				}
+				asyncJobEvent.setEventStartId(json.getString(CloudStackConstants.CS_EVENT_ID));
+				asyncJobEvent.setJobId(eventObject.getString(CloudStackConstants.CS_ASYNC_JOB_ID));
+				// websocket record for async call.
+				websocketService.handleEventAction(asyncJobEvent);
             }
             if (eventObject.getString("commandEventType").equals(EventTypes.EVENT_VM_DESTROY)) {
                 if (!convertEntityService.getDepartmentById(vmIn.getDepartmentId()).getType()
@@ -580,6 +649,29 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                                 CS_Domain, Delete);
                     }
                 }
+                Event asyncJobEvent = new Event();
+				// Event record for async call.
+				asyncJobEvent.setEvent(eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+				asyncJobEvent.setEventDateTime(convertEntityService.getTimeService().getCurrentDateAndTime());
+				asyncJobEvent.setEventOwnerId(convertEntityService.getOwnerByUuid(eventObject.getString(CloudStackConstants.CS_USER)));
+				asyncJobEvent.setEventType(EventType.ASYNC);
+				JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
+				if (eventObject.getString(CloudStackConstants.CS_STATUS).equalsIgnoreCase(CloudStackConstants.CS_STATUS_FAILED)) {
+					asyncJobEvent.setMessage(jobResult.getString(CloudStackConstants.CS_ERROR_TEXT));
+					asyncJobEvent.setStatus(Event.Status.FAILED);
+					asyncJobEvent.setResourceUuid(json.getString(CloudStackConstants.CS_UUID));
+				} else {
+					if (eventObject.has(CloudStackConstants.CS_INSTANCE_UUID)) {
+						asyncJobEvent.setResourceUuid(eventObject.getString(CloudStackConstants.CS_INSTANCE_UUID));
+					} else {
+						asyncJobEvent.setResourceUuid(json.getString(CloudStackConstants.CS_UUID));
+					}
+					asyncJobEvent.setStatus(Event.Status.valueOf(eventObject.getString(CloudStackConstants.CS_STATUS).toUpperCase()));
+				}
+				asyncJobEvent.setEventStartId(json.getString(CloudStackConstants.CS_EVENT_ID));
+				asyncJobEvent.setJobId(eventObject.getString(CloudStackConstants.CS_ASYNC_JOB_ID));
+				// websocket record for async call.
+				websocketService.handleEventAction(asyncJobEvent);
             }
         }
     }

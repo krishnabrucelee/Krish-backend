@@ -45,31 +45,43 @@ public class Event implements Serializable {
     private String jobId;
 
     /** Resource id of event. */
-    @Column(name = "resource_id")
-    private String resourceId;
+    @Column(name = "resource_uuid")
+    private String resourceUuid;
 
-    /** event type. */
+    /** Eevent type. */
     @Column(name = "event")
     private String event;
 
-    /** event message. */
+    /** Event start id. */
+    @Column(name = "event_start_id")
+    private String eventStartId;
+
+    /** Event message. */
     @Column(name = "message")
     private String message;
 
-    /** event date time. */
+    /** Event date time. */
     @Column(name = "event_date_time")
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime eventDateTime;
 
-    /** event owner. */
+    /** Event owner. */
     @JoinColumn(name = "event_owner", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
     private User eventOwner;
 
-    /** event user id. */
+    /** Event user id. */
     @Column(name = "event_owner")
     private Long eventOwnerId;
+
+    /** Event archive. */
+    @Column(name = "event_archive")
+    private Boolean isArchive;
+
+    /** Event active. */
+    @Column(name = "event_active")
+    private Boolean isActive;
 
     /** Type for event, whether it is action, async, usage, alerts etc . */
     @Column(name = "type")
@@ -93,7 +105,7 @@ public class Event implements Serializable {
         ASYNC,
 
         /** Event type as Resourcestate for state based. */
-        REOURCESTATE
+        RESOURCESTATE
     }
 
     /** Status for event, whether it is completed, failed etc . */
@@ -120,36 +132,21 @@ public class Event implements Serializable {
         /** Event status as succeeded after get complete action. */
         SUCCEEDED,
 
+        /** Event status as failed action get failed. */
+        FAILED,
+
+        /** Event status as info action get success. */
+        INFO,
+
+        /** Event status as error action get failed. */
+        ERROR,
+
         /** Event status as prestate transition event. */
         PRESTATETRANSITIONEVENT,
 
         /** Event status as poststate transition event. */
         POSTSTATETRANSITIONEVENT
     }
-
-    /** Created date and time. */
-    @CreatedDate
-    @Column(name = "created_date_time")
-    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    private ZonedDateTime createdDateTime;
-
-    /** Last modified date and time. */
-    @LastModifiedDate
-    @Column(name = "updated_date_time")
-    @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    private ZonedDateTime updatedDateTime;
-
-    /** Created by user. */
-    @CreatedBy
-    @Column(name = "created_user_id")
-    private Long createdBy;
-
-    /** Last updated by user. */
-    @LastModifiedBy
-    @Column(name = "updated_user_id")
-    private Long updatedBy;
 
     /**
      * Get the id.
@@ -188,21 +185,21 @@ public class Event implements Serializable {
     }
 
     /**
-     * Get the resourceId.
+     * Get the resource's uuid.
      *
-     * @return the resourceId.
+     * @return the resource's uuid.
      */
-    public String getResourceId() {
-        return resourceId;
+    public String getResourceUuid() {
+        return resourceUuid;
     }
 
     /**
-     * Set the resourceId.
+     * Set the resource's uuid.
      *
-     * @param resourceId the resourceId to set.
+     * @param resourceUuid the resource's uuid to set.
      */
-    public void setResourceId(String resourceId) {
-        this.resourceId = resourceId;
+    public void setResourceUuid(String resourceUuid) {
+        this.resourceUuid = resourceUuid;
     }
 
     /**
@@ -296,78 +293,6 @@ public class Event implements Serializable {
     }
 
     /**
-     * Get the created date and time.
-     *
-     * @return the createdDateTime.
-     */
-    public ZonedDateTime getCreatedDateTime() {
-        return createdDateTime;
-    }
-
-    /**
-     * Set the created date and time.
-     *
-     * @param createdDateTime the createdDateTime to set.
-     */
-    public void setCreatedDateTime(ZonedDateTime createdDateTime) {
-        this.createdDateTime = createdDateTime;
-    }
-
-    /**
-     * Get the updated date and time.
-     *
-     * @return the updatedDateTime.
-     */
-    public ZonedDateTime getUpdatedDateTime() {
-        return updatedDateTime;
-    }
-
-    /**
-     * Set the updated date and time.
-     *
-     * @param updatedDateTime the updatedDateTime to set.
-     */
-    public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
-        this.updatedDateTime = updatedDateTime;
-    }
-
-    /**
-     * Get the createdBy.
-     *
-     * @return the createdBy.
-     */
-    public Long getCreatedBy() {
-        return createdBy;
-    }
-
-    /**
-     * Set the createdBy.
-     *
-     * @param createdBy the createdBy to set.
-     */
-    public void setCreatedBy(Long createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    /**
-     * Get the updatedBy.
-     *
-     * @return the updatedBy.
-     */
-    public Long getUpdatedBy() {
-        return updatedBy;
-    }
-
-    /**
-     * Set the updatedBy.
-     *
-     * @param updatedBy the updatedBy to set.
-     */
-    public void setUpdatedBy(Long updatedBy) {
-        this.updatedBy = updatedBy;
-    }
-
-    /**
      * Get the event date and time.
      *
      * @return the eventDateTime.
@@ -402,4 +327,50 @@ public class Event implements Serializable {
     public void setEventType(EventType eventType) {
         this.eventType = eventType;
     }
+
+	/**
+	 * Get the event start id.
+	 *
+	 * @return the eventStartId
+	 */
+	public String getEventStartId() {
+		return eventStartId;
+	}
+
+	/**
+	 * Set the event start id.
+	 *
+	 * @param eventStartId the eventStartId to set.
+	 */
+	public void setEventStartId(String eventStartId) {
+		this.eventStartId = eventStartId;
+	}
+
+	/**
+	 * @return the isArchive
+	 */
+	public Boolean getIsArchive() {
+		return isArchive;
+	}
+
+	/**
+	 * @param isArchive the isArchive to set
+	 */
+	public void setIsArchive(Boolean isArchive) {
+		this.isArchive = isArchive;
+	}
+
+	/**
+	 * @return the isActive
+	 */
+	public Boolean getIsActive() {
+		return isActive;
+	}
+
+	/**
+	 * @param isActive the isActive to set
+	 */
+	public void setIsActive(Boolean isActive) {
+		this.isActive = isActive;
+	}
 }

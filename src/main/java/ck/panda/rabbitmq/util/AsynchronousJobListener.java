@@ -8,7 +8,6 @@ import org.springframework.amqp.core.MessageListener;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import ck.panda.constants.CloudStackConstants;
-import ck.panda.constants.EventTypes;
 import ck.panda.service.AsynchronousJobService;
 import ck.panda.service.SyncService;
 import ck.panda.util.CloudStackServer;
@@ -76,25 +75,14 @@ public class AsynchronousJobListener implements MessageListener {
      * @throws Exception exception.
      */
     public void handleStatusEvent(JSONObject eventObject) throws Exception {
-        if (eventObject.has("status")) {
-            if (eventObject.getString("status").equalsIgnoreCase("SUCCEEDED")) {
-                syncService.init(cloudStackServer);
-                ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
-                AuthenticatedExternalWebService authenticatedExternalWebService = new AuthenticatedExternalWebService(
-                        backendAdminUsername, null,
-                        AuthorityUtils.commaSeparatedStringToAuthorityList(backendAdminRole));
-                authenticatedExternalWebService.setExternalWebService(externalWebService);
-                SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);
-                asyncService.syncResourceStatus(eventObject);
-            } else if (eventObject.getString("status").equalsIgnoreCase("FAILED")) {
-            	switch (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)) {
-                case EventTypes.EVENT_VM_SNAPSHOT_CREATE:
-                    syncService.syncVmSnapshots();
-                    break;
-                default:
-                    LOGGER.debug("No async required");
-                }
-            }
+        if (eventObject.has(CloudStackConstants.CS_EVENT_STATUS)) {
+        syncService.init(cloudStackServer);
+		ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
+		AuthenticatedExternalWebService authenticatedExternalWebService = new AuthenticatedExternalWebService(
+				backendAdminUsername, null, AuthorityUtils.commaSeparatedStringToAuthorityList(backendAdminRole));
+		authenticatedExternalWebService.setExternalWebService(externalWebService);
+		SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);
+		asyncService.syncResourceStatus(eventObject);
         }
     }
 }
