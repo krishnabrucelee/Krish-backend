@@ -49,7 +49,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      * @param search search text.
      * @return instance list.
      */
-    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.template as template, vm.network as network, vm.displayName as displayName, owner.userName as instanceOwner, publicIP.publicIpAddress as publicIpAddress, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.domainId= :domainId AND vm.status = :status AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE"
+    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.network as network, vm.displayName as displayName, owner.userName as instanceOwner, publicIP.publicIpAddress as publicIpAddress, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.domainId= :domainId AND vm.status = :status AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE"
             + " AND (vm.displayName LIKE %:search% OR owner.userName LIKE %:search% OR vm.application LIKE %:search% OR vm.osType LIKE %:search% OR vm.cpuCore LIKE %:search%"
             + " OR vm.memory LIKE %:search% OR CONCAT(vm.volumeSize/POWER(2, 30), LOWER(' GB')) LIKE LOWER(%:search%) OR publicIP.publicIpAddress LIKE %:search% OR vm.ipAddress LIKE %:search%)")
     Page<VmInstance> findAllByDomainAndStatusWithPageRequest(@Param("domainId") Long domainId,
@@ -90,7 +90,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      * @param search search text.
      * @return instance list.
      */
-    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.template as template, vm.network as network, publicIP.publicIpAddress as publicIpAddress, vm.displayName as displayName, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.domainId = :id AND vm.status <> :status AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE"
+    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.network as network, publicIP.publicIpAddress as publicIpAddress, vm.displayName as displayName, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.domainId = :id AND vm.status <> :status AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE"
             + " AND (vm.displayName LIKE %:search% OR owner.userName LIKE %:search% OR vm.application LIKE %:search% OR vm.osType LIKE %:search% OR vm.cpuCore LIKE %:search%"
             + " OR vm.memory LIKE %:search% OR CONCAT(vm.volumeSize/POWER(2, 30), LOWER(' GB')) LIKE LOWER(%:search%) OR publicIP.publicIpAddress LIKE %:search% OR vm.ipAddress LIKE %:search%)")
     Page<VmInstance> findAllByDomainAndExceptStatus(@Param("id") Long id, @Param("status") Status status,
@@ -103,7 +103,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      * @param pageable page request.
      * @return instance list.
      */
-    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.template as template, vm.network as network, publicIP.publicIpAddress as publicIpAddress, vm.displayName as displayName, vm.ipAddress as ipAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.status <> :status AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE")
+    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.network as network, publicIP.publicIpAddress as publicIpAddress, vm.displayName as displayName, vm.ipAddress as ipAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.status <> :status AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE")
     Page<VmInstance> findAllByStatus(Pageable pageable, @Param("status") Status status);
 
     /**
@@ -122,7 +122,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      * @param pageable page request.
      * @return instance list.
      */
-    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.template as template, vm.network as network, vm.displayName as displayName, publicIP.publicIpAddress as publicIpAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner as owner WHERE vm.status <> :status AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE")
+    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.network as network, vm.displayName as displayName, publicIP.publicIpAddress as publicIpAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner as owner WHERE vm.status <> :status AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE")
     Page<VmInstance> findAllByExceptStatusWithPageRequest(@Param("status") Status status, Pageable pageable);
 
     /**
@@ -141,7 +141,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      * @param pageable page request
      * @return instance list
      */
-    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.template as template, vm.network as network, vm.displayName as displayName, publicIP.publicIpAddress as publicIpAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.status = :status AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE")
+    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.network as network, vm.displayName as displayName, publicIP.publicIpAddress as publicIpAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.status = :status AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE")
     Page<VmInstance> findAllByStatusWithPageRequest(@Param("status") Status status, Pageable pageable);
 
     /**
@@ -152,7 +152,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      * @param instanceOwner belongs to VM.
      * @return instance list
      */
-    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.template as template, vm.network as network, vm.displayName as displayName, publicIP.publicIpAddress as publicIpAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.status = :status AND vm.instanceOwner = :user AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE")
+    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.network as network, vm.displayName as displayName, publicIP.publicIpAddress as publicIpAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.status = :status AND vm.instanceOwner = :user AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE")
     Page<VmInstance> findAllByUserAndStatusWithPageRequest(@Param("status") Status status, Pageable pageable,
             @Param("user") User instanceOwner);
 
@@ -164,7 +164,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      * @param instanceOwner belongs to VM.
      * @return instance list.
      */
-    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.template as template, vm.network as network, vm.displayName as displayName, publicIP.publicIpAddress as publicIpAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.status <> :status AND vm.instanceOwner = :user AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE")
+    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.network as network, vm.displayName as displayName, publicIP.publicIpAddress as publicIpAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.status <> :status AND vm.instanceOwner = :user AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE")
     Page<VmInstance> findAllByUserAndExceptStatusWithPageRequest(@Param("status") Status status, Pageable pageable,
             @Param("user") User instanceOwner);
 
@@ -215,7 +215,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      * @param search search text.
      * @return instance list.
      */
-    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.template as template, vm.network as network, vm.displayName as displayName, publicIP.publicIpAddress as publicIpAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.status = :status AND vm.project IS NULL AND vm.department = :department AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE"
+    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.network as network, vm.displayName as displayName, publicIP.publicIpAddress as publicIpAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.status = :status AND vm.project IS NULL AND vm.department = :department AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE"
             + " AND (vm.displayName LIKE %:search% OR owner.userName LIKE %:search% OR vm.application LIKE %:search% OR vm.osType LIKE %:search% OR vm.cpuCore LIKE %:search%"
             + " OR vm.memory LIKE %:search% OR CONCAT(vm.volumeSize/POWER(2, 30), LOWER(' GB')) LIKE LOWER(%:search%) OR publicIP.publicIpAddress LIKE %:search% OR vm.ipAddress LIKE %:search%)")
     Page<VmInstance> findAllByDepartmentAndStatusWithPageRequest(@Param("status") Status status,
@@ -293,7 +293,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      * @param search search text.
      * @return instance list.
      */
-    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.template as template, vm.network as network, vm.displayName as displayName, publicIP.publicIpAddress as publicIpAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.project IS NULL AND vm.departmentId = :departmentId AND vm.status <> :status AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE"
+    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.network as network, vm.displayName as displayName, publicIP.publicIpAddress as publicIpAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.project IS NULL AND vm.departmentId = :departmentId AND vm.status <> :status AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE"
             + " AND (vm.displayName LIKE %:search% OR owner.userName LIKE %:search% OR vm.application LIKE %:search% OR vm.osType LIKE %:search% OR vm.cpuCore LIKE %:search%"
             + " OR vm.memory LIKE %:search% OR CONCAT(vm.volumeSize/POWER(2, 30), LOWER(' GB')) LIKE LOWER(%:search%) OR publicIP.publicIpAddress LIKE %:search% OR vm.ipAddress LIKE %:search%)")
     Page<VmInstance> findAllByDepartmentAndExceptStatusWithPageRequest(@Param("departmentId") Long departmentId,
@@ -362,7 +362,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      * @param search search text.
      * @return instance list.
      */
-    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.template as template, vm.network as network, vm.displayName as displayName, publicIP.publicIpAddress as publicIpAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.status <> :status AND (vm.domainId = :domainId OR 0 = :domainId) AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE"
+    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.network as network, vm.displayName as displayName, publicIP.publicIpAddress as publicIpAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.status <> :status AND (vm.domainId = :domainId OR 0 = :domainId) AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE"
             + " AND (vm.displayName LIKE %:search% OR owner.userName LIKE %:search% OR vm.application LIKE %:search% OR vm.osType LIKE %:search% OR vm.cpuCore LIKE %:search%"
             + " OR vm.memory LIKE %:search% OR CONCAT(vm.volumeSize/POWER(2, 30), LOWER(' GB')) LIKE LOWER(%:search%) OR publicIP.publicIpAddress LIKE %:search% OR vm.ipAddress LIKE %:search%)")
     Page<VmInstance> findAllByDomainAndExceptStatusWithPageRequest(@Param("status") Status status, @Param("domainId") Long domainId, Pageable pageable, @Param("search") String search);
@@ -376,7 +376,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      * @param search search text.
      * @return instance list
      */
-    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.template as template, vm.network as network, vm.displayName as displayName, publicIP.publicIpAddress as publicIpAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.status = :status AND (vm.domainId = :domainId OR 0 = :domainId) AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE"
+    @Query(value = "SELECT new map(vm.cpuCore as cpuCore, vm.memory as memory, vm.network as network, vm.displayName as displayName, publicIP.publicIpAddress as publicIpAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize,vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id) FROM VmInstance vm, IpAddress publicIP LEFT JOIN vm.instanceOwner owner WHERE vm.status = :status AND (vm.domainId = :domainId OR 0 = :domainId) AND vm.networkId = publicIP.networkId AND publicIP.isSourcenat IS TRUE"
             + " AND (vm.displayName LIKE %:search% OR owner.userName LIKE %:search% OR vm.application LIKE %:search% OR vm.osType LIKE %:search% OR vm.cpuCore LIKE %:search%"
             + " OR vm.memory LIKE %:search% OR CONCAT(vm.volumeSize/POWER(2, 30), LOWER(' GB')) LIKE LOWER(%:search%) OR publicIP.publicIpAddress LIKE %:search% OR vm.ipAddress LIKE %:search%)")
     Page<VmInstance> findAllByStatusAndDomainWithPageRequest(@Param("status") Status status, @Param("domainId") Long domainId, Pageable pageable, @Param("search") String search);
