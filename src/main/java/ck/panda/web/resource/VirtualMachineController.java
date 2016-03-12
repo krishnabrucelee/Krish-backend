@@ -67,7 +67,7 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     @Override
     public VmInstance create(@RequestBody VmInstance vminstance) throws Exception {
         vminstance.setSyncFlag(true);
-        return virtualmachineservice.save(vminstance);
+        return virtualmachineservice.saveVmInstance(vminstance, Long.valueOf(tokenDetails.getTokenDetails("id")));
     }
 
     @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing Virtual Machine.", response = VmInstance.class)
@@ -93,7 +93,7 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, VmInstance.class);
-        Page<VmInstance> pageResponse = virtualmachineservice.findAllBySort(page, Status.EXPUNGING);;
+        Page<VmInstance> pageResponse = virtualmachineservice.findAllBySort(page, Status.EXPUNGING);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }

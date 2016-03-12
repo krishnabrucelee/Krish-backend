@@ -615,4 +615,63 @@ public class CloudStackConstants {
     /** Constant for router. */
     public static final String CS_ROUTER = "router";
 
+    /** Constant for status of failed. */
+    public static final String CS_STATUS = "status";
+
+    /** Constant for status of alert usage. */
+    public static final String CS_ALERT_USAGE = "ALERT-USAGE";
+
+    /** Constant for status of alert message. */
+    public static final String CS_ALERT_MESSAGE = "body";
+
+    /** Constant for status of alert subject. */
+    public static final String CS_ALERT_SUBJECT = "subject";
+
+    /** Constant for status of failed. */
+    public static final String CS_STATUS_FAILED = "FAILED";
+
+    /** Constant for status of Error. */
+    public static final String CS_STATUS_ERROR = "Error";
+
+    /** Constant for status of succeeded. */
+    public static final String CS_STATUS_SUCCEEDED = "SUCCEEDED";
+
+    /** Constant for id of event. */
+    public static final String CS_EVENT_ID = "ctxStartEventId";
+
+    /** Constant for CS resource state status. */
+    public static final String CS_RESOURCE_STATE_STATUS = "OperationSucceeded";
+
+    /** Constant for CS event date and time. */
+    public static final String CS_EVENT_DATE_TIME = "eventDateTime";
+
+    /** Constant for action websocket publish. */
+    public static final String CS_ACTION_MAP = "/topic/action.event/";
+
+    /** Constant for async websocket publish. */
+    public static final String CS_ASYNC_MAP = "/topic/async.event/";
+
+    /** Constant for error websocket publish. */
+    public static final String CS_ERROR_MAP = "/topic/error.event/";
+
+    /** Constant for resource websocket publish. */
+    public static final String CS_RESOURCE_MAP = "/topic/resource.event/";
+
+    /** Constant for alert websocket publish. */
+    public static final String CS_ALERT_MAP = "/topic/alert.event/";
+
+    /** Constant for seperator. */
+    public static final String CS_SEPERATOR = "/";
+
+    /** Constant for action event status as scheduled. */
+    public static final String CS_EVENT_SCHEDULED = "Scheduled";
+
+    /** Constant for CS async job id. */
+    public static final String CS_ASYNC_JOB_ID = "jobId";
+
+    /** Constant for uuid. */
+    public static final String CS_UUID = "uuid";
+
+    /** Constant for uuid of instance. */
+    public static final String CS_INSTANCE_UUID = "instanceUuid";
 }
