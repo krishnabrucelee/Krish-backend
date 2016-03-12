@@ -58,6 +58,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     /** Constant for min io disk offering. */
     public static final String CS_MIN_IOPS_DO = ".minIopsDo";
 
+    /** Constant for empty string search. */
+    public static final String EMPTY_SEARCH_FILTER = "";
+
     /** Validator attribute. */
     @Autowired
     private AppValidator validator;
@@ -88,7 +91,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
 
     /** Quota limit validation reference. */
     @Autowired
-    QuotaValidationService quotaLimitValidation;
+    private QuotaValidationService quotaLimitValidation;
 
     /** CloudStack connector reference for instance. */
     @Autowired
@@ -636,7 +639,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 // List all Vms are not in expunging state for domain admin.
                 Page<VmInstance> allInstanceList = virtualmachinerepository
                         .findAllByDepartmentAndExceptStatusWithPageRequest(user.getDomainId(), Status.EXPUNGING,
-                                pagingAndSorting.toPageRequest());
+                                pagingAndSorting.toPageRequest(), EMPTY_SEARCH_FILTER);
                 return allInstanceList;
             } else {
                 // Get active project list for current user.
@@ -648,13 +651,13 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     }
                     Page<VmInstance> allInstanceTempList = virtualmachinerepository
                             .findAllByDepartmentAndProjectAndExceptStatusAndPage(Status.EXPUNGING, user.getDepartment(),
-                                    projectList, pagingAndSorting.toPageRequest());
+                                    projectList, pagingAndSorting.toPageRequest(), EMPTY_SEARCH_FILTER);
                     return (Page<VmInstance>) allInstanceTempList;
                 } else {
                     // List all Vms are not in expunging state for ROOT admin.
                     Page<VmInstance> allInstanceLists = virtualmachinerepository
                             .findAllByDepartmentAndExceptStatusWithPageRequest(user.getDepartmentId(), Status.EXPUNGING,
-                                    pagingAndSorting.toPageRequest());
+                                    pagingAndSorting.toPageRequest(), EMPTY_SEARCH_FILTER);
                     return (Page<VmInstance>) allInstanceLists;
                 }
             }
@@ -672,7 +675,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
                 // List all Vms by status for domain admin.
                 Page<VmInstance> allInstanceList = virtualmachinerepository.findAllByDomainAndStatusWithPageRequest(
-                        user.getDomainId(), status, pagingAndSorting.toPageRequest());
+                        user.getDomainId(), status, pagingAndSorting.toPageRequest(), EMPTY_SEARCH_FILTER);
                 return allInstanceList;
             } else {
                 // Get active project list for current user.
@@ -684,13 +687,13 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     }
                     Page<VmInstance> allInstanceList = virtualmachinerepository
                             .findAllByDepartmentAndProjectAndStatusAndPage(status, user.getDepartment(), projectList,
-                                    pagingAndSorting.toPageRequest());
+                                    pagingAndSorting.toPageRequest(), EMPTY_SEARCH_FILTER);
                     return (Page<VmInstance>) allInstanceList;
                 } else {
                     // List all Vms by status for ROOT admin.
                     Page<VmInstance> allInstanceLists = virtualmachinerepository
                             .findAllByDepartmentAndStatusWithPageRequest(status, user.getDepartment(),
-                                    pagingAndSorting.toPageRequest());
+                                    pagingAndSorting.toPageRequest(), EMPTY_SEARCH_FILTER);
                     return (Page<VmInstance>) allInstanceLists;
                 }
 
@@ -708,7 +711,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
                     // List all Vms are not in expunging state for domain admin.
                     List<VmInstance> allInstanceList = virtualmachinerepository
-                            .findAllByDomainAndExceptStatus(user.getDomainId(), Status.EXPUNGING);
+                            .findAllByDomainAndExceptStatus(user.getDomainId(), Status.EXPUNGING, EMPTY_SEARCH_FILTER);
                     return allInstanceList;
                 } else {
                     if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
@@ -718,7 +721,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                             // List all Vms are not in expunging state by project and/or department.
                             List<VmInstance> allInstanceTempList = virtualmachinerepository
                                     .findAllByDepartmentAndProjectAndExceptStatus(Status.EXPUNGING,
-                                            user.getDepartment(), project);
+                                            user.getDepartment(), project, EMPTY_SEARCH_FILTER);
                             allInstanceList.addAll(allInstanceTempList);
                         }
                         // List all Vms are not in expunging state by current user, belongs to department and project.
@@ -727,7 +730,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     } else {
                         // List all Vms are not in expunging state for ROOT admin.
                         List<VmInstance> allInstanceLists = virtualmachinerepository
-                                .findAllByDepartmentAndExceptStatus(Status.EXPUNGING, user.getDepartment());
+                                .findAllByDepartmentAndExceptStatus(Status.EXPUNGING, user.getDepartment(), EMPTY_SEARCH_FILTER);
                         return allInstanceLists;
                     }
                 }
@@ -847,7 +850,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
                     // Vms count by status for domain admin.
                     List<VmInstance> allInstanceList = virtualmachinerepository
-                            .findAllByDomainAndStatus(user.getDomainId(), status);
+                            .findAllByDomainAndStatus(user.getDomainId(), status, EMPTY_SEARCH_FILTER);
                     return allInstanceList.size();
                 } else {
                     // Get active project list for current user.
@@ -855,7 +858,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
                         for (Project project : projectService.findAllByUserAndIsActive(user.getId(), true)) {
                             List<VmInstance> allInstanceTempList = virtualmachinerepository
-                                    .findAllByDepartmentAndProjectAndStatus(status, user.getDepartment(), project);
+                                    .findAllByDepartmentAndProjectAndStatus(status, user.getDepartment(), project, EMPTY_SEARCH_FILTER);
                             allInstanceList.addAll(allInstanceTempList);
                         }
                         List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
@@ -863,7 +866,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         return instances.size();
                     } else {
                         List<VmInstance> allInstanceLists = virtualmachinerepository
-                                .findAllByDepartmentAndStatus(status, user.getDepartment());
+                                .findAllByDepartmentAndStatus(status, user.getDepartment(), EMPTY_SEARCH_FILTER);
                         // Vms count by status for an ROOT admin.
                         return allInstanceLists.size();
                     }
@@ -956,9 +959,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         break;
                     // 4.4 Check primary storage availability.
                     case GenericConstants.RESOURCE_PRIMARY_STORAGE:
-                        if(vm.getStorageOfferingId() != null) {
-                            if(convertEntityService.getStorageOfferById(vm.getStorageOfferingId()).getIsCustomDisk()) {
-                                if(resourceUsage < vm.getDiskSize() + convertEntityService.getTemplateById(vm.getTemplateId()).getSize()) {
+                        if (vm.getStorageOfferingId() != null) {
+                            if (convertEntityService.getStorageOfferById(vm.getStorageOfferingId()).getIsCustomDisk()) {
+                                if (resourceUsage < vm.getDiskSize() + convertEntityService.getTemplateById(vm.getTemplateId()).getSize()) {
                                     errMessage = CloudStackConstants.RESOURCE_CHECK + " primary.storage.available " + CloudStackConstants.CONTACT_CLOUD_ADMIN;
                                 }
                             } else if (resourceUsage < convertEntityService.getStorageOfferById(vm.getStorageOfferingId()).getDiskSize() + convertEntityService.getTemplateById(vm.getTemplateId()).getSize()) {
@@ -977,7 +980,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         } else {
                             optionalMap.put(CloudStackConstants.CS_ASSOCIATE_NETWORK, convertEntityService.getNetworkById(vm.getNetworkId()).getUuid());
                         }
-                        if(vm.getProjectId() != null) {
+                        if (vm.getProjectId() != null) {
                             optionalMap.put("projectid", convertEntityService.getProjectById(vm.getProjectId()).getUuid());
                         }
                         optionalMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
@@ -1081,8 +1084,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
                             jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
                                     .getString(CloudStackConstants.CS_ERROR_TEXT));
-                }
-                else {
+                } else {
                     virtualmachinerepository.save(convertEncryptPassword(vmInstance));
                 }
             } else {
@@ -1187,7 +1189,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
                 // List all Vms by status for domain admin.
                 Page<VmInstance> allInstanceList = virtualmachinerepository.findAllByDomainAndExceptStatus(
-                        user.getDomainId(), Status.EXPUNGING, pagingAndSorting.toPageRequest());
+                        user.getDomainId(), Status.EXPUNGING, pagingAndSorting.toPageRequest(), EMPTY_SEARCH_FILTER);
                 return allInstanceList;
             } else {
                 // Get active project list for current user.
@@ -1199,13 +1201,13 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     }
                     Page<VmInstance> allInstanceLists = virtualmachinerepository
                             .findAllByDepartmentAndProjectAndExceptStatusAndPage(Status.EXPUNGING, user.getDepartment(),
-                                    projectList, pagingAndSorting.toPageRequest());
+                                    projectList, pagingAndSorting.toPageRequest(), EMPTY_SEARCH_FILTER);
                     return (Page<VmInstance>) allInstanceLists;
                 } else {
                     // List all Vms by status for ROOT admin.
                     Page<VmInstance> allInstanceLists = virtualmachinerepository
                             .findAllByDepartmentAndExceptStatusWithPageRequest(user.getDepartment().getId(),
-                                    Status.EXPUNGING, pagingAndSorting.toPageRequest());
+                                    Status.EXPUNGING, pagingAndSorting.toPageRequest(), EMPTY_SEARCH_FILTER);
                     return (Page<VmInstance>) allInstanceLists;
                 }
             }
@@ -1220,7 +1222,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
                 // List all Vms by status for domain admin.
                 List<VmInstance> allInstanceList = virtualmachinerepository
-                        .findAllByDomainAndExceptStatus(user.getDomainId(), Status.EXPUNGING);
+                        .findAllByDomainAndExceptStatus(user.getDomainId(), Status.EXPUNGING, EMPTY_SEARCH_FILTER);
                 return allInstanceList;
             } else {
                 // Get active project list for current user.
@@ -1230,7 +1232,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         // List all Vms for the current user by status and project and/or department.
                         List<VmInstance> allInstanceTempList = virtualmachinerepository
                                 .findAllByDepartmentAndProjectAndExceptStatus(Status.EXPUNGING, user.getDepartment(),
-                                        project);
+                                        project, EMPTY_SEARCH_FILTER);
                         allInstanceList.addAll(allInstanceTempList);
                     }
                     List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
@@ -1239,7 +1241,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 } else {
                     // List all Vms by status for ROOT admin.
                     List<VmInstance> allInstanceLists = virtualmachinerepository
-                            .findAllByDepartmentAndExceptStatus(Status.EXPUNGING, user.getDepartment());
+                            .findAllByDepartmentAndExceptStatus(Status.EXPUNGING, user.getDepartment(), EMPTY_SEARCH_FILTER);
                     return allInstanceLists;
                 }
             }
@@ -1251,6 +1253,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
      * A method a set Custom storage values for instance.
      *
      * @param vmInstance Vm instance object
+     * @param instanceMap instance map
+     * @return instance map
      * @throws Exception error
      */
     public HashMap<String, String> customStorageForInstance(VmInstance vmInstance, HashMap<String, String> instanceMap) throws Exception {
@@ -1295,24 +1299,143 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     }
 
     @Override
-    public Page<VmInstance> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
-        return virtualmachinerepository.findAllByDomainAndExceptStatusWithPageRequest(Status.EXPUNGING, domainId, pagingAndSorting.toPageRequest());
+    public Page<VmInstance> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting, String searchText, Long userId) throws Exception {
+        User user = convertEntityService.getOwnerById(userId);
+        if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
+            if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
+                // List all Vms by status for domain admin.
+                Page<VmInstance> allInstanceList = virtualmachinerepository.findAllByDomainAndExceptStatus(
+                        user.getDomainId(), Status.EXPUNGING, pagingAndSorting.toPageRequest(), searchText);
+                return allInstanceList;
+            } else {
+                // Get active project list for current user.
+                if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
+                    List<Project> projectList = new ArrayList<Project>();
+                    for (Project project : projectService.findAllByUserAndIsActive(user.getId(), true)) {
+                        // List all Vms for the current user by status and project and/or department.
+                        projectList.add(project);
+                    }
+                    Page<VmInstance> allInstanceLists = virtualmachinerepository
+                            .findAllByDepartmentAndProjectAndExceptStatusAndPage(Status.EXPUNGING, user.getDepartment(),
+                                    projectList, pagingAndSorting.toPageRequest(), searchText);
+                    return (Page<VmInstance>) allInstanceLists;
+                } else {
+                    // List all Vms by status for ROOT admin.
+                    Page<VmInstance> allInstanceLists = virtualmachinerepository
+                            .findAllByDepartmentAndExceptStatusWithPageRequest(user.getDepartment().getId(),
+                                    Status.EXPUNGING, pagingAndSorting.toPageRequest(), searchText);
+                    return (Page<VmInstance>) allInstanceLists;
+                }
+            }
+        }
+        return virtualmachinerepository.findAllByDomainAndExceptStatusWithPageRequest(Status.EXPUNGING, domainId, pagingAndSorting.toPageRequest(), searchText);
     }
 
     @Override
-    public Page<VmInstance> findAllByStatusAndDomain(PagingAndSorting pagingAndSorting, Status status, Long domainId)
+    public Page<VmInstance> findAllByStatusAndDomain(PagingAndSorting pagingAndSorting, Status status, Long domainId, String searchText, Long userId)
             throws Exception {
-        return virtualmachinerepository.findAllByStatusAndDomainWithPageRequest(status, domainId, pagingAndSorting.toPageRequest());
+        // Get user information from token details.
+        User user = convertEntityService.getOwnerById(userId);
+        if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
+            if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
+                // List all Vms by status for domain admin.
+                Page<VmInstance> allInstanceList = virtualmachinerepository.findAllByDomainAndStatusWithPageRequest(
+                        user.getDomainId(), status, pagingAndSorting.toPageRequest(), searchText);
+                return allInstanceList;
+            } else {
+                // Get active project list for current user.
+                if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
+                    List<Project> projectList = new ArrayList<Project>();
+                    for (Project project : projectService.findAllByUserAndIsActive(user.getId(), true)) {
+                        // List all Vms for the current user by status and project and/or department.
+                        projectList.add(project);
+                    }
+                    Page<VmInstance> allInstanceList = virtualmachinerepository
+                            .findAllByDepartmentAndProjectAndStatusAndPage(status, user.getDepartment(), projectList,
+                                    pagingAndSorting.toPageRequest(), searchText);
+                    return (Page<VmInstance>) allInstanceList;
+                } else {
+                    // List all Vms by status for ROOT admin.
+                    Page<VmInstance> allInstanceLists = virtualmachinerepository
+                            .findAllByDepartmentAndStatusWithPageRequest(status, user.getDepartment(),
+                                    pagingAndSorting.toPageRequest(), searchText);
+                    return (Page<VmInstance>) allInstanceLists;
+                }
+
+            }
+        }
+        return virtualmachinerepository.findAllByStatusAndDomainWithPageRequest(status, domainId, pagingAndSorting.toPageRequest(), searchText);
     }
 
     @Override
-    public Integer findCountByStatusAndDomain(Status status, Long domainId) {
-        return virtualmachinerepository.findAllByDomainAndStatus(domainId, status).size();
+    public Integer findCountByStatusAndDomain(Status status, Long domainId, Long userId, String searchText) {
+        try {
+            // Get user information from token details.
+            User user = convertEntityService.getOwnerById(userId);
+            if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
+                if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
+                    // Vms count by status for domain admin.
+                    List<VmInstance> allInstanceList = virtualmachinerepository
+                            .findAllByDomainAndStatus(user.getDomainId(), status, searchText);
+                    return allInstanceList.size();
+                } else {
+                    // Get active project list for current user.
+                    if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
+                        List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
+                        for (Project project : projectService.findAllByUserAndIsActive(user.getId(), true)) {
+                            List<VmInstance> allInstanceTempList = virtualmachinerepository
+                                    .findAllByDepartmentAndProjectAndStatus(status, user.getDepartment(), project, searchText);
+                            allInstanceList.addAll(allInstanceTempList);
+                        }
+                        List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
+                        // Vms count by status belongs to the project and/or department.
+                        return instances.size();
+                    } else {
+                        List<VmInstance> allInstanceLists = virtualmachinerepository
+                                .findAllByDepartmentAndStatus(status, user.getDepartment(), searchText);
+                        // Vms count by status for an ROOT admin.
+                        return allInstanceLists.size();
+                    }
+                }
+            }
+        } catch (NumberFormatException e) {
+        } catch (Exception e) {
+        }
+        return virtualmachinerepository.findAllByDomainAndStatus(domainId, status, searchText).size();
     }
 
     @Override
-    public List<VmInstance> findAllByDomain(Long domainId) throws Exception {
-        return (List<VmInstance>) virtualmachinerepository.findAllByDomainAndExceptStatus(domainId, Status.EXPUNGING);
+    public List<VmInstance> findAllByDomain(Long domainId, Long userId, String searchText) throws Exception {
+        User user = convertEntityService.getOwnerById(userId);
+        if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
+            if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
+                // List all Vms by status for domain admin.
+                List<VmInstance> allInstanceList = virtualmachinerepository
+                        .findAllByDomainAndExceptStatus(user.getDomainId(), Status.EXPUNGING, searchText);
+                return allInstanceList;
+            } else {
+                // Get active project list for current user.
+                if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
+                    List<VmInstance> allInstanceList = new ArrayList<VmInstance>();
+                    for (Project project : projectService.findAllByUserAndIsActive(user.getId(), true)) {
+                        // List all Vms for the current user by status and project and/or department.
+                        List<VmInstance> allInstanceTempList = virtualmachinerepository
+                                .findAllByDepartmentAndProjectAndExceptStatus(Status.EXPUNGING, user.getDepartment(),
+                                        project, searchText);
+                        allInstanceList.addAll(allInstanceTempList);
+                    }
+                    List<VmInstance> instances = allInstanceList.stream().distinct().collect(Collectors.toList());
+                    // List all Vms by status for the current user, belongs to department and project.
+                    return instances;
+                } else {
+                    // List all Vms by status for ROOT admin.
+                    List<VmInstance> allInstanceLists = virtualmachinerepository
+                            .findAllByDepartmentAndExceptStatus(Status.EXPUNGING, user.getDepartment(), searchText);
+                    return allInstanceLists;
+                }
+            }
+        }
+        return (List<VmInstance>) virtualmachinerepository.findAllByDomainAndExceptStatus(domainId, Status.EXPUNGING, searchText);
     }
 
     @Override
