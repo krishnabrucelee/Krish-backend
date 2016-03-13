@@ -22,6 +22,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Template;
+import ck.panda.domain.entity.Template.TemplateType;
 import ck.panda.service.TemplateService;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -47,7 +48,7 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     public Template create(@RequestBody Template template) throws Exception {
         template.setSyncFlag(true);
         template.setTemplateOwnerId(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
-        return templateService.save(template);
+        return templateService.save(template, Long.parseLong(tokenDetails.getTokenDetails("id")));
     }
 
     @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing Template.", response = Template.class)
@@ -60,7 +61,7 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     @Override
     public Template update(@RequestBody Template template, @PathVariable(PATH_ID) Long id) throws Exception {
         template.setSyncFlag(true);
-        return templateService.update(template);
+        return templateService.update(template, Long.parseLong(tokenDetails.getTokenDetails("id")));
     }
 
     @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Template.")
@@ -98,7 +99,12 @@ public class TemplateController extends CRUDController<Template> implements ApiC
             Page<Template> pageResponse = templateService.findAllIso(page);
             response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
             return pageResponse.getContent();
-        } else {
+        } else if(type.contains("user")) {
+             Page<Template> pageResponse = templateService.findAllByUserIdAndType(page, type, Long.parseLong(tokenDetails.getTokenDetails("id")));
+              response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+             return pageResponse.getContent();
+        }
+        else {
              Page<Template> pageResponse = templateService.findAllByType(page, type, true, true);
              response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
              return pageResponse.getContent();
@@ -162,5 +168,12 @@ public class TemplateController extends CRUDController<Template> implements ApiC
         return "{\"windowsCount\":" + templateCount.get("windowsCount") + ",\"linuxCount\":" + templateCount.get("linuxCount") + ",\"totalCount\":"
                 + templateCount.get("totalCount") + ",\"windowsIsoCount\":" + templateCount.get("windowsIsoCount") + ",\"linuxIsoCount\":"
                 + templateCount.get("linuxIsoCount") + ",\"totalIsoCount\":" + templateCount.get("totalIsoCount") + "}";
+    }
+
+    @RequestMapping(value = "/listalltemplate", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Template> listAllTemplate() throws Exception {
+        return templateService.findAllTemplatesByIsActiveAndType(true);
     }
 }

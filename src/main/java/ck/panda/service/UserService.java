@@ -4,8 +4,11 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.User.Status;
 import ck.panda.domain.entity.User.UserType;
 import ck.panda.util.domain.CRUDService;
@@ -175,7 +178,7 @@ public interface UserService extends CRUDService<User> {
      * @throws Exception exceptions
      */
     User disableUser(Long userId) throws Exception;
-    
+
     /**
      * Find all the user by domain.
      *
@@ -204,5 +207,18 @@ public interface UserService extends CRUDService<User> {
      * @throws Exception if error occurs
      */
     User findByUserValidList(Long id) throws Exception;
+
+    /**
+     * Find all user by domain. departmetn id and isActive status.
+     *
+     * @param domainId of the user.
+     * @param isActive status of the user.
+     * @param departmentId of the user.
+     * @param domainAdmin type of the user.
+     * @return user.
+     * @throws Exception if error occurs.
+     */
+    List<User> findAllByDomainDepartmentIdUserTypeAndIsActive(Long domainId, Boolean isActive, Long departmentId,
+            UserType domainAdmin) throws Exception;
 
 }

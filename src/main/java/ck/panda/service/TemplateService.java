@@ -109,4 +109,44 @@ public interface TemplateService extends CRUDService<Template> {
      * @return type of the template
      */
     Page<Template> findAllByType(PagingAndSorting pagingAndSorting, String type, Boolean featured, Boolean shared);
+
+    /**
+     * To save the created template based on user id.
+     *
+     * @param template to be created.
+     * @param UserId of the user.
+     * @return template.
+     * @throws Exception if error occurs.
+     */
+    Template save(Template template, Long UserId) throws Exception;
+
+     /**
+      * To update the template based on user id.
+      *
+      * @param template to be created.
+      * @param userId of the user.
+      * @return template.
+      * @throws Exception if error occurs.
+      */
+    Template update(Template template, Long userId) throws Exception;
+
+    /**
+     * Find all template by type and user id.
+     *
+     * @param pagingAndSorting for pagination.
+     * @param type of the template.
+     * @param userId of the user.
+     * @return template.
+     * @throws Exception if error occurs.
+     */
+    Page<Template> findAllByUserIdAndType(PagingAndSorting pagingAndSorting, String type, Long userId) throws Exception;
+
+    /**
+     * Find all templates by isActive status and type.
+     *
+     * @param isActive status of the template.
+     * @return template.
+     * @throws Exception if error occurs.
+     */
+    List<Template> findAllTemplatesByIsActiveAndType(Boolean isActive) throws Exception;
 }
