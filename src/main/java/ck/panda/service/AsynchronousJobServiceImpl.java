@@ -1335,7 +1335,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     Nic csNic = csNicMap.get(nic.getUuid());
                     nic.setUuid(csNic.getUuid());
                     nic.setIsDefault(csNic.getIsDefault());
-
                     nicService.update(nic);
                     csNicMap.remove(nic.getUuid());
                 } else {
