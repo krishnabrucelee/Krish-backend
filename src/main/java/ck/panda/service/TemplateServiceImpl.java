@@ -66,6 +66,9 @@ public class TemplateServiceImpl implements TemplateService {
     @Autowired
     private DomainService domainService;
 
+    @Autowired
+    private DepartmentService departmentService;
+
     /** Hypervisor service reference. */
     @Autowired
     private HypervisorService hypervisorService;
@@ -127,7 +130,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     @PreAuthorize("hasPermission(#template.getSyncFlag(), 'REGISTER_TEMPLATE')")
-    public Template save(Template template) throws Exception {
+    public Template save(Template template, Long userId) throws Exception {
         template.setIsActive(true);
         if (template.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity(CloudStackConstants.TEMPLATE_NAME, template);
@@ -140,23 +143,24 @@ public class TemplateServiceImpl implements TemplateService {
                 if (template.getBootable() == null) {
                     template.setBootable(true);
                 }
-                csRegisterTemplate(template, errors);
-                List<TemplateCost> templateCostList = saveTemplateCost(template);
-                template.setTemplateCost(templateCostList);
-                Template templateCS = templateRepository.save(template);
-                TemplateCost templateCost = templateCostService.find(templateCS.getTemplateCost().get(0).getId());
-                templateCost.setTemplateCostId(templateCS.getId());
-                templateCostService.save(templateCost);
+                csRegisterTemplate(template, errors, userId);
+                if(template.getTemplateCost() != null) {
+                    List<TemplateCost> templateCostList = saveTemplateCost(template);
+                    template.setTemplateCost(templateCostList);
+                    Template templateCS = templateRepository.save(template);
+                    TemplateCost templateCost = templateCostService.find(templateCS.getTemplateCost().get(0).getId());
+                    templateCost.setTemplateCostId(templateCS.getId());
+                    templateCostService.save(templateCost);
                 return templateCS;
+                }
             }
-        } else {
-            return templateRepository.save(template);
         }
+            return templateRepository.save(template);
     }
 
     @Override
     @PreAuthorize("hasPermission(#template.getSyncFlag(), 'EDIT_TEMPLATE')")
-    public Template update(Template template) throws Exception {
+    public Template update(Template template, Long userId) throws Exception {
         if (template.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity(CloudStackConstants.TEMPLATE_NAME, template);
             errors = validator.validateEntity(template, errors);
@@ -165,14 +169,15 @@ public class TemplateServiceImpl implements TemplateService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
-                csUpdateTemplate(template);
+                csUpdateTemplate(template,userId);
+                if(template.getTemplateCost().size() > 0 ) {
                 List<TemplateCost> templateCostList = updateTemplateCost(template);
                 template.setTemplateCost(templateCostList);
                 return templateRepository.save(template);
+                }
             }
-        } else {
-            return templateRepository.save(template);
         }
+        return templateRepository.save(template);
     }
 
     @Override
@@ -239,6 +244,9 @@ public class TemplateServiceImpl implements TemplateService {
                 template.setHypervisorId(hypervisor.getId());
                 template.setTemplateOwnerId(convertEntityService.getUserByName(template.getTransCreatedName(),
                     convertEntityService.getDomain(template.getTransDomain())));
+                template.setDomainId(convertEntityService.getDomainId(template.getTransDomain()));
+                template.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
+                        template.getTransDepartment(), convertEntityService.getDomain(template.getTransDomain())));
                 templateList.add(template);
             }
         }
@@ -444,14 +452,14 @@ public class TemplateServiceImpl implements TemplateService {
      * @param errors object for validation
      * @throws Exception unhandled errors.
      */
-    public void csRegisterTemplate(Template template, Errors errors) throws Exception {
+    public void csRegisterTemplate(Template template, Errors errors, Long userId) throws Exception {
         configUtil.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
         String csResponse = "";
         JSONObject templateJSON = null;
         JSONArray templateArray = null;
         if (template.getFormat().equals(Template.Format.ISO)) {
-            optional = optionalFieldValidation(template, optional);
+            optional = optionalFieldValidation(template, optional, userId);
             optional.put("ostypeid", osTypeService.find(template.getOsTypeId()).getUuid());
             csResponse = cloudStackTemplateService.registerIso(template.getDescription(),
                     template.getName(), template.getUrl(), zoneService.find(template.getZoneId()).getUuid(), CloudStackConstants.JSON, optional);
@@ -465,7 +473,7 @@ public class TemplateServiceImpl implements TemplateService {
             csResponse = cloudStackTemplateService.registerTemplate(template.getDescription(),
                     template.getFormat().name(), hypervisorService.find(template.getHypervisorId()).getName(),
                     template.getName(), osTypeService.find(template.getOsTypeId()).getUuid(), template.getUrl(),
-                    zoneService.find(template.getZoneId()).getUuid(), CloudStackConstants.JSON, optionalFieldValidation(template, optional));
+                    zoneService.find(template.getZoneId()).getUuid(), CloudStackConstants.JSON, optionalFieldValidation(template, optional,userId));
             templateJSON = new JSONObject(csResponse).getJSONObject(CloudStackConstants.CS_REGISTER_TEMPLATE_RESPONSE);
             if (templateJSON.has(CloudStackConstants.CS_ERROR_CODE)) {
                 errors = this.validateCSEvent(errors, templateJSON.getString(CloudStackConstants.CS_ERROR_TEXT));
@@ -497,10 +505,10 @@ public class TemplateServiceImpl implements TemplateService {
      * @param template entity object
      * @throws Exception unhandled errors.
      */
-    public void csUpdateTemplate(Template template) throws Exception {
+    public void csUpdateTemplate(Template template, Long userId) throws Exception {
         configUtil.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
-        optionalFieldValidation(template, optional);
+        optionalFieldValidation(template, optional,userId);
         optional.put(CloudStackConstants.CS_NAME, template.getName());
         optional.put(CloudStackConstants.CS_DISPLAY_TEXT, template.getDescription());
         try {
@@ -580,8 +588,10 @@ public class TemplateServiceImpl implements TemplateService {
         if (template.getDetailedDescription() == null || template.getDetailedDescription().isEmpty()) {
             errors.addFieldError(TEMPLATE_DETAILED_DESC, "template.detaileddescription");
         }
-        if (template.getTemplateCost() == null) {
+        if(template.getSubmitCheck() == false ) {
+            if (template.getTemplateCost() == null) {
             errors.addFieldError(TEMPLATE_COST, "template.cost.error");
+            }
         }
         if (template.getMinimumMemory() == null) {
             errors.addFieldError(TEMPLATE_MIN_MEMORY, "template.minimummemory.error");
@@ -604,8 +614,11 @@ public class TemplateServiceImpl implements TemplateService {
      * @param template entity object
      * @param optional for null value checking
      * @return optional values list
+     * @throws Exception
      */
-    public HashMap<String, String> optionalFieldValidation(Template template, HashMap<String, String> optional) {
+    public HashMap<String, String> optionalFieldValidation(Template template, HashMap<String, String> optional, Long userId) throws Exception {
+        User user = convertEntityService.getOwnerById(userId);
+
         if (template.getDynamicallyScalable() != null) {
             optional.put(CloudStackConstants.CS_DYNAMIC_SCALABLE, template.getDynamicallyScalable().toString());
         }
@@ -631,6 +644,13 @@ public class TemplateServiceImpl implements TemplateService {
             optional.put(CloudStackConstants.CS_BOOTABLE, template.getBootable().toString());
         } else {
             optional.put(CloudStackConstants.CS_BOOTABLE, CloudStackConstants.STATUS_ACTIVE);
+        }
+        if(template.getDepartmentId() != null) {
+             optional.put(CloudStackConstants.CS_ACCOUNT,
+                     departmentService.find(user.getDepartmentId()).getUserName());
+        }
+        if(template.getDomainId() != null) {
+            optional.put(CloudStackConstants.CS_DOMAIN_ID, convertEntityService.getDomainUuidById(user.getDomainId()));
         }
         return optional;
     }
@@ -671,7 +691,13 @@ public class TemplateServiceImpl implements TemplateService {
          }
          return templates;
     }
-    /**
+
+    @Override
+    public Page<Template> findAllByUserIdAndType(PagingAndSorting pagingAndSorting, String type, Long userId) throws Exception {
+        User user = convertEntityService.getOwnerById(userId);
+        return templateRepository.findTemplateByUserId(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), user.getId(), true);
+    }
+     /**
      * Add cost for newly created template.
      *
      * @param template entity object
@@ -708,5 +734,26 @@ public class TemplateServiceImpl implements TemplateService {
         }
         templateCostList.addAll(persistTemplate.getTemplateCost());
         return templateCostList;
+    }
+
+    @Override
+    public Template save(Template template) throws Exception {
+         if (!template.getSyncFlag()) {
+             return templateRepository.save(template);
+         }
+         return template;
+    }
+
+    @Override
+    public Template update(Template template) throws Exception {
+         if (!template.getSyncFlag()) {
+             return templateRepository.save(template);
+         }
+         return template;
+    }
+
+    @Override
+    public List<Template> findAllTemplatesByIsActiveAndType(Boolean isActive) throws Exception {
+        return (List<Template>) templateRepository.findAllTemplatesByIsActiveAndType(TemplateType.SYSTEM, true);
     }
 }

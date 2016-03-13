@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.User.Status;
 import ck.panda.domain.entity.User.UserType;
 
@@ -164,4 +165,18 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     @Query(value = "SELECT new map(user.id as id, user.userName as userName, user.email as email, user.type as type, user.firstName as firstName, user.lastName as lastName, user.uuid as uuid, user.status as status, user.domain as domain, user.role as role) FROM User user WHERE user.id = :id")
     User findByUserValidList(@Param("id") Long id);
 
+    /**
+     * Find all user by domain. departmetn id and isActive status.
+     *
+     * @param domainId of the user.
+     * @param isActive status of the user.
+     * @param departmentId of the user.
+     * @param domainAdmin type of the user.
+     * @return user.
+     * @throws Exception if error occurs.
+     */
+    @Query(value = "SELECT user FROM User user WHERE user.domainId = :domainId AND user.departmentId = :departmentId AND user.isActive = :isActive "
+            + "AND user.type= :type")
+    List<User> findByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive,@Param("departmentId") Long departmentId,
+            @Param("type") UserType type);
 }

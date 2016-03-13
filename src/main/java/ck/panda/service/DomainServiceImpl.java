@@ -346,6 +346,15 @@ public class DomainServiceImpl implements DomainService {
                         String jobResponse = csAccountService.accountJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
                         JSONObject jobresult = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
                     }
+                    List<User> userList = userService.findAllByDomainDepartmentIdUserTypeAndIsActive(domain.getId(), true,department.getId(), UserType.DOMAIN_ADMIN);
+                    for (User user : userList) {
+                        user.setIsActive(false);
+                        user.setStatus(User.Status.DELETED);
+                        configServer.setServer(1L);
+                        csUserService.deleteUser((user.getUuid()), CloudStackConstants.JSON);
+                        user.setSyncFlag(false);
+                        userService.save(user);
+                    }
                     department.setIsActive(false);
                     department.setStatus(Department.Status.DELETED);
                     department.setSyncFlag(false);

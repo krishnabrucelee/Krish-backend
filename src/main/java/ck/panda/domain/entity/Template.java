@@ -34,6 +34,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.constants.CloudStackConstants;
+import ck.panda.util.JsonUtil;
 import ck.panda.util.JsonValidator;
 
 /**
@@ -89,6 +90,15 @@ public class Template implements Serializable {
     /** Reference URL of the template. */
     @Column(name = "reference_url")
     private String referenceUrl;
+
+    /** Domain Object for the template. */
+    @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Domain domain;
+
+    /** id for the Domain. */
+    @Column(name = "domain_id")
+    private Long domainId;
 
     /** Template zone. */
     @ManyToOne
@@ -264,7 +274,7 @@ public class Template implements Serializable {
     private String displayText;
 
     /** Template department. */
-    @Column(name = "department_id", insertable = false, updatable = false)
+    @JoinColumn(name = "department_id", referencedColumnName = "id", updatable = false, insertable = false)
     private Department department;
 
     /** Template department id. */
@@ -295,9 +305,16 @@ public class Template implements Serializable {
     @Transient
     private String transDomain;
 
+    /** Template domain transient. */
+    @Transient
+    private String transDepartment;
+
     /** Template sync flag. */
     @Transient
     private Boolean syncFlag;
+
+    @Transient
+    private Boolean submitCheck;
 
     /**
      * Get the id.
@@ -1303,6 +1320,77 @@ public class Template implements Serializable {
         this.syncFlag = syncFlag;
     }
 
+    /**
+     * Get doamin object
+     *
+     * @return the domain
+     */
+    public Domain getDomain() {
+        return domain;
+    }
+
+    /**
+     * Set the domain object.
+     *
+     * @param domain to set
+     */
+    public void setDomain(Domain domain) {
+        this.domain = domain;
+    }
+
+    /**
+     * Get the domain id.
+     *
+     * @return the domainId
+     */
+    public Long getDomainId() {
+        return domainId;
+    }
+
+    /**
+     * Set the domainId.
+     *
+     * @param domainId  to set
+     */
+    public void setDomainId(Long domainId) {
+        this.domainId = domainId;
+    }
+
+    /**
+     * @return the submitCheck
+     */
+    public Boolean getSubmitCheck() {
+        return submitCheck;
+    }
+
+    /**
+     * @param submitCheck the submitCheck to set
+     */
+    public void setSubmitCheck(Boolean submitCheck) {
+        this.submitCheck = submitCheck;
+    }
+
+    /**
+     * Get the transDepartment .
+     *
+     * @return the transDepartment
+     */
+    public String getTransDepartment() {
+        return transDepartment;
+    }
+
+    /**
+     * Set the transDepartment .
+     *
+     * @param transDepartment to set
+     */
+    public void setTransDepartment(String transDepartment) {
+        this.transDepartment = transDepartment;
+    }
+
+
+
+
     /** RootDiskController enum type used to list the static root disk controller values. */
     public enum RootDiskController {
         /** Root disk controller type as SCSI. */
@@ -1412,7 +1500,8 @@ public class Template implements Serializable {
             template.transOsType = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_OS_TYPEID);
             template.transZone = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_ZONE_ID);
             template.transHypervisor = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_HYPERVISOR);
-            template.setDepartmentId(null);
+            template.setTransDepartment(JsonUtil.getStringValue(object, CloudStackConstants.CS_ACCOUNT));
+            template.setIsActive(true);
             if (object.has(CloudStackConstants.CS_FORMAT)) {
                 template.setFormat(template.getFormat().valueOf(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_FORMAT)));
                 template.setType(template.getType().valueOf(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_TEMPLATE_TYPE)));

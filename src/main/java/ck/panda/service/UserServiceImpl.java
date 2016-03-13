@@ -18,6 +18,7 @@ import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.User.Status;
 import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.repository.jpa.UserRepository;
@@ -476,5 +477,8 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAllByDomainId(domainId, pagingAndSorting.toPageRequest());
     }
 
-
+    @Override
+    public List<User> findAllByDomainDepartmentIdUserTypeAndIsActive(Long domainId, Boolean isActive,Long departmentId, UserType domainAdmin) throws Exception {
+        return (List<User>) userRepository.findByDomainAndIsActive(domainId, true ,departmentId, UserType.DOMAIN_ADMIN);
+    }
 }
