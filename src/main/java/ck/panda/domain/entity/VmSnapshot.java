@@ -110,15 +110,15 @@ public class VmSnapshot implements Serializable {
 
     /** Enumeration status for snapshot. */
     public enum Status {
-        /** after destroy or expunge snapshot get status as expunging. */
-        Expunging,
-        /** while snapshot creation if get failure and it get status as Error. */
-        Error,
-        /** while snapshot creation it get status as creating . */
+        /** While snapshot creation it gets status as creating. */
         Creating,
-        /** while snapshot creation it get implemented the status as Implemented. */
+        /** While snapshot creation if gets failure and it gets status as Error. */
+        Error,
+        /** After destroy or expunge snapshot get status as expunging. */
+        Expunging,
+        /** While snapshot creation it gets the status as Implemented. */
         Implemented,
-        /** after create snapshot it get status as ready . */
+        /** After create snapshot it gets status as ready. */
         Ready
     }
 

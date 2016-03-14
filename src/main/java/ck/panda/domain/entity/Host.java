@@ -136,10 +136,6 @@ public class Host implements Serializable {
      *
      */
     public enum Status {
-
-        /** Host will be in a Enabled State. */
-        UP,
-
         /** Host will be in a Alert State. */
         ALERT,
 
@@ -147,7 +143,10 @@ public class Host implements Serializable {
         DISCONNECTED,
 
         /** Host will be down.*/
-        DOWN
+        DOWN,
+
+        /** Host will be in a Enabled State. */
+        UP
     }
 
     /**

@@ -25,7 +25,7 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      * @param isActive true / false
      * @return lists Active state volume
      */
-    @Query(value = "SELECT volume FROM Volume volume WHERE volume.isActive = :isActive")
+    @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE volume.isActive = :isActive")
     Page<Volume> findAllByActive(Pageable pageable, @Param("isActive") Boolean isActive);
 
     /**
@@ -58,7 +58,7 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      * @param pageable page
      * @return volume.
      */
-    @Query(value = "SELECT volume FROM Volume volume WHERE volume.isActive = :isActive AND volume.domainId = :domainId")
+    @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE volume.isActive = :isActive AND volume.domainId = :domainId")
     Page<Volume> findByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive,
             Pageable pageable);
 
@@ -69,7 +69,7 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      * @param isActive get the department list based on active/inactive status.
      * @return list of volumes.
      */
-    @Query(value = "SELECT volume FROM Volume volume WHERE volume.isActive = :isActive")
+    @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE volume.isActive = :isActive")
     Page<Volume> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
 
     /**
@@ -196,7 +196,7 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      * @param isActive true/false
      * @return volumes
      */
-    @Query(value = "SELECT volume FROM Volume volume WHERE volume.isActive = :isActive")
+    @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE volume.isActive = :isActive")
     List<Volume> findAllByActive(@Param("isActive") Boolean isActive);
 
     /**
@@ -208,7 +208,7 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      * @param pageable page
      * @return volumes
      */
-    @Query(value = "SELECT volume FROM Volume volume WHERE volume.departmentId = :departmentId AND volume.volumeType in :volumeType AND volume.isActive = :isActive AND volume.projectId IS NULL")
+    @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE volume.departmentId = :departmentId AND volume.volumeType in :volumeType AND volume.isActive = :isActive AND volume.projectId IS NULL")
     Page<Volume> findByDepartmentAndVolumeTypeAndPage(@Param("departmentId") Long departmentId,
             @Param("volumeType") List<VolumeType> volumeType, @Param("isActive") Boolean isActive, Pageable pageable);
 
@@ -347,7 +347,7 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      * @param pageable to get the list with pagination.
      * @return list of volumes.
      */
-    @Query(value = "SELECT volume FROM Volume volume WHERE volume.domainId = :domainId AND volume.isActive = :isActive")
+    @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE volume.domainId = :domainId AND volume.isActive = :isActive")
     Page<Volume> findAllByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, Pageable pageable);
 
     /**
@@ -370,7 +370,7 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      * @param pageable to get the list with pagination.
      * @return volume
      */
-    @Query(value = "SELECT volume FROM Volume volume WHERE (volume.project in :allProjectList OR volume.departmentId = :departmentId) AND volume.volumeType in :volumeType AND volume.isActive = :isActive")
+    @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE (volume.project in :allProjectList OR volume.departmentId = :departmentId) AND volume.volumeType in :volumeType AND volume.isActive = :isActive")
     Page<Volume> findByProjectAndVolumeTypeAndPage(@Param("allProjectList") List<Project> allProjectList,
             @Param("departmentId") Long departmentId, @Param("volumeType") List<VolumeType> volumeType,
             @Param("isActive") Boolean isActive, Pageable pageable);

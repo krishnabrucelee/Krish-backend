@@ -106,10 +106,10 @@ public class NetworkOffering implements Serializable {
      *
      */
     public enum Status {
-        /** Network Offering will be in a Enabled State. */
-        ENABLED,
         /** Network Offering will be in a Disabled State. */
-        DISABLED
+        DISABLED,
+        /** Network Offering will be in a Enabled State. */
+        ENABLED
     }
 
     /**
