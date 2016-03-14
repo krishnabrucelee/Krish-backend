@@ -48,14 +48,6 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     @Autowired
     private TokenDetails tokenDetails;
 
-    /** Cloud stack server service. */
-    @Autowired
-    private CloudStackServer cloudStackServer;
-
-    /** Service reference to syncService. */
-    @Autowired
-    private SyncService syncService;
-
     /** console proxy reference. */
     @Value(value = "${console.proxy}")
     private String consoleProxy;
@@ -218,8 +210,6 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     @ResponseBody
     public String getVNC(@RequestBody VmInstance vminstance) throws Exception {
         // TODO optimize/refactor this console code after completion of Kanaka NoVNC configuration.
-        syncService.init(cloudStackServer);
-        syncService.syncInstances();
         String token = null;
         VmInstance persistInstance = virtualmachineservice.find(vminstance.getId());
         String hostUUID = persistInstance.getHost().getUuid(); // VM's the host's UUID
