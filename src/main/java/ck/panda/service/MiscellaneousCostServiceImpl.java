@@ -36,9 +36,8 @@ public class MiscellaneousCostServiceImpl implements MiscellaneousCostService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-
                 MiscellaneousCost oldCost = costRepo.findByIsActive(true);
-                if(oldCost.getIsActive()!= null) {
+                if(oldCost != null) {
                  oldCost.setIsActive(false);
             }
                 cost.setCostType(CostTypes.TEMPLATE);

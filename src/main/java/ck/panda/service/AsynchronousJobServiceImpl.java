@@ -1255,9 +1255,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 csVmIpaddress.setGuestIpAddress(csVmIpaddress.getGuestIpAddress());
                 csVmIpaddress.setNicId(convertEntityService.getNic(csVmIpaddress.getTransNicId()).getId());
                 csVmIpaddress.setVmInstanceId(convertEntityService.getNic(csVmIpaddress.getTransNicId()).getVmInstanceId());
-                if (vmIpService.findByUUID(csVmIpaddress.getUuid()) == null) {
-                    vmIpService.save(csVmIpaddress);
-                }
             }
 
         }

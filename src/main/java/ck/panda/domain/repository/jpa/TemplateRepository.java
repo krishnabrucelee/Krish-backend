@@ -11,6 +11,7 @@ import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.Template.Format;
 import ck.panda.domain.entity.Template.Status;
 import ck.panda.domain.entity.Template.TemplateType;
+import ck.panda.domain.entity.User.UserType;
 
 /**
  * JPA repository for Template entity.
@@ -243,9 +244,42 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
     @Query(value = "SELECT template FROM Template template WHERE template.type <>:type AND template.share =:share AND template.status =:status AND template.isActive =:isActive")
     Page<Template> findTemplateByCommunity(@Param("type") TemplateType type, Pageable pageable, @Param("share") Boolean share, @Param("status") Status status, @Param("isActive") Boolean isActive);
 
+
+    /**
+     * Find templates based on user id for pagination.
+     *
+     * @param type of the template.
+     * @param pageable paging and sorting.
+     * @param userId of the template.
+     * @param isActive status of the template.
+     * @return templates.
+     */
     @Query(value = "SELECT template FROM Template template WHERE template.type <>:type AND template.templateOwnerId =:userId AND template.isActive =:isActive")
     Page<Template> findTemplateByUserId(@Param("type") TemplateType type, Pageable pageable, @Param("userId") Long userId, @Param("isActive") Boolean isActive);
 
+    /**
+     * Find all the templates except system template.
+     *
+     * @param type of the template.
+     * @param isActive status of the template.
+     * @return templates.
+     */
     @Query(value = "SELECT template FROM Template template WHERE template.type <>:type AND template.isActive =:isActive")
     List<Template> findAllTemplatesByIsActiveAndType(@Param("type") TemplateType type, @Param("isActive") Boolean isActive  );
+
+    /**
+     * Find all templates by user type, isActive status of the template.
+     *
+     * @param architecture 64 or 32 bit
+     * @param type of the user
+     * @param status of the template.
+     * @param isActive status of th template
+     * @param rootAdmin type filtering.
+     * @param domainId of the user.
+     * @return templates.
+     */
+    @Query(value = "SELECT template FROM Template template LEFT JOIN template.templateOwner user WHERE user.type =:rootAdmin OR template.architecture =:architecture OR 'ALL' =:architecture AND template.type <>:type AND template.status = :status AND template.share IS TRUE AND template.isActive =:isActive AND template.domainId = :domainId")
+    List<Template> findByTemplateAndUserType(@Param("architecture") String architecture, @Param("type") TemplateType type,
+        @Param("status") Status status, @Param("isActive") Boolean isActive,@Param("rootAdmin")UserType rootAdmin, @Param("domainId") Long domainId);
+
 }

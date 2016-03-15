@@ -447,12 +447,12 @@ public class NicServiceImpl implements NicService {
                  vm.setVmInstanceId(convertEntityService.getNic(secondaryIP.getString(CloudStackConstants.CS_NIC_ID)).getVmInstanceId());
                  vm.setIsActive(true);
                  vm.setIpType(IpType.secondaryIpAddress);
-                 VmIpaddress persistVmIP = vmIpService.save(vm);
-                 nics.setSyncFlag(false);
-                 vmIpList = nics.getVmIpAddress();
-                 vmIpList.add(persistVmIP);
-                 nics.setVmIpAddress(vmIpList);
-                 nicRepo.save(nics);
+                     VmIpaddress persistVmIP = vmIpService.save(vm);
+                     nics.setSyncFlag(false);
+                     vmIpList = nics.getVmIpAddress();
+                     vmIpList.add(persistVmIP);
+                     nics.setVmIpAddress(vmIpList);
+                     nicRepo.save(nics);
          }
         return nic;
     }
@@ -479,7 +479,18 @@ public class NicServiceImpl implements NicService {
                  String jobResponseResult = cloudStackNicService.AcquireIpJobResult(jobResponse.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
                  JSONObject queryJobresults = new JSONObject(jobResponseResult).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
              }
-             vmIpService.save(vm);
+             Nic nics = convertEntityService.getNicById(vm.getNicId());
+             VmIpaddress persistVmIP = vmIpService.save(vm);
+             List<VmIpaddress> vmIpList = new ArrayList<VmIpaddress>();
+             nics.setSyncFlag(false);
+             for(VmIpaddress vmIp :nics.getVmIpAddress()) {
+                if(vmIp.getId() != vm.getId()){
+                    vmIpList.add(vmIp);
+                }
+             }
+             nics.setVmIpAddress(vmIpList);
+             nicRepo.save(nics);
+
          } catch (BadCredentialsException e) {
                  throw new BadCredentialsException(e.getMessage());
          }

@@ -23,6 +23,7 @@ import ck.panda.domain.entity.Template.Status;
 import ck.panda.domain.entity.Template.TemplateType;
 import ck.panda.domain.entity.TemplateCost;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.TemplateRepository;
 import ck.panda.util.AppValidator;
@@ -298,7 +299,7 @@ public class TemplateServiceImpl implements TemplateService {
             return csPrepareTemplate((List<Template>) templateRepository.findByTemplateAndFeature(ALL_TEMPLATE,
                    TemplateType.SYSTEM, Status.ACTIVE, true));
         }
-        return csPrepareTemplate(templateRepository.findByTemplate(ALL_TEMPLATE, TemplateType.SYSTEM, Status.ACTIVE, true));
+        return csPrepareTemplate(templateRepository.findByTemplateAndUserType(ALL_TEMPLATE, TemplateType.SYSTEM, Status.ACTIVE, true, UserType.ROOT_ADMIN, user.getDomainId()));
     }
 
     @Override
@@ -484,6 +485,9 @@ public class TemplateServiceImpl implements TemplateService {
         for (int i = 0; i < templateArray.length(); i++) {
             JSONObject jsonobject = templateArray.getJSONObject(i);
             template.setUuid(jsonobject.getString(CloudStackConstants.CS_ID));
+            template.setDomainId(convertEntityService.getDomainId(jsonobject.getString(CloudStackConstants.CS_DOMAIN_ID)));
+            template.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
+                (jsonobject.getString(CloudStackConstants.CS_ACCOUNT)), convertEntityService.getDomain(jsonobject.getString(CloudStackConstants.CS_DOMAIN_ID))));
             if (jsonobject.getBoolean(CloudStackConstants.CS_READY_STATE)) {
                 template.setStatus(Status.ACTIVE);
             } else {
