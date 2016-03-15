@@ -263,7 +263,10 @@ public class LoadBalancerRule implements Serializable {
         STAGED,
 
         /** Load Balance rule in ADD state. */
-        ADD
+        ADD,
+
+        /** Stage before complete destroy*/
+        DELETING
     }
 
     /**
