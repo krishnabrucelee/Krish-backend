@@ -55,7 +55,7 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      *
      * @param domainId for each domain.
      * @param isActive get the volume list based on active/inactive status.
-     * @param pageable page
+     * @param pageable page.
      * @return volume.
      */
     @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE volume.isActive = :isActive AND volume.domainId = :domainId")
@@ -65,9 +65,9 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
     /**
      * Find all the active or inactive departments with pagination.
      *
-     * @param pageable to get the list with pagination.
-     * @param isActive get the department list based on active/inactive status.
-     * @return list of volumes.
+     * @param pageable to get the list with pagination
+     * @param isActive get the department list based on active/inactive status
+     * @return list of volumes
      */
     @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE volume.isActive = :isActive")
     Page<Volume> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
@@ -75,10 +75,10 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
     /**
      * Find the Volume by instance Id and IsActive.
      *
-     * @param domainId for each domain.
-     * @param isActive get the volume list based on active/inactive status.
+     * @param domainId for each domain
+     * @param isActive get the volume list based on active/inactive status
      * @param vmInstanceId Instance id
-     * @return volumes.
+     * @return volumes
      */
     @Query(value = "SELECT volume FROM Volume volume WHERE volume.isActive = :isActive AND volume.vmInstanceId = :vmInstanceId AND volume.domainId = :domainId")
     List<Volume> findByInstanceAndDomainIsActive(@Param("domainId") Long domainId,
@@ -87,9 +87,9 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
     /**
      * Find the Volume by instance Id and IsActive.
      *
-     * @param vmInstanceId instance for each domain.
-     * @param isActive get the volume list based on active/inactive status.
-     * @return volumes.
+     * @param vmInstanceId instance for each domain
+     * @param isActive get the volume list based on active/inactive status
+     * @return volumes
      */
     @Query(value = "SELECT volume FROM Volume volume WHERE volume.isActive = :isActive AND volume.vmInstanceId = :vmInstanceId")
     List<Volume> findByInstanceAndIsActive(@Param("vmInstanceId") Long vmInstanceId,
@@ -98,10 +98,10 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
     /**
      * Find the Volume by volume Type and IsActive.
      *
-     * @param domainId for each domain.
-     * @param isActive get the volume list based on active/inactive status.
+     * @param domainId for each domain
+     * @param isActive get the volume list based on active/inactive status
      * @param volumeType volume Type
-     * @return volumes.
+     * @return volumes
      */
     @Query(value = "SELECT volume FROM Volume volume WHERE volume.isActive = :isActive AND volume.volumeType = :volumeType AND volume.domainId = :domainId")
     List<Volume> findByVolumeTypeAndIsActive(@Param("domainId") Long domainId,
@@ -110,9 +110,9 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
     /**
      * Find the Volume by volume Type and IsActive.
      *
-     * @param volumeType for each domain.
-     * @param isActive get the volume list based on active/inactive status.
-     * @return volumes.
+     * @param volumeType for each domain
+     * @param isActive get the volume list based on active/inactive status
+     * @return volumes
      */
     @Query(value = "SELECT volume FROM Volume volume WHERE volume.isActive = :isActive AND volume.volumeType = :volumeType")
     List<Volume> findByVolumeTypeAndIsActive(@Param("volumeType") VolumeType volumeType,
@@ -121,10 +121,10 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
     /**
      * Find the Volume by volume Type and IsActive.
      *
-     * @param vmInstanceId instance for each domain.
-     * @param volumeType for each domain.
-     * @param isActive get the volume list based on active/inactive status.
-     * @return volumes.
+     * @param vmInstanceId instance for each domain
+     * @param volumeType for each domain
+     * @param isActive get the volume list based on active/inactive status
+     * @return volumes
      */
     @Query(value = "SELECT volume FROM Volume volume WHERE volume.isActive = :isActive AND volume.volumeType = :volumeType AND volume.vmInstanceId = :vmInstanceId")
     List<Volume> findByInstanceAndVolumeTypeAndIsActive(@Param("vmInstanceId") Long vmInstanceId,
@@ -134,20 +134,20 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      * Find the Volume by volume Type and IsActive.
      *
      * @param vmInstanceId instance for each domain.
-     * @param volumeType for each domain.
-     * @param isActive get the volume list based on active/inactive status.
-     * @return volume.
+     * @param volumeType for each domain
+     * @param isActive get the volume list based on active/inactive status
+     * @return volume
      */
     @Query(value = "SELECT volume FROM Volume volume WHERE volume.isActive = :isActive AND volume.volumeType = :volumeType AND volume.vmInstanceId = :vmInstanceId")
     Volume findByInstanceAndVolumeType(@Param("vmInstanceId") Long vmInstanceId,
             @Param("volumeType") VolumeType volumeType, @Param("isActive") Boolean isActive);
 
     /**
-     * Find all department from volume..
+     * Find all department from volume.
      *
-     * @param departmentId department id.
-     * @param isActive get the volume list based on active/inactive status.
-     * @return volume list.
+     * @param departmentId department id
+     * @param isActive get the volume list based on active/inactive status
+     * @return volume list
      */
     @Query(value = "SELECT volume FROM Volume volume WHERE volume.departmentId = :id AND volume.isActive = :isActive ")
     List<Volume> findByDepartmentAndIsActive(@Param("id") Long departmentId, @Param("isActive") Boolean isActive);
@@ -155,8 +155,8 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
     /**
      * Get the volumes based on project.
      *
-     * @param projectId project id.
-     * @param volumeType volume type.
+     * @param projectId project id
+     * @param volumeType volume type
      * @param isActive true/false
      * @return volumes
      */
@@ -167,7 +167,7 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
     /**
      * Get the volumes based on department.
      *
-     * @param departmentId department id.
+     * @param departmentId department id
      * @param isActive true/false
      * @param volumeType volume Type
      * @return volumes
@@ -179,8 +179,8 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
     /**
      * Get the volumes based on department and not project.
      *
-     * @param departmentId department id.
-     * @param projectId project id.
+     * @param departmentId department id
+     * @param projectId project id
      * @param volumeType volume Type
      * @param isActive true/false
      * @return volume
@@ -215,9 +215,9 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
     /**
      * Get the volumes based on project.
      *
-     * @param projectId project id.
+     * @param projectId project id
      * @param departmentId department id
-     * @param volumeType volume type.
+     * @param volumeType volume type
      * @param isActive true/false
      * @return volume
      */
@@ -305,9 +305,9 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
     /**
      * Get the attached volume count based on project.
      *
-     * @param project project.
+     * @param project project
      * @param departmentId department id
-     * @param volumeType volume type.
+     * @param volumeType volume type
      * @param isActive true/false
      * @return volume attached Count
      */
@@ -321,7 +321,7 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      *
      * @param project project.
      * @param departmentId department id
-     * @param volumeType volume type.
+     * @param volumeType volume type
      * @param isActive true/false
      * @return volume detached Count
      */
@@ -333,8 +333,8 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
     /**
      * Find all volumes by isActive.
      *
-     * @param isActive status of the volume.
-     * @return volume.
+     * @param isActive status of the volume
+     * @return volume
      */
     @Query(value = "SELECT volume FROM Volume volume WHERE volume.isActive = :isActive")
     List<Volume> findAllByIsActive(@Param("isActive") Boolean isActive);
@@ -343,9 +343,9 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      * Find all the domain based active or inactive departments with pagination.
      *
      * @param domainId domain id of the volume
-     * @param isActive get the department list based on active/inactive status.
-     * @param pageable to get the list with pagination.
-     * @return list of volumes.
+     * @param isActive get the department list based on active/inactive status
+     * @param pageable to get the list with pagination
+     * @return list of volumes
      */
     @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE volume.domainId = :domainId AND volume.isActive = :isActive")
     Page<Volume> findAllByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, Pageable pageable);
@@ -363,9 +363,9 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
     /**
      * Get the volumes based on project, department and volume type with pagination.
      *
-     * @param allProjectList project list.
+     * @param allProjectList project list
      * @param departmentId department id
-     * @param volumeType volume type.
+     * @param volumeType volume type
      * @param isActive true/false
      * @param pageable to get the list with pagination.
      * @return volume

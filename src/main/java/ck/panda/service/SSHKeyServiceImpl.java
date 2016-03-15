@@ -334,7 +334,7 @@ public class SSHKeyServiceImpl implements SSHKeyService {
                 SSHKey sshkey = SSHKey.convert(sshKeyListJSON.getJSONObject(i));
                 sshkey.setDomainId(convertEntity.getDomainId(sshkey.getTransDomainId()));
                 sshkey.setDepartmentId(convertEntity.getDepartmentByUsername(sshkey.getTransDepartment(),
-                    domainService.findbyUUID(sshkey.getTransDomainId()).getId()));
+                    domainService.findByUUIDAndIsActive(sshkey.getTransDomainId()).getId()));
                 if (j != project.size()) {
                     sshkey.setProjectId(project.get(j).getId());
                     sshkey.setDepartmentId(projectService.find(sshkey.getProjectId()).getDepartmentId());
