@@ -18,7 +18,6 @@ import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
-import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.User.Status;
 import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.repository.jpa.UserRepository;
@@ -92,7 +91,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @PreAuthorize("hasPermission(#user.getSyncFlag(), 'CREATE_USER')")
-    public User save(User user) throws Exception {
+    public User save(User user, Long id) throws Exception {
+        String dept;
         HashMap<String, String> userMap = new HashMap<String, String>();
         List<User> users = new ArrayList<User>();
         if (user.getSyncFlag()) {
@@ -110,9 +110,19 @@ public class UserServiceImpl implements UserService {
                 SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, CS_AES);
                 String encryptedPassword = new String(EncryptionUtil.encrypt(user.getPassword(), originalKey));
                 user.setIsActive(true);
-                userMap.put(cloudStackConstants.CS_DOMAIN_ID, convertEntityService.getDomainById(user.getDomainId()).getUuid());
+                if ((convertEntityService.getOwnerById(id).getType()).equals(User.UserType.ROOT_ADMIN)) {
+                    userMap.put(cloudStackConstants.CS_DOMAIN_ID, convertEntityService.getDomainById(user.getDomainId()).getUuid());
+                } else {
+                    userMap.put(CloudStackConstants.CS_DOMAIN_ID, departmentService.find(convertEntityService.getOwnerById(id)
+                        .getDepartmentId()).getDomain().getUuid());
+                }
+                if (!(convertEntityService.getOwnerById(id).getType()).equals(User.UserType.USER)) {
+                    dept = user.getDepartment().getUserName();
+                } else {
+                    dept = departmentService.find(convertEntityService.getOwnerById(id).getDepartmentId()).getUserName();
+                }
                 config.setServer(1L);
-                String cloudResponse = csUserService.createUser(user.getDepartment().getUserName(), user.getEmail(),
+                String cloudResponse = csUserService.createUser(dept, user.getEmail(),
                         user.getFirstName(), user.getLastName(), user.getUserName(), user.getPassword(), cloudStackConstants.JSON,
                         userMap);
                 JSONObject createUserResponseJSON = new JSONObject(cloudResponse).getJSONObject("createuserresponse");
@@ -123,6 +133,12 @@ public class UserServiceImpl implements UserService {
                 JSONObject userRes = createUserResponseJSON.getJSONObject(cloudStackConstants.CS_USER);
                 user.setUuid((String) userRes.get(cloudStackConstants.CS_ID));
                 user.setPassword(encryptedPassword);
+                if (!(convertEntityService.getOwnerById(id).getType()).equals(User.UserType.ROOT_ADMIN)) {
+                    user.setDomainId(convertEntityService.getOwnerById(id).getDomainId());
+                }
+                if ((convertEntityService.getOwnerById(id).getType()).equals(User.UserType.USER)) {
+                    user.setDepartmentId(convertEntityService.getOwnerById(id).getDepartmentId());
+                }
                 user.setDomainId(user.getDomainId());
                 user.setStatus(user.getStatus()
                         .valueOf(userRes.getString(CloudStackConstants.CS_STATE).toUpperCase()));
@@ -480,5 +496,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> findAllByDomainDepartmentIdUserTypeAndIsActive(Long domainId, Boolean isActive,Long departmentId, UserType domainAdmin) throws Exception {
         return (List<User>) userRepository.findByDomainAndIsActive(domainId, true ,departmentId, UserType.DOMAIN_ADMIN);
+    }
+
+    @Override
+    public User save(User user) throws Exception {
+        if (!user.getSyncFlag()) {
+            return userRepository.save(user);
+        }
+        return user;
     }
 }

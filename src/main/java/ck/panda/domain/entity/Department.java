@@ -27,6 +27,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 
 /**
@@ -472,10 +473,16 @@ public class Department implements Serializable {
         Department department = new Department();
         department.setSyncFlag(false);
         try {
-            department.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            department.setUserName(JsonUtil.getStringValue(jsonObject, "name"));
-            department.setType(AccountType.values()[JsonUtil.getIntegerValue(jsonObject, "accounttype")]);
-            department.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
+            department.setUuid(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ID));
+            department.setUserName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_NAME));
+            if (JsonUtil.getIntegerValue(jsonObject, CloudStackConstants.CS_ACCOUNT_TYPE) == 2) {
+                department.setType(AccountType.DOMAIN_ADMIN);
+            } else if (JsonUtil.getIntegerValue(jsonObject, CloudStackConstants.CS_ACCOUNT_TYPE) == 1) {
+                department.setType(AccountType.ROOT_ADMIN);
+            } else {
+                department.setType(AccountType.USER);
+            }
+            department.setTransDomainId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DOMAIN_ID));
             department.setIsActive(true);
         } catch (Exception ex) {
             ex.printStackTrace();

@@ -674,4 +674,7 @@ public class CloudStackConstants {
 
     /** Constant for uuid of instance. */
     public static final String CS_INSTANCE_UUID = "instanceUuid";
+
+    /** Constant for account id. */
+    public static final String CS_ACCOUNT_ID = "accountid";
 }
