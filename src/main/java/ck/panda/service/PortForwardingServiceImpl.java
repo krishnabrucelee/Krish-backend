@@ -165,29 +165,23 @@ public class PortForwardingServiceImpl implements PortForwardingService {
             if (portForwardingJSON.has("errorcode")) {
                 errors = this.validateEvent(errors, portForwardingJSON.getString("errortext"));
                 throw new ApplicationException(errors);
+            }
+            if(portForwardingJSON.has(CloudStackConstants.CS_ID)) {
+                portForwarding.setUuid((String) portForwardingJSON.get(CloudStackConstants.CS_ID));
             } else {
-                Thread.sleep(20000);
                 String eventObjectResult = cloudStackFirewallService.firewallJobResult(portForwardingJSON.getString("jobid"),
                         "json");
                 JSONObject jobresult = new JSONObject(eventObjectResult).getJSONObject("queryasyncjobresultresponse");
-                if (jobresult.getString("jobstatus").equals("0")) {
+                if (jobresult.getString("jobstatus").equals("2")) {
                     errors = this.validateEvent(errors, jobresult.getString("jobstatus"));
                     throw new ApplicationException(errors);
-                }
-                if (jobresult.getJSONObject("jobresult").has("portforwardingrule")) {
-                    PortForwarding csPortForwarding = PortForwarding.convert(jobresult.getJSONObject("jobresult").getJSONObject("portforwardingrule"));
-                    csPortForwarding.setVmInstanceId(convertEntityService.getVmInstanceId(csPortForwarding.getTransvmInstanceId()));
-                    csPortForwarding.setNetworkId(convertEntityService.getNetworkId(csPortForwarding.getTransNetworkId()));
-                    csPortForwarding.setIpAddressId(convertEntityService.getIpAddressId(csPortForwarding.getTransIpAddressId()));
-                    return csPortForwarding;
-                } else {
-                    return null;
                 }
             }
         } catch (ApplicationException e) {
             LOGGER.error("ERROR AT PORT FORWARDING RULE CREATION", e);
             throw new ApplicationException(e.getErrors());
         }
+        return portForwarding;
     }
 
     /**
