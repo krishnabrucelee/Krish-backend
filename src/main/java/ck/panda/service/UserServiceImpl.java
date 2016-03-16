@@ -473,6 +473,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Page<User> findAllByUserPanelAndDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
+        return userRepository.findAllByUserPanelAndDomainId(domainId, User.Status.DELETED, pagingAndSorting.toPageRequest());
+    }
+
+    @Override
     public Page<User> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
         return userRepository.findAllByDomainId(domainId, pagingAndSorting.toPageRequest());
     }
