@@ -23,7 +23,6 @@ import javax.persistence.Version;
 import javax.validation.constraints.Size;
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -31,7 +30,6 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 import ck.panda.util.JsonValidator;
@@ -247,6 +245,8 @@ public class Volume implements Serializable {
 
     /** Enum type for disk Status. */
     public enum Status {
+        /** Volume will be in a Abandoned State. */
+        ABANDONED,
         /** Volume will be in a Allocated State. */
         ALLOCATED,
         /** Volume will be in a Destroy State. */
@@ -255,34 +255,32 @@ public class Volume implements Serializable {
         EXPUNGED,
         /** Volume will be in a Ready State. */
         READY,
-        /** Volume will be in a UploadNotStarted State. */
-        UPLOAD_NOT_STARTED,
-        /** The volume upload operation is in progress or in short the volume is on secondary storage. */
-        UPLOAD_OP,
+        /** Volume will be in a Upload State. */
+        UPLOAD,
+        /** Volume will be in a Uploaded State. */
+        UPLOADED,
         /** Volume will be in a UploadAbandoned State. */
         UPLOAD_ABANDONED,
         /** Volume will be in a UploadError State. */
         UPLOAD_ERROR,
-        /** Volume will be in a Abandoned State. */
-        ABANDONED,
-        /** Volume will be in a Uploaded State. */
-        UPLOADED,
-        /** Volume will be in a Upload State. */
-        UPLOAD
+        /** Volume will be in a UploadNotStarted State. */
+        UPLOAD_NOT_STARTED,
+        /** The volume upload operation is in progress or in short the volume is on secondary storage. */
+        UPLOAD_OP
     }
 
     /** Format enum type used to list the static format values. */
     public enum Format {
+        /** Hypervisor format type as OVA. */
+        OVA,
+        /** Hypervisor format type as QCOW2. */
+        QCOW2,
         /** Hypervisor format type as RAW. */
         RAW,
         /** Hypervisor format type as VHD. */
         VHD,
         /** Hypervisor format type as VHDX. */
-        VHDX,
-        /** Hypervisor format type as OVA. */
-        OVA,
-        /** Hypervisor format type as QCOW2. */
-        QCOW2
+        VHDX
     }
 
     /**

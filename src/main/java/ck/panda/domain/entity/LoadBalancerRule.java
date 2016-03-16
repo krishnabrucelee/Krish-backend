@@ -223,11 +223,11 @@ public class LoadBalancerRule implements Serializable {
         /** Firewall rule for network. */
         FIREWALL,
 
-        /** Port Forwarding rule for network. */
-        PORTFORWARDING,
-
         /** Load Balancing rule for network. */
-        LOADBALANCING
+        LOADBALANCING,
+
+        /** Port Forwarding rule for network. */
+        PORTFORWARDING
     }
 
     /** Traffic type for a network . */
@@ -241,17 +241,17 @@ public class LoadBalancerRule implements Serializable {
 
     /** Types of protocol for an IP Address .*/
     public enum Protocol {
-        /**  TCP enables two hosts to establish a connection and exchange streams of data. */
-        TCP,
-
-        /** User Datagram Protocol (UDP) is a transport layer protocol provides a best-effort datagram service to an End System (IP host).*/
-        UDP,
+        /** All the above three protocols. */
+        ALL,
 
         /** It is used to send error message when  requested service is not available or that a host or router could not be reached. */
         ICMP,
 
-        /** All the above three protocols .*/
-        ALL
+        /**  TCP enables two hosts to establish a connection and exchange streams of data. */
+        TCP,
+
+        /** User Datagram Protocol (UDP) is a transport layer protocol provides a best-effort datagram service to an End System (IP host).*/
+        UDP
     }
 
     /** Types of state for an firewall . */
@@ -259,11 +259,11 @@ public class LoadBalancerRule implements Serializable {
         /** Load Balance rule in Active state. */
         ACTIVE,
 
-        /** Load Balance rule in Staged state.*/
-        STAGED,
-
         /** Load Balance rule in ADD state. */
-        ADD
+        ADD,
+
+        /** Load Balance rule in Staged state.*/
+        STAGED
     }
 
     /**

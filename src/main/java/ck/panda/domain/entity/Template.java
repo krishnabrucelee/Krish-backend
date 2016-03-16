@@ -1388,15 +1388,12 @@ public class Template implements Serializable {
         this.transDepartment = transDepartment;
     }
 
-
-
-
     /** RootDiskController enum type used to list the static root disk controller values. */
     public enum RootDiskController {
-        /** Root disk controller type as SCSI. */
-        SCSI,
         /** Root disk controller type as IDE. */
-        IDE
+        IDE,
+        /** Root disk controller type as SCSI. */
+        SCSI
     }
 
     /** NicAdapter enum type used to list the static NIC adapter values. */
@@ -1413,50 +1410,50 @@ public class Template implements Serializable {
 
     /** KeyboardType enum type used to list the static Keyboard type values. */
     public enum KeyboardType {
+        /** Keyboard type as Japanese. */
+        JAPANESE_KEYBOARD,
         /** Keyboard type as US. */
         US_KEYBOARD,
         /** Keyboard type as UK. */
         UK_KEYBOARD,
-        /** Keyboard type as Japanese. */
-        JAPANESE_KEYBOARD,
         /** Keyboard type as simplified chinese. */
         SIMPLIFIED_CHINESE
     }
 
     /** Format enum type used to list the static format values. */
     public enum Format {
-        /** Hypervisor format type as VHD. */
-        VHD,
-        /** Hypervisor format type as VHDX. */
-        VHDX,
+        /** Hypervisor format type as BAREMETAL. */
+        BAREMETAL,
+        /** Hypervisor format type as ISO. */
+        ISO,
+        /** Hypervisor format type as OVA. */
+        OVA,
         /** Hypervisor format type as QCOW2. */
         QCOW2,
         /** Hypervisor format type as RAW. */
         RAW,
-        /** Hypervisor format type as VMDK. */
-        VMDK,
-        /** Hypervisor format type as OVA. */
-        OVA,
-        /** Hypervisor format type as BAREMETAL. */
-        BAREMETAL,
         /** Hypervisor format type as TAR. */
         TAR,
-        /** Hypervisor format type as ISO. */
-        ISO
+        /** Hypervisor format type as VMDK. */
+        VMDK,
+        /** Hypervisor format type as VHD. */
+        VHD,
+        /** Hypervisor format type as VHDX. */
+        VHDX
     }
 
     /** TemplateType enum type used to list the static template type values. */
     public enum TemplateType {
-        /** Template type as SYSTEM. */
-        SYSTEM,
         /** Template type as BUILTIN. */
         BUILTIN,
         /** Template type as PERHOST. */
         PERHOST,
-        /** Template type as USER. */
-        USER,
         /** Template type as ROUTING. */
-        ROUTING
+        ROUTING,
+        /** Template type as SYSTEM. */
+        SYSTEM,
+        /** Template type as USER. */
+        USER
     }
 
     /** Status enum type used to list the status values. */
@@ -1469,10 +1466,10 @@ public class Template implements Serializable {
 
     /** Flag enum type used to choose whether it is template or iso. */
     public enum Flag {
-        /** Template flag. */
-        TEMPLATE,
         /** Iso flag. */
-        ISO
+        ISO,
+        /** Template flag. */
+        TEMPLATE
     }
 
     /**

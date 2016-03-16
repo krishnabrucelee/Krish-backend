@@ -110,10 +110,10 @@ public class Project implements Serializable {
 
     /** Enumeration status for Project. */
     public enum Status {
-        /** Enabled status is used to list projects through out the application. */
-        ENABLED,
         /** Deleted status make projects as soft deleted and it will not list on the applicaiton. */
-        DELETED
+        DELETED,
+        /** Enabled status is used to list projects through out the application. */
+        ENABLED
     }
 
     /** Version attribute to handle optimistic locking. */

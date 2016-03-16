@@ -214,32 +214,32 @@ public class VmInstance implements Serializable {
 
     /** Enumeration status for instance. */
     public enum Status {
-        /** Running status of instance. */
-        RUNNING,
+        /** While instance creation if get status as creating. */
+        CREATING,
         /** Destroy status of instance. */
         DESTROY,
         /** Destroyed status of instance. */
         DESTROYED,
-        /** Stopped status of instance. */
-        STOPPED,
-        /** Status of instance when migrate from one to another. */
-        MIGRATING,
-        /** After launch or start instance get status as starting. */
-        STARTING,
-        /** After stop or destroy instance get status as stopping. */
-        STOPPING,
+        /** While instance creation if get failure get status as Error. */
+        ERROR,
         /** After destroy or expunge instance get status as expunging. */
         EXPUNGING,
         /** After destroy or expunge instance get status as expunged. */
         EXPUNGED,
-        /** While instance creation if get failure get status as Error. */
-        ERROR,
-        /** While instance creation if get status as creating. */
-        CREATING,
         /** While instance creation if get status as Implemented. */
         IMPLEMENTED,
+        /** Status of instance when migrate from one to another. */
+        MIGRATING,
         /** After launch instance if get status as ready. */
-        READY
+        READY,
+        /** Running status of instance. */
+        RUNNING,
+        /** After launch or start instance get status as starting. */
+        STARTING,
+        /** Stopped status of instance. */
+        STOPPED,
+        /** After stop or destroy instance get status as stopping. */
+        STOPPING
     }
 
     /** Instance host. */

@@ -42,7 +42,7 @@ public interface VmSnapshotRepository extends PagingAndSortingRepository<VmSnaps
      * @param isRemoved check whether removed or not.
      * @return Vm snapshot.
      */
-    @Query(value = "select snapshot from VmSnapshot snapshot where snapshot.isRemoved IS :isRemoved AND snapshot.status <>:status)")
+    @Query(value = "select snapshot from VmSnapshot snapshot LEFT JOIN snapshot.vm where snapshot.isRemoved IS :isRemoved AND snapshot.status <>:status)")
     Page<VmSnapshot> findAllByActiveAndExpunging(Pageable pageable, @Param("isRemoved") Boolean isRemoved, @Param("status") Status status);
 
     /**
@@ -54,7 +54,7 @@ public interface VmSnapshotRepository extends PagingAndSortingRepository<VmSnaps
      * @param status of the snapshot
      * @return Vm snapshot.
      */
-    @Query(value = "select snapshot from VmSnapshot snapshot where snapshot.domainId =:domainId AND snapshot.isRemoved IS :isRemoved AND snapshot.status <>:status)")
+    @Query(value = "select snapshot from VmSnapshot snapshot LEFT JOIN snapshot.vm where snapshot.domainId =:domainId AND snapshot.isRemoved IS :isRemoved AND snapshot.status <>:status)")
     Page<VmSnapshot> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId, @Param("isRemoved") Boolean isRemoved, @Param("status") Status status, Pageable pageable);
 
 }

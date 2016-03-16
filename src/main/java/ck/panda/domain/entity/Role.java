@@ -121,10 +121,10 @@ public class Role implements Serializable {
      *
      */
     public enum Status {
-        /** Roles will be in a Enabled State. */
-        ENABLED,
         /** Roles will be in a Disabled State. */
-        DISABLED
+        DISABLED,
+        /** Roles will be in a Enabled State. */
+        ENABLED
     }
 
     /**

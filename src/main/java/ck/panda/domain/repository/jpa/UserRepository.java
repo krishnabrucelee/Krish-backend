@@ -65,7 +65,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @param status status of the user
      * @return list of user.
      */
-    @Query(value = "SELECT user FROM User user WHERE user.domain =:domain AND user.status <> :status")
+    @Query(value = "SELECT user FROM User user LEFT JOIN user.role WHERE user.domain =:domain AND user.status <> :status")
     Page<User> findAllUserByDomain(Pageable pageable, @Param("domain") Domain domain, @Param("status") Status status);
 
     /**
@@ -144,7 +144,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @param status status of the user
      * @return list of users
      */
-    @Query(value = "SELECT user FROM User user WHERE user.status <> :status")
+    @Query(value = "SELECT user FROM User user LEFT JOIN user.role WHERE user.status <> :status")
     Page<User> findAllUserByStatus(Pageable pageable,@Param("status") Status status);
 
     /**
@@ -154,7 +154,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @param pageable pagination information.
      * @return list of user.
      */
-    @Query(value = "select user from User user where user.domainId =:domainId")
+    @Query(value = "select user from User user LEFT JOIN user.role where user.domainId =:domainId")
     Page<User> findAllByDomainId(@Param("domainId") Long domainId, Pageable pageable);
 
     /**

@@ -33,7 +33,7 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, L
      * @param isActive true/false.
      * @return list of project.
      */
-    @Query(value = "SELECT project FROM Project project WHERE project.isActive IS :isactive ")
+    @Query(value = "SELECT project FROM Project project LEFT JOIN project.projectOwner WHERE project.isActive IS :isactive ")
     Page<Project> findAllByStatus(Pageable pageable, @Param("isactive") Boolean isActive);
 
     /**
@@ -93,7 +93,7 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, L
      * @param isActive true/false.
      * @return list of project.
      */
-    @Query(value = "SELECT project FROM Project project WHERE project.isActive IS :isActive AND project.domainId = :domainId ")
+    @Query(value = "SELECT project FROM Project project LEFT JOIN project.projectOwner WHERE project.isActive IS :isActive AND project.domainId = :domainId ")
     Page<Project> findAllByDomain(@Param("domainId") Long domainId, Pageable pageable,
             @Param("isActive") Boolean isActive);
 
@@ -105,7 +105,7 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, L
      * @param isActive true/false.
      * @return list of project.
      */
-    @Query(value = "SELECT project FROM Project project WHERE project.domainId = :domainId AND project.isActive IS :isactive")
+    @Query(value = "SELECT project FROM Project project LEFT JOIN project.projectOwner WHERE project.domainId = :domainId AND project.isActive IS :isactive")
     Page<Project> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId, @Param("isactive") Boolean isActive, Pageable pageable);
 
     /**
@@ -116,7 +116,7 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, L
      * @param pageable pagination information.
      * @return list of project.
      */
-    @Query(value = "SELECT project FROM Project project WHERE project.isActive = :isActive AND project.departmentId = :departmentId")
+    @Query(value = "SELECT project FROM Project project LEFT JOIN project.projectOwner WHERE project.isActive = :isActive AND project.departmentId = :departmentId")
     Page<Project> findAllByDepartmentAndIsActiveAndPage(@Param("departmentId") Long departmentId,
             @Param("isActive") Boolean isActive, Pageable pageable);
 }

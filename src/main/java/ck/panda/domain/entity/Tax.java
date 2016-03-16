@@ -300,10 +300,9 @@ public class Tax implements Serializable {
      * Enumeration status for Tax.
      */
     public enum Status {
-        /** Enabled status is used to list taxs through out the application. */
-        ENABLED,
-
         /** Deleted status make tax as soft deleted and it will not list on the applicaiton. */
-        DELETED
+        DELETED,
+        /** Enabled status is used to list taxs through out the application. */
+        ENABLED
     }
 }

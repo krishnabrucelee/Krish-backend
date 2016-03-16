@@ -443,26 +443,22 @@ public class Department implements Serializable {
 
     /** Define user type. */
     public enum AccountType {
-
-        /** User status make department as user type. */
-        USER,
-
+        /** Domain admin status make department as Domain Admin type. */
+        DOMAIN_ADMIN,
         /** Root admin status make department as Root Admin type. */
         ROOT_ADMIN,
-
-        /** Domain admin status make department as Domain Admin type. */
-        DOMAIN_ADMIN;
+        /** User status make department as user type. */
+        USER
     }
 
     /**
      * Enumeration status for Department.
      */
     public enum Status {
-        /** Enabled status is used to list departments through out the application. */
-        ENABLED,
-
         /** Deleted status make department as soft deleted and it will not list on the applicaiton. */
-        DELETED
+        DELETED,
+        /** Enabled status is used to list departments through out the application. */
+        ENABLED
     }
 
     /**

@@ -36,10 +36,10 @@ public class Application implements Serializable {
 
     /** Status enum type used to list the status values. */
     public enum Status {
-        /** Application status as Enabled. */
-        ENABLED,
         /** Application status as Disabled. */
-        DISABLED
+        DISABLED,
+        /** Application status as Enabled. */
+        ENABLED
     }
 
     /** Id of the Application. */

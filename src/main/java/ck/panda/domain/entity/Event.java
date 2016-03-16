@@ -13,10 +13,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import org.hibernate.annotations.Type;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -95,9 +91,6 @@ public class Event implements Serializable {
         /** Event type as Action for action from user end. */
         ACTION,
 
-        /** Event type as Usage for usage based event. */
-        USAGE,
-
         /** Event type as Alert for alert based event. */
         ALERT,
 
@@ -105,7 +98,10 @@ public class Event implements Serializable {
         ASYNC,
 
         /** Event type as Resourcestate for state based. */
-        RESOURCESTATE
+        RESOURCESTATE,
+
+        /** Event type as Usage for usage based event. */
+        USAGE
     }
 
     /** Status for event, whether it is completed, failed etc . */
@@ -117,20 +113,11 @@ public class Event implements Serializable {
      * Enumeration status for Event.
      */
     public enum Status {
-        /** Event status as scheduled. */
-        SCHEDULED,
-
-        /** Event status as in progess after scheduled. */
-        IN_PROGRESS,
-
-        /** Event status as started after get start process. */
-        STARTED,
-
         /** Event status as completed after get complete event process. */
         COMPLETED,
 
-        /** Event status as succeeded after get complete action. */
-        SUCCEEDED,
+        /** Event status as error action get failed. */
+        ERROR,
 
         /** Event status as failed action get failed. */
         FAILED,
@@ -138,14 +125,23 @@ public class Event implements Serializable {
         /** Event status as info action get success. */
         INFO,
 
-        /** Event status as error action get failed. */
-        ERROR,
+        /** Event status as in progess after scheduled. */
+        IN_PROGRESS,
 
         /** Event status as prestate transition event. */
         PRESTATETRANSITIONEVENT,
 
         /** Event status as poststate transition event. */
-        POSTSTATETRANSITIONEVENT
+        POSTSTATETRANSITIONEVENT,
+
+        /** Event status as scheduled. */
+        SCHEDULED,
+
+        /** Event status as started after get start process. */
+        STARTED,
+
+        /** Event status as succeeded after get complete action. */
+        SUCCEEDED
     }
 
     /**
