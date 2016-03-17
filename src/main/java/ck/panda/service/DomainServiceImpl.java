@@ -320,6 +320,11 @@ public class DomainServiceImpl implements DomainService {
     }
 
     @Override
+    public Domain findByUUIDAndIsActive(String uuid) throws Exception {
+        return domainRepo.findByUUIDAndIsActive(uuid, true);
+    }
+
+    @Override
     public Domain softDelete(Domain domain) throws Exception {
         Errors errors = validator.rejectIfNullEntity("domain", domain);
         if (domain.getSyncFlag()) {

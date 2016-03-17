@@ -112,17 +112,19 @@ public class AuthenticationFilter extends GenericFilterBean {
         Optional<String> domain = Optional.fromNullable(httpRequest.getHeader(XAUTH_REQUEST));
         String resourcePath = new UrlPathHelper().getPathWithinApplication(httpRequest);
         try {
+			if (resourcePath.contains("socket")) {
+				LOGGER.debug("Trying to authenticate user by x-auth-token method : ", token);
+				token = Optional.fromNullable(httpRequest.getAttribute("token").toString());
+			}
             if (postToAuthenticate(httpRequest, resourcePath)) {
                 LOGGER.debug("Trying to authenticate user by x-auth-username method : ", userName);
                 processUsernamePasswordAuthentication(httpRequest, httpResponse, userName, password, domain);
                 return;
             }
-
             if (token.isPresent()) {
                 LOGGER.debug("Trying to authenticate user by x-auth-token method : ", token);
                 processTokenAuthentication(token, httpRequest);
             }
-
             LOGGER.debug("Authentication filter is passing request down the filter chain");
             addSessionContextToLogging();
             chain.doFilter(request, response);

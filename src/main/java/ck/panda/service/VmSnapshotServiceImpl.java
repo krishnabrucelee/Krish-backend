@@ -280,4 +280,9 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
         return vmsnapshot;
     }
 
+    @Override
+    public Page<VmSnapshot> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
+        return vmSnapshotRepository.findAllByDomainIdAndIsActive(domainId, false, Status.Expunging, pagingAndSorting.toPageRequest());
+    }
+
 }

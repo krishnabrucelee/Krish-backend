@@ -237,10 +237,10 @@ public class StorageOffering implements Serializable {
      *
      */
     public enum Status {
-        /** Storage Offering will be in a Enabled State. */
-        ENABLED,
         /** Storage Offering will be in a Disabled State. */
-        DISABLED
+        DISABLED,
+        /** Storage Offering will be in a Enabled State. */
+        ENABLED
     }
 
     /**
@@ -248,10 +248,10 @@ public class StorageOffering implements Serializable {
      *
      */
     public enum StorageType {
-        /** Shared is storage accessible via NFS. */
-        shared,
         /** Isolated is attached to the hypervisor host where vm is running. */
-        local
+        local,
+        /** Shared is storage accessible via NFS. */
+        shared
     }
 
     /**

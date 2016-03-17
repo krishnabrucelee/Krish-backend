@@ -221,11 +221,11 @@ public class IpAddress implements Serializable {
      * Enumeration VPN state for ipaddress.
      */
     public enum VpnState {
-        /** Allocated status for VPN state. */
-        RUNNING,
-
         /** Disabled status for VPN state. */
-        DISABLED
+        DISABLED,
+
+        /** Allocated status for VPN state. */
+        RUNNING
     }
 
     /**

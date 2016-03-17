@@ -1,5 +1,10 @@
 package ck.panda.web.resource;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,6 +17,9 @@ import ck.panda.util.web.ApiController;
  */
 @RestController
 public class AuthenticationController implements ApiController {
+	/** Simple message template reference. */
+	@Autowired
+	private SimpMessagingTemplate simpMessagingTemplate;
 
     /**
      * Authenticate method.
@@ -28,4 +36,14 @@ public class AuthenticationController implements ApiController {
                 + "Authentication can be issued multiple times and each call results in new ßticket.";
     }
 
+    @MessageMapping("/cloud/event.message")
+	@SendTo("/topic/action.event/")
+	public String eventMessage(@Payload String message) {
+		return message;
+	}
+
+	@MessageMapping("/socket/ws")
+	public void filtereventMessage() {
+		simpMessagingTemplate.convertAndSend("/topic/action.event/", "hi");
+	}
 }

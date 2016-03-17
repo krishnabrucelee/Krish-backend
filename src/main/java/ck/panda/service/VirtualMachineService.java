@@ -23,6 +23,16 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      */
     VmInstance findByUUID(String uuid);
 
+   /**
+    * Create new instance from panda.
+    *
+    * @param vmInstance vmInstance to save.
+    * @param userId created user.
+    * @return vm Instance.
+    * @throws Exception unhandled exception.
+    */
+   VmInstance saveVmInstance(VmInstance vmInstance, Long userId) throws Exception;
+
     /**
      * Find vm instance by id.
      *
@@ -149,6 +159,7 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
     /**
      * To get list of instance by status.
      *
+     * @param pagingAndSorting parameters.
      * @param status status.
      * @return vm list.
      * @throws Exception unhandled errors.
@@ -246,10 +257,12 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      *
      * @param pagingAndSorting parameters.
      * @param domainId domain id.
+     * @param searchText quick search text
+     * @param userId user id.
      * @return page result of intances.
      * @throws Exception if error occurs.
      */
-    Page<VmInstance> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
+    Page<VmInstance> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting, String searchText, Long userId) throws Exception;
 
     /**
      * Find all the domain instance based on the given status for paginated list.
@@ -257,26 +270,41 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * @param pagingAndSorting page request.
      * @param status status of vm.
      * @param domainId domain id.
+     * @param searchText quick search text
+     * @param userId user id.
      * @return instances.
      * @throws Exception unhandled errors.
      */
-    Page<VmInstance> findAllByStatusAndDomain(PagingAndSorting pagingAndSorting, Status status, Long domainId) throws Exception;
+    Page<VmInstance> findAllByStatusAndDomain(PagingAndSorting pagingAndSorting, Status status, Long domainId, String searchText, Long userId) throws Exception;
 
     /**
      * Get the count of the instance based on the status and domain.
      *
      * @param status status of vm.
+     * @param userId user id.
+     * @param searchText search text.
      * @param domainId user id.
      * @return count.
      */
-    Integer findCountByStatusAndDomain(Status status, Long domainId);
+    Integer findCountByStatusAndDomain(Status status, Long domainId, Long userId, String searchText);
 
     /**
      * Find list of vm Instances by domain without pagination.
      *
      * @param domainId user id.
+     * @param userId user id.
+     * @param searchText search text.
      * @return result of instance.
      * @throws Exception if error occurs.
      */
-    List<VmInstance> findAllByDomain(Long domainId) throws Exception;
+    List<VmInstance> findAllByDomain(Long domainId, Long userId, String searchText) throws Exception;
+
+    /**
+     * Reset SSH Key in created instance.
+     *
+     * @param vminstance virtual machine.
+     * @return instance.
+     * @throws Exception if error occurs.
+     */
+    VmInstance resetSSHKey(VmInstance vminstance) throws Exception;
 }

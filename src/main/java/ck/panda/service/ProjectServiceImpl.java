@@ -9,10 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Department;
@@ -308,10 +306,7 @@ public class ProjectServiceImpl implements ProjectService {
                         isActive);
             } else {
                 // Find all active projects by department.
-                projects = projectRepository.findAllByDepartmentAndIsActive(user.getDepartmentId(), isActive);
-                Page<Project> allProjectLists = new PageImpl<Project>(projects, pagingAndSorting.toPageRequest(),
-                        pagingAndSorting.getPageSize());
-                return allProjectLists;
+                return projectRepository.findAllByDepartmentAndIsActiveAndPage(user.getDepartmentId(), isActive, pagingAndSorting.toPageRequest());
             }
         }
         return projectRepository.findAllByStatus(pagingAndSorting.toPageRequest(), isActive);

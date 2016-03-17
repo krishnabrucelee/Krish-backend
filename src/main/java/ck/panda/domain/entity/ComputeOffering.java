@@ -208,39 +208,32 @@ public class ComputeOffering implements Serializable {
      * Enumeration for Region status.
      */
     public enum DiskIo {
-
         /** If average disk input and speed at is better level. */
         AVERAGE,
-
-        /** If good disk input and output speed is above average level. */
-        GOOD,
-
         /** If excellent disk input and output speed is at highest level. */
-        EXCELLENT
+        EXCELLENT,
+        /** If good disk input and output speed is above average level. */
+        GOOD
     }
 
     /**
      * Enumeration for Storage Type status.
      */
     public enum StorageType {
-
-        /** If shared is selected we can create instance without enabling zone to use local storage. */
-        shared,
-
         /** If zone is enabled to access local storage then only we can create vm using this option. */
         local,
+        /** If shared is selected we can create instance without enabling zone to use local storage. */
+        shared
     }
 
     /**
      * Enumeration for QOS type status.
      */
     public enum QosType {
-
-        /** If hypervisor is chosed we can specify disk bytes read and write bytes value. */
+        /** If hypervisor is chosen we can specify disk bytes read and write bytes value. */
         HYPERVISOR,
-
-        /** If storage is chosed we can specify minimum and maximum iops values. */
-        STORAGE,
+        /** If storage is chosen we can specify minimum and maximum iops values. */
+        STORAGE
     }
 
     /**

@@ -214,32 +214,32 @@ public class VmInstance implements Serializable {
 
     /** Enumeration status for instance. */
     public enum Status {
-        /** Running status of instance. */
-        RUNNING,
+        /** While instance creation if get status as creating. */
+        CREATING,
         /** Destroy status of instance. */
         DESTROY,
         /** Destroyed status of instance. */
         DESTROYED,
-        /** Stopped status of instance. */
-        STOPPED,
-        /** Status of instance when migrate from one to another. */
-        MIGRATING,
-        /** After launch or start instance get status as starting. */
-        STARTING,
-        /** After stop or destroy instance get status as stopping. */
-        STOPPING,
+        /** While instance creation if get failure get status as Error. */
+        ERROR,
         /** After destroy or expunge instance get status as expunging. */
         EXPUNGING,
         /** After destroy or expunge instance get status as expunged. */
         EXPUNGED,
-        /** While instance creation if get failure get status as Error. */
-        ERROR,
-        /** While instance creation if get status as creating. */
-        CREATING,
         /** While instance creation if get status as Implemented. */
         IMPLEMENTED,
+        /** Status of instance when migrate from one to another. */
+        MIGRATING,
         /** After launch instance if get status as ready. */
-        READY
+        READY,
+        /** Running status of instance. */
+        RUNNING,
+        /** After launch or start instance get status as starting. */
+        STARTING,
+        /** Stopped status of instance. */
+        STOPPED,
+        /** After stop or destroy instance get status as stopping. */
+        STOPPING
     }
 
     /** Instance host. */
@@ -354,6 +354,15 @@ public class VmInstance implements Serializable {
     @Column(name = "min_iops")
     private Long diskMinIops;
 
+    /** Instance ssh key. */
+    @OneToOne
+    @JoinColumn(name = "ssh_key_id", referencedColumnName = "id", updatable = false, insertable = false)
+    private SSHKey keypair;
+
+    /** Instance ssh key id. */
+    @Column(name = "ssh_key_id")
+    private Long keypairId;
+
     /** Version attribute to handle optimistic locking. */
     @Version
     @Column(name = "version")
@@ -438,6 +447,10 @@ public class VmInstance implements Serializable {
     /** Transient owner id of the instance. */
     @Transient
     private String transOwnerId;
+
+    /** Transient keypair name of the instance. */
+    @Transient
+    private String transKeypairName;
 
     /**
      * Get sync status.
@@ -691,6 +704,42 @@ public class VmInstance implements Serializable {
      */
     public void setNetworkOfferingId(Long networkOfferingId) {
         this.networkOfferingId = networkOfferingId;
+    }
+
+    /**
+     * Get the keypair of the instance.
+     *
+     * @return the keypair.
+     */
+    public SSHKey getKeypair() {
+        return keypair;
+    }
+
+    /**
+     * set the keypair of the instance.
+     *
+     * @param keypair to set.
+     */
+    public void setKeypair(SSHKey keypair) {
+        this.keypair = keypair;
+    }
+
+    /**
+     * Get the keypairId of the instance.
+     *
+     * @return the keypairId.
+     */
+    public Long getKeypairId() {
+        return keypairId;
+    }
+
+    /**
+     * set the keypairId of the instance.
+     *
+     * @param keypairId to set.
+     */
+    public void setKeypairId(Long keypairId) {
+        this.keypairId = keypairId;
     }
 
     /**
@@ -1215,20 +1264,23 @@ public class VmInstance implements Serializable {
         this.computeOffering = computeOffering;
     }
 
-	/**
-	 * @return the osType
-	 */
-	public String getOsType() {
-		return osType;
-	}
+    /**
+     * Get the osType.
+     *
+     * @return the osType
+     */
+    public String getOsType() {
+        return osType;
+    }
 
-	/**
-	 * @param osType
-	 *            the osType to set
-	 */
-	public void setOsType(String osType) {
-		this.osType = osType;
-	}
+    /**
+     * Set the osType.
+     *
+     * @param osType osType to set
+     */
+    public void setOsType(String osType) {
+        this.osType = osType;
+    }
 
 
     /**
@@ -1908,6 +1960,24 @@ public class VmInstance implements Serializable {
     }
 
     /**
+     * Get transient keypair name.
+     *
+     * @return the transKeypairName
+     */
+    public String getTransKeypairName() {
+        return transKeypairName;
+    }
+
+    /**
+     * Set the transient Keypair name.
+     *
+     * @param transKeypairName to set
+     */
+    public void setTransKeypairName(String transKeypairName) {
+        this.transKeypairName = transKeypairName;
+    }
+
+    /**
      * Get the  compute offering min iops.
      *
      * @return the computeMinIops
@@ -1946,40 +2016,40 @@ public class VmInstance implements Serializable {
     /**
      * Set transient force stop.
      *
-	 * @return the transForcedStop.
-	 */
-	public Boolean getTransForcedStop() {
-		return transForcedStop;
-	}
+     * @return the transForcedStop.
+     */
+    public Boolean getTransForcedStop() {
+        return transForcedStop;
+    }
 
-	/**
-	 * Get transient for forced stop.
-	 *
-	 * @param transForcedStop the transForcedStop to set.
-	 */
-	public void setTransForcedStop(Boolean transForcedStop) {
-		this.transForcedStop = transForcedStop;
-	}
+    /**
+     * Get transient for forced stop.
+     *
+     * @param transForcedStop the transForcedStop to set.
+     */
+    public void setTransForcedStop(Boolean transForcedStop) {
+        this.transForcedStop = transForcedStop;
+    }
 
-	/**
-	 * Get the public ip address.
-	 *
-	 * @return the publicIpAddress
-	 */
-	public String getPublicIpAddress() {
-		return publicIpAddress;
-	}
+    /**
+     * Get the public ip address.
+     *
+     * @return the publicIpAddress
+     */
+    public String getPublicIpAddress() {
+        return publicIpAddress;
+    }
 
-	/**
-	 * Set the public ip address.
-	 *
-	 * @param publicIpAddress the publicIpAddress to set
-	 */
-	public void setPublicIpAddress(String publicIpAddress) {
-		this.publicIpAddress = publicIpAddress;
-	}
+    /**
+     * Set the public ip address.
+     *
+     * @param publicIpAddress the publicIpAddress to set
+     */
+    public void setPublicIpAddress(String publicIpAddress) {
+        this.publicIpAddress = publicIpAddress;
+    }
 
-	@Override
+    @Override
     public String toString() {
         return "VmInstance [Id=" + id + ", name=" + name + ", uuid=" + uuid + ", vncPassword=" + vncPassword
                 + ", instanceOwner=" + instanceOwner + ", instanceOwnerId=" + instanceOwnerId + ", application="
@@ -2005,7 +2075,7 @@ public class VmInstance implements Serializable {
         VmInstance vmInstance = new VmInstance();
         vmInstance.setSyncFlag(false);
         try {
-        	vmInstance.setTransHypervisor(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_HYPERVISOR_TYPE));
+            vmInstance.setTransHypervisor(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_HYPERVISOR_TYPE));
             vmInstance.setName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_NAME));
             vmInstance.setUuid(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ID));
             vmInstance.setTransDomainId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DOMAIN_ID));
@@ -2043,6 +2113,7 @@ public class VmInstance implements Serializable {
                     .setInstanceInternalName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_INSTANCE_NAME));
             vmInstance.setTransOwnerId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_USER_ID));
             vmInstance.setTemplateName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_TEMPLATE_NAME));
+            vmInstance.setTransKeypairName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_KEYPAIR));
         } catch (Exception e) {
             e.printStackTrace();
         }

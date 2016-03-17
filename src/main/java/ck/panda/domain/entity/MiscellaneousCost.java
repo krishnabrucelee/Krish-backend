@@ -94,14 +94,14 @@ public class MiscellaneousCost {
     /** Types of the cost .*/
     public enum CostTypes {
 
+        /** IpAddress cost .*/
+        IPADDRESS,
+
         /** Template cost .*/
         TEMPLATE,
 
         /** Vm snapshot cost. */
         VMSNAPSHOT,
-
-        /** IpAddress cost .*/
-        IPADDRESS,
 
         /** Volume cost .*/
         VOLUME

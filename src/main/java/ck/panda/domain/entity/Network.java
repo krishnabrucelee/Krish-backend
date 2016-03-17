@@ -200,24 +200,24 @@ public class Network implements Serializable {
 
     /** Enum type for Network Type. */
     public enum NetworkType {
-        /** Network type be Shared. */
-        Shared,
         /** Network type be Isolated. */
         Isolated,
+        /** Network type be Shared. */
+        Shared
     }
 
     /** Enum type for Network Status. */
     public enum Status {
-        /** Network will be in a Implemented State. */
-        IMPLEMENTED,
         /** Network will be in a Allocated State. */
         ALLOCATED,
         /** Network will be in a destroyed State. */
         DESTROY,
-        /** Network will be in a Shutdown State. */
-        SHUTDOWN,
+        /** Network will be in a Implemented State. */
+        IMPLEMENTED,
         /** Network will be in a Setup State. */
-        SETUP
+        SETUP,
+        /** Network will be in a Shutdown State. */
+        SHUTDOWN
     }
 
     /** Set syncFlag. */

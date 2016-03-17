@@ -66,7 +66,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param isActive true/false
      * @return user and routing template list
      */
-    @Query(value = "SELECT template FROM Template template WHERE template.type <>:type AND template.format <>:format AND template.isActive =:isActive")
+    @Query(value = "SELECT template FROM Template template LEFT JOIN template.osCategory LEFT JOIN template.templateOwner LEFT JOIN template.osType LEFT JOIN template.templateCost WHERE template.type <>:type AND template.format <>:format AND template.isActive =:isActive")
     Page<Template> findAllByType(@Param("type") TemplateType type, @Param("format") Format format, Pageable pageable,
         @Param("isActive") Boolean isActive);
     /**
@@ -143,7 +143,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param isActive true/false
      * @return user and routing template list
      */
-    @Query(value = "SELECT template FROM Template template WHERE template.type <>:type AND template.format =:format AND template.isActive =:isActive")
+    @Query(value = "SELECT template FROM Template template LEFT JOIN template.osCategory LEFT JOIN template.templateOwner LEFT JOIN template.osType LEFT JOIN template.templateCost WHERE template.type <>:type AND template.format =:format AND template.isActive =:isActive")
     Page<Template> findAllByFormat(@Param("type") TemplateType type, @Param("format") Format format, Pageable pageable,
         @Param("isActive") Boolean isActive);
 
@@ -228,7 +228,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param status status of the template
      * @return template
      */
-    @Query(value = "SELECT template FROM Template template WHERE template.type <>:type AND template.featured =:featured AND template.share =:share AND template.status =:status AND template.isActive =:isActive")
+    @Query(value = "SELECT template FROM Template template LEFT JOIN template.osCategory LEFT JOIN template.templateOwner LEFT JOIN template.osType LEFT JOIN template.templateCost WHERE template.type <>:type AND template.featured =:featured AND template.share =:share AND template.status =:status AND template.isActive =:isActive")
     Page<Template> findTemplateByFeatured(@Param("type") TemplateType type, Pageable pageable, @Param("featured") Boolean featured, @Param("share") Boolean share, @Param("status") Status status, @Param("isActive") Boolean isActive);
 
     /**
@@ -241,31 +241,30 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param status status of the template
      * @return template
      */
-    @Query(value = "SELECT template FROM Template template WHERE template.type <>:type AND template.share =:share AND template.status =:status AND template.isActive =:isActive")
+    @Query(value = "SELECT template FROM Template template LEFT JOIN template.osCategory LEFT JOIN template.templateOwner LEFT JOIN template.osType LEFT JOIN template.templateCost WHERE template.type <>:type AND template.share =:share AND template.status =:status AND template.isActive =:isActive")
     Page<Template> findTemplateByCommunity(@Param("type") TemplateType type, Pageable pageable, @Param("share") Boolean share, @Param("status") Status status, @Param("isActive") Boolean isActive);
 
-
     /**
-     * Find templates based on user id for pagination.
+     * Get the template by user id.
      *
-     * @param type of the template.
-     * @param pageable paging and sorting.
-     * @param userId of the template.
-     * @param isActive status of the template.
-     * @return templates.
+     * @param type template type
+     * @param pageable page
+     * @param userId of the template
+     * @param isActive status
+     * @return template
      */
-    @Query(value = "SELECT template FROM Template template WHERE template.type <>:type AND template.templateOwnerId =:userId AND template.isActive =:isActive")
+    @Query(value = "SELECT template FROM Template template LEFT JOIN template.osCategory LEFT JOIN template.templateOwner LEFT JOIN template.osType LEFT JOIN template.templateCost WHERE template.type <>:type AND template.templateOwnerId =:userId AND template.isActive =:isActive")
     Page<Template> findTemplateByUserId(@Param("type") TemplateType type, Pageable pageable, @Param("userId") Long userId, @Param("isActive") Boolean isActive);
 
     /**
-     * Find all the templates except system template.
+     * Get the template by template type and isActive.
      *
-     * @param type of the template.
-     * @param isActive status of the template.
-     * @return templates.
+     * @param type template type
+     * @param isActive status
+     * @return template
      */
     @Query(value = "SELECT template FROM Template template WHERE template.type <>:type AND template.isActive =:isActive")
-    List<Template> findAllTemplatesByIsActiveAndType(@Param("type") TemplateType type, @Param("isActive") Boolean isActive  );
+    List<Template> findAllTemplatesByIsActiveAndType(@Param("type") TemplateType type, @Param("isActive") Boolean isActive);
 
     /**
      * Find all templates by user type, isActive status of the template.

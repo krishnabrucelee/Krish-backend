@@ -26,14 +26,15 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     List<User> findAllByActive(@Param("query") String query);
 
     /**
-     * Find the department already exist for the same domain.
+     * Find the user already exist for the same domain.
      *
      * @param userName userName of the user
      * @param domain domain of the user
+     * @param isActive check whether users are removed or not.
      * @return user
      */
-    @Query(value = "SELECT user FROM User user WHERE user.userName=:userName AND user.domain=:domain")
-    User findByUserNameAndDomain(@Param("userName") String userName, @Param("domain") Domain domain);
+    @Query(value = "select user from User user where user.userName = :userName AND user.domain = :domain AND user.isActive = :isActive")
+    User findByUserNameAndDomainAndActive(@Param("userName") String userName, @Param("domain") Domain domain, @Param("isActive") Boolean isActive);
 
     /**
      * Find user by department.
@@ -64,7 +65,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @param status status of the user
      * @return list of user.
      */
-    @Query(value = "SELECT user FROM User user WHERE user.domain =:domain AND user.status <> :status")
+    @Query(value = "SELECT user FROM User user LEFT JOIN user.role WHERE user.domain =:domain AND user.status <> :status")
     Page<User> findAllUserByDomain(Pageable pageable, @Param("domain") Domain domain, @Param("status") Status status);
 
     /**
@@ -143,7 +144,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @param status status of the user
      * @return list of users
      */
-    @Query(value = "SELECT user FROM User user WHERE user.status <> :status")
+    @Query(value = "SELECT user FROM User user LEFT JOIN user.role WHERE user.status <> :status")
     Page<User> findAllUserByStatus(Pageable pageable,@Param("status") Status status);
 
     /**
@@ -153,7 +154,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @param pageable pagination information.
      * @return list of user.
      */
-    @Query(value = "select user from User user where user.domainId =:domainId")
+    @Query(value = "select user from User user LEFT JOIN user.role where user.domainId =:domainId")
     Page<User> findAllByDomainId(@Param("domainId") Long domainId, Pageable pageable);
 
     /**

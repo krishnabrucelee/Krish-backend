@@ -32,6 +32,15 @@ public interface DomainService extends CRUDService<Domain> {
     Domain findbyUUID(String uuid) throws Exception;
 
     /**
+     * Find domain by uuid and isActive.
+     *
+     * @param uuid uuid of domain.
+     * @return domain object.
+     * @throws Exception unhandled errors.
+     */
+    Domain findByUUIDAndIsActive(String uuid) throws Exception;
+
+    /**
      * Find domain by name.
      *
      * @param name of domain.

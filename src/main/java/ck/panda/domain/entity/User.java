@@ -168,13 +168,13 @@ public class User implements Serializable {
     /** Define user type. */
     public enum UserType {
         /** Define type constant. */
-        USER, ROOT_ADMIN, DOMAIN_ADMIN;
+        DOMAIN_ADMIN, ROOT_ADMIN, USER;
     }
 
     /** Define status. */
     public enum Status {
         /** Define status constant. */
-        ACTIVE, DELETED, BLOCKED, ENABLED, DISABLED;
+        ACTIVE, BLOCKED, DELETED, DISABLED, ENABLED;
     }
 
     /**

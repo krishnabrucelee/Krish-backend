@@ -43,10 +43,10 @@ public class SSHKey implements Serializable {
 
     /** Status enum type used to list the status values. */
     public enum Status {
-        /** SSH Key status as Enabled. */
-        ENABLED,
         /** SSH Key status as Disabled. */
-        DISABLED
+        DISABLED,
+        /** SSH Key status as Enabled. */
+        ENABLED
     }
 
     /** Id of the SSH key. */

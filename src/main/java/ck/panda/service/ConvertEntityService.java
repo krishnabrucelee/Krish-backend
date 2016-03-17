@@ -36,6 +36,7 @@ import ck.panda.domain.entity.SnapshotPolicy;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.CloudStackServer;
+import ck.panda.util.audit.DateTimeService;
 import ck.panda.domain.entity.SSHKey;
 
 /**
@@ -81,6 +82,14 @@ public class ConvertEntityService {
     /** Storage Offering Service for listing storage offering. */
     @Autowired
     private StorageOfferingService storageService;
+
+    /** Date and time service reference. */
+    @Autowired
+    private DateTimeService dateTimeService;
+
+    /** Websocket service for tracking.*/
+   	@Autowired
+   	private WebsocketService webSocket;
 
     /**
      * NetworkOfferingService for listing network offers in cloudstack server.
@@ -293,6 +302,29 @@ public class ConvertEntityService {
      */
     public Template getTemplateById(Long id) throws Exception {
         return templateService.find(id);
+    }
+
+    /**
+     * Get ssh key by id.
+     *
+     * @param id of ssh key.
+     * @return ssh key.
+     * @throws Exception unhandled exception.
+     */
+    public SSHKey getSSHKeyById(Long id) throws Exception {
+        return sshKeyService.find(id);
+    }
+
+    /**
+     * Get ssh key by name and departmentId.
+     *
+     * @param name of ssh key
+     * @param departmentId of ssh key.
+     * @return ssh key.
+     * @throws Exception unhandled exception.
+     */
+    public SSHKey getSSHKeyByNameAndDepartment(String name, Long departmentId) throws Exception {
+        return sshKeyService.findAllByDepartmentAndKeypairAndIsActive(departmentId, name, true);
     }
 
     /**
@@ -1158,6 +1190,24 @@ public class ConvertEntityService {
      */
     public CloudStackResourceCapacity getCloudStackResourceCapacityService() {
         return this.cloudStackResourceCapacity;
+    }
+
+    /**
+     * Get Date and Time servie object.
+     *
+     * @return Date and time service object
+     */
+    public DateTimeService getTimeService() {
+        return this.dateTimeService;
+    }
+
+    /**
+     * Get Websocket server object.
+     *
+     * @return  Websocket server object.
+     */
+    public WebsocketService getWebsocketService() {
+        return this.webSocket;
     }
 
     /**

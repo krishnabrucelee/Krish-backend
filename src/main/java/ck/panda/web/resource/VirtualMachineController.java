@@ -48,14 +48,6 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     @Autowired
     private TokenDetails tokenDetails;
 
-    /** Cloud stack server service. */
-    @Autowired
-    private CloudStackServer cloudStackServer;
-
-    /** Service reference to syncService. */
-    @Autowired
-    private SyncService syncService;
-
     /** console proxy reference. */
     @Value(value = "${console.proxy}")
     private String consoleProxy;
@@ -67,7 +59,7 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     @Override
     public VmInstance create(@RequestBody VmInstance vminstance) throws Exception {
         vminstance.setSyncFlag(true);
-        return virtualmachineservice.save(vminstance);
+        return virtualmachineservice.saveVmInstance(vminstance, Long.valueOf(tokenDetails.getTokenDetails("id")));
     }
 
     @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing Virtual Machine.", response = VmInstance.class)
@@ -93,7 +85,7 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, VmInstance.class);
-        Page<VmInstance> pageResponse = virtualmachineservice.findAllBySort(page, Status.EXPUNGING);;
+        Page<VmInstance> pageResponse = virtualmachineservice.findAllBySort(page, Status.EXPUNGING);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
@@ -156,7 +148,7 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<VmInstance> getVmList() throws Exception {
-        return virtualmachineservice.findAll();
+        return virtualmachineservice.findByVmStatus(Status.EXPUNGING);
     }
 
     /**
@@ -218,8 +210,6 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     @ResponseBody
     public String getVNC(@RequestBody VmInstance vminstance) throws Exception {
         // TODO optimize/refactor this console code after completion of Kanaka NoVNC configuration.
-        syncService.init(cloudStackServer);
-        syncService.syncInstances();
         String token = null;
         VmInstance persistInstance = virtualmachineservice.find(vminstance.getId());
         String hostUUID = persistInstance.getHost().getUuid(); // VM's the host's UUID
@@ -294,6 +284,7 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
      *
      * @param sortBy asc/desc
      * @param domainId domain id of vm.
+     * @param searchText search text.
      * @param status status of vm.
      * @param range pagination range.
      * @param limit per page limit.
@@ -306,15 +297,15 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<VmInstance> listVmByDomainId(@RequestParam String sortBy, @RequestParam Long domainId, @RequestParam String status,
-            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+    public List<VmInstance> listVmByDomainId(@RequestParam String sortBy, @RequestParam Long domainId, @RequestParam String searchText,
+            @RequestParam String status, @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, VmInstance.class);
         Page<VmInstance> pageResponse = null;
         if (!status.equals("Expunging")) {
-            pageResponse = virtualmachineservice.findAllByStatusAndDomain(page, Status.valueOf(status.toUpperCase()), domainId);
+            pageResponse = virtualmachineservice.findAllByStatusAndDomain(page, Status.valueOf(status.toUpperCase()), domainId, searchText, Long.valueOf(tokenDetails.getTokenDetails("id")));
         } else {
-            pageResponse = virtualmachineservice.findAllByDomainId(domainId, page);
+            pageResponse = virtualmachineservice.findAllByDomainId(domainId, page, searchText, Long.valueOf(tokenDetails.getTokenDetails("id")));
         }
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
@@ -324,19 +315,33 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
      * Get the vm counts for stopped, running and total count based on the domain filter.
      *
      * @param domainId domain id of vm.
+     * @param searchText search text.
      * @return vm count.
      * @throws Exception unhandled errors.
      */
     @RequestMapping(value = "/vmCountsByDomain", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public String getVmCounts(@RequestParam("domainId") Long domainId) throws Exception {
-        Integer vmCount = virtualmachineservice.findAllByDomain(domainId).size();
-        Integer runningVmCount = virtualmachineservice.findCountByStatusAndDomain(Status.RUNNING, domainId);
-        Integer stoppedVmCount = virtualmachineservice.findCountByStatusAndDomain(Status.STOPPED, domainId);
+    public String getVmCounts(@RequestParam("domainId") Long domainId, @RequestParam String searchText) throws Exception {
+        Integer vmCount = virtualmachineservice.findAllByDomain(domainId, Long.valueOf(tokenDetails.getTokenDetails("id")), searchText).size();
+        Integer runningVmCount = virtualmachineservice.findCountByStatusAndDomain(Status.RUNNING, domainId, Long.valueOf(tokenDetails.getTokenDetails("id")), searchText);
+        Integer stoppedVmCount = virtualmachineservice.findCountByStatusAndDomain(Status.STOPPED, domainId, Long.valueOf(tokenDetails.getTokenDetails("id")), searchText);
         return "{\"runningVmCount\":" + runningVmCount + ",\"stoppedVmCount\":" + stoppedVmCount + ",\"totalCount\":"
         + vmCount + "}";
     }
 
+    /**
+     * Reset SSH Key in created instance.
+     *
+     * @param vminstance object.
+     * @return instance
+     * @throws Exception if error occurs.
+     */
+    @RequestMapping(value = "/reset", method = RequestMethod.PUT, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected VmInstance resetSSHKey(@RequestBody VmInstance vminstance) throws Exception {
+        return virtualmachineservice.resetSSHKey(vminstance);
+    }
 
 }

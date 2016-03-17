@@ -14,6 +14,8 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import net.sf.ehcache.CacheManager;
+
 /**
  * SimpleCORSFilter to allow cross domain call.
  *
@@ -37,7 +39,10 @@ public class SimpleCORSFilter implements Filter {
         response.setHeader("Access-Control-Allow-Headers",
                 "Origin, Range, x-requested-with, x-auth-token, x-auth-username,x-auth-password, Content-Type, Accept");
         response.setHeader("Access-Control-Expose-Headers", "Rage, Content-Range");
-
+        if (request.getRequestURI().contains("socket")) {
+            request.setAttribute("token", CacheManager.getInstance().getCache("restApiAuthTokenCache").getKeys().get(0));
+         	//request.
+         }
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);
         } else {

@@ -166,20 +166,20 @@ public class Snapshot implements Serializable {
     /** Status for snapshot. */
     public enum Status {
 
+        /** When snapshot gets Allocated . */
+        ALLOCATED,
+
         /** Intial response while creating a snapshot. */
         BACKINGUP,
 
         /** Backed up is when snapshot is created. */
         BACKEDUP,
 
-        /** Ready to create a snapshot. */
-        READY,
-
         /** When snapshot gets destroyed. */
         DESTROYED,
 
-        /** When snapshot gets Allocated . */
-        ALLOCATED
+        /** Ready to create a snapshot. */
+        READY
     }
 
 

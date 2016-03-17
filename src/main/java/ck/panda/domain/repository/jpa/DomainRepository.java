@@ -24,6 +24,16 @@ public interface DomainRepository extends PagingAndSortingRepository<Domain, Lon
     Domain findByUUID(@Param("uuid") String uuid);
 
     /**
+     * Find domain by uuid.
+     *
+     * @param uuid uuid of domain.
+     * @param isActive get the Domain list based on active/inactive status.
+     * @return domain object.
+     */
+    @Query(value = "SELECT domain FROM Domain domain WHERE domain.uuid = :uuid AND domain.isActive = :isActive")
+    Domain findByUUIDAndIsActive(@Param("uuid") String uuid, @Param("isActive") Boolean isActive);
+
+    /**
      * Find domain name to avoid duplications.
      *
      * @param domainName for login check
