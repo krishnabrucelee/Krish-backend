@@ -88,6 +88,7 @@ public class MiscellaneousCost {
 
     /** Status enum type used to list the status values. */
     public enum Status {
+
         /** Template status as ACTIVE. */
         ACTIVE,
         /** Template status as INACTIVE. */
@@ -97,17 +98,17 @@ public class MiscellaneousCost {
     /** Types of the cost .*/
     public enum CostTypes {
 
-        /** IpAddress cost .*/
-        IPADDRESS,
-
         /** Template cost .*/
         TEMPLATE,
 
-        /** Vm snapshot cost. */
-        VMSNAPSHOT,
-
         /** Volume snapshot cost .*/
-        VOLUMESNAPSHOT
+        VOLUMESNAPSHOT,
+
+        /** IpAddress cost .*/
+        IPADDRESS,
+
+        /** Vm snapshot cost. */
+        VMSNAPSHOT
 
     }
 
