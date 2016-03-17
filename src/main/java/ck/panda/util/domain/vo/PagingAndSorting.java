@@ -52,7 +52,7 @@ public class PagingAndSorting {
 
     /**
      * Get the pageNumber.
-     * 
+     *
      * @return pageNumber
      */
     public Integer getPageNumber() {
@@ -61,7 +61,7 @@ public class PagingAndSorting {
 
     /**
      * Get the pageSize.
-     * 
+     *
      * @return pageSize
      */
     public Integer getPageSize() {
@@ -70,7 +70,7 @@ public class PagingAndSorting {
 
     /**
      * Get the sortField.
-     * 
+     *
      * @return sortField
      */
     public String getSortField() {
@@ -79,7 +79,7 @@ public class PagingAndSorting {
 
     /**
      * Get the sortDirection.
-     * 
+     *
      * @return sortDirection
      */
     public String getSortDirection() {
@@ -88,7 +88,7 @@ public class PagingAndSorting {
 
     /**
      * Converts to Spring PageRequest object.
-     * 
+     *
      * @return PageRequest
      */
     public PageRequest toPageRequest() {
