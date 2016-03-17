@@ -368,9 +368,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
              storageOfferingcost = new StorageOfferingCost();
              storageOfferingcost.setStorageId(storage.getId());
              storageOfferingcost.setCostGbPerMonth(cost.getCostGbPerMonth());
-             storageOfferingcost.setCostIopsPerMonth(cost.getCostIopsPerMonth());
              storageOfferingcost.setCostPerMonth(cost.getCostPerMonth());
-             storageOfferingcost.setCostPerIops(cost.getCostPerIops());
              storageOfferingcost.setTotalCost(totalCost);
              storageOfferingcost = storageCostService.save(storageOfferingcost);
              storageCost.add(storageOfferingcost);

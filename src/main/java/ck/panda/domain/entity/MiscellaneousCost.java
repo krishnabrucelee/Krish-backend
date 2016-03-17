@@ -63,7 +63,7 @@ public class MiscellaneousCost {
     private ZonedDateTime updatedDateTime;
 
     /** Cost of the template. */
-    @Column(name = "template_cost")
+    @Column(name = "cost", columnDefinition = "Decimal(10,4)")
     private Double costperGB;
 
     /** Version attribute to handle optimistic locking. */
@@ -77,6 +77,9 @@ public class MiscellaneousCost {
 
     @Column(name = "cost_type")
     private CostTypes costType;
+
+    @Column(name = "unit_type")
+    private UnitType unitType;
 
     /** Template current state. */
     @Column(name = "status")
@@ -103,9 +106,18 @@ public class MiscellaneousCost {
         /** Vm snapshot cost. */
         VMSNAPSHOT,
 
-        /** Volume cost .*/
-        VOLUME
+        /** Volume snapshot cost .*/
+        VOLUMESNAPSHOT
 
+    }
+
+    public enum UnitType {
+
+        /** GB unit */
+        GB,
+
+        /** Ip Address per unit */
+        IP
     }
     /**
      * Get the id.
@@ -299,4 +311,17 @@ public class MiscellaneousCost {
         this.isActive = isActive;
     }
 
-}
+    /**
+     * @return the unitType
+     */
+    public UnitType getUnitType() {
+        return unitType;
+    }
+
+    /**
+     * @param unitType the unitType to set
+     */
+    public void setUnitType(UnitType unitType) {
+        this.unitType = unitType;
+    }
+ }
