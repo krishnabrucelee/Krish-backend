@@ -149,7 +149,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     Page<User> findAllUserByStatus(Pageable pageable,@Param("status") Status status);
 
     /**
-     * find all the user by domain in user panel.
+     * Find all the user by domain in user panel.
      *
      * @param domainId domain id of the user.
      * @param pageable pagination information.
@@ -159,7 +159,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     Page<User> findAllByUserPanelAndDomainId(@Param("domainId") Long domainId, @Param("status") Status deleted, Pageable pageable);
 
     /**
-     * find all the user by domain.
+     * Find all the user by domain.
      *
      * @param domainId domain id of the user.
      * @param pageable pagination information.
