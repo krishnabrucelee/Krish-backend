@@ -299,7 +299,7 @@ public class TemplateServiceImpl implements TemplateService {
             return csPrepareTemplate((List<Template>) templateRepository.findByTemplateAndFeature(ALL_TEMPLATE,
                    TemplateType.SYSTEM, Status.ACTIVE, true));
         }
-        return csPrepareTemplate(templateRepository.findByTemplateAndUserType(ALL_TEMPLATE, TemplateType.SYSTEM, Status.ACTIVE, true, UserType.ROOT_ADMIN, user.getDomainId()));
+        return csPrepareTemplate(templateRepository.findAllTemplateByDomainIdUserTypeAndIsActiveStatus(ALL_TEMPLATE, TemplateType.SYSTEM, Status.ACTIVE, true, UserType.ROOT_ADMIN, user.getDomainId()));
     }
 
     @Override
