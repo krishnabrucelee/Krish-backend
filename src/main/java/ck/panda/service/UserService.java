@@ -191,6 +191,16 @@ public interface UserService extends CRUDService<User> {
     User disableUser(Long userId) throws Exception;
 
     /**
+     * Find all the user by domain in user panel.
+     *
+     * @param domainId domain id of the user.
+     * @param pagingAndSorting paging and sorting information.
+     * @return list of user.
+     * @throws Exception if error occurs.
+     */
+    Page<User> findAllByUserPanelAndDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
+
+    /**
      * Find all the user by domain.
      *
      * @param domainId domain id of the user.

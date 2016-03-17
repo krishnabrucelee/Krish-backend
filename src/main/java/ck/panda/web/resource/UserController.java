@@ -42,6 +42,9 @@ public class UserController extends CRUDController<User> implements ApiControlle
     @Autowired
     private TokenDetails tokenDetails;
 
+    /** Constant for panda user panel. */
+    public static final String PANDA_USER_PANEL = "pandaUserPanel";
+
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new User.", response = User.class)
     @Override
     public User create(@RequestBody User user) throws Exception {
@@ -301,13 +304,19 @@ public class UserController extends CRUDController<User> implements ApiControlle
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<User> listUserByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
+    public List<User> listUserByDomainId(@RequestParam String sortBy, @RequestParam Long domainId, @RequestParam String flag,
             @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, User.class);
-        Page<User> pageResponse = userService.findAllByDomainId(domainId, page);
-        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
-        return pageResponse.getContent();
+        if (flag.equals(PANDA_USER_PANEL)) {
+            Page<User> pageResponse = userService.findAllByUserPanelAndDomainId(domainId, page);
+            response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+            return pageResponse.getContent();
+        } else {
+            Page<User> pageResponse = userService.findAllByDomainId(domainId, page);
+            response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+            return pageResponse.getContent();
+        }
     }
 
   }

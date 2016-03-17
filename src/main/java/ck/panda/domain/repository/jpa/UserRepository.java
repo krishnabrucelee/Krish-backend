@@ -2,6 +2,7 @@ package ck.panda.domain.repository.jpa;
 
 import java.util.List;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -148,7 +149,17 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     Page<User> findAllUserByStatus(Pageable pageable,@Param("status") Status status);
 
     /**
-     * find all the user by domain.
+     * Find all the user by domain in user panel.
+     *
+     * @param domainId domain id of the user.
+     * @param pageable pagination information.
+     * @return list of user.
+     */
+    @Query(value = "select user from User user LEFT JOIN user.role where user.domainId =:domainId and user.status <> :status")
+    Page<User> findAllByUserPanelAndDomainId(@Param("domainId") Long domainId, @Param("status") Status deleted, Pageable pageable);
+
+    /**
+     * Find all the user by domain.
      *
      * @param domainId domain id of the user.
      * @param pageable pagination information.
@@ -180,4 +191,5 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
             + "AND user.type= :type")
     List<User> findByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive,@Param("departmentId") Long departmentId,
             @Param("type") UserType type);
+
 }
