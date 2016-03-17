@@ -97,23 +97,18 @@ public class ComputeOfferingCostServiceImpl implements ComputeOfferingCostServic
     public Double totalcost(ComputeOfferingCost computecost) throws Exception {
             Double instanceRunningCostVcpu = JsonUtil.getDoubleValue(computecost.getInstanceRunningCostVcpu());
             Double instanceRunningCostMemory = JsonUtil.getDoubleValue(computecost.getInstanceRunningCostMemory());
-            Double instanceRunningCostPerIops = JsonUtil.getDoubleValue(computecost.getInstanceRunningCostPerIops());
             Double instanceRunningCostPerMB =  JsonUtil.getDoubleValue(computecost.getInstanceRunningCostPerMB());
             Double instanceRunningCostPerVcpu = JsonUtil.getDoubleValue(computecost.getInstanceRunningCostPerVcpu());
-            Double instanceRunningCostIops = JsonUtil.getDoubleValue(computecost.getInstanceStoppageCostIops());
             Double instanceRunningCostPerMhz = JsonUtil.getDoubleValue(computecost.getInstanceRunningCostPerMhz());
             Double instanceStoppageCostPerMhz = JsonUtil.getDoubleValue(computecost.getInstanceStoppageCostPerMhz());
             Double instanceStoppageCostVcpu = JsonUtil.getDoubleValue(computecost.getInstanceStoppageCostVcpu());
             Double instanceStoppageCostMemory = JsonUtil.getDoubleValue(computecost.getInstanceStoppageCostMemory());
-            Double instanceStoppageCostIops = JsonUtil.getDoubleValue(computecost.getInstanceStoppageCostIops());
-            Double instanceStoppageCostPerIops = JsonUtil.getDoubleValue(computecost.getInstanceStoppageCostPerIops());
             Double instanceStoppageCostPerVcpu = JsonUtil.getDoubleValue(computecost.getInstanceStoppageCostPerVcpu());
             Double instanceStoppageCostPerMB =  JsonUtil.getDoubleValue(computecost.getInstanceStoppageCostPerMB());
             Double setUpCost = JsonUtil.getDoubleValue(computecost.getSetupCost());
-            Double total = instanceRunningCostVcpu + instanceRunningCostMemory + instanceRunningCostPerIops
-                + instanceRunningCostPerMB + instanceRunningCostPerVcpu + instanceRunningCostIops + instanceRunningCostPerMhz
-                + instanceStoppageCostPerMhz + instanceStoppageCostVcpu + instanceStoppageCostMemory + instanceStoppageCostIops
-                + instanceStoppageCostPerIops + instanceStoppageCostPerVcpu + instanceStoppageCostPerMB + setUpCost;
+            Double total = instanceRunningCostVcpu + instanceRunningCostMemory +
+                + instanceRunningCostPerMB + instanceRunningCostPerVcpu +  instanceRunningCostPerMhz
+                + instanceStoppageCostPerMhz + instanceStoppageCostVcpu + instanceStoppageCostMemory + instanceStoppageCostPerVcpu + instanceStoppageCostPerMB + setUpCost;
             return total;
     }
 

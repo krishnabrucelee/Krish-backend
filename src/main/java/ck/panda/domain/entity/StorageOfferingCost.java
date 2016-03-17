@@ -59,26 +59,14 @@ public class StorageOfferingCost implements Serializable {
     /**
      * Cost per month usage.
      */
-    @Column(name = "cost_per_hour_disk")
+    @Column(name = "non_custom_disk")
     private Double costPerMonth;
 
     /**
      * Cost for 1 Gb per month usage.
      */
-    @Column(name = "cost_gb_per_month")
+    @Column(name = "custom_disk")
     private Double costGbPerMonth;
-
-    /**
-     * Cost per month usage.
-     */
-    @Column(name = "cost_per_hour_iops")
-    private Double costPerIops;
-
-    /**
-     * Cost for 1 Iops per month usage.
-     */
-    @Column(name = "cost_iops_per_month")
-    private Double costIopsPerMonth;
 
     /** Status attribute to verify status of the Storage offering. */
     @Column(name = "status")
@@ -189,42 +177,6 @@ public class StorageOfferingCost implements Serializable {
      */
     public void setCostGbPerMonth(Double costGbPerMonth) {
         this.costGbPerMonth = costGbPerMonth;
-    }
-
-    /**
-     * Get the cost per iops of the Storage offering cost.
-     *
-     * @return the costPerIops of the Storage offering cost.
-     */
-    public Double getCostPerIops() {
-        return costPerIops;
-    }
-
-    /**
-     * Set the cost per iops of the Storage offering cost.
-     *
-     * @param costPerIops the costPerIops to set
-     */
-    public void setCostPerIops(Double costPerIops) {
-        this.costPerIops = costPerIops;
-    }
-
-    /**
-     * Get the cost iops per month of the Storage offering cost.
-     *
-     * @return the costIopsPerMonth of the Storage offering cost.
-     */
-    public Double getCostIopsPerMonth() {
-        return costIopsPerMonth;
-    }
-
-    /**
-     * Set the cost iops per month of the Storage offering cost.
-     *
-     * @param costIopsPerMonth the costIopsPerMonth to set
-     */
-    public void setCostIopsPerMonth(Double costIopsPerMonth) {
-        this.costIopsPerMonth = costIopsPerMonth;
     }
 
     /**

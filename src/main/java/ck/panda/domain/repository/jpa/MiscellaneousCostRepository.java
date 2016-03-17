@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.MiscellaneousCost;
+import ck.panda.domain.entity.MiscellaneousCost.CostTypes;
 
 /**
  * MiscellaneousCost interface that extends PagingAndSortingRepository along with sorting and pagination.
@@ -17,6 +18,9 @@ public interface MiscellaneousCostRepository extends PagingAndSortingRepository<
 
     @Query(value = "SELECT cost FROM MiscellaneousCost cost WHERE cost.isActive = :isActive")
     List<MiscellaneousCost> findAllByIsActive(@Param("isActive") Boolean isActive);
+
+    @Query(value = "SELECT cost FROM MiscellaneousCost cost WHERE cost.isActive = :isActive AND cost.costType =:type")
+    List<MiscellaneousCost> findByIsActiveAndCostType(@Param("isActive") Boolean isActive,@Param("type") CostTypes type);
 }
 
 

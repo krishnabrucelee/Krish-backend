@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.MiscellaneousCost;
 import ck.panda.domain.entity.MiscellaneousCost.CostTypes;
+import ck.panda.domain.entity.MiscellaneousCost.UnitType;
 import ck.panda.domain.repository.jpa.MiscellaneousCostRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -36,12 +37,47 @@ public class MiscellaneousCostServiceImpl implements MiscellaneousCostService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-                MiscellaneousCost oldCost = costRepo.findByIsActive(true);
-                if(oldCost != null) {
-                 oldCost.setIsActive(false);
-            }
-                cost.setCostType(CostTypes.TEMPLATE);
-                cost.setIsActive(true);
+                if(cost.getCostType() == CostTypes.TEMPLATE) {
+                List<MiscellaneousCost> oldCost = costRepo.findByIsActiveAndCostType(true, CostTypes.TEMPLATE);
+                if (oldCost.size() != 0) {
+                    for(MiscellaneousCost miscellaneous: oldCost) {
+                        miscellaneous.setIsActive(false);
+                    }
+                }
+                        cost.setCostType(CostTypes.TEMPLATE);
+                        cost.setUnitType(UnitType.GB);
+                        cost.setIsActive(true);
+                }
+                if(cost.getCostType() == CostTypes.VMSNAPSHOT) {
+                    List<MiscellaneousCost> oldCost = costRepo.findByIsActiveAndCostType(true, CostTypes.VMSNAPSHOT);
+                        if (oldCost.size() != 0) {
+                            for(MiscellaneousCost miscellaneous: oldCost) {
+                                miscellaneous.setIsActive(false);
+                            }
+                        }    cost.setCostType(CostTypes.VMSNAPSHOT);
+                            cost.setUnitType(UnitType.GB);
+                            cost.setIsActive(true);
+                    }
+                if(cost.getCostType() == CostTypes.IPADDRESS) {
+                    List<MiscellaneousCost> oldCost = costRepo.findByIsActiveAndCostType(true, CostTypes.IPADDRESS);
+                        if (oldCost.size() != 0) {
+                            for(MiscellaneousCost miscellaneous: oldCost) {
+                                miscellaneous.setIsActive(false);
+                            }
+                        }    cost.setCostType(CostTypes.IPADDRESS);
+                             cost.setUnitType(UnitType.IP);
+                            cost.setIsActive(true);
+                    }
+                if(cost.getCostType() == CostTypes.VOLUMESNAPSHOT) {
+                    List<MiscellaneousCost> oldCost = costRepo.findByIsActiveAndCostType(true, CostTypes.VOLUMESNAPSHOT);
+                        if (oldCost.size() != 0) {
+                            for(MiscellaneousCost miscellaneous: oldCost) {
+                                miscellaneous.setIsActive(false);
+                            }
+                        }    cost.setCostType(CostTypes.VOLUMESNAPSHOT);
+                             cost.setUnitType(UnitType.GB);
+                            cost.setIsActive(true);
+                    }
             return costRepo.save(cost);
         }
     }
@@ -86,6 +122,26 @@ public class MiscellaneousCostServiceImpl implements MiscellaneousCostService {
     @Override
     public List<MiscellaneousCost>  findAllByIsActive(Boolean isActive) throws Exception {
         return (List<MiscellaneousCost>)costRepo.findAllByIsActive(true);
+    }
+
+    @Override
+    public List<MiscellaneousCost>  findAllByVmsnapshotType(CostTypes type) throws Exception {
+        return (List<MiscellaneousCost>)costRepo.findByIsActiveAndCostType(true, CostTypes.VMSNAPSHOT);
+    }
+
+    @Override
+    public List<MiscellaneousCost>  findAllByVolumeSnapshotType(CostTypes type) throws Exception {
+        return (List<MiscellaneousCost>)costRepo.findByIsActiveAndCostType(true, CostTypes.VOLUMESNAPSHOT);
+    }
+
+    @Override
+    public List<MiscellaneousCost>  findAllByIpCostType(CostTypes type) throws Exception {
+        return (List<MiscellaneousCost>)costRepo.findByIsActiveAndCostType(true, CostTypes.IPADDRESS);
+    }
+
+    @Override
+    public List<MiscellaneousCost>  findAllByTemplateCost(CostTypes type) throws Exception {
+        return (List<MiscellaneousCost>)costRepo.findByIsActiveAndCostType(true, CostTypes.TEMPLATE);
     }
 }
 

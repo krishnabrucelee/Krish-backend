@@ -38,7 +38,7 @@ public class TemplateCost implements Serializable {
     private Long templateCostId;
 
     /** Cost of the template. */
-    @Column(name = "cost")
+    @Column(name = "cost", columnDefinition = "Decimal(10,4) default 0")
     private Double cost;
 
     /** Version attribute to handle optimistic locking. */

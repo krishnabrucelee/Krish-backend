@@ -20,6 +20,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.MiscellaneousCost;
+import ck.panda.domain.entity.MiscellaneousCost.CostTypes;
 import ck.panda.service.MiscellaneousCostService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -77,6 +78,34 @@ public class MiscellaneousController extends CRUDController<MiscellaneousCost> i
     @ResponseBody
     protected List<MiscellaneousCost> getSearch() throws Exception {
         return costService.findAllByIsActive(true);
+    }
+
+    @RequestMapping(value = "listtemplate", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<MiscellaneousCost> findTemplateCost() throws Exception {
+        return costService.findAllByTemplateCost(CostTypes.TEMPLATE);
+    }
+
+    @RequestMapping(value = "listvmsnapshot", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<MiscellaneousCost> getVmSnapshotCost() throws Exception {
+        return costService.findAllByVmsnapshotType(CostTypes.VMSNAPSHOT);
+    }
+
+    @RequestMapping(value = "listvolumesnapshot", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<MiscellaneousCost> findVolumeSnapshotCost() throws Exception {
+        return costService.findAllByVolumeSnapshotType(CostTypes.VOLUMESNAPSHOT);
+    }
+
+    @RequestMapping(value = "listbyipcost", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<MiscellaneousCost> findIpAddressCost() throws Exception {
+        return costService.findAllByIpCostType(CostTypes.IPADDRESS);
     }
 
     /**

@@ -351,16 +351,12 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
         if (computeOfferingcost == null) {
              computeOfferingcost = new ComputeOfferingCost();
              computeOfferingcost.setComputeId(compute.getId());
-             computeOfferingcost.setInstanceRunningCostIops(cost.getInstanceRunningCostIops());
              computeOfferingcost.setInstanceRunningCostMemory(cost.getInstanceRunningCostMemory());
              computeOfferingcost.setInstanceRunningCostVcpu(cost.getInstanceRunningCostVcpu());
              computeOfferingcost.setInstanceStoppageCostVcpu(cost.getInstanceStoppageCostVcpu());
              computeOfferingcost.setInstanceStoppageCostMemory(cost.getInstanceStoppageCostMemory());
-             computeOfferingcost.setInstanceStoppageCostIops(cost.getInstanceStoppageCostIops());
              computeOfferingcost.setInstanceRunningCostPerMB(cost.getInstanceRunningCostPerMB());
              computeOfferingcost.setInstanceRunningCostPerVcpu(cost.getInstanceRunningCostPerVcpu());
-             computeOfferingcost.setInstanceRunningCostPerIops(cost.getInstanceRunningCostPerIops());
-             computeOfferingcost.setInstanceStoppageCostPerIops(cost.getInstanceStoppageCostPerIops());
              computeOfferingcost.setInstanceStoppageCostPerMB(cost.getInstanceStoppageCostPerMB());
              computeOfferingcost.setInstanceStoppageCostPerVcpu(cost.getInstanceStoppageCostPerVcpu());
              computeOfferingcost.setInstanceStoppageCostPerMhz(cost.getInstanceStoppageCostPerMhz());

@@ -58,11 +58,9 @@ public class StorageOfferingCostServiceImpl implements StorageOfferingCostServic
 
     @Override
     public Double totalcost(StorageOfferingCost storageCost) throws Exception {
-            Double instanceStoppageCostIops = JsonUtil.getDoubleValue(storageCost.getCostPerIops());
-            Double instanceStoppageCostPerIops = JsonUtil.getDoubleValue(storageCost.getCostPerMonth());
             Double instanceStoppageCostforGB = JsonUtil.getDoubleValue(storageCost.getCostGbPerMonth());
             Double instanceStoppageCostperGB = JsonUtil.getDoubleValue(storageCost.getCostPerMonth());
-            Double total = instanceStoppageCostIops + instanceStoppageCostPerIops + instanceStoppageCostforGB + instanceStoppageCostperGB;
+            Double total = instanceStoppageCostforGB + instanceStoppageCostperGB;
             return total;
     }
 
