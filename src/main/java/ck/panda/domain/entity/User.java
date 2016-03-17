@@ -710,20 +710,20 @@ public class User implements Serializable {
 
         User user = new User();
         user.setSyncFlag(false);
-        user.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-        user.setUserName(JsonUtil.getStringValue(jsonObject, "username"));
-        user.setFirstName(JsonUtil.getStringValue(jsonObject, "firstname"));
-        user.setLastName(JsonUtil.getStringValue(jsonObject, "lastname"));
-        user.setEmail(JsonUtil.getStringValue(jsonObject, "email"));
-        if (JsonUtil.getIntegerValue(jsonObject, "accounttype") == 0) {
-            user.setType(UserType.USER);
-        } else if (JsonUtil.getIntegerValue(jsonObject, "accounttype") == 1) {
+        user.setUuid(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ID));
+        user.setUserName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_USER_NAME));
+        user.setFirstName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_FIRST_NAME));
+        user.setLastName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_LAST_NAME));
+        user.setEmail(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_EMAIL));
+        if (JsonUtil.getIntegerValue(jsonObject, CloudStackConstants.CS_ACCOUNT_TYPE) == 2) {
+            user.setType(UserType.DOMAIN_ADMIN);
+        } else if (JsonUtil.getIntegerValue(jsonObject, CloudStackConstants.CS_ACCOUNT_TYPE) == 1) {
             user.setType(UserType.ROOT_ADMIN);
         } else {
-            user.setType(UserType.DOMAIN_ADMIN);
+            user.setType(UserType.USER);
         }
-        user.setTransDomainId(JsonUtil.getStringValue(jsonObject, "domainid"));
-        user.setTransDepartment(JsonUtil.getStringValue(jsonObject, "accountid"));
+        user.setTransDomainId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DOMAIN_ID));
+        user.setTransDepartment(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ACCOUNT_ID));
         user.setIsActive(true);
         user.setStatus(Status.valueOf(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_STATE).toUpperCase()));
         return user;
