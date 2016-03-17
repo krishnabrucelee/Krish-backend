@@ -114,7 +114,6 @@ public class NicServiceImpl implements NicService {
             JSONObject addNicResponse = new JSONObject(createNicResponse)
                     .getJSONObject("addnictovirtualmachineresponse");
             //TODO: temporarily adding thread to get asynchronous job status. This will be removed when web socket is done.
-            Thread.sleep(6000);
             if (addNicResponse.has("jobid")) {
                 String jobResponse = cloudStackInstanceService.queryAsyncJobResult(addNicResponse.getString("jobid"),
                         "json");
@@ -223,7 +222,6 @@ public class NicServiceImpl implements NicService {
             JSONObject defaultNicResponse = new JSONObject(updateNicResponse)
                     .getJSONObject("updatedefaultnicforvirtualmachineresponse");
             //TODO: temporarily adding thread to get asynchronous job status. This will be removed when web socket is done.
-            Thread.sleep(6000);
             if (defaultNicResponse.has("jobid")) {
                 String jobResponse = cloudStackInstanceService
                         .queryAsyncJobResult(defaultNicResponse.getString("jobid"), "json");
@@ -296,7 +294,6 @@ public class NicServiceImpl implements NicService {
             JSONObject deleteNicResponse = new JSONObject(removeNicResponse)
                     .getJSONObject(CS_REMOVE_NIC);
             //TODO: temporarily adding thread to get asynchronous job status. This will be removed when web socket is done.
-            Thread.sleep(6000);
             if (deleteNicResponse.has(CloudStackConstants.CS_JOB_ID)) {
                 String jobResponse = cloudStackInstanceService.queryAsyncJobResult(deleteNicResponse.getString(CloudStackConstants.CS_JOB_ID),
                         CloudStackConstants.JSON);
@@ -435,7 +432,6 @@ public class NicServiceImpl implements NicService {
              errors = this.validateEvent(errors, csacquireIPResponseJSON.getString(CloudStackConstants.CS_ERROR_TEXT));
              throw new ApplicationException(errors);
          } else if (csacquireIPResponseJSON.has(CloudStackConstants.CS_JOB_ID)) {
-             Thread.sleep(5000);
              String jobResponse = cloudStackNicService.AcquireIpJobResult(csacquireIPResponseJSON.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
              JSONObject jobresult = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE).getJSONObject(CloudStackConstants.CS_JOB_RESULT);
              JSONObject secondaryIP = jobresult.getJSONObject(CS_SECONDARYIP);

@@ -767,7 +767,6 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         String scaleVm = cloudStackInstanceService.scaleVirtualMachine(vmInstance.getUuid(),
                 vmInstance.getComputeOffering().getUuid(), CloudStackConstants.JSON, optionalMap);
         JSONObject jobId = new JSONObject(scaleVm).getJSONObject(CloudStackConstants.SCALE_VM_RESPONSE);
-        Thread.sleep(2000);
         if (jobId.has(CloudStackConstants.CS_ERROR_CODE)) {
             errors = this.validateEvent(errors, jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
             throw new ApplicationException(errors);
@@ -1039,8 +1038,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     }
 
     @Override
-    public List<VmInstance> findByVmStatus(Status status) throws Exception {
-        return virtualmachinerepository.findAllByExceptStatus(status);
+    public List<VmInstance> findByVmStatus(List<Status> status, Long userId) throws Exception {
+    	User user = convertEntityService.getOwnerById(userId);
+        return virtualmachinerepository.findAllByDomainAndExceptInStatus( user.getDomainId(), status);
     }
 
     /**

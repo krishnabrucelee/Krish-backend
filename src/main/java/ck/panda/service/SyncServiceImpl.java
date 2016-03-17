@@ -1320,6 +1320,10 @@ public class SyncServiceImpl implements SyncService {
                     String encryptedPassword = new String(EncryptionUtil.encrypt(csVm.getPassword(), originalKey));
                     instance.setVncPassword(encryptedPassword);
                 }
+                IpAddress ipAddress = ipService.UpdateIPByNetwork(instance.getNetwork().getUuid());
+				if (ipAddress != null) {
+					instance.setPublicIpAddress(ipAddress.getPublicIpAddress());
+				}
                 // 3.2 If found, update the vm object in app db
                 virtualMachineService.update(instance);
 
@@ -1336,7 +1340,13 @@ public class SyncServiceImpl implements SyncService {
         // and
         // add it to app db
         for (String key : vmMap.keySet()) {
-            virtualMachineService.save(vmMap.get(key));
+            VmInstance instances = virtualMachineService.save(vmMap.get(key));
+        	IpAddress ipAddress = ipService.UpdateIPByNetwork(instances.getNetwork().getUuid());
+			if (ipAddress != null) {
+				instances.setSyncFlag(false);
+				instances.setPublicIpAddress(ipAddress.getPublicIpAddress());
+				virtualMachineService.update(instances);
+			}
         }
     }
 

@@ -60,6 +60,15 @@ public interface IpaddressService extends CRUDService<IpAddress> {
     List<IpAddress> findAllFromCSServer() throws Exception;
 
     /**
+     * Update ipaddress from CloudStack by network id.
+     *
+     * @param networkId network's id.
+     * @return list of ipaddresses.
+     * @throws Exception unhandled errors.
+     */
+    IpAddress UpdateIPByNetwork(String networkId) throws Exception;
+
+    /**
      * Paging and Sorting for displaying more number of elements in list.
      *
      * @param pagingAndSorting sortable method.

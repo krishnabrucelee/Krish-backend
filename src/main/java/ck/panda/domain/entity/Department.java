@@ -28,6 +28,7 @@ import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.constants.CloudStackConstants;
+import ck.panda.domain.entity.User.UserType;
 import ck.panda.util.JsonUtil;
 
 /**

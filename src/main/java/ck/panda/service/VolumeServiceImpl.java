@@ -688,17 +688,19 @@ public class VolumeServiceImpl implements VolumeService {
             } else {
                 volume.setUuid((String) jobId.get(CloudStackConstants.CS_ID));
                 if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
-                    Thread.sleep(5000);
                     config.setUserServer();
                     String jobResponse = csVolumeService.volumeJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
                             CloudStackConstants.JSON);
                     JSONObject jobresult = new JSONObject(jobResponse)
                             .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
-                    if (jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
-                            .has(CloudStackConstants.CS_ERROR_CODE)) {
-                        errors = this.validateEvent(errors, jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
-                                .getString(CloudStackConstants.CS_ERROR_TEXT));
-                    }
+					if (jobresult.has(CloudStackConstants.CS_JOB_RESULT)) {
+						if (jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
+								.has(CloudStackConstants.CS_ERROR_CODE)) {
+							errors = this.validateEvent(errors,
+									jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
+											.getString(CloudStackConstants.CS_ERROR_TEXT));
+						}
+					}
                     if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
                             .equals(CloudStackConstants.PROGRESS_JOB_STATUS)) {
                         volume.setStatus(Status.valueOf(EventTypes.ALLOCATED));
@@ -809,23 +811,26 @@ public class VolumeServiceImpl implements VolumeService {
                 volume.setVmInstanceId(volume.getVmInstance().getId());
             }
             if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
-                Thread.sleep(10000);
                 config.setUserServer();
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
                         CloudStackConstants.JSON);
                 JSONObject jobresult = new JSONObject(jobResponse)
                         .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
-                if (jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT).has(CloudStackConstants.CS_ERROR_CODE)) {
-                    errors = this.validateEvent(errors, jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
-                            .getString(CloudStackConstants.CS_ERROR_TEXT));
-                    throw new ApplicationException(errors);
-                }
-                if (jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT).has(CS_VOLUME)) {
-                    volume.setUuid((String) jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
-                            .getJSONObject(CS_VOLUME).get(CloudStackConstants.CS_ID));
-                    volume.setVmInstanceId(volume.getVmInstanceId());
-                    volume.setStatus(Status.READY);
-                }
+				if (jobresult.has(CloudStackConstants.CS_JOB_RESULT)) {
+					if (jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
+							.has(CloudStackConstants.CS_ERROR_CODE)) {
+						errors = this.validateEvent(errors, jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
+								.getString(CloudStackConstants.CS_ERROR_TEXT));
+						throw new ApplicationException(errors);
+					}
+					if (jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT).has(CS_VOLUME)) {
+						volume.setUuid((String) jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
+								.getJSONObject(CS_VOLUME).get(CloudStackConstants.CS_ID));
+						volume.setVmInstanceId(volume.getVmInstanceId());
+						volume.setStatus(Status.READY);
+					}
+
+				}
                 if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
                         .equals(CloudStackConstants.PROGRESS_JOB_STATUS)) {
                     volume.setStatus(Status.READY);
@@ -858,21 +863,23 @@ public class VolumeServiceImpl implements VolumeService {
         } else {
             volume.setVmInstanceId(null);
             if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
-                Thread.sleep(5000);
                 config.setUserServer();
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
                         CloudStackConstants.JSON);
                 JSONObject jobresult = new JSONObject(jobResponse)
                         .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
-                if (jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT).has(CloudStackConstants.CS_ERROR_CODE)) {
-                    errors = this.validateEvent(errors, jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
-                            .getString(CloudStackConstants.CS_ERROR_TEXT));
-                    throw new ApplicationException(errors);
-                }
-                if (jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT).has(CS_VOLUME)) {
-                    volume.setUuid((String) jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
-                            .getJSONObject(CS_VOLUME).get(CloudStackConstants.CS_ID));
-                }
+				if (jobresult.has(CloudStackConstants.CS_JOB_RESULT)) {
+					if (jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
+							.has(CloudStackConstants.CS_ERROR_CODE)) {
+						errors = this.validateEvent(errors, jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
+								.getString(CloudStackConstants.CS_ERROR_TEXT));
+						throw new ApplicationException(errors);
+					}
+					if (jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT).has(CS_VOLUME)) {
+						volume.setUuid((String) jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
+								.getJSONObject(CS_VOLUME).get(CloudStackConstants.CS_ID));
+					}
+				}
                 if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
                         .equals(CloudStackConstants.PROGRESS_JOB_STATUS)) {
                     volume.setStatus(Status.READY);
@@ -916,7 +923,6 @@ public class VolumeServiceImpl implements VolumeService {
             throw new ApplicationException(errors);
         } else {
             if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
-                Thread.sleep(5000);
                 config.setUserServer();
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
                         CloudStackConstants.JSON);
@@ -927,10 +933,12 @@ public class VolumeServiceImpl implements VolumeService {
                     volume.setEventMessage(jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
                             .getString(CloudStackConstants.CS_ERROR_TEXT));
                 }
-                if (jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT).has(CS_VOLUME)) {
-                    volume.setUuid((String) jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
-                            .getJSONObject(CS_VOLUME).get(CloudStackConstants.CS_ID));
-                }
+				if (jobresult.has(CloudStackConstants.CS_JOB_RESULT)) {
+					if (jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT).has(CS_VOLUME)) {
+						volume.setUuid((String) jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
+								.getJSONObject(CS_VOLUME).get(CloudStackConstants.CS_ID));
+					}
+				}
                 if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
                         .equals(CloudStackConstants.PROGRESS_JOB_STATUS)) {
                     volume.setStatus(Status.READY);

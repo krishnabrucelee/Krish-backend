@@ -114,7 +114,7 @@ public class DepartmentServiceImpl implements DepartmentService {
                 department.setDomainId(user.getDomainId());
             }
 
-            // Validate department
+            // Validate department.
             this.validateDepartment(department);
             Domain domain = domainService.find(department.getDomainId());
             department.setDomainId(department.getDomainId());
@@ -126,7 +126,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             //TODO : This will be the hardcoded values for the dummy user after creating department it will remove from the cloudstack.
             config.setServer(1L);
             String createAccountResponse = csAccountService.createAccount(
-                    String.valueOf(department.getType().ordinal()), "test@test.com", "first", "last",
+                    String.valueOf(CloudStackConstants.CS_USER_TYPE), "test@test.com", "first", "last",
                     department.getUserName(), "test", CloudStackConstants.JSON, accountMap);
 
             JSONObject createAccountResponseJSON = new JSONObject(createAccountResponse)
