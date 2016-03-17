@@ -965,9 +965,7 @@ public class VolumeServiceImpl implements VolumeService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             }
-            if (volumeRepo.findByUUID(volume.getUuid()).getIsActive()) {
-                return volumeRepo.save(volume);
-            }
+                return volume;
         }
         return volumeRepo.save(volume);
     }
@@ -1025,7 +1023,7 @@ public class VolumeServiceImpl implements VolumeService {
             throw new ApplicationException(errors);
         } else {
             if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
-                Thread.sleep(10000);
+                Thread.sleep(5000);
                 config.setUserServer();
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
                         CloudStackConstants.JSON);

@@ -79,10 +79,10 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void softDelete(@RequestBody Volume volume, @PathVariable(PATH_ID) Long id) throws Exception {
+    public Volume softDelete(@RequestBody Volume volume, @PathVariable(PATH_ID) Long id) throws Exception {
         /** Doing Soft delete from the department table. */
         volume.setIsSyncFlag(true);
-        volumeService.softDelete(volume);
+        return volumeService.softDelete(volume);
     }
 
     @Override
