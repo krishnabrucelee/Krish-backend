@@ -44,7 +44,7 @@ public class SortingUtil {
             if (field.contains("-")) {
                 return field.substring(1,field.length());
             }
-            return field;
+            return field.substring(1,field.length());
         }
 
         return null;
