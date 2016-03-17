@@ -215,7 +215,7 @@ public class Domain implements Serializable {
 
     /**
      * Get the domain status.
-     *
+     *USER
      * @return the status
      */
     public Status getStatus() {
@@ -279,7 +279,7 @@ public class Domain implements Serializable {
     /**
      * Set updated user.
      *
-     * @param updatedBy the updatedBy to set
+     * @param updatedBy the updatedBy to setUSER
      */
     public void setUpdatedBy(Long updatedBy) {
         this.updatedBy = updatedBy;

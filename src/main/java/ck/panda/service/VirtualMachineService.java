@@ -228,10 +228,11 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * Find vm instance by status.
      *
      * @param status of the vm instance
+     * @param userId of user id.
      * @return list of instances
      * @throws Exception if error occurs.
      */
-    List<VmInstance> findByVmStatus(Status status) throws Exception;
+    List<VmInstance> findByVmStatus(List<Status> status, Long userId) throws Exception;
 
     /**
      * Find all vm instances associated with storage offering.

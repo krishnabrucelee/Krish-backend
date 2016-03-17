@@ -98,7 +98,6 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                     vmSnapshot.setOwnerId(vmInstance.getInstanceOwnerId());
                     vmSnapshot.setIsRemoved(false);
                     config.setUserServer();
-                    Thread.sleep(5000);
                     String snapshotResponse = csSnapshotService.vmSnapshotJobResult(cssnapshot.getString(CloudStackConstants.CS_JOB_ID));
                     JSONObject snapshot = new JSONObject(snapshotResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
                     if (snapshot.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.ERROR_JOB_STATUS)) {
@@ -210,7 +209,6 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
             try {
                 String snapshotResponse = csSnapshotService.deleteVMSnapshot(vmSnapshot.getUuid());
                 JSONObject snapshots = new JSONObject(snapshotResponse).getJSONObject(CloudStackConstants.CS_DELETE_VM_SNAPSHOT_RESPONSE);
-                Thread.sleep(3000);
                 if (snapshots.has(CloudStackConstants.CS_JOB_ID)) {
                     String snapshot = csSnapshotService.vmSnapshotJobResult(snapshots.getString(CloudStackConstants.CS_JOB_ID));
                     JSONObject jobresult = new JSONObject(snapshot).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);

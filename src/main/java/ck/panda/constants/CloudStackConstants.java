@@ -208,6 +208,15 @@ public class CloudStackConstants {
     /** Constant for user . */
     public static final String CS_USER = "user";
 
+    /** Constant for user as user type . */
+    public static final String CS_USER_TYPE = "0";
+
+    /** Constant for user as domain admin . */
+    public static final String CS_DOMAIN_TYPE = "2";
+
+    /** Constant for user as root admin . */
+    public static final String CS_ROOT_TYPE = "1";
+
     /** Constant for first name of the user. */
     public static final String CS_FIRST_NAME = "firstname";
 

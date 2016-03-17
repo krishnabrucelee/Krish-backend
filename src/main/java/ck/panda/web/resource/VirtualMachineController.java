@@ -148,7 +148,14 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<VmInstance> getVmList() throws Exception {
-        return virtualmachineservice.findByVmStatus(Status.EXPUNGING);
+    	List<Status> status = new ArrayList<Status>();
+    	status.add(Status.EXPUNGING);
+    	status.add(Status.ERROR);
+    	status.add(Status.DESTROYED);
+    	status.add(Status.STARTING);
+    	status.add(Status.STOPPING);
+    	status.add(Status.EXPUNGED);
+        return virtualmachineservice.findByVmStatus(status, Long.valueOf(tokenDetails.getTokenDetails("id")));
     }
 
     /**

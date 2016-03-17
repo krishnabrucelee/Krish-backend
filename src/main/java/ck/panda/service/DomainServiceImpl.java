@@ -186,7 +186,7 @@ public class DomainServiceImpl implements DomainService {
         department.setType(Department.AccountType.DOMAIN_ADMIN);
         department.setIsActive(true);
         optional.put("domainid", String.valueOf(persistedDomain.getUuid()));
-        String accountresponse = csAccountService.createAccount(String.valueOf(department.getType().ordinal()),
+        String accountresponse = csAccountService.createAccount(String.valueOf(CloudStackConstants.CS_DOMAIN_TYPE),
                 persistedDomain.getEmail(), persistedDomain.getPrimaryFirstName(), persistedDomain.getLastName(),
                 department.getUserName(), persistedDomain.getPassword(), "json", optional);
         JSONObject createAccountResponseJSON = new JSONObject(accountresponse).getJSONObject("createaccountresponse");

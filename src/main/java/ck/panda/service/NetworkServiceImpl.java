@@ -305,10 +305,8 @@ public class NetworkServiceImpl implements NetworkService {
                 config.setUserServer();
                 String updateNetworkResponse = csNetwork.updateNetwork(network.getUuid(), optional, CloudStackConstants.JSON);
                 JSONObject jobId = new JSONObject(updateNetworkResponse).getJSONObject(CS_UPDATE_NETWORK_RESPONSE);
-                Thread.sleep(5000);
                 if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
                     String jobResponse = csNetwork.networkJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
-                    Thread.sleep(2000);
                     JSONObject jobresults = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
                     if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.PROGRESS_JOB_STATUS)) {
                         network.setStatus(Status.ALLOCATED);
@@ -634,7 +632,6 @@ public class NetworkServiceImpl implements NetworkService {
             JSONObject jobId = new JSONObject(restartResponse).getJSONObject(CS_RESTART_NETWORK_RESPONSE);
             // Temporarily added thread, will be removed once web socket is
             // done.
-            Thread.sleep(5000);
             // Checking job id.
             if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
                 String jobResponse = csNetwork.networkJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),

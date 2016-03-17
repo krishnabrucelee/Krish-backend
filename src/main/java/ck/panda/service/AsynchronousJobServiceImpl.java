@@ -560,9 +560,13 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 vmIn = virtualMachineService.update(vmInstance);
             }
             if (eventObject.getString("commandEventType").equals(EventTypes.EVENT_VM_CREATE)) {
-                Errors errors = new Errors(messageSource);
                 this.assignNicTovM(vmIn);
                 this.assignVolumeTovM(vmIn);
+                IpAddress ipAddress = ipService.UpdateIPByNetwork(vmIn.getNetwork().getUuid());
+				if (ipAddress != null) {
+					vmIn.setPublicIpAddress(ipAddress.getPublicIpAddress());
+					vmIn = virtualMachineService.update(vmIn);
+				}
                 if (volumeService.findByInstanceAndVolumeType(vmIn.getId()) != null) {
                     vmIn.setVolumeSize(volumeService.findByInstanceAndVolumeType(vmIn.getId()).getDiskSize());
                     vmIn = virtualMachineService.update(vmIn);

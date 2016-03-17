@@ -158,7 +158,6 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
              if (errors.hasErrors()) {
                     throw new ApplicationException(errors);
              }
-             Thread.sleep(1000);
              if (csloadBalancerResponseJSON.has(CloudStackConstants.CS_JOB_ID)) {
                 String jobResponse = cloudStackLoadBalancerService.loadBalancerJobResult(csloadBalancerResponseJSON.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
                 JSONObject jobresult = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
@@ -304,7 +303,6 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             }
             loadBalancer.setUuid((String) loadBalancerJSON.get("id"));
                 if (loadBalancerJSON.has(CloudStackConstants.CS_JOB_ID)) {
-                   Thread.sleep(2000);
                    String eventObjectResult = cloudStackLoadBalancerService.loadBalancerRuleJobResult(loadBalancerJSON.getString(CloudStackConstants.CS_JOB_ID),
                            CloudStackConstants.JSON);
                    JSONObject jobresult = new JSONObject(eventObjectResult).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);

@@ -287,6 +287,58 @@ public class IpaddressServiceImpl implements IpaddressService {
         return ipList;
     }
 
+
+	@Override
+	public IpAddress UpdateIPByNetwork(String networkId) throws Exception {
+		IpAddress publicIpAddress = new IpAddress();
+        HashMap<String, String> ipMap = new HashMap<String, String>();
+        ipMap.put("allocatedonly", "true");
+        ipMap.put("associatednetworkid", networkId);
+        ipMap.put("issourcenat", "true");
+        configServer.setServer(1L);
+        Network network = convertEntityService.getNetworkById(convertEntityService.getNetworkByUuid(networkId));
+		if (network.getProjectId() != null) {
+			ipMap.put("projectid", network.getProject().getUuid());
+		} else {
+			ipMap.put("listall","true");
+		}
+        // 1. Get the list of ipAddress from CS server using CS connector
+        String response = csipaddressService.listPublicIpAddresses(CloudStackConstants.JSON, ipMap);
+        JSONArray ipAddressListJSON = null;
+        JSONObject responseObject = new JSONObject(response).getJSONObject(CloudStackConstants.CS_PUBLIC_IPADDRESS_RESPONSE);
+        if (responseObject.has(CloudStackConstants.CS_PUBLIC_IP_ADDRESS)) {
+            ipAddressListJSON = responseObject.getJSONArray(CloudStackConstants.CS_PUBLIC_IP_ADDRESS);
+            // 2. Iterate the json list, convert the single json entity to pod
+            for (int i = 0, size = ipAddressListJSON.length(); i < size; i++) {
+                // 2.1 Call convert by passing JSONObject to ipAddress entity
+                // the converted pod entity to list
+                IpAddress ipAddress = IpAddress.convert(ipAddressListJSON.getJSONObject(i));
+                ipAddress.setDomainId(convertEntityService.getDomainId(ipAddress.getTransDomainId()));
+                ipAddress.setZoneId(convertEntityService.getZoneId(ipAddress.getTransZoneId()));
+                ipAddress.setNetworkId(convertEntityService.getNetworkId(ipAddress.getTransNetworkId()));
+                ipAddress.setProjectId(convertEntityService.getProjectId(ipAddress.getTransProjectId()));
+
+                IpAddress ipAddresses = ipRepo.findByUUID(ipAddress.getUuid());
+				if (ipAddresses != null) {
+					ipAddresses.setUuid(ipAddress.getUuid());
+					ipAddresses.setPublicIpAddress(ipAddress.getPublicIpAddress());
+					ipAddresses.setState(ipAddress.getState());
+					ipAddresses.setIsSourcenat(ipAddress.getIsSourcenat());
+					ipAddresses.setIsStaticnat(ipAddress.getIsStaticnat());
+					ipAddresses.setNetworkId(ipAddress.getNetworkId());
+					ipAddresses.setDomainId(ipAddress.getDomainId());
+					ipAddresses.setZoneId(ipAddress.getZoneId());
+					ipAddresses.setProjectId(ipAddress.getProjectId());
+					ipAddresses.setIsActive(true);
+					publicIpAddress = ipRepo.save(ipAddresses);
+				} else {
+					publicIpAddress = ipRepo.save(ipAddress);
+				}
+            }
+        }
+        return publicIpAddress;
+	}
+
     @Override
     public Page<IpAddress> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
         return ipRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
@@ -485,7 +537,6 @@ public class IpaddressServiceImpl implements IpaddressService {
                     }
                 }
                 if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
-                    Thread.sleep(20000);
                     String jobResponse = csipaddressService.associatedJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
                     JSONObject jobresults = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
 
@@ -564,7 +615,6 @@ public class IpaddressServiceImpl implements IpaddressService {
                 }
             }
             if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
-                Thread.sleep(20000);
                 String jobResponse = csipaddressService.associatedJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
                 JSONObject jobresults = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
 
@@ -623,4 +673,5 @@ public class IpaddressServiceImpl implements IpaddressService {
         }
         return ipAddress;
     }
+
 }
