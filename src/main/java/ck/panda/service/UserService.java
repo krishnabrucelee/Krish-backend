@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.SSHKey;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.User.Status;
@@ -17,6 +18,16 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 /** The UserService interface used for to perform CRUD operations and basic API's related business logic. */
 @Service
 public interface UserService extends CRUDService<User> {
+
+    /**
+     * Save the user.
+     *
+     * @param user User entity
+     * @param id of the login user
+     * @return User
+     * @throws Exception error occurs
+     */
+    User save(User user, Long id) throws Exception;
 
     /**
      * To get list of users from cloudstack server.

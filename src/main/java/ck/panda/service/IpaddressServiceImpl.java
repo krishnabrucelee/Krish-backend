@@ -171,7 +171,10 @@ public class IpaddressServiceImpl implements IpaddressService {
                         String jobResponse = csipaddressService
                                 .associatedJobResult(csassociatedIPResponseJSON.getString("jobid"), "json");
                         JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
-                    }
+                        List<IpAddress> iplist = new ArrayList<IpAddress>();
+                        iplist.add(ipRepo.findByUUID(csassociatedIPResponseJSON.getString("id")));
+                        return iplist;
+                        }
                     return (List<IpAddress>) ipRepo.findByNetwork(networkId, IpAddress.State.ALLOCATED);
                 } catch (ApplicationException e) {
                     LOGGER.error("ERROR AT IP AQUIRE", e);
@@ -335,7 +338,7 @@ public class IpaddressServiceImpl implements IpaddressService {
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException(e.getMessage());
         }
-        return ipRepo.save(ipAddress);
+        return ipAddress;
         } else {
             errors.addGlobalError("Resource limit for department has not been set. Please update department quota");
             throw new ApplicationException(errors);
