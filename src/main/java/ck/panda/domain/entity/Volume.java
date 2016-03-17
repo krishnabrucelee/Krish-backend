@@ -228,6 +228,10 @@ public class Volume implements Serializable {
     @Transient
     private String transProjectId;
 
+    /** Transient project of the volume. */
+    @Transient
+    private String transJobId;
+
     /**
      * isSyncFlag field is not to be serialized, whereas JPA's @Transient annotation is used to indicate that a field is
      * not to be persisted in the database.
@@ -1004,6 +1008,24 @@ public class Volume implements Serializable {
     }
 
     /**
+     * Get the transJobId of the Volume.
+     *
+     * @return the transJobId
+     */
+    public String getTransJobId() {
+        return transJobId;
+    }
+
+    /**
+     * Set the transJobId of the Volume.
+     *
+     * @param transJobId the transJobId to set
+     */
+    public void setTransJobId(String transJobId) {
+        this.transJobId = transJobId;
+    }
+
+    /**
      * Convert JSONObject to Volume entity.
      *
      * @param object json object
@@ -1044,7 +1066,7 @@ public class Volume implements Serializable {
             volume.setTransDepartmentId((JsonUtil.getStringValue(object, CloudStackConstants.CS_ACCOUNT)));
             volume.setTransProjectId(JsonUtil.getStringValue(object, CloudStackConstants.CS_PROJECT_ID));
         } catch (Exception e) {
-        	throw new Exception(e);
+            throw new Exception(e);
         }
 
         return volume;

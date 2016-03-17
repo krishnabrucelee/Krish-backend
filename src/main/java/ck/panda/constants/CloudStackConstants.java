@@ -677,4 +677,7 @@ public class CloudStackConstants {
 
     /** Constant for account id. */
     public static final String CS_ACCOUNT_ID = "accountid";
+
+    /** Constant for volume upload. */
+    public static final String CS_VOLUME_UPLOAD = "VOLUME.UPLOAD";
 }

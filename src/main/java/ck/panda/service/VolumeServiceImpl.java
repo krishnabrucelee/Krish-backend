@@ -1018,12 +1018,12 @@ public class VolumeServiceImpl implements VolumeService {
                 optional);
         try {
         JSONObject jobId = new JSONObject(volumeS).getJSONObject(CS_UPLOAD_VOLUME_RESPONSE);
+        volume.setTransJobId(jobId.getString(CloudStackConstants.CS_JOB_ID));
         if (jobId.has(CloudStackConstants.CS_ERROR_CODE)) {
             errors = this.validateEvent(errors, jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
             throw new ApplicationException(errors);
         } else {
             if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
-                Thread.sleep(5000);
                 config.setUserServer();
                 String jobResponse = csVolumeService.volumeJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
                         CloudStackConstants.JSON);
@@ -1034,17 +1034,8 @@ public class VolumeServiceImpl implements VolumeService {
                         .equals(CloudStackConstants.ERROR_JOB_STATUS)) {
                     errors = this.validateEvent(errors, jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
                             .getString(CloudStackConstants.CS_ERROR_TEXT));
-                }
-                if (jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT).has(CS_VOLUME)) {
-                    volume.setUuid((String) jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT)
-                            .getJSONObject(CS_VOLUME).get(CloudStackConstants.CS_ID));
-                    if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
-                            .equals(CloudStackConstants.SUCCEEDED_JOB_STATUS)) {
-                        setUploadVolume(volume);
-                    }
-                    if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
-                            .equals(CloudStackConstants.PROGRESS_JOB_STATUS)) {
-                        setUploadVolume(volume);
+                    if (errors.hasErrors()) {
+                        throw new ApplicationException(errors);
                     }
                 }
             }
@@ -1068,12 +1059,13 @@ public class VolumeServiceImpl implements VolumeService {
         String uuid = volume.getUuid();
         Format format = volume.getFormat();
         String url = volume.getUrl();
-        if (volumeRepo.findByUUID(volume.getUuid()) != null) {
+        if (volumeRepo.findByUUID(volume.getUuid()) == null) {
             volume = volumeRepo.findByUUID(volume.getUuid());
         }
         volume.setUuid(uuid);
         volume.setFormat(format);
         volume.setUrl(url);
+        volume.setIsActive(true);
         volume.setDiskSizeFlag(false);
         volume.setVolumeType(Volume.VolumeType.DATADISK);
         volumeRepo.save(volume);
