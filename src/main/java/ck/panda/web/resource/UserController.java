@@ -46,7 +46,7 @@ public class UserController extends CRUDController<User> implements ApiControlle
     @Override
     public User create(@RequestBody User user) throws Exception {
         user.setSyncFlag(true);
-        return userService.save(user, Long.parseLong(tokenDetails.getTokenDetails("id")));
+        return userService.save(user, Long.parseLong(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
     }
 
     @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing User.", response = User.class)
