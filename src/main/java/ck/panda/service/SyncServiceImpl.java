@@ -1341,7 +1341,7 @@ public class SyncServiceImpl implements SyncService {
         // add it to app db
         for (String key : vmMap.keySet()) {
             VmInstance instances = virtualMachineService.save(vmMap.get(key));
-        	IpAddress ipAddress = ipService.UpdateIPByNetwork(instances.getNetwork().getUuid());
+        	IpAddress ipAddress = ipService.UpdateIPByNetwork(convertEntityService.getNetworkById(instances.getNetworkId()).getUuid());
 			if (ipAddress != null) {
 				instances.setSyncFlag(false);
 				instances.setPublicIpAddress(ipAddress.getPublicIpAddress());
