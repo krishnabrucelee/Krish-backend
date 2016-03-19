@@ -14,6 +14,18 @@ import ck.panda.domain.entity.VpnUser;
 public interface VpnUserRepository extends PagingAndSortingRepository<VpnUser, Long> {
 
     /**
+     * Find all VPN User by department and domain.
+     *
+     * @param departmentId department id
+     * @param domainId domain id
+     * @param isActive department status Active/Inactive
+     * @return list of VPN users.
+     */
+    @Query(value = "SELECT vpn FROM VpnUser vpn WHERE vpn.isActive = :isActive AND vpn.departmentId = :departmentId AND vpn.domainId = :domainId")
+    List<VpnUser> findAllByDepartmentAndDomainAndIsActive(@Param("departmentId") Long departmentId, @Param("domainId") Long domainId,
+            @Param("isActive") Boolean isActive);
+
+    /**
      * Find all the active or inactive VPN user with pagination.
      *
      * @param pageable to get the list with pagination.

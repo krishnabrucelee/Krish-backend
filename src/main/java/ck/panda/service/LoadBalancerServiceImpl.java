@@ -423,4 +423,9 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         return loadBalancerRepo.findByLbIdAndIsActive(lbPolicyId, true);
     }
 
+    @Override
+    public List<LoadBalancerRule> findAllByIpAddressAndIsActive(Long id, Boolean isActive) throws Exception {
+        return loadBalancerRepo.findAllByIpAddressAndIsActive(id, true);
+    }
+
    }

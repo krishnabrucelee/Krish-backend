@@ -22,6 +22,7 @@ import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.VpnUser;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.IpAddress;
@@ -39,6 +40,10 @@ import ck.panda.util.error.exception.CustomGenericException;
 
 /**
  * Service implementation for Network entity.
+ */
+/**
+ * @author Assistanz
+ *
  */
 @Service
 public class NetworkServiceImpl implements NetworkService {
@@ -153,6 +158,11 @@ public class NetworkServiceImpl implements NetworkService {
     @Autowired
     private UpdateResourceCountService updateResourceCountService;
 
+    /** For listing VPN user list from cloudstack server. */
+    @Autowired
+    private VpnUserService vpnUserService;
+
+    /**IP Address service reference.  */
     @Autowired
     private IpaddressService ipService;
 
@@ -392,14 +402,27 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public Network ipRelease(Network network) throws Exception {
         List<IpAddress> ipList = ipService.findByNetwork(network.getId());
-        for(IpAddress ip : ipList) {
+        for (IpAddress ip : ipList) {
             ip.setIsActive(false);
             ip.setState(State.FREE);
             ip.setNetworkId(null);
+            List<VpnUser> vpnUserList = vpnUserService.findAllByDepartmentAndDomainAndIsActive(network.getDepartmentId(), network.getDomainId(), true);
+            if (vpnUserList.size() != 0) {
+            for (VpnUser vpnUser : vpnUserList) {
+                vpnUser.setIsActive(false);
+                vpnUser.setSyncFlag(false);
+                vpnUserService.softDelete(vpnUser);
+            }
+            }
             ip.setDomainId(null);
             ip.setIsSourcenat(false);
             ip.setIsStaticnat(false);
             ip.setSyncFlag(false);
+            ip.setVpnForDisplay(false);
+            ip.setVpnIpRange(null);
+            ip.setVpnPresharedKey(null);
+            ip.setVpnState(null);
+            ip.setVpnUuid(null);
             ipService.update(ip);
         }
         return network;

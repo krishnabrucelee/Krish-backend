@@ -1046,14 +1046,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with CloudStack server Ip address from Asynchronous Job.
      *
-     * @param jobResult
-     *            job result
-     * @param eventObject
-     *            network event object
-     * @throws ApplicationException
-     *             unhandled application errors
-     * @throws Exception
-     *             cloudstack unhandled errors
+     * @param jobResult job result
+     * @param eventObject network event object
+     * @throws ApplicationException unhandled application errors
+     * @throws Exception cloudstack unhandled errors
      */
     public void asyncIpAddress(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
         Errors errors = null;
@@ -1128,6 +1124,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             IpAddress ipAddress = ipService.findbyUUID(json.getString("id"));
             if (ipAddress != null) {
                 ipAddress.setSyncFlag(false);
+                ipService.ruleDelete(ipAddress);
                 ipService.softDelete(ipAddress);
                 //Resource Count delete
                 if (!convertEntityService.getDepartmentById(ipAddress.getDepartmentId()).getType()

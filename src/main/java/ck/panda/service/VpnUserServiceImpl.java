@@ -11,6 +11,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.PortForwarding;
 import ck.panda.domain.entity.VpnUser;
 import ck.panda.domain.repository.jpa.VpnUserRepository;
 import ck.panda.util.AppValidator;
@@ -230,5 +231,10 @@ public class VpnUserServiceImpl implements VpnUserService {
         }
 
         return vpnUser;
+    }
+
+    @Override
+    public List<VpnUser> findAllByDepartmentAndDomainAndIsActive(Long departmentId, Long domainId, Boolean isActive) throws Exception {
+        return vpnUserRepository.findAllByDepartmentAndDomainAndIsActive(departmentId, domainId, true);
     }
 }
