@@ -184,7 +184,7 @@ public class UserServiceImpl implements UserService {
         if (user.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity(cloudStackConstants.CS_USER, user);
             errors = validator.validateEntity(user, errors);
-                errors = this.validateName(errors, user.getUserName(), user.getDomain(), user.getId());
+            errors = this.validateName(errors, user.getUserName(), user.getDomain(), user.getId());
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
