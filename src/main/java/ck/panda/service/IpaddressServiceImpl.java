@@ -125,6 +125,18 @@ public class IpaddressServiceImpl implements IpaddressService {
     /** Constant for action event running status. */
     public static final String CS_RUNNING_STATE = "Running";
 
+    /** Constant for Allocated only. */
+    public static final String CS_ALLOCATED_ONLY = "allocatedonly";
+
+    /** Constant for Associated network id. */
+    public static final String CS_ASSOCIATED_NETWORK_ID = "associatednetworkid";
+
+    /** Constant for True status. */
+    public static final String CS_TRUE = "true";
+
+    /** Constant for Source nat. */
+    public static final String CS_IS_SOURCE_NAT = "issourcenat";
+
     @Override
     public List<IpAddress> acquireIP(Long networkId) throws Exception {
         Errors errors = null;
@@ -340,15 +352,15 @@ public class IpaddressServiceImpl implements IpaddressService {
     public IpAddress UpdateIPByNetwork(String networkId) throws Exception {
         IpAddress publicIpAddress = new IpAddress();
         HashMap<String, String> ipMap = new HashMap<String, String>();
-        ipMap.put("allocatedonly", "true");
-        ipMap.put("associatednetworkid", networkId);
-        ipMap.put("issourcenat", "true");
+        ipMap.put(CS_ALLOCATED_ONLY, CS_TRUE);
+        ipMap.put(CS_ASSOCIATED_NETWORK_ID, networkId);
+        ipMap.put(CS_IS_SOURCE_NAT, CS_TRUE);
         configServer.setServer(1L);
         Network network = convertEntityService.getNetworkById(convertEntityService.getNetworkByUuid(networkId));
         if (network.getProjectId() != null) {
-            ipMap.put("projectid", convertEntityService.getProjectById(network.getProjectId()).getUuid());
+            ipMap.put(CloudStackConstants.CS_PROJECT_ID, convertEntityService.getProjectById(network.getProjectId()).getUuid());
         } else {
-            ipMap.put("listall","true");
+            ipMap.put(CloudStackConstants.CS_LIST_ALL, CS_TRUE);
         }
         // 1. Get the list of ipAddress from CS server using CS connector
         String response = csipaddressService.listPublicIpAddresses(CloudStackConstants.JSON, ipMap);
