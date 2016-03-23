@@ -1,7 +1,5 @@
 package ck.panda.service;
 
-import java.io.UnsupportedEncodingException;
-
 import javax.mail.MessagingException;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.EmailConfiguration;
