@@ -17,11 +17,14 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
+import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.IpAddress;
+import ck.panda.domain.entity.LoadBalancerRule;
 import ck.panda.domain.entity.IpAddress.State;
 import ck.panda.domain.entity.IpAddress.VpnState;
 import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
 import ck.panda.domain.entity.Network;
+import ck.panda.domain.entity.PortForwarding;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.repository.jpa.IpaddressRepository;
@@ -93,6 +96,18 @@ public class IpaddressServiceImpl implements IpaddressService {
     /** Quota limit validation reference. */
     @Autowired
     private QuotaValidationService quotaLimitValidation;
+
+    /** Port forwarding service reference. */
+    @Autowired
+    private PortForwardingService portForwardingService;
+
+    /** Load balancer service reference. */
+    @Autowired
+    private LoadBalancerService loadBalancerService;
+
+    /**  Egress rule service reference. */
+    @Autowired
+    private EgressRuleService egressRuleService;
 
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
@@ -229,8 +244,41 @@ public class IpaddressServiceImpl implements IpaddressService {
             ipaddress.setState(IpAddress.State.FREE);
         } else {
             ipaddress = this.dissocitateIpAddress(ipaddress.getUuid());
+            this.ruleDelete(ipaddress);
         }
         return ipRepo.save(ipaddress);
+    }
+
+    @Override
+    public IpAddress ruleDelete(IpAddress ipaddress) throws Exception {
+        List<PortForwarding> portForwardingList = portForwardingService.findAllByIpAddressAndIsActive(ipaddress.getId(), true);
+        List<FirewallRules> firewallList = egressRuleService.findAllByIpAddressAndIsActive(ipaddress.getId(), true);
+        List<LoadBalancerRule> loadBalancerList = loadBalancerService.findAllByIpAddressAndIsActive(ipaddress.getId(), true);
+            if (portForwardingList.size() != 0) {
+                for (PortForwarding portForwarding : portForwardingList) {
+                    portForwarding.setIsActive(false);
+                    configServer.setServer(1L);
+                    portForwarding.setSyncFlag(false);
+                    portForwardingService.softDelete(portForwarding);
+                }
+            }
+            if (firewallList.size() != 0) {
+                for (FirewallRules firewallRules : firewallList) {
+                    firewallRules.setIsActive(false);
+                    configServer.setServer(1L);
+                    firewallRules.setSyncFlag(false);
+                    egressRuleService.save(firewallRules);
+                }
+            }
+            if (loadBalancerList.size() != 0) {
+                for (LoadBalancerRule loadBalancerRule : loadBalancerList) {
+                    loadBalancerRule.setIsActive(false);
+                    configServer.setServer(1L);
+                    loadBalancerRule.setSyncFlag(false);
+                    loadBalancerService.save(loadBalancerRule);
+                }
+            }
+        return ipaddress;
     }
 
     @Override

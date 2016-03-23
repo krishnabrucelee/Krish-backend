@@ -13,6 +13,16 @@ import ck.panda.util.domain.CRUDService;
 public interface LoadBalancerService extends CRUDService<LoadBalancerRule> {
 
     /**
+     * Find all LoadBalancer by ipAddress.
+     *
+     * @param id ipAddress id .
+     * @param isActive ipAddress status Active/Inactive
+     * @return list of ipAddress in LoadBalancer.
+     * @throws Exception if error occurs.
+     */
+    List<LoadBalancerRule> findAllByIpAddressAndIsActive(Long id, Boolean isActive) throws Exception;
+
+    /**
      * To get list of LoadBalancer from cloudstack server.
      *
      * @return LoadBalancer list from server

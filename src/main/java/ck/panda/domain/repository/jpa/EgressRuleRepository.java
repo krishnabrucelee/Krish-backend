@@ -1,15 +1,12 @@
 package ck.panda.domain.repository.jpa;
 
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.FirewallRules.TrafficType;
 
@@ -19,6 +16,17 @@ import ck.panda.domain.entity.FirewallRules.TrafficType;
  */
 @Service
 public interface EgressRuleRepository extends PagingAndSortingRepository<FirewallRules, Long> {
+
+    /**
+     * Find all firewall rules by ipAddress and status.
+     *
+     * @param ipAddressId ipAddress id.
+     * @param isActive active/inactive status.
+     * @return list of firewall rules.
+     */
+    @Query(value = "SELECT egress FROM FirewallRules egress WHERE egress.isActive = :isActive AND egress.ipAddressId = :ipAddressId")
+    List<FirewallRules> findAllByIpAddressAndIsActive(@Param("ipAddressId") Long ipAddressId,
+            @Param("isActive") Boolean isActive);
 
     /**
      * Find egress rules by uuid.
