@@ -2,12 +2,19 @@ package ck.panda.domain.entity;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.Date;
+import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -16,12 +23,24 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
+
+import ck.panda.domain.entity.Network.Status;
 
 @Entity
 @Table(name = "email_template")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
 public class EmailTemplate implements Serializable {
+
+    public EmailTemplate() {
+        super();
+    }
+
+    public EmailTemplate(String fileName) {
+        super();
+        this.fileName = fileName;
+    }
 
     /** Unique Id of the email template. */
     @Id
@@ -39,7 +58,7 @@ public class EmailTemplate implements Serializable {
 
     /** File path to upload the template */
     @Column(name = "file_path")
-    private String filePath;
+    private String fileName;
 
     /** Created by user. */
     @CreatedBy
@@ -50,6 +69,10 @@ public class EmailTemplate implements Serializable {
     @LastModifiedBy
     @Column(name = "updated_user_id")
     private Long updatedBy;
+
+    /** Recipient attribute to verify type of the user. */
+    @Column(name = "recipient_type")
+    private RecipientType recipientType;
 
     /** Created date and time. */
     @CreatedDate
@@ -69,6 +92,42 @@ public class EmailTemplate implements Serializable {
     @Version
     @Column(name = "version")
     private Long version;
+
+    /** Types of the user. */
+    public enum RecipientType {
+
+        /** User type .*/
+        USER,
+
+        /** Root admin type */
+        ROOT_ADMIN,
+
+        /** Domain admin type.*/
+        DOMAIN_ADMIN
+    }
+
+    @Transient
+    private MultipartFile file;
+
+
+    public EmailTemplate(byte[] bytes) {
+        // TODO Auto-generated constructor stub
+    }
+
+    /**
+     * @return the file
+     */
+    public MultipartFile getFile() {
+        return file;
+    }
+
+    /**
+     * @param file the file to set
+     */
+    public void setFile(MultipartFile file) {
+        this.file = file;
+    }
+
 
     /**
      * Get the id of the template.
@@ -124,22 +183,19 @@ public class EmailTemplate implements Serializable {
         this.language = language;
     }
 
+
     /**
-     * Get the file path
-     *
-     * @return the filePath
+     * @return the fileName
      */
-    public String getFilePath() {
-        return filePath;
+    public String getFileName() {
+        return fileName;
     }
 
     /**
-     * Set the filePath
-     *
-     * @param filePath  to set
+     * @param fileName the fileName to set
      */
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     /**
@@ -231,4 +287,20 @@ public class EmailTemplate implements Serializable {
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
+
+    /**
+     * @return the recipientType
+     */
+    public RecipientType getRecipientType() {
+        return recipientType;
+    }
+
+    /**
+     * @param recipientType the recipientType to set
+     */
+    public void setRecipientType(RecipientType recipientType) {
+        this.recipientType = recipientType;
+    }
+
+
 }

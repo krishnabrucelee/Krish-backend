@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
+
+import ck.panda.constants.EventsUtil;
 import ck.panda.constants.PermissionUtil;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Cluster;
@@ -23,6 +25,7 @@ import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.FirewallRules.Protocol;
 import ck.panda.domain.entity.FirewallRules.TrafficType;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.EventLiterals;
 import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.Host;
 import ck.panda.domain.entity.Hypervisor;
@@ -77,6 +80,7 @@ import ck.panda.util.error.exception.ApplicationException;
  * delete it.
  *
  */
+@PropertySource(value = "classpath:event.properties")
 @PropertySource(value = "classpath:permission.properties")
 @Service
 @SuppressWarnings("PMD.CyclomaticComplexity")
@@ -120,6 +124,9 @@ public class SyncServiceImpl implements SyncService {
     /** ProjectService for listing Regions. */
     @Autowired
     private ProjectService projectService;
+
+    @Autowired
+    private EventLiteralsService eventService;
 
     /** RegionSerivce for listing Regions. */
     @Autowired
@@ -322,6 +329,10 @@ public class SyncServiceImpl implements SyncService {
     /** Permission report properties. */
     @Value(value = "${permission.report}")
     private String report;
+
+    /** receipient properties. */
+    @Value(value = "${test.users}")
+    private String users;
 
     /** Full permission for root and domain admin. */
     public static final String ADMIN_PERMISSION = "FULL_PERMISSION";
@@ -562,6 +573,7 @@ public class SyncServiceImpl implements SyncService {
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Ip Address", e);
         }
+
 
     }
 
@@ -1217,6 +1229,8 @@ public class SyncServiceImpl implements SyncService {
         types.add(AccountType.DOMAIN_ADMIN);
         departmentList = departmentService.findByAccountTypesAndActive(types, true);
         createRole(departmentList, existPermissionList);
+        List<EventLiterals> eventLists = new ArrayList<EventLiterals>();
+        this.EventList(eventLists);
     }
 
     /**
@@ -1321,9 +1335,9 @@ public class SyncServiceImpl implements SyncService {
                     instance.setVncPassword(encryptedPassword);
                 }
                 IpAddress ipAddress = ipService.UpdateIPByNetwork(instance.getNetwork().getUuid());
-				if (ipAddress != null) {
-					instance.setPublicIpAddress(ipAddress.getPublicIpAddress());
-				}
+                if (ipAddress != null) {
+                    instance.setPublicIpAddress(ipAddress.getPublicIpAddress());
+                }
                 // 3.2 If found, update the vm object in app db
                 virtualMachineService.update(instance);
 
@@ -1341,12 +1355,12 @@ public class SyncServiceImpl implements SyncService {
         // add it to app db
         for (String key : vmMap.keySet()) {
             VmInstance instances = virtualMachineService.save(vmMap.get(key));
-        	IpAddress ipAddress = ipService.UpdateIPByNetwork(instances.getNetwork().getUuid());
-			if (ipAddress != null) {
-				instances.setSyncFlag(false);
-				instances.setPublicIpAddress(ipAddress.getPublicIpAddress());
-				virtualMachineService.update(instances);
-			}
+            IpAddress ipAddress = ipService.UpdateIPByNetwork(instances.getNetwork().getUuid());
+            if (ipAddress != null) {
+                instances.setSyncFlag(false);
+                instances.setPublicIpAddress(ipAddress.getPublicIpAddress());
+                virtualMachineService.update(instances);
+            }
         }
     }
 
@@ -2568,4 +2582,11 @@ public class SyncServiceImpl implements SyncService {
         syncResourceLimitProject(project);
     }
 
+    @Override
+    public void EventList(List<EventLiterals> eventLists) throws Exception {
+    List<EventLiterals> userLists = EventsUtil.createEventsList(user,instance);
+    for (EventLiterals events : userLists) {
+    eventService.save(events);
+    }
+}
 }

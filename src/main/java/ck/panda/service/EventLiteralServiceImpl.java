@@ -19,6 +19,7 @@ public class EventLiteralServiceImpl implements EventLiteralsService {
     @Autowired
     private EventLiteralsRepository eventRepo;
 
+
     @Override
     public EventLiterals save(EventLiterals email) throws Exception {
         return eventRepo.save(email);
@@ -52,5 +53,15 @@ public class EventLiteralServiceImpl implements EventLiteralsService {
     @Override
     public List<EventLiterals> findAll() throws Exception {
         return (List<EventLiterals>) eventRepo.findAll();
+    }
+
+    @Override
+    public List<EventLiterals> findByType(String eventName) throws Exception {
+        return (List<EventLiterals>) eventRepo.findByEventType("USER");
+    }
+
+    @Override
+    public List<EventLiterals> findByIsActive(Boolean isActive) throws Exception {
+        return (List<EventLiterals>) eventRepo.findByIsActive(true);
     }
 }

@@ -37,6 +37,14 @@ public class EventLiterals implements Serializable {
     @Column(name = "event_literals")
     private String eventLiterals;
 
+    /** Name of the event .*/
+    @Column(name = "event_literals_key")
+    private String eventLiteralsKey;
+
+    /** IsActive attribute to verify Active or Inactive. */
+    @Column(name = "is_active")
+    private Boolean isActive;
+
     /** Created by user. */
     @CreatedBy
     @Column(name = "created_user_id")
@@ -209,4 +217,37 @@ public class EventLiterals implements Serializable {
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
-}
+
+    /**
+     * @return the eventLiteralsKey
+     */
+    public String getEventLiteralsKey() {
+        return eventLiteralsKey;
+    }
+
+    /**
+     * @param eventLiteralsKey the eventLiteralsKey to set
+     */
+    public void setEventLiteralsKey(String eventLiteralsKey) {
+        this.eventLiteralsKey = eventLiteralsKey;
+    }
+
+    /**
+     * Get isActive.
+     *
+     * @return the isActive
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    /**
+     * Set is Active.
+     *
+     * @param isActive the isActive to set
+     */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
+ }
