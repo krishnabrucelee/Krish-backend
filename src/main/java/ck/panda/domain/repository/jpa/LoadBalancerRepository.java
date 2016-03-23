@@ -15,6 +15,17 @@ import ck.panda.domain.entity.LoadBalancerRule;
 public interface LoadBalancerRepository extends PagingAndSortingRepository<LoadBalancerRule, Long> {
 
     /**
+     * Find all load balancer by ipAddress and status.
+     *
+     * @param ipAddressId ipAddress id.
+     * @param isActive active/inactive status.
+     * @return list of firewall rules.
+     */
+    @Query(value = "SELECT lb FROM LoadBalancerRule lb WHERE lb.isActive = :isActive AND lb.ipAddressId = :ipAddressId")
+    List<LoadBalancerRule> findAllByIpAddressAndIsActive(@Param("ipAddressId") Long ipAddressId,
+            @Param("isActive") Boolean isActive);
+
+    /**
      * Get the load balancer based on the uuid.
      *
      * @param uuid of the load balancer

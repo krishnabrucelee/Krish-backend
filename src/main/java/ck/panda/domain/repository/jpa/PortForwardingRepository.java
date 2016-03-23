@@ -15,6 +15,17 @@ import ck.panda.domain.entity.PortForwarding;
 public interface PortForwardingRepository extends PagingAndSortingRepository<PortForwarding, Long> {
 
     /**
+     * Find all Port Forwarding by ipAddress and status.
+     *
+     * @param ipAddressId ipAddress id.
+     * @param isActive active/inactive status.
+     * @return list of Port Forwarding.
+     */
+    @Query(value = "SELECT port FROM PortForwarding port WHERE port.isActive = :isActive AND port.ipAddressId = :ipAddressId")
+    List<PortForwarding> findAllByIpAddressAndIsActive(@Param("ipAddressId") Long ipAddressId,
+            @Param("isActive") Boolean isActive);
+
+    /**
      * Get the Port Forwarding based on the uuid.
      *
      * @param uuid of the Port Forwarding
