@@ -20,6 +20,8 @@ public class Email {
 	private HashMap<String, byte[]> attachments;
 
 	/**
+	 * Set sender email.
+	 *
 	 * @return the from
 	 */
 	public String getFrom() {
@@ -27,6 +29,8 @@ public class Email {
 	}
 
 	/**
+	 * Set sender email.
+	 *
 	 * @param from the from to set
 	 */
 	public void setFrom(String from) {
@@ -34,6 +38,8 @@ public class Email {
 	}
 
 	/**
+	 * Set recipient email.
+	 *
 	 * @return the to
 	 */
 	public String getTo() {
@@ -41,6 +47,8 @@ public class Email {
 	}
 
 	/**
+	 * Get recipient email.
+	 *
 	 * @param to the to to set
 	 */
 	public void setTo(String to) {
@@ -48,6 +56,8 @@ public class Email {
 	}
 
 	/**
+	 * Get recipients email.
+	 *
 	 * @return the cc
 	 */
 	public String getCc() {
@@ -55,6 +65,8 @@ public class Email {
 	}
 
 	/**
+	 * Set recipients email.
+	 *
 	 * @param cc the cc to set
 	 */
 	public void setCc(String cc) {
@@ -62,6 +74,8 @@ public class Email {
 	}
 
 	/**
+	 * Get recipients email.
+	 *
 	 * @return the bcc
 	 */
 	public String getBcc() {
@@ -69,6 +83,8 @@ public class Email {
 	}
 
 	/**
+	 * Set recipients email.
+	 *
 	 * @param bcc the bcc to set
 	 */
 	public void setBcc(String bcc) {
@@ -76,6 +92,8 @@ public class Email {
 	}
 
 	/**
+	 * Get subject for email.
+	 *
 	 * @return the subject
 	 */
 	public String getSubject() {
@@ -83,6 +101,8 @@ public class Email {
 	}
 
 	/**
+	 * Set subject of the email.
+	 *
 	 * @param subject the subject to set
 	 */
 	public void setSubject(String subject) {
@@ -90,6 +110,8 @@ public class Email {
 	}
 
 	/**
+	 * Get body of the email.
+	 *
 	 * @return the body
 	 */
 	public String getBody() {
@@ -97,6 +119,8 @@ public class Email {
 	}
 
 	/**
+	 * Set subject for email.
+	 *
 	 * @param body the body to set
 	 */
 	public void setBody(String body) {
@@ -104,6 +128,8 @@ public class Email {
 	}
 
 	/**
+	 * Get attachments for email.
+	 *
 	 * @return the attachments
 	 */
 	public HashMap<String, byte[]> getAttachments() {
@@ -111,6 +137,8 @@ public class Email {
 	}
 
 	/**
+	 * Set attachments for email.
+	 *
 	 * @param attachments the attachments to set
 	 */
 	public void setAttachments(HashMap<String, byte[]> attachments) {

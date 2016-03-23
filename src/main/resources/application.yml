@@ -57,10 +57,10 @@ spring:
 
  # Mail configuration
     mail:
-        host: mail.assistanz.com
+        host: mail.xxx.com
         port: 25
-        username: panda@assistanz.com
-        password: ck!P@nd@
+        username: xxx@xxx.com
+        password: xxx
         properties:
             mail:
                 smtp:
