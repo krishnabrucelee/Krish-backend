@@ -38,13 +38,7 @@ import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 import ck.panda.util.error.exception.CustomGenericException;
 
-/**
- * Service implementation for Network entity.
- */
-/**
- * @author Assistanz
- *
- */
+/**Network service implementation class. */
 @Service
 public class NetworkServiceImpl implements NetworkService {
 
@@ -403,9 +397,6 @@ public class NetworkServiceImpl implements NetworkService {
     public Network ipRelease(Network network) throws Exception {
         List<IpAddress> ipList = ipService.findByNetwork(network.getId());
         for (IpAddress ip : ipList) {
-            ip.setIsActive(false);
-            ip.setState(State.FREE);
-            ip.setNetworkId(null);
             List<VpnUser> vpnUserList = vpnUserService.findAllByDepartmentAndDomainAndIsActive(network.getDepartmentId(), network.getDomainId(), true);
             if (vpnUserList.size() != 0) {
             for (VpnUser vpnUser : vpnUserList) {
@@ -414,16 +405,21 @@ public class NetworkServiceImpl implements NetworkService {
                 vpnUserService.softDelete(vpnUser);
             }
             }
-            ip.setDomainId(null);
-            ip.setIsSourcenat(false);
-            ip.setIsStaticnat(false);
-            ip.setSyncFlag(false);
-            ip.setVpnForDisplay(false);
-            ip.setVpnIpRange(null);
-            ip.setVpnPresharedKey(null);
-            ip.setVpnState(null);
-            ip.setVpnUuid(null);
-            ipService.update(ip);
+            ipService.ruleDelete(ip);
+            IpAddress ipAddress = new IpAddress();
+            ipAddress.setId(ip.getId());
+            ipAddress.setState(State.FREE);
+            ipAddress.setDepartmentId(ip.getDepartmentId());
+            ipAddress.setZoneId(ip.getZoneId());
+            ipAddress.setDisplay(ip.getDisplay());
+            ipAddress.setProjectId(ip.getProjectId());
+            ipAddress.setUuid(ip.getUuid());
+            ipAddress.setPublicIpAddress(ip.getPublicIpAddress());
+            ipAddress.setVmInstanceId(ip.getVmInstanceId());
+            ipAddress.setVlan(ip.getVlan());
+            ipAddress.setCreatedBy(ip.getCreatedBy());
+            ipAddress.setCreatedDateTime(ip.getCreatedDateTime());
+            ipService.update(ipAddress);
         }
         return network;
     }
