@@ -6,7 +6,7 @@ package ck.panda.constants;
  */
 public class CloudStackConstants {
 
-    /**
+	/**
      * Makes sure that utility classes (classes that contain only static methods or fields in their API) do not have a
      * public constructor.
      */

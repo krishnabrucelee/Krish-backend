@@ -452,8 +452,7 @@ public class IpaddressServiceImpl implements IpaddressService {
         }
         return ipAddress;
         } else {
-            errors.addGlobalError("Resource limit for department has not been set. Please update department quota");
-            throw new ApplicationException(errors);
+            throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Resource limit for department has not been set. Please update department quota");
         }
     }
 

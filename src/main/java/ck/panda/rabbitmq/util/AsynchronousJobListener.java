@@ -22,7 +22,7 @@ import ck.panda.util.infrastructure.externalwebservice.ExternalWebServiceStub;
 public class AsynchronousJobListener implements MessageListener {
 
 	/** Logger attribute. */
-	private static final Logger LOGGER = LoggerFactory.getLogger(ActionListener.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AsynchronousJobListener.class);
 
 	/** Sync service. */
 	private SyncService syncService;
