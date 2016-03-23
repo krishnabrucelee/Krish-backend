@@ -9,34 +9,34 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class EmailEvent {
 
 	/** Event uuid. */
-    private String entityuuid;
+	private String entityuuid;
 
-    /** Event date and time. */
-    private String eventDateTime;
+	/** Event date and time. */
+	private String eventDateTime;
 
-    /** Event user. */
-    private String user;
+	/** Event user. */
+	private String user;
 
-    /** Event name. */
-    private String event;
+	/** Event name. */
+	private String event;
 
-    /** Event type. */
-    private String eventType;
+	/** Event type. */
+	private String eventType;
 
-    /** Event message body. */
-    private String messageBody;
+	/** Event message body. */
+	private String messageBody;
 
-    /** Event message subject. */
-    private String subject;
+	/** Event message subject. */
+	private String subject;
 
-    /** Event resource uuid. */
-    private String resourceUuid;
+	/** Event resource uuid. */
+	private String resourceUuid;
 
-    /** Event resource id. */
-    private String resourceId;
+	/** Event resource id. */
+	private String resourceId;
 
-    /** Event resource type. */
-    private String resourceType;
+	/** Event resource type. */
+	private String resourceType;
 
 	/**
 	 * Get entity uuid.
@@ -50,7 +50,7 @@ public class EmailEvent {
 	/**
 	 * Set entity uuid.
 	 *
-	 * @param entityuuid the entityuuid to set
+	 * @param entityuuid to set
 	 */
 	public void setEntityuuid(String entityuuid) {
 		this.entityuuid = entityuuid;
@@ -68,7 +68,7 @@ public class EmailEvent {
 	/**
 	 * Set the event date and time.
 	 *
-	 * @param eventDateTime the eventDateTime to set
+	 * @param eventDateTime to set
 	 */
 	public void setEventDateTime(String eventDateTime) {
 		this.eventDateTime = eventDateTime;
@@ -86,7 +86,7 @@ public class EmailEvent {
 	/**
 	 * Set the user.
 	 *
-	 * @param user the user to set
+	 * @param user to set
 	 */
 	public void setUser(String user) {
 		this.user = user;
@@ -104,7 +104,7 @@ public class EmailEvent {
 	/**
 	 * Set the user.
 	 *
-	 * @param event the event to set
+	 * @param event to set
 	 */
 	public void setEvent(String event) {
 		this.event = event;
@@ -122,7 +122,7 @@ public class EmailEvent {
 	/**
 	 * Set the event type.
 	 *
-	 * @param eventType the eventType to set
+	 * @param eventType to set
 	 */
 	public void setEventType(String eventType) {
 		this.eventType = eventType;
@@ -140,7 +140,7 @@ public class EmailEvent {
 	/**
 	 * Set the message body.
 	 *
-	 * @param messageBody the messageBody to set
+	 * @param messageBody to set
 	 */
 	public void setMessageBody(String messageBody) {
 		this.messageBody = messageBody;
@@ -158,7 +158,7 @@ public class EmailEvent {
 	/**
 	 * Set the message subject.
 	 *
-	 * @param subject the subject to set
+	 * @param subject to set
 	 */
 	public void setSubject(String subject) {
 		this.subject = subject;
@@ -176,7 +176,7 @@ public class EmailEvent {
 	/**
 	 * Set the resource's uuid.
 	 *
-	 * @param resourceUuid the resourceUuid to set
+	 * @param resourceUuid to set
 	 */
 	public void setResourceUuid(String resourceUuid) {
 		this.resourceUuid = resourceUuid;
@@ -194,7 +194,7 @@ public class EmailEvent {
 	/**
 	 * Set the resource's id.
 	 *
-	 * @param resourceId the resourceId to set
+	 * @param resourceId to set
 	 */
 	public void setResourceId(String resourceId) {
 		this.resourceId = resourceId;
@@ -212,7 +212,7 @@ public class EmailEvent {
 	/**
 	 * Set the resource's type.
 	 *
-	 * @param resourceType the resourceType to set
+	 * @param resourceType to set
 	 */
 	public void setResourceType(String resourceType) {
 		this.resourceType = resourceType;
