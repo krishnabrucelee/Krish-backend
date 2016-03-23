@@ -125,6 +125,18 @@ public class IpaddressServiceImpl implements IpaddressService {
     /** Constant for action event running status. */
     public static final String CS_RUNNING_STATE = "Running";
 
+    /** Constant for Allocated only. */
+    public static final String CS_ALLOCATED_ONLY = "allocatedonly";
+
+    /** Constant for Associated network id. */
+    public static final String CS_ASSOCIATED_NETWORK_ID = "associatednetworkid";
+
+    /** Constant for True status. */
+    public static final String CS_TRUE = "true";
+
+    /** Constant for Source nat. */
+    public static final String CS_IS_SOURCE_NAT = "issourcenat";
+
     @Override
     public List<IpAddress> acquireIP(Long networkId) throws Exception {
         Errors errors = null;
@@ -336,20 +348,20 @@ public class IpaddressServiceImpl implements IpaddressService {
     }
 
 
-	@Override
-	public IpAddress UpdateIPByNetwork(String networkId) throws Exception {
-		IpAddress publicIpAddress = new IpAddress();
+    @Override
+    public IpAddress UpdateIPByNetwork(String networkId) throws Exception {
+        IpAddress publicIpAddress = new IpAddress();
         HashMap<String, String> ipMap = new HashMap<String, String>();
-        ipMap.put("allocatedonly", "true");
-        ipMap.put("associatednetworkid", networkId);
-        ipMap.put("issourcenat", "true");
+        ipMap.put(CS_ALLOCATED_ONLY, CS_TRUE);
+        ipMap.put(CS_ASSOCIATED_NETWORK_ID, networkId);
+        ipMap.put(CS_IS_SOURCE_NAT, CS_TRUE);
         configServer.setServer(1L);
         Network network = convertEntityService.getNetworkById(convertEntityService.getNetworkByUuid(networkId));
-		if (network.getProjectId() != null) {
-			ipMap.put("projectid", network.getProject().getUuid());
-		} else {
-			ipMap.put("listall","true");
-		}
+        if (network.getProjectId() != null) {
+            ipMap.put(CloudStackConstants.CS_PROJECT_ID, convertEntityService.getProjectById(network.getProjectId()).getUuid());
+        } else {
+            ipMap.put(CloudStackConstants.CS_LIST_ALL, CS_TRUE);
+        }
         // 1. Get the list of ipAddress from CS server using CS connector
         String response = csipaddressService.listPublicIpAddresses(CloudStackConstants.JSON, ipMap);
         JSONArray ipAddressListJSON = null;
@@ -367,25 +379,25 @@ public class IpaddressServiceImpl implements IpaddressService {
                 ipAddress.setProjectId(convertEntityService.getProjectId(ipAddress.getTransProjectId()));
 
                 IpAddress ipAddresses = ipRepo.findByUUID(ipAddress.getUuid());
-				if (ipAddresses != null) {
-					ipAddresses.setUuid(ipAddress.getUuid());
-					ipAddresses.setPublicIpAddress(ipAddress.getPublicIpAddress());
-					ipAddresses.setState(ipAddress.getState());
-					ipAddresses.setIsSourcenat(ipAddress.getIsSourcenat());
-					ipAddresses.setIsStaticnat(ipAddress.getIsStaticnat());
-					ipAddresses.setNetworkId(ipAddress.getNetworkId());
-					ipAddresses.setDomainId(ipAddress.getDomainId());
-					ipAddresses.setZoneId(ipAddress.getZoneId());
-					ipAddresses.setProjectId(ipAddress.getProjectId());
-					ipAddresses.setIsActive(true);
-					publicIpAddress = ipRepo.save(ipAddresses);
-				} else {
-					publicIpAddress = ipRepo.save(ipAddress);
-				}
+                if (ipAddresses != null) {
+                    ipAddresses.setUuid(ipAddress.getUuid());
+                    ipAddresses.setPublicIpAddress(ipAddress.getPublicIpAddress());
+                    ipAddresses.setState(ipAddress.getState());
+                    ipAddresses.setIsSourcenat(ipAddress.getIsSourcenat());
+                    ipAddresses.setIsStaticnat(ipAddress.getIsStaticnat());
+                    ipAddresses.setNetworkId(ipAddress.getNetworkId());
+                    ipAddresses.setDomainId(ipAddress.getDomainId());
+                    ipAddresses.setZoneId(ipAddress.getZoneId());
+                    ipAddresses.setProjectId(ipAddress.getProjectId());
+                    ipAddresses.setIsActive(true);
+                    publicIpAddress = ipRepo.save(ipAddresses);
+                } else {
+                    publicIpAddress = ipRepo.save(ipAddress);
+                }
             }
         }
         return publicIpAddress;
-	}
+    }
 
     @Override
     public Page<IpAddress> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
