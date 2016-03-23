@@ -9,12 +9,14 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ck.panda.constants.CloudStackConstants;
+import ck.panda.constants.EmailConstants;
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.Event;
 import ck.panda.domain.entity.Event.EventType;
 import ck.panda.domain.entity.Event.Status;
 import ck.panda.service.AsynchronousJobService;
 import ck.panda.service.ConvertEntityService;
+import ck.panda.service.EmailJobService;
 import ck.panda.service.SyncService;
 import ck.panda.util.CloudStackServer;
 import ck.panda.util.infrastructure.AuthenticatedExternalWebService;
@@ -48,6 +50,9 @@ public class ActionListener implements MessageListener {
     /** Admin role. */
     private String backendAdminRole;
 
+    /** Email job service. */
+    private EmailJobService emailJobService;
+
     /**
      * Inject SyncService.
      *
@@ -58,13 +63,14 @@ public class ActionListener implements MessageListener {
      * @param backendAdminRole backend admin user role.
      */
     public ActionListener(SyncService syncService, AsynchronousJobService asyncService, ConvertEntityService convertEntityService,
-            CloudStackServer cloudStackServer, String backendAdminUsername, String backendAdminRole) {
+            CloudStackServer cloudStackServer, String backendAdminUsername, String backendAdminRole, EmailJobService emailJobService) {
         this.syncService = syncService;
         this.asyncService = asyncService;
         this.cloudStackServer = cloudStackServer;
         this.backendAdminUsername = backendAdminUsername;
         this.backendAdminRole = backendAdminRole;
         this.convertEntityService = convertEntityService;
+        this.emailJobService = emailJobService;
     }
 
     /** Action event listener . */
@@ -129,14 +135,23 @@ public class ActionListener implements MessageListener {
 			switch (eventStart) {
 			case EventTypes.EVENT_USER:
 				if (eventName.equals(EventTypes.EVENT_USER_LOGIN) || eventName.equals(EventTypes.EVENT_USER_LOGOUT)) {
-					LOGGER.debug("User sync", eventMessage);// TODO: Will do
-															// login event.
+					LOGGER.debug("User sync", eventMessage);// TODO: Will do login event.
 				} else {
-					Thread.sleep(3000); // Delay sync call for user to get
-										// success CRUD.
+					Thread.sleep(3000); // Delay sync call for user to get success CRUD.
 					syncService.syncUser();
 					if (eventName.equals(EventTypes.EVENT_USER_CREATE)) {
 						syncService.syncUpdateUserRole();
+						ObjectMapper mapper = new ObjectMapper();
+						eventResponse = mapper.readValue(eventMessage, ResponseEvent.class);
+						EmailEvent emailEvent = new EmailEvent();
+						emailEvent.setEntityuuid(eventResponse.getEntityuuid());
+						emailEvent.setResourceUuid(eventResponse.getEntityuuid());
+						emailEvent.setEvent(EventTypes.EVENT_USER_CREATE);
+						emailEvent.setEventType(EmailConstants.ACCOUNT);
+						emailEvent.setEventDateTime(eventResponse.getEventDateTime());
+						emailEvent.setUser(convertEntityService.getOwnerByUuid(eventResponse.getEntityuuid()).toString());
+						emailEvent.setSubject(EmailConstants.SUBJECT_ACCOUNT_SIGNUP);
+						emailJobService.sendMessageToQueue(emailEvent);
 					}
 				}
 				break;

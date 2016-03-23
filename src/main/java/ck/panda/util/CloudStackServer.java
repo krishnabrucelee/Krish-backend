@@ -138,7 +138,7 @@ public class CloudStackServer {
     /**
      * Whether you access the CloudStack API with HTTP or HTTPS, it must still be signed so that CloudStack can verify
      * the caller has been authenticated and authorized to execute the command.
-     * 
+     *
      * @param queryValues web service commands like create service offering
      * @return value for request.
      * @throws java.security.NoSuchAlgorithmException if tried to execute different algorithm except HMAC SHA1
@@ -166,7 +166,7 @@ public class CloudStackServer {
     /**
      * Whether you access the CloudStack API with HTTP or HTTPS, it must still be signed so that CloudStack can verify
      * the caller has been authenticated and authorized to execute the command.
-     * 
+     *
      * @param queryValues web service commands like create service offering
      * @return value for request.
      * @throws java.security.NoSuchAlgorithmException if tried to execute different algorithm except HMAC SHA1
@@ -190,7 +190,7 @@ public class CloudStackServer {
 
     /**
      * A web service command executed and parameters in command is compared with the cloudstack parameters.
-     * 
+     *
      * @param command web service eg. Create an instance
      * @param optional excluding mandatory fields
      * @return query values.
@@ -211,7 +211,7 @@ public class CloudStackServer {
 
     /**
      * A web service command executed and parameters in command is compared with the cloudstack parameters for login.
-     * 
+     *
      * @param command web service eg. Create an instance
      * @param optional excluding mandatory fields
      * @return query values.

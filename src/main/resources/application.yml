@@ -31,8 +31,8 @@ spring:
         password: ${RABBITMQ_PASSWORD}
         exchange:
             name: ${RABBITMQ_EXCHANGE}
-
-
+        email:
+            name: ${RABBITMQ_EMAIL_EXCHANGE}
 
     # CS server Routing key
         server:
@@ -51,8 +51,28 @@ spring:
             resource:
                 pattern: "*.ResourceStateEvent.*.*.*"
                 queue: ${RABBITMQ_RESOURCE_EVENT}
+            email:
+                pattern: "email.template"
+                queue : ${RABBITMQ_EMAIL}
 
+ # Mail configuration
+    mail:
+        host: mail.assistanz.com
+        port: 25
+        username: panda@assistanz.com
+        password: ck!P@nd@
+        properties:
+            mail:
+                smtp:
+                    auth: true
+                starttls:
+                    enable: true
+                    required: true
 
+    template:
+        view:
+            prefix: file:/var/log/
+            suffix: .html
 ---
 
 cloudstack:
