@@ -89,6 +89,7 @@ public class EmailJobServiceImpl implements EmailJobService {
 		//Defining the model object for the given Freemarker template
 		Map<String, String> context = new HashMap<String, String>();
 		context.put("name", email.getEvent());
+		// sample template.
 		String templateName = "email_template.ftl";
 		return generateContent(context, templateName);
 	}

@@ -11,7 +11,6 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.lang.reflect.Field;
 
@@ -21,9 +20,23 @@ import java.lang.reflect.Field;
 @Service
 public class EmailServiceImpl implements EmailService {
 
+	/** Constant for sender . */
+	private static final String SENDER = "from";
+
+	/** Constant for recipient . */
+	private static final String RECIPIENT = "to";
+
+	/** Constant for body . */
+	private static final String BODY = "body";
+
+	/** Constant for validation . */
+	private static final String ERROR = "value cannot be null";
+
+	/** EmailConfigurationService reference . */
 	@Autowired
 	private EmailConfigurationService emailServiceConfig;
 
+	/** Java Mail Service for mail send . */
 	@Autowired
 	private JavaMailSenderImpl javaMailService;
 
@@ -73,13 +86,13 @@ public class EmailServiceImpl implements EmailService {
 		for (Field field : email.getClass().getDeclaredFields()) {
 			field.setAccessible(true);
 			Object value = field.get(email);
-			if (value == null && (field.getName().equalsIgnoreCase("from") || field.getName().equalsIgnoreCase("to")
-					|| field.getName().equalsIgnoreCase("body"))) {
+			if (value == null && (field.getName().equalsIgnoreCase(SENDER) || field.getName().equalsIgnoreCase(RECIPIENT)
+					|| field.getName().equalsIgnoreCase(BODY))) {
 				hasNullValues = true;
 				break;
 			}
 			if (hasNullValues) {
-				return field.getName() + "value cannot be null";
+				return field.getName() + ERROR;
 			}
 		}
 		return "";
