@@ -288,20 +288,20 @@ public class IpaddressServiceImpl implements IpaddressService {
     }
 
 
-	@Override
-	public IpAddress UpdateIPByNetwork(String networkId) throws Exception {
-		IpAddress publicIpAddress = new IpAddress();
+    @Override
+    public IpAddress UpdateIPByNetwork(String networkId) throws Exception {
+        IpAddress publicIpAddress = new IpAddress();
         HashMap<String, String> ipMap = new HashMap<String, String>();
         ipMap.put("allocatedonly", "true");
         ipMap.put("associatednetworkid", networkId);
         ipMap.put("issourcenat", "true");
         configServer.setServer(1L);
         Network network = convertEntityService.getNetworkById(convertEntityService.getNetworkByUuid(networkId));
-		if (network.getProjectId() != null) {
-			ipMap.put("projectid", network.getProject().getUuid());
-		} else {
-			ipMap.put("listall","true");
-		}
+        if (network.getProjectId() != null) {
+            ipMap.put("projectid", convertEntityService.getProjectById(network.getProjectId()).getUuid());
+        } else {
+            ipMap.put("listall","true");
+        }
         // 1. Get the list of ipAddress from CS server using CS connector
         String response = csipaddressService.listPublicIpAddresses(CloudStackConstants.JSON, ipMap);
         JSONArray ipAddressListJSON = null;
@@ -319,25 +319,25 @@ public class IpaddressServiceImpl implements IpaddressService {
                 ipAddress.setProjectId(convertEntityService.getProjectId(ipAddress.getTransProjectId()));
 
                 IpAddress ipAddresses = ipRepo.findByUUID(ipAddress.getUuid());
-				if (ipAddresses != null) {
-					ipAddresses.setUuid(ipAddress.getUuid());
-					ipAddresses.setPublicIpAddress(ipAddress.getPublicIpAddress());
-					ipAddresses.setState(ipAddress.getState());
-					ipAddresses.setIsSourcenat(ipAddress.getIsSourcenat());
-					ipAddresses.setIsStaticnat(ipAddress.getIsStaticnat());
-					ipAddresses.setNetworkId(ipAddress.getNetworkId());
-					ipAddresses.setDomainId(ipAddress.getDomainId());
-					ipAddresses.setZoneId(ipAddress.getZoneId());
-					ipAddresses.setProjectId(ipAddress.getProjectId());
-					ipAddresses.setIsActive(true);
-					publicIpAddress = ipRepo.save(ipAddresses);
-				} else {
-					publicIpAddress = ipRepo.save(ipAddress);
-				}
+                if (ipAddresses != null) {
+                    ipAddresses.setUuid(ipAddress.getUuid());
+                    ipAddresses.setPublicIpAddress(ipAddress.getPublicIpAddress());
+                    ipAddresses.setState(ipAddress.getState());
+                    ipAddresses.setIsSourcenat(ipAddress.getIsSourcenat());
+                    ipAddresses.setIsStaticnat(ipAddress.getIsStaticnat());
+                    ipAddresses.setNetworkId(ipAddress.getNetworkId());
+                    ipAddresses.setDomainId(ipAddress.getDomainId());
+                    ipAddresses.setZoneId(ipAddress.getZoneId());
+                    ipAddresses.setProjectId(ipAddress.getProjectId());
+                    ipAddresses.setIsActive(true);
+                    publicIpAddress = ipRepo.save(ipAddresses);
+                } else {
+                    publicIpAddress = ipRepo.save(ipAddress);
+                }
             }
         }
         return publicIpAddress;
-	}
+    }
 
     @Override
     public Page<IpAddress> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
