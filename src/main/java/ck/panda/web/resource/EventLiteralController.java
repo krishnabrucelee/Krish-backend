@@ -73,13 +73,26 @@ public class EventLiteralController extends CRUDController<EventLiterals> implem
         return pageResponse.getContent();
     }
 
+    /**
+     * List all event literals.
+     *
+     * @return event literals.
+     * @throws Exception if error occurs.
+     */
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected List<EventLiterals> getSearch() throws Exception {
+    protected List<EventLiterals> listAll() throws Exception {
         return literalService.findByIsActive(true);
     }
 
+    /**
+     * List event literals by event name.
+     *
+     * @param eventName to be choosed.
+     * @return event literals.
+     * @throws Exception if error occurs.
+     */
     @RequestMapping(value = "listbyevent", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
