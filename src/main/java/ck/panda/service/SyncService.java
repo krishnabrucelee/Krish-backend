@@ -1,7 +1,10 @@
 package ck.panda.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.EventLiterals;
 import ck.panda.domain.entity.Project;
 import ck.panda.rabbitmq.util.ResponseEvent;
 import ck.panda.util.CloudStackServer;
@@ -300,5 +303,7 @@ public interface SyncService {
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors
      */
-	void syncResourceLimitActionEventProject(ResponseEvent eventResponse) throws ApplicationException, Exception;
+    void syncResourceLimitActionEventProject(ResponseEvent eventResponse) throws ApplicationException, Exception;
+
+    void EventList(List<EventLiterals> eventLists) throws Exception;
 }
