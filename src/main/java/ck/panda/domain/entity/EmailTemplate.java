@@ -2,19 +2,13 @@ package ck.panda.domain.entity;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.Date;
-import java.util.UUID;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
 import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -24,8 +18,6 @@ import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
-
-import ck.panda.domain.entity.Network.Status;
 
 @Entity
 @Table(name = "email_template")
@@ -54,11 +46,6 @@ public class EmailTemplate implements Serializable {
     /** Language of the template */
     @Column(name = "chinese_language")
     private String chineseLanguage;
-
-
-    /** File path to upload the template */
-    @Column(name = "file_path")
-    private String fileName;
 
     /** Created by user. */
     @CreatedBy
@@ -160,21 +147,6 @@ public class EmailTemplate implements Serializable {
         this.eventName = eventName;
     }
 
-
-    /**
-     * @return the fileName
-     */
-    public String getFileName() {
-        return fileName;
-    }
-
-    /**
-     * @param fileName the fileName to set
-     */
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
     /**
      * Get the version of the template.
      *
@@ -266,6 +238,8 @@ public class EmailTemplate implements Serializable {
     }
 
     /**
+     * Get the recipientType .
+     *
      * @return the recipientType
      */
     public RecipientType getRecipientType() {
@@ -273,13 +247,17 @@ public class EmailTemplate implements Serializable {
     }
 
     /**
-     * @param recipientType the recipientType to set
+     * Set he recipientType.
+     *
+     * @param recipientType to set
      */
     public void setRecipientType(RecipientType recipientType) {
         this.recipientType = recipientType;
     }
 
     /**
+     * Get subject.
+     *
      * @return the subject
      */
     public String getSubject() {
@@ -287,13 +265,17 @@ public class EmailTemplate implements Serializable {
     }
 
     /**
-     * @param subject the subject to set
+     * Set the subject.
+     *
+     * @param subject to set.
      */
     public void setSubject(String subject) {
         this.subject = subject;
     }
 
     /**
+     * Get english langauage.
+     *
      * @return the englishLanguage
      */
     public String getEnglishLanguage() {
@@ -301,13 +283,17 @@ public class EmailTemplate implements Serializable {
     }
 
     /**
-     * @param englishLanguage the englishLanguage to set
+     * Set the english langauage..
+     *
+     * @param englishLanguage to set
      */
     public void setEnglishLanguage(String englishLanguage) {
         this.englishLanguage = englishLanguage;
     }
 
     /**
+     * Ge chinese language.
+     *
      * @return the chineseLanguage
      */
     public String getChineseLanguage() {
@@ -315,7 +301,9 @@ public class EmailTemplate implements Serializable {
     }
 
     /**
-     * @param chineseLanguage the chineseLanguage to set
+     * Set the chineseLanguage.
+     *
+     * @param chineseLanguage  to set
      */
     public void setChineseLanguage(String chineseLanguage) {
         this.chineseLanguage = chineseLanguage;

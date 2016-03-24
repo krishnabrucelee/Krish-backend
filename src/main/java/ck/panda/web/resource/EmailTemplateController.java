@@ -84,7 +84,7 @@ public class EmailTemplateController extends CRUDController<EmailTemplate> imple
 
     @RequestMapping(value = "/uploadFile", method = RequestMethod.POST)
     public @ResponseBody String handleFileUpload(
-            @RequestParam(value="file", required=true) MultipartFile[] files, @RequestParam(value="eventName", required=true) String eventName, @RequestParam(value="englishLanguage", required=true) String englishLanguage, @RequestParam(value="chineseLanguage")String chineseLanguage) throws Exception {
+            @RequestParam(value="file", required=true) MultipartFile[] files, @RequestParam(value="eventName", required=true) String eventName, @RequestParam(value="englishLanguage", required=true) String englishLanguage, @RequestParam(value="chineseLanguage")String chineseLanguage,@RequestParam(value="subject")String subject) throws Exception {
         InputStream inputStream = null;
         OutputStream outputStream = null;
 
@@ -97,6 +97,7 @@ public class EmailTemplateController extends CRUDController<EmailTemplate> imple
             File newFile = new File(englishTemplateDir + "/" + eventName);
             email.setEventName(eventName);
             email.setEnglishLanguage(fileName);
+            email.setSubject(subject);
             emailService.save(email);
             try {
                 inputStream = file.getInputStream();
@@ -121,6 +122,7 @@ public class EmailTemplateController extends CRUDController<EmailTemplate> imple
             File newFile = new File(chineseTemplateDir + "/" + eventName);
                 email.setEventName(eventName);
                 email.setChineseLanguage(fileName);
+                email.setSubject(subject);
                 emailService.save(email);
                 try {
                     inputStream = file.getInputStream();
