@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.IpAddress;
+import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.IpAddress.State;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -151,4 +152,13 @@ public interface IpaddressService extends CRUDService<IpAddress> {
      * @throws Exception if error occurs.
      */
     IpAddress findByVpnKey(Long id) throws Exception;
+
+    /**
+     * Delete rule from ipAddress.
+     *
+     * @param ipaddress object
+     * @return ipaddress
+     * @throws Exception if error occurs.
+     */
+    IpAddress ruleDelete(IpAddress ipaddress) throws Exception;
 }

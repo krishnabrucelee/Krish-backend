@@ -17,11 +17,14 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
+import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.IpAddress;
+import ck.panda.domain.entity.LoadBalancerRule;
 import ck.panda.domain.entity.IpAddress.State;
 import ck.panda.domain.entity.IpAddress.VpnState;
 import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
 import ck.panda.domain.entity.Network;
+import ck.panda.domain.entity.PortForwarding;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.repository.jpa.IpaddressRepository;
@@ -94,6 +97,18 @@ public class IpaddressServiceImpl implements IpaddressService {
     @Autowired
     private QuotaValidationService quotaLimitValidation;
 
+    /** Port forwarding service reference. */
+    @Autowired
+    private PortForwardingService portForwardingService;
+
+    /** Load balancer service reference. */
+    @Autowired
+    private LoadBalancerService loadBalancerService;
+
+    /**  Egress rule service reference. */
+    @Autowired
+    private EgressRuleService egressRuleService;
+
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
@@ -109,6 +124,18 @@ public class IpaddressServiceImpl implements IpaddressService {
 
     /** Constant for action event running status. */
     public static final String CS_RUNNING_STATE = "Running";
+
+    /** Constant for Allocated only. */
+    public static final String CS_ALLOCATED_ONLY = "allocatedonly";
+
+    /** Constant for Associated network id. */
+    public static final String CS_ASSOCIATED_NETWORK_ID = "associatednetworkid";
+
+    /** Constant for True status. */
+    public static final String CS_TRUE = "true";
+
+    /** Constant for Source nat. */
+    public static final String CS_IS_SOURCE_NAT = "issourcenat";
 
     @Override
     public List<IpAddress> acquireIP(Long networkId) throws Exception {
@@ -229,8 +256,41 @@ public class IpaddressServiceImpl implements IpaddressService {
             ipaddress.setState(IpAddress.State.FREE);
         } else {
             ipaddress = this.dissocitateIpAddress(ipaddress.getUuid());
+            this.ruleDelete(ipaddress);
         }
         return ipRepo.save(ipaddress);
+    }
+
+    @Override
+    public IpAddress ruleDelete(IpAddress ipaddress) throws Exception {
+        List<PortForwarding> portForwardingList = portForwardingService.findAllByIpAddressAndIsActive(ipaddress.getId(), true);
+        List<FirewallRules> firewallList = egressRuleService.findAllByIpAddressAndIsActive(ipaddress.getId(), true);
+        List<LoadBalancerRule> loadBalancerList = loadBalancerService.findAllByIpAddressAndIsActive(ipaddress.getId(), true);
+            if (portForwardingList.size() != 0) {
+                for (PortForwarding portForwarding : portForwardingList) {
+                    portForwarding.setIsActive(false);
+                    configServer.setServer(1L);
+                    portForwarding.setSyncFlag(false);
+                    portForwardingService.softDelete(portForwarding);
+                }
+            }
+            if (firewallList.size() != 0) {
+                for (FirewallRules firewallRules : firewallList) {
+                    firewallRules.setIsActive(false);
+                    configServer.setServer(1L);
+                    firewallRules.setSyncFlag(false);
+                    egressRuleService.save(firewallRules);
+                }
+            }
+            if (loadBalancerList.size() != 0) {
+                for (LoadBalancerRule loadBalancerRule : loadBalancerList) {
+                    loadBalancerRule.setIsActive(false);
+                    configServer.setServer(1L);
+                    loadBalancerRule.setSyncFlag(false);
+                    loadBalancerService.save(loadBalancerRule);
+                }
+            }
+        return ipaddress;
     }
 
     @Override
@@ -288,20 +348,20 @@ public class IpaddressServiceImpl implements IpaddressService {
     }
 
 
-	@Override
-	public IpAddress UpdateIPByNetwork(String networkId) throws Exception {
-		IpAddress publicIpAddress = new IpAddress();
+    @Override
+    public IpAddress UpdateIPByNetwork(String networkId) throws Exception {
+        IpAddress publicIpAddress = new IpAddress();
         HashMap<String, String> ipMap = new HashMap<String, String>();
-        ipMap.put("allocatedonly", "true");
-        ipMap.put("associatednetworkid", networkId);
-        ipMap.put("issourcenat", "true");
+        ipMap.put(CS_ALLOCATED_ONLY, CS_TRUE);
+        ipMap.put(CS_ASSOCIATED_NETWORK_ID, networkId);
+        ipMap.put(CS_IS_SOURCE_NAT, CS_TRUE);
         configServer.setServer(1L);
         Network network = convertEntityService.getNetworkById(convertEntityService.getNetworkByUuid(networkId));
-		if (network.getProjectId() != null) {
-			ipMap.put("projectid", network.getProject().getUuid());
-		} else {
-			ipMap.put("listall","true");
-		}
+        if (network.getProjectId() != null) {
+            ipMap.put(CloudStackConstants.CS_PROJECT_ID, convertEntityService.getProjectById(network.getProjectId()).getUuid());
+        } else {
+            ipMap.put(CloudStackConstants.CS_LIST_ALL, CS_TRUE);
+        }
         // 1. Get the list of ipAddress from CS server using CS connector
         String response = csipaddressService.listPublicIpAddresses(CloudStackConstants.JSON, ipMap);
         JSONArray ipAddressListJSON = null;
@@ -319,25 +379,25 @@ public class IpaddressServiceImpl implements IpaddressService {
                 ipAddress.setProjectId(convertEntityService.getProjectId(ipAddress.getTransProjectId()));
 
                 IpAddress ipAddresses = ipRepo.findByUUID(ipAddress.getUuid());
-				if (ipAddresses != null) {
-					ipAddresses.setUuid(ipAddress.getUuid());
-					ipAddresses.setPublicIpAddress(ipAddress.getPublicIpAddress());
-					ipAddresses.setState(ipAddress.getState());
-					ipAddresses.setIsSourcenat(ipAddress.getIsSourcenat());
-					ipAddresses.setIsStaticnat(ipAddress.getIsStaticnat());
-					ipAddresses.setNetworkId(ipAddress.getNetworkId());
-					ipAddresses.setDomainId(ipAddress.getDomainId());
-					ipAddresses.setZoneId(ipAddress.getZoneId());
-					ipAddresses.setProjectId(ipAddress.getProjectId());
-					ipAddresses.setIsActive(true);
-					publicIpAddress = ipRepo.save(ipAddresses);
-				} else {
-					publicIpAddress = ipRepo.save(ipAddress);
-				}
+                if (ipAddresses != null) {
+                    ipAddresses.setUuid(ipAddress.getUuid());
+                    ipAddresses.setPublicIpAddress(ipAddress.getPublicIpAddress());
+                    ipAddresses.setState(ipAddress.getState());
+                    ipAddresses.setIsSourcenat(ipAddress.getIsSourcenat());
+                    ipAddresses.setIsStaticnat(ipAddress.getIsStaticnat());
+                    ipAddresses.setNetworkId(ipAddress.getNetworkId());
+                    ipAddresses.setDomainId(ipAddress.getDomainId());
+                    ipAddresses.setZoneId(ipAddress.getZoneId());
+                    ipAddresses.setProjectId(ipAddress.getProjectId());
+                    ipAddresses.setIsActive(true);
+                    publicIpAddress = ipRepo.save(ipAddresses);
+                } else {
+                    publicIpAddress = ipRepo.save(ipAddress);
+                }
             }
         }
         return publicIpAddress;
-	}
+    }
 
     @Override
     public Page<IpAddress> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
@@ -392,8 +452,7 @@ public class IpaddressServiceImpl implements IpaddressService {
         }
         return ipAddress;
         } else {
-            errors.addGlobalError("Resource limit for department has not been set. Please update department quota");
-            throw new ApplicationException(errors);
+            throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Resource limit for department has not been set. Please update department quota");
         }
     }
 

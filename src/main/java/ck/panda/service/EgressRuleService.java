@@ -1,12 +1,10 @@
 package ck.panda.service;
 
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.FirewallRules.TrafficType;
-import ck.panda.domain.entity.Nic;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
@@ -17,6 +15,16 @@ import ck.panda.util.domain.vo.PagingAndSorting;
  */
 @Service
 public interface EgressRuleService extends CRUDService<FirewallRules> {
+
+    /**
+     * Find all firewall rules by ipAddress.
+     *
+     * @param id ipAddress id .
+     * @param isActive ipAddress status Active/Inactive
+     * @return list of ipAddress in firewall rules.
+     * @throws Exception if error occurs.
+     */
+    List<FirewallRules> findAllByIpAddressAndIsActive(Long id, Boolean isActive) throws Exception;
 
     /**
      * To get list of egressFirewallRule from cloudstack server.

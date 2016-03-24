@@ -38,6 +38,7 @@ import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
+import ck.panda.domain.entity.VmIpaddress.IpType;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.VpnUser;
@@ -563,10 +564,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 this.assignNicTovM(vmIn);
                 this.assignVolumeTovM(vmIn);
                 IpAddress ipAddress = ipService.UpdateIPByNetwork(vmIn.getNetwork().getUuid());
-				if (ipAddress != null) {
-					vmIn.setPublicIpAddress(ipAddress.getPublicIpAddress());
-					vmIn = virtualMachineService.update(vmIn);
-				}
+                if (ipAddress != null) {
+                    vmIn.setPublicIpAddress(ipAddress.getPublicIpAddress());
+                    vmIn = virtualMachineService.update(vmIn);
+                }
                 if (volumeService.findByInstanceAndVolumeType(vmIn.getId()) != null) {
                     vmIn.setVolumeSize(volumeService.findByInstanceAndVolumeType(vmIn.getId()).getDiskSize());
                     vmIn = virtualMachineService.update(vmIn);
@@ -738,6 +739,19 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 if (nicService.findbyUUID(nic.getUuid()) == null) {
                     nicService.save(nic);
                 }
+                VmIpaddress vmIp = new VmIpaddress();
+                vmIp.setVmInstanceId(nic.getVmInstanceId());
+                vmIp.setNicId(nic.getId());
+                vmIp.setIsActive(true);
+                vmIp.setIpType(IpType.primaryIpAddress);
+                vmIp.setGuestIpAddress(nic.getIpAddress());
+
+                VmIpaddress persistVmIP = vmIpService.save(vmIp);
+                List<VmIpaddress> vmIpList = new ArrayList<VmIpaddress>();
+                nic.setSyncFlag(false);
+                vmIpList.add(persistVmIP);
+                nic.setVmIpAddress(vmIpList);
+                nicService.save(nic);
             }
         }
     }
@@ -1046,14 +1060,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with CloudStack server Ip address from Asynchronous Job.
      *
-     * @param jobResult
-     *            job result
-     * @param eventObject
-     *            network event object
-     * @throws ApplicationException
-     *             unhandled application errors
-     * @throws Exception
-     *             cloudstack unhandled errors
+     * @param jobResult job result
+     * @param eventObject network event object
+     * @throws ApplicationException unhandled application errors
+     * @throws Exception cloudstack unhandled errors
      */
     public void asyncIpAddress(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
         Errors errors = null;
@@ -1128,6 +1138,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             IpAddress ipAddress = ipService.findbyUUID(json.getString("id"));
             if (ipAddress != null) {
                 ipAddress.setSyncFlag(false);
+                ipService.ruleDelete(ipAddress);
                 ipService.softDelete(ipAddress);
                 //Resource Count delete
                 if (!convertEntityService.getDepartmentById(ipAddress.getDepartmentId()).getType()

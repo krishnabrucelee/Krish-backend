@@ -15,6 +15,17 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 public interface VpnUserService extends CRUDService<VpnUser> {
 
     /**
+     * Find all VPN User by department and domain.
+     *
+     * @param departmentId department id
+     * @param domainId domain id
+     * @param isActive status Active/Inactive
+     * @return list of VPN users.
+     * @throws Exception if error occurs.
+     */
+    List<VpnUser> findAllByDepartmentAndDomainAndIsActive(Long departmentId, Long domainId, Boolean isActive) throws Exception;
+
+    /**
      * Paging and Sorting for displaying more number of elements in list.
      *
      * @param pagingAndSorting sortable method.

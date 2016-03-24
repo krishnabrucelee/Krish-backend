@@ -10,6 +10,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -17,10 +18,12 @@ import org.springframework.context.annotation.Configuration;
 import ck.panda.rabbitmq.util.ActionListener;
 import ck.panda.rabbitmq.util.AlertEventListener;
 import ck.panda.rabbitmq.util.AsynchronousJobListener;
+import ck.panda.rabbitmq.util.EmailListener;
 import ck.panda.rabbitmq.util.ResourceStateListener;
 import ck.panda.rabbitmq.util.UsageEventListener;
 import ck.panda.service.AsynchronousJobService;
 import ck.panda.service.ConvertEntityService;
+import ck.panda.service.EmailJobService;
 import ck.panda.service.SyncService;
 import ck.panda.util.CloudStackServer;
 
@@ -67,9 +70,17 @@ public class RabbitConfig {
     @Value(value = "${spring.rabbit.server.resource.pattern}")
     private String csResourcePattern;
 
+    /** CS server usage routing key pattern. */
+    @Value(value = "${spring.rabbit.server.email.pattern}")
+    private String csEmailPattern;
+
     /** CS server exchange name. */
     @Value(value = "${spring.rabbit.exchange.name}")
     private String exchangeName;
+
+    /** CS server exchange name. */
+    @Value(value = "${spring.rabbit.email.name}")
+    private String emailExchangeName;
 
     /** CS server alert queue name. */
     @Value(value = "${spring.rabbit.server.alert.queue}")
@@ -91,6 +102,10 @@ public class RabbitConfig {
     @Value(value = "${spring.rabbit.server.resource.queue}")
     private String csResourceQueueName;
 
+    /** CS server email queue name. */
+    @Value(value = "${spring.rabbit.server.email.queue}")
+    private String csEmailQueueName;
+
     /** Admin username. */
     @Value("${backend.admin.username}")
     private String backendAdminUsername;
@@ -111,6 +126,16 @@ public class RabbitConfig {
     @Bean
     Queue queue() {
         return new Queue(csActionQueueName, true);
+    }
+
+    /**
+     * Queue for email messages.
+     *
+     * @return queue name
+     */
+    @Bean
+    Queue emailQueue() {
+        return new Queue(csEmailQueueName, true);
     }
 
     /**
@@ -161,6 +186,16 @@ public class RabbitConfig {
     @Bean
     TopicExchange exchange() {
         return new TopicExchange(exchangeName);
+    }
+
+    /**
+     * Create Topic Exchange from given exchange name specified in CS server event-bus configuration.
+     *
+     * @return exchange name.
+     */
+    @Bean
+    TopicExchange emailExchange() {
+        return new TopicExchange(emailExchangeName);
     }
 
     /**
@@ -224,6 +259,18 @@ public class RabbitConfig {
     }
 
     /**
+     * Binding Queue with exchange to get email message from CS server event.
+     *
+     * @param emailQueue name of the queue4.
+     * @param exchange name of the exchange.
+     * @return binding object
+     */
+    @Bean
+    Binding binding5(Queue emailQueue, TopicExchange emailExchange) {
+        return BindingBuilder.bind(emailQueue).to(emailExchange).with(csEmailPattern);
+    }
+
+    /**
      * Convenience "factory" to facilitate opening a link Connection to an AMQP broker.
      *
      * @return connection factory
@@ -238,14 +285,14 @@ public class RabbitConfig {
     }
 
     /**
-     * It simplifies synchronous RabbitMQ access (sending and receiving messages).
+     * It simplifies synchronous RabbitMQ access for email (sending and receiving messages).
      *
      * @return rabbit template setup
      */
     @Bean
-    public RabbitTemplate template() {
+    public RabbitTemplate emailTemplate() {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory());
-        rabbitTemplate.setExchange(exchangeName);
+        rabbitTemplate.setExchange(emailExchangeName);
         rabbitTemplate.setConnectionFactory(connectionFactory());
         return rabbitTemplate;
     }
@@ -259,11 +306,12 @@ public class RabbitConfig {
 	@Bean
 	MessageListenerAdapter actionListenerAdapter() {
 		SyncService syncService = applicationContext.getBean(SyncService.class);
+		EmailJobService emailJobService = applicationContext.getBean(EmailJobService.class);
 		AsynchronousJobService asyncService = applicationContext.getBean(AsynchronousJobService.class);
 		CloudStackServer cloudStackServer = applicationContext.getBean(CloudStackServer.class);
 		ConvertEntityService convertEntityService = applicationContext.getBean(ConvertEntityService.class);
 		return new MessageListenerAdapter(new ActionListener(syncService, asyncService, convertEntityService,
-				cloudStackServer, backendAdminUsername, backendAdminRole));
+				cloudStackServer, backendAdminUsername, backendAdminRole, emailJobService));
 	}
 
     /**
@@ -315,6 +363,18 @@ public class RabbitConfig {
     @Bean
     MessageListenerAdapter usageListenerAdapter() {
         return new MessageListenerAdapter(new UsageEventListener());
+    }
+
+    /**
+     * Message listener adapter that delegates the handling of email messages to target listener methods via reflection,
+     * with flexible type conversion.
+     *
+     * @return message usage listener.
+     */
+    @Bean
+    MessageListenerAdapter emailListenerAdapter() {
+    	EmailJobService emailJobService = applicationContext.getBean(EmailJobService.class);
+        return new MessageListenerAdapter(new EmailListener(emailJobService, backendAdminUsername, backendAdminRole));
     }
 
     /**
@@ -391,6 +451,22 @@ public class RabbitConfig {
         container.setConnectionFactory(connectionFactory());
         container.setQueues(queue4);
         container.setMessageListener(resourceStateListenerAdapter());
+        return container;
+    }
+
+    /**
+     * Add message listerner to message listener container with specified queue to listen/consume email
+     * message.
+     *
+     * @param emailQueue queue for asynchronous event.
+     * @return message listener container for email message.
+     */
+    @Bean
+    SimpleMessageListenerContainer emailContainer(Queue emailQueue) {
+        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+        container.setConnectionFactory(connectionFactory());
+        container.setQueues(emailQueue);
+        container.setMessageListener(emailListenerAdapter());
         return container;
     }
 }

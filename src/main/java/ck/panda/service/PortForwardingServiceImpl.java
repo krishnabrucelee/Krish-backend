@@ -207,4 +207,9 @@ public class PortForwardingServiceImpl implements PortForwardingService {
             throws Exception {
         return portForwardingRepo.findAllByIpaddressAndIsActive(pagingAndSorting.toPageRequest(), ipaddressId, true);
     }
+
+    @Override
+    public List<PortForwarding> findAllByIpAddressAndIsActive(Long id, Boolean isActive) throws Exception {
+        return portForwardingRepo.findAllByIpAddressAndIsActive(id, true);
+    }
 }

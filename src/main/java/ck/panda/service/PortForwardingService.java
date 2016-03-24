@@ -1,11 +1,8 @@
 package ck.panda.service;
 
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.PortForwarding;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -16,6 +13,16 @@ import ck.panda.util.domain.vo.PagingAndSorting;
  */
 @Service
 public interface PortForwardingService extends CRUDService<PortForwarding> {
+
+    /**
+     * Find all PortForwarding by ipAddress.
+     *
+     * @param id ipAddress id .
+     * @param isActive ipAddress status Active/Inactive
+     * @return list of ipAddress in PortForwarding.
+     * @throws Exception if error occurs.
+     */
+    List<PortForwarding> findAllByIpAddressAndIsActive(Long id, Boolean isActive) throws Exception;
 
     /**
      * To get list of PortForwarding from cloudstack server.

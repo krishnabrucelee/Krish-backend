@@ -332,4 +332,9 @@ public class EgressRuleServiceImpl implements EgressRuleService {
         }
         return egressRepo.save(ingressFirewallRule);
     }
+
+    @Override
+    public List<FirewallRules> findAllByIpAddressAndIsActive(Long id, Boolean isActive) throws Exception {
+        return egressRepo.findAllByIpAddressAndIsActive(id, true);
+    }
 }
