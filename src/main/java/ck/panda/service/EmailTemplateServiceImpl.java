@@ -15,7 +15,7 @@ import ck.panda.util.domain.vo.PagingAndSorting;
  *
  */
 @Service
-public class EmailTemplateServiceImpl implements EmailTemplateService {
+public class EmailTemplateServiceImpl implements EmailTypeTemplateService {
 
     /** Email template repository reference. */
     @Autowired
