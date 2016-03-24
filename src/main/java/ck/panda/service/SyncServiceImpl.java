@@ -2591,9 +2591,9 @@ public class SyncServiceImpl implements SyncService {
 
     @Override
     public void EventList(List<EventLiterals> eventLists) throws Exception {
-    List<EventLiterals> userLists = EventsUtil.createEventsList(account,users,accountremoval);
-    for (EventLiterals events : userLists) {
-    eventService.save(events);
+        List<EventLiterals> userLists = EventsUtil.createEventsList(account,users,accountremoval);
+        for (EventLiterals events : userLists) {
+            eventService.save(events);
+        }
     }
-}
 }

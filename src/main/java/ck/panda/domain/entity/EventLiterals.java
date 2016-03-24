@@ -264,7 +264,7 @@ public class EventLiterals implements Serializable {
     }
 
     /**
-     * Set the description .
+     * Set the description.
      *
      * @param description to set
      */
