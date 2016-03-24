@@ -55,16 +55,18 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @PreAuthorize("hasPermission(#role.getSyncFlag(), 'CREATE_ROLE')")
-    public Role save(Role role) throws Exception {
+    public Role save(Role role, Long id) throws Exception {
         Errors errors = validator.rejectIfNullEntity("role", role);
         errors = validator.validateEntity(role, errors);
         validateName(errors, role.getName(), role.getDepartmentId(), true);
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
-        } else {
-            role.setStatus(Status.ENABLED);
-            return roleRepo.save(role);
         }
+        role.setStatus(Status.ENABLED);
+        if ((convertEntityService.getOwnerById(id).getType()).equals(User.UserType.USER)) {
+            role.setDepartmentId(convertEntityService.getOwnerById(id).getDepartmentId());
+        }
+        return roleRepo.save(role);
     }
 
     @Override
@@ -178,6 +180,14 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public Page<Role> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
         return roleRepo.findAllByDomainIdAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
+    }
+
+    @Override
+    public Role save(Role role) throws Exception {
+        if (!role.getSyncFlag()) {
+            return roleRepo.save(role);
+        }
+        return role;
     }
 
 }
