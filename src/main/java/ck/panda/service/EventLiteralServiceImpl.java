@@ -19,7 +19,6 @@ public class EventLiteralServiceImpl implements EventLiteralsService {
     @Autowired
     private EventLiteralsRepository eventRepo;
 
-
     @Override
     public EventLiterals save(EventLiterals email) throws Exception {
         return eventRepo.save(email);
@@ -30,7 +29,6 @@ public class EventLiteralServiceImpl implements EventLiteralsService {
         return eventRepo.save(email);
     }
 
-    @Override
     public void delete(EventLiterals email) throws Exception {
         eventRepo.delete(email);
     }

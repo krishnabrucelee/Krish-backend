@@ -1,7 +1,5 @@
 package ck.panda.service;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -54,17 +52,5 @@ public class EmailTemplateServiceImpl implements EmailTypeTemplateService {
     @Override
     public List<EmailTemplate> findAll() throws Exception {
         return (List<EmailTemplate>) emailRepo.findAll();
-    }
-
-
-    public List<String> listFolders(String directoryName){
-        List<String> textFiles = new ArrayList<String>();
-        File directory = new File(directoryName);
-        for (File file : directory.listFiles()) {
-          if (file.getName().endsWith((".html"))) {
-            textFiles.add(file.getName());
-          }
-        }
-        return textFiles;
     }
 }

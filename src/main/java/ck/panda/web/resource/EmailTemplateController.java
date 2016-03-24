@@ -25,7 +25,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.EmailTemplate;
-import ck.panda.service.EmailTemplateService;
+import ck.panda.service.EmailTypeTemplateService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -44,7 +44,7 @@ public class EmailTemplateController extends CRUDController<EmailTemplate> imple
 
     /** Service reference to EmailTemplate. */
     @Autowired
-    private EmailTemplateService emailService;
+    private EmailTypeTemplateService emailService;
 
     /** English template directory. */
     @Value("${english.template.dir}")

@@ -97,6 +97,8 @@ public class EmailTemplate implements Serializable {
     private MultipartFile file;
 
     /**
+     * Get the file to be uploaded.
+     *
      * @return the file
      */
     public MultipartFile getFile() {
@@ -104,6 +106,8 @@ public class EmailTemplate implements Serializable {
     }
 
     /**
+     * Set the file to be uploaded.
+     *
      * @param file the file to set
      */
     public void setFile(MultipartFile file) {
@@ -238,7 +242,7 @@ public class EmailTemplate implements Serializable {
     }
 
     /**
-     * Get the recipientType .
+     * Get the type of the recipient while uploading template.
      *
      * @return the recipientType
      */
@@ -247,7 +251,7 @@ public class EmailTemplate implements Serializable {
     }
 
     /**
-     * Set he recipientType.
+     * Set the type of the recipient while uploading template.
      *
      * @param recipientType to set
      */
@@ -256,7 +260,7 @@ public class EmailTemplate implements Serializable {
     }
 
     /**
-     * Get subject.
+     * Get subject of the template.
      *
      * @return the subject
      */
@@ -265,7 +269,7 @@ public class EmailTemplate implements Serializable {
     }
 
     /**
-     * Set the subject.
+     * Set the  subject of the template.
      *
      * @param subject to set.
      */
@@ -308,5 +312,4 @@ public class EmailTemplate implements Serializable {
     public void setChineseLanguage(String chineseLanguage) {
         this.chineseLanguage = chineseLanguage;
     }
-
 }
