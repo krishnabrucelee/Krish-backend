@@ -32,51 +32,39 @@ public class EmailConfiguration {
     @Column(name = "id")
     private Long id;
 
-    /**
-     * Application Url of panda panel.
-     */
+    /** Application Url of panda panel. */
     @Column(name = "application_url")
     private String applicationUrl;
 
-    /**
-     * Admin user name of panda panel.
-     */
+    /** Admin user name of panda panel. */
     @Column(name = "user_name")
     private String userName;
 
-    /**
-     * Port no of the email server.
-     */
+    /** Email language. */
+    @Column(name = "email_language")
+    private String emailLanguage;
+
+    /** Port no of the email server. */
     @Column(name = "port")
     private Integer port;
 
-    /**
-     * The from address of the email server.
-     */
+    /** The from address of the email server. */
     @Column(name = "email_from")
     private String emailFrom;
 
-    /**
-     * Host of the email server.
-     */
+    /** Host of the email server. */
     @Column(name = "host")
     private String host;
 
-    /**
-     * Admin Password of the panda panel.
-     */
+    /** Admin Password of the panda panel. */
     @Column(name = "password")
     private String password;
 
-    /**
-     * SSL is enabled or not.
-     */
+    /** SSL is enabled or not. */
     @Column(name = "is_ssl", columnDefinition = "tinyint")
     private Boolean ssl;
 
-    /**
-     * Sender name of panda panel.
-     */
+    /** Sender name of panda panel. */
     @Column(name = "sender_name")
     private String senderName;
 
@@ -404,6 +392,24 @@ public class EmailConfiguration {
      */
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
+    }
+
+    /**
+     * Get the email language.
+     *
+     * @return the email language
+     */
+    public String getEmailLanguage() {
+        return emailLanguage;
+    }
+
+    /**
+     * Set the email language.
+     *
+     * @param emailLanguage the email language to set
+     */
+    public void setEmailLanguage(String emailLanguage) {
+        this.emailLanguage = emailLanguage;
     }
 
 }
