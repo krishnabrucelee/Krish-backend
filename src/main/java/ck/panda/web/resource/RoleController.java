@@ -57,7 +57,7 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
     @Override
     public Role create(@RequestBody Role role) throws Exception {
         role.setSyncFlag(true);
-        return roleService.save(role);
+        return roleService.save(role, Long.parseLong(tokenDetails.getTokenDetails("id")));
     }
 
     @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing Role.", response = Role.class)
