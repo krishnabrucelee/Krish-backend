@@ -10,16 +10,14 @@ import ck.panda.domain.entity.EventLiterals;
 import ck.panda.domain.entity.Permission.Module;
 
 /**
- *
- * Prepare permission list.
+ * Prepare event list.
  */
 public final class EventsUtil {
 
     /**
-     * PermissionUtil constructor.
+     * EventUtil constructor.
      */
     private EventsUtil() {
-
     }
 
     @SuppressWarnings("rawtypes")
@@ -42,11 +40,8 @@ public final class EventsUtil {
                 events.setEventLiteralsKey(actionTest[0].toUpperCase());
                 events.setIsActive(true);
                 moduleList.add(events);
-
+                }
             }
-            }
-
-
         return moduleList;
     }
 }
