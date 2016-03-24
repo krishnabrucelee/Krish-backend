@@ -89,16 +89,16 @@ public class EmailTemplateController extends CRUDController<EmailTemplate> imple
         OutputStream outputStream = null;
 
         int i = 0;
-        for(MultipartFile file : files) {
+        for (MultipartFile file : files) {
             i++;
-            if(englishLanguage != null && i == 1) {
-            String fileName = file.getOriginalFilename();
-            EmailTemplate email = new EmailTemplate();
-            File newFile = new File(englishTemplateDir + "/" + eventName);
-            email.setEventName(eventName);
-            email.setEnglishLanguage(fileName);
-            email.setSubject(subject);
-            emailService.save(email);
+            if (englishLanguage != null && i == 1) {
+                String fileName = file.getOriginalFilename();
+                EmailTemplate email = new EmailTemplate();
+                File newFile = new File(englishTemplateDir + "/" + eventName);
+                email.setEventName(eventName);
+                email.setEnglishLanguage(fileName);
+                email.setSubject(subject);
+                emailService.save(email);
             try {
                 inputStream = file.getInputStream();
                 if (!newFile.exists()) {
@@ -120,10 +120,10 @@ public class EmailTemplateController extends CRUDController<EmailTemplate> imple
             String fileName = file.getOriginalFilename();
             EmailTemplate email = new EmailTemplate();
             File newFile = new File(chineseTemplateDir + "/" + eventName);
-                email.setEventName(eventName);
-                email.setChineseLanguage(fileName);
-                email.setSubject(subject);
-                emailService.save(email);
+            email.setEventName(eventName);
+            email.setChineseLanguage(fileName);
+            email.setSubject(subject);
+            emailService.save(email);
                 try {
                     inputStream = file.getInputStream();
 
@@ -143,7 +143,6 @@ public class EmailTemplateController extends CRUDController<EmailTemplate> imple
                newFile.getAbsolutePath();
             }
          }
-
         return eventName;
     }
  }
