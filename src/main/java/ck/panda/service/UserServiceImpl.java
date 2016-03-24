@@ -442,6 +442,7 @@ public class UserServiceImpl implements UserService {
       }
 
     @Override
+    @PreAuthorize("hasPermission(null, 'RESET_USER_PASSWORD')")
     public User updatePassword(User user) throws Exception {
         if (user.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity(cloudStackConstants.CS_USER, user);
