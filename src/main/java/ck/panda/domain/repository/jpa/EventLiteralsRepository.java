@@ -16,7 +16,7 @@ import ck.panda.domain.entity.EventLiterals;
 @Service
 public interface EventLiteralsRepository extends PagingAndSortingRepository<EventLiterals, Long> {
 
-    @Query(value = "SELECT DISTINCT event.eventName FROM EventLiterals event WHERE event.eventName = :type")
+    @Query(value = "SELECT event FROM EventLiterals event WHERE event.eventName = :type")
     List<EventLiterals> findByEventType(@Param("type") String type)throws Exception;
 
     @Query(value = "SELECT DISTINCT new map(event.eventName as eventName) FROM EventLiterals event WHERE event.isActive = :isActive")

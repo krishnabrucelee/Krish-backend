@@ -80,11 +80,11 @@ public class EventLiteralController extends CRUDController<EventLiterals> implem
         return literalService.findByIsActive(true);
     }
 
-    @RequestMapping(value = "listall", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "listbyevent", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected List<EventLiterals> getSearchAll() throws Exception {
-        return literalService.findAll();
+    protected List<EventLiterals> findByEventName(@RequestParam String eventName) throws Exception {
+        return literalService.findByType(eventName);
     }
 
  }

@@ -57,7 +57,7 @@ public class EventLiteralServiceImpl implements EventLiteralsService {
 
     @Override
     public List<EventLiterals> findByType(String eventName) throws Exception {
-        return (List<EventLiterals>) eventRepo.findByEventType("USER");
+        return (List<EventLiterals>) eventRepo.findByEventType(eventName);
     }
 
     @Override
