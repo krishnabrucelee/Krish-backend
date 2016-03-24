@@ -22,24 +22,27 @@ public final class EventsUtil {
 
     }
 
-
-
     @SuppressWarnings("rawtypes")
-    public static List<EventLiterals> createEventsList(String user, String instance) {
+    public static List<EventLiterals> createEventsList(String account, String users, String accountremoval) {
         List<String> stringList = new ArrayList<String>();
         List<EventLiterals> moduleList = new ArrayList<EventLiterals>();
-        stringList.add(user);
+        stringList.add(account);
+        stringList.add(users);
+        stringList.add(accountremoval);
         for (String string : stringList) {
             List<String> actionList = new ArrayList<String>();
             String[] stringArray = string.split("-");
             String[] actions = stringArray[1].split(",");
             for (String action : actions) {
+                String[] actionTest = action.split(":");
                 EventLiterals events = new EventLiterals();
-                events.setEventLiterals(action);
+                events.setEventLiterals(actionTest[0]);
                 events.setEventName(stringArray[0]);
-                events.setEventLiteralsKey(action.toUpperCase());
+                events.setDescription(actionTest[1]);
+                events.setEventLiteralsKey(actionTest[0].toUpperCase());
                 events.setIsActive(true);
                 moduleList.add(events);
+
             }
             }
 

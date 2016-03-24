@@ -134,3 +134,10 @@ aes:
 login:
     timeout:
         inmilliseconds: ${LOGIN_TIMEOUT}
+
+english:
+    template:
+        dir: /test
+chinese:
+    template:
+        dir: /test1

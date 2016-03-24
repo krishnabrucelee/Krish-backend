@@ -1,10 +1,16 @@
 package ck.panda.web.resource;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
-import ck.panda.domain.entity.Document;
 import ck.panda.domain.entity.EmailTemplate;
 import ck.panda.service.EmailTemplateService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -40,6 +45,14 @@ public class EmailTemplateController extends CRUDController<EmailTemplate> imple
     /** Service reference to EmailTemplate. */
     @Autowired
     private EmailTemplateService emailService;
+
+    /** English template directory. */
+    @Value("${english.template.dir}")
+    private String englishTemplateDir = "/test1";
+
+    /** Chinese template directory */
+    @Value("${chinese.template.dir}")
+    private String chineseTemplateDir = "/test";
 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new domain.", response = EmailTemplate.class)
     @Override
@@ -70,19 +83,65 @@ public class EmailTemplateController extends CRUDController<EmailTemplate> imple
     }
 
     @RequestMapping(value = "/uploadFile", method = RequestMethod.POST)
-    public @ResponseBody EmailTemplate handleFileUpload(
-            @RequestParam(value="file", required=true) MultipartFile file) {
+    public @ResponseBody String handleFileUpload(
+            @RequestParam(value="file", required=true) MultipartFile[] files, @RequestParam(value="eventName", required=true) String eventName, @RequestParam(value="englishLanguage", required=true) String englishLanguage, @RequestParam(value="chineseLanguage")String chineseLanguage) throws Exception {
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
 
-        try {
-            Document document = new Document(file.getBytes(),file.getName());
-            emailService.saves(document);
-             return document.getMetadata();
-        } catch (RuntimeException e) {
-            LOGGER.error("Error while uploading.", e);
-            throw e;
-        } catch (Exception e) {
-            LOGGER.error("Error while uploading.", e);
-            throw new RuntimeException(e);
+        int i = 0;
+        for(MultipartFile file : files) {
+            i++;
+            if(englishLanguage != null && i == 1) {
+            String fileName = file.getOriginalFilename();
+            EmailTemplate email = new EmailTemplate();
+            File newFile = new File(englishTemplateDir + "/" + eventName);
+            email.setEventName(eventName);
+            email.setEnglishLanguage(fileName);
+            emailService.save(email);
+            try {
+                inputStream = file.getInputStream();
+                if (!newFile.exists()) {
+                    newFile.createNewFile();
+                }
+                outputStream = new FileOutputStream(newFile);
+                int read = 0;
+                byte[] bytes = new byte[1024];
+
+                while ((read = inputStream.read(bytes)) != -1) {
+                    outputStream.write(bytes, 0, read);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+             newFile.getAbsolutePath();
         }
+        if(chineseLanguage!=null && i == 2) {
+            String fileName = file.getOriginalFilename();
+            EmailTemplate email = new EmailTemplate();
+            File newFile = new File(chineseTemplateDir + "/" + eventName);
+                email.setEventName(eventName);
+                email.setChineseLanguage(fileName);
+                emailService.save(email);
+                try {
+                    inputStream = file.getInputStream();
+
+                    if (!newFile.exists()) {
+                        newFile.createNewFile();
+                    }
+                    outputStream = new FileOutputStream(newFile);
+                    int read = 0;
+                    byte[] bytes = new byte[1024];
+
+                    while ((read = inputStream.read(bytes)) != -1) {
+                        outputStream.write(bytes, 0, read);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+               newFile.getAbsolutePath();
+            }
+         }
+
+        return eventName;
     }
  }

@@ -33,15 +33,6 @@ import ck.panda.domain.entity.Network.Status;
 @SuppressWarnings("serial")
 public class EmailTemplate implements Serializable {
 
-    public EmailTemplate() {
-        super();
-    }
-
-    public EmailTemplate(String fileName) {
-        super();
-        this.fileName = fileName;
-    }
-
     /** Unique Id of the email template. */
     @Id
     @GeneratedValue
@@ -52,9 +43,18 @@ public class EmailTemplate implements Serializable {
     @Column(name = "event_name")
     private String eventName;
 
+    /** Subject of the template */
+    @Column(name = "subject")
+    private String subject;
+
     /** Language of the template */
-    @Column(name = "language")
-    private String language;
+    @Column(name = "eng_language")
+    private String englishLanguage;
+
+    /** Language of the template */
+    @Column(name = "chinese_language")
+    private String chineseLanguage;
+
 
     /** File path to upload the template */
     @Column(name = "file_path")
@@ -109,11 +109,6 @@ public class EmailTemplate implements Serializable {
     @Transient
     private MultipartFile file;
 
-
-    public EmailTemplate(byte[] bytes) {
-        // TODO Auto-generated constructor stub
-    }
-
     /**
      * @return the file
      */
@@ -163,24 +158,6 @@ public class EmailTemplate implements Serializable {
      */
     public void setEventName(String eventName) {
         this.eventName = eventName;
-    }
-
-    /**
-     * Get the language to be used.
-     *
-     * @return the language
-     */
-    public String getLanguage() {
-        return language;
-    }
-
-    /**
-     * Set the language to be used.
-     *
-     * @param language to set
-     */
-    public void setLanguage(String language) {
-        this.language = language;
     }
 
 
@@ -302,5 +279,46 @@ public class EmailTemplate implements Serializable {
         this.recipientType = recipientType;
     }
 
+    /**
+     * @return the subject
+     */
+    public String getSubject() {
+        return subject;
+    }
+
+    /**
+     * @param subject the subject to set
+     */
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    /**
+     * @return the englishLanguage
+     */
+    public String getEnglishLanguage() {
+        return englishLanguage;
+    }
+
+    /**
+     * @param englishLanguage the englishLanguage to set
+     */
+    public void setEnglishLanguage(String englishLanguage) {
+        this.englishLanguage = englishLanguage;
+    }
+
+    /**
+     * @return the chineseLanguage
+     */
+    public String getChineseLanguage() {
+        return chineseLanguage;
+    }
+
+    /**
+     * @param chineseLanguage the chineseLanguage to set
+     */
+    public void setChineseLanguage(String chineseLanguage) {
+        this.chineseLanguage = chineseLanguage;
+    }
 
 }

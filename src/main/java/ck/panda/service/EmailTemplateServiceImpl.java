@@ -1,24 +1,13 @@
 package ck.panda.service;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-
-import ck.panda.domain.entity.Document;
 import ck.panda.domain.entity.EmailTemplate;
 import ck.panda.domain.repository.jpa.EmailTemplateRepository;
-import ck.panda.domain.repository.jpa.FileService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
@@ -32,23 +21,9 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
     @Autowired
     private EmailTemplateRepository emailRepo;
 
-    @Autowired
-    private FileService fileRepo;
-
     @Override
     public EmailTemplate save(EmailTemplate email) throws Exception {
-        email.setEventName(email.getEventName());
-        //Document document = new Document(email);
-        //document.setEventName(email.getEventName());
         return emailRepo.save(email);
-    }
-
-    @Override
-    public EmailTemplate saves(Document document) throws FileNotFoundException, IOException {
-         String tempFilePath = writeDocumentToTempFile(document);
-         MultiValueMap<String, Object> parts = createMultipartFileParam(tempFilePath);
-         fileRepo.insert(document);
-        return document.getMetadata();
     }
 
     @Override
@@ -81,20 +56,15 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
         return (List<EmailTemplate>) emailRepo.findAll();
     }
 
-    private String writeDocumentToTempFile(Document document) throws IOException, FileNotFoundException {
-        Path path;
-        path = Files.createTempDirectory(document.getFileName());
-        String tempDirPath = path.toString();
-        File file = new File(tempDirPath,document.getFileName());
-        FileOutputStream fo = new FileOutputStream(file);
-        fo.write(document.getFileData());
-        fo.close();
-        return file.getPath();
-    }
 
-    private MultiValueMap<String, Object> createMultipartFileParam(String tempFilePath) {
-        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
-        parts.add("file", new FileSystemResource(tempFilePath));
-        return parts;
+    public List<String> listFolders(String directoryName){
+        List<String> textFiles = new ArrayList<String>();
+        File directory = new File(directoryName);
+        for (File file : directory.listFiles()) {
+          if (file.getName().endsWith((".html"))) {
+            textFiles.add(file.getName());
+          }
+        }
+        return textFiles;
     }
 }

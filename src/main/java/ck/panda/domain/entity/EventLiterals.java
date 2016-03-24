@@ -45,6 +45,10 @@ public class EventLiterals implements Serializable {
     @Column(name = "is_active")
     private Boolean isActive;
 
+    /** Description for the event.*/
+    @Column(name = "description")
+    private String description;
+
     /** Created by user. */
     @CreatedBy
     @Column(name = "created_user_id")
@@ -249,5 +253,25 @@ public class EventLiterals implements Serializable {
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
     }
+
+    /**
+     * Get the description.
+     *
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * Set the description .
+     *
+     * @param description to set
+     */
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+
 
  }

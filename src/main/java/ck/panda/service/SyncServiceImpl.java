@@ -52,7 +52,6 @@ import ck.panda.domain.entity.SnapshotPolicy;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
-import ck.panda.domain.entity.User.Status;
 import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.rabbitmq.util.ResponseEvent;
@@ -333,6 +332,14 @@ public class SyncServiceImpl implements SyncService {
     /** receipient properties. */
     @Value(value = "${test.users}")
     private String users;
+
+    /** Account sign up properties. */
+    @Value(value = "${test.account}")
+    private String account;
+
+    /** receipient properties. */
+    @Value(value = "${test.accountremoval}")
+    private String accountremoval;
 
     /** Full permission for root and domain admin. */
     public static final String ADMIN_PERMISSION = "FULL_PERMISSION";
@@ -1355,7 +1362,7 @@ public class SyncServiceImpl implements SyncService {
         // add it to app db
         for (String key : vmMap.keySet()) {
             VmInstance instances = virtualMachineService.save(vmMap.get(key));
-        	IpAddress ipAddress = ipService.UpdateIPByNetwork(convertEntityService.getNetworkById(instances.getNetworkId()).getUuid());
+            IpAddress ipAddress = ipService.UpdateIPByNetwork(convertEntityService.getNetworkById(instances.getNetworkId()).getUuid());
             if (ipAddress != null) {
                 instances.setSyncFlag(false);
                 instances.setPublicIpAddress(ipAddress.getPublicIpAddress());
@@ -2584,7 +2591,7 @@ public class SyncServiceImpl implements SyncService {
 
     @Override
     public void EventList(List<EventLiterals> eventLists) throws Exception {
-    List<EventLiterals> userLists = EventsUtil.createEventsList(user,instance);
+    List<EventLiterals> userLists = EventsUtil.createEventsList(account,users,accountremoval);
     for (EventLiterals events : userLists) {
     eventService.save(events);
     }
