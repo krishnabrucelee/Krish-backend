@@ -119,7 +119,9 @@ public class VmSnapshot implements Serializable {
         /** While snapshot creation it gets the status as Implemented. */
         Implemented,
         /** After create snapshot it gets status as ready. */
-        Ready
+        Ready,
+        /** Allocated status whne snapshot memory is occupied */
+        Allocated
     }
 
     /** current state. */

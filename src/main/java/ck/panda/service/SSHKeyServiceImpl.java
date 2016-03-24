@@ -332,13 +332,16 @@ public class SSHKeyServiceImpl implements SSHKeyService {
                 // 2.1 Call convert by passing JSONObject to User entity and Add
                 // the converted User entity to list
                 SSHKey sshkey = SSHKey.convert(sshKeyListJSON.getJSONObject(i));
-                sshkey.setDomainId(convertEntity.getDomainId(sshkey.getTransDomainId()));
-                sshkey.setDepartmentId(convertEntity.getDepartmentByUsername(sshkey.getTransDepartment(),
+                if(domainService.findByUUIDAndIsActive(sshkey.getTransDomainId()) != null) {
+                    sshkey.setDomainId(convertEntity.getDomainId(sshkey.getTransDomainId()));
+                    sshkey.setDepartmentId(convertEntity.getDepartmentByUsername(sshkey.getTransDepartment(),
                     domainService.findByUUIDAndIsActive(sshkey.getTransDomainId()).getId()));
-                if (j != project.size()) {
-                    sshkey.setProjectId(project.get(j).getId());
-                    sshkey.setDepartmentId(projectService.find(sshkey.getProjectId()).getDepartmentId());
                 }
+                    if (j != project.size()) {
+                        sshkey.setProjectId(project.get(j).getId());
+                        sshkey.setDepartmentId(projectService.find(sshkey.getProjectId()).getDepartmentId());
+                    }
+
                 sshKeyList.add(sshkey);
             }
         }
