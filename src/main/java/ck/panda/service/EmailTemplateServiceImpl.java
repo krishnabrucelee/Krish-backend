@@ -53,4 +53,14 @@ public class EmailTemplateServiceImpl implements EmailTypeTemplateService {
     public List<EmailTemplate> findAll() throws Exception {
         return (List<EmailTemplate>) emailRepo.findAll();
     }
+
+    @Override
+    public List<EmailTemplate> findAllByActive() throws Exception {
+        return (List<EmailTemplate>) emailRepo.findAllByActive(true);
+    }
+
+    @Override
+    public EmailTemplate findByName(String language) throws Exception {
+        return  emailRepo.findNameAndIsActive(true,language);
+    }
 }

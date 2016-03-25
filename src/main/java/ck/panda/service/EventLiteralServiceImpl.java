@@ -62,4 +62,9 @@ public class EventLiteralServiceImpl implements EventLiteralsService {
     public List<EventLiterals> findByIsActive(Boolean isActive) throws Exception {
         return (List<EventLiterals>) eventRepo.findByIsActive(true);
     }
+
+    @Override
+    public List<EventLiterals> findAllByIsActive(Boolean isActive) throws Exception {
+        return (List<EventLiterals>) eventRepo.findAllByIsActive(true);
+    }
 }

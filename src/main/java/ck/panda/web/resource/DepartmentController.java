@@ -137,7 +137,7 @@ public class DepartmentController extends CRUDController<Department> implements 
     @RequestMapping(value = "/domain/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     public List<Department> findByDomain(@PathVariable(PATH_ID) Long id) throws Exception {
-        return departmentService.findByDomainAndIsActive(id, true);
+        return departmentService.findAllByDomainAndIsActive(id, true);
     }
 
     /**

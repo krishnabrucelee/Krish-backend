@@ -47,6 +47,10 @@ public class EmailTemplate implements Serializable {
     @Column(name = "chinese_language")
     private String chineseLanguage;
 
+    /** IsActive attribute to verify Active or Inactive. */
+    @Column(name = "is_active")
+    private Boolean isActive;
+
     /** Created by user. */
     @CreatedBy
     @Column(name = "created_user_id")
@@ -60,6 +64,7 @@ public class EmailTemplate implements Serializable {
     /** Recipient attribute to verify type of the user. */
     @Column(name = "recipient_type")
     private RecipientType recipientType;
+
 
     /** Created date and time. */
     @CreatedDate
@@ -312,4 +317,23 @@ public class EmailTemplate implements Serializable {
     public void setChineseLanguage(String chineseLanguage) {
         this.chineseLanguage = chineseLanguage;
     }
+
+    /**
+     * Get isActive.
+     *
+     * @return the isActive
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    /**
+     * Set is Active.
+     *
+     * @param isActive the isActive to set
+     */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
+
 }

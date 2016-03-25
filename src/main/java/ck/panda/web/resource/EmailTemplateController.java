@@ -25,8 +25,12 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.EmailTemplate;
+import ck.panda.domain.entity.EmailTemplate.RecipientType;
 import ck.panda.service.EmailTypeTemplateService;
 import ck.panda.util.domain.vo.PagingAndSorting;
+import ck.panda.util.error.Errors;
+import ck.panda.util.error.exception.ApplicationException;
+import ck.panda.util.error.exception.CustomGenericException;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
 
@@ -84,20 +88,25 @@ public class EmailTemplateController extends CRUDController<EmailTemplate> imple
 
     @RequestMapping(value = "/uploadFile", method = RequestMethod.POST)
     public @ResponseBody String handleFileUpload(
-            @RequestParam(value="file", required=true) MultipartFile[] files, @RequestParam(value="eventName", required=true) String eventName, @RequestParam(value="englishLanguage", required=true) String englishLanguage, @RequestParam(value="chineseLanguage")String chineseLanguage,@RequestParam(value="subject")String subject) throws Exception {
+            @RequestParam(value="file", required=true) MultipartFile[] files, @RequestParam(value="eventName", required=true) String eventName, @RequestParam(value="englishLanguage", required=true) String englishLanguage, @RequestParam(value="chineseLanguage")String chineseLanguage,@RequestParam(value="subject")String subject,@RequestParam(value="recipientType")String recipientType) throws Exception {
         InputStream inputStream = null;
         OutputStream outputStream = null;
-
+        EmailTemplate email = new EmailTemplate();
         int i = 0;
         for (MultipartFile file : files) {
             i++;
             if (englishLanguage != null && i == 1) {
                 String fileName = file.getOriginalFilename();
-                EmailTemplate email = new EmailTemplate();
                 File newFile = new File(englishTemplateDir + "/" + eventName);
+                EmailTemplate emailFile = emailService.findByName(fileName);
+                if (emailFile != null && emailFile.getId() != email.getId()) {
+                    throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "error.english.file.already.exists");
+                }
                 email.setEventName(eventName);
                 email.setEnglishLanguage(fileName);
                 email.setSubject(subject);
+                email.setRecipientType(RecipientType.valueOf(recipientType));
+                email.setIsActive(true);
                 emailService.save(email);
             try {
                 inputStream = file.getInputStream();
@@ -118,11 +127,11 @@ public class EmailTemplateController extends CRUDController<EmailTemplate> imple
         }
         if(chineseLanguage!=null && i == 2) {
             String fileName = file.getOriginalFilename();
-            EmailTemplate email = new EmailTemplate();
             File newFile = new File(chineseTemplateDir + "/" + eventName);
-            email.setEventName(eventName);
+            if (emailService.findByName(fileName) != null) {
+                throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "error.chinese.file.already.exists");
+            }
             email.setChineseLanguage(fileName);
-            email.setSubject(subject);
             emailService.save(email);
                 try {
                     inputStream = file.getInputStream();
