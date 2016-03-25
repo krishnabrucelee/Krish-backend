@@ -98,7 +98,7 @@ public class UserServiceImpl implements UserService {
         if (user.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity(cloudStackConstants.CS_USER, user);
             errors = validator.validateEntity(user, errors);
-            errors = this.validateName(errors, user.getUserName(), user.getDomain());
+            errors = this.validateName(errors, user.getUserName(), user.getDomain(), user.getId());
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
@@ -166,11 +166,12 @@ public class UserServiceImpl implements UserService {
      * @param errors already existing error list.
      * @param name name of the user.
      * @param domain domain object.
+     * @param id user id.
      * @return errors.
      * @throws Exception unhandled errors.
      */
-    private Errors validateName(Errors errors, String name, Domain domain) throws Exception {
-        User user = userRepository.findByUserNameAndDomainAndActive(name, domain, true);
+    private Errors validateName(Errors errors, String name, Domain domain, Long id) throws Exception {
+        User user = userRepository.findByUserNameAndDomainAndActiveAndUserId(name, domain, true, id);
         if (user != null && user.getStatus() != User.Status.DELETED) {
             errors.addFieldError(cloudStackConstants.CS_USER_NAME, "user.already.exist.for.same.domain");
         }
@@ -183,7 +184,7 @@ public class UserServiceImpl implements UserService {
         if (user.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity(cloudStackConstants.CS_USER, user);
             errors = validator.validateEntity(user, errors);
-            errors = this.validateName(errors, user.getUserName(), user.getDomain());
+            errors = this.validateName(errors, user.getUserName(), user.getDomain(), user.getId());
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
@@ -442,6 +443,7 @@ public class UserServiceImpl implements UserService {
       }
 
     @Override
+    @PreAuthorize("hasPermission(null, 'RESET_USER_PASSWORD')")
     public User updatePassword(User user) throws Exception {
         if (user.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity(cloudStackConstants.CS_USER, user);

@@ -2,7 +2,6 @@ package ck.panda.domain.repository.jpa;
 
 import java.util.List;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -10,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
-import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.User.Status;
 import ck.panda.domain.entity.User.UserType;
 
@@ -36,6 +34,18 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      */
     @Query(value = "select user from User user where user.userName = :userName AND user.domain = :domain AND user.isActive = :isActive")
     User findByUserNameAndDomainAndActive(@Param("userName") String userName, @Param("domain") Domain domain, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find the user already exist for the same domain.
+     *
+     * @param userName userName of the user
+     * @param domain domain of the user
+     * @param isActive check whether users are removed or not
+     * @param id user id
+     * @return user
+     */
+    @Query(value = "select user from User user where user.userName = :userName AND user.domain = :domain AND user.isActive = :isActive AND user.id <> :id")
+    User findByUserNameAndDomainAndActiveAndUserId(@Param("userName") String userName, @Param("domain") Domain domain, @Param("isActive") Boolean isActive, @Param("id") Long id);
 
     /**
      * Find user by department.

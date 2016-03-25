@@ -21,6 +21,5 @@ public interface EmailTemplateService {
      */
     String mergeTemplateIntoString(String template, Map<String, Object> model)
             throws IOException, TemplateException;
-
-
 }
+

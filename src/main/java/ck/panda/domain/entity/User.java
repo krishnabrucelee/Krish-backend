@@ -92,6 +92,10 @@ public class User implements Serializable {
     @Column(name = "last_name")
     private String lastName;
 
+    /** Email language. */
+    @Column(name = "language")
+    private String language;
+
     /** List of projects for users. */
     @Transient
     private List<Project> projectList;
@@ -741,5 +745,23 @@ public class User implements Serializable {
             userMap.put(user.getUuid(), user);
         }
         return userMap;
+    }
+
+    /**
+     * Get the language.
+     *
+     * @return the language
+     */
+    public String getLanguage() {
+        return language;
+    }
+
+    /**
+     * Set the language.
+     *
+     * @param language the language to set
+     */
+    public void setLanguage(String language) {
+        this.language = language;
     }
 }
