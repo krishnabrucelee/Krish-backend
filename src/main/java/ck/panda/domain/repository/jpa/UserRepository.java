@@ -202,4 +202,23 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     List<User> findByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive,@Param("departmentId") Long departmentId,
             @Param("type") UserType type);
 
+    /**
+     * Find the user by given uuid.
+     *
+     * @param uuid of the user.
+     * @return user.
+     */
+    @Query(value = "SELECT user FROM User user WHERE user.uuid =:uuid")
+    User findByUuId(@Param("uuid") String uuid);
+
+    /**
+     * find all the root admin.
+     *
+     * @param type user type.
+     * @param isActive true/false
+     * @return list of user.
+     */
+    @Query(value = "SELECT user FROM User user WHERE user.type =:type AND user.isActive = :isActive")
+    User findAllByUserTypeAndIsActive(@Param("type") UserType type, @Param("isActive") Boolean isActive);
+
 }

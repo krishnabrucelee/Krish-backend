@@ -6,7 +6,7 @@ package ck.panda.constants;
  */
 public class CloudStackConstants {
 
-	/**
+    /**
      * Makes sure that utility classes (classes that contain only static methods or fields in their API) do not have a
      * public constructor.
      */
@@ -689,4 +689,10 @@ public class CloudStackConstants {
 
     /** Constant for volume upload. */
     public static final String CS_VOLUME_UPLOAD = "VOLUME.UPLOAD";
+
+    /** Constant for capacity percentage used. */
+    public static final String CS_CAPACITY_PERCENT = "percentused";
+
+    /** Constant for capacity max used. */
+    public static final Integer CS_CAPACITY_MAX = 80;
 }

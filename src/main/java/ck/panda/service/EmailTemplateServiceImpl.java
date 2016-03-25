@@ -53,4 +53,10 @@ public class EmailTemplateServiceImpl implements EmailTypeTemplateService {
     public List<EmailTemplate> findAll() throws Exception {
         return (List<EmailTemplate>) emailRepo.findAll();
     }
+
+    @Override
+    public EmailTemplate findByEventName(String eventName) {
+        // TODO Auto-generated method stub
+        return emailRepo.findByEventName(eventName);
+    }
 }

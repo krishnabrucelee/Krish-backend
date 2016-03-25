@@ -258,6 +258,9 @@ public class EventTypes {
     /** User Create Events. */
     public static final String EVENT_USER_CREATE = "USER.CREATE";
 
+    /** User Delete Events. */
+    public static final String EVENT_USER_DELETE = "USER.DELETE";
+
     /** Template Delete Events. */
     public static final String EVENT_TEMPLATE_DELETE = "TEMPLATE.DELETE";
 
@@ -304,9 +307,12 @@ public class EventTypes {
     public static final String EVENT_VPN_USER_REMOVE = "VPN.USER.REMOVE";
 
     /** Domain event create.     */
-	public static final Object EVENT_DOMAIN_CREATE = "DOMAIN.CREATE";
+    public static final Object EVENT_DOMAIN_CREATE = "DOMAIN.CREATE";
 
-	/** Project event create.     */
-	public static final Object EVENT_PROJECT_CREATE = "PROJECT.CREATE";
+    /** Project event create.     */
+    public static final Object EVENT_PROJECT_CREATE = "PROJECT.CREATE";
+
+    /** User update. */
+    public static final String EVENT_USER_UPDATE = "USER.UPDATE";
 
 }

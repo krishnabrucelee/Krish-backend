@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
@@ -11,10 +13,13 @@ import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
+import ck.panda.rabbitmq.util.EmailEvent;
 import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
+import ck.panda.constants.CloudStackConstants;
+import ck.panda.constants.EmailConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.error.exception.CustomGenericException;
@@ -41,6 +46,10 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
     /** Resource Limit Department service reference. */
     @Autowired
     private ResourceLimitDomainService resourceLimitDomainService;
+
+    /** Email Job service. */
+    @Autowired
+    private EmailJobService emailJobService;
 
     @Override
     public String QuotaLimitCheckByResourceObject(Object resourceObject, String resourceType,
@@ -230,6 +239,66 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
         convertEntityService.resourceCount(csResponse);
     }
 
+    public void validateListResourceCapacity(String resource) throws Exception {
+        HashMap<String, String> optionalMap = new HashMap<String, String>();
+        // 2. List capacity CS API call.
+        String csListResponse = cloudStackResourceCapacity.listCapacity(optionalMap, CloudStackConstants.JSON);
+        JSONObject csCapacity = new JSONObject(csListResponse).getJSONObject(CloudStackConstants.CS_CAPACITY_LIST_RESPONSE);
+        if (csCapacity.has(CloudStackConstants.CS_CAPACITY)) {
+            JSONArray capacityArrayJSON = csCapacity.getJSONArray(CloudStackConstants.CS_CAPACITY);
+            for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
+                String resourceType = capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CAPACITY_TYPE);
+                // 2.1 Total capacity in puplic pool for each resource type.
+                Double tempTotalCapacity = Double.valueOf(capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CS_CAPACITY_PERCENT));
+                if (GenericConstants.RESOURCE_CAPACITY.containsKey(resourceType)) {
+                    switch (resourceType) {
+                    case GenericConstants.RESOURCE_MEMORY:
+                        if (tempTotalCapacity > CloudStackConstants.CS_CAPACITY_MAX) {
+                            EmailEvent emailEvent = new EmailEvent();
+                            emailEvent.setSubject(resource + "Resource unavailable");
+                            emailEvent.setMessageBody("Resource capacity for " + resource + " " + tempTotalCapacity +"used ");
+                            emailEvent.setEventType(CloudStackConstants.CS_CAPACITY);
+                            emailEvent.setEvent("Resource");
+                            emailJobService.sendMessageToQueue(emailEvent);
+                        }
+                        break;
+                    case GenericConstants.RESOURCE_CPU:
+                        if (tempTotalCapacity > CloudStackConstants.CS_CAPACITY_MAX) {
+                            EmailEvent emailEvent = new EmailEvent();
+                            emailEvent.setSubject(resource + "Resource unavailable");
+                            emailEvent.setMessageBody("Resource capacity for " + resource + " " + tempTotalCapacity +"used ");
+                            emailEvent.setEventType(CloudStackConstants.CS_CAPACITY);
+                            emailEvent.setEvent("Resource");
+                            emailJobService.sendMessageToQueue(emailEvent);
+                        }
+                        break;
+                    case GenericConstants.RESOURCE_PRIMARY_STORAGE:
+                        if (tempTotalCapacity > CloudStackConstants.CS_CAPACITY_MAX) {
+                            EmailEvent emailEvent = new EmailEvent();
+                            emailEvent.setSubject(resource + "Resource unavailable");
+                            emailEvent.setMessageBody("Resource capacity for " + resource + " " + tempTotalCapacity +"used ");
+                            emailEvent.setEventType(CloudStackConstants.CS_CAPACITY);
+                            emailEvent.setEvent("Resource");
+                            emailJobService.sendMessageToQueue(emailEvent);
+                        }
+                        break;
+                    case GenericConstants.RESOURCE_IP_ADDRESS:
+                        if (tempTotalCapacity > CloudStackConstants.CS_CAPACITY_MAX) {
+                            EmailEvent emailEvent = new EmailEvent();
+                            emailEvent.setSubject(resource + "Resource unavailable");
+                            emailEvent.setMessageBody("Resource capacity for " + resource + " " + tempTotalCapacity +"used ");
+                            emailEvent.setEventType(CloudStackConstants.CS_CAPACITY);
+                            emailEvent.setEvent("Resource");
+                            emailJobService.sendMessageToQueue(emailEvent);
+                        }
+                        break;
+                    }
+                }
+
+            }
+        }
+    }
+
     public ResourceLimitDepartment getMaxByDepartmentAndResourceType(Long departmentId, String resourceType) throws Exception {
         ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
                 .findByDepartmentAndResourceType(departmentId, ResourceLimitDepartment.ResourceType.valueOf(resourceType), true);
@@ -270,6 +339,7 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
                 //TODO apply internalization.
                 validateResponse = " User "+ resource +" Limit exceeded in domain " + convertEntityService.getDomainById(accountTypeId).getName();
             }
+            this.validateListResourceCapacity(resource);
         }
         return validateResponse;
     }

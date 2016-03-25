@@ -11,4 +11,11 @@ import ck.panda.util.domain.CRUDService;
 @Service
 public interface EmailTypeTemplateService extends CRUDService<EmailTemplate> {
 
+    /**
+     * Get email template by event name.
+     * @param eventName event name
+     * @return EmailTemplate
+     */
+    EmailTemplate findByEventName(String eventName);
+
 }

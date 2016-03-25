@@ -242,4 +242,22 @@ public interface UserService extends CRUDService<User> {
     List<User> findAllByDomainDepartmentIdUserTypeAndIsActive(Long domainId, Boolean isActive, Long departmentId,
             UserType domainAdmin) throws Exception;
 
+    /**
+     * Get user by uuid.
+     * @param uuid unique id of user.
+     * @return user
+     * @throws Exception unhandled error.
+     */
+    User findByUuId(String uuid) throws Exception;
+
+    /**
+     * Find the user type based on the isActive status.
+     *
+     * @param type for user.
+     * @param isActive user status Active/Inactive
+     * @throws Exception error occur
+     * @return users.
+     */
+    User findAllByUserTypeAndIsActive(Boolean isActive, UserType rootAdmin);
+
 }

@@ -75,6 +75,13 @@ public class EmailConfigurationServiceImpl implements EmailConfigurationService 
 
     @Override
     public EmailConfiguration update(EmailConfiguration email) throws Exception {
+        if (email.getPassword() != null) {
+            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes(CS_UTF));
+            byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, CS_AES);
+            String encryptedPassword = new String(EncryptionUtil.encrypt(email.getPassword(), originalKey));
+            email.setPassword(encryptedPassword);
+        }
         return emailRepo.save(email);
     }
 
