@@ -255,7 +255,9 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
         LOGGER.info("storage offer update response " + storageOfferings);
         JSONObject storageOfferingsResponse = new JSONObject(storageOfferings)
                 .getJSONObject(CS_UPDATE_DISK_RESPONSE).getJSONObject(CloudStackConstants.CS_DISK_OFFERING);
-        this.costCalculation(storage);
+        if (storage.getStoragePrice().size() != 0) {
+            this.costCalculation(storage);
+        }
         if (storageOfferingsResponse.has(CloudStackConstants.CS_ERROR_CODE)) {
             errors = this.validateEvent(errors, storageOfferingsResponse.getString(CloudStackConstants.CS_ERROR_TEXT));
             throw new ApplicationException(errors);
