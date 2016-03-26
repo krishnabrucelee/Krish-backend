@@ -1,11 +1,7 @@
 package ck.panda.service;
 
-
 import java.util.List;
-
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Organization;
 import ck.panda.util.domain.CRUDService;
 

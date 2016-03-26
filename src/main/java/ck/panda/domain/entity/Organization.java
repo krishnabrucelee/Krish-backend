@@ -110,7 +110,7 @@ public class Organization implements Serializable {
     private Boolean isActive;
 
     /**
-     * Get the id of the organization..
+     * Get the id of the organization.
      *
      * @return the id
      */
