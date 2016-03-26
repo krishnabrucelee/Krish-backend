@@ -33,4 +33,7 @@ public interface EventLiteralsRepository extends PagingAndSortingRepository<Even
      */
     @Query(value = "SELECT DISTINCT new map(event.eventName as eventName) FROM EventLiterals event WHERE event.isActive = :isActive")
     List<EventLiterals> findByIsActive(@Param("isActive") Boolean isActive);
+
+    @Query(value = "SELECT event FROM EventLiterals event WHERE event.isActive = :isActive")
+    List<EventLiterals> findAllByIsActive(@Param("isActive") Boolean isActive);
 }

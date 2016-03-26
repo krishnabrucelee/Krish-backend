@@ -53,4 +53,20 @@ public class EmailTemplateServiceImpl implements EmailTypeTemplateService {
     public List<EmailTemplate> findAll() throws Exception {
         return (List<EmailTemplate>) emailRepo.findAll();
     }
+
+    @Override
+    public List<EmailTemplate> findAllByActive() throws Exception {
+        return (List<EmailTemplate>) emailRepo.findAllByActive(true);
+    }
+
+    @Override
+    public List<EmailTemplate> findByEventName(String eventName) throws Exception {
+        return (List<EmailTemplate>) emailRepo.findAllByEventNameAndIsActive(true,eventName);
+    }
+
+
+    @Override
+    public EmailTemplate findByEventAndIsActive(String eventName, Boolean isActive) throws Exception {
+        return  emailRepo.findEventByName(true,eventName);
+    }
 }

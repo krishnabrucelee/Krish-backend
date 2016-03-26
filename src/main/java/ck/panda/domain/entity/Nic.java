@@ -5,8 +5,11 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -68,7 +71,7 @@ public class Nic implements Serializable {
     private Boolean isActive;
 
     /** Secondary ipAddress of the Nic. */
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     private List<VmIpaddress> vmIpAddress;
 
     /** Network ip Address to establish a connection. */

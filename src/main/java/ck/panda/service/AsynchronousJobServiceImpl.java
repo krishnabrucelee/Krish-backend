@@ -43,7 +43,6 @@ import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.VpnUser;
 import ck.panda.domain.entity.Department.AccountType;
-import ck.panda.domain.entity.Volume.Format;
 import ck.panda.domain.entity.Volume.Status;
 import ck.panda.rabbitmq.util.ResponseEvent;
 import ck.panda.util.CloudStackInstanceService;
@@ -1362,6 +1361,8 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     nicService.update(nic);
                     csNicMap.remove(nic.getUuid());
                 } else {
+                    nic.setSyncFlag(false);
+                    nic.setIsActive(false);
                     nicService.softDelete(nic);
                 }
             }
@@ -1378,6 +1379,20 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 csVmIpaddress.setGuestIpAddress(csVmIpaddress.getGuestIpAddress());
                 csVmIpaddress.setNicId(convertEntityService.getNic(csVmIpaddress.getTransNicId()).getId());
                 csVmIpaddress.setVmInstanceId(convertEntityService.getNic(csVmIpaddress.getTransNicId()).getVmInstanceId());
+                csVmIpaddress.setIsActive(true);
+                List<VmIpaddress> vmIpList = new ArrayList<VmIpaddress>();
+                Nic nics = convertEntityService.getNic(csVmIpaddress.getTransNicId());
+                csVmIpaddress.setIpType(IpType.secondaryIpAddress);
+                    VmIpaddress persistVmIP = vmIpService.save(csVmIpaddress);
+                    nics.setSyncFlag(false);
+                    for(VmIpaddress vmIp : nics.getVmIpAddress()) {
+                        vmIp.getGuestIpAddress();
+                        vmIpList.add(vmIp);
+                    }
+                    vmIpList.add(persistVmIP);
+                    nics.setVmIpAddress(vmIpList);
+                    nicService.save(nics);
+
             }
 
         }
