@@ -361,6 +361,4 @@ public class Account {
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
     }
-
-
 }

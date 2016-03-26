@@ -33,4 +33,54 @@ public class EmailConstants {
     /** Constant used to system error alert related event. */
     public static final String SYSTEM_ERROR = "System Error";
 
+    /** Constant for capacity. */
+    public static final String EMAIL_CAPACITY = "CAPACITY";
+
+    /** Constant for capacity. */
+    public static final String EMAIL_ACCOUNT_SIGNUP = "ACCOUNT SIGNUP";
+
+    /** Constant for capacity. */
+    public static final String EMAIL_ACCOUNT_REMOVAL = "ACCOUNT REMOVAL";
+
+    /** Constant for capacity. */
+    public static final String EMAIL_PASSWORD_RESET = "PASSWORD RESET";
+
+    /** Constant for capacity. */
+    public static final String EMAIL_SYSTEM_ERROR = "SYSTEM ERROR";
+
+    /** Constant for capacity. */
+    public static final String EMAIL_Cpu = "Cpu";
+
+    /** Constant for capacity. */
+    public static final String EMAIL_Memory = "Memory";
+
+    /** Constant for capacity. */
+    public static final String EMAIL_Primary_storage = "Primary storage";
+
+    /** Constant for capacity. */
+    public static final String EMAIL_Ip = "Ip";
+
+    /** Constant for capacity. */
+    public static final String EMAIL_English = "English";
+
+    /** Constant for capacity. */
+    public static final String EMAIL_Chinese = "Chinese";
+
+    /** Constant for capacity. */
+    public static final String EMAIL_FreeMarker = "FreeMarker";
+
+    /** Constant for capacity. */
+    public static final String EMAIL_dataCenterId = "dataCenterId";
+
+    /** Constant for capacity. */
+    public static final String EMAIL_podId = "podId";
+
+    public static final String EMAIL_TEMPLATE_user = "user";
+
+    public static final String EMAIL_TEMPLATE_alert = "alert";
+
+    public static final String EMAIL_TEMPLATE_capacity = "capacity";
+
+    public static final String EMAIL_zonename = "zonename";
+
     }

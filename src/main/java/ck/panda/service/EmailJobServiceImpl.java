@@ -28,8 +28,11 @@ import ck.panda.domain.entity.EmailConfiguration;
 import ck.panda.domain.entity.EmailTemplate;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.UserType;
+import ck.panda.domain.entity.Zone;
 import ck.panda.email.util.Account;
+import ck.panda.email.util.Alert;
 import ck.panda.email.util.Email;
+import ck.panda.email.util.Resource;
 import ck.panda.rabbitmq.util.EmailEvent;
 import ck.panda.util.EncryptionUtil;
 import freemarker.template.Configuration;
@@ -78,6 +81,10 @@ public class EmailJobServiceImpl implements EmailJobService {
     /** Email event entity. */
     private EmailEvent eventResponse = null;
 
+    /** Zone service reference . */
+    @Autowired
+    private ZoneService zoneService;
+
     /** User service reference . */
     @Autowired
     private EmailTypeTemplateService emailTypeTemplateService;
@@ -119,7 +126,10 @@ public class EmailJobServiceImpl implements EmailJobService {
      * Get the email content after dynamic variables applied in html template.
      *
      * @param email email template dynamic variables.
-     * @return email content.
+     * @param user user details
+     * @param emailConfiguration email configuration details
+     * @param templateName template name configuration details
+     * @return mimeEmail email details.
      * @throws Exception unhandled error
      */
     private String generateCountContent(EmailEvent email, User user, EmailConfiguration emailConfiguration,
@@ -153,9 +163,9 @@ public class EmailJobServiceImpl implements EmailJobService {
             account.setPandaUrl(emailConfiguration.getApplicationUrl());
             account.setCreatedDateTime(user.getCreatedDateTime().toString());
             account.setCreatedBy(user.getCreatedBy().toString());
-            context.put("user", account);
+            context.put(EmailConstants.EMAIL_TEMPLATE_user, account);
             // sample template.
-            templateName = emailTypeTemplateService.findByEventName("ACCOUNT SIGNUP");
+            templateName = emailTypeTemplateService.findByEventName(EmailConstants.EMAIL_ACCOUNT_SIGNUP);
             if (templateName != null) {
                 mimeEmail.setRecipientType(templateName.getRecipientType().toString());
                 mimeEmail.setSubject(templateName.getSubject());
@@ -175,8 +185,8 @@ public class EmailJobServiceImpl implements EmailJobService {
             account.setClientPhone(user.getDomain().getPhone());
             account.setClientCompanyNameAbbreviation(user.getDomain().getCompanyNameAbbreviation());
             account.setPandaUrl(emailConfiguration.getApplicationUrl());
-            context.put("user", account);
-            templateName = emailTypeTemplateService.findByEventName("ACCOUNT REMOVAL");
+            context.put(EmailConstants.EMAIL_TEMPLATE_user, account);
+            templateName = emailTypeTemplateService.findByEventName(EmailConstants.EMAIL_ACCOUNT_REMOVAL);
             if (templateName != null) {
                 mimeEmail.setRecipientType(templateName.getRecipientType().toString());
                 mimeEmail.setSubject(templateName.getSubject());
@@ -200,8 +210,8 @@ public class EmailJobServiceImpl implements EmailJobService {
             account.setPandaUrl(emailConfiguration.getApplicationUrl());
             account.setClientName(user.getDomain().getName());
             account.setClientCompanyNameAbbreviation(user.getDomain().getCompanyNameAbbreviation());
-            context.put("user", account);
-            templateName = emailTypeTemplateService.findByEventName("PASSWORD RESET");
+            context.put(EmailConstants.EMAIL_TEMPLATE_user, account);
+            templateName = emailTypeTemplateService.findByEventName(EmailConstants.EMAIL_PASSWORD_RESET);
             if (templateName != null) {
                 mimeEmail.setRecipientType(templateName.getRecipientType().toString());
                 mimeEmail.setSubject(templateName.getSubject());
@@ -209,37 +219,72 @@ public class EmailJobServiceImpl implements EmailJobService {
             }
         }
         if (email.getEventType().equals(EmailConstants.SYSTEM_ERROR)) {
-            context.put("alert", email);
-            templateName = emailTypeTemplateService.findByEventName("SYSTEM ERROR");
+            Alert alert = new Alert();
+            alert.setSubject(email.getSubject());
+            alert.setDetails(email.getMessageBody());
+            //resource uuid for zone name
+            Zone zone = zoneService.findByUUID(email.getResourceUuid());
+            alert.setZone(zone.getName());
+            //resource id for pod id
+            alert.setPodId(email.getResourceId());
+            context.put(EmailConstants.EMAIL_TEMPLATE_alert, alert);
+            templateName = emailTypeTemplateService.findByEventName(EmailConstants.EMAIL_SYSTEM_ERROR);
             if (templateName != null) {
                 mimeEmail.setRecipientType(templateName.getRecipientType().toString());
                 mimeEmail.setSubject(templateName.getSubject());
                 return validateTemplate(user, templateName, context, emailConfiguration);
             }
         }
-        if (email.getEventType().equals(CloudStackConstants.CS_CAPACITY)) {
-            context.put("capacity", email);
-            templateName = emailTypeTemplateService.findByEventName("CAPACITY");
+        if (email.getEventType().equals(EmailConstants.EMAIL_CAPACITY)) {
+            Resource resource = new Resource();
+            templateName = emailTypeTemplateService.findByEventName(EmailConstants.EMAIL_CAPACITY);
             if (templateName != null) {
                 mimeEmail.setSubject(templateName.getSubject());
+                //zone name in resource uuid.
+                resource.setZone(email.getResourceUuid());
+                resource.setPercentage(email.getMessageBody());
+                resource.setResourceName(email.getEvent());
+                if (email.getResources().get(EmailConstants.EMAIL_Cpu) != null) {
+                    resource.setCpu(email.getResources().get(EmailConstants.EMAIL_Cpu));
+                }
+                if (email.getResources().get(EmailConstants.EMAIL_Memory) != null) {
+                    resource.setMemory(email.getResources().get(EmailConstants.EMAIL_Memory));
+                }
+                if (email.getResources().get(EmailConstants.EMAIL_Primary_storage) != null) {
+                    resource.setPrimaryStorage(email.getResources().get(EmailConstants.EMAIL_Primary_storage));
+                }
+                if (email.getResources().get(EmailConstants.EMAIL_Ip) != null) {
+                    resource.setIp(email.getResources().get(EmailConstants.EMAIL_Ip));
+                }
+                context.put(EmailConstants.EMAIL_TEMPLATE_capacity, resource);
                 return validateTemplate(user, templateName, context, emailConfiguration);
             }
         }
         return null;
     }
 
+    /**
+     * Validate template for email.
+     *
+     * @param user user details
+     * @param templateName template name configuration details
+     * @param context email context details
+     * @param emailConfiguration email configuration details
+     * @return generate context of email
+     * @throws MessagingException unhandled message exception
+     */
     private String validateTemplate(User user, EmailTemplate templateName, Map<String,Object> context, EmailConfiguration emailConfiguration) throws MessagingException {
         if (user.getLanguage() != null) {
-            if (user.getLanguage().equals("English") && templateName.getEnglishLanguage() != null) {
+            if (user.getLanguage().equals(EmailConstants.EMAIL_English) && templateName.getEnglishLanguage() != null) {
                 return generateContent(context, templateName.getEnglishLanguage());
             }
-            if (user.getLanguage().equals("English") && templateName.getEnglishLanguage() == null) {
+            if (user.getLanguage().equals(EmailConstants.EMAIL_English) && templateName.getEnglishLanguage() == null) {
                 return generateContent(context, templateName.getChineseLanguage());
             }
-            if (user.getLanguage().equals("Chinese") && templateName.getChineseLanguage() != null) {
+            if (user.getLanguage().equals(EmailConstants.EMAIL_Chinese) && templateName.getChineseLanguage() != null) {
                 return generateContent(context, templateName.getChineseLanguage());
             }
-            if (user.getLanguage().equals("Chinese") && templateName.getChineseLanguage() == null) {
+            if (user.getLanguage().equals(EmailConstants.EMAIL_Chinese) && templateName.getChineseLanguage() == null) {
                 return generateContent(context, templateName.getEnglishLanguage());
             }
         }
@@ -250,11 +295,11 @@ public class EmailJobServiceImpl implements EmailJobService {
             return generateContent(context, templateName.getChineseLanguage());
         }
         if ((templateName.getEnglishLanguage() != null && templateName.getChineseLanguage() != null)
-                && emailConfiguration.getEmailLanguage().equals("English")) {
+                && emailConfiguration.getEmailLanguage().equals(EmailConstants.EMAIL_English)) {
             return generateContent(context, templateName.getEnglishLanguage());
         }
         if ((templateName.getEnglishLanguage() != null && templateName.getChineseLanguage() != null)
-                && emailConfiguration.getEmailLanguage().equals("Chinese")) {
+                && emailConfiguration.getEmailLanguage().equals(EmailConstants.EMAIL_Chinese)) {
             return generateContent(context, templateName.getChineseLanguage());
         }
         return null;
@@ -263,13 +308,10 @@ public class EmailJobServiceImpl implements EmailJobService {
     /**
      * Apply dynamic content from context.
      *
-     * @param context
-     *            Hashmap variable for dynamic content.
-     * @param templateName
-     *            template name.
+     * @param context Hashmap variable for dynamic content.
+     * @param templateName template name.
      * @return email content.
-     * @throws MessagingException
-     *             unhandled exception.
+     * @throws MessagingException unhandled exception.
      */
     private String generateContent(Map<String, Object> context, String templateName) throws MessagingException {
         try {
@@ -277,9 +319,9 @@ public class EmailJobServiceImpl implements EmailJobService {
             Template template = freemarkerConfiguration.getTemplate(templateName, DEFAULT_ENCODING);
             return FreeMarkerTemplateUtils.processTemplateIntoString(template, context);
         } catch (IOException e) {
-            throw new MessagingException("FreeMarker", e);
+            throw new MessagingException(EmailConstants.EMAIL_FreeMarker, e);
         } catch (TemplateException e) {
-            throw new MessagingException("FreeMarker", e);
+            throw new MessagingException(EmailConstants.EMAIL_FreeMarker, e);
         }
     }
 }

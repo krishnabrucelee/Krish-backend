@@ -55,6 +55,8 @@ public class AlertEventListener implements MessageListener {
                     emailEvent.setSubject(eventObject.getString(CloudStackConstants.CS_ALERT_SUBJECT));
                     emailEvent.setMessageBody(alertEvent.getMessage());
                     emailEvent.setEventType(EmailConstants.SYSTEM_ERROR);
+                    emailEvent.setResourceUuid(eventObject.getString(EmailConstants.EMAIL_dataCenterId));
+                    emailEvent.setResourceId(eventObject.getString(EmailConstants.EMAIL_podId));
                     emailJobService.sendMessageToQueue(emailEvent);
                     try {
                         convertEntityService.getWebsocketService().handleEventAction(alertEvent);

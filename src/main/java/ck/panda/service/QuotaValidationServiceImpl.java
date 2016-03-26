@@ -3,21 +3,17 @@ package ck.panda.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.ResourceLimitDepartment;
-import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
 import ck.panda.rabbitmq.util.EmailEvent;
 import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
+import ck.panda.email.util.Resource;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EmailConstants;
 import ck.panda.constants.GenericConstants;
@@ -57,6 +53,7 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
         /** Used for setting optional values for resource usage. */
         HashMap<String, Long> resourceUsageMap = new HashMap<String, Long>();
         List<String> resourceList = new ArrayList<String>();
+        this.validateListResourceCapacity();
         switch(resourceType) {
         case "Instance":
             VmInstance vmInstance = (VmInstance)resourceObject;
@@ -239,8 +236,16 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
         convertEntityService.resourceCount(csResponse);
     }
 
-    public void validateListResourceCapacity(String resource) throws Exception {
+    /**
+     * Validate list resource capacity for domain.
+     *
+     * @throws Exception unhandled exception
+     */
+    public void validateListResourceCapacity() throws Exception {
         HashMap<String, String> optionalMap = new HashMap<String, String>();
+        Resource resourceEmail = new Resource();
+        EmailEvent emailEvent = new EmailEvent();
+        HashMap<String, String> resourceMap = new HashMap<String, String>();
         // 2. List capacity CS API call.
         String csListResponse = cloudStackResourceCapacity.listCapacity(optionalMap, CloudStackConstants.JSON);
         JSONObject csCapacity = new JSONObject(csListResponse).getJSONObject(CloudStackConstants.CS_CAPACITY_LIST_RESPONSE);
@@ -248,47 +253,53 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
             JSONArray capacityArrayJSON = csCapacity.getJSONArray(CloudStackConstants.CS_CAPACITY);
             for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
                 String resourceType = capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CAPACITY_TYPE);
+                String zonename = capacityArrayJSON.getJSONObject(i).getString(EmailConstants.EMAIL_zonename);
                 // 2.1 Total capacity in puplic pool for each resource type.
                 Double tempTotalCapacity = Double.valueOf(capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CS_CAPACITY_PERCENT));
                 if (GenericConstants.RESOURCE_CAPACITY.containsKey(resourceType)) {
                     switch (resourceType) {
                     case GenericConstants.RESOURCE_MEMORY:
+                        resourceEmail.setMemory(tempTotalCapacity.toString());
+                        resourceMap.put(EmailConstants.EMAIL_Memory, resourceEmail.getMemory());
                         if (tempTotalCapacity > CloudStackConstants.CS_CAPACITY_MAX) {
-                            EmailEvent emailEvent = new EmailEvent();
-                            emailEvent.setSubject(resource + "Resource unavailable");
-                            emailEvent.setMessageBody("Resource capacity for " + resource + " " + tempTotalCapacity +"used ");
-                            emailEvent.setEventType(CloudStackConstants.CS_CAPACITY);
-                            emailEvent.setEvent("Resource");
+                            emailEvent.setMessageBody(tempTotalCapacity.toString());
+                            emailEvent.setEventType(EmailConstants.EMAIL_CAPACITY);
+                            emailEvent.setEvent(EmailConstants.EMAIL_Memory);
+                            emailEvent.setResources(resourceMap);
                             emailJobService.sendMessageToQueue(emailEvent);
                         }
                         break;
                     case GenericConstants.RESOURCE_CPU:
+                        resourceEmail.setCpu(tempTotalCapacity.toString());
+                        resourceMap.put(EmailConstants.EMAIL_Cpu, resourceEmail.getCpu());
                         if (tempTotalCapacity > CloudStackConstants.CS_CAPACITY_MAX) {
-                            EmailEvent emailEvent = new EmailEvent();
-                            emailEvent.setSubject(resource + "Resource unavailable");
-                            emailEvent.setMessageBody("Resource capacity for " + resource + " " + tempTotalCapacity +"used ");
-                            emailEvent.setEventType(CloudStackConstants.CS_CAPACITY);
-                            emailEvent.setEvent("Resource");
+                            emailEvent.setMessageBody(tempTotalCapacity.toString());
+                            emailEvent.setEventType(EmailConstants.EMAIL_CAPACITY);
+                            emailEvent.setEvent(EmailConstants.EMAIL_Cpu);
+                            emailEvent.setResources(resourceMap);
                             emailJobService.sendMessageToQueue(emailEvent);
                         }
                         break;
                     case GenericConstants.RESOURCE_PRIMARY_STORAGE:
+                        resourceEmail.setPrimaryStorage(tempTotalCapacity.toString());
+                        resourceMap.put(EmailConstants.EMAIL_Primary_storage, resourceEmail.getPrimaryStorage());
                         if (tempTotalCapacity > CloudStackConstants.CS_CAPACITY_MAX) {
-                            EmailEvent emailEvent = new EmailEvent();
-                            emailEvent.setSubject(resource + "Resource unavailable");
-                            emailEvent.setMessageBody("Resource capacity for " + resource + " " + tempTotalCapacity +"used ");
-                            emailEvent.setEventType(CloudStackConstants.CS_CAPACITY);
-                            emailEvent.setEvent("Resource");
+                            emailEvent.setMessageBody(tempTotalCapacity.toString());
+                            emailEvent.setEventType(EmailConstants.EMAIL_CAPACITY);
+                            emailEvent.setEvent(EmailConstants.EMAIL_Primary_storage);
+                            emailEvent.setResources(resourceMap);
                             emailJobService.sendMessageToQueue(emailEvent);
                         }
                         break;
                     case GenericConstants.RESOURCE_IP_ADDRESS:
+                        resourceEmail.setIp(tempTotalCapacity.toString());
+                        resourceMap.put(EmailConstants.EMAIL_Ip, resourceEmail.getIp());
                         if (tempTotalCapacity > CloudStackConstants.CS_CAPACITY_MAX) {
-                            EmailEvent emailEvent = new EmailEvent();
-                            emailEvent.setSubject(resource + "Resource unavailable");
-                            emailEvent.setMessageBody("Resource capacity for " + resource + " " + tempTotalCapacity +"used ");
-                            emailEvent.setEventType(CloudStackConstants.CS_CAPACITY);
-                            emailEvent.setEvent("Resource");
+                            emailEvent.setMessageBody(tempTotalCapacity.toString());
+                            emailEvent.setEventType(EmailConstants.EMAIL_CAPACITY);
+                            emailEvent.setResourceUuid(zonename);
+                            emailEvent.setEvent(EmailConstants.EMAIL_Ip);
+                            emailEvent.setResources(resourceMap);
                             emailJobService.sendMessageToQueue(emailEvent);
                         }
                         break;
@@ -339,7 +350,6 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
                 //TODO apply internalization.
                 validateResponse = " User "+ resource +" Limit exceeded in domain " + convertEntityService.getDomainById(accountTypeId).getName();
             }
-            this.validateListResourceCapacity(resource);
         }
         return validateResponse;
     }
