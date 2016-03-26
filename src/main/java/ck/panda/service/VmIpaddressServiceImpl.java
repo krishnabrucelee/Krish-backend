@@ -74,7 +74,7 @@ public class VmIpaddressServiceImpl implements VmIpaddressService {
 
     @Override
     public VmIpaddress findByUUID(String uuid) throws Exception {
-        return ipaddressRepo.findByUUID(uuid);
+        return ipaddressRepo.findByUUIDAndIsActive(uuid, true);
     }
 
     @Override
@@ -98,8 +98,8 @@ public class VmIpaddressServiceImpl implements VmIpaddressService {
         return vmIp;
     }
 
-	@Override
-	public VmIpaddress findByIPAddress(String guestIpAddress, Long vmInstanceId) throws Exception {
-		return ipaddressRepo.findAllByVmIpaddressAndvmInstanceId(guestIpAddress, vmInstanceId);
-	}
+    @Override
+    public VmIpaddress findByIPAddress(String guestIpAddress, Long vmInstanceId) throws Exception {
+        return ipaddressRepo.findAllByVmIpaddressAndvmInstanceId(guestIpAddress, vmInstanceId);
+    }
 }

@@ -30,4 +30,6 @@ public interface EventLiteralsService extends CRUDService<EventLiterals> {
      */
     List<EventLiterals> findByIsActive(Boolean isActive) throws Exception;
 
+    List<EventLiterals> findAllByIsActive(Boolean isActive) throws Exception;
+
 }

@@ -580,6 +580,12 @@ public class SyncServiceImpl implements SyncService {
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Ip Address", e);
         }
+        try {
+            // 32. Sync Load Balancer entity
+            this.syncEventList();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Event List", e);
+        }
 
 
     }
@@ -1236,8 +1242,6 @@ public class SyncServiceImpl implements SyncService {
         types.add(AccountType.DOMAIN_ADMIN);
         departmentList = departmentService.findByAccountTypesAndActive(types, true);
         createRole(departmentList, existPermissionList);
-        List<EventLiterals> eventLists = new ArrayList<EventLiterals>();
-        this.EventList(eventLists);
     }
 
     /**
@@ -2590,10 +2594,20 @@ public class SyncServiceImpl implements SyncService {
     }
 
     @Override
-    public void EventList(List<EventLiterals> eventLists) throws Exception {
+    public void syncEventList() throws Exception {
         List<EventLiterals> userLists = EventsUtil.createEventsList(account,users,accountremoval);
-        for (EventLiterals events : userLists) {
-            eventService.save(events);
-        }
+        List<EventLiterals> eventTest = eventService.findAllByIsActive(true);
+            for (EventLiterals events : userLists) {
+                if (eventTest.size() ==0) {
+                    eventService.save(events);
+                }
+                String eventConcat = events.getEventName() + events.getEventLiterals();
+                for(EventLiterals literals :eventTest) {
+                    String literalConcat = literals.getEventName() + literals.getEventLiterals();
+                    if(!eventConcat.equals(literalConcat) &&(literals.getId() == null)){
+                        eventService.update(events);
+                    }
+                }
+           }
     }
 }

@@ -305,5 +305,10 @@ public interface SyncService {
      */
     void syncResourceLimitActionEventProject(ResponseEvent eventResponse) throws ApplicationException, Exception;
 
-    void EventList(List<EventLiterals> eventLists) throws Exception;
+    /**
+     * Sync event list.
+     *
+     * @throws Exception if error occurs.
+     */
+    void syncEventList() throws Exception;
 }

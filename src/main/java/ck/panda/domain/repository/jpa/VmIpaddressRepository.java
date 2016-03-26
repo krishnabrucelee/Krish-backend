@@ -27,10 +27,11 @@ public interface VmIpaddressRepository extends PagingAndSortingRepository<VmIpad
      * Get the vm ip address  based on the uuid.
      *
      * @param uuid of the vm ip address.
+     * @param isActive get the vmIpAddress list based on active/inactive status.
      * @return vm ipaddress.
      */
-    @Query(value = "select net from VmIpaddress net where net.uuid = :uuid")
-    VmIpaddress findByUUID(@Param("uuid") String uuid);
+    @Query(value = "select net from VmIpaddress net where net.uuid = :uuid AND net.isActive =:isActive")
+    VmIpaddress findByUUIDAndIsActive(@Param("uuid") String uuid,@Param("isActive") Boolean isActive);
 
     /**
      * Find all by VMInstance Id.
