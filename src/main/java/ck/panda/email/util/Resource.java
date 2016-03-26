@@ -21,6 +21,9 @@ public class Resource {
     /** Resource primaryStorage */
     private String primaryStorage;
 
+    /** Resource secondaryStorage */
+    private String secondaryStorage;
+
     /** Resource ip */
     private String ip;
 
@@ -130,6 +133,24 @@ public class Resource {
      */
     public void setPrimaryStorage(String primaryStorage) {
         this.primaryStorage = primaryStorage;
+    }
+
+    /**
+     * Get the secondaryStorage of Resource.
+     *
+     * @return the secondaryStorage
+     */
+    public String getSecondaryStorage() {
+        return secondaryStorage;
+    }
+
+    /**
+     * Set the secondaryStorage of Resource.
+     *
+     * @param secondaryStorage the secondaryStorage to set
+     */
+    public void setSecondaryStorage(String secondaryStorage) {
+        this.secondaryStorage = secondaryStorage;
     }
 
     /**

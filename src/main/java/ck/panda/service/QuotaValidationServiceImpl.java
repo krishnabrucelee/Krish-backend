@@ -253,14 +253,37 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
             JSONArray capacityArrayJSON = csCapacity.getJSONArray(CloudStackConstants.CS_CAPACITY);
             for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
                 String resourceType = capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CAPACITY_TYPE);
+                Double tempTotalCapacity = Double
+                        .valueOf(capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CS_CAPACITY_PERCENT));
+                if (resourceType.equals(GenericConstants.RESOURCE_MEMORY)) {
+                    resourceEmail.setMemory(tempTotalCapacity.toString());
+                    resourceMap.put(EmailConstants.EMAIL_Memory, resourceEmail.getMemory());
+                }
+                if (resourceType.equals(GenericConstants.RESOURCE_CPU)) {
+                    resourceEmail.setCpu(tempTotalCapacity.toString());
+                    resourceMap.put(EmailConstants.EMAIL_Cpu, resourceEmail.getCpu());
+                }
+                if (resourceType.equals(GenericConstants.RESOURCE_PRIMARY_STORAGE)) {
+                    resourceEmail.setPrimaryStorage(tempTotalCapacity.toString());
+                    resourceMap.put(EmailConstants.EMAIL_Primary_storage, resourceEmail.getPrimaryStorage());
+                }
+                if (resourceType.equals(GenericConstants.RESOURCE_IP_ADDRESS)) {
+                    resourceEmail.setIp(tempTotalCapacity.toString());
+                    resourceMap.put(EmailConstants.EMAIL_Ip, resourceEmail.getIp());
+                }
+                if (resourceType.equals(GenericConstants.RESOURCE_SECONDARY_STORAGE)) {
+                    resourceEmail.setSecondaryStorage(tempTotalCapacity.toString());
+                    resourceMap.put(EmailConstants.EMAIL_Secondary_storage, resourceEmail.getSecondaryStorage());
+                }
+            }
+            for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
+                String resourceType = capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CAPACITY_TYPE);
                 String zonename = capacityArrayJSON.getJSONObject(i).getString(EmailConstants.EMAIL_zonename);
                 // 2.1 Total capacity in puplic pool for each resource type.
                 Double tempTotalCapacity = Double.valueOf(capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CS_CAPACITY_PERCENT));
                 if (GenericConstants.RESOURCE_CAPACITY.containsKey(resourceType)) {
                     switch (resourceType) {
                     case GenericConstants.RESOURCE_MEMORY:
-                        resourceEmail.setMemory(tempTotalCapacity.toString());
-                        resourceMap.put(EmailConstants.EMAIL_Memory, resourceEmail.getMemory());
                         if (tempTotalCapacity > CloudStackConstants.CS_CAPACITY_MAX) {
                             emailEvent.setMessageBody(tempTotalCapacity.toString());
                             emailEvent.setEventType(EmailConstants.EMAIL_CAPACITY);
@@ -270,8 +293,6 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
                         }
                         break;
                     case GenericConstants.RESOURCE_CPU:
-                        resourceEmail.setCpu(tempTotalCapacity.toString());
-                        resourceMap.put(EmailConstants.EMAIL_Cpu, resourceEmail.getCpu());
                         if (tempTotalCapacity > CloudStackConstants.CS_CAPACITY_MAX) {
                             emailEvent.setMessageBody(tempTotalCapacity.toString());
                             emailEvent.setEventType(EmailConstants.EMAIL_CAPACITY);
@@ -281,8 +302,6 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
                         }
                         break;
                     case GenericConstants.RESOURCE_PRIMARY_STORAGE:
-                        resourceEmail.setPrimaryStorage(tempTotalCapacity.toString());
-                        resourceMap.put(EmailConstants.EMAIL_Primary_storage, resourceEmail.getPrimaryStorage());
                         if (tempTotalCapacity > CloudStackConstants.CS_CAPACITY_MAX) {
                             emailEvent.setMessageBody(tempTotalCapacity.toString());
                             emailEvent.setEventType(EmailConstants.EMAIL_CAPACITY);
@@ -292,13 +311,21 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
                         }
                         break;
                     case GenericConstants.RESOURCE_IP_ADDRESS:
-                        resourceEmail.setIp(tempTotalCapacity.toString());
-                        resourceMap.put(EmailConstants.EMAIL_Ip, resourceEmail.getIp());
                         if (tempTotalCapacity > CloudStackConstants.CS_CAPACITY_MAX) {
                             emailEvent.setMessageBody(tempTotalCapacity.toString());
                             emailEvent.setEventType(EmailConstants.EMAIL_CAPACITY);
                             emailEvent.setResourceUuid(zonename);
                             emailEvent.setEvent(EmailConstants.EMAIL_Ip);
+                            emailEvent.setResources(resourceMap);
+                            emailJobService.sendMessageToQueue(emailEvent);
+                        }
+                        break;
+                    case GenericConstants.RESOURCE_SECONDARY_STORAGE:
+                        if (tempTotalCapacity > CloudStackConstants.CS_CAPACITY_MAX) {
+                            emailEvent.setMessageBody(tempTotalCapacity.toString());
+                            emailEvent.setEventType(EmailConstants.EMAIL_CAPACITY);
+                            emailEvent.setResourceUuid(zonename);
+                            emailEvent.setEvent(EmailConstants.EMAIL_Secondary_storage);
                             emailEvent.setResources(resourceMap);
                             emailJobService.sendMessageToQueue(emailEvent);
                         }

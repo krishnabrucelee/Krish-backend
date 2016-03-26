@@ -341,6 +341,14 @@ public class SyncServiceImpl implements SyncService {
     @Value(value = "${test.accountremoval}")
     private String accountremoval;
 
+    /** receipient properties. */
+    @Value(value = "${test.resource}")
+    private String resource;
+
+    /** receipient properties. */
+    @Value(value = "${test.systemerror}")
+    private String systemerror;
+
     /** Full permission for root and domain admin. */
     public static final String ADMIN_PERMISSION = "FULL_PERMISSION";
 
@@ -2595,7 +2603,7 @@ public class SyncServiceImpl implements SyncService {
 
     @Override
     public void syncEventList() throws Exception {
-        List<EventLiterals> userLists = EventsUtil.createEventsList(account,users,accountremoval);
+        List<EventLiterals> userLists = EventsUtil.createEventsList(account,users,accountremoval,resource,systemerror);
         List<EventLiterals> eventTest = eventService.findAllByIsActive(true);
             for (EventLiterals events : userLists) {
                 if (eventTest.size() ==0) {

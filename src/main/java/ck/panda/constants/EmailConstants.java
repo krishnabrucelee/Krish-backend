@@ -83,4 +83,7 @@ public class EmailConstants {
     /** Constant for zone name. */
     public static final String EMAIL_zonename = "zonename";
 
+    /** Constant for Secondary storage. */
+    public static final String EMAIL_Secondary_storage = "Secondary storage";
+
     }
