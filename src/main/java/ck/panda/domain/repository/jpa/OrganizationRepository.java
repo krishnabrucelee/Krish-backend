@@ -1,7 +1,5 @@
 package ck.panda.domain.repository.jpa;
 
-import java.util.List;
-
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -17,5 +15,5 @@ public interface OrganizationRepository extends PagingAndSortingRepository<Organ
      * @return organization
      */
     @Query(value = "SELECT organization FROM Organization organization WHERE organization.isActive = :isActive")
-    List<Organization> findByIsActive(@Param("isActive") Boolean isActive);
+    Organization findByIsActive(@Param("isActive") Boolean isActive);
 }

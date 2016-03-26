@@ -512,4 +512,14 @@ public class UserServiceImpl implements UserService {
         }
         return user;
     }
+
+    @Override
+    public User findByUuId(String uuid) throws Exception {
+        return userRepository.findByUuId(uuid);
+    }
+
+    @Override
+    public User findAllByUserTypeAndIsActive(Boolean isActive, UserType rootAdmin) {
+        return userRepository.findAllByUserTypeAndIsActive(rootAdmin, isActive);
+    }
 }

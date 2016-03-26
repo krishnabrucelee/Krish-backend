@@ -19,6 +19,6 @@ public interface OrganizationService extends CRUDService<Organization> {
      * @return list Organization.
      * @throws Exception if error occurs.
      */
-    List<Organization> findByIsActive(Boolean isActive) throws Exception;
+    Organization findByIsActive(Boolean isActive) throws Exception;
 
 }

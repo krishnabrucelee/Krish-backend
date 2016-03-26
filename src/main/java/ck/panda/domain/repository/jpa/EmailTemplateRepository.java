@@ -17,6 +17,14 @@ import ck.panda.domain.entity.EmailTemplate;
 @Service
 public interface EmailTemplateRepository extends PagingAndSortingRepository<EmailTemplate, Long> {
 
+    /**
+     * Get email template by event name.
+     * @param eventName event name
+     * @return EmailTemplate
+     */
+    @Query(value = "SELECT email FROM EmailTemplate email WHERE email.eventName = :eventName")
+    EmailTemplate findByEventName(@Param("eventName") String eventName);
+
      /**
      * Find all by is Active in Email Template.
      *
@@ -44,5 +52,5 @@ public interface EmailTemplateRepository extends PagingAndSortingRepository<Emai
      * @return email template.
      */
     @Query(value = "SELECT email FROM EmailTemplate email WHERE email.isActive = :isActive AND email.eventName =:eventName")
-    EmailTemplate findEventByName(@Param("isActive") Boolean isActive,@Param("eventName")String eventName);
+    EmailTemplate findEventByName(@Param("isActive") Boolean isActive, @Param("eventName")String eventName);
 }

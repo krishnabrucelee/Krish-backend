@@ -70,7 +70,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public List<Organization> findByIsActive(Boolean isActive) throws Exception {
+    public Organization findByIsActive(Boolean isActive) throws Exception {
         return organizationRepo.findByIsActive(true);
     }
 }

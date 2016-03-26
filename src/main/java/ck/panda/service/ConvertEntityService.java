@@ -88,8 +88,8 @@ public class ConvertEntityService {
     private DateTimeService dateTimeService;
 
     /** Websocket service for tracking.*/
-   	@Autowired
-   	private WebsocketService webSocket;
+       @Autowired
+       private WebsocketService webSocket;
 
     /**
      * NetworkOfferingService for listing network offers in cloudstack server.
@@ -571,6 +571,21 @@ public class ConvertEntityService {
     public Long getOwnerByUuid(String uuid) throws Exception {
         if (userService.findByUuIdAndIsActive(uuid, true) != null) {
             return userService.findByUuIdAndIsActive(uuid, true).getId();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get deleted owner by UUID.
+     *
+     * @param uuid uuid of account/user.
+     * @return user id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getDeletedOwnerByUuid(String uuid) throws Exception {
+        if (userService.findByUuId(uuid) != null) {
+            return userService.findByUuId(uuid).getId();
         } else {
             return null;
         }
