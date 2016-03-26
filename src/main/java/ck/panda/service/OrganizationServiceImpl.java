@@ -34,6 +34,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
+            organization.setIsActive(true);
             return organizationRepo.save(organization);
         }
     }
