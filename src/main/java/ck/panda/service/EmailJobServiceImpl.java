@@ -94,7 +94,7 @@ public class EmailJobServiceImpl implements EmailJobService {
         eventResponse = eventmapper.readValue(eventObject, EmailEvent.class);
         Email mimeEmail = new Email();
         EmailTemplate templateName = new EmailTemplate();
-        if (eventResponse.getEventType().equals(EmailConstants.EMAIL_CAPACITY)) {
+        if (eventResponse.getEventType().equals(EmailConstants.EMAIL_CAPACITY) || eventResponse.getEventType().equals(EmailConstants.SYSTEM_ERROR)) {
             User user = userService.findAllByUserTypeAndIsActive(true, UserType.ROOT_ADMIN);
             Organization orgnizationDetails = organizationService.findByIsActive(true);
             mimeEmail.setFrom(emailConfiguration.getEmailFrom());
@@ -253,6 +253,9 @@ public class EmailJobServiceImpl implements EmailJobService {
                 }
                 if (email.getResources().get(EmailConstants.EMAIL_Ip) != null) {
                     resource.setIp(email.getResources().get(EmailConstants.EMAIL_Ip));
+                }
+                if (email.getResources().get(EmailConstants.EMAIL_Secondary_storage) != null) {
+                    resource.setSecondaryStorage(email.getResources().get(EmailConstants.EMAIL_Secondary_storage));
                 }
                 context.put(EmailConstants.EMAIL_TEMPLATE_capacity, resource);
                 return validateTemplate(user, templateName, context, emailConfiguration);
