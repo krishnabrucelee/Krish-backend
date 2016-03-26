@@ -30,8 +30,9 @@ public class AlertEventListener implements MessageListener {
      *
      * @param convertEntityService convertEntityService object.
      */
-    public AlertEventListener(ConvertEntityService convertEntityService){
+    public AlertEventListener(ConvertEntityService convertEntityService, EmailJobService emailJobService){
         this.convertEntityService = convertEntityService;
+        this.emailJobService = emailJobService;
     }
 
     @Override
@@ -56,7 +57,9 @@ public class AlertEventListener implements MessageListener {
                     emailEvent.setMessageBody(alertEvent.getMessage());
                     emailEvent.setEventType(EmailConstants.SYSTEM_ERROR);
                     emailEvent.setResourceUuid(eventObject.getString(EmailConstants.EMAIL_dataCenterId));
-                    emailEvent.setResourceId(eventObject.getString(EmailConstants.EMAIL_podId));
+                    if (eventObject.has(EmailConstants.EMAIL_podId)) {
+                        emailEvent.setResourceId(eventObject.getString(EmailConstants.EMAIL_podId));
+                    }
                     emailJobService.sendMessageToQueue(emailEvent);
                     try {
                         convertEntityService.getWebsocketService().handleEventAction(alertEvent);

@@ -1,31 +1,24 @@
 package ck.panda.service;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EmailConstants;
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.EmailConfiguration;
 import ck.panda.domain.entity.EmailTemplate;
+import ck.panda.domain.entity.Organization;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.entity.Zone;
@@ -85,6 +78,10 @@ public class EmailJobServiceImpl implements EmailJobService {
     @Autowired
     private ZoneService zoneService;
 
+    /** Organization service reference . */
+    @Autowired
+    private OrganizationService organizationService;
+
     /** User service reference . */
     @Autowired
     private EmailTypeTemplateService emailTypeTemplateService;
@@ -97,10 +94,11 @@ public class EmailJobServiceImpl implements EmailJobService {
         eventResponse = eventmapper.readValue(eventObject, EmailEvent.class);
         Email mimeEmail = new Email();
         EmailTemplate templateName = new EmailTemplate();
-        if (eventResponse.getEventType().equals("CAPACITY")) {
+        if (eventResponse.getEventType().equals(EmailConstants.EMAIL_CAPACITY)) {
             User user = userService.findAllByUserTypeAndIsActive(true, UserType.ROOT_ADMIN);
+            Organization orgnizationDetails = organizationService.findByIsActive(true);
             mimeEmail.setFrom(emailConfiguration.getEmailFrom());
-            mimeEmail.setTo(user.getEmail());
+            mimeEmail.setTo(orgnizationDetails.getEmail());
             mimeEmail.setBody(generateCountContent(eventResponse, user, emailConfiguration, templateName, mimeEmail));
             emailService.sendMail(mimeEmail);
         } else {
@@ -165,7 +163,7 @@ public class EmailJobServiceImpl implements EmailJobService {
             account.setCreatedBy(user.getCreatedBy().toString());
             context.put(EmailConstants.EMAIL_TEMPLATE_user, account);
             // sample template.
-            templateName = emailTypeTemplateService.findByEventName(EmailConstants.EMAIL_ACCOUNT_SIGNUP);
+            templateName = emailTypeTemplateService.findByEventAndIsActive(EmailConstants.EMAIL_ACCOUNT_SIGNUP, true);
             if (templateName != null) {
                 mimeEmail.setRecipientType(templateName.getRecipientType().toString());
                 mimeEmail.setSubject(templateName.getSubject());
@@ -186,7 +184,7 @@ public class EmailJobServiceImpl implements EmailJobService {
             account.setClientCompanyNameAbbreviation(user.getDomain().getCompanyNameAbbreviation());
             account.setPandaUrl(emailConfiguration.getApplicationUrl());
             context.put(EmailConstants.EMAIL_TEMPLATE_user, account);
-            templateName = emailTypeTemplateService.findByEventName(EmailConstants.EMAIL_ACCOUNT_REMOVAL);
+            templateName = emailTypeTemplateService.findByEventAndIsActive(EmailConstants.EMAIL_ACCOUNT_REMOVAL, true);
             if (templateName != null) {
                 mimeEmail.setRecipientType(templateName.getRecipientType().toString());
                 mimeEmail.setSubject(templateName.getSubject());
@@ -211,7 +209,7 @@ public class EmailJobServiceImpl implements EmailJobService {
             account.setClientName(user.getDomain().getName());
             account.setClientCompanyNameAbbreviation(user.getDomain().getCompanyNameAbbreviation());
             context.put(EmailConstants.EMAIL_TEMPLATE_user, account);
-            templateName = emailTypeTemplateService.findByEventName(EmailConstants.EMAIL_PASSWORD_RESET);
+            templateName = emailTypeTemplateService.findByEventAndIsActive(EmailConstants.EMAIL_PASSWORD_RESET, true);
             if (templateName != null) {
                 mimeEmail.setRecipientType(templateName.getRecipientType().toString());
                 mimeEmail.setSubject(templateName.getSubject());
@@ -228,7 +226,7 @@ public class EmailJobServiceImpl implements EmailJobService {
             //resource id for pod id
             alert.setPodId(email.getResourceId());
             context.put(EmailConstants.EMAIL_TEMPLATE_alert, alert);
-            templateName = emailTypeTemplateService.findByEventName(EmailConstants.EMAIL_SYSTEM_ERROR);
+            templateName = emailTypeTemplateService.findByEventAndIsActive(EmailConstants.EMAIL_SYSTEM_ERROR, true);
             if (templateName != null) {
                 mimeEmail.setRecipientType(templateName.getRecipientType().toString());
                 mimeEmail.setSubject(templateName.getSubject());
@@ -237,7 +235,7 @@ public class EmailJobServiceImpl implements EmailJobService {
         }
         if (email.getEventType().equals(EmailConstants.EMAIL_CAPACITY)) {
             Resource resource = new Resource();
-            templateName = emailTypeTemplateService.findByEventName(EmailConstants.EMAIL_CAPACITY);
+            templateName = emailTypeTemplateService.findByEventAndIsActive(EmailConstants.EMAIL_CAPACITY, true);
             if (templateName != null) {
                 mimeEmail.setSubject(templateName.getSubject());
                 //zone name in resource uuid.

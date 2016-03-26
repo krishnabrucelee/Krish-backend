@@ -67,6 +67,6 @@ public class EmailTemplateServiceImpl implements EmailTypeTemplateService {
 
     @Override
     public EmailTemplate findByEventAndIsActive(String eventName, Boolean isActive) throws Exception {
-        return  emailRepo.findEventByName(true,eventName);
+        return emailRepo.findEventByName(true, eventName);
     }
 }

@@ -52,5 +52,5 @@ public interface EmailTemplateRepository extends PagingAndSortingRepository<Emai
      * @return email template.
      */
     @Query(value = "SELECT email FROM EmailTemplate email WHERE email.isActive = :isActive AND email.eventName =:eventName")
-    EmailTemplate findEventByName(@Param("isActive") Boolean isActive,@Param("eventName")String eventName);
+    EmailTemplate findEventByName(@Param("isActive") Boolean isActive, @Param("eventName")String eventName);
 }

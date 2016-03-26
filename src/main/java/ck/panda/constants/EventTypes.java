@@ -306,10 +306,10 @@ public class EventTypes {
     /** VPN Remote Access User Remove Events. */
     public static final String EVENT_VPN_USER_REMOVE = "VPN.USER.REMOVE";
 
-    /** Domain event create.     */
+    /** Domain event create. */
     public static final Object EVENT_DOMAIN_CREATE = "DOMAIN.CREATE";
 
-    /** Project event create.     */
+    /** Project event create. */
     public static final Object EVENT_PROJECT_CREATE = "PROJECT.CREATE";
 
     /** User update. */

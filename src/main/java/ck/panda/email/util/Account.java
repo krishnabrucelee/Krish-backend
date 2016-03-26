@@ -1,8 +1,7 @@
 package ck.panda.email.util;
 
 /**
- * Account Pojo class
- */
+ * Event for Account */
 public class Account {
 
     /** User uuid. */

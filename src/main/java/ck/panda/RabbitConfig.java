@@ -303,16 +303,16 @@ public class RabbitConfig {
      *
      * @return message action event listener.
      */
-	@Bean
-	MessageListenerAdapter actionListenerAdapter() {
-		SyncService syncService = applicationContext.getBean(SyncService.class);
-		EmailJobService emailJobService = applicationContext.getBean(EmailJobService.class);
-		AsynchronousJobService asyncService = applicationContext.getBean(AsynchronousJobService.class);
-		CloudStackServer cloudStackServer = applicationContext.getBean(CloudStackServer.class);
-		ConvertEntityService convertEntityService = applicationContext.getBean(ConvertEntityService.class);
-		return new MessageListenerAdapter(new ActionListener(syncService, asyncService, convertEntityService,
-				cloudStackServer, backendAdminUsername, backendAdminRole, emailJobService));
-	}
+    @Bean
+    MessageListenerAdapter actionListenerAdapter() {
+        SyncService syncService = applicationContext.getBean(SyncService.class);
+        EmailJobService emailJobService = applicationContext.getBean(EmailJobService.class);
+        AsynchronousJobService asyncService = applicationContext.getBean(AsynchronousJobService.class);
+        CloudStackServer cloudStackServer = applicationContext.getBean(CloudStackServer.class);
+        ConvertEntityService convertEntityService = applicationContext.getBean(ConvertEntityService.class);
+        return new MessageListenerAdapter(new ActionListener(syncService, asyncService, convertEntityService,
+                cloudStackServer, backendAdminUsername, backendAdminRole, emailJobService));
+    }
 
     /**
      * Message listener adapter that delegates the handling of asynchronous job messages to target listener methods via
@@ -348,11 +348,12 @@ public class RabbitConfig {
      *
      * @return message alert listener.
      */
-	@Bean
-	MessageListenerAdapter alertListenerAdapter() {
-		ConvertEntityService convertEntityService = applicationContext.getBean(ConvertEntityService.class);
-		return new MessageListenerAdapter(new AlertEventListener(convertEntityService));
-	}
+    @Bean
+    MessageListenerAdapter alertListenerAdapter() {
+        ConvertEntityService convertEntityService = applicationContext.getBean(ConvertEntityService.class);
+        EmailJobService emailJobService = applicationContext.getBean(EmailJobService.class);
+        return new MessageListenerAdapter(new AlertEventListener(convertEntityService, emailJobService));
+    }
 
     /**
      * Message listener adapter that delegates the handling of usage messages to target listener methods via reflection,
@@ -373,7 +374,7 @@ public class RabbitConfig {
      */
     @Bean
     MessageListenerAdapter emailListenerAdapter() {
-    	EmailJobService emailJobService = applicationContext.getBean(EmailJobService.class);
+        EmailJobService emailJobService = applicationContext.getBean(EmailJobService.class);
         return new MessageListenerAdapter(new EmailListener(emailJobService, backendAdminUsername, backendAdminRole));
     }
 

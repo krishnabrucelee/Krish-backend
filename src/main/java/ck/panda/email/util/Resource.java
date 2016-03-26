@@ -1,8 +1,6 @@
 package ck.panda.email.util;
 
-/**
- * Resource Pojo class
- */
+/** Event for Resource */
 public class Resource {
 
     /** Resource name */
