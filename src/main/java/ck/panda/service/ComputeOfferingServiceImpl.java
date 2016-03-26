@@ -17,6 +17,7 @@ import ck.panda.domain.entity.ComputeOfferingCost;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.ComputeOfferingRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackComputeOffering;
@@ -159,7 +160,9 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
                 JSONObject editComputeJSON = new JSONObject(editComputeResponse)
                         .getJSONObject(CS_UPDATE_COMPUTEOFFERING).getJSONObject(CS_SERVICE_OFFERING);
                 //cost calculation for compute offering.
-                this.costCalculation(compute);
+                if(compute.getComputeCost().size() !=0) {
+                    this.costCalculation(compute);
+                }
             }
         }
        return computeRepo.save(compute);
@@ -346,6 +349,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
         List<ComputeOfferingCost> computeCost = new ArrayList<ComputeOfferingCost>();
         ComputeOffering persistCompute = find(compute.getId());
         ComputeOfferingCost cost = compute.getComputeCost().get(0);
+        Zone zone = compute.getComputeCost().get(0).getZone();
         Double totalCost = costService.totalcost(cost);
         ComputeOfferingCost computeOfferingcost = costService.findByCostAndId(compute.getId(),totalCost);
         if (computeOfferingcost == null) {
