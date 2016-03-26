@@ -12,6 +12,8 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -19,12 +21,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.EmailTemplate;
+import ck.panda.domain.entity.EventLiterals;
 import ck.panda.domain.entity.EmailTemplate.RecipientType;
 import ck.panda.service.EmailTypeTemplateService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -91,23 +95,23 @@ public class EmailTemplateController extends CRUDController<EmailTemplate> imple
             @RequestParam(value="file", required=true) MultipartFile[] files, @RequestParam(value="eventName", required=true) String eventName, @RequestParam(value="englishLanguage", required=true) String englishLanguage, @RequestParam(value="chineseLanguage")String chineseLanguage,@RequestParam(value="subject")String subject,@RequestParam(value="recipientType")String recipientType) throws Exception {
         InputStream inputStream = null;
         OutputStream outputStream = null;
-        EmailTemplate email = new EmailTemplate();
         int i = 0;
+        EmailTemplate email = emailService.findByEventAndIsActive(eventName, true);
+        if (email == null ) {
+            email = new EmailTemplate();
+        }
         for (MultipartFile file : files) {
             i++;
             if (englishLanguage != null && i == 1) {
                 String fileName = file.getOriginalFilename();
                 File newFile = new File(englishTemplateDir + "/" + eventName);
-                EmailTemplate emailFile = emailService.findByName(fileName);
-                if (emailFile != null && emailFile.getId() != email.getId()) {
-                    throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "error.english.file.already.exists");
-                }
                 email.setEventName(eventName);
                 email.setEnglishLanguage(fileName);
                 email.setSubject(subject);
                 email.setRecipientType(RecipientType.valueOf(recipientType));
                 email.setIsActive(true);
                 emailService.save(email);
+
             try {
                 inputStream = file.getInputStream();
                 if (!newFile.exists()) {
@@ -128,9 +132,6 @@ public class EmailTemplateController extends CRUDController<EmailTemplate> imple
         if(chineseLanguage!=null && i == 2) {
             String fileName = file.getOriginalFilename();
             File newFile = new File(chineseTemplateDir + "/" + eventName);
-            if (emailService.findByName(fileName) != null) {
-                throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "error.chinese.file.already.exists");
-            }
             email.setChineseLanguage(fileName);
             emailService.save(email);
                 try {
@@ -151,7 +152,22 @@ public class EmailTemplateController extends CRUDController<EmailTemplate> imple
                 }
                newFile.getAbsolutePath();
             }
-         }
+        }
         return eventName;
     }
+
+    /**
+     * List event literals by event name.
+     *
+     * @param eventName to be choosed.
+     * @return event literals.
+     * @throws Exception if error occurs.
+     */
+    @RequestMapping(value = "listbyeventname", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<EmailTemplate> findByEventName(@RequestParam String eventName) throws Exception {
+        return emailService.findByEventName(eventName);
+    }
+
  }

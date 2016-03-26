@@ -30,9 +30,19 @@ public interface EmailTemplateRepository extends PagingAndSortingRepository<Emai
      * Find template by isactive status and language.
      *
      * @param isActive status of the template.
-     * @param language of the template.
+     * @param eventName of the template.
      * @return email template.
      */
-    @Query(value = "SELECT email FROM EmailTemplate email WHERE email.isActive = :isActive AND email.englishLanguage =:language OR email.chineseLanguage =:language")
-    EmailTemplate findNameAndIsActive(@Param("isActive") Boolean isActive,@Param("language")String language);
+    @Query(value = "SELECT email FROM EmailTemplate email WHERE email.isActive = :isActive AND email.eventName =:eventName")
+    List<EmailTemplate> findAllByEventNameAndIsActive(@Param("isActive") Boolean isActive,@Param("eventName")String eventName);
+
+    /**
+     * Find email template by event name.
+     *
+     * @param isActive status of the event.
+     * @param eventName of the email template.
+     * @return email template.
+     */
+    @Query(value = "SELECT email FROM EmailTemplate email WHERE email.isActive = :isActive AND email.eventName =:eventName")
+    EmailTemplate findEventByName(@Param("isActive") Boolean isActive,@Param("eventName")String eventName);
 }

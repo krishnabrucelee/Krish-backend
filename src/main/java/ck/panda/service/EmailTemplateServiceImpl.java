@@ -60,7 +60,13 @@ public class EmailTemplateServiceImpl implements EmailTypeTemplateService {
     }
 
     @Override
-    public EmailTemplate findByName(String language) throws Exception {
-        return  emailRepo.findNameAndIsActive(true,language);
+    public List<EmailTemplate> findByEventName(String eventName) throws Exception {
+        return (List<EmailTemplate>) emailRepo.findAllByEventNameAndIsActive(true,eventName);
+    }
+
+
+    @Override
+    public EmailTemplate findByEventAndIsActive(String eventName, Boolean isActive) throws Exception {
+        return  emailRepo.findEventByName(true,eventName);
     }
 }

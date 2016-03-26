@@ -25,9 +25,17 @@ public interface EmailTypeTemplateService extends CRUDService<EmailTemplate> {
      * Find template by isactive status and language.
      *
      * @param isActive status of the template.
-     * @param language of the template.
+     * @param eventName of the template.
      * @return email template.
      */
-    EmailTemplate findByName(String language) throws Exception;
+    List<EmailTemplate> findByEventName(String eventName) throws Exception;
 
+    /**
+     * Find email template by event name.
+     *
+     * @param isActive status of the event.
+     * @param eventName of the email template.
+     * @return email template.
+     */
+    EmailTemplate findByEventAndIsActive(String eventName, Boolean isActive) throws Exception;
 }
