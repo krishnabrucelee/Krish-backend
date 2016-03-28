@@ -33,7 +33,6 @@ spring:
             name: ${RABBITMQ_EXCHANGE}
         email:
             name: ${RABBITMQ_EMAIL_EXCHANGE}
-
     # CS server Routing key
         server:
             action:
@@ -54,7 +53,6 @@ spring:
             email:
                 pattern: "email.template"
                 queue : ${RABBITMQ_EMAIL}
-
  # Mail configuration
     mail:
         host: mail.xxx.com
@@ -157,7 +155,7 @@ login:
 
 english:
     template:
-        dir: /test
+        dir: ${ENGLISH_TEMPLATE_DIR}
 chinese:
     template:
-        dir: /test1
+        dir: ${CHINESE_TEMPLATE_DIR}

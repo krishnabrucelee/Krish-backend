@@ -78,6 +78,10 @@ public class TemplateServiceImpl implements TemplateService {
     @Autowired
     private TemplateCostService templateCostService;
 
+    /** User service reference. */
+    @Autowired
+    private UserService userService;
+
     /** Template repository reference. */
     @Autowired
     private TemplateRepository templateRepository;
@@ -177,6 +181,13 @@ public class TemplateServiceImpl implements TemplateService {
                 return templateRepository.save(template);
                 }
             }
+        }
+        User user = userService.find(template.getTemplateOwnerId());
+        if(user.getType() == UserType.ROOT_ADMIN) {
+            template.setTemplateCreationType(false);
+        }
+        else {
+         template.setTemplateCreationType(true);
         }
         return templateRepository.save(template);
     }
@@ -501,6 +512,12 @@ public class TemplateServiceImpl implements TemplateService {
         }
         template.setDisplayText(osTypeService.find(template.getOsTypeId()).getDescription());
         template.setSize(0L);
+        if(template.getTemplateCreationType()== true) {
+            template.setTemplateCreationType(true);
+        }
+        else {
+            template.setTemplateCreationType(false);
+        }
     }
 
     /**
@@ -590,7 +607,7 @@ public class TemplateServiceImpl implements TemplateService {
         if (template.getDetailedDescription() == null || template.getDetailedDescription().isEmpty()) {
             errors.addFieldError(TEMPLATE_DETAILED_DESC, "template.detaileddescription");
         }
-        if(template.getSubmitCheck() == false ) {
+        if(template.getTemplateCreationType() == false ) {
             if (template.getTemplateCost() == null) {
             errors.addFieldError(TEMPLATE_COST, "template.cost.error");
             }
