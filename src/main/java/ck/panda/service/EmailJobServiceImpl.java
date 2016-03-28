@@ -1,5 +1,6 @@
 package ck.panda.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.HashMap;
@@ -60,6 +61,14 @@ public class EmailJobServiceImpl implements EmailJobService {
     /** Server email pattern. */
     @Value(value = "${spring.rabbit.server.email.pattern}")
     private String routingKey;
+
+    /** chinese email template directory. */
+    @Value(value = "${chinese.template.dir}")
+    private String chineseTemplatePath;
+
+    /** english email template directory. */
+    @Value(value = "${english.template.dir}")
+    private String englishTemplatePath;
 
     /** Constant for generic UTF. */
     public static final String CS_UTF = "utf-8";
@@ -277,31 +286,31 @@ public class EmailJobServiceImpl implements EmailJobService {
     private String validateTemplate(User user, EmailTemplate templateName, Map<String,Object> context, EmailConfiguration emailConfiguration) throws MessagingException {
         if (user.getLanguage() != null) {
             if (user.getLanguage().equals(EmailConstants.EMAIL_English) && templateName.getEnglishLanguage() != null) {
-                return generateContent(context, templateName.getEnglishLanguage());
+                return generateContent(context, templateName.getEventName(), englishTemplatePath);
             }
             if (user.getLanguage().equals(EmailConstants.EMAIL_English) && templateName.getEnglishLanguage() == null) {
-                return generateContent(context, templateName.getChineseLanguage());
+                return generateContent(context, templateName.getEventName(), chineseTemplatePath);
             }
             if (user.getLanguage().equals(EmailConstants.EMAIL_Chinese) && templateName.getChineseLanguage() != null) {
-                return generateContent(context, templateName.getChineseLanguage());
+                return generateContent(context, templateName.getEventName(), chineseTemplatePath);
             }
             if (user.getLanguage().equals(EmailConstants.EMAIL_Chinese) && templateName.getChineseLanguage() == null) {
-                return generateContent(context, templateName.getEnglishLanguage());
+                return generateContent(context, templateName.getEventName(), englishTemplatePath);
             }
         }
         if (templateName.getEnglishLanguage() != null && templateName.getChineseLanguage() == null) {
-            return generateContent(context, templateName.getEnglishLanguage());
+            return generateContent(context, templateName.getEventName(), englishTemplatePath);
         }
         if (templateName.getEnglishLanguage() == null && templateName.getChineseLanguage() != null) {
-            return generateContent(context, templateName.getChineseLanguage());
+            return generateContent(context, templateName.getEventName(), chineseTemplatePath);
         }
         if ((templateName.getEnglishLanguage() != null && templateName.getChineseLanguage() != null)
                 && emailConfiguration.getEmailLanguage().equals(EmailConstants.EMAIL_English)) {
-            return generateContent(context, templateName.getEnglishLanguage());
+            return generateContent(context, templateName.getEventName(), englishTemplatePath);
         }
         if ((templateName.getEnglishLanguage() != null && templateName.getChineseLanguage() != null)
                 && emailConfiguration.getEmailLanguage().equals(EmailConstants.EMAIL_Chinese)) {
-            return generateContent(context, templateName.getChineseLanguage());
+            return generateContent(context, templateName.getEventName(), chineseTemplatePath);
         }
         return null;
     }
@@ -314,9 +323,10 @@ public class EmailJobServiceImpl implements EmailJobService {
      * @return email content.
      * @throws MessagingException unhandled exception.
      */
-    private String generateContent(Map<String, Object> context, String templateName) throws MessagingException {
+    private String generateContent(Map<String, Object> context, String templateName, String templatePath) throws MessagingException {
         try {
             // free marker template for dynamic content.
+            freemarkerConfiguration.setDirectoryForTemplateLoading(new File(templatePath));
             Template template = freemarkerConfiguration.getTemplate(templateName, DEFAULT_ENCODING);
             return FreeMarkerTemplateUtils.processTemplateIntoString(template, context);
         } catch (IOException e) {
