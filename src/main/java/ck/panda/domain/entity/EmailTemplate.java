@@ -40,6 +40,10 @@ public class EmailTemplate implements Serializable {
     private String subject;
 
     /** Language of the template */
+    @Column(name = "file_path")
+    private String filePath;
+
+    /** Language of the template */
     @Column(name = "eng_language")
     private String englishLanguage;
 
@@ -335,5 +339,21 @@ public class EmailTemplate implements Serializable {
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
     }
+
+    /**
+     * @return the filePath
+     */
+    public String getFilePath() {
+        return filePath;
+    }
+
+    /**
+     * @param filePath the filePath to set
+     */
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+
 
 }

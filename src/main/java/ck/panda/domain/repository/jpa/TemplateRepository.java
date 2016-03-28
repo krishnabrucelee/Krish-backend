@@ -66,7 +66,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param isActive true/false
      * @return user and routing template list
      */
-    @Query(value = "SELECT template FROM Template template LEFT JOIN template.osCategory LEFT JOIN template.templateOwner LEFT JOIN template.osType LEFT JOIN template.templateCost WHERE template.type <>:type AND template.format <>:format AND template.isActive =:isActive")
+    @Query(value = "SELECT template FROM Template template LEFT JOIN template.osCategory LEFT JOIN template.templateOwner LEFT JOIN template.osType WHERE template.type <>:type AND template.format <>:format AND template.isActive =:isActive")
     Page<Template> findAllByType(@Param("type") TemplateType type, @Param("format") Format format, Pageable pageable,
         @Param("isActive") Boolean isActive);
     /**

@@ -313,8 +313,9 @@ public class Template implements Serializable {
     @Transient
     private Boolean syncFlag;
 
-    @Transient
-    private Boolean submitCheck;
+    /** Template creation type. */
+    @Column(name = "template_creation_type")
+    private Boolean templateCreationType;
 
     /**
      * Get the id.
@@ -1357,17 +1358,21 @@ public class Template implements Serializable {
     }
 
     /**
-     * @return the submitCheck
+     * Get the Template creation type.
+     *
+     * @return the templateCreationType
      */
-    public Boolean getSubmitCheck() {
-        return submitCheck;
+    public Boolean getTemplateCreationType() {
+        return templateCreationType;
     }
 
     /**
-     * @param submitCheck the submitCheck to set
+     * Set the Get the Template creation type.
+     *
+     * @param templateCreationType  to set
      */
-    public void setSubmitCheck(Boolean submitCheck) {
-        this.submitCheck = submitCheck;
+    public void setTemplateCreationType(Boolean templateCreationType) {
+        this.templateCreationType = templateCreationType;
     }
 
     /**
@@ -1498,6 +1503,13 @@ public class Template implements Serializable {
             template.transZone = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_ZONE_ID);
             template.transHypervisor = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_HYPERVISOR);
             template.setTransDepartment(JsonUtil.getStringValue(object, CloudStackConstants.CS_ACCOUNT));
+            if(template.getTransDepartment().equals("admin")) {
+                template.setTemplateCreationType(false);
+            }
+            else {
+                template.setTemplateCreationType(true);
+
+            }
             template.setIsActive(true);
             if (object.has(CloudStackConstants.CS_FORMAT)) {
                 template.setFormat(template.getFormat().valueOf(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_FORMAT)));
