@@ -17,4 +17,6 @@ export RABBITMQ_CS_USAGE_EVENT=CSUsageEvent
 export RABBITMQ_CS_ASYNC_EVENT=CSAsynchEvent
 export RABBITMQ_RESOURCE_EVENT=CSResourceEvent
 export RABBITMQ_EXCHANGE=cloudstack-events
+export ENGLISH_TEMPLATE_DIR = /home/assistanz/reports/englishtemplate
+export CHINESE_TEMPLATE_DIR = /home/assistanz/reports/chinesetemplate
 export APP_BUILD_NUMBER="1.0"
