@@ -39,7 +39,7 @@ public class EmailTemplate implements Serializable {
     @Column(name = "subject")
     private String subject;
 
-    /** Language of the template */
+    /** File path for template */
     @Column(name = "file_path")
     private String filePath;
 
