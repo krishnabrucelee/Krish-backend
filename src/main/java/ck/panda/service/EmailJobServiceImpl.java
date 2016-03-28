@@ -327,7 +327,6 @@ public class EmailJobServiceImpl implements EmailJobService {
         try {
             // free marker template for dynamic content.
             freemarkerConfiguration.setDirectoryForTemplateLoading(new File(templatePath));
-//            System.out.println(freemarkerConfiguration.getTemplateLoader().findTemplateSource(templateName));
             Template template = freemarkerConfiguration.getTemplate(templateName, DEFAULT_ENCODING);
             return FreeMarkerTemplateUtils.processTemplateIntoString(template, context);
         } catch (IOException e) {
