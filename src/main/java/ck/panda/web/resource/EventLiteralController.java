@@ -86,7 +86,7 @@ public class EventLiteralController extends CRUDController<EventLiterals> implem
      * @return event literals.
      * @throws Exception if error occurs.
      */
-    @RequestMapping(value = "listbyevent", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = "/listbyevent", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<EventLiterals> findByEventName(@RequestParam String eventName) throws Exception {

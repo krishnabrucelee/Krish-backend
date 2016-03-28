@@ -62,7 +62,6 @@ public class StorageOffering implements Serializable {
      * A desired name of the Storage offering.
      */
     @NotEmpty
-    @Size(min = 4, max = 20, message = "storage.name.size.error")
     @Column(name = "name", nullable = false)
     private String name;
 
@@ -81,8 +80,7 @@ public class StorageOffering implements Serializable {
      * Description of Storage Offering.
      */
     @NotEmpty
-    @Size(min = 4, max = 400, message = "storage.description.size.error")
-    @Column(name = "description")
+    @Column(name = "description", nullable = false)
     private String description;
 
     /**
