@@ -1508,7 +1508,6 @@ public class Template implements Serializable {
             }
             else {
                 template.setTemplateCreationType(true);
-
             }
             template.setIsActive(true);
             if (object.has(CloudStackConstants.CS_FORMAT)) {

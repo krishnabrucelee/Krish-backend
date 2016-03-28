@@ -341,6 +341,8 @@ public class EmailTemplate implements Serializable {
     }
 
     /**
+     * Get the file path.
+     *
      * @return the filePath
      */
     public String getFilePath() {
@@ -348,7 +350,9 @@ public class EmailTemplate implements Serializable {
     }
 
     /**
-     * @param filePath the filePath to set
+     * Set the file path.
+     *
+     * @param filePath  to set
      */
     public void setFilePath(String filePath) {
         this.filePath = filePath;
