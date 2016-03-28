@@ -1503,7 +1503,7 @@ public class Template implements Serializable {
             template.transZone = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_ZONE_ID);
             template.transHypervisor = JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_HYPERVISOR);
             template.setTransDepartment(JsonUtil.getStringValue(object, CloudStackConstants.CS_ACCOUNT));
-            if(template.getTransDepartment().equals("admin")) {
+            if(template.getTransDepartment().equals(CloudStackConstants.CS_ADMIN)) {
                 template.setTemplateCreationType(false);
             }
             else {

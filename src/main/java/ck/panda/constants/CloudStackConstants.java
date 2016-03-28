@@ -695,4 +695,8 @@ public class CloudStackConstants {
 
     /** Constant for capacity max used. */
     public static final Integer CS_CAPACITY_MAX = 80;
+
+    /** Constant for admin. */
+    public static final String CS_ADMIN = "admin";
+
 }
