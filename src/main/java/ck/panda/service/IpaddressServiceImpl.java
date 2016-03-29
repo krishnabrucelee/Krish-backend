@@ -595,6 +595,7 @@ public class IpaddressServiceImpl implements IpaddressService {
                         throw new BadCredentialsException(jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
                     }
                 }
+                Thread.sleep(15000);
                 if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
                     String jobResponse = csipaddressService.associatedJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
                     JSONObject jobresults = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
@@ -673,6 +674,7 @@ public class IpaddressServiceImpl implements IpaddressService {
                     throw new BadCredentialsException(jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
                 }
             }
+            Thread.sleep(15000);
             if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
                 String jobResponse = csipaddressService.associatedJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
                 JSONObject jobresults = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
