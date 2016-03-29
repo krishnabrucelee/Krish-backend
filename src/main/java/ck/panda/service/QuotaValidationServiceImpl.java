@@ -18,6 +18,7 @@ import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EmailConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.util.CloudStackResourceCapacity;
+import ck.panda.util.ConfigUtil;
 import ck.panda.util.error.exception.CustomGenericException;
 
 @Service
@@ -47,12 +48,18 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
     @Autowired
     private EmailJobService emailJobService;
 
+    /** Cloud stack configuration utility class. */
+    @Autowired
+    private ConfigUtil config;
+
     @Override
     public String QuotaLimitCheckByResourceObject(Object resourceObject, String resourceType,
             Long accountTypeId, String accountType) throws Exception {
         /** Used for setting optional values for resource usage. */
         HashMap<String, Long> resourceUsageMap = new HashMap<String, Long>();
         List<String> resourceList = new ArrayList<String>();
+        // Api call from Root admin.
+        config.setServer(1L);
         this.validateListResourceCapacity();
         switch(resourceType) {
         case "Instance":
@@ -232,6 +239,7 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
     public void updateResourceCountByDomain(String domainUuid, HashMap<String, String> domainCountMap)
             throws Exception {
         // Resource count for domain
+
         String csResponse = cloudStackResourceCapacity.updateResourceCount(domainUuid, domainCountMap, "json");
         convertEntityService.resourceCount(csResponse);
     }

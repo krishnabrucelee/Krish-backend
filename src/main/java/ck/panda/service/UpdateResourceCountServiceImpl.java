@@ -12,6 +12,7 @@ import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
 import ck.panda.util.CloudStackResourceCapacity;
+import ck.panda.util.ConfigUtil;
 import ck.panda.util.error.exception.CustomGenericException;
 
 @Service
@@ -33,12 +34,17 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
     @Autowired
     private ResourceLimitProjectService resourceLimitProjectService;
 
+    /** Cloud stack configuration utility class. */
+    @Autowired
+    private ConfigUtil config;
+
     @Override
     public String QuotaUpdateByResourceObject(Object resourceObject, String resourceType,
             Long accountTypeId, String accountType, String status) throws Exception {
         /** Used for setting optional values for resource usage. */
         HashMap<String, Long> resourceUsageMap = new HashMap<String, Long>();
         List<String> resourceList = new ArrayList<String>();
+        config.setServer(1L);
         switch(resourceType) {
         case "Instance":
             VmInstance vmInstance = (VmInstance)resourceObject;

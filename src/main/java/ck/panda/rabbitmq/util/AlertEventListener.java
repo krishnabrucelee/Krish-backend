@@ -55,6 +55,7 @@ public class AlertEventListener implements MessageListener {
                     EmailEvent emailEvent = new EmailEvent();
                     emailEvent.setSubject(eventObject.getString(CloudStackConstants.CS_ALERT_SUBJECT));
                     emailEvent.setMessageBody(alertEvent.getMessage());
+                    emailEvent.setEvent(EmailConstants.SYSTEM_ERROR);
                     emailEvent.setEventType(EmailConstants.SYSTEM_ERROR);
                     emailEvent.setResourceUuid(eventObject.getString(EmailConstants.EMAIL_dataCenterId));
                     if (eventObject.has(EmailConstants.EMAIL_podId)) {
