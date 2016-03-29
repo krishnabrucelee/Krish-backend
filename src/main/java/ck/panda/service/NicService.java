@@ -48,7 +48,7 @@ public interface NicService extends CRUDService<Nic> {
      * @return nic Nics from instance.
      * @throws Exception exception
      */
-    List<VmIpaddress> findByVMInstance(Long nic) throws Exception;
+    List<VmIpaddress> findByVMInstance(Long instanceId, Long networkId) throws Exception;
 
     /**
      * Find all nics from CloudStack.
@@ -112,5 +112,43 @@ public interface NicService extends CRUDService<Nic> {
        * @throws Exception if error occurs.
        */
     List<Nic> findAllByNetworkAndIsActive(Long networkId, Boolean isActive) throws Exception;
+
+    /**
+     * Find vmIpAddress by Vm instance Id.
+     *
+     * @param instanceId of the instance.
+     * @return vmIpAddress.
+     * @throws Exception if error occurs.
+     */
+    List<VmIpaddress> findByNicAndVmInstance(Long instanceId) throws Exception;
+
+    /**
+     * Find all Nic by Network id, instance id and isActive status.
+     *
+     * @param networkId of the network.
+     * @param instanceId of the instance.
+     * @param isActive status of the nic.
+     * @return nic.
+     * @throws Exception if error occurs.
+     */
+    Nic findAllNetworkAndVmInstanceByIsActive(Long networkId, Long instanceId, Boolean isActive) throws Exception;
+
+    /**
+     * Find Nic by vminstance.
+     *
+     * @param instanceId of the instance.
+     * @return nic.
+     * @throws Exception if error occurs.
+     */
+    Nic findByVmInstance(Long instanceId) throws Exception;
+
+    /**
+     * Find all vmipAdddres by instance id.
+     *
+     * @param instanceId of the vmipaddress.
+     * @return vmipaddress.
+     * @throws Exception if error occurs.
+     */
+    List<VmIpaddress> findByInstanceId(Long instanceId) throws Exception;
 
 }

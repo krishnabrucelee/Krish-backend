@@ -113,7 +113,8 @@ public class NicServiceImpl implements NicService {
                     nic.getVmInstance().getUuid(), optional, "json");
             JSONObject addNicResponse = new JSONObject(createNicResponse)
                     .getJSONObject("addnictovirtualmachineresponse");
-            //TODO: temporarily adding thread to get asynchronous job status. This will be removed when web socket is done.
+            // Unable get job result by using websocket.
+            Thread.sleep(5000);
             if (addNicResponse.has("jobid")) {
                 String jobResponse = cloudStackInstanceService.queryAsyncJobResult(addNicResponse.getString("jobid"),
                         "json");
@@ -189,11 +190,22 @@ public class NicServiceImpl implements NicService {
             nic.setIsActive(true);
             if (nicRepo.findByUUID(nic.getUuid()) == null) {
                 nicRepo.save(nic);
+                VmIpaddress vmIp = new VmIpaddress();
+                vmIp.setVmInstanceId(vmService.findByUUID(nicListJSON.getJSONObject(i).getString(CloudStackConstants.CS_VIRTUAL_MACHINE_ID)).getId());
+                vmIp.setNicId(nic.getId());
+                vmIp.setIsActive(true);
+                vmIp.setIpType(IpType.primaryIpAddress);
+                vmIp.setGuestIpAddress(nic.getIpAddress());
+                vmIp.setUuid(nic.getUuid());
+                VmIpaddress persistVmIP = vmIpService.save(vmIp);
+                List<VmIpaddress> vmIpList = new ArrayList<VmIpaddress>();
+                nic.setSyncFlag(false);
+                vmIpList.add(persistVmIP);
+                nic.setVmIpAddress(vmIpList);
+                nicRepo.save(nic);
             }
               }
             }
-
-
 
     /**
      * Check the nic CS error handling.
@@ -221,7 +233,8 @@ public class NicServiceImpl implements NicService {
                     instance.getUuid(), "json", optional);
             JSONObject defaultNicResponse = new JSONObject(updateNicResponse)
                     .getJSONObject("updatedefaultnicforvirtualmachineresponse");
-            //TODO: temporarily adding thread to get asynchronous job status. This will be removed when web socket is done.
+            // Unable get job result by using websocket.
+            Thread.sleep(5000);
             if (defaultNicResponse.has("jobid")) {
                 String jobResponse = cloudStackInstanceService
                         .queryAsyncJobResult(defaultNicResponse.getString("jobid"), "json");
@@ -283,6 +296,7 @@ public class NicServiceImpl implements NicService {
     @Override
     @PreAuthorize("hasPermission(#nic.getSyncFlag(), 'DELETE_NETWORK_TO_VM')")
     public Nic softDelete(Nic nic) throws Exception {
+        nic.setIsActive(false);
         if (nic.getSyncFlag()) {
             Errors errors = validator.rejectIfNullEntity(CS_NIC, nic);
             HashMap<String, String> optional = new HashMap<String, String>();
@@ -292,7 +306,8 @@ public class NicServiceImpl implements NicService {
                     instance.getUuid(), optional, CloudStackConstants.JSON);
             JSONObject deleteNicResponse = new JSONObject(removeNicResponse)
                     .getJSONObject(CS_REMOVE_NIC);
-            //TODO: temporarily adding thread to get asynchronous job status. This will be removed when web socket is done.
+            // Unable get job result by using websocket.
+            Thread.sleep(5000);
             if (deleteNicResponse.has(CloudStackConstants.CS_JOB_ID)) {
                 String jobResponse = cloudStackInstanceService.queryAsyncJobResult(deleteNicResponse.getString(CloudStackConstants.CS_JOB_ID),
                         CloudStackConstants.JSON);
@@ -319,9 +334,22 @@ public class NicServiceImpl implements NicService {
     }
 
     @Override
-    public List<VmIpaddress> findByVMInstance(Long nic) throws Exception {
-        return vmIpService.findByVMInstance(nic);
+    public List<VmIpaddress> findByVMInstance(Long instanceId, Long networkId) throws Exception {
+           Nic nicTest = nicRepo.findAllNetworkByIsActive(networkId,instanceId,true);
+          return vmIpService.findByNicAndVmInstance(instanceId,nicTest.getId());
     }
+
+    @Override
+    public List<VmIpaddress> findByInstanceId(Long instanceId) throws Exception {
+        return vmIpService.findByVMInstance(instanceId);    }
+
+    @Override
+    public List<VmIpaddress> findByNicAndVmInstance(Long instanceId) throws Exception {
+        VmInstance vm = vmService.find(instanceId);
+        Nic nic = findAllNetworkAndVmInstanceByIsActive(vm.getNetworkId(), vm.getId(),true);
+            return vmIpService.findByNicAndVmInstance(instanceId,nic.getId());
+        }
+
 
     @Override
     public List<Nic> findAllFromCSServer() throws Exception {
@@ -486,4 +514,15 @@ public class NicServiceImpl implements NicService {
     public Nic findById(Long id) throws Exception {
         return nicRepo.findById(id);
     }
+
+    @Override
+    public Nic findAllNetworkAndVmInstanceByIsActive(Long networkId,Long instanceId, Boolean isActive) throws Exception {
+        return  nicRepo.findAllNetworkByIsActive(networkId,instanceId, true);
+    }
+
+    @Override
+    public Nic findByVmInstance(Long instanceId) throws Exception {
+        return nicRepo.findByVmInstanceAndIsActiveStatus(instanceId, true);
+    }
+
 }

@@ -132,8 +132,8 @@ public class NicController extends CRUDController<Nic> implements ApiController 
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<VmIpaddress> listByVMInstance(@RequestParam("instanceid") Long instanceId) throws Exception {
-        return nicOfferingService.findByVMInstance(instanceId);
+    public List<VmIpaddress> listByVMInstance(@RequestParam("instanceid") Long instanceId,@RequestParam("networkid") Long networkId) throws Exception {
+        return nicOfferingService.findByVMInstance(instanceId,networkId);
     }
 
     /**
@@ -164,6 +164,36 @@ public class NicController extends CRUDController<Nic> implements ApiController 
     @ResponseBody
     public Nic ReleaseSecondaryIp(@RequestBody Nic nic,@PathVariable(PATH_ID) Long vmIpaddressId) throws Exception {
         return nicOfferingService.releaseSecondaryIP(nic, vmIpaddressId);
+    }
+
+    /**
+     * List by instance attached to nic.
+     *
+     * @param instanceId Nic
+     * @return nic by instances
+     * @throws Exception exception
+     */
+    @RequestMapping(value = "listbynicandinstances", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<VmIpaddress> listByNicAndVmInstance(@RequestParam("instanceid") Long instanceId) throws Exception {
+        return nicOfferingService.findByNicAndVmInstance(instanceId);
+    }
+
+    /**
+     * List by instance attached to nic.
+     *
+     * @param instanceId Nic
+     * @return nic by instances
+     * @throws Exception exception
+     */
+    @RequestMapping(value = "listbyinstanceid", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<VmIpaddress> listByInstanceById(@RequestParam("instanceid") Long instanceId) throws Exception {
+        return nicOfferingService.findByInstanceId(instanceId);
     }
 
  }
