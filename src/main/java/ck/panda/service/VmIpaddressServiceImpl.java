@@ -89,6 +89,11 @@ public class VmIpaddressServiceImpl implements VmIpaddressService {
     }
 
     @Override
+    public List<VmIpaddress> findByNicAndVmInstance(Long vmInstanceId, Long nicId) throws Exception {
+        return ipaddressRepo.findByNicAndVmInstanceAndIsActive(vmInstanceId, nicId,true);
+    }
+
+    @Override
     public List<VmIpaddress> findAllLoadBalancer(Long lbId) throws Exception {
         LoadBalancerRule loadBalancer = lbService.find(lbId);
         List<VmIpaddress> vmIp = loadBalancer.getVmIpAddress();

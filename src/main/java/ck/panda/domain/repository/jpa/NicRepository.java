@@ -73,4 +73,24 @@ public interface NicRepository extends PagingAndSortingRepository<Nic, Long> {
      */
     @Query(value = "select nic from Nic nic where  nic.networkId=:networkId AND nic.isActive =:isActive")
     List<Nic> findByNetworkIdAndIsActive(@Param("networkId") Long networkId, @Param("isActive") Boolean isActive);
+
+    /**
+     * List nic by Network.
+     *
+     * @param networkId for that network.
+     * @param isActive get the nic list based on active/inactive status.
+     * @return nics.
+     */
+    @Query(value = "select nic from Nic nic where  nic.networkId=:networkId AND nic.vmInstanceId=:vmInstanceId AND nic.isActive =:isActive")
+    Nic findAllNetworkByIsActive(@Param("networkId") Long networkId, @Param("vmInstanceId") Long vmInstanceId, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find by Instance Id and isActive status.
+     *
+     * @param isActive get the nic list based on active/inactive status.
+     * @param vmInstanceId from nic
+     * @return nic.
+     */
+    @Query(value = "select nic from Nic nic where  nic.vmInstanceId=:vmInstanceId AND nic.isActive =:isActive")
+     Nic findByVmInstanceAndIsActiveStatus(@Param("vmInstanceId") Long vmInstanceId, @Param("isActive") Boolean isActive);
 }

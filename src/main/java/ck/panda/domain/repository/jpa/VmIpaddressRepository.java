@@ -62,4 +62,14 @@ public interface VmIpaddressRepository extends PagingAndSortingRepository<VmIpad
      */
     @Query(value = "SELECT vmIpaddress FROM VmIpaddress vmIpaddress WHERE vmIpaddress.guestIpAddress =:guestIpAddress AND vmIpaddress.vmInstanceId =:vmInstanceId")
     VmIpaddress findAllByVmIpaddressAndvmInstanceId(@Param("guestIpAddress") String guestIpAddress, @Param("vmInstanceId") Long vmInstanceId);
+
+    /**
+     * Find all by VMInstance Id.
+     *
+     * @param isActive get the vmIpAddress list based on active/inactive status.
+     * @param vmInstanceId from nic
+     * @return Vm ipaddress.
+     */
+    @Query(value = "select vmIpaddress from VmIpaddress vmIpaddress where vmIpaddress.vmInstanceId=:vmInstanceId AND vmIpaddress.nicId=:nicId AND vmIpaddress.isActive =:isActive")
+    List<VmIpaddress> findByNicAndVmInstanceAndIsActive(@Param("vmInstanceId") Long vmInstanceId,@Param("nicId") Long nicId, @Param("isActive") Boolean isActive);
 }
