@@ -181,5 +181,20 @@ public class NicController extends CRUDController<Nic> implements ApiController 
         return nicOfferingService.findByNicAndVmInstance(instanceId);
     }
 
+    /**
+     * List by instance attached to nic.
+     *
+     * @param instanceId Nic
+     * @return nic by instances
+     * @throws Exception exception
+     */
+    @RequestMapping(value = "listbyinstanceid", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<VmIpaddress> listByInstanceById(@RequestParam("instanceid") Long instanceId) throws Exception {
+        return nicOfferingService.findByInstanceId(instanceId);
+    }
+
  }
 

@@ -340,6 +340,10 @@ public class NicServiceImpl implements NicService {
     }
 
     @Override
+    public List<VmIpaddress> findByInstanceId(Long instanceId) throws Exception {
+        return vmIpService.findByVMInstance(instanceId);    }
+
+    @Override
     public List<VmIpaddress> findByNicAndVmInstance(Long instanceId) throws Exception {
         VmInstance vm = vmService.find(instanceId);
         Nic nic = findAllNetworkAndVmInstanceByIsActive(vm.getNetworkId(), vm.getId(),true);

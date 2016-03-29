@@ -142,4 +142,13 @@ public interface NicService extends CRUDService<Nic> {
      */
     Nic findByVmInstance(Long instanceId) throws Exception;
 
+    /**
+     * Find all vmipAdddres by instance id.
+     *
+     * @param instanceId of the vmipaddress.
+     * @return vmipaddress.
+     * @throws Exception if error occurs.
+     */
+    List<VmIpaddress> findByInstanceId(Long instanceId) throws Exception;
+
 }
