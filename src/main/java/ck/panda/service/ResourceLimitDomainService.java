@@ -5,11 +5,15 @@ package ck.panda.service;
 
 import java.util.HashMap;
 import java.util.List;
+
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import ck.panda.domain.entity.ResourceLimitDomain;
+import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
 import ck.panda.util.domain.CRUDService;
+import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 
 /**
@@ -112,6 +116,15 @@ public interface ResourceLimitDomainService extends CRUDService<ResourceLimitDom
      * @return
      */
     HashMap<String, String> getResourceLimitsOfProject(Long projectId);
+
+    /**
+     * Find all the domain based quota list.
+     *
+     * @param domainId domain id of the volume
+     * @return list of quota's with pagination.
+     * @throws Exception error occurs
+     */
+    List<ResourceLimitDomain> findAllByDomainId(Long domainId) throws Exception;
 
 
 }

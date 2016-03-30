@@ -343,4 +343,9 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
         return resourceMaxCount;
     }
 
+    @Override
+    public List<ResourceLimitDomain> findAllByDomainId(Long domainId) throws Exception {
+        return (List<ResourceLimitDomain>) resourceLimitDomainRepo.findAllByDomainIdAndIsActive(domainId, true);
+    }
+
 }
