@@ -5,6 +5,10 @@ spring:
         url: jdbc:mysql://localhost:3306/${DB_NAME:ckpanda}
         username: ${DB_USERNAME}
         password: ${DB_PASSWORD}
+        testWhileIdle: true
+        timeBetweenEvictionRunsMillis: 3625000
+        validationQuery: SELECT 1
+
 
     jpa:
         hibernate.ddl-auto: create-drop
