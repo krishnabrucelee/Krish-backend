@@ -142,6 +142,7 @@ public class VpnUserServiceImpl implements VpnUserService {
                     }
                 }
                 if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
+                    Thread.sleep(5000);
                     String jobResponse = csipaddressService.associatedJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
                     JSONObject jobresults = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
 
@@ -207,6 +208,7 @@ public class VpnUserServiceImpl implements VpnUserService {
                 }
             }
             if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
+                Thread.sleep(5000);
                 String jobResponse = csipaddressService.associatedJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
                 JSONObject jobresults = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
 
