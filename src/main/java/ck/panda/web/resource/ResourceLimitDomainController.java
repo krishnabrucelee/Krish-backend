@@ -194,4 +194,22 @@ public class ResourceLimitDomainController extends CRUDController<ResourceLimitD
     public HashMap<String, String> findByProjectQuotaDomainResource(@PathVariable(PATH_ID) Long projectId) throws Exception {
         return resourceLimitDomainService.getResourceLimitsOfProject(convertEntityService.getProjectById(projectId).getDomainId());
     }
+
+    /**
+     * Get all quota list by domain.
+     *
+     * @param sortBy asc/desc
+     * @param domainId domain id of quota.
+     * @param range pagination range.
+     * @param limit per page limit.
+     * @param request page request.
+     * @param response response content.
+     * @return quota list.
+     * @throws Exception unhandled exception.
+     */
+    @RequestMapping(value = "/listByDomain/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public List<ResourceLimitDomain> listQuotaByDomainId(@PathVariable(PATH_ID) Long domainId) throws Exception {
+        return resourceLimitDomainService.findAllByDomainId(domainId);
+    }
 }
