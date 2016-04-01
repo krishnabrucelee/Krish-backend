@@ -9,13 +9,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Version;
 import javax.persistence.Table;
 import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -34,10 +34,14 @@ public class ComputeOfferingCost implements Serializable {
     @Column(name = "id")
     private Long id;
 
-    /** Zone id for this offering. */
-    @JoinColumn(name = "zone_id", referencedColumnName = "id")
+    /** Zone object for this offering. */
+    @JoinColumn(name = "zone_id", referencedColumnName = "id",insertable = false, updatable = false)
     @ManyToOne
     private Zone zone;
+
+    /** Id of the zone */
+    @Column(name = "zone_id")
+    private Long zoneId;
 
     /** Id of the compute offering. */
     @Column(name = "compute_id")
@@ -427,4 +431,24 @@ public class ComputeOfferingCost implements Serializable {
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
     }
+
+    /**
+     * Get the zone id of the offering.
+     *
+     * @return the zoneId
+     */
+    public Long getZoneId() {
+        return zoneId;
+    }
+
+    /**
+     *  Set the zone id of the offering.
+     *
+     * @param zoneId the zoneId to set
+     */
+    public void setZoneId(Long zoneId) {
+        this.zoneId = zoneId;
+    }
+
+
 }

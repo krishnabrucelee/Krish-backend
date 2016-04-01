@@ -50,11 +50,16 @@ public class StorageOfferingCost implements Serializable {
     private Double totalCost;
 
     /**
-     * The Zone ID, this disk offering belongs to. Ignore this information as it is not currently applicable.
+     * The Zone object, this storage offering belongs to.
      */
-    @JoinColumn(name = "zone_id", referencedColumnName = "Id")
+    @JoinColumn(name = "zone_id", referencedColumnName = "id",insertable = false, updatable = false)
     @ManyToOne
     private Zone zone;
+
+
+    /** Id of the zone. */
+    @Column(name = "zone_id")
+    private Long zoneId;
 
     /**
      * Cost per month usage.
@@ -340,4 +345,24 @@ public class StorageOfferingCost implements Serializable {
     public void setStorageId(Long storageId) {
         this.storageId = storageId;
     }
+
+    /**
+     * Get zone id of the offering.
+     *
+     * @return the zoneId
+     */
+    public Long getZoneId() {
+        return zoneId;
+    }
+
+    /**
+     * Set zone id of the offering.
+     *
+     * @param zoneId to set
+     */
+    public void setZoneId(Long zoneId) {
+        this.zoneId = zoneId;
+    }
+
+
 }

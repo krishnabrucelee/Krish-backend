@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
+import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.StorageOfferingCost;
@@ -86,7 +87,10 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
                 Double totalCost = storageCostService.totalcost(cost);
                 cost.setTotalCost(totalCost);
                 cost.setStorageId(storage.getId());
-                return storageOfferingRepo.save(storage);
+                cost.setZoneId(cost.getZone().getId());
+                StorageOffering persistStorage= storageOfferingRepo.save(storage);
+                cost.setStorageId(persistStorage.getId());
+                return storageOfferingRepo.save(persistStorage);
             }
         } else {
             LOGGER.debug(storage.getUuid());
@@ -372,6 +376,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
              storageOfferingcost.setCostGbPerMonth(cost.getCostGbPerMonth());
              storageOfferingcost.setCostPerMonth(cost.getCostPerMonth());
              storageOfferingcost.setTotalCost(totalCost);
+             storageOfferingcost.setZoneId(cost.getZoneId());
              storageOfferingcost = storageCostService.save(storageOfferingcost);
              storageCost.add(storageOfferingcost);
          }

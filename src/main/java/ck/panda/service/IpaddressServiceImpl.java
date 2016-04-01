@@ -578,15 +578,14 @@ public class IpaddressServiceImpl implements IpaddressService {
         Errors errors = null;
         IpAddress ipAddress = findbyUUID(uuid);
         try {
-            configServer.setUserServer();
             Boolean routerStatus = virtualRoutersStatusCheck(ipAddress.getNetwork().getDomain().getUuid(),
                     ipAddress.getNetwork().getDepartment().getUserName(), ipAddress.getNetwork().getUuid());
 
             if (routerStatus) {
+                configServer.setUserServer();
                 HashMap<String, String> optional = new HashMap<String, String>();
                 optional.put(CloudStackConstants.CS_DOMAIN_ID, ipAddress.getNetwork().getDomain().getUuid());
                 optional.put(CloudStackConstants.CS_ACCOUNT, ipAddress.getNetwork().getDepartment().getUserName());
-
                 String createRemoteAccess = csVPNService.createRemoteAccessVpn(ipAddress.getUuid(), optional, CloudStackConstants.JSON);
                 JSONObject jobId = new JSONObject(createRemoteAccess).getJSONObject(CloudStackConstants.CS_CREATE_REMOTE_ACCESS_VPN);
                 if (jobId.has(CloudStackConstants.CS_ERROR_CODE)) {
@@ -595,7 +594,7 @@ public class IpaddressServiceImpl implements IpaddressService {
                         throw new BadCredentialsException(jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
                     }
                 }
-                Thread.sleep(15000);
+                Thread.sleep(20000);
                 if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
                     String jobResponse = csipaddressService.associatedJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
                     JSONObject jobresults = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
@@ -608,7 +607,6 @@ public class IpaddressServiceImpl implements IpaddressService {
                         ipAddress.setVpnUuid(jobresultReponse.getString(CloudStackConstants.CS_ID));
                         ipAddress.setVpnPresharedKey(convertEncryptedKey(jobresultReponse.getString(CloudStackConstants.CS_PRESHARED_KEY)));
                         ipAddress.setVpnState(VpnState.valueOf(jobresultReponse.getString(CloudStackConstants.CS_STATE).toUpperCase()));
-                        ipAddress.setVpnForDisplay(jobresultReponse.getBoolean(CloudStackConstants.CS_FOR_DISPLAY));
                     } else if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.PROGRESS_JOB_STATUS)) {
                         errors = validator.sendGlobalError(CS_EVENT_RUNNING);
                         if (errors.hasErrors()) {
@@ -648,6 +646,7 @@ public class IpaddressServiceImpl implements IpaddressService {
         routerOptional.put(CloudStackConstants.CS_DOMAIN_ID, domainId);
         routerOptional.put(CloudStackConstants.CS_ACCOUNT, accountName);
         routerOptional.put(CloudStackConstants.CS_NETWORK_ID, networkId);
+        configServer.setServer(1L);
         String listRouters = csVPNService.listRouters(routerOptional, CloudStackConstants.JSON);
         JSONObject responseObject = new JSONObject(listRouters).getJSONObject(CloudStackConstants.CS_LIST_ROUTER_RESPONSE);
         if (responseObject.has(CloudStackConstants.CS_ROUTER)) {
@@ -674,7 +673,7 @@ public class IpaddressServiceImpl implements IpaddressService {
                     throw new BadCredentialsException(jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
                 }
             }
-            Thread.sleep(15000);
+            Thread.sleep(20000);
             if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
                 String jobResponse = csipaddressService.associatedJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
                 JSONObject jobresults = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);

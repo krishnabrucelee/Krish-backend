@@ -133,8 +133,10 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
                 Double totalCost = costService.totalcost(cost);
                 // storing in our DB.
                 cost.setTotalCost(totalCost);
-                cost.setComputeId(compute.getId());
-                return computeRepo.save(compute);
+                cost.setZoneId(cost.getZone().getId());
+                ComputeOffering persistCompute = computeRepo.save(compute);
+                cost.setComputeId(persistCompute.getId());
+                return computeRepo.save(persistCompute);
             }
         } else {
             LOGGER.debug(compute.getUuid());
@@ -367,6 +369,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
              computeOfferingcost.setInstanceRunningCostPerMhz(cost.getInstanceRunningCostPerMhz());
              computeOfferingcost.setTotalCost(totalCost);
              computeOfferingcost.setSetupCost(cost.getSetupCost());
+             computeOfferingcost.setZoneId(cost.getZoneId());
              computeOfferingcost = costService.save(computeOfferingcost);
              computeCost.add(computeOfferingcost);
          }
