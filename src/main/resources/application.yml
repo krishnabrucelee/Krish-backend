@@ -3,8 +3,8 @@ spring:
     datasource:
         driverClassName: com.mysql.jdbc.Driver
         url: jdbc:mysql://localhost:3306/${DB_NAME:ckpanda}
-        username: ${DB_USERNAME}
-        password: ${DB_PASSWORD}
+        username: ${DB_USERNAME:root}
+        password: ${DB_PASSWORD:l3tm3in}
         testWhileIdle: true
         timeBetweenEvictionRunsMillis: 3625000
         validationQuery: SELECT 1
@@ -81,11 +81,13 @@ cloudstack:
     url: ${CLOUDSTACK_URL}
 console:
     proxy: ${CONSOLE_URL}
+mrping:
+    url: ${MRPING_URL:http://localhost:8081/api}
 
 ---
 
 app:
-    buildversion: ${APP_BUILD_NUMBER}
+    buildversion: ${APP_BUILD_NUMBER:"1.0"}
 
 
 logging:
@@ -163,3 +165,6 @@ english:
 chinese:
     template:
         dir: ${CHINESE_TEMPLATE_DIR}
+invoice:
+    base:
+        path: ${ENGLISH_ATTACHMENT_DIR:/home/Assistanz/invoice/englishattachment}

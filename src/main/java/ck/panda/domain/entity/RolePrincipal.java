@@ -33,6 +33,9 @@ public class RolePrincipal {
     /** Login user domain name. */
     public static final String LOGIN_USER_DOMAIN_NAME = "domainName";
 
+    /** Login user domain abbreviation name. */
+    public static final String LOGIN_USER_DOMAIN_ABBREVIATION_NAME = "domainAbbreviationName";
+
     /** Login user domain id. */
     public static final String LOGIN_USER_DOMAIN_ID = "domainId";
 
@@ -107,6 +110,7 @@ public class RolePrincipal {
             jsonObject.put(LOGIN_USER_NAME, userName);
             jsonObject.put(LOGIN_USER_TYPE, user.getType());
             jsonObject.put(LOGIN_USER_DOMAIN_NAME, user.getDomain().getName());
+            jsonObject.put(LOGIN_USER_DOMAIN_ABBREVIATION_NAME, user.getDomain().getCompanyNameAbbreviation());
             jsonObject.put(LOGIN_USER_DOMAIN_ID, user.getDomain().getId());
             jsonObject.put(LOGIN_USER_DEPARTMENT_ID, user.getDepartment().getId());
             jsonObject.put(BUILD_NUMBER, buildVersion);

@@ -2,12 +2,14 @@ package ck.panda.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.mail.MessagingException;
+import org.json.JSONObject;
 import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EmailConstants;
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.EmailConfiguration;
@@ -26,9 +29,11 @@ import ck.panda.domain.entity.Zone;
 import ck.panda.email.util.Account;
 import ck.panda.email.util.Alert;
 import ck.panda.email.util.Email;
+import ck.panda.email.util.Invoice;
 import ck.panda.email.util.Resource;
 import ck.panda.rabbitmq.util.EmailEvent;
 import ck.panda.util.EncryptionUtil;
+import ck.panda.util.PingService;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -70,6 +75,10 @@ public class EmailJobServiceImpl implements EmailJobService {
     @Value(value = "${english.template.dir}")
     private String englishTemplatePath;
 
+    /** Invoice base directory. */
+    @Value("${invoice.base.path}")
+    private String invoiceBasePath;
+
     /** Constant for generic UTF. */
     public static final String CS_UTF = "utf-8";
 
@@ -83,17 +92,21 @@ public class EmailJobServiceImpl implements EmailJobService {
     /** Email event entity. */
     private EmailEvent eventResponse = null;
 
-    /** Zone service reference . */
+    /** Zone service reference. */
     @Autowired
     private ZoneService zoneService;
 
-    /** Organization service reference . */
+    /** Organization service reference. */
     @Autowired
     private OrganizationService organizationService;
 
-    /** User service reference . */
+    /** User service reference. */
     @Autowired
     private EmailTypeTemplateService emailTypeTemplateService;
+
+    /** Ping service reference. */
+    @Autowired
+    private PingService pingService;
 
     @Override
     public void sendEmail(String eventObject) throws Exception {
@@ -103,21 +116,30 @@ public class EmailJobServiceImpl implements EmailJobService {
         eventResponse = eventmapper.readValue(eventObject, EmailEvent.class);
         Email mimeEmail = new Email();
         EmailTemplate templateName = new EmailTemplate();
-        if (eventResponse.getEventType().equals(EmailConstants.EMAIL_CAPACITY) || eventResponse.getEventType().equals(EmailConstants.SYSTEM_ERROR)) {
+        if (eventResponse.getEventType().equals(EventTypes.EVENT_MONTHLY_INVOICE)) {
+            User user = userService.findAllByUserTypeAndIsActive(true, UserType.ROOT_ADMIN);
+            String usageResponse = pingService.getInvoiceById(eventResponse.getInvoiceId());
+            eventResponse.setEvent(eventResponse.getEventType());
+            mimeEmail.setInvoice(usageResponse);
+            mimeEmail.setBody(generateCountContent(eventResponse, user, emailConfiguration, templateName, mimeEmail));
+            emailService.sendMail(mimeEmail);
+        }
+        if (eventResponse.getEventType().equals(EmailConstants.EMAIL_CAPACITY)
+                || eventResponse.getEventType().equals(EmailConstants.SYSTEM_ERROR)) {
             User user = userService.findAllByUserTypeAndIsActive(true, UserType.ROOT_ADMIN);
             Organization orgnizationDetails = organizationService.findByIsActive(true);
             mimeEmail.setFrom(emailConfiguration.getEmailFrom());
             mimeEmail.setTo(orgnizationDetails.getEmail());
             mimeEmail.setBody(generateCountContent(eventResponse, user, emailConfiguration, templateName, mimeEmail));
             emailService.sendMail(mimeEmail);
-        } else {
+        } else if (eventResponse.getEvent() != null && eventResponse.getEvent().equals(EventTypes.EVENT_USER_CREATE)
+                || eventResponse.getEvent().equals(EventTypes.EVENT_USER_DELETE)
+                || eventResponse.getEvent().equals(EventTypes.EVENT_USER_UPDATE)) {
             User user = userService.find(Long.parseLong(eventResponse.getUser()));
             mimeEmail.setFrom(emailConfiguration.getEmailFrom());
             mimeEmail.setTo(user.getEmail());
             mimeEmail.setBody(generateCountContent(eventResponse, user, emailConfiguration, templateName, mimeEmail));
-            if (mimeEmail.getRecipientType().equals(user.getType().toString())) {
-                emailService.sendMail(mimeEmail);
-            }
+            emailService.sendMail(mimeEmail);
         }
     }
 
@@ -229,10 +251,10 @@ public class EmailJobServiceImpl implements EmailJobService {
             Alert alert = new Alert();
             alert.setSubject(email.getSubject());
             alert.setDetails(email.getMessageBody());
-            //resource uuid for zone name
+            // resource uuid for zone name
             Zone zone = zoneService.findByUUID(email.getResourceUuid());
             alert.setZone(zone.getName());
-            //resource id for pod id
+            // resource id for pod id
             alert.setPodId(email.getResourceId());
             context.put(EmailConstants.EMAIL_TEMPLATE_alert, alert);
             templateName = emailTypeTemplateService.findByEventAndIsActive(EmailConstants.EMAIL_SYSTEM_ERROR, true);
@@ -247,7 +269,7 @@ public class EmailJobServiceImpl implements EmailJobService {
             templateName = emailTypeTemplateService.findByEventAndIsActive(EmailConstants.EMAIL_CAPACITY, true);
             if (templateName != null) {
                 mimeEmail.setSubject(templateName.getSubject());
-                //zone name in resource uuid.
+                // zone name in resource uuid.
                 resource.setZone(email.getResourceUuid());
                 resource.setPercentage(email.getMessageBody());
                 resource.setResourceName(email.getEvent());
@@ -270,6 +292,49 @@ public class EmailJobServiceImpl implements EmailJobService {
                 return validateTemplate(user, templateName, context, emailConfiguration);
             }
         }
+        if (email.getEventType().equals(EventTypes.EVENT_MONTHLY_INVOICE)) {
+            context.clear();
+            templateName = emailTypeTemplateService.findByEventAndIsActive(EmailConstants.EMAIL_INVOICE, true);
+            if (templateName != null) {
+                mimeEmail.setSubject(templateName.getSubject());
+                Invoice invoice = new Invoice();
+                SimpleDateFormat formatter = new SimpleDateFormat(EmailConstants.EMAIL_INVOIVE_DATE_FORMAT);
+                JSONObject organisationResult = null;
+                JSONObject domainResult = null;
+                JSONObject usageResult = new JSONObject(mimeEmail.getInvoice());
+                if (usageResult.has(EmailConstants.EMAIL_INVOIVE_organization)) {
+                    organisationResult = usageResult.getJSONObject(EmailConstants.EMAIL_INVOIVE_organization);
+                }
+                if (usageResult.has(CloudStackConstants.CS_DOMAIN)) {
+                    domainResult = usageResult.getJSONObject(CloudStackConstants.CS_DOMAIN);
+                }
+                mimeEmail.setFrom(organisationResult.getString(EmailConstants.EMAIL_INVOICE_email));
+                mimeEmail.setTo(domainResult.getString(EmailConstants.EMAIL_INVOICE_email));
+                HashMap<String, String> fileMap = new HashMap<>();
+                fileMap.put(EmailConstants.EMAIL_INVOICE_fileAttachment,
+                        invoiceBasePath + File.separator + usageResult.getString(EmailConstants.EMAIL_INVOICE_filePath)
+                                + File.separator + usageResult.getString(EmailConstants.EMAIL_INVOICE_fileName)
+                                + ".pdf");
+                mimeEmail.setAttachments(fileMap);
+                invoice.setOrganizationAddress(organisationResult.getString(EmailConstants.EMAIL_INVOICE_address));
+                invoice.setOrganizationEmail(organisationResult.getString(EmailConstants.EMAIL_INVOICE_email));
+                invoice.setOrganizationName(organisationResult.getString(EmailConstants.EMAIL_INVOICE_name));
+                invoice.setOrganizationPhone(organisationResult.getString(EmailConstants.EMAIL_INVOICE_phone));
+                invoice.setDomainEmail(mimeEmail.getTo());
+                invoice.setDomainName(domainResult.getString(EmailConstants.EMAIL_INVOICE_name));
+                invoice.setDomainPhone(domainResult.getString(EmailConstants.EMAIL_INVOICE_phone));
+                invoice.setInvoiceNumber(usageResult.getString(EmailConstants.EMAIL_INVOICE_invoiceNumber));
+                invoice.setBillPeriod(usageResult.getString(EmailConstants.EMAIL_INVOICE_billPeriod));
+                invoice.setDueDate(formatter.parse(usageResult.getString(EmailConstants.EMAIL_INVOICE_dueDate)));
+                invoice.setDate(formatter.parse(usageResult.getString(EmailConstants.EMAIL_INVOICE_date)));
+                invoice.setTotalCost(usageResult.getString(EmailConstants.EMAIL_INVOICE_totalCost));
+                invoice.setCurrency(usageResult.getString(EmailConstants.EMAIL_INVOICE_currency));
+                invoice.setGeneratedDate(
+                        formatter.parse(usageResult.getString(EmailConstants.EMAIL_INVOICE_generatedDate)));
+                context.put(EmailConstants.EVENT_MONTHLY_INVOICE, invoice);
+                return validateTemplate(user, templateName, context, emailConfiguration);
+            }
+        }
         return null;
     }
 
@@ -283,7 +348,8 @@ public class EmailJobServiceImpl implements EmailJobService {
      * @return generate context of email
      * @throws MessagingException unhandled message exception
      */
-    private String validateTemplate(User user, EmailTemplate templateName, Map<String,Object> context, EmailConfiguration emailConfiguration) throws MessagingException {
+    private String validateTemplate(User user, EmailTemplate templateName, Map<String, Object> context,
+            EmailConfiguration emailConfiguration) throws MessagingException {
         if (user.getLanguage() != null) {
             if (user.getLanguage().equals(EmailConstants.EMAIL_English) && templateName.getEnglishLanguage() != null) {
                 return generateContent(context, templateName.getEventName(), englishTemplatePath);
@@ -323,7 +389,8 @@ public class EmailJobServiceImpl implements EmailJobService {
      * @return email content.
      * @throws MessagingException unhandled exception.
      */
-    private String generateContent(Map<String, Object> context, String templateName, String templatePath) throws MessagingException {
+    private String generateContent(Map<String, Object> context, String templateName, String templatePath)
+            throws MessagingException {
         try {
             // free marker template for dynamic content.
             freemarkerConfiguration.setDirectoryForTemplateLoading(new File(templatePath));

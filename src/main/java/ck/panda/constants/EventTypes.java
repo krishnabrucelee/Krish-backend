@@ -315,4 +315,10 @@ public class EventTypes {
     /** User update. */
     public static final String EVENT_USER_UPDATE = "USER.UPDATE";
 
+    /** Monthly invoice event. */
+    public static final Object EVENT_MONTHLY_INVOICE = "MONTHLY_INVOICE";
+
+    /** Email constant. */
+    public static final String EVENT_Email = "Email";
+
 }
