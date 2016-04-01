@@ -167,4 +167,4 @@ chinese:
         dir: ${CHINESE_TEMPLATE_DIR}
 invoice:
     base:
-        path: ${ENGLISH_ATTACHMENT_DIR:/home/Assistanz/invoice/englishattachment}
+        path: ${INVOICE_ATTACHMENT_DIR:/home/Assistanz/invoice/invoiceattachment}
