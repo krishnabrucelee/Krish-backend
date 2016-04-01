@@ -325,7 +325,6 @@ public class EmailJobServiceImpl implements EmailJobService {
                 invoice.setDomainPhone(domainResult.getString(EmailConstants.EMAIL_INVOICE_phone));
                 invoice.setInvoiceNumber(usageResult.getString(EmailConstants.EMAIL_INVOICE_invoiceNumber));
                 invoice.setBillPeriod(usageResult.getString(EmailConstants.EMAIL_INVOICE_billPeriod));
-                System.out.println(usageResult.getString(EmailConstants.EMAIL_INVOICE_dueDate));
                 if (usageResult.getString(EmailConstants.EMAIL_INVOICE_dueDate) == null) {
                     invoice.setDueDate(formatter.parse(usageResult.getString(EmailConstants.EMAIL_INVOICE_dueDate)));
                     invoice.setDate(formatter.parse(usageResult.getString(EmailConstants.EMAIL_INVOICE_date)));
