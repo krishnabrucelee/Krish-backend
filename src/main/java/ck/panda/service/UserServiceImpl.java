@@ -261,6 +261,13 @@ public class UserServiceImpl implements UserService {
                 // 2.1 Call convert by passing JSONObject to User entity and Add
                 // the converted User entity to list.
                 User user = User.convert(userListJSON.getJSONObject(i));
+                Domain domain = domainService.findByUUIDAndIsActive(user.getTransDomainId());
+                domain.setEmail(user.getEmail());
+                domain.setLastName(user.getLastName());
+                domain.setPrimaryFirstName(user.getFirstName());
+                domain.setPortalUserName(user.getUserName());
+                domain.setSyncFlag(false);
+                domainService.save(domain);
                 if (!user.getUserName().equalsIgnoreCase("baremetal-system-account")) {
                     user.setDepartmentId((convertEntityService.getDepartment(user.getTransDepartment()).getId()));
                     user.setDomainId(convertEntityService.getDomainId(user.getTransDomainId()));
@@ -522,4 +529,5 @@ public class UserServiceImpl implements UserService {
     public User findAllByUserTypeAndIsActive(Boolean isActive, UserType rootAdmin) {
         return userRepository.findAllByUserTypeAndIsActive(rootAdmin, isActive);
     }
+
 }
