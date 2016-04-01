@@ -325,12 +325,17 @@ public class EmailJobServiceImpl implements EmailJobService {
                 invoice.setDomainPhone(domainResult.getString(EmailConstants.EMAIL_INVOICE_phone));
                 invoice.setInvoiceNumber(usageResult.getString(EmailConstants.EMAIL_INVOICE_invoiceNumber));
                 invoice.setBillPeriod(usageResult.getString(EmailConstants.EMAIL_INVOICE_billPeriod));
-                invoice.setDueDate(formatter.parse(usageResult.getString(EmailConstants.EMAIL_INVOICE_dueDate)));
-                invoice.setDate(formatter.parse(usageResult.getString(EmailConstants.EMAIL_INVOICE_date)));
+                System.out.println(usageResult.getString(EmailConstants.EMAIL_INVOICE_dueDate));
+                if (usageResult.getString(EmailConstants.EMAIL_INVOICE_dueDate) == null) {
+                    invoice.setDueDate(formatter.parse(usageResult.getString(EmailConstants.EMAIL_INVOICE_dueDate)));
+                    invoice.setDate(formatter.parse(usageResult.getString(EmailConstants.EMAIL_INVOICE_date)));
+                }
+                if (usageResult.getString(EmailConstants.EMAIL_INVOICE_generatedDate) == null) {
+                    invoice.setGeneratedDate(
+                            formatter.parse(usageResult.getString(EmailConstants.EMAIL_INVOICE_generatedDate)));
+                }
                 invoice.setTotalCost(usageResult.getString(EmailConstants.EMAIL_INVOICE_totalCost));
                 invoice.setCurrency(usageResult.getString(EmailConstants.EMAIL_INVOICE_currency));
-                invoice.setGeneratedDate(
-                        formatter.parse(usageResult.getString(EmailConstants.EMAIL_INVOICE_generatedDate)));
                 context.put(EmailConstants.EVENT_MONTHLY_INVOICE, invoice);
                 return validateTemplate(user, templateName, context, emailConfiguration);
             }
