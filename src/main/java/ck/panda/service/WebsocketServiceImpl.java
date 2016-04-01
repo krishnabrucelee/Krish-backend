@@ -25,6 +25,10 @@ public class WebsocketServiceImpl implements WebsocketService {
 		Event persistevent = eventNotificationService.save(event);
 		if (persistevent != null) {
 			if (persistevent.getEvent() != null) {
+				if(persistevent.getEventType().equals(Event.EventType.ACTION) && persistevent.getEvent().contains("VPN.USER.")){
+					messagingTemplate.convertAndSend(
+							CloudStackConstants.CS_ACTION_MAP + persistevent.getEventOwnerId(),persistevent.getMessage());
+				}
 				if (persistevent.getEventType().equals(Event.EventType.ACTION) && persistevent.getStatus().equals(Event.Status.INFO)) {
 					messagingTemplate.convertAndSend(
 							CloudStackConstants.CS_ACTION_MAP + persistevent.getEventOwnerId(),persistevent.getMessage());
