@@ -64,6 +64,18 @@ public class EmailConfigurationServiceImpl implements EmailConfigurationService 
     public EmailConfiguration save(EmailConfiguration email) throws Exception {
         email.setIsActive(true);
         if (email.getPassword() != null) {
+            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes(CS_UTF));
+            byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, CS_AES);
+            String encryptedPassword = new String(EncryptionUtil.encrypt(email.getPassword(), originalKey));
+            email.setPassword(encryptedPassword);
+        }
+        return emailRepo.save(email);
+    }
+
+    @Override
+    public EmailConfiguration update(EmailConfiguration email) throws Exception {
+        if (email.getPassword() != null) {
             EmailConfiguration emailConfig = emailRepo.findByIsActive(true);
             if (!emailConfig.getPassword().equals(email.getPassword())) {
                 String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes(CS_UTF));
@@ -72,18 +84,6 @@ public class EmailConfigurationServiceImpl implements EmailConfigurationService 
                 String encryptedPassword = new String(EncryptionUtil.encrypt(email.getPassword(), originalKey));
                 email.setPassword(encryptedPassword);
             }
-        }
-        return emailRepo.save(email);
-    }
-
-    @Override
-    public EmailConfiguration update(EmailConfiguration email) throws Exception {
-        if (email.getPassword() != null) {
-            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes(CS_UTF));
-            byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
-            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, CS_AES);
-            String encryptedPassword = new String(EncryptionUtil.encrypt(email.getPassword(), originalKey));
-            email.setPassword(encryptedPassword);
         }
         return emailRepo.save(email);
     }
