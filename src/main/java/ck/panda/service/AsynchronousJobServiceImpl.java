@@ -268,7 +268,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         } else {
             if (eventObject.has(CloudStackConstants.CS_INSTANCE_UUID)) {
                 asyncJobEvent.setResourceUuid(eventObject.getString(CloudStackConstants.CS_INSTANCE_UUID));
-            } else {
+            } else if (eventObject.has(CloudStackConstants.CS_UUID)) {
                 asyncJobEvent.setResourceUuid(json.getString(CloudStackConstants.CS_UUID));
             }
             asyncJobEvent.setStatus(

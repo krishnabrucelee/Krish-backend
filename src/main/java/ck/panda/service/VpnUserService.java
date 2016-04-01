@@ -71,6 +71,16 @@ public interface VpnUserService extends CRUDService<VpnUser> {
     List<VpnUser> findByDomainWithDepartment(Long domainId, Long departmentId) throws Exception;
 
     /**
+     * Find VPN user by by domain and project.
+     *
+     * @param domainId of VPN user.
+     * @param projectId of VPN user.
+     * @return VPN user object.
+     * @throws Exception unhandled errors.
+     */
+    List<VpnUser> findByDomainWithProject(Long domainId, Long projectId) throws Exception;
+
+    /**
      * Find VPN user by account, user and domainid.
      *
      * @param userName of VPN user.

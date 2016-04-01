@@ -239,4 +239,9 @@ public class VpnUserServiceImpl implements VpnUserService {
     public List<VpnUser> findAllByDepartmentAndDomainAndIsActive(Long departmentId, Long domainId, Boolean isActive) throws Exception {
         return vpnUserRepository.findAllByDepartmentAndDomainAndIsActive(departmentId, domainId, true);
     }
+
+	@Override
+	public List<VpnUser> findByDomainWithProject(Long domainId, Long projectId) throws Exception {
+		return (List<VpnUser>) vpnUserRepository.findByDomainWithProject(domainId, projectId, true);
+	}
 }

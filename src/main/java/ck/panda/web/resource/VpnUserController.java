@@ -78,4 +78,20 @@ public class VpnUserController extends CRUDController<VpnUser> implements ApiCon
         return vpnUserService.findByDomainWithDepartment(domainId, departmentId);
     }
 
+    /**
+     * List by VPN user by domain and project.
+     *
+     * @param domainId VPN user
+     * @param projectId of the VPN user
+     * @return VPN user list
+     * @throws Exception unhandled exception
+     */
+    @RequestMapping(value = "listbyvpnusers", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<VpnUser> listVpnUserByProject(@RequestParam("domainId") Long domainId, @RequestParam("projectId") Long projectId) throws Exception {
+        return vpnUserService.findByDomainWithProject(domainId, projectId);
+    }
+
 }
