@@ -19,7 +19,9 @@ public class Email {
     /** Email template recipient type (EmailTemplate entity recipientType field). **/
     private String recipientType;
     /** Email attachments. **/
-    private HashMap<String, byte[]> attachments;
+    private HashMap<String, String> attachments;
+    /** Invoice object. **/
+    private String invoice;
 
     /**
      * Set sender email.
@@ -152,7 +154,7 @@ public class Email {
      *
      * @return the attachments
      */
-    public HashMap<String, byte[]> getAttachments() {
+    public HashMap<String, String> getAttachments() {
         return attachments;
     }
 
@@ -161,7 +163,26 @@ public class Email {
      *
      * @param attachments the attachments to set
      */
-    public void setAttachments(HashMap<String, byte[]> attachments) {
+    public void setAttachments(HashMap<String, String> attachments) {
         this.attachments = attachments;
     }
+
+    /**
+     * Get the invoice of Email.
+     *
+     * @return the invoice
+     */
+    public String getInvoice() {
+        return invoice;
+    }
+
+    /**
+     * Set the invoice of Email.
+     *
+     * @param invoice the invoice to set
+     */
+    public void setInvoice(String invoice) {
+        this.invoice = invoice;
+    }
+
 }

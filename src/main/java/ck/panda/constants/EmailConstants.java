@@ -7,8 +7,8 @@ package ck.panda.constants;
 public class EmailConstants {
 
     /**
-     * Makes sure that utility classes (classes that contain only static methods or fields in their API) do not have a
-     * public constructor.
+     * Makes sure that utility classes (classes that contain only static methods
+     * or fields in their API) do not have a public constructor.
      */
     protected EmailConstants() {
         throw new UnsupportedOperationException();
@@ -86,4 +86,58 @@ public class EmailConstants {
     /** Constant for Secondary storage. */
     public static final String EMAIL_Secondary_storage = "Secondary storage";
 
-    }
+    /** Constant for monthly invoice. */
+    public static final String EVENT_MONTHLY_INVOICE = "invoice";
+
+    /** Constant for invoice. */
+    public static final String EMAIL_INVOICE = "INVOICE";
+
+    /** Constant for organization. */
+    public static final String EMAIL_INVOIVE_organization = "organization";
+
+    /** Constant for email. */
+    public static final String EMAIL_INVOICE_email = "email";
+
+    /** Constant for english attachment. */
+    public static final String EMAIL_INVOICE_fileAttachment = "fileAttachment";
+
+    /** Constant for address. */
+    public static final String EMAIL_INVOICE_address = "address";
+
+    /** Constant for name. */
+    public static final String EMAIL_INVOICE_name = "name";
+
+    /** Constant for phone. */
+    public static final String EMAIL_INVOICE_phone = "phone";
+
+    /** Constant for invoice number. */
+    public static final String EMAIL_INVOICE_invoiceNumber = "invoiceNumber";
+
+    /** Constant for bill period. */
+    public static final String EMAIL_INVOICE_billPeriod = "billPeriod";
+
+    /** Constant for due date. */
+    public static final String EMAIL_INVOICE_dueDate = "dueDate";
+
+    /** Constant for total cost. */
+    public static final String EMAIL_INVOICE_totalCost = "totalCost";
+
+    /** Constant for currency. */
+    public static final String EMAIL_INVOICE_currency = "currency";
+
+    /** Constant for file name. */
+    public static final String EMAIL_INVOICE_fileName = "fileName";
+
+    /** Constant for file path. */
+    public static final String EMAIL_INVOICE_filePath = "filePath";
+
+    /** Constant for generated date. */
+    public static final String EMAIL_INVOICE_generatedDate = "generatedDate";
+
+    /** Constant for invoice date. */
+    public static final String EMAIL_INVOICE_date = "date";
+
+    /** Constant for invoice date format. */
+    public static final String EMAIL_INVOIVE_DATE_FORMAT = "dd/MM/yyyy";
+
+}

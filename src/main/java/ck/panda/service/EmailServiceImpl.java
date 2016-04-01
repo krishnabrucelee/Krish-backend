@@ -8,6 +8,7 @@ import ck.panda.util.error.exception.CustomGenericException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamSource;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -73,7 +74,7 @@ public class EmailServiceImpl implements EmailService {
             String decryptedPassword = new String(EncryptionUtil.decrypt(emailConfiguration.getPassword(), originalKey));
             javaMailService.setPassword(decryptedPassword);
             MimeMessage message = javaMailService.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message);
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setFrom(email.getFrom());
             helper.setTo(email.getTo());
             helper.setSubject(email.getSubject());
@@ -82,9 +83,8 @@ public class EmailServiceImpl implements EmailService {
             if (email.getAttachments() != null) {
                 for (String attachmentFile : email.getAttachments().keySet()) {
                     // Add the attachment
-                    final InputStreamSource attachmentSource = new ByteArrayResource(
-                            email.getAttachments().get(attachmentFile));
-                    helper.addAttachment(attachmentFile, attachmentSource);
+                    FileSystemResource file = new FileSystemResource( email.getAttachments().get(attachmentFile));
+                    helper.addAttachment(file.getFilename(), file);
                 }
             }
             javaMailService.send(message);

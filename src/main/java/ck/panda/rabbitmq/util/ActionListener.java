@@ -181,6 +181,19 @@ public class ActionListener implements MessageListener {
                     }
                 }
                 break;
+            case EventTypes.EVENT_Email:
+                ObjectMapper mappers = new ObjectMapper();
+                eventResponse = mappers.readValue(eventMessage, ResponseEvent.class);
+                EmailEvent emailEvent = new EmailEvent();
+                emailEvent.setEntityuuid(eventResponse.getEntityuuid());
+                emailEvent.setResourceUuid(eventResponse.getEntityuuid());
+                emailEvent.setEvent(EventTypes.EVENT_USER_DELETE);
+                emailEvent.setEventType(EmailConstants.ACCOUNT);
+                emailEvent.setEventDateTime(eventResponse.getEventDateTime());
+                emailEvent.setUser(convertEntityService.getDeletedOwnerByUuid(eventResponse.getEntityuuid()).toString());
+                emailEvent.setSubject(EmailConstants.SUBJECT_ACCOUNT_DELETE);
+                emailJobService.sendMessageToQueue(emailEvent);
+                break;
             case EventTypes.EVENT_REGISTER_SSH:
                 LOGGER.debug("Register SSH/API sync", eventMessage);
                 break;

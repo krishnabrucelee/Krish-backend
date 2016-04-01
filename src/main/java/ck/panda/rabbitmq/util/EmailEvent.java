@@ -16,6 +16,9 @@ public class EmailEvent {
     /** Event date and time. */
     private String eventDateTime;
 
+    /** Invoice Id. */
+    private String invoiceId;
+
     /** Event user. */
     private String user;
 
@@ -40,6 +43,7 @@ public class EmailEvent {
     /** Event resource type. */
     private String resourceType;
 
+    /** Event resource type. */
     private HashMap<String, String> resources;
 
     /**
@@ -58,6 +62,24 @@ public class EmailEvent {
      */
     public void setEntityuuid(String entityuuid) {
         this.entityuuid = entityuuid;
+    }
+
+    /**
+     * Get the invoiceId of EmailEvent.
+     *
+     * @return the invoiceId
+     */
+    public String getInvoiceId() {
+        return invoiceId;
+    }
+
+    /**
+     * Set the invoiceId of EmailEvent.
+     *
+     * @param invoiceId the invoiceId to set
+     */
+    public void setInvoiceId(String invoiceId) {
+        this.invoiceId = invoiceId;
     }
 
     /**
@@ -223,7 +245,7 @@ public class EmailEvent {
     }
 
     /**
-     * Get the resources of EmailEvent.java
+     * Get the resources of EmailEvent.
      *
      * @return the resources
      */
@@ -232,7 +254,7 @@ public class EmailEvent {
     }
 
     /**
-     * Set the resources of EmailEvent.java
+     * Set the resources of EmailEvent.
      *
      * @param resources the resources to set
      */

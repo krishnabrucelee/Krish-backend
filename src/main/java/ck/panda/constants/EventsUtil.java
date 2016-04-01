@@ -1,13 +1,8 @@
 package ck.panda.constants;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import ck.panda.domain.entity.EventLiterals;
-import ck.panda.domain.entity.Permission.Module;
 
 /**
  * Prepare event list.
@@ -21,7 +16,7 @@ public final class EventsUtil {
     }
 
     @SuppressWarnings("rawtypes")
-    public static List<EventLiterals> createEventsList(String account, String users, String accountremoval, String resource, String systemError) {
+    public static List<EventLiterals> createEventsList(String account, String users, String accountremoval, String resource, String systemError, String invoice) {
         List<String> stringList = new ArrayList<String>();
         List<EventLiterals> moduleList = new ArrayList<EventLiterals>();
         stringList.add(account);
@@ -29,6 +24,7 @@ public final class EventsUtil {
         stringList.add(accountremoval);
         stringList.add(resource);
         stringList.add(systemError);
+        stringList.add(invoice);
         for (String string : stringList) {
             List<String> actionList = new ArrayList<String>();
             String[] stringArray = string.split("-");
