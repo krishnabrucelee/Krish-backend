@@ -1391,4 +1391,23 @@ public class ConvertEntityService {
         return resourceMap;
     }
 
+    /**
+     * Get User details by account name and domain.
+     *
+     * @param domain
+     *            object.
+     * @param name
+     *            of the user.
+     * @return user id.
+     * @throws Exception
+     *             unhandled exception.
+     */
+    public User getUserIdByAccountAndDomain(String name, Domain domain) throws Exception {
+        User user = userService.findByUserNameAndDomain(name, domain);
+        if (user != null) {
+            return user;
+        }
+        return null;
+    }
+
 }

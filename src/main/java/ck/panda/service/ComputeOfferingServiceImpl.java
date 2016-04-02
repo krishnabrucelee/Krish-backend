@@ -26,6 +26,8 @@ import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
+import ck.panda.constants.PingConstants;
+import ck.panda.util.PingService;
 
 /**
  *  Compute Offering service aid user to create compute offers in Cloud Stack Server.
@@ -65,6 +67,10 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     /** Convert Entity service for reference. */
     @Autowired
     private ConvertEntityService convertEntityService;
+
+    /** Mr.ping service reference. */
+    @Autowired
+    private PingService pingService;
 
     /** Constant for service offering id. */
     private static final String CS_SERVICE_OFFERING = "serviceoffering";
@@ -111,7 +117,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             errors = validator.validateEntity(compute, errors);
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
-            } else {
+            } else if (pingService.apiConnectionCheck(errors)) {
                 // set server for maintain session with configuration values
                 cscomputeOffering.setServer(configServer.setServer(1L));
                 // create compute offering in ACS and getting response in Json String.
@@ -136,8 +142,13 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
                 cost.setZoneId(cost.getZone().getId());
                 ComputeOffering persistCompute = computeRepo.save(compute);
                 cost.setComputeId(persistCompute.getId());
-                return computeRepo.save(persistCompute);
+                if (pingService.apiConnectionCheck(errors)) {
+                    compute = computeRepo.save(persistCompute);
+                    savePlanCostInPing(compute);
+                }
+                return compute;
             }
+            return compute;
         } else {
             LOGGER.debug(compute.getUuid());
             return computeRepo.save(compute);
@@ -152,7 +163,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             errors = validator.validateEntity(compute, errors);
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
-            } else {
+            } else if (pingService.apiConnectionCheck(errors)) {
                 HashMap<String, String> optionalParams = new HashMap<String, String>();
                 cscomputeOffering.setServer(configServer.setServer(1L));
                 // update compute offering in ACS and getting response in Json String.
@@ -166,8 +177,14 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
                     this.costCalculation(compute);
                 }
             }
+            if (pingService.apiConnectionCheck(errors)) {
+                compute = computeRepo.save(compute);
+                savePlanCostInPing(compute);
+            }
+            return compute;
+        } else {
+            return computeRepo.save(compute);
         }
-       return computeRepo.save(compute);
     }
 
     @Override
@@ -386,6 +403,63 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
     @Override
     public Page<ComputeOffering> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
         return computeRepo.findAllByDomainIdAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
+    }
 
+    /**
+     * Set optional value for MR.ping api call.
+     *
+     * @param computeOfferingCost compute offering cost
+     * @return status
+     * @throws Exception raise if error
+     */
+    public Boolean savePlanCostInPing(ComputeOffering computeOfferingCost) throws Exception {
+        JSONObject optional = new JSONObject();
+        optional.put(PingConstants.PLAN_UUID, computeOfferingCost.getUuid());
+        optional.put(PingConstants.NAME, computeOfferingCost.getName());
+        optional.put(PingConstants.IS_CUSTOM, computeOfferingCost.getCustomized());
+        optional.put(PingConstants.COMPUTE_SETUP_COST, computeOfferingCost.getComputeCost().get(0).getSetupCost());
+        optional.put(PingConstants.REFERENCE_NAME, PingConstants.VM);
+        optional.put(PingConstants.GROUP_NAME, PingConstants.VM);
+        if (computeOfferingCost.getCustomized()) {
+            optional.put(PingConstants.COMUTE_RUNNING_PER_VCPU_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getInstanceRunningCostPerVcpu()));
+            optional.put(PingConstants.COMUTE_RUNNING_PER_MB_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getInstanceRunningCostPerMB()));
+            optional.put(PingConstants.COMUTE_RUNNING_PER_SPEED_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getInstanceRunningCostPerMhz()));
+            optional.put(PingConstants.COMUTE_STOPPAGE_PER_VCPU_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getInstanceStoppageCostPerVcpu()));
+            optional.put(PingConstants.COMUTE_STOPPAGE_PER_MB_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getInstanceStoppageCostPerMB()));
+            optional.put(PingConstants.COMUTE_STOPPAGE_PER_SPEED_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getInstanceStoppageCostPerMhz()));
+            Double totalCost = optional.getDouble(PingConstants.COMUTE_RUNNING_PER_VCPU_COST) + optional.getDouble(PingConstants.COMUTE_RUNNING_PER_MB_COST)
+                   + optional.getDouble(PingConstants.COMUTE_RUNNING_PER_SPEED_COST) + optional.getDouble(PingConstants.COMUTE_STOPPAGE_PER_VCPU_COST)
+                   + optional.getDouble(PingConstants.COMUTE_STOPPAGE_PER_MB_COST) + optional.getDouble(PingConstants.COMUTE_STOPPAGE_PER_SPEED_COST)
+                   + optional.getDouble(PingConstants.COMPUTE_SETUP_COST);
+            optional.put(PingConstants.TOTAL_COST, totalCost);
+        } else {
+            optional.put(PingConstants.COMUTE_RUNNING_FOR_VCPU_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getInstanceRunningCostVcpu()));
+            optional.put(PingConstants.COMUTE_RUNNING_FOR_MB_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getInstanceRunningCostMemory()));
+            optional.put(PingConstants.COMUTE_STOPPAGE_FOR_VCPU_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getInstanceStoppageCostVcpu()));
+            optional.put(PingConstants.COMUTE_STOPPAGE_FOR_MB_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getInstanceStoppageCostMemory()));
+            Double totalCost = optional.getDouble(PingConstants.COMUTE_RUNNING_FOR_VCPU_COST) + optional.getDouble(PingConstants.COMUTE_RUNNING_FOR_MB_COST)
+                   + optional.getDouble(PingConstants.COMUTE_STOPPAGE_FOR_VCPU_COST) + optional.getDouble(PingConstants.COMUTE_STOPPAGE_FOR_MB_COST)
+                   + optional.getDouble(PingConstants.COMPUTE_SETUP_COST);
+            optional.put(PingConstants.TOTAL_COST, totalCost);
+        }
+        if (computeOfferingCost.getComputeCost().get(0).getZoneId() != null) {
+            Zone zone = convertEntityService.getZoneById(computeOfferingCost.getComputeCost().get(0).getZoneId());
+            optional.put(PingConstants.ZONE_ID, zone.getUuid());
+        }
+        pingService.addPlanCost(optional);
+        return true;
+    }
+
+    /**
+     * Offering cost null value check.
+     *
+     * @param value offering cost
+     * @return double value
+     */
+    public Double offeringNullCheck(Double value) {
+        if (value == null) {
+            value = 0.0;
+        }
+        return value;
     }
 }

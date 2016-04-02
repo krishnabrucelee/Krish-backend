@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
+import ck.panda.constants.PingConstants;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.entity.OsCategory;
@@ -29,6 +30,7 @@ import ck.panda.domain.repository.jpa.TemplateRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackTemplateService;
 import ck.panda.util.ConfigUtil;
+import ck.panda.util.PingService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -67,6 +69,7 @@ public class TemplateServiceImpl implements TemplateService {
     @Autowired
     private DomainService domainService;
 
+    /** Department service reference. */
     @Autowired
     private DepartmentService departmentService;
 
@@ -85,6 +88,10 @@ public class TemplateServiceImpl implements TemplateService {
     /** Template repository reference. */
     @Autowired
     private TemplateRepository templateRepository;
+
+    /** Mr.ping service reference. */
+    @Autowired
+    private PingService pingService;
 
     /** Validator attribute. */
     @Autowired
@@ -141,10 +148,14 @@ public class TemplateServiceImpl implements TemplateService {
             Errors errors = validator.rejectIfNullEntity(CloudStackConstants.TEMPLATE_NAME, template);
             errors = validator.validateEntity(template, errors);
             errors = customValidateEntity(template, errors, true);
+            User userDetails = convertEntityService.getOwnerById(userId);
 
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
+                if (userDetails.getType() == User.UserType.ROOT_ADMIN && template.getTemplateCost() != null) {
+                    pingService.apiConnectionCheck(errors);
+                }
                 if (template.getBootable() == null) {
                     template.setBootable(true);
                 }
@@ -156,11 +167,23 @@ public class TemplateServiceImpl implements TemplateService {
                     TemplateCost templateCost = templateCostService.find(templateCS.getTemplateCost().get(0).getId());
                     templateCost.setTemplateCostId(templateCS.getId());
                     templateCostService.save(templateCost);
-                return templateCS;
+                    return templateCS;
                 }
             }
-        }
+
+            if (userDetails.getType() == User.UserType.ROOT_ADMIN && template.getTemplateCost() != null) {
+                if (pingService.apiConnectionCheck(errors)) {
+                    template = templateRepository.save(template);
+                    savePingProject(template);
+                }
+            } else {
+                template = templateRepository.save(template);
+            }
+            return template;
+
+        } else {
             return templateRepository.save(template);
+        }
     }
 
     @Override
@@ -170,15 +193,29 @@ public class TemplateServiceImpl implements TemplateService {
             Errors errors = validator.rejectIfNullEntity(CloudStackConstants.TEMPLATE_NAME, template);
             errors = validator.validateEntity(template, errors);
             errors = customValidateEntity(template, errors, false);
+            User userDetails = convertEntityService.getOwnerById(userId);
 
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
+                if (userDetails.getType() == User.UserType.ROOT_ADMIN && template.getTemplateCost() != null) {
+                    pingService.apiConnectionCheck(errors);
+                }
                 csUpdateTemplate(template,userId);
                 if(template.getTemplateCost().size() > 0 ) {
                 List<TemplateCost> templateCostList = updateTemplateCost(template);
                 template.setTemplateCost(templateCostList);
-                return templateRepository.save(template);
+                if (userDetails.getType() == User.UserType.ROOT_ADMIN) {
+                    if (pingService.apiConnectionCheck(errors) && template.getTemplateCost() != null) {
+                        template = templateRepository.save(template);
+                        savePingProject(template);
+                    } else {
+                        template = templateRepository.save(template);
+                    }
+                    return template;
+                } else {
+                    return templateRepository.save(template);
+                }
                 }
             }
         }
@@ -462,6 +499,7 @@ public class TemplateServiceImpl implements TemplateService {
      *
      * @param template entity object
      * @param errors object for validation
+     * @param userId user id
      * @throws Exception unhandled errors.
      */
     public void csRegisterTemplate(Template template, Errors errors, Long userId) throws Exception {
@@ -524,6 +562,7 @@ public class TemplateServiceImpl implements TemplateService {
      * Update template/ISO in CS.
      *
      * @param template entity object
+     * @param userId user id
      * @throws Exception unhandled errors.
      */
     public void csUpdateTemplate(Template template, Long userId) throws Exception {
@@ -632,8 +671,9 @@ public class TemplateServiceImpl implements TemplateService {
      *
      * @param template entity object
      * @param optional for null value checking
+     * @param userId user id
      * @return optional values list
-     * @throws Exception
+     * @throws Exception raise if error
      */
     public HashMap<String, String> optionalFieldValidation(Template template, HashMap<String, String> optional, Long userId) throws Exception {
         User user = convertEntityService.getOwnerById(userId);
@@ -664,11 +704,11 @@ public class TemplateServiceImpl implements TemplateService {
         } else {
             optional.put(CloudStackConstants.CS_BOOTABLE, CloudStackConstants.STATUS_ACTIVE);
         }
-        if(template.getDepartmentId() != null) {
+        if (template.getDepartmentId() != null) {
              optional.put(CloudStackConstants.CS_ACCOUNT,
                      departmentService.find(user.getDepartmentId()).getUserName());
         }
-        if(template.getDomainId() != null) {
+        if (template.getDomainId() != null) {
             optional.put(CloudStackConstants.CS_DOMAIN_ID, convertEntityService.getDomainUuidById(user.getDomainId()));
         }
         return optional;
@@ -774,5 +814,26 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     public List<Template> findAllTemplatesByIsActiveAndType(Boolean isActive) throws Exception {
         return (List<Template>) templateRepository.findAllTemplatesByIsActiveAndType(TemplateType.SYSTEM, true);
+    }
+
+    /**
+     * Set optional value for MR.ping api call.
+     *
+     * @param templateCost template cost
+     * @return status
+     * @throws Exception raise if error
+     */
+    public Boolean savePingProject(Template templateCost) throws Exception {
+        JSONObject optional = new JSONObject();
+        optional.put(PingConstants.PLAN_UUID, templateCost.getUuid());
+        optional.put(PingConstants.NAME, templateCost.getName());
+        optional.put(PingConstants.REFERENCE_NAME, PingConstants.ADMIN_TEMPLATE);
+        optional.put(PingConstants.GROUP_NAME, PingConstants.TEMPLATE);
+        optional.put(PingConstants.TOTAL_COST, templateCost.getTemplateCost().get(0).getCost());
+        optional.put(PingConstants.ZONE_ID, zoneService.find(templateCost.getZoneId()).getUuid());
+        optional.put(PingConstants.ISADMIN, !templateCost.getTemplateCreationType());
+        optional.put(PingConstants.ONE_TIME_CHARGEABLE, templateCost.getOneTimeChargeable());
+        pingService.addPlanCost(optional);
+        return true;
     }
 }

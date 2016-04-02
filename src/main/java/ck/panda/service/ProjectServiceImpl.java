@@ -27,6 +27,8 @@ import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 import ck.panda.util.error.exception.CustomGenericException;
 import ck.panda.util.error.exception.EntityNotFoundException;
+import ck.panda.constants.PingConstants;
+import ck.panda.util.PingService;
 
 /**
  * Project service implementation used to get list of project and save ,delete, update the project in application
@@ -70,6 +72,10 @@ public class ProjectServiceImpl implements ProjectService {
     @Autowired
     private ConfigUtil config;
 
+    /** Mr.ping service reference. */
+    @Autowired
+    private PingService pingService;
+
     @Override
     @PreAuthorize("hasPermission(#project.getSyncFlag(), 'CREATE_PROJECT')")
     public Project save(Project project) throws Exception {
@@ -84,7 +90,7 @@ public class ProjectServiceImpl implements ProjectService {
             // Check it has field errors or not.
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
-            } else {
+            } else if (pingService.apiConnectionCheck(errors)) {
                 optional.put(CloudStackConstants.CS_DOMAIN_ID,
                         convertEntityService.getDomainById(project.getDomainId()).getUuid());
                 optional.put(CloudStackConstants.CS_ACCOUNT,
@@ -120,6 +126,7 @@ public class ProjectServiceImpl implements ProjectService {
                                 + csProject.getString(CloudStackConstants.CS_ID));
                         project.setIsActive(true);
                         project.setStatus(Project.Status.ENABLED);
+                        saveProjectToPing(project);
                     }
                 }
             }
@@ -142,7 +149,7 @@ public class ProjectServiceImpl implements ProjectService {
             // Check it has field errors or not.
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
-            } else {
+            } else if (pingService.apiConnectionCheck(errors)) {
                 HashMap<String, String> optional = new HashMap<String, String>();
                 optional.put(CloudStackConstants.CS_DOMAIN_ID,
                         convertEntityService.getDomainById(project.getDomainId()).getUuid());
@@ -186,6 +193,7 @@ public class ProjectServiceImpl implements ProjectService {
                             CloudStackConstants.JSON);
                 }
             }
+            saveProjectToPing(project);
         }
         // Update project entity.
         return projectRepository.save(project);
@@ -386,5 +394,21 @@ public class ProjectServiceImpl implements ProjectService {
     public Page<Project> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting)
             throws Exception {
         return projectRepository.findAllByDomainIdAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
+    }
+
+    /**
+     * Save project details to MR.ping project for usage calculation.
+     *
+     * @param project domain object
+     * @return status
+     * @throws Exception raise if error
+     */
+    public Boolean saveProjectToPing(Project project) throws Exception {
+        JSONObject optional = new JSONObject();
+        optional.put(PingConstants.UUID, project.getUuid());
+        optional.put(PingConstants.DOMAIN_ID, convertEntityService.getDomainById(project.getDomainId()).getUuid());
+        optional.put(PingConstants.DEPARTMENT_UUID, convertEntityService.getDepartmentById(project.getDepartmentId()).getUuid());
+        pingService.addProjectToPing(optional);
+        return true;
     }
 }

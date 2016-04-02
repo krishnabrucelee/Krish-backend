@@ -32,6 +32,8 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 import ck.panda.util.error.exception.EntityNotFoundException;
+import ck.panda.constants.PingConstants;
+import ck.panda.util.PingService;
 
 /**
  * Department service implementation class.
@@ -98,6 +100,10 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Autowired
     private NetworkService networkService;
 
+    /** Mr.ping service reference. */
+    @Autowired
+    private PingService pingService;
+
     /** Baremetal system constant. */
     public static final String BAREMETAL_SYSTEM_ACCOUNT = "baremetal-system-account";
 
@@ -136,6 +142,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             csUserService.deleteUser(userObj.getString(CloudStackConstants.CS_ID), CloudStackConstants.JSON);
             department.setUuid((String) createAccountResponseJSON.get(CloudStackConstants.CS_ID));
             LOGGER.debug("Department created successfully" + department.getUserName());
+            saveDepartmentToPingProject(department);
         }
         return departmentRepo.save(department);
     }
@@ -149,13 +156,15 @@ public class DepartmentServiceImpl implements DepartmentService {
     private void validateDepartment(Department department) throws Exception {
         Errors errors = validator.rejectIfNullEntity(CloudStackConstants.CS_DEPARTMENT, department);
         errors = validator.validateEntity(department, errors);
-        Department dep = departmentRepo.findByUsernameDomainAndIsActive(department.getUserName(),
+        if (pingService.apiConnectionCheck(errors)) {
+            Department dep = departmentRepo.findByUsernameDomainAndIsActive(department.getUserName(),
                 department.getDomainId(), true);
-        if (dep != null && department.getId() != dep.getId()) {
-            errors.addFieldError(USER_NAME, "department.already.exist.for.same.domain");
-        }
-        if (errors.hasErrors()) {
-            throw new ApplicationException(errors);
+            if (dep != null && department.getId() != dep.getId()) {
+                errors.addFieldError(USER_NAME, "department.already.exist.for.same.domain");
+            }
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
+            }
         }
     }
 
@@ -174,6 +183,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             config.setServer(1L);
             csAccountService.updateAccount(department.getUserName(), accountMap);
             LOGGER.debug("Department updated successfully" + department.getUserName());
+            saveDepartmentToPingProject(department);
         }
         return departmentRepo.save(department);
     }
@@ -231,7 +241,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             List<SSHKey> sshkeyResponse = sshkeyService.findAllByDepartmentAndIsActive(department.getId(), true);
             List<Network> networkResponse = networkService.findByDepartmentAndNetworkIsActive(department.getId(), true);
             if (projectResponse.size() != 0 || vmResponse.size() != 0
-                    || roleResponse.size() != 0 || volumeResponse.size() != 0 || sshkeyResponse.size()!= 0 ) {
+                    || roleResponse.size() != 0 || volumeResponse.size() != 0 || sshkeyResponse.size() != 0 ) {
                 errors.addGlobalError(GenericConstants.PAGE_ERROR_SEPARATOR + GenericConstants.TOKEN_SEPARATOR
                         + projectResponse.size() + GenericConstants.TOKEN_SEPARATOR
                         + vmResponse.size() + GenericConstants.TOKEN_SEPARATOR
@@ -357,5 +367,21 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public List<Department> findAllByDomainAccountTypeAndIsActive(Long domainId, Boolean isActive, AccountType domainAdmin) throws Exception {
         return (List<Department>) departmentRepo.findByDomainAndIsActive(domainId, isActive, AccountType.DOMAIN_ADMIN);
+    }
+
+    /**
+     * Save department details to MR.ping project for usage calculation.
+     *
+     * @param department domain object
+     * @return status
+     * @throws Exception raise if error
+     */
+    public Boolean saveDepartmentToPingProject(Department department) throws Exception {
+        JSONObject optional = new JSONObject();
+        optional.put(PingConstants.UUID, department.getUuid());
+        optional.put(PingConstants.NAME, department.getUserName());
+        optional.put(PingConstants.DOMAIN_ID, domainService.find(department.getDomainId()).getUuid());
+        pingService.addDepartmentToPing(optional);
+        return true;
     }
 }

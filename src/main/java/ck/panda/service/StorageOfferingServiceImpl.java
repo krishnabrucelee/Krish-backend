@@ -11,11 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
-import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.StorageOfferingCost;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.StorageOfferingRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackOptionalUtil;
@@ -25,6 +25,8 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
 import ck.panda.util.error.exception.EntityNotFoundException;
+import ck.panda.constants.PingConstants;
+import ck.panda.util.PingService;
 
 /**
  * Storage Offering service implementation class.
@@ -72,6 +74,10 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     @Autowired
     private StorageOfferingCostService storageCostService;
 
+    /** Mr.ping service reference. */
+    @Autowired
+    private PingService pingService;
+
     @Override
     public StorageOffering save(StorageOffering storage) throws Exception {
         if (storage.getIsSyncFlag()) {
@@ -81,7 +87,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
 
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
-            } else {
+            } else if (pingService.apiConnectionCheck(errors)) {
                 createStorage(storage, errors);
                 StorageOfferingCost cost = storage.getStoragePrice().get(0);
                 Double totalCost = storageCostService.totalcost(cost);
@@ -90,8 +96,13 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
                 cost.setZoneId(cost.getZone().getId());
                 StorageOffering persistStorage= storageOfferingRepo.save(storage);
                 cost.setStorageId(persistStorage.getId());
-                return storageOfferingRepo.save(persistStorage);
+                if (pingService.apiConnectionCheck(errors)) {
+                    storage = storageOfferingRepo.save(persistStorage);
+                    savePlanCostInPing(storage);
+                }
+                return storage;
             }
+            return storage;
         } else {
             LOGGER.debug(storage.getUuid());
             return storageOfferingRepo.save(storage);
@@ -107,10 +118,15 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
             errors = validator.validateEntity(storage, errors);
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
-            } else {
+            } else if (pingService.apiConnectionCheck(errors)) {
                 updateStorageOffering(storage, errors);
-                return storageOfferingRepo.save(storage);
+                if (pingService.apiConnectionCheck(errors)) {
+                    storage = storageOfferingRepo.save(storage);
+                    savePlanCostInPing(storage);
+                }
+                return storage;
             }
+            return storage;
         } else {
             LOGGER.debug(storage.getUuid());
             return storageOfferingRepo.save(storage);
@@ -388,5 +404,45 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
     @Override
     public Page<StorageOffering> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
         return storageOfferingRepo.findAllByDomainIdAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
+    }
+
+    /**
+     * Set optional value for MR.ping api call.
+     *
+     * @param storageOfferingCost storage offering cost
+     * @return status
+     * @throws Exception raise if error
+     */
+    public Boolean savePlanCostInPing(StorageOffering storageOfferingCost) throws Exception {
+        JSONObject optional = new JSONObject();
+        optional.put(PingConstants.PLAN_UUID, storageOfferingCost.getUuid());
+        optional.put(PingConstants.NAME, storageOfferingCost.getName());
+        optional.put(PingConstants.IS_CUSTOM, storageOfferingCost.getIsCustomDisk());
+        optional.put(PingConstants.REFERENCE_NAME, PingConstants.STORAGE_OFFERING);
+        optional.put(PingConstants.GROUP_NAME, PingConstants.STORAGE_OFFERING);
+        if (storageOfferingCost.getIsCustomDisk()) {
+            optional.put(PingConstants.TOTAL_COST, offeringNullCheck(storageOfferingCost.getStoragePrice().get(0).getCostGbPerMonth()));
+        } else {
+            optional.put(PingConstants.TOTAL_COST, offeringNullCheck(storageOfferingCost.getStoragePrice().get(0).getCostPerMonth()));
+        }
+        if (storageOfferingCost.getStoragePrice().get(0).getZoneId() != null) {
+            Zone zone = convertEntityService.getZoneById(storageOfferingCost.getStoragePrice().get(0).getZoneId());
+            optional.put(PingConstants.ZONE_ID, zone.getUuid());
+        }
+        pingService.addPlanCost(optional);
+        return true;
+    }
+
+    /**
+     * Offering cost null value check.
+     *
+     * @param value offering cost
+     * @return double value
+     */
+    public Double offeringNullCheck(Double value) {
+        if (value == null) {
+            value = 0.0;
+        }
+        return value;
     }
 }

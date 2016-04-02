@@ -50,4 +50,32 @@ public abstract class JsonValidator {
             return 0;
         }
     }
+
+    /**
+    *
+    * @param key value
+    * @return integer value
+    * @throws Exception raise if error.
+    */
+   public static Integer stringToIntegerConvertion(String key) throws Exception {
+       if (key != null) {
+           return Integer.getInteger(key);
+       } else {
+           return 0;
+       }
+   }
+
+   /**
+   *
+   * @param key value
+   * @return integer value
+   * @throws Exception raise if error.
+   */
+  public static Double stringToDoubleConvertion(String key) throws Exception {
+      if (key != null) {
+          return Double.valueOf(key);
+      } else {
+          return 0.0;
+      }
+  }
 }
