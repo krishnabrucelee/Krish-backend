@@ -73,4 +73,6 @@ public class OrganizationServiceImpl implements OrganizationService {
     public Organization findByIsActive(Boolean isActive) throws Exception {
         return organizationRepo.findByIsActive(true);
     }
+
+
 }

@@ -5,7 +5,6 @@ import java.net.Socket;
 import java.net.URL;
 import java.util.LinkedList;
 import org.apache.commons.httpclient.NameValuePair;
-import org.bson.types.ObjectId;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

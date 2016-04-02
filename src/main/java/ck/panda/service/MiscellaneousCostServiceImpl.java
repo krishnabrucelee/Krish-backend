@@ -1,14 +1,17 @@
 package ck.panda.service;
 
 import java.util.List;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import ck.panda.constants.PingConstants;
 import ck.panda.domain.entity.MiscellaneousCost;
 import ck.panda.domain.entity.MiscellaneousCost.CostTypes;
 import ck.panda.domain.entity.MiscellaneousCost.UnitType;
 import ck.panda.domain.repository.jpa.MiscellaneousCostRepository;
 import ck.panda.util.AppValidator;
+import ck.panda.util.PingService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -28,6 +31,10 @@ public class MiscellaneousCostServiceImpl implements MiscellaneousCostService {
     @Autowired
     private MiscellaneousCostRepository costRepo;
 
+    /** Mr.ping service reference. */
+    @Autowired
+    private PingService pingService;
+
     @Override
     public MiscellaneousCost save(MiscellaneousCost cost) throws Exception {
 
@@ -37,48 +44,56 @@ public class MiscellaneousCostServiceImpl implements MiscellaneousCostService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
-                if(cost.getCostType() == CostTypes.TEMPLATE) {
-                List<MiscellaneousCost> oldCost = costRepo.findByIsActiveAndCostType(true, CostTypes.TEMPLATE);
-                if (oldCost.size() != 0) {
-                    for(MiscellaneousCost miscellaneous: oldCost) {
-                        miscellaneous.setIsActive(false);
+                if (cost.getCostType() == CostTypes.TEMPLATE) {
+                    List<MiscellaneousCost> oldCost = costRepo.findByIsActiveAndCostType(true, CostTypes.TEMPLATE);
+                    if (oldCost.size() != 0) {
+                        for (MiscellaneousCost miscellaneous: oldCost) {
+                            miscellaneous.setIsActive(false);
+                        }
                     }
+                    cost.setCostType(CostTypes.TEMPLATE);
+                    cost.setUnitType(UnitType.GB);
+                    cost.setIsActive(true);
                 }
-                        cost.setCostType(CostTypes.TEMPLATE);
-                        cost.setUnitType(UnitType.GB);
-                        cost.setIsActive(true);
-                }
-                if(cost.getCostType() == CostTypes.VMSNAPSHOT) {
+                if (cost.getCostType() == CostTypes.VMSNAPSHOT) {
                     List<MiscellaneousCost> oldCost = costRepo.findByIsActiveAndCostType(true, CostTypes.VMSNAPSHOT);
-                        if (oldCost.size() != 0) {
-                            for(MiscellaneousCost miscellaneous: oldCost) {
-                                miscellaneous.setIsActive(false);
-                            }
-                        }    cost.setCostType(CostTypes.VMSNAPSHOT);
-                            cost.setUnitType(UnitType.GB);
-                            cost.setIsActive(true);
+                    if (oldCost.size() != 0) {
+                        for (MiscellaneousCost miscellaneous: oldCost) {
+                            miscellaneous.setIsActive(false);
+                        }
                     }
-                if(cost.getCostType() == CostTypes.IPADDRESS) {
+                    cost.setCostType(CostTypes.VMSNAPSHOT);
+                    cost.setUnitType(UnitType.GB);
+                    cost.setIsActive(true);
+                }
+                if (cost.getCostType() == CostTypes.IPADDRESS) {
                     List<MiscellaneousCost> oldCost = costRepo.findByIsActiveAndCostType(true, CostTypes.IPADDRESS);
-                        if (oldCost.size() != 0) {
-                            for(MiscellaneousCost miscellaneous: oldCost) {
-                                miscellaneous.setIsActive(false);
-                            }
-                        }    cost.setCostType(CostTypes.IPADDRESS);
-                             cost.setUnitType(UnitType.IP);
-                            cost.setIsActive(true);
+                    if (oldCost.size() != 0) {
+                        for (MiscellaneousCost miscellaneous: oldCost) {
+                            miscellaneous.setIsActive(false);
+                        }
                     }
-                if(cost.getCostType() == CostTypes.VOLUMESNAPSHOT) {
+                    cost.setCostType(CostTypes.IPADDRESS);
+                    cost.setUnitType(UnitType.IP);
+                    cost.setIsActive(true);
+                }
+                if (cost.getCostType() == CostTypes.VOLUMESNAPSHOT) {
                     List<MiscellaneousCost> oldCost = costRepo.findByIsActiveAndCostType(true, CostTypes.VOLUMESNAPSHOT);
-                        if (oldCost.size() != 0) {
-                            for(MiscellaneousCost miscellaneous: oldCost) {
-                                miscellaneous.setIsActive(false);
-                            }
-                        }    cost.setCostType(CostTypes.VOLUMESNAPSHOT);
-                             cost.setUnitType(UnitType.GB);
-                            cost.setIsActive(true);
+                    if (oldCost.size() != 0) {
+                        for (MiscellaneousCost miscellaneous: oldCost) {
+                            miscellaneous.setIsActive(false);
+                        }
                     }
-            return costRepo.save(cost);
+                    cost.setCostType(CostTypes.VOLUMESNAPSHOT);
+                    cost.setUnitType(UnitType.GB);
+                    cost.setIsActive(true);
+                }
+
+                if (pingService.apiConnectionCheck(errors)) {
+                    cost = costRepo.save(cost);
+                    savePingProject(cost);
+                }
+                return cost;
         }
     }
 
@@ -143,5 +158,32 @@ public class MiscellaneousCostServiceImpl implements MiscellaneousCostService {
     public List<MiscellaneousCost>  findAllByTemplateCost(CostTypes type) throws Exception {
         return (List<MiscellaneousCost>)costRepo.findByIsActiveAndCostType(true, CostTypes.TEMPLATE);
     }
-}
 
+    /**
+     * Set optional value for MR.ping api call.
+     *
+     * @param cost miscellaneous cost
+     * @return status
+     * @throws Exception raise if error
+     */
+    public Boolean savePingProject(MiscellaneousCost cost) throws Exception {
+        JSONObject optional = new JSONObject();
+        optional.put(PingConstants.PLAN_UUID, cost.getId());
+        optional.put(PingConstants.NAME, cost.getCostType());
+        optional.put(PingConstants.REFERENCE_NAME, cost.getCostType().toString());
+        if (optional.get(PingConstants.REFERENCE_NAME).equals(PingConstants.TEMPLATE)) {
+            optional.put(PingConstants.GROUP_NAME, PingConstants.TEMPLATE);
+        }
+        if (optional.get(PingConstants.REFERENCE_NAME).equals(PingConstants.IP_ADDRESS)) {
+            optional.put(PingConstants.GROUP_NAME, PingConstants.IP_ADDRESS);
+        }
+        if (optional.get(PingConstants.REFERENCE_NAME).equals(PingConstants.VM_SNAPSHOT)
+                || optional.get(PingConstants.REFERENCE_NAME).equals(PingConstants.VOLUME_SNAPSHOT)) {
+            optional.put(PingConstants.GROUP_NAME, PingConstants.SNAPSHOT);
+        }
+        optional.put(PingConstants.TOTAL_COST, cost.getCostperGB());
+        optional.put(PingConstants.ZONE_ID, cost.getZone().getUuid());
+        pingService.addPlanCost(optional);
+        return true;
+    }
+}
