@@ -252,7 +252,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         asyncJobEvent.setEventType(EventType.ASYNC);
         JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
         if (eventObject.getString(CloudStackConstants.CS_STATUS)
-                .equalsIgnoreCase(CloudStackConstants.CS_STATUS_FAILED)) {
+                .equalsIgnoreCase(CloudStackConstants.CS_STATUS_FAILED) && jobResult != null) {
             asyncJobEvent.setMessage(jobResult.getString(CloudStackConstants.CS_ERROR_TEXT));
             asyncJobEvent.setStatus(Event.Status.FAILED);
             if (json.has(CloudStackConstants.CS_UUID)) {

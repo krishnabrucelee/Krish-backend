@@ -2454,15 +2454,19 @@ public class SyncServiceImpl implements SyncService {
             csFirewallRule.setStartPort(loadBalancerRule.getPrivatePort());
             csFirewallRule.setEndPort(loadBalancerRule.getPublicPort());
             csFirewallRule.setIsActive(true);
-            csFirewallRule.setIpAddressId(loadBalancerRule.getIpAddressId());
+            if (csFirewallRule.getIpAddressId() != null) {
+              csFirewallRule.setIpAddressId(loadBalancerRule.getIpAddressId());
+            }
             csFirewallRule.setPurpose(FirewallRules.Purpose.LOADBALANCING);
             csFirewallRule.setNetworkId(convertEntityService.getNetworkByUuid(loadBalancerRule.getTransNetworkId()));
-            csFirewallRule.setDepartmentId(convertEntityService.getNetworkById(csFirewallRule.getNetworkId())
+            if (csFirewallRule.getNetworkId() != null) {
+                    csFirewallRule.setDepartmentId(convertEntityService.getNetworkById(csFirewallRule.getNetworkId())
                     .getDepartmentId());
-            csFirewallRule.setProjectId(convertEntityService.getNetworkById(csFirewallRule.getNetworkId())
+                    csFirewallRule.setProjectId(convertEntityService.getNetworkById(csFirewallRule.getNetworkId())
                     .getProjectId());
-            csFirewallRule.setDomainId(convertEntityService.getNetworkById(csFirewallRule.getNetworkId())
+                    csFirewallRule.setDomainId(convertEntityService.getNetworkById(csFirewallRule.getNetworkId())
                     .getDomainId());
+            }
             egressRuleService.save(csFirewallRule);
         }
     }

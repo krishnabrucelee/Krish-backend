@@ -244,10 +244,11 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                     }
                 }
                 loadBalancer.setNetworkId(convertEntityService.getNetworkId(loadBalancer.getTransNetworkId()));
+                if(loadBalancer.getNetworkId() != null) {
+                    loadBalancer.setDomainId(convertEntityService.getNetworkById(loadBalancer.getNetworkId()).getDomainId());
+                }
                 loadBalancer.setIpAddressId(convertEntityService.getIpAddressId(loadBalancer.getTransIpAddressId()));
                 loadBalancer.setZoneId(convertEntityService.getZoneId(loadBalancer.getTransZoneId()));
-                loadBalancer.setDomainId(convertEntityService.getNetworkById(loadBalancer.getNetworkId())
-                        .getDomainId());
                 loadBalancerList.add(loadBalancer);
             }
          }
