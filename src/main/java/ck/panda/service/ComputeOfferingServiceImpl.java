@@ -417,7 +417,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
         optional.put(PingConstants.PLAN_UUID, computeOfferingCost.getUuid());
         optional.put(PingConstants.NAME, computeOfferingCost.getName());
         optional.put(PingConstants.IS_CUSTOM, computeOfferingCost.getCustomized());
-        optional.put(PingConstants.COMPUTE_SETUP_COST, computeOfferingCost.getComputeCost().get(0).getSetupCost());
+        optional.put(PingConstants.COMPUTE_SETUP_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getSetupCost()));
         optional.put(PingConstants.REFERENCE_NAME, PingConstants.VM);
         optional.put(PingConstants.GROUP_NAME, PingConstants.VM);
         if (computeOfferingCost.getCustomized()) {
