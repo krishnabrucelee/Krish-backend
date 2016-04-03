@@ -29,14 +29,14 @@ spring:
 
     # RabbitMQ Properties
     rabbit:
-        host: ${RABBITMQ_HOST:192.168.1.159}
+        host: ${RABBITMQ_HOST}
         vhost: /
-        username: ${RABBITMQ_USERNAME:panda}
-        password: ${RABBITMQ_PASSWORD:l3tm3in}
+        username: ${RABBITMQ_USERNAME}
+        password: ${RABBITMQ_PASSWORD}
         exchange:
             name: ${RABBITMQ_EXCHANGE}
         email:
-            name: ${RABBITMQ_EMAIL_EXCHANGE:EmailExchange}
+            name: ${RABBITMQ_EMAIL_EXCHANGE}
     # CS server Routing key
         server:
             action:
@@ -56,7 +56,7 @@ spring:
                 queue: ${RABBITMQ_RESOURCE_EVENT}
             email:
                 pattern: "email.template"
-                queue : ${RABBITMQ_EMAIL:Email}
+                queue : ${RABBITMQ_EMAIL}
  # Mail configuration
     mail:
         host: mail.xxx.com
@@ -82,7 +82,7 @@ cloudstack:
 console:
     proxy: ${CONSOLE_URL}
 mrping:
-    url: ${MRPING_URL:http://localhost:8081/api}
+    url: ${MRPING_URL}
 
 ---
 
@@ -124,8 +124,8 @@ keystore:
 backend:
     admin:
         userid: 1
-        username: ${BACKEND_ADMIN_USERNAME:admin}
-        password: ${BACKEND_ADMIN_PASSWORD:password}
+        username: ${BACKEND_ADMIN_USERNAME}
+        password: ${BACKEND_ADMIN_PASSWORD}
         role: BACKEND_ADMIN
         dominid: 1
         departmentid: 1000
@@ -161,10 +161,10 @@ login:
 
 english:
     template:
-        dir: ${ENGLISH_TEMPLATE_DIR:/home/english}
+        dir: ${ENGLISH_TEMPLATE_DIR}
 chinese:
     template:
-        dir: ${CHINESE_TEMPLATE_DIR:home/chinese}
+        dir: ${CHINESE_TEMPLATE_DIR}
 invoice:
     base:
         path: ${INVOICE_ATTACHMENT_DIR:/home/Assistanz/invoice/invoiceattachment}
