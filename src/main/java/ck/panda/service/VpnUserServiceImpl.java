@@ -131,7 +131,11 @@ public class VpnUserServiceImpl implements VpnUserService {
                 configServer.setUserServer();
                 HashMap<String, String> optional = new HashMap<String, String>();
                 optional.put(CloudStackConstants.CS_DOMAIN_ID, convertEntityService.getDomainById(vpnUser.getDomainId()).getUuid());
-                optional.put(CloudStackConstants.CS_ACCOUNT, convertEntityService.getDepartmentById(vpnUser.getDepartmentId()).getUserName());
+                if (vpnUser.getProjectId() != null) {
+                    optional.put(CloudStackConstants.CS_PROJECT_ID, convertEntityService.getProjectById(vpnUser.getProjectId()).getUuid());
+                } else {
+                    optional.put(CloudStackConstants.CS_ACCOUNT, convertEntityService.getDepartmentById(vpnUser.getDepartmentId()).getUserName());
+                }
 
                 String deleteRemoteAccess = csVPNService.removeVpnUser(vpnUser.getUserName(), optional, CloudStackConstants.JSON);
                 JSONObject jobId = new JSONObject(deleteRemoteAccess).getJSONObject(CloudStackConstants.CS_REMOVE_VPN_USER_RESPONSE);
@@ -197,8 +201,11 @@ public class VpnUserServiceImpl implements VpnUserService {
             configServer.setUserServer();
             HashMap<String, String> optional = new HashMap<String, String>();
             optional.put(CloudStackConstants.CS_DOMAIN_ID, convertEntityService.getDomainById(vpnUser.getDomainId()).getUuid());
-            optional.put(CloudStackConstants.CS_ACCOUNT, convertEntityService.getDepartmentById(vpnUser.getDepartmentId()).getUserName());
-
+            if (vpnUser.getProjectId() != null) {
+                optional.put(CloudStackConstants.CS_PROJECT_ID, convertEntityService.getProjectById(vpnUser.getProjectId()).getUuid());
+            } else {
+                optional.put(CloudStackConstants.CS_ACCOUNT, convertEntityService.getDepartmentById(vpnUser.getDepartmentId()).getUserName());
+            }
             String createVpnUser = csVPNService.addVpnUser(vpnUser.getPassword(), vpnUser.getUserName(), optional, CloudStackConstants.JSON);
             JSONObject jobId = new JSONObject(createVpnUser).getJSONObject(CloudStackConstants.CS_ADD_VPN_USER_RESPONSE);
             if (jobId.has(CloudStackConstants.CS_ERROR_CODE)) {
@@ -240,8 +247,15 @@ public class VpnUserServiceImpl implements VpnUserService {
         return vpnUserRepository.findAllByDepartmentAndDomainAndIsActive(departmentId, domainId, true);
     }
 
-	@Override
-	public List<VpnUser> findByDomainWithProject(Long domainId, Long projectId) throws Exception {
-		return (List<VpnUser>) vpnUserRepository.findByDomainWithProject(domainId, projectId, true);
-	}
+    @Override
+    public List<VpnUser> findByDomainWithProject(Long domainId, Long projectId) throws Exception {
+        return (List<VpnUser>) vpnUserRepository.findByDomainWithProject(domainId, projectId, true);
+    }
+
+    @Override
+    public VpnUser findbyDomainWithProjectAndUser(String userName, String projectUUid, String domainUUid) throws Exception {
+        Domain domain = convertEntityService.getDomain(domainUUid);
+        return vpnUserRepository.findbyDomainWithProjectAndUser(userName,
+            convertEntityService.getProject(projectUUid).getId(), domain.getId(), true);
+    }
 }

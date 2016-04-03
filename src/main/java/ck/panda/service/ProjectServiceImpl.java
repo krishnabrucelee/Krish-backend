@@ -411,4 +411,9 @@ public class ProjectServiceImpl implements ProjectService {
         pingService.addProjectToPing(optional);
         return true;
     }
+
+    @Override
+    public Project findByProjectNameAndIsActive(String projectAccountName, Long domainId, Boolean isActive) {
+        return projectRepository.findByProjectNameAndIsActive(projectAccountName, domainId, isActive);
+    }
 }

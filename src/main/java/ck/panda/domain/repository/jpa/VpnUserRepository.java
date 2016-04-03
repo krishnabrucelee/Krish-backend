@@ -77,4 +77,16 @@ public interface VpnUserRepository extends PagingAndSortingRepository<VpnUser, L
      */
     @Query(value = "SELECT vpn FROM VpnUser vpn WHERE vpn.userName = :userName AND vpn.departmentId = :departmentId AND vpn.domainId = :domainId AND vpn.isActive =:isActive")
     VpnUser findbyDomainWithAccountAndUser(@Param("userName") String userName, @Param("departmentId") Long departmentId, @Param("domainId") Long domainId, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find VPN user by uuid.
+     *
+     * @param userName of VPN user.
+     * @param projectId of VPN user.
+     * @param domainId of VPN user.
+     * @param isActive of VPN user.
+     * @return VPN user object.
+     */
+    @Query(value = "SELECT vpn FROM VpnUser vpn WHERE vpn.userName = :userName AND vpn.projectId = :projectId AND vpn.domainId = :domainId AND vpn.isActive =:isActive")
+    VpnUser findbyDomainWithProjectAndUser(@Param("userName") String userName, @Param("projectId") Long projectId, @Param("domainId") Long domainId, @Param("isActive") Boolean isActive);
 }
