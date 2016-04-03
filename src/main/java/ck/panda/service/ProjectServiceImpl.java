@@ -387,4 +387,9 @@ public class ProjectServiceImpl implements ProjectService {
             throws Exception {
         return projectRepository.findAllByDomainIdAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
     }
+
+    @Override
+    public Project findByProjectNameAndIsActive(String projectAccountName, Long domainId, Boolean isActive) {
+        return projectRepository.findByProjectNameAndIsActive(projectAccountName, domainId, isActive);
+    }
 }

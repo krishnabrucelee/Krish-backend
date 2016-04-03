@@ -2,6 +2,7 @@ package ck.panda.service;
 
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import javax.crypto.SecretKey;
@@ -33,6 +34,7 @@ import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.PortForwarding;
+import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
@@ -1592,9 +1594,23 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
              vpnUser.setUuid(jobresultReponse.getString(CloudStackConstants.CS_ID));
              vpnUser.setUserName(jobresultReponse.getString(CloudStackConstants.CS_USER_NAME));
              vpnUser.setDomainId(convertEntityService.getDomainId(jobresultReponse.getString(CloudStackConstants.CS_DOMAIN_ID)));
-             vpnUser.setDepartmentId(convertEntityService.getDepartmentByUsername(jobresultReponse.getString(CloudStackConstants.CS_ACCOUNT), vpnUser.getDomainId()));
-             if (jobresultReponse.has(CloudStackConstants.CS_PROJECT_ID)) {
-                 vpnUser.setProjectId(convertEntityService.getProjectId(jobresultReponse.getString(CloudStackConstants.CS_PROJECT_ID)));
+             if (jobresultReponse.has(CloudStackConstants.CS_ACCOUNT)) {
+                 String projectAccountName = jobresultReponse.getString(CloudStackConstants.CS_ACCOUNT);
+                     String[] split = projectAccountName.split("-");
+                     if (split[0].equals("PrjAcct")) {
+                         ArrayList<String> list = new ArrayList<String>();
+                         Collections.addAll(list, split);
+                         list.remove(split[0]);
+                         list.remove(split[split.length-1]);
+                         String ProjectConcatName = String.join("-", list);
+                         Project projectDetails = projectService.findByProjectNameAndIsActive(ProjectConcatName, vpnUser.getDomainId(), true);
+                         if (projectDetails != null) {
+                             vpnUser.setProjectId(projectDetails.getId());
+                             vpnUser.setDepartmentId(convertEntityService.getProjectById(vpnUser.getProjectId()).getDepartmentId()) ;
+                         }
+                     } else {
+                         vpnUser.setDepartmentId(convertEntityService.getDepartmentByUsername(jobresultReponse.getString(CloudStackConstants.CS_ACCOUNT), vpnUser.getDomainId()));
+                     }
              }
              if (vpnUserService.findbyUUID(vpnUser.getUuid()) == null) {
                  vpnUser.setSyncFlag(false);
@@ -1604,12 +1620,22 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
 
          if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VPN_USER_REMOVE)) {
              JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
+             if (json.has(CloudStackConstants.CS_ACCOUNT)) {
              VpnUser vpnUser = vpnUserService.findbyDomainWithAccountAndUser(json.getString(CloudStackConstants.CS_USER_NAME),
                  json.getString(CloudStackConstants.CS_ACCOUNT),
                  json.getString(CloudStackConstants.CS_DOMAIN_ID));
              if (vpnUser != null) {
                  vpnUser.setSyncFlag(false);
                  vpnUserService.softDelete(vpnUser);
+             }
+             } else if (json.has(CloudStackConstants.CS_PROJECT_ID)) {
+                 VpnUser vpnUser = vpnUserService.findbyDomainWithProjectAndUser(json.getString(CloudStackConstants.CS_USER_NAME),
+                         json.getString(CloudStackConstants.CS_PROJECT_ID),
+                         json.getString(CloudStackConstants.CS_DOMAIN_ID));
+                     if (vpnUser != null) {
+                         vpnUser.setSyncFlag(false);
+                         vpnUserService.softDelete(vpnUser);
+                     }
              }
          }
     }

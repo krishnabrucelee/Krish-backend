@@ -578,9 +578,12 @@ public class IpaddressServiceImpl implements IpaddressService {
         Errors errors = null;
         IpAddress ipAddress = findbyUUID(uuid);
         try {
+            String projectUuid = null;
+            if (ipAddress.getProject() != null) {
+                projectUuid = ipAddress.getProject().getUuid();
+            }
             Boolean routerStatus = virtualRoutersStatusCheck(ipAddress.getNetwork().getDomain().getUuid(),
-                    ipAddress.getNetwork().getDepartment().getUserName(), ipAddress.getNetwork().getUuid());
-
+                    ipAddress.getNetwork().getDepartment().getUserName(), ipAddress.getNetwork().getUuid(), projectUuid);
             if (routerStatus) {
                 configServer.setUserServer();
                 HashMap<String, String> optional = new HashMap<String, String>();
@@ -639,13 +642,17 @@ public class IpaddressServiceImpl implements IpaddressService {
      * @return encrypted value
      * @throws Exception unhandled errors.
      */
-    private Boolean virtualRoutersStatusCheck(String domainId, String accountName, String networkId) throws Exception {
+    private Boolean virtualRoutersStatusCheck(String domainId, String accountName, String networkId, String projectId) throws Exception {
         Boolean routerState = false;
         JSONArray routerListJSON = null;
         HashMap<String, String> routerOptional = new HashMap<String, String>();
         routerOptional.put(CloudStackConstants.CS_DOMAIN_ID, domainId);
-        routerOptional.put(CloudStackConstants.CS_ACCOUNT, accountName);
         routerOptional.put(CloudStackConstants.CS_NETWORK_ID, networkId);
+        if (projectId !=null) {
+            routerOptional.put(CloudStackConstants.CS_PROJECT_ID, projectId);
+        } else {
+            routerOptional.put(CloudStackConstants.CS_ACCOUNT, accountName);
+        }
         configServer.setServer(1L);
         String listRouters = csVPNService.listRouters(routerOptional, CloudStackConstants.JSON);
         JSONObject responseObject = new JSONObject(listRouters).getJSONObject(CloudStackConstants.CS_LIST_ROUTER_RESPONSE);

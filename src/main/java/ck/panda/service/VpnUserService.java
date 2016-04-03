@@ -90,4 +90,15 @@ public interface VpnUserService extends CRUDService<VpnUser> {
      * @throws Exception unhandled errors.
      */
     VpnUser findbyDomainWithAccountAndUser(String userName, String account, String domainUUid) throws Exception;
+
+    /**
+     * Find VPN user by account, user and domainid.
+     *
+     * @param userName of VPN user.
+     * @param projectUUid of VPN user.
+     * @param domainUUid of VPN user.
+     * @return VPN user object.
+     * @throws Exception unhandled errors.
+     */
+    VpnUser findbyDomainWithProjectAndUser(String userName, String projectUUid, String domainUUid) throws Exception;
 }
