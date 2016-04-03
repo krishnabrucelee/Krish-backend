@@ -155,4 +155,13 @@ public class PingConstants {
     /** Constant for one time chargeable template. */
     public static final String ONE_TIME_CHARGEABLE = "oneTimeChargeable";
 
+    /** Constant for api URL. */
+    public static final String API_URL = "apiUrl";
+
+    /** Constant for api key. */
+    public static final String API_KEY = "apiKey";
+
+    /** Constant for secret key. */
+    public static final String SECRET_KEY = "secretKey";
+
 }

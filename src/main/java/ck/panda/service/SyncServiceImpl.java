@@ -608,8 +608,13 @@ public class SyncServiceImpl implements SyncService {
         }
         try {
             // 36. Sync domain, department, project in MR.ping
-            pingService.pingInitialSync();
-            LOGGER.debug("MR.ping");
+            CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
+            JSONObject optional = new JSONObject();
+            optional.put(PingConstants.API_URL, cloudConfig.getApiURL());
+            optional.put(PingConstants.API_KEY, cloudConfig.getApiKey());
+            optional.put(PingConstants.SECRET_KEY, cloudConfig.getSecretKey());
+            pingService.pingInitialSync(optional);
+            LOGGER.debug("Mr.Ping");
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Ip Address", e);
         }
