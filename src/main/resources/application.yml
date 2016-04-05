@@ -98,7 +98,7 @@ logging:
 ---
 
 server:
-    port: 8080
+    port: ${PANDA_PORT:8080}
     session-timeout: 60
 
 ---
