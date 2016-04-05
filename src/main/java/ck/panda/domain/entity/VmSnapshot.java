@@ -104,6 +104,25 @@ public class VmSnapshot implements Serializable {
     @Column(name = "zone_id")
     private Long zoneId;
 
+    /** Project Object for the Network. */
+    @JoinColumn(name = "project_id", referencedColumnName = "id", updatable = false, insertable = false)
+    @ManyToOne
+    private Project project;
+
+    /** Network project id. */
+    @Column(name = "project_id")
+    private Long projectId;
+
+    /** Department Object for the Network. */
+    @JoinColumn(name = "department_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private Department department;
+
+    /** id for the Department. */
+    @Column(name = "department_id")
+    private Long departmentId;
+
+
     /** current state. */
     @Column(name = "status")
     private Status status;
@@ -677,53 +696,77 @@ public class VmSnapshot implements Serializable {
         this.transDomainId = transDomainId;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("VmSnapshot [id=");
-        builder.append(id);
-        builder.append(", name=");
-        builder.append(name);
-        builder.append(", description=");
-        builder.append(description);
-        builder.append(", uuid=");
-        builder.append(uuid);
-        builder.append(", owner=");
-        builder.append(owner);
-        builder.append(", ownerId=");
-        builder.append(ownerId);
-        builder.append(", syncFlag=");
-        builder.append(syncFlag);
-        builder.append(", vm=");
-        builder.append(vm);
-        builder.append(", vmId=");
-        builder.append(vmId);
-        builder.append(", domain=");
-        builder.append(domain);
-        builder.append(", domainId=");
-        builder.append(domainId);
-        builder.append(", zone=");
-        builder.append(zone);
-        builder.append(", zoneId=");
-        builder.append(zoneId);
-        builder.append(", status=");
-        builder.append(status);
-        builder.append(", type=");
-        builder.append(type);
-        builder.append(", isRemoved=");
-        builder.append(isRemoved);
-        builder.append(", version=");
-        builder.append(version);
-        builder.append(", createdBy=");
-        builder.append(createdBy);
-        builder.append(", updatedBy=");
-        builder.append(updatedBy);
-        builder.append(", createdDateTime=");
-        builder.append(createdDateTime);
-        builder.append(", updatedDateTime=");
-        builder.append(updatedDateTime);
-        builder.append("]");
-        return builder.toString();
+    /**
+     * Get network project.
+     *
+     * @return the project.
+     */
+    public Project getProject() {
+        return project;
+    }
+
+    /**
+     * Set network project.
+     *
+     * @param project to set.
+     */
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    /**
+     * Get network project id.
+     *
+     * @return the projectId.
+     */
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    /**
+     * Set network project id.
+     *
+     * @param projectId the project id to set.
+     */
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
+    }
+
+
+    /**
+     * Get the department for snapshot.
+     *
+     * @return the department
+     */
+    public Department getDepartment() {
+        return department;
+    }
+
+    /**
+     * Set the department for snapshot.
+     *
+     * @param department to set
+     */
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
+
+    /**
+     * Get the department id of the snapshot.
+     *
+     * @return the departmentId
+     */
+    public Long getDepartmentId() {
+        return departmentId;
+    }
+
+    /**
+     * Set the department id of the snapshot.
+     *
+     * @param departmentId to set
+     */
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
     }
 
     /**

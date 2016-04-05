@@ -743,6 +743,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 VmIpaddress vmIp = new VmIpaddress();
                 vmIp.setVmInstanceId(nic.getVmInstanceId());
                 vmIp.setNicId(nic.getId());
+                vmIp.setUuid(nic.getUuid());
                 vmIp.setIsActive(true);
                 vmIp.setIpType(IpType.primaryIpAddress);
                 vmIp.setGuestIpAddress(nic.getIpAddress());
@@ -1517,6 +1518,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
              vmSnapshot.setDomainId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getDomainId());
              vmSnapshot.setOwnerId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getInstanceOwnerId());
              vmSnapshot.setZoneId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getZoneId());
+             VmInstance instance = virtualMachineService.findByUUID(vmSnapshot.getTransvmInstanceId());
+             vmSnapshot.setDepartmentId(instance.getDepartmentId());
+             vmSnapshot.setProjectId(instance.getProjectId());
              List<VmSnapshot> vmSnapshotList = vmSnapshotService.findByVmInstance(vmSnapshot.getVmId(), false);
              for (VmSnapshot vmSnap : vmSnapshotList) {
                  if (vmSnap.getIsCurrent()) {

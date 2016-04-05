@@ -21,6 +21,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.service.VmSnapshotService;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
@@ -36,6 +37,10 @@ public class VMSnapshotController extends CRUDController<VmSnapshot> implements 
     /** Service reference to Snapshot. */
     @Autowired
     private VmSnapshotService snapshotService;
+
+    /** Token Detail Utilities. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new vmsnapshot.", response = VmSnapshot.class)
     @Override
@@ -61,7 +66,7 @@ public class VMSnapshotController extends CRUDController<VmSnapshot> implements 
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, VmSnapshot.class);
-        Page<VmSnapshot> pageResponse = snapshotService.findAll(page);
+        Page<VmSnapshot> pageResponse = snapshotService.findAllByActive(page,Long.parseLong(tokenDetails.getTokenDetails("id")));
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
