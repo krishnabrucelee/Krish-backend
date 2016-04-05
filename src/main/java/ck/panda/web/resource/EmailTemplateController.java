@@ -92,7 +92,7 @@ public class EmailTemplateController extends CRUDController<EmailTemplate> imple
 
     @RequestMapping(value = "/uploadFile", method = RequestMethod.POST)
     public @ResponseBody String handleFileUpload(
-            @RequestParam(value="file") MultipartFile[] files, @RequestParam(value="eventName", required=true) String eventName, @RequestParam(value="englishLanguage", required=true) String englishLanguage, @RequestParam(value="chineseLanguage")String chineseLanguage,@RequestParam(value="subject")String subject,@RequestParam(value="recipientType")String recipientType) throws Exception {
+            @RequestParam(value="file") MultipartFile[] files, @RequestParam(value="eventName", required=true) String eventName, @RequestParam(value="englishLanguage", required=true) String englishLanguage, @RequestParam(value="chineseLanguage")String chineseLanguage,@RequestParam(value="subject")String subject,@RequestParam(value="recipientType")String recipientType,@RequestParam(value="hasEnglish")Boolean hasEnglish) throws Exception {
         InputStream inputStream = null;
         OutputStream outputStream = null;
         int i = 0;
@@ -102,55 +102,55 @@ public class EmailTemplateController extends CRUDController<EmailTemplate> imple
         }
         for (MultipartFile file : files) {
             i++;
-            if (englishLanguage != null && i == 1) {
-                String fileName = file.getOriginalFilename();
-                File newFile = new File(englishTemplateDir + "/" + eventName);
-                email.setEventName(eventName);
-                email.setEnglishLanguage(fileName);
-                email.setSubject(subject);
-                email.setRecipientType(RecipientType.valueOf(recipientType));
-                email.setIsActive(true);
-                email.setFilePath(englishTemplateDir);
-                emailService.save(email);
+            if((hasEnglish == false && files.length == 1) || (files.length > 1) && i == 2) {
+                 String fileName = file.getOriginalFilename();
+                 File newFile = new File(chineseTemplateDir + "/" + eventName);
+                 email.setChineseLanguage(fileName);
+                 emailService.save(email);
+                     try {
+                         inputStream = file.getInputStream();
 
-            try {
-                inputStream = file.getInputStream();
-                if (!newFile.exists()) {
-                    newFile.createNewFile();
-                }
-                outputStream = new FileOutputStream(newFile);
-                int read = 0;
-                byte[] bytes = new byte[1024];
+                         if (!newFile.exists()) {
+                             newFile.createNewFile();
+                         }
+                         outputStream = new FileOutputStream(newFile);
+                         int read = 0;
+                         byte[] bytes = new byte[1024];
 
-                while ((read = inputStream.read(bytes)) != -1) {
-                    outputStream.write(bytes, 0, read);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-             newFile.getAbsolutePath();
+                         while ((read = inputStream.read(bytes)) != -1) {
+                             outputStream.write(bytes, 0, read);
+                         }
+                     } catch (IOException e) {
+                         e.printStackTrace();
+                     }
+                    newFile.getAbsolutePath();
         }
-        if(chineseLanguage!=null && i == 2) {
-            String fileName = file.getOriginalFilename();
-            File newFile = new File(chineseTemplateDir + "/" + eventName);
-            email.setChineseLanguage(fileName);
-            emailService.save(email);
-                try {
-                    inputStream = file.getInputStream();
+            else {
+                  String fileName = file.getOriginalFilename();
+                  File newFile = new File(englishTemplateDir + "/" + eventName);
+                  email.setEventName(eventName);
+                  email.setEnglishLanguage(fileName);
+                  email.setSubject(subject);
+                  email.setRecipientType(RecipientType.valueOf(recipientType));
+                  email.setIsActive(true);
+                  email.setFilePath(englishTemplateDir);
+                  emailService.save(email);
 
-                    if (!newFile.exists()) {
-                        newFile.createNewFile();
-                    }
-                    outputStream = new FileOutputStream(newFile);
-                    int read = 0;
-                    byte[] bytes = new byte[1024];
+              try {
+                  inputStream = file.getInputStream();
+                  if (!newFile.exists()) {
+                      newFile.createNewFile();
+                  }
+                  outputStream = new FileOutputStream(newFile);
+                  int read = 0;
+                  byte[] bytes = new byte[1024];
 
-                    while ((read = inputStream.read(bytes)) != -1) {
-                        outputStream.write(bytes, 0, read);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                  while ((read = inputStream.read(bytes)) != -1) {
+                      outputStream.write(bytes, 0, read);
+                  }
+              } catch (IOException e) {
+                  e.printStackTrace();
+              }
                newFile.getAbsolutePath();
             }
         }
