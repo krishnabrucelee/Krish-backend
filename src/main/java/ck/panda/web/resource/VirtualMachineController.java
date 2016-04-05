@@ -1,9 +1,13 @@
 package ck.panda.web.resource;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +26,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
-import ck.panda.service.SyncService;
+import ck.panda.service.ConvertEntityService;
 import ck.panda.service.VirtualMachineService;
-import ck.panda.util.CloudStackServer;
+import ck.panda.util.CloudStackInstanceService;
+import ck.panda.util.ConfigUtil;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -48,9 +54,21 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     @Autowired
     private TokenDetails tokenDetails;
 
+    /** Cloud stack configuration reference. */
+    @Autowired
+    private ConfigUtil configUtil;
+
+    /** Reference of the convert entity service. */
+    @Autowired
+    private ConvertEntityService convertEntityService;
+
     /** console proxy reference. */
     @Value(value = "${console.proxy}")
     private String consoleProxy;
+
+    /** CloudStack connector reference for instance. */
+    @Autowired
+    private CloudStackInstanceService cloudStackInstanceService;
 
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(VirtualMachineController.class);
@@ -219,10 +237,39 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
         // TODO optimize/refactor this console code after completion of Kanaka NoVNC configuration.
         String token = null;
         VmInstance persistInstance = virtualmachineservice.find(vminstance.getId());
-        String hostUUID = persistInstance.getHost().getUuid(); // VM's the host's UUID
-        String instanceUUID = persistInstance.getUuid(); // virtual machine UUID
-        token = hostUUID + "-" + instanceUUID;
-        LOGGER.debug("VNC Token" + token);
+		if (persistInstance.getHost() != null) {
+			String hostUUID = persistInstance.getHost().getUuid(); // VM's the host's UUID.
+			String instanceUUID = persistInstance.getUuid(); // virtual machine UUID.
+			token = hostUUID + "-" + instanceUUID;
+			LOGGER.debug("VNC Token" + token);
+		} else {
+			// VM console issue fixed. PK-557.
+			 HashMap<String, String> vmMap = new HashMap<String, String>();
+             vmMap.put(CloudStackConstants.CS_ID, persistInstance.getUuid());
+             configUtil.setServer(1L);
+             String response = cloudStackInstanceService.listVirtualMachines(CloudStackConstants.JSON, vmMap);
+             JSONArray vmListJSON = null;
+             JSONObject responseObject = new JSONObject(response)
+                     .getJSONObject(CloudStackConstants.CS_LIST_VM_RESPONSE);
+             if (responseObject.has(CloudStackConstants.CS_VM)) {
+                 vmListJSON = responseObject.getJSONArray(CloudStackConstants.CS_VM);
+                 // 2. Iterate the json list, convert the single json
+                 // entity to vm.
+                 for (int i = 0, size = vmListJSON.length(); i < size; i++) {
+                     // 2.1 Call convert by passing JSONObject to vm
+                     // entity.
+                     VmInstance CsVmInstance = VmInstance.convert(vmListJSON.getJSONObject(i));
+                     // 2.2 Update vm host by transient variable.
+                     persistInstance.setHostId(convertEntityService.getHostId(CsVmInstance.getTransHostId()));
+                     persistInstance.setInstanceInternalName(CsVmInstance.getInstanceInternalName());
+                 }
+                 persistInstance = virtualmachineservice.update(persistInstance);
+                 String hostUUID = persistInstance.getHost().getUuid(); // VM's the host's UUID.
+     			 String instanceUUID = persistInstance.getUuid(); // virtual machine UUID.
+     			 token = hostUUID + "-" + instanceUUID;
+     			 LOGGER.debug("VNC Token" + token);
+             }
+		}
         return "{\"success\":" + "\"" + consoleProxy + "/console/?token=" + token + "\"}";
     }
 
