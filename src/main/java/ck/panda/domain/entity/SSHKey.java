@@ -18,7 +18,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
-import javax.validation.constraints.Size;
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.json.JSONObject;
@@ -57,7 +56,6 @@ public class SSHKey implements Serializable {
 
     /** Name of the Keypair. */
     @NotEmpty
-    @Size(min = 4, max = 20)
     @Column(name = "name", nullable = false)
     private String name;
 
