@@ -28,13 +28,9 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.EmailTemplate;
-import ck.panda.domain.entity.EventLiterals;
 import ck.panda.domain.entity.EmailTemplate.RecipientType;
 import ck.panda.service.EmailTypeTemplateService;
 import ck.panda.util.domain.vo.PagingAndSorting;
-import ck.panda.util.error.Errors;
-import ck.panda.util.error.exception.ApplicationException;
-import ck.panda.util.error.exception.CustomGenericException;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
 
@@ -56,11 +52,11 @@ public class EmailTemplateController extends CRUDController<EmailTemplate> imple
 
     /** English template directory. */
     @Value("${english.template.dir}")
-    private String englishTemplateDir = "/test1";
+    private String englishTemplateDir;
 
     /** Chinese template directory */
     @Value("${chinese.template.dir}")
-    private String chineseTemplateDir = "/test";
+    private String chineseTemplateDir;
 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new domain.", response = EmailTemplate.class)
     @Override
