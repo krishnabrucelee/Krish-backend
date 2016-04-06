@@ -57,4 +57,6 @@ public interface VmSnapshotService extends CRUDService<VmSnapshot> {
      */
     Page<VmSnapshot> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
 
+    Page<VmSnapshot> findAllByActive(PagingAndSorting pagingAndSorting, Long userId) throws Exception;
+
 }

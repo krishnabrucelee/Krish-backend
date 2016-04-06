@@ -13,6 +13,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EventTypes;
+import ck.panda.domain.entity.Project;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.VmSnapshot.Status;
@@ -57,6 +59,10 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
     /** Cloud stack configuration utility class. */
     @Autowired
     private ConfigUtil config;
+
+    /** Reference for project service. */
+    @Autowired
+    private ProjectService projectService;
 
     /** VM snapshot object name. */
     public static final String VM_SNAPSHOT = "vmSnapshot";
@@ -229,12 +235,23 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
         }
         return vmSnapshotRepository.save(vmSnapshot);
     }
-
     @Override
     public List<VmSnapshot> findAllFromCSServer() throws Exception {
-        List<VmSnapshot> vmsnapshotList = new ArrayList<VmSnapshot>();
-        HashMap<String, String> vmsnapshotMap = new HashMap<String, String>();
-        vmsnapshotMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.CS_ACTIVE_VM);
+        List<Project> projectList = projectService.findAllByActive(true);
+        List<VmSnapshot> vmSnapList = new ArrayList<VmSnapshot>();
+        for (Project project: projectList) {
+            HashMap<String, String> vmsnapshotMap = new HashMap<String, String>();
+            vmsnapshotMap.put(CloudStackConstants.CS_PROJECT_ID, project.getUuid());
+            vmSnapList = getSnapshotList(vmsnapshotMap, vmSnapList);
+        }
+
+        HashMap<String, String> networkMap = new HashMap<String, String>();
+        networkMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
+        vmSnapList = getSnapshotList(networkMap, vmSnapList);
+        return vmSnapList;
+        }
+
+    private List<VmSnapshot> getSnapshotList(HashMap<String, String> vmsnapshotMap, List<VmSnapshot> vmSnapList) throws Exception {
         config.setServer(1L);
         // 1. Get the list of vm snapshot from CS server using CS connector
         String response = csSnapshotService.listVMSnapshot(vmsnapshotMap);
@@ -254,11 +271,13 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                     vmSnapshot.setDomainId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getDomainId());
                     vmSnapshot.setOwnerId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getInstanceOwnerId());
                     vmSnapshot.setZoneId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getZoneId());
+                    vmSnapshot.setDepartmentId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getDepartmentId());
+                    vmSnapshot.setProjectId((convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getProjectId()));
                 }
-                vmsnapshotList.add(vmSnapshot);
+                vmSnapList.add(vmSnapshot);
             }
-        }
-        return vmsnapshotList;
+         }
+        return vmSnapList;
     }
 
     @Override
@@ -281,6 +300,46 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
     @Override
     public Page<VmSnapshot> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
         return vmSnapshotRepository.findAllByDomainIdAndIsActive(domainId, false, Status.Expunging, pagingAndSorting.toPageRequest());
+    }
+
+    @Override
+    public Page<VmSnapshot> findAllByActive(PagingAndSorting pagingAndSorting, Long userId) throws Exception {
+
+       User user = convertEntityService.getOwnerById(userId);
+       // Check the user is not a root and admin and set the domain value from login detail
+       if (user.getType().equals(User.UserType.ROOT_ADMIN)) {
+           return vmSnapshotRepository.findAllByActiveAndExpunging(pagingAndSorting.toPageRequest(), false, Status.Expunging);
+       }
+       if (user.getType().equals(User.UserType.DOMAIN_ADMIN)) {
+           return vmSnapshotRepository.findAllByDomainIdAndIsActive(user.getDomainId(), false, Status.Expunging, pagingAndSorting.toPageRequest());
+       }
+
+        Page<VmSnapshot> vmSnapshot = this.getSnapshotListByUser(pagingAndSorting,userId);
+        return vmSnapshot;
+    }
+
+    /**
+     * Get the Snapshot list based on the active status.
+     *
+     * @param pagingAndSorting do pagination with sorting for Snapshot.
+     * @param userId id of the user.
+     * @return Snapshot
+     * @throws Exception if error occurs.
+     */
+    private Page<VmSnapshot> getSnapshotListByUser(PagingAndSorting pagingAndSorting, Long userId) throws  Exception {
+        User user = convertEntityService.getOwnerById(userId);
+        if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
+            List<Project> allProjectList = new ArrayList<Project>();
+            for (Project project : projectService.findAllByUserAndIsActive(user.getId(), true)) {
+                allProjectList.add(project);
+            }
+            Page<VmSnapshot> projectSnapshot = vmSnapshotRepository.findByProjectDepartmentAndIsActive(allProjectList,
+                    user.getDepartmentId(), false, pagingAndSorting.toPageRequest());
+            return projectSnapshot;
+        } else {
+            return vmSnapshotRepository.findByDepartmentAndPagination(user.getDepartmentId(), false,
+                    pagingAndSorting.toPageRequest());
+        }
     }
 
 }
