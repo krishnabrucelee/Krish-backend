@@ -384,14 +384,11 @@ public class SyncServiceImpl implements SyncService {
     @Override
     public void sync() throws Exception {
 
-        // Check ping server is reachable or not.
-        Errors errors = new Errors(messageSource);
-        pingService.apiConnectionCheck(errors);
-
         try {
             // 1. Sync Region entity
             this.syncRegion();
         } catch (Exception e) {
+            Errors errors = new Errors(messageSource);
             errors.addGlobalError(
                     "Either of URL or API key or Secret key is wrong. please provide correct values and proceed ");
             if (errors.hasErrors()) {
@@ -606,19 +603,6 @@ public class SyncServiceImpl implements SyncService {
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Event List", e);
         }
-        try {
-            // 36. Sync domain, department, project in MR.ping
-            CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
-            JSONObject optional = new JSONObject();
-            optional.put(PingConstants.API_URL, cloudConfig.getApiURL());
-            optional.put(PingConstants.API_KEY, cloudConfig.getApiKey());
-            optional.put(PingConstants.SECRET_KEY, cloudConfig.getSecretKey());
-            pingService.pingInitialSync(optional);
-            LOGGER.debug("Mr.Ping");
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch Ip Address", e);
-        }
-
 
     }
 
@@ -2648,6 +2632,12 @@ public class SyncServiceImpl implements SyncService {
            }
     }
 
+    /**
+     * Sync existing template in ping application.
+     *
+     * @param template object
+     * @throws Exception raise if error
+     */
     public void pingTemplateInitialSync(Template template) throws Exception {
         User user = convertEntityService.getUserIdByAccountAndDomain(template.getTransCreatedName(),
                 domainService.findbyUUID(template.getTransDomain()));
