@@ -21,6 +21,7 @@ import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.Project;
+import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
@@ -184,6 +185,10 @@ public class ConvertEntityService {
     /** Resource Limit Domain Service. */
     @Autowired
     private ResourceLimitDomainService resourceLimitDomainService;
+
+    /** Resource Limit department Service. */
+    @Autowired
+    private ResourceLimitDepartmentService resourceLimitDepartmentService;
 
     /** Resource Limit Project Service. */
     @Autowired
@@ -1314,7 +1319,8 @@ public class ConvertEntityService {
                     // value
                     HashMap<String, String> resourceMap = getResourceTypeValue();
                     // checking null validation for resource map
-                    if (resourceMap != null && !resourceCountArrayJSON.getJSONObject(i).has("project")) {
+                    if (resourceMap != null && !resourceCountArrayJSON.getJSONObject(i).has("account") &&
+                            !resourceCountArrayJSON.getJSONObject(i).has("project")) {
                         // update resource count in resource limit domain table
                         ResourceLimitDomain resourceDomainCount = resourceLimitDomainService
                                 .findByDomainAndResourceCount(getDomainId(domainId),
@@ -1345,7 +1351,49 @@ public class ConvertEntityService {
                         // Set used limit value
                         resourceDomainCount.setIsSyncFlag(false);
                         resourceLimitDomainService.update(resourceDomainCount);
-                    } else {
+                    }
+                    if (resourceMap != null && resourceCountArrayJSON.getJSONObject(i).has("account")
+                            && !resourceCountArrayJSON.getJSONObject(i).has("project")) {
+                        String account = resourceCountArrayJSON.getJSONObject(i)
+                                .getString(CloudStackConstants.CS_ACCOUNT);
+                        // update resource count in resource limit domain table
+                        ResourceLimitDepartment resourceDepartmentCount = resourceLimitDepartmentService
+                                .findByDepartmentAndResourceType(getDepartmentByUsername(account, getDomainId(domainId)),
+                                        ResourceLimitDepartment.ResourceType.valueOf(resourceMap.get(resourceType)), true);
+                        // check the max value if not -1 and upadate the
+                        // available value
+                        if (resourceDepartmentCount != null) {
+                            if (resourceDepartmentCount.getMax() != -1) {
+                                // Check resource type primary = 10 and
+                                // secondary
+                                // storage = 11 and convert resource
+                                // count values GiB to MB.
+                                if (resourceType.equals(CS_PRIMARY_STORAGE)
+                                        || resourceType.equals(CS_SECONDARY_STORAGE)) {
+                                    // Convert and set Available resource count
+                                    // of
+                                    // primary and secondary GiB to MB.
+                                    resourceDepartmentCount.setAvailable(resourceDepartmentCount.getMax()
+                                            - (Long.valueOf(resourceCount) / (1024 * 1024 * 1024)));
+                                    // Convert and set Used resource count of
+                                    // primary and secondary GiB to MB.
+                                    resourceDepartmentCount
+                                            .setUsedLimit((Long.valueOf(resourceCount) / (1024 * 1024 * 1024)));
+                                } else {
+                                    resourceDepartmentCount.setAvailable(
+                                            resourceDepartmentCount.getMax() - Long.valueOf(resourceCount));
+                                    resourceDepartmentCount.setUsedLimit(Long.valueOf(resourceCount));
+                                }
+                            } else {
+                                resourceDepartmentCount.setAvailable(resourceDepartmentCount.getMax());
+                                resourceDepartmentCount.setUsedLimit(Long.valueOf(resourceCount));
+                            }
+                            // Set used limit value
+                            resourceDepartmentCount.setIsSyncFlag(false);
+                            resourceLimitDepartmentService.update(resourceDepartmentCount);
+                        }
+                    }
+                    if (resourceMap != null && resourceCountArrayJSON.getJSONObject(i).has("project")) {
                         String projectId = resourceCountArrayJSON.getJSONObject(i)
                                 .getString(CloudStackConstants.CS_PROJECT_ID);
                         // update resource count in resource limit domain table

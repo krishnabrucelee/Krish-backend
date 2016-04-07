@@ -322,10 +322,6 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
             resourceMaxCount.put(resourceTypeMap.get(name), resourceDomainCount.toString());
             }
         }
-        //pass domain id to resource departments and get the departments list
-
-                //iterate and get the resource max values
-
         return resourceMaxCount;
     }
 
@@ -333,10 +329,11 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
     public HashMap<String, String> getResourceLimitsOfProject(Long domainId) {
         HashMap<String, String> resourceTypeMap = convertEntityService.getResourceTypeValue();
         HashMap<String, String> resourceMaxCount = new HashMap<String, String>();
-        for(String name : resourceTypeMap.keySet()) {
-            Long resourceDomainCount = resourceLimitDomainRepo.findTotalCountOfResourceProject(domainId, ResourceLimitDomain.ResourceType.valueOf(resourceTypeMap.get(name)), true);
+        for (String name : resourceTypeMap.keySet()) {
+            Long resourceDomainCount = resourceLimitDomainRepo.findTotalCountOfResourceProject(domainId,
+                    ResourceLimitDomain.ResourceType.valueOf(resourceTypeMap.get(name)), true);
             if (resourceDomainCount != null) {
-            resourceMaxCount.put(resourceTypeMap.get(name), resourceDomainCount.toString());
+                resourceMaxCount.put(resourceTypeMap.get(name), resourceDomainCount.toString());
             }
         }
         return resourceMaxCount;
@@ -345,6 +342,19 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
     @Override
     public List<ResourceLimitDomain> findAllByDomainId(Long domainId) throws Exception {
         return (List<ResourceLimitDomain>) resourceLimitDomainRepo.findAllByDomainIdAndIsActive(domainId, true);
+    }
+
+    @Override
+    public HashMap<String, Long> getSumOfDomainMin(Long id) throws Exception {
+        List<ResourceLimitDomain> resourceLimits = resourceLimitDomainRepo.findAllByDomainIdAndIsActive(id, true);
+        HashMap<String, Long> resourceMap = new HashMap<String, Long>();
+        for (ResourceLimitDomain resourceLimit : resourceLimits) {
+            Long sumOfAllDepartmentMax = resourceLimitDepartmentService.findByResourceCountByDepartmentAndResourceType(
+                    resourceLimit.getDomainId(),
+                    ResourceLimitDepartment.ResourceType.valueOf(resourceLimit.getResourceType().name()), 0L, true);
+            resourceMap.put(resourceLimit.getResourceType().toString(), sumOfAllDepartmentMax);
+        }
+        return resourceMap;
     }
 
 }

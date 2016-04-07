@@ -68,8 +68,20 @@ public interface ResourceLimitDepartmentService extends CRUDService<ResourceLimi
     HashMap<String, String> getResourceLimitsOfDepartment(Long domainId);
 
     /**
-     * @param projectId
-     * @return
+     * Gety the resource limits of projects.
+     * @param projectId project id.
+     * @return resource limits of project
      */
     HashMap<String, String> getResourceLimitsOfProject(Long projectId);
+
+    /**
+     * List all project max resource limits by department id.
+     *
+     * @param id department id
+     * @return resource service
+     * @throws Exception error
+     */
+    HashMap<String, Long> getSumOfDepartmentMin(Long id) throws Exception;
+
+    HashMap<String, Long> getSumOfDepartmentMax(Long id) throws Exception;
 }
