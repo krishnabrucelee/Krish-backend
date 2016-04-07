@@ -405,7 +405,7 @@ public class DomainServiceImpl implements DomainService {
         errors = validator.validateEntity(domain, errors);
         Domain validateDomain = domainRepo.findByName(domain.getCompanyNameAbbreviation(), true);
         if (validateDomain != null && domain.getId() != validateDomain.getId()) {
-            errors.addFieldError("companyNameAbbreviation", "domain.already.exist");
+            errors.addFieldError("companyNameAbbreviation", "error.domain.already.exist");
         }
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
