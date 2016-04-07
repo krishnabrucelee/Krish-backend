@@ -165,6 +165,10 @@ public class ConvertEntityService {
     @Autowired
     private CloudStackInstanceService cloudStackInstanceService;
 
+    /** Vmsnapshot service for reference .*/
+    @Autowired
+    private VmSnapshotService vmSnapshotService ;
+
     /** CloudStack connector. */
     @Autowired
     private CloudStackServer server;
@@ -1170,6 +1174,17 @@ public class ConvertEntityService {
     public VolumeService getVolumeService() {
         return this.volumeService;
     }
+
+
+    /**
+     * Get vmsnapshot service object.
+     *
+     * @return vmsnapshot service object
+     */
+    public VmSnapshotService getVmSnapshotService() {
+        return this.vmSnapshotService;
+    }
+
 
     /**
      * Get NIC service object.
