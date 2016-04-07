@@ -1,14 +1,16 @@
 package ck.panda.service;
 
 import java.util.List;
-
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import ck.panda.constants.PingConstants;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.repository.jpa.CloudStackConfigurationRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackServer;
+import ck.panda.util.PingService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -36,6 +38,10 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
     @Autowired
     private SyncService syncService;
 
+    /** Mr.ping service reference. */
+    @Autowired
+    private PingService pingService;
+
     @Override
     public CloudStackConfiguration save(CloudStackConfiguration config) throws Exception {
 
@@ -47,9 +53,27 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
         }
         server.setServer(config.getApiURL(), config.getSecretKey(), config.getApiKey());
         syncService.syncRegion();
+        pingConfigurationSetup(config, errors);
         configRepo.save(config);
         syncService.sync();
         return config;
+    }
+
+    /**
+     * Configuration setup for ping application.
+     *
+     * @param config cloud configuration
+     * @param errors object
+     * @throws Exception raise if error
+     */
+    public void pingConfigurationSetup(CloudStackConfiguration config, Errors errors) throws Exception {
+        // Check ping server is reachable or not.
+        pingService.apiConnectionCheck(errors);
+        JSONObject optional = new JSONObject();
+        optional.put(PingConstants.API_URL, config.getApiURL());
+        optional.put(PingConstants.API_KEY, config.getApiKey());
+        optional.put(PingConstants.SECRET_KEY, config.getSecretKey());
+        pingService.pingInitialSync(optional);
     }
 
     @Override
