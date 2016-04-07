@@ -212,4 +212,18 @@ public class ResourceLimitDomainController extends CRUDController<ResourceLimitD
     public List<ResourceLimitDomain> listQuotaByDomainId(@PathVariable(PATH_ID) Long domainId) throws Exception {
         return resourceLimitDomainService.findAllByDomainId(domainId);
     }
+
+    /**
+     * List all department max resource limits by domain.
+     *
+     * @param id domain id
+     * @return resource service
+     * @throws Exception error
+     */
+    @RequestMapping(value = "domainmin/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected HashMap<String, Long> getSumOfDomainMin(@PathVariable(PATH_ID) Long id) throws Exception {
+        return resourceLimitDomainService.getSumOfDomainMin(id);
+    }
 }

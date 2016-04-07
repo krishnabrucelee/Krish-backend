@@ -12,12 +12,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.repository.jpa.ResourceLimitDepartmentRepository;
 import ck.panda.util.AppValidator;
+import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.CloudStackResourceLimitService;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -65,6 +67,10 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
     /** Convert Entity service reference. */
     @Autowired
     private ConvertEntityService convertEntityService;
+
+    /** CloudStack Resource Capacity Service. */
+    @Autowired
+    private CloudStackResourceCapacity cloudStackResourceCapacity;
 
     @Override
     public ResourceLimitDepartment save(ResourceLimitDepartment resource) throws Exception {
@@ -170,9 +176,9 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
                     resourceData.setIsActive(true);
                     resourceLimitDepartmentRepo.save(resourceData);
                 } else {
-                    updateResourceDepartment(resource);
-                    resource.setIsActive(true);
-                    resourceLimitDepartmentRepo.save(resource);
+                        updateResourceDepartment(resource);
+                        resource.setIsActive(true);
+                        resourceLimitDepartmentRepo.save(resource);
                 }
             }
         }
@@ -287,10 +293,6 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
             resourceMaxCount.put(resourceTypeMap.get(name), resourceDepartmentCount.toString());
             }
         }
-        //pass domain id to resource departments and get the departments list
-
-                //iterate and get the resource max values
-
         return resourceMaxCount;
     }
 
@@ -307,6 +309,55 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
 
         return resourceMaxCount;
 
+    }
+
+    @Override
+    public HashMap<String, Long> getSumOfDepartmentMin(Long id) throws Exception {
+        // Used for setting optional values for resource count.
+        HashMap<String, String> domainCountMap = new HashMap<String, String>();
+        domainCountMap.put(CloudStackConstants.CS_ACCOUNT, convertEntityService.getDepartmentById(id).getUserName());
+        // Sync for resource count in domain
+        String csResponse = cloudStackResourceCapacity.updateResourceCount(
+                convertEntityService.getDepartmentById(id).getDomain().getUuid(), domainCountMap, "json");
+        convertEntityService.resourceCount(csResponse);
+        HashMap<String, String> resourceTypeMap = convertEntityService.getResourceTypeValue();
+        HashMap<String, Long> resourceMap = new HashMap<String, Long>();
+        for (String name : resourceTypeMap.keySet()) {
+            ResourceLimitDepartment resourceLimit = resourceLimitDepartmentRepo.findByDepartmentAndResourceType(id,
+                    ResourceLimitDepartment.ResourceType.valueOf(resourceTypeMap.get(name)), true);
+            Long resourceProjectCount = resourceLimitProjectService.getTotalCountOfResourceProject(id,
+                    ResourceLimitProject.ResourceType.valueOf(resourceTypeMap.get(name)));
+            if (resourceLimit == null || resourceProjectCount == null) {
+                resourceMap.put(resourceTypeMap.get(name), (0L + 0L));
+            } else {
+                resourceMap.put(resourceTypeMap.get(name),
+                        (resourceProjectCount + resourceLimit.getUsedLimit()));
+            }
+        }
+        return resourceMap;
+    }
+
+    @Override
+    public HashMap<String, Long> getSumOfDepartmentMax(Long id) throws Exception {
+        HashMap<String, String> resourceTypeMap = convertEntityService.getResourceTypeValue();
+        HashMap<String, Long> resourceMap = new HashMap<String, Long>();
+        for (String name : resourceTypeMap.keySet()) {
+            ResourceLimitDepartment resourceLimit = resourceLimitDepartmentRepo.findByDepartmentAndResourceType(id,
+                    ResourceLimitDepartment.ResourceType.valueOf(resourceTypeMap.get(name)), true);
+            ResourceLimitDomain domainLimitMax = resourceLimitDomainService.findByDomainAndResourceType(
+                    convertEntityService.getDepartmentById(id).getDomainId(),
+                    ResourceLimitDomain.ResourceType.valueOf(resourceTypeMap.get(name)), true);
+            Long resourceDepartmentCount = resourceLimitDepartmentRepo.findTotalCountOfResourceDepartment(
+                    convertEntityService.getDepartmentById(id).getDomainId(),
+                    ResourceLimitDepartment.ResourceType.valueOf(resourceTypeMap.get(name)), true);
+            if (domainLimitMax == null || resourceDepartmentCount == null) {
+                resourceMap.put(resourceTypeMap.get(name), ((0L) + (domainLimitMax.getMax() - 0L)));
+            } else {
+                resourceMap.put(resourceTypeMap.get(name),
+                        ((resourceLimit.getMax()) + (domainLimitMax.getMax() - resourceDepartmentCount)));
+            }
+        }
+        return resourceMap;
     }
 
 }

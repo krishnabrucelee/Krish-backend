@@ -324,6 +324,11 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
     }
 
     @Override
+    public Long getTotalCountOfResourceProject(Long departmentId, ResourceLimitProject.ResourceType resourceType) {
+            Long resourceProjectCount = resourceLimitProjectRepo.findTotalCountOfResourceDepartment(departmentId, resourceType, true);
+        return resourceProjectCount;
+    }
+    @Override
     public HashMap<String, String> getResourceLimitsOfDepartment(Long departmentId) {
         HashMap<String, String> resourceTypeMap = convertEntityService.getResourceTypeValue();
         HashMap<String, String> resourceMaxCount = new HashMap<String, String>();
@@ -335,6 +340,34 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
         }
 
         return resourceMaxCount;
+    }
+
+    @Override
+    public HashMap<String, Long> getSumOfProjectMin(Long id) throws Exception {
+        List<ResourceLimitProject> resourceLimits = resourceLimitProjectRepo.findAllByProjectIdAndIsActive(id, true);
+        HashMap<String, Long> resourceMap = new HashMap<String, Long>();
+        for (ResourceLimitProject resourceLimit : resourceLimits) {
+            resourceMap.put(resourceLimit.getResourceType().toString(), resourceLimit.getUsedLimit());
+    }
+        return resourceMap;
+    }
+
+    @Override
+    public HashMap<String, Long> getSumOfProjectMax(Long id) throws Exception {
+        List<ResourceLimitProject> resourceLimits = resourceLimitProjectRepo.findAllByProjectIdAndIsActive(id, true);
+        HashMap<String, Long> resourceMap = new HashMap<String, Long>();
+        for (ResourceLimitProject resourceLimit : resourceLimits) {
+            Long sumOfAllProjectMax = findByResourceCountByProjectAndResourceType(resourceLimit.getDepartmentId(),
+                    ResourceLimitProject.ResourceType.valueOf(resourceLimit.getResourceType().name()), 0L, true);
+            ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService.findByDepartmentAndResourceType(
+                    resourceLimit.getDepartmentId(),
+                    ResourceLimitDepartment.ResourceType.valueOf(resourceLimit.getResourceType().name()), true);
+            if (departmentLimit != null) {
+            resourceMap.put(resourceLimit.getResourceType().toString(), (resourceLimit.getMax()
+                    + (departmentLimit.getMax() - sumOfAllProjectMax - departmentLimit.getUsedLimit())));
+            }
+        }
+        return resourceMap;
     }
 
 }

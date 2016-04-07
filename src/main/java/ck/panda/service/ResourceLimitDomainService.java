@@ -120,5 +120,14 @@ public interface ResourceLimitDomainService extends CRUDService<ResourceLimitDom
      */
     List<ResourceLimitDomain> findAllByDomainId(Long domainId) throws Exception;
 
+    /**
+     * List all department max resource limits by domain.
+     *
+     * @param id domain id
+     * @return resource service
+     * @throws Exception error
+     */
+    HashMap<String, Long> getSumOfDomainMin(Long id) throws Exception;
+
 
 }
