@@ -114,4 +114,14 @@ public interface ProjectService extends CRUDService<Project> {
      * @throws Exception if error occurs.
      */
     Page<Project> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
+
+    /**
+     * Find project by project name and status.
+     *
+     * @param projectAccountName name of the project.
+     * @param domainId domain id of the project
+     * @param isActive active/inactive status.
+     * @return project.
+     */
+    Project findByProjectNameAndIsActive(String projectAccountName, Long domainId, Boolean isActive);
 }

@@ -313,7 +313,7 @@ public class EmailJobServiceImpl implements EmailJobService {
                 HashMap<String, String> fileMap = new HashMap<>();
                 fileMap.put(EmailConstants.EMAIL_INVOICE_fileAttachment,
                         invoiceBasePath + File.separator + usageResult.getString(EmailConstants.EMAIL_INVOICE_filePath)
-                                + File.separator + usageResult.getString(EmailConstants.EMAIL_INVOICE_fileName)
+                                + File.separator + emailConfiguration.getEmailLanguage() + File.separator + usageResult.getString(EmailConstants.EMAIL_INVOICE_fileName)
                                 + ".pdf");
                 mimeEmail.setAttachments(fileMap);
                 invoice.setOrganizationAddress(organisationResult.getString(EmailConstants.EMAIL_INVOICE_address));

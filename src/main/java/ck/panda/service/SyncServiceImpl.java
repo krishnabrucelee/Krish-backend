@@ -14,9 +14,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
-
 import ck.panda.constants.EventsUtil;
 import ck.panda.constants.PermissionUtil;
+import ck.panda.constants.PingConstants;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Cluster;
 import ck.panda.domain.entity.ComputeOffering;
@@ -67,6 +67,7 @@ import ck.panda.util.CloudStackServer;
 import ck.panda.util.EncryptionUtil;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
+import ck.panda.util.PingService;
 
 /**
  * We have to sync up with cloudstack server for the following data
@@ -268,6 +269,10 @@ public class SyncServiceImpl implements SyncService {
     /** CloudStack Resource Capacity Service. */
     @Autowired
     private CloudStackResourceCapacity cloudStackResourceCapacity;
+
+    /** Mr.ping service reference. */
+    @Autowired
+    private PingService pingService;
 
     /** Permission instance properties. */
     @Value(value = "${permission.instance}")
@@ -593,12 +598,11 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.error("ERROR AT synch Ip Address", e);
         }
         try {
-            // 32. Sync Load Balancer entity
+            // 35. Sync Load Balancer entity
             this.syncEventList();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Event List", e);
         }
-
 
     }
 
@@ -1207,6 +1211,7 @@ public class SyncServiceImpl implements SyncService {
         // add it to app db
         for (String key : csTemplateMap.keySet()) {
             templateService.save(csTemplateMap.get(key));
+            pingTemplateInitialSync(csTemplateMap.get(key));
         }
         LOGGER.debug("Total rows added : " + (csTemplateMap.size()));
 
@@ -2625,5 +2630,29 @@ public class SyncServiceImpl implements SyncService {
                     }
                 }
            }
+    }
+
+    /**
+     * Sync existing template in ping application.
+     *
+     * @param template object
+     * @throws Exception raise if error
+     */
+    public void pingTemplateInitialSync(Template template) throws Exception {
+        User user = convertEntityService.getUserIdByAccountAndDomain(template.getTransCreatedName(),
+                domainService.findbyUUID(template.getTransDomain()));
+        if (user != null && user.getType() == UserType.ROOT_ADMIN) {
+            JSONObject optional = new JSONObject();
+            optional.put(PingConstants.PLAN_UUID, template.getUuid());
+            optional.put(PingConstants.NAME, template.getName());
+            optional.put(PingConstants.REFERENCE_NAME, PingConstants.ADMIN_TEMPLATE);
+            optional.put(PingConstants.GROUP_NAME, PingConstants.TEMPLATE);
+            optional.put(PingConstants.TOTAL_COST, "0");
+            optional.put(PingConstants.ZONE_ID, zoneService.find(template.getZoneId()).getUuid());
+            optional.put(PingConstants.ISADMIN, true);
+            optional.put(PingConstants.ONE_TIME_CHARGEABLE, false);
+            pingService.addPlanCost(optional);
+        }
+
     }
 }

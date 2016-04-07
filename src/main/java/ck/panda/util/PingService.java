@@ -5,7 +5,6 @@ import java.net.Socket;
 import java.net.URL;
 import java.util.LinkedList;
 import org.apache.commons.httpclient.NameValuePair;
-import org.bson.types.ObjectId;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -152,13 +151,14 @@ public class PingService {
     /**
      * Initial sync for domain, department and project.
      *
+     * @param requestJson - request json value
      * @return - Json string response
      * @throws Exception - Raise if any error
      */
-    public String pingInitialSync() throws Exception {
+    public String pingInitialSync(JSONObject requestJson) throws Exception {
         server.setServer(apiURL + "/domain/sync");
-        LinkedList<NameValuePair> arguments = new LinkedList<NameValuePair>();
-        String responseJson = server.request(arguments);
+        String arguments = server.getJsonToString(requestJson);
+        String responseJson = server.postRequest(arguments);
         return responseJson;
     }
 

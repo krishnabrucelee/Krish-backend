@@ -82,7 +82,7 @@ cloudstack:
 console:
     proxy: ${CONSOLE_URL}
 mrping:
-    url: ${MRPING_URL:http://localhost:8081/api}
+    url: ${MRPING_URL}
 
 ---
 
@@ -98,7 +98,7 @@ logging:
 ---
 
 server:
-    port: 8080
+    port: ${PANDA_PORT:8080}
     session-timeout: 60
 
 ---

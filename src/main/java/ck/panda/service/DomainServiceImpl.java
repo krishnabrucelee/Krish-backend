@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Department.AccountType;
@@ -34,6 +33,8 @@ import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
+import ck.panda.constants.PingConstants;
+import ck.panda.util.PingService;
 
 /**
  * Domain service implementation class.
@@ -89,6 +90,10 @@ public class DomainServiceImpl implements DomainService {
     @Autowired
     private RoleService roleService;
 
+    /** Mr.ping service reference. */
+    @Autowired
+    private PingService pingService;
+
     /** Secret key for the user encryption. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
@@ -106,7 +111,7 @@ public class DomainServiceImpl implements DomainService {
             errors = validator.validateEntity(domain, errors);
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
-            } else {
+            } else if (pingService.apiConnectionCheck(errors)) {
                 // set server for maintain session with configuration values
                 configServer.setServer(1L);
                 HashMap<String, String> optional = new HashMap<String, String>();
@@ -159,6 +164,7 @@ public class DomainServiceImpl implements DomainService {
                 String encryptedPassword = new String(EncryptionUtil.encrypt(password, originalKey));
                 domain.setPassword(encryptedPassword);
                 persistedDomain = domainRepo.save(domain);
+                saveDomainToPingProject(persistedDomain);
                 LOGGER.debug("Company created : " + domain.getName());
                 Department department = this.createDomainAdmin(persistedDomain, password);
             }
@@ -198,6 +204,7 @@ public class DomainServiceImpl implements DomainService {
         department.setUuid((String) createDomain.get("id"));
         department.setSyncFlag(false);
         department = deptService.save(department);
+        saveDepartmentToPingProject(department);
         User user = User.convert(createDomain.getJSONArray("user").getJSONObject(0));
         user.setDepartmentId(convertEntityService.getDepartmentId(user.getTransDepartment()));
         user.setDomainId(convertEntityService.getDomainId(user.getTransDomainId()));
@@ -244,7 +251,7 @@ public class DomainServiceImpl implements DomainService {
             errors = validator.validateEntity(domain, errors);
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
-            } else {
+            } else if (pingService.apiConnectionCheck(errors)) {
                 HashMap<String, String> domainMap = new HashMap<String, String>();
                 domainMap.put("name", domain.getCompanyNameAbbreviation());
                 // set server for maintain session with configuration values
@@ -272,6 +279,7 @@ public class DomainServiceImpl implements DomainService {
                 domain.setSecondaryContactName(secondaryContactName);
                 domain.setSecondaryContactLastName(secondaryContactLastName);
                 domain.setSecondaryContactPhone(secondaryContactPhone);
+                saveDomainToPingProject(domain);
             }
         }
         return domainRepo.save(domain);
@@ -444,5 +452,40 @@ public class DomainServiceImpl implements DomainService {
     @Override
     public Domain findDomain() throws Exception {
         return domainRepo.findOne(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
+    }
+
+    /**
+     * Save domain details to MR.ping project for usage calculation.
+     *
+     * @param domain domain object
+     * @return status
+     * @throws Exception raise if error
+     */
+    public Boolean saveDomainToPingProject(Domain domain) throws Exception {
+        JSONObject optional = new JSONObject();
+        optional.put(PingConstants.UUID, domain.getUuid());
+        optional.put(PingConstants.NAME, domain.getCompanyNameAbbreviation());
+        optional.put(PingConstants.COMPANY_ADDRESS, domain.getCompanyAddress());
+        optional.put(PingConstants.CITY_HEAD_QUARTER, domain.getCityHeadquarter());
+        optional.put(PingConstants.EMAIL, domain.getEmail());
+        optional.put(PingConstants.PHONE, domain.getPhone());
+        pingService.addDomainToPing(optional);
+        return true;
+    }
+
+    /**
+     * Save department details to MR.ping project for usage calculation.
+     *
+     * @param department domain object
+     * @return status
+     * @throws Exception raise if error
+     */
+    public Boolean saveDepartmentToPingProject(Department department) throws Exception {
+        JSONObject optional = new JSONObject();
+        optional.put(PingConstants.UUID, department.getUuid());
+        optional.put(PingConstants.NAME, department.getUserName());
+        optional.put(PingConstants.DOMAIN_ID, domainRepo.findOne(department.getDomainId()).getUuid());
+        pingService.addDepartmentToPing(optional);
+        return true;
     }
 }
