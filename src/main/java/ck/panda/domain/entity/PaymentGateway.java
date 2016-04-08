@@ -55,6 +55,10 @@ public class PaymentGateway {
     @Column(name = "seller_email")
     private String sellerEmail;
 
+    /** Payment gateway status. */
+    @Column(name = "is_active")
+    private Boolean isActive;
+
     /** Currency type. */
     @Column(name = "currency_type")
     private CurrencyType currencyType;
@@ -338,4 +342,19 @@ public class PaymentGateway {
     public void setPartner(String partner) {
         this.partner = partner;
     }
+
+	/**
+	 * @return the isActive
+	 */
+	public Boolean getIsActive() {
+		return isActive;
+	}
+
+	/**
+	 * @param isActive the isActive to set
+	 */
+	public void setIsActive(Boolean isActive) {
+		this.isActive = isActive;
+	}
+
 }

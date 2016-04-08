@@ -32,6 +32,7 @@ public class PaymentGatewayServiceImpl  implements PaymentGatewayService {
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
         } else {
+        	payment.setIsActive(true);
             return paymentRepo.save(payment);
         }
     }
@@ -65,6 +66,11 @@ public class PaymentGatewayServiceImpl  implements PaymentGatewayService {
     public PaymentGateway find(Long id) throws Exception {
         return paymentRepo.findOne(id);
     }
+
+	@Override
+	public PaymentGateway getActivePaymentGateway(Boolean isActive) {
+		return paymentRepo.findByStatus(isActive);
+	}
 }
 
 
