@@ -117,8 +117,8 @@ public interface DepartmentRepository extends PagingAndSortingRepository<Departm
      * @param isActive get the department list based on active/inactive status.
      * @return Department list.
      */
-    @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.domainId = :domainId AND dpt.isActive = :isActive "
-            + "AND dpt.type in (:types)")
+    @Query(value = "SELECT dpt FROM Department dpt WHERE dpt.domainId = :domainId "
+            + "AND dpt.isActive = :isActive  AND dpt.type in (:types)")
     List<Department> findByDomainAndAccountTypesAndActive(@Param("domainId") Long domainId,
             @Param("types") List<AccountType> types, @Param("isActive") Boolean isActive);
 
