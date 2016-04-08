@@ -34,48 +34,49 @@ import ck.panda.util.web.CRUDController;
 @Api(value = "PaymentGateway", description = "Operations with PaymentGateway", produces = "application/json")
 public class PaymentGatewayController extends CRUDController<PaymentGateway> implements ApiController {
 
-    /** Service reference to PaymentGateway. */
-    @Autowired
-    private PaymentGatewayService paymentService;
+	/** Service reference to PaymentGateway. */
+	@Autowired
+	private PaymentGatewayService paymentService;
 
-    @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new PaymentGateway.", response = PaymentGateway.class)
-    @Override
-    public PaymentGateway create(@RequestBody PaymentGateway cost) throws Exception {
-        return paymentService.save(cost);
-    }
+	@ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new PaymentGateway.", response = PaymentGateway.class)
+	@Override
+	public PaymentGateway create(@RequestBody PaymentGateway cost) throws Exception {
+		return paymentService.save(cost);
+	}
 
-    @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing PaymentGateway.", response = PaymentGateway.class)
-    @Override
-    public PaymentGateway read(@PathVariable(PATH_ID) Long id) throws Exception {
-        return paymentService.find(id);
-    }
+	@ApiOperation(value = SW_METHOD_READ, notes = "Read an existing PaymentGateway.", response = PaymentGateway.class)
+	@Override
+	public PaymentGateway read(@PathVariable(PATH_ID) Long id) throws Exception {
+		return paymentService.find(id);
+	}
 
-    @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing PaymentGateway.", response = PaymentGateway.class)
-    @Override
-    public PaymentGateway update(@RequestBody PaymentGateway cost, @PathVariable(PATH_ID) Long id) throws Exception {
-        return paymentService.update(cost);
-    }
+	@ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing PaymentGateway.", response = PaymentGateway.class)
+	@Override
+	public PaymentGateway update(@RequestBody PaymentGateway cost, @PathVariable(PATH_ID) Long id) throws Exception {
+		return paymentService.update(cost);
+	}
 
-    @Override
-    public List<PaymentGateway> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
-                    throws Exception {
-        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, PaymentGateway.class);
-        Page<PaymentGateway> pageResponse = paymentService.findAll(page);
-        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
-        return pageResponse.getContent();
-    }
+	@Override
+	public List<PaymentGateway> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
+			@RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, PaymentGateway.class);
+		Page<PaymentGateway> pageResponse = paymentService.findAll(page);
+		response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+		return pageResponse.getContent();
+	}
 
-    /**
-     * List all payment gateway details.
-     *
-     * @return payment gateway.
-     * @throws Exception unhandled errors.
-     */
-    @RequestMapping(value = "paylist", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    protected List<PaymentGateway> getSearch() throws Exception {
-        return paymentService.findAll();
-    }
+	/**
+	 * List all payment gateway details.
+	 *
+	 * @return payment gateway.
+	 * @throws Exception
+	 *             unhandled errors.
+	 */
+	@RequestMapping(value = "paylist", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	protected List<PaymentGateway> getSearch() throws Exception {
+		return paymentService.findAll();
+	}
 }
