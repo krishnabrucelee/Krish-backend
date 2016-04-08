@@ -135,6 +135,20 @@ public class PingService {
     }
 
     /**
+     * Update invoice to ping.
+     *
+     * @param requestJson - request json value
+     * @return - Json string response
+     * @throws Exception - Raise if any error
+     */
+    public String updateInvoiceToPing(JSONObject requestJson) throws Exception {
+        server.setServer(apiURL + "/invoice");
+        String arguments = server.getJsonToString(requestJson);
+        String responseJson = server.postRequest(arguments);
+        return responseJson;
+    }
+
+    /**
      * Get the invoice by invoice id.
      *
      * @param invoiceId invoice id
