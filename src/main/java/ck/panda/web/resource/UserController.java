@@ -65,6 +65,14 @@ public class UserController extends CRUDController<User> implements ApiControlle
         return userService.update(user);
     }
 
+    @RequestMapping(value = "suspend/{id}", method = RequestMethod.PUT, produces = {
+            MediaType.APPLICATION_JSON_VALUE }, consumes = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ResponseBody
+    public User updateSuspended(@RequestBody User user, @PathVariable(PATH_ID) Long id) throws Exception {
+        return userService.updateSuspended(user);
+    }
+
     /**
      * Soft delete for user.
      *

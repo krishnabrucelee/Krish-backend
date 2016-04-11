@@ -1478,4 +1478,18 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         }
         return vmInstance;
     }
+
+
+    @Override
+    public List<VmInstance> findAllByUserAndStatus(User user, Status status) throws Exception {
+        return virtualmachinerepository.findAllByUserAndStatus(user, status);
+    }
+
+    @Override
+    public void updateVmToStoppedByOwnerAndStatus(User user, Status status) {
+        for(VmInstance vm : virtualmachinerepository.findAllByUserAndStatus(user, status)) {
+            vm.setStatus(Status.STOPPED);
+            virtualmachinerepository.save(vm);
+        }
+    }
 }

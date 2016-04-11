@@ -178,7 +178,7 @@ public class User implements Serializable {
     /** Define status. */
     public enum Status {
         /** Define status constant. */
-        ACTIVE, BLOCKED, DELETED, DISABLED, ENABLED;
+        ACTIVE, BLOCKED, DELETED, DISABLED, ENABLED, SUSPENDED;
     }
 
     /**
