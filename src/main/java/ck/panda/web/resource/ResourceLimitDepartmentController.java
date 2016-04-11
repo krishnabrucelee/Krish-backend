@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
-import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.Volume;
 import ck.panda.service.ConvertEntityService;
@@ -178,5 +177,33 @@ public class ResourceLimitDepartmentController extends CRUDController<ResourceLi
     @ResponseStatus(HttpStatus.OK)
     public HashMap<String, String> findQuotaDepartmentResource(@PathVariable(PATH_ID) Long departmentId) throws Exception {
         return resourceLimitService.getResourceLimitsOfDepartment(convertEntityService.getDepartmentById(departmentId).getDomainId());
+    }
+
+    /**
+     * List all department min resource limits by department id.
+     *
+     * @param id department id
+     * @return resource service
+     * @throws Exception error
+     */
+    @RequestMapping(value = "departmentmin/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected HashMap<String, Long> getSumOfDepartmentMin(@PathVariable(PATH_ID) Long id) throws Exception {
+        return resourceLimitService.getSumOfDepartmentMin(id);
+    }
+
+    /**
+     * List all department max resource limits by department id.
+     *
+     * @param id department id
+     * @return resource service
+     * @throws Exception error
+     */
+    @RequestMapping(value = "departmentmax/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected HashMap<String, Long> getSumOfDepartmentMax(@PathVariable(PATH_ID) Long id) throws Exception {
+        return resourceLimitService.getSumOfDepartmentMax(id);
     }
 }

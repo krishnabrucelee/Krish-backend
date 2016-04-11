@@ -62,21 +62,35 @@ public interface ResourceLimitDepartmentRepository extends PagingAndSortingRepos
             @Param("resourceType") ResourceLimitDepartment.ResourceType resourceType, @Param("isActive") Boolean isActive);
 
     /**
-     * @param domainId
-     * @param resourceType
-     * @param isActive
-     * @return
+     * Get total count of resource departments.
+     *
+     * @param domainId domain id
+     * @param resourceType resource type
+     * @param isActive true/false.
+     * @return resource type.
      */
     @Query(value = "select sum(resource.max) from ResourceLimitDepartment resource where resource.isActive = :isActive AND resource.domainId = :domainId AND resource.resourceType = :resourceType ")
     Long findTotalCountOfResourceDepartment(@Param("domainId") Long domainId, @Param("resourceType") ResourceLimitDepartment.ResourceType resourceType, @Param("isActive") Boolean isActive);
 
     /**
-     * @param projectId
-     * @param resourceType
-     * @param isActive
-     * @return
+     * Get total count of resource projects.
+     *
+     * @param projectId project id
+     * @param resourceType resource type
+     * @param isActive true/false.
+     * @return resource type.
      */
     @Query(value = "select sum(resource.max) from ResourceLimitDepartment resource where resource.isActive = :isActive AND resource.departmentId = :departmentId AND resource.resourceType = :resourceType ")
     Long findTotalCountOfResourceProject(@Param("departmentId") Long departmentId, @Param("resourceType") ResourceLimitDepartment.ResourceType resourceType, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find all the active resource limits based on the department id.
+     *
+     * @param domainId doamin id.
+     * @param isActive true/false
+     * @return department.
+     */
+    @Query(value = "select resource from ResourceLimitDepartment resource where resource.isActive = :isActive AND resource.domainId = :domainId")
+    List<ResourceLimitDepartment> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive);
 
 }

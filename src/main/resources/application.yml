@@ -75,6 +75,11 @@ spring:
         view:
             prefix: file:/var/log/
             suffix: .html
+
+#Payment page
+    view:
+        prefix: /WEB-INF/jsp/
+        suffix: .jsp
 ---
 
 cloudstack:
@@ -168,3 +173,7 @@ chinese:
 invoice:
     base:
         path: ${INVOICE_ATTACHMENT_DIR:/home/Assistanz/invoice/invoiceattachment}
+
+---
+panda:
+    url: ${PANDA_URL:http://localhost:9090/pandaui/login}

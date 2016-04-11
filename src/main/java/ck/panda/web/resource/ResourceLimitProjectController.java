@@ -165,4 +165,31 @@ public class ResourceLimitProjectController extends CRUDController<ResourceLimit
         return resourceLimitService.getResourceLimitsOfDepartment(convertEntityService.getProjectById(projectId).getDepartmentId());
     }
 
+    /**
+     * Get the sum of project max value.
+     *
+     * @param id project id.
+     * @return sum of project max value
+     * @throws Exception unhandled exception
+     */
+    @RequestMapping(value = "projectmin/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected HashMap<String, Long> getSumOfProjectMin(@PathVariable(PATH_ID) Long id) throws Exception {
+        return resourceLimitService.getSumOfProjectMin(id);
+    }
+
+    /**
+     * Get the sum of project max value.
+     *
+     * @param id project id.
+     * @return sum of project max value
+     * @throws Exception unhandled exception
+     */
+    @RequestMapping(value = "projectmax/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected HashMap<String, Long> getSumOfProjectMax(@PathVariable(PATH_ID) Long id) throws Exception {
+        return resourceLimitService.getSumOfProjectMax(id);
+    }
 }

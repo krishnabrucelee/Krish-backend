@@ -7,6 +7,8 @@ import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.RolePrincipal;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.error.MessageByLocaleService;
+import ck.panda.util.infrastructure.AuthenticatedExternalWebService;
+import ck.panda.util.infrastructure.externalwebservice.ExternalWebServiceStub;
 import ck.panda.util.web.ApiController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -116,6 +119,13 @@ public class AuthenticationFilter extends GenericFilterBean {
 				LOGGER.debug("Trying to authenticate user by x-auth-token method : ", token);
 				token = Optional.fromNullable(httpRequest.getAttribute("token").toString());
 			}
+			if (resourcePath.contains("panda")) {
+				ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
+				AuthenticatedExternalWebService authenticatedExternalWebService = new AuthenticatedExternalWebService(
+					"pandapay", null, AuthorityUtils.commaSeparatedStringToAuthorityList("BACKEND_ADMIN"));
+				authenticatedExternalWebService.setExternalWebService(externalWebService);
+				SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);
+			}
             if (postToAuthenticate(httpRequest, resourcePath)) {
                 LOGGER.debug("Trying to authenticate user by x-auth-username method : ", userName);
                 processUsernamePasswordAuthentication(httpRequest, httpResponse, userName, password, domain);
@@ -151,12 +161,14 @@ public class AuthenticationFilter extends GenericFilterBean {
     private void addSessionContextToLogging() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String tokenValue = EMPTY_VALUE;
-        if (authentication != null && !Strings.isNullOrEmpty(authentication.getDetails().toString())) {
+        if(authentication != null && authentication.getPrincipal().equals("pandapay")){
+        	 MessageDigestPasswordEncoder encoder = new MessageDigestPasswordEncoder(PASSWORD_ENCODER);
+             tokenValue = encoder.encodePassword(authentication.getAuthorities().toString(), SALT_SPRINKLE);
+        } else if (authentication != null && !Strings.isNullOrEmpty(authentication.getDetails().toString())) {
             MessageDigestPasswordEncoder encoder = new MessageDigestPasswordEncoder(PASSWORD_ENCODER);
             tokenValue = encoder.encodePassword(authentication.getDetails().toString(), SALT_SPRINKLE);
         }
         MDC.put(TOKEN_SESSION_KEY, tokenValue);
-
         String userValue = EMPTY_VALUE;
         if (authentication != null && !Strings.isNullOrEmpty(authentication.getPrincipal().toString())) {
             userValue = authentication.getPrincipal().toString();

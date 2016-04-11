@@ -98,15 +98,39 @@ public interface ResourceLimitProjectService extends CRUDService<ResourceLimitPr
     List<ResourceLimitProject> findAllByProjectAndIsActive(Long projectId, Boolean isActive) throws ApplicationException, Exception;
 
     /**
-     * @param domainId
-     * @return
+     * Get the resource limits of project from domain id.
+     *
+     * @param domainId domain id.
+     * @return resource limits of project
      */
     HashMap<String, String> getResourceLimitsOfProject(Long domainId);
 
     /**
-     * @param departmentId
-     * @return
+     * Get the resource limits of department from department id.
+     *
+     * @param departmentId department id
+     * @return resource limits of department
      */
     HashMap<String, String> getResourceLimitsOfDepartment(Long departmentId);
+
+    /**
+     * Get the sum of project min value.
+     *
+     * @param id project id.
+     * @return sum of project max value
+     * @throws Exception unhandled exception
+     */
+    HashMap<String, Long> getSumOfProjectMin(Long id) throws Exception;
+
+    /**
+     * Get the sum of project max value.
+     *
+     * @param id project id.
+     * @return sum of project max value
+     * @throws Exception unhandled exception
+     */
+    HashMap<String, Long> getSumOfProjectMax(Long id) throws Exception;
+
+    Long getTotalCountOfResourceProject(Long domainId, ResourceType resourceType);
 
 }

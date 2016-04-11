@@ -41,8 +41,9 @@ public class SimpleCORSFilter implements Filter {
         response.setHeader("Access-Control-Expose-Headers", "Rage, Content-Range");
         if (request.getRequestURI().contains("socket")) {
             request.setAttribute("token", CacheManager.getInstance().getCache("restApiAuthTokenCache").getKeys().get(0));
-         	//request.
-         }
+        }
+        if (request.getRequestURI().contains("panda")) {
+        }
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);
         } else {
