@@ -82,7 +82,7 @@ cloudstack:
 console:
     proxy: ${CONSOLE_URL}
 mrping:
-    url: ${MRPING_URL:http://localhost:8081/api}
+    url: ${MRPING_URL:http://localhost:8086/api}
 
 ---
 
