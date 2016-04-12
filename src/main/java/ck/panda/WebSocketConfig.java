@@ -30,7 +30,7 @@ public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry config) {
 		config.enableSimpleBroker("/topic/error.event/", "/topic/async.event/", "/topic/resource.event/",
-				"/topic/action.event/");
+				"/topic/action.event/", "/topic/test");
 		config.setApplicationDestinationPrefixes("/cloud");
 	}
 
@@ -69,7 +69,6 @@ public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
 			@Override
 			public void afterHandshake(ServerHttpRequest arg0, ServerHttpResponse arg1, WebSocketHandler arg2,
 					Exception arg3) {
-				// TODO Auto-generated method stub
 			}
 		};
 
