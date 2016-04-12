@@ -15,7 +15,7 @@ public interface PermissionRepository extends PagingAndSortingRepository<Permiss
 
     /**
      * List the permission.
-     * 
+     *
      * @return list of permission.
      */
     @Query(value = "select permission from Permission permission where permission.isActive IS TRUE")

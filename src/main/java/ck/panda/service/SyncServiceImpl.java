@@ -334,6 +334,11 @@ public class SyncServiceImpl implements SyncService {
     @Value(value = "${permission.report}")
     private String report;
 
+    /** Permission billing properties. */
+    @Value(value = "${permission.billing}")
+    private String billing;
+
+
     /** receipient properties. */
     @Value(value = "${test.users}")
     private String users;
@@ -2486,8 +2491,8 @@ public class SyncServiceImpl implements SyncService {
         try {
             if (existPermissionList.size() == 0) {
                 List<Permission> newPermissionList = PermissionUtil.createPermissions(instance, storage, network,
-                        sshkey, quatoLimit, vpc, template, additionalServive, project, application, department, roles,
-                        user, report);
+                        sshkey, quatoLimit, vpc, template, additionalServive, project, application, department,
+                        roles, user, report, billing);
                 for (Permission permission : newPermissionList) {
                     permissionService.save(permission);
                 }
