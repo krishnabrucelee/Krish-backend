@@ -3,7 +3,6 @@ package ck.panda.service;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
@@ -322,7 +321,7 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
     List<VmInstance> findAllByUserAndStatus(User user, Status status) throws Exception;
 
     /**
-     * Find all the vm status by owner.
+     * Update vm to stopped status by user and status.
      *
      * @param user user reference.
      * @param status status of the instance.
