@@ -19,49 +19,53 @@ import ck.panda.service.PaymentService;
 @Api(value = "Payments", description = "Operations with Payments", produces = "application/json")
 public class AliPayController {
 	/** Service reference to Payment. */
-    @Autowired
-    private PaymentService paymentService;
+	@Autowired
+	private PaymentService paymentService;
 
-    /** The panda url. */
-    @Value(value = "${panda.url}")
-    private String pandaUrl;
+	/** The panda url. */
+	@Value(value = "${panda.url}")
+	private String pandaUrl;
 
 	/**
-     * Get payment response from Alipay payment gateway for notify.
-     *
-     * @param request http servlet request
-     * @throws Exception if error occurs
-     */
-    @RequestMapping(value = "/notify", method = RequestMethod.GET)
-    public ModelAndView nofity(HttpServletRequest request) throws Exception {
-    	Payment payment = paymentService.savePayment(request);
-    	payment.setUrl(pandaUrl);
-    	if(payment == null){
-    		return new ModelAndView("payment-invalid", "payment", payment);
-    	}
-    	if (payment.getPaymentStatus().equals(PaymentStatus.ABANDONED)){
-    		return new ModelAndView("payment-failure", "payment", payment);
-    	}
-    	return new ModelAndView("payment-notify", "payment", payment);
-    }
+	 * Get payment response from Alipay payment gateway for notify.
+	 *
+	 * @param request
+	 *            http servlet request
+	 * @throws Exception
+	 *             if error occurs
+	 */
+	@RequestMapping(value = "/notify", method = RequestMethod.GET)
+	public ModelAndView nofity(HttpServletRequest request) throws Exception {
+		Payment payment = paymentService.savePayment(request);
+		payment.setUrl(pandaUrl);
+		if (payment == null) {
+			return new ModelAndView("payment-invalid", "payment", payment);
+		}
+		if (payment.getPaymentStatus().equals(PaymentStatus.ABANDONED)) {
+			return new ModelAndView("payment-failure", "payment", payment);
+		}
+		return new ModelAndView("payment-notify", "payment", payment);
+	}
 
-    /**
-     * Get payment response from Alipay payment gateway for return url.
-     *
-     * @param request http servlet request
-     * @throws Exception if error occurs
-     */
-    @RequestMapping(value = "/return", method = RequestMethod.GET)
-    public ModelAndView getReturnUrl(HttpServletRequest request) throws Exception {
-    	Payment payment = paymentService.savePayment(request);
-    	payment.setUrl(pandaUrl);
-    	if(payment == null){
-    		return new ModelAndView("payment-invalid", "payment", payment);
-    	}
-    	if (payment.getPaymentStatus().equals(PaymentStatus.ABANDONED)){
-    		return new ModelAndView("payment-failure", "payment", payment);
-    	}
-    	return new ModelAndView("payment-success", "payment", payment);
-    }
+	/**
+	 * Get payment response from Alipay payment gateway for return url.
+	 *
+	 * @param request
+	 *            http servlet request
+	 * @throws Exception
+	 *             if error occurs
+	 */
+	@RequestMapping(value = "/return", method = RequestMethod.GET)
+	public ModelAndView getReturnUrl(HttpServletRequest request) throws Exception {
+		Payment payment = paymentService.savePayment(request);
+		payment.setUrl(pandaUrl);
+		if (payment == null) {
+			return new ModelAndView("payment-invalid", "payment", payment);
+		}
+		if (payment.getPaymentStatus().equals(PaymentStatus.ABANDONED)) {
+			return new ModelAndView("payment-failure", "payment", payment);
+		}
+		return new ModelAndView("payment-success", "payment", payment);
+	}
 
 }

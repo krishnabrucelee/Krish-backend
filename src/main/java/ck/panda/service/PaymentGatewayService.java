@@ -13,9 +13,9 @@ public interface PaymentGatewayService extends CRUDService<PaymentGateway> {
 	/**
 	 * Get active payment gateway.
 	 *
-	 * @param isActive true/false.
+	 * @param isActive
+	 *            true/false.
 	 * @return payment gateway.
 	 */
 	PaymentGateway getActivePaymentGateway(Boolean isActive);
 }
-

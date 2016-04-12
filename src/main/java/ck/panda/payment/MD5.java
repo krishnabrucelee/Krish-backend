@@ -6,17 +6,20 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  * The following code is sample code to test for the convenience of business and
- * provided businesses as needed for your site, according to technical writing ,
- * not have to use the code. The code for study and research Alipay interface
+ * provided businesses as needed for your site, according to technical writing,
+ * not have to use the code. The code for study and research Alipay interface.
  */
 public class MD5 {
 
 	/**
 	 * Signature string
 	 *
-	 * @param Text string to be signed
-	 * @param Key Key
-	 * @param Input_charset encoding format
+	 * @param Text
+	 *            string to be signed
+	 * @param Key
+	 *            Key
+	 * @param Input_charset
+	 *            encoding format
 	 * @return Signature result
 	 */
 	public static String sign(String text, String key, String input_charset) {
@@ -27,10 +30,14 @@ public class MD5 {
 	/**
 	 * Signature string
 	 *
-	 * @param Text string to be signed
-	 * @param Sign signature result
-	 * @param Key Key
-	 * @param Input_charset encoding format
+	 * @param Text
+	 *            string to be signed
+	 * @param Sign
+	 *            signature result
+	 * @param Key
+	 *            Key
+	 * @param Input_charset
+	 *            encoding format
 	 * @return Signature result
 	 */
 	public static boolean verify(String text, String sign, String key, String input_charset) {

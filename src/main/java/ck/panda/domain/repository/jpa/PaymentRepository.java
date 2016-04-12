@@ -14,9 +14,10 @@ public interface PaymentRepository extends PagingAndSortingRepository<Payment, L
 	/**
 	 * Get payment details by order id.
 	 *
-	 * @param orderNo order id.
+	 * @param orderNo
+	 *            order id.
 	 * @return payment.
 	 */
-	@Query(value="SELECT pay FROM Payment pay WHERE pay.orderId = :orderNo")
+	@Query(value = "SELECT pay FROM Payment pay WHERE pay.orderId = :orderNo")
 	Payment getPaymentDetailByOrderNo(@Param("orderNo") String orderNo);
 }

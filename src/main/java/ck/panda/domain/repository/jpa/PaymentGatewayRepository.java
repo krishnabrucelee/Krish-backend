@@ -11,11 +11,11 @@ public interface PaymentGatewayRepository extends PagingAndSortingRepository<Pay
 
 	/**
 	 * Get payment gateway details by status.
-	 * @param isActive true/false.
+	 *
+	 * @param isActive
+	 *            true/false.
 	 * @return payment gateway.
 	 */
 	@Query(value = "SELECT pay FROM PaymentGateway pay WHERE pay.isActive = :isActive")
 	PaymentGateway findByStatus(@Param("isActive") Boolean isActive);
 }
-
-

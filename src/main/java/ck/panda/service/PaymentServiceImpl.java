@@ -36,8 +36,8 @@ public class PaymentServiceImpl implements PaymentService {
 	private DateTimeService dateTimeService;
 
 	/** Mr.ping service reference. */
-    @Autowired
-    private PingService pingService;
+	@Autowired
+	private PingService pingService;
 
 	/** Convert Entity Service reference. */
 	@Autowired
@@ -150,28 +150,28 @@ public class PaymentServiceImpl implements PaymentService {
 				JSONObject optional = new JSONObject();
 				SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 				Date date = dt.parse(payment.getNotifyTime());
-		        optional.put("invoiceNumber", payment.getSubject());
-		        optional.put("paymentMethod", "ALI_PAY");
-		        optional.put("transactionReference", payment.getTransactionId());
-		        optional.put("paidOn", date.getTime());
-		        optional.put("status", "PAID");
-		        pingService.updateInvoiceToPing(optional);
+				optional.put("invoiceNumber", payment.getSubject());
+				optional.put("paymentMethod", "ALI_PAY");
+				optional.put("transactionReference", payment.getTransactionId());
+				optional.put("paidOn", date.getTime());
+				optional.put("status", "PAID");
+				pingService.updateInvoiceToPing(optional);
 			} else {
-					payment.setPaymentStatus(PaymentStatus.FAILURE);
-					payment.setDomainId(convertEntityService.getDomainId(
-							new String(request.getParameter("extra_common_param").getBytes("ISO-8859-1"), "UTF-8")));
-					payment.setTotalFee(new String(request.getParameter("total_fee").getBytes("ISO-8859-1"), "UTF-8"));
-					payment.setSubject(new String(request.getParameter("subject").getBytes("ISO-8859-1"), "UTF-8"));
-					payment.setService(new String(request.getParameter("exterface").getBytes("ISO-8859-1"), "UTF-8"));
-					JSONObject optional = new JSONObject();
-					optional.put("invoiceNumber", payment.getSubject());
-					optional.put("paymentMethod", "ALI_PAY");
-					optional.put("transactionReference", payment.getTransactionId());
-					SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-					Date date = dt.parse(payment.getNotifyTime());
-					optional.put("paidOn", date.getTime());
-					optional.put("status", "UNPAID");
-					pingService.updateInvoiceToPing(optional);
+				payment.setPaymentStatus(PaymentStatus.FAILURE);
+				payment.setDomainId(convertEntityService.getDomainId(
+						new String(request.getParameter("extra_common_param").getBytes("ISO-8859-1"), "UTF-8")));
+				payment.setTotalFee(new String(request.getParameter("total_fee").getBytes("ISO-8859-1"), "UTF-8"));
+				payment.setSubject(new String(request.getParameter("subject").getBytes("ISO-8859-1"), "UTF-8"));
+				payment.setService(new String(request.getParameter("exterface").getBytes("ISO-8859-1"), "UTF-8"));
+				JSONObject optional = new JSONObject();
+				optional.put("invoiceNumber", payment.getSubject());
+				optional.put("paymentMethod", "ALI_PAY");
+				optional.put("transactionReference", payment.getTransactionId());
+				SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				Date date = dt.parse(payment.getNotifyTime());
+				optional.put("paidOn", date.getTime());
+				optional.put("status", "UNPAID");
+				pingService.updateInvoiceToPing(optional);
 			}
 		} catch (Exception ce) {
 			payment = new Payment();
