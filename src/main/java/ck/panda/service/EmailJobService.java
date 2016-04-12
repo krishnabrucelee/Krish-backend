@@ -1,11 +1,7 @@
 package ck.panda.service;
 
-import org.json.JSONObject;
 import org.springframework.stereotype.Service;
-
 import ck.panda.rabbitmq.util.EmailEvent;
-import ck.panda.rabbitmq.util.ResponseEvent;
-import ck.panda.util.error.exception.ApplicationException;
 
 /**
  * Email job service is used to listen and parse email template from email message from RabbitMQ and send it to email service .

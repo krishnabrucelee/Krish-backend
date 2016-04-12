@@ -24,7 +24,6 @@ import ck.panda.service.UserService;
 import ck.panda.util.CloudStackAuthenticationService;
 import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
-import ck.panda.util.error.MessageByLocaleService;
 
 /**
  * Database authentication manager to handle all the validation and authentication for login users.

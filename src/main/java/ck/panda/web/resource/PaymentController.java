@@ -5,13 +5,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
@@ -31,6 +28,7 @@ import ck.panda.domain.entity.PaymentGateway;
 import ck.panda.payment.util.AlipaySubmit;
 import ck.panda.service.PaymentGatewayService;
 import ck.panda.service.PaymentService;
+import ck.panda.util.PingService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.exception.CustomGenericException;
 import ck.panda.util.web.ApiController;
@@ -45,6 +43,10 @@ public class PaymentController extends CRUDController<Payment> implements ApiCon
     /** Service reference to Payment. */
     @Autowired
     private PaymentService paymentService;
+
+    /** Mr.ping service reference. */
+    @Autowired
+    private PingService pingService;
 
     /** Alipay service reference. */
     @Autowired
@@ -85,10 +87,9 @@ public class PaymentController extends CRUDController<Payment> implements ApiCon
     /**
      * Get payment response from Alipay payment gateway.
      *
-     * @param request
-     *            http servlet request
-     * @throws Exception
-     *             if error occurs
+     * @param request http servlet request
+     * @throws Exception if error occurs.
+     * @return payment result.
      */
     @RequestMapping(value = "/pay", method = RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
@@ -97,6 +98,9 @@ public class PaymentController extends CRUDController<Payment> implements ApiCon
         PaymentGateway paymentGateway = paymentGatewayService.getActivePaymentGateway(true);
         if (paymentGateway == null) {
             throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Payment gateway not yet configured");
+        }
+        if (pingService.apiConnectionCheck(null)) {
+            throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Mr.Ping Server is not Reachable. please try again later.");
         }
         Map<String, String> sParaTemp = new HashMap<String, String>();
         sParaTemp.put("service", paymentGateway.getServiceType().name());
