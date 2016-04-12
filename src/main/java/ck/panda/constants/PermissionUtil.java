@@ -38,13 +38,14 @@ public final class PermissionUtil {
      * @param roles - Name of roles
      * @param user - Name of user
      * @param report - Name of report
+     * @param billing - Name of billing
      * @return Permission list - Name of Permission
      */
 
     @SuppressWarnings("rawtypes")
     public static List<Permission> createPermissions(String instance, String storage, String network, String sshkey,
             String quotaLimit, String vpc, String temp, String addService, String project, String application,
-            String dept, String roles, String user, String report) {
+            String dept, String roles, String user, String report, String billing) {
         List<String> stringList = new ArrayList<String>();
         Map<Module, List<String>> moduleActionMap = new HashMap<Module, List<String>>();
         List<Module> moduleList = new ArrayList<Module>();
@@ -62,6 +63,7 @@ public final class PermissionUtil {
         stringList.add(roles);
         stringList.add(user);
         stringList.add(report);
+        stringList.add(billing);
 
         for (String string : stringList) {
             List<String> actionList = new ArrayList<String>();
@@ -116,9 +118,9 @@ public final class PermissionUtil {
      */
     public static List<Permission> updatePermissions(String instance, String storage, String network, String sshkey,
             String quotaLimit, String vpc, String temp, String addService, String project, String application,
-            String dept, String roles, String user, String report) {
+            String dept, String roles, String user, String report, String billing) {
         List<Permission> newList = PermissionUtil.createPermissions(instance, storage, network, sshkey, quotaLimit, vpc,
-                temp, addService, project, application, dept, roles, user, report);
+                temp, addService, project, application, dept, roles, user, report, billing);
         return newList;
     }
 
@@ -143,6 +145,7 @@ public final class PermissionUtil {
         moduleDesc.put(Module.ROLES, "Roles");
         moduleDesc.put(Module.USER, "User");
         moduleDesc.put(Module.REPORT, "Reports");
+        moduleDesc.put(Module.BILLING, "Billing");
         return moduleDesc;
     }
 

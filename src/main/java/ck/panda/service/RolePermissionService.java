@@ -7,8 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+import ck.panda.domain.entity.Permission;
 import ck.panda.domain.entity.Role;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.repository.jpa.RoleRepository;
+import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.util.TokenDetails;
 
 /**
@@ -26,6 +29,10 @@ public class RolePermissionService implements PermissionEvaluator {
     @Autowired
     private RoleRepository roleRepository;
 
+    /** User repository reference. */
+    @Autowired
+    private UserRepository userRepository;
+
     /** Token details repository reference. */
     @Autowired
     private TokenDetails tokenDetails;
@@ -35,6 +42,9 @@ public class RolePermissionService implements PermissionEvaluator {
 
     /** Department constant for token details. */
     public static final String DEPARTMENT_ID = "departmentid";
+
+    /** Id constant for token details. */
+    public static final String ID = "id";
 
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
@@ -50,11 +60,17 @@ public class RolePermissionService implements PermissionEvaluator {
             }
 
             //TODO : We have to remove the token details from here
+            User user = userRepository.findOne(Long.parseLong(tokenDetails.getTokenDetails(ID)));
             Role role = roleRepository.findWithPermissionsByNameDepartmentAndIsActive(
                     tokenDetails.getTokenDetails(ROLE_NAME),
                     Long.parseLong(tokenDetails.getTokenDetails(DEPARTMENT_ID)), true);
             for (int i = 0; i < role.getPermissionList().size(); i++) {
-                if (role.getPermissionList().get(i).getActionKey().equals(permission.toString())) {
+                if(user.getStatus() == User.Status.SUSPENDED
+                        && role.getPermissionList().get(i).getModule() == Permission.Module.BILLING
+                        && role.getPermissionList().get(i).getActionKey().equals(permission.toString())) {
+                        return true;
+                }
+                else if(user.getStatus() != User.Status.SUSPENDED && role.getPermissionList().get(i).getActionKey().equals(permission.toString())) {
                     return true;
                 }
             }
