@@ -13,25 +13,22 @@ import ck.panda.util.domain.CRUDService;
 @Service
 public interface PaymentService extends CRUDService<Payment> {
 
-	/**
-	 * Get payment response and stored in our database.
-	 *
-	 * @param request
-	 *            payment response
-	 * @throws Exception
-	 *             if error occurs
-	 */
-	Payment savePayment(HttpServletRequest request) throws Exception;
+    /**
+     * Get payment response and stored in our database.
+     *
+     * @param request payment response
+     * @throws Exception if error occurs
+     * @return payment.
+     */
+    Payment savePayment(HttpServletRequest request) throws Exception;
 
-	/**
-	 * Get payment details by order no.
-	 *
-	 * @param orderNo
-	 *            order number.
-	 * @return payment
-	 * @throws Exception
-	 *             unhandled exception.
-	 */
-	Payment getPaymentDetailByOrderNo(String orderNo) throws Exception;
+    /**
+     * Get payment details by order no.
+     *
+     * @param orderNo order number.
+     * @return payment
+     * @throws Exception unhandled exception.
+     */
+    Payment getPaymentDetailByOrderNo(String orderNo) throws Exception;
 
 }

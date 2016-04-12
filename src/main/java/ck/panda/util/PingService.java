@@ -192,6 +192,9 @@ public class PingService {
             socket.close();
             status = true;
         } catch (Exception ex) {
+            if (errors == null) {
+                return status;
+            }
             errors.addGlobalError("Mr.Ping Server is not Reachable");
             throw new ApplicationException(errors);
         }

@@ -59,7 +59,7 @@ public class PaymentGatewayController extends CRUDController<PaymentGateway> imp
     @Override
     public List<PaymentGateway> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
-                    throws Exception {
+            throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, PaymentGateway.class);
         Page<PaymentGateway> pageResponse = paymentService.findAll(page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
