@@ -99,7 +99,7 @@ public class PaymentController extends CRUDController<Payment> implements ApiCon
         if (paymentGateway == null) {
             throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Payment gateway not yet configured");
         }
-        if (pingService.apiConnectionCheck(null)) {
+        if (!pingService.apiConnectionCheck(null)) {
             throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Mr.Ping Server is not Reachable. please try again later.");
         }
         Map<String, String> sParaTemp = new HashMap<String, String>();

@@ -27,7 +27,7 @@ public class AliPayController {
     private PaymentService paymentService;
 
     /** The panda url. */
-    @Value(value = "${panda.url}")
+    @Value(value = "${payment.return.url}")
     private String pandaUrl;
 
     /**
