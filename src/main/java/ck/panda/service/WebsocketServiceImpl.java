@@ -25,7 +25,7 @@ public class WebsocketServiceImpl implements WebsocketService {
     private EventNotificationService eventNotificationService;
 
     @Scheduled(fixedDelay = 60000)
-    public void handleEventTest(Event event) throws Exception {
+    public void handleEventTest() throws Exception {
         messagingTemplate.convertAndSend("/topic/test","test web socket");
     }
 
