@@ -20,6 +20,7 @@ import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.Status;
 import ck.panda.domain.entity.User.UserType;
+import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackUserService;
@@ -78,6 +79,10 @@ public class UserServiceImpl implements UserService {
 
     /** Reference of cloudStack Constants. */
     private CloudStackConstants cloudStackConstants;
+
+    /** Virtual machine service. */
+    @Autowired
+    private VirtualMachineService virtualMachineService;
 
     /** Constant for generic UTF. */
     public static final String CS_UTF = "utf-8";
@@ -188,6 +193,7 @@ public class UserServiceImpl implements UserService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             } else {
+
                 HashMap<String, String> optional = new HashMap<String, String>();
                 optional.put(cloudStackConstants.CS_DOMAIN_ID, user.getDomain().getUuid());
                 optional.put(cloudStackConstants.CS_USER_NAME, user.getUserName());
@@ -528,6 +534,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findAllByUserTypeAndIsActive(Boolean isActive, UserType rootAdmin) {
         return userRepository.findAllByUserTypeAndIsActive(rootAdmin, isActive);
+    }
+
+    @Override
+    public User updateSuspended(User user) throws Exception {
+        user.setStatus(User.Status.SUSPENDED);
+        // Update the vm status to stopped while suspending the account
+        if(user.getStatus() == User.Status.SUSPENDED) {
+            virtualMachineService.updateVmToStoppedByOwnerAndStatus(user, VmInstance.Status.RUNNING);
+        }
+        return userRepository.save(user);
     }
 
 }

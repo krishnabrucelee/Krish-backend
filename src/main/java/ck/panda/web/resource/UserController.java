@@ -66,6 +66,22 @@ public class UserController extends CRUDController<User> implements ApiControlle
     }
 
     /**
+     * Update user to suspended state and deactive all the resources associated to the users.
+     *
+     * @param user reference of the user.
+     * @param id user id.
+     * @return user reference.
+     * @throws Exception if error.
+     */
+    @RequestMapping(value = "suspend/{id}", method = RequestMethod.PUT, produces = {
+            MediaType.APPLICATION_JSON_VALUE }, consumes = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ResponseBody
+    public User updateSuspended(@RequestBody User user, @PathVariable(PATH_ID) Long id) throws Exception {
+        return userService.updateSuspended(user);
+    }
+
+    /**
      * Soft delete for user.
      *
      * @param user the user object.

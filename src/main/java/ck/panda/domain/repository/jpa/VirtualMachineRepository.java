@@ -424,4 +424,15 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
             + " OR vm.memory LIKE %:search% OR CONCAT(vm.volumeSize/POWER(2, 30), LOWER(' GB')) LIKE LOWER(%:search%) OR vm.publicIpAddress LIKE %:search% OR vm.ipAddress LIKE %:search%)")
     Page<VmInstance> findAllByDepartmentAndProjectAndStatusAndPage(@Param("status") Status status,
             @Param("department") Department department, @Param("projectList") List<Project> projectList, Pageable pageable, @Param("search") String search);
+
+
+    /**
+     * Get the list of VMs by given status and user.
+     *
+     * @param status of the status of VM.
+     * @param instanceOwner belongs to VM.
+     * @return instance list.
+     */
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.instanceOwner = :user AND vm.status = :status")
+    List<VmInstance> findAllByUserAndStatus(@Param("user") User instanceOwner, @Param("status") Status status);
 }

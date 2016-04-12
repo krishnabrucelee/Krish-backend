@@ -42,6 +42,9 @@ public class RolePrincipal {
     /** Login user department id. */
     public static final String LOGIN_USER_DEPARTMENT_ID = "departmentId";
 
+    /** Login user status. */
+    public static final String LOGIN_USER_STATUS = "userStatus";
+
     /** Build number. */
     public static final String BUILD_NUMBER = "buildNumber";
 
@@ -113,6 +116,7 @@ public class RolePrincipal {
             jsonObject.put(LOGIN_USER_DOMAIN_ABBREVIATION_NAME, user.getDomain().getCompanyNameAbbreviation());
             jsonObject.put(LOGIN_USER_DOMAIN_ID, user.getDomain().getId());
             jsonObject.put(LOGIN_USER_DEPARTMENT_ID, user.getDepartment().getId());
+            jsonObject.put(LOGIN_USER_STATUS, user.getStatus());
             jsonObject.put(BUILD_NUMBER, buildVersion);
             jsonObject.put(LOGIN_TIME, DateConvertUtil.getTimestamp());
             jsonObject.put(TIME_ZONE, timeZone.getID());
