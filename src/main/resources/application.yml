@@ -172,7 +172,7 @@ chinese:
         dir: ${CHINESE_TEMPLATE_DIR:/home/chinese}
 invoice:
     base:
-        path: ${INVOICE_ATTACHMENT_DIR:/home/Assistanz/invoice/invoiceattachment}
+        path: ${INVOICE_ATTACHMENT_DIR:/home/D2-cloud/invoice/invoiceattachment}
 
 ---
 panda:
