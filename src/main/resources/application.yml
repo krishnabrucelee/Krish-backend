@@ -78,7 +78,7 @@ spring:
 
 #Payment page
     view:
-        prefix: /WEB-INF/jsp/
+        prefix: /jsp/
         suffix: .jsp
 ---
 
@@ -175,5 +175,6 @@ invoice:
         path: ${INVOICE_ATTACHMENT_DIR:/home/D2-cloud/invoice/invoiceattachment}
 
 ---
-panda:
-    url: ${PANDA_URL:http://localhost:9090/pandaui/login}
+payment:
+    return:
+        url: ${PAYMENT_RETURN_URL:http://localhost:9090/pandaui/login}

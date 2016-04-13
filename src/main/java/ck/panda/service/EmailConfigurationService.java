@@ -18,16 +18,17 @@ public interface EmailConfigurationService extends CRUDService<EmailConfiguratio
      * @param emailSubject subject of the email
      * @param emailBody body of the email
      * @throws MessagingException exception handles if occurs
-     * @throws Exception
+     * @throws Exception unhandled exception
      */
-    public void sendEmailTo(String emailTo, String emailSubject, String emailBody) throws MessagingException, Exception;
+    void sendEmailTo(String emailTo, String emailSubject, String emailBody) throws MessagingException, Exception;
 
     /**
      * Get the email configuration details if it is active.
      *
      * @param isActive true/false
      * @return Email Configuration
+     * @throws Exception unhandled exception
      */
-    public EmailConfiguration findByIsActive(Boolean isActive) throws Exception;
+    EmailConfiguration findByIsActive(Boolean isActive) throws Exception;
 
 }

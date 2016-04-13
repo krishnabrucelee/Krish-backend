@@ -344,7 +344,9 @@ public class Permission implements Serializable {
         /** User module constant. */
         USER,
         /** Report module constant. */
-        REPORT;
+        REPORT,
+        /** billing module constant. */
+        BILLING;
     }
 
     /**

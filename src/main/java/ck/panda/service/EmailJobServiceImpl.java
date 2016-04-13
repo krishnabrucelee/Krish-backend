@@ -38,6 +38,12 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
+/**
+ * Email job service implementation class used for send email template for
+ * user,domain admin. root admin for following events user signup, password
+ * reset, system alerts, invoice generation, resource limit exceed, invoice
+ * generation overdue, etc.,
+ */
 @Service
 public class EmailJobServiceImpl implements EmailJobService {
     /** Template encoding. */
@@ -157,7 +163,8 @@ public class EmailJobServiceImpl implements EmailJobService {
      * @param email email template dynamic variables.
      * @param user user details
      * @param emailConfiguration email configuration details
-     * @param templateName template name configuration details
+     * @param templateName template name configuration details.
+     * @param mimeEmail email content.
      * @return mimeEmail email details.
      * @throws Exception unhandled error
      */
@@ -166,7 +173,6 @@ public class EmailJobServiceImpl implements EmailJobService {
         // Defining the model object for the given Freemarker template
         Map<String, Object> context = new HashMap<String, Object>();
         Account account = new Account();
-
         if (email.getEvent().equals(EventTypes.EVENT_USER_CREATE)) {
             context.clear();
             account.setUserName(user.getUserName());
@@ -390,6 +396,7 @@ public class EmailJobServiceImpl implements EmailJobService {
      *
      * @param context Hashmap variable for dynamic content.
      * @param templateName template name.
+     * @param templatePath email template path.
      * @return email content.
      * @throws MessagingException unhandled exception.
      */

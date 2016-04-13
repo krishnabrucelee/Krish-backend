@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Properties;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +23,7 @@ import ck.panda.util.domain.vo.PagingAndSorting;
 @Service
 public class EmailConfigurationServiceImpl implements EmailConfigurationService {
 
+    /** Get email configuration. */
     @Autowired
     private EmailConfigurationRepository emailRepo;
 

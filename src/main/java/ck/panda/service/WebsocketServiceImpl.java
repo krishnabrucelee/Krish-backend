@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import ck.panda.constants.CloudStackConstants;
@@ -22,6 +23,11 @@ public class WebsocketServiceImpl implements WebsocketService {
     /** Event notification service for tracking.*/
     @Autowired
     private EventNotificationService eventNotificationService;
+
+    @Scheduled(fixedDelay = 60000)
+    public void handleEventTest() throws Exception {
+        messagingTemplate.convertAndSend("/topic/test","test web socket");
+    }
 
     @Override
     public void handleEventAction(Event event) throws Exception {

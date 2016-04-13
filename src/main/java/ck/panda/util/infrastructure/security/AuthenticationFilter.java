@@ -74,7 +74,7 @@ public class AuthenticationFilter extends GenericFilterBean {
     public static final String XAUTH_REQUEST = "x-requested-with";
 
     /** Domain name of the login user. */
-    public static final String DOMAIN_NAME= "domainname";
+    public static final String DOMAIN_NAME = "domainname";
 
     /** Root admin domain flag. */
     public static final String ROOT_DOMAIN = "ROOT";
@@ -115,17 +115,17 @@ public class AuthenticationFilter extends GenericFilterBean {
         Optional<String> domain = Optional.fromNullable(httpRequest.getHeader(XAUTH_REQUEST));
         String resourcePath = new UrlPathHelper().getPathWithinApplication(httpRequest);
         try {
-			if (resourcePath.contains("socket")) {
-				LOGGER.debug("Trying to authenticate user by x-auth-token method : ", token);
-				token = Optional.fromNullable(httpRequest.getAttribute("token").toString());
-			}
-			if (resourcePath.contains("panda")) {
-				ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
-				AuthenticatedExternalWebService authenticatedExternalWebService = new AuthenticatedExternalWebService(
-					"pandapay", null, AuthorityUtils.commaSeparatedStringToAuthorityList("BACKEND_ADMIN"));
-				authenticatedExternalWebService.setExternalWebService(externalWebService);
-				SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);
-			}
+            if (resourcePath.contains("socket")) {
+                LOGGER.debug("Trying to authenticate user by x-auth-token method : ", token);
+                token = Optional.fromNullable(httpRequest.getAttribute("token").toString());
+            }
+            if (resourcePath.contains("panda")) {
+                ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
+                AuthenticatedExternalWebService authenticatedExternalWebService = new AuthenticatedExternalWebService(
+                        "pandapay", null, AuthorityUtils.commaSeparatedStringToAuthorityList("BACKEND_ADMIN"));
+                authenticatedExternalWebService.setExternalWebService(externalWebService);
+                SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);
+            }
             if (postToAuthenticate(httpRequest, resourcePath)) {
                 LOGGER.debug("Trying to authenticate user by x-auth-username method : ", userName);
                 processUsernamePasswordAuthentication(httpRequest, httpResponse, userName, password, domain);
