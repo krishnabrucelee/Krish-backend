@@ -63,6 +63,26 @@ public class PingServer {
     }
 
     /**
+     * URL Mapping.All MR.ping requests are submitted in the form of a HTTP GET/POST with an associated command
+     * and any parameters. with headers
+     *
+     * @param queryValues - The web services command we wish to execute, such as create a virtual machine or create a
+     *            disk volume
+     * @param method - The request method
+     * @return final URL
+     * @throws Exception if any invalid parameters.
+     */
+    public String requestWithMethod(LinkedList<NameValuePair> queryValues, HttpMethod method) throws Exception {
+        try {
+            method.setFollowRedirects(true);
+            method.setQueryString(queryValues.toArray(new NameValuePair[0]));
+        } catch (Exception e) {
+            throw new CloudStackException(e);
+        }
+        return getResponse(method);
+    }
+
+    /**
      * URL Mapping.All MR.ping requests are submitted in the form of a HTTP POST with an associated command
      * and any parameters.
      *

@@ -4,7 +4,9 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URL;
 import java.util.LinkedList;
+import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -159,6 +161,68 @@ public class PingService {
         server.setServer(apiURL + "/invoice/"+id);
         LinkedList<NameValuePair> arguments = new LinkedList<NameValuePair>();
         String responseJson = server.request(arguments);
+        return responseJson;
+    }
+
+    /**
+     * Get the usage statistic.
+     *
+     * @param usageStatistics usage statistics
+     * @return - Json string response
+     * @throws Exception - Raise if any error
+     */
+    public String getUsageStatistics(String fromDate, String toDate, String groupingType, String domainUuid) throws Exception {
+        server.setServer(apiURL + "/usage/listUsageByPeriod");
+        LinkedList<NameValuePair> arguments = new LinkedList<NameValuePair>();
+        arguments.add(new NameValuePair("fromDate", fromDate));
+        arguments.add(new NameValuePair("toDate", toDate));
+        arguments.add(new NameValuePair("groupingType", groupingType));
+        arguments.add(new NameValuePair("domainUuid", domainUuid));
+        String responseJson = server.request(arguments);
+        return responseJson;
+    }
+
+    /**
+     * List invoice by domain uuid.
+     *
+     * @param sortBy sorting field.
+     * @param domainUuid domain uuid.
+     * @param status status of the invoice.
+     * @param range range of the invoice.
+     * @param limit limit of the invoice.
+     * @return Invoice status
+     * @throws Exception if errors.
+     */
+    public String listInvoiceByDomainId(String sortBy, String domainUuid, String status, String range, String limit) throws Exception {
+        HttpMethod method = new GetMethod(apiURL + "/invoice/listByDomain");
+        method.setRequestHeader("Range", range);
+        LinkedList<NameValuePair> arguments = new LinkedList<NameValuePair>();
+        arguments.add(new NameValuePair("sortBy", sortBy));
+        arguments.add(new NameValuePair("domainUuid", domainUuid));
+        arguments.add(new NameValuePair("status", status));
+        arguments.add(new NameValuePair("range", range));
+        arguments.add(new NameValuePair("limit", limit));
+        String responseJson = server.requestWithMethod(arguments, method);
+        return responseJson;
+    }
+
+    /**
+     * List invoices.
+     *
+     * @param sortBy sorting field.
+     * @param range range of the invoice.
+     * @param limit limit of the invoice.
+     * @return Invoice list
+     * @throws Exception if errors.
+     */
+    public String listInvoice(String sortBy, String range, String limit) throws Exception {
+        HttpMethod method = new GetMethod(apiURL + "/invoice");
+        method.setRequestHeader("Range", range);
+        LinkedList<NameValuePair> arguments = new LinkedList<NameValuePair>();
+        arguments.add(new NameValuePair("sortBy", sortBy));
+        arguments.add(new NameValuePair("range", range));
+        arguments.add(new NameValuePair("limit", limit));
+        String responseJson = server.requestWithMethod(arguments, method);
         return responseJson;
     }
 
