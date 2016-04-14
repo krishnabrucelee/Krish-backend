@@ -53,7 +53,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param isActive true/false
      * @return list of filtered template
      */
-    @Query(value = "SELECT template FROM Template template WHERE (template.architecture =:architecture OR 'ALL' =:architecture) AND template.type <>:type AND template.status = :status AND (template.share IS TRUE OR template.featured IS TRUE) AND template.isActive =:isActive")
+    @Query(value = "SELECT template FROM Template template WHERE (template.architecture =:architecture OR 'ALL' =:architecture) AND template.type <>:type AND template.status = :status AND template.share IS TRUE AND template.featured IS TRUE OR ( template.share IS TRUE AND template.featured IS FALSE) AND template.isActive =:isActive")
     List<Template> findByTemplateAndFeature(@Param("architecture") String architecture, @Param("type") TemplateType type,
         @Param("status") Status status, @Param("isActive") Boolean isActive);
 
