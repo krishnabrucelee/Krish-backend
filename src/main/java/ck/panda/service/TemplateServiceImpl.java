@@ -219,12 +219,13 @@ public class TemplateServiceImpl implements TemplateService {
                 }
             }
         }
-        User user = userService.find(template.getTemplateOwnerId());
-        if(user.getType() == UserType.ROOT_ADMIN) {
-            template.setTemplateCreationType(false);
-        }
-        else {
-         template.setTemplateCreationType(true);
+        if (template.getTemplateOwnerId() != null) {
+            User user = userService.find(template.getTemplateOwnerId());
+            if (user.getType() == UserType.ROOT_ADMIN) {
+                template.setTemplateCreationType(false);
+            }
+        } else {
+            template.setTemplateCreationType(true);
         }
         return templateRepository.save(template);
     }
