@@ -116,6 +116,9 @@ public class Event implements Serializable {
         /** Event status as completed after get complete event process. */
         COMPLETED,
 
+        /** Event status as created after get create event process. */
+        CREATED,
+
         /** Event status as error action get failed. */
         ERROR,
 

@@ -208,15 +208,17 @@ public class Network implements Serializable {
 
     /** Enum type for Network Status. */
     public enum Status {
-        /** Network will be in a Allocated State. */
+        /** Indicates the network configuration is in allocated but not setup (Vlan is not set, and network is not ready for use). Isolated network goes to this state right after it's created with NO Vlan passed in. As vlan is optional parameter in createNetwork call only for Isolated networks, you should see this state for isolated networks only. */
         ALLOCATED,
-        /** Network will be in a destroyed State. */
+        /**  Indicates that the network is destroyed and not displayed to the end user. */
         DESTROY,
-        /** Network will be in a Implemented State. */
+        /** Indicates the network configuration is ready to be used by VM (Vlan is set for the network). */
         IMPLEMENTED,
-        /** Network will be in a Setup State. */
+        /** Indicates the network configuration is being implemented. */
+        IMPLEMENTING,
+        /** Indicates the network configuration is setup with Vlan from the moment it was created. Happens when vlan is passed in to the createNetwork call, so its immutable for the network for its entire lifecycle. Happens for Shared networks. */
         SETUP,
-        /** Network will be in a Shutdown State. */
+        /** Indicates the network configuration is being shutdown (this is intermediate state, although the name doesn't sound so). During this stage Vlan is being released, and the network goes back to Allocated state. */
         SHUTDOWN
     }
 

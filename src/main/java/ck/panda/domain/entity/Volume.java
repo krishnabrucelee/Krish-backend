@@ -257,8 +257,14 @@ public class Volume implements Serializable {
         DESTROY,
         /** Volume will be in a Expunged State. */
         EXPUNGED,
+        /** Volume will be in a Expunging State. */
+        EXPUNGING,
+        /** Volume will be in a Migrate State. */
+        MIGRATING,
         /** Volume will be in a Ready State. */
         READY,
+        /** Volume will be in a shapshot State. */
+        SNAPSHOTTING,
         /** Volume will be in a Upload State. */
         UPLOAD,
         /** Volume will be in a Uploaded State. */
@@ -270,12 +276,14 @@ public class Volume implements Serializable {
         /** Volume will be in a UploadNotStarted State. */
         UPLOAD_NOT_STARTED,
         /** The volume upload operation is in progress or in short the volume is on secondary storage. */
-        UPLOAD_OP
+        UPLOAD_OP,
+        /** The volume upload operation is in progress or in short the volume is on secondary storage. */
+        UPLOADOP
     }
 
     /** Format enum type used to list the static format values. */
     public enum Format {
-        /** Hypervisor format type as OVA. */
+        /** Hypervisor format type aSnapshottings OVA. */
         OVA,
         /** Hypervisor format type as QCOW2. */
         QCOW2,

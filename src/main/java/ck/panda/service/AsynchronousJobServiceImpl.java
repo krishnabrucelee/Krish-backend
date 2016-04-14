@@ -66,7 +66,7 @@ import ck.panda.util.error.exception.ApplicationException;
 @Service
 public class AsynchronousJobServiceImpl implements AsynchronousJobService {
 
-      /** Constant for user entity. */
+    /** Constant for user entity. */
     private static final String USER_DISABLE = "USER.DISABLE";
 
     /** Logger attribute. */
@@ -174,12 +174,12 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     private SnapshotService snapShotService;
 
     /**
-     *  Service reference to User.
+     * Service reference to User.
      */
     @Autowired
     private UserService userService;
     /**
-     *  Service reference to vmSnapshot Sevice.
+     * Service reference to vmSnapshot Sevice.
      */
     @Autowired
     private VmSnapshotService vmSnapshotService;
@@ -217,28 +217,22 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with CloudStack server list via Asynchronous Job.
      *
-     * @param Object
-     *            response object.
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @param Object response object.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     @Override
     public void syncResourceStatus(JSONObject eventObject) throws Exception {
-        Event asyncJobEvent = new Event();
         // Event record.
         configUtil.setServer(1L);
         String eventObjectResult = cloudStackInstanceService.queryAsyncJobResult(eventObject.getString(CS_ASYNC_JOB_ID),
                 CloudStackConstants.JSON);
-
         JSONObject jobResultResponse = new JSONObject(eventObjectResult)
                 .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
         JSONObject jobResult = null;
         if (jobResultResponse.has(CloudStackConstants.CS_JOB_RESULT)) {
             jobResult = jobResultResponse.getJSONObject(CloudStackConstants.CS_JOB_RESULT);
         }
-
         String commandText = null;
         if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).contains(".")) {
             commandText = eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).substring(0,
@@ -246,40 +240,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         } else {
             commandText = eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE);
         }
-        // Event record for async call.
-        asyncJobEvent.setEvent(eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
-        asyncJobEvent.setEventDateTime(convertEntityService.getTimeService().getCurrentDateAndTime());
-        asyncJobEvent.setEventOwnerId(
-                convertEntityService.getOwnerByUuid(eventObject.getString(CloudStackConstants.CS_USER)));
-        asyncJobEvent.setEventType(EventType.ASYNC);
-        JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
-        if (eventObject.getString(CloudStackConstants.CS_STATUS)
-                .equalsIgnoreCase(CloudStackConstants.CS_STATUS_FAILED) && jobResult != null) {
-            asyncJobEvent.setMessage(jobResult.getString(CloudStackConstants.CS_ERROR_TEXT));
-            asyncJobEvent.setStatus(Event.Status.FAILED);
-            if (json.has(CloudStackConstants.CS_UUID)) {
-                asyncJobEvent.setResourceUuid(json.getString(CloudStackConstants.CS_UUID));
-            }
-            switch (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)) {
-            case EventTypes.EVENT_VM_SNAPSHOT_CREATE:
-                syncService.syncVmSnapshots();
-                break;
-            default:
-                LOGGER.debug("No async required");
-            }
-        } else {
-            if (eventObject.has(CloudStackConstants.CS_INSTANCE_UUID)) {
-                asyncJobEvent.setResourceUuid(eventObject.getString(CloudStackConstants.CS_INSTANCE_UUID));
-            } else if (eventObject.has(CloudStackConstants.CS_UUID)) {
-                asyncJobEvent.setResourceUuid(json.getString(CloudStackConstants.CS_UUID));
-            }
-            asyncJobEvent.setStatus(
-                    Event.Status.valueOf(eventObject.getString(CloudStackConstants.CS_STATUS).toUpperCase()));
-        }
-        asyncJobEvent.setEventStartId(json.getString(CloudStackConstants.CS_EVENT_ID));
-        asyncJobEvent.setJobId(eventObject.getString(CloudStackConstants.CS_ASYNC_JOB_ID));
-        // websocket record for async call.
-        websocketService.handleEventAction(asyncJobEvent);
         if (eventObject.getString(CloudStackConstants.CS_STATUS)
                 .equalsIgnoreCase(CloudStackConstants.CS_STATUS_SUCCEEDED) && jobResult != null) {
             switch (commandText) {
@@ -395,12 +355,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with CloudStack server virtual machine.
      *
-     * @param jobResult
-     *            job result
-     * @param eventObject
-     *            network event object
-     * @throws Exception
-     *             cloudstack unhandled errors
+     * @param jobResult job result
+     * @param eventObject network event object
+     * @throws Exception cloudstack unhandled errors
      */
     public void syncVirtualMachine(JSONObject jobResult, JSONObject eventObject) throws Exception {
 
@@ -431,12 +388,15 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     csVm.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
                             csVm.getTransDepartmentId(), convertEntityService.getDomain(csVm.getTransDomainId())));
                     if (csVm.getTransProjectId() != null) {
-                        csVm.setDepartmentId(convertEntityService.getProject(csVm.getTransProjectId()).getDepartmentId());
+                        csVm.setDepartmentId(
+                                convertEntityService.getProject(csVm.getTransProjectId()).getDepartmentId());
                     }
                     csVm.setTemplateId(convertEntityService.getTemplateId(csVm.getTransTemplateId()));
                     csVm.setComputeOfferingId(convertEntityService.getComputeOfferId(csVm.getTransComputeOfferingId()));
                     if (csVm.getTransKeypairName() != null) {
-                        instance.setKeypairId(convertEntityService.getSSHKeyByNameAndDepartment(csVm.getTransKeypairName(), csVm.getDepartmentId()).getId());
+                        instance.setKeypairId(convertEntityService
+                                .getSSHKeyByNameAndDepartment(csVm.getTransKeypairName(), csVm.getDepartmentId())
+                                .getId());
                     }
                     if (csVm.getHostId() != null) {
                         csVm.setPodId(convertEntityService
@@ -507,13 +467,15 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     }
                     if (csVm.getProjectId() != null) {
                         instance.setProjectId(csVm.getProjectId());
-                        instance.setDepartmentId(convertEntityService.getProjectById(csVm.getProjectId()).getDepartmentId());
+                        instance.setDepartmentId(
+                                convertEntityService.getProjectById(csVm.getProjectId()).getDepartmentId());
                     }
                     if (csVm.getInstanceOwnerId() != null) {
                         instance.setInstanceOwnerId(csVm.getInstanceOwnerId());
                     }
                     if (instance.getTemplateId() != null) {
-                        instance.setOsType(convertEntityService.getTemplateById(instance.getTemplateId()).getDisplayText());
+                        instance.setOsType(
+                                convertEntityService.getTemplateById(instance.getTemplateId()).getDisplayText());
                     }
                     instance.setTemplateName(csVm.getTemplateName());
                     LOGGER.debug("sync VM for ASYNC");
@@ -538,7 +500,8 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                         convertEntityService.getDomain(vmInstance.getTransDomainId())));
                 if (vmInstance.getTransHypervisor() != null) {
                     if (hypervisorService.findByName(vmInstance.getTransHypervisor()) != null) {
-                        vmInstance.setHypervisorId(hypervisorService.findByName(vmInstance.getTransHypervisor()).getId());
+                        vmInstance
+                                .setHypervisorId(hypervisorService.findByName(vmInstance.getTransHypervisor()).getId());
                     }
                 }
                 vmInstance.setDepartmentId(
@@ -552,10 +515,12 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                             .getPodIdByHost(convertEntityService.getHostId(vmInstance.getTransHostId())));
                 }
                 if (vmInstance.getTransKeypairName() != null) {
-                    vmInstance.setKeypairId(convertEntityService.getSSHKeyByNameAndDepartment(vmInstance.getTransKeypairName(), vmInstance.getDepartmentId()).getId());
+                    vmInstance.setKeypairId(convertEntityService.getSSHKeyByNameAndDepartment(
+                            vmInstance.getTransKeypairName(), vmInstance.getDepartmentId()).getId());
                 }
                 if (vmInstance.getTemplateId() != null) {
-                    vmInstance.setOsType(convertEntityService.getTemplateById(vmInstance.getTemplateId()).getDisplayText());
+                    vmInstance.setOsType(
+                            convertEntityService.getTemplateById(vmInstance.getTemplateId()).getDisplayText());
                 }
                 vmInstance.setTemplateName(vmInstance.getTemplateName());
 
@@ -621,29 +586,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                                 CS_Domain, Update);
                     }
                 }
-                Event asyncJobEvent = new Event();
-                // Event record for async call.
-                asyncJobEvent.setEvent(eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
-                asyncJobEvent.setEventDateTime(convertEntityService.getTimeService().getCurrentDateAndTime());
-                asyncJobEvent.setEventOwnerId(convertEntityService.getOwnerByUuid(eventObject.getString(CloudStackConstants.CS_USER)));
-                asyncJobEvent.setEventType(EventType.ASYNC);
-                JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
-                if (eventObject.getString(CloudStackConstants.CS_STATUS).equalsIgnoreCase(CloudStackConstants.CS_STATUS_FAILED)) {
-                    asyncJobEvent.setMessage(jobResult.getString(CloudStackConstants.CS_ERROR_TEXT));
-                    asyncJobEvent.setStatus(Event.Status.FAILED);
-                    asyncJobEvent.setResourceUuid(json.getString(CloudStackConstants.CS_UUID));
-                } else {
-                    if (eventObject.has(CloudStackConstants.CS_INSTANCE_UUID)) {
-                        asyncJobEvent.setResourceUuid(eventObject.getString(CloudStackConstants.CS_INSTANCE_UUID));
-                    } else {
-                        asyncJobEvent.setResourceUuid(json.getString(CloudStackConstants.CS_UUID));
-                    }
-                    asyncJobEvent.setStatus(Event.Status.valueOf(eventObject.getString(CloudStackConstants.CS_STATUS).toUpperCase()));
-                }
-                asyncJobEvent.setEventStartId(json.getString(CloudStackConstants.CS_EVENT_ID));
-                asyncJobEvent.setJobId(eventObject.getString(CloudStackConstants.CS_ASYNC_JOB_ID));
-                // websocket record for async call.
-                websocketService.handleEventAction(asyncJobEvent);
             }
             if (eventObject.getString("commandEventType").equals(EventTypes.EVENT_VM_DESTROY)) {
                 if (!convertEntityService.getDepartmentById(vmIn.getDepartmentId()).getType()
@@ -664,29 +606,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                                 CS_Domain, Delete);
                     }
                 }
-                Event asyncJobEvent = new Event();
-                // Event record for async call.
-                asyncJobEvent.setEvent(eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
-                asyncJobEvent.setEventDateTime(convertEntityService.getTimeService().getCurrentDateAndTime());
-                asyncJobEvent.setEventOwnerId(convertEntityService.getOwnerByUuid(eventObject.getString(CloudStackConstants.CS_USER)));
-                asyncJobEvent.setEventType(EventType.ASYNC);
-                JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
-                if (eventObject.getString(CloudStackConstants.CS_STATUS).equalsIgnoreCase(CloudStackConstants.CS_STATUS_FAILED)) {
-                    asyncJobEvent.setMessage(jobResult.getString(CloudStackConstants.CS_ERROR_TEXT));
-                    asyncJobEvent.setStatus(Event.Status.FAILED);
-                    asyncJobEvent.setResourceUuid(json.getString(CloudStackConstants.CS_UUID));
-                } else {
-                    if (eventObject.has(CloudStackConstants.CS_INSTANCE_UUID)) {
-                        asyncJobEvent.setResourceUuid(eventObject.getString(CloudStackConstants.CS_INSTANCE_UUID));
-                    } else {
-                        asyncJobEvent.setResourceUuid(json.getString(CloudStackConstants.CS_UUID));
-                    }
-                    asyncJobEvent.setStatus(Event.Status.valueOf(eventObject.getString(CloudStackConstants.CS_STATUS).toUpperCase()));
-                }
-                asyncJobEvent.setEventStartId(json.getString(CloudStackConstants.CS_EVENT_ID));
-                asyncJobEvent.setJobId(eventObject.getString(CloudStackConstants.CS_ASYNC_JOB_ID));
-                // websocket record for async call.
-                websocketService.handleEventAction(asyncJobEvent);
             }
         }
     }
@@ -694,12 +613,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Get the default NIC when creating the template.
      *
-     * @param vmInstance
-     *            instance details
-     * @throws ApplicationException
-     *             unhandled application errors
-     * @throws Exception
-     *             cloudstack unhandled errors
+     * @param vmInstance instance details
+     * @throws ApplicationException unhandled application errors
+     * @throws Exception cloudstack unhandled errors
      */
     public void assignNicTovM(VmInstance vmInstance) throws ApplicationException, Exception {
         HashMap<String, String> nicMap = new HashMap<String, String>();
@@ -761,12 +677,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Get the default Volume when creating the template.
      *
-     * @param vmInstance
-     *            instance details
-     * @throws ApplicationException
-     *             unhandled application errors
-     * @throws Exception
-     *             cloudstack unhandled errors
+     * @param vmInstance instance details
+     * @throws ApplicationException unhandled application errors
+     * @throws Exception cloudstack unhandled errors
      */
     public void assignVolumeTovM(VmInstance vmInstance) throws ApplicationException, Exception {
         HashMap<String, String> volumeMap = new HashMap<String, String>();
@@ -806,14 +719,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with CloudStack server Network from Asynchronous Job.
      *
-     * @param jobResult
-     *            job result
-     * @param eventObject
-     *            network event object
-     * @throws ApplicationException
-     *             unhandled application errors
-     * @throws Exception
-     *             cloudstack unhandled errors
+     * @param jobResult job result
+     * @param eventObject network event object
+     * @throws ApplicationException unhandled application errors
+     * @throws Exception cloudstack unhandled errors
      */
     public void asyncNetwork(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
 
@@ -910,14 +819,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with CloudStack server Firewall from Asynchronous Job.
      *
-     * @param jobResult
-     *            job result
-     * @param eventObject
-     *            network event object
-     * @throws ApplicationException
-     *             unhandled application errors
-     * @throws Exception
-     *             cloudstack unhandled errors
+     * @param jobResult job result
+     * @param eventObject network event object
+     * @throws ApplicationException unhandled application errors
+     * @throws Exception cloudstack unhandled errors
      */
     public void asyncFirewall(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
         if (eventObject.getString("commandEventType").equals("FIREWALL.EGRESS.OPEN")) {
@@ -1034,17 +939,12 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     }
 
     /**
-     * Sync with CloudStack server Ip address for sourcenat from Asynchronous
-     * Job.
+     * Sync with CloudStack server Ip address for sourcenat from Asynchronous Job.
      *
-     * @param jobResult
-     *            job result
-     * @param eventObject
-     *            network event object
-     * @throws ApplicationException
-     *             unhandled application errors
-     * @throws Exception
-     *             cloudstack unhandled errors
+     * @param jobResult job result
+     * @param eventObject network event object
+     * @throws ApplicationException unhandled application errors
+     * @throws Exception cloudstack unhandled errors
      */
     public void asyncNat(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
         if (eventObject.getString("commandEventType").equals("STATICNAT.DISABLE")) {
@@ -1100,19 +1000,23 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                             .getNetworkById(convertEntityService.getNetworkByUuid(csIp.getTransNetworkId()))
                             .getDomainId());
                     ipService.update(persistIp);
-                    //Resource Count update
+                    // Resource Count update
                     if (!convertEntityService.getDepartmentById(persistIp.getDepartmentId()).getType()
                             .equals(AccountType.USER)) {
-                        updateResourceCountService.QuotaUpdateByResourceObject(persistIp, CS_IP, persistIp.getDomainId(), CS_Domain, Update);
+                        updateResourceCountService.QuotaUpdateByResourceObject(persistIp, CS_IP,
+                                persistIp.getDomainId(), CS_Domain, Update);
                     } else {
                         if (persistIp.getProjectId() != null) {
-                            updateResourceCountService.QuotaUpdateByResourceObject(persistIp, CS_IP, persistIp.getProjectId(), CS_Project, Update);
+                            updateResourceCountService.QuotaUpdateByResourceObject(persistIp, CS_IP,
+                                    persistIp.getProjectId(), CS_Project, Update);
                         }
                         if (persistIp.getDepartmentId() != null) {
-                            updateResourceCountService.QuotaUpdateByResourceObject(persistIp, CS_IP, persistIp.getDepartmentId(), CS_Department, Update);
+                            updateResourceCountService.QuotaUpdateByResourceObject(persistIp, CS_IP,
+                                    persistIp.getDepartmentId(), CS_Department, Update);
                         }
                         if (persistIp.getDomainId() != null) {
-                            updateResourceCountService.QuotaUpdateByResourceObject(persistIp, CS_IP, persistIp.getDomainId(), CS_Domain, Update);
+                            updateResourceCountService.QuotaUpdateByResourceObject(persistIp, CS_IP,
+                                    persistIp.getDomainId(), CS_Domain, Update);
                         }
                     }
                 }
@@ -1142,19 +1046,23 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 ipAddress.setSyncFlag(false);
                 ipService.ruleDelete(ipAddress);
                 ipService.softDelete(ipAddress);
-                //Resource Count delete
+                // Resource Count delete
                 if (!convertEntityService.getDepartmentById(ipAddress.getDepartmentId()).getType()
                         .equals(AccountType.USER)) {
-                    updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP, ipAddress.getDomainId(), CS_Domain, Delete);
+                    updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP, ipAddress.getDomainId(),
+                            CS_Domain, Delete);
                 } else {
                     if (ipAddress.getProjectId() != null) {
-                        updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP, ipAddress.getProjectId(), CS_Project, Delete);
+                        updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
+                                ipAddress.getProjectId(), CS_Project, Delete);
                     }
                     if (ipAddress.getDepartmentId() != null) {
-                        updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP, ipAddress.getDepartmentId(), CS_Department, Delete);
+                        updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
+                                ipAddress.getDepartmentId(), CS_Department, Delete);
                     }
                     if (ipAddress.getDomainId() != null) {
-                        updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP, ipAddress.getDomainId(), CS_Domain, Delete);
+                        updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
+                                ipAddress.getDomainId(), CS_Domain, Delete);
                     }
                 }
             }
@@ -1165,12 +1073,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with CloudStack server Network from Asynchronous Job.
      *
-     * @param eventObject
-     *            template event object
-     * @throws ApplicationException
-     *             unhandled application errors
-     * @throws Exception
-     *             cloudstack unhandled errors
+     * @param eventObject template event object
+     * @throws ApplicationException unhandled application errors
+     * @throws Exception cloudstack unhandled errors
      */
     public void asyncTemplates(JSONObject eventObject) throws ApplicationException, Exception {
 
@@ -1192,14 +1097,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with Cloud Server Volume.
      *
-     * @param jobResult
-     *            job result
-     * @param eventObject
-     *            volume event object
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @param jobResult job result
+     * @param eventObject volume event object
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     public void asyncVolume(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
 
@@ -1231,22 +1132,23 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 volume.setStatus(Status.ALLOCATED);
             }
             if (eventObject.getString("commandEventType").equals("VOLUME.UPLOAD")) {
-                //Resource count update for upload volume.
-                if (!convertEntityService.getDepartmentById(volume.getDepartmentId()).getType().equals(AccountType.USER)) {
-                    updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_UploadVolume, volume.getDomainId(),
-                            CS_Domain, Update);
+                // Resource count update for upload volume.
+                if (!convertEntityService.getDepartmentById(volume.getDepartmentId()).getType()
+                        .equals(AccountType.USER)) {
+                    updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_UploadVolume,
+                            volume.getDomainId(), CS_Domain, Update);
                 } else {
                     if (volume.getProjectId() != null) {
-                        updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_UploadVolume, volume.getProjectId(),
-                                CS_Project, Update);
+                        updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_UploadVolume,
+                                volume.getProjectId(), CS_Project, Update);
                     }
                     if (volume.getDepartmentId() != null) {
                         updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_UploadVolume,
                                 volume.getDepartmentId(), CS_Department, Update);
                     }
                     if (volume.getDomainId() != null) {
-                        updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_UploadVolume, volume.getDomainId(),
-                                CS_Domain, Update);
+                        updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_UploadVolume,
+                                volume.getDomainId(), CS_Domain, Update);
                     }
                 }
             }
@@ -1326,14 +1228,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with Cloud Server Volume.
      *
-     * @param jobResult
-     *            job result
-     * @param eventObject
-     *            volume event object
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @param jobResult job result
+     * @param eventObject volume event object
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     public void asyncNic(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
 
@@ -1381,20 +1279,21 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 csVmIpaddress.setUuid(csVmIpaddress.getUuid());
                 csVmIpaddress.setGuestIpAddress(csVmIpaddress.getGuestIpAddress());
                 csVmIpaddress.setNicId(convertEntityService.getNic(csVmIpaddress.getTransNicId()).getId());
-                csVmIpaddress.setVmInstanceId(convertEntityService.getNic(csVmIpaddress.getTransNicId()).getVmInstanceId());
+                csVmIpaddress
+                        .setVmInstanceId(convertEntityService.getNic(csVmIpaddress.getTransNicId()).getVmInstanceId());
                 csVmIpaddress.setIsActive(true);
                 List<VmIpaddress> vmIpList = new ArrayList<VmIpaddress>();
                 Nic nics = convertEntityService.getNic(csVmIpaddress.getTransNicId());
                 csVmIpaddress.setIpType(IpType.secondaryIpAddress);
-                    VmIpaddress persistVmIP = vmIpService.save(csVmIpaddress);
-                    nics.setSyncFlag(false);
-                    for(VmIpaddress vmIp : nics.getVmIpAddress()) {
-                        vmIp.getGuestIpAddress();
-                        vmIpList.add(vmIp);
-                    }
-                    vmIpList.add(persistVmIP);
-                    nics.setVmIpAddress(vmIpList);
-                    nicService.save(nics);
+                VmIpaddress persistVmIP = vmIpService.save(csVmIpaddress);
+                nics.setSyncFlag(false);
+                for (VmIpaddress vmIp : nics.getVmIpAddress()) {
+                    vmIp.getGuestIpAddress();
+                    vmIpList.add(vmIp);
+                }
+                vmIpList.add(persistVmIP);
+                nics.setVmIpAddress(vmIpList);
+                nicService.save(nics);
 
             }
 
@@ -1422,14 +1321,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with Cloud Server Network port forwarding.
      *
-     * @param jobResult
-     *            job result
-     * @param eventObject
-     *            volume event object
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @param jobResult job result
+     * @param eventObject volume event object
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     public void asyncNet(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
 
@@ -1478,28 +1373,29 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     @SuppressWarnings("unused")
     public void asyncSnapshot(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
 
-         if (eventObject.getString("commandEventType").equals("SNAPSHOT.CREATE") || eventObject.getString("commandEventType").equals("SNAPSHOT.REVERT") || eventObject.getString("commandEventType").equals(EventTypes.EVENT_UNKNOWN)) {
-             Snapshot snapShot = Snapshot.convert(jobResult.getJSONObject("snapshot"));
-             snapShot.setZoneId(convertEntityService.getZoneId(snapShot.getTransZoneId()));
-             snapShot.setDomainId(convertEntityService.getDomainId(snapShot.getTransDomainId()));
-             snapShot.setVolumeId(convertEntityService.getVolumeId(snapShot.getTransVolumeId()));
-             snapShot.setDepartmentId(
-                     convertEntityService.getDepartmentByUsernameAndDomains(snapShot.getTransDepartmentId(),
-                             convertEntityService.getDomain(snapShot.getTransDomainId())));
-             snapShot.setSyncFlag(false);
-             if(snapShotService.findByUUID(snapShot.getUuid()) == null) {
-                 snapShotService.save(snapShot);
-             }
+        if (eventObject.getString("commandEventType").equals("SNAPSHOT.CREATE")
+                || eventObject.getString("commandEventType").equals("SNAPSHOT.REVERT")
+                || eventObject.getString("commandEventType").equals(EventTypes.EVENT_UNKNOWN)) {
+            Snapshot snapShot = Snapshot.convert(jobResult.getJSONObject("snapshot"));
+            snapShot.setZoneId(convertEntityService.getZoneId(snapShot.getTransZoneId()));
+            snapShot.setDomainId(convertEntityService.getDomainId(snapShot.getTransDomainId()));
+            snapShot.setVolumeId(convertEntityService.getVolumeId(snapShot.getTransVolumeId()));
+            snapShot.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
+                    snapShot.getTransDepartmentId(), convertEntityService.getDomain(snapShot.getTransDomainId())));
+            snapShot.setSyncFlag(false);
+            if (snapShotService.findByUUID(snapShot.getUuid()) == null) {
+                snapShotService.save(snapShot);
+            }
 
-         }
-          if (eventObject.getString("commandEventType").equals("SNAPSHOT.DELETE")) {
-             JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
-             Snapshot snapshot = snapShotService.findByUUID(json.getString("id"));
-             if (snapshot != null) {
-                 snapshot.setSyncFlag(false);
-                 snapShotService.softDelete(snapshot);
-             }
-          }
+        }
+        if (eventObject.getString("commandEventType").equals("SNAPSHOT.DELETE")) {
+            JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
+            Snapshot snapshot = snapShotService.findByUUID(json.getString("id"));
+            if (snapshot != null) {
+                snapshot.setSyncFlag(false);
+                snapShotService.softDelete(snapshot);
+            }
+        }
     }
 
     /**
@@ -1512,55 +1408,58 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      */
     public void asyncVMSnapshot(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
 
-         if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VM_SNAPSHOT_CREATE)) {
-             VmSnapshot vmSnapshot = VmSnapshot.convert(jobResult.getJSONObject(CloudStackConstants.CS_VM_SNAPSHOT));
-             vmSnapshot.setVmId(convertEntityService.getVmInstanceId(vmSnapshot.getTransvmInstanceId()));
-             vmSnapshot.setDomainId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getDomainId());
-             vmSnapshot.setOwnerId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getInstanceOwnerId());
-             vmSnapshot.setZoneId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getZoneId());
-             VmInstance instance = virtualMachineService.findByUUID(vmSnapshot.getTransvmInstanceId());
-             vmSnapshot.setDepartmentId(instance.getDepartmentId());
-             vmSnapshot.setProjectId(instance.getProjectId());
-             List<VmSnapshot> vmSnapshotList = vmSnapshotService.findByVmInstance(vmSnapshot.getVmId(), false);
-             for (VmSnapshot vmSnap : vmSnapshotList) {
-                 if (vmSnap.getIsCurrent()) {
-                     vmSnap.setIsCurrent(false);
-                     vmSnap.setSyncFlag(false);
-                     vmSnapshotService.save(vmSnap);
-                 }
-             }
+        if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
+                .equals(EventTypes.EVENT_VM_SNAPSHOT_CREATE)) {
+            VmSnapshot vmSnapshot = VmSnapshot.convert(jobResult.getJSONObject(CloudStackConstants.CS_VM_SNAPSHOT));
+            vmSnapshot.setVmId(convertEntityService.getVmInstanceId(vmSnapshot.getTransvmInstanceId()));
+            vmSnapshot.setDomainId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getDomainId());
+            vmSnapshot.setOwnerId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getInstanceOwnerId());
+            vmSnapshot.setZoneId(convertEntityService.getVm(vmSnapshot.getTransvmInstanceId()).getZoneId());
+            VmInstance instance = virtualMachineService.findByUUID(vmSnapshot.getTransvmInstanceId());
+            vmSnapshot.setDepartmentId(instance.getDepartmentId());
+            vmSnapshot.setProjectId(instance.getProjectId());
+            List<VmSnapshot> vmSnapshotList = vmSnapshotService.findByVmInstance(vmSnapshot.getVmId(), false);
+            for (VmSnapshot vmSnap : vmSnapshotList) {
+                if (vmSnap.getIsCurrent()) {
+                    vmSnap.setIsCurrent(false);
+                    vmSnap.setSyncFlag(false);
+                    vmSnapshotService.save(vmSnap);
+                }
+            }
 
-             vmSnapshot.setSyncFlag(false);
-             if (vmSnapshotService.findByUUID(vmSnapshot.getUuid()) == null) {
-                 vmSnapshotService.save(vmSnapshot);
-             }
-         }
+            vmSnapshot.setSyncFlag(false);
+            if (vmSnapshotService.findByUUID(vmSnapshot.getUuid()) == null) {
+                vmSnapshotService.save(vmSnapshot);
+            }
+        }
 
-         if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VM_SNAPSHOT_REVERT)) {
-             JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
-             VmSnapshot vmsnapshot = vmSnapshotService.findByUUID(json.getString(CloudStackConstants.CS_VM_SNAPSHOT_ID));
-             List<VmSnapshot> vmSnapshotList = vmSnapshotService.findByVmInstance(vmsnapshot.getVmId(), false);
-             for (VmSnapshot vmSnap : vmSnapshotList) {
-                 if (vmSnap.getIsCurrent()) {
-                     vmSnap.setIsCurrent(false);
-                     vmSnap.setSyncFlag(false);
-                     vmSnapshotService.save(vmSnap);
-                 }
-             }
-             vmsnapshot.setStatus(ck.panda.domain.entity.VmSnapshot.Status.valueOf(EventTypes.EVENT_READY));
-             vmsnapshot.setIsCurrent(true);
-             vmsnapshot.setSyncFlag(false);
-             vmSnapshotService.save(vmsnapshot);
-         }
+        if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
+                .equals(EventTypes.EVENT_VM_SNAPSHOT_REVERT)) {
+            JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
+            VmSnapshot vmsnapshot = vmSnapshotService.findByUUID(json.getString(CloudStackConstants.CS_VM_SNAPSHOT_ID));
+            List<VmSnapshot> vmSnapshotList = vmSnapshotService.findByVmInstance(vmsnapshot.getVmId(), false);
+            for (VmSnapshot vmSnap : vmSnapshotList) {
+                if (vmSnap.getIsCurrent()) {
+                    vmSnap.setIsCurrent(false);
+                    vmSnap.setSyncFlag(false);
+                    vmSnapshotService.save(vmSnap);
+                }
+            }
+            vmsnapshot.setStatus(ck.panda.domain.entity.VmSnapshot.Status.valueOf(EventTypes.EVENT_READY));
+            vmsnapshot.setIsCurrent(true);
+            vmsnapshot.setSyncFlag(false);
+            vmSnapshotService.save(vmsnapshot);
+        }
 
-         if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VM_SNAPSHOT_DELETE)) {
-             JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
-             VmSnapshot vmsnapshot = vmSnapshotService.findByUUID(json.getString(CloudStackConstants.CS_VM_SNAPSHOT_ID));
-             vmsnapshot.setIsRemoved(true);
-             vmsnapshot.setStatus(ck.panda.domain.entity.VmSnapshot.Status.Expunging);
-             vmsnapshot.setSyncFlag(false);
-             vmSnapshotService.save(vmsnapshot);
-         }
+        if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
+                .equals(EventTypes.EVENT_VM_SNAPSHOT_DELETE)) {
+            JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
+            VmSnapshot vmsnapshot = vmSnapshotService.findByUUID(json.getString(CloudStackConstants.CS_VM_SNAPSHOT_ID));
+            vmsnapshot.setIsRemoved(true);
+            vmsnapshot.setStatus(ck.panda.domain.entity.VmSnapshot.Status.Expunging);
+            vmsnapshot.setSyncFlag(false);
+            vmSnapshotService.save(vmsnapshot);
+        }
     }
 
     /**
@@ -1573,75 +1472,85 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      */
     public void asyncVpn(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
 
-         if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_REMOTE_ACCESS_CREATE)) {
-             JSONObject jobresultReponse = jobResult.getJSONObject(CloudStackConstants.CS_REMOTE_ACCESS_VPN);
-             IpAddress ipAddress = ipService.findbyUUID(jobresultReponse.getString(CloudStackConstants.CS_PUBLIC_IP_ID));
-             ipAddress.setVpnUuid(jobresultReponse.getString(CloudStackConstants.CS_ID));
-             ipAddress.setVpnPresharedKey(convertEncryptedKey(jobresultReponse.getString(CloudStackConstants.CS_PRESHARED_KEY)));
-             ipAddress.setVpnState(VpnState.valueOf(jobresultReponse.getString(CloudStackConstants.CS_STATE).toUpperCase()));
-             ipAddress.setVpnForDisplay(jobresultReponse.getBoolean(CloudStackConstants.CS_FOR_DISPLAY));
-             ipAddress.setSyncFlag(false);
-             ipService.save(ipAddress);
-         }
+        if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
+                .equals(EventTypes.EVENT_REMOTE_ACCESS_CREATE)) {
+            JSONObject jobresultReponse = jobResult.getJSONObject(CloudStackConstants.CS_REMOTE_ACCESS_VPN);
+            IpAddress ipAddress = ipService.findbyUUID(jobresultReponse.getString(CloudStackConstants.CS_PUBLIC_IP_ID));
+            ipAddress.setVpnUuid(jobresultReponse.getString(CloudStackConstants.CS_ID));
+            ipAddress.setVpnPresharedKey(
+                    convertEncryptedKey(jobresultReponse.getString(CloudStackConstants.CS_PRESHARED_KEY)));
+            ipAddress.setVpnState(
+                    VpnState.valueOf(jobresultReponse.getString(CloudStackConstants.CS_STATE).toUpperCase()));
+            ipAddress.setVpnForDisplay(jobresultReponse.getBoolean(CloudStackConstants.CS_FOR_DISPLAY));
+            ipAddress.setSyncFlag(false);
+            ipService.save(ipAddress);
+        }
 
-         if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_REMOTE_ACCESS_DESTROY)) {
-             JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
-             IpAddress ipAddress = ipService.findbyUUID(json.getString(CloudStackConstants.CS_PUBLIC_IP_ID));
-             ipAddress.setVpnState(VpnState.DISABLED);
-             ipAddress.setSyncFlag(false);
-             ipService.save(ipAddress);
-         }
+        if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
+                .equals(EventTypes.EVENT_REMOTE_ACCESS_DESTROY)) {
+            JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
+            IpAddress ipAddress = ipService.findbyUUID(json.getString(CloudStackConstants.CS_PUBLIC_IP_ID));
+            ipAddress.setVpnState(VpnState.DISABLED);
+            ipAddress.setSyncFlag(false);
+            ipService.save(ipAddress);
+        }
 
-         if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VPN_USER_ADD)) {
-             JSONObject jobresultReponse = jobResult.getJSONObject(CloudStackConstants.CS_VPN_USER);
-             VpnUser vpnUser = new VpnUser();
-             vpnUser.setUuid(jobresultReponse.getString(CloudStackConstants.CS_ID));
-             vpnUser.setUserName(jobresultReponse.getString(CloudStackConstants.CS_USER_NAME));
-             vpnUser.setDomainId(convertEntityService.getDomainId(jobresultReponse.getString(CloudStackConstants.CS_DOMAIN_ID)));
-             if (jobresultReponse.has(CloudStackConstants.CS_ACCOUNT)) {
-                 String projectAccountName = jobresultReponse.getString(CloudStackConstants.CS_ACCOUNT);
-                     String[] split = projectAccountName.split("-");
-                     if (split[0].equals("PrjAcct")) {
-                         ArrayList<String> list = new ArrayList<String>();
-                         Collections.addAll(list, split);
-                         list.remove(split[0]);
-                         list.remove(split[split.length-1]);
-                         String ProjectConcatName = String.join("-", list);
-                         Project projectDetails = projectService.findByProjectNameAndIsActive(ProjectConcatName, vpnUser.getDomainId(), true);
-                         if (projectDetails != null) {
-                             vpnUser.setProjectId(projectDetails.getId());
-                             vpnUser.setDepartmentId(convertEntityService.getProjectById(vpnUser.getProjectId()).getDepartmentId()) ;
-                         }
-                     } else {
-                         vpnUser.setDepartmentId(convertEntityService.getDepartmentByUsername(jobresultReponse.getString(CloudStackConstants.CS_ACCOUNT), vpnUser.getDomainId()));
-                     }
-             }
-             if (vpnUserService.findbyUUID(vpnUser.getUuid()) == null) {
-                 vpnUser.setSyncFlag(false);
-                 vpnUserService.save(vpnUser);
-             }
-         }
+        if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VPN_USER_ADD)) {
+            JSONObject jobresultReponse = jobResult.getJSONObject(CloudStackConstants.CS_VPN_USER);
+            VpnUser vpnUser = new VpnUser();
+            vpnUser.setUuid(jobresultReponse.getString(CloudStackConstants.CS_ID));
+            vpnUser.setUserName(jobresultReponse.getString(CloudStackConstants.CS_USER_NAME));
+            vpnUser.setDomainId(
+                    convertEntityService.getDomainId(jobresultReponse.getString(CloudStackConstants.CS_DOMAIN_ID)));
+            if (jobresultReponse.has(CloudStackConstants.CS_ACCOUNT)) {
+                String projectAccountName = jobresultReponse.getString(CloudStackConstants.CS_ACCOUNT);
+                String[] split = projectAccountName.split("-");
+                if (split[0].equals("PrjAcct")) {
+                    ArrayList<String> list = new ArrayList<String>();
+                    Collections.addAll(list, split);
+                    list.remove(split[0]);
+                    list.remove(split[split.length - 1]);
+                    String ProjectConcatName = String.join("-", list);
+                    Project projectDetails = projectService.findByProjectNameAndIsActive(ProjectConcatName,
+                            vpnUser.getDomainId(), true);
+                    if (projectDetails != null) {
+                        vpnUser.setProjectId(projectDetails.getId());
+                        vpnUser.setDepartmentId(
+                                convertEntityService.getProjectById(vpnUser.getProjectId()).getDepartmentId());
+                    }
+                } else {
+                    vpnUser.setDepartmentId(convertEntityService.getDepartmentByUsername(
+                            jobresultReponse.getString(CloudStackConstants.CS_ACCOUNT), vpnUser.getDomainId()));
+                }
+            }
+            if (vpnUserService.findbyUUID(vpnUser.getUuid()) == null) {
+                vpnUser.setSyncFlag(false);
+                vpnUserService.save(vpnUser);
+            }
+        }
 
-         if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VPN_USER_REMOVE)) {
-             JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
-             if (json.has(CloudStackConstants.CS_ACCOUNT)) {
-             VpnUser vpnUser = vpnUserService.findbyDomainWithAccountAndUser(json.getString(CloudStackConstants.CS_USER_NAME),
-                 json.getString(CloudStackConstants.CS_ACCOUNT),
-                 json.getString(CloudStackConstants.CS_DOMAIN_ID));
-             if (vpnUser != null) {
-                 vpnUser.setSyncFlag(false);
-                 vpnUserService.softDelete(vpnUser);
-             }
-             } else if (json.has(CloudStackConstants.CS_PROJECT_ID)) {
-                 VpnUser vpnUser = vpnUserService.findbyDomainWithProjectAndUser(json.getString(CloudStackConstants.CS_USER_NAME),
-                         json.getString(CloudStackConstants.CS_PROJECT_ID),
-                         json.getString(CloudStackConstants.CS_DOMAIN_ID));
-                     if (vpnUser != null) {
-                         vpnUser.setSyncFlag(false);
-                         vpnUserService.softDelete(vpnUser);
-                     }
-             }
-         }
+        if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VPN_USER_REMOVE)) {
+            JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
+            if (json.has(CloudStackConstants.CS_ACCOUNT)) {
+                VpnUser vpnUser = vpnUserService.findbyDomainWithAccountAndUser(
+                        json.getString(CloudStackConstants.CS_USER_NAME),
+                        json.getString(CloudStackConstants.CS_ACCOUNT),
+                        json.getString(CloudStackConstants.CS_DOMAIN_ID));
+                if (vpnUser != null) {
+                    vpnUser.setSyncFlag(false);
+                    vpnUserService.softDelete(vpnUser);
+                }
+            } else if (json.has(CloudStackConstants.CS_PROJECT_ID)) {
+                VpnUser vpnUser = vpnUserService.findbyDomainWithProjectAndUser(
+                        json.getString(CloudStackConstants.CS_USER_NAME),
+                        json.getString(CloudStackConstants.CS_PROJECT_ID),
+                        json.getString(CloudStackConstants.CS_DOMAIN_ID));
+                if (vpnUser != null) {
+                    vpnUser.setSyncFlag(false);
+                    vpnUserService.softDelete(vpnUser);
+                }
+            }
+        }
     }
 
     /**
@@ -1655,9 +1564,11 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
         // Set password from CS for an instance with AES encryption.
         String encryptedValue = "";
         if (value != null) {
-            String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes(GenericConstants.CHARACTER_ENCODING));
+            String strEncoded = Base64.getEncoder()
+                    .encodeToString(secretKey.getBytes(GenericConstants.CHARACTER_ENCODING));
             byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
-            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, GenericConstants.ENCRYPT_ALGORITHM);
+            SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length,
+                    GenericConstants.ENCRYPT_ALGORITHM);
             encryptedValue = new String(EncryptionUtil.encrypt(value, originalKey));
         }
         return encryptedValue;
@@ -1666,14 +1577,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with Cloud Server Network Load Balancer.
      *
-     * @param jobResult
-     *            job result
-     * @param eventObject
-     *            Load Balancer event object
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @param jobResult job result
+     * @param eventObject Load Balancer event object
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     @SuppressWarnings("unused")
     public void asyncLb(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
@@ -1696,47 +1603,58 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             JSONArray stickyPolicy = stickyResult.getJSONArray(CloudStackConstants.CS_STICKY_POLICY);
             for (int j = 0, sizes = stickyPolicy.length(); j < sizes; j++) {
                 JSONObject json = (JSONObject) stickyPolicy.get(j);
-                LoadBalancerRule lbRule = loadBalancerService.findByUUID(stickyResult.getString(CloudStackConstants.CS_LB_RULE_ID));
+                LoadBalancerRule lbRule = loadBalancerService
+                        .findByUUID(stickyResult.getString(CloudStackConstants.CS_LB_RULE_ID));
 
                 LbStickinessPolicy loadBalanceRule = null;
                 if (lbRule.getLbPolicyId() != null) {
                     loadBalanceRule = lbPolicyService.find(lbRule.getLbPolicyId());
-                }  else if(lbPolicyService.findByUUID(json.getString(CloudStackConstants.CS_ID)) != null) {
+                } else if (lbPolicyService.findByUUID(json.getString(CloudStackConstants.CS_ID)) != null) {
                     loadBalanceRule = lbPolicyService.findByUUID(json.getString(CloudStackConstants.CS_ID));
-                }
-                else {
+                } else {
                     loadBalanceRule = new LbStickinessPolicy();
                 }
                 loadBalanceRule.setUuid(json.getString(CloudStackConstants.CS_ID));
-                loadBalanceRule.setStickinessMethod(StickinessMethod.valueOf(json.getString(CloudStackConstants.CS_METHOD_NAME)));
+                loadBalanceRule.setStickinessMethod(
+                        StickinessMethod.valueOf(json.getString(CloudStackConstants.CS_METHOD_NAME)));
                 loadBalanceRule.setStickinessName(json.getString(CloudStackConstants.CS_NAME));
                 loadBalanceRule.setSyncFlag(false);
                 if (json.has(CloudStackConstants.CS_PARAMS)) {
                     JSONObject paramsResponse = json.getJSONObject(CloudStackConstants.CS_PARAMS);
-                    loadBalanceRule.setStickyTableSize(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_TABLE_SIZE));
-                    loadBalanceRule.setStickyLength(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_LENGTH));
-                    loadBalanceRule.setStickyExpires(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_EXPIRE));
+                    loadBalanceRule.setStickyTableSize(
+                            JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_TABLE_SIZE));
+                    loadBalanceRule
+                            .setStickyLength(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_LENGTH));
+                    loadBalanceRule
+                            .setStickyExpires(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_EXPIRE));
                     loadBalanceRule.setStickyMode(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_MODE));
-                    loadBalanceRule.setStickyPrefix(JsonUtil.getBooleanValue(paramsResponse, CloudStackConstants.CS_PREFIX));
-                    loadBalanceRule.setStickyRequestLearn(JsonUtil.getBooleanValue(paramsResponse, CloudStackConstants.CS_REQUEST_LEARN));
-                    loadBalanceRule.setStickyIndirect(JsonUtil.getBooleanValue(paramsResponse, CloudStackConstants.CS_INDIRECT));
-                    loadBalanceRule.setStickyNoCache(JsonUtil.getBooleanValue(paramsResponse, CloudStackConstants.CS_NO_CACHE));
-                    loadBalanceRule.setStickyPostOnly(JsonUtil.getBooleanValue(paramsResponse, CloudStackConstants.CS_POST_ONLY));
-                    loadBalanceRule.setStickyHoldTime(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_HOLD_TIME));
-                    loadBalanceRule.setStickyCompany(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_DOMAIN));
-                    loadBalanceRule.setCookieName(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_COOKIE));
+                    loadBalanceRule
+                            .setStickyPrefix(JsonUtil.getBooleanValue(paramsResponse, CloudStackConstants.CS_PREFIX));
+                    loadBalanceRule.setStickyRequestLearn(
+                            JsonUtil.getBooleanValue(paramsResponse, CloudStackConstants.CS_REQUEST_LEARN));
+                    loadBalanceRule.setStickyIndirect(
+                            JsonUtil.getBooleanValue(paramsResponse, CloudStackConstants.CS_INDIRECT));
+                    loadBalanceRule.setStickyNoCache(
+                            JsonUtil.getBooleanValue(paramsResponse, CloudStackConstants.CS_NO_CACHE));
+                    loadBalanceRule.setStickyPostOnly(
+                            JsonUtil.getBooleanValue(paramsResponse, CloudStackConstants.CS_POST_ONLY));
+                    loadBalanceRule.setStickyHoldTime(
+                            JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_HOLD_TIME));
+                    loadBalanceRule
+                            .setStickyCompany(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_DOMAIN));
+                    loadBalanceRule
+                            .setCookieName(JsonUtil.getStringValue(paramsResponse, CloudStackConstants.CS_COOKIE));
                 }
                 if (lbPolicyService.findByUUID(loadBalanceRule.getUuid()) == null) {
-                        LbStickinessPolicy lbPolicy = lbPolicyService.save(loadBalanceRule);
-                         lbRule.setLbPolicyId(lbPolicy.getId());
-                         lbRule.setLbPolicy(lbPolicy);
-                         lbRule.setSyncFlag(false);
-                         loadBalancerService.save(lbRule);
-                }
-                else {
+                    LbStickinessPolicy lbPolicy = lbPolicyService.save(loadBalanceRule);
+                    lbRule.setLbPolicyId(lbPolicy.getId());
+                    lbRule.setLbPolicy(lbPolicy);
+                    lbRule.setSyncFlag(false);
+                    loadBalancerService.save(lbRule);
+                } else {
                     loadBalanceRule.setSyncFlag(false);
                     LbStickinessPolicy lbPolicy = lbPolicyService.update(loadBalanceRule);
-                     //Assign lb policy to rule
+                    // Assign lb policy to rule
                     lbRule.setLbPolicyId(lbPolicy.getId());
                     lbRule.setLbPolicy(lbPolicy);
                     lbRule.setSyncFlag(false);
@@ -1774,10 +1692,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                         vmList.add(vmIp);
                     }
                 }
-            loadBalancer.setVmIpAddress(vmList);
-            loadBalancer.setSyncFlag(false);
-            loadBalancer.setState(State.ACTIVE);
-            loadBalancerService.save(loadBalancer);
+                loadBalancer.setVmIpAddress(vmList);
+                loadBalancer.setSyncFlag(false);
+                loadBalancer.setState(State.ACTIVE);
+                loadBalancerService.save(loadBalancer);
                 HashMap<String, String> loadBalancerInstanceMap = new HashMap<String, String>();
                 loadBalancerInstanceMap.put("lbvmips", "true");
                 loadBalancerInstanceMap.put("listall", "true");
@@ -1825,14 +1743,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with Cloud Server Network Firewall Rules.
      *
-     * @param jobResult
-     *            job result
-     * @param purpose
-     *            of the firewall
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @param jobResult job result
+     * @param purpose of the firewall
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     public void firewallRules(JSONObject jobResult, FirewallRules.Purpose purpose)
             throws ApplicationException, Exception {
@@ -1861,12 +1775,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with CloudStack server Network offering.
      *
-     * @param uuid
-     *            network offering response event
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors
+     * @param uuid network offering response event
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
      */
     @Override
     public void asyncNetworkOffering(ResponseEvent eventObject) throws ApplicationException, Exception {
@@ -1897,10 +1808,8 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /**
      * Sync with Cloud Server Volume.
      *
-     * @throws ApplicationException
-     *             unhandled application errors.
-     * @throws Exception
-     *             cloudstack unhandled errors.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
      */
     @Override
     public void asyncVolume(ResponseEvent eventObject) throws ApplicationException, Exception {
@@ -1910,7 +1819,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             volume.setIsActive(false);
             Errors errors = new Errors(messageSource);
             volumeService.softDelete(volume);
-            //Resource count delete for volume.
+            // Resource count delete for volume.
             if (!convertEntityService.getDepartmentById(volume.getDepartmentId()).getType().equals(AccountType.USER)) {
                 updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_Volume, volume.getDomainId(),
                         CS_Domain, Delete);
@@ -1920,8 +1829,8 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                             CS_Project, Delete);
                 }
                 if (volume.getDepartmentId() != null) {
-                    updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_Volume,
-                            volume.getDepartmentId(), CS_Department, Delete);
+                    updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_Volume, volume.getDepartmentId(),
+                            CS_Department, Delete);
                 }
                 if (volume.getDomainId() != null) {
                     updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_Volume, volume.getDomainId(),

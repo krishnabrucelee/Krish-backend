@@ -25,6 +25,7 @@ import ck.panda.service.ConvertEntityService;
 import ck.panda.service.EmailJobService;
 import ck.panda.service.SyncService;
 import ck.panda.util.CloudStackServer;
+import ck.panda.util.ConfigUtil;
 
 /**
  * RabbitMQ configuration to publish/consume messages from CS server via RabbitMQ server with specified Exchange name.
@@ -324,7 +325,9 @@ public class RabbitConfig {
         SyncService syncService = applicationContext.getBean(SyncService.class);
         AsynchronousJobService asyncService = applicationContext.getBean(AsynchronousJobService.class);
         CloudStackServer cloudStackServer = applicationContext.getBean(CloudStackServer.class);
-        return new MessageListenerAdapter(new AsynchronousJobListener(syncService, asyncService, cloudStackServer,
+        ConvertEntityService convertEntityService = applicationContext.getBean(ConvertEntityService.class);
+        ConfigUtil configUtil = applicationContext.getBean(ConfigUtil.class);
+        return new MessageListenerAdapter(new AsynchronousJobListener(syncService, asyncService, cloudStackServer, convertEntityService, configUtil,
             backendAdminUsername, backendAdminRole));
     }
 

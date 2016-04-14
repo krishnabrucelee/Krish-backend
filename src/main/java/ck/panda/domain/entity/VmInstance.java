@@ -216,30 +216,26 @@ public class VmInstance implements Serializable {
     public enum Status {
         /** While instance creation if get status as creating. */
         CREATING,
-        /** Destroy status of instance. */
-        DESTROY,
-        /** Destroyed status of instance. */
+        /** VM is marked for destroy. Vm in Destroyed state can be recovered by the admin. */
         DESTROYED,
-        /** While instance creation if get failure get status as Error. */
+        /** VM is in error. Goes to this state when deployVm command fails. */
         ERROR,
-        /** After destroy or expunge instance get status as expunging. */
+        /** VM is being expunged. No recovery is possible at this point. */
         EXPUNGING,
-        /** After destroy or expunge instance get status as expunged. */
-        EXPUNGED,
-        /** While instance creation if get status as Implemented. */
-        IMPLEMENTED,
-        /** Status of instance when migrate from one to another. */
+        /** VM is being migrated.  host id holds to from host.*/
         MIGRATING,
-        /** After launch instance if get status as ready. */
-        READY,
         /** Running status of instance. */
         RUNNING,
+        /** VM is shutdowned from inside. */
+        SHUTDOWNED,
         /** After launch or start instance get status as starting. */
         STARTING,
-        /** Stopped status of instance. */
+        /** VM is stopped.  host id should be null. */
         STOPPED,
         /** After stop or destroy instance get status as stopping. */
-        STOPPING
+        STOPPING,
+        /** VM state is unknown. */
+        UNKNOWN
     }
 
     /** Instance host. */

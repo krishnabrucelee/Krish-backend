@@ -40,7 +40,7 @@ public class SimpleCORSFilter implements Filter {
                 "Origin, Range, x-requested-with, x-auth-token, x-auth-username,x-auth-password, Content-Type, Accept");
         response.setHeader("Access-Control-Expose-Headers", "Rage, Content-Range");
         if (request.getRequestURI().contains("socket")) {
-            request.setAttribute("token", CacheManager.getInstance().getCache("restApiAuthTokenCache").getKeys().get(0));
+
         }
         if (request.getRequestURI().contains("panda")) {
         }

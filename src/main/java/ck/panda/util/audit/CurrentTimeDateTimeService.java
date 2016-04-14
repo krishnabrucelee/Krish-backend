@@ -37,12 +37,19 @@ public class CurrentTimeDateTimeService implements DateTimeService {
      * @param date string date.
      * @return dateAndTime.
      */
-	@Override
+    @Override
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-	public ZonedDateTime convertDateAndTime(String date) {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z");
-		ZonedDateTime dateAndTime = ZonedDateTime.parse(date, formatter);
-		LOGGER.info("Returning current date and time: {}", dateAndTime);
-		return dateAndTime;
-	}
+    public ZonedDateTime convertDateAndTime(String date) {
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z");
+            ZonedDateTime dateAndTime = ZonedDateTime.parse(date, formatter);
+            LOGGER.info("Returning given date and time: {}", dateAndTime);
+            return dateAndTime;
+        } catch (Exception e) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            ZonedDateTime dateAndTime = ZonedDateTime.parse(date, formatter);
+            LOGGER.info("Returning given date and time: {}", dateAndTime);
+            return dateAndTime;
+        }
+    }
 }

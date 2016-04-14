@@ -129,13 +129,13 @@ public class ActionListener implements MessageListener {
             actionEvent.setStatus(Status.ERROR);
         }
         // save the event get from action listener.
-        convertEntityService.getWebsocketService().handleEventAction(actionEvent);
+        convertEntityService.getWebsocketService().handleEventAction(actionEvent, eventObject);
         if (eventObject.getString(CloudStackConstants.CS_EVENT_STATUS)
                 .equalsIgnoreCase(CloudStackConstants.CS_EVENT_COMPLETE)) {
             switch (eventStart) {
             case EventTypes.EVENT_USER:
                 if (eventName.equals(EventTypes.EVENT_USER_LOGIN) || eventName.equals(EventTypes.EVENT_USER_LOGOUT)) {
-                    LOGGER.debug("User sync", eventMessage);// TODO: Will do login event.
+                    LOGGER.debug("User sync", eventMessage); // TODO Will do login event.
                 } else {
                     Thread.sleep(3000); // Delay sync call for user to get success CRUD.
                     syncService.syncUser();
