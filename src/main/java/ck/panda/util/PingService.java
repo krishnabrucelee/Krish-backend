@@ -10,6 +10,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -171,6 +172,7 @@ public class PingService {
      * @return - Json string response
      * @throws Exception - Raise if any error
      */
+    @PreAuthorize("hasPermission(null, 'USAGE_STATISTICS')")
     public String getUsageStatistics(String fromDate, String toDate, String groupingType, String domainUuid) throws Exception {
         server.setServer(apiURL + "/usage/listUsageByPeriod");
         LinkedList<NameValuePair> arguments = new LinkedList<NameValuePair>();
@@ -193,7 +195,39 @@ public class PingService {
      * @return Invoice status
      * @throws Exception if errors.
      */
+    @PreAuthorize("hasPermission(null, 'INVOICE')")
     public String listInvoiceByDomainId(String sortBy, String domainUuid, String status, String range, String limit) throws Exception {
+        return listInvoiceReportByDomainId(sortBy, domainUuid, status, range, limit);
+    }
+
+    /**
+     * List project by domain uuid.
+     *
+     * @param sortBy sorting field.
+     * @param domainUuid domain uuid.
+     * @param status status of the invoice.
+     * @param range range of the invoice.
+     * @param limit limit of the invoice.
+     * @return Invoice status
+     * @throws Exception if errors.
+     */
+    @PreAuthorize("hasPermission(null, 'PAYMENTS')")
+    public String listPaymentByDomainId(String sortBy, String domainUuid, String status, String range, String limit) throws Exception {
+        return listInvoiceReportByDomainId(sortBy, domainUuid, status, range, limit);
+    }
+
+    /**
+     * List invoice/project by domain uuid.
+     *
+     * @param sortBy sorting field.
+     * @param domainUuid domain uuid.
+     * @param status status of the invoice.
+     * @param range range of the invoice.
+     * @param limit limit of the invoice.
+     * @return Invoice status
+     * @throws Exception if errors.
+     */
+    public String  listInvoiceReportByDomainId(String sortBy, String domainUuid, String status, String range, String limit) throws Exception {
         HttpMethod method = new GetMethod(apiURL + "/invoice/listByDomain");
         method.setRequestHeader("Range", range);
         LinkedList<NameValuePair> arguments = new LinkedList<NameValuePair>();
@@ -215,7 +249,35 @@ public class PingService {
      * @return Invoice list
      * @throws Exception if errors.
      */
+    @PreAuthorize("hasPermission(null, 'INVOICE')")
     public String listInvoice(String sortBy, String range, String limit) throws Exception {
+        return listInvoiceReport(sortBy, range, limit);
+    }
+
+    /**
+     * List projects.
+     *
+     * @param sortBy sorting field.
+     * @param range range of the invoice.
+     * @param limit limit of the invoice.
+     * @return Invoice list
+     * @throws Exception if errors.
+     */
+    @PreAuthorize("hasPermission(null, 'PAYMENTS')")
+    public String listPayment(String sortBy, String range, String limit) throws Exception {
+        return listInvoiceReport(sortBy, range, limit);
+    }
+
+    /**
+     * List invoices.
+     *
+     * @param sortBy sorting field.
+     * @param range range of the invoice.
+     * @param limit limit of the invoice.
+     * @return Invoice list
+     * @throws Exception if errors.
+     */
+    public String listInvoiceReport(String sortBy, String range, String limit) throws Exception {
         HttpMethod method = new GetMethod(apiURL + "/invoice");
         method.setRequestHeader("Range", range);
         LinkedList<NameValuePair> arguments = new LinkedList<NameValuePair>();

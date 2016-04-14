@@ -49,10 +49,14 @@ public class UsageController implements ApiController {
     @RequestMapping(value = "invoice/listByDomain", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected String listInvoiceByDomainId(@RequestParam("sortBy") String sortBy, @RequestParam("domainUuid") String domainUuid,
+    protected String listInvoiceByDomainId(@RequestParam("type") String type, @RequestParam("sortBy") String sortBy, @RequestParam("domainUuid") String domainUuid,
             @RequestParam("status") String status,
             @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit) throws Exception {
-        return pingService.listInvoiceByDomainId(sortBy, domainUuid, status, range, limit.toString());
+        if(type.equals("invoice"))
+            return pingService.listInvoiceByDomainId(sortBy, domainUuid, status, range, limit.toString());
+        else {
+            return pingService.listPaymentByDomainId(sortBy, domainUuid, status, range, limit.toString());
+        }
     }
 
     /**
@@ -64,8 +68,12 @@ public class UsageController implements ApiController {
     @RequestMapping(value = "invoice", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected String listInvoice(@RequestParam("sortBy") String sortBy, @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit) throws Exception {
-        return pingService.listInvoice(sortBy, range, limit.toString());
+    protected String listInvoice(@RequestParam("type") String type, @RequestParam("sortBy") String sortBy, @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit) throws Exception {
+        if(type.equals("invoice")) {
+            return pingService.listInvoice(sortBy, range, limit.toString());
+        } else {
+            return pingService.listPayment(sortBy, range, limit.toString());
+        }
     }
 
 }
