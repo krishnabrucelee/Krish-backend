@@ -21,6 +21,9 @@ public class CloudStackConstants {
     /** Constant for job types. */
     public static final String CS_JOB_ID = "jobid", CS_JOB_RESULT = "jobresult", CS_JOB_STATUS = "jobstatus";
 
+    /** Constant for job types. */
+    public static final String CS_JOB_INSTANCE_ID = "jobinstanceid";
+
     /** Constant for asynchronous job result response. */
     public static final String QUERY_ASYNC_JOB_RESULT_RESPONSE = "queryasyncjobresultresponse";
 
@@ -414,6 +417,9 @@ public class CloudStackConstants {
 
     /** Constant for generic OS type id. */
     public static final String CS_OS_TYPEID = "ostypeid";
+
+    /** Constant for routing key. */
+    public static final String CS_ROUTING_KEY = "Routing Key";
 
     /** Constant for generic hypervisor. */
     public static final String CS_HYPERVISOR = "hypervisor";

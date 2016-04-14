@@ -117,7 +117,11 @@ public class AuthenticationFilter extends GenericFilterBean {
         try {
             if (resourcePath.contains("socket")) {
                 LOGGER.debug("Trying to authenticate user by x-auth-token method : ", token);
-                token = Optional.fromNullable(httpRequest.getAttribute("token").toString());
+                ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
+                AuthenticatedExternalWebService authenticatedExternalWebService = new AuthenticatedExternalWebService(
+                        "pandasocket", null, AuthorityUtils.commaSeparatedStringToAuthorityList("BACKEND_ADMIN"));
+                authenticatedExternalWebService.setExternalWebService(externalWebService);
+                SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);
             }
             if (resourcePath.contains("panda")) {
                 ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
@@ -161,9 +165,12 @@ public class AuthenticationFilter extends GenericFilterBean {
     private void addSessionContextToLogging() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String tokenValue = EMPTY_VALUE;
-        if(authentication != null && authentication.getPrincipal().equals("pandapay")){
-        	 MessageDigestPasswordEncoder encoder = new MessageDigestPasswordEncoder(PASSWORD_ENCODER);
-             tokenValue = encoder.encodePassword(authentication.getAuthorities().toString(), SALT_SPRINKLE);
+        if (authentication != null && authentication.getPrincipal().equals("pandapay")) {
+            MessageDigestPasswordEncoder encoder = new MessageDigestPasswordEncoder(PASSWORD_ENCODER);
+            tokenValue = encoder.encodePassword(authentication.getAuthorities().toString(), SALT_SPRINKLE);
+        } else if (authentication != null && authentication.getPrincipal().equals("pandasocket")) {
+            MessageDigestPasswordEncoder encoder = new MessageDigestPasswordEncoder(PASSWORD_ENCODER);
+            tokenValue = encoder.encodePassword(authentication.getAuthorities().toString(), SALT_SPRINKLE);
         } else if (authentication != null && !Strings.isNullOrEmpty(authentication.getDetails().toString())) {
             MessageDigestPasswordEncoder encoder = new MessageDigestPasswordEncoder(PASSWORD_ENCODER);
             tokenValue = encoder.encodePassword(authentication.getDetails().toString(), SALT_SPRINKLE);

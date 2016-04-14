@@ -72,6 +72,10 @@ public class ConvertEntityService {
     @Autowired
     private IsoService isoService;
 
+    /** Websocket service reference. */
+    @Autowired
+    private WebsocketService websocketService;
+
     /** OSCategoryService for listing operating sytem in cloudstack server. */
     @Autowired
     private OsCategoryService osCategoryService;
@@ -1216,6 +1220,15 @@ public class ConvertEntityService {
      */
     public PortForwardingService getPortForwardingService() {
         return this.portForwardingService;
+    }
+
+    /**
+     * Get web socket service object.
+     *
+     * @return Websocket service object
+     */
+    public WebsocketService getWebsocket() {
+        return this.websocketService;
     }
 
     /**

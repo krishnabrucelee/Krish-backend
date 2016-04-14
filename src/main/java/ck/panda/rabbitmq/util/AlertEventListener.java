@@ -63,7 +63,7 @@ public class AlertEventListener implements MessageListener {
                     }
                     emailJobService.sendMessageToQueue(emailEvent);
                     try {
-                        convertEntityService.getWebsocketService().handleEventAction(alertEvent);
+                        convertEntityService.getWebsocketService().handleEventAction(alertEvent, eventObject);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

@@ -172,7 +172,6 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     	status.add(Status.DESTROYED);
     	status.add(Status.STARTING);
     	status.add(Status.STOPPING);
-    	status.add(Status.EXPUNGED);
         return virtualmachineservice.findByVmStatus(status, Long.valueOf(tokenDetails.getTokenDetails("id")));
     }
 

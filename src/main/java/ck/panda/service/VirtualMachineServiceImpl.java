@@ -972,8 +972,12 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                                 errMessage = CloudStackConstants.RESOURCE_CHECK + " primary.storage.available " + CloudStackConstants.CONTACT_CLOUD_ADMIN;
                             }
                         } else {
-                            if (resourceUsage < convertEntityService.getTemplateById(vm.getTemplateId()).getSize()) {
-                                errMessage = CloudStackConstants.RESOURCE_CHECK + " primary.storage.available " + CloudStackConstants.CONTACT_CLOUD_ADMIN;
+                            if (vm.getTemplateId() != null) {
+                                if (resourceUsage < convertEntityService.getTemplateById(vm.getTemplateId())
+                                        .getSize()) {
+                                    errMessage = CloudStackConstants.RESOURCE_CHECK + " primary.storage.available "
+                                            + CloudStackConstants.CONTACT_CLOUD_ADMIN;
+                                }
                             }
                         }
                         break;
