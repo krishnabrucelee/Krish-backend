@@ -1,5 +1,9 @@
 package ck.panda.util.infrastructure.security;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.Enumeration;
 import java.util.HashMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -16,14 +20,19 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Optional;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.GeneralConfiguration;
+import ck.panda.domain.entity.LoginSecurityTrack;
 import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.User;
 import ck.panda.service.DepartmentService;
+import ck.panda.service.GeneralConfigurationService;
+import ck.panda.service.LoginSecurityTrackService;
 import ck.panda.service.RoleService;
 import ck.panda.service.UserService;
 import ck.panda.util.CloudStackAuthenticationService;
 import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
+import ck.panda.util.DateConvertUtil;
 
 /**
  * Database authentication manager to handle all the validation and authentication for login users.
@@ -89,6 +98,14 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
     @Autowired
     private DepartmentService departmentService;
 
+    /** Login security track service reference. */
+    @Autowired
+    private LoginSecurityTrackService loginSecurityTrackService;
+
+    /** General configuration service reference. */
+    @Autowired
+    private GeneralConfigurationService generalConfigurationService;
+
     /** Admin user name. */
     @Value("${backend.admin.username}")
     private String backendAdminUserName;
@@ -146,7 +163,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
                     }
                     resultOfAuthentication = userLoginAuthentication(userName, domain, resultOfAuthentication, user);
                 } else {
-                    throw new BadCredentialsException("error.login.credentials");
+                    loginAttemptvalidationCheck("error.login.credentials", CloudStackConstants.STATUS_INACTIVE);
                 }
             }
         } catch (BadCredentialsException e) {
@@ -166,9 +183,10 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
      * @param resultOfAuthentication to set
      * @param user to set
      * @return admin default authentication token
+     * @throws Exception unhandled exceptions.
      */
     public AuthenticationWithToken adminDefaultLoginAuthentication(Optional<String> userName, Optional<String> password,
-            AuthenticationWithToken resultOfAuthentication, User user) {
+            AuthenticationWithToken resultOfAuthentication, User user) throws Exception {
         if (userName.get().equals(backendAdminUserName) && password.get().equals(backendAdminPassword)) {
             resultOfAuthentication = externalServiceAuthenticator.authenticate(backendAdminUserName, backendAdminRole,
                     null, null, buildNumber);
@@ -181,7 +199,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
             resultOfAuthentication.setToken(newToken);
             tokenService.store(newToken, resultOfAuthentication);
         } else {
-            throw new BadCredentialsException("error.login.credentials");
+            loginAttemptvalidationCheck("error.login.credentials", CloudStackConstants.STATUS_INACTIVE);
         }
         return resultOfAuthentication;
     }
@@ -199,14 +217,15 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
     public AuthenticationWithToken userLoginAuthentication(Optional<String> userName, Optional<String> domain,
             AuthenticationWithToken resultOfAuthentication, User user) throws Exception {
         if (user == null) {
-            throw new BadCredentialsException("error.login.credentials");
+            loginAttemptvalidationCheck("error.login.credentials", CloudStackConstants.STATUS_INACTIVE);
         } else if (user != null && !user.getIsActive()) {
-            throw new BadCredentialsException("error.inactive.login.credentials");
+            loginAttemptvalidationCheck("error.inactive.login.credentials", CloudStackConstants.STATUS_INACTIVE);
         } else if (user != null && user.getRole() == null) {
-            throw new BadCredentialsException("error.access.permission.blocked");
+            loginAttemptvalidationCheck("error.access.permission.blocked", CloudStackConstants.STATUS_INACTIVE);
         } else {
+            Boolean loginAttemptCheck = loginAttemptvalidationCheck("success", CloudStackConstants.STATUS_ACTIVE);
             Boolean authKeyResponse = apiSecretKeyGeneration(user);
-            if (authKeyResponse) {
+            if (authKeyResponse && loginAttemptCheck) {
                 Department department = departmentService.find(user.getDepartment().getId());
                 Role role = roleService.findWithPermissionsByNameDepartmentAndIsActive(user.getRole().getName(), department.getId(), true);
                 resultOfAuthentication = externalServiceAuthenticator.authenticate(userName.get(),
@@ -290,4 +309,137 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
             }
         }
     }
+
+    /**
+     * Login attempt validation check.
+     *
+     * @param errorKey error key
+     * @param status status
+     * @return login attempt status true/false
+     * @throws Exception raise if error
+     */
+    private Boolean loginAttemptvalidationCheck(String errorKey, String status) throws Exception {
+        Integer unlockTime = -1;
+        String ipAddress = getLocalIpAddress();
+        LoginSecurityTrack persistLoginSecurityTrack = loginSecurityTrackService.findByIpAddress(ipAddress);
+        GeneralConfiguration generalConfiguration = generalConfigurationService.findByIsActive(true);
+
+        if (persistLoginSecurityTrack == null && status.equals(CloudStackConstants.STATUS_ACTIVE)) {
+            return true;
+        } else if (persistLoginSecurityTrack != null && generalConfiguration.getMaxLogin() >= persistLoginSecurityTrack.getLoginAttemptCount()
+                && status.equals(CloudStackConstants.STATUS_ACTIVE)) {
+            persistLoginSecurityTrack.setLoginAttemptCount(0);
+            persistLoginSecurityTrack.setLoginTimeStamp(null);
+            loginSecurityTrackService.save(persistLoginSecurityTrack);
+            return true;
+        } else {
+            unlockTime = loginAttemptCountCheck(unlockTime, ipAddress, persistLoginSecurityTrack, generalConfiguration, status);
+            if (unlockTime == -1 && status.equals(CloudStackConstants.STATUS_INACTIVE)) {
+                throw new BadCredentialsException(errorKey);
+            } else if (unlockTime != -1) {
+                throw new BadCredentialsException("Your account is locked please login after " + unlockTime + " minutes");
+            }
+            return true;
+        }
+    }
+
+    /**
+     * Check the login attempt count for security purpose.
+     *
+     * @param unlockTime unlock time
+     * @param ipAddress ip address
+     * @param status status
+     * @param persistLoginSecurityTrack login security object
+     * @param generalConfiguration general configuration object
+     * @return login attempt count
+     * @throws Exception unhandled exceptions.
+     */
+    private Integer loginAttemptCountCheck(Integer unlockTime, String ipAddress, LoginSecurityTrack persistLoginSecurityTrack,
+            GeneralConfiguration generalConfiguration, String status) throws Exception {
+        if (persistLoginSecurityTrack == null) {
+            LoginSecurityTrack loginSecurityTrack = new LoginSecurityTrack();
+            loginSecurityTrack.setLoginAttemptCount(1);
+            loginSecurityTrack.setLoginIpAddress(ipAddress);
+            loginSecurityTrack.setLoginTimeStamp(null);
+            loginSecurityTrack.setIsActive(true);
+            loginSecurityTrackService.save(loginSecurityTrack);
+        } else if (generalConfiguration != null) {
+            if (generalConfiguration.getMaxLogin() > persistLoginSecurityTrack.getLoginAttemptCount()) {
+                persistLoginSecurityTrack.setLoginAttemptCount(persistLoginSecurityTrack.getLoginAttemptCount() + 1);
+                persistLoginSecurityTrack.setLoginTimeStamp(null);
+                loginSecurityTrackService.save(persistLoginSecurityTrack);
+            } else {
+                unlockTime = loginAttemptFailureState(persistLoginSecurityTrack, generalConfiguration, unlockTime, status);
+            }
+        }
+        return unlockTime;
+    }
+
+    /**
+     * Check the login attempt count for security purpose.
+     *
+     * @param persistLoginSecurityTrack login security object
+     * @param generalConfiguration general configuration object
+     * @param unlockTime unlock time
+     * @param status status
+     * @return login attempt count
+     * @throws Exception unhandled exceptions.
+     */
+    private Integer loginAttemptFailureState(LoginSecurityTrack persistLoginSecurityTrack, GeneralConfiguration generalConfiguration,
+            Integer unlockTime, String status) throws Exception {
+        if (persistLoginSecurityTrack.getLoginTimeStamp() != null && DateConvertUtil.getTimestamp() > persistLoginSecurityTrack.getLoginTimeStamp()) {
+            if (status.equals(CloudStackConstants.STATUS_ACTIVE)) {
+                persistLoginSecurityTrack.setLoginAttemptCount(0);
+            } else {
+                persistLoginSecurityTrack.setLoginAttemptCount(1);
+            }
+            persistLoginSecurityTrack.setLoginTimeStamp(null);
+            loginSecurityTrackService.save(persistLoginSecurityTrack);
+        } else {
+            persistLoginSecurityTrack.setLoginAttemptCount(persistLoginSecurityTrack.getLoginAttemptCount() + 1);
+            if (persistLoginSecurityTrack.getLoginTimeStamp() == null) {
+                persistLoginSecurityTrack.setLoginTimeStamp(DateConvertUtil.getTimestamp() + (generalConfiguration.getUnlockTime() * 60));
+                loginSecurityTrackService.save(persistLoginSecurityTrack);
+                return generalConfiguration.getUnlockTime();
+            } else {
+                loginSecurityTrackService.save(persistLoginSecurityTrack);
+                int remainingLockedTime = (int) ((persistLoginSecurityTrack.getLoginTimeStamp() - DateConvertUtil.getTimestamp()) / 60);
+                return remainingLockedTime + 1;
+            }
+        }
+        return unlockTime;
+    }
+
+    /**
+     * Get current machine local IP address.
+     *
+     * @return ip address
+     * @throws Exception raise if error
+     */
+    private String getLocalIpAddress() throws Exception {
+        int count = 0;
+        InetAddress address = InetAddress.getLocalHost();
+        String ipAddress = address.getHostAddress();
+        Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+        while (interfaces.hasMoreElements()) {
+            NetworkInterface current = interfaces.nextElement();
+            if (!current.isUp() || current.isLoopback() || current.isVirtual()) {
+                continue;
+            }
+            Enumeration<InetAddress> addresses = current.getInetAddresses();
+            while (addresses.hasMoreElements()) {
+                InetAddress currentAddress = addresses.nextElement();
+                if (currentAddress.isLoopbackAddress()) {
+                    continue;
+                }
+                if (currentAddress instanceof Inet4Address &&  count == 0) {
+                    ipAddress = currentAddress.getHostAddress();
+                    count++;
+                    break;
+                }
+            }
+        }
+        return ipAddress;
+    }
+
 }

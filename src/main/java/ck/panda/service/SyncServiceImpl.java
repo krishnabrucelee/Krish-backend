@@ -27,6 +27,7 @@ import ck.panda.domain.entity.FirewallRules.TrafficType;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.EventLiterals;
 import ck.panda.domain.entity.FirewallRules;
+import ck.panda.domain.entity.GeneralConfiguration;
 import ck.panda.domain.entity.Host;
 import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.entity.IpAddress;
@@ -269,6 +270,10 @@ public class SyncServiceImpl implements SyncService {
     /** CloudStack Resource Capacity Service. */
     @Autowired
     private CloudStackResourceCapacity cloudStackResourceCapacity;
+
+    /** General configuration service reference. */
+    @Autowired
+    private GeneralConfigurationService generalConfigurationService;
 
     /** Mr.ping service reference. */
     @Autowired
@@ -607,6 +612,12 @@ public class SyncServiceImpl implements SyncService {
             this.syncEventList();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Event List", e);
+        }
+        try {
+            // 36. Sync general configuration
+            this.syncGeneralConfiguration();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch General Configuration", e);
         }
 
     }
@@ -2657,6 +2668,24 @@ public class SyncServiceImpl implements SyncService {
             optional.put(PingConstants.ISADMIN, true);
             optional.put(PingConstants.ONE_TIME_CHARGEABLE, false);
             pingService.addPlanCost(optional);
+        }
+
+    }
+
+    /**
+     * Sync general configuration.
+     *
+     * @throws Exception raise if error
+     */
+    public void syncGeneralConfiguration() throws Exception {
+        GeneralConfiguration persistGeneralConfiguration = generalConfigurationService.findByIsActive(true);
+        if (persistGeneralConfiguration == null) {
+            GeneralConfiguration generalConfiguration = new GeneralConfiguration();
+            generalConfiguration.setMaxLogin(5);
+            generalConfiguration.setUnlockTime(10);
+            generalConfiguration.setRememberMeExpiredDays(60);
+            generalConfiguration.setIsActive(true);
+            generalConfigurationService.save(generalConfiguration);
         }
 
     }
