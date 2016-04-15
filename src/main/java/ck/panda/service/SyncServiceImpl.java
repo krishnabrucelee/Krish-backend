@@ -2673,7 +2673,7 @@ public class SyncServiceImpl implements SyncService {
     }
 
     /**
-     * Sync general configuration.
+     * Sync general default configuration.
      *
      * @throws Exception raise if error
      */
@@ -2682,8 +2682,8 @@ public class SyncServiceImpl implements SyncService {
         if (persistGeneralConfiguration == null) {
             GeneralConfiguration generalConfiguration = new GeneralConfiguration();
             generalConfiguration.setMaxLogin(5);
-            generalConfiguration.setUnlockTime(10);
-            generalConfiguration.setRememberMeExpiredDays(60);
+            generalConfiguration.setUnlockTime(5);
+            generalConfiguration.setRememberMeExpiredDays(30);
             generalConfiguration.setIsActive(true);
             generalConfigurationService.save(generalConfiguration);
         }
