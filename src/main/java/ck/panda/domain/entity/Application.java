@@ -50,7 +50,7 @@ public class Application implements Serializable {
 
     /** Type of the Application. */
     @NotEmpty
-    @Size(min = 4, max = 20)
+    @Size(min = 1, max = 20)
     @Column(name = "type", nullable = false)
     private String type;
 
