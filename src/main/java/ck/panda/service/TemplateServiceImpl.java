@@ -755,7 +755,7 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     public Page<Template> findAllByUserIdAndType(PagingAndSorting pagingAndSorting, String type, Long userId) throws Exception {
         User user = convertEntityService.getOwnerById(userId);
-        return templateRepository.findTemplateByUserId(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), user.getId(), true);
+        return templateRepository.findTemplateByUserId(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), user.getId(),user.getDepartmentId(), true);
     }
      /**
      * Add cost for newly created template.
