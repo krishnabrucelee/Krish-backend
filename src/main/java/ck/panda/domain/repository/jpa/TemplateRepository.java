@@ -228,7 +228,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param status status of the template
      * @return template
      */
-    @Query(value = "SELECT template FROM Template template LEFT JOIN template.osCategory LEFT JOIN template.templateOwner LEFT JOIN template.osType LEFT JOIN template.templateCost WHERE template.type <>:type AND template.featured =:featured AND template.share =:share AND template.status =:status AND template.isActive =:isActive")
+    @Query(value = "SELECT template FROM Template template LEFT JOIN template.osCategory LEFT JOIN template.templateOwner LEFT JOIN template.osType  WHERE template.type <>:type AND template.featured =:featured AND template.share =:share AND template.status =:status AND template.isActive =:isActive")
     Page<Template> findTemplateByFeatured(@Param("type") TemplateType type, Pageable pageable, @Param("featured") Boolean featured, @Param("share") Boolean share, @Param("status") Status status, @Param("isActive") Boolean isActive);
 
     /**
@@ -241,7 +241,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param status status of the template
      * @return template
      */
-    @Query(value = "SELECT template FROM Template template LEFT JOIN template.osCategory LEFT JOIN template.templateOwner LEFT JOIN template.osType LEFT JOIN template.templateCost WHERE template.type <>:type AND template.share =:share AND template.status =:status AND template.isActive =:isActive")
+    @Query(value = "SELECT template FROM Template template LEFT JOIN template.osCategory LEFT JOIN template.templateOwner LEFT JOIN template.osType  WHERE template.type <>:type AND template.share =:share AND template.status =:status AND template.isActive =:isActive")
     Page<Template> findTemplateByCommunity(@Param("type") TemplateType type, Pageable pageable, @Param("share") Boolean share, @Param("status") Status status, @Param("isActive") Boolean isActive);
 
     /**

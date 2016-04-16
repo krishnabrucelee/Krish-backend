@@ -56,7 +56,7 @@ public class Volume implements Serializable {
 
     /** A desired name of the volume. */
     @NotEmpty
-    @Size(min = 4, max = 20)
+    @Size(min = 1, max = 20)
     @Column(name = "name", nullable = false)
     private String name;
 

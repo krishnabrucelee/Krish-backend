@@ -334,11 +334,11 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                 allProjectList.add(project);
             }
             Page<VmSnapshot> projectSnapshot = vmSnapshotRepository.findByProjectDepartmentAndIsActive(allProjectList,
-                    user.getDepartmentId(), false, pagingAndSorting.toPageRequest());
+                    user.getDepartmentId(), false, pagingAndSorting.toPageRequest(), Status.Expunging);
             return projectSnapshot;
         } else {
-            return vmSnapshotRepository.findByDepartmentAndPagination(user.getDepartmentId(), false,
-                    pagingAndSorting.toPageRequest());
+            return vmSnapshotRepository.findByDepartmentAndPagination(user.getDepartmentId(), false,pagingAndSorting.toPageRequest(),
+                    Status.Expunging);
         }
     }
 
