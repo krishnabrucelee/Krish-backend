@@ -13,10 +13,9 @@ import ck.panda.util.domain.vo.PagingAndSorting;
  *
  * This service provides basic CRUD and essential api's for Role related business actions.
  */
-@Service
 public interface RoleService extends CRUDService<Role> {
 
-	 /**
+     /**
      * Save the role.
      *
      * @param role  entity
@@ -24,9 +23,9 @@ public interface RoleService extends CRUDService<Role> {
      * @return role
      * @throws Exception error occurs
      */
-	Role save(Role role, Long id) throws Exception;
+    Role save(Role role, Long id) throws Exception;
 
-	/**
+    /**
      * Find role with permission list.
      *
      * @param name of the role

@@ -335,4 +335,17 @@ public class UserController extends CRUDController<User> implements ApiControlle
         }
     }
 
+    /**
+     * Method to get list of required parameter of user.
+     *
+     * @param id user id
+     * @return users
+     * @throws Exception if error occurs
+     */
+    @RequestMapping(value = "/usersessiondetails/{id}", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public String getUserSessionDetails(@PathVariable(PATH_ID) Long id) throws Exception {
+        return userService.findByUserSessionDetails(id);
+    }
   }

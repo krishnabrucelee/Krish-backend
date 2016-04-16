@@ -9,12 +9,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-
-import net.sf.ehcache.CacheManager;
 
 /**
  * SimpleCORSFilter to allow cross domain call.
@@ -37,7 +34,7 @@ public class SimpleCORSFilter implements Filter {
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
         response.setHeader("Access-Control-Max-Age", "3600");
         response.setHeader("Access-Control-Allow-Headers",
-                "Origin, Range, x-requested-with, x-auth-token, x-auth-username,x-auth-password, Content-Type, Accept");
+                "Origin, Range, x-requested-with, x-auth-token, x-auth-username, x-auth-password, x-auth-remember, x-auth-login-token, x-auth-user-id, x-auth-login-time, Content-Type, Accept, x-force-login");
         response.setHeader("Access-Control-Expose-Headers", "Rage, Content-Range");
         if (request.getRequestURI().contains("socket")) {
 
