@@ -40,6 +40,19 @@ public interface ResourceLimitDomainRepository extends PagingAndSortingRepositor
     List<ResourceLimitDomain> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId,
             @Param("isActive") Boolean isActive);
 
+
+    /**
+     * Find all the active resource limits based on the domain id and resource type.
+     *
+     * @param domainId domain id.
+     * @param isActive true/false
+     * @param resourceType resource type
+     * @return domain
+     */
+    @Query(value = "select resource from ResourceLimitDomain resource where resource.isActive =:isActive AND resource.domainId =:domainId AND resource.resourceType =:resourceType")
+    List<ResourceLimitDomain> findAllByDomainIdAndIsActiveAndResourceType(@Param("domainId") Long domainId, @Param("resourceType") ResourceType resourceType,
+            @Param("isActive") Boolean isActive);
+
     /**
      * Find all the active resource limits based on the domain id.
      *
