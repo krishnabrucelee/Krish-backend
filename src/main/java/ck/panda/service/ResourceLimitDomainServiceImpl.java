@@ -183,9 +183,7 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
             // the converted Resource limit entity to list
             ResourceLimitDomain resource = ResourceLimitDomain.convert(resourceListJSON.getJSONObject(i));
             resource.setDomainId(convertEntityService.getDomainId(resource.getTransDomainId()));
-            resource.setUniqueSeperator(
-                    resource.getTransDomainId() + "-" + ResourceType.values()[(resource.getTransResourceType())]);
-            resource.setUniqueSeperator(resource.getDomainId() + resource.getResourceType().toString());
+            resource.setUniqueSeperator(resource.getTransDomainId() + resource.getResourceType().toString());
             resourceList.add(resource);
         }
         return resourceList;
@@ -305,6 +303,11 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
     public List<ResourceLimitDomain> findCurrentLoginDomain() throws NumberFormatException, Exception {
         Domain domain = domainService.find(Long.valueOf(tokenDetails.getTokenDetails("domainid")));
         return (List<ResourceLimitDomain>) resourceLimitDomainRepo.findAllByDomainIdAndIsActive(domain.getId(), true);
+    }
+
+    @Override
+    public List<ResourceLimitDomain> findByDomainIdAndResourceType(Long domainId, ResourceType resource, Boolean isActive) throws Exception {
+    	return (List<ResourceLimitDomain>) resourceLimitDomainRepo.findAllByDomainIdAndIsActiveAndResourceType(domainId, resource, true);
     }
 
     @Override

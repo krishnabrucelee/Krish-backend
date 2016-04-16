@@ -1883,20 +1883,14 @@ public class SyncServiceImpl implements SyncService {
         LOGGER.debug("Total rows updated : " + (appResourceList.size()));
         for (ResourceLimitDomain resource : appResourceList) {
             LOGGER.debug("NEW DOMAIN ID " + resource.getDomainId());
-            if (csResourceMap.containsKey(resource.getDomainId() + resource.getResourceType().toString())) {
-                if (resource != null) {
+            if (csResourceMap.containsKey(domain.getUuid() + resource.getResourceType().toString())) {
                     resource.setMax(
-                            csResourceMap.get(resource.getDomainId() + resource.getResourceType().toString()).getMax());
+                            csResourceMap.get(domain.getUuid() + resource.getResourceType().toString()).getMax());
                     resource.setIsActive(true);
                     resource.setIsSyncFlag(false);
                     resourceDomainService.update(resource);
-                }
-                csResourceMap.remove(resource.getDomainId() + resource.getResourceType().toString());
-            } else {
-                resource.setIsActive(false);
-                resource.setIsSyncFlag(false);
-                resourceDomainService.update(resource);
             }
+            csResourceMap.remove(domain.getUuid() + resource.getResourceType().toString());
         }
         // 4. Get the remaining list of cs server hash resource object, then
         // iterate and
