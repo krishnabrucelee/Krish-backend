@@ -311,4 +311,19 @@ public interface SyncService {
      * @throws Exception if error occurs.
      */
     void syncEventList() throws Exception;
+
+    /**
+     * Sync snapshot.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception if error occurs.
+     */
+    void syncSnapshot() throws ApplicationException, Exception;
+
+    /**
+     * Sync load balancer sticky policy.
+     *
+     * @throws Exception if error occurs.
+     */
+    void syncLoadBalancerStickyPolicy() throws Exception;
 }

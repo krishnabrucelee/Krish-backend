@@ -89,4 +89,19 @@ public class CloudStackConfigurationController extends CRUDController<CloudStack
         return configService.findAll();
     }
 
+    /**
+     * Import individual sync from CS.
+     *
+     * @param id import id
+     * @param type sync type
+     * @return configuration values.
+     * @throws Exception unhandled errors.
+     */
+    @RequestMapping(value = "/importData", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected void importCsData(@RequestParam String keyName, @RequestParam String type) throws Exception {
+        configService.importCsData(keyName, type);
+    }
+
 }

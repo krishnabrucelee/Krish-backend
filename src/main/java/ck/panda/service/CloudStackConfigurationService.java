@@ -13,4 +13,13 @@ public interface CloudStackConfigurationService extends CRUDService<CloudStackCo
     // TODO for validation.
     // CloudStackConfiguration findByKeys(String apiKey);
 
+    /**
+     * Import individual sync from CS.
+     *
+     * @param keyName sync type id
+     * @param type sync type
+     * @throws Exception unhandled errors.
+     */
+    void importCsData(String keyName, String type) throws Exception;
+
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.json.JSONObject;
@@ -34,6 +35,7 @@ import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.Iso;
 import ck.panda.domain.entity.LbStickinessPolicy;
 import ck.panda.domain.entity.LoadBalancerRule;
+import ck.panda.domain.entity.ManualCloudSync;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
 import ck.panda.domain.entity.Nic;
@@ -83,6 +85,7 @@ import ck.panda.util.PingService;
  */
 @PropertySource(value = "classpath:event.properties")
 @PropertySource(value = "classpath:permission.properties")
+@PropertySource(value = "classpath:manualsync.properties")
 @Service
 @SuppressWarnings("PMD.CyclomaticComplexity")
 public class SyncServiceImpl implements SyncService {
@@ -279,6 +282,10 @@ public class SyncServiceImpl implements SyncService {
     @Autowired
     private PingService pingService;
 
+    /** Manual cloud sync service reference. */
+    @Autowired
+    private ManualCloudSyncService manualCloudSyncService;
+
     /** Permission instance properties. */
     @Value(value = "${permission.instance}")
     private String instance;
@@ -343,7 +350,6 @@ public class SyncServiceImpl implements SyncService {
     @Value(value = "${permission.billing}")
     private String billing;
 
-
     /** receipient properties. */
     @Value(value = "${test.users}")
     private String users;
@@ -367,6 +373,54 @@ public class SyncServiceImpl implements SyncService {
     /** receipient properties. */
     @Value(value = "${test.invoice}")
     private String invoice;
+
+    /** Manual sync domain properties. */
+    @Value(value = "${manualsync.domain}")
+    private String manualSyncDomain;
+
+    /** Manual sync zone properties. */
+    @Value(value = "${manualsync.zone}")
+    private String manualSyncZone;
+
+    /** Manual sync department properties. */
+    @Value(value = "${manualsync.department}")
+    private String manualSyncDepartment;
+
+    /** Manual sync users properties. */
+    @Value(value = "${manualsync.users}")
+    private String manualSyncUsers;
+
+    /** Manual sync projects properties. */
+    @Value(value = "${manualsync.projects}")
+    private String manualSyncProjects;
+
+    /** Manual sync compute offer properties. */
+    @Value(value = "${manualsync.computeoffer}")
+    private String manualSyncComputeOffer;
+
+    /** Manual sync disk offer properties. */
+    @Value(value = "${manualsync.diskoffer}")
+    private String manualSyncDiskOffer;
+
+    /** Manual sync network offer properties. */
+    @Value(value = "${manualsync.networkoffer}")
+    private String manualSyncNetworkOffer;
+
+    /** Manual sync os template properties. */
+    @Value(value = "${manualsync.ostemplate}")
+    private String manualSyncOsTemplate;
+
+    /** Manual sync vpc offer properties. */
+    @Value(value = "${manualsync.vpcoffer}")
+    private String manualSyncVpcOffer;
+
+    /** Manual sync network properties. */
+    @Value(value = "${manualsync.network}")
+    private String manualSyncNetwork;
+
+    /** Manual sync vpc properties. */
+    @Value(value = "${manualsync.vpc}")
+    private String manualSyncVpc;
 
     /** Full permission for root and domain admin. */
     public static final String ADMIN_PERMISSION = "FULL_PERMISSION";
@@ -395,7 +449,7 @@ public class SyncServiceImpl implements SyncService {
     public void sync() throws Exception {
 
         try {
-            // 1. Sync Region entity
+            // 0. Sync Region entity
             this.syncRegion();
         } catch (Exception e) {
             Errors errors = new Errors(messageSource);
@@ -404,6 +458,12 @@ public class SyncServiceImpl implements SyncService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             }
+        }
+        try {
+            // 1. Sync manual sync items
+            this.syncManualImportData();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Manual Import Data", e);
         }
         try {
             // 2. Sync Zone entity
@@ -667,6 +727,9 @@ public class SyncServiceImpl implements SyncService {
             domainService.save(csDomainMap.get(key));
             LOGGER.debug("Total rows added", (csDomainMap.size()));
         }
+
+        //Update manual sync update domain count
+        updateManualSyncCount("DOMAIN", csDomainList.size(), csDomainList.size());
     }
 
     /**
@@ -715,6 +778,9 @@ public class SyncServiceImpl implements SyncService {
             zoneService.save(csZoneMap.get(key));
         }
         LOGGER.debug("Total rows added : " + (csZoneMap.size()));
+
+        //Update manual sync update domain count
+        updateManualSyncCount("ZONE", csZoneList.size(), csZoneList.size());
     }
 
     /**
@@ -956,6 +1022,9 @@ public class SyncServiceImpl implements SyncService {
         }
         LOGGER.debug("Total rows added : " + (csStorageOfferingMap.size()));
 
+        //Update manual sync update domain count
+        updateManualSyncCount("DISK_OFFER", csStorageOfferingsList.size(), csStorageOfferingsList.size());
+
     }
 
     /**
@@ -1013,6 +1082,9 @@ public class SyncServiceImpl implements SyncService {
         }
         LOGGER.debug("Total rows added : " + (csUserMap.size()));
 
+        //Update manual sync update domain count
+        updateManualSyncCount("USER", csUserService.size(), csUserService.size());
+
     }
 
     /**
@@ -1063,6 +1135,9 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.debug("Syncservice networking offering uuid:");
             networkOfferingService.save(csNetworkOfferingMap.get(key));
         }
+
+        //Update manual sync update domain count
+        updateManualSyncCount("NETWORK_OFFER", csNetworkOfferingList.size(), csNetworkOfferingList.size());
     }
 
     /**
@@ -1119,6 +1194,9 @@ public class SyncServiceImpl implements SyncService {
         }
         LOGGER.debug("Total rows added : " + (csNetworkMap.size()));
 
+        //Update manual sync update domain count
+        updateManualSyncCount("NETWORK", csNetworkList.size(), csNetworkList.size());
+
     }
 
     /**
@@ -1169,6 +1247,9 @@ public class SyncServiceImpl implements SyncService {
             computeService.save(csComputeOfferingMap.get(key));
         }
         LOGGER.debug("Total rows added : " + (csComputeOfferingMap.size()));
+
+        //Update manual sync update domain count
+        updateManualSyncCount("COMPUTE_OFFER", csComputeOfferingList.size(), csComputeOfferingList.size());
     }
 
     /**
@@ -1231,6 +1312,9 @@ public class SyncServiceImpl implements SyncService {
         }
         LOGGER.debug("Total rows added : " + (csTemplateMap.size()));
 
+        //Update manual sync update domain count
+        updateManualSyncCount("TEMPLATE", csTemplatesList.size(), csTemplatesList.size());
+
     }
 
     /**
@@ -1275,6 +1359,9 @@ public class SyncServiceImpl implements SyncService {
         types.add(AccountType.DOMAIN_ADMIN);
         departmentList = departmentService.findByAccountTypesAndActive(types, true);
         createRole(departmentList, existPermissionList);
+
+        //Update manual sync update domain count
+        updateManualSyncCount("DEPARTMENT", csAccountService.size(), csAccountService.size());
     }
 
     /**
@@ -1524,13 +1611,8 @@ public class SyncServiceImpl implements SyncService {
         }
     }
 
-    /**
-     * Sync with Cloud Server Snapshot.
-     *
-     * @throws ApplicationException unhandled application errors.
-     * @throws Exception cloudstack unhandled errors.
-     */
-    private void syncSnapshot() throws ApplicationException, Exception {
+    @Override
+    public void syncSnapshot() throws ApplicationException, Exception {
 
         // 1. Get all the snapshot objects from CS server as hash
         List<Snapshot> csSnapshotService = snapshotService.findAllFromCSServer();
@@ -2045,6 +2127,9 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.debug("Syncservice Project uuid:");
             projectService.save(csProjectMap.get(key));
         }
+
+        //Update manual sync update domain count
+        updateManualSyncCount("PROJECT", csProjectList.size(), csProjectList.size());
     }
 
     @Override
@@ -2414,7 +2499,8 @@ public class SyncServiceImpl implements SyncService {
         }
     }
 
-   public void syncLoadBalancerStickyPolicy() throws ApplicationException, Exception {
+    @Override
+    public void syncLoadBalancerStickyPolicy() throws ApplicationException, Exception {
 
         // 1. Get all the LoadBalancer objects from CS server as hash
         List<LbStickinessPolicy> csLoadBalancerList = lbPolicyService.findAllFromCSServer();
@@ -2682,5 +2768,93 @@ public class SyncServiceImpl implements SyncService {
             generalConfigurationService.save(generalConfiguration);
         }
 
+    }
+
+    /**
+     * Sync manual import data configuration.
+     *
+     * @throws Exception raise if error
+     */
+    public void syncManualImportData() throws Exception {
+        List<ManualCloudSync> manualCloudSync = manualCloudSyncService.findAll();
+        if (manualCloudSync.size() == 0) {
+            createManualSyncItem(manualSyncDomain, manualSyncZone, manualSyncDepartment, manualSyncUsers, manualSyncProjects,
+                    manualSyncComputeOffer, manualSyncDiskOffer, manualSyncNetworkOffer, manualSyncOsTemplate, manualSyncVpcOffer,
+                    manualSyncNetwork, manualSyncVpc);
+        }
+    }
+
+    /**
+     * Insert manual sync list item.
+     *
+     * @param manualSyncDomain manual sync domain
+     * @param manualSyncZone manual sync zone
+     * @param manualSyncDepartment manual sync department
+     * @param manualSyncUsers manual sync users
+     * @param manualSyncProjects manual sync projects
+     * @param manualSyncComputeOffer manual sync compute offer
+     * @param manualSyncDiskOffer manual sync disk offer
+     * @param manualSyncNetworkOffer manual sync network offer
+     * @param manualSyncOsTemplate manual sync OS template
+     * @param manualSyncVpcOffer manual sync VPC offer
+     * @param manualSyncNetwork manual sync network
+     * @param manualSyncVpc manual sync vpc
+     * @throws Exception raise if error
+     */
+    public void createManualSyncItem(String manualSyncDomain, String manualSyncZone, String manualSyncDepartment, String manualSyncUsers,
+            String manualSyncProjects, String manualSyncComputeOffer, String manualSyncDiskOffer, String manualSyncNetworkOffer,
+            String manualSyncOsTemplate, String manualSyncVpcOffer, String manualSyncNetwork, String manualSyncVpc) throws Exception {
+        List<String> stringList = new ArrayList<String>();
+        Map<Integer, List<String>> actionMap = new HashMap<Integer, List<String>>();
+        stringList.add(manualSyncDomain);
+        stringList.add(manualSyncZone);
+        stringList.add(manualSyncDepartment);
+        stringList.add(manualSyncUsers);
+        stringList.add(manualSyncProjects);
+        stringList.add(manualSyncComputeOffer);
+        stringList.add(manualSyncDiskOffer);
+        stringList.add(manualSyncNetworkOffer);
+        stringList.add(manualSyncOsTemplate);
+        stringList.add(manualSyncVpcOffer);
+        stringList.add(manualSyncNetwork);
+        stringList.add(manualSyncVpc);
+
+        int i = 0;
+        for (String string : stringList) {
+            List<String> actionList = new ArrayList<String>();
+            String[] actions = string.split(",");
+            for (String action : actions) {
+                actionList.add(action);
+            }
+            actionMap.put(i, actionList);
+            i++;
+        }
+
+        for (int j = 0; j < actionMap.size(); j++) {
+            List<String> manualSyncList = actionMap.get(j);
+            ManualCloudSync manualSyncItem = new ManualCloudSync();
+            manualSyncItem.setName(manualSyncList.get(0));
+            manualSyncItem.setKeyName(manualSyncList.get(1));
+            manualSyncItem.setAcsCount(Integer.parseInt(manualSyncList.get(2)));
+            manualSyncItem.setPandaCount(Integer.parseInt(manualSyncList.get(3)));
+            manualSyncItem.setIsActive(true);
+            manualCloudSyncService.save(manualSyncItem);
+        }
+    }
+
+    /**
+     * Update manual sync data count
+     *
+     * @param keyName key name
+     * @param acsCount ACS count
+     * @param pandaCount panda count
+     * @throws Exception raise if error
+     */
+    public void updateManualSyncCount(String keyName, Integer acsCount, Integer pandaCount) throws Exception {
+        //Update manual sync update counts
+        ManualCloudSync manualSyncItem = manualCloudSyncService.findBySyncName(keyName);
+        manualSyncItem.setAcsCount(acsCount);
+        manualSyncItem.setPandaCount(pandaCount);
+        manualCloudSyncService.save(manualSyncItem);
     }
 }
