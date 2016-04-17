@@ -158,9 +158,11 @@ public class AuthenticationFilter extends GenericFilterBean {
                 processUsernamePasswordAuthentication(httpRequest, httpResponse, userName, password, domain, rememberMe, loginToken, userId, forceLogin);
                 return;
             }
-            if (token.isPresent() || !token.get().isEmpty()) {
-                LOGGER.debug("Trying to authenticate user by x-auth-token method : ", token);
-                processTokenAuthentication(token, loginToken, userId, httpRequest);
+            if (token.isPresent()) {
+                if (!token.get().isEmpty()) {
+                    LOGGER.debug("Trying to authenticate user by x-auth-token method : ", token);
+                    processTokenAuthentication(token, loginToken, userId, httpRequest);
+                }
             }
             LOGGER.debug("Authentication filter is passing request down the filter chain");
             addSessionContextToLogging();
