@@ -140,10 +140,10 @@ public class TokenService {
                 stringBuilder.append(backendAdminDepartmentId).append(GenericConstants.TOKEN_SEPARATOR);
                 stringBuilder.append(backendAdminRole).append(GenericConstants.TOKEN_SEPARATOR);
                 stringBuilder.append(domainName).append(GenericConstants.TOKEN_SEPARATOR);
-                stringBuilder.append(rememberMe).append(GenericConstants.TOKEN_SEPARATOR);
                 stringBuilder.append(backendAdminType).append(GenericConstants.TOKEN_SEPARATOR);
                 stringBuilder.append(userApiKey).append(GenericConstants.TOKEN_SEPARATOR);
                 stringBuilder.append(userSecretKey).append(GenericConstants.TOKEN_SEPARATOR);
+                stringBuilder.append(rememberMe).append(GenericConstants.TOKEN_SEPARATOR);
             } else {
                 stringBuilder.append(user.getId()).append(GenericConstants.TOKEN_SEPARATOR);
                 stringBuilder.append(user.getUserName()).append(GenericConstants.TOKEN_SEPARATOR);
@@ -151,10 +151,10 @@ public class TokenService {
                 stringBuilder.append(user.getDepartment().getId()).append(GenericConstants.TOKEN_SEPARATOR);
                 stringBuilder.append(user.getRole().getName()).append(GenericConstants.TOKEN_SEPARATOR);
                 stringBuilder.append(domainName).append(GenericConstants.TOKEN_SEPARATOR);
-                stringBuilder.append(rememberMe).append(GenericConstants.TOKEN_SEPARATOR);
                 stringBuilder.append(user.getType()).append(GenericConstants.TOKEN_SEPARATOR);
                 stringBuilder.append(user.getApiKey()).append(GenericConstants.TOKEN_SEPARATOR);
                 stringBuilder.append(user.getSecretKey()).append(GenericConstants.TOKEN_SEPARATOR);
+                stringBuilder.append(rememberMe).append(GenericConstants.TOKEN_SEPARATOR);
             }
             stringBuilder.append(DateConvertUtil.getTimestamp());
         } catch (Exception e) {
