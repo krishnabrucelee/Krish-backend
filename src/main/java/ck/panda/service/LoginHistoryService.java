@@ -51,7 +51,8 @@ public interface LoginHistoryService extends CRUDService<LoginHistory>{
      *
      * @param id user id
      * @return Login history
+     * @throws Exception unhandled exception
      */
-    void updateLogoutStatus(Long id);
+    LoginHistory updateLogoutStatus(Long id) throws Exception;
 
 }
