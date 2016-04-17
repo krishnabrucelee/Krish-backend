@@ -1,11 +1,8 @@
 package ck.panda.service;
 
-import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import ck.panda.domain.entity.GeneralConfiguration;
@@ -81,27 +78,36 @@ public class LoginHistoryServiceImpl implements LoginHistoryService {
             domain = "ROOT";
         }
         User user = userService.findByUser(userName, password, domain);
-        LoginHistory loginDetails = new LoginHistory();
-        LoginHistory loginHistoryId = findByUserId(user.getId());
-        GeneralConfiguration generalConfiguration = generalConfigurationService.findByIsActive(true);
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeZone(TimeZone.getTimeZone("UTC"));
-        cal.add(Calendar.DATE, generalConfiguration.getRememberMeExpiredDays());
-        System.out.println(cal.getTimeInMillis() / 1000);
-        Long currentTimeStamp = cal.getTimeInMillis() / 1000;
-        if (loginHistoryId == null) {
+        if (domain.equals("ROOT") && user == null) {
+            LoginHistory loginDetails = new LoginHistory();
             loginDetails.setIsAlreadyLogin(true);
             loginDetails.setRememberMe(rememberMe);
-            loginDetails.setUserId(user.getId());
+            loginDetails.setUserId(0L);
             loginDetails.setLoginToken(loginToken);
-            loginDetails.setRememberMeExpireDate(currentTimeStamp);
+            loginDetails.setRememberMeExpireDate(DateConvertUtil.getTimestamp());
             return loginRepo.save(loginDetails);
         } else {
-            loginHistoryId.setIsAlreadyLogin(true);
-            loginHistoryId.setRememberMeExpireDate(currentTimeStamp);
-            loginHistoryId.setRememberMe(rememberMe);
-            loginHistoryId.setLoginToken(loginToken);
-            return loginRepo.save(loginHistoryId);
+            LoginHistory loginDetails = new LoginHistory();
+            LoginHistory loginHistoryId = findByUserId(user.getId());
+            GeneralConfiguration generalConfiguration = generalConfigurationService.findByIsActive(true);
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeZone(TimeZone.getTimeZone("UTC"));
+            cal.add(Calendar.DATE, generalConfiguration.getRememberMeExpiredDays());
+            Long currentTimeStamp = cal.getTimeInMillis() / 1000;
+            if (loginHistoryId == null) {
+                loginDetails.setIsAlreadyLogin(true);
+                loginDetails.setRememberMe(rememberMe);
+                loginDetails.setUserId(user.getId());
+                loginDetails.setLoginToken(loginToken);
+                loginDetails.setRememberMeExpireDate(currentTimeStamp);
+                return loginRepo.save(loginDetails);
+            } else {
+                loginHistoryId.setIsAlreadyLogin(true);
+                loginHistoryId.setRememberMeExpireDate(currentTimeStamp);
+                loginHistoryId.setRememberMe(rememberMe);
+                loginHistoryId.setLoginToken(loginToken);
+                return loginRepo.save(loginHistoryId);
+            }
         }
     }
 
@@ -121,11 +127,11 @@ public class LoginHistoryServiceImpl implements LoginHistoryService {
     }
 
     @Override
-    public void updateLogoutStatus(Long id) {
+    public LoginHistory updateLogoutStatus(Long id) throws Exception {
         LoginHistory loginHistory = loginRepo.findByUserId(id);
         loginHistory.setIsAlreadyLogin(false);
         loginHistory.setRememberMe("false");
         loginHistory.setRememberMeExpireDate(null);
-        loginRepo.save(loginHistory);
+        return loginRepo.save(loginHistory);
     }
 }

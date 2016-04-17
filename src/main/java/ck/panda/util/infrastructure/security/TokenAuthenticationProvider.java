@@ -1,37 +1,26 @@
 package ck.panda.util.infrastructure.security;
 
-import com.google.common.base.Optional;
-
-import ck.panda.domain.entity.Department;
-import ck.panda.domain.entity.GeneralConfiguration;
-import ck.panda.domain.entity.LoginHistory;
-import ck.panda.domain.entity.Role;
-import ck.panda.domain.entity.User;
-import ck.panda.service.DepartmentService;
-import ck.panda.service.GeneralConfigurationService;
-import ck.panda.service.LoginHistoryService;
-import ck.panda.service.RoleService;
-import ck.panda.service.UserService;
-import ck.panda.util.DateConvertUtil;
-
-import java.security.SecureRandom;
-import java.sql.Timestamp;
-import java.time.ZonedDateTime;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
-import java.util.Calendar;
-import java.util.Date;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
+import com.google.common.base.Optional;
+import ck.panda.domain.entity.GeneralConfiguration;
+import ck.panda.domain.entity.LoginHistory;
+import ck.panda.domain.entity.Role;
+import ck.panda.domain.entity.User;
+import ck.panda.service.GeneralConfigurationService;
+import ck.panda.service.LoginHistoryService;
+import ck.panda.service.RoleService;
+import ck.panda.service.UserService;
+import ck.panda.util.DateConvertUtil;
 
 /**
  * Token authentication provider.
@@ -87,6 +76,7 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
         }
 
         HashMap<String, String> getLoginToken = (HashMap<String, String>) authentication.getDetails();
+        if (!tokenService.contains(token.get()) || (getLoginToken.get("userId") != null && !getLoginToken.get("userId").equals("undefined"))) {
         String loginToken = getLoginToken.get("loginToken");
         String userId = getLoginToken.get("userId");
         LoginHistory alreadyLoginDetail = loginHistoryService.findByUserIdAndAlreadyLogin(Long.valueOf(userId),
@@ -98,7 +88,6 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
             cal.setTimeZone(TimeZone.getTimeZone("UTC"));
             cal.add(Calendar.DATE, generalConfigurations.getRememberMeExpiredDays());
         } catch (Exception e1) {
-            // TODO Auto-generated catch block
             e1.printStackTrace();
         }
         if (!tokenService.contains(token.get()) || !alreadyLoginDetail.getLoginToken().equals(loginToken)) {
@@ -131,6 +120,8 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
                 throw new BadCredentialsException("error.session.expired");
             }
         }
+        }
+
         try {
             authentication = tokenService.retrieve(token.get());
         } catch (Exception e) {

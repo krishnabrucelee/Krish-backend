@@ -3,20 +3,14 @@ package ck.panda.util.infrastructure.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
-import ck.panda.domain.entity.LoginHistory;
 import ck.panda.domain.entity.RolePrincipal;
 import ck.panda.util.TokenDetails;
-import ck.panda.service.LoginHistoryService;
-import ck.panda.service.UserService;
 import ck.panda.util.error.MessageByLocaleService;
 import ck.panda.util.infrastructure.AuthenticatedExternalWebService;
 import ck.panda.util.infrastructure.externalwebservice.ExternalWebServiceStub;
 import ck.panda.util.web.ApiController;
-
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -27,16 +21,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.authentication.encoding.MessageDigestPasswordEncoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.util.UrlPathHelper;
-
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -46,11 +35,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Authentication filter.
@@ -345,12 +331,14 @@ public class AuthenticationFilter extends GenericFilterBean {
     private Authentication tryToAuthenticateWithToken(Optional<String> token, Optional<String> loginToken, Optional<String> userId, HttpServletRequest httpRequest) {
         PreAuthenticatedAuthenticationToken requestAuthentication = new PreAuthenticatedAuthenticationToken(token,
                 null);
-        if (loginToken.isPresent() && userId.isPresent()) {
-            HashMap<String, String> setLoginToken = new HashMap<String, String>();
+        HashMap<String, String> setLoginToken = new HashMap<String, String>();
+        if (userId.isPresent()) {
             setLoginToken.put("loginToken", loginToken.get());
-            setLoginToken.put("userId", userId.get());
-            requestAuthentication.setDetails(setLoginToken);
         }
+        if (userId.isPresent()) {
+            setLoginToken.put("userId", userId.get());
+        }
+        requestAuthentication.setDetails(setLoginToken);
         return tryToAuthenticate(requestAuthentication, loginToken, userId, httpRequest);
     }
 

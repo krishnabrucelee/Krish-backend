@@ -234,6 +234,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
             }
             resultOfAuthentication.setToken(newToken);
             tokenService.store(newToken, resultOfAuthentication);
+            loginHistoryService.saveLoginDetails(userName.get(), password.get(), BACKEND_ADMIN, rememberMe, loginToken);
         } else {
             loginAttemptvalidationCheck("error.login.credentials", CloudStackConstants.STATUS_INACTIVE);
         }
