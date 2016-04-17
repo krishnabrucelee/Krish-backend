@@ -130,4 +130,16 @@ public interface ResourceLimitDomainService extends CRUDService<ResourceLimitDom
     HashMap<String, Long> getSumOfDomainMin(Long id) throws Exception;
 
 
+    /**
+     * Find by domain and resource type
+     *
+     * @param domainId domain id
+     * @param resource resource
+     * @param isActive is active
+     * @return list of quota's
+     * @throws Exception error occurs
+     */
+    List<ResourceLimitDomain> findByDomainIdAndResourceType(Long domainId, ResourceType resource, Boolean isActive) throws Exception;
+
+
 }
