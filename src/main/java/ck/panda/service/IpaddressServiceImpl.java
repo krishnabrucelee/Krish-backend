@@ -150,19 +150,18 @@ public class IpaddressServiceImpl implements IpaddressService {
                 .getDepartmentById(convertEntityService.getNetworkById(networkId).getDepartmentId()).getType()
                 .equals(AccountType.USER)) {
             if (convertEntityService.getNetworkById(networkId).getProjectId() != null) {
-                syncService.syncResourceLimitProject(convertEntityService
-                        .getProjectById(convertEntityService.getNetworkById(networkId).getProjectId()));
+//                syncService.syncResourceLimitProject(convertEntityService
+//                        .getProjectById(convertEntityService.getNetworkById(networkId).getProjectId()));
                 quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getNetworkById(networkId),
                         "IP", convertEntityService.getNetworkById(networkId).getProjectId(), "Project");
-            }
-            if (convertEntityService.getNetworkById(networkId).getDepartmentId() != null) {
+            } else {
                 quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getNetworkById(networkId),
                         "IP", convertEntityService.getNetworkById(networkId).getDepartmentId(), "Department");
             }
-            if (convertEntityService.getNetworkById(networkId).getDomainId() != null) {
+           /* if (convertEntityService.getNetworkById(networkId).getDomainId() != null) {
                 quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getNetworkById(networkId),
                         "IP", convertEntityService.getNetworkById(networkId).getDomainId(), "Domain");
-            }
+            }*/
             // 3. Check the resource availability to acquire new ip.
             String isAvailable = isResourceAvailable(convertEntityService.getNetworkById(networkId), optionalMap);
             if (isAvailable != null) {
@@ -427,8 +426,8 @@ public class IpaddressServiceImpl implements IpaddressService {
 
         if (departmentLimit != null) {
             if (convertEntityService.getNetworkById(ipAddress.getNetworkId()).getProjectId() != null) {
-                syncService.syncResourceLimitProject(
-                        convertEntityService.getProjectById(convertEntityService.getNetworkById(ipAddress.getNetworkId()).getProjectId()));
+//                syncService.syncResourceLimitProject(
+//                        convertEntityService.getProjectById(convertEntityService.getNetworkById(ipAddress.getNetworkId()).getProjectId()));
             }
 
         try {

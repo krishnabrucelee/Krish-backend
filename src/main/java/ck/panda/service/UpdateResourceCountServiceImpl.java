@@ -219,12 +219,12 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
         return null;
     }
 
-    public void updateResourceCountByDomain(String domainUuid, HashMap<String, String> domainCountMap)
-            throws Exception {
-        // Resource count for domain
-        String csResponse = cloudStackResourceCapacity.updateResourceCount(domainUuid, domainCountMap, "json");
-        convertEntityService.resourceCount(csResponse);
-    }
+//    public void updateResourceCountByDomain(String domainUuid, HashMap<String, String> domainCountMap)
+//            throws Exception {
+//        // Resource count for domain
+//        String csResponse = cloudStackResourceCapacity.updateResourceCount(domainUuid, domainCountMap, "json");
+//        //convertEntityService.resourceCount(csResponse);
+//    }
 
     public void updateCountByDepartmentAndResourceType(Long departmentId, String resourceType, Long updateResourceCount, String status) throws Exception {
         ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
@@ -264,10 +264,10 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
             updateCountByProjectAndResourceType(accountTypeId, resource, EmptytoLong(resourceUsageMap.get(resources)), status);
         } else if(accountType.equals("Department")){
             updateCountByDepartmentAndResourceType(accountTypeId, resource, EmptytoLong(resourceUsageMap.get(resources)), status);
-        } else {
+        }/* else {
             // Resource count for domain.
-            updateResourceCountByDomain(convertEntityService.getDomainById(accountTypeId).getUuid(), null);
-        }
+//            updateResourceCountByDomain(convertEntityService.getDomainById(accountTypeId).getUuid(), null);
+        }*/
     }
     public Long EmptytoLong(Long value) {
         if (value == null) {
