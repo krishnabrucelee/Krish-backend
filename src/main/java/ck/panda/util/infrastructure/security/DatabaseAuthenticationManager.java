@@ -4,7 +4,11 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.HashMap;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -21,11 +25,13 @@ import com.google.common.base.Optional;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.GeneralConfiguration;
+import ck.panda.domain.entity.LoginHistory;
 import ck.panda.domain.entity.LoginSecurityTrack;
 import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.User;
 import ck.panda.service.DepartmentService;
 import ck.panda.service.GeneralConfigurationService;
+import ck.panda.service.LoginHistoryService;
 import ck.panda.service.LoginSecurityTrackService;
 import ck.panda.service.RoleService;
 import ck.panda.service.UserService;
@@ -33,6 +39,7 @@ import ck.panda.util.CloudStackAuthenticationService;
 import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.DateConvertUtil;
+import ck.panda.util.EncryptionUtil;
 
 /**
  * Database authentication manager to handle all the validation and authentication for login users.
@@ -122,17 +129,42 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
     @Value("${app.buildversion}")
     private String buildNumber;
 
+    /** Secret key value is append. */
+    @Value(value = "${aes.salt.secretKey}")
+    private String secretKey;
+
+    /** Login History Service attribute. */
+    @Autowired
+    private LoginHistoryService loginHistoryService;
+
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException, BadCredentialsException {
         Optional<String> userName = (Optional) authentication.getPrincipal();
         Optional<String> password = (Optional) authentication.getCredentials();
 
         AuthenticationWithToken resultOfAuthentication = null;
+        String rememberMe = null;
+        String forceLogin = null;
+        HashMap<String, String> loginMap = (HashMap<String, String>) authentication.getDetails();
         if (userName != null && password != null) {
-            Optional<String> domain = (Optional) authentication.getDetails();
-            resultOfAuthentication = authValidation(userName, password, domain, resultOfAuthentication);
+            String domain = null;
+            if (loginMap.containsKey(CS_DOMAIN)) {
+                domain = loginMap.get(CS_DOMAIN);
+            } else {
+                domain = loginMap.get(BACKEND_ADMIN);
+            }
+            if (!loginMap.get("rememberMe").equals(false)) {
+                rememberMe = loginMap.get("rememberMe");
+            }
+            forceLogin = loginMap.get("forceLogin");
+            resultOfAuthentication = authValidation(userName, password, domain, rememberMe, resultOfAuthentication, forceLogin);
         } else {
-            resultOfAuthentication = (AuthenticationWithToken) tokenAuthenticationProvider.authenticate(authentication);
+            LoginHistory loginHistory = loginHistoryService.findByLoginToken(loginMap.get("loginToken"));
+            if (loginHistory == null) {
+                throw new BadCredentialsException("Your credentials are used by another user, So you are logging out.");
+            } else {
+                resultOfAuthentication = (AuthenticationWithToken) tokenAuthenticationProvider.authenticate(authentication);
+            }
         }
         return resultOfAuthentication;
     }
@@ -144,24 +176,25 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
      * @param password login user password
      * @param resultOfAuthentication authentication token object
      * @param domain login user domain
+     * @param rememberMe
      * @return authentication token value
      * @throws AuthenticationException if authentication exception occurs.
      */
     public AuthenticationWithToken authValidation(Optional<String> userName, Optional<String> password,
-            Optional<String> domain, AuthenticationWithToken resultOfAuthentication) throws AuthenticationException {
+            String domain, String rememberMe, AuthenticationWithToken resultOfAuthentication, String forceLogin) throws AuthenticationException {
         User user = null;
         try {
             user = userService.findByUser(userName.get(), password.get(), ROOT_DOMAIN_SYMBOL);
-            if (user == null && domain.get().equals(BACKEND_ADMIN)) {
-                resultOfAuthentication = adminDefaultLoginAuthentication(userName, password, resultOfAuthentication,
+            if (user == null && domain.equals(BACKEND_ADMIN)) {
+                resultOfAuthentication = adminDefaultLoginAuthentication(userName, password, rememberMe, resultOfAuthentication,
                         user);
             } else {
-                Boolean authResponse = csLoginAuthentication(userName.get(), password.get(), domain.get());
+                Boolean authResponse = csLoginAuthentication(userName.get(), password.get(), domain);
                 if (authResponse) {
-                    if (!domain.get().equals(BACKEND_ADMIN)) {
-                        user = userService.findByUser(userName.get(), password.get(), domain.get());
+                    if (!domain.equals(BACKEND_ADMIN)) {
+                        user = userService.findByUser(userName.get(), password.get(), domain);
                     }
-                    resultOfAuthentication = userLoginAuthentication(userName, domain, resultOfAuthentication, user);
+                    resultOfAuthentication = userLoginAuthentication(userName, domain, password, rememberMe, resultOfAuthentication, user, forceLogin);
                 } else {
                     loginAttemptvalidationCheck("error.login.credentials", CloudStackConstants.STATUS_INACTIVE);
                 }
@@ -180,24 +213,28 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
      *
      * @param userName to set
      * @param password to set
+     * @param rememberMe
      * @param resultOfAuthentication to set
      * @param user to set
      * @return admin default authentication token
      * @throws Exception unhandled exceptions.
      */
     public AuthenticationWithToken adminDefaultLoginAuthentication(Optional<String> userName, Optional<String> password,
-            AuthenticationWithToken resultOfAuthentication, User user) throws Exception {
+            String rememberMe, AuthenticationWithToken resultOfAuthentication, User user) throws Exception {
         if (userName.get().equals(backendAdminUserName) && password.get().equals(backendAdminPassword)) {
+            SecureRandom random = new SecureRandom();
+            String loginToken = random.toString();
             resultOfAuthentication = externalServiceAuthenticator.authenticate(backendAdminUserName, backendAdminRole,
-                    null, null, buildNumber);
+                    null, null, buildNumber, rememberMe, loginToken);
             String newToken = null;
             try {
-                newToken = tokenService.generateNewToken(user, ROOT_DOMAIN);
+                newToken = tokenService.generateNewToken(user, ROOT_DOMAIN, rememberMe);
             } catch (Exception e) {
                 LOGGER.error("Error for generating token : " + e);
             }
             resultOfAuthentication.setToken(newToken);
             tokenService.store(newToken, resultOfAuthentication);
+            loginHistoryService.saveLoginDetails(userName.get(), password.get(), BACKEND_ADMIN, rememberMe, loginToken);
         } else {
             loginAttemptvalidationCheck("error.login.credentials", CloudStackConstants.STATUS_INACTIVE);
         }
@@ -209,13 +246,15 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
      *
      * @param userName to set
      * @param domain to set
+     * @param password
+     * @param rememberMe
      * @param resultOfAuthentication to set
      * @param user to set
      * @return user authentication token
      * @throws Exception unhandled exceptions.
      */
-    public AuthenticationWithToken userLoginAuthentication(Optional<String> userName, Optional<String> domain,
-            AuthenticationWithToken resultOfAuthentication, User user) throws Exception {
+    public AuthenticationWithToken userLoginAuthentication(Optional<String> userName, String domain,
+            Optional<String> password, String rememberMe, AuthenticationWithToken resultOfAuthentication, User user, String forceLogin) throws Exception {
         if (user == null) {
             loginAttemptvalidationCheck("error.login.credentials", CloudStackConstants.STATUS_INACTIVE);
         } else if (user != null && !user.getIsActive()) {
@@ -226,18 +265,24 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
             Boolean loginAttemptCheck = loginAttemptvalidationCheck("success", CloudStackConstants.STATUS_ACTIVE);
             Boolean authKeyResponse = apiSecretKeyGeneration(user);
             if (authKeyResponse && loginAttemptCheck) {
+                Boolean forceLoginResponse = forceLoginAttemptCheck(user, forceLogin);
+                if (forceLoginResponse) {
+                SecureRandom random = new SecureRandom();
+                String loginToken = random.toString();
                 Department department = departmentService.find(user.getDepartment().getId());
                 Role role = roleService.findWithPermissionsByNameDepartmentAndIsActive(user.getRole().getName(), department.getId(), true);
                 resultOfAuthentication = externalServiceAuthenticator.authenticate(userName.get(),
-                        user.getRole().getName(), role, user, buildNumber);
+                        user.getRole().getName(), role, user, buildNumber, rememberMe, loginToken);
                 String newToken = null;
                 try {
-                    newToken = tokenService.generateNewToken(user, domain.get());
+                    newToken = tokenService.generateNewToken(user, domain, rememberMe);
                 } catch (Exception e) {
                     LOGGER.error("Error for generating token:" + e);
                 }
                 resultOfAuthentication.setToken(newToken);
                 tokenService.store(newToken, resultOfAuthentication);
+                loginHistoryService.saveLoginDetails(userName.get(), password.get(), domain, rememberMe, loginToken);
+                }
             } else {
                 throw new BadCredentialsException("error.apikey.generate.problem");
             }
@@ -308,6 +353,14 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
                 }
             }
         }
+    }
+
+    public String test(Optional<String> token) throws Exception {
+        String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
+        byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
+        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+        String encryptedPassword = new String(EncryptionUtil.decrypt(token.get(), originalKey));
+        return encryptedPassword;
     }
 
     /**
@@ -440,6 +493,17 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
             }
         }
         return ipAddress;
+    }
+
+    private Boolean forceLoginAttemptCheck(User user, String forceLogin) throws Exception {
+        LoginHistory loginHistory = loginHistoryService.findByUserId(user.getId());
+        if (loginHistory == null || loginHistory.getIsAlreadyLogin() == false) {
+            return true;
+        } else if (loginHistory.getIsAlreadyLogin() == true && forceLogin.equals("true")) {
+            return true;
+        } else {
+            throw new BadCredentialsException("error.already.exists");
+        }
     }
 
 }

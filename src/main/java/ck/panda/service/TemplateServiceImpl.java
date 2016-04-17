@@ -167,19 +167,16 @@ public class TemplateServiceImpl implements TemplateService {
                     TemplateCost templateCost = templateCostService.find(templateCS.getTemplateCost().get(0).getId());
                     templateCost.setTemplateCostId(templateCS.getId());
                     templateCostService.save(templateCost);
+                    if (userDetails.getType() == User.UserType.ROOT_ADMIN && template.getTemplateCost() != null) {
+                        if (pingService.apiConnectionCheck(errors)) {
+                            template = templateRepository.save(template);
+                            savePingProject(template);
+                        }
+                    }
                     return templateCS;
                 }
             }
-
-            if (userDetails.getType() == User.UserType.ROOT_ADMIN && template.getTemplateCost() != null) {
-                if (pingService.apiConnectionCheck(errors)) {
-                    template = templateRepository.save(template);
-                    savePingProject(template);
-                }
-            } else {
-                template = templateRepository.save(template);
-            }
-            return template;
+            return templateRepository.save(template);
 
         } else {
             return templateRepository.save(template);

@@ -3,6 +3,7 @@ package ck.panda.util.infrastructure.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.RolePrincipal;
 import ck.panda.util.TokenDetails;
@@ -23,7 +24,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.util.UrlPathHelper;
 import javax.servlet.FilterChain;
@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 
 /**
  * Authentication filter.
@@ -67,6 +68,18 @@ public class AuthenticationFilter extends GenericFilterBean {
     /** Authentication password. */
     public static final String XAUTH_PASSWORD = "x-auth-password";
 
+    /** Authentication login token. */
+    public static final String XAUTH_LOGIN_TOKEN = "x-auth-login-token";
+
+    /** Authentication user id. */
+    public static final String XAUTH_USER_ID = "x-auth-user-id";
+
+    /** Authentication remember. */
+    public static final String XAUTH_REMEMBER_ME = "x-auth-remember";
+
+    /** Authentication force login flag. */
+    public static final String XFORCE_LOGIN = "x-force-login";
+
     /** Authentication token. */
     public static final String XAUTH_TOKEN = "x-auth-token";
 
@@ -81,6 +94,12 @@ public class AuthenticationFilter extends GenericFilterBean {
 
     /** HTTP request post action. */
     public static final String HTTP_POST = "POST";
+
+    /** HTTP request post action. */
+    public static final String REMEMBER_ME = "rememberMe";
+
+    /** HTTP request post action. */
+    public static final String FORCE_LOGIN = "forceLogin";
 
     /** Authentication manager attribute. */
     private DatabaseAuthenticationManager databaseAuthenticationManager;
@@ -111,8 +130,12 @@ public class AuthenticationFilter extends GenericFilterBean {
         HttpServletResponse httpResponse = asHttp(response);
         Optional<String> userName = Optional.fromNullable(httpRequest.getHeader(XAUTH_USERNAME));
         Optional<String> password = Optional.fromNullable(httpRequest.getHeader(XAUTH_PASSWORD));
+        Optional<String> rememberMe = Optional.fromNullable(httpRequest.getHeader(XAUTH_REMEMBER_ME));
+        Optional<String> loginToken = Optional.fromNullable(httpRequest.getHeader(XAUTH_LOGIN_TOKEN));
+        Optional<String> userId = Optional.fromNullable(httpRequest.getHeader(XAUTH_USER_ID));
         Optional<String> token = Optional.fromNullable(httpRequest.getHeader(XAUTH_TOKEN));
         Optional<String> domain = Optional.fromNullable(httpRequest.getHeader(XAUTH_REQUEST));
+        Optional<String> forceLogin = Optional.fromNullable(httpRequest.getHeader(XFORCE_LOGIN));
         String resourcePath = new UrlPathHelper().getPathWithinApplication(httpRequest);
         try {
             if (resourcePath.contains("socket")) {
@@ -123,7 +146,7 @@ public class AuthenticationFilter extends GenericFilterBean {
                 authenticatedExternalWebService.setExternalWebService(externalWebService);
                 SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);
             }
-            if (resourcePath.contains("panda")) {
+            if (resourcePath.contains("panda") && !resourcePath.contains("usersessiondetails")) {
                 ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
                 AuthenticatedExternalWebService authenticatedExternalWebService = new AuthenticatedExternalWebService(
                         "pandapay", null, AuthorityUtils.commaSeparatedStringToAuthorityList("BACKEND_ADMIN"));
@@ -132,12 +155,14 @@ public class AuthenticationFilter extends GenericFilterBean {
             }
             if (postToAuthenticate(httpRequest, resourcePath)) {
                 LOGGER.debug("Trying to authenticate user by x-auth-username method : ", userName);
-                processUsernamePasswordAuthentication(httpRequest, httpResponse, userName, password, domain);
+                processUsernamePasswordAuthentication(httpRequest, httpResponse, userName, password, domain, rememberMe, loginToken, userId, forceLogin);
                 return;
             }
             if (token.isPresent()) {
-                LOGGER.debug("Trying to authenticate user by x-auth-token method : ", token);
-                processTokenAuthentication(token, httpRequest);
+                if (!token.get().isEmpty()) {
+                    LOGGER.debug("Trying to authenticate user by x-auth-token method : ", token);
+                    processTokenAuthentication(token, loginToken, userId, httpRequest);
+                }
             }
             LOGGER.debug("Authentication filter is passing request down the filter chain");
             addSessionContextToLogging();
@@ -155,6 +180,12 @@ public class AuthenticationFilter extends GenericFilterBean {
             httpResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
             httpResponse.setCharacterEncoding(GenericConstants.CHARACTER_ENCODING);
             httpResponse.getWriter().write("{\"message\":\"" + messageByLocaleService.getMessage(authenticationException.getMessage()) + "\"}");
+        } catch (NumberFormatException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         } finally {
             MDC.remove(TOKEN_SESSION_KEY);
             MDC.remove(USER_SESSION_KEY);
@@ -223,19 +254,27 @@ public class AuthenticationFilter extends GenericFilterBean {
      * @param userName to set
      * @param password to set
      * @param domain name to set
+     * @param rememberMe to set
+     * @param loginToken to set
+     * @param userId to set
+     * @param forceLogin to set
      * @throws IOException if I/O exception occurs.
      */
     private void processUsernamePasswordAuthentication(HttpServletRequest httpRequest, HttpServletResponse httpResponse,
-            Optional<String> userName, Optional<String> password, Optional<String> domain) throws IOException {
+            Optional<String> userName, Optional<String> password, Optional<String> domain, Optional<String> rememberMe, Optional<String> loginToken, Optional<String> userId, Optional<String> forceLogin) throws IOException {
         Authentication resultOfAuthentication = tryToAuthenticateWithUsernameAndPassword(httpRequest, userName,
-                password, domain);
+                password, domain, rememberMe, loginToken, userId, forceLogin);
         SecurityContextHolder.getContext().setAuthentication(resultOfAuthentication);
         httpResponse.setStatus(HttpServletResponse.SC_OK);
         httpResponse.addHeader(GenericConstants.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         try {
             if (userTokenDetails.getTokenDetails(DOMAIN_NAME).equals(ROOT_DOMAIN)) {
                 TokenResponse tokenResponse = new TokenResponse(resultOfAuthentication.getDetails().toString());
-                String tokenJsonResponse = new ObjectMapper().writeValueAsString(tokenResponse);
+                Object rememberResponse = resultOfAuthentication.getPrincipal();
+                HashMap<String, Object> hashMap = new HashMap<String, Object>();
+                hashMap.put("tokenResponse",tokenResponse);
+                hashMap.put("rememberResponse", rememberResponse);
+                String tokenJsonResponse = new ObjectMapper().writeValueAsString(hashMap);
                 httpResponse.getWriter().print(tokenJsonResponse);
             } else {
                 RolePrincipal rolePrincipal = (RolePrincipal) resultOfAuthentication.getPrincipal();
@@ -252,25 +291,35 @@ public class AuthenticationFilter extends GenericFilterBean {
      * @param httpRequest to set
      * @param userName to set
      * @param password to set
-     * @param domain to set
+     * @param rememberMe to set
+     * @param loginToken to set
+     * @param userId to set
+     * @param forceLogin to set
      * @return Authentication
      */
     private Authentication tryToAuthenticateWithUsernameAndPassword(HttpServletRequest httpRequest,
-            Optional<String> userName, Optional<String> password, Optional<String> domain) {
+            Optional<String> userName, Optional<String> password, Optional<String> domain, Optional<String> rememberMe, Optional<String> loginToken, Optional<String> userId, Optional<String> forceLogin) {
         UsernamePasswordAuthenticationToken requestAuthentication = new UsernamePasswordAuthenticationToken(userName,
                 password);
-        requestAuthentication.setDetails(domain);
-        return tryToAuthenticate(requestAuthentication, httpRequest);
+        if (rememberMe.isPresent()) {
+            HashMap<String, String> loginMap = new HashMap<String, String>();
+            loginMap.put(CloudStackConstants.CS_DOMAIN, domain.get());
+            loginMap.put(REMEMBER_ME, rememberMe.get());
+            loginMap.put(FORCE_LOGIN, forceLogin.get());
+            requestAuthentication.setDetails(loginMap);
+        }
+        return tryToAuthenticate(requestAuthentication, loginToken, userId, httpRequest);
     }
 
     /**
      * Process token authentication.
      *
      * @param token to set
+     * @param loginToken
      * @param httpRequest to set
      */
-    private void processTokenAuthentication(Optional<String> token, HttpServletRequest httpRequest) {
-        Authentication resultOfAuthentication = tryToAuthenticateWithToken(token, httpRequest);
+    private void processTokenAuthentication(Optional<String> token, Optional<String> loginToken, Optional<String> userId, HttpServletRequest httpRequest) {
+        Authentication resultOfAuthentication = tryToAuthenticateWithToken(token, loginToken, userId, httpRequest);
         SecurityContextHolder.getContext().setAuthentication(resultOfAuthentication);
     }
 
@@ -281,10 +330,18 @@ public class AuthenticationFilter extends GenericFilterBean {
      * @param httpRequest to set
      * @return Authentication
      */
-    private Authentication tryToAuthenticateWithToken(Optional<String> token, HttpServletRequest httpRequest) {
+    private Authentication tryToAuthenticateWithToken(Optional<String> token, Optional<String> loginToken, Optional<String> userId, HttpServletRequest httpRequest) {
         PreAuthenticatedAuthenticationToken requestAuthentication = new PreAuthenticatedAuthenticationToken(token,
                 null);
-        return tryToAuthenticate(requestAuthentication, httpRequest);
+        HashMap<String, String> setLoginToken = new HashMap<String, String>();
+        if (userId.isPresent()) {
+            setLoginToken.put("loginToken", loginToken.get());
+        }
+        if (userId.isPresent()) {
+            setLoginToken.put("userId", userId.get());
+        }
+        requestAuthentication.setDetails(setLoginToken);
+        return tryToAuthenticate(requestAuthentication, loginToken, userId, httpRequest);
     }
 
     /**
@@ -294,7 +351,7 @@ public class AuthenticationFilter extends GenericFilterBean {
      * @param httpRequest to set
      * @return Authentication
      */
-    private Authentication tryToAuthenticate(Authentication requestAuthentication, HttpServletRequest httpRequest) {
+    private Authentication tryToAuthenticate(Authentication requestAuthentication, Optional<String> loginToken, Optional<String> userId, HttpServletRequest httpRequest) {
         Authentication responseAuthentication = databaseAuthenticationManager.authenticate(requestAuthentication);
         DateFormat dateFormat = new SimpleDateFormat(GenericConstants.AUTH_DATE_FORMAT);
         if (responseAuthentication == null || !responseAuthentication.isAuthenticated()) {
