@@ -166,18 +166,13 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             if (departmentLimit != null && convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
                     .getType().equals(AccountType.USER)) {
                 if (vmInstance.getProjectId() != null) {
-                    syncService
-                            .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
+//                    syncService
+//                            .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
                     quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
                             vmInstance.getProjectId(), "Project");
-                }
-                if (vmInstance.getDepartmentId() != null) {
+                } else {
                     quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
                             vmInstance.getDepartmentId(), "Department");
-                }
-                if (vmInstance.getDomainId() != null) {
-                    quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
-                            vmInstance.getDomainId(), "Domain");
                 }
                 // 3. Check the resource availability to deploy new vm.
                 String isAvailable = isResourceAvailable(vmInstance, optionalMap);
@@ -384,8 +379,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             if (departmentsLimit != null && convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
                     .getType().equals(AccountType.USER)) {
                 if (vmInstance.getProjectId() != null) {
-                    syncService
-                            .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
+//                    syncService
+//                            .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
                 }
                 config.setUserServer();
                 instanceResponse = cloudStackInstanceService.destroyVirtualMachine(vmInstance.getUuid(),
@@ -409,8 +404,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             if (departmentLimits != null && convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
                     .getType().equals(AccountType.USER)) {
                 if (vmInstance.getProjectId() != null) {
-                    syncService
-                            .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
+//                    syncService
+//                            .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
                 }
                 optionalMap.put(CloudStackConstants.CS_VM_ENPUNGE, CloudStackConstants.CS_ACTIVE_VM);
                 config.setUserServer();
@@ -434,18 +429,13 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             if (departmentLimit != null && convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
                     .getType().equals(AccountType.USER)) {
                 if (vmInstance.getProjectId() != null) {
-                    syncService
-                            .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
+//                    syncService
+//                            .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
                     quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "RestoreInstance",
                             vmInstance.getProjectId(), "Project");
-                }
-                if (vmInstance.getDepartmentId() != null) {
+                } else {
                     quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "RestoreInstance",
                             vmInstance.getDepartmentId(), "Department");
-                }
-                if (vmInstance.getDomainId() != null) {
-                    quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "RestoreInstance",
-                            vmInstance.getDomainId(), "Domain");
                 }
                 // 3. Check the resource availability to deploy new vm.
                 String isAvailable = isResourceAvailable(vmInstance, optionalMap);

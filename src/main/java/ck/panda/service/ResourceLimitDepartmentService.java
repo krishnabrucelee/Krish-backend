@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.util.domain.CRUDService;
+import ck.panda.util.error.exception.ApplicationException;
 
 /**
  * Resource Limit Department Service.
@@ -66,6 +67,22 @@ public interface ResourceLimitDepartmentService extends CRUDService<ResourceLimi
      * @return max values of resources
      */
     HashMap<String, String> getResourceLimitsOfDepartment(Long domainId);
+
+    /**
+     * Get resource counts of department.
+     *
+     * @param departmentId department id
+     * @return max values of resources
+     */
+    HashMap<String, String> getResourceCountsOfDepartment(Long departmentId);
+
+    /**
+     * Get resource counts of domain.
+     *
+     * @param domainId department id
+     * @return max values of resources
+     */
+    HashMap<String, String> getResourceCountsOfDomain(Long domainId);
 
     /**
      * Gety the resource limits of projects.

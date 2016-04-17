@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
-import ck.panda.domain.entity.ResourceLimitDepartment;
+import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.ResourceLimitProject.ResourceType;
 import ck.panda.util.domain.CRUDService;

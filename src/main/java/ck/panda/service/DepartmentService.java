@@ -38,6 +38,15 @@ public interface DepartmentService extends CRUDService<Department> {
     Page<Department> findAllByActive(PagingAndSorting pagingAndSorting, Long userId) throws Exception;
 
     /**
+     * Find all the departments with active status.
+     *
+     * @param isActive true/false.
+     * @return list of departments.
+     * @throws Exception error occurs
+     */
+    List<Department> findAllByActive(Boolean isActive) throws Exception;
+
+    /**
      * To get list of domains from cloudstack server.
      *
      * @return domain list from server
@@ -145,7 +154,7 @@ public interface DepartmentService extends CRUDService<Department> {
      */
     List<Department> findAllByDomainAccountTypeAndIsActive(Long domainId, Boolean isActive, AccountType domainAdmin)
             throws Exception;
-            
+
     /**
      * Find all the domain based department with active status.
      *

@@ -181,20 +181,18 @@ public class NetworkServiceImpl implements NetworkService {
                 if (departmentLimit != null && convertEntityService.getDepartmentById(network.getDepartmentId()).getType()
                         .equals(AccountType.USER)) {
                     if (network.getProjectId() != null) {
-                        syncService
-                                .syncResourceLimitProject(convertEntityService.getProjectById(network.getProjectId()));
+//                        syncService
+//                                .syncResourceLimitProject(convertEntityService.getProjectById(network.getProjectId()));
                         quotaLimitValidation.QuotaLimitCheckByResourceObject(network, NETWORK,
                                 network.getProjectId(), "Project");
-                    }
-
-                    if (network.getDepartmentId() != null) {
+                    } else {
                         quotaLimitValidation.QuotaLimitCheckByResourceObject(network, NETWORK,
                                 network.getDepartmentId(), "Department");
                     }
-                    if (network.getDomainId() != null) {
+                   /* if (network.getDomainId() != null) {
                         quotaLimitValidation.QuotaLimitCheckByResourceObject(network, NETWORK,
                                 network.getDomainId(), "Domain");
-                    }
+                    }*/
                     try {
                         config.setUserServer();
                         Zone zoneObject = convertEntityService.getZoneById(network.getZoneId());
@@ -248,14 +246,9 @@ public class NetworkServiceImpl implements NetworkService {
                         if (network.getProjectId() != null) {
                             updateResourceCountService.QuotaUpdateByResourceObject(network, NETWORK, network.getProjectId(),
                                     "Project", "update");
-                        }
-                        if (network.getDepartmentId() != null) {
+                        } else {
                             updateResourceCountService.QuotaUpdateByResourceObject(network, NETWORK,
                                     network.getDepartmentId(), "Department", "update");
-                        }
-                        if (network.getDomainId() != null) {
-                            updateResourceCountService.QuotaUpdateByResourceObject(network, NETWORK, network.getDomainId(),
-                                    "Domain", "update");
                         }
                     }
                     return networkRepo.save(network);
@@ -369,7 +362,7 @@ public class NetworkServiceImpl implements NetworkService {
                        .findByDepartmentAndResourceType(network.getDepartmentId(), ResourceType.Instance, true);
                if (departmentLimit != null) {
                    if (network.getProjectId() != null) {
-                       syncService.syncResourceLimitProject(convertEntityService.getProjectById(network.getProjectId()));
+//                       syncService.syncResourceLimitProject(convertEntityService.getProjectById(network.getProjectId()));
                    }
                network.setIsActive(false);
                network.setStatus(Network.Status.DESTROY);

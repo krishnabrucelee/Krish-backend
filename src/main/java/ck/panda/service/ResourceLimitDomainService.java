@@ -46,6 +46,17 @@ public interface ResourceLimitDomainService extends CRUDService<ResourceLimitDom
     List<ResourceLimitDomain> findAllByDomainIdAndIsActive(Long id, Boolean isActive) throws Exception;
 
     /**
+     * Find all resource limits by domain id and resource type.
+     *
+     * @param domainId domain id
+     * @param resource resource type count
+     * @param isActive true/false
+     * @return domain
+     * @throws Exception error
+     */
+    List<ResourceLimitDomain> findByDomainIdAndResourceType(Long domainId, ResourceLimitDomain.ResourceType resourceType, Boolean isActive) throws Exception;
+
+    /**
      * Find all resource type by domain id.
      *
      * @param domainId domain id
@@ -128,7 +139,6 @@ public interface ResourceLimitDomainService extends CRUDService<ResourceLimitDom
      * @throws Exception error
      */
     HashMap<String, Long> getSumOfDomainMin(Long id) throws Exception;
-
 
     /**
      * Find by domain and resource type

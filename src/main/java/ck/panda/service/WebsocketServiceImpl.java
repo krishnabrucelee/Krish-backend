@@ -256,15 +256,9 @@ public class WebsocketServiceImpl implements WebsocketService {
                                                 updateResourceCountService.QuotaUpdateByResourceObject(vmInstance,
                                                         "RestoreInstance", vmInstance.getProjectId(), "Project",
                                                         "Update");
-                                            }
-                                            if (vmInstance.getDepartmentId() != null) {
+                                            } else {
                                                 updateResourceCountService.QuotaUpdateByResourceObject(vmInstance,
                                                         "RestoreInstance", vmInstance.getDepartmentId(), "Department",
-                                                        "Update");
-                                            }
-                                            if (vmInstance.getDomainId() != null) {
-                                                updateResourceCountService.QuotaUpdateByResourceObject(vmInstance,
-                                                        "RestoreInstance", vmInstance.getDomainId(), "Domain",
                                                         "Update");
                                             }
                                         }

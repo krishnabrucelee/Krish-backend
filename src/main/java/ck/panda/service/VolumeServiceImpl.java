@@ -174,20 +174,18 @@ public class VolumeServiceImpl implements VolumeService {
                 if (departmentLimit != null && convertEntityService.getDepartmentById(volume.getDepartmentId()).getType()
                         .equals(AccountType.USER)) {
                     if (volume.getProjectId() != null) {
-                        syncService
-                                .syncResourceLimitProject(convertEntityService.getProjectById(volume.getProjectId()));
+//                        syncService
+//                                .syncResourceLimitProject(convertEntityService.getProjectById(volume.getProjectId()));
                         quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "Volume",
                                 volume.getProjectId(), "Project");
-                    }
-
-                    if (volume.getDepartmentId() != null) {
+                    } else {
                         quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "Volume",
                                 volume.getDepartmentId(), "Department");
                     }
-                    if (volume.getDomainId() != null) {
+                   /* if (volume.getDomainId() != null) {
                         quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "Volume",
                                 volume.getDomainId(), "Domain");
-                    }
+                    }*/
 
                     // 3. Check the resource availability to create new volume.
                     String isAvailable = isResourceAvailable(volume, optionalMap);
@@ -434,20 +432,18 @@ public class VolumeServiceImpl implements VolumeService {
                 if (departmentLimit != null && convertEntityService.getDepartmentById(volume.getDepartmentId())
                         .getType().equals(AccountType.USER)) {
                     if (volume.getProjectId() != null) {
-                        syncService
-                                .syncResourceLimitProject(convertEntityService.getProjectById(volume.getProjectId()));
+//                        syncService
+//                                .syncResourceLimitProject(convertEntityService.getProjectById(volume.getProjectId()));
                         quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "UploadVolume",
                                 volume.getProjectId(), "Project");
-                    }
-
-                    if (volume.getDepartmentId() != null) {
+                    } else {
                         quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "UploadVolume",
                                 volume.getDepartmentId(), "Department");
                     }
-                    if (volume.getDomainId() != null) {
+                    /*if (volume.getDomainId() != null) {
                         quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "UploadVolume",
                                 volume.getDomainId(), "Domain");
-                    }
+                    }*/
                     Volume volumeCS = upload(volume, convertEntityService.getOwnerById(userId).getDomainId(), userId,
                             errors);
                     if (errors.hasErrors()) {
@@ -711,7 +707,7 @@ public class VolumeServiceImpl implements VolumeService {
                         volume.setDiskSize(volume.getDiskSize() * (CS_CONVERTION_GIB));
                     } else {
                         StorageOffering store = storageService.find(volume.getStorageOfferingId());
-                        volume.setDiskSize(store.getDiskSize());
+                        volume.setDiskSize(store.getDiskSize() * (CS_CONVERTION_GIB));
                     }
                     volume.setDiskSizeFlag(true);
                     if (volume.getDomain() != null) {
@@ -965,7 +961,7 @@ public class VolumeServiceImpl implements VolumeService {
                     .findByDepartmentAndResourceType(volume.getDepartmentId(), ResourceType.Instance, true);
             if (departmentLimit != null) {
                 if (volume.getProjectId() != null) {
-                    syncService.syncResourceLimitProject(convertEntityService.getProjectById(volume.getProjectId()));
+              //      syncService.syncResourceLimitProject(convertEntityService.getProjectById(volume.getProjectId()));
                 }
                 // set server for finding value in configuration
                 config.setUserServer();

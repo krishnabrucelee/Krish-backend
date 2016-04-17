@@ -194,6 +194,15 @@ public interface SyncService {
     /**
      * Sync with Cloud Server Account.
      *
+     * @param project for resource limit.
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    void syncResourceLimitForProject(Project project) throws ApplicationException, Exception;
+
+    /**
+     * Sync with Cloud Server Account.
+     *
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */

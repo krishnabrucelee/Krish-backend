@@ -548,6 +548,4 @@ public class ResourceLimitDepartment implements Serializable {
         this.projectId = projectId;
     }
 
-
-
 }
