@@ -59,6 +59,6 @@ public interface DomainRepository extends PagingAndSortingRepository<Domain, Lon
      * @param isActive get the Domain list based on active/inactive status.
      * @return list of Domains.
      */
-    @Query(value = "SELECT domain FROM Domain domain WHERE domain.isActive = :isActive")
+    @Query(value = "SELECT domain FROM Domain domain WHERE domain.isActive = :isActive ORDER BY domain.name ASC")
     List<Domain> findAllByDomainAndIsActive(@Param("isActive") Boolean isActive);
 }
