@@ -3,6 +3,8 @@ package ck.panda.service;
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
+
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.json.JSONArray;
@@ -63,6 +65,14 @@ public class ConvertEntityService {
     /** Domain Service for listing domains. */
     @Autowired
     private DomainService domainService;
+
+    /** Resource Limit Service for listing resource limits. */
+    @Autowired
+    private ResourceLimitDomainService resourceDomainService;
+
+    /** Listing resource limit project service. */
+    @Autowired
+    private ResourceLimitProjectService resourceProjectService;
 
     /** RegionSerivce for listing Regions. */
     @Autowired
@@ -1321,10 +1331,42 @@ public class ConvertEntityService {
             for (int i = 0, size = resourceCountArrayJSON.length(); i < size; i++) {
                 // get resource count, type, domain and set in a variable for
                 // future use
-                String resourceCount = resourceCountArrayJSON.getJSONObject(i).getString(CS_RESOUCE_COUNT);
                 String resourceType = resourceCountArrayJSON.getJSONObject(i).getString(CS_RESOUCE_TYPE);
-                String domainId = resourceCountArrayJSON.getJSONObject(i)
-                        .getString(CloudStackConstants.CS_DOMAIN_ID);
+                String resourceCount = resourceCountArrayJSON.getJSONObject(i).getString(CS_RESOUCE_COUNT);
+                if (resourceType.equals(CS_PRIMARY_STORAGE) || resourceType.equals(CS_SECONDARY_STORAGE)) {
+                	resourceCount = String.valueOf((Long.parseLong(resourceCount) / (1024 * 1024 * 1024)));
+                }
+                if (resourceCountArrayJSON.getJSONObject(i).has(CloudStackConstants.CS_DOMAIN_ID) && !resourceCountArrayJSON.getJSONObject(i).has(CloudStackConstants.CS_ACCOUNT)) {
+                    String domainId = resourceCountArrayJSON.getJSONObject(i)
+                            .getString(CloudStackConstants.CS_DOMAIN_ID);
+                        // Get all the resource objects from application.
+                    	ResourceLimitDomain appDomainResource = resourceDomainService.findByDomainAndResourceType(getDomainId(domainId), ResourceLimitDomain.ResourceType.valueOf(getResourceTypeValue().get(resourceType)),
+                                true);
+                    	appDomainResource.setUsedLimit(Long.parseLong(resourceCount));
+                    	appDomainResource.setIsSyncFlag(false);
+                        resourceDomainService.update(appDomainResource);
+                }
+                if (resourceCountArrayJSON.getJSONObject(i).has(CloudStackConstants.CS_PROJECT_ID)) {
+                	String projectId = resourceCountArrayJSON.getJSONObject(i)
+                            .getString(CloudStackConstants.CS_PROJECT_ID);
+                	// Get all the resource objects from application.
+                    ResourceLimitProject appProjectResource = resourceProjectService.findByProjectAndResourceType(getProjectId(projectId), ResourceLimitProject.ResourceType.valueOf(getResourceTypeValue().get(resourceType)), true);
+                    appProjectResource.setUsedLimit(Long.parseLong(resourceCount));
+                    appProjectResource.setIsSyncFlag(false);
+                    resourceProjectService.update(appProjectResource);
+                }
+                if (resourceCountArrayJSON.getJSONObject(i).has(CloudStackConstants.CS_ACCOUNT) && !resourceCountArrayJSON.getJSONObject(i).has(CloudStackConstants.CS_PROJECT_ID)) {
+                	String account = resourceCountArrayJSON.getJSONObject(i)
+                            .getString(CloudStackConstants.CS_ACCOUNT);
+                	String domainId = resourceCountArrayJSON.getJSONObject(i)
+                            .getString(CloudStackConstants.CS_DOMAIN_ID);
+                	// Get all the resource objects from application.
+                    ResourceLimitDepartment appDepartmentResource = resourceLimitDepartmentService.findByDepartmentAndResourceType(getDepartmentByUsernameAndDomains(account, getDomain(domainId)), ResourceLimitDepartment.ResourceType.valueOf(getResourceTypeValue().get(resourceType)), true);
+                    appDepartmentResource.setUsedLimit(Long.parseLong(resourceCount));
+                    appDepartmentResource.setMax(Long.parseLong(resourceCount));
+                    appDepartmentResource.setIsSyncFlag(false);
+                    resourceLimitDepartmentService.update(appDepartmentResource);
+                }
                 // check resource type other than 5(resource type of project)
                 // and allow to update
                 if (!resourceType.equals(CS_PROJECT)) {
@@ -1332,7 +1374,7 @@ public class ConvertEntityService {
                     // value
                     HashMap<String, String> resourceMap = getResourceTypeValue();
                     // checking null validation for resource map
-                    if (resourceMap != null && !resourceCountArrayJSON.getJSONObject(i).has("account") &&
+                    /*if (resourceMap != null && !resourceCountArrayJSON.getJSONObject(i).has("account") &&
                             !resourceCountArrayJSON.getJSONObject(i).has("project")) {
                         // update resource count in resource limit domain table
                         ResourceLimitDomain resourceDomainCount = resourceLimitDomainService
@@ -1364,8 +1406,8 @@ public class ConvertEntityService {
                         // Set used limit value
                         resourceDomainCount.setIsSyncFlag(false);
                         resourceLimitDomainService.update(resourceDomainCount);
-                    }
-                    if (resourceMap != null && resourceCountArrayJSON.getJSONObject(i).has("account")
+                    }*/
+                    /*if (resourceMap != null && resourceCountArrayJSON.getJSONObject(i).has("account")
                             && !resourceCountArrayJSON.getJSONObject(i).has("project")) {
                         String account = resourceCountArrayJSON.getJSONObject(i)
                                 .getString(CloudStackConstants.CS_ACCOUNT);
@@ -1405,8 +1447,8 @@ public class ConvertEntityService {
                             resourceDepartmentCount.setIsSyncFlag(false);
                             resourceLimitDepartmentService.update(resourceDepartmentCount);
                         }
-                    }
-                    if (resourceMap != null && resourceCountArrayJSON.getJSONObject(i).has("project")) {
+                    }*/
+                    /*if (resourceMap != null && resourceCountArrayJSON.getJSONObject(i).has("project")) {
                         String projectId = resourceCountArrayJSON.getJSONObject(i)
                                 .getString(CloudStackConstants.CS_PROJECT_ID);
                         // update resource count in resource limit domain table
@@ -1439,7 +1481,7 @@ public class ConvertEntityService {
                         // Set used limit value
                         resourceProjectCount.setIsSyncFlag(false);
                         resourceLimitProjectService.update(resourceProjectCount);
-                    }
+                    }*/
                 }
             }
         }
@@ -1458,6 +1500,7 @@ public class ConvertEntityService {
         resourceMap.put(CS_VOLUME, String.valueOf(ResourceType.Volume));
         resourceMap.put(CS_SNAPSHOT, String.valueOf(ResourceType.Snapshot));
         resourceMap.put(CS_TEMPLATE, String.valueOf(ResourceType.Template));
+        resourceMap.put(CS_PROJECT, String.valueOf(ResourceType.Project));
         resourceMap.put(CS_NETWORK, String.valueOf(ResourceType.Network));
         resourceMap.put(CS_VPC, String.valueOf(ResourceType.VPC));
         resourceMap.put(CS_CPU, String.valueOf(ResourceType.CPU));

@@ -71,10 +71,11 @@ public class TokenService {
      *
      * @param user token.
      * @param domainName name of the domain
+     * @param rememberMe
      * @return token
      * @throws Exception unhandled exceptions.
      */
-    public String generateNewToken(User user, String domainName) throws Exception {
+    public String generateNewToken(User user, String domainName, String rememberMe) throws Exception {
         String encryptedToken = null;
         try {
             String strEncoded = Base64.getEncoder()
@@ -83,7 +84,7 @@ public class TokenService {
             SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length,
                     GenericConstants.ENCRYPT_ALGORITHM);
             encryptedToken = new String(
-                    ck.panda.util.EncryptionUtil.encrypt(createTokenDetails(user, domainName).toString(), originalKey));
+                    ck.panda.util.EncryptionUtil.encrypt(createTokenDetails(user, domainName, rememberMe).toString(), originalKey));
         } catch (UnsupportedEncodingException e) {
             LOGGER.error("Error at token generation : ", e);
         }
@@ -128,7 +129,7 @@ public class TokenService {
      * @param domainName name of the domain
      * @return user details
      */
-    public StringBuilder createTokenDetails(User user, String domainName) {
+    public StringBuilder createTokenDetails(User user, String domainName, String rememberMe) {
         StringBuilder stringBuilder = null;
         try {
             stringBuilder = new StringBuilder();
@@ -142,6 +143,7 @@ public class TokenService {
                 stringBuilder.append(backendAdminType).append(GenericConstants.TOKEN_SEPARATOR);
                 stringBuilder.append(userApiKey).append(GenericConstants.TOKEN_SEPARATOR);
                 stringBuilder.append(userSecretKey).append(GenericConstants.TOKEN_SEPARATOR);
+                stringBuilder.append(rememberMe).append(GenericConstants.TOKEN_SEPARATOR);
             } else {
                 stringBuilder.append(user.getId()).append(GenericConstants.TOKEN_SEPARATOR);
                 stringBuilder.append(user.getUserName()).append(GenericConstants.TOKEN_SEPARATOR);
@@ -152,6 +154,7 @@ public class TokenService {
                 stringBuilder.append(user.getType()).append(GenericConstants.TOKEN_SEPARATOR);
                 stringBuilder.append(user.getApiKey()).append(GenericConstants.TOKEN_SEPARATOR);
                 stringBuilder.append(user.getSecretKey()).append(GenericConstants.TOKEN_SEPARATOR);
+                stringBuilder.append(rememberMe).append(GenericConstants.TOKEN_SEPARATOR);
             }
             stringBuilder.append(DateConvertUtil.getTimestamp());
         } catch (Exception e) {

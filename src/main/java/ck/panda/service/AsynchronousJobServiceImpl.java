@@ -576,14 +576,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     if (vmIn.getProjectId() != null) {
                         updateResourceCountService.QuotaUpdateByResourceObject(vmIn, CS_Instance, vmIn.getProjectId(),
                                 CS_Project, Update);
-                    }
-                    if (vmIn.getDepartmentId() != null) {
+                    } else {
                         updateResourceCountService.QuotaUpdateByResourceObject(vmIn, CS_Instance,
                                 vmIn.getDepartmentId(), CS_Department, Update);
-                    }
-                    if (vmIn.getDomainId() != null) {
-                        updateResourceCountService.QuotaUpdateByResourceObject(vmIn, CS_Instance, vmIn.getDomainId(),
-                                CS_Domain, Update);
                     }
                 }
             }
@@ -596,14 +591,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     if (vmIn.getProjectId() != null) {
                         updateResourceCountService.QuotaUpdateByResourceObject(vmIn, CS_Destroy, vmIn.getProjectId(),
                                 CS_Project, Delete);
-                    }
-                    if (vmIn.getDepartmentId() != null) {
+                    } else {
                         updateResourceCountService.QuotaUpdateByResourceObject(vmIn, CS_Destroy, vmIn.getDepartmentId(),
                                 CS_Department, Delete);
-                    }
-                    if (vmIn.getDomainId() != null) {
-                        updateResourceCountService.QuotaUpdateByResourceObject(vmIn, CS_Destroy, vmIn.getDomainId(),
-                                CS_Domain, Delete);
                     }
                 }
             }
@@ -762,14 +752,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 if (network.getProjectId() != null) {
                     updateResourceCountService.QuotaUpdateByResourceObject(network, CS_Network, network.getProjectId(),
                             CS_Project, Delete);
-                }
-                if (network.getDepartmentId() != null) {
+                } else {
                     updateResourceCountService.QuotaUpdateByResourceObject(network, CS_Network,
                             network.getDepartmentId(), CS_Department, Delete);
-                }
-                if (network.getDomainId() != null) {
-                    updateResourceCountService.QuotaUpdateByResourceObject(network, CS_Network, network.getDomainId(),
-                            CS_Domain, Delete);
                 }
             }
         }
@@ -1009,14 +994,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                         if (persistIp.getProjectId() != null) {
                             updateResourceCountService.QuotaUpdateByResourceObject(persistIp, CS_IP,
                                     persistIp.getProjectId(), CS_Project, Update);
-                        }
-                        if (persistIp.getDepartmentId() != null) {
+                        } else {
                             updateResourceCountService.QuotaUpdateByResourceObject(persistIp, CS_IP,
                                     persistIp.getDepartmentId(), CS_Department, Update);
-                        }
-                        if (persistIp.getDomainId() != null) {
-                            updateResourceCountService.QuotaUpdateByResourceObject(persistIp, CS_IP,
-                                    persistIp.getDomainId(), CS_Domain, Update);
                         }
                     }
                 }
@@ -1055,14 +1035,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     if (ipAddress.getProjectId() != null) {
                         updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
                                 ipAddress.getProjectId(), CS_Project, Delete);
-                    }
-                    if (ipAddress.getDepartmentId() != null) {
+                    } else {
                         updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
                                 ipAddress.getDepartmentId(), CS_Department, Delete);
-                    }
-                    if (ipAddress.getDomainId() != null) {
-                        updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
-                                ipAddress.getDomainId(), CS_Domain, Delete);
                     }
                 }
             }
@@ -1141,14 +1116,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     if (volume.getProjectId() != null) {
                         updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_UploadVolume,
                                 volume.getProjectId(), CS_Project, Update);
-                    }
-                    if (volume.getDepartmentId() != null) {
+                    } else {
                         updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_UploadVolume,
                                 volume.getDepartmentId(), CS_Department, Update);
-                    }
-                    if (volume.getDomainId() != null) {
-                        updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_UploadVolume,
-                                volume.getDomainId(), CS_Domain, Update);
                     }
                 }
             }
@@ -1173,14 +1143,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     if (volume.getProjectId() != null) {
                         updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_Volume, volume.getProjectId(),
                                 CS_Project, Update);
-                    }
-                    if (volume.getDepartmentId() != null) {
+                    } else {
                         updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_Volume,
                                 volume.getDepartmentId(), CS_Department, Update);
-                    }
-                    if (volume.getDomainId() != null) {
-                        updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_Volume, volume.getDomainId(),
-                                CS_Domain, Update);
                     }
                 }
             }
@@ -1827,14 +1792,9 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 if (volume.getProjectId() != null) {
                     updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_Volume, volume.getProjectId(),
                             CS_Project, Delete);
-                }
-                if (volume.getDepartmentId() != null) {
+                } else {
                     updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_Volume, volume.getDepartmentId(),
                             CS_Department, Delete);
-                }
-                if (volume.getDomainId() != null) {
-                    updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_Volume, volume.getDomainId(),
-                            CS_Domain, Delete);
                 }
             }
         }

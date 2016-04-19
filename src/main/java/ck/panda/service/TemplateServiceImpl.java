@@ -167,19 +167,16 @@ public class TemplateServiceImpl implements TemplateService {
                     TemplateCost templateCost = templateCostService.find(templateCS.getTemplateCost().get(0).getId());
                     templateCost.setTemplateCostId(templateCS.getId());
                     templateCostService.save(templateCost);
+                    if (userDetails.getType() == User.UserType.ROOT_ADMIN && template.getTemplateCost() != null) {
+                        if (pingService.apiConnectionCheck(errors)) {
+                            template = templateRepository.save(template);
+                            savePingProject(template);
+                        }
+                    }
                     return templateCS;
                 }
             }
-
-            if (userDetails.getType() == User.UserType.ROOT_ADMIN && template.getTemplateCost() != null) {
-                if (pingService.apiConnectionCheck(errors)) {
-                    template = templateRepository.save(template);
-                    savePingProject(template);
-                }
-            } else {
-                template = templateRepository.save(template);
-            }
-            return template;
+            return templateRepository.save(template);
 
         } else {
             return templateRepository.save(template);
@@ -219,12 +216,13 @@ public class TemplateServiceImpl implements TemplateService {
                 }
             }
         }
-        User user = userService.find(template.getTemplateOwnerId());
-        if(user.getType() == UserType.ROOT_ADMIN) {
-            template.setTemplateCreationType(false);
-        }
-        else {
-         template.setTemplateCreationType(true);
+        if (template.getTemplateOwnerId() != null) {
+            User user = userService.find(template.getTemplateOwnerId());
+            if (user.getType() == UserType.ROOT_ADMIN) {
+                template.setTemplateCreationType(false);
+            }
+        } else {
+            template.setTemplateCreationType(true);
         }
         return templateRepository.save(template);
     }
@@ -754,7 +752,7 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     public Page<Template> findAllByUserIdAndType(PagingAndSorting pagingAndSorting, String type, Long userId) throws Exception {
         User user = convertEntityService.getOwnerById(userId);
-        return templateRepository.findTemplateByUserId(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), user.getId(), true);
+        return templateRepository.findTemplateByUserId(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), user.getId(),user.getDepartmentId(), true);
     }
      /**
      * Add cost for newly created template.

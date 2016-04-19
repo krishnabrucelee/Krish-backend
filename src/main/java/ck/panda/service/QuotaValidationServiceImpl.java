@@ -236,13 +236,13 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
         return null;
     }
 
-    public void updateResourceCountByDomain(String domainUuid, HashMap<String, String> domainCountMap)
-            throws Exception {
-        // Resource count for domain
-
-        String csResponse = cloudStackResourceCapacity.updateResourceCount(domainUuid, domainCountMap, "json");
-        convertEntityService.resourceCount(csResponse);
-    }
+//    public void updateResourceCountByDomain(String domainUuid, HashMap<String, String> domainCountMap)
+//            throws Exception {
+//        // Resource count for domain
+//
+//        String csResponse = cloudStackResourceCapacity.updateResourceCount(domainUuid, domainCountMap, "json");
+//        convertEntityService.resourceCount(csResponse);
+//    }
 
     /**
      * Validate list resource capacity for domain.
@@ -379,7 +379,7 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
             }
         } else {
             // Resource count for domain.
-            updateResourceCountByDomain(convertEntityService.getDomainById(accountTypeId).getUuid(), null);
+            //updateResourceCountByDomain(convertEntityService.getDomainById(accountTypeId).getUuid(), null);
             ResourceLimitDomain domainLimit = getMaxByDomainAndResourceType(accountTypeId, resource);
             if(((domainLimit.getMax() < (EmptytoLong(domainLimit.getUsedLimit()) + EmptytoLong(resourceUsageMap.get(resources)))) && (domainLimit.getMax() != (EmptytoLong(domainLimit.getUsedLimit()) + EmptytoLong(resourceUsageMap.get(resources))))) && domainLimit.getMax() != -1) {
                 //TODO apply internalization.

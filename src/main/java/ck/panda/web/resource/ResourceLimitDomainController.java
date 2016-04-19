@@ -125,7 +125,6 @@ public class ResourceLimitDomainController extends CRUDController<ResourceLimitD
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<ResourceLimitDomain> getResourceLimitByDomain(@PathVariable(PATH_ID) Long id) throws Exception {
-        resourceLimitDomainService.asyncResourceDomain(id);
         return resourceLimitDomainService.findAllByDomainIdAndIsActive(id, true);
     }
 

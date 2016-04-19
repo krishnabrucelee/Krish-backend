@@ -15,9 +15,12 @@ import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Project;
+import ck.panda.domain.entity.ResourceLimitDepartment;
+import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.VpnUser;
 import ck.panda.domain.repository.jpa.ProjectRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackProjectService;
@@ -67,6 +70,14 @@ public class ProjectServiceImpl implements ProjectService {
     /** Reference of the convert entity service. */
     @Autowired
     private ConvertEntityService convertEntityService;
+
+    /** Resource limit department service reference. */
+    @Autowired
+    private ResourceLimitDepartmentService resourceLimitDepartmentService;
+
+    /** Resource limit project service reference. */
+    @Autowired
+    private ResourceLimitProjectService resourceLimitProjectService;
 
     /** Configuration Utilities. */
     @Autowired
@@ -296,6 +307,19 @@ public class ProjectServiceImpl implements ProjectService {
                 throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
                         csProject.getString(CloudStackConstants.CS_ERROR_TEXT));
             }
+        }
+        List<ResourceLimitDepartment> resourceLimitDepartment = resourceLimitDepartmentService.findAllByDepartmentIdAndIsActive(project.getDepartmentId(), true);
+        List<ResourceLimitProject> resourceLimitProject = resourceLimitProjectService.findAllByProjectIdAndIsActive(project.getId(), true);
+        for (ResourceLimitDepartment departmentLimit : resourceLimitDepartment) {
+        	for (ResourceLimitProject projectLimit : resourceLimitProject) {
+        		if (departmentLimit.getResourceType().toString().equals(projectLimit.getResourceType().toString())) {
+        			departmentLimit.setUsedLimit(departmentLimit.getUsedLimit() - projectLimit.getMax());
+        			resourceLimitDepartmentService.save(departmentLimit);
+        			projectLimit.setIsActive(false);
+        			projectLimit.setIsSyncFlag(false);
+        			resourceLimitProjectService.save(projectLimit);
+        		}
+        	}
         }
         // Update project entity.
         return projectRepository.save(project);

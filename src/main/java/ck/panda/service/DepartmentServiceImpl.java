@@ -18,6 +18,9 @@ import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Project;
+import ck.panda.domain.entity.ResourceLimitDepartment;
+import ck.panda.domain.entity.ResourceLimitDomain;
+import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.SSHKey;
 import ck.panda.domain.entity.User;
@@ -59,6 +62,14 @@ public class DepartmentServiceImpl implements DepartmentService {
     /** Reference of the convert entity service. */
     @Autowired
     private ConvertEntityService convertEntityService;
+
+    /** Resource limit department service reference. */
+    @Autowired
+    private ResourceLimitDepartmentService resourceLimitDepartmentService;
+
+    /** Resource limit domain service reference. */
+    @Autowired
+    private ResourceLimitDomainService resourceLimitDomainService;
 
     /** Domain repository reference. */
     @Autowired
@@ -270,6 +281,19 @@ public class DepartmentServiceImpl implements DepartmentService {
                 LOGGER.debug("Department deleted successfully" + department.getUserName());
             }
         }
+        List<ResourceLimitDomain> resourceLimitDomain = resourceLimitDomainService.findAllByDomainIdAndIsActive(department.getDomainId(), true);
+        List<ResourceLimitDepartment> resourceLimitDepartment = resourceLimitDepartmentService.findAllByDepartmentIdAndIsActive(department.getId(), true);
+        for (ResourceLimitDomain domainLimit : resourceLimitDomain) {
+        	for (ResourceLimitDepartment departmentLimit : resourceLimitDepartment) {
+        		if (domainLimit.getResourceType().toString().equals(departmentLimit.getResourceType().toString())) {
+        			domainLimit.setUsedLimit(domainLimit.getUsedLimit() - departmentLimit.getMax());
+        			domainLimit.setIsSyncFlag(false);
+                    resourceLimitDomainService.save(domainLimit);
+                    departmentLimit.setIsActive(false);
+                    resourceLimitDepartmentService.save(departmentLimit);
+        		}
+        	}
+        }
         return departmentRepo.save(department);
     }
 
@@ -384,4 +408,13 @@ public class DepartmentServiceImpl implements DepartmentService {
         pingService.addDepartmentToPing(optional);
         return true;
     }
+
+	@Override
+	public List<Department> findAllByActive(Boolean isActive) throws Exception {
+		List<Department.AccountType> accountTypes = new  ArrayList<Department.AccountType>();
+    	accountTypes.add(Department.AccountType.USER);
+    	accountTypes.add(Department.AccountType.DOMAIN_ADMIN);
+    	accountTypes.add(Department.AccountType.ROOT_ADMIN);
+		return findByAccountTypesAndActive(accountTypes, isActive);
+	}
 }

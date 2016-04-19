@@ -48,6 +48,9 @@ public class RolePrincipal {
     /** Build number. */
     public static final String BUILD_NUMBER = "buildNumber";
 
+    /** Remember Me. */
+    public static final String REMEMBER_ME = "rememberMe";
+
     /** Login time . */
     public static final String LOGIN_TIME = "loginTime";
 
@@ -69,6 +72,9 @@ public class RolePrincipal {
     /** Login user role permission list. */
     public static final String ROLE_PERMISSION_LIST = "permissionList";
 
+    /** Login history token. */
+    public static final String LOGIN_HISTORY_TOKEN = "loginToken";
+
     /** User name attributes. */
     private String userName;
 
@@ -80,6 +86,12 @@ public class RolePrincipal {
 
     /** Build Version number. */
     private String buildVersion;
+
+    /** Remember me attribute. */
+    private String rememberMe;
+
+    /** Login history token attribute. */
+    private String loginToken;
 
     /**
      * Default constructor.
@@ -93,13 +105,17 @@ public class RolePrincipal {
      * @param user to set
      * @param userName to set
      * @param role to set
+     * @param rememberMe to set
+     * @param loginToken to set
      * @param buildVersion to set
      */
-    public RolePrincipal(User user, String userName, Role role, String buildVersion) {
+    public RolePrincipal(User user, String userName, Role role, String buildVersion, String rememberMe, String loginToken) {
         this.user = user;
         this.userName = userName;
         this.role = role;
         this.buildVersion = buildVersion;
+        this.rememberMe = rememberMe;
+        this.loginToken = loginToken;
     }
 
     @Override
@@ -107,34 +123,43 @@ public class RolePrincipal {
         Authentication token = SecurityContextHolder.getContext().getAuthentication();
         JSONObject jsonObject = new JSONObject();
         try {
-            TimeZone timeZone = Calendar.getInstance().getTimeZone();
-            jsonObject.put(LOGIN_USER_TOKEN, token.getDetails().toString());
-            jsonObject.put(CloudStackConstants.CS_ID, user.getId());
-            jsonObject.put(LOGIN_USER_NAME, userName);
-            jsonObject.put(LOGIN_USER_TYPE, user.getType());
-            jsonObject.put(LOGIN_USER_DOMAIN_NAME, user.getDomain().getName());
-            jsonObject.put(LOGIN_USER_DOMAIN_ABBREVIATION_NAME, user.getDomain().getCompanyNameAbbreviation());
-            jsonObject.put(LOGIN_USER_DOMAIN_ID, user.getDomain().getId());
-            jsonObject.put(LOGIN_USER_DEPARTMENT_ID, user.getDepartment().getId());
-            jsonObject.put(LOGIN_USER_STATUS, user.getStatus());
-            jsonObject.put(BUILD_NUMBER, buildVersion);
-            jsonObject.put(LOGIN_TIME, DateConvertUtil.getTimestamp());
-            jsonObject.put(TIME_ZONE, timeZone.getID());
-            JSONArray jsonArray = new JSONArray();
-            Map<String, Object> hashList = new HashMap<String, Object>();
-            for (int i = 0; i < role.getPermissionList().size(); i++) {
-                Permission permission = role.getPermissionList().get(i);
-                hashList.put(CloudStackConstants.CS_ID, permission.getId());
-                hashList.put(ROLE_ACTION, permission.getAction());
-                hashList.put(ROLE_ACTION_KEY, permission.getActionKey());
-                hashList.put(ROLE_DESCRIPTION, permission.getDescription());
-                hashList.put(ROLE_STATUS, permission.getIsActive());
-                jsonArray.put(hashList);
-                hashList = new HashMap<String, Object>();
+            if (role == null) {
+                jsonObject.put(RolePrincipal.REMEMBER_ME, rememberMe);
+                jsonObject.put(RolePrincipal.LOGIN_HISTORY_TOKEN, loginToken);
+                jsonObject.put(RolePrincipal.LOGIN_TIME, DateConvertUtil.getTimestamp());
+            } else {
+                TimeZone timeZone = Calendar.getInstance().getTimeZone();
+                jsonObject.put(LOGIN_USER_TOKEN, token.getDetails().toString());
+                jsonObject.put(CloudStackConstants.CS_ID, user.getId());
+                jsonObject.put(LOGIN_USER_NAME, userName);
+                jsonObject.put(LOGIN_USER_TYPE, user.getType());
+                jsonObject.put(LOGIN_USER_DOMAIN_NAME, user.getDomain().getName());
+                jsonObject.put(LOGIN_USER_DOMAIN_ABBREVIATION_NAME, user.getDomain().getCompanyNameAbbreviation());
+                jsonObject.put(LOGIN_USER_DOMAIN_ID, user.getDomain().getId());
+                jsonObject.put(LOGIN_USER_DEPARTMENT_ID, user.getDepartment().getId());
+                jsonObject.put(LOGIN_USER_STATUS, user.getStatus());
+                jsonObject.put(BUILD_NUMBER, buildVersion);
+                jsonObject.put(REMEMBER_ME, rememberMe);
+                jsonObject.put(LOGIN_HISTORY_TOKEN, loginToken);
+                jsonObject.put(LOGIN_TIME, DateConvertUtil.getTimestamp());
+                jsonObject.put(TIME_ZONE, timeZone.getID());
+                JSONArray jsonArray = new JSONArray();
+                Map<String, Object> hashList = new HashMap<String, Object>();
+                for (int i = 0; i < role.getPermissionList().size(); i++) {
+                    Permission permission = role.getPermissionList().get(i);
+                    hashList.put(CloudStackConstants.CS_ID, permission.getId());
+                    hashList.put(ROLE_ACTION, permission.getAction());
+                    hashList.put(ROLE_ACTION_KEY, permission.getActionKey());
+                    hashList.put(ROLE_DESCRIPTION, permission.getDescription());
+                    hashList.put(ROLE_STATUS, permission.getIsActive());
+                    jsonArray.put(hashList);
+                    hashList = new HashMap<String, Object>();
+                }
+                jsonObject.put(ROLE_PERMISSION_LIST, jsonArray);
             }
-            jsonObject.put(ROLE_PERMISSION_LIST, jsonArray);
         } catch (Exception e) {
-            LOGGER.error("ERROR AT GETTING LOGIN USER DETAILS");
+            LOGGER.error("ERROR AT GETTING Role principal DETAILS");
+            e.getMessage();
         }
         return jsonObject.toString();
     }

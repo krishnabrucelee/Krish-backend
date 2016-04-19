@@ -2,8 +2,12 @@ package ck.panda.service;
 
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.json.JSONArray;
@@ -16,7 +20,10 @@ import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.Permission;
 import ck.panda.domain.entity.Project;
+import ck.panda.domain.entity.Role;
+import ck.panda.domain.entity.RolePrincipal;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.Status;
 import ck.panda.domain.entity.User.UserType;
@@ -25,6 +32,7 @@ import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
+import ck.panda.util.DateConvertUtil;
 import ck.panda.util.EncryptionUtil;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -83,6 +91,10 @@ public class UserServiceImpl implements UserService {
     /** Virtual machine service. */
     @Autowired
     private VirtualMachineService virtualMachineService;
+
+    /** Role service. */
+    @Autowired
+    private RoleService roleService;
 
     /** Constant for generic UTF. */
     public static final String CS_UTF = "utf-8";
@@ -267,13 +279,15 @@ public class UserServiceImpl implements UserService {
                 // 2.1 Call convert by passing JSONObject to User entity and Add
                 // the converted User entity to list.
                 User user = User.convert(userListJSON.getJSONObject(i));
-                Domain domain = domainService.findByUUIDAndIsActive(user.getTransDomainId());
-                domain.setEmail(user.getEmail());
-                domain.setLastName(user.getLastName());
-                domain.setPrimaryFirstName(user.getFirstName());
-                domain.setPortalUserName(user.getUserName());
-                domain.setSyncFlag(false);
-                domainService.save(domain);
+                if(user.getType() == UserType.DOMAIN_ADMIN) {
+                    Domain domain = domainService.findByUUIDAndIsActive(user.getTransDomainId());
+                    domain.setEmail(user.getEmail());
+                    domain.setLastName(user.getLastName());
+                    domain.setPrimaryFirstName(user.getFirstName());
+                    domain.setPortalUserName(user.getUserName());
+                    domain.setSyncFlag(false);
+                    domainService.save(domain);
+                }
                 if (!user.getUserName().equalsIgnoreCase("baremetal-system-account")) {
                     user.setDepartmentId((convertEntityService.getDepartment(user.getTransDepartment()).getId()));
                     user.setDomainId(convertEntityService.getDomainId(user.getTransDomainId()));
@@ -544,6 +558,48 @@ public class UserServiceImpl implements UserService {
             virtualMachineService.updateVmToStoppedByOwnerAndStatus(user, VmInstance.Status.RUNNING);
         }
         return userRepository.save(user);
+    }
+
+    @Override
+    public User findByUserNameAndActive(String userName, Boolean isActive) {
+        return userRepository.findByUserNameAndActive(userName, isActive);
+    }
+
+    @Override
+    public String findByUserSessionDetails(Long id) throws Exception {
+       User user = userRepository.findOne(id);
+       Department department = departmentService.find(user.getDepartment().getId());
+       Role role = roleService.findWithPermissionsByNameDepartmentAndIsActive(user.getRole().getName(), department.getId(), true);
+       JSONObject jsonObject = new JSONObject();
+       try {
+           TimeZone timeZone = Calendar.getInstance().getTimeZone();
+           jsonObject.put(CloudStackConstants.CS_ID, user.getId());
+           jsonObject.put(RolePrincipal.LOGIN_USER_NAME, user.getUserName());
+           jsonObject.put(RolePrincipal.LOGIN_USER_TYPE, user.getType());
+           jsonObject.put(RolePrincipal.LOGIN_USER_DOMAIN_NAME, user.getDomain().getName());
+           jsonObject.put(RolePrincipal.LOGIN_USER_DOMAIN_ABBREVIATION_NAME, user.getDomain().getCompanyNameAbbreviation());
+           jsonObject.put(RolePrincipal.LOGIN_USER_DOMAIN_ID, user.getDomain().getId());
+           jsonObject.put(RolePrincipal.LOGIN_USER_DEPARTMENT_ID, user.getDepartment().getId());
+           jsonObject.put(RolePrincipal.LOGIN_USER_STATUS, user.getStatus());
+           jsonObject.put(RolePrincipal.LOGIN_TIME, DateConvertUtil.getTimestamp());
+           jsonObject.put(RolePrincipal.TIME_ZONE, timeZone.getID());
+           JSONArray jsonArray = new JSONArray();
+           Map<String, Object> hashList = new HashMap<String, Object>();
+           for (int i = 0; i < role.getPermissionList().size(); i++) {
+               Permission permission = role.getPermissionList().get(i);
+               hashList.put(CloudStackConstants.CS_ID, permission.getId());
+               hashList.put(RolePrincipal.ROLE_ACTION, permission.getAction());
+               hashList.put(RolePrincipal.ROLE_ACTION_KEY, permission.getActionKey());
+               hashList.put(RolePrincipal.ROLE_DESCRIPTION, permission.getDescription());
+               hashList.put(RolePrincipal.ROLE_STATUS, permission.getIsActive());
+               jsonArray.put(hashList);
+               hashList = new HashMap<String, Object>();
+           }
+           jsonObject.put(RolePrincipal.ROLE_PERMISSION_LIST, jsonArray);
+       } catch (Exception e) {
+           e.getMessage();
+       }
+       return jsonObject.toString();
     }
 
 }

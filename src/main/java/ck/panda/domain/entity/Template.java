@@ -65,7 +65,7 @@ public class Template implements Serializable {
 
     /** Name of the template. */
     @NotEmpty
-    @Size(min = 4, max = 255)
+    @Size(min = 1, max = 255)
     @Column(name = "name", nullable = false)
     private String name;
 

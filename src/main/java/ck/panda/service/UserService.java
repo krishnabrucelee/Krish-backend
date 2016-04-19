@@ -17,7 +17,6 @@ import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /** The UserService interface used for to perform CRUD operations and basic API's related business logic. */
-@Service
 public interface UserService extends CRUDService<User> {
 
     /**
@@ -269,5 +268,9 @@ public interface UserService extends CRUDService<User> {
      * @throws Exception if error.
      */
     User updateSuspended(User user) throws Exception;
+
+    User findByUserNameAndActive(String username, Boolean isActive);
+
+    String findByUserSessionDetails(Long id) throws Exception;
 
 }
