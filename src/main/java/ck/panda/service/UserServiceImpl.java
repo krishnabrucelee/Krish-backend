@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.json.JSONArray;
@@ -17,9 +16,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EmailConstants;
 import ck.panda.constants.EventTypes;
@@ -35,7 +31,6 @@ import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.repository.jpa.UserRepository;
 import ck.panda.rabbitmq.util.EmailEvent;
-import ck.panda.rabbitmq.util.ResponseEvent;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
@@ -532,7 +527,7 @@ public class UserServiceImpl implements UserService {
     private void sendEmailForPasswordUpdate(User user) throws Exception {
         syncService.syncUpdateUserRole();
         EmailEvent emailEvent = new EmailEvent();
-        emailEvent.setEntityuuid(user.getUuid());
+        emailEvent.setEntityUuid(user.getUuid());
         emailEvent.setResourceUuid(user.getUuid());
         emailEvent.setEvent(EventTypes.EVENT_USER_UPDATE);
         emailEvent.setEventType(EmailConstants.ACCOUNT);

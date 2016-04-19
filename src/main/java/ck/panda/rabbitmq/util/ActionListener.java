@@ -144,7 +144,7 @@ public class ActionListener implements MessageListener {
                         ObjectMapper mapper = new ObjectMapper();
                         eventResponse = mapper.readValue(eventMessage, ResponseEvent.class);
                         EmailEvent emailEvent = new EmailEvent();
-                        emailEvent.setEntityuuid(eventResponse.getEntityuuid());
+                        emailEvent.setEntityUuid(eventResponse.getEntityuuid());
                         emailEvent.setResourceUuid(eventResponse.getEntityuuid());
                         emailEvent.setEvent(EventTypes.EVENT_USER_CREATE);
                         emailEvent.setEventType(EmailConstants.ACCOUNT);
@@ -157,7 +157,7 @@ public class ActionListener implements MessageListener {
                         ObjectMapper mapper = new ObjectMapper();
                         eventResponse = mapper.readValue(eventMessage, ResponseEvent.class);
                         EmailEvent emailEvent = new EmailEvent();
-                        emailEvent.setEntityuuid(eventResponse.getEntityuuid());
+                        emailEvent.setEntityUuid(eventResponse.getEntityuuid());
                         emailEvent.setResourceUuid(eventResponse.getEntityuuid());
                         emailEvent.setEvent(EventTypes.EVENT_USER_DELETE);
                         emailEvent.setEventType(EmailConstants.ACCOUNT);
@@ -172,7 +172,7 @@ public class ActionListener implements MessageListener {
                 ObjectMapper mappers = new ObjectMapper();
                 eventResponse = mappers.readValue(eventMessage, ResponseEvent.class);
                 EmailEvent emailEvent = new EmailEvent();
-                emailEvent.setEntityuuid(eventResponse.getEntityuuid());
+                emailEvent.setEntityUuid(eventResponse.getEntityuuid());
                 emailEvent.setResourceUuid(eventResponse.getEntityuuid());
                 emailEvent.setEvent(EventTypes.EVENT_USER_DELETE);
                 emailEvent.setEventType(EmailConstants.ACCOUNT);
