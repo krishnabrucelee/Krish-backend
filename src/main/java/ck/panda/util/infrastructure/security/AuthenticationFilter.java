@@ -101,6 +101,9 @@ public class AuthenticationFilter extends GenericFilterBean {
     /** HTTP request post action. */
     public static final String FORCE_LOGIN = "forceLogin";
 
+    /** HTTP request post action. */
+    public static final String FORWARDED_FOR = "forwardedFor";
+
     /** Authentication manager attribute. */
     private DatabaseAuthenticationManager databaseAuthenticationManager;
 
@@ -115,6 +118,7 @@ public class AuthenticationFilter extends GenericFilterBean {
      *
      * @param databaseAuthenticationManager to set
      * @param userTokenDetails to set
+     * @param messageByLocaleService to set
      */
     public AuthenticationFilter(DatabaseAuthenticationManager databaseAuthenticationManager,
             TokenDetails userTokenDetails, MessageByLocaleService messageByLocaleService) {
@@ -136,6 +140,7 @@ public class AuthenticationFilter extends GenericFilterBean {
         Optional<String> token = Optional.fromNullable(httpRequest.getHeader(XAUTH_TOKEN));
         Optional<String> domain = Optional.fromNullable(httpRequest.getHeader(XAUTH_REQUEST));
         Optional<String> forceLogin = Optional.fromNullable(httpRequest.getHeader(XFORCE_LOGIN));
+        Optional<String> forwardedFor = Optional.fromNullable(httpRequest.getRemoteAddr());
         String resourcePath = new UrlPathHelper().getPathWithinApplication(httpRequest);
         try {
             if (resourcePath.contains("socket")) {
@@ -155,7 +160,8 @@ public class AuthenticationFilter extends GenericFilterBean {
             }
             if (postToAuthenticate(httpRequest, resourcePath)) {
                 LOGGER.debug("Trying to authenticate user by x-auth-username method : ", userName);
-                processUsernamePasswordAuthentication(httpRequest, httpResponse, userName, password, domain, rememberMe, loginToken, userId, forceLogin);
+                processUsernamePasswordAuthentication(httpRequest, httpResponse, userName, password, domain, rememberMe,
+                        loginToken, userId, forceLogin, forwardedFor);
                 return;
             }
             if (token.isPresent()) {
@@ -258,12 +264,14 @@ public class AuthenticationFilter extends GenericFilterBean {
      * @param loginToken to set
      * @param userId to set
      * @param forceLogin to set
+     * @param forwardedFor to set
      * @throws IOException if I/O exception occurs.
      */
     private void processUsernamePasswordAuthentication(HttpServletRequest httpRequest, HttpServletResponse httpResponse,
-            Optional<String> userName, Optional<String> password, Optional<String> domain, Optional<String> rememberMe, Optional<String> loginToken, Optional<String> userId, Optional<String> forceLogin) throws IOException {
+            Optional<String> userName, Optional<String> password, Optional<String> domain, Optional<String> rememberMe,
+            Optional<String> loginToken, Optional<String> userId, Optional<String> forceLogin, Optional<String> forwardedFor) throws IOException {
         Authentication resultOfAuthentication = tryToAuthenticateWithUsernameAndPassword(httpRequest, userName,
-                password, domain, rememberMe, loginToken, userId, forceLogin);
+                password, domain, rememberMe, loginToken, userId, forceLogin, forwardedFor);
         SecurityContextHolder.getContext().setAuthentication(resultOfAuthentication);
         httpResponse.setStatus(HttpServletResponse.SC_OK);
         httpResponse.addHeader(GenericConstants.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
@@ -291,14 +299,17 @@ public class AuthenticationFilter extends GenericFilterBean {
      * @param httpRequest to set
      * @param userName to set
      * @param password to set
+     * @param domain name to set
      * @param rememberMe to set
      * @param loginToken to set
      * @param userId to set
      * @param forceLogin to set
+     * @param forwardedFor to set
      * @return Authentication
      */
     private Authentication tryToAuthenticateWithUsernameAndPassword(HttpServletRequest httpRequest,
-            Optional<String> userName, Optional<String> password, Optional<String> domain, Optional<String> rememberMe, Optional<String> loginToken, Optional<String> userId, Optional<String> forceLogin) {
+            Optional<String> userName, Optional<String> password, Optional<String> domain, Optional<String> rememberMe,
+            Optional<String> loginToken, Optional<String> userId, Optional<String> forceLogin, Optional<String> forwardedFor) {
         UsernamePasswordAuthenticationToken requestAuthentication = new UsernamePasswordAuthenticationToken(userName,
                 password);
         if (rememberMe.isPresent()) {
@@ -306,6 +317,7 @@ public class AuthenticationFilter extends GenericFilterBean {
             loginMap.put(CloudStackConstants.CS_DOMAIN, domain.get());
             loginMap.put(REMEMBER_ME, rememberMe.get());
             loginMap.put(FORCE_LOGIN, forceLogin.get());
+            loginMap.put(FORWARDED_FOR, forwardedFor.get());
             requestAuthentication.setDetails(loginMap);
         }
         return tryToAuthenticate(requestAuthentication, loginToken, userId, httpRequest);
@@ -315,7 +327,8 @@ public class AuthenticationFilter extends GenericFilterBean {
      * Process token authentication.
      *
      * @param token to set
-     * @param loginToken
+     * @param loginToken to set
+     * @param userId to set
      * @param httpRequest to set
      */
     private void processTokenAuthentication(Optional<String> token, Optional<String> loginToken, Optional<String> userId, HttpServletRequest httpRequest) {
@@ -327,6 +340,8 @@ public class AuthenticationFilter extends GenericFilterBean {
      * Try to authenticate with token.
      *
      * @param token to set
+     * @param loginToken to set
+     * @param userId to set
      * @param httpRequest to set
      * @return Authentication
      */
@@ -348,6 +363,8 @@ public class AuthenticationFilter extends GenericFilterBean {
      * Try to authenticate.
      *
      * @param requestAuthentication to set
+     * @param loginToken to set
+     * @param userId to set
      * @param httpRequest to set
      * @return Authentication
      */
