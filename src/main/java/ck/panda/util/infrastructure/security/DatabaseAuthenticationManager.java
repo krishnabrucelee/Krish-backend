@@ -1,14 +1,7 @@
 package ck.panda.util.infrastructure.security;
 
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.util.Enumeration;
 import java.security.SecureRandom;
-import java.util.Base64;
 import java.util.HashMap;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -145,6 +138,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
         AuthenticationWithToken resultOfAuthentication = null;
         String rememberMe = null;
         String forceLogin = null;
+        String forwardedFor = null;
         HashMap<String, String> loginMap = (HashMap<String, String>) authentication.getDetails();
         if (userName != null && password != null) {
             String domain = null;
@@ -157,7 +151,8 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
                 rememberMe = loginMap.get("rememberMe");
             }
             forceLogin = loginMap.get("forceLogin");
-            resultOfAuthentication = authValidation(userName, password, domain, rememberMe, resultOfAuthentication, forceLogin);
+            forwardedFor = loginMap.get("forwardedFor");
+            resultOfAuthentication = authValidation(userName, password, domain, rememberMe, resultOfAuthentication, forceLogin, forwardedFor);
         } else {
             LoginHistory loginHistory = loginHistoryService.findByLoginToken(loginMap.get("loginToken"));
             if (loginHistory == null) {
@@ -172,31 +167,33 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
     /**
      * Authenticate user login details and return the token information.
      *
-     * @param userName login user name
-     * @param password login user password
-     * @param resultOfAuthentication authentication token object
-     * @param domain login user domain
-     * @param rememberMe
+     * @param userName to set
+     * @param password to set
+     * @param resultOfAuthentication to set
+     * @param domain to set
+     * @param rememberMe to set
+     * @param forceLogin to set
+     * @param forwardedFor to set
      * @return authentication token value
      * @throws AuthenticationException if authentication exception occurs.
      */
     public AuthenticationWithToken authValidation(Optional<String> userName, Optional<String> password,
-            String domain, String rememberMe, AuthenticationWithToken resultOfAuthentication, String forceLogin) throws AuthenticationException {
+            String domain, String rememberMe, AuthenticationWithToken resultOfAuthentication, String forceLogin, String forwardedFor) throws AuthenticationException {
         User user = null;
         try {
             user = userService.findByUser(userName.get(), password.get(), ROOT_DOMAIN_SYMBOL);
             if (user == null && domain.equals(BACKEND_ADMIN)) {
                 resultOfAuthentication = adminDefaultLoginAuthentication(userName, password, rememberMe, resultOfAuthentication,
-                        user);
+                        user, forwardedFor);
             } else {
                 Boolean authResponse = csLoginAuthentication(userName.get(), password.get(), domain);
                 if (authResponse) {
                     if (!domain.equals(BACKEND_ADMIN)) {
                         user = userService.findByUser(userName.get(), password.get(), domain);
                     }
-                    resultOfAuthentication = userLoginAuthentication(userName, domain, password, rememberMe, resultOfAuthentication, user, forceLogin);
+                    resultOfAuthentication = userLoginAuthentication(userName, domain, password, rememberMe, resultOfAuthentication, user, forceLogin, forwardedFor);
                 } else {
-                    loginAttemptvalidationCheck("error.login.credentials", CloudStackConstants.STATUS_INACTIVE);
+                    loginAttemptvalidationCheck("error.login.credentials", CloudStackConstants.STATUS_INACTIVE, forwardedFor);
                 }
             }
         } catch (BadCredentialsException e) {
@@ -213,14 +210,15 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
      *
      * @param userName to set
      * @param password to set
-     * @param rememberMe
+     * @param rememberMe to set
      * @param resultOfAuthentication to set
      * @param user to set
+     * @param forwardedFor to set
      * @return admin default authentication token
      * @throws Exception unhandled exceptions.
      */
     public AuthenticationWithToken adminDefaultLoginAuthentication(Optional<String> userName, Optional<String> password,
-            String rememberMe, AuthenticationWithToken resultOfAuthentication, User user) throws Exception {
+            String rememberMe, AuthenticationWithToken resultOfAuthentication, User user, String forwardedFor) throws Exception {
         if (userName.get().equals(backendAdminUserName) && password.get().equals(backendAdminPassword)) {
             SecureRandom random = new SecureRandom();
             String loginToken = random.toString();
@@ -236,7 +234,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
             tokenService.store(newToken, resultOfAuthentication);
             loginHistoryService.saveLoginDetails(userName.get(), password.get(), BACKEND_ADMIN, rememberMe, loginToken);
         } else {
-            loginAttemptvalidationCheck("error.login.credentials", CloudStackConstants.STATUS_INACTIVE);
+            loginAttemptvalidationCheck("error.login.credentials", CloudStackConstants.STATUS_INACTIVE, forwardedFor);
         }
         return resultOfAuthentication;
     }
@@ -246,23 +244,25 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
      *
      * @param userName to set
      * @param domain to set
-     * @param password
-     * @param rememberMe
+     * @param password to set
+     * @param rememberMe to set
      * @param resultOfAuthentication to set
      * @param user to set
+     * @param forceLogin to set
+     * @param forwardedFor to set
      * @return user authentication token
      * @throws Exception unhandled exceptions.
      */
     public AuthenticationWithToken userLoginAuthentication(Optional<String> userName, String domain,
-            Optional<String> password, String rememberMe, AuthenticationWithToken resultOfAuthentication, User user, String forceLogin) throws Exception {
+            Optional<String> password, String rememberMe, AuthenticationWithToken resultOfAuthentication, User user, String forceLogin, String forwardedFor) throws Exception {
         if (user == null) {
-            loginAttemptvalidationCheck("error.login.credentials", CloudStackConstants.STATUS_INACTIVE);
+            loginAttemptvalidationCheck("error.login.credentials", CloudStackConstants.STATUS_INACTIVE, forwardedFor);
         } else if (user != null && !user.getIsActive()) {
-            loginAttemptvalidationCheck("error.inactive.login.credentials", CloudStackConstants.STATUS_INACTIVE);
+            loginAttemptvalidationCheck("error.inactive.login.credentials", CloudStackConstants.STATUS_INACTIVE, forwardedFor);
         } else if (user != null && user.getRole() == null) {
-            loginAttemptvalidationCheck("error.access.permission.blocked", CloudStackConstants.STATUS_INACTIVE);
+            loginAttemptvalidationCheck("error.access.permission.blocked", CloudStackConstants.STATUS_INACTIVE, forwardedFor);
         } else {
-            Boolean loginAttemptCheck = loginAttemptvalidationCheck("success", CloudStackConstants.STATUS_ACTIVE);
+            Boolean loginAttemptCheck = loginAttemptvalidationCheck("success", CloudStackConstants.STATUS_ACTIVE, forwardedFor);
             Boolean authKeyResponse = apiSecretKeyGeneration(user);
             if (authKeyResponse && loginAttemptCheck) {
                 Boolean forceLoginResponse = forceLoginAttemptCheck(user, forceLogin);
@@ -355,45 +355,41 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
         }
     }
 
-    public String test(Optional<String> token) throws Exception {
-        String strEncoded = Base64.getEncoder().encodeToString(secretKey.getBytes("utf-8"));
-        byte[] decodedKey = Base64.getDecoder().decode(strEncoded);
-        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-        String encryptedPassword = new String(EncryptionUtil.decrypt(token.get(), originalKey));
-        return encryptedPassword;
-    }
-
     /**
      * Login attempt validation check.
      *
-     * @param errorKey error key
-     * @param status status
+     * @param errorKey to set
+     * @param status to set
+     * @param forwardedFor to set
      * @return login attempt status true/false
      * @throws Exception raise if error
      */
-    private Boolean loginAttemptvalidationCheck(String errorKey, String status) throws Exception {
+    private Boolean loginAttemptvalidationCheck(String errorKey, String status, String forwardedFor) throws Exception {
         Integer unlockTime = -1;
-        String ipAddress = getLocalIpAddress();
-        LoginSecurityTrack persistLoginSecurityTrack = loginSecurityTrackService.findByIpAddress(ipAddress);
-        GeneralConfiguration generalConfiguration = generalConfigurationService.findByIsActive(true);
+        String ipAddress = forwardedFor;
+        if (ipAddress != null) {
+            LoginSecurityTrack persistLoginSecurityTrack = loginSecurityTrackService.findByIpAddress(ipAddress);
+            GeneralConfiguration generalConfiguration = generalConfigurationService.findByIsActive(true);
 
-        if (persistLoginSecurityTrack == null && status.equals(CloudStackConstants.STATUS_ACTIVE)) {
-            return true;
-        } else if (persistLoginSecurityTrack != null && generalConfiguration.getMaxLogin() >= persistLoginSecurityTrack.getLoginAttemptCount()
+            if (persistLoginSecurityTrack == null && status.equals(CloudStackConstants.STATUS_ACTIVE)) {
+                return true;
+            } else if (persistLoginSecurityTrack != null && generalConfiguration.getMaxLogin() >= persistLoginSecurityTrack.getLoginAttemptCount()
                 && status.equals(CloudStackConstants.STATUS_ACTIVE)) {
-            persistLoginSecurityTrack.setLoginAttemptCount(0);
-            persistLoginSecurityTrack.setLoginTimeStamp(null);
-            loginSecurityTrackService.save(persistLoginSecurityTrack);
-            return true;
-        } else {
-            unlockTime = loginAttemptCountCheck(unlockTime, ipAddress, persistLoginSecurityTrack, generalConfiguration, status);
-            if (unlockTime == -1 && status.equals(CloudStackConstants.STATUS_INACTIVE)) {
-                throw new BadCredentialsException(errorKey);
-            } else if (unlockTime != -1) {
-                throw new BadCredentialsException("Your account is locked please login after " + unlockTime + " minutes");
+                persistLoginSecurityTrack.setLoginAttemptCount(0);
+                persistLoginSecurityTrack.setLoginTimeStamp(null);
+                loginSecurityTrackService.save(persistLoginSecurityTrack);
+                return true;
+            } else {
+                unlockTime = loginAttemptCountCheck(unlockTime, ipAddress, persistLoginSecurityTrack, generalConfiguration, status);
+                if (unlockTime == -1 && status.equals(CloudStackConstants.STATUS_INACTIVE)) {
+                    throw new BadCredentialsException(errorKey);
+                } else if (unlockTime != -1) {
+                    throw new BadCredentialsException("Your account is locked please login after " + unlockTime + " minutes");
+                }
+                return true;
             }
-            return true;
         }
+        return true;
     }
 
     /**
@@ -464,42 +460,18 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
     }
 
     /**
-     * Get current machine local IP address.
+     * Check the force login status.
      *
-     * @return ip address
+     * @param user to set
+     * @param forceLogin to set
+     * @return force login status
      * @throws Exception raise if error
      */
-    private String getLocalIpAddress() throws Exception {
-        int count = 0;
-        InetAddress address = InetAddress.getLocalHost();
-        String ipAddress = address.getHostAddress();
-        Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-        while (interfaces.hasMoreElements()) {
-            NetworkInterface current = interfaces.nextElement();
-            if (!current.isUp() || current.isLoopback() || current.isVirtual()) {
-                continue;
-            }
-            Enumeration<InetAddress> addresses = current.getInetAddresses();
-            while (addresses.hasMoreElements()) {
-                InetAddress currentAddress = addresses.nextElement();
-                if (currentAddress.isLoopbackAddress()) {
-                    continue;
-                }
-                if (currentAddress instanceof Inet4Address &&  count == 0) {
-                    ipAddress = currentAddress.getHostAddress();
-                    count++;
-                    break;
-                }
-            }
-        }
-        return ipAddress;
-    }
-
     private Boolean forceLoginAttemptCheck(User user, String forceLogin) throws Exception {
         LoginHistory loginHistory = loginHistoryService.findByUserId(user.getId());
-        if (loginHistory == null || loginHistory.getIsAlreadyLogin() == false) {
+        if (loginHistory == null || !loginHistory.getIsAlreadyLogin()) {
             return true;
-        } else if (loginHistory.getIsAlreadyLogin() == true && forceLogin.equals("true")) {
+        } else if (loginHistory.getIsAlreadyLogin() && forceLogin.equals("true")) {
             return true;
         } else {
             throw new BadCredentialsException("error.already.exists");
