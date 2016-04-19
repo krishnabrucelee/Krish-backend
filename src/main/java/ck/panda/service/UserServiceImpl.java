@@ -17,7 +17,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ck.panda.constants.CloudStackConstants;
+import ck.panda.constants.EmailConstants;
+import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Permission;
@@ -29,6 +34,8 @@ import ck.panda.domain.entity.User.Status;
 import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.repository.jpa.UserRepository;
+import ck.panda.rabbitmq.util.EmailEvent;
+import ck.panda.rabbitmq.util.ResponseEvent;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
@@ -95,6 +102,14 @@ public class UserServiceImpl implements UserService {
     /** Role service. */
     @Autowired
     private RoleService roleService;
+
+    /** Role service. */
+    @Autowired
+    private SyncService syncService;
+
+    /** Email job service. */
+    @Autowired
+    private EmailJobService emailJobService;
 
     /** Constant for generic UTF. */
     public static final String CS_UTF = "utf-8";
@@ -500,11 +515,31 @@ public class UserServiceImpl implements UserService {
                 String encryptedPassword = new String(EncryptionUtil.encrypt(user.getConfirmPassword(), originalKey));
                 user.setPassword(encryptedPassword);
             }
+            sendEmailForPasswordUpdate(user);
             return userRepository.save(user);
         } else {
             user.setStatus(Status.ACTIVE);
             return userRepository.save(user);
         }
+    }
+
+    /**
+     * Send an email for password updated user.
+     *
+     * @param user updated password details of user
+     * @throws Exception if errors throws exception.
+     */
+    private void sendEmailForPasswordUpdate(User user) throws Exception {
+        syncService.syncUpdateUserRole();
+        EmailEvent emailEvent = new EmailEvent();
+        emailEvent.setEntityuuid(user.getUuid());
+        emailEvent.setResourceUuid(user.getUuid());
+        emailEvent.setEvent(EventTypes.EVENT_USER_UPDATE);
+        emailEvent.setEventType(EmailConstants.ACCOUNT);
+        emailEvent.setEventDateTime(user.getUpdatedDateTime().toString());
+        emailEvent.setUser(convertEntityService.getOwnerByUuid(user.getUuid()).toString());
+        emailEvent.setSubject(EmailConstants.SUBJECT_ACCOUNT_PASSWORD);
+        emailJobService.sendMessageToQueue(emailEvent);
     }
 
     @Override

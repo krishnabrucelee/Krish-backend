@@ -165,19 +165,6 @@ public class ActionListener implements MessageListener {
                         emailEvent.setUser(convertEntityService.getDeletedOwnerByUuid(eventResponse.getEntityuuid()).toString());
                         emailEvent.setSubject(EmailConstants.SUBJECT_ACCOUNT_DELETE);
                         emailJobService.sendMessageToQueue(emailEvent);
-                    } else if (eventName.equals(EventTypes.EVENT_USER_UPDATE)) {
-                        syncService.syncUpdateUserRole();
-                        ObjectMapper mapper = new ObjectMapper();
-                        eventResponse = mapper.readValue(eventMessage, ResponseEvent.class);
-                        EmailEvent emailEvent = new EmailEvent();
-                        emailEvent.setEntityuuid(eventResponse.getEntityuuid());
-                        emailEvent.setResourceUuid(eventResponse.getEntityuuid());
-                        emailEvent.setEvent(EventTypes.EVENT_USER_UPDATE);
-                        emailEvent.setEventType(EmailConstants.ACCOUNT);
-                        emailEvent.setEventDateTime(eventResponse.getEventDateTime());
-                        emailEvent.setUser(convertEntityService.getOwnerByUuid(eventResponse.getEntityuuid()).toString());
-                        emailEvent.setSubject(EmailConstants.SUBJECT_ACCOUNT_PASSWORD);
-                        emailJobService.sendMessageToQueue(emailEvent);
                     }
                 }
                 break;
