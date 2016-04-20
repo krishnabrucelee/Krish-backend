@@ -15,6 +15,7 @@ import ck.panda.domain.entity.Event;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
+import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
@@ -121,6 +122,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Autowired
     private ResourceLimitDepartmentService resourceLimitDepartmentService;
 
+    /** Resource Limit Project service reference. */
+    @Autowired
+    private ResourceLimitProjectService resourceLimitProjectService;
+
     /** Sync Service reference. */
     @Autowired
     private SyncService syncService;
@@ -163,13 +168,19 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             // check department and project quota validation.
             ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService.findByDepartmentAndResourceType(
                     vmInstance.getDepartmentId(), ResourceType.valueOf("Instance"), true);
+            ResourceLimitProject projectLimit = resourceLimitProjectService
+                    .findByProjectAndResourceType(vmInstance.getProjectId(), ResourceLimitProject.ResourceType.Instance, true);
             if (departmentLimit != null && convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
                     .getType().equals(AccountType.USER)) {
                 if (vmInstance.getProjectId() != null) {
-//                    syncService
-//                            .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
+                	 if (projectLimit != null) {
                     quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
                             vmInstance.getProjectId(), "Project");
+                	 } else {
+                		errors.addGlobalError(
+                                "Resource limit for project has not been set. Please update project quota");
+                        throw new ApplicationException(errors);
+                	}
                 } else {
                     quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
                             vmInstance.getDepartmentId(), "Department");

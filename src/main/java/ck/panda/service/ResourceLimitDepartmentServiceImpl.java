@@ -161,10 +161,10 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
     @PreAuthorize("hasPermission(null, 'DEPARTMENT_QUOTA_EDIT')")
     public List<ResourceLimitDepartment> createResourceLimits(List<ResourceLimitDepartment> resourceLimits)
             throws Exception {
-    	Errors errors = this.validateResourceLimit(resourceLimits);
+    	/*Errors errors = this.validateResourceLimit(resourceLimits);
         if (errors.hasErrors()) {
             throw new ApplicationException(errors);
-        } else {
+        } else {*/
             for (ResourceLimitDepartment resource : resourceLimits) {
             	if (resource.getId() != null) {
                     ResourceLimitDepartment resourceData = resourceLimitDepartmentRepo.findOne(resource.getId());
@@ -174,6 +174,7 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
                     resourceLimitDepartmentRepo.save(resourceData);
                     ResourceLimitDomain resourceDatas = resourceLimitDomainService.findByDomainAndResourceCount(resource.getDomainId(), updateUsedCount(resourceData), true);
                     Long resourceCount = resourceLimitDepartmentRepo.findByDomainIdAndResourceType(resource.getDomainId(),resource.getResourceType(),true);
+                    //Long resourceCounts = resourceLimitDepartmentRepo.findByDomainIdAndResourceTypeAndResourceMax(resource.getDomainId(),resource.getResourceType(),true);
                     resourceDatas.setUsedLimit(resourceCount);
                     resourceDatas.setIsSyncFlag(false);
                     resourceLimitDomainService.save(resourceDatas);
@@ -183,11 +184,12 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
                     resourceLimitDepartmentRepo.save(resource);
                     ResourceLimitDomain resourceDatas = resourceLimitDomainService.findByDomainAndResourceCount(resource.getDomainId(), updateUsedCount(resource), true);
                     Long resourceCount = resourceLimitDepartmentRepo.findByDomainIdAndResourceType(resource.getDomainId(),resource.getResourceType(),true);
+                    //Long resourceCounts = resourceLimitDepartmentRepo.findByDomainIdAndResourceTypeAndResourceMax(resource.getDomainId(),resource.getResourceType(),true);
                     resourceDatas.setUsedLimit(resourceCount);
                     resourceDatas.setIsSyncFlag(false);
                     resourceLimitDomainService.save(resourceDatas);
                 }
-            }
+            //}
 
         }
         return (List<ResourceLimitDepartment>) resourceLimitDepartmentRepo.findAll();
@@ -421,8 +423,12 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
 						+ (resourceLimitDomain.getMax() - resourceLimitDomain.getUsedLimit()));
 				}
 			} else {
-				resourceMap.put(resourceTypeMap.get(name),
+			    if (resourceLimitDomain.getUsedLimit() == null) {
+			    	resourceMap.put(resourceTypeMap.get(name), resourceLimitDomain.getMax());
+				} else {
+			        resourceMap.put(resourceTypeMap.get(name),
 						(resourceLimitDomain.getMax() - resourceLimitDomain.getUsedLimit()));
+				}
 			}
 		}
 		return resourceMap;

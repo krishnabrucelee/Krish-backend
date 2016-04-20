@@ -226,16 +226,18 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
                     updateResourceProject(resourceData);
                     resourceLimitProjectRepo.save(resourceData);
                     ResourceLimitDepartment resourceDatas = resourceLimitDepartmentService.findByDepartmentAndResourceType(resource.getDepartmentId(), updateUsedCount(resourceData), true);
-                    Long resourceCount = resourceLimitProjectRepo.findByDepartmentIdAndResourceType(resource.getDepartmentId(), resource.getResourceType(), true);
-                    resourceDatas.setUsedLimit(resourceCount);
+                    //Long resourceCount = resourceLimitProjectRepo.findByDepartmentIdAndResourceType(resource.getDepartmentId(), resource.getResourceType(), true);
+                    Long resourceCounts = resourceLimitProjectRepo.findByDepartmentIdAndResourceTypeAndResourceMax(resource.getDepartmentId(), resource.getResourceType(), true);
+                    resourceDatas.setUsedLimit(resourceCounts);
                     resourceLimitDepartmentService.save(resourceDatas);
                 } else {
                     updateResourceProject(resource);
                     resource.setIsActive(true);
                     resourceLimitProjectRepo.save(resource);
                     ResourceLimitDepartment resourceDatas = resourceLimitDepartmentService.findByDepartmentAndResourceType(resource.getDepartmentId(), updateUsedCount(resource), true);
-                    Long resourceCount = resourceLimitProjectRepo.findByDepartmentIdAndResourceType(resource.getDepartmentId(), resource.getResourceType(), true);
-                    resourceDatas.setUsedLimit(resourceCount);
+                    //Long resourceCount = resourceLimitProjectRepo.findByDepartmentIdAndResourceType(resource.getDepartmentId(), resource.getResourceType(), true);
+                    Long resourceCounts = resourceLimitProjectRepo.findByDepartmentIdAndResourceTypeAndResourceMax(resource.getDepartmentId(), resource.getResourceType(), true);
+                    resourceDatas.setUsedLimit(resourceCounts);
                     resourceLimitDepartmentService.save(resourceDatas);
                 }
             }
@@ -308,7 +310,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
         	if (!resourceLimit.getResourceType().equals(ResourceLimitProject.ResourceType.Project)) {
             // Step1: Find max from domain with specific resource type.
             ResourceLimitDepartment projectLimit = resourceLimitDepartmentService.findByDepartmentAndResourceType(
-                    resourceLimit.getDepartmentId(),
+                    convertEntityService.getProjectById(resourceLimit.getProjectId()).getDepartmentId(),
                     ResourceLimitDepartment.ResourceType.valueOf(resourceLimit.getResourceType().name()), true);
             // Step2: Find resource count from department for spcific domain and
             // resource type
@@ -415,9 +417,17 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
         	ResourceLimitDepartment resourceLimitDepartment = resourceLimitDepartmentService.findByDepartmentAndResourceType(projectResponse.getDepartmentId(), ResourceLimitDepartment.ResourceType.valueOf(resourceTypeMap.get(name)), true);
         	ResourceLimitProject resourceLimitProject = resourceLimitProjectRepo.findByProjectAndResourceType(id, ResourceLimitProject.ResourceType.valueOf(resourceTypeMap.get(name)), true);
         	if (resourceLimitProject != null) {
-            	resourceMap.put(resourceTypeMap.get(name),resourceLimitProject.getMax() + (resourceLimitDepartment.getMax() - resourceLimitDepartment.getUsedLimit()));
-			} else {
-            	resourceMap.put(resourceTypeMap.get(name),(resourceLimitDepartment.getMax() - resourceLimitDepartment.getUsedLimit()));
+        		if (resourceLimitDepartment.getMax() == -1) {
+					resourceMap.put(resourceTypeMap.get(name), -1L);
+				} else {
+					resourceMap.put(resourceTypeMap.get(name),resourceLimitProject.getMax() + (resourceLimitDepartment.getMax() - resourceLimitDepartment.getUsedLimit()));
+				}
+		    } else {
+				if (resourceLimitDepartment.getUsedLimit() == null) {
+			    	resourceMap.put(resourceTypeMap.get(name), resourceLimitDepartment.getMax());
+				} else {
+					resourceMap.put(resourceTypeMap.get(name),(resourceLimitDepartment.getMax() - resourceLimitDepartment.getUsedLimit()));
+				}
 			}
         }
         return resourceMap;

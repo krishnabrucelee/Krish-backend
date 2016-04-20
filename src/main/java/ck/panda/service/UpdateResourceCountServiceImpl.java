@@ -47,78 +47,84 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
         config.setServer(1L);
         switch(resourceType) {
         case "Instance":
-            VmInstance vmInstance = (VmInstance)resourceObject;
-            resourceList.add(ConvertEntityService.CS_INSTANCE);
-            resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
-            resourceList.add(ConvertEntityService.CS_CPU);
-            if(convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getCustomized()) {
-                resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(vmInstance.getCpuCore()));
-                resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(vmInstance.getMemory()));
-            } else {
-                resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getNumberOfCores()));
-                resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getMemory()));
-            }
-            if(vmInstance.getStorageOfferingId() != null) {
-                if(convertEntityService.getStorageOfferById(vmInstance.getStorageOfferingId()).getIsCustomDisk()) {
-                    resourceUsageMap.put(ConvertEntityService.CS_PRIMARY_STORAGE, vmInstance.getDiskSize() + isTemplateZero(convertEntityService.getTemplateById(vmInstance.getTemplateId()).getSize()));
-                } else {
-                    resourceUsageMap.put(ConvertEntityService.CS_PRIMARY_STORAGE, convertEntityService.getStorageOfferById(vmInstance.getStorageOfferingId()).getDiskSize() + isTemplateZero(convertEntityService.getTemplateById(vmInstance.getTemplateId()).getSize()));
-                }
-                resourceUsageMap.put(ConvertEntityService.CS_VOLUME, 2L);
-            } else {
-                resourceUsageMap.put(ConvertEntityService.CS_PRIMARY_STORAGE, isTemplateZero(convertEntityService.getTemplateById(vmInstance.getTemplateId()).getSize()));
-                resourceUsageMap.put(ConvertEntityService.CS_VOLUME, 1L);
-            }
-            resourceList.add(ConvertEntityService.CS_VOLUME);
-            resourceList.add(ConvertEntityService.CS_MEMORY);
-            resourceList.add(ConvertEntityService.CS_PRIMARY_STORAGE);
-            resourceList.add(ConvertEntityService.CS_IP);
-            resourceUsageMap.put(ConvertEntityService.CS_IP, 1L);
-            if (accountType.equals("Project")) {
-                updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
-            } else if (accountType.equals("Department")) {
-                updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
-             } else {
-                updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
-            }
+			VmInstance vmInstance = (VmInstance) resourceObject;
+			resourceList.add(ConvertEntityService.CS_INSTANCE);
+			resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
+			resourceList.add(ConvertEntityService.CS_CPU);
+			if (convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getCustomized()) {
+				resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(vmInstance.getCpuCore()));
+				resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(vmInstance.getMemory()));
+			} else {
+				resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(convertEntityService
+						.getComputeOfferById(vmInstance.getComputeOfferingId()).getNumberOfCores()));
+				resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(
+						convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getMemory()));
+			}
+			if (vmInstance.getStorageOfferingId() != null) {
+				if (convertEntityService.getStorageOfferById(vmInstance.getStorageOfferingId()).getIsCustomDisk()) {
+					resourceUsageMap.put(ConvertEntityService.CS_PRIMARY_STORAGE,
+							vmInstance.getDiskSize() + isTemplateZero(
+									convertEntityService.getTemplateById(vmInstance.getTemplateId()).getSize()));
+				} else {
+					resourceUsageMap.put(ConvertEntityService.CS_PRIMARY_STORAGE, convertEntityService
+							.getStorageOfferById(vmInstance.getStorageOfferingId()).getDiskSize()
+							+ isTemplateZero(
+									convertEntityService.getTemplateById(vmInstance.getTemplateId()).getSize()));
+				}
+				resourceUsageMap.put(ConvertEntityService.CS_VOLUME, 2L);
+			} else {
+				resourceUsageMap.put(ConvertEntityService.CS_PRIMARY_STORAGE,
+						isTemplateZero(convertEntityService.getTemplateById(vmInstance.getTemplateId()).getSize()));
+				resourceUsageMap.put(ConvertEntityService.CS_VOLUME, 1L);
+			}
+			resourceList.add(ConvertEntityService.CS_VOLUME);
+			resourceList.add(ConvertEntityService.CS_MEMORY);
+			resourceList.add(ConvertEntityService.CS_PRIMARY_STORAGE);
+			resourceList.add(ConvertEntityService.CS_IP);
+			resourceUsageMap.put(ConvertEntityService.CS_IP, 1L);
+			if (accountType.equals("Project")) {
+				updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
+			} else if (accountType.equals("Department")) {
+				updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
+			}
             break;
         case "Volume":
-            resourceList.clear();
-            Volume volume = (Volume)resourceObject;
-            resourceList.add(ConvertEntityService.CS_VOLUME);
-            resourceList.add(ConvertEntityService.CS_PRIMARY_STORAGE);
-            if(volume.getDiskSize() != null) {
-                    resourceUsageMap.put(ConvertEntityService.CS_PRIMARY_STORAGE, volume.getDiskSize() / (1024*1024*1024));
-                } else {
-                    resourceUsageMap.put(ConvertEntityService.CS_PRIMARY_STORAGE, convertEntityService.getStorageOfferById(volume.getStorageOfferingId()).getDiskSize());
-                }
-            resourceUsageMap.put(ConvertEntityService.CS_VOLUME, 1L);
-            if (accountType.equals("Project")) {
-                updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
-            } else if (accountType.equals("Department")) {
-                updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
-             } else {
-                updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
-           }
+			resourceList.clear();
+			Volume volume = (Volume) resourceObject;
+			resourceList.add(ConvertEntityService.CS_VOLUME);
+			resourceList.add(ConvertEntityService.CS_PRIMARY_STORAGE);
+			if (volume.getDiskSize() != null) {
+				resourceUsageMap.put(ConvertEntityService.CS_PRIMARY_STORAGE,
+						volume.getDiskSize() / (1024 * 1024 * 1024));
+			} else {
+				resourceUsageMap.put(ConvertEntityService.CS_PRIMARY_STORAGE,
+						convertEntityService.getStorageOfferById(volume.getStorageOfferingId()).getDiskSize());
+			}
+			resourceUsageMap.put(ConvertEntityService.CS_VOLUME, 1L);
+			if (accountType.equals("Project")) {
+				updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
+			} else if (accountType.equals("Department")) {
+				updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
+			}
             break;
         case "UploadVolume":
-            resourceList.clear();
-            Volume uploadVolume = (Volume)resourceObject;
-            resourceList.add(ConvertEntityService.CS_VOLUME);
-            resourceList.add(ConvertEntityService.CS_SECONDARY_STORAGE);
-            if(uploadVolume.getDiskSize() != null) {
-                    resourceUsageMap.put(ConvertEntityService.CS_SECONDARY_STORAGE, uploadVolume.getDiskSize() / (1024*1024*1024));
-                } else {
-                    resourceUsageMap.put(ConvertEntityService.CS_SECONDARY_STORAGE, convertEntityService.getStorageOfferById(uploadVolume.getStorageOfferingId()).getDiskSize());
-                }
-            resourceUsageMap.put(ConvertEntityService.CS_VOLUME, 1L);
-            if (accountType.equals("Project")) {
-                updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
-            } else if (accountType.equals("Department")) {
-                updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
-             } else {
-                updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
-           }
+			resourceList.clear();
+			Volume uploadVolume = (Volume) resourceObject;
+			resourceList.add(ConvertEntityService.CS_VOLUME);
+			resourceList.add(ConvertEntityService.CS_SECONDARY_STORAGE);
+			if (uploadVolume.getDiskSize() != null) {
+				resourceUsageMap.put(ConvertEntityService.CS_SECONDARY_STORAGE,
+						uploadVolume.getDiskSize() / (1024 * 1024 * 1024));
+			} else {
+				resourceUsageMap.put(ConvertEntityService.CS_SECONDARY_STORAGE,
+						convertEntityService.getStorageOfferById(uploadVolume.getStorageOfferingId()).getDiskSize());
+			}
+			resourceUsageMap.put(ConvertEntityService.CS_VOLUME, 1L);
+			if (accountType.equals("Project")) {
+				updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
+			} else if (accountType.equals("Department")) {
+				updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
+			}
             break;
         case "Network":
             resourceList.clear();
@@ -127,8 +133,6 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
             if (accountType.equals("Project")) {
                 updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
             } else if (accountType.equals("Department")) {
-                updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
-            } else {
                 updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
             }
             break;
@@ -140,8 +144,6 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
                 updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
             } else if (accountType.equals("Department")) {
                 updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
-            } else {
-                updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
             }
             break;
         case "RestoreInstance" :
@@ -150,6 +152,7 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
             resourceList.add(ConvertEntityService.CS_INSTANCE);
             resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
             resourceList.add(ConvertEntityService.CS_CPU);
+            resourceUsageMap.put(ConvertEntityService.CS_CPU, 1L);
             if(convertEntityService.getComputeOfferById(restoreInstance.getComputeOfferingId()).getCustomized()) {
                 resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(restoreInstance.getCpuCore()));
                 resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(restoreInstance.getMemory()));
@@ -162,8 +165,6 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
                 updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
             } else if (accountType.equals("Department")) {
                 updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
-            } else {
-                updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
             }
             break;
         case "Destroy" :
@@ -171,6 +172,7 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
             VmInstance destroyInstance = (VmInstance)resourceObject;
             resourceList.add(ConvertEntityService.CS_INSTANCE);
             resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
+            resourceUsageMap.put(ConvertEntityService.CS_CPU, 1L);
             resourceList.add(ConvertEntityService.CS_CPU);
             if(convertEntityService.getComputeOfferById(destroyInstance.getComputeOfferingId()).getCustomized()) {
                 resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(destroyInstance.getCpuCore()));
@@ -185,46 +187,39 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
                 updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
             } else if (accountType.equals("Department")) {
                 updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
-            } else {
-                updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
             }
             break;
         case "Expunging" :
-            resourceList.clear();
-            VmInstance expungingInstance = (VmInstance)resourceObject;
-            resourceList.add(ConvertEntityService.CS_INSTANCE);
-            resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
-            resourceList.add(ConvertEntityService.CS_CPU);
-            if(convertEntityService.getComputeOfferById(expungingInstance.getComputeOfferingId()).getCustomized()) {
-                resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(expungingInstance.getCpuCore()));
-                resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(expungingInstance.getMemory()));
-            } else {
-                resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(convertEntityService.getComputeOfferById(expungingInstance.getComputeOfferingId()).getNumberOfCores()));
-                resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(convertEntityService.getComputeOfferById(expungingInstance.getComputeOfferingId()).getMemory()));
-            }
-            resourceUsageMap.put(ConvertEntityService.CS_PRIMARY_STORAGE, convertEntityService.getTemplateById(expungingInstance.getTemplateId()).getSize());
-            resourceUsageMap.put(ConvertEntityService.CS_VOLUME, 1L);
-            resourceList.add(ConvertEntityService.CS_VOLUME);
-            resourceList.add(ConvertEntityService.CS_MEMORY);
-            resourceList.add(ConvertEntityService.CS_PRIMARY_STORAGE);
-            if (accountType.equals("Project")) {
-                updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
-            } else if (accountType.equals("Department")) {
-                updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
-             } else {
-                updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
-            }
-            break;
-        }
+			resourceList.clear();
+			VmInstance expungingInstance = (VmInstance) resourceObject;
+			resourceList.add(ConvertEntityService.CS_INSTANCE);
+			resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
+			resourceUsageMap.put(ConvertEntityService.CS_CPU, 1L);
+			resourceList.add(ConvertEntityService.CS_CPU);
+			if (convertEntityService.getComputeOfferById(expungingInstance.getComputeOfferingId()).getCustomized()) {
+				resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(expungingInstance.getCpuCore()));
+				resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(expungingInstance.getMemory()));
+			} else {
+				resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(convertEntityService
+						.getComputeOfferById(expungingInstance.getComputeOfferingId()).getNumberOfCores()));
+				resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(convertEntityService
+						.getComputeOfferById(expungingInstance.getComputeOfferingId()).getMemory()));
+			}
+			resourceUsageMap.put(ConvertEntityService.CS_PRIMARY_STORAGE,
+					convertEntityService.getTemplateById(expungingInstance.getTemplateId()).getSize());
+			resourceUsageMap.put(ConvertEntityService.CS_VOLUME, 1L);
+			resourceList.add(ConvertEntityService.CS_VOLUME);
+			resourceList.add(ConvertEntityService.CS_MEMORY);
+			resourceList.add(ConvertEntityService.CS_PRIMARY_STORAGE);
+			if (accountType.equals("Project")) {
+				updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
+			} else if (accountType.equals("Department")) {
+				updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
+			}
+			break;
+       }
         return null;
     }
-
-//    public void updateResourceCountByDomain(String domainUuid, HashMap<String, String> domainCountMap)
-//            throws Exception {
-//        // Resource count for domain
-//        String csResponse = cloudStackResourceCapacity.updateResourceCount(domainUuid, domainCountMap, "json");
-//        //convertEntityService.resourceCount(csResponse);
-//    }
 
     public void updateCountByDepartmentAndResourceType(Long departmentId, String resourceType, Long updateResourceCount, String status) throws Exception {
         ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
@@ -264,10 +259,7 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
             updateCountByProjectAndResourceType(accountTypeId, resource, EmptytoLong(resourceUsageMap.get(resources)), status);
         } else if(accountType.equals("Department")){
             updateCountByDepartmentAndResourceType(accountTypeId, resource, EmptytoLong(resourceUsageMap.get(resources)), status);
-        }/* else {
-            // Resource count for domain.
-//            updateResourceCountByDomain(convertEntityService.getDomainById(accountTypeId).getUuid(), null);
-        }*/
+        }
     }
     public Long EmptytoLong(Long value) {
         if (value == null) {

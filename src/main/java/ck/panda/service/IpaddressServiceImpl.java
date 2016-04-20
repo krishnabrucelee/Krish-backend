@@ -26,6 +26,7 @@ import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.PortForwarding;
 import ck.panda.domain.entity.ResourceLimitDepartment;
+import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.repository.jpa.IpaddressRepository;
 import ck.panda.util.AppValidator;
@@ -80,6 +81,10 @@ public class IpaddressServiceImpl implements IpaddressService {
     /** Resource Limit Department service reference. */
     @Autowired
     private ResourceLimitDepartmentService resourceLimitDepartmentService;
+
+    /** Resource Limit Project service reference. */
+    @Autowired
+    private ResourceLimitProjectService resourceLimitProjectService;
 
     /** Sync Service reference. */
     @Autowired
@@ -146,22 +151,23 @@ public class IpaddressServiceImpl implements IpaddressService {
         // check department and project quota validation.
         ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService.findByDepartmentAndResourceType(
                 convertEntityService.getNetworkById(networkId).getDepartmentId(), ResourceType.Instance, true);
+        ResourceLimitProject projectLimit = resourceLimitProjectService
+                .findByProjectAndResourceType(convertEntityService.getNetworkById(networkId).getProjectId(), ResourceLimitProject.ResourceType.Instance, true);
         if (departmentLimit != null && convertEntityService
                 .getDepartmentById(convertEntityService.getNetworkById(networkId).getDepartmentId()).getType()
                 .equals(AccountType.USER)) {
             if (convertEntityService.getNetworkById(networkId).getProjectId() != null) {
-//                syncService.syncResourceLimitProject(convertEntityService
-//                        .getProjectById(convertEntityService.getNetworkById(networkId).getProjectId()));
+            	if (projectLimit != null) {
                 quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getNetworkById(networkId),
                         "IP", convertEntityService.getNetworkById(networkId).getProjectId(), "Project");
-            } else {
+            	} else {
+                    throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Resource limit for project has not been set. Please update project quota");
+            	}
+            }
+            else {
                 quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getNetworkById(networkId),
                         "IP", convertEntityService.getNetworkById(networkId).getDepartmentId(), "Department");
             }
-           /* if (convertEntityService.getNetworkById(networkId).getDomainId() != null) {
-                quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getNetworkById(networkId),
-                        "IP", convertEntityService.getNetworkById(networkId).getDomainId(), "Domain");
-            }*/
             // 3. Check the resource availability to acquire new ip.
             String isAvailable = isResourceAvailable(convertEntityService.getNetworkById(networkId), optionalMap);
             if (isAvailable != null) {
