@@ -20,8 +20,6 @@ import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EventTypes;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Domain;
-import ck.panda.domain.entity.Event;
-import ck.panda.domain.entity.Event.EventType;
 import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.FirewallRules.Purpose;
 import ck.panda.domain.entity.IpAddress.VpnState;

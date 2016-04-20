@@ -173,14 +173,13 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             if (departmentLimit != null && convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
                     .getType().equals(AccountType.USER)) {
                 if (vmInstance.getProjectId() != null) {
-                	 if (projectLimit != null) {
-                    quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
+                    if (projectLimit != null) {
+                        quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
                             vmInstance.getProjectId(), "Project");
-                	 } else {
-                		errors.addGlobalError(
-                                "Resource limit for project has not been set. Please update project quota");
+                    } else {
+                        errors.addGlobalError("Resource limit for project has not been set. Please update project quota");
                         throw new ApplicationException(errors);
-                	}
+                    }
                 } else {
                     quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
                             vmInstance.getDepartmentId(), "Department");
