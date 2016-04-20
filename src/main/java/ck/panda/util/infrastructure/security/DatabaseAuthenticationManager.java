@@ -156,7 +156,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
         } else {
             LoginHistory loginHistory = loginHistoryService.findByLoginToken(loginMap.get("loginToken"));
             if (loginHistory == null) {
-                throw new BadCredentialsException("Your credentials are used by another user, So you are logging out.");
+                throw new BadCredentialsException("Your credentials are used by another user. So you are logging out.");
             } else {
                 resultOfAuthentication = (AuthenticationWithToken) tokenAuthenticationProvider.authenticate(authentication);
             }
@@ -373,6 +373,8 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
 
             if (persistLoginSecurityTrack == null && status.equals(CloudStackConstants.STATUS_ACTIVE)) {
                 return true;
+            } if (generalConfiguration == null) {
+                throw new BadCredentialsException("error.login.credentials");
             } else if (persistLoginSecurityTrack != null && generalConfiguration.getMaxLogin() >= persistLoginSecurityTrack.getLoginAttemptCount()
                 && status.equals(CloudStackConstants.STATUS_ACTIVE)) {
                 persistLoginSecurityTrack.setLoginAttemptCount(0);
