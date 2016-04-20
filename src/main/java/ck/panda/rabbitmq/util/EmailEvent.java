@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class EmailEvent {
 
     /** Event uuid. */
-    private String entityuuid;
+    private String entityUuid;
 
     /** Event date and time. */
     private String eventDateTime;
@@ -49,19 +49,19 @@ public class EmailEvent {
     /**
      * Get entity uuid.
      *
-     * @return the entityuuid
+     * @return the entityUuid
      */
-    public String getEntityuuid() {
-        return entityuuid;
+    public String getEntityUuid() {
+        return entityUuid;
     }
 
     /**
      * Set entity uuid.
      *
-     * @param entityuuid to set
+     * @param entityUuid to set
      */
-    public void setEntityuuid(String entityuuid) {
-        this.entityuuid = entityuuid;
+    public void setEntityUuid(String entityUuid) {
+        this.entityUuid = entityUuid;
     }
 
     /**
