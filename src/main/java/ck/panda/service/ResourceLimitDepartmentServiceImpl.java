@@ -275,6 +275,8 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
     }
 
     /**
+     * Resource type based on department resource.
+     *
      * @param resource of the department.
      * @return resource type
      * @throws Exception if error occurs
@@ -284,30 +286,30 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
         switch (resource.getResourceType()) {
             case Instance:
                 return ResourceLimitDomain.ResourceType.Instance;
-	        case IP:
-	            return ResourceLimitDomain.ResourceType.IP;
-	        case Volume:
-	            return ResourceLimitDomain.ResourceType.Volume;
-	        case Snapshot:
-	            return ResourceLimitDomain.ResourceType.Snapshot;
-	        case Template:
-	        	return ResourceLimitDomain.ResourceType.Template;
-	        case Project:
-	        	return ResourceLimitDomain.ResourceType.Project;
-	        case Network:
-	        	return ResourceLimitDomain.ResourceType.Network;
-	        case VPC:
-	        	return ResourceLimitDomain.ResourceType.VPC;
-	        case CPU:
-	        	return ResourceLimitDomain.ResourceType.CPU;
-	        case Memory:
-	        	return ResourceLimitDomain.ResourceType.Memory;
-	        case PrimaryStorage:
-	        	return ResourceLimitDomain.ResourceType.PrimaryStorage;
-	        case SecondaryStorage:
-	        	return ResourceLimitDomain.ResourceType.SecondaryStorage;
-	        default:
-	        	break;
+            case IP:
+                return ResourceLimitDomain.ResourceType.IP;
+            case Volume:
+                return ResourceLimitDomain.ResourceType.Volume;
+            case Snapshot:
+                return ResourceLimitDomain.ResourceType.Snapshot;
+            case Template:
+                return ResourceLimitDomain.ResourceType.Template;
+            case Project:
+                return ResourceLimitDomain.ResourceType.Project;
+            case Network:
+                return ResourceLimitDomain.ResourceType.Network;
+            case VPC:
+                return ResourceLimitDomain.ResourceType.VPC;
+            case CPU:
+                return ResourceLimitDomain.ResourceType.CPU;
+            case Memory:
+                return ResourceLimitDomain.ResourceType.Memory;
+            case PrimaryStorage:
+                return ResourceLimitDomain.ResourceType.PrimaryStorage;
+            case SecondaryStorage:
+                return ResourceLimitDomain.ResourceType.SecondaryStorage;
+            default:
+                break;
         }
         return null;
     }

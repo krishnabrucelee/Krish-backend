@@ -245,41 +245,43 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
 
 
     /**
-     * @param resource limit by project.
-     * @return
+     * Resource type based on project resource.
+     *
+     * @param resource type of the project.
+     * @return resource type
      * @throws Exception error in resource limit project.
      */
     public ResourceLimitDepartment.ResourceType updateUsedCount(ResourceLimitProject resource)
             throws Exception {
-    	switch (resource.getResourceType()) {
-		    case Instance:
-		         return ResourceLimitDepartment.ResourceType.Instance;
-		    case IP:
-		        return ResourceLimitDepartment.ResourceType.IP;
-		    case Volume:
-		        return ResourceLimitDepartment.ResourceType.Volume;
-		    case Snapshot:
-		        return ResourceLimitDepartment.ResourceType.Snapshot;
-		    case Template:
-		        return ResourceLimitDepartment.ResourceType.Template;
-		    case Project:
-		        return ResourceLimitDepartment.ResourceType.Project;
-		    case Network:
-		        return ResourceLimitDepartment.ResourceType.Network;
-		    case VPC:
-		        return ResourceLimitDepartment.ResourceType.VPC;
-		    case CPU:
-		        return ResourceLimitDepartment.ResourceType.CPU;
-		    case Memory:
-		        return ResourceLimitDepartment.ResourceType.Memory;
-		    case PrimaryStorage:
-		        return ResourceLimitDepartment.ResourceType.PrimaryStorage;
-		    case SecondaryStorage:
-		    	return ResourceLimitDepartment.ResourceType.SecondaryStorage;
-		    default:
-		    	break;
-    	}
-    	return null;
+        switch (resource.getResourceType()) {
+            case Instance:
+                return ResourceLimitDepartment.ResourceType.Instance;
+            case IP:
+                return ResourceLimitDepartment.ResourceType.IP;
+            case Volume:
+                return ResourceLimitDepartment.ResourceType.Volume;
+            case Snapshot:
+                return ResourceLimitDepartment.ResourceType.Snapshot;
+            case Template:
+                return ResourceLimitDepartment.ResourceType.Template;
+            case Project:
+                return ResourceLimitDepartment.ResourceType.Project;
+            case Network:
+                return ResourceLimitDepartment.ResourceType.Network;
+            case VPC:
+                return ResourceLimitDepartment.ResourceType.VPC;
+            case CPU:
+                return ResourceLimitDepartment.ResourceType.CPU;
+            case Memory:
+                return ResourceLimitDepartment.ResourceType.Memory;
+            case PrimaryStorage:
+                return ResourceLimitDepartment.ResourceType.PrimaryStorage;
+            case SecondaryStorage:
+                return ResourceLimitDepartment.ResourceType.SecondaryStorage;
+            default:
+                break;
+        }
+        return null;
     }
 
     /**
