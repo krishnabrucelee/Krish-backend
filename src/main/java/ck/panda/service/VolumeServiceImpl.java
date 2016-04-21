@@ -171,21 +171,23 @@ public class VolumeServiceImpl implements VolumeService {
                 // check department and project quota validation.
                 ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
                         .findByDepartmentAndResourceType(volume.getDepartmentId(), ResourceType.Instance, true);
+                ResourceLimitProject projectLimit = resourceLimitProjectService
+                        .findByProjectAndResourceType(volume.getProjectId(), ResourceLimitProject.ResourceType.Instance, true);
                 if (departmentLimit != null && convertEntityService.getDepartmentById(volume.getDepartmentId()).getType()
                         .equals(AccountType.USER)) {
                     if (volume.getProjectId() != null) {
-//                        syncService
-//                                .syncResourceLimitProject(convertEntityService.getProjectById(volume.getProjectId()));
-                        quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "Volume",
+                    	if (projectLimit != null) {
+                    		quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "Volume",
                                 volume.getProjectId(), "Project");
+                    	} else {
+                    		errors.addGlobalError(
+                                    "Resource limit for project has not been set. Please update project quota");
+                            throw new ApplicationException(errors);
+                    	}
                     } else {
                         quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "Volume",
                                 volume.getDepartmentId(), "Department");
                     }
-                   /* if (volume.getDomainId() != null) {
-                        quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "Volume",
-                                volume.getDomainId(), "Domain");
-                    }*/
 
                     // 3. Check the resource availability to create new volume.
                     String isAvailable = isResourceAvailable(volume, optionalMap);

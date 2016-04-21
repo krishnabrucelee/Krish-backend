@@ -67,8 +67,19 @@ public interface ResourceLimitDepartmentRepository extends PagingAndSortingRepos
      * @param isActive true/false.
      * @return department resource type.
      */
-    @Query(value = "select sum(resource.max) from ResourceLimitDepartment resource where resource.isActive = :isActive AND resource.domainId = :domainId AND resource.resourceType = :resourceType")
+    @Query(value = "select sum(resource.max) from ResourceLimitDepartment resource where resource.isActive = :isActive AND resource.domainId = :domainId AND resource.resourceType = :resourceType AND resource.max <> -1 ")
     Long findByDomainIdAndResourceType(@Param("domainId") Long domainId, @Param("resourceType") ResourceLimitDepartment.ResourceType resourceType, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find all the active resource limits based on the domain id and resource max limit.
+     *
+     * @param domainId domain id.
+     * @param isActive true/false.
+     * @return department resource type.
+     */
+    @Query(value = "select sum(resource.max) from ResourceLimitDepartment resource where resource.isActive = :isActive AND resource.domainId = :domainId AND resource.resourceType = :resourceType AND resource.max = -1 ")
+    Long findByDomainIdAndResourceTypeAndResourceMax(@Param("domainId") Long domainId, @Param("resourceType") ResourceLimitDepartment.ResourceType resourceType, @Param("isActive") Boolean isActive);
+
 
     /**
      * Get total count of resource departments.
