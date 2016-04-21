@@ -105,7 +105,7 @@ public class TemplateController extends CRUDController<Template> implements ApiC
              return pageResponse.getContent();
         }
         else {
-             Page<Template> pageResponse = templateService.findAllByType(page, type, true, true);
+             Page<Template> pageResponse = templateService.findAllByType(page, type, true, true, Long.parseLong(tokenDetails.getTokenDetails("id")));
              response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
              return pageResponse.getContent();
         }
@@ -170,10 +170,30 @@ public class TemplateController extends CRUDController<Template> implements ApiC
                 + templateCount.get("linuxIsoCount") + ",\"totalIsoCount\":" + templateCount.get("totalIsoCount") + "}";
     }
 
+    /**
+     * List all the Active templates.
+     *
+     * @return templates.
+     * @throws Exception if error occurs.
+     */
     @RequestMapping(value = "/listalltemplate", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<Template> listAllTemplate() throws Exception {
+    public List<Template> listAllActiveTemplate() throws Exception {
         return templateService.findAllTemplatesByIsActiveAndType(true);
+    }
+
+    /**
+     * List all the templates by type.
+     *
+     * @param type of the template.
+     * @return template.
+     * @throws Exception if error occurs.
+     */
+    @RequestMapping(value = "/listalltemplateByType", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Template> listAllTemplateByType(@RequestParam("type") String type) throws Exception {
+        return templateService.findAllTemplateByType(type, true, true, Long.parseLong(tokenDetails.getTokenDetails("id")));
     }
 }

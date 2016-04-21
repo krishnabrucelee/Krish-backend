@@ -602,4 +602,8 @@ public class UserServiceImpl implements UserService {
        return jsonObject.toString();
     }
 
+    @Override
+    public User findByRootAdminUser() throws Exception {
+        return userRepository.findByRootAdminUser(UserType.ROOT_ADMIN);
+    }
 }

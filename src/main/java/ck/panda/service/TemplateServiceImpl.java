@@ -352,6 +352,7 @@ public class TemplateServiceImpl implements TemplateService {
     public List<Template> findTemplateByFilters(Template template, Long id) throws Exception {
         User user = convertEntityService.getOwnerById(id);
         Domain domain = domainService.find(user.getDomainId());
+        User rootUser = userService.findByRootAdminUser();
         if (template.getArchitecture() == null) {
             template.setArchitecture(ALL_TEMPLATE);
         }
@@ -360,15 +361,15 @@ public class TemplateServiceImpl implements TemplateService {
                 return csPrepareTemplate((List<Template>) templateRepository.findByTemplateAndFeature(
                        template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true));
             }
-            return (List<Template>) templateRepository.findByTemplate(template.getArchitecture(), TemplateType.SYSTEM,
-                    Status.ACTIVE, true);
+            return (List<Template>) templateRepository.findByTemplateAndUserId(template.getArchitecture(), TemplateType.SYSTEM,
+                    Status.ACTIVE, true,user.getDomainId(),rootUser.getId());
         } else {
             if (domain != null && domain.getName().equals(DOMAIN_ROOT_ADMIN)) {
                 return csPrepareTemplate(templateRepository.findAllByOsCategoryAndArchitectureAndType(template.getOsCategoryId(),
                        template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true));
             }
             return csPrepareTemplate(templateRepository.findAllByOsCategoryAndArchitectureAndTypeAndStatus(
-                   template.getOsCategoryId(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true));
+                   template.getOsCategoryId(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true,user.getId()));
         }
     }
 
@@ -410,7 +411,6 @@ public class TemplateServiceImpl implements TemplateService {
         template.setStatus(Template.Status.INACTIVE);
         if (template.getSyncFlag()) {
             csDeleteTemplate(template.getId());
-            return template;
         }
         return templateRepository.save(template);
     }
@@ -604,6 +604,7 @@ public class TemplateServiceImpl implements TemplateService {
                 templateResponse = cloudStackTemplateService.deleteTemplate(template.getUuid(), CloudStackConstants.JSON, optional);
                 templateJson = new JSONObject(templateResponse).getJSONObject(CloudStackConstants.CS_DELETE_TEMPLATE_RESPONSE);
             }
+            Thread.sleep(5000);
             if (templateJson.has(CloudStackConstants.CS_JOB_ID)) {
                 String templateJob = cloudStackTemplateService.queryAsyncJobResult(templateJson.getString(CloudStackConstants.CS_JOB_ID),
                        CloudStackConstants.JSON);
@@ -739,13 +740,24 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    public Page<Template> findAllByType(PagingAndSorting pagingAndSorting, String type, Boolean featured, Boolean shared) {
+    public Page<Template> findAllByType(PagingAndSorting pagingAndSorting, String type, Boolean featured, Boolean shared,Long userId) throws Exception {
         Page<Template> templates = null;
-         if (type.equals(TEMPLATE_FEATURED)) {
-             templates = templateRepository.findTemplateByFeatured(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), featured, shared, Status.ACTIVE, true);
-         } else if (type.equals(TEMPLATE_COMMUNITY)) {
-             templates = templateRepository.findTemplateByCommunity(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), shared, Status.ACTIVE, true);
-         }
+        User user = convertEntityService.getOwnerById(userId);
+        if(user.getType().equals(UserType.ROOT_ADMIN)) {
+              if (type.equals(TEMPLATE_FEATURED)) {
+                  templates = templateRepository.findAllTemplateByFeatured(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), featured, shared, true);
+              } else if (type.equals(TEMPLATE_COMMUNITY)) {
+                  templates = templateRepository.findAllTemplateByCommunity(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), shared, true);
+              }
+        }
+        else {
+            User rootUser = userService.findByRootAdminUser();
+            if (type.equals(TEMPLATE_FEATURED)) {
+                templates = templateRepository.findTemplateByFeatured(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), featured, shared, true,user.getDomainId(),rootUser.getId());
+            } else if (type.equals(TEMPLATE_COMMUNITY)) {
+                templates = templateRepository.findTemplateByCommunity(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), shared, true,user.getDomainId(),rootUser.getId());
+            }
+        }
          return templates;
     }
 
@@ -833,5 +845,27 @@ public class TemplateServiceImpl implements TemplateService {
         optional.put(PingConstants.ONE_TIME_CHARGEABLE, templateCost.getOneTimeChargeable());
         pingService.addPlanCost(optional);
         return true;
+    }
+
+    @Override
+    public List<Template> findAllTemplateByType(String type, Boolean featured, Boolean shared,Long userId) throws Exception {
+        List<Template> templates = null;
+        User user = convertEntityService.getOwnerById(userId);
+        if(user.getType().equals(UserType.ROOT_ADMIN)) {
+              if (type.equals(TEMPLATE_FEATURED)) {
+                  templates = templateRepository.listAllTemplateByFeatured(TemplateType.SYSTEM, featured, shared, true);
+              } else if (type.equals(TEMPLATE_COMMUNITY)) {
+                  templates = templateRepository.listAllTemplateByCommunity(TemplateType.SYSTEM, shared, true);
+              }
+        }
+        else {
+            User rootUser = userService.findByRootAdminUser();
+            if (type.equals(TEMPLATE_FEATURED)) {
+                templates = templateRepository.listTemplateByFeaturedAndDomainId(TemplateType.SYSTEM, featured, shared, true,user.getDomainId(),rootUser.getId());
+            } else if (type.equals(TEMPLATE_COMMUNITY)) {
+                templates = templateRepository.listTemplateByCommunity(TemplateType.SYSTEM, shared, true,user.getDomainId(),rootUser.getId());
+            }
+        }
+        return templates;
     }
 }
