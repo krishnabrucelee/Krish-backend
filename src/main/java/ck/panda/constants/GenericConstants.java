@@ -88,4 +88,39 @@ public class GenericConstants {
     /** Full permission role constant. */
     public static final String FULL_PERMISSION = "FULL_PERMISSION";
 
+    /** Constant for instance. */
+    public static final String INSTANCE = "Instance";
+
+    /** Constant for volume. */
+    public static final String VOLUME = "Volume";
+
+    /** Constant for upload volume. */
+    public static final String UPLOAD_VOLUME = "UploadVolume";
+
+    /** Constant for network. */
+    public static final String NETWORK = "Network";
+
+    /** Constant for IP. */
+    public static final String IP = "IP";
+
+    /** Constant for restore instance. */
+    public static final String RESTORE_INSTANCE = "RestoreInstance";
+
+    /** Constant for destroy status. */
+    public static final String DESTROY = "Destroy";
+
+    /** Constant for expunging status. */
+    public static final String EXPUNGING = "Expunging";
+
+    /** Constant for project. */
+    public static final String PROJECT = "Project";
+
+    /** Constant for department. */
+    public static final String DEPARTMENT = "Department";
+
+    /** Constant for update status. */
+    public static final String UPDATE = "update";
+
+    /** Constant for delete status. */
+    public static final String DELETE = "delete";
    }
