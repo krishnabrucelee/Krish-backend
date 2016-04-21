@@ -1964,26 +1964,26 @@ public class SyncServiceImpl implements SyncService {
     public void syncResourceLimit() throws ApplicationException, Exception {
          List<Department> departments = departmentService.findAllByActive(true);
          for (Department deparment : departments) {
-        	 HashMap<String, String> departmentCountMap = new HashMap<String, String>();
-			for (String key : convertEntityService.getResourceTypeValue().keySet()) {
-				ResourceLimitDepartment persistDepartment = resourceDepartmentService
-						.findByDepartmentAndResourceType(deparment.getId(), ResourceLimitDepartment.ResourceType
-								.valueOf(convertEntityService.getResourceTypeValue().get(key)), true);
-				if (persistDepartment != null) {
-					resourceDepartmentService.delete(persistDepartment);
-				}
-				ResourceLimitDepartment resourceLimitDepartment = new ResourceLimitDepartment();
-				resourceLimitDepartment.setDepartmentId(deparment.getId());
-				resourceLimitDepartment.setDomainId(deparment.getDomainId());
-				resourceLimitDepartment.setMax(0L);
-				resourceLimitDepartment.setAvailable(0L);
-				resourceLimitDepartment.setUsedLimit(0L);
-				resourceLimitDepartment.setResourceType(ResourceLimitDepartment.ResourceType.valueOf(convertEntityService.getResourceTypeValue().get(key)));
-				resourceLimitDepartment.setIsSyncFlag(false);
-				resourceLimitDepartment.setIsActive(true);
-				resourceDepartmentService.update(resourceLimitDepartment);
-			}
-       	   departmentCountMap.put(CloudStackConstants.CS_ACCOUNT, deparment.getUserName());
+             HashMap<String, String> departmentCountMap = new HashMap<String, String>();
+            for (String key : convertEntityService.getResourceTypeValue().keySet()) {
+                ResourceLimitDepartment persistDepartment = resourceDepartmentService
+                        .findByDepartmentAndResourceType(deparment.getId(), ResourceLimitDepartment.ResourceType
+                                .valueOf(convertEntityService.getResourceTypeValue().get(key)), true);
+                if (persistDepartment != null) {
+                    resourceDepartmentService.delete(persistDepartment);
+                }
+                ResourceLimitDepartment resourceLimitDepartment = new ResourceLimitDepartment();
+                resourceLimitDepartment.setDepartmentId(deparment.getId());
+                resourceLimitDepartment.setDomainId(deparment.getDomainId());
+                resourceLimitDepartment.setMax(0L);
+                resourceLimitDepartment.setAvailable(0L);
+                resourceLimitDepartment.setUsedLimit(0L);
+                resourceLimitDepartment.setResourceType(ResourceLimitDepartment.ResourceType.valueOf(convertEntityService.getResourceTypeValue().get(key)));
+                resourceLimitDepartment.setIsSyncFlag(false);
+                resourceLimitDepartment.setIsActive(true);
+                resourceDepartmentService.update(resourceLimitDepartment);
+            }
+              departmentCountMap.put(CloudStackConstants.CS_ACCOUNT, deparment.getUserName());
             //Sync for resource count in domain
            String csResponse = cloudStackResourceCapacity.updateResourceCount(
                     convertEntityService.getDomainById(deparment.getDomainId()).getUuid(), departmentCountMap, "json");
@@ -2000,15 +2000,15 @@ public class SyncServiceImpl implements SyncService {
             syncResourceLimitForProject(project);
         }
         for (Domain domain : domains) {
-        	HashMap<String, String> domainMap = new HashMap<String, String>();
-        	domainMap = resourceDepartmentService.getResourceCountsOfDomain(domain.getId());
-			for (String key : domainMap.keySet()) {
-				ResourceLimitDomain resourceDomain = resourceDomainService.findByDomainAndResourceType(domain.getId(),
-						ResourceLimitDomain.ResourceType.valueOf(key), true);
-				resourceDomain.setUsedLimit(Long.parseLong(domainMap.get(key)));
-				resourceDomain.setIsSyncFlag(false);
-				resourceDomainService.update(resourceDomain);
-			}
+            HashMap<String, String> domainMap = new HashMap<String, String>();
+            domainMap = resourceDepartmentService.getResourceCountsOfDomain(domain.getId());
+            for (String key : domainMap.keySet()) {
+                ResourceLimitDomain resourceDomain = resourceDomainService.findByDomainAndResourceType(domain.getId(),
+                        ResourceLimitDomain.ResourceType.valueOf(key), true);
+                resourceDomain.setUsedLimit(Long.parseLong(domainMap.get(key)));
+                resourceDomain.setIsSyncFlag(false);
+                resourceDomainService.update(resourceDomain);
+            }
         }
         syncResourceLimitUpdateForProjectAndDepartment();
     }
@@ -2100,68 +2100,68 @@ public class SyncServiceImpl implements SyncService {
         convertEntityService.resourceCount(csResponse);
     }
 
-	@Override
-	public void syncResourceLimitForProject(Project project) throws ApplicationException, Exception {
+    @Override
+    public void syncResourceLimitForProject(Project project) throws ApplicationException, Exception {
 
-		// Used for setting optional values for resource count.
-		HashMap<String, String> hashLimitMap = new HashMap<String, String>();
-		HashMap<String, String> projectMap = new HashMap<String, String>();
-		HashMap<String, String> departmentMap = new HashMap<String, String>();
-		HashMap<String, String> domainMap = new HashMap<String, String>();
-		domainMap = resourceDomainService.getResourceLimitsOfDomain(project.getDomainId());
-		projectMap = resourceProjectService.getResourceLimitsOfDepartment(project.getDepartmentId());
-		// Used for setting optional values for resource count.
-		HashMap<String, String> projectCountMap = new HashMap<String, String>();
-		projectCountMap.put(CloudStackConstants.CS_ACCOUNT,
-				convertEntityService.getDepartmentUsernameById(project.getDepartmentId()));
-		// Sync for resource count in domain
-		String csResponse = cloudStackResourceCapacity.updateResourceCount(
-				convertEntityService.getDomainById(project.getDomainId()).getUuid(), projectCountMap, "json");
-		convertEntityService.resourceCount(csResponse);
-		departmentMap = resourceDepartmentService.getResourceCountsOfDepartment(project.getDepartmentId());
-		for (String key : projectMap.keySet()) {
-			if (!key.equalsIgnoreCase("project")) {
-				// departmentUsed
-				ResourceLimitProject resourceLimitProject = resourceProjectService.findByProjectAndResourceType(
-						project.getId(), ResourceLimitProject.ResourceType.valueOf(key), true);
-				ResourceLimitDepartment resourceLimitDepartment = resourceDepartmentService
-						.findByDepartmentAndResourceType(project.getDepartmentId(),
-								ResourceLimitDepartment.ResourceType.valueOf(key), true);
-				if (Long.parseLong(domainMap.get(key)) == -1L) {
-					resourceLimitProject.setMax(resourceLimitProject.getMax());
-				} else if ((Long.parseLong(projectMap.get(key)) + Long.parseLong(departmentMap.get(key))) > Long
-						.parseLong(domainMap.get(key)) && Long.parseLong(domainMap.get(key)) != -1L) {
-					resourceLimitProject.setMax(resourceLimitProject.getUsedLimit());
-				} else {
-					resourceLimitProject.setMax(resourceLimitProject.getMax());
-				}
-				resourceLimitProject.setIsSyncFlag(false);
-				resourceProjectService.update(resourceLimitProject);
-				resourceLimitDepartment
-						.setUsedLimit(Long.parseLong(projectMap.get(key)) + Long.parseLong(departmentMap.get(key)));
-				if (resourceLimitDepartment.getResourceType().equals(ResourceLimitDepartment.ResourceType.Project)) {
-					resourceLimitDepartment.setMax(-1L);
-				} else {
-					resourceLimitDepartment.setMax(resourceLimitDepartment.getUsedLimit());
-				}
-				resourceLimitDepartment.setIsSyncFlag(false);
-				resourceDepartmentService.update(resourceLimitDepartment);
-				hashLimitMap.put(key,
-						String.valueOf(Long.parseLong(projectMap.get(key)) + Long.parseLong(departmentMap.get(key))));
-			}
-		}
-	}
+        // Used for setting optional values for resource count.
+        HashMap<String, String> hashLimitMap = new HashMap<String, String>();
+        HashMap<String, String> projectMap = new HashMap<String, String>();
+        HashMap<String, String> departmentMap = new HashMap<String, String>();
+        HashMap<String, String> domainMap = new HashMap<String, String>();
+        domainMap = resourceDomainService.getResourceLimitsOfDomain(project.getDomainId());
+        projectMap = resourceProjectService.getResourceLimitsOfDepartment(project.getDepartmentId());
+        // Used for setting optional values for resource count.
+        HashMap<String, String> projectCountMap = new HashMap<String, String>();
+        projectCountMap.put(CloudStackConstants.CS_ACCOUNT,
+                convertEntityService.getDepartmentUsernameById(project.getDepartmentId()));
+        // Sync for resource count in domain
+        String csResponse = cloudStackResourceCapacity.updateResourceCount(
+                convertEntityService.getDomainById(project.getDomainId()).getUuid(), projectCountMap, "json");
+        convertEntityService.resourceCount(csResponse);
+        departmentMap = resourceDepartmentService.getResourceCountsOfDepartment(project.getDepartmentId());
+        for (String key : projectMap.keySet()) {
+            if (!key.equalsIgnoreCase("project")) {
+                // departmentUsed
+                ResourceLimitProject resourceLimitProject = resourceProjectService.findByProjectAndResourceType(
+                        project.getId(), ResourceLimitProject.ResourceType.valueOf(key), true);
+                ResourceLimitDepartment resourceLimitDepartment = resourceDepartmentService
+                        .findByDepartmentAndResourceType(project.getDepartmentId(),
+                                ResourceLimitDepartment.ResourceType.valueOf(key), true);
+                if (Long.parseLong(domainMap.get(key)) == -1L) {
+                    resourceLimitProject.setMax(resourceLimitProject.getMax());
+                } else if ((Long.parseLong(projectMap.get(key)) + Long.parseLong(departmentMap.get(key))) > Long
+                        .parseLong(domainMap.get(key)) && Long.parseLong(domainMap.get(key)) != -1L) {
+                    resourceLimitProject.setMax(resourceLimitProject.getUsedLimit());
+                } else {
+                    resourceLimitProject.setMax(resourceLimitProject.getMax());
+                }
+                resourceLimitProject.setIsSyncFlag(false);
+                resourceProjectService.update(resourceLimitProject);
+                resourceLimitDepartment
+                        .setUsedLimit(Long.parseLong(projectMap.get(key)) + Long.parseLong(departmentMap.get(key)));
+                if (resourceLimitDepartment.getResourceType().equals(ResourceLimitDepartment.ResourceType.Project)) {
+                    resourceLimitDepartment.setMax(-1L);
+                } else {
+                    resourceLimitDepartment.setMax(resourceLimitDepartment.getUsedLimit());
+                }
+                resourceLimitDepartment.setIsSyncFlag(false);
+                resourceDepartmentService.update(resourceLimitDepartment);
+                hashLimitMap.put(key,
+                        String.valueOf(Long.parseLong(projectMap.get(key)) + Long.parseLong(departmentMap.get(key))));
+            }
+        }
+    }
 
-	public void syncResourceLimitUpdateForProjectAndDepartment() throws Exception{
-		List<ResourceLimitDepartment> persistDepartments = resourceDepartmentService.findAll();
-		List<ResourceLimitProject> persistResourceLimitProjects = resourceProjectService.findAll();
-		for(ResourceLimitDepartment department: persistDepartments) {
-			updateResourceLimit(department, "department");
-		}
-		for(ResourceLimitProject project: persistResourceLimitProjects) {
-			updateResourceLimit(project, "project");
-		}
-	}
+    public void syncResourceLimitUpdateForProjectAndDepartment() throws Exception{
+        List<ResourceLimitDepartment> persistDepartments = resourceDepartmentService.findAll();
+        List<ResourceLimitProject> persistResourceLimitProjects = resourceProjectService.findAll();
+        for(ResourceLimitDepartment department: persistDepartments) {
+            updateResourceLimit(department, "department");
+        }
+        for(ResourceLimitProject project: persistResourceLimitProjects) {
+            updateResourceLimit(project, "project");
+        }
+    }
 
     /**
      * Sync with Cloud Server Iso.
@@ -2902,8 +2902,8 @@ public class SyncServiceImpl implements SyncService {
      * @throws Exception error
      */
     private void updateResourceLimit(Object resourceObject, String type) throws Exception {
-    	String resourceLimits = null;
-    	if (type.equals("project")) {
+        String resourceLimits = null;
+        if (type.equals("project")) {
            ResourceLimitProject resource = (ResourceLimitProject) resourceObject;
            HashMap<String, String> optional = new HashMap<String, String>();
            if (resource.getDomainId() != null) {
@@ -2917,21 +2917,21 @@ public class SyncServiceImpl implements SyncService {
            }
            resourceLimits = csResourceLimitService.updateResourceLimit(resource.getResourceType().ordinal(), "json",
                    optional);
-    	} else if(type.equals("department")) {
-    		  ResourceLimitDepartment resource = (ResourceLimitDepartment) resourceObject;
-    		  HashMap<String, String> optional = new HashMap<String, String>();
-    		  	if (resource.getDomainId() != null) {
+        } else if(type.equals("department")) {
+              ResourceLimitDepartment resource = (ResourceLimitDepartment) resourceObject;
+              HashMap<String, String> optional = new HashMap<String, String>();
+                  if (resource.getDomainId() != null) {
                   optional.put("domainid", convertEntityService.getDomainUuidById(resource.getDomainId()));
-    		  	}
-    	        if (resource.getDepartmentId() != null) {
-    	            optional.put("account", convertEntityService.getDepartmentUsernameById(resource.getDepartmentId()));
-    	        }
-    	        if (resource.getMax() != null) {
-    	            optional.put("max", resource.getMax().toString());
-    	        }
+                  }
+                if (resource.getDepartmentId() != null) {
+                    optional.put("account", convertEntityService.getDepartmentUsernameById(resource.getDepartmentId()));
+                }
+                if (resource.getMax() != null) {
+                    optional.put("max", resource.getMax().toString());
+                }
               resourceLimits = csResourceLimitService.updateResourceLimit(resource.getResourceType().ordinal(), "json",
                       optional);
-    	}
+        }
         LOGGER.info("Resource limit update response " + resourceLimits);
         JSONObject resourceLimitsResponse = new JSONObject(resourceLimits).getJSONObject("updateresourcelimitresponse");
         if (resourceLimitsResponse.has("errorcode")) {

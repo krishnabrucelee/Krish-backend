@@ -231,6 +231,8 @@ public class SSHKeyServiceImpl implements SSHKeyService {
 
     @Override
     public void delete(SSHKey sshkey) throws Exception {
+        sshkey.setIsActive(false);
+        sshkey.setStatus(SSHKey.Status.DISABLED);
         sshkeyRepo.delete(sshkey);
     }
 
@@ -396,7 +398,7 @@ public class SSHKeyServiceImpl implements SSHKeyService {
 
     @Override
     public List<SSHKey> findAllByDepartmentAndIsActive(Long departmentId, Boolean isActive) throws Exception {
-    	//Made changes since project based keys are visible in add sshKey dropdown (PK-558)
+        //Made changes since project based keys are visible in add sshKey dropdown (PK-558)
         return sshkeyRepo.findByDepartmentAndIsActive(departmentId, true);
     }
 
