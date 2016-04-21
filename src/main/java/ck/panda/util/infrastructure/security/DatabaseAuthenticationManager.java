@@ -262,9 +262,9 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
         } else if (user != null && user.getRole() == null) {
             loginAttemptvalidationCheck("error.access.permission.blocked", CloudStackConstants.STATUS_INACTIVE);
         } else {
-            Boolean loginAttemptCheck = loginAttemptvalidationCheck("success", CloudStackConstants.STATUS_ACTIVE);
+//            Boolean loginAttemptCheck = loginAttemptvalidationCheck("success", CloudStackConstants.STATUS_ACTIVE);
             Boolean authKeyResponse = apiSecretKeyGeneration(user);
-            if (authKeyResponse && loginAttemptCheck) {
+            if (authKeyResponse) {
                 Boolean forceLoginResponse = forceLoginAttemptCheck(user, forceLogin);
                 if (forceLoginResponse) {
                 SecureRandom random = new SecureRandom();
