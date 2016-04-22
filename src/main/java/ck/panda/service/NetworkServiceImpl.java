@@ -16,6 +16,7 @@ import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
+import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.Network.Status;
 import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
@@ -178,21 +179,23 @@ public class NetworkServiceImpl implements NetworkService {
                 // check department and project quota validation.
                 ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
                         .findByDepartmentAndResourceType(network.getDepartmentId(), ResourceType.Instance, true);
+                ResourceLimitProject projectLimit = resourceLimitProjectService
+                        .findByProjectAndResourceType(network.getProjectId(), ResourceLimitProject.ResourceType.Instance, true);
                 if (departmentLimit != null && convertEntityService.getDepartmentById(network.getDepartmentId()).getType()
                         .equals(AccountType.USER)) {
                     if (network.getProjectId() != null) {
-//                        syncService
-//                                .syncResourceLimitProject(convertEntityService.getProjectById(network.getProjectId()));
-                        quotaLimitValidation.QuotaLimitCheckByResourceObject(network, NETWORK,
+                    	if (projectLimit != null) {
+                    		quotaLimitValidation.QuotaLimitCheckByResourceObject(network, NETWORK,
                                 network.getProjectId(), "Project");
+                    	} else {
+                    		errors.addGlobalError(
+                                    "Resource limit for project has not been set. Please update project quota");
+                            throw new ApplicationException(errors);
+                    	}
                     } else {
                         quotaLimitValidation.QuotaLimitCheckByResourceObject(network, NETWORK,
                                 network.getDepartmentId(), "Department");
                     }
-                   /* if (network.getDomainId() != null) {
-                        quotaLimitValidation.QuotaLimitCheckByResourceObject(network, NETWORK,
-                                network.getDomainId(), "Domain");
-                    }*/
                     try {
                         config.setUserServer();
                         Zone zoneObject = convertEntityService.getZoneById(network.getZoneId());
@@ -239,17 +242,12 @@ public class NetworkServiceImpl implements NetworkService {
                         LOGGER.error("ERROR AT NETWORK CREATION", e);
                         throw new ApplicationException(e.getErrors());
                     }
-                    if (!convertEntityService.getDepartmentById(network.getDepartmentId()).getType().equals(AccountType.USER)) {
-                        updateResourceCountService.QuotaUpdateByResourceObject(network, NETWORK, network.getDomainId(),
-                                "Domain", "update");
-                    } else {
-                        if (network.getProjectId() != null) {
-                            updateResourceCountService.QuotaUpdateByResourceObject(network, NETWORK, network.getProjectId(),
+                    if (network.getProjectId() != null) {
+                    	updateResourceCountService.QuotaUpdateByResourceObject(network, NETWORK, network.getProjectId(),
                                     "Project", "update");
-                        } else {
-                            updateResourceCountService.QuotaUpdateByResourceObject(network, NETWORK,
+                    } else {
+                    	updateResourceCountService.QuotaUpdateByResourceObject(network, NETWORK,
                                     network.getDepartmentId(), "Department", "update");
-                        }
                     }
                     return networkRepo.save(network);
 
