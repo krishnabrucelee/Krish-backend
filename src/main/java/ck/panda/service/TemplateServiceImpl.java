@@ -369,7 +369,7 @@ public class TemplateServiceImpl implements TemplateService {
                        template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true));
             }
             return csPrepareTemplate(templateRepository.findAllByOsCategoryAndArchitectureAndTypeAndStatus(
-                   template.getOsCategoryId(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true,user.getId()));
+                   template.getOsCategoryId(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true,user.getDomainId(),rootUser.getId()));
         }
     }
 

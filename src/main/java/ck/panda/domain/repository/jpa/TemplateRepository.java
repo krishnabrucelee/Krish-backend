@@ -103,7 +103,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param isActive true/false
      * @return template
      */
-    @Query(value = "SELECT template FROM Template template WHERE template.osCategoryId=:osCategoryId AND (template.architecture =:architecture OR 'ALL' =:architecture) AND template.type <>:type AND template.status = :status AND (template.share IS TRUE OR template.featured IS TRUE) AND template.isActive =:isActive")
+    @Query(value = "SELECT template FROM Template template WHERE template.osCategoryId=:osCategoryId AND (template.architecture =:architecture OR 'ALL' =:architecture) AND template.type <>:type AND template.status = :status AND template.share IS TRUE AND template.featured IS TRUE OR ( template.share IS TRUE AND template.featured IS FALSE) AND template.isActive =:isActive")
     List<Template> findAllByOsCategoryAndArchitectureAndType(@Param("osCategoryId") Long osCategoryId, @Param("architecture") String architecture,
         @Param("type") TemplateType type, @Param("status") Status status, @Param("isActive") Boolean isActive);
 
@@ -117,10 +117,10 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param isActive true/false
      * @return template
      */
-    @Query(value = "SELECT template FROM Template template WHERE template.osCategoryId=:osCategoryId AND (template.architecture =:architecture OR 'ALL' =:architecture) AND template.type <>:type AND template.status = :status AND template.share IS TRUE AND template.isActive =:isActive OR template.templateOwnerId =:userId AND template.status = :status ")
+    @Query(value = "SELECT template FROM Template template WHERE (template.osCategoryId=:osCategoryId AND (template.architecture =:architecture OR 'ALL' =:architecture) AND template.type <>:type AND template.status = :status AND template.share IS TRUE AND template.isActive =:isActive) AND (template.domainId =:domainId OR template.templateOwnerId =:userId)")
     List<Template> findAllByOsCategoryAndArchitectureAndTypeAndStatus(@Param("osCategoryId") Long osCategoryId,
         @Param("architecture") String architecture, @Param("type") TemplateType type, @Param("status") Status status,
-        @Param("isActive") Boolean isActive,@Param("userId") Long userId);
+        @Param("isActive") Boolean isActive,@Param("domainId") Long domainId, @Param("userId") Long userId);
 
     /**
      * Get the template based on the status, OS category, format and without system type.
