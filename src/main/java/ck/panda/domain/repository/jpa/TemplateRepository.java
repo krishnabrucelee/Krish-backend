@@ -53,7 +53,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param isActive true/false
      * @return list of filtered template
      */
-    @Query(value = "SELECT template FROM Template template WHERE ((template.architecture =:architecture OR 'ALL' =:architecture) AND template.type <>:type AND template.status = :status AND template.share IS TRUE AND template.isActive = :isActive) AND (template.domainId = :domainId OR template.templateOwnerId = :userId)")
+    @Query(value = "SELECT template FROM Template template WHERE ((template.architecture = :architecture OR 'ALL' =:architecture) AND template.type <>:type AND template.status = :status AND template.share IS TRUE AND template.isActive = :isActive) AND (template.domainId = :domainId OR template.templateOwnerId = :userId)")
     List<Template> findByTemplateAndUserId(@Param("architecture") String architecture, @Param("type") TemplateType type,
         @Param("status") Status status, @Param("isActive") Boolean isActive, @Param("domainId") Long domainId, @Param("userId") Long userId);
 
@@ -67,7 +67,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param isActive true/false
      * @return list of filtered template
      */
-    @Query(value = "SELECT template FROM Template template WHERE (template.architecture =:architecture OR 'ALL' =:architecture) AND template.type <>:type AND template.status = :status AND template.share IS TRUE AND template.featured IS TRUE OR ( template.share IS TRUE AND template.featured IS FALSE) AND template.isActive =:isActive")
+    @Query(value = "SELECT template FROM Template template WHERE (template.architecture = :architecture OR 'ALL' =:architecture) AND template.type <>:type AND template.status = :status AND template.share IS TRUE AND template.featured IS TRUE OR ( template.share IS TRUE AND template.featured IS FALSE) AND template.isActive = :isActive")
     List<Template> findByTemplateAndFeature(@Param("architecture") String architecture, @Param("type") TemplateType type,
         @Param("status") Status status, @Param("isActive") Boolean isActive);
 
@@ -80,7 +80,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param isActive true/false
      * @return user and routing template list
      */
-    @Query(value = "SELECT template FROM Template template LEFT JOIN template.osCategory LEFT JOIN template.templateOwner LEFT JOIN template.osType WHERE template.type <>:type AND template.format <>:format AND template.isActive =:isActive")
+    @Query(value = "SELECT template FROM Template template LEFT JOIN template.osCategory LEFT JOIN template.templateOwner LEFT JOIN template.osType WHERE template.type <>:type AND template.format <>:format AND template.isActive = :isActive")
     Page<Template> findAllByType(@Param("type") TemplateType type, @Param("format") Format format, Pageable pageable,
         @Param("isActive") Boolean isActive);
     /**
@@ -90,7 +90,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param isActive true/false
      * @return template
      */
-    @Query(value = "SELECT template FROM Template template WHERE template.uuid = :uuid AND template.isActive =:isActive")
+    @Query(value = "SELECT template FROM Template template WHERE template.uuid = :uuid AND template.isActive = :isActive")
     Template findByUUID(@Param("uuid") String uuid, @Param("isActive") Boolean isActive);
 
     /**
@@ -117,7 +117,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param isActive true/false
      * @return template
      */
-    @Query(value = "SELECT template FROM Template template WHERE (template.osCategoryId=:osCategoryId AND (template.architecture =:architecture OR 'ALL' =:architecture) AND template.type <>:type AND template.status = :status AND template.share IS TRUE AND template.isActive =:isActive) AND (template.domainId =:domainId OR template.templateOwnerId =:userId)")
+    @Query(value = "SELECT template FROM Template template WHERE (template.osCategoryId=:osCategoryId AND (template.architecture = :architecture OR 'ALL' = :architecture) AND template.type <>:type AND template.status = :status AND template.share IS TRUE AND template.isActive = :isActive) AND (template.domainId = :domainId OR template.templateOwnerId = :userId)")
     List<Template> findAllByOsCategoryAndArchitectureAndTypeAndStatus(@Param("osCategoryId") Long osCategoryId,
         @Param("architecture") String architecture, @Param("type") TemplateType type, @Param("status") Status status,
         @Param("isActive") Boolean isActive,@Param("domainId") Long domainId, @Param("userId") Long userId);
@@ -144,7 +144,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param format of the template
      * @return template
      */
-    @Query(value = "SELECT DISTINCT template FROM Template template WHERE template.type <>:type AND template.status = :status AND template.osCategory LIKE :osCategory AND template.format =:format")
+    @Query(value = "SELECT DISTINCT template FROM Template template WHERE template.type <>:type AND template.status = :status AND template.osCategory LIKE :osCategory AND template.format = :format")
     List<Template> findByTemplateWithoutIsoCategory(@Param("type") TemplateType type, @Param("status") Status status,
         @Param("osCategory") OsCategory osCategory, @Param("format") Format format);
 
@@ -171,7 +171,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param isActive true/false
      * @return list of filtered template
      */
-    @Query(value = "SELECT template FROM Template template WHERE (template.architecture =:architecture OR 'ALL' =:architecture) AND template.type <>:type AND template.status = :status AND (template.share IS TRUE OR template.featured IS TRUE) AND template.format =:format AND template.isActive =:isActive")
+    @Query(value = "SELECT template FROM Template template WHERE (template.architecture =:architecture OR 'ALL' = :architecture) AND template.type <>:type AND template.status = :status AND (template.share IS TRUE OR template.featured IS TRUE) AND template.format = :format AND template.isActive = :isActive")
     List<Template> findByIsoAndFeature(@Param("architecture") String architecture, @Param("type") TemplateType type,
         @Param("format") List<Format> format, @Param("status") Status status, @Param("isActive") Boolean isActive);
 
@@ -185,7 +185,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param isActive true/false
      * @return list of filtered template
      */
-    @Query(value = "SELECT template FROM Template template WHERE (template.architecture =:architecture OR 'ALL' =:architecture) AND template.type <>:type AND template.status = :status AND template.share IS TRUE AND template.isActive =:isActive AND template.format =:format")
+    @Query(value = "SELECT template FROM Template template WHERE (template.architecture =:architecture OR 'ALL' = :architecture) AND template.type <>:type AND template.status = :status AND template.share IS TRUE AND template.isActive =:isActive AND template.format = :format")
     List<Template> findByIso(@Param("architecture") String architecture, @Param("type") TemplateType type, @Param("format") List<Format> format,
         @Param("status") Status status, @Param("isActive") Boolean isActive);
 
@@ -200,7 +200,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param isActive true/false
      * @return template
      */
-    @Query(value = "SELECT template FROM Template template WHERE template.osCategoryId=:osCategoryId AND (template.architecture =:architecture OR 'ALL' =:architecture) AND template.type <>:type AND template.status = :status AND (template.share IS TRUE OR template.featured IS TRUE) AND template.isActive =:isActive AND template.format =:format")
+    @Query(value = "SELECT template FROM Template template WHERE template.osCategoryId = :osCategoryId AND (template.architecture = :architecture OR 'ALL' =:architecture) AND template.type <>:type AND template.status = :status AND (template.share IS TRUE OR template.featured IS TRUE) AND template.isActive = :isActive AND template.format = :format")
     List<Template> findAllByOsCategoryAndArchitectureAndTypeAndIso(@Param("osCategoryId") Long osCategoryId,
         @Param("architecture") String architecture, @Param("type") TemplateType type, @Param("format") List<Format> format,
         @Param("status") Status status, @Param("isActive") Boolean isActive);
@@ -216,7 +216,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param isActive true/false
      * @return template
      */
-    @Query(value = "SELECT template FROM Template template WHERE template.osCategoryId=:osCategoryId AND (template.architecture =:architecture OR 'ALL' =:architecture) AND template.type <>:type AND template.status = :status AND template.share IS TRUE AND template.isActive =:isActive AND template.format =:format")
+    @Query(value = "SELECT template FROM Template template WHERE template.osCategoryId = :osCategoryId AND (template.architecture = :architecture OR 'ALL' = :architecture) AND template.type <>:type AND template.status = :status AND template.share IS TRUE AND template.isActive =:isActive AND template.format =:format")
     List<Template> findAllByOsCategoryAndArchitectureAndTypeAndStatusAndIso(@Param("osCategoryId") Long osCategoryId,
         @Param("architecture") String architecture, @Param("type") TemplateType type, @Param("format") List<Format> format,
         @Param("status") Status status, @Param("isActive") Boolean isActive);
@@ -228,7 +228,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param isActive true/false
      * @return template list
      */
-    @Query(value = "SELECT template FROM Template template WHERE template.type <>:type AND template.isActive =:isActive")
+    @Query(value = "SELECT template FROM Template template WHERE template.type <>:type AND template.isActive = :isActive")
     List<Template> findTemplateCounts(@Param("type") TemplateType type, @Param("isActive") Boolean isActive);
 
     /**
@@ -242,7 +242,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param status status of the template
      * @return template
      */
-    @Query(value = "SELECT template FROM Template template LEFT JOIN template.osCategory LEFT JOIN template.templateOwner LEFT JOIN template.osType  WHERE (template.type <>:type AND template.featured =:featured AND template.share =:share AND template.isActive = :isActive) AND (template.domainId = :domainId OR template.templateOwnerId = :rootUser)")
+    @Query(value = "SELECT template FROM Template template LEFT JOIN template.osCategory LEFT JOIN template.templateOwner LEFT JOIN template.osType  WHERE (template.type <>:type AND template.featured = :featured AND template.share = :share AND template.isActive = :isActive) AND (template.domainId = :domainId OR template.templateOwnerId = :rootUser)")
     Page<Template> findTemplateByFeatured(@Param("type") TemplateType type, Pageable pageable, @Param("featured") Boolean featured, @Param("share") Boolean share,@Param("isActive") Boolean isActive,@Param("domainId") Long domainId, @Param("rootUser") Long rootUser);
 
     /**
@@ -282,7 +282,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param isActive status of the template.
      * @return templates.
      */
-    @Query(value = "SELECT template FROM Template template LEFT JOIN template.osCategory LEFT JOIN template.templateOwner LEFT JOIN template.osType  WHERE template.type <>:type AND template.share =:share AND template.isActive =:isActive")
+    @Query(value = "SELECT template FROM Template template LEFT JOIN template.osCategory LEFT JOIN template.templateOwner LEFT JOIN template.osType  WHERE template.type <>:type AND template.share = :share AND template.isActive = :isActive")
     Page<Template> findAllTemplateByCommunity(@Param("type") TemplateType type, Pageable pageable, @Param("share") Boolean share,@Param("isActive") Boolean isActive);
 
 
