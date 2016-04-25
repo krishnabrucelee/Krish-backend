@@ -359,6 +359,10 @@ public class VmInstance implements Serializable {
     @Column(name = "ssh_key_id")
     private Long keypairId;
 
+    /** List of affinity group for an instance. */
+    @ManyToMany
+    private List<AffinityGroup> affinityGroupList;
+
     /** Version attribute to handle optimistic locking. */
     @Version
     @Column(name = "version")
@@ -736,6 +740,24 @@ public class VmInstance implements Serializable {
      */
     public void setKeypairId(Long keypairId) {
         this.keypairId = keypairId;
+    }
+
+    /**
+     * Get the affinity group list.
+     *
+     * @return the affinity group list.
+     */
+    public List<AffinityGroup> getAffinityGroupList() {
+        return affinityGroupList;
+    }
+
+    /**
+     * Set the affinity group list.
+     *
+     * @param affinityGroupList the affinity group list to set.
+     */
+    public void setAffinityGroupList(List<AffinityGroup> affinityGroupList) {
+        this.affinityGroupList = affinityGroupList;
     }
 
     /**

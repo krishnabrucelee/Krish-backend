@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +15,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EventsUtil;
 import ck.panda.constants.PermissionUtil;
 import ck.panda.constants.PingConstants;
+import ck.panda.domain.entity.AffinityGroup;
+import ck.panda.domain.entity.AffinityGroupType;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Cluster;
 import ck.panda.domain.entity.ComputeOffering;
@@ -456,6 +455,14 @@ public class SyncServiceImpl implements SyncService {
     @Autowired
     private VpnUserService vpnUserService;
 
+    /** Service reference to affinity group type. */
+    @Autowired
+    private AffinityGroupTypeService affinityGroupTypeService;
+
+    /** Service reference to affinity group. */
+    @Autowired
+    private AffinityGroupService affinityGroupService;
+
     @Override
     public void init(CloudStackServer server) throws Exception {
         CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
@@ -697,7 +704,19 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.error("ERROR AT synch Event List", e);
         }
         try {
-            // 36. Sync general configuration
+            // 36. Sync affinity group type
+            this.syncAffinityGroupType();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Affinity group type", e);
+        }
+        try {
+            // 37. Sync affinity group
+            this.syncAffinityGroup();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Affinity group", e);
+        }
+        try {
+            // 38. Sync general configuration
             this.syncGeneralConfiguration();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch General Configuration", e);
@@ -2851,6 +2870,94 @@ public class SyncServiceImpl implements SyncService {
                     }
                 }
            }
+    }
+
+    /**
+     * Sync with CloudStack server affinity group type.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
+     */
+    @Override
+    public void syncAffinityGroupType() throws ApplicationException, Exception {
+
+        // 1. Get all the affinity group objects from CS server as hash
+        List<AffinityGroupType> csAffinityGroupTypesList = affinityGroupTypeService.findAllFromCSServer();
+        HashMap<String, AffinityGroupType> csAffinityGroupTypeMap = (HashMap<String, AffinityGroupType>) AffinityGroupType.convert(csAffinityGroupTypesList);
+
+        // 2. Get all the affinity group objects from application
+        List<AffinityGroupType> appAffinityGroupTypeList = affinityGroupTypeService.findAll();
+
+        // 3. Iterate application affinity group list
+        for (AffinityGroupType affinityGroupType : appAffinityGroupTypeList) {
+            LOGGER.debug("Total rows updated : " + (appAffinityGroupTypeList.size()));
+            // 3.1 Find the corresponding CS server affinity group object by finding
+            // it in a hash using uuid
+            if (csAffinityGroupTypeMap.containsKey(affinityGroupType.getType())) {
+                AffinityGroupType csAffinityGroupType = csAffinityGroupTypeMap.get(affinityGroupType.getType());
+
+                // 3.2 If found, update the affinity group object in app db
+                affinityGroupTypeService.update(affinityGroupType);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // affinity group which is not added in the app
+                csAffinityGroupTypeMap.remove(affinityGroupType.getType());
+            } else {
+                affinityGroupTypeService.delete(affinityGroupType);
+            }
+        }
+        // 4. Get the remaining list of cs server hash affinity group object, then
+        // iterate and
+        // add it to app db
+        for (String key : csAffinityGroupTypeMap.keySet()) {
+            affinityGroupTypeService.save(csAffinityGroupTypeMap.get(key));
+        }
+        LOGGER.debug("Total rows added : " + (csAffinityGroupTypeMap.size()));
+    }
+
+    /**
+     * Sync with CloudStack server affinity group.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
+     */
+    @Override
+    public void syncAffinityGroup() throws ApplicationException, Exception {
+
+        // 1. Get all the affinity group objects from CS server as hash
+        List<AffinityGroup> csAffinityGroupsList = affinityGroupService.findAllFromCSServer();
+        HashMap<String, AffinityGroup> csAffinityGroupMap = (HashMap<String, AffinityGroup>) AffinityGroup.convert(csAffinityGroupsList);
+
+        // 2. Get all the affinity group objects from application
+        List<AffinityGroup> appAffinityGroupList = affinityGroupService.findAll();
+
+        // 3. Iterate application affinity group list
+        for (AffinityGroup affinityGroup : appAffinityGroupList) {
+            affinityGroup.setIsSyncFlag(false);
+            LOGGER.debug("Total rows updated : " + (appAffinityGroupList.size()));
+            // 3.1 Find the corresponding CS server affinity group object by finding
+            // it in a hash using uuid
+            if (csAffinityGroupMap.containsKey(affinityGroup.getUuid())) {
+                AffinityGroup csAffinityGroup = csAffinityGroupMap.get(affinityGroup.getUuid());
+
+                // 3.2 If found, update the affinity group object in app db
+                affinityGroupService.update(affinityGroup);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // affinity group which is not added in the app
+                csAffinityGroupMap.remove(affinityGroup.getUuid());
+            } else {
+                affinityGroupService.delete(affinityGroup);
+            }
+        }
+        // 4. Get the remaining list of cs server hash affinity group object, then
+        // iterate and
+        // add it to app db
+        for (String key : csAffinityGroupMap.keySet()) {
+            csAffinityGroupMap.get(key).setIsSyncFlag(false);
+            affinityGroupService.save(csAffinityGroupMap.get(key));
+        }
+        LOGGER.debug("Total rows added : " + (csAffinityGroupMap.size()));
     }
 
     /**
