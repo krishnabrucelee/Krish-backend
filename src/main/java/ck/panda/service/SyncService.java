@@ -1,10 +1,7 @@
 package ck.panda.service;
 
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Domain;
-import ck.panda.domain.entity.EventLiterals;
 import ck.panda.domain.entity.Project;
 import ck.panda.rabbitmq.util.ResponseEvent;
 import ck.panda.util.CloudStackServer;
@@ -335,4 +332,20 @@ public interface SyncService {
      * @throws Exception if error occurs.
      */
     void syncLoadBalancerStickyPolicy() throws Exception;
+
+    /**
+     * Sync with CloudStack server affinity group type.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
+     */
+    void syncAffinityGroupType() throws ApplicationException, Exception;
+
+    /**
+     * Sync with CloudStack server affinity group.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
+     */
+    void syncAffinityGroup() throws ApplicationException, Exception;
 }
