@@ -171,6 +171,14 @@ public interface SyncService {
     void syncResourceLimit() throws ApplicationException, Exception;
 
     /**
+     * Sync with CloudStack server ResourceLimit max and used limit.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors
+     */
+    void syncResourceUpdate() throws ApplicationException, Exception;
+
+    /**
      * Sync with Cloud Server Account.
      *
      * @param domain domain
