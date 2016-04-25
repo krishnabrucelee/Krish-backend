@@ -108,7 +108,7 @@ public interface TemplateService extends CRUDService<Template> {
      * @param shared template
      * @return type of the template
      */
-    Page<Template> findAllByType(PagingAndSorting pagingAndSorting, String type, Boolean featured, Boolean shared);
+    Page<Template> findAllByType(PagingAndSorting pagingAndSorting, String type, Boolean featured, Boolean shared,Long userId)throws Exception;
 
     /**
      * To save the created template based on user id.
@@ -149,4 +149,16 @@ public interface TemplateService extends CRUDService<Template> {
      * @throws Exception if error occurs.
      */
     List<Template> findAllTemplatesByIsActiveAndType(Boolean isActive) throws Exception;
+
+    /**
+     * Find all the templates by type, isActive status and user Id.
+     *
+     * @param type of the template.
+     * @param featured type of the template.
+     * @param shared type of the template.
+     * @param userId of the template.
+     * @return templates.
+     * @throws Exception if error occurs.
+     */
+    List<Template> findAllTemplateByType(String type, Boolean featured, Boolean shared, Long userId) throws Exception;
 }
