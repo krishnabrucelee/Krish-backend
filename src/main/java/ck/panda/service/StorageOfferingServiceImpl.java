@@ -420,7 +420,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
         optional.put(PingConstants.IS_CUSTOM, storageOfferingCost.getIsCustomDisk());
         optional.put(PingConstants.REFERENCE_NAME, PingConstants.STORAGE_OFFERING);
         optional.put(PingConstants.GROUP_NAME, PingConstants.STORAGE_OFFERING);
-        if	(storageOfferingCost.getStoragePrice().size() != 0) {
+        if (storageOfferingCost.getStoragePrice().size() != 0) {
             if (storageOfferingCost.getIsCustomDisk()) {
                 optional.put(PingConstants.TOTAL_COST, offeringNullCheck(storageOfferingCost.getStoragePrice().get(0).getCostGbPerMonth()));
             }
