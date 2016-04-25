@@ -16,6 +16,6 @@ public interface AffinityGroupTypeRepository extends PagingAndSortingRepository<
      * @param type of the affinity group type
      * @return affinity group
      */
-    @Query(value = "select affinityGroupType from AffinityGroupType affinityGroupType where affinityGroupType.type = :type")
+    @Query(value = "SELECT affinityGroupType FROM AffinityGroupType affinityGroupType WHERE affinityGroupType.type = :type")
     AffinityGroupType findByType(@Param("type") String type);
 }

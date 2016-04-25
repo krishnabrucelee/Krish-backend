@@ -2872,12 +2872,6 @@ public class SyncServiceImpl implements SyncService {
            }
     }
 
-    /**
-     * Sync with CloudStack server affinity group type.
-     *
-     * @throws ApplicationException unhandled application errors.
-     * @throws Exception cloudstack unhandled errors
-     */
     @Override
     public void syncAffinityGroupType() throws ApplicationException, Exception {
 
@@ -2915,12 +2909,6 @@ public class SyncServiceImpl implements SyncService {
         LOGGER.debug("Total rows added : " + (csAffinityGroupTypeMap.size()));
     }
 
-    /**
-     * Sync with CloudStack server affinity group.
-     *
-     * @throws ApplicationException unhandled application errors.
-     * @throws Exception cloudstack unhandled errors
-     */
     @Override
     public void syncAffinityGroup() throws ApplicationException, Exception {
 

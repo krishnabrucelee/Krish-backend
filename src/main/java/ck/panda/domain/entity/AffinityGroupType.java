@@ -22,8 +22,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 /**
- *
  * Affinity group type for grouping the virtual machine.
+ *
  */
 @Entity
 @Table(name = "affinity_group_type")
@@ -220,7 +220,6 @@ public class AffinityGroupType implements Serializable {
      * Set the updated date time.
      *
      * @param updatedDateTime to set
-     *
      */
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
