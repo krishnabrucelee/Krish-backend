@@ -167,7 +167,7 @@ public class Template implements Serializable {
     private String osVersion;
 
     /** Cost of the template. */
-    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @OrderBy("id DESC")
     private List<TemplateCost> templateCost;
 
