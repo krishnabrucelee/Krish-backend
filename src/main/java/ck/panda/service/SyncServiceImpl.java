@@ -1986,7 +1986,7 @@ public class SyncServiceImpl implements SyncService {
               departmentCountMap.put(CloudStackConstants.CS_ACCOUNT, deparment.getUserName());
             //Sync for resource count in domain
            String csResponse = cloudStackResourceCapacity.updateResourceCount(
-                    convertEntityService.getDomainById(deparment.getDomainId()).getUuid(), departmentCountMap, "json");
+                    convertEntityService.getDomainById(deparment.getDomainId()).getUuid(), departmentCountMap, CloudStackConstants.JSON);
            convertEntityService.resourceCount(csResponse);
         }
         List<Domain> domains = domainService.findAllDomain();
@@ -2047,7 +2047,7 @@ public class SyncServiceImpl implements SyncService {
         // Used for setting optional values for resource count.
         HashMap<String, String> domainCountMap = new HashMap<String, String>();
         // Sync for resource count in domain
-        String csResponse = cloudStackResourceCapacity.updateResourceCount(domain.getUuid(), domainCountMap, "json");
+        String csResponse = cloudStackResourceCapacity.updateResourceCount(domain.getUuid(), domainCountMap, CloudStackConstants.JSON);
         convertEntityService.resourceCount(csResponse);
     }
 
@@ -2096,7 +2096,7 @@ public class SyncServiceImpl implements SyncService {
         projectCountMap.put(CloudStackConstants.CS_PROJECT_ID, project.getUuid());
         //Sync for resource count in domain
         String csResponse = cloudStackResourceCapacity.updateResourceCount(
-                convertEntityService.getDomainById(project.getDomainId()).getUuid(), projectCountMap, "json");
+                convertEntityService.getDomainById(project.getDomainId()).getUuid(), projectCountMap, CloudStackConstants.JSON);
         convertEntityService.resourceCount(csResponse);
     }
 
@@ -2116,11 +2116,11 @@ public class SyncServiceImpl implements SyncService {
                 convertEntityService.getDepartmentUsernameById(project.getDepartmentId()));
         // Sync for resource count in domain
         String csResponse = cloudStackResourceCapacity.updateResourceCount(
-                convertEntityService.getDomainById(project.getDomainId()).getUuid(), projectCountMap, "json");
+                convertEntityService.getDomainById(project.getDomainId()).getUuid(), projectCountMap, CloudStackConstants.JSON);
         convertEntityService.resourceCount(csResponse);
         departmentMap = resourceDepartmentService.getResourceCountsOfDepartment(project.getDepartmentId());
         for (String key : projectMap.keySet()) {
-            if (!key.equalsIgnoreCase("project")) {
+            if (!key.equalsIgnoreCase(CloudStackConstants.CS_PROJECT)) {
                 // departmentUsed
                 ResourceLimitProject resourceLimitProject = resourceProjectService.findByProjectAndResourceType(
                         project.getId(), ResourceLimitProject.ResourceType.valueOf(key), true);
@@ -2156,10 +2156,10 @@ public class SyncServiceImpl implements SyncService {
         List<ResourceLimitDepartment> persistDepartments = resourceDepartmentService.findAll();
         List<ResourceLimitProject> persistResourceLimitProjects = resourceProjectService.findAll();
         for(ResourceLimitDepartment department: persistDepartments) {
-            updateResourceLimit(department, "department");
+            updateResourceLimit(department, CloudStackConstants.CS_DEPARTMENT);
         }
         for(ResourceLimitProject project: persistResourceLimitProjects) {
-            updateResourceLimit(project, "project");
+            updateResourceLimit(project, CloudStackConstants.CS_PROJECT);
         }
     }
 

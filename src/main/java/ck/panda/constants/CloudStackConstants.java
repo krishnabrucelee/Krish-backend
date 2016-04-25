@@ -705,4 +705,7 @@ public class CloudStackConstants {
     /** Constant for admin. */
     public static final String CS_ADMIN = "admin";
 
+    /** Constant for project. */
+    public static final String CS_PROJECT = "project";
+
 }
