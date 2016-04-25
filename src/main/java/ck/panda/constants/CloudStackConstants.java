@@ -717,4 +717,7 @@ public class CloudStackConstants {
     /** Constant for update virtual machine response. */
     public static final String CS_UPDATE_VM_RESPONSE = "updatevirtualmachineresponse";
 
+    /** Constant for project. */
+	public static final String PROJECT = "project";
+
 }
