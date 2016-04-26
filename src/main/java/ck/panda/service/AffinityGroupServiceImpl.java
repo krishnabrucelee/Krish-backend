@@ -128,9 +128,14 @@ public class AffinityGroupServiceImpl implements AffinityGroupService {
             VmInstance vmInstance = virtualMachineService.findByUUID(affinityGroup.getTransInstanceList().get(i));
             if (vmInstance != null) {
                 List<AffinityGroup> affinityGrupList = vmInstance.getAffinityGroupList();
-                if (affinityGrupList != null) {
+                if (affinityGrupList != null && affinityGrupList.size() > 0) {
                     affinityGrupList.add(affinityGroup);
                     vmInstance.setAffinityGroupList(affinityGrupList);
+                    virtualMachineService.save(vmInstance);
+                } else {
+                    List<AffinityGroup> newAffinityGrupList = new ArrayList<AffinityGroup>();
+                    newAffinityGrupList.add(affinityGroup);
+                    vmInstance.setAffinityGroupList(newAffinityGrupList);
                     virtualMachineService.save(vmInstance);
                 }
             }
@@ -140,7 +145,17 @@ public class AffinityGroupServiceImpl implements AffinityGroupService {
 
     @Override
     public AffinityGroup update(AffinityGroup affinityGroup) throws Exception {
-        return affinityGroupRepository.save(affinityGroup);
+        affinityGroup = affinityGroupRepository.save(affinityGroup);
+        for (int i = 0; i < affinityGroup.getTransInstanceList().size(); i++) {
+            VmInstance vmInstance = virtualMachineService.findByUUID(affinityGroup.getTransInstanceList().get(i));
+            if (vmInstance != null) {
+                List<AffinityGroup> newAffinityGrupList = new ArrayList<AffinityGroup>();
+                newAffinityGrupList.add(affinityGroup);
+                vmInstance.setAffinityGroupList(newAffinityGrupList);
+                virtualMachineService.save(vmInstance);
+            }
+        }
+        return affinityGroup;
     }
 
     @Override

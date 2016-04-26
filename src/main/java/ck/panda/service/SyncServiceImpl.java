@@ -2943,6 +2943,7 @@ public class SyncServiceImpl implements SyncService {
             // it in a hash using uuid
             if (csAffinityGroupMap.containsKey(affinityGroup.getUuid())) {
                 AffinityGroup csAffinityGroup = csAffinityGroupMap.get(affinityGroup.getUuid());
+                affinityGroup.setTransInstanceList(csAffinityGroup.getTransInstanceList());
 
                 // 3.2 If found, update the affinity group object in app db
                 affinityGroupService.update(affinityGroup);
