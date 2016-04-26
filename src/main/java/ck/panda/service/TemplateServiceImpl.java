@@ -834,4 +834,20 @@ public class TemplateServiceImpl implements TemplateService {
         pingService.addPlanCost(optional);
         return true;
     }
+
+    
+	@Override
+	public List<Template> findAllByUserIdIsActiveAndShare(TemplateType type, Status status, Boolean isActive,
+			Long userId) throws Exception {
+		
+		User user = convertEntityService.getOwnerById(userId);
+        if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
+            if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
+            	return templateRepository.findAllByCommunity(type, true, Template.Status.ACTIVE, true);
+            } else {
+            	return templateRepository.findAllByUserId(type, userId, user.getDepartmentId(), true);
+            }
+        }
+    	return templateRepository.findAllByCommunity(type, true, Template.Status.ACTIVE, true);
+	}
 }

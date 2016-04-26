@@ -280,5 +280,43 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
     @Query(value = "SELECT template FROM Template template LEFT JOIN template.templateOwner user WHERE user.type =:rootAdmin OR template.architecture =:architecture OR 'ALL' =:architecture AND template.type <>:type AND template.status = :status AND template.share IS TRUE AND template.isActive =:isActive AND template.domainId = :domainId")
     List<Template> findAllTemplateByDomainIdUserTypeAndIsActiveStatus(@Param("architecture") String architecture, @Param("type") TemplateType type,
         @Param("status") Status status, @Param("isActive") Boolean isActive,@Param("rootAdmin")UserType rootAdmin, @Param("domainId") Long domainId);
+    
+    
+    /**
+     * Find all by domain, status and shared.
+     * @param type system, builtin etc.
+     * @param status active, inactive
+     * @param isActive true or false
+     * @param domainId domain id.
+     * @return list of templates.
+     */
+    @Query(value = "SELECT template FROM Template template WHERE template.type <>:type AND template.status = :status "
+    		+ "AND template.share =:share "
+    		+ "AND template.isActive =:isActive AND template.domainId = :domainId")
+    List<Template> findAllByDomainIdIsActiveAndShare(@Param("type") TemplateType type,
+        @Param("status") Status status, @Param("isActive") Boolean isActive, @Param("domainId") Long domainId);
+    
+    /**
+     * Get the template by the type community.
+     *
+     * @param type community
+     * @param share public type
+     * @param isActive status
+     * @param status status of the template
+     * @return template
+     */
+    @Query(value = "SELECT template FROM Template template LEFT JOIN template.osCategory LEFT JOIN template.templateOwner LEFT JOIN template.osType  WHERE template.type <>:type AND template.share =:share AND template.status =:status AND template.isActive =:isActive")
+    List<Template> findAllByCommunity(@Param("type") TemplateType type, @Param("share") Boolean share, @Param("status") Status status, @Param("isActive") Boolean isActive);
+    
+    /**
+     * Find all the template by user id.
+     *
+     * @param type template type
+     * @param userId of the template
+     * @param isActive status
+     * @return template
+     */
+    @Query(value = "SELECT template FROM Template template LEFT JOIN template.osCategory LEFT JOIN template.templateOwner LEFT JOIN template.osType WHERE template.type <>:type AND (template.templateOwnerId = NULL AND template.departmentId =:departmentId) OR (template.templateOwnerId != NULL AND template.templateOwnerId =:userId) AND template.isActive =:isActive")
+    List<Template> findAllByUserId(@Param("type") TemplateType type, @Param("userId") Long userId,@Param("departmentId") Long departmentId, @Param("isActive") Boolean isActive);
 
 }

@@ -125,5 +125,14 @@ public interface NetworkService extends CRUDService<Network> {
      * @throws Exception unhandled errors.
      */
     Page<Network> findAllByDomainId(Long domainId, PagingAndSorting page) throws Exception;
+    
+    /**
+     * Find all by domain and isactive.
+     * @param domainId domain id.
+     * @param isActive status.
+     * @return network list.
+     * @throws Exception if error.
+     */
+    List<Network> findAllByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception;
 
 }

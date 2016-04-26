@@ -735,4 +735,9 @@ public class NetworkServiceImpl implements NetworkService {
     public Page<Network> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
         return networkRepo.findAllByDomainIdAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
     }
+    
+    @Override
+    public List<Network> findAllByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception {
+        return networkRepo.findAllByDomainAndIsActive(domainId, isActive);
+    }
 }
