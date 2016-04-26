@@ -793,14 +793,11 @@ public class TemplateServiceImpl implements TemplateService {
         List<TemplateCost> templateCostList = new ArrayList<TemplateCost>();
         Double tempCost = template.getTemplateCost().get(0).getCost();
         Template persistTemplate = find(template.getId());
-        TemplateCost templatecost = templateCostService.findByTemplateCost(template.getId(), tempCost);
-        if (templatecost == null) {
-            templatecost = new TemplateCost();
+        TemplateCost templatecost = new TemplateCost();
             templatecost.setCost(tempCost);
             templatecost.setTemplateCostId(template.getId());
             templatecost = templateCostService.save(templatecost);
             templateCostList.add(templatecost);
-        }
         templateCostList.addAll(persistTemplate.getTemplateCost());
         return templateCostList;
     }

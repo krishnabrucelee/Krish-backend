@@ -370,9 +370,7 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
         ComputeOfferingCost cost = compute.getComputeCost().get(0);
         Zone zone = compute.getComputeCost().get(0).getZone();
         Double totalCost = costService.totalcost(cost);
-        ComputeOfferingCost computeOfferingcost = costService.findByCostAndId(compute.getId(),totalCost);
-        if (computeOfferingcost == null) {
-             computeOfferingcost = new ComputeOfferingCost();
+        ComputeOfferingCost computeOfferingcost = new ComputeOfferingCost();
              computeOfferingcost.setComputeId(compute.getId());
              computeOfferingcost.setInstanceRunningCostMemory(cost.getInstanceRunningCostMemory());
              computeOfferingcost.setInstanceRunningCostVcpu(cost.getInstanceRunningCostVcpu());
@@ -389,9 +387,8 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
              computeOfferingcost.setZoneId(cost.getZoneId());
              computeOfferingcost = costService.save(computeOfferingcost);
              computeCost.add(computeOfferingcost);
-         }
-         computeCost.addAll(persistCompute.getComputeCost());
-         compute.setComputeCost(computeCost);
+             computeCost.addAll(persistCompute.getComputeCost());
+             compute.setComputeCost(computeCost);
          return computeRepo.save(compute);
     }
 

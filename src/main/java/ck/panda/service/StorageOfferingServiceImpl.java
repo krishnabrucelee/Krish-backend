@@ -385,9 +385,7 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
         StorageOffering persistStorage = find(storage.getId());
         StorageOfferingCost cost = storage.getStoragePrice().get(0);
         Double totalCost = storageCostService.totalcost(cost);
-        StorageOfferingCost storageOfferingcost = storageCostService.findByCostAndId(storage.getId(),totalCost);
-        if (storageOfferingcost == null) {
-             storageOfferingcost = new StorageOfferingCost();
+        StorageOfferingCost storageOfferingcost = new StorageOfferingCost();
              storageOfferingcost.setStorageId(storage.getId());
              storageOfferingcost.setCostGbPerMonth(cost.getCostGbPerMonth());
              storageOfferingcost.setCostPerMonth(cost.getCostPerMonth());
@@ -395,7 +393,6 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
              storageOfferingcost.setZoneId(cost.getZoneId());
              storageOfferingcost = storageCostService.save(storageOfferingcost);
              storageCost.add(storageOfferingcost);
-         }
          storageCost.addAll(persistStorage.getStoragePrice());
          storage.setStoragePrice(storageCost);
          return storage;
