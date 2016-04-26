@@ -134,6 +134,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Autowired
     private NicService nicService;
 
+    /** Affinity group service reference. */
+    @Autowired
+    private AffinityGroupService affinityGroupService;
+
     @Override
     @PreAuthorize("hasPermission(#vmInstance.getSyncFlag(), 'CREATE_VM')")
     public VmInstance save(VmInstance vmInstance) throws Exception {
@@ -1495,5 +1499,50 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             vm.setStatus(Status.STOPPED);
             virtualmachinerepository.save(vm);
         }
+    }
+
+    @Override
+    public VmInstance affinityGroup(VmInstance vmInstance) throws Exception {
+        Errors errors = validator.rejectIfNullEntity(CloudStackConstants.ENTITY_VMINSTANCE, vmInstance);
+        errors = validator.validateEntity(vmInstance, errors);
+        HashMap<String, String> optionalMap = new HashMap<String, String>();
+        String affinityGroupIds = "";
+        for (int j = 0; j < vmInstance.getAffinityGroupList().size(); j++) {
+            if (j == vmInstance.getAffinityGroupList().size()-1) {
+                affinityGroupIds = affinityGroupIds + vmInstance.getAffinityGroupList().get(j).getUuid();
+            } else {
+                affinityGroupIds = affinityGroupIds + vmInstance.getAffinityGroupList().get(j).getUuid() + ",";
+            }
+        }
+        optionalMap.put(CloudStackConstants.CS_AFFINITY_GROUP_IDS, affinityGroupIds);
+        config.setUserServer();
+        String affinityGroupResponse = cloudStackInstanceService.updateVMAffinityGroup(vmInstance.getUuid(),
+            CloudStackConstants.JSON, optionalMap);
+        JSONObject jobId = new JSONObject(affinityGroupResponse).getJSONObject(CloudStackConstants.CS_UPDATE_VM_RESPONSE);
+        if (jobId.has(CloudStackConstants.CS_ERROR_CODE)) {
+            errors = this.validateEvent(errors, jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
+            throw new ApplicationException(errors);
+        } else {
+            String jobState = jobStatus(jobId, vmInstance);
+            if (jobState.equals(GenericConstants.ERROR_JOB_STATUS)) {
+                errors = this.validateEvent(errors, jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
+                throw new ApplicationException(errors);
+            } else {
+                virtualmachinerepository.save(convertEncryptPassword(vmInstance));
+            }
+        }
+        return vmInstance;
+    }
+    @Override
+    public List<VmInstance> findInstanceByGroup(Long id) throws Exception {
+        List<VmInstance> allInstance = new ArrayList<VmInstance>();
+        for (VmInstance instance : virtualmachinerepository.findAll()) {
+            for (int i = 0; i < instance.getAffinityGroupList().size(); i++) {
+                if (instance.getAffinityGroupList().get(i).getId() == id) {
+                    allInstance.add(instance);
+                }
+            }
+        }
+        return allInstance;
     }
 }

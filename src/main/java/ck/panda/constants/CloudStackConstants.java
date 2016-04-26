@@ -704,8 +704,20 @@ public class CloudStackConstants {
 
     /** Constant for admin. */
     public static final String CS_ADMIN = "admin";
-
+    
     /** Constant for project. */
     public static final String CS_PROJECT = "project";
+
+    /** Constant for virtual machine ids. */
+    public static final String CS_VIRTUAL_MACHINE_IDS = "virtualmachineIds";
+
+    /** Constant for affinity group ids. */
+    public static final String CS_AFFINITY_GROUP_IDS = "affinitygroupids";
+
+    /** Constant for update virtual machine response. */
+    public static final String CS_UPDATE_VM_RESPONSE = "updatevirtualmachineresponse";
+
+    /** Constant for project. */
+	public static final String PROJECT = "project";
 
 }

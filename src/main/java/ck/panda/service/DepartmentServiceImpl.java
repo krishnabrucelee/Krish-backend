@@ -286,7 +286,12 @@ public class DepartmentServiceImpl implements DepartmentService {
         for (ResourceLimitDomain domainLimit : resourceLimitDomain) {
         	for (ResourceLimitDepartment departmentLimit : resourceLimitDepartment) {
         		if (domainLimit.getResourceType().toString().equals(departmentLimit.getResourceType().toString())) {
-        			domainLimit.setUsedLimit(domainLimit.getUsedLimit() - departmentLimit.getMax());
+					if (departmentLimit.getMax() == -1L) {
+						domainLimit.setUsedLimit(EmptytoLong(domainLimit.getUsedLimit()));
+					} else {
+						domainLimit.setUsedLimit(
+								EmptytoLong(domainLimit.getUsedLimit()) - EmptytoLong(departmentLimit.getMax()));
+					}
         			domainLimit.setIsSyncFlag(false);
                     resourceLimitDomainService.save(domainLimit);
                     departmentLimit.setIsActive(false);
@@ -417,4 +422,18 @@ public class DepartmentServiceImpl implements DepartmentService {
     	accountTypes.add(Department.AccountType.ROOT_ADMIN);
 		return findByAccountTypesAndActive(accountTypes, isActive);
 	}
+
+	/**
+     * Empty check.
+     *
+     * @param value long value
+     * @return long.
+     */
+    public Long EmptytoLong(Long value) {
+        if (value == null) {
+            return 0L;
+        }
+        return value;
+    }
+
 }

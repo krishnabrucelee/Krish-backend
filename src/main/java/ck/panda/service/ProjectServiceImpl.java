@@ -313,7 +313,11 @@ public class ProjectServiceImpl implements ProjectService {
         for (ResourceLimitDepartment departmentLimit : resourceLimitDepartment) {
         	for (ResourceLimitProject projectLimit : resourceLimitProject) {
         		if (departmentLimit.getResourceType().toString().equals(projectLimit.getResourceType().toString())) {
-        			departmentLimit.setUsedLimit(departmentLimit.getUsedLimit() - projectLimit.getMax());
+        			if(projectLimit.getMax() == -1L){
+        				departmentLimit.setUsedLimit(EmptytoLong(departmentLimit.getUsedLimit()));
+        			} else {
+        				departmentLimit.setUsedLimit(EmptytoLong(departmentLimit.getUsedLimit()) - EmptytoLong(projectLimit.getMax()));
+        			}
         			resourceLimitDepartmentService.save(departmentLimit);
         			projectLimit.setIsActive(false);
         			projectLimit.setIsSyncFlag(false);
@@ -439,5 +443,18 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Project findByProjectNameAndIsActive(String projectAccountName, Long domainId, Boolean isActive) {
         return projectRepository.findByProjectNameAndIsActive(projectAccountName, domainId, isActive);
+    }
+
+    /**
+     * Empty check.
+     *
+     * @param value long value
+     * @return long.
+     */
+    public Long EmptytoLong(Long value) {
+        if (value == null) {
+            return 0L;
+        }
+        return value;
     }
 }

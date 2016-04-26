@@ -66,10 +66,6 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
     @Autowired
     private ConvertEntityService convertEntityService;
 
-    /** CloudStack Resource Capacity Service. */
-    @Autowired
-    private CloudStackResourceCapacity cloudStackResourceCapacity;
-
     @Override
     public ResourceLimitDepartment save(ResourceLimitDepartment resource) throws Exception {
         Errors errors = validator.rejectIfNullEntity("resourcelimits", resource);
@@ -174,7 +170,7 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
                     ResourceLimitDomain resourceDatas = resourceLimitDomainService.findByDomainAndResourceCount(resource.getDomainId(), updateUsedCount(resourceData), true);
                     Long resourceCount = resourceLimitDepartmentRepo.findByDomainIdAndResourceType(resource.getDomainId(),resource.getResourceType(),true);
                     Long resourceCounts = resourceLimitDepartmentRepo.findByDomainIdAndResourceTypeAndResourceMax(resource.getDomainId(),resource.getResourceType(),true);
-                    resourceDatas.setUsedLimit(resourceCount);
+                    resourceDatas.setUsedLimit(EmptytoLong(resourceCount) + EmptytoLong(resourceCounts));
                     resourceDatas.setIsSyncFlag(false);
                     resourceLimitDomainService.save(resourceDatas);
                 } else {
@@ -184,7 +180,7 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
                     ResourceLimitDomain resourceDatas = resourceLimitDomainService.findByDomainAndResourceCount(resource.getDomainId(), updateUsedCount(resource), true);
                     Long resourceCount = resourceLimitDepartmentRepo.findByDomainIdAndResourceType(resource.getDomainId(),resource.getResourceType(),true);
                     Long resourceCounts = resourceLimitDepartmentRepo.findByDomainIdAndResourceTypeAndResourceMax(resource.getDomainId(),resource.getResourceType(),true);
-                    resourceDatas.setUsedLimit(resourceCount);
+                    resourceDatas.setUsedLimit(EmptytoLong(resourceCount) + EmptytoLong(resourceCounts));
                     resourceDatas.setIsSyncFlag(false);
                     resourceLimitDomainService.save(resourceDatas);
                 }
@@ -236,43 +232,38 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
      * @return if error with resource.
      * @throws Exception error.
      */
-    private Errors validateResourceLimit(List<ResourceLimitDepartment> resourceLimits) throws Exception {
-        Errors errors = new Errors(messageSource);
-        for (ResourceLimitDepartment resourceLimit : resourceLimits) {
-            if (!resourceLimit.getResourceType().equals(ResourceLimitDepartment.ResourceType.Project)) {
-            // Step1: Find max from domain with specific resource type.
-            ResourceLimitDomain domainLimit = resourceLimitDomainService.findByDomainAndResourceType(
-                    resourceLimit.getDomainId(),
-                    ResourceLimitDomain.ResourceType.valueOf(resourceLimit.getResourceType().name()), true);
-            // Step2: Find resource count from department for spcific domain and
-            // resource type
-            Long count = findByResourceCountByDepartmentAndResourceType(resourceLimit.getDomainId(),
-                    resourceLimit.getResourceType(), resourceLimit.getDepartmentId(), true);
-            Long totalCount = resourceLimit.getMax() + count;
-            // if(step1 < step2) {
-            if (domainLimit != null) {
-                if (domainLimit.getMax() != -1 && domainLimit.getMax() < totalCount) {
-                    errors.addFieldError(resourceLimit.getResourceType().toString(),
-                            domainLimit.getMax() + " in " + resourceLimit.getResourceType().toString() + " " + " for resource limit domain exceeded");
+	private Errors validateResourceLimit(List<ResourceLimitDepartment> resourceLimits) throws Exception {
+		Errors errors = new Errors(messageSource);
+		for (ResourceLimitDepartment resourceLimit : resourceLimits) {
+			if (!resourceLimit.getResourceType().equals(ResourceLimitDepartment.ResourceType.Project)) {
+				// Step1: Find max from domain with specific resource type.
+				ResourceLimitDomain domainLimit = resourceLimitDomainService.findByDomainAndResourceType(
+						resourceLimit.getDomainId(),
+						ResourceLimitDomain.ResourceType.valueOf(resourceLimit.getResourceType().name()), true);
+				// Step2: Find resource count from department for specific domain and resource type.
+				ResourceLimitDepartment department = resourceLimitDepartmentRepo.findByDepartmentAndResourceType(resourceLimit.getDomainId(), ResourceLimitDepartment.ResourceType.valueOf(resourceLimit.getResourceType().name()), true);
+				Long totalCount = 0L;
+				if(resourceLimit.getMax() == -1){
+					totalCount = resourceLimit.getMax();
+				} else {
+					totalCount = resourceLimit.getMax() + (domainLimit.getUsedLimit() - department.getMax());
+				}
+				// if(step1 < step2) {
+				if (domainLimit != null) {
+					if (resourceLimit.getMax() == domainLimit.getMax() && domainLimit.getMax() == -1L) {
 
-                }
-            } else {
-                errors.addGlobalError("update.domain.quota.first");
-            }
-            // Comparing with project
-                Long projectResourceCount = resourceLimitProjectService.findByResourceCountByProjectAndResourceType(
-                        resourceLimit.getDepartmentId(),
-                        ResourceLimitProject.ResourceType.valueOf(resourceLimit.getResourceType().name()),
-                        0L, true);
-                if (resourceLimit.getMax() < projectResourceCount) {
-                    errors.addFieldError(resourceLimit.getResourceType().toString(),
-                            projectResourceCount + " in " + resourceLimit.getResourceType().toString()
-                                    + " already allocated to projects of this department");
-                }
-            }
-        }
-        return errors;
-    }
+					} else if (domainLimit.getMax() !=-1 && domainLimit.getMax() < totalCount) {
+						errors.addFieldError(resourceLimit.getResourceType().toString(),
+								domainLimit.getMax() + " in " + resourceLimit.getResourceType().toString() + " "
+										+ " for resource limit domain exceeded");
+					}
+				} else {
+					errors.addGlobalError("update.domain.quota.first");
+				}
+			}
+		}
+		return errors;
+	}
 
     /**
      * Resource type based on department resource.
@@ -356,7 +347,7 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
 			Long resourceDepartmentCount = resourceLimitDepartmentRepo.findResourceTotalCountOfResourceDepartment(
 					departmentId, ResourceLimitDepartment.ResourceType.valueOf(resourceTypeMap.get(name)), true);
 			if (resourceDepartmentCount != null) {
-				resourceMaxCount.put(resourceTypeMap.get(name), resourceDepartmentCount.toString());
+				resourceMaxCount.put(resourceTypeMap.get(name), EmptytoLong(resourceDepartmentCount).toString());
 			}
 		}
 		return resourceMaxCount;
@@ -429,6 +420,19 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
             }
         }
         return resourceMap;
+    }
+
+    /**
+     * Empty check.
+     *
+     * @param value long value
+     * @return long.
+     */
+    public Long EmptytoLong(Long value) {
+        if (value == null) {
+            return 0L;
+        }
+        return value;
     }
 
 }
