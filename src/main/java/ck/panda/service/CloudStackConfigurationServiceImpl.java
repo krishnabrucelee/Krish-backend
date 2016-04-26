@@ -225,7 +225,7 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
     @Override
     public void importCsData(String keyName, String type) throws Exception {
         configUtil.setServer(1L);
-        switch(keyName) {
+        switch (keyName) {
         case DOMAIN:
             //Sync domain
             if (type.equals(IMPORT)) {
@@ -540,11 +540,10 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
     }
 
     /**
-     * Update manual sync data count
+     * Update manual sync data count.
      *
      * @param keyName key name
      * @param acsCount ACS count
-     * @param pandaCount panda count
      * @throws Exception raise if error
      */
     public void updateManualSyncCount(String keyName, Integer acsCount) throws Exception {

@@ -273,4 +273,12 @@ public interface UserService extends CRUDService<User> {
 
     String findByUserSessionDetails(Long id) throws Exception;
 
+    /**
+     * Find root admin user.
+     *
+     * @return user.
+     * @throws Exception if error occurs.
+     */
+    User findByRootAdminUser() throws Exception;
+
 }

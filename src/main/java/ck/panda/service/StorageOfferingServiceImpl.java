@@ -420,14 +420,17 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
         optional.put(PingConstants.IS_CUSTOM, storageOfferingCost.getIsCustomDisk());
         optional.put(PingConstants.REFERENCE_NAME, PingConstants.STORAGE_OFFERING);
         optional.put(PingConstants.GROUP_NAME, PingConstants.STORAGE_OFFERING);
-        if (storageOfferingCost.getIsCustomDisk()) {
-            optional.put(PingConstants.TOTAL_COST, offeringNullCheck(storageOfferingCost.getStoragePrice().get(0).getCostGbPerMonth()));
-        } else {
-            optional.put(PingConstants.TOTAL_COST, offeringNullCheck(storageOfferingCost.getStoragePrice().get(0).getCostPerMonth()));
-        }
-        if (storageOfferingCost.getStoragePrice().get(0).getZoneId() != null) {
+        if (storageOfferingCost.getStoragePrice().size() != 0) {
+            if (storageOfferingCost.getIsCustomDisk()) {
+                optional.put(PingConstants.TOTAL_COST, offeringNullCheck(storageOfferingCost.getStoragePrice().get(0).getCostGbPerMonth()));
+            }
+            else {
+                optional.put(PingConstants.TOTAL_COST, offeringNullCheck(storageOfferingCost.getStoragePrice().get(0).getCostPerMonth()));
+            }
+              if (storageOfferingCost.getStoragePrice().get(0).getZoneId() != null) {
             Zone zone = convertEntityService.getZoneById(storageOfferingCost.getStoragePrice().get(0).getZoneId());
             optional.put(PingConstants.ZONE_ID, zone.getUuid());
+              }
         }
         pingService.addPlanCost(optional);
         return true;

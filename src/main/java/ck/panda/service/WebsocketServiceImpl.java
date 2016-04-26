@@ -24,6 +24,7 @@ import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.CloudStackServer;
+import ck.panda.util.CloudStackSnapshotService;
 import ck.panda.util.CloudStackVolumeService;
 import ck.panda.util.ConfigUtil;
 
@@ -41,6 +42,19 @@ public class WebsocketServiceImpl implements WebsocketService {
     /** Simple messaging template for send and receive messages. */
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    /** VM snapshot object name. */
+    public static final String VM_SNAPSHOT = "vmSnapshot";
+
+    /** VM snapshot object name. */
+    public static final String VM_SNAPSHOT_ID = "vmsnapshotid";
+
+    /** VM snapshot memory. */
+    public static final String VM_SNAPSHOT_MEMORY = "snapshotmemory";
+
+    /** Cloudstack snapshot service reference. */
+    @Autowired
+    private CloudStackSnapshotService cssnapshot;
 
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(AsynchronousJobServiceImpl.class);
@@ -69,10 +83,6 @@ public class WebsocketServiceImpl implements WebsocketService {
     /** CloudStack configuration . */
     @Autowired
     private CloudStackConfigurationService cloudConfigService;
-
-    /** CloudStack Resource Capacity Service. */
-    @Autowired
-    private CloudStackResourceCapacity cloudStackResourceCapacity;
 
     /** sync service reference. */
     @Autowired
@@ -142,6 +152,41 @@ public class WebsocketServiceImpl implements WebsocketService {
                 if (event.getMessage() != null && (event.getStatus().equals(Event.Status.FAILED)
                         || event.getStatus().equals(Event.Status.ERROR))) {
                     String message = eventmapper.writeValueAsString(event);
+					if (event.getStatus().equals(Event.Status.FAILED) && (event.getEvent().equalsIgnoreCase(EventTypes.EVENT_VM_SNAPSHOT_DELETE)
+							|| event.getEvent().equalsIgnoreCase(EventTypes.EVENT_VM_SNAPSHOT_REVERT))) {
+						if (eventObject.has(CloudStackConstants.CS_CMD_INFO)) {
+							JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
+							if (eventObject.getString(CloudStackConstants.CS_STATUS)
+									.equalsIgnoreCase(CloudStackConstants.CS_STATUS_FAILED)) {
+								VmSnapshot persistVmSnapshot = vmSnapshotService
+										.findByUUID(json.getString(VM_SNAPSHOT_ID));
+								HashMap<String, String> optional = new HashMap<String, String>();
+								optional.put(VM_SNAPSHOT_ID, json.getString(VM_SNAPSHOT_ID));
+								config.setServer(1L);
+								// 1. Get the list of vm snapshot from CS server using CS connector.
+								String response = cssnapshot.listVMSnapshot(optional);
+								JSONArray vmSnapshotListJSON = null;
+								JSONObject responseObject = new JSONObject(response)
+										.getJSONObject(CloudStackConstants.CS_LIST_VM_SNAPSHOT_RESPONSE);
+								if (responseObject.has(VM_SNAPSHOT)) {
+									vmSnapshotListJSON = responseObject.getJSONArray(VM_SNAPSHOT);
+									// 2.1 Call convert by passing JSONObject to vm snapshot entity and Add the converted vm snapshot entity to list.
+									VmSnapshot vmSnapshot = VmSnapshot.convert(vmSnapshotListJSON.getJSONObject(0));
+									if (vmSnapshot != null) {
+										persistVmSnapshot.setStatus(vmSnapshot.getStatus());
+										persistVmSnapshot.setIsCurrent(vmSnapshot.getIsCurrent());
+										persistVmSnapshot.setSyncFlag(vmSnapshot.getSyncFlag());
+										if(persistVmSnapshot.getStatus().equals(VmSnapshot.Status.Expunging)){
+											persistVmSnapshot.setIsRemoved(true);
+										} else {
+											persistVmSnapshot.setIsRemoved(false);
+										}
+									}
+									vmSnapshotService.update(persistVmSnapshot);
+								}
+							}
+						}
+                    }
                     messagingTemplate.convertAndSend(CloudStackConstants.CS_ERROR_MAP + event.getEventOwnerId(),
                             message);
                 }

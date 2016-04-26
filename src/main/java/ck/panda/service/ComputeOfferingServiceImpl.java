@@ -417,10 +417,11 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
         optional.put(PingConstants.PLAN_UUID, computeOfferingCost.getUuid());
         optional.put(PingConstants.NAME, computeOfferingCost.getName());
         optional.put(PingConstants.IS_CUSTOM, computeOfferingCost.getCustomized());
-        optional.put(PingConstants.COMPUTE_SETUP_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getSetupCost()));
         optional.put(PingConstants.REFERENCE_NAME, PingConstants.VM);
         optional.put(PingConstants.GROUP_NAME, PingConstants.VM);
-        if (computeOfferingCost.getCustomized()) {
+        if (computeOfferingCost.getComputeCost().size() != 0) {
+            optional.put(PingConstants.COMPUTE_SETUP_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getSetupCost()));
+            if (computeOfferingCost.getCustomized()) {
             optional.put(PingConstants.COMUTE_RUNNING_PER_VCPU_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getInstanceRunningCostPerVcpu()));
             optional.put(PingConstants.COMUTE_RUNNING_PER_MB_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getInstanceRunningCostPerMB()));
             optional.put(PingConstants.COMUTE_RUNNING_PER_SPEED_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getInstanceRunningCostPerMhz()));
@@ -432,19 +433,20 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
                    + optional.getDouble(PingConstants.COMUTE_STOPPAGE_PER_MB_COST) + optional.getDouble(PingConstants.COMUTE_STOPPAGE_PER_SPEED_COST)
                    + optional.getDouble(PingConstants.COMPUTE_SETUP_COST);
             optional.put(PingConstants.TOTAL_COST, totalCost);
-        } else {
-            optional.put(PingConstants.COMUTE_RUNNING_FOR_VCPU_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getInstanceRunningCostVcpu()));
-            optional.put(PingConstants.COMUTE_RUNNING_FOR_MB_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getInstanceRunningCostMemory()));
-            optional.put(PingConstants.COMUTE_STOPPAGE_FOR_VCPU_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getInstanceStoppageCostVcpu()));
-            optional.put(PingConstants.COMUTE_STOPPAGE_FOR_MB_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getInstanceStoppageCostMemory()));
-            Double totalCost = optional.getDouble(PingConstants.COMUTE_RUNNING_FOR_VCPU_COST) + optional.getDouble(PingConstants.COMUTE_RUNNING_FOR_MB_COST)
+            } else {
+                optional.put(PingConstants.COMUTE_RUNNING_FOR_VCPU_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getInstanceRunningCostVcpu()));
+                optional.put(PingConstants.COMUTE_RUNNING_FOR_MB_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getInstanceRunningCostMemory()));
+                optional.put(PingConstants.COMUTE_STOPPAGE_FOR_VCPU_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getInstanceStoppageCostVcpu()));
+                optional.put(PingConstants.COMUTE_STOPPAGE_FOR_MB_COST, offeringNullCheck(computeOfferingCost.getComputeCost().get(0).getInstanceStoppageCostMemory()));
+                Double totalCost = optional.getDouble(PingConstants.COMUTE_RUNNING_FOR_VCPU_COST) + optional.getDouble(PingConstants.COMUTE_RUNNING_FOR_MB_COST)
                    + optional.getDouble(PingConstants.COMUTE_STOPPAGE_FOR_VCPU_COST) + optional.getDouble(PingConstants.COMUTE_STOPPAGE_FOR_MB_COST)
                    + optional.getDouble(PingConstants.COMPUTE_SETUP_COST);
-            optional.put(PingConstants.TOTAL_COST, totalCost);
-        }
-        if (computeOfferingCost.getComputeCost().get(0).getZoneId() != null) {
-            Zone zone = convertEntityService.getZoneById(computeOfferingCost.getComputeCost().get(0).getZoneId());
-            optional.put(PingConstants.ZONE_ID, zone.getUuid());
+                optional.put(PingConstants.TOTAL_COST, totalCost);
+            }
+            if (computeOfferingCost.getComputeCost().get(0).getZoneId() != null) {
+                Zone zone = convertEntityService.getZoneById(computeOfferingCost.getComputeCost().get(0).getZoneId());
+                optional.put(PingConstants.ZONE_ID, zone.getUuid());
+            }
         }
         pingService.addPlanCost(optional);
         return true;
