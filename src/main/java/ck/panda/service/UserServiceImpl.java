@@ -635,6 +635,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findByRootAdminUser() throws Exception {
-        return userRepository.findByRootAdminUser(UserType.ROOT_ADMIN);
+        return userRepository.findByRootAdminUser(UserType.ROOT_ADMIN,true);
     }
 }
