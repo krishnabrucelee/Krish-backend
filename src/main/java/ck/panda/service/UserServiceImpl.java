@@ -582,12 +582,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User updateSuspended(User user) throws Exception {
-        user.setStatus(User.Status.SUSPENDED);
+        User users = userRepository.findOne(user.getId());
+        users.setStatus(User.Status.SUSPENDED);
         // Update the vm status to stopped while suspending the account
         if(user.getStatus() == User.Status.SUSPENDED) {
-            virtualMachineService.updateVmToStoppedByOwnerAndStatus(user, VmInstance.Status.RUNNING);
+            virtualMachineService.updateVmToStoppedByOwnerAndStatus(users, VmInstance.Status.RUNNING);
         }
-        return userRepository.save(user);
+        return userRepository.save(users);
     }
 
     @Override
