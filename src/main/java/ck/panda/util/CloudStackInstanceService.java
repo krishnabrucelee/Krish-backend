@@ -400,4 +400,24 @@ public class CloudStackInstanceService {
         arguments.add(new NameValuePair("keypair", keypair));
         return server.request(arguments);
     }
+
+    /**
+     * Updates the affinity/anti-affinity group associations of a virtual machine.
+     *
+     * @param virtualMachineId The ID of the virtual machine
+     * @param response json.
+     * @param optional value
+     * @return response String json
+     * @throws Exception raise if error
+     */
+    public String updateVMAffinityGroup(String virtualMachineId, String response,
+            HashMap<String, String> optional) throws Exception {
+
+        LinkedList<NameValuePair> arguments
+                = server.getDefaultQuery("updateVMAffinityGroup", optional);
+        arguments.add(new NameValuePair("id", virtualMachineId));
+        arguments.add(new NameValuePair("response", response));
+        String responseDocument = server.request(arguments);
+        return responseDocument;
+    }
 }
