@@ -58,4 +58,9 @@ public class TemplateCostServiceImpl implements TemplateCostService {
     public TemplateCost findByTemplateCost(Long templateId, Double cost) {
         return templateCostRepository.findByTemplateCost(templateId, cost);
     }
+
+    @Override
+    public List<TemplateCost> findAllByTemplateCost(Long templateId) {
+        return templateCostRepository.findByTemplateCost(templateId);
+    }
 }

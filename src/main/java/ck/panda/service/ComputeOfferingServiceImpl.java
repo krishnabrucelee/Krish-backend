@@ -365,31 +365,40 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
      * @throws Exception if error occurs.
      */
     private ComputeOffering costCalculation(ComputeOffering compute) throws Exception {
-        List<ComputeOfferingCost> computeCost = new ArrayList<ComputeOfferingCost>();
-        ComputeOffering persistCompute = find(compute.getId());
         ComputeOfferingCost cost = compute.getComputeCost().get(0);
-        Zone zone = compute.getComputeCost().get(0).getZone();
         Double totalCost = costService.totalcost(cost);
-        ComputeOfferingCost computeOfferingcost = new ComputeOfferingCost();
-             computeOfferingcost.setComputeId(compute.getId());
-             computeOfferingcost.setInstanceRunningCostMemory(cost.getInstanceRunningCostMemory());
-             computeOfferingcost.setInstanceRunningCostVcpu(cost.getInstanceRunningCostVcpu());
-             computeOfferingcost.setInstanceStoppageCostVcpu(cost.getInstanceStoppageCostVcpu());
-             computeOfferingcost.setInstanceStoppageCostMemory(cost.getInstanceStoppageCostMemory());
-             computeOfferingcost.setInstanceRunningCostPerMB(cost.getInstanceRunningCostPerMB());
-             computeOfferingcost.setInstanceRunningCostPerVcpu(cost.getInstanceRunningCostPerVcpu());
-             computeOfferingcost.setInstanceStoppageCostPerMB(cost.getInstanceStoppageCostPerMB());
-             computeOfferingcost.setInstanceStoppageCostPerVcpu(cost.getInstanceStoppageCostPerVcpu());
-             computeOfferingcost.setInstanceStoppageCostPerMhz(cost.getInstanceStoppageCostPerMhz());
-             computeOfferingcost.setInstanceRunningCostPerMhz(cost.getInstanceRunningCostPerMhz());
-             computeOfferingcost.setTotalCost(totalCost);
-             computeOfferingcost.setSetupCost(cost.getSetupCost());
-             computeOfferingcost.setZoneId(cost.getZoneId());
-             computeOfferingcost = costService.save(computeOfferingcost);
-             computeCost.add(computeOfferingcost);
-             computeCost.addAll(persistCompute.getComputeCost());
-             compute.setComputeCost(computeCost);
-         return computeRepo.save(compute);
+        List<ComputeOfferingCost> computeOfferingcostList = costService.findByComputeOfferingId(compute.getId());
+        if(computeOfferingcostList.size() != 0) {
+            ComputeOfferingCost persistedCost = computeOfferingcostList.get(computeOfferingcostList.size() - 1);
+            if (!compute.getCustomized()) {
+                int runningMemoryCost = Double.compare(offeringNullCheck(cost.getInstanceRunningCostMemory()),persistedCost.getInstanceRunningCostMemory());
+                int runningVcpuCost= Double.compare(offeringNullCheck(cost.getInstanceRunningCostVcpu()),offeringNullCheck(persistedCost.getInstanceRunningCostVcpu()));
+                int stoppageVcpuCost =  Double.compare(offeringNullCheck(cost.getInstanceStoppageCostVcpu()),offeringNullCheck(persistedCost.getInstanceStoppageCostVcpu()));
+                int stoppageVcpuMemory =  Double.compare(offeringNullCheck(cost.getInstanceStoppageCostMemory()),offeringNullCheck(persistedCost.getInstanceStoppageCostMemory()));
+                int setupCost =  Double.compare(offeringNullCheck(cost.getSetupCost()),offeringNullCheck(persistedCost.getSetupCost()));
+                if (runningMemoryCost> 0 || runningVcpuCost>0 || stoppageVcpuCost>0 || stoppageVcpuMemory>0 || setupCost >0 || runningMemoryCost< 0 || runningVcpuCost<0 || stoppageVcpuCost<0 || stoppageVcpuMemory<0 || setupCost <0 ) {
+                    this.computeCostSave(compute);
+                }
+            }
+            else {
+                int runningcostPerMB = Double.compare(offeringNullCheck(cost.getInstanceRunningCostPerMB()),offeringNullCheck(persistedCost.getInstanceRunningCostPerMB()));
+                int runningcostPerVcpu = Double.compare(offeringNullCheck(cost.getInstanceRunningCostPerVcpu()),offeringNullCheck(persistedCost.getInstanceRunningCostPerVcpu()));
+                int runningcostPerMhz = Double.compare(offeringNullCheck(cost.getInstanceRunningCostPerMhz()),offeringNullCheck(persistedCost.getInstanceRunningCostPerMhz()));
+                int stoppagecostPerMB = Double.compare(offeringNullCheck(cost.getInstanceStoppageCostPerMB()),offeringNullCheck(persistedCost.getInstanceStoppageCostPerMB()));
+                int stoppagecostPerVcpu = Double.compare(offeringNullCheck(cost.getInstanceStoppageCostPerVcpu()),offeringNullCheck(persistedCost.getInstanceStoppageCostPerVcpu()));
+                int stoppagecostPerMhz = Double.compare(offeringNullCheck(cost.getInstanceStoppageCostPerMhz()),offeringNullCheck(persistedCost.getInstanceStoppageCostPerMhz()));
+                int setupCost =  Double.compare(offeringNullCheck(cost.getSetupCost()),offeringNullCheck(persistedCost.getSetupCost()));
+                if ( runningcostPerMB >0 || runningcostPerVcpu > 0
+                    || runningcostPerMhz>0 || stoppagecostPerMB>0 || stoppagecostPerVcpu>0 || stoppagecostPerMhz>0 || setupCost >0 || runningcostPerMB >0 || runningcostPerVcpu <0
+                    || runningcostPerMhz<0 || stoppagecostPerMB<0 || stoppagecostPerVcpu<0 || stoppagecostPerMhz<0 || setupCost <0 ) {
+                 this.computeCostSave(compute);
+               }
+            }
+        }
+        else {
+            this.computeCostSave(compute);
+        }
+         return compute;
     }
 
     @Override
@@ -460,5 +469,38 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
             value = 0.0;
         }
         return value;
+    }
+
+    /**
+     * To save compute offering cost.
+     *
+     * @param compute offering object.
+     * @throws Exception if error occurs.
+     */
+    private void computeCostSave(ComputeOffering compute) throws Exception {
+         List<ComputeOfferingCost> computeCost = new ArrayList<ComputeOfferingCost>();
+         ComputeOffering persistCompute = find(compute.getId());
+         ComputeOfferingCost cost = compute.getComputeCost().get(0);
+         ComputeOfferingCost computeOfferingcost = new ComputeOfferingCost();
+         computeOfferingcost.setComputeId(compute.getId());
+         Double totalCost = costService.totalcost(cost);
+         computeOfferingcost.setInstanceRunningCostMemory(cost.getInstanceRunningCostMemory());
+         computeOfferingcost.setInstanceRunningCostVcpu(cost.getInstanceRunningCostVcpu());
+         computeOfferingcost.setInstanceStoppageCostVcpu(cost.getInstanceStoppageCostVcpu());
+         computeOfferingcost.setInstanceStoppageCostMemory(cost.getInstanceStoppageCostMemory());
+         computeOfferingcost.setInstanceRunningCostPerMB(cost.getInstanceRunningCostPerMB());
+         computeOfferingcost.setInstanceRunningCostPerVcpu(cost.getInstanceRunningCostPerVcpu());
+         computeOfferingcost.setInstanceStoppageCostPerMB(cost.getInstanceStoppageCostPerMB());
+         computeOfferingcost.setInstanceStoppageCostPerVcpu(cost.getInstanceStoppageCostPerVcpu());
+         computeOfferingcost.setInstanceStoppageCostPerMhz(cost.getInstanceStoppageCostPerMhz());
+         computeOfferingcost.setInstanceRunningCostPerMhz(cost.getInstanceRunningCostPerMhz());
+         computeOfferingcost.setTotalCost(totalCost);
+         computeOfferingcost.setSetupCost(cost.getSetupCost());
+         computeOfferingcost.setZoneId(cost.getZoneId());
+         computeOfferingcost = costService.save(computeOfferingcost);
+         computeCost.add(computeOfferingcost);
+         computeCost.addAll(persistCompute.getComputeCost());
+         compute.setComputeCost(computeCost);
+         computeRepo.save(compute);
     }
 }

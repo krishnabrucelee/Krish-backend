@@ -200,8 +200,7 @@ public class TemplateServiceImpl implements TemplateService {
                 }
                 csUpdateTemplate(template,userId);
                 if(template.getTemplateCost().size() > 0 ) {
-                List<TemplateCost> templateCostList = updateTemplateCost(template);
-                template.setTemplateCost(templateCostList);
+                    updateTemplateCost(template);
                 if (userDetails.getType() == User.UserType.ROOT_ADMIN) {
                     if (pingService.apiConnectionCheck(errors) && template.getTemplateCost() != null) {
                         template = templateRepository.save(template);
@@ -814,12 +813,17 @@ public class TemplateServiceImpl implements TemplateService {
         List<TemplateCost> templateCostList = new ArrayList<TemplateCost>();
         Double tempCost = template.getTemplateCost().get(0).getCost();
         Template persistTemplate = find(template.getId());
-        TemplateCost templatecost = new TemplateCost();
-            templatecost.setCost(tempCost);
-            templatecost.setTemplateCostId(template.getId());
-            templatecost = templateCostService.save(templatecost);
-            templateCostList.add(templatecost);
-        templateCostList.addAll(persistTemplate.getTemplateCost());
+        List<TemplateCost> templatecostList = templateCostService.findAllByTemplateCost(template.getId());
+        if(templatecostList.size() != 0) {
+            TemplateCost persistedCost = templatecostList.get(templatecostList.size() - 1);
+                int templateGBCost = Double.compare(offeringNullCheck(tempCost),offeringNullCheck(persistedCost.getCost()));
+                if(templateGBCost >0 || templateGBCost <0) {
+                    this.templateCostSave(template);
+                }
+
+        } else {
+            this.templateCostSave(template);
+        }
         return templateCostList;
     }
 
@@ -893,5 +897,39 @@ public class TemplateServiceImpl implements TemplateService {
           }
         }
         return templates;
+    }
+
+    /**
+     * To save template cost.
+     *
+     * @param template object.
+     * @return template.
+     * @throws Exception if error occurs.
+     */
+    private Template templateCostSave(Template template) throws Exception {
+         List<TemplateCost> templateCostList = new ArrayList<TemplateCost>();
+         Double tempCost = template.getTemplateCost().get(0).getCost();
+         Template persistTemplate = find(template.getId());
+         TemplateCost templatecost = new TemplateCost();
+             templatecost.setCost(tempCost);
+             templatecost.setTemplateCostId(template.getId());
+             templatecost = templateCostService.save(templatecost);
+             templateCostList.add(templatecost);
+         templateCostList.addAll(persistTemplate.getTemplateCost());
+         template.setTemplateCost(templateCostList);
+        return template;
+    }
+
+    /**
+     * Offering cost null value check.
+     *
+     * @param value offering cost
+     * @return double value
+     */
+    public Double offeringNullCheck(Double value) {
+        if (value == null) {
+            value = 0.0;
+        }
+        return value;
     }
 }

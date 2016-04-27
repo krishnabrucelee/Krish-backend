@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
+import ck.panda.domain.entity.ComputeOfferingCost;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.StorageOfferingCost;
@@ -381,20 +382,25 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
      * @throws Exception if error occurs.
      */
     private StorageOffering costCalculation(StorageOffering storage) throws Exception {
-        List<StorageOfferingCost> storageCost = new ArrayList<StorageOfferingCost>();
-        StorageOffering persistStorage = find(storage.getId());
         StorageOfferingCost cost = storage.getStoragePrice().get(0);
         Double totalCost = storageCostService.totalcost(cost);
-        StorageOfferingCost storageOfferingcost = new StorageOfferingCost();
-             storageOfferingcost.setStorageId(storage.getId());
-             storageOfferingcost.setCostGbPerMonth(cost.getCostGbPerMonth());
-             storageOfferingcost.setCostPerMonth(cost.getCostPerMonth());
-             storageOfferingcost.setTotalCost(totalCost);
-             storageOfferingcost.setZoneId(cost.getZoneId());
-             storageOfferingcost = storageCostService.save(storageOfferingcost);
-             storageCost.add(storageOfferingcost);
-         storageCost.addAll(persistStorage.getStoragePrice());
-         storage.setStoragePrice(storageCost);
+        List<StorageOfferingCost> storageOfferingcostList = storageCostService.findByStorageId(storage.getId());
+        if (storageOfferingcostList.size() != 0) {
+            StorageOfferingCost persistedCost = storageOfferingcostList.get(storageOfferingcostList.size() - 1);
+            if (!storage.getIsCustomDisk()) {
+                int disk = Double.compare(offeringNullCheck(cost.getCostPerMonth()),offeringNullCheck(persistedCost.getCostPerMonth()));
+                if (disk >0 || disk <0) {
+                    this.storageCostSave(storage);
+                }
+            } else {
+                int customdisk = Double.compare(offeringNullCheck(cost.getCostGbPerMonth()),offeringNullCheck(persistedCost.getCostGbPerMonth()));
+                if (customdisk >0 || customdisk <0) {
+                    this.storageCostSave(storage);
+                }
+            }
+        } else {
+            this.storageCostSave(storage);
+        }
          return storage;
     }
 
@@ -445,4 +451,29 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
         }
         return value;
     }
+
+    /**
+     * To save storage offering cost
+     *
+     * @param storage object of the storage offering
+     * @return storage
+     * @throws Exception if error occurs.
+     */
+    private StorageOffering storageCostSave(StorageOffering storage) throws Exception {
+        List<StorageOfferingCost> storageCost = new ArrayList<StorageOfferingCost>();
+        StorageOffering persistStorage = find(storage.getId());
+        StorageOfferingCost cost = storage.getStoragePrice().get(0);
+        Double totalCost = storageCostService.totalcost(cost);
+        StorageOfferingCost storageOfferingcost = new StorageOfferingCost();
+             storageOfferingcost.setStorageId(storage.getId());
+             storageOfferingcost.setCostGbPerMonth(cost.getCostGbPerMonth());
+             storageOfferingcost.setCostPerMonth(cost.getCostPerMonth());
+             storageOfferingcost.setTotalCost(totalCost);
+             storageOfferingcost.setZoneId(cost.getZoneId());
+             storageOfferingcost = storageCostService.save(storageOfferingcost);
+             storageCost.add(storageOfferingcost);
+         storageCost.addAll(persistStorage.getStoragePrice());
+         storage.setStoragePrice(storageCost);
+        return storage;
+  }
 }
