@@ -238,7 +238,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @return list of user.
      */
     @Query(value = "SELECT user FROM User user WHERE user.type = :type AND user.isActive = :isActive")
-    User findByRootAdminUser(@Param("type") UserType type, @Param("isActive") Boolean isActive);
+    List<User> findByRootAdminUser(@Param("type") UserType type, @Param("isActive") Boolean isActive);
 
 
 }

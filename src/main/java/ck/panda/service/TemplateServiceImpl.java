@@ -352,25 +352,39 @@ public class TemplateServiceImpl implements TemplateService {
     public List<Template> findTemplateByFilters(Template template, Long id) throws Exception {
         User user = convertEntityService.getOwnerById(id);
         Domain domain = domainService.find(user.getDomainId());
-        User rootUser = userService.findByRootAdminUser();
-        if (template.getArchitecture() == null) {
-            template.setArchitecture(ALL_TEMPLATE);
-        }
-        if (template.getOsCategoryId() == null) {
-            if (domain != null && domain.getName().equals(DOMAIN_ROOT_ADMIN)) {
-                return csPrepareTemplate((List<Template>) templateRepository.findByTemplateAndFeature(
+        List<User> userList = userService.findByRootAdminUser();
+        List<Template> templates = null;
+        for(User rootUser: userList) {
+            if (template.getArchitecture() == null) {
+                template.setArchitecture(ALL_TEMPLATE);
+            }
+            if (template.getOsCategoryId() == null) {
+                if (domain != null && domain.getName().equals(DOMAIN_ROOT_ADMIN)) {
+                    templates = csPrepareTemplate((List<Template>) templateRepository.findByTemplateAndFeature(
                        template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true));
             }
-            return (List<Template>) templateRepository.findByTemplateAndUserId(template.getArchitecture(), TemplateType.SYSTEM,
-                    Status.ACTIVE, true,user.getDomainId(),rootUser.getId());
-        } else {
-            if (domain != null && domain.getName().equals(DOMAIN_ROOT_ADMIN)) {
-                return csPrepareTemplate(templateRepository.findAllByOsCategoryAndArchitectureAndType(template.getOsCategoryId(),
+                else {
+                    List<Template> templateList = templateRepository.findByTemplateOwnerIdAndIsActive(rootUser.getId(), true);
+                    if(templateList.size() != 0)
+                            {
+                        templates = (List<Template>) templateRepository.findByTemplateAndUserId(template.getArchitecture(), TemplateType.SYSTEM,
+                                    Status.ACTIVE, true,user.getDomainId(),rootUser.getId());
+                    }
+                }
+            } else {
+                if (domain != null && domain.getName().equals(DOMAIN_ROOT_ADMIN)) {
+                    templates = csPrepareTemplate(templateRepository.findAllByOsCategoryAndArchitectureAndType(template.getOsCategoryId(),
                        template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true));
-            }
-            return csPrepareTemplate(templateRepository.findAllByOsCategoryAndArchitectureAndTypeAndStatus(
-                   template.getOsCategoryId(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true,user.getDomainId(),rootUser.getId()));
+                }
+                else {
+                     if(templateRepository.findByTemplateOwnerIdAndIsActive(rootUser.getId(), true) != null) {
+                    templates = csPrepareTemplate(templateRepository.findAllByOsCategoryAndArchitectureAndTypeAndStatus(
+                            template.getOsCategoryId(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true,user.getDomainId(),rootUser.getId()));
+                     }
+                 }
+             }
         }
+        return templates;
     }
 
     @Override
@@ -751,11 +765,18 @@ public class TemplateServiceImpl implements TemplateService {
               }
         }
         else {
-            User rootUser = userService.findByRootAdminUser();
+            List<User> userList = userService.findByRootAdminUser();
+            for(User rootUser: userList) {
+                List<Template> templateList = templateRepository.findByTemplateOwnerIdAndIsActive(rootUser.getId(), true);
             if (type.equals(TEMPLATE_FEATURED)) {
+                 if(templateList.size() != 0) {
                 templates = templateRepository.findTemplateByFeatured(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), featured, shared, true,user.getDomainId(),rootUser.getId());
+                 }
             } else if (type.equals(TEMPLATE_COMMUNITY)) {
+                if(templateList.size() != 0) {
                 templates = templateRepository.findTemplateByCommunity(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), shared, true,user.getDomainId(),rootUser.getId());
+            }
+               }
             }
         }
          return templates;
@@ -856,12 +877,20 @@ public class TemplateServiceImpl implements TemplateService {
               }
         }
         else {
-            User rootUser = userService.findByRootAdminUser();
+            List<User> userList = userService.findByRootAdminUser();
+            for(User rootUser: userList) {
+                List<Template> templateList = templateRepository.findByTemplateOwnerIdAndIsActive(rootUser.getId(), true);
+
             if (type.equals(TEMPLATE_FEATURED)) {
+                if(templateList.size() != 0) {
                 templates = templateRepository.listTemplateByFeaturedAndDomainId(TemplateType.SYSTEM, featured, shared, true,user.getDomainId(),rootUser.getId());
+                }
             } else if (type.equals(TEMPLATE_COMMUNITY)) {
+                if(templateList.size() != 0) {
                 templates = templateRepository.listTemplateByCommunity(TemplateType.SYSTEM, shared, true,user.getDomainId(),rootUser.getId());
             }
+            }
+          }
         }
         return templates;
     }
