@@ -259,7 +259,7 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
 					totalCount = resourceLimit.getMax();
 				} else {
 					totalCount = resourceLimit.getMax()
-							+ (resourceLimitDomain.getUsedLimit() - resourceLimitDomain.getMax());
+							+ (resourceLimitDomain.getUsedLimit());
 				}
 				if (resourceLimitDomain.getMax() < totalCount && resourceLimitDomain.getMax() != -1) {
 					errors.addFieldError(resourceLimit.getResourceType().toString(),
@@ -366,19 +366,6 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
     public List<ResourceLimitDomain> findAllByDomainId(Long domainId) throws Exception {
         return (List<ResourceLimitDomain>) resourceLimitDomainRepo.findAllByDomainIdAndIsActive(domainId, true);
     }
-
-    /*@Override
-    public HashMap<String, Long> getSumOfDomainMin(Long id) throws Exception {
-        List<ResourceLimitDomain> resourceLimits = resourceLimitDomainRepo.findAllByDomainIdAndIsActive(id, true);
-        HashMap<String, Long> resourceMap = new HashMap<String, Long>();
-        for (ResourceLimitDomain resourceLimit : resourceLimits) {
-            Long sumOfAllDepartmentMax = resourceLimitDepartmentService.findByResourceCountByDepartmentAndResourceType(
-                    resourceLimit.getDomainId(),
-                    ResourceLimitDepartment.ResourceType.valueOf(resourceLimit.getResourceType().name()), 0L, true);
-            resourceMap.put(resourceLimit.getResourceType().toString(), sumOfAllDepartmentMax);
-        }
-        return resourceMap;
-    }*/
 
     @Override
     public HashMap<String, Long> getSumOfDomainMin(Long id) throws Exception {

@@ -156,8 +156,6 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Override
     @PreAuthorize("hasPermission(#vmInstance.getSyncFlag(), 'CREATE_VM')")
     public VmInstance saveVmInstance(VmInstance vmInstance, Long userId) throws Exception {
-        // 1. Event record.
-        Event vmEvent = new Event();
         // 2. Entity validation.
         Errors errors = validator.rejectIfNullEntity(CloudStackConstants.ENTITY_VMINSTANCE, vmInstance);
         errors = validator.validateEntity(vmInstance, errors);

@@ -155,7 +155,29 @@ public class DepartmentServiceImpl implements DepartmentService {
             LOGGER.debug("Department created successfully" + department.getUserName());
             saveDepartmentToPingProject(department);
         }
-        return departmentRepo.save(department);
+        department = departmentRepo.save(department);
+		if (department.getSyncFlag()) {
+			for (String keys : convertEntityService.getResourceTypeValue().keySet()) {
+				ResourceLimitDepartment persistDepartment = resourceLimitDepartmentService
+						.findByDepartmentAndResourceType(department.getId(), ResourceLimitDepartment.ResourceType
+								.valueOf(convertEntityService.getResourceTypeValue().get(keys)), true);
+				if (persistDepartment != null) {
+					resourceLimitDepartmentService.delete(persistDepartment);
+				}
+				ResourceLimitDepartment resourceLimitDepartment = new ResourceLimitDepartment();
+				resourceLimitDepartment.setDepartmentId(department.getId());
+				resourceLimitDepartment.setDomainId(department.getDomainId());
+				resourceLimitDepartment.setMax(0L);
+				resourceLimitDepartment.setAvailable(0L);
+				resourceLimitDepartment.setUsedLimit(0L);
+				resourceLimitDepartment.setResourceType(ResourceLimitDepartment.ResourceType
+						.valueOf(convertEntityService.getResourceTypeValue().get(keys)));
+				resourceLimitDepartment.setIsSyncFlag(false);
+				resourceLimitDepartment.setIsActive(true);
+				resourceLimitDepartmentService.update(resourceLimitDepartment);
+			}
+		}
+        return department;
     }
 
     /**
