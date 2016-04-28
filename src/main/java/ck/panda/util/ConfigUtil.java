@@ -5,11 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import ck.panda.domain.entity.CloudStackConfiguration;
-import ck.panda.domain.entity.User;
 import ck.panda.domain.repository.jpa.CloudStackConfigurationRepository;
-import ck.panda.service.DepartmentServiceImpl;
 import ck.panda.util.error.exception.EntityNotFoundException;
 
 /**
@@ -31,6 +28,7 @@ public class ConfigUtil {
     @Autowired
     private CloudStackServer server;
 
+    /** Token details service reference. */
     @Autowired
     private TokenDetails tokenDetails;
 
@@ -55,6 +53,13 @@ public class ConfigUtil {
         return server;
     }
 
+    /**
+     * Set the user api key and secret key.
+     *
+     * @return server status
+     * @throws NumberFormatException raise if number format exception
+     * @throws Exception raise if error
+     */
     public CloudStackServer setUserServer() throws NumberFormatException, Exception {
         CloudStackConfiguration config = configRepo.findOne(1L);
         if (config == null) {
@@ -62,6 +67,25 @@ public class ConfigUtil {
         } else {
             server.setServer(config.getApiURL(), tokenDetails.getTokenDetails("secretkey"),
                     tokenDetails.getTokenDetails("apikey"));
+        }
+        return server;
+    }
+
+    /**
+     * Set the instance user api key and secret key.
+     *
+     * @param secretkey secret key
+     * @param apikey api key
+     * @return server status
+     * @throws NumberFormatException raise if number format exception
+     * @throws Exception raise if error
+     */
+    public CloudStackServer setInstanceUserServer(String secretkey, String apikey) throws NumberFormatException, Exception {
+        CloudStackConfiguration config = configRepo.findOne(1L);
+        if (config == null) {
+            throw new EntityNotFoundException("config.not.found");
+        } else {
+            server.setServer(config.getApiURL(), secretkey, apikey);
         }
         return server;
     }
