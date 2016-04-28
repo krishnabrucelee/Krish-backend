@@ -256,12 +256,12 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
 						ResourceLimitDomain.ResourceType.valueOf(resourceLimit.getResourceType().name()), true);
 				Long totalCount = 0L;
 				if (resourceLimit.getMax() == -1) {
-					totalCount = resourceLimit.getMax();
+					totalCount = EmptytoLong(resourceLimit.getMax());
 				} else {
-					totalCount = resourceLimit.getMax()
-							+ (resourceLimitDomain.getUsedLimit());
+					totalCount = EmptytoLong(resourceLimit.getMax())
+							+ (EmptytoLong(resourceLimitDomain.getUsedLimit()));
 				}
-				if (resourceLimitDomain.getMax() < totalCount && resourceLimitDomain.getMax() != -1) {
+				if (EmptytoLong(resourceLimitDomain.getMax()) < EmptytoLong(totalCount) && EmptytoLong(resourceLimitDomain.getMax()) != -1) {
 					errors.addFieldError(resourceLimit.getResourceType().toString(),
 							departmentResourceCount + " in " + resourceLimit.getResourceType().toString() + " "
 									+ "already allocated to departments of this domain");
@@ -356,7 +356,7 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
             Long resourceDomainCount = resourceLimitDomainRepo.findTotalCountOfResourceProject(domainId,
                     ResourceLimitDomain.ResourceType.valueOf(resourceTypeMap.get(name)), true);
             if (resourceDomainCount != null) {
-                resourceMaxCount.put(resourceTypeMap.get(name), resourceDomainCount.toString());
+                resourceMaxCount.put(resourceTypeMap.get(name), EmptytoLong(resourceDomainCount).toString());
             }
         }
         return resourceMaxCount;
@@ -373,7 +373,7 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
         HashMap<String, Long> resourceMap = new HashMap<String, Long>();
         for (String name : resourceTypeMap.keySet()) {
         	ResourceLimitDomain resourceLimitDomain = resourceLimitDomainRepo.findByDomainAndResourceCount(id, ResourceLimitDomain.ResourceType.valueOf(resourceTypeMap.get(name)), true);
-            resourceMap.put(resourceTypeMap.get(name),resourceLimitDomain.getUsedLimit());
+            resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitDomain.getUsedLimit()));
         }
         return resourceMap;
     }

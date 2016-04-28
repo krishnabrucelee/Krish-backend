@@ -317,15 +317,15 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
             // resource type
             Long totalCount = 0L;
 			if(resourceLimit.getMax() == -1){
-				totalCount = resourceLimit.getMax();
+				totalCount = EmptytoLong(resourceLimit.getMax());
 			} else {
-				totalCount = resourceLimit.getMax() + (departmntLimit.getUsedLimit() - projectLimit.getMax());
+				totalCount = EmptytoLong(resourceLimit.getMax()) + (EmptytoLong(departmntLimit.getUsedLimit()) - EmptytoLong(projectLimit.getMax()));
 			}
             // if(step1 < step2)
             if (departmntLimit != null) {
-            	if(resourceLimit.getMax() == departmntLimit.getMax() && departmntLimit.getMax() == -1L) {
+            	if(EmptytoLong(resourceLimit.getMax()) == EmptytoLong(departmntLimit.getMax()) && EmptytoLong(departmntLimit.getMax()) == -1L) {
 
-            	} else if (departmntLimit.getMax() != -1 && departmntLimit.getMax() < totalCount) {
+            	} else if (EmptytoLong(departmntLimit.getMax()) != -1 && EmptytoLong(departmntLimit.getMax()) < totalCount) {
                     errors.addFieldError(resourceLimit.getResourceType().toString(),
                     		departmntLimit.getMax() + " in " + resourceLimit.getResourceType().toString() + " " + " for resource limit department exceeded");
                 }
@@ -409,7 +409,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
         for (String name : resourceTypeMap.keySet()) {
             ResourceLimitProject resourceLimitProject = resourceLimitProjectRepo.findByProjectAndResourceType(id, ResourceLimitProject.ResourceType.valueOf(resourceTypeMap.get(name)), true);
             if (resourceLimitProject != null) {
-                resourceMap.put(resourceTypeMap.get(name),resourceLimitProject.getUsedLimit());
+                resourceMap.put(resourceTypeMap.get(name),EmptytoLong(resourceLimitProject.getUsedLimit()));
             }
         }
         return resourceMap;
@@ -427,7 +427,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
                 if (resourceLimitDepartment.getMax() == -1) {
                     resourceMap.put(resourceTypeMap.get(name), -1L);
                 } else {
-                    resourceMap.put(resourceTypeMap.get(name),resourceLimitProject.getMax() + (resourceLimitDepartment.getMax() - resourceLimitDepartment.getUsedLimit()));
+                    resourceMap.put(resourceTypeMap.get(name),EmptytoLong(resourceLimitProject.getMax()) + (EmptytoLong(resourceLimitDepartment.getMax()) - EmptytoLong(resourceLimitDepartment.getUsedLimit())));
                 }
             } else {
                 if (resourceLimitDepartment.getUsedLimit() == null) {
@@ -436,7 +436,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
                 	 if (resourceLimitDepartment.getMax() == -1) {
                 		 resourceMap.put(resourceTypeMap.get(name), -1L);
                 	 } else {
-                		 resourceMap.put(resourceTypeMap.get(name),(resourceLimitDepartment.getMax() - resourceLimitDepartment.getUsedLimit()));
+                		 resourceMap.put(resourceTypeMap.get(name),(EmptytoLong(resourceLimitDepartment.getMax()) - EmptytoLong(resourceLimitDepartment.getUsedLimit())));
                 	 }
                 }
             }

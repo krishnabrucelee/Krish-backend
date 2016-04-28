@@ -244,15 +244,15 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
 				ResourceLimitDepartment department = resourceLimitDepartmentRepo.findByDepartmentAndResourceType(resourceLimit.getDomainId(), ResourceLimitDepartment.ResourceType.valueOf(resourceLimit.getResourceType().name()), true);
 				Long totalCount = 0L;
 				if(resourceLimit.getMax() == -1){
-					totalCount = resourceLimit.getMax();
+					totalCount = EmptytoLong(resourceLimit.getMax());
 				} else {
-					totalCount = resourceLimit.getMax() + (domainLimit.getUsedLimit() - department.getMax());
+					totalCount = EmptytoLong(resourceLimit.getMax()) + (EmptytoLong(domainLimit.getUsedLimit()) - EmptytoLong(department.getMax()));
 				}
 				// if(step1 < step2) {
 				if (domainLimit != null) {
-					if (resourceLimit.getMax() == domainLimit.getMax() && domainLimit.getMax() == -1L) {
+					if (EmptytoLong(resourceLimit.getMax()) == EmptytoLong(domainLimit.getMax()) && EmptytoLong(domainLimit.getMax()) == -1L) {
 
-					} else if (domainLimit.getMax() !=-1 && domainLimit.getMax() < totalCount) {
+					} else if (EmptytoLong(domainLimit.getMax()) !=-1 && EmptytoLong(domainLimit.getMax()) < totalCount) {
 						errors.addFieldError(resourceLimit.getResourceType().toString(),
 								domainLimit.getMax() + " in " + resourceLimit.getResourceType().toString() + " "
 										+ " for resource limit domain exceeded");
@@ -335,7 +335,7 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
         for (String name : resourceTypeMap.keySet()) {
             Long resourceDepartmentCount = resourceLimitDepartmentRepo.findTotalCountOfResourceDepartment(domainId, ResourceLimitDepartment.ResourceType.valueOf(resourceTypeMap.get(name)), true);
             if (resourceDepartmentCount != null) {
-            resourceMaxCount.put(resourceTypeMap.get(name), resourceDepartmentCount.toString());
+            resourceMaxCount.put(resourceTypeMap.get(name), EmptytoLong(resourceDepartmentCount).toString());
             }
         }
         return resourceMaxCount;
@@ -395,7 +395,7 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
         for (String name : resourceTypeMap.keySet()) {
             ResourceLimitDepartment resourceLimitDepartment = resourceLimitDepartmentRepo.findByDepartmentAndResourceType(id, ResourceLimitDepartment.ResourceType.valueOf(resourceTypeMap.get(name)), true);
             if (resourceLimitDepartment != null) {
-                resourceMap.put(resourceTypeMap.get(name), resourceLimitDepartment.getUsedLimit());
+                resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitDepartment.getUsedLimit()));
             }
         }
         return resourceMap;
@@ -415,17 +415,17 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
                 if (resourceLimitDomain.getMax() == -1) {
                     resourceMap.put(resourceTypeMap.get(name), -1L);
                 } else {
-                    resourceMap.put(resourceTypeMap.get(name), resourceLimitDepartment.getMax() + (resourceLimitDomain.getMax() - resourceLimitDomain.getUsedLimit()));
+                    resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitDepartment.getMax()) + (EmptytoLong(resourceLimitDomain.getMax()) - EmptytoLong(resourceLimitDomain.getUsedLimit())));
                 }
             } else {
                 if (resourceLimitDomain.getUsedLimit() == null) {
-                    resourceMap.put(resourceTypeMap.get(name), resourceLimitDomain.getMax());
+                    resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitDomain.getMax()));
                 } else {
 					if (resourceLimitDomain.getMax() == -1) {
 						resourceMap.put(resourceTypeMap.get(name), -1L);
 					} else {
 						resourceMap.put(resourceTypeMap.get(name),
-								(resourceLimitDomain.getMax() - resourceLimitDomain.getUsedLimit()));
+								(EmptytoLong(resourceLimitDomain.getMax()) - EmptytoLong(resourceLimitDomain.getUsedLimit())));
 					}
                 }
             }
