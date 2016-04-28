@@ -181,6 +181,20 @@ public class ResourceLimitDomainController extends CRUDController<ResourceLimitD
         return resourceLimitDomainService.getResourceLimitsOfDomain(convertEntityService.getDepartmentById(departmentId).getDomainId());
     }
 
+    
+    /**
+     * Get resource limits of domain.
+     *
+     * @param domainId domain id
+     * @return max values of resources
+     * @throws Exception error occurs.
+     */
+    @RequestMapping(value = "/domainquota/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    public HashMap<String, String> findByDomainQuotaByDomainId(@PathVariable(PATH_ID) Long domainId) throws Exception {
+        return resourceLimitDomainService.getResourceLimitsOfDomain(domainId);
+    }
+    
     /**
      * Get resource limits of Domain.
      *

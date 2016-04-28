@@ -461,6 +461,7 @@ public class ProjectServiceImpl implements ProjectService {
     public Boolean saveProjectToPing(Project project) throws Exception {
         JSONObject optional = new JSONObject();
         optional.put(PingConstants.UUID, project.getUuid());
+        optional.put(PingConstants.NAME, project.getName());
         optional.put(PingConstants.DOMAIN_ID, convertEntityService.getDomainById(project.getDomainId()).getUuid());
         optional.put(PingConstants.DEPARTMENT_UUID, convertEntityService.getDepartmentById(project.getDepartmentId()).getUuid());
         pingService.addProjectToPing(optional);
