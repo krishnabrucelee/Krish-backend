@@ -673,7 +673,6 @@ public class VolumeServiceImpl implements VolumeService {
     private Volume createVolume(Volume volume, Long userId, Errors errors) throws Exception {
         config.setUserServer();
         String volumeS = csVolumeService.createVolume(volume.getName(),
-
                 convertEntityService.getZoneUuidById(volume.getZoneId()), CloudStackConstants.JSON,
                 optionalValuesToMap(volume, userId));
         LOGGER.info("Volume create response " + volumeS);

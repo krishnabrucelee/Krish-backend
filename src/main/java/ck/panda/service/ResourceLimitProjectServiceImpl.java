@@ -340,8 +340,11 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
     @Override
     public Long findByResourceCountByProjectAndResourceType(Long departmentId,
             ResourceLimitProject.ResourceType resourceType, Long projectId, Boolean isActive) throws Exception {
-        return resourceLimitProjectRepo.findByResourceCountByProjectAndResourceType(departmentId, resourceType,
+        Long count = resourceLimitProjectRepo.findByResourceCountByProjectAndResourceType(departmentId, resourceType,
                 projectId, isActive);
+        Long count1  = resourceLimitProjectRepo.findByResourceCountByProjectAndResourceTypes(departmentId, resourceType,
+                projectId, isActive);
+        return EmptytoLong(count) + EmptytoLong(count1);
     }
 
     @Override
@@ -373,18 +376,17 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
         HashMap<String, String> resourceMaxCount = new HashMap<String, String>();
         for (String name : resourceTypeMap.keySet()) {
             Long resourceProjectCount = resourceLimitProjectRepo.findTotalCountOfResourceProject(domainId, ResourceLimitProject.ResourceType.valueOf(resourceTypeMap.get(name)), true);
-            if (resourceProjectCount != null) {
-                resourceMaxCount.put(resourceTypeMap.get(name), resourceProjectCount.toString());
-            }
+            Long resourceProjectCounts = resourceLimitProjectRepo.findTotalCountOfResourceProjects(domainId, ResourceLimitProject.ResourceType.valueOf(resourceTypeMap.get(name)), true);
+            resourceMaxCount.put(resourceTypeMap.get(name), String.valueOf((EmptytoLong(resourceProjectCount) + EmptytoLong(resourceProjectCounts))));
         }
-
         return resourceMaxCount;
     }
 
     @Override
     public Long getTotalCountOfResourceProject(Long departmentId, ResourceLimitProject.ResourceType resourceType) {
             Long resourceProjectCount = resourceLimitProjectRepo.findTotalCountOfResourceDepartment(departmentId, resourceType, true);
-        return resourceProjectCount;
+            Long resourceProjectCounts = resourceLimitProjectRepo.findTotalCountOfResourceDepartments(departmentId, resourceType, true);
+        return EmptytoLong(resourceProjectCount) + EmptytoLong(resourceProjectCounts);
     }
     @Override
     public HashMap<String, String> getResourceLimitsOfDepartment(Long departmentId) {
@@ -392,11 +394,11 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
         HashMap<String, String> resourceMaxCount = new HashMap<String, String>();
         for (String name : resourceTypeMap.keySet()) {
             Long resourceProjectCount = resourceLimitProjectRepo.findTotalCountOfResourceDepartment(departmentId, ResourceLimitProject.ResourceType.valueOf(resourceTypeMap.get(name)), true);
+            Long resourceProjectCounts = resourceLimitProjectRepo.findTotalCountOfResourceDepartments(departmentId, ResourceLimitProject.ResourceType.valueOf(resourceTypeMap.get(name)), true);
             if (resourceProjectCount != null) {
-                resourceMaxCount.put(resourceTypeMap.get(name), EmptytoLong(resourceProjectCount).toString());
+                resourceMaxCount.put(resourceTypeMap.get(name), String.valueOf((EmptytoLong(resourceProjectCount) + EmptytoLong(resourceProjectCounts))));
             }
         }
-
         return resourceMaxCount;
     }
 
@@ -431,7 +433,11 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
                 if (resourceLimitDepartment.getUsedLimit() == null) {
                     resourceMap.put(resourceTypeMap.get(name), resourceLimitDepartment.getMax());
                 } else {
-                    resourceMap.put(resourceTypeMap.get(name),(resourceLimitDepartment.getMax() - resourceLimitDepartment.getUsedLimit()));
+                	 if (resourceLimitDepartment.getMax() == -1) {
+                		 resourceMap.put(resourceTypeMap.get(name), -1L);
+                	 } else {
+                		 resourceMap.put(resourceTypeMap.get(name),(resourceLimitDepartment.getMax() - resourceLimitDepartment.getUsedLimit()));
+                	 }
                 }
             }
         }

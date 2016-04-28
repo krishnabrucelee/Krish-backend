@@ -2089,10 +2089,8 @@ public class SyncServiceImpl implements SyncService {
         List<ResourceLimitProject> csResourceList = resourceProjectService.findAllFromCSServerProject(project.getUuid());
                HashMap<String, ResourceLimitProject> csResourceMap = (HashMap<String, ResourceLimitProject>) ResourceLimitProject
                 .convert(csResourceList);
-
         // 2. Get all the resource objects from application
         List<ResourceLimitProject> appResourceList = resourceProjectService.findAllByProjectIdAndIsActive(project.getId(), true);
-
         // 3. Iterate application resource list
         LOGGER.debug("Total rows updated : " + (appResourceList.size()));
         for (ResourceLimitProject resource : appResourceList) {
@@ -2113,9 +2111,7 @@ public class SyncServiceImpl implements SyncService {
                 resourceProjectService.update(resource);
             }
         }
-        // 4. Get the remaining list of cs server hash resource object, then
-        // iterate and
-        // add it to app db
+        // 4. Get the remaining list of cs server hash resource object, then iterate and add it to app db.
         for (String key : csResourceMap.keySet()) {
             LOGGER.debug("Syncservice resource Project id:");
             resourceProjectService.save(csResourceMap.get(key));
@@ -2125,7 +2121,7 @@ public class SyncServiceImpl implements SyncService {
         // Used for setting optional values for resource count.
         HashMap<String, String> projectCountMap = new HashMap<String, String>();
         projectCountMap.put(CloudStackConstants.CS_PROJECT_ID, project.getUuid());
-        //Sync for resource count in domain
+        // Sync for resource count in domain.
         String csResponse = cloudStackResourceCapacity.updateResourceCount(
                 convertEntityService.getDomainById(project.getDomainId()).getUuid(), projectCountMap, CloudStackConstants.JSON);
         convertEntityService.resourceCount(csResponse);
@@ -2143,7 +2139,7 @@ public class SyncServiceImpl implements SyncService {
         departmentMap = resourceDepartmentService.getResourceCountsOfDepartment(project.getDepartmentId());
         for (String key : projectMap.keySet()) {
 			if (!key.equalsIgnoreCase(CloudStackConstants.PROJECT)) {
-                // departmentUsed
+                // departmentUsed.
                 ResourceLimitProject resourceLimitProject = resourceProjectService.findByProjectAndResourceType(
                         project.getId(), ResourceLimitProject.ResourceType.valueOf(key), true);
                 if (Long.parseLong(domainMap.get(key)) == -1L) {
@@ -2169,21 +2165,24 @@ public class SyncServiceImpl implements SyncService {
 		projectMap = resourceProjectService.getResourceLimitsOfDepartment(department.getId());
 		departmentMap = resourceDepartmentService.getResourceCountsOfDepartment(department.getId());
 		for (String key : departmentMap.keySet()) {
-			ResourceLimitDepartment resourceLimitDepartment = resourceDepartmentService.findByDepartmentAndResourceType(
-					department.getId(), ResourceLimitDepartment.ResourceType.valueOf(key), true);
-			if (projectMap != null) {
-                resourceLimitDepartment
-                        .setUsedLimit(Long.parseLong(projectMap.get(key)) + Long.parseLong(departmentMap.get(key)));
-			} else {
-				resourceLimitDepartment.setUsedLimit(Long.parseLong(departmentMap.get(key)));
+			if (!key.equalsIgnoreCase(CloudStackConstants.PROJECT)) {
+				ResourceLimitDepartment resourceLimitDepartment = resourceDepartmentService
+						.findByDepartmentAndResourceType(department.getId(),
+								ResourceLimitDepartment.ResourceType.valueOf(key), true);
+				if (!projectMap.isEmpty()) {
+					resourceLimitDepartment
+							.setUsedLimit(Long.parseLong(projectMap.get(key)) + Long.parseLong(departmentMap.get(key)));
+				} else {
+					resourceLimitDepartment.setUsedLimit(Long.parseLong(departmentMap.get(key)));
+				}
+				if (resourceLimitDepartment.getResourceType().equals(ResourceLimitDepartment.ResourceType.Project)) {
+					resourceLimitDepartment.setMax(-1L);
+				} else {
+					resourceLimitDepartment.setMax(resourceLimitDepartment.getUsedLimit());
+				}
+				resourceLimitDepartment.setIsSyncFlag(false);
+				resourceDepartmentService.update(resourceLimitDepartment);
 			}
-			if (resourceLimitDepartment.getResourceType().equals(ResourceLimitDepartment.ResourceType.Project)) {
-				resourceLimitDepartment.setMax(-1L);
-			} else {
-				resourceLimitDepartment.setMax(resourceLimitDepartment.getUsedLimit());
-			}
-			resourceLimitDepartment.setIsSyncFlag(false);
-			resourceDepartmentService.update(resourceLimitDepartment);
         }
     }
 
@@ -2191,10 +2190,14 @@ public class SyncServiceImpl implements SyncService {
         List<ResourceLimitDepartment> persistDepartments = resourceDepartmentService.findAll();
         List<ResourceLimitProject> persistResourceLimitProjects = resourceProjectService.findAll();
         for(ResourceLimitDepartment department: persistDepartments) {
-			updateResourceLimit(department, CloudStackConstants.CS_DEPARTMENT);
+			if (!department.getResourceType().equals(ResourceLimitDepartment.ResourceType.Project)) {
+				updateResourceLimit(department, CloudStackConstants.CS_DEPARTMENT);
+			}
         }
         for(ResourceLimitProject project: persistResourceLimitProjects) {
-			updateResourceLimit(project, CloudStackConstants.PROJECT);
+			if (!project.getResourceType().equals(ResourceLimitProject.ResourceType.Project)) {
+				updateResourceLimit(project, CloudStackConstants.PROJECT);
+			}
         }
     }
 
@@ -2205,7 +2208,6 @@ public class SyncServiceImpl implements SyncService {
      * @throws Exception cloudstack unhandled errors.
      */
     private void syncIso() throws ApplicationException, Exception {
-
         // 1. Get all the iso objects from CS server as hash
         List<Iso> csIsoService = isoService.findAllFromCSServer();
         HashMap<String, Iso> csIsoMap = (HashMap<String, Iso>) Iso.convert(csIsoService);
