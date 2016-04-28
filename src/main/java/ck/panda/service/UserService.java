@@ -279,6 +279,6 @@ public interface UserService extends CRUDService<User> {
      * @return user.
      * @throws Exception if error occurs.
      */
-    User findByRootAdminUser() throws Exception;
+    List<User> findByRootAdminUser() throws Exception;
 
 }

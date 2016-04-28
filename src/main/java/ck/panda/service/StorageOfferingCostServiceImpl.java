@@ -68,4 +68,9 @@ public class StorageOfferingCostServiceImpl implements StorageOfferingCostServic
     public StorageOfferingCost findByCostAndId(Long storageId, Double totalCost) {
         return costRepo.findByStorageAndTotalCost(storageId, totalCost);
     }
+
+    @Override
+    public List<StorageOfferingCost> findByStorageId(Long storageId) {
+        return costRepo.findByStorageId(storageId);
+    }
 }

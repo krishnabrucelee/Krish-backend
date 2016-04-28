@@ -1,5 +1,7 @@
 package ck.panda.domain.repository.jpa;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -20,4 +22,7 @@ public interface StorageOfferingCostRepository extends PagingAndSortingRepositor
     @Query(value = "SELECT cost FROM StorageOfferingCost cost WHERE cost.storageId = :storageId AND cost.totalCost = :totalcost")
     StorageOfferingCost findByStorageAndTotalCost(@Param("storageId") Long storageId,
             @Param("totalcost") Double totalCost);
+
+    @Query(value = "SELECT cost FROM StorageOfferingCost cost WHERE cost.storageId = :storageId ")
+    List<StorageOfferingCost> findByStorageId(@Param("storageId") Long storageId);
 }
