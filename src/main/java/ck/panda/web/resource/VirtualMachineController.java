@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -166,12 +165,12 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<VmInstance> getVmList() throws Exception {
-    	List<Status> status = new ArrayList<Status>();
-    	status.add(Status.EXPUNGING);
-    	status.add(Status.ERROR);
-    	status.add(Status.DESTROYED);
-    	status.add(Status.STARTING);
-    	status.add(Status.STOPPING);
+        List<Status> status = new ArrayList<Status>();
+        status.add(Status.EXPUNGING);
+        status.add(Status.ERROR);
+        status.add(Status.DESTROYED);
+        status.add(Status.STARTING);
+        status.add(Status.STOPPING);
         return virtualmachineservice.findByVmStatus(status, Long.valueOf(tokenDetails.getTokenDetails("id")));
     }
 
@@ -236,14 +235,14 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
         // TODO optimize/refactor this console code after completion of Kanaka NoVNC configuration.
         String token = null;
         VmInstance persistInstance = virtualmachineservice.find(vminstance.getId());
-		if (persistInstance.getHost() != null) {
-			String hostUUID = persistInstance.getHost().getUuid(); // VM's the host's UUID.
-			String instanceUUID = persistInstance.getUuid(); // virtual machine UUID.
-			token = hostUUID + "-" + instanceUUID;
-			LOGGER.debug("VNC Token" + token);
-		} else {
-			// VM console issue fixed. PK-557.
-			 HashMap<String, String> vmMap = new HashMap<String, String>();
+        if (persistInstance.getHost() != null) {
+            String hostUUID = persistInstance.getHost().getUuid(); // VM's the host's UUID.
+            String instanceUUID = persistInstance.getUuid(); // virtual machine UUID.
+            token = hostUUID + "-" + instanceUUID;
+            LOGGER.debug("VNC Token" + token);
+        } else {
+            // VM console issue fixed. PK-557.
+             HashMap<String, String> vmMap = new HashMap<String, String>();
              vmMap.put(CloudStackConstants.CS_ID, persistInstance.getUuid());
              configUtil.setServer(1L);
              String response = cloudStackInstanceService.listVirtualMachines(CloudStackConstants.JSON, vmMap);
@@ -264,11 +263,11 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
                  }
                  persistInstance = virtualmachineservice.update(persistInstance);
                  String hostUUID = persistInstance.getHost().getUuid(); // VM's the host's UUID.
-     			 String instanceUUID = persistInstance.getUuid(); // virtual machine UUID.
-     			 token = hostUUID + "-" + instanceUUID;
-     			 LOGGER.debug("VNC Token" + token);
+                  String instanceUUID = persistInstance.getUuid(); // virtual machine UUID.
+                  token = hostUUID + "-" + instanceUUID;
+                  LOGGER.debug("VNC Token" + token);
              }
-		}
+        }
         return "{\"success\":" + "\"" + consoleProxy + "/console/?token=" + token + "\"}";
     }
 
@@ -395,6 +394,34 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     @ResponseBody
     protected VmInstance resetSSHKey(@RequestBody VmInstance vminstance) throws Exception {
         return virtualmachineservice.resetSSHKey(vminstance);
+    }
+
+    /**
+     * Update the affinity group for created instance.
+     *
+     * @param vminstance object.
+     * @return instance
+     * @throws Exception if error occurs.
+     */
+    @RequestMapping(value = "/affinityGroup", method = RequestMethod.PUT, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected VmInstance affinityGroup(@RequestBody VmInstance vminstance) throws Exception {
+        return virtualmachineservice.affinityGroup(vminstance);
+    }
+
+    /**
+     * Get instance list by affinity group id.
+     *
+     * @param id group id
+     * @return affinity group list
+     * @throws Exception error occurs
+     */
+    @RequestMapping(value = "/affinityGroupInstance/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<VmInstance> affinityGroupInstance(@PathVariable(PATH_ID) Long id) throws Exception {
+         return virtualmachineservice.findInstanceByGroup(id);
     }
 
 }

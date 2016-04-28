@@ -435,4 +435,5 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      */
     @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.instanceOwner = :user AND vm.status = :status")
     List<VmInstance> findAllByUserAndStatus(@Param("user") User instanceOwner, @Param("status") Status status);
+
 }

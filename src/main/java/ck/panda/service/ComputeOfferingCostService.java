@@ -1,5 +1,7 @@
 package ck.panda.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import ck.panda.domain.entity.ComputeOfferingCost;
@@ -20,6 +22,14 @@ public interface ComputeOfferingCostService extends CRUDService<ComputeOfferingC
      * @return computeoffering cost.
      */
     ComputeOfferingCost findByCostAndId(Long computeId, Double totalCost);
+
+    /**
+     * Find computeofferingcost by id.
+     *
+     * @param computeId of the offering.
+     * @return computeoffering cost.
+     */
+    List<ComputeOfferingCost> findByComputeOfferingId(Long computeId);
 
     /**
      * Calculate total cost of the compute offering.

@@ -116,4 +116,9 @@ public class ComputeOfferingCostServiceImpl implements ComputeOfferingCostServic
     public ComputeOfferingCost findByCostAndId(Long computeId, Double totalCost) {
         return costRepo.findByComputeAndTotalCost(computeId, totalCost);
     }
+
+    @Override
+    public List<ComputeOfferingCost> findByComputeOfferingId(Long computeId) {
+        return costRepo.findByComputeId(computeId);
+    }
 }

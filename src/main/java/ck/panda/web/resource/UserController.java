@@ -73,9 +73,8 @@ public class UserController extends CRUDController<User> implements ApiControlle
      * @return user reference.
      * @throws Exception if error.
      */
-    @RequestMapping(value = "suspend/{id}", method = RequestMethod.PUT, produces = {
-            MediaType.APPLICATION_JSON_VALUE }, consumes = { MediaType.APPLICATION_JSON_VALUE })
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @RequestMapping(value = "suspend/{id}", method = RequestMethod.PUT, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public User updateSuspended(@RequestBody User user, @PathVariable(PATH_ID) Long id) throws Exception {
         return userService.updateSuspended(user);

@@ -1,5 +1,7 @@
 package ck.panda.domain.repository.jpa;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -19,4 +21,13 @@ public interface TemplateCostRepository extends PagingAndSortingRepository<Templ
      */
     @Query(value = "SELECT templateCost FROM TemplateCost templateCost WHERE templateCost.templateCostId = :templateCostId AND templateCost.cost = :cost")
     TemplateCost findByTemplateCost(@Param("templateCostId") Long templateCostId, @Param("cost") Double cost);
+
+    /**
+     * Find template cost using template id
+     *
+     * @param templateCostId of the template
+     * @return template cost
+     */
+    @Query(value = "SELECT templateCost FROM TemplateCost templateCost WHERE templateCost.templateCostId = :templateCostId")
+    List<TemplateCost> findByTemplateCost(@Param("templateCostId") Long templateCostId);
 }

@@ -3,7 +3,6 @@ package ck.panda.service;
 import java.util.HashMap;
 import java.util.List;
 import org.springframework.data.domain.Page;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.Template;
@@ -111,7 +110,7 @@ public interface TemplateService extends CRUDService<Template> {
      * @param shared template
      * @return type of the template
      */
-    Page<Template> findAllByType(PagingAndSorting pagingAndSorting, String type, Boolean featured, Boolean shared);
+    Page<Template> findAllByType(PagingAndSorting pagingAndSorting, String type, Boolean featured, Boolean shared,Long userId)throws Exception;
 
     /**
      * To save the created template based on user id.
@@ -163,6 +162,18 @@ public interface TemplateService extends CRUDService<Template> {
      * @return template list.
      * @throws Exception if errors.
      */
-    List<Template> findAllByUserIdIsActiveAndShare(TemplateType type, Status status, Boolean isActive, Long userId) throws Exception;
-    
+    List<Template> findAllByUserIdIsActiveAndShare(TemplateType type, Status status, Boolean isActive, Long userId) throws Exception;    
+
+    /**
+     * Find all the templates by type, isActive status and user Id.
+     *
+     * @param type of the template.
+     * @param featured type of the template.
+     * @param shared type of the template.
+     * @param userId of the template.
+     * @return templates.
+     * @throws Exception if error occurs.
+     */
+	List<Template> findAllTemplateByType(String type, Boolean featured, Boolean shared,Long userId) throws Exception;
 }
+	

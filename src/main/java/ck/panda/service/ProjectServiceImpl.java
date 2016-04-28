@@ -59,6 +59,10 @@ public class ProjectServiceImpl implements ProjectService {
     @Autowired
     private VirtualMachineService virtualMachineService;
 
+    /** Listing resource limit project service. */
+    @Autowired
+    private ResourceLimitProjectService resourceProjectService;
+
     /** project repository reference. */
     @Autowired
     private ProjectRepository projectRepository;
@@ -143,8 +147,31 @@ public class ProjectServiceImpl implements ProjectService {
             }
         }
         // Save the entity with uuid for created new project in CS.
-        return projectRepository.save(project);
-    }
+        project = projectRepository.save(project);
+		if (project.getSyncFlag()) {
+			for (String keys : convertEntityService.getResourceTypeValue().keySet()) {
+				ResourceLimitProject persistProject = resourceProjectService
+						.findByProjectAndResourceType(project.getId(), ResourceLimitProject.ResourceType
+								.valueOf(convertEntityService.getResourceTypeValue().get(keys)), true);
+				if (persistProject != null) {
+					resourceProjectService.delete(persistProject);
+				}
+				ResourceLimitProject resourceLimitProject = new ResourceLimitProject();
+				resourceLimitProject.setDepartmentId(project.getDepartmentId());
+				resourceLimitProject.setDomainId(project.getDomainId());
+				resourceLimitProject.setProjectId(project.getId());
+				resourceLimitProject.setMax(0L);
+				resourceLimitProject.setAvailable(0L);
+				resourceLimitProject.setUsedLimit(0L);
+				resourceLimitProject.setResourceType(ResourceLimitProject.ResourceType
+						.valueOf(convertEntityService.getResourceTypeValue().get(keys)));
+				resourceLimitProject.setIsSyncFlag(false);
+				resourceLimitProject.setIsActive(true);
+				resourceProjectService.update(resourceLimitProject);
+			}
+		}
+		return project;
+	}
 
     @Override
     @PreAuthorize("hasPermission(#project.getSyncFlag(), 'EDIT_PROJECT')")
@@ -313,7 +340,11 @@ public class ProjectServiceImpl implements ProjectService {
         for (ResourceLimitDepartment departmentLimit : resourceLimitDepartment) {
         	for (ResourceLimitProject projectLimit : resourceLimitProject) {
         		if (departmentLimit.getResourceType().toString().equals(projectLimit.getResourceType().toString())) {
-        			departmentLimit.setUsedLimit(departmentLimit.getUsedLimit() - projectLimit.getMax());
+					if (projectLimit.getMax() == -1L) {
+        				departmentLimit.setUsedLimit(EmptytoLong(departmentLimit.getUsedLimit()));
+        			} else {
+        				departmentLimit.setUsedLimit(EmptytoLong(departmentLimit.getUsedLimit()) - EmptytoLong(projectLimit.getMax()));
+        			}
         			resourceLimitDepartmentService.save(departmentLimit);
         			projectLimit.setIsActive(false);
         			projectLimit.setIsSyncFlag(false);
@@ -440,5 +471,18 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Project findByProjectNameAndIsActive(String projectAccountName, Long domainId, Boolean isActive) {
         return projectRepository.findByProjectNameAndIsActive(projectAccountName, domainId, isActive);
+    }
+
+    /**
+     * Empty check.
+     *
+     * @param value long value
+     * @return long.
+     */
+    public Long EmptytoLong(Long value) {
+        if (value == null) {
+            return 0L;
+        }
+        return value;
     }
 }

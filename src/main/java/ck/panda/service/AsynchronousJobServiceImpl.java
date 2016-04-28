@@ -527,11 +527,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             if (eventObject.getString("commandEventType").equals(EventTypes.EVENT_VM_CREATE)) {
                 this.assignNicTovM(vmIn);
                 this.assignVolumeTovM(vmIn);
-                IpAddress ipAddress = ipService.UpdateIPByNetwork(vmIn.getNetwork().getUuid());
-                if (ipAddress != null) {
-                    vmIn.setPublicIpAddress(ipAddress.getPublicIpAddress());
-                    vmIn = virtualMachineService.update(vmIn);
-                }
                 if (volumeService.findByInstanceAndVolumeType(vmIn.getId()) != null) {
                     vmIn.setVolumeSize(volumeService.findByInstanceAndVolumeType(vmIn.getId()).getDiskSize());
                     vmIn = virtualMachineService.update(vmIn);
@@ -565,15 +560,28 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                             vmIn = virtualMachineService.update(vmIn);
                         }
                     }
+				}
+				if (vmIn.getProjectId() != null) {
+					updateResourceCountService.QuotaUpdateByResourceObject(vmIn, CS_Instance, vmIn.getProjectId(),
+							CS_Project, Update);
+				} else {
+					updateResourceCountService.QuotaUpdateByResourceObject(vmIn, CS_Instance, vmIn.getDepartmentId(),
+							CS_Department, Update);
+				}
+				IpAddress ipAddress = ipService
+						.UpdateIPByNetwork(convertEntityService.getNetworkById(vmIn.getNetworkId()).getUuid());
+				if (ipAddress != null) {
+					vmIn.setPublicIpAddress(ipAddress.getPublicIpAddress());
+					vmIn = virtualMachineService.update(vmIn);
+				}
+			}
+			if (eventObject.getString("commandEventType").equals(EventTypes.EVENT_VM_DESTROY)) {
+				if (vmIn.getProjectId() != null) {
+                    updateResourceCountService.QuotaUpdateByResourceObject(vmIn, "Destroy", vmIn.getProjectId(), "Project", "delete");
+                } else {
+                    updateResourceCountService.QuotaUpdateByResourceObject(vmIn, "Destroy", vmIn.getDepartmentId(), "Department", "delete");
                 }
-                    if (vmIn.getProjectId() != null) {
-                        updateResourceCountService.QuotaUpdateByResourceObject(vmIn, CS_Instance, vmIn.getProjectId(),
-                                CS_Project, Update);
-                    } else {
-                        updateResourceCountService.QuotaUpdateByResourceObject(vmIn, CS_Instance,
-                                vmIn.getDepartmentId(), CS_Department, Update);
-                    }
-            }
+			}
         }
     }
 

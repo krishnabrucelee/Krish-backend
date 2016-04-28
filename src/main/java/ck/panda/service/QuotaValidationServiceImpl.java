@@ -90,6 +90,7 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
             resourceList.add(ConvertEntityService.CS_MEMORY);
             resourceList.add(ConvertEntityService.CS_PRIMARY_STORAGE);
             resourceList.add(ConvertEntityService.CS_IP);
+            resourceUsageMap.put(ConvertEntityService.CS_CPU, 1L);
             resourceUsageMap.put(ConvertEntityService.CS_IP, 1L);
             if (accountType.equals("Project")) {
                 String validateMessage = checkResourceAvailablity(accountTypeId, accountType, resourceList, resourceUsageMap);

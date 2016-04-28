@@ -155,7 +155,29 @@ public class DepartmentServiceImpl implements DepartmentService {
             LOGGER.debug("Department created successfully" + department.getUserName());
             saveDepartmentToPingProject(department);
         }
-        return departmentRepo.save(department);
+        department = departmentRepo.save(department);
+		if (department.getSyncFlag()) {
+			for (String keys : convertEntityService.getResourceTypeValue().keySet()) {
+				ResourceLimitDepartment persistDepartment = resourceLimitDepartmentService
+						.findByDepartmentAndResourceType(department.getId(), ResourceLimitDepartment.ResourceType
+								.valueOf(convertEntityService.getResourceTypeValue().get(keys)), true);
+				if (persistDepartment != null) {
+					resourceLimitDepartmentService.delete(persistDepartment);
+				}
+				ResourceLimitDepartment resourceLimitDepartment = new ResourceLimitDepartment();
+				resourceLimitDepartment.setDepartmentId(department.getId());
+				resourceLimitDepartment.setDomainId(department.getDomainId());
+				resourceLimitDepartment.setMax(0L);
+				resourceLimitDepartment.setAvailable(0L);
+				resourceLimitDepartment.setUsedLimit(0L);
+				resourceLimitDepartment.setResourceType(ResourceLimitDepartment.ResourceType
+						.valueOf(convertEntityService.getResourceTypeValue().get(keys)));
+				resourceLimitDepartment.setIsSyncFlag(false);
+				resourceLimitDepartment.setIsActive(true);
+				resourceLimitDepartmentService.update(resourceLimitDepartment);
+			}
+		}
+        return department;
     }
 
     /**
@@ -286,7 +308,12 @@ public class DepartmentServiceImpl implements DepartmentService {
         for (ResourceLimitDomain domainLimit : resourceLimitDomain) {
         	for (ResourceLimitDepartment departmentLimit : resourceLimitDepartment) {
         		if (domainLimit.getResourceType().toString().equals(departmentLimit.getResourceType().toString())) {
-        			domainLimit.setUsedLimit(domainLimit.getUsedLimit() - departmentLimit.getMax());
+					if (departmentLimit.getMax() == -1L) {
+						domainLimit.setUsedLimit(EmptytoLong(domainLimit.getUsedLimit()));
+					} else {
+						domainLimit.setUsedLimit(
+								EmptytoLong(domainLimit.getUsedLimit()) - EmptytoLong(departmentLimit.getMax()));
+					}
         			domainLimit.setIsSyncFlag(false);
                     resourceLimitDomainService.save(domainLimit);
                     departmentLimit.setIsActive(false);
@@ -417,4 +444,18 @@ public class DepartmentServiceImpl implements DepartmentService {
     	accountTypes.add(Department.AccountType.ROOT_ADMIN);
 		return findByAccountTypesAndActive(accountTypes, isActive);
 	}
+
+	/**
+     * Empty check.
+     *
+     * @param value long value
+     * @return long.
+     */
+    public Long EmptytoLong(Long value) {
+        if (value == null) {
+            return 0L;
+        }
+        return value;
+    }
+
 }
