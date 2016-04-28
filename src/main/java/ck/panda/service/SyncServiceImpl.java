@@ -2068,6 +2068,7 @@ public class SyncServiceImpl implements SyncService {
             if (csResourceMap.containsKey(domain.getUuid() + resource.getResourceType().toString())) {
                     resource.setMax(
                             csResourceMap.get(domain.getUuid() + resource.getResourceType().toString()).getMax());
+                    resource.setUsedLimit(0L);
                     resource.setIsActive(true);
                     resource.setIsSyncFlag(false);
                     resourceDomainService.update(resource);
