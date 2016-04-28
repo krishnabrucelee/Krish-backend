@@ -1,11 +1,8 @@
 package ck.panda.service;
 
-import java.util.HashMap;
 import java.util.List;
-
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
-
 import ck.panda.domain.entity.Application;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.ResourceLimitDomain;
@@ -24,7 +21,6 @@ public interface DashboardService {
 	 * @throws Exception if error.
 	 */
 	JSONObject getInfrastructure() throws Exception;
-    
     
     /**
      * Resource limit domain.
@@ -49,5 +45,4 @@ public interface DashboardService {
      * @throws Exception if error.
      */
     List<Application> findAllApplicationByDomain() throws Exception;
-
 }

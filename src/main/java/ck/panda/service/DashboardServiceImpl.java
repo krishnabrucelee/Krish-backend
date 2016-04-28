@@ -1,15 +1,13 @@
 package ck.panda.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.Application;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.IpAddress;
@@ -77,13 +75,37 @@ public class DashboardServiceImpl implements DashboardService {
     /** Service reference to resource. */
     @Autowired
     private ResourceLimitDomainService resourceLimitDomainService;
+    
+    /** Constant for VM count. */
+    public static final String RUNNING_VM_COUNT = "runningVmCount", STOPPED_VM_COUNT = "stoppedVmCount";
+    
+    /** Constant for total count. */
+    public static final String TOTAL_COUNT = "totalCount";
+    
+    /** Constant for vcpu count. */
+    public static final String VCPU = "vcpu";
+    
+    /** Constant for ram count. */
+    public static final String RAM = "ram";
+    
+    /** Constant for storage count. */
+    public static final String STORAGE = "storage";
+    
+    /** Constant for publicIp count. */
+    public static final String PUBLIC_IP = "publicIp";
+    
+    /** Constant for networks count. */
+    public static final String NETWORKS = "networks";
+    
+    /** Constant for template count. */
+    public static final String TEMPLATE = "template";
 
     @Override
     public JSONObject getInfrastructure() throws Exception {
-        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
-        List<VmInstance> vmList = virtualmachineService.findAllByUser(Long.valueOf(tokenDetails.getTokenDetails("id")));
-        Integer runningVmCount = virtualmachineService.findCountByStatus(Status.RUNNING, Long.valueOf(tokenDetails.getTokenDetails("id")));
-        Integer stoppedVmCount = virtualmachineService.findCountByStatus(Status.STOPPED, Long.valueOf(tokenDetails.getTokenDetails("id")));
+        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
+        List<VmInstance> vmList = virtualmachineService.findAllByUser(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
+        Integer runningVmCount = virtualmachineService.findCountByStatus(Status.RUNNING, Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
+        Integer stoppedVmCount = virtualmachineService.findCountByStatus(Status.STOPPED, Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
         Integer vmCount = vmList.size();
         List<Network> networkList = networkService.findAllByUserId(user.getId());
         Integer networkCount = networkList.size();
@@ -96,9 +118,9 @@ public class DashboardServiceImpl implements DashboardService {
         }
         Integer ipCount = ipAddressList.size();
         Integer templateCount = templateService.findAllByUserIdIsActiveAndShare(Template.TemplateType.SYSTEM,
-                Template.Status.ACTIVE, true, Long.valueOf(tokenDetails.getTokenDetails("id"))).size();
+                Template.Status.ACTIVE, true, Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID))).size();
         Long storageSize = 0L;
-        List<Volume> volumeList = (List<Volume>) volumeService.findAllVolumeByUserId(Long.valueOf(tokenDetails.getTokenDetails("id")));
+        List<Volume> volumeList = (List<Volume>) volumeService.findAllVolumeByUserId(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
         for(Volume volume : volumeList) {
         	storageSize = (storageSize + (volume.getDiskSize() / (1024 * 1024 * 1024)));
         }
@@ -111,34 +133,34 @@ public class DashboardServiceImpl implements DashboardService {
         }
 
     	JSONObject infra = new JSONObject();
-        infra.put("runningVmCount", runningVmCount);
-        infra.put("stoppedVmCount", stoppedVmCount);
-        infra.put("totalCount", vmCount);
-        infra.put("vcpu", runningVmCount);
-        infra.put("ram", memory);
-        infra.put("storage", storageSize);
-        infra.put("publicIp", ipCount);
-        infra.put("networks", networkCount);
-        infra.put("template", templateCount);
+        infra.put(RUNNING_VM_COUNT, runningVmCount);
+        infra.put(STOPPED_VM_COUNT, stoppedVmCount);
+        infra.put(TOTAL_COUNT, vmCount);
+        infra.put(VCPU, cpuCore);
+        infra.put(RAM, memory);
+        infra.put(STORAGE, storageSize);
+        infra.put(PUBLIC_IP, ipCount);
+        infra.put(NETWORKS, networkCount);
+        infra.put(TEMPLATE, templateCount);
         return infra;
     }
 
     @Override
     public List<ResourceLimitDomain> findByDomainQuota() throws Exception {
-        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
+        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
         return resourceLimitDomainService.findAllByDomainId(user.getDomainId());
     }
 
     @Override
     public List<Department> findAllDepartmentByDomain() throws Exception {
-        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
+        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
         List<Department> departmentList =  departmentService.findAllByDomainAndIsActive(user.getDomainId(), true);
         return departmentList;
     }
 
     @Override
     public List<Application> findAllApplicationByDomain() throws Exception {
-        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
+        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
         return applicationService.findAllByDomain(user.getDomainId());
     }
 
