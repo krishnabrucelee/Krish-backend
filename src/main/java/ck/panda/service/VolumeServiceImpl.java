@@ -176,14 +176,14 @@ public class VolumeServiceImpl implements VolumeService {
                 if (departmentLimit != null && convertEntityService.getDepartmentById(volume.getDepartmentId()).getType()
                         .equals(AccountType.USER)) {
                     if (volume.getProjectId() != null) {
-                    	if (projectLimit != null) {
-                    		quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "Volume",
+                        if (projectLimit != null) {
+                            quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "Volume",
                                 volume.getProjectId(), "Project");
-                    	} else {
-                    		errors.addGlobalError(
+                        } else {
+                            errors.addGlobalError(
                                     "Resource limit for project has not been set. Please update project quota");
                             throw new ApplicationException(errors);
-                    	}
+                        }
                     } else {
                         quotaLimitValidation.QuotaLimitCheckByResourceObject(volume, "Volume",
                                 volume.getDepartmentId(), "Department");
@@ -1259,10 +1259,10 @@ public class VolumeServiceImpl implements VolumeService {
         Integer adminAttachedCount = volumeRepo.getAttachedCountByDomainAndIsActive(domainId, true).size();
         return adminAttachedCount;
     }
-    
+
     @Override
     public List<Volume> findAllVolumeByUserId(Long userId) throws Exception {
-    	if (convertEntityService.getOwnerById(userId).getDomainId() != null
+        if (convertEntityService.getOwnerById(userId).getDomainId() != null
                 && !convertEntityService.getOwnerById(userId).getType().equals(User.UserType.ROOT_ADMIN)) {
             if (convertEntityService.getOwnerById(userId).getType().equals(User.UserType.DOMAIN_ADMIN)) {
                 return volumeRepo.findAllByDomainAndIsActive(convertEntityService.getOwnerById(userId).getDomainId(), true);
@@ -1272,7 +1272,7 @@ public class VolumeServiceImpl implements VolumeService {
                 volumeType.add(VolumeType.ROOT);
                 if (projectService.findAllByUserAndIsActive(userId, true).size() > 0) {
                     List<Project> projectList = projectService.findAllByUserAndIsActive(userId, true);
-                    
+
                     return volumeRepo.findAllByProjectAndVolumeType(projectList,
                             convertEntityService.getOwnerById(userId).getDepartmentId(), volumeType, true);
                 } else {

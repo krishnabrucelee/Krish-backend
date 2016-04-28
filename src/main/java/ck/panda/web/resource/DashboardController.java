@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
+import ck.panda.domain.entity.Application;
+import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.service.DashboardService;
 import ck.panda.util.web.ApiController;
@@ -45,8 +47,8 @@ public class DashboardController implements ApiController {
     @RequestMapping(value = "/infrastructure", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public HashMap<String, Integer> getInfrastructure(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    	return dashboardService.getInfrastructure();
+    public String getInfrastructure(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    	return dashboardService.getInfrastructure().toString();
     }
 
     /**
@@ -60,5 +62,31 @@ public class DashboardController implements ApiController {
     @ResponseBody
     public List<ResourceLimitDomain> findByDomainQuota()  throws Exception {
     	return dashboardService.findByDomainQuota();
+    }
+    
+    /**
+     * Get the departments.
+     * 
+     * @return department list
+     * @throws Exception if error
+     */
+    @RequestMapping(value = "/departmentByDomain", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Department> findAllDepartmentByDomain()  throws Exception {
+    	return dashboardService.findAllDepartmentByDomain();
+    }
+    
+    /**
+     * Get the applicaitons.
+     * 
+     * @return applicaiton list
+     * @throws Exception if error
+     */
+    @RequestMapping(value = "/applicationByDomain", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Application> findAllApplicationByDomain()  throws Exception {
+    	return dashboardService.findAllApplicationByDomain();
     }
 }

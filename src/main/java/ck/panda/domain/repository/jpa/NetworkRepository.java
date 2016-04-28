@@ -63,6 +63,16 @@ public interface NetworkRepository extends PagingAndSortingRepository<Network, L
      */
     @Query(value = "SELECT net FROM Network net LEFT JOIN net.project WHERE net.isActive =:isActive")
     Page<Network> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
+    
+    /**
+     * Find all the active or inactive snapshots with pagination.
+     *
+     * @param pageable to get the list with pagination.
+     * @param isActive get the snapshot list based on active/inactive status.
+     * @return list of snapshots.
+     */
+    @Query(value = "SELECT net FROM Network net LEFT JOIN net.project WHERE net.isActive =:isActive")
+    List<Network> findAllByIsActiveWihtoutPaging(@Param("isActive") Boolean isActive);
 
     /**
      * Find all the active or inactive domain network.
@@ -75,6 +85,17 @@ public interface NetworkRepository extends PagingAndSortingRepository<Network, L
     @Query(value = "SELECT net FROM Network net LEFT JOIN net.project WHERE net.isActive =:isActive AND net.domainId =:domainId")
     Page<Network> findByDomainIsActive(Pageable pageable, @Param("isActive") Boolean isActive,
             @Param("domainId") Long domainId);
+    
+    /**
+     * Find all the active or inactive domain network.
+     *
+     * @param pageable to get the list with pagination.
+     * @param isActive get the snapshot list based on active/inactive status.
+     * @param domainId get the id of the domain
+     * @return list of network.
+     */
+    @Query(value = "SELECT net FROM Network net LEFT JOIN net.project WHERE net.isActive =:isActive AND net.domainId =:domainId")
+    List<Network> findAllByDomainIsActive(@Param("isActive") Boolean isActive, @Param("domainId") Long domainId);
 
     /**
      * Find by name of the Network.
@@ -118,6 +139,17 @@ public interface NetworkRepository extends PagingAndSortingRepository<Network, L
     @Query(value = "SELECT net FROM Network net LEFT JOIN net.project WHERE net.departmentId=:departmentId AND net.isActive =:isActive AND net.projectId = NULL ")
     Page<Network> findByDepartmentAndPagination(@Param("departmentId") Long departmentId,
             @Param("isActive") Boolean isActive, Pageable pageable);
+    
+    /**
+     * Find all active networks by department.
+     *
+     * @param departmentId of the network.
+     * @param isActive status of the network.
+     * @param pageable for pagination.
+     * @return networks.
+     */
+    @Query(value = "SELECT net FROM Network net LEFT JOIN net.project WHERE net.departmentId=:departmentId AND net.isActive =:isActive AND net.projectId = NULL ")
+    List<Network> findByDepartment(@Param("departmentId") Long departmentId, @Param("isActive") Boolean isActive);
 
     /**
      * Find all the domain based active or inactive network with pagination.
@@ -143,6 +175,20 @@ public interface NetworkRepository extends PagingAndSortingRepository<Network, L
     Page<Network> findByProjectDepartmentAndIsActive(@Param("allProjectList") List<Project> allProjectList,
             @Param("departmentId") Long departmentId,
             @Param("isActive") Boolean isActive, Pageable pageable);
+    
+    /**
+     * Find all networks by project and deparment with pagination.
+     *
+     * @param allProjectList project list.
+     * @param departmentId of the network.
+     * @param isActive status of the network.
+     * @param pageable to get the list with pagination.
+     * @return list of networks.
+     */
+    @Query(value = "SELECT net FROM Network net LEFT JOIN net.project WHERE (net.project in :allProjectList OR net.departmentId=:departmentId ) AND net.isActive =:isActive")
+    List<Network> findAByProjectDepartmentAndIsActiveWithoutPaging(@Param("allProjectList") List<Project> allProjectList,
+            @Param("departmentId") Long departmentId,
+            @Param("isActive") Boolean isActive);
     
     
     /**

@@ -740,4 +740,40 @@ public class NetworkServiceImpl implements NetworkService {
     public List<Network> findAllByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception {
         return networkRepo.findAllByDomainAndIsActive(domainId, isActive);
     }
+    
+    
+    @Override
+    public List<Network> findAllByUserId(Long userId) throws Exception {
+       User user = convertEntityService.getOwnerById(userId);
+       // Check the user is not a root and admin and set the domain value from login detail
+       if (user.getType().equals(User.UserType.ROOT_ADMIN)) {
+           return networkRepo.findAllByIsActiveWihtoutPaging(true);
+       }
+       if (user.getType().equals(User.UserType.DOMAIN_ADMIN)) {
+           return networkRepo.findAllByDomainIsActive(true, user.getDomainId());
+       }
+       List<Network> network = this.getNetworkListByUserWihtoutPaging(userId);
+        return network;
+    }
+    
+    
+    /**
+     * Get the Network list based on the active status.
+     *
+     * @param pagingAndSorting do pagination with sorting for network.
+     * @param userId id of the user.
+     * @return network
+     * @throws Exception exception
+     */
+    private List<Network> getNetworkListByUserWihtoutPaging(Long userId) throws  Exception {
+        User user = convertEntityService.getOwnerById(userId);
+        if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
+            List<Project> allProjectList = projectService.findAllByUserAndIsActive(user.getId(), true);
+            List<Network> projectNetwork = networkRepo.findAByProjectDepartmentAndIsActiveWithoutPaging(allProjectList,
+                    user.getDepartmentId(), true);
+            return projectNetwork;
+        } else {
+            return networkRepo.findByDepartment(user.getDepartmentId(), true);
+        }
+    }
 }
