@@ -94,7 +94,7 @@ public interface ResourceLimitDomainRepository extends PagingAndSortingRepositor
      * @param isActive
      * @return
      */
-    @Query(value = "select sum(resource.max) from ResourceLimitDomain resource where resource.isActive = :isActive AND resource.domainId = :domainId AND resource.resourceType = :resourceType ")
+    @Query(value = "select resource.max from ResourceLimitDomain resource where resource.isActive = :isActive AND resource.domainId = :domainId AND resource.resourceType = :resourceType ")
     Long findTotalCountOfResourceDomain(@Param("domainId") Long domainId, @Param("resourceType") ResourceLimitDomain.ResourceType resourceType, @Param("isActive") Boolean isActive);
 
     /**
@@ -103,7 +103,7 @@ public interface ResourceLimitDomainRepository extends PagingAndSortingRepositor
      * @param isActive
      * @return
      */
-    @Query(value = "select sum(resource.max) from ResourceLimitDomain resource where resource.isActive = :isActive AND resource.domainId = :domainId AND resource.resourceType = :resourceType ")
+    @Query(value = "select resource.max from ResourceLimitDomain resource where resource.isActive = :isActive AND resource.domainId = :domainId AND resource.resourceType = :resourceType ")
     Long findTotalCountOfResourceProject(@Param("domainId") Long domainId, @Param("resourceType") ResourceLimitDomain.ResourceType resourceType, @Param("isActive") Boolean isActive);
 
 }

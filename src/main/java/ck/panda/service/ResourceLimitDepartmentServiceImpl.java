@@ -244,15 +244,15 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
 				ResourceLimitDepartment department = resourceLimitDepartmentRepo.findByDepartmentAndResourceType(resourceLimit.getDomainId(), ResourceLimitDepartment.ResourceType.valueOf(resourceLimit.getResourceType().name()), true);
 				Long totalCount = 0L;
 				if(resourceLimit.getMax() == -1){
-					totalCount = resourceLimit.getMax();
+					totalCount = EmptytoLong(resourceLimit.getMax());
 				} else {
-					totalCount = resourceLimit.getMax() + (domainLimit.getUsedLimit() - department.getMax());
+					totalCount = EmptytoLong(resourceLimit.getMax()) + (EmptytoLong(domainLimit.getUsedLimit()) - EmptytoLong(department.getMax()));
 				}
 				// if(step1 < step2) {
 				if (domainLimit != null) {
-					if (resourceLimit.getMax() == domainLimit.getMax() && domainLimit.getMax() == -1L) {
+					if (EmptytoLong(resourceLimit.getMax()) == EmptytoLong(domainLimit.getMax()) && EmptytoLong(domainLimit.getMax()) == -1L) {
 
-					} else if (domainLimit.getMax() !=-1 && domainLimit.getMax() < totalCount) {
+					} else if (EmptytoLong(domainLimit.getMax()) !=-1 && EmptytoLong(domainLimit.getMax()) < totalCount) {
 						errors.addFieldError(resourceLimit.getResourceType().toString(),
 								domainLimit.getMax() + " in " + resourceLimit.getResourceType().toString() + " "
 										+ " for resource limit domain exceeded");
@@ -315,8 +315,11 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
     @Override
     public Long findByResourceCountByDepartmentAndResourceType(Long domainId,
             ResourceLimitDepartment.ResourceType resourceType, Long departmentId, Boolean isActive) throws Exception {
-        return resourceLimitDepartmentRepo.findByResourceCountByDepartmentAndResourceType(domainId, resourceType,
+        Long count1 = resourceLimitDepartmentRepo.findByResourceCountByDepartmentAndResourceType(domainId, resourceType,
                 departmentId, isActive);
+        Long count2 = resourceLimitDepartmentRepo.findByResourceCountByDepartmentAndResourceTypes(domainId, resourceType,
+                departmentId, isActive);
+        return EmptytoLong(count1) + EmptytoLong(count2);
     }
 
     @Override
@@ -332,7 +335,7 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
         for (String name : resourceTypeMap.keySet()) {
             Long resourceDepartmentCount = resourceLimitDepartmentRepo.findTotalCountOfResourceDepartment(domainId, ResourceLimitDepartment.ResourceType.valueOf(resourceTypeMap.get(name)), true);
             if (resourceDepartmentCount != null) {
-            resourceMaxCount.put(resourceTypeMap.get(name), resourceDepartmentCount.toString());
+            resourceMaxCount.put(resourceTypeMap.get(name), EmptytoLong(resourceDepartmentCount).toString());
             }
         }
         return resourceMaxCount;
@@ -360,9 +363,10 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
 		for (String name : resourceTypeMap.keySet()) {
 			Long resourceDepartmentCount = resourceLimitDepartmentRepo.findResourceTotalCountOfResourceDomain(
 					domainId, ResourceLimitDepartment.ResourceType.valueOf(resourceTypeMap.get(name)), true);
-			if (resourceDepartmentCount != null) {
-				resourceMaxCount.put(resourceTypeMap.get(name), resourceDepartmentCount.toString());
-			}
+			Long resourceCount = resourceLimitDepartmentRepo.findResourceTotalCountOfResourceDomains(
+					domainId, ResourceLimitDepartment.ResourceType.valueOf(resourceTypeMap.get(name)), true);
+			resourceMaxCount.put(resourceTypeMap.get(name), String.valueOf((EmptytoLong(resourceDepartmentCount) + EmptytoLong(resourceCount))));
+
 		}
 		return resourceMaxCount;
 	}
@@ -371,15 +375,17 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
     public HashMap<String, String> getResourceLimitsOfProject(Long projectId) {
         HashMap<String, String> resourceTypeMap = convertEntityService.getResourceTypeValue();
         HashMap<String, String> resourceMaxCount = new HashMap<String, String>();
-        for (String name : resourceTypeMap.keySet()) {
-            Long resourceDepartmentCount = resourceLimitDepartmentRepo.findTotalCountOfResourceProject(projectId, ResourceLimitDepartment.ResourceType.valueOf(resourceTypeMap.get(name)), true);
-            if (resourceDepartmentCount != null) {
-            resourceMaxCount.put(resourceTypeMap.get(name), resourceDepartmentCount.toString());
-            }
-        }
-
+		for (String name : resourceTypeMap.keySet()) {
+			Long resourceDepartmentCount = resourceLimitDepartmentRepo.findTotalCountOfResourceProject(projectId,
+					ResourceLimitDepartment.ResourceType.valueOf(resourceTypeMap.get(name)), true);
+			Long resourceDepartmentCounts = resourceLimitDepartmentRepo.findTotalCountOfResourceProjects(projectId,
+					ResourceLimitDepartment.ResourceType.valueOf(resourceTypeMap.get(name)), true);
+			if (resourceDepartmentCount != null) {
+				resourceMaxCount.put(resourceTypeMap.get(name),
+						String.valueOf((EmptytoLong(resourceDepartmentCount) + EmptytoLong(resourceDepartmentCounts))));
+			}
+		}
         return resourceMaxCount;
-
     }
 
     @Override
@@ -389,7 +395,7 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
         for (String name : resourceTypeMap.keySet()) {
             ResourceLimitDepartment resourceLimitDepartment = resourceLimitDepartmentRepo.findByDepartmentAndResourceType(id, ResourceLimitDepartment.ResourceType.valueOf(resourceTypeMap.get(name)), true);
             if (resourceLimitDepartment != null) {
-                resourceMap.put(resourceTypeMap.get(name), resourceLimitDepartment.getUsedLimit());
+                resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitDepartment.getUsedLimit()));
             }
         }
         return resourceMap;
@@ -409,13 +415,18 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
                 if (resourceLimitDomain.getMax() == -1) {
                     resourceMap.put(resourceTypeMap.get(name), -1L);
                 } else {
-                    resourceMap.put(resourceTypeMap.get(name), resourceLimitDepartment.getMax() + (resourceLimitDomain.getMax() - resourceLimitDomain.getUsedLimit()));
+                    resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitDepartment.getMax()) + (EmptytoLong(resourceLimitDomain.getMax()) - EmptytoLong(resourceLimitDomain.getUsedLimit())));
                 }
             } else {
                 if (resourceLimitDomain.getUsedLimit() == null) {
-                    resourceMap.put(resourceTypeMap.get(name), resourceLimitDomain.getMax());
+                    resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitDomain.getMax()));
                 } else {
-                    resourceMap.put(resourceTypeMap.get(name), (resourceLimitDomain.getMax() - resourceLimitDomain.getUsedLimit()));
+					if (resourceLimitDomain.getMax() == -1) {
+						resourceMap.put(resourceTypeMap.get(name), -1L);
+					} else {
+						resourceMap.put(resourceTypeMap.get(name),
+								(EmptytoLong(resourceLimitDomain.getMax()) - EmptytoLong(resourceLimitDomain.getUsedLimit())));
+					}
                 }
             }
         }

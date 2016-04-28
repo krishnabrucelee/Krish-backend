@@ -28,6 +28,7 @@ import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackIsoService;
 import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.CloudStackServer;
+import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.EncryptionUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -134,9 +135,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Autowired
     private NicService nicService;
 
-    /** Affinity group service reference. */
+    /** Cloud stack user service. */
     @Autowired
-    private AffinityGroupService affinityGroupService;
+    private CloudStackUserService cloudStackUserService;
 
     @Override
     @PreAuthorize("hasPermission(#vmInstance.getSyncFlag(), 'CREATE_VM')")
@@ -155,8 +156,6 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Override
     @PreAuthorize("hasPermission(#vmInstance.getSyncFlag(), 'CREATE_VM')")
     public VmInstance saveVmInstance(VmInstance vmInstance, Long userId) throws Exception {
-        // 1. Event record.
-        Event vmEvent = new Event();
         // 2. Entity validation.
         Errors errors = validator.rejectIfNullEntity(CloudStackConstants.ENTITY_VMINSTANCE, vmInstance);
         errors = validator.validateEntity(vmInstance, errors);
@@ -1508,14 +1507,17 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         HashMap<String, String> optionalMap = new HashMap<String, String>();
         String affinityGroupIds = "";
         for (int j = 0; j < vmInstance.getAffinityGroupList().size(); j++) {
-            if (j == vmInstance.getAffinityGroupList().size()-1) {
+            if (j == vmInstance.getAffinityGroupList().size() - 1) {
                 affinityGroupIds = affinityGroupIds + vmInstance.getAffinityGroupList().get(j).getUuid();
             } else {
                 affinityGroupIds = affinityGroupIds + vmInstance.getAffinityGroupList().get(j).getUuid() + ",";
             }
         }
         optionalMap.put(CloudStackConstants.CS_AFFINITY_GROUP_IDS, affinityGroupIds);
-        config.setUserServer();
+        User user = convertEntityService.getOwnerById(vmInstance.getInstanceOwnerId());
+        if (user == null || !apiSecretKeyGeneration(user)) {
+            config.setUserServer();
+        }
         String affinityGroupResponse = cloudStackInstanceService.updateVMAffinityGroup(vmInstance.getUuid(),
             CloudStackConstants.JSON, optionalMap);
         JSONObject jobId = new JSONObject(affinityGroupResponse).getJSONObject(CloudStackConstants.CS_UPDATE_VM_RESPONSE);
@@ -1533,6 +1535,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         }
         return vmInstance;
     }
+
     @Override
     public List<VmInstance> findInstanceByGroup(Long id) throws Exception {
         List<VmInstance> allInstance = new ArrayList<VmInstance>();
@@ -1544,5 +1547,33 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             }
         }
         return allInstance;
+    }
+
+    /**
+     * Get the API and Secret key for a user.
+     *
+     * @param user to set
+     * @return API and Secret key status true/false
+     * @throws Exception unhandled exceptions.
+     */
+    private Boolean apiSecretKeyGeneration(User user) throws Exception {
+        config.setServer(1L);
+        HashMap<String, String> optional = new HashMap<String, String>();
+        optional.put(CloudStackConstants.CS_ID, user.getUuid());
+        String listUserByIdResponse = cloudStackUserService.listUsers(optional, CloudStackConstants.JSON);
+        JSONObject listUsersResponse = new JSONObject(listUserByIdResponse)
+                .getJSONObject(CloudStackConstants.CS_LIST_USER_RESPONSE);
+        if (listUsersResponse.has(CloudStackConstants.CS_ERROR_CODE)) {
+            return false;
+        } else {
+            JSONArray userJsonobject = (JSONArray) listUsersResponse.get(CloudStackConstants.CS_USER);
+            if (userJsonobject.getJSONObject(0).has(CloudStackConstants.CS_API_KEY)) {
+                user.setApiKey(userJsonobject.getJSONObject(0).get(CloudStackConstants.CS_API_KEY).toString());
+                user.setSecretKey(userJsonobject.getJSONObject(0).get(CloudStackConstants.CS_SECRET_KEY).toString());
+                config.setInstanceUserServer(user.getSecretKey(), user.getApiKey());
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -200,8 +200,7 @@ public class TemplateServiceImpl implements TemplateService {
                 }
                 csUpdateTemplate(template,userId);
                 if(template.getTemplateCost().size() > 0 ) {
-                List<TemplateCost> templateCostList = updateTemplateCost(template);
-                template.setTemplateCost(templateCostList);
+                    updateTemplateCost(template);
                 if (userDetails.getType() == User.UserType.ROOT_ADMIN) {
                     if (pingService.apiConnectionCheck(errors) && template.getTemplateCost() != null) {
                         template = templateRepository.save(template);
@@ -352,25 +351,39 @@ public class TemplateServiceImpl implements TemplateService {
     public List<Template> findTemplateByFilters(Template template, Long id) throws Exception {
         User user = convertEntityService.getOwnerById(id);
         Domain domain = domainService.find(user.getDomainId());
-        User rootUser = userService.findByRootAdminUser();
-        if (template.getArchitecture() == null) {
-            template.setArchitecture(ALL_TEMPLATE);
-        }
-        if (template.getOsCategoryId() == null) {
-            if (domain != null && domain.getName().equals(DOMAIN_ROOT_ADMIN)) {
-                return csPrepareTemplate((List<Template>) templateRepository.findByTemplateAndFeature(
+        List<User> userList = userService.findByRootAdminUser();
+        List<Template> templates = null;
+        for(User rootUser: userList) {
+            if (template.getArchitecture() == null) {
+                template.setArchitecture(ALL_TEMPLATE);
+            }
+            if (template.getOsCategoryId() == null) {
+                if (domain != null && domain.getName().equals(DOMAIN_ROOT_ADMIN)) {
+                    templates = csPrepareTemplate((List<Template>) templateRepository.findByTemplateAndFeature(
                        template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true));
             }
-            return (List<Template>) templateRepository.findByTemplateAndUserId(template.getArchitecture(), TemplateType.SYSTEM,
-                    Status.ACTIVE, true,user.getDomainId(),rootUser.getId());
-        } else {
-            if (domain != null && domain.getName().equals(DOMAIN_ROOT_ADMIN)) {
-                return csPrepareTemplate(templateRepository.findAllByOsCategoryAndArchitectureAndType(template.getOsCategoryId(),
+                else {
+                    List<Template> templateList = templateRepository.findByTemplateOwnerIdAndIsActive(rootUser.getId(), true);
+                    if(templateList.size() != 0)
+                            {
+                        templates = (List<Template>) templateRepository.findByTemplateAndUserId(template.getArchitecture(), TemplateType.SYSTEM,
+                                    Status.ACTIVE, true,user.getDomainId(),rootUser.getId());
+                    }
+                }
+            } else {
+                if (domain != null && domain.getName().equals(DOMAIN_ROOT_ADMIN)) {
+                    templates = csPrepareTemplate(templateRepository.findAllByOsCategoryAndArchitectureAndType(template.getOsCategoryId(),
                        template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true));
-            }
-            return csPrepareTemplate(templateRepository.findAllByOsCategoryAndArchitectureAndTypeAndStatus(
-                   template.getOsCategoryId(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true,user.getDomainId(),rootUser.getId()));
+                }
+                else {
+                     if(templateRepository.findByTemplateOwnerIdAndIsActive(rootUser.getId(), true) != null) {
+                    templates = csPrepareTemplate(templateRepository.findAllByOsCategoryAndArchitectureAndTypeAndStatus(
+                            template.getOsCategoryId(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true,user.getDomainId(),rootUser.getId()));
+                     }
+                 }
+             }
         }
+        return templates;
     }
 
     @Override
@@ -751,11 +764,18 @@ public class TemplateServiceImpl implements TemplateService {
               }
         }
         else {
-            User rootUser = userService.findByRootAdminUser();
+            List<User> userList = userService.findByRootAdminUser();
+            for(User rootUser: userList) {
+                List<Template> templateList = templateRepository.findByTemplateOwnerIdAndIsActive(rootUser.getId(), true);
             if (type.equals(TEMPLATE_FEATURED)) {
+                 if(templateList.size() != 0) {
                 templates = templateRepository.findTemplateByFeatured(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), featured, shared, true,user.getDomainId(),rootUser.getId());
+                 }
             } else if (type.equals(TEMPLATE_COMMUNITY)) {
+                if(templateList.size() != 0) {
                 templates = templateRepository.findTemplateByCommunity(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), shared, true,user.getDomainId(),rootUser.getId());
+            }
+               }
             }
         }
          return templates;
@@ -793,15 +813,17 @@ public class TemplateServiceImpl implements TemplateService {
         List<TemplateCost> templateCostList = new ArrayList<TemplateCost>();
         Double tempCost = template.getTemplateCost().get(0).getCost();
         Template persistTemplate = find(template.getId());
-        TemplateCost templatecost = templateCostService.findByTemplateCost(template.getId(), tempCost);
-        if (templatecost == null) {
-            templatecost = new TemplateCost();
-            templatecost.setCost(tempCost);
-            templatecost.setTemplateCostId(template.getId());
-            templatecost = templateCostService.save(templatecost);
-            templateCostList.add(templatecost);
+        List<TemplateCost> templatecostList = templateCostService.findAllByTemplateCost(template.getId());
+        if(templatecostList.size() != 0) {
+            TemplateCost persistedCost = templatecostList.get(templatecostList.size() - 1);
+                int templateGBCost = Double.compare(offeringNullCheck(tempCost),offeringNullCheck(persistedCost.getCost()));
+                if(templateGBCost >0 || templateGBCost <0) {
+                    this.templateCostSave(template);
+                }
+
+        } else {
+            this.templateCostSave(template);
         }
-        templateCostList.addAll(persistTemplate.getTemplateCost());
         return templateCostList;
     }
 
@@ -859,13 +881,55 @@ public class TemplateServiceImpl implements TemplateService {
               }
         }
         else {
-            User rootUser = userService.findByRootAdminUser();
+            List<User> userList = userService.findByRootAdminUser();
+            for(User rootUser: userList) {
+                List<Template> templateList = templateRepository.findByTemplateOwnerIdAndIsActive(rootUser.getId(), true);
+
             if (type.equals(TEMPLATE_FEATURED)) {
+                if(templateList.size() != 0) {
                 templates = templateRepository.listTemplateByFeaturedAndDomainId(TemplateType.SYSTEM, featured, shared, true,user.getDomainId(),rootUser.getId());
+                }
             } else if (type.equals(TEMPLATE_COMMUNITY)) {
+                if(templateList.size() != 0) {
                 templates = templateRepository.listTemplateByCommunity(TemplateType.SYSTEM, shared, true,user.getDomainId(),rootUser.getId());
             }
+            }
+          }
         }
         return templates;
+    }
+
+    /**
+     * To save template cost.
+     *
+     * @param template object.
+     * @return template.
+     * @throws Exception if error occurs.
+     */
+    private Template templateCostSave(Template template) throws Exception {
+         List<TemplateCost> templateCostList = new ArrayList<TemplateCost>();
+         Double tempCost = template.getTemplateCost().get(0).getCost();
+         Template persistTemplate = find(template.getId());
+         TemplateCost templatecost = new TemplateCost();
+             templatecost.setCost(tempCost);
+             templatecost.setTemplateCostId(template.getId());
+             templatecost = templateCostService.save(templatecost);
+             templateCostList.add(templatecost);
+         templateCostList.addAll(persistTemplate.getTemplateCost());
+         template.setTemplateCost(templateCostList);
+        return template;
+    }
+
+    /**
+     * Offering cost null value check.
+     *
+     * @param value offering cost
+     * @return double value
+     */
+    public Double offeringNullCheck(Double value) {
+        if (value == null) {
+            value = 0.0;
+        }
+        return value;
     }
 }
