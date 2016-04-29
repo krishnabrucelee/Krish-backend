@@ -45,7 +45,7 @@ public class ThemeCustomisationServiceImpl implements ThemeCustomisationService 
 
     @Override
     public Page<ThemeCustomisation> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return null;
+        return themeCustomisationRepo.findAll(pagingAndSorting.toPageRequest());
     }
 
     @Override

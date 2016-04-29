@@ -29,7 +29,7 @@ CREATE TABLE `theme_setting_footers` (
   KEY `FK_rolnv7pw0quxd6o1bvdllibtu` (`theme_setting`),
   CONSTRAINT `FK_65cngift961kmdltkgd1e0lgf` FOREIGN KEY (`footers`) REFERENCES `theme_customisation` (`id`),
   CONSTRAINT `FK_rolnv7pw0quxd6o1bvdllibtu` FOREIGN KEY (`theme_setting`) REFERENCES `theme_setting` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

@@ -29,7 +29,7 @@ CREATE TABLE `theme_setting_headers` (
   KEY `FK_leq7j97qgsfy4ff9bgmqwvi5l` (`theme_setting`),
   CONSTRAINT `FK_leq7j97qgsfy4ff9bgmqwvi5l` FOREIGN KEY (`theme_setting`) REFERENCES `theme_setting` (`id`),
   CONSTRAINT `FK_p39o3oq375y51nn4p9kot3wnf` FOREIGN KEY (`headers`) REFERENCES `theme_customisation` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

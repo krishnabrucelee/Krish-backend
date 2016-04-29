@@ -55,7 +55,7 @@ public class ThemeSettingServiceImpl implements ThemeSettingService {
 
     @Override
     public Page<ThemeSetting> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        return null;
+        return themeSettingRepo.findAll(pagingAndSorting.toPageRequest());
     }
 
     @Override
