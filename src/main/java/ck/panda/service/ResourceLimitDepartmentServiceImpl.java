@@ -170,7 +170,7 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
                     ResourceLimitDomain resourceDatas = resourceLimitDomainService.findByDomainAndResourceCount(resource.getDomainId(), updateUsedCount(resourceData), true);
                     Long resourceCount = resourceLimitDepartmentRepo.findByDomainIdAndResourceType(resource.getDomainId(),resource.getResourceType(),true);
                     Long resourceCounts = resourceLimitDepartmentRepo.findByDomainIdAndResourceTypeAndResourceMax(resource.getDomainId(),resource.getResourceType(),true);
-                    resourceDatas.setUsedLimit(EmptytoLong(resourceCount) + EmptytoLong(resourceCounts));
+                    resourceDatas.setUsedLimit(EmptytoLong(resourceCount) + EmptytoLong(resourceCounts) + EmptytoLong(resourceDatas.getUsedLimit()));
                     resourceDatas.setIsSyncFlag(false);
                     resourceLimitDomainService.save(resourceDatas);
                 } else {
