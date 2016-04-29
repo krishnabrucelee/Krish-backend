@@ -103,6 +103,7 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
             String userId = getLoginToken.get(USER_ID);
             LoginHistory loginHistory = loginHistoryService.findByUserIdAndAlreadyLogin(Long.valueOf(userId), true);
             Long currentTimeStamp;
+            if (loginHistory != null) {
             try {
                 Calendar cal = Calendar.getInstance();
                 cal.setTimeZone(TimeZone.getTimeZone(UTC));
@@ -126,6 +127,7 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
                 }
             } catch (Exception e1) {
                 throw new BadCredentialsException(ERROR_SESSION_EXPIRED);
+            }
             }
         }
 

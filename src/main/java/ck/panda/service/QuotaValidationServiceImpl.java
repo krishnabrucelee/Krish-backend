@@ -73,7 +73,6 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
             } else {
                 resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getNumberOfCores()));
                 resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getMemory()));
-
             }
             if(vmInstance.getStorageOfferingId() != null) {
                 if(convertEntityService.getStorageOfferById(vmInstance.getStorageOfferingId()).getIsCustomDisk()) {

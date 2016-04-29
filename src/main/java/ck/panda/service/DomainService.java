@@ -83,4 +83,14 @@ public interface DomainService extends CRUDService<Domain> {
      */
     Domain findDomain() throws Exception;
 
+    /**
+     * Paging and Sorting for displaying more number of elements in list.
+     *
+     * @param pagingAndSorting sortable method.
+     * @param searchText search text
+     * @return sorted values.
+     * @throws Exception unhandled errors.
+     */
+    Page<Domain> findDomainBySearchText(PagingAndSorting pagingAndSorting, String searchText) throws Exception;
+
 }

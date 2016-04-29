@@ -83,6 +83,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Autowired
     private VolumeService volumeService;
 
+    /** User service reference. */
+    @Autowired
+    private UserService userService;
+
     /** Project service reference. */
     @Autowired
     private ProjectService projectService;
@@ -173,20 +177,21 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     vmInstance.getDepartmentId(), ResourceType.valueOf("Instance"), true);
             ResourceLimitProject projectLimit = resourceLimitProjectService
                     .findByProjectAndResourceType(vmInstance.getProjectId(), ResourceLimitProject.ResourceType.Instance, true);
-            if (departmentLimit != null && convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
-                    .getType().equals(AccountType.USER)) {
-                if (vmInstance.getProjectId() != null) {
-                    if (projectLimit != null) {
-                        quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
-                            vmInstance.getProjectId(), "Project");
-                    } else {
-                        errors.addGlobalError("Resource limit for project has not been set. Please update project quota");
-                        throw new ApplicationException(errors);
-                    }
-                } else {
-                    quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
-                            vmInstance.getDepartmentId(), "Department");
-                }
+			if (departmentLimit != null && convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
+					.getType().equals(AccountType.USER)) {
+				if (vmInstance.getProjectId() != null) {
+					if (projectLimit != null) {
+						quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
+								vmInstance.getProjectId(), "Project");
+					} else {
+						errors.addGlobalError(
+								"Resource limit for project has not been set. Please update project quota");
+						throw new ApplicationException(errors);
+					}
+				} else {
+					quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
+							vmInstance.getDepartmentId(), "Department");
+				}
                 // 3. Check the resource availability to deploy new vm.
                 String isAvailable = isResourceAvailable(vmInstance, optionalMap);
                 if (isAvailable != null) {
@@ -196,6 +201,8 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     // 4. set optionalMap arguments for deploy vm API call.
                     optionalMap.clear();
                     vmInstance.setDisplayName(vmInstance.getName());
+                    vmInstance.setInstanceUserName(userService.find(vmInstance.getInstanceOwnerId()).getUserName());
+                    vmInstance.setInstanceOsType(convertEntityService.getTemplateById(vmInstance.getTemplateId()).getDisplayText());
                     optionalMap.put(CloudStackConstants.CS_NAME, vmInstance.getName());
                     if (vmInstance.getNetworkUuid().contains(",")) {
                         String[] networkIds = vmInstance.getNetworkUuid().split(",");
@@ -1155,7 +1162,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     }
                 }
                 // 2.2 update vm entity by transient variable.
-
+				vmInstance.setInstanceGuestIp(ipToLong(vmInstance.getIpAddress()));
                 vmInstance.setDomainId(convertEntityService.getDomainId(vmInstance.getTransDomainId()));
                 vmInstance.setZoneId(convertEntityService.getZoneId(vmInstance.getTransZoneId()));
                 vmInstance.setNetworkId(convertEntityService.getNetworkId(vmInstance.getTransNetworkId()));
@@ -1175,6 +1182,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 vmInstance.setHostId(convertEntityService.getHostId(vmInstance.getTransHostId()));
                 vmInstance.setInstanceOwnerId(convertEntityService.getOwnerByUuid(vmInstance.getTransOwnerId()));
                 vmInstance.setTemplateId(convertEntityService.getTemplateId(vmInstance.getTransTemplateId()));
+                vmInstance.setInstanceOsType(convertEntityService.getTemplateById(convertEntityService.getTemplateId(vmInstance.getTransTemplateId())).getDisplayText());
                 vmInstance.setComputeOfferingId(
                         convertEntityService.getComputeOfferId(vmInstance.getTransComputeOfferingId()));
                 if (vmInstance.getHostId() != null) {
@@ -1183,6 +1191,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 }
                 if (vmInstance.getTemplateId() != null) {
                     vmInstance.setOsType(convertEntityService.getTemplateById(vmInstance.getTemplateId()).getDisplayText());
+                    vmInstance.setInstanceOsType(convertEntityService.getTemplateById(vmInstance.getTemplateId()).getDisplayText());
                 }
                 if (vmInstance.getTransKeypairName() != null) {
                     vmInstance.setKeypairId(convertEntityService.getSSHKeyByNameAndDepartment(vmInstance.getTransKeypairName(), vmInstance.getDepartmentId()).getId());
@@ -1513,7 +1522,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 affinityGroupIds = affinityGroupIds + vmInstance.getAffinityGroupList().get(j).getUuid() + ",";
             }
         }
-        optionalMap.put(CloudStackConstants.CS_AFFINITY_GROUP_IDS, affinityGroupIds);
+        if (vmInstance.getAffinityGroupList().size() != 0) {
+            optionalMap.put(CloudStackConstants.CS_AFFINITY_GROUP_IDS, affinityGroupIds);
+        } else {
+            optionalMap.put(CloudStackConstants.CS_AFFINITY_GROUP_IDS, "");
+        }
         User user = convertEntityService.getOwnerById(vmInstance.getInstanceOwnerId());
         if (user == null || !apiSecretKeyGeneration(user)) {
             config.setUserServer();
@@ -1576,4 +1589,28 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
         }
         return false;
     }
+
+	@Override
+	public VmInstance findVMByIDWithSpecifiedField(Long vmId) {
+		return virtualmachinerepository.findVMByIDWithSpecifiedField(vmId);
+	}
+
+	public long ipToLong(String ipAddress) {
+    	long result = 0;
+		if (ipAddress != null) {
+			String[] ipAddressInArray = ipAddress.split("\\.");
+
+			for (int i = 0; i < ipAddressInArray.length; i++) {
+
+				int power = 3 - i;
+				int ip = Integer.parseInt(ipAddressInArray[i]);
+				result += ip * Math.pow(256, power);
+
+			}
+		} else {
+			result = 0;
+		}
+
+    	return result;
+      }
 }
