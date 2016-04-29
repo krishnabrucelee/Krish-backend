@@ -3,7 +3,6 @@ package ck.panda.web.resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,13 +22,18 @@ import ck.panda.util.web.ApiController;
 @Api(value = "Usages", description = "Operations with usages", produces = "application/json")
 public class UsageController implements ApiController {
 
+    /** Service for Ping.*/
     @Autowired
     private PingService pingService;
 
     /**
      * Find the list of active usages.
      *
-     * @return projects project list.
+     * @param fromDate Start Date
+     * @param toDate End Date
+     * @param groupingType grouping type
+     * @param domainUuid domain uuid
+     * @return projects projectlist.
      * @throws Exception error occurs.
      */
     @RequestMapping(value = "listUsageByPeriod", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -43,36 +47,39 @@ public class UsageController implements ApiController {
     /**
      * Find the list of invoices by domain.
      *
+     * @param type type
+     * @param domainUuid domain uuid
+     * @param status status
      * @return projects project list.
      * @throws Exception error occurs.
      */
     @RequestMapping(value = "invoice/listByDomain", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected String listInvoiceByDomainId(@RequestParam("type") String type, @RequestParam("sortBy") String sortBy, @RequestParam("domainUuid") String domainUuid,
-            @RequestParam("status") String status,
-            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit) throws Exception {
-        if(type.equals("invoice"))
-            return pingService.listInvoiceByDomainId(sortBy, domainUuid, status, range, limit.toString());
-        else {
-            return pingService.listPaymentByDomainId(sortBy, domainUuid, status, range, limit.toString());
+    protected String listInvoiceByDomainId(@RequestParam("type") String type,@RequestParam("domainUuid") String domainUuid,
+            @RequestParam("status") String status) throws Exception {
+        if (type.equals("invoice")) {
+            return pingService.listInvoiceByDomainId(domainUuid, status,type);
+        } else {
+            return pingService.listPaymentByDomainId(domainUuid, status,type);
         }
     }
 
     /**
      * Find the list of invoices.
      *
+     * @param type type
      * @return projects project list.
      * @throws Exception error occurs.
      */
     @RequestMapping(value = "invoice", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected String listInvoice(@RequestParam("type") String type, @RequestParam("sortBy") String sortBy, @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit) throws Exception {
-        if(type.equals("invoice")) {
-            return pingService.listInvoice(sortBy, range, limit.toString());
+    protected String listInvoice(@RequestParam("type") String type) throws Exception {
+        if (type.equals("invoice")) {
+            return pingService.listInvoice(type);
         } else {
-            return pingService.listPayment(sortBy, range, limit.toString());
+            return pingService.listPayment(type);
         }
     }
 
