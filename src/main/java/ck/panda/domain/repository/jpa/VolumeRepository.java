@@ -375,4 +375,38 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
             @Param("departmentId") Long departmentId, @Param("volumeType") List<VolumeType> volumeType,
             @Param("isActive") Boolean isActive, Pageable pageable);
 
+    
+    /**
+     * Find the Volume by Domain Id and IsActive.
+     *
+     * @param domainId for each domain.
+     * @param isActive get the volume list based on active/inactive status.
+     * @return volume.
+     */
+    @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE volume.isActive = :isActive AND volume.domainId = :domainId")
+    List<Volume> findAllByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive);
+    
+    
+    /**
+     * Get the volumes based on project, department and volume type.
+     *
+     * @param allProjectList project list
+     * @param departmentId department id
+     * @param volumeType volume type
+     * @param isActive true/false
+     * @return volume
+     */
+    @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE (volume.project in :projectList OR volume.departmentId = :departmentId) AND volume.volumeType in :volumeType AND volume.isActive = :isActive")
+    List<Volume> findAllByProjectAndVolumeType(@Param("projectList") List<Project> projectList,
+            @Param("departmentId") Long departmentId, @Param("volumeType") List<VolumeType> volumeType,
+            @Param("isActive") Boolean isActive);
+
+    /**
+     * Find all the volumes.
+     *
+     * @param isActive true / false
+     * @return lists Active state volume
+     */
+    @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE volume.isActive = :isActive")
+    List<Volume> findAllVolumesByActive(@Param("isActive") Boolean isActive);
 }
