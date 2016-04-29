@@ -154,12 +154,12 @@ public class PingService {
     /**
      * Get the invoice by invoice id.
      *
-     * @param invoiceId invoice id
+     *@param id invoice id
      * @return - Json string response
      * @throws Exception - Raise if any error
      */
     public String getInvoiceById(String id) throws Exception {
-        server.setServer(apiURL + "/invoice/"+id);
+        server.setServer(apiURL + "/invoice/" + id);
         LinkedList<NameValuePair> arguments = new LinkedList<NameValuePair>();
         String responseJson = server.request(arguments);
         return responseJson;
@@ -168,7 +168,10 @@ public class PingService {
     /**
      * Get the usage statistic.
      *
-     * @param usageStatistics usage statistics
+     * @param fromDate Start Date
+     * @param toDate End Date
+     * @param groupingType Grouping Type
+     * @param domainUuid domain uuid
      * @return - Json string response
      * @throws Exception - Raise if any error
      */
@@ -187,55 +190,46 @@ public class PingService {
     /**
      * List invoice by domain uuid.
      *
-     * @param sortBy sorting field.
+     *@param type type
      * @param domainUuid domain uuid.
      * @param status status of the invoice.
-     * @param range range of the invoice.
-     * @param limit limit of the invoice.
      * @return Invoice status
      * @throws Exception if errors.
      */
     @PreAuthorize("hasPermission(null, 'INVOICE')")
-    public String listInvoiceByDomainId(String sortBy, String domainUuid, String status, String range, String limit) throws Exception {
-        return listInvoiceReportByDomainId(sortBy, domainUuid, status, range, limit);
+    public String listInvoiceByDomainId(String domainUuid, String status, String type) throws Exception {
+        return listInvoiceReportByDomainId(domainUuid, status, type);
     }
 
     /**
      * List project by domain uuid.
      *
-     * @param sortBy sorting field.
+     * @param type Type
      * @param domainUuid domain uuid.
      * @param status status of the invoice.
-     * @param range range of the invoice.
-     * @param limit limit of the invoice.
      * @return Invoice status
      * @throws Exception if errors.
      */
     @PreAuthorize("hasPermission(null, 'PAYMENTS')")
-    public String listPaymentByDomainId(String sortBy, String domainUuid, String status, String range, String limit) throws Exception {
-        return listInvoiceReportByDomainId(sortBy, domainUuid, status, range, limit);
+    public String listPaymentByDomainId(String domainUuid, String status,String type) throws Exception {
+        return listInvoiceReportByDomainId(domainUuid, status, type);
     }
 
     /**
      * List invoice/project by domain uuid.
      *
-     * @param sortBy sorting field.
+     * @param type Type
      * @param domainUuid domain uuid.
      * @param status status of the invoice.
-     * @param range range of the invoice.
-     * @param limit limit of the invoice.
      * @return Invoice status
      * @throws Exception if errors.
      */
-    public String  listInvoiceReportByDomainId(String sortBy, String domainUuid, String status, String range, String limit) throws Exception {
-        HttpMethod method = new GetMethod(apiURL + "/invoice/listByDomain");
-        method.setRequestHeader("Range", range);
+    public String  listInvoiceReportByDomainId(String domainUuid, String status, String type) throws Exception {
+        HttpMethod method = new GetMethod(apiURL + "/invoice/listByDomainInvoice");
         LinkedList<NameValuePair> arguments = new LinkedList<NameValuePair>();
-        arguments.add(new NameValuePair("sortBy", sortBy));
         arguments.add(new NameValuePair("domainUuid", domainUuid));
         arguments.add(new NameValuePair("status", status));
-        arguments.add(new NameValuePair("range", range));
-        arguments.add(new NameValuePair("limit", limit));
+        arguments.add(new NameValuePair("type", type));
         String responseJson = server.requestWithMethod(arguments, method);
         return responseJson;
     }
@@ -243,47 +237,38 @@ public class PingService {
     /**
      * List invoices.
      *
-     * @param sortBy sorting field.
-     * @param range range of the invoice.
-     * @param limit limit of the invoice.
+     * @param type type
      * @return Invoice list
      * @throws Exception if errors.
      */
     @PreAuthorize("hasPermission(null, 'INVOICE')")
-    public String listInvoice(String sortBy, String range, String limit) throws Exception {
-        return listInvoiceReport(sortBy, range, limit);
+    public String listInvoice(String type) throws Exception {
+        return listInvoiceReport(type);
     }
 
     /**
      * List projects.
      *
-     * @param sortBy sorting field.
-     * @param range range of the invoice.
-     * @param limit limit of the invoice.
+     * @param type type
      * @return Invoice list
      * @throws Exception if errors.
      */
     @PreAuthorize("hasPermission(null, 'PAYMENTS')")
-    public String listPayment(String sortBy, String range, String limit) throws Exception {
-        return listInvoiceReport(sortBy, range, limit);
+    public String listPayment(String type) throws Exception {
+        return listInvoiceReport(type);
     }
 
     /**
      * List invoices.
      *
-     * @param sortBy sorting field.
-     * @param range range of the invoice.
-     * @param limit limit of the invoice.
+     * @param type type
      * @return Invoice list
      * @throws Exception if errors.
      */
-    public String listInvoiceReport(String sortBy, String range, String limit) throws Exception {
-        HttpMethod method = new GetMethod(apiURL + "/invoice");
-        method.setRequestHeader("Range", range);
+    public String listInvoiceReport(String type) throws Exception {
+        HttpMethod method = new GetMethod(apiURL + "/invoice/invoiceList");
         LinkedList<NameValuePair> arguments = new LinkedList<NameValuePair>();
-        arguments.add(new NameValuePair("sortBy", sortBy));
-        arguments.add(new NameValuePair("range", range));
-        arguments.add(new NameValuePair("limit", limit));
+        arguments.add(new NameValuePair("type", type));
         String responseJson = server.requestWithMethod(arguments, method);
         return responseJson;
     }
