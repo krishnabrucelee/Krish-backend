@@ -241,7 +241,7 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
 						resourceLimit.getDomainId(),
 						ResourceLimitDomain.ResourceType.valueOf(resourceLimit.getResourceType().name()), true);
 				// Step2: Find resource count from department for specific domain and resource type.
-				ResourceLimitDepartment department = resourceLimitDepartmentRepo.findByDepartmentAndResourceType(resourceLimit.getDomainId(), ResourceLimitDepartment.ResourceType.valueOf(resourceLimit.getResourceType().name()), true);
+				ResourceLimitDepartment department = resourceLimitDepartmentRepo.findByDepartmentAndResourceType(resourceLimit.getDepartmentId(), ResourceLimitDepartment.ResourceType.valueOf(resourceLimit.getResourceType().name()), true);
 				Long totalCount = 0L;
 				if(resourceLimit.getMax() == -1){
 					totalCount = EmptytoLong(resourceLimit.getMax());

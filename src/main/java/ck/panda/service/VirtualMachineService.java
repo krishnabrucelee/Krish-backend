@@ -24,6 +24,14 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      */
     VmInstance findByUUID(String uuid);
 
+    /**
+     * Find vm instance by id with specified field.
+     *
+     * @param vmId instance id.
+     * @return instance.
+     */
+    VmInstance findVMByIDWithSpecifiedField(Long vmId);
+
    /**
     * Create new instance from panda.
     *
