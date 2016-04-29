@@ -556,7 +556,7 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.error("ERROR AT synch OS Category", e);
         }
         try {
-            // 12. Sync OSType entity
+            // 12. Sync OSType entity.
             this.syncOsTypes();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch OS Types", e);
@@ -1473,6 +1473,7 @@ public class SyncServiceImpl implements SyncService {
                 instance.setIsoName(csVm.getIsoName());
                 if (csVm.getIpAddress() != null) {
                     instance.setIpAddress(csVm.getIpAddress());
+                    instance.setInstanceGuestIp(ipToLong(csVm.getIpAddress()));
                 }
                 if (csVm.getNetworkId() != null) {
                     instance.setNetworkId(csVm.getNetworkId());
@@ -1493,9 +1494,11 @@ public class SyncServiceImpl implements SyncService {
                 }
                 if (csVm.getInstanceOwnerId() != null) {
                     instance.setInstanceOwnerId(csVm.getInstanceOwnerId());
+                    instance.setInstanceUserName(userService.find(csVm.getInstanceOwnerId()).getUserName());
                 }
                 if (instance.getTemplateId() != null) {
                     instance.setOsType(convertEntityService.getTemplateById(instance.getTemplateId()).getDisplayText());
+                    instance.setInstanceOsType(convertEntityService.getTemplateById(instance.getTemplateId()).getDisplayText());
                 }
                 instance.setTemplateName(csVm.getTemplateName());
                 LOGGER.debug("sync VM for ASYNC");
@@ -1510,6 +1513,7 @@ public class SyncServiceImpl implements SyncService {
                 IpAddress ipAddress = ipService.UpdateIPByNetwork(convertEntityService.getNetworkById(instance.getNetworkId()).getUuid());
                 if (ipAddress != null) {
                     instance.setPublicIpAddress(ipAddress.getPublicIpAddress());
+                    instance.setInstancePublicIp(ipToLong(ipAddress.getPublicIpAddress()));
                 }
                 // 3.2 If found, update the vm object in app db
                 virtualMachineService.update(instance);
@@ -1528,10 +1532,16 @@ public class SyncServiceImpl implements SyncService {
         // add it to app db
         for (String key : vmMap.keySet()) {
             VmInstance instances = virtualMachineService.save(vmMap.get(key));
+			if (instances.getIpAddress() != null) {
+				instances.setInstanceGuestIp(ipToLong(instances.getIpAddress()));
+				virtualMachineService.update(instances);
+			}
             IpAddress ipAddress = ipService.UpdateIPByNetwork(convertEntityService.getNetworkById(instances.getNetworkId()).getUuid());
             if (ipAddress != null) {
                 instances.setSyncFlag(false);
                 instances.setPublicIpAddress(ipAddress.getPublicIpAddress());
+                instances.setInstancePublicIp(ipToLong(ipAddress.getPublicIpAddress()));
+                instances.setInstanceGuestIp(ipToLong(instances.getIpAddress()));
                 virtualMachineService.update(instances);
             }
         }
@@ -1942,6 +1952,7 @@ public class SyncServiceImpl implements SyncService {
                 instance.setIsoName(csVm.getIsoName());
                 if (csVm.getIpAddress() != null) {
                     instance.setIpAddress(csVm.getIpAddress());
+                    instance.setInstanceGuestIp(ipToLong(csVm.getIpAddress()));
                 }
                 if (csVm.getNetworkId() != null) {
                     instance.setNetworkId(csVm.getNetworkId());
@@ -1961,6 +1972,7 @@ public class SyncServiceImpl implements SyncService {
                 }
                 if (csVm.getInstanceOwnerId() != null) {
                     instance.setInstanceOwnerId(csVm.getInstanceOwnerId());
+                    instance.setInstanceUserName(userService.find(csVm.getInstanceOwnerId()).getUserName());
                 }
                 LOGGER.debug("sync VM for ASYNC");
                 // VNC password set.
@@ -2184,20 +2196,33 @@ public class SyncServiceImpl implements SyncService {
         }
     }
 
-    public void syncResourceLimitUpdateForProjectAndDepartment() throws Exception{
-        List<ResourceLimitDepartment> persistDepartments = resourceDepartmentService.findAll();
-        List<ResourceLimitProject> persistResourceLimitProjects = resourceProjectService.findAll();
-        for(ResourceLimitDepartment department: persistDepartments) {
+	public void syncResourceLimitUpdateForProjectAndDepartment() throws Exception {
+		List<ResourceLimitDepartment> persistDepartments = resourceDepartmentService.findAll();
+		List<ResourceLimitProject> persistResourceLimitProjects = resourceProjectService.findAll();
+		int num = 50;
+		int num1 = 0;
+		int num2 = 0;
+		for (ResourceLimitDepartment department : persistDepartments) {
+			if (num1 == num) {
+				Thread.sleep(20000);
+				num1 = 0;
+			}
 			if (!department.getResourceType().equals(ResourceLimitDepartment.ResourceType.Project)) {
 				updateResourceLimit(department, CloudStackConstants.CS_DEPARTMENT);
 			}
-        }
-        for(ResourceLimitProject project: persistResourceLimitProjects) {
+			num1++;
+		}
+		for (ResourceLimitProject project : persistResourceLimitProjects) {
+			if (num2 == num) {
+				Thread.sleep(20000);
+				num2 = 0;
+			}
 			if (!project.getResourceType().equals(ResourceLimitProject.ResourceType.Project)) {
 				updateResourceLimit(project, CloudStackConstants.PROJECT);
 			}
-        }
-    }
+			num2++;
+		}
+	}
 
     /**
      * Sync with Cloud Server Iso.
@@ -3139,4 +3164,23 @@ public class SyncServiceImpl implements SyncService {
         manualSyncItem.setPandaCount(pandaCount);
         manualCloudSyncService.save(manualSyncItem);
     }
+
+    public long ipToLong(String ipAddress) {
+    	long result = 0;
+		if (ipAddress != null) {
+			String[] ipAddressInArray = ipAddress.split("\\.");
+
+			for (int i = 0; i < ipAddressInArray.length; i++) {
+
+				int power = 3 - i;
+				int ip = Integer.parseInt(ipAddressInArray[i]);
+				result += ip * Math.pow(256, power);
+
+			}
+		} else {
+			result = 0;
+		}
+
+    	return result;
+      }
 }
