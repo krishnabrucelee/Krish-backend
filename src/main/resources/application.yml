@@ -87,7 +87,7 @@ cloudstack:
 console:
     proxy: ${CONSOLE_URL}
 mrping:
-    url: ${MRPING_URL}
+    url: ${MRPING_URL:http://localhost:8081/api/invoice}
 
 ---
 
@@ -182,3 +182,12 @@ invoice:
 payment:
     return:
         url: ${PAYMENT_RETURN_URL:http://localhost:9090/pandaui/login}
+
+---
+background:
+    image:
+        dir: ${BACKGROUND_IMAGE_DIR:/home/Assistanz/Repository/Admin-master/pandaadminui/src/main/webapp/images}
+
+logo:
+    image:
+        dir: ${LOGO_IMAGE_DIR:/home/Assistanz/Repository/Admin-master/pandaadminui/src/main/webapp/images}
