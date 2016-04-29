@@ -334,7 +334,8 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
                     VmInstance vmId = convertEntityService.getVmInstanceById(loadbalancer.getVmIpAddress().get(i).getVmInstanceId());
                     optional.put("vmidipmap[" + i + "].vmid", vmId.getUuid());
                     optional.put("vmidipmap[" + i + "].vmip", loadbalancer.getVmIpAddress().get(i).getGuestIpAddress());
-                String assignResponse = cloudStackLoadBalancerService.assignToLoadBalancerRule(lbRule.getUuid(), "json", optional);
+                    configUtil.setUserServer();
+                    String assignResponse = cloudStackLoadBalancerService.assignToLoadBalancerRule(lbRule.getUuid(), "json", optional);
                 for(VmIpaddress vmIp : lbRule.getVmIpAddress()) {
                     vmIp.getGuestIpAddress();
                     vmlist.add(vmIp);
@@ -418,6 +419,7 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
             optional.put("vmidipmap[" + i + "].vmid", vmId.getUuid());
             optional.put("vmidipmap[" + i + "].vmip", loadbalancer.getVmIpAddress().get(i).getGuestIpAddress());
         }
+        configUtil.setUserServer();
         cloudStackLoadBalancerService.assignToLoadBalancerRule(loadbalancer.getUuid(), "json", optional);
         loadbalancer.setVmIpAddress(vmlist);
          return loadbalancer;

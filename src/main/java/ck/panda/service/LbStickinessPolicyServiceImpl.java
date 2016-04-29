@@ -155,11 +155,17 @@ public class LbStickinessPolicyServiceImpl implements LbStickinessPolicyService 
     /** Constant for create lb stickiness policy. */
     private static final String CS_STICKY_POLICIES = "stickinesspolicies";
 
+    /** Configuration Utilities. */
+    @Autowired
+    private ConfigUtil config;
+
     @Override
     public LbStickinessPolicy save(LbStickinessPolicy lbStickinessPolicy, String loadbalancer) throws Exception {
         lbStickinessPolicy.setIsActive(true);
          Errors errors = validator.rejectIfNullEntity("lbStickinessPolicy", lbStickinessPolicy);
          errors = validator.validateEntity(lbStickinessPolicy, errors);
+         // Configuration value to ACS.
+         config.setUserServer();
          String createStickiness = cloudStackLoadBalancerService.createLBStickinessPolicy(loadbalancer, CloudStackConstants.JSON, addOptionalValues(lbStickinessPolicy));
           JSONObject csloadBalancerResponseJSON = new JSONObject(createStickiness)
                   .getJSONObject(CS_CREATE_STICKY_POLICY);
@@ -181,6 +187,8 @@ public class LbStickinessPolicyServiceImpl implements LbStickinessPolicyService 
         if(lbStickinessPolicy.getSyncFlag()) {
         Errors errors = validator.rejectIfNullEntity("lbStickinessPolicy", lbStickinessPolicy);
         LoadBalancerRule listresponse = loadBalancerService.findByLbId(lbStickinessPolicy.getId());
+        // Configuration value to ACS.
+        config.setUserServer();
         String createStickiness = cloudStackLoadBalancerService.createLBStickinessPolicy(listresponse.getUuid(), CloudStackConstants.JSON, addOptionalValues(lbStickinessPolicy));
         JSONObject csloadBalancerResponseJSON = new JSONObject(createStickiness)
                 .getJSONObject(CS_CREATE_STICKY_POLICY);
