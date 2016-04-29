@@ -551,7 +551,7 @@ public class VolumeServiceImpl implements VolumeService {
             return volumeRepo.findByInstanceAndDomainIsActive(convertEntityService.getOwnerById(userId).getDomainId(),
                     volume, true);
         }
-        return volumeRepo.findByInstanceAndIsActive(volume, true);
+        return volumeRepo.findByInstanceVolumeTypeAndIsActive(volume, true);
     }
 
     @Override
@@ -559,9 +559,9 @@ public class VolumeServiceImpl implements VolumeService {
         if (convertEntityService.getOwnerById(userId).getDomainId() != null
                 && !convertEntityService.getOwnerById(userId).getType().equals(User.UserType.ROOT_ADMIN)) {
             return volumeRepo.findByVolumeTypeAndIsActive(convertEntityService.getOwnerById(userId).getDomainId(),
-                    Volume.VolumeType.DATADISK, true);
+                    Volume.VolumeType.ROOT, true);
         }
-        return volumeRepo.findByVolumeTypeAndIsActive(Volume.VolumeType.DATADISK, true);
+        return volumeRepo.findByVolumeTypeAndIsActive(Volume.VolumeType.ROOT, true);
     }
 
     @Override
