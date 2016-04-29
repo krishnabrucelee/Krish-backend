@@ -166,6 +166,9 @@ public class CloudStackConstants {
     /** Constant for generic name. */
     public static final String CS_NAME = "name";
 
+    /** Constant for generic url. */
+    public static final String CS_URL = "url";
+
     /** Constant for cloudStack error response. */
     public static final String CS_ERROR_CODE = "errorcode", CS_ERROR_TEXT = "errortext";
 
@@ -704,7 +707,7 @@ public class CloudStackConstants {
 
     /** Constant for admin. */
     public static final String CS_ADMIN = "admin";
-    
+
     /** Constant for project. */
     public static final String CS_PROJECT = "project";
 
@@ -718,6 +721,6 @@ public class CloudStackConstants {
     public static final String CS_UPDATE_VM_RESPONSE = "updatevirtualmachineresponse";
 
     /** Constant for project. */
-	public static final String PROJECT = "project";
+    public static final String PROJECT = "project";
 
 }
