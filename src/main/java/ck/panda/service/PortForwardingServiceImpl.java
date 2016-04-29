@@ -125,7 +125,7 @@ public class PortForwardingServiceImpl implements PortForwardingService {
     @Override
     public PortForwarding softDelete(PortForwarding portForwarding) throws Exception {
         if (portForwarding.getSyncFlag()) {
-            configUtil.setServer(1L);
+            configUtil.setUserServer();
             PortForwarding csPortForwarding = portForwardingRepo.findOne(portForwarding.getId());
             try {
                 cloudStackFirewallService.deletePortForwardingRule(csPortForwarding.getUuid(), "json");
