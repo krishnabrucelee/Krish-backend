@@ -1513,7 +1513,11 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 affinityGroupIds = affinityGroupIds + vmInstance.getAffinityGroupList().get(j).getUuid() + ",";
             }
         }
-        optionalMap.put(CloudStackConstants.CS_AFFINITY_GROUP_IDS, affinityGroupIds);
+        if (vmInstance.getAffinityGroupList().size() != 0) {
+            optionalMap.put(CloudStackConstants.CS_AFFINITY_GROUP_IDS, affinityGroupIds);
+        } else {
+            optionalMap.put(CloudStackConstants.CS_AFFINITY_GROUP_IDS, "");
+        }
         User user = convertEntityService.getOwnerById(vmInstance.getInstanceOwnerId());
         if (user == null || !apiSecretKeyGeneration(user)) {
             config.setUserServer();
