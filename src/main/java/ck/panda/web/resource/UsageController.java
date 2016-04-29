@@ -1,7 +1,5 @@
 package ck.panda.web.resource;
 
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -33,11 +31,11 @@ public class UsageController implements ApiController {
     /** Service for Ping.*/
     @Autowired
     private PingService pingService;
-    
+
     /** Service reference to Conver entity . */
     @Autowired
     private ConvertEntityService convertEntityService;
-    
+
     /** Autowired TokenDetails. */
     @Autowired
     private TokenDetails tokenDetails;
@@ -98,7 +96,7 @@ public class UsageController implements ApiController {
             return pingService.listPayment(type);
         }
     }
-    
+
     /**
      * Get the usage total by domain.
      *
@@ -111,10 +109,10 @@ public class UsageController implements ApiController {
     @ResponseBody
     public String getUsageTotalForAYearByDomain()
                     throws Exception {
-    	User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
+        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
         return pingService.getUsageTotalForAYearByDomain(user.getDomain().getUuid());
     }
-    
+
     /**
      * Get the usage details by project.
      *
@@ -127,10 +125,10 @@ public class UsageController implements ApiController {
     @ResponseBody
     public String getUsageProjectTotalByDomain(HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
-    	User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
+        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
         return pingService.getUsageTotalByProjectAndDomain(user.getDomain().getUuid());
     }
-    
+
     /**
      * Get the usage details by account.
      *
@@ -143,8 +141,8 @@ public class UsageController implements ApiController {
     @ResponseBody
     public String getUsageAccountTotalByDomain(HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
-    	User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
-    	return pingService.getUsageTotalByAccountAndDomain(user.getDomain().getUuid());
+        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
+        return pingService.getUsageTotalByAccountAndDomain(user.getDomain().getUuid());
     }
 
 }
