@@ -286,6 +286,51 @@ public class PingService {
         String responseJson = server.postRequest(arguments);
         return responseJson;
     }
+    
+    /**
+     * Get the usage total for a year by domain.
+     * 
+     * @param domainUuid uuid of the domain.
+     * @return usage total.
+     * @throws Exception if errors.
+     */
+    public String  getUsageTotalForAYearByDomain(String domainUuid) throws Exception {
+        HttpMethod method = new GetMethod(apiURL + "/usage/usageTotalByDomain");
+        LinkedList<NameValuePair> arguments = new LinkedList<NameValuePair>();
+        arguments.add(new NameValuePair("domainUuid", domainUuid));
+        String responseJson = server.requestWithMethod(arguments, method);
+        return responseJson;
+    }
+    
+    /**
+     * Get the usage total by project and domain.
+     * 
+     * @param domainUuid uuid of the domain.
+     * @return usage total.
+     * @throws Exception if errors.
+     */
+    public String  getUsageTotalByProjectAndDomain(String domainUuid) throws Exception {
+        HttpMethod method = new GetMethod(apiURL + "/usage/usageByProject");
+        LinkedList<NameValuePair> arguments = new LinkedList<NameValuePair>();
+        arguments.add(new NameValuePair("domainUuid", domainUuid));
+        String responseJson = server.requestWithMethod(arguments, method);
+        return responseJson;
+    }
+    
+    /**
+     * Get the usage total by account and domain.
+     * 
+     * @param domainUuid uuid of the domain.
+     * @return usage total.
+     * @throws Exception if errors.
+     */
+    public String  getUsageTotalByAccountAndDomain(String domainUuid) throws Exception {
+        HttpMethod method = new GetMethod(apiURL + "/usage/usageByAccount");
+        LinkedList<NameValuePair> arguments = new LinkedList<NameValuePair>();
+        arguments.add(new NameValuePair("domainUuid", domainUuid));
+        String responseJson = server.requestWithMethod(arguments, method);
+        return responseJson;
+    }
 
     /**
      * Check if an IP port is open or not.

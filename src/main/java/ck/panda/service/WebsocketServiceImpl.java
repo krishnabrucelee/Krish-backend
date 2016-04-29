@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.CloudStackConfiguration;
+import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.Event;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Nic;
@@ -49,12 +50,31 @@ public class WebsocketServiceImpl implements WebsocketService {
     /** VM snapshot object name. */
     public static final String VM_SNAPSHOT_ID = "vmsnapshotid";
 
+    /** VM snapshot object name. */
+    public static final String VolumeId = "id";
+
     /** VM snapshot memory. */
     public static final String VM_SNAPSHOT_MEMORY = "snapshotmemory";
 
     /** Cloudstack snapshot service reference. */
     @Autowired
     private CloudStackSnapshotService cssnapshot;
+
+    /** Department Service reference. */
+    @Autowired
+    private DepartmentService departmentService;
+
+    /** Domain Service reference. */
+    @Autowired
+    private DomainService domainService;
+
+    /** Domain Service reference. */
+    @Autowired
+    private VolumeService volumeService;
+
+    /** Autowired Project Service. */
+    @Autowired
+    private ProjectService projectService;
 
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(AsynchronousJobServiceImpl.class);
@@ -99,10 +119,6 @@ public class WebsocketServiceImpl implements WebsocketService {
     /** Service reference to Port Forwarding. */
     @Autowired
     private PortForwardingService portForwardingService;
-
-    /** Volume service for get status of volume. */
-    @Autowired
-    private VolumeService volumeService;
 
     /** Lists types of Volumes in cloudstack server. */
     @Autowired
@@ -187,6 +203,53 @@ public class WebsocketServiceImpl implements WebsocketService {
 							}
 						}
                     }
+					if (event.getStatus().equals(Event.Status.FAILED)
+							&& (event.getEvent().equalsIgnoreCase(EventTypes.EVENT_VOLUME_ATTACH)
+									|| event.getEvent().equalsIgnoreCase(EventTypes.EVENT_VOLUME_DETACH))) {
+						if (eventObject.has(CloudStackConstants.CS_CMD_INFO)) {
+							JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
+							if (eventObject.getString(CloudStackConstants.CS_STATUS)
+									.equalsIgnoreCase(CloudStackConstants.CS_STATUS_FAILED)) {
+								Volume persistVolume = volumeService.findByUUID(json.getString(VolumeId));
+								if (persistVolume != null) {
+									HashMap<String, String> volumeMap = new HashMap<String, String>();
+									config.setServer(1L);
+									volumeMap.put(CloudStackConstants.CS_ID, json.getString(VolumeId));
+									String response = csVolumeService.listVolumes(CloudStackConstants.JSON, volumeMap);
+									JSONArray volumeListJSON = null;
+									JSONObject responseObject = new JSONObject(response)
+											.getJSONObject(CS_LIST_VOLUME_RESPONSE);
+									if (responseObject.has(CS_VOLUME)) {
+										volumeListJSON = responseObject.getJSONArray(CS_VOLUME);
+										Volume volume = Volume.convert(volumeListJSON.getJSONObject(0));
+										persistVolume
+												.setZoneId(convertEntityService.getZoneId(volume.getTransZoneId()));
+										persistVolume.setDomainId(
+												convertEntityService.getDomainId(volume.getTransDomainId()));
+										persistVolume.setStorageOfferingId(convertEntityService
+												.getStorageOfferId(volume.getTransStorageOfferingId()));
+										persistVolume.setVmInstanceId(
+												convertEntityService.getVmInstanceId(volume.getTransvmInstanceId()));
+										if (volume.getTransProjectId() != null) {
+											persistVolume.setProjectId(
+													convertEntityService.getProjectId(volume.getTransProjectId()));
+											persistVolume.setDepartmentId(
+													projectService.find(volume.getProjectId()).getDepartmentId());
+										} else {
+											// departmentRepository.findByUuidAndIsActive(volume.getTransDepartmentId(),
+											// true);
+											Domain domain = domainService.find(volume.getDomainId());
+											persistVolume.setDepartmentId(
+													convertEntityService.getDepartmentByUsernameAndDomains(
+															volume.getTransDepartmentId(), domain));
+										}
+										persistVolume.setIsSyncFlag(false);
+										volumeService.update(persistVolume);
+									}
+								}
+							}
+						}
+					}
                     messagingTemplate.convertAndSend(CloudStackConstants.CS_ERROR_MAP + event.getEventOwnerId(),
                             message);
                 }
@@ -291,14 +354,6 @@ public class WebsocketServiceImpl implements WebsocketService {
                                                 } else {
                                                     updateResourceCountService.QuotaUpdateByResourceObject(vmInstance, "RestoreInstance", vmInstance.getDepartmentId(),
                                                         "Department", "Update");
-                                                }
-                                            }
-                                            if (eventObject.getString(EventTypes.OLD_RESOURCE_STATE).equalsIgnoreCase(EventTypes.EVENT_STATUS_STOPPED)
-                                                && eventObject.getString(EventTypes.RESOURCE_STATE).equalsIgnoreCase(EventTypes.EVENT_STATUS_DESTROYED)) {
-                                                if (vmInstance.getProjectId() != null) {
-                                                    updateResourceCountService.QuotaUpdateByResourceObject(vmInstance, "Destroy", vmInstance.getProjectId(), "Project", "delete");
-                                                } else {
-                                                    updateResourceCountService.QuotaUpdateByResourceObject(vmInstance, "Destroy", vmInstance.getDepartmentId(), "Department", "delete");
                                                 }
                                             }
                                             if (event.getMessage().equalsIgnoreCase("Expunging")) {

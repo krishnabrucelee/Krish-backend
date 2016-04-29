@@ -256,12 +256,12 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
 						ResourceLimitDomain.ResourceType.valueOf(resourceLimit.getResourceType().name()), true);
 				Long totalCount = 0L;
 				if (resourceLimit.getMax() == -1) {
-					totalCount = resourceLimit.getMax();
+					totalCount = EmptytoLong(resourceLimit.getMax());
 				} else {
-					totalCount = resourceLimit.getMax()
-							+ (resourceLimitDomain.getUsedLimit() - resourceLimitDomain.getMax());
+					totalCount = EmptytoLong(resourceLimit.getMax())
+							+ (EmptytoLong(resourceLimitDomain.getUsedLimit()));
 				}
-				if (resourceLimitDomain.getMax() < totalCount && resourceLimitDomain.getMax() != -1) {
+				if (EmptytoLong(resourceLimitDomain.getMax()) < EmptytoLong(totalCount) && EmptytoLong(resourceLimitDomain.getMax()) != -1) {
 					errors.addFieldError(resourceLimit.getResourceType().toString(),
 							departmentResourceCount + " in " + resourceLimit.getResourceType().toString() + " "
 									+ "already allocated to departments of this domain");
@@ -356,7 +356,7 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
             Long resourceDomainCount = resourceLimitDomainRepo.findTotalCountOfResourceProject(domainId,
                     ResourceLimitDomain.ResourceType.valueOf(resourceTypeMap.get(name)), true);
             if (resourceDomainCount != null) {
-                resourceMaxCount.put(resourceTypeMap.get(name), resourceDomainCount.toString());
+                resourceMaxCount.put(resourceTypeMap.get(name), EmptytoLong(resourceDomainCount).toString());
             }
         }
         return resourceMaxCount;
@@ -367,26 +367,13 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
         return (List<ResourceLimitDomain>) resourceLimitDomainRepo.findAllByDomainIdAndIsActive(domainId, true);
     }
 
-    /*@Override
-    public HashMap<String, Long> getSumOfDomainMin(Long id) throws Exception {
-        List<ResourceLimitDomain> resourceLimits = resourceLimitDomainRepo.findAllByDomainIdAndIsActive(id, true);
-        HashMap<String, Long> resourceMap = new HashMap<String, Long>();
-        for (ResourceLimitDomain resourceLimit : resourceLimits) {
-            Long sumOfAllDepartmentMax = resourceLimitDepartmentService.findByResourceCountByDepartmentAndResourceType(
-                    resourceLimit.getDomainId(),
-                    ResourceLimitDepartment.ResourceType.valueOf(resourceLimit.getResourceType().name()), 0L, true);
-            resourceMap.put(resourceLimit.getResourceType().toString(), sumOfAllDepartmentMax);
-        }
-        return resourceMap;
-    }*/
-
     @Override
     public HashMap<String, Long> getSumOfDomainMin(Long id) throws Exception {
         HashMap<String, String> resourceTypeMap = convertEntityService.getResourceTypeValue();
         HashMap<String, Long> resourceMap = new HashMap<String, Long>();
         for (String name : resourceTypeMap.keySet()) {
         	ResourceLimitDomain resourceLimitDomain = resourceLimitDomainRepo.findByDomainAndResourceCount(id, ResourceLimitDomain.ResourceType.valueOf(resourceTypeMap.get(name)), true);
-            resourceMap.put(resourceTypeMap.get(name),resourceLimitDomain.getUsedLimit());
+            resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitDomain.getUsedLimit()));
         }
         return resourceMap;
     }

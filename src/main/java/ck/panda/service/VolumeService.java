@@ -248,5 +248,13 @@ public interface VolumeService extends CRUDService<Volume> {
      * @throws Exception error occurs
      */
     Integer findAttachedCountByDomain(Long domainId) throws NumberFormatException, Exception;
+    
+    /**
+     * Find all the volumes by user id.
+     * @param userId user id.
+     * @return volumes list
+     * @throws Exception if errors.
+     */
+    List<Volume> findAllVolumeByUserId(Long userId) throws Exception;
 
 }

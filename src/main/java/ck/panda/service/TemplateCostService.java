@@ -1,5 +1,7 @@
 package ck.panda.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.TemplateCost;
 import ck.panda.util.domain.CRUDService;
@@ -19,4 +21,13 @@ public interface TemplateCostService extends CRUDService<TemplateCost> {
      * @return template cost
      */
     TemplateCost findByTemplateCost(Long templateId, Double cost);
+
+    /**
+     * Find template cost using template id.
+     *
+     * @param templateId id of the template
+     * @return template cost
+     */
+    List<TemplateCost> findAllByTemplateCost(Long templateId);
+
 }
