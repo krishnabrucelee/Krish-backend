@@ -36,7 +36,7 @@ spring:
         exchange:
             name: ${RABBITMQ_EXCHANGE}
         email:
-            name: ${RABBITMQ_EMAIL_EXCHANGE:Exchange}
+            name: ${RABBITMQ_EMAIL_EXCHANGE}
     # CS server Routing key
         server:
             action:
@@ -56,7 +56,7 @@ spring:
                 queue: ${RABBITMQ_RESOURCE_EVENT}
             email:
                 pattern: "email.template"
-                queue : ${RABBITMQ_EMAIL:Email}
+                queue : ${RABBITMQ_EMAIL}
  # Mail configuration
     mail:
         host: mail.xxx.com
@@ -87,7 +87,7 @@ cloudstack:
 console:
     proxy: ${CONSOLE_URL}
 mrping:
-    url: ${MRPING_URL:http://localhost:8086/api}
+    url: ${MRPING_URL}
 
 ---
 
@@ -170,13 +170,13 @@ login:
 
 english:
     template:
-        dir: ${ENGLISH_TEMPLATE_DIR:/home/english}
+        dir: ${ENGLISH_TEMPLATE_DIR}
 chinese:
     template:
-        dir: ${CHINESE_TEMPLATE_DIR:/home/chinese}
+        dir: ${CHINESE_TEMPLATE_DIR}
 invoice:
     base:
-        path: ${INVOICE_ATTACHMENT_DIR:/home/D2-cloud/invoice/invoiceattachment}
+        path: ${INVOICE_ATTACHMENT_DIR:/home/Assistanz/invoice/invoiceattachment}
 
 ---
 payment:
