@@ -620,7 +620,6 @@ public class UserServiceImpl implements UserService {
            jsonObject.put(RolePrincipal.LOGIN_USER_STATUS, user.getStatus());
            jsonObject.put(RolePrincipal.LOGIN_TIME, DateConvertUtil.getTimestamp());
            jsonObject.put(RolePrincipal.TIME_ZONE, timeZone.getID());
-           jsonObject.put(RolePrincipal.TIME_ZONE, timeZone.getID());
            jsonObject.put(RolePrincipal.REMEMBER_ME, loginHistory.getRememberMe());
            JSONArray jsonArray = new JSONArray();
            Map<String, Object> hashList = new HashMap<String, Object>();
