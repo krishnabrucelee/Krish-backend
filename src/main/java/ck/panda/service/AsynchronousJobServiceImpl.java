@@ -449,6 +449,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     instance.setIsoName(csVm.getIsoName());
                     if (csVm.getIpAddress() != null) {
                         instance.setIpAddress(csVm.getIpAddress());
+                        instance.setInstanceGuestIp(ipToLong(csVm.getIpAddress()));
                     }
                     if (csVm.getNetworkId() != null) {
                         instance.setNetworkId(csVm.getNetworkId());
@@ -473,6 +474,8 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     }
                     if (instance.getTemplateId() != null) {
                         instance.setOsType(
+                                convertEntityService.getTemplateById(instance.getTemplateId()).getDisplayText());
+                        instance.setInstanceOsType(
                                 convertEntityService.getTemplateById(instance.getTemplateId()).getDisplayText());
                     }
                     instance.setTemplateName(csVm.getTemplateName());
@@ -572,6 +575,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
 						.UpdateIPByNetwork(convertEntityService.getNetworkById(vmIn.getNetworkId()).getUuid());
 				if (ipAddress != null) {
 					vmIn.setPublicIpAddress(ipAddress.getPublicIpAddress());
+					vmIn.setInstancePublicIp(ipToLong(ipAddress.getPublicIpAddress()));
 					vmIn = virtualMachineService.update(vmIn);
 				}
 			}
@@ -1774,5 +1778,24 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             }
         }
     }
+
+    public long ipToLong(String ipAddress) {
+    	long result = 0;
+		if (ipAddress != null) {
+			String[] ipAddressInArray = ipAddress.split("\\.");
+
+			for (int i = 0; i < ipAddressInArray.length; i++) {
+
+				int power = 3 - i;
+				int ip = Integer.parseInt(ipAddressInArray[i]);
+				result += ip * Math.pow(256, power);
+
+			}
+		} else {
+			result = 0;
+		}
+
+    	return result;
+      }
 
 }
