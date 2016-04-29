@@ -1,7 +1,9 @@
 package ck.panda.util.infrastructure.security;
 
-import java.security.SecureRandom;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.TimeZone;
+import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -32,7 +34,6 @@ import ck.panda.util.CloudStackAuthenticationService;
 import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.DateConvertUtil;
-import ck.panda.util.EncryptionUtil;
 
 /**
  * Database authentication manager to handle all the validation and authentication for login users.
@@ -155,7 +156,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
             resultOfAuthentication = authValidation(userName, password, domain, rememberMe, resultOfAuthentication, forceLogin, forwardedFor);
         } else {
             LoginHistory loginHistory = loginHistoryService.findByLoginToken(loginMap.get("loginToken"));
-            if (loginHistory == null) {
+            if (loginHistory == null && !loginMap.get("loginToken").equals("-1")) {
                 throw new BadCredentialsException("Your credentials are used by another user. So you are logging out.");
             } else {
                 resultOfAuthentication = (AuthenticationWithToken) tokenAuthenticationProvider.authenticate(authentication);
@@ -220,8 +221,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
     public AuthenticationWithToken adminDefaultLoginAuthentication(Optional<String> userName, Optional<String> password,
             String rememberMe, AuthenticationWithToken resultOfAuthentication, User user, String forwardedFor) throws Exception {
         if (userName.get().equals(backendAdminUserName) && password.get().equals(backendAdminPassword)) {
-            SecureRandom random = new SecureRandom();
-            String loginToken = random.toString();
+            String loginToken = UUID.randomUUID().toString();
             resultOfAuthentication = externalServiceAuthenticator.authenticate(backendAdminUserName, backendAdminRole,
                     null, null, buildNumber, rememberMe, loginToken);
             String newToken = null;
@@ -253,8 +253,8 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
      * @return user authentication token
      * @throws Exception unhandled exceptions.
      */
-    public AuthenticationWithToken userLoginAuthentication(Optional<String> userName, String domain,
-            Optional<String> password, String rememberMe, AuthenticationWithToken resultOfAuthentication, User user, String forceLogin, String forwardedFor) throws Exception {
+    public AuthenticationWithToken userLoginAuthentication(Optional<String> userName, String domain, Optional<String> password, String rememberMe,
+            AuthenticationWithToken resultOfAuthentication, User user, String forceLogin, String forwardedFor) throws Exception {
         if (user == null) {
             loginAttemptvalidationCheck("error.login.credentials", CloudStackConstants.STATUS_INACTIVE, forwardedFor);
         } else if (user != null && !user.getIsActive()) {
@@ -267,8 +267,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
             if (authKeyResponse && loginAttemptCheck) {
                 Boolean forceLoginResponse = forceLoginAttemptCheck(user, forceLogin);
                 if (forceLoginResponse) {
-                SecureRandom random = new SecureRandom();
-                String loginToken = random.toString();
+                String loginToken = UUID.randomUUID().toString();
                 Department department = departmentService.find(user.getDepartment().getId());
                 Role role = roleService.findWithPermissionsByNameDepartmentAndIsActive(user.getRole().getName(), department.getId(), true);
                 resultOfAuthentication = externalServiceAuthenticator.authenticate(userName.get(),
@@ -373,7 +372,8 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
 
             if (persistLoginSecurityTrack == null && status.equals(CloudStackConstants.STATUS_ACTIVE)) {
                 return true;
-            } if (generalConfiguration == null) {
+            }
+            if (generalConfiguration == null) {
                 throw new BadCredentialsException("error.login.credentials");
             } else if (persistLoginSecurityTrack != null && generalConfiguration.getMaxLogin() >= persistLoginSecurityTrack.getLoginAttemptCount()
                 && status.equals(CloudStackConstants.STATUS_ACTIVE)) {
@@ -471,7 +471,11 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
      */
     private Boolean forceLoginAttemptCheck(User user, String forceLogin) throws Exception {
         LoginHistory loginHistory = loginHistoryService.findByUserId(user.getId());
-        if (loginHistory == null || !loginHistory.getIsAlreadyLogin()) {
+        Long currentTimeStamp;
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeZone(TimeZone.getTimeZone("UTC"));
+        currentTimeStamp = cal.getTimeInMillis() / 1000;
+        if (loginHistory == null || !loginHistory.getIsAlreadyLogin() || loginHistory.getSessionExpireTime() < currentTimeStamp) {
             return true;
         } else if (loginHistory.getIsAlreadyLogin() && forceLogin.equals("true")) {
             return true;

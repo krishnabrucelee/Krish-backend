@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.6.13, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.9, for linux-glibc2.5 (x86_64)
 --
--- Host: 127.0.0.1    Database: ckpanda
+-- Host: localhost    Database: ckpanda
 -- ------------------------------------------------------
--- Server version	5.1.73
+-- Server version	5.6.29
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -16,32 +16,31 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `affinity_group_type`
+-- Table structure for table `login_history`
 --
 
-DROP TABLE IF EXISTS `affinity_group_type`;
+DROP TABLE IF EXISTS `login_history`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `affinity_group_type` (
+CREATE TABLE `login_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `created_by` bigint(20) DEFAULT NULL,
-  `created_date_time` datetime DEFAULT NULL,
-  `is_active` bit(1) DEFAULT NULL,
-  `type` varchar(255) NOT NULL,
-  `updated_by` bigint(20) DEFAULT NULL,
-  `updated_date_time` datetime DEFAULT NULL,
-  `version` bigint(20) DEFAULT NULL,
+  `is_already_login` bit(1) DEFAULT NULL,
+  `login_token` varchar(255) DEFAULT NULL,
+  `remember_me` varchar(255) DEFAULT NULL,
+  `remember_me_expire` bigint(20) DEFAULT NULL,
+  `session_expiry` bigint(20) DEFAULT NULL,
+  `user_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `affinity_group_type`
+-- Dumping data for table `login_history`
 --
 
-LOCK TABLES `affinity_group_type` WRITE;
-/*!40000 ALTER TABLE `affinity_group_type` DISABLE KEYS */;
-/*!40000 ALTER TABLE `affinity_group_type` ENABLE KEYS */;
+LOCK TABLES `login_history` WRITE;
+/*!40000 ALTER TABLE `login_history` DISABLE KEYS */;
+/*!40000 ALTER TABLE `login_history` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -53,4 +52,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-04-25 18:37:50
+-- Dump completed on 2016-04-19 18:49:52

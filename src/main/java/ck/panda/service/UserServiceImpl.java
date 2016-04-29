@@ -21,6 +21,7 @@ import ck.panda.constants.EmailConstants;
 import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.LoginHistory;
 import ck.panda.domain.entity.Permission;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.Role;
@@ -105,6 +106,10 @@ public class UserServiceImpl implements UserService {
     /** Email job service. */
     @Autowired
     private EmailJobService emailJobService;
+
+    /** Login history service attribute. */
+    @Autowired
+    private LoginHistoryService loginHistoryService;
 
     /** Constant for generic UTF. */
     public static final String CS_UTF = "utf-8";
@@ -600,6 +605,7 @@ public class UserServiceImpl implements UserService {
     public String findByUserSessionDetails(Long id) throws Exception {
        User user = userRepository.findOne(id);
        Department department = departmentService.find(user.getDepartment().getId());
+       LoginHistory loginHistory = loginHistoryService.findByUserIdAndAlreadyLogin(user.getId(), true);
        Role role = roleService.findWithPermissionsByNameDepartmentAndIsActive(user.getRole().getName(), department.getId(), true);
        JSONObject jsonObject = new JSONObject();
        try {
@@ -614,6 +620,8 @@ public class UserServiceImpl implements UserService {
            jsonObject.put(RolePrincipal.LOGIN_USER_STATUS, user.getStatus());
            jsonObject.put(RolePrincipal.LOGIN_TIME, DateConvertUtil.getTimestamp());
            jsonObject.put(RolePrincipal.TIME_ZONE, timeZone.getID());
+           jsonObject.put(RolePrincipal.TIME_ZONE, timeZone.getID());
+           jsonObject.put(RolePrincipal.REMEMBER_ME, loginHistory.getRememberMe());
            JSONArray jsonArray = new JSONArray();
            Map<String, Object> hashList = new HashMap<String, Object>();
            for (int i = 0; i < role.getPermissionList().size(); i++) {

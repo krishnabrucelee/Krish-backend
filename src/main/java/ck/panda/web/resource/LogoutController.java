@@ -25,6 +25,9 @@ public class LogoutController {
     @Autowired
     private LoginHistoryService loginHistoryService;
 
+    /** Logout type. */
+    public static final String LOG_OUT = "LOG_OUT";
+
     /**
      * logout from panda.
      *
@@ -48,11 +51,13 @@ public class LogoutController {
      * logout the application.
      *
      * @param id application id
+     * @param request servlet request
+     * @param response servlet response.
      * @throws Exception error occurs
      */
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     public void deleteSession(@PathVariable("id") Long id, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        loginHistoryService.updateLogoutStatus(id);
+        loginHistoryService.updateLogoutStatus(id, LOG_OUT);
     }
 }

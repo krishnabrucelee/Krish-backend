@@ -26,10 +26,6 @@ public class TokenService {
     /** REST API auth token constant. */
     private static final Cache REST_API_AUTH_TOKEN = CacheManager.getInstance().getCache("restApiAuthTokenCache");
 
-    /** Scheduler time constant. */
-    @Value(value = "${login.timeout.inmilliseconds}")
-    public static int LOGIN_TIMEOUT_IN_MILLISECONDS;
-
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
     private String secretKey;
@@ -67,11 +63,20 @@ public class TokenService {
     private String userSecretKey;
 
     /**
+     * Evicting expired tokens.
+     *
+     */
+    public void evictExpiredTokens() {
+        LOGGER.info("Evicting expired tokens");
+        REST_API_AUTH_TOKEN.evictExpiredElements();
+    }
+
+    /**
      * Generate new encrypted token using user login details.
      *
      * @param user token.
      * @param domainName name of the domain
-     * @param rememberMe
+     * @param rememberMe flag
      * @return token
      * @throws Exception unhandled exceptions.
      */
@@ -127,6 +132,7 @@ public class TokenService {
      *
      * @param user details for token generation
      * @param domainName name of the domain
+     * @param rememberMe flag
      * @return user details
      */
     public StringBuilder createTokenDetails(User user, String domainName, String rememberMe) {
