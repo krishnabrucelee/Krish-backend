@@ -42,6 +42,10 @@ public class GeneralConfiguration implements Serializable {
     @Column(name = "remember_me_expired_days")
     private Integer rememberMeExpiredDays;
 
+    /** Session timeout of the general configuration. */
+    @Column(name = "session_time")
+    private Integer sessionTime;
+
     /** Created date and time. */
     @CreatedDate
     @Column(name = "created_date_time")
@@ -130,6 +134,24 @@ public class GeneralConfiguration implements Serializable {
      */
     public void setRememberMeExpiredDays(Integer rememberMeExpiredDays) {
         this.rememberMeExpiredDays = rememberMeExpiredDays;
+    }
+
+    /**
+     * Get the session timeout.
+     *
+     * @return the sessionTime
+     */
+    public Integer getSessionTime() {
+        return sessionTime;
+    }
+
+    /**
+     * Set the session timeout.
+     *
+     * @param sessionTime the sessionTime to set
+     */
+    public void setSessionTime(Integer sessionTime) {
+        this.sessionTime = sessionTime;
     }
 
     /**

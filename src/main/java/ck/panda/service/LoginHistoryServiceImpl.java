@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.TimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.GeneralConfiguration;
 import ck.panda.domain.entity.LoginHistory;
 import ck.panda.domain.entity.User;
@@ -13,7 +15,8 @@ import ck.panda.util.DateConvertUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
 /**
- * Login history service implementation
+ * Login history service implementation.
+ *
  */
 public class LoginHistoryServiceImpl implements LoginHistoryService {
 
@@ -29,56 +32,61 @@ public class LoginHistoryServiceImpl implements LoginHistoryService {
     @Autowired
     private GeneralConfigurationService generalConfigurationService;
 
+    /** Back end admin. */
+    public static final String BACKEND_ADMIN = "BACKEND_ADMIN";
+
+    /** Root domain. */
+    public static final String ROOT = "ROOT";
+
+    /** Time zone. */
+    public static final String UTC = "UTC";
+
+    /** Cookie time out. */
+    public static final String COOKIE_TIME_OUT = "COOKIE_TIME_OUT";
+
     @Override
-    public LoginHistory save(LoginHistory t) throws Exception {
-        // TODO Auto-generated method stub
-        return null;
+    public LoginHistory save(LoginHistory loginHistory) throws Exception {
+        return loginRepo.save(loginHistory);
     }
 
     @Override
-    public LoginHistory update(LoginHistory t) throws Exception {
-        // TODO Auto-generated method stub
-        return null;
+    public LoginHistory update(LoginHistory loginHistory) throws Exception {
+        return loginRepo.save(loginHistory);
     }
 
     @Override
-    public void delete(LoginHistory t) throws Exception {
-        // TODO Auto-generated method stub
-
+    public void delete(LoginHistory loginHistory) throws Exception {
+        loginRepo.delete(loginHistory);
     }
 
     @Override
     public void delete(Long id) throws Exception {
-        // TODO Auto-generated method stub
-
+        loginRepo.delete(id);
     }
 
     @Override
     public LoginHistory find(Long id) throws Exception {
-        // TODO Auto-generated method stub
-        return null;
+        return loginRepo.findOne(id);
     }
 
     @Override
     public Page<LoginHistory> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-        // TODO Auto-generated method stub
-        return null;
+        return loginRepo.findAll(pagingAndSorting.toPageRequest());
     }
 
     @Override
     public List<LoginHistory> findAll() throws Exception {
-        // TODO Auto-generated method stub
-        return null;
+        return (List<LoginHistory>) loginRepo.findAll();
     }
 
     @Override
     public LoginHistory saveLoginDetails(String userName, String password, String domain, String rememberMe, String loginToken)
             throws Exception {
-        if (domain.equals("BACKEND_ADMIN")) {
-            domain = "ROOT";
+        if (domain.equals(BACKEND_ADMIN)) {
+            domain = ROOT;
         }
         User user = userService.findByUser(userName, password, domain);
-        if (domain.equals("ROOT") && user == null) {
+        if (domain.equals(ROOT) && user == null) {
             LoginHistory loginDetails = new LoginHistory();
             loginDetails.setIsAlreadyLogin(true);
             loginDetails.setRememberMe(rememberMe);
@@ -91,21 +99,24 @@ public class LoginHistoryServiceImpl implements LoginHistoryService {
             LoginHistory loginHistoryId = findByUserId(user.getId());
             GeneralConfiguration generalConfiguration = generalConfigurationService.findByIsActive(true);
             Calendar cal = Calendar.getInstance();
-            cal.setTimeZone(TimeZone.getTimeZone("UTC"));
-            cal.add(Calendar.DATE, generalConfiguration.getRememberMeExpiredDays());
+            cal.setTimeZone(TimeZone.getTimeZone(UTC));
             Long currentTimeStamp = cal.getTimeInMillis() / 1000;
+            cal.add(Calendar.DATE, generalConfiguration.getRememberMeExpiredDays());
+            Long expiryTimeStamp = cal.getTimeInMillis() / 1000;
             if (loginHistoryId == null) {
                 loginDetails.setIsAlreadyLogin(true);
                 loginDetails.setRememberMe(rememberMe);
                 loginDetails.setUserId(user.getId());
                 loginDetails.setLoginToken(loginToken);
-                loginDetails.setRememberMeExpireDate(currentTimeStamp);
+                loginDetails.setRememberMeExpireDate(expiryTimeStamp);
+                loginDetails.setSessionExpireTime(currentTimeStamp + (generalConfiguration.getSessionTime() * 60));
                 return loginRepo.save(loginDetails);
             } else {
                 loginHistoryId.setIsAlreadyLogin(true);
-                loginHistoryId.setRememberMeExpireDate(currentTimeStamp);
+                loginHistoryId.setRememberMeExpireDate(expiryTimeStamp);
                 loginHistoryId.setRememberMe(rememberMe);
                 loginHistoryId.setLoginToken(loginToken);
+                loginHistoryId.setSessionExpireTime(currentTimeStamp + (generalConfiguration.getSessionTime() * 60));
                 return loginRepo.save(loginHistoryId);
             }
         }
@@ -127,11 +138,20 @@ public class LoginHistoryServiceImpl implements LoginHistoryService {
     }
 
     @Override
-    public LoginHistory updateLogoutStatus(Long id) throws Exception {
+    public LoginHistory updateLogoutStatus(Long id, String type) throws Exception {
         LoginHistory loginHistory = loginRepo.findByUserId(id);
-        loginHistory.setIsAlreadyLogin(false);
-        loginHistory.setRememberMe("false");
-        loginHistory.setRememberMeExpireDate(null);
-        return loginRepo.save(loginHistory);
+        Long currentTimeStamp;
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeZone(TimeZone.getTimeZone(UTC));
+        currentTimeStamp = cal.getTimeInMillis() / 1000;
+        if (type.equals(COOKIE_TIME_OUT) && loginHistory.getSessionExpireTime() > currentTimeStamp
+                && loginHistory.getRememberMe().equals(CloudStackConstants.STATUS_INACTIVE)) {
+            return loginHistory;
+        } else {
+            loginHistory.setIsAlreadyLogin(false);
+            loginHistory.setRememberMe(CloudStackConstants.STATUS_INACTIVE);
+            loginHistory.setRememberMeExpireDate(null);
+            return loginRepo.save(loginHistory);
+        }
     }
 }

@@ -1,22 +1,18 @@
 package ck.panda.domain.entity;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Type;
-import org.joda.time.DateTime;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.format.annotation.DateTimeFormat;
 
+/**
+ * Login history tracking entity.
+ *
+ */
 @Entity
 @Table(name = "login_history")
 @SuppressWarnings("serial")
@@ -49,6 +45,10 @@ public class LoginHistory implements Serializable {
     @Column(name = "remember_me_expire")
     private Long rememberMeExpireDate;
 
+    /** Session expirty time. */
+    @Column(name = "session_expiry")
+    private Long sessionExpireTime;
+
     /**
      * Get the id of LoginHistory.
      *
@@ -79,7 +79,7 @@ public class LoginHistory implements Serializable {
     /**
      * Set the userId of LoginHistory.
      *
-     * @param long1 the userId to set
+     * @param userId the userId to set
      */
     public void setUserId(Long userId) {
         this.userId = userId;
@@ -155,6 +155,24 @@ public class LoginHistory implements Serializable {
      */
     public void setRememberMeExpireDate(Long rememberMeExpireDate) {
         this.rememberMeExpireDate = rememberMeExpireDate;
+    }
+
+    /**
+     * Get the sessionExpireTime of LoginHistory.
+     *
+     * @return the sessionExpireTime
+     */
+    public Long getSessionExpireTime() {
+        return sessionExpireTime;
+    }
+
+    /**
+     * Set the sessionExpireTime of LoginHistory.
+     *
+     * @param sessionExpireTime the sessionExpireTime to set
+     */
+    public void setSessionExpireTime(Long sessionExpireTime) {
+        this.sessionExpireTime = sessionExpireTime;
     }
 
 }
