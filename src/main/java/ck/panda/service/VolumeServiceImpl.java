@@ -1249,13 +1249,38 @@ public class VolumeServiceImpl implements VolumeService {
     }
 
     @Override
-    public Page<Volume> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
-        return volumeRepo.findAllByDomainAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
+    public Page<Volume> findAllByDomainAndSearchText(Long domainId, String searchText, PagingAndSorting pagingAndSorting) throws Exception {
+        List<VolumeType> volumeType = new ArrayList<VolumeType>();
+        Page<Volume> listVolume = null;
+        if (searchText.equals("ROOT") || searchText.equals("DATADISK")) {
+            if (searchText.equals("DATADISK")) {
+                volumeType.add(VolumeType.DATADISK);
+            } else if (searchText.equals("ROOT")) {
+                volumeType.add(VolumeType.ROOT);
+            }
+            listVolume = volumeRepo.findAllByDomainAndSearchText(domainId, true, searchText, volumeType, pagingAndSorting.toPageRequest());
+        } else {
+            listVolume = volumeRepo.findAllByDomainAndSearchText(domainId, true, searchText, pagingAndSorting.toPageRequest());
+        }
+        return listVolume;
     }
 
     @Override
-    public Integer findAttachedCountByDomain(Long domainId) throws NumberFormatException, Exception {
-        Integer adminAttachedCount = volumeRepo.getAttachedCountByDomainAndIsActive(domainId, true).size();
+    public Integer findAttachedCountByDomain(Long domainId, String searchText) throws NumberFormatException, Exception {
+        List<VolumeType> volumeType = new ArrayList<VolumeType>();
+        List<Volume> listVolume = null;
+        if (searchText.equals("ROOT") || searchText.equals("DATADISK")) {
+            if (searchText.equals("DATADISK")) {
+                volumeType.add(VolumeType.DATADISK);
+            } else if (searchText.equals("ROOT")) {
+                volumeType.add(VolumeType.ROOT);
+            }
+            listVolume = volumeRepo.getAttachedCountByDomainAndIsActive(domainId, true, searchText, volumeType);
+        } else {
+            listVolume = volumeRepo.getAttachedCountByDomainAndIsActive(domainId, true, searchText);
+        }
+
+        Integer adminAttachedCount = listVolume.size();
         return adminAttachedCount;
     }
 

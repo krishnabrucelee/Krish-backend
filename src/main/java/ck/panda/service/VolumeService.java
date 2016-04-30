@@ -233,22 +233,24 @@ public interface VolumeService extends CRUDService<Volume> {
      * Find all the domain based Volume list.
      *
      * @param domainId domain id of the volume
+     * @param searchText search text.
      * @param page pagination and sorting values.
      * @return list of volumes with pagination.
      * @throws Exception error occurs
      */
-    Page<Volume> findAllByDomainId(Long domainId, PagingAndSorting page) throws Exception;
+    Page<Volume> findAllByDomainAndSearchText(Long domainId, String searchText, PagingAndSorting page) throws Exception;
 
     /**
      * Get the count of the volume based on the attached.
      *
      * @param domainId user details
+     * @param searchText search text.
      * @return volume count
      * @throws NumberFormatException Number format
      * @throws Exception error occurs
      */
-    Integer findAttachedCountByDomain(Long domainId) throws NumberFormatException, Exception;
-    
+    Integer findAttachedCountByDomain(Long domainId, String searchText) throws NumberFormatException, Exception;
+
     /**
      * Find all the volumes by user id.
      * @param userId user id.
