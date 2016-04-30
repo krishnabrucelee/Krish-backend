@@ -339,12 +339,27 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     public List<Template> findByTemplate(Long id) throws Exception {
         User user = convertEntityService.getOwnerById(id);
+        List<User> userList = userService.findByRootAdminUser();
         Domain domain = domainService.find(user.getDomainId());
+        List<Template> templates = null;
+        List<Template> listAllTemplate = new ArrayList<Template>();
+        for(User rootUser: userList) {
         if (domain != null && domain.getName().equals(DOMAIN_ROOT_ADMIN)) {
-            return csPrepareTemplate((List<Template>) templateRepository.findByTemplateAndFeature(ALL_TEMPLATE,
+            templates = csPrepareTemplate((List<Template>) templateRepository.findByTemplateAndFeature(ALL_TEMPLATE,
                    TemplateType.SYSTEM, Status.ACTIVE, true));
         }
-        return csPrepareTemplate(templateRepository.findAllTemplateByDomainIdUserTypeAndIsActiveStatus(ALL_TEMPLATE, TemplateType.SYSTEM, Status.ACTIVE, true, UserType.ROOT_ADMIN, user.getDomainId()));
+        else {
+            List<Template> templateList = templateRepository.findByTemplateOwnerIdAndIsActive(rootUser.getId(), true);
+            if(templateList.size() != 0)
+                    {
+                templates = (List<Template>) templateRepository.findByTemplateForUserId(TemplateType.SYSTEM,
+                            Status.ACTIVE, true,user.getDomainId(),rootUser.getId());
+            }        }
+        }
+        if(templates != null && templates.size() > 0) {
+            listAllTemplate.addAll(templates);
+         }
+        return templates;
     }
 
     @Override
@@ -352,6 +367,7 @@ public class TemplateServiceImpl implements TemplateService {
         User user = convertEntityService.getOwnerById(id);
         Domain domain = domainService.find(user.getDomainId());
         List<User> userList = userService.findByRootAdminUser();
+        List<Template> listAllTemplate = new ArrayList<Template>();
         List<Template> templates = null;
         for(User rootUser: userList) {
             if (template.getArchitecture() == null) {
@@ -377,11 +393,17 @@ public class TemplateServiceImpl implements TemplateService {
                 }
                 else {
                      if(templateRepository.findByTemplateOwnerIdAndIsActive(rootUser.getId(), true) != null) {
+                         List<Template> templateList = templateRepository.findByTemplateOwnerIdAndIsActive(rootUser.getId(), true);
+                         if(templateList.size() != 0) {
                     templates = csPrepareTemplate(templateRepository.findAllByOsCategoryAndArchitectureAndTypeAndStatus(
                             template.getOsCategoryId(), template.getArchitecture(), TemplateType.SYSTEM, Status.ACTIVE, true,user.getDomainId(),rootUser.getId()));
+                        }
                      }
                  }
              }
+            if(templates != null && templates.size() > 0) {
+               listAllTemplate.addAll(templates);
+            }
         }
         return templates;
     }
@@ -933,19 +955,19 @@ public class TemplateServiceImpl implements TemplateService {
         return value;
     }
 
-    
-	@Override
-	public List<Template> findAllByUserIdIsActiveAndShare(TemplateType type, Status status, Boolean isActive,
-			Long userId) throws Exception {
-		
-		User user = convertEntityService.getOwnerById(userId);
+
+    @Override
+    public List<Template> findAllByUserIdIsActiveAndShare(TemplateType type, Status status, Boolean isActive,
+            Long userId) throws Exception {
+
+        User user = convertEntityService.getOwnerById(userId);
         if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
             if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
-            	return templateRepository.findAllByCommunity(type, true, Template.Status.ACTIVE, true);
+                return templateRepository.findAllByCommunity(type, true, Template.Status.ACTIVE, true);
             } else {
-            	return templateRepository.findAllByUserId(type, userId, user.getDepartmentId(), true);
+                return templateRepository.findAllByUserId(type, userId, user.getDepartmentId(), true);
             }
         }
-    	return templateRepository.findAllByCommunity(type, true, Template.Status.ACTIVE, true);
-	}
+        return templateRepository.findAllByCommunity(type, true, Template.Status.ACTIVE, true);
+    }
 }
