@@ -776,4 +776,9 @@ public class NetworkServiceImpl implements NetworkService {
             return networkRepo.findByDepartment(user.getDepartmentId(), true);
         }
     }
+
+	@Override
+	public List<Network> findAllByDomainId(Long domainId) throws Exception {
+		return networkRepo.findAllByDomainIsActive(true, domainId);
+	}
 }

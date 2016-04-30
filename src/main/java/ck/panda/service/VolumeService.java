@@ -256,5 +256,13 @@ public interface VolumeService extends CRUDService<Volume> {
      * @throws Exception if errors.
      */
     List<Volume> findAllVolumeByUserId(Long userId) throws Exception;
+    
+    /**
+     * Find all the volumes by domain id.
+     * @param domainId domain id.
+     * @return volumes list
+     * @throws Exception if errors.
+     */
+    List<Volume> findAllVolumeByDomainId(Long domainId) throws Exception;
 
 }

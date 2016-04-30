@@ -136,12 +136,21 @@ public interface NetworkService extends CRUDService<Network> {
     List<Network> findAllByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception;
     
     /**
-     * Find all the user by active.
+     * Find all the network by user id.
      * 
      * @param userId user id.
      * @return network list.
      * @throws Exception if error.
      */
     List<Network> findAllByUserId(Long userId) throws Exception;
+    
+    /**
+     * Find all the networks by domain id.
+     * 
+     * @param userId user id.
+     * @return network list.
+     * @throws Exception if error.
+     */
+    List<Network> findAllByDomainId(Long domainId) throws Exception;
 
 }

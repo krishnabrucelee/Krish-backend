@@ -280,5 +280,15 @@ public interface UserService extends CRUDService<User> {
      * @throws Exception if error occurs.
      */
     List<User> findByRootAdminUser() throws Exception;
+    
+    
+    /**
+     * Find all the user by domain.
+     *
+     * @param domain domain reference.
+     * @return list of user.
+     * @throws Exception if error occurs.
+     */
+    List<User> findAllByDomain(Domain domain) throws Exception;
 
 }

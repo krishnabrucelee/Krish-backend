@@ -1282,4 +1282,9 @@ public class VolumeServiceImpl implements VolumeService {
         }
         return volumeRepo.findAllVolumesByActive(true);
     }
+
+	@Override
+	public List<Volume> findAllVolumeByDomainId(Long domainId) throws Exception {
+		return volumeRepo.findAllByDomainAndIsActive(domainId, true);
+	}
 }
