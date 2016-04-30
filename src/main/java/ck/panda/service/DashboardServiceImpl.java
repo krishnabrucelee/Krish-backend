@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
+import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Application;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.IpAddress;
@@ -17,6 +18,7 @@ import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
+import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.util.TokenDetails;
 import ck.panda.web.resource.DashboardController;
@@ -103,11 +105,16 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public JSONObject getInfrastructure() throws Exception {
         User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
-        List<VmInstance> vmList = virtualmachineService.findAllByUser(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
-        Integer runningVmCount = virtualmachineService.findCountByStatus(Status.RUNNING, Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
-        Integer stoppedVmCount = virtualmachineService.findCountByStatus(Status.STOPPED, Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
+        List<VmInstance> vmList = virtualmachineService.findAllByDomain(user.getDomainId(), user.getId(), "");
+        Integer runningVmCount = virtualmachineService.findCountByStatusAndDomain(Status.RUNNING, user.getDomainId(), user.getId(), "");
+        Integer stoppedVmCount = virtualmachineService.findCountByStatusAndDomain(Status.STOPPED, user.getDomainId(), user.getId(), "");
         Integer vmCount = vmList.size();
-        List<Network> networkList = networkService.findAllByUserId(user.getId());
+        List<Network> networkList = new ArrayList();
+        if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
+        	networkList = networkService.findAllByDomainId(user.getDomainId());
+        } else {
+        	networkList = networkService.findAllByUserId(user.getId());
+        }
         Integer networkCount = networkList.size();
         List<IpAddress> ipAddressList = new ArrayList(); 
         if(networkCount > 0) {
@@ -144,11 +151,63 @@ public class DashboardServiceImpl implements DashboardService {
         infra.put(TEMPLATE, templateCount);
         return infra;
     }
+    
+    
+    @Override
+    public JSONObject getInfrastructureByDomainId(Long domainId) throws Exception {
+        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
+        List<VmInstance> vmList = virtualmachineService.findAllByDomain(domainId , user.getId(), "");
+        Integer runningVmCount = virtualmachineService.findCountByStatusAndDomain(Status.RUNNING, domainId, user.getId(), "");
+        Integer stoppedVmCount = virtualmachineService.findCountByStatusAndDomain(Status.STOPPED, domainId, user.getId(), "");
+        Integer vmCount = vmList.size();
+        List<Network> networkList = new ArrayList();
+    	networkList = networkService.findAllByDomainId(domainId);
+        Integer networkCount = networkList.size();
+        List<IpAddress> ipAddressList = new ArrayList(); 
+        if(networkCount > 0) {
+        	for(Network network : networkList) {
+        		List<IpAddress> ipList = ipService.findByNetwork(network.getId());
+        		ipAddressList.addAll(ipList);
+        	}
+        }
+        Integer ipCount = ipAddressList.size();
+        Integer templateCount = templateService.findAllByUserIdIsActiveAndShare(Template.TemplateType.SYSTEM,
+                Template.Status.ACTIVE, true, Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID))).size();
+        Long storageSize = 0L;
+        List<Volume> volumeList = (List<Volume>) volumeService.findAllVolumeByDomainId(domainId);
+        for(Volume volume : volumeList) {
+        	storageSize = (storageSize + (volume.getDiskSize() / (1024 * 1024 * 1024)));
+        }
+
+        Integer cpuCore = 0;
+        Integer memory = 0;
+        for(VmInstance vm : vmList) {
+            cpuCore = cpuCore + vm.getCpuCore();
+            memory = memory + (vm.getMemory() / 1024);
+        }
+
+    	JSONObject infra = new JSONObject();
+        infra.put(RUNNING_VM_COUNT, runningVmCount);
+        infra.put(STOPPED_VM_COUNT, stoppedVmCount);
+        infra.put(TOTAL_COUNT, vmCount);
+        infra.put(VCPU, cpuCore);
+        infra.put(RAM, memory);
+        infra.put(STORAGE, storageSize);
+        infra.put(PUBLIC_IP, ipCount);
+        infra.put(NETWORKS, networkCount);
+        infra.put(TEMPLATE, templateCount);
+        return infra;
+    }
 
     @Override
     public List<ResourceLimitDomain> findByDomainQuota() throws Exception {
         User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
         return resourceLimitDomainService.findAllByDomainId(user.getDomainId());
+    }
+    
+    @Override
+    public List<ResourceLimitDomain> findDomainQuotaById(Long domainId) throws Exception {
+        return resourceLimitDomainService.findAllByDomainId(domainId);
     }
 
     @Override

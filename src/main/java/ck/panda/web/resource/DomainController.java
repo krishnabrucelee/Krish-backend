@@ -21,6 +21,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.service.DomainService;
 import ck.panda.util.TokenDetails;
@@ -138,5 +139,21 @@ public class DomainController extends CRUDController<Domain> implements ApiContr
         Page<Domain> pageResponse = domainService.findDomainBySearchText(page, searchText);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
+    }
+    
+    
+    /**
+     * Update domain to suspended state and deactive all the resources associated to the users.
+     *
+     * @param user reference of the user.
+     * @param id user id.
+     * @return user reference.
+     * @throws Exception if error.
+     */
+    @RequestMapping(value = "suspend/{id}", method = RequestMethod.PUT, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public Domain updateSuspended(@RequestBody Domain domain, @PathVariable(PATH_ID) Long id) throws Exception {
+        return domainService.updateSuspended(domain);
     }
 }

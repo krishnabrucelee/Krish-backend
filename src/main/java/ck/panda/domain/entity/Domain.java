@@ -581,7 +581,10 @@ public class Domain implements Serializable {
         ACTIVE,
 
         /** Deleted status make domain as soft deleted and it will not list on the applicaiton. */
-        INACTIVE
+        INACTIVE,
+        
+        /** Suspend domain. */
+        SUSPENDED
     }
 
     /**
@@ -598,6 +601,7 @@ public class Domain implements Serializable {
         domain.setName(JsonUtil.getStringValue(jsonObject, "name"));
         domain.setCompanyNameAbbreviation(JsonUtil.getStringValue(jsonObject, "name"));
         domain.setIsActive(true);
+        domain.setStatus(Status.ACTIVE);
         return domain;
     }
 
