@@ -36,6 +36,7 @@ import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.CloudStackVolumeService;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.JsonValidator;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -154,6 +155,10 @@ public class VolumeServiceImpl implements VolumeService {
     /** CloudStack connector reference for resource capacity. */
     @Autowired
     private CloudStackResourceCapacity cloudStackResourceCapacity;
+
+    /** Token details reference. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     @Override
     @PreAuthorize("hasPermission(#volume.getIsSyncFlag(), 'ADD_VOLUME')")
@@ -1250,6 +1255,10 @@ public class VolumeServiceImpl implements VolumeService {
 
     @Override
     public Page<Volume> findAllByDomainAndSearchText(Long domainId, String searchText, PagingAndSorting pagingAndSorting) throws Exception {
+        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
+        if (!convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.ROOT_ADMIN)) {
+            domainId = user.getDomainId();
+        }
         List<VolumeType> volumeType = new ArrayList<VolumeType>();
         Page<Volume> listVolume = null;
         if (searchText.equals("ROOT") || searchText.equals("DATADISK")) {
@@ -1267,6 +1276,10 @@ public class VolumeServiceImpl implements VolumeService {
 
     @Override
     public Integer findAttachedCountByDomain(Long domainId, String searchText) throws NumberFormatException, Exception {
+        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
+        if (!convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.ROOT_ADMIN)) {
+            domainId = user.getDomainId();
+        }
         List<VolumeType> volumeType = new ArrayList<VolumeType>();
         List<Volume> listVolume = null;
         if (searchText.equals("ROOT") || searchText.equals("DATADISK")) {
