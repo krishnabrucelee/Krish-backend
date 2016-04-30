@@ -226,7 +226,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
                     ResourceLimitDepartment resourceDatas = resourceLimitDepartmentService.findByDepartmentAndResourceType(resource.getDepartmentId(), updateUsedCount(resourceData), true);
                     Long resourceCount = resourceLimitProjectRepo.findByDepartmentIdAndResourceType(resource.getDepartmentId(), resource.getResourceType(), true);
                     Long resourceCounts = resourceLimitProjectRepo.findByDepartmentIdAndResourceTypeAndResourceMax(resource.getDepartmentId(), resource.getResourceType(), true);
-                    resourceDatas.setUsedLimit((EmptytoLong(resourceCounts) + EmptytoLong(resourceCount)) + EmptytoLong(resourceDatas.getUsedLimit()));
+                    resourceDatas.setUsedLimit((EmptytoLong(resourceCounts) + EmptytoLong(resourceCount)));
                     resourceLimitDepartmentService.save(resourceDatas);
                 } else {
                     updateResourceProject(resource);
@@ -427,7 +427,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
                 if (resourceLimitDepartment.getMax() == -1) {
                     resourceMap.put(resourceTypeMap.get(name), -1L);
                 } else {
-                    resourceMap.put(resourceTypeMap.get(name),EmptytoLong(resourceLimitProject.getMax()) + (EmptytoLong(resourceLimitDepartment.getMax()) - EmptytoLong(resourceLimitDepartment.getUsedLimit())));
+                    resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitDepartment.getMax()));
                 }
             } else {
                 if (resourceLimitDepartment.getUsedLimit() == null) {
@@ -436,7 +436,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
                 	 if (resourceLimitDepartment.getMax() == -1) {
                 		 resourceMap.put(resourceTypeMap.get(name), -1L);
                 	 } else {
-                		 resourceMap.put(resourceTypeMap.get(name),(EmptytoLong(resourceLimitDepartment.getMax()) - EmptytoLong(resourceLimitDepartment.getUsedLimit())));
+                		 resourceMap.put(resourceTypeMap.get(name), (EmptytoLong(resourceLimitDepartment.getMax()) - EmptytoLong(resourceLimitDepartment.getUsedLimit())));
                 	 }
                 }
             }
