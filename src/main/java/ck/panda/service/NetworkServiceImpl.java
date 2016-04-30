@@ -64,6 +64,9 @@ public class NetworkServiceImpl implements NetworkService {
     /** Constant for cloudstack response restart. */
     private static final String CS_RESTART_NETWORK_RESPONSE = "restartnetworkresponse";
 
+    /** Update quota constants. */
+    public static final String  CS_Network = "Network", CS_IP = "IP", Update = "update", Delete = "delete", CS_Project = "Project", CS_Department = "Department";
+
     /** Constant for clean up. */
     private static final String CS_CLEAN_UP = "cleanup";
 
@@ -410,7 +413,14 @@ public class NetworkServiceImpl implements NetworkService {
             ipAddress.setVlan(ip.getVlan());
             ipAddress.setCreatedBy(ip.getCreatedBy());
             ipAddress.setCreatedDateTime(ip.getCreatedDateTime());
-            ipService.update(ipAddress);
+            ipAddress = ipService.update(ipAddress);
+            if (ipAddress.getProjectId() != null) {
+            	updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
+                            ipAddress.getProjectId(), CS_Project, Delete);
+            } else {
+            	updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
+                            ipAddress.getDepartmentId(), CS_Department, Delete);
+            }
         }
         return network;
     }
@@ -735,13 +745,13 @@ public class NetworkServiceImpl implements NetworkService {
     public Page<Network> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
         return networkRepo.findAllByDomainIdAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
     }
-    
+
     @Override
     public List<Network> findAllByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception {
         return networkRepo.findAllByDomainAndIsActive(domainId, isActive);
     }
-    
-    
+
+
     @Override
     public List<Network> findAllByUserId(Long userId) throws Exception {
        User user = convertEntityService.getOwnerById(userId);
@@ -755,8 +765,8 @@ public class NetworkServiceImpl implements NetworkService {
        List<Network> network = this.getNetworkListByUserWihtoutPaging(userId);
         return network;
     }
-    
-    
+
+
     /**
      * Get the Network list based on the active status.
      *
