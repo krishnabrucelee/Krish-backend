@@ -148,30 +148,30 @@ public class ProjectServiceImpl implements ProjectService {
         }
         // Save the entity with uuid for created new project in CS.
         project = projectRepository.save(project);
-		if (project.getSyncFlag()) {
-			for (String keys : convertEntityService.getResourceTypeValue().keySet()) {
-				ResourceLimitProject persistProject = resourceProjectService
-						.findByProjectAndResourceType(project.getId(), ResourceLimitProject.ResourceType
-								.valueOf(convertEntityService.getResourceTypeValue().get(keys)), true);
-				if (persistProject != null) {
-					resourceProjectService.delete(persistProject);
-				}
-				ResourceLimitProject resourceLimitProject = new ResourceLimitProject();
-				resourceLimitProject.setDepartmentId(project.getDepartmentId());
-				resourceLimitProject.setDomainId(project.getDomainId());
-				resourceLimitProject.setProjectId(project.getId());
-				resourceLimitProject.setMax(0L);
-				resourceLimitProject.setAvailable(0L);
-				resourceLimitProject.setUsedLimit(0L);
-				resourceLimitProject.setResourceType(ResourceLimitProject.ResourceType
-						.valueOf(convertEntityService.getResourceTypeValue().get(keys)));
-				resourceLimitProject.setIsSyncFlag(false);
-				resourceLimitProject.setIsActive(true);
-				resourceProjectService.update(resourceLimitProject);
-			}
-		}
-		return project;
-	}
+        if (project.getSyncFlag()) {
+            for (String keys : convertEntityService.getResourceTypeValue().keySet()) {
+                ResourceLimitProject persistProject = resourceProjectService
+                        .findByProjectAndResourceType(project.getId(), ResourceLimitProject.ResourceType
+                                .valueOf(convertEntityService.getResourceTypeValue().get(keys)), true);
+                if (persistProject != null) {
+                    resourceProjectService.delete(persistProject);
+                }
+                ResourceLimitProject resourceLimitProject = new ResourceLimitProject();
+                resourceLimitProject.setDepartmentId(project.getDepartmentId());
+                resourceLimitProject.setDomainId(project.getDomainId());
+                resourceLimitProject.setProjectId(project.getId());
+                resourceLimitProject.setMax(0L);
+                resourceLimitProject.setAvailable(0L);
+                resourceLimitProject.setUsedLimit(0L);
+                resourceLimitProject.setResourceType(ResourceLimitProject.ResourceType
+                        .valueOf(convertEntityService.getResourceTypeValue().get(keys)));
+                resourceLimitProject.setIsSyncFlag(false);
+                resourceLimitProject.setIsActive(true);
+                resourceProjectService.update(resourceLimitProject);
+            }
+        }
+        return project;
+    }
 
     @Override
     @PreAuthorize("hasPermission(#project.getSyncFlag(), 'EDIT_PROJECT')")
@@ -338,19 +338,19 @@ public class ProjectServiceImpl implements ProjectService {
         List<ResourceLimitDepartment> resourceLimitDepartment = resourceLimitDepartmentService.findAllByDepartmentIdAndIsActive(project.getDepartmentId(), true);
         List<ResourceLimitProject> resourceLimitProject = resourceLimitProjectService.findAllByProjectIdAndIsActive(project.getId(), true);
         for (ResourceLimitDepartment departmentLimit : resourceLimitDepartment) {
-        	for (ResourceLimitProject projectLimit : resourceLimitProject) {
-        		if (departmentLimit.getResourceType().toString().equals(projectLimit.getResourceType().toString())) {
-					if (projectLimit.getMax() == -1L) {
-        				departmentLimit.setUsedLimit(EmptytoLong(departmentLimit.getUsedLimit()));
-        			} else {
-        				departmentLimit.setUsedLimit(EmptytoLong(departmentLimit.getUsedLimit()) - EmptytoLong(projectLimit.getMax()));
-        			}
-        			resourceLimitDepartmentService.save(departmentLimit);
-        			projectLimit.setIsActive(false);
-        			projectLimit.setIsSyncFlag(false);
-        			resourceLimitProjectService.save(projectLimit);
-        		}
-        	}
+            for (ResourceLimitProject projectLimit : resourceLimitProject) {
+                if (departmentLimit.getResourceType().toString().equals(projectLimit.getResourceType().toString())) {
+                    if (projectLimit.getMax() == -1L) {
+                        departmentLimit.setUsedLimit(EmptytoLong(departmentLimit.getUsedLimit()));
+                    } else {
+                        departmentLimit.setUsedLimit(EmptytoLong(departmentLimit.getUsedLimit()) - EmptytoLong(projectLimit.getMax()));
+                    }
+                    resourceLimitDepartmentService.save(departmentLimit);
+                    projectLimit.setIsActive(false);
+                    projectLimit.setIsSyncFlag(false);
+                    resourceLimitProjectService.save(projectLimit);
+                }
+            }
         }
         // Update project entity.
         return projectRepository.save(project);
@@ -446,9 +446,14 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Page<Project> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting)
-            throws Exception {
+    public Page<Project> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
         return projectRepository.findAllByDomainIdAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
+    }
+
+    @Override
+    public Page<Project> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText)
+            throws Exception {
+        return projectRepository.findAllByDomainIdAndIsActiveAndSearchText(domainId, true, pagingAndSorting.toPageRequest(),searchText);
     }
 
     /**
@@ -485,4 +490,5 @@ public class ProjectServiceImpl implements ProjectService {
         }
         return value;
     }
+
 }

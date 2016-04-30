@@ -105,16 +105,16 @@ public interface ProjectService extends CRUDService<Project> {
      */
     List<Project> getAllProjects(Long userId) throws Exception;
 
-    /**
+  /*  *//**
      * Find all project by domain.
      *
      * @param domainId domain id of the project
      * @param pagingAndSorting paging and sorting information.
      * @return list of project.
      * @throws Exception if error occurs.
-     */
+     *//*
     Page<Project> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
-
+*/
     /**
      * Find project by project name and status.
      *
@@ -123,5 +123,27 @@ public interface ProjectService extends CRUDService<Project> {
      * @param isActive active/inactive status.
      * @return project.
      */
-    Project findByProjectNameAndIsActive(String projectAccountName, Long domainId, Boolean isActive);
+    Project findByProjectNameAndIsActive(String projectAccountName, Long domainId, Boolean isActive) throws Exception;
+
+    /**
+     * Find all domain id and search text.
+     *
+     * @param domainId
+     * @param pagingAndSorting
+     * @param searchText
+     * @return
+     * @throws Exception
+     */
+    Page<Project> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText)
+            throws Exception;
+
+    /**
+     *
+     *
+     * @param domainId
+     * @param page
+     * @return
+     * @throws Exception
+     */
+    Page<Project> findAllByDomainId(Long domainId, PagingAndSorting page) throws Exception;
 }
