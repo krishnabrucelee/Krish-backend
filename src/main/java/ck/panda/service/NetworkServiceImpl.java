@@ -368,7 +368,7 @@ public class NetworkServiceImpl implements NetworkService {
 				network.setIsActive(false);
 				network.setStatus(Network.Status.DESTROY);
 				if (network.getSyncFlag()) {
-					if (network.getProjectId() != null) {
+					/*if (network.getProjectId() != null) {
 						quotaLimitValidation.QuotaLimitCheckByResourceObject(
 								convertEntityService.getNetworkById(network.getId()), "IP",
 								convertEntityService.getNetworkById(network.getId()).getProjectId(), "Project");
@@ -377,7 +377,7 @@ public class NetworkServiceImpl implements NetworkService {
 						quotaLimitValidation.QuotaLimitCheckByResourceObject(
 								convertEntityService.getNetworkById(network.getId()), "IP",
 								convertEntityService.getNetworkById(network.getId()).getDepartmentId(), "Department");
-					}
+					}*/
 					config.setUserServer();
 					String networkResponse = csNetwork.deleteNetwork(network.getUuid(), CloudStackConstants.JSON);
 					JSONObject jobId = new JSONObject(networkResponse).getJSONObject(CS_DELETE_NETWORK_RESPONSE);
