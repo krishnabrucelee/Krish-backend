@@ -11,7 +11,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.Volume;
-import ck.panda.domain.entity.VmInstance.Status;
 import ck.panda.domain.entity.Volume.VolumeType;
 
 /**
