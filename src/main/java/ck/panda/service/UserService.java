@@ -208,7 +208,7 @@ public interface UserService extends CRUDService<User> {
      * @return list of user.
      * @throws Exception if error occurs.
      */
-    Page<User> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
+    Page<User> findAllByDomainId(Long domainId, String searchText, PagingAndSorting pagingAndSorting) throws Exception;
 
 
     /**
