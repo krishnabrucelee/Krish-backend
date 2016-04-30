@@ -6,7 +6,6 @@ import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.ThemeCustomisation;
 import ck.panda.domain.entity.ThemeCustomisation.CustomType;
@@ -72,12 +71,18 @@ public class ThemeSettingServiceImpl implements ThemeSettingService {
     public List<ThemeSetting> findByIsActive(Boolean isActive) {
         List<ThemeSetting> themeList = new ArrayList<ThemeSetting>();
         ThemeSetting theme = themeSettingRepo.findByThemeAndIsActive(true);
-        List<ThemeCustomisation> customHeaderList = themeCustomisationService.findByCustomTypeAndIsActive(CustomType.HEADER, true);
-        List<ThemeCustomisation> customFooterList = themeCustomisationService.findByCustomTypeAndIsActive(CustomType.FOOTER, true);
-        theme.setHeaders(customHeaderList);
-        theme.setFooters(customFooterList);
-        themeList.add(theme);
-        return themeList;
+        if (theme != null) {
+            List<ThemeCustomisation> customHeaderList = themeCustomisationService
+                    .findByCustomTypeAndIsActive(CustomType.HEADER, true);
+            List<ThemeCustomisation> customFooterList = themeCustomisationService
+                    .findByCustomTypeAndIsActive(CustomType.FOOTER, true);
+            theme.setHeaders(customHeaderList);
+            theme.setFooters(customFooterList);
+            themeList.add(theme);
+            return themeList;
+        } else {
+            return null;
+        }
     }
 
     @Override
