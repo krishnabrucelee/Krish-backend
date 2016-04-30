@@ -93,4 +93,12 @@ public interface DomainService extends CRUDService<Domain> {
      */
     Page<Domain> findDomainBySearchText(PagingAndSorting pagingAndSorting, String searchText) throws Exception;
 
+    /**
+     * Update the domain to suspended state.
+     *
+     * @return domain
+     * @throws Exception unhandled errors.
+     */
+    Domain updateSuspended(Domain domain) throws Exception;
+    
 }

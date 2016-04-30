@@ -21,6 +21,15 @@ public interface DashboardService {
 	 * @throws Exception if error.
 	 */
 	JSONObject getInfrastructure() throws Exception;
+	
+	/**
+	 * Get the infrastructure.
+	 *  
+	 * @param domainId domain id.
+	 * @return infrastructure response.
+	 * @throws Exception if error.
+	 */
+	JSONObject getInfrastructureByDomainId(Long domainId) throws Exception;
     
     /**
      * Resource limit domain.
@@ -45,4 +54,12 @@ public interface DashboardService {
      * @throws Exception if error.
      */
     List<Application> findAllApplicationByDomain() throws Exception;
+    
+    /**
+     * Find resource limit domain by domain id.
+     * @param domainId domain id.
+     * @return resource limit domains.
+     * @throws Exception if errors.
+     */
+    List<ResourceLimitDomain> findDomainQuotaById(Long domainId) throws Exception;
 }

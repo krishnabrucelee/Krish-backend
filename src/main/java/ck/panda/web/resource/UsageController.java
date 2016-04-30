@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -113,6 +114,21 @@ public class UsageController implements ApiController {
         return pingService.getUsageTotalForAYearByDomain(user.getDomain().getUuid());
     }
 
+    /**
+     * Get the usage total by domain id.
+     *
+     * @throws Exception if error occurs.
+     *
+     */
+    @RequestMapping(value = "usageTotal/domain/{id}", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public String getUsageTotalForAYearByDomainId(@PathVariable(PATH_ID) String id)
+                    throws Exception {
+        return pingService.getUsageTotalForAYearByDomain(id);
+    }
+    
     /**
      * Get the usage details by project.
      *
