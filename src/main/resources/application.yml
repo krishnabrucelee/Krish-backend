@@ -87,7 +87,7 @@ cloudstack:
 console:
     proxy: ${CONSOLE_URL}
 mrping:
-    url: ${MRPING_URL:http://localhost:8081/api/invoice}
+    url: ${MRPING_URL}
 
 ---
 

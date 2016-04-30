@@ -7,6 +7,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.rabbitmq.util.EmailEvent;
 import ck.panda.domain.entity.ResourceLimitDomain;
@@ -31,6 +33,9 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
     /** CloudStack Resource Capacity Service. */
     @Autowired
     private CloudStackResourceCapacity cloudStackResourceCapacity;
+
+    @Autowired
+    private IpaddressService ipaddressService;
 
     /** Resource Limit Department service reference. */
     @Autowired
@@ -73,7 +78,6 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
             } else {
                 resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getNumberOfCores()));
                 resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getMemory()));
-
             }
             if(vmInstance.getStorageOfferingId() != null) {
                 if(convertEntityService.getStorageOfferById(vmInstance.getStorageOfferingId()).getIsCustomDisk()) {
@@ -91,7 +95,16 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
             resourceList.add(ConvertEntityService.CS_PRIMARY_STORAGE);
             resourceList.add(ConvertEntityService.CS_IP);
             resourceUsageMap.put(ConvertEntityService.CS_CPU, 1L);
-            resourceUsageMap.put(ConvertEntityService.CS_IP, 1L);
+        	List<IpAddress> ipaddresses = ipaddressService.findByNetwork(vmInstance.getNetworkId());
+			Boolean isCheck =false;
+			for (IpAddress ipaddress : ipaddresses) {
+				if (ipaddress.getIsSourcenat()) {
+					isCheck = true;
+				}
+			}
+			if(!isCheck){
+				resourceUsageMap.put(ConvertEntityService.CS_IP, 1L);
+			}
             if (accountType.equals("Project")) {
                 String validateMessage = checkResourceAvailablity(accountTypeId, accountType, resourceList, resourceUsageMap);
                 if (validateMessage != null) {

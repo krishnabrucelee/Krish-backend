@@ -64,6 +64,9 @@ public class NetworkServiceImpl implements NetworkService {
     /** Constant for cloudstack response restart. */
     private static final String CS_RESTART_NETWORK_RESPONSE = "restartnetworkresponse";
 
+    /** Update quota constants. */
+    public static final String  CS_Network = "Network", CS_IP = "IP", Update = "update", Delete = "delete", CS_Project = "Project", CS_Department = "Department";
+
     /** Constant for clean up. */
     private static final String CS_CLEAN_UP = "cleanup";
 
@@ -340,49 +343,59 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     @PreAuthorize("hasPermission(#network.getSyncFlag(), 'DELETE_NETWORK')")
-    public Network softDelete(Network network) throws Exception {
-        network.setIsActive(false);
-            if (network.getSyncFlag()) {
-                List<VmInstance> vmResponse = vmService.findAllByNetworkAndVmStatus(network.getId(),
-                        VmInstance.Status.EXPUNGING);
-                List<Nic> nicResponse = nicService.findAllByNetworkAndIsActive(network.getId(), true);
-                if (vmResponse.size() != 0 || nicResponse.size() != 0) {
-                    throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,"Network is associated with Vm instances. You cannot delete this network");
-                  }
+	public Network softDelete(Network network) throws Exception {
+		network.setIsActive(false);
+		if (network.getSyncFlag()) {
+			List<VmInstance> vmResponse = vmService.findAllByNetworkAndVmStatus(network.getId(),
+					VmInstance.Status.EXPUNGING);
+			List<Nic> nicResponse = nicService.findAllByNetworkAndIsActive(network.getId(), true);
+			if (vmResponse.size() != 0 || nicResponse.size() != 0) {
+				throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
+						"Network is associated with Vm instances. You cannot delete this network");
+			}
+			Errors errors = validator.rejectIfNullEntity(NETWORK, network);
+			errors = validator.validateEntity(network, errors);
+			if (errors.hasErrors()) {
+				throw new ApplicationException(errors);
+			}
+			// check department and project quota validation.
+			ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
+					.findByDepartmentAndResourceType(network.getDepartmentId(), ResourceType.Instance, true);
+			if (departmentLimit != null) {
+				if (network.getProjectId() != null) {
+					// syncService.syncResourceLimitProject(convertEntityService.getProjectById(network.getProjectId()));
+				}
+				network.setIsActive(false);
+				network.setStatus(Network.Status.DESTROY);
+				if (network.getSyncFlag()) {
+					if (network.getProjectId() != null) {
+						quotaLimitValidation.QuotaLimitCheckByResourceObject(
+								convertEntityService.getNetworkById(network.getId()), "IP",
+								convertEntityService.getNetworkById(network.getId()).getProjectId(), "Project");
 
-                Errors errors = validator.rejectIfNullEntity(NETWORK, network);
-                errors = validator.validateEntity(network, errors);
-                if (errors.hasErrors()) {
-                    throw new ApplicationException(errors);
-                }
-                // check department and project quota validation.
-               ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
-                       .findByDepartmentAndResourceType(network.getDepartmentId(), ResourceType.Instance, true);
-               if (departmentLimit != null) {
-                   if (network.getProjectId() != null) {
-//                       syncService.syncResourceLimitProject(convertEntityService.getProjectById(network.getProjectId()));
-                   }
-               network.setIsActive(false);
-               network.setStatus(Network.Status.DESTROY);
-               if (network.getSyncFlag()) {
-                   config.setUserServer();
-                   String networkResponse = csNetwork.deleteNetwork(network.getUuid(), CloudStackConstants.JSON);
-                   JSONObject jobId = new JSONObject(networkResponse).getJSONObject(CS_DELETE_NETWORK_RESPONSE);
-                   if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
-                       String jobResponse = csNetwork.networkJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
-                               CloudStackConstants.JSON);
-                       JSONObject jobresult = new JSONObject(jobResponse)
-                               .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
-                       this.ipRelease(network);
-                   }
-               }
-           }
-               else {
-                   throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,"Resource limit for department has not been set. Please update department quota");
-               }
-            }
-        return networkRepo.save(network);
-    }
+					} else if (network.getDepartmentId() != null) {
+						quotaLimitValidation.QuotaLimitCheckByResourceObject(
+								convertEntityService.getNetworkById(network.getId()), "IP",
+								convertEntityService.getNetworkById(network.getId()).getDepartmentId(), "Department");
+					}
+					config.setUserServer();
+					String networkResponse = csNetwork.deleteNetwork(network.getUuid(), CloudStackConstants.JSON);
+					JSONObject jobId = new JSONObject(networkResponse).getJSONObject(CS_DELETE_NETWORK_RESPONSE);
+					if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
+						String jobResponse = csNetwork.networkJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
+								CloudStackConstants.JSON);
+						JSONObject jobresult = new JSONObject(jobResponse)
+								.getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+						this.ipRelease(network);
+					}
+				}
+			} else {
+				throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
+						"Resource limit for department has not been set. Please update department quota");
+			}
+		}
+		return networkRepo.save(network);
+	}
 
     @Override
     public Network ipRelease(Network network) throws Exception {
@@ -397,6 +410,7 @@ public class NetworkServiceImpl implements NetworkService {
             }
             }
             ipService.ruleDelete(ip);
+
             IpAddress ipAddress = new IpAddress();
             ipAddress.setId(ip.getId());
             ipAddress.setState(State.FREE);
@@ -410,7 +424,14 @@ public class NetworkServiceImpl implements NetworkService {
             ipAddress.setVlan(ip.getVlan());
             ipAddress.setCreatedBy(ip.getCreatedBy());
             ipAddress.setCreatedDateTime(ip.getCreatedDateTime());
-            ipService.update(ipAddress);
+            ipAddress = ipService.update(ipAddress);
+            if (ipAddress.getProjectId() != null) {
+            	updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
+                            ipAddress.getProjectId(), CS_Project, Delete);
+            } else {
+            	updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
+                            ipAddress.getDepartmentId(), CS_Department, Delete);
+            }
         }
         return network;
     }
@@ -735,13 +756,13 @@ public class NetworkServiceImpl implements NetworkService {
     public Page<Network> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
         return networkRepo.findAllByDomainIdAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
     }
-    
+
     @Override
     public List<Network> findAllByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception {
         return networkRepo.findAllByDomainAndIsActive(domainId, isActive);
     }
-    
-    
+
+
     @Override
     public List<Network> findAllByUserId(Long userId) throws Exception {
        User user = convertEntityService.getOwnerById(userId);
@@ -755,8 +776,8 @@ public class NetworkServiceImpl implements NetworkService {
        List<Network> network = this.getNetworkListByUserWihtoutPaging(userId);
         return network;
     }
-    
-    
+
+
     /**
      * Get the Network list based on the active status.
      *

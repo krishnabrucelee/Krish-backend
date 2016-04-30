@@ -488,4 +488,9 @@ public class DomainServiceImpl implements DomainService {
         pingService.addDepartmentToPing(optional);
         return true;
     }
+
+    @Override
+    public Page<Domain> findDomainBySearchText(PagingAndSorting pagingAndSorting, String searchText) throws Exception {
+        return domainRepo.findDomainBySearchText(pagingAndSorting.toPageRequest(), searchText, true);
+    }
 }

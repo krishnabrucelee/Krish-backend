@@ -551,7 +551,7 @@ public class VolumeServiceImpl implements VolumeService {
             return volumeRepo.findByInstanceAndDomainIsActive(convertEntityService.getOwnerById(userId).getDomainId(),
                     volume, true);
         }
-        return volumeRepo.findByInstanceAndIsActive(volume, true);
+        return volumeRepo.findByInstanceVolumeTypeAndIsActive(volume, true);
     }
 
     @Override

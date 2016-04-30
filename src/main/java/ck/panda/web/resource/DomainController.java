@@ -114,4 +114,29 @@ public class DomainController extends CRUDController<Domain> implements ApiContr
         domain.setSyncFlag(true);
         domainService.softDelete(domain);
     }
+
+    /**
+     * Get all domain list by quick search.
+     *
+     * @param sortBy asc/desc
+     * @param searchText search text.
+     * @param range pagination range.
+     * @param limit per page limit.
+     * @param request page request.
+     * @param response response content.
+     * @return domain list.
+     * @throws Exception unhandled exception.
+     */
+    @RequestMapping(value = "/listByFilter", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Domain> listBySearchFilter(@RequestParam String sortBy, @RequestParam String searchText,
+            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Domain.class);
+        Page<Domain> pageResponse = domainService.findDomainBySearchText(page, searchText);
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
+    }
 }

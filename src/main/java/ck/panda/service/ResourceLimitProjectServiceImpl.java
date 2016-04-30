@@ -226,7 +226,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
                     ResourceLimitDepartment resourceDatas = resourceLimitDepartmentService.findByDepartmentAndResourceType(resource.getDepartmentId(), updateUsedCount(resourceData), true);
                     Long resourceCount = resourceLimitProjectRepo.findByDepartmentIdAndResourceType(resource.getDepartmentId(), resource.getResourceType(), true);
                     Long resourceCounts = resourceLimitProjectRepo.findByDepartmentIdAndResourceTypeAndResourceMax(resource.getDepartmentId(), resource.getResourceType(), true);
-                    resourceDatas.setUsedLimit(EmptytoLong(resourceCounts) + EmptytoLong(resourceCount));
+                    resourceDatas.setUsedLimit((EmptytoLong(resourceCounts) + EmptytoLong(resourceCount)) + EmptytoLong(resourceDatas.getUsedLimit()));
                     resourceLimitDepartmentService.save(resourceDatas);
                 } else {
                     updateResourceProject(resource);
