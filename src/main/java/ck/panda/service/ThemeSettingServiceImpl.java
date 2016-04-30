@@ -6,7 +6,6 @@ import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.ThemeCustomisation;
 import ck.panda.domain.entity.ThemeCustomisation.CustomType;
