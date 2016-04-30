@@ -171,7 +171,12 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             HashMap<String, String> optionalMap = new HashMap<String, String>();
             optionalMap.put(CloudStackConstants.CS_ZONE_ID,
                     convertEntityService.getZoneById(vmInstance.getZoneId()).getUuid());
-
+            if (vmInstance.getNetworkUuid().contains(",")) {
+                String[] networkIds = vmInstance.getNetworkUuid().split(",");
+                vmInstance.setNetworkId(convertEntityService.getNetworkByUuid(networkIds[0]));
+            } else {
+                vmInstance.setNetworkId(convertEntityService.getNetworkByUuid(vmInstance.getNetworkUuid()));
+            }
             // check department and project quota validation.
             ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService.findByDepartmentAndResourceType(
                     vmInstance.getDepartmentId(), ResourceType.valueOf("Instance"), true);
@@ -204,12 +209,6 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     vmInstance.setInstanceUserName(userService.find(vmInstance.getInstanceOwnerId()).getUserName());
                     vmInstance.setInstanceOsType(convertEntityService.getTemplateById(vmInstance.getTemplateId()).getDisplayText());
                     optionalMap.put(CloudStackConstants.CS_NAME, vmInstance.getName());
-                    if (vmInstance.getNetworkUuid().contains(",")) {
-                        String[] networkIds = vmInstance.getNetworkUuid().split(",");
-                        vmInstance.setNetworkId(convertEntityService.getNetworkByUuid(networkIds[0]));
-                    } else {
-                        vmInstance.setNetworkId(convertEntityService.getNetworkByUuid(vmInstance.getNetworkUuid()));
-                    }
                     optionalMap.put(CloudStackConstants.CS_NETWORK_IDS, vmInstance.getNetworkUuid());
                     optionalMap.put(CloudStackConstants.CS_DISPLAY_VM, CloudStackConstants.CS_ACTIVE_VM);
                     optionalMap.put(CloudStackConstants.CS_KEYBOARD_TYPE, CloudStackConstants.KEYBOARD_VALUE);
