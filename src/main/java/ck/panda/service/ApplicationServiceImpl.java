@@ -11,6 +11,7 @@ import ck.panda.domain.entity.Application.Status;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.repository.jpa.ApplicationRepository;
 import ck.panda.util.AppValidator;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -34,6 +35,10 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     /** Constant for application. */
     public static final String APPLICATION = "application";
+
+    /** Token details reference. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     @Override
     @PreAuthorize("hasPermission(null, 'CREATE_APPLICATION_TYPE')")
@@ -139,6 +144,10 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public Page<Application> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText, Long userId) throws Exception {
+        User user = convertEntity.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
+        if (!convertEntity.getOwnerById(user.getId()).getType().equals(User.UserType.ROOT_ADMIN)) {
+            domainId = user.getDomainId();
+        }
         return applicationRepo.findDomainBySearchText(domainId, pagingAndSorting.toPageRequest(), searchText, true);
     }
 }
