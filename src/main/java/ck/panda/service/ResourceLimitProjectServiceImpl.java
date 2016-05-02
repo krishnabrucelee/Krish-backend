@@ -57,6 +57,9 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
     /** Constant for update resource limit. */
     public static final String CS_UPDATE_RESOURCE_RESPONSE = "updateresourcelimitresponse";
 
+    /** Constant for update resource limit. */
+    public static final String CS_UPDATE_RESOURCE_COUNT_RESPONSE = "updateresourcecountresponse";
+
     /** Constant for resource type. */
     public static final String CS_RESOUCE_TYPE = "resourcetype";
 
@@ -244,8 +247,11 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
                     Long resourceCount = resourceLimitProjectRepo.findByDepartmentIdAndResourceType(resource.getDepartmentId(), resource.getResourceType(), true);
                     Long resourceCounts = resourceLimitProjectRepo.findByDepartmentIdAndResourceTypeAndResourceMax(resource.getDepartmentId(), resource.getResourceType(), true);
                     HashMap<String,String> departmentUsedCountMap = getUsedCount(convertEntityService.getDepartmentById(resource.getDepartmentId()));
-                    resourceDatas.setUsedLimit((EmptytoLong(resourceCounts) + EmptytoLong(resourceCount)) +  EmptytoLong(Long.valueOf(departmentUsedCountMap.get(resource.getResourceType()))));
-                    resourceLimitDepartmentService.save(resourceDatas);
+                    resourceDatas.setMax(resourceDatas.getMax());
+                    resourceDatas.setUsedLimit((EmptytoLong(resourceCounts) + EmptytoLong(resourceCount)) +
+                    		EmptytoLong(Long.parseLong(departmentUsedCountMap.get(resource.getResourceType().name()))));
+                    resourceDatas.setIsSyncFlag(false);
+                    resourceLimitDepartmentService.update(resourceDatas);
                 } else {
                     updateResourceProject(resource);
                     resource.setIsActive(true);
@@ -254,8 +260,10 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
                     Long resourceCount = resourceLimitProjectRepo.findByDepartmentIdAndResourceType(resource.getDepartmentId(), resource.getResourceType(), true);
                     Long resourceCounts = resourceLimitProjectRepo.findByDepartmentIdAndResourceTypeAndResourceMax(resource.getDepartmentId(), resource.getResourceType(), true);
                     HashMap<String,String> departmentUsedCountMap = getUsedCount(convertEntityService.getDepartmentById(resource.getDepartmentId()));
-                    resourceDatas.setUsedLimit(EmptytoLong(resourceCounts) + EmptytoLong(resourceCount) +  EmptytoLong(Long.valueOf(departmentUsedCountMap.get(resource.getResourceType()))));
-                    resourceLimitDepartmentService.save(resourceDatas);
+                    resourceDatas.setMax(resourceDatas.getMax());
+                    resourceDatas.setUsedLimit(EmptytoLong(resourceCounts) + EmptytoLong(resourceCount) +  EmptytoLong(Long.valueOf(departmentUsedCountMap.get(resource.getResourceType().name()))));
+                    resourceDatas.setIsSyncFlag(false);
+                    resourceLimitDepartmentService.update(resourceDatas);
                 }
             }
         }
@@ -462,9 +470,8 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
 		// Sync for resource count in domain
 		String csResponse = cloudStackResourceCapacity.updateResourceCount(
 				convertEntityService.getDomainById(department.getDomainId()).getUuid(), departmentCountMap, "json");
-		convertEntityService.resourceCount(csResponse);
 		// get cloud stack resource count response
-		JSONObject csCountJson = new JSONObject(csResponse).getJSONObject(CS_UPDATE_RESOURCE_RESPONSE);
+		JSONObject csCountJson = new JSONObject(csResponse).getJSONObject(CS_UPDATE_RESOURCE_COUNT_RESPONSE);
 		// If json response has resource count object
 		if (csCountJson.has(CS_RESOUCE_COUNT)) {
 			resourceCountArrayJSON = csCountJson.getJSONArray(CS_RESOUCE_COUNT);
