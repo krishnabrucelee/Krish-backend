@@ -458,6 +458,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
 		HashMap<String, String> departmentUsedCountMap = new HashMap<String, String>();
 		HashMap<String, String> departmentCountMap = new HashMap<String, String>();
 		departmentCountMap.put(CloudStackConstants.CS_ACCOUNT, department.getUserName());
+		config.setServer(1L);
 		// Sync for resource count in domain
 		String csResponse = cloudStackResourceCapacity.updateResourceCount(
 				convertEntityService.getDomainById(department.getDomainId()).getUuid(), departmentCountMap, "json");
