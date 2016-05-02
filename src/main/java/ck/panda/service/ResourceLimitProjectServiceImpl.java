@@ -427,7 +427,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
                 if (resourceLimitDepartment.getMax() == -1) {
                     resourceMap.put(resourceTypeMap.get(name), -1L);
                 } else {
-                    resourceMap.put(resourceTypeMap.get(name), (EmptytoLong(resourceLimitDepartment.getMax()) - EmptytoLong(resourceLimitDepartment.getUsedLimit())));
+                    resourceMap.put(resourceTypeMap.get(name), resourceLimitProject.getMax() + (EmptytoLong(resourceLimitDepartment.getMax()) - EmptytoLong(resourceLimitDepartment.getUsedLimit())));
                 }
             }
         }
