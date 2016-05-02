@@ -428,7 +428,17 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
     @Query(value = "SELECT template FROM Template template WHERE template.templateOwnerId = :userId AND template.isActive = :isActive")
     List<Template> findByTemplateOwnerIdAndIsActive(@Param("userId") Long userId, @Param("isActive") Boolean isActive);
 
+    /**
+     * Get the template by architecture, status and without system type.
+     *
+     * @param architecture of the template
+     * @param type of the template
+     * @param status of the template
+     * @param isActive true/false
+     * @return list of filtered template
+     */
     @Query(value = "SELECT template FROM Template template WHERE (template.type <>:type AND template.status = :status AND template.share IS TRUE AND template.isActive = :isActive) AND (template.domainId = :domainId OR template.templateOwnerId = :userId)")
     List<Template> findByTemplateForUserId( @Param("type") TemplateType type,
         @Param("status") Status status, @Param("isActive") Boolean isActive, @Param("domainId") Long domainId, @Param("userId") Long userId);
+
 }
