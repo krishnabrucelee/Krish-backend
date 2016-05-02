@@ -16,12 +16,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
+import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.ResourceLimitProject.ResourceType;
 import ck.panda.domain.repository.jpa.ResourceLimitProjectRepository;
 import ck.panda.util.AppValidator;
+import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.CloudStackResourceLimitService;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -38,6 +40,11 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceLimitProjectServiceImpl.class);
 
+    /** Constant for resource type details. */
+    public static final String CS_INSTANCE = "0", CS_IP = "1", CS_VOLUME = "2", CS_SNAPSHOT = "3", CS_TEMPLATE = "4",
+            CS_PROJECT = "5", CS_NETWORK = "6", CS_VPC = "7", CS_CPU = "8", CS_MEMORY = "9", CS_PRIMARY_STORAGE = "10",
+            CS_SECONDARY_STORAGE = "11";
+
     /** Constant for resource limits. */
     public static final String RESOUCE_LIMITS = "resourcelimits";
 
@@ -49,6 +56,16 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
 
     /** Constant for update resource limit. */
     public static final String CS_UPDATE_RESOURCE_RESPONSE = "updateresourcelimitresponse";
+
+    /** Constant for resource type. */
+    public static final String CS_RESOUCE_TYPE = "resourcetype";
+
+    /** Constant for resource count. */
+    public static final String CS_RESOUCE_COUNT = "resourcecount";
+
+    /** CloudStack Resource Capacity Service. */
+    @Autowired
+    private CloudStackResourceCapacity cloudStackResourceCapacity;
 
     /** Constant for max resource limits. */
     public static final String CS_MAX = "max";
@@ -226,7 +243,8 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
                     ResourceLimitDepartment resourceDatas = resourceLimitDepartmentService.findByDepartmentAndResourceType(resource.getDepartmentId(), updateUsedCount(resourceData), true);
                     Long resourceCount = resourceLimitProjectRepo.findByDepartmentIdAndResourceType(resource.getDepartmentId(), resource.getResourceType(), true);
                     Long resourceCounts = resourceLimitProjectRepo.findByDepartmentIdAndResourceTypeAndResourceMax(resource.getDepartmentId(), resource.getResourceType(), true);
-                    resourceDatas.setUsedLimit((EmptytoLong(resourceCounts) + EmptytoLong(resourceCount)) +  EmptytoLong(resourceDatas.getUsedLimit()));
+                    HashMap<String,String> departmentUsedCountMap = getUsedCount(convertEntityService.getDepartmentById(resource.getDepartmentId()));
+                    resourceDatas.setUsedLimit((EmptytoLong(resourceCounts) + EmptytoLong(resourceCount)) +  EmptytoLong(Long.valueOf(departmentUsedCountMap.get(resource.getResourceType()))));
                     resourceLimitDepartmentService.save(resourceDatas);
                 } else {
                     updateResourceProject(resource);
@@ -235,7 +253,8 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
                     ResourceLimitDepartment resourceDatas = resourceLimitDepartmentService.findByDepartmentAndResourceType(resource.getDepartmentId(), updateUsedCount(resource), true);
                     Long resourceCount = resourceLimitProjectRepo.findByDepartmentIdAndResourceType(resource.getDepartmentId(), resource.getResourceType(), true);
                     Long resourceCounts = resourceLimitProjectRepo.findByDepartmentIdAndResourceTypeAndResourceMax(resource.getDepartmentId(), resource.getResourceType(), true);
-                    resourceDatas.setUsedLimit(EmptytoLong(resourceCounts) + EmptytoLong(resourceCount) +  EmptytoLong(resourceDatas.getUsedLimit()));
+                    HashMap<String,String> departmentUsedCountMap = getUsedCount(convertEntityService.getDepartmentById(resource.getDepartmentId()));
+                    resourceDatas.setUsedLimit(EmptytoLong(resourceCounts) + EmptytoLong(resourceCount) +  EmptytoLong(Long.valueOf(departmentUsedCountMap.get(resource.getResourceType()))));
                     resourceLimitDepartmentService.save(resourceDatas);
                 }
             }
@@ -433,6 +452,39 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
         }
         return resourceMap;
     }
+
+	public HashMap<String, String> getUsedCount(Department department) throws Exception {
+		JSONArray resourceCountArrayJSON = null;
+		HashMap<String, String> departmentUsedCountMap = new HashMap<String, String>();
+		HashMap<String, String> departmentCountMap = new HashMap<String, String>();
+		departmentCountMap.put(CloudStackConstants.CS_ACCOUNT, department.getUserName());
+		// Sync for resource count in domain
+		String csResponse = cloudStackResourceCapacity.updateResourceCount(
+				convertEntityService.getDomainById(department.getDomainId()).getUuid(), departmentCountMap, "json");
+		convertEntityService.resourceCount(csResponse);
+		// get cloud stack resource count response
+		JSONObject csCountJson = new JSONObject(csResponse).getJSONObject(CS_UPDATE_RESOURCE_RESPONSE);
+		// If json response has resource count object
+		if (csCountJson.has(CS_RESOUCE_COUNT)) {
+			resourceCountArrayJSON = csCountJson.getJSONArray(CS_RESOUCE_COUNT);
+			// Iterate resource count response from resource type
+			for (int i = 0, size = resourceCountArrayJSON.length(); i < size; i++) {
+				// get resource count, type, domain and set in a variable for
+				// future use
+				String resourceType = resourceCountArrayJSON.getJSONObject(i).getString(CS_RESOUCE_TYPE);
+				String resourceCount = resourceCountArrayJSON.getJSONObject(i).getString(CS_RESOUCE_COUNT);
+				if (resourceType.equals(CS_PRIMARY_STORAGE) || resourceType.equals(CS_SECONDARY_STORAGE)) {
+					resourceCount = String.valueOf((Long.parseLong(resourceCount) / (1024 * 1024 * 1024)));
+				}
+				if (resourceCountArrayJSON.getJSONObject(i).has(CloudStackConstants.CS_ACCOUNT)
+						&& !resourceCountArrayJSON.getJSONObject(i).has(CloudStackConstants.CS_PROJECT_ID)) {
+					departmentUsedCountMap.put(convertEntityService.getResourceTypeValue().get(resourceType),
+							EmptytoLong(Long.valueOf(resourceCount)).toString());
+				}
+			}
+		}
+		return departmentUsedCountMap;
+	}
 
     /**
      * Empty check.
