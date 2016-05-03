@@ -383,7 +383,7 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
             ResourceLimitProject projectLimit = getMaxByProjectAndResourceType(accountTypeId, resource);
             if(((projectLimit.getMax() < (EmptytoLong(projectLimit.getUsedLimit()) + EmptytoLong(resourceUsageMap.get(resources)))) && (projectLimit.getMax() != (EmptytoLong(projectLimit.getUsedLimit()) + EmptytoLong(resourceUsageMap.get(resources))))) && projectLimit.getMax() != -1) {
                 //TODO apply internalization.
-                validateResponse = " User "+ resource +" limit is too small in project " + convertEntityService.getProjectById(accountTypeId).getName();
+                validateResponse = "There is not enough " + resource + " available for " + convertEntityService.getProjectById(accountTypeId).getName() +". Please update project quota.";
             }
 		} else if (accountType.equals("Department")) {
 			ResourceLimitDepartment departmentLimit = getMaxByDepartmentAndResourceType(accountTypeId, resource);
@@ -393,8 +393,7 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
 							+ EmptytoLong(resourceUsageMap.get(resources)))))
 					&& departmentLimit.getMax() != -1) {
 				// TODO apply internalization.
-				validateResponse = " User " + resource + " Limit exceeded in department "
-						+ convertEntityService.getDepartmentById(accountTypeId).getUserName();
+				validateResponse = "There is not enough " + resource + " available for " + convertEntityService.getDepartmentById(accountTypeId).getUserName() + ". Please update department quota.";
 			}
 		} else {
             // Resource count for domain.
@@ -402,7 +401,7 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
             ResourceLimitDomain domainLimit = getMaxByDomainAndResourceType(accountTypeId, resource);
             if(((domainLimit.getMax() < (EmptytoLong(domainLimit.getUsedLimit()) + EmptytoLong(resourceUsageMap.get(resources)))) && (domainLimit.getMax() != (EmptytoLong(domainLimit.getUsedLimit()) + EmptytoLong(resourceUsageMap.get(resources))))) && domainLimit.getMax() != -1) {
                 //TODO apply internalization.
-                validateResponse = " User "+ resource +" Limit exceeded in domain " + convertEntityService.getDomainById(accountTypeId).getName();
+                validateResponse = "There is not enough " + resource + " available for " + convertEntityService.getDomainById(accountTypeId).getName() + ". Please update domain quota.";
             }
         }
         return validateResponse;
