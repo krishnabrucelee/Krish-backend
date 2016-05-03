@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
+import ck.panda.domain.entity.Application;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.service.ConvertEntityService;
@@ -145,6 +146,7 @@ public class DepartmentController extends CRUDController<Department> implements 
      *
      * @param sortBy asc/desc
      * @param domainId domain id of department.
+     * @param searchText search text.
      * @param range pagination range.
      * @param limit per page limit.
      * @param request page request.
@@ -156,13 +158,12 @@ public class DepartmentController extends CRUDController<Department> implements 
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<Department> listDepartmentByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
+    public List<Department> listDepartmentByDomainId(@RequestParam String sortBy, @RequestParam Long domainId, @RequestParam String searchText,
             @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
-        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Department.class);
-        Page<Department> pageResponse = departmentService.findAllByDomainId(domainId, page);
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Application.class);
+        Page<Department> pageResponse = departmentService.findAllByDomainIdAndSearchText(domainId, page, searchText, Long.valueOf(tokenDetails.getTokenDetails("id")));
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
-
 }

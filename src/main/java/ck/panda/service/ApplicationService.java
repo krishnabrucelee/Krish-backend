@@ -63,13 +63,13 @@ public interface ApplicationService extends CRUDService<Application> {
     Page<Application> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
 
     /**
-     * Find domain based list of vm Instances with pagination.
+     * Find domain based list on application with pagination.
      *
      * @param pagingAndSorting parameters.
      * @param domainId domain id.
      * @param searchText quick search text
      * @param userId user id.
-     * @return page result of intances.
+     * @return page result of application.
      * @throws Exception if error occurs.
      */
     Page<Application> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText, Long userId) throws Exception;

@@ -110,8 +110,8 @@ public class ApplicationController extends CRUDController<Application> implement
     public List<Application> findAllByDomain(@RequestParam Long domainId) throws Exception {
         return applicationService.findAllByDomain(domainId);
     }
-
-    /**
+/*
+    *//**
      * Get all application list by domain.
      *
      * @param sortBy asc/desc
@@ -122,7 +122,7 @@ public class ApplicationController extends CRUDController<Application> implement
      * @param response response content.
      * @return application list.
      * @throws Exception unhandled exception.
-     */
+     *//*
     @RequestMapping(value = "/listByDomain", method = RequestMethod.GET, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
@@ -134,7 +134,7 @@ public class ApplicationController extends CRUDController<Application> implement
         Page<Application> pageResponse = applicationService.findAllByDomainId(domainId, page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
-    }
+    }*/
 
     /**
      * Get all application list by domain.
