@@ -58,6 +58,20 @@ public interface VmSnapshotRepository extends PagingAndSortingRepository<VmSnaps
     @Query(value = "select snapshot from VmSnapshot snapshot LEFT JOIN snapshot.vm where snapshot.domainId =:domainId AND snapshot.isRemoved IS :isRemoved AND snapshot.status <>:status)")
     Page<VmSnapshot> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId, @Param("isRemoved") Boolean isRemoved, @Param("status") Status status, Pageable pageable);
 
+
+    /**
+     * Find all domain based vm snapshot without expunging status by active.
+     *
+     * @param domainId domain id of the vm snapshot
+     * @param pageable paging and sorting.
+     * @param isRemoved check whether removed or not.
+     * @param status of the snapshot
+     * @return Vm snapshot.
+     */
+    @Query(value = "select snapshot from VmSnapshot snapshot LEFT JOIN snapshot.vm where (snapshot.domainId =:domainId OR 0L = :domainId) AND snapshot.isRemoved IS :isRemoved AND snapshot.status <>:status AND (snapshot.name LIKE %:search% OR snapshot.description LIKE %:search% "
+            + "OR snapshot.vm.name LIKE %:search% OR snapshot.createdDateTime LIKE %:search% )")
+    Page<VmSnapshot> findAllByDomainIdAndIsActiveSearchText(@Param("domainId") Long domainId, @Param("isRemoved") Boolean isRemoved, @Param("status") Status status, Pageable pageable,@Param("search") String search);
+
     /**
      * Find all snapshots by projects, department and isRemoved status.
      *

@@ -106,7 +106,7 @@ public interface ProjectRepository extends PagingAndSortingRepository<Project, L
      * @return list of project.
      */
     @Query(value = "SELECT project FROM Project project LEFT JOIN project.projectOwner WHERE (project.domainId = :domainId OR 0L = :domainId) AND project.isActive IS :isactive AND (project.name LIKE %:search% OR project.domain.companyNameAbbreviation LIKE %:search% "
-            + "OR project.department.userName LIKE %:search% OR project.description LIKE %:search% )")
+            + "OR project.department.userName LIKE %:search% OR project.description LIKE %:search% OR project.createdDateTime LIKE %:search%)")
     Page<Project> findAllByDomainIdAndIsActiveAndSearchText(@Param("domainId") Long domainId, @Param("isactive") Boolean isActive, Pageable pageable,@Param("search") String search);
 
     /**

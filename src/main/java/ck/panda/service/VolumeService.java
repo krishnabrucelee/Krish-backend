@@ -258,7 +258,7 @@ public interface VolumeService extends CRUDService<Volume> {
      * @throws Exception if errors.
      */
     List<Volume> findAllVolumeByUserId(Long userId) throws Exception;
-    
+
     /**
      * Find all the volumes by domain id.
      * @param domainId domain id.
@@ -266,5 +266,15 @@ public interface VolumeService extends CRUDService<Volume> {
      * @throws Exception if errors.
      */
     List<Volume> findAllVolumeByDomainId(Long domainId) throws Exception;
+
+    /**
+     * Find all volumes by projects.
+     *
+     * @param projectId of the project.
+     * @param isActive status of the project.
+     * @return project.
+     * @throws Exception if error occurs.
+     */
+    List<Volume> findAllByProjectAndIsActive(Long projectId, Boolean isActive) throws Exception;
 
 }
