@@ -383,15 +383,20 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
             ResourceLimitProject projectLimit = getMaxByProjectAndResourceType(accountTypeId, resource);
             if(((projectLimit.getMax() < (EmptytoLong(projectLimit.getUsedLimit()) + EmptytoLong(resourceUsageMap.get(resources)))) && (projectLimit.getMax() != (EmptytoLong(projectLimit.getUsedLimit()) + EmptytoLong(resourceUsageMap.get(resources))))) && projectLimit.getMax() != -1) {
                 //TODO apply internalization.
-                validateResponse = " User "+ resource +" Limit exceeded in project " + convertEntityService.getProjectById(accountTypeId).getName();
+                validateResponse = " User "+ resource +" limit is too small in project " + convertEntityService.getProjectById(accountTypeId).getName();
             }
-        } else if(accountType.equals("Department")){
-            ResourceLimitDepartment departmentLimit = getMaxByDepartmentAndResourceType(accountTypeId, resource);
-            if(((departmentLimit.getMax() < (EmptytoLong(departmentLimit.getUsedLimit()) + EmptytoLong(resourceUsageMap.get(resources)))) && (departmentLimit.getMax() != (EmptytoLong(departmentLimit.getUsedLimit()) + EmptytoLong(resourceUsageMap.get(resources))))) && departmentLimit.getMax() != -1) {
-                //TODO apply internalization.
-                validateResponse = " User "+ resource +" Limit exceeded in department " + convertEntityService.getDepartmentById(accountTypeId).getUserName();
-            }
-        } else {
+		} else if (accountType.equals("Department")) {
+			ResourceLimitDepartment departmentLimit = getMaxByDepartmentAndResourceType(accountTypeId, resource);
+			if (((departmentLimit.getMax() < (EmptytoLong(departmentLimit.getUsedLimit())
+					+ EmptytoLong(resourceUsageMap.get(resources))))
+					&& (departmentLimit.getMax() != (EmptytoLong(departmentLimit.getUsedLimit())
+							+ EmptytoLong(resourceUsageMap.get(resources)))))
+					&& departmentLimit.getMax() != -1) {
+				// TODO apply internalization.
+				validateResponse = " User " + resource + " Limit exceeded in department "
+						+ convertEntityService.getDepartmentById(accountTypeId).getUserName();
+			}
+		} else {
             // Resource count for domain.
             //updateResourceCountByDomain(convertEntityService.getDomainById(accountTypeId).getUuid(), null);
             ResourceLimitDomain domainLimit = getMaxByDomainAndResourceType(accountTypeId, resource);
