@@ -63,6 +63,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     /** Constant for empty string search. */
     public static final String EMPTY_SEARCH_FILTER = "";
 
+    /** Cloud stack user key response. */
+    public static final String USER_KEYS = "userkeys";
+
     /** Validator attribute. */
     @Autowired
     private AppValidator validator;
@@ -182,21 +185,21 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     vmInstance.getDepartmentId(), ResourceType.valueOf("Instance"), true);
             ResourceLimitProject projectLimit = resourceLimitProjectService
                     .findByProjectAndResourceType(vmInstance.getProjectId(), ResourceLimitProject.ResourceType.Instance, true);
-			if (departmentLimit != null && convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
-					.getType().equals(AccountType.USER)) {
-				if (vmInstance.getProjectId() != null) {
-					if (projectLimit != null) {
-						quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
-								vmInstance.getProjectId(), "Project");
-					} else {
-						errors.addGlobalError(
-								"Resource limit for project has not been set. Please update project quota");
-						throw new ApplicationException(errors);
-					}
-				} else {
-					quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
-							vmInstance.getDepartmentId(), "Department");
-				}
+            if (departmentLimit != null && convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
+                    .getType().equals(AccountType.USER)) {
+                if (vmInstance.getProjectId() != null) {
+                    if (projectLimit != null) {
+                        quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
+                                vmInstance.getProjectId(), "Project");
+                    } else {
+                        errors.addGlobalError(
+                                "Resource limit for project has not been set. Please update project quota");
+                        throw new ApplicationException(errors);
+                    }
+                } else {
+                    quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
+                            vmInstance.getDepartmentId(), "Department");
+                }
                 // 3. Check the resource availability to deploy new vm.
                 String isAvailable = isResourceAvailable(vmInstance, optionalMap);
                 if (isAvailable != null) {
@@ -1161,7 +1164,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     }
                 }
                 // 2.2 update vm entity by transient variable.
-				vmInstance.setInstanceGuestIp(ipToLong(vmInstance.getIpAddress()));
+                vmInstance.setInstanceGuestIp(ipToLong(vmInstance.getIpAddress()));
                 vmInstance.setDomainId(convertEntityService.getDomainId(vmInstance.getTransDomainId()));
                 vmInstance.setZoneId(convertEntityService.getZoneId(vmInstance.getTransZoneId()));
                 vmInstance.setNetworkId(convertEntityService.getNetworkId(vmInstance.getTransNetworkId()));
@@ -1584,32 +1587,44 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 user.setSecretKey(userJsonobject.getJSONObject(0).get(CloudStackConstants.CS_SECRET_KEY).toString());
                 config.setInstanceUserServer(user.getSecretKey(), user.getApiKey());
                 return true;
+            } else {
+                String keyValueResponse = cloudStackUserService.registerUserKeys(user.getUuid(),
+                        CloudStackConstants.JSON);
+                JSONObject keyValue = new JSONObject(keyValueResponse)
+                        .getJSONObject(CloudStackConstants.CS_REGISTER_KEY_RESPONSE);
+                if (keyValue.has(CloudStackConstants.CS_ERROR_CODE)) {
+                    return false;
+                } else {
+                    user.setApiKey(keyValue.getJSONObject(USER_KEYS).getString(CloudStackConstants.CS_API_KEY));
+                    user.setSecretKey(keyValue.getJSONObject(USER_KEYS).getString(CloudStackConstants.CS_SECRET_KEY));
+                    config.setInstanceUserServer(user.getSecretKey(), user.getApiKey());
+                    return true;
+                }
             }
         }
-        return false;
     }
 
-	@Override
-	public VmInstance findVMByIDWithSpecifiedField(Long vmId) {
-		return virtualmachinerepository.findVMByIDWithSpecifiedField(vmId);
-	}
+    @Override
+    public VmInstance findVMByIDWithSpecifiedField(Long vmId) {
+        return virtualmachinerepository.findVMByIDWithSpecifiedField(vmId);
+    }
 
-	public long ipToLong(String ipAddress) {
-    	long result = 0;
-		if (ipAddress != null) {
-			String[] ipAddressInArray = ipAddress.split("\\.");
+    public long ipToLong(String ipAddress) {
+        long result = 0;
+        if (ipAddress != null) {
+            String[] ipAddressInArray = ipAddress.split("\\.");
 
-			for (int i = 0; i < ipAddressInArray.length; i++) {
+            for (int i = 0; i < ipAddressInArray.length; i++) {
 
-				int power = 3 - i;
-				int ip = Integer.parseInt(ipAddressInArray[i]);
-				result += ip * Math.pow(256, power);
+                int power = 3 - i;
+                int ip = Integer.parseInt(ipAddressInArray[i]);
+                result += ip * Math.pow(256, power);
 
-			}
-		} else {
-			result = 0;
-		}
+            }
+        } else {
+            result = 0;
+        }
 
-    	return result;
+        return result;
       }
 }
