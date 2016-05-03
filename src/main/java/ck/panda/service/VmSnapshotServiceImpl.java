@@ -355,5 +355,4 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                     Status.Expunging);
         }
     }
-
 }

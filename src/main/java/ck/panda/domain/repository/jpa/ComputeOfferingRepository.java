@@ -72,7 +72,6 @@ public interface ComputeOfferingRepository extends PagingAndSortingRepository<Co
     @Query(value = "SELECT compute FROM ComputeOffering compute WHERE compute.domainId = :domainId AND compute.isActive = :isActive")
     Page<ComputeOffering> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, Pageable pageable);
 
-
     /**
      * Find all the domain based active or inactive compute offering with pagination.
      *
