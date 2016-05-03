@@ -152,6 +152,7 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
 			List<IpAddress> ipaddresse = ipaddressService.findByNetwork(net.getId());
 			if (ipaddresse.size() > 0) {
 				resourceUsageMap.put(ConvertEntityService.CS_IP, Long.valueOf(ipaddresse.size()));
+				resourceList.add(ConvertEntityService.CS_IP);
 			}
 			if (accountType.equals(GenericConstants.PROJECT)) {
 				updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
