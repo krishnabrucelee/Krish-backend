@@ -411,6 +411,11 @@ public class ComputeOfferingServiceImpl implements ComputeOfferingService {
         return computeRepo.findAllByDomainIdAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
     }
 
+    @Override
+    public Page<ComputeOffering> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText) throws Exception {
+        return computeRepo.findAllByDomainIdAndIsActiveAndSearchText(domainId, true, pagingAndSorting.toPageRequest(),searchText);
+    }
+
     /**
      * Set optional value for MR.ping api call.
      *

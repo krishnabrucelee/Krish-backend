@@ -131,11 +131,11 @@ public class VMSnapshotController extends CRUDController<VmSnapshot> implements 
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<VmSnapshot> listSnapshotByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
+    public List<VmSnapshot> listSnapshotByDomainId(@RequestParam String sortBy, @RequestParam Long domainId, @RequestParam String searchText,
             @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, VmSnapshot.class);
-        Page<VmSnapshot> pageResponse = snapshotService.findAllByDomainId(domainId, page);
+        Page<VmSnapshot> pageResponse = snapshotService.findAllByDomainIdAndSearchText(domainId, page,searchText);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }

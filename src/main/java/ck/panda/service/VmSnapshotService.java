@@ -57,6 +57,25 @@ public interface VmSnapshotService extends CRUDService<VmSnapshot> {
      */
     Page<VmSnapshot> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
 
+    /**
+     * Find all snapshot by is active status.
+     *
+     * @param pagingAndSorting for pagination.
+     * @param userId of the user.
+     * @return vm snapshots.
+     * @throws Exception if error occurs.
+     */
     Page<VmSnapshot> findAllByActive(PagingAndSorting pagingAndSorting, Long userId) throws Exception;
 
+    /**
+     * Find all snapshots by search text and domain id.
+     *
+     * @param domainId of the domain.
+     * @param pagingAndSorting for pagination.
+     * @param searchText for snaphsot.
+     * @return vm snapshot.
+     * @throws Exception if error occurs.
+     */
+    Page<VmSnapshot> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText)
+            throws Exception;
 }

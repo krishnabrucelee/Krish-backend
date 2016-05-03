@@ -23,6 +23,7 @@ import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackSnapshotService;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.JsonUtil;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -63,6 +64,10 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
     /** Reference for project service. */
     @Autowired
     private ProjectService projectService;
+
+    /** Token details reference. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     /** VM snapshot object name. */
     public static final String VM_SNAPSHOT = "vmSnapshot";
@@ -303,6 +308,15 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
     }
 
     @Override
+    public Page<VmSnapshot> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText) throws Exception {
+          User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
+          if (!convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.ROOT_ADMIN)) {
+              domainId = user.getDomainId();
+          }
+        return vmSnapshotRepository.findAllByDomainIdAndIsActiveSearchText(domainId, false, Status.Expunging, pagingAndSorting.toPageRequest(),searchText);
+    }
+
+    @Override
     public Page<VmSnapshot> findAllByActive(PagingAndSorting pagingAndSorting, Long userId) throws Exception {
 
        User user = convertEntityService.getOwnerById(userId);
@@ -341,5 +355,4 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
                     Status.Expunging);
         }
     }
-
 }

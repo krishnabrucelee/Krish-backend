@@ -181,7 +181,7 @@ public class ProjectController extends CRUDController<Project> implements ApiCon
             @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Project.class);
-        Page<Project> pageResponse = projectService.findAllByDomainIdAndSearchText(domainId, page,searchText);
+        Page<Project> pageResponse = projectService.findAllByDomainIdAndSearchText(domainId, page, searchText);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }

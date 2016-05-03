@@ -164,6 +164,16 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
     List<Volume> findByDepartmentAndIsActive(@Param("id") Long departmentId, @Param("isActive") Boolean isActive);
 
     /**
+     * Find all project from volume.
+     *
+     * @param projectId project id
+     * @param isActive get the volume list based on active/inactive status
+     * @return volume list
+     */
+    @Query(value = "SELECT volume FROM Volume volume WHERE volume.projectId = :id AND volume.isActive = :isActive ")
+    List<Volume> findByProjectAndIsActive(@Param("id") Long projectId, @Param("isActive") Boolean isActive);
+
+    /**
      * Get the volumes based on project.
      *
      * @param projectId project id

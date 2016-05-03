@@ -14,12 +14,15 @@ import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitProject;
+import ck.panda.domain.entity.SSHKey;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.VpnUser;
 import ck.panda.domain.repository.jpa.ProjectRepository;
 import ck.panda.util.AppValidator;
@@ -32,6 +35,7 @@ import ck.panda.util.error.exception.CustomGenericException;
 import ck.panda.util.error.exception.EntityNotFoundException;
 import ck.panda.constants.PingConstants;
 import ck.panda.util.PingService;
+import ck.panda.util.TokenDetails;
 
 /**
  * Project service implementation used to get list of project and save ,delete, update the project in application
@@ -90,6 +94,22 @@ public class ProjectServiceImpl implements ProjectService {
     /** Mr.ping service reference. */
     @Autowired
     private PingService pingService;
+
+    /** Token details reference. */
+    @Autowired
+    private TokenDetails tokenDetails;
+
+    /** Network Service Reference */
+    @Autowired
+    private NetworkService networkService;
+
+    /** Sshkey service reference */
+    @Autowired
+    private SSHKeyService sshKeyService;
+
+    /** Volume Service Reference. */
+    @Autowired
+    private VolumeService volumeService;
 
     @Override
     @PreAuthorize("hasPermission(#project.getSyncFlag(), 'CREATE_PROJECT')")
@@ -310,6 +330,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @PreAuthorize("hasPermission(#project.getSyncFlag(), 'DELETE_PROJECT')")
     public Project softDelete(Project project) throws Exception {
+        Errors errors = validator.rejectIfNullEntity(RESPONSE_PROJECT, project);
         List<VmInstance.Status> statusCode = new ArrayList<VmInstance.Status>();
         project.setIsActive(false);
         project.setStatus(Project.Status.DELETED);
@@ -319,9 +340,18 @@ public class ProjectServiceImpl implements ProjectService {
             statusCode.add(VmInstance.Status.STARTING);
             statusCode.add(VmInstance.Status.STOPPING);
             List<VmInstance> vmList = virtualMachineService.findAllByProjectAndStatus(project.getId(), statusCode);
-            if (vmList.size() > 0) {
-                throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
-                        "warning.cannot.delete.project.which.has.instances");
+            List<Network> networkList = networkService.findByProjectAndNetworkIsActive(project.getId(), true);
+            List<SSHKey> sshKeyList = sshKeyService.findAllByProjectAndIsActive(project.getId(), true);
+            List<Volume> volumeList = volumeService.findAllByProjectAndIsActive(project.getId(), true);
+            if (vmList.size() > 0 || networkList.size() > 0 || sshKeyList.size() > 0 || volumeList.size() > 0 ) {
+                errors.addGlobalError(GenericConstants.PAGE_ERROR_SEPARATOR + GenericConstants.TOKEN_SEPARATOR
+                        + vmList.size() + GenericConstants.TOKEN_SEPARATOR
+                        + networkList.size() + GenericConstants.TOKEN_SEPARATOR
+                        + sshKeyList.size() + GenericConstants.TOKEN_SEPARATOR
+                        + volumeList.size());
+            }
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
             }
             HashMap<String, String> optional = new HashMap<String, String>();
             optional.put(CloudStackConstants.CS_DOMAIN_ID, project.getDepartment().getDomain().getUuid());
@@ -345,6 +375,7 @@ public class ProjectServiceImpl implements ProjectService {
                     } else {
                         departmentLimit.setUsedLimit(EmptytoLong(departmentLimit.getUsedLimit()) - EmptytoLong(projectLimit.getMax()));
                     }
+                    departmentLimit.setIsSyncFlag(false);
                     resourceLimitDepartmentService.save(departmentLimit);
                     projectLimit.setIsActive(false);
                     projectLimit.setIsSyncFlag(false);
@@ -453,8 +484,17 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Page<Project> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText)
             throws Exception {
-        return projectRepository.findAllByDomainIdAndIsActiveAndSearchText(domainId, true, pagingAndSorting.toPageRequest(),searchText);
-    }
+          User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
+          if (convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.USER)) {
+              domainId = user.getDomainId();
+               Long departmentId = user.getDepartmentId();
+               return projectRepository.findAllByDomainIdAndIsActiveAndSearchText(domainId, true, pagingAndSorting.toPageRequest(),searchText,departmentId);
+          }
+          if (!convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.ROOT_ADMIN)) {
+              domainId = user.getDomainId();
+          }
+        return projectRepository.findAllByDomainAndSearchText(domainId, true, pagingAndSorting.toPageRequest(),searchText);
+   }
 
     /**
      * Save project details to MR.ping project for usage calculation.
