@@ -122,10 +122,10 @@ public class AffinityGroupController extends CRUDController<AffinityGroup> imple
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<AffinityGroup> listAffinityGroupByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
-            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            @RequestParam String searchText, @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, AffinityGroup.class);
-        Page<AffinityGroup> pageResponse = affinityGroupService.findAllByDomainId(domainId, page);
+        Page<AffinityGroup> pageResponse = affinityGroupService.findAllByDomainId(domainId, searchText, page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }

@@ -121,6 +121,7 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
      * @param domainId domain id of role.
      * @param range pagination range.
      * @param limit per page limit.
+     * @param searchText search text.
      * @param request page request.
      * @param response response content.
      * @return role list.
@@ -131,10 +132,10 @@ public class RoleController extends CRUDController<Role> implements ApiControlle
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<Role> listRoleByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
-            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            @RequestParam String searchText, @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Role.class);
-        Page<Role> pageResponse = roleService.findAllByDomainId(domainId, page);
+        Page<Role> pageResponse = roleService.findAllByDomainId(domainId, searchText, page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }

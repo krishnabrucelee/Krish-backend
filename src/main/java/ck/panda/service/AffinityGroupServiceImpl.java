@@ -283,9 +283,9 @@ public class AffinityGroupServiceImpl implements AffinityGroupService {
     }
 
     @Override
-    public Page<AffinityGroup> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting)
+    public Page<AffinityGroup> findAllByDomainId(Long domainId, String searchText, PagingAndSorting pagingAndSorting)
             throws Exception {
-        return affinityGroupRepository.findByDomainAndPageable(domainId, true, pagingAndSorting.toPageRequest());
+        return affinityGroupRepository.findByDomainSearchAndPageable(domainId, true, searchText, pagingAndSorting.toPageRequest());
     }
 
 }
