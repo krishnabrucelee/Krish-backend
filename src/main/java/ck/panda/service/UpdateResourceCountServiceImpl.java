@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.IpAddress;
+import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.VmInstance;
@@ -154,9 +155,11 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
 			}
 			break;
 		case GenericConstants.IP:
+			Network network = (Network) resourceObject;
+			List<IpAddress> ipaddresse = ipaddressService.findByNetwork(network.getId());
 			resourceList.clear();
 			resourceList.add(ConvertEntityService.CS_IP);
-			resourceUsageMap.put(ConvertEntityService.CS_IP, 1L);
+			resourceUsageMap.put(ConvertEntityService.CS_IP, Long.valueOf(ipaddresse.size()));
 			if (accountType.equals(GenericConstants.PROJECT)) {
 				updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
 			} else if (accountType.equals(GenericConstants.DEPARTMENT)) {
