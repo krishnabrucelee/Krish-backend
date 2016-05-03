@@ -103,7 +103,9 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @param isActive true/false
      * @return template
      */
-    @Query(value = "SELECT template FROM Template template WHERE template.osCategoryId=:osCategoryId AND (template.architecture =:architecture OR 'ALL' =:architecture) AND template.type <>:type AND template.status = :status AND template.share IS TRUE AND template.featured IS TRUE OR ( template.share IS TRUE AND template.featured IS FALSE) AND template.isActive =:isActive")
+    @Query(value = "SELECT template FROM Template template WHERE template.osCategoryId=:osCategoryId AND "
+            + "(template.architecture =:architecture OR 'ALL' =:architecture) AND template.type <>:type AND "
+            + "template.status = :status AND template.share IS TRUE AND template.isActive =:isActive")
     List<Template> findAllByOsCategoryAndArchitectureAndType(@Param("osCategoryId") Long osCategoryId, @Param("architecture") String architecture,
         @Param("type") TemplateType type, @Param("status") Status status, @Param("isActive") Boolean isActive);
 
@@ -323,8 +325,8 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
     @Query(value = "SELECT template FROM Template template LEFT JOIN template.templateOwner user WHERE user.type =:rootAdmin OR template.architecture =:architecture OR 'ALL' =:architecture AND template.type <>:type AND template.status = :status AND template.share IS TRUE AND template.isActive =:isActive AND template.domainId = :domainId")
     List<Template> findAllTemplateByDomainIdUserTypeAndIsActiveStatus(@Param("architecture") String architecture, @Param("type") TemplateType type,
         @Param("status") Status status, @Param("isActive") Boolean isActive,@Param("rootAdmin")UserType rootAdmin, @Param("domainId") Long domainId);
-    
-    
+
+
     /**
      * Find all by domain, status and shared.
      * @param type system, builtin etc.
@@ -334,12 +336,12 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      * @return list of templates.
      */
     @Query(value = "SELECT template FROM Template template WHERE template.type <>:type "
-    		+ "AND template.share =:share "
+            + "AND template.share =:share "
     		+ "AND template.isActive =:isActive "
     		+ "AND template.domainId = :domainId")
     List<Template> findAllByDomainIdIsActiveAndShare(@Param("type") TemplateType type,
         @Param("share") Boolean share, @Param("isActive") Boolean isActive, @Param("domainId") Long domainId);
-    
+
     /**
      * Get the template by the type community.
      *
@@ -351,7 +353,7 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      */
     @Query(value = "SELECT template FROM Template template LEFT JOIN template.osCategory LEFT JOIN template.templateOwner LEFT JOIN template.osType  WHERE template.type <>:type AND template.share =:share AND template.status =:status AND template.isActive =:isActive")
     List<Template> findAllByCommunity(@Param("type") TemplateType type, @Param("share") Boolean share, @Param("status") Status status, @Param("isActive") Boolean isActive);
-    
+
     /**
      * Find all the template by user id.
      *
@@ -426,4 +428,8 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
      */
     @Query(value = "SELECT template FROM Template template WHERE template.templateOwnerId = :userId AND template.isActive = :isActive")
     List<Template> findByTemplateOwnerIdAndIsActive(@Param("userId") Long userId, @Param("isActive") Boolean isActive);
+
+    @Query(value = "SELECT template FROM Template template WHERE (template.type <>:type AND template.status = :status AND template.share IS TRUE AND template.isActive = :isActive) AND (template.domainId = :domainId OR template.templateOwnerId = :userId)")
+    List<Template> findByTemplateForUserId( @Param("type") TemplateType type,
+        @Param("status") Status status, @Param("isActive") Boolean isActive, @Param("domainId") Long domainId, @Param("userId") Long userId);
 }

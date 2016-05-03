@@ -558,8 +558,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<User> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
-        return userRepository.findAllByDomainId(domainId, pagingAndSorting.toPageRequest());
+    public Page<User> findAllByDomainId(Long domainId, String searchText, PagingAndSorting pagingAndSorting) throws Exception {
+
+        List<UserType> userType = new ArrayList<UserType>();
+        if (searchText.equals(UserType.DOMAIN_ADMIN.toString())) {
+            userType.add(UserType.DOMAIN_ADMIN);
+            return userRepository.findAllByDomainId(true, userType, pagingAndSorting.toPageRequest());
+        }
+        if (searchText.equals(UserType.ROOT_ADMIN.toString())) {
+            userType.add(UserType.ROOT_ADMIN);
+            return userRepository.findAllByDomainId(true, userType, pagingAndSorting.toPageRequest());
+        }
+        if (searchText.equals(UserType.USER.toString())) {
+            userType.add(UserType.USER);
+            return userRepository.findAllByDomainId(true, userType, pagingAndSorting.toPageRequest());
+        }
+        return userRepository.findAllByDomainId(domainId, searchText, pagingAndSorting.toPageRequest());
     }
 
     @Override

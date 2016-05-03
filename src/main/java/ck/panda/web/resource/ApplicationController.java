@@ -135,4 +135,31 @@ public class ApplicationController extends CRUDController<Application> implement
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
+
+    /**
+     * Get all application list by domain.
+     *
+     * @param sortBy asc/desc
+     * @param domainId domain id of application.
+     * @param searchText search text.
+     * @param range pagination range.
+     * @param limit per page limit.
+     * @param request page request.
+     * @param response response content.
+     * @return application list.
+     * @throws Exception unhandled exception.
+     */
+    @RequestMapping(value = "/listByFilter", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Application> listApplicationByDomain(@RequestParam String sortBy, @RequestParam Long domainId, @RequestParam String searchText,
+            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Application.class);
+        Page<Application> pageResponse = applicationService.findAllByDomainIdAndSearchText(domainId, page, searchText, Long.valueOf(tokenDetails.getTokenDetails("id")));
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
+    }
+
 }

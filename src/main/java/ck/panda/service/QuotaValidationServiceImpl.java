@@ -7,6 +7,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.rabbitmq.util.EmailEvent;
 import ck.panda.domain.entity.ResourceLimitDomain;
@@ -31,6 +33,9 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
     /** CloudStack Resource Capacity Service. */
     @Autowired
     private CloudStackResourceCapacity cloudStackResourceCapacity;
+
+    @Autowired
+    private IpaddressService ipaddressService;
 
     /** Resource Limit Department service reference. */
     @Autowired
@@ -65,13 +70,14 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
         case "Instance":
             VmInstance vmInstance = (VmInstance)resourceObject;
             resourceList.add(ConvertEntityService.CS_INSTANCE);
-            resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
             resourceList.add(ConvertEntityService.CS_CPU);
             if(convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getCustomized()) {
-                resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(vmInstance.getCpuCore()));
+                resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
                 resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(vmInstance.getMemory()));
+                resourceUsageMap.put(ConvertEntityService.CS_CPU, Long.valueOf(vmInstance.getCpuCore()));
             } else {
-                resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getNumberOfCores()));
+                resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
+                resourceUsageMap.put(ConvertEntityService.CS_CPU, Long.valueOf(convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getNumberOfCores()));
                 resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getMemory()));
             }
             if(vmInstance.getStorageOfferingId() != null) {
@@ -89,8 +95,16 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
             resourceList.add(ConvertEntityService.CS_MEMORY);
             resourceList.add(ConvertEntityService.CS_PRIMARY_STORAGE);
             resourceList.add(ConvertEntityService.CS_IP);
-            resourceUsageMap.put(ConvertEntityService.CS_CPU, 1L);
-            resourceUsageMap.put(ConvertEntityService.CS_IP, 1L);
+        	List<IpAddress> ipaddresses = ipaddressService.findByNetwork(vmInstance.getNetworkId());
+			Boolean isCheck =false;
+			for (IpAddress ipaddress : ipaddresses) {
+				if (ipaddress.getIsSourcenat()) {
+					isCheck = true;
+				}
+			}
+			if(!isCheck){
+				resourceUsageMap.put(ConvertEntityService.CS_IP, 1L);
+			}
             if (accountType.equals("Project")) {
                 String validateMessage = checkResourceAvailablity(accountTypeId, accountType, resourceList, resourceUsageMap);
                 if (validateMessage != null) {
@@ -204,15 +218,15 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
         case "RestoreInstance" :
             VmInstance restoreInstance = (VmInstance)resourceObject;
             resourceList.add(ConvertEntityService.CS_INSTANCE);
-            resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
             resourceList.add(ConvertEntityService.CS_CPU);
             if(convertEntityService.getComputeOfferById(restoreInstance.getComputeOfferingId()).getCustomized()) {
-                resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(restoreInstance.getCpuCore()));
+                resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
+                resourceUsageMap.put(ConvertEntityService.CS_CPU, Long.valueOf(restoreInstance.getCpuCore()));
                 resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(restoreInstance.getMemory()));
             } else {
-                resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(convertEntityService.getComputeOfferById(restoreInstance.getComputeOfferingId()).getNumberOfCores()));
+            	resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
+                resourceUsageMap.put(ConvertEntityService.CS_CPU, Long.valueOf(convertEntityService.getComputeOfferById(restoreInstance.getComputeOfferingId()).getNumberOfCores()));
                 resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(convertEntityService.getComputeOfferById(restoreInstance.getComputeOfferingId()).getMemory()));
-
             }
             resourceList.add(ConvertEntityService.CS_MEMORY);
             if (accountType.equals("Project")) {
@@ -369,21 +383,25 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
             ResourceLimitProject projectLimit = getMaxByProjectAndResourceType(accountTypeId, resource);
             if(((projectLimit.getMax() < (EmptytoLong(projectLimit.getUsedLimit()) + EmptytoLong(resourceUsageMap.get(resources)))) && (projectLimit.getMax() != (EmptytoLong(projectLimit.getUsedLimit()) + EmptytoLong(resourceUsageMap.get(resources))))) && projectLimit.getMax() != -1) {
                 //TODO apply internalization.
-                validateResponse = " User "+ resource +" Limit exceeded in project " + convertEntityService.getProjectById(accountTypeId).getName();
+                validateResponse = "There is not enough " + resource + " available for " + convertEntityService.getProjectById(accountTypeId).getName() +". Please update project quota.";
             }
-        } else if(accountType.equals("Department")){
-            ResourceLimitDepartment departmentLimit = getMaxByDepartmentAndResourceType(accountTypeId, resource);
-            if(((departmentLimit.getMax() < (EmptytoLong(departmentLimit.getUsedLimit()) + EmptytoLong(resourceUsageMap.get(resources)))) && (departmentLimit.getMax() != (EmptytoLong(departmentLimit.getUsedLimit()) + EmptytoLong(resourceUsageMap.get(resources))))) && departmentLimit.getMax() != -1) {
-                //TODO apply internalization.
-                validateResponse = " User "+ resource +" Limit exceeded in department " + convertEntityService.getDepartmentById(accountTypeId).getUserName();
-            }
-        } else {
+		} else if (accountType.equals("Department")) {
+			ResourceLimitDepartment departmentLimit = getMaxByDepartmentAndResourceType(accountTypeId, resource);
+			if (((departmentLimit.getMax() < (EmptytoLong(departmentLimit.getUsedLimit())
+					+ EmptytoLong(resourceUsageMap.get(resources))))
+					&& (departmentLimit.getMax() != (EmptytoLong(departmentLimit.getUsedLimit())
+							+ EmptytoLong(resourceUsageMap.get(resources)))))
+					&& departmentLimit.getMax() != -1) {
+				// TODO apply internalization.
+				validateResponse = "There is not enough " + resource + " available for " + convertEntityService.getDepartmentById(accountTypeId).getUserName() + ". Please update department quota.";
+			}
+		} else {
             // Resource count for domain.
             //updateResourceCountByDomain(convertEntityService.getDomainById(accountTypeId).getUuid(), null);
             ResourceLimitDomain domainLimit = getMaxByDomainAndResourceType(accountTypeId, resource);
             if(((domainLimit.getMax() < (EmptytoLong(domainLimit.getUsedLimit()) + EmptytoLong(resourceUsageMap.get(resources)))) && (domainLimit.getMax() != (EmptytoLong(domainLimit.getUsedLimit()) + EmptytoLong(resourceUsageMap.get(resources))))) && domainLimit.getMax() != -1) {
                 //TODO apply internalization.
-                validateResponse = " User "+ resource +" Limit exceeded in domain " + convertEntityService.getDomainById(accountTypeId).getName();
+                validateResponse = "There is not enough " + resource + " available for " + convertEntityService.getDomainById(accountTypeId).getName() + ". Please update domain quota.";
             }
         }
         return validateResponse;

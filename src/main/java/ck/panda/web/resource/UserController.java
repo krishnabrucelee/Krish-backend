@@ -322,16 +322,37 @@ public class UserController extends CRUDController<User> implements ApiControlle
     public List<User> listUserByDomainId(@RequestParam String sortBy, @RequestParam Long domainId, @RequestParam String flag,
             @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
-        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, User.class);
-        if (flag.equals(PANDA_USER_PANEL)) {
+
+            PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, User.class);
             Page<User> pageResponse = userService.findAllByUserPanelAndDomainId(domainId, page);
             response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
             return pageResponse.getContent();
-        } else {
-            Page<User> pageResponse = userService.findAllByDomainId(domainId, page);
+    }
+
+    /**
+     * Get all user list by domain.
+     *
+     * @param sortBy asc/desc
+     * @param domainId domain id of user.
+     * @param range pagination range.
+     * @param limit per page limit.
+     * @param request page request.
+     * @param response response content.
+     * @return user list.
+     * @throws Exception unhandled exception.
+     */
+    @RequestMapping(value = "/listByAdminSearch", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<User> listUserByFilter(@RequestParam String sortBy, @RequestParam Long domainId, @RequestParam String searchText,
+            @RequestParam String flag, @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+            PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, User.class);
+            Page<User> pageResponse = userService.findAllByDomainId(domainId, searchText, page);
             response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
             return pageResponse.getContent();
-        }
     }
 
     /**

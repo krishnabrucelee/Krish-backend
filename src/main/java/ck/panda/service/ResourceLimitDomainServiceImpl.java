@@ -258,13 +258,7 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
 				if (resourceLimit.getMax() == -1) {
 					totalCount = EmptytoLong(resourceLimit.getMax());
 				} else {
-					totalCount = EmptytoLong(resourceLimit.getMax())
-							+ (EmptytoLong(resourceLimitDomain.getUsedLimit()));
-				}
-				if (EmptytoLong(resourceLimitDomain.getMax()) < EmptytoLong(totalCount) && EmptytoLong(resourceLimitDomain.getMax()) != -1) {
-					errors.addFieldError(resourceLimit.getResourceType().toString(),
-							departmentResourceCount + " in " + resourceLimit.getResourceType().toString() + " "
-									+ "already allocated to departments of this domain");
+					totalCount = EmptytoLong(resourceLimit.getMax());
 				}
 			}
 		}

@@ -3,14 +3,8 @@ package ck.panda.service;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
-import ck.panda.domain.entity.SSHKey;
 import ck.panda.domain.entity.User;
-import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.User.Status;
 import ck.panda.domain.entity.User.UserType;
 import ck.panda.util.domain.CRUDService;
@@ -208,7 +202,7 @@ public interface UserService extends CRUDService<User> {
      * @return list of user.
      * @throws Exception if error occurs.
      */
-    Page<User> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
+    Page<User> findAllByDomainId(Long domainId, String searchText, PagingAndSorting pagingAndSorting) throws Exception;
 
 
     /**
