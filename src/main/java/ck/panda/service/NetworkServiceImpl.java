@@ -414,6 +414,8 @@ public class NetworkServiceImpl implements NetworkService {
             IpAddress ipAddress = new IpAddress();
             ipAddress.setId(ip.getId());
             ipAddress.setState(State.FREE);
+            ipAddress.setIsStaticnat(false);
+            ipAddress.setIsSourcenat(false);
             ipAddress.setDepartmentId(ip.getDepartmentId());
             ipAddress.setZoneId(ip.getZoneId());
             ipAddress.setDisplay(ip.getDisplay());
