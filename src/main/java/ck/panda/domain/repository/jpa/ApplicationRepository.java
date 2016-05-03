@@ -102,7 +102,7 @@ public interface ApplicationRepository extends PagingAndSortingRepository<Applic
      * @param pageable to get the list with pagination
      * @return list of applications
      */
-    @Query(value = "SELECT app FROM Application app WHERE (app.domainId=:domainId OR 0 = :domainId) AND app.isActive = :isActive AND (app.type LIKE %:search% OR app.description LIKE %:search% OR app.status LIKE %:search%)")
+    @Query(value = "SELECT app FROM Application app WHERE (app.domainId=:domainId OR 0 = :domainId) AND app.isActive = :isActive AND (app.type LIKE %:search% OR app.description LIKE %:search% OR app.domain.name LIKE %:search% OR app.status LIKE %:search%)")
     Page<Application> findDomainBySearchText(@Param("domainId") Long domainId, Pageable pageable, @Param("search") String search, @Param("isActive") Boolean isActive);
 
 }

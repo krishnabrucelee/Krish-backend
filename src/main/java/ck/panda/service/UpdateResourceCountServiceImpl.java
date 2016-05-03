@@ -56,13 +56,14 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
 		case GenericConstants.INSTANCE:
 			VmInstance vmInstance = (VmInstance) resourceObject;
 			resourceList.add(ConvertEntityService.CS_INSTANCE);
-			resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
 			resourceList.add(ConvertEntityService.CS_CPU);
 			if (convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getCustomized()) {
-				resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(vmInstance.getCpuCore()));
+				resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
+				resourceUsageMap.put(ConvertEntityService.CS_CPU, Long.valueOf(vmInstance.getCpuCore()));
 				resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(vmInstance.getMemory()));
 			} else {
-				resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(convertEntityService
+				resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
+				resourceUsageMap.put(ConvertEntityService.CS_CPU, Long.valueOf(convertEntityService
 						.getComputeOfferById(vmInstance.getComputeOfferingId()).getNumberOfCores()));
 				resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(
 						convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getMemory()));
@@ -98,7 +99,6 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
 			if(!isCheck){
 				resourceUsageMap.put(ConvertEntityService.CS_IP, 1L);
 			}
-			resourceUsageMap.put(ConvertEntityService.CS_CPU, 1L);
 			if (accountType.equals(GenericConstants.PROJECT)) {
 				updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
 			} else if (accountType.equals(GenericConstants.DEPARTMENT)) {
@@ -167,14 +167,14 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
 			resourceList.clear();
 			VmInstance restoreInstance = (VmInstance) resourceObject;
 			resourceList.add(ConvertEntityService.CS_INSTANCE);
-			resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
 			resourceList.add(ConvertEntityService.CS_CPU);
-			resourceUsageMap.put(ConvertEntityService.CS_CPU, 1L);
 			if (convertEntityService.getComputeOfferById(restoreInstance.getComputeOfferingId()).getCustomized()) {
-				resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(restoreInstance.getCpuCore()));
+				resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
+				resourceUsageMap.put(ConvertEntityService.CS_CPU, Long.valueOf(restoreInstance.getCpuCore()));
 				resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(restoreInstance.getMemory()));
 			} else {
-				resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(convertEntityService
+				resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
+				resourceUsageMap.put(ConvertEntityService.CS_CPU, Long.valueOf(convertEntityService
 						.getComputeOfferById(restoreInstance.getComputeOfferingId()).getNumberOfCores()));
 				resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(
 						convertEntityService.getComputeOfferById(restoreInstance.getComputeOfferingId()).getMemory()));
@@ -190,14 +190,14 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
 			resourceList.clear();
 			VmInstance destroyInstance = (VmInstance) resourceObject;
 			resourceList.add(ConvertEntityService.CS_INSTANCE);
-			resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
-			resourceUsageMap.put(ConvertEntityService.CS_CPU, 1L);
 			resourceList.add(ConvertEntityService.CS_CPU);
 			if (convertEntityService.getComputeOfferById(destroyInstance.getComputeOfferingId()).getCustomized()) {
-				resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(destroyInstance.getCpuCore()));
+				resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
+				resourceUsageMap.put(ConvertEntityService.CS_CPU, Long.valueOf(destroyInstance.getCpuCore()));
 				resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(destroyInstance.getMemory()));
 			} else {
-				resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(convertEntityService
+				resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
+				resourceUsageMap.put(ConvertEntityService.CS_CPU, Long.valueOf(convertEntityService
 						.getComputeOfferById(destroyInstance.getComputeOfferingId()).getNumberOfCores()));
 				resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(
 						convertEntityService.getComputeOfferById(destroyInstance.getComputeOfferingId()).getMemory()));
@@ -214,14 +214,14 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
 			resourceList.clear();
 			VmInstance expungingInstance = (VmInstance) resourceObject;
 			resourceList.add(ConvertEntityService.CS_INSTANCE);
-			resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
-			resourceUsageMap.put(ConvertEntityService.CS_CPU, 1L);
 			resourceList.add(ConvertEntityService.CS_CPU);
 			if (convertEntityService.getComputeOfferById(expungingInstance.getComputeOfferingId()).getCustomized()) {
-				resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(expungingInstance.getCpuCore()));
+				resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
+				resourceUsageMap.put(ConvertEntityService.CS_CPU, Long.valueOf(expungingInstance.getCpuCore()));
 				resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(expungingInstance.getMemory()));
 			} else {
-				resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(convertEntityService
+				resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
+				resourceUsageMap.put(ConvertEntityService.CS_CPU, Long.valueOf(convertEntityService
 						.getComputeOfferById(expungingInstance.getComputeOfferingId()).getNumberOfCores()));
 				resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(convertEntityService
 						.getComputeOfferById(expungingInstance.getComputeOfferingId()).getMemory()));

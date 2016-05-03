@@ -70,13 +70,14 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
         case "Instance":
             VmInstance vmInstance = (VmInstance)resourceObject;
             resourceList.add(ConvertEntityService.CS_INSTANCE);
-            resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
             resourceList.add(ConvertEntityService.CS_CPU);
             if(convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getCustomized()) {
-                resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(vmInstance.getCpuCore()));
+                resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
                 resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(vmInstance.getMemory()));
+                resourceUsageMap.put(ConvertEntityService.CS_CPU, Long.valueOf(vmInstance.getCpuCore()));
             } else {
-                resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getNumberOfCores()));
+                resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
+                resourceUsageMap.put(ConvertEntityService.CS_CPU, Long.valueOf(convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getNumberOfCores()));
                 resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(convertEntityService.getComputeOfferById(vmInstance.getComputeOfferingId()).getMemory()));
             }
             if(vmInstance.getStorageOfferingId() != null) {
@@ -94,7 +95,6 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
             resourceList.add(ConvertEntityService.CS_MEMORY);
             resourceList.add(ConvertEntityService.CS_PRIMARY_STORAGE);
             resourceList.add(ConvertEntityService.CS_IP);
-            resourceUsageMap.put(ConvertEntityService.CS_CPU, 1L);
         	List<IpAddress> ipaddresses = ipaddressService.findByNetwork(vmInstance.getNetworkId());
 			Boolean isCheck =false;
 			for (IpAddress ipaddress : ipaddresses) {
@@ -218,15 +218,15 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
         case "RestoreInstance" :
             VmInstance restoreInstance = (VmInstance)resourceObject;
             resourceList.add(ConvertEntityService.CS_INSTANCE);
-            resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
             resourceList.add(ConvertEntityService.CS_CPU);
             if(convertEntityService.getComputeOfferById(restoreInstance.getComputeOfferingId()).getCustomized()) {
-                resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(restoreInstance.getCpuCore()));
+                resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
+                resourceUsageMap.put(ConvertEntityService.CS_CPU, Long.valueOf(restoreInstance.getCpuCore()));
                 resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(restoreInstance.getMemory()));
             } else {
-                resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, Long.valueOf(convertEntityService.getComputeOfferById(restoreInstance.getComputeOfferingId()).getNumberOfCores()));
+            	resourceUsageMap.put(ConvertEntityService.CS_INSTANCE, 1L);
+                resourceUsageMap.put(ConvertEntityService.CS_CPU, Long.valueOf(convertEntityService.getComputeOfferById(restoreInstance.getComputeOfferingId()).getNumberOfCores()));
                 resourceUsageMap.put(ConvertEntityService.CS_MEMORY, Long.valueOf(convertEntityService.getComputeOfferById(restoreInstance.getComputeOfferingId()).getMemory()));
-
             }
             resourceList.add(ConvertEntityService.CS_MEMORY);
             if (accountType.equals("Project")) {
