@@ -971,10 +971,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     ipService.update(persistIp);
                     // Resource Count update
                         if (persistIp.getProjectId() != null) {
-                            updateResourceCountService.QuotaUpdateByResourceObject(convertEntityService.getNetworkById(persistIp.getNetworkId()), CS_IP,
+                            updateResourceCountService.QuotaUpdateByResourceObject(persistIp, CS_IP,
                                     persistIp.getProjectId(), CS_Project, Update);
                         } else {
-                            updateResourceCountService.QuotaUpdateByResourceObject(convertEntityService.getNetworkById(persistIp.getNetworkId()), CS_IP,
+                            updateResourceCountService.QuotaUpdateByResourceObject(persistIp, CS_IP,
                                     persistIp.getDepartmentId(), CS_Department, Update);
                         }
                 }
@@ -1006,10 +1006,10 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 ipService.softDelete(ipAddress);
                 // Resource Count delete
                 if (ipAddress.getProjectId() != null) {
-                    updateResourceCountService.QuotaUpdateByResourceObject(convertEntityService.getNetworkById(ipAddress.getNetworkId()), CS_IP,
+                    updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
                                 ipAddress.getProjectId(), CS_Project, Delete);
                 } else {
-                    updateResourceCountService.QuotaUpdateByResourceObject(convertEntityService.getNetworkById(ipAddress.getNetworkId()), CS_IP,
+                    updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
                                 ipAddress.getDepartmentId(), CS_Department, Delete);
                 }
             }

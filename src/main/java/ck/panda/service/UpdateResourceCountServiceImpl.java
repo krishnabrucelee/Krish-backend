@@ -145,9 +145,14 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
 			}
 			break;
 		case GenericConstants.NETWORK:
+			Network net = (Network)resourceObject;
 			resourceList.clear();
 			resourceList.add(ConvertEntityService.CS_NETWORK);
 			resourceUsageMap.put(ConvertEntityService.CS_NETWORK, 1L);
+			List<IpAddress> ipaddresse = ipaddressService.findByNetwork(net.getId());
+			if (ipaddresse.size() > 0) {
+				resourceUsageMap.put(ConvertEntityService.CS_IP, Long.valueOf(ipaddresse.size()));
+			}
 			if (accountType.equals(GenericConstants.PROJECT)) {
 				updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
 			} else if (accountType.equals(GenericConstants.DEPARTMENT)) {
@@ -155,11 +160,9 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
 			}
 			break;
 		case GenericConstants.IP:
-			Network network = (Network) resourceObject;
-			List<IpAddress> ipaddresse = ipaddressService.findByNetwork(network.getId());
 			resourceList.clear();
 			resourceList.add(ConvertEntityService.CS_IP);
-			resourceUsageMap.put(ConvertEntityService.CS_IP, Long.valueOf(ipaddresse.size()));
+			resourceUsageMap.put(ConvertEntityService.CS_IP, 1L);
 			if (accountType.equals(GenericConstants.PROJECT)) {
 				updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
 			} else if (accountType.equals(GenericConstants.DEPARTMENT)) {
