@@ -3,6 +3,8 @@ package ck.panda.service;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.repository.query.Param;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.Status;
@@ -188,11 +190,12 @@ public interface UserService extends CRUDService<User> {
      * Find all the user by domain in user panel.
      *
      * @param domainId domain id of the user.
+     * @param searchText search text.
      * @param pagingAndSorting paging and sorting information.
      * @return list of user.
      * @throws Exception if error occurs.
      */
-    Page<User> findAllByUserPanelAndDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
+    Page<User> findAllByUserPanelAndDomainId(Long domainId, String searchText, PagingAndSorting pagingAndSorting) throws Exception;
 
     /**
      * Find all the user by domain.
@@ -274,8 +277,8 @@ public interface UserService extends CRUDService<User> {
      * @throws Exception if error occurs.
      */
     List<User> findByRootAdminUser() throws Exception;
-    
-    
+
+
     /**
      * Find all the user by domain.
      *

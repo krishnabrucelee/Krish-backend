@@ -56,10 +56,11 @@ public interface AffinityGroupService extends CRUDService<AffinityGroup> {
      * Find all affinity group by domain.
      *
      * @param domainId domain id of the affinity group
+     * @param searchText search text.
      * @param pagingAndSorting paging and sorting information.
      * @return list of affinity group.
      * @throws Exception if error occurs.
      */
-    Page<AffinityGroup> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
+    Page<AffinityGroup> findAllByDomainId(Long domainId, String searchText, PagingAndSorting pagingAndSorting) throws Exception;
 
 }

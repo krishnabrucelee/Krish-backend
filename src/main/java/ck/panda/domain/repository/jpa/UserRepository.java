@@ -165,8 +165,9 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @param pageable pagination information.
      * @return list of user.
      */
-    @Query(value = "select user from User user LEFT JOIN user.role where user.domainId =:domainId and user.status <> :status")
-    Page<User> findAllByUserPanelAndDomainId(@Param("domainId") Long domainId, @Param("status") Status deleted, Pageable pageable);
+    @Query(value = "select user from User user LEFT JOIN user.role where (user.domainId = :domainId OR 0 = :domainId) AND (user.userName LIKE %:search% OR user.department.userName LIKE %:search% OR user.domain.name LIKE %:search% OR user.type LIKE %:search% OR user.role.name LIKE %:search%"
+            + " OR user.email LIKE %:search% OR user.status LIKE %:search%) and user.status <> :status")
+    Page<User> findAllByUserPanelAndDomainId(@Param("domainId") Long domainId, @Param("search") String searchText, @Param("status") Status deleted, Pageable pageable);
 
     /**
      * Find all the user by domain.
@@ -186,8 +187,8 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @param pageable pagination information.
      * @return list of user.
      */
-    @Query(value = "SELECT user FROM User user WHERE user.type =:type AND user.isActive = :isActive")
-    Page<User> findAllByDomainId(@Param("isActive") Boolean isActive, @Param("type") List<UserType> userType, Pageable pageable);
+    @Query(value = "SELECT user FROM User user WHERE (user.domainId = :domainId OR 0 = :domainId) AND user.type =:type AND user.isActive = :isActive")
+    Page<User> findAllByDomainId(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, @Param("type") List<UserType> userType, Pageable pageable);
 
     /**
      * Get list of required parameter of user.

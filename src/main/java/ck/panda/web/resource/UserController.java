@@ -320,11 +320,11 @@ public class UserController extends CRUDController<User> implements ApiControlle
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<User> listUserByDomainId(@RequestParam String sortBy, @RequestParam Long domainId, @RequestParam String flag,
-            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            @RequestParam String searchText, @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
 
             PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, User.class);
-            Page<User> pageResponse = userService.findAllByUserPanelAndDomainId(domainId, page);
+            Page<User> pageResponse = userService.findAllByUserPanelAndDomainId(domainId, searchText, page);
             response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
             return pageResponse.getContent();
     }
