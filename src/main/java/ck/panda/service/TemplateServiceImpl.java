@@ -963,7 +963,7 @@ public class TemplateServiceImpl implements TemplateService {
         User user = convertEntityService.getOwnerById(userId);
         if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
             if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
-                return templateRepository.findAllByCommunity(type, true, Template.Status.ACTIVE, true);
+            	return templateRepository.findAllByDomainIdIsActiveAndShare(type, false, true, user.getDomainId());
             } else {
                 return templateRepository.findAllByUserId(type, userId, user.getDepartmentId(), true);
             }

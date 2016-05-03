@@ -133,11 +133,12 @@ public class DashboardServiceImpl implements DashboardService {
         }
 
         Integer cpuCore = 0;
-        Integer memory = 0;
+        float memory = 0;
         for(VmInstance vm : vmList) {
             cpuCore = cpuCore + vm.getCpuCore();
-            memory = memory + (vm.getMemory() / 1024);
+            memory = memory + (vm.getMemory());
         }
+    	memory = (float) memory / 1024;
 
     	JSONObject infra = new JSONObject();
         infra.put(RUNNING_VM_COUNT, runningVmCount);
@@ -180,11 +181,12 @@ public class DashboardServiceImpl implements DashboardService {
         }
 
         Integer cpuCore = 0;
-        Integer memory = 0;
+        float memory = 0;
         for(VmInstance vm : vmList) {
             cpuCore = cpuCore + vm.getCpuCore();
-            memory = memory + (vm.getMemory() / 1024);
+            memory = memory + (vm.getMemory());
         }
+    	memory = (float) memory / 1024;
 
     	JSONObject infra = new JSONObject();
         infra.put(RUNNING_VM_COUNT, runningVmCount);
