@@ -299,6 +299,11 @@ public class WebsocketServiceImpl implements WebsocketService {
                                     }
                                 }
 								if (event.getEvent().equals("VirtualMachine")) {
+									if (eventObject.getString(EventTypes.RESOURCE_STATE)
+											.equalsIgnoreCase(VmInstance.Status.STOPPED.name()) && eventObject.getString(EventTypes.OLD_RESOURCE_STATE)
+											.equalsIgnoreCase(VmInstance.Status.DESTROYED.name())) {
+										Thread.sleep(5000);
+									}
 									VmInstance vmInstance = virtualMachineService.findByUUID(event.getResourceUuid());
 									if (vmInstance != null) {
 										if (!eventObject.getString(EventTypes.RESOURCE_STATE).equalsIgnoreCase(
