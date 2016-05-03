@@ -99,12 +99,15 @@ public class ProjectServiceImpl implements ProjectService {
     @Autowired
     private TokenDetails tokenDetails;
 
+    /** Network Service Reference */
     @Autowired
     private NetworkService networkService;
 
+    /** Sshkey service reference */
     @Autowired
     private SSHKeyService sshKeyService;
 
+    /** Volume Service Reference. */
     @Autowired
     private VolumeService volumeService;
 
