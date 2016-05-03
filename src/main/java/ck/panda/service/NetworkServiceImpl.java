@@ -400,13 +400,6 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public Network ipRelease(Network network) throws Exception {
         List<IpAddress> ipList = ipService.findByNetwork(network.getId());
-        if (network.getProjectId() != null) {
-        	updateResourceCountService.QuotaUpdateByResourceObject(network, CS_IP,
-        			network.getProjectId(), CS_Project, Delete);
-        } else {
-        	updateResourceCountService.QuotaUpdateByResourceObject(network, CS_IP,
-        			network.getDepartmentId(), CS_Department, Delete);
-        }
         for (IpAddress ip : ipList) {
             List<VpnUser> vpnUserList = vpnUserService.findAllByDepartmentAndDomainAndIsActive(network.getDepartmentId(), network.getDomainId(), true);
             if (vpnUserList.size() != 0) {
