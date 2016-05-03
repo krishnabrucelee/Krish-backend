@@ -20,7 +20,6 @@ import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitDomain;
-import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.SSHKey;
 import ck.panda.domain.entity.User;
@@ -37,6 +36,7 @@ import ck.panda.util.error.exception.ApplicationException;
 import ck.panda.util.error.exception.EntityNotFoundException;
 import ck.panda.constants.PingConstants;
 import ck.panda.util.PingService;
+import ck.panda.util.TokenDetails;
 
 /**
  * Department service implementation class.
@@ -114,6 +114,10 @@ public class DepartmentServiceImpl implements DepartmentService {
     /** Mr.ping service reference. */
     @Autowired
     private PingService pingService;
+
+    /** Token details reference. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     /** Baremetal system constant. */
     public static final String BAREMETAL_SYSTEM_ACCOUNT = "baremetal-system-account";
@@ -456,6 +460,15 @@ public class DepartmentServiceImpl implements DepartmentService {
             return 0L;
         }
         return value;
+    }
+
+    @Override
+    public Page<Department> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText, Long userId) throws Exception {
+        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
+        if (!convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.ROOT_ADMIN)) {
+            domainId = user.getDomainId();
+        }
+        return departmentRepo.findDomainBySearchText(domainId, pagingAndSorting.toPageRequest(), searchText, true);
     }
 
 }
