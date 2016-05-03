@@ -347,6 +347,9 @@ public class ProjectServiceImpl implements ProjectService {
                         + sshKeyList.size() + GenericConstants.TOKEN_SEPARATOR
                         + volumeList.size());
             }
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
+            }
             HashMap<String, String> optional = new HashMap<String, String>();
             optional.put(CloudStackConstants.CS_DOMAIN_ID, project.getDepartment().getDomain().getUuid());
             optional.put(CloudStackConstants.CS_ACCOUNT, project.getDepartment().getUserName());
@@ -369,6 +372,7 @@ public class ProjectServiceImpl implements ProjectService {
                     } else {
                         departmentLimit.setUsedLimit(EmptytoLong(departmentLimit.getUsedLimit()) - EmptytoLong(projectLimit.getMax()));
                     }
+                    departmentLimit.setIsSyncFlag(false);
                     resourceLimitDepartmentService.save(departmentLimit);
                     projectLimit.setIsActive(false);
                     projectLimit.setIsSyncFlag(false);
@@ -478,11 +482,16 @@ public class ProjectServiceImpl implements ProjectService {
     public Page<Project> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText)
             throws Exception {
           User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
+          if (convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.USER)) {
+              domainId = user.getDomainId();
+               Long departmentId = user.getDepartmentId();
+               return projectRepository.findAllByDomainIdAndIsActiveAndSearchText(domainId, true, pagingAndSorting.toPageRequest(),searchText,departmentId);
+          }
           if (!convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.ROOT_ADMIN)) {
               domainId = user.getDomainId();
           }
-        return projectRepository.findAllByDomainIdAndIsActiveAndSearchText(domainId, true, pagingAndSorting.toPageRequest(),searchText);
-    }
+        return projectRepository.findAllByDomainAndSearchText(domainId, true, pagingAndSorting.toPageRequest(),searchText);
+   }
 
     /**
      * Save project details to MR.ping project for usage calculation.
