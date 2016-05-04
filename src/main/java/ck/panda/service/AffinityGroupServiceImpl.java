@@ -14,6 +14,7 @@ import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.AffinityGroup;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.AffinityGroup.Status;
+import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.repository.jpa.AffinityGroupRepository;
 import ck.panda.util.AppValidator;
@@ -94,16 +95,8 @@ public class AffinityGroupServiceImpl implements AffinityGroupService {
             throw new ApplicationException(errors);
         } else {
             HashMap<String, String> optional = new HashMap<String, String>();
-            if (affinityGroup.getTransAffinityGroupAccessFlag().equals(INSTANCE)) {
-                optional.put(CloudStackConstants.CS_ACCOUNT, convertEntityService.getDepartmentById(affinityGroup.getDepartmentId()).getUserName());
-                optional.put(CloudStackConstants.CS_DOMAIN_ID, convertEntityService.getDomainById(affinityGroup.getDomainId()).getUuid());
-            } else {
-                User user = convertEntityService.getOwnerById(id);
-                affinityGroup.setDomainId(user.getDomainId());
-                affinityGroup.setDepartmentId(user.getDepartmentId());
-                optional.put(CloudStackConstants.CS_ACCOUNT, user.getDepartment().getUserName());
-                optional.put(CloudStackConstants.CS_DOMAIN_ID, user.getDomain().getUuid());
-            }
+            optional.put(CloudStackConstants.CS_ACCOUNT, convertEntityService.getDepartmentById(affinityGroup.getDepartmentId()).getUserName());
+            optional.put(CloudStackConstants.CS_DOMAIN_ID, convertEntityService.getDomainById(affinityGroup.getDomainId()).getUuid());
             optional.put(CloudStackConstants.CS_DESCRIPTION, affinityGroup.getDescription());
             config.setUserServer();
             String csResponse = cloudStackAffinityGroupService.createAffinityGroup(affinityGroup.getName(),
@@ -290,9 +283,9 @@ public class AffinityGroupServiceImpl implements AffinityGroupService {
     }
 
     @Override
-    public Page<AffinityGroup> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting)
+    public Page<AffinityGroup> findAllByDomainId(Long domainId, String searchText, PagingAndSorting pagingAndSorting)
             throws Exception {
-        return affinityGroupRepository.findByDomainAndPageable(domainId, true, pagingAndSorting.toPageRequest());
+        return affinityGroupRepository.findByDomainSearchAndPageable(domainId, true, searchText, pagingAndSorting.toPageRequest());
     }
 
 }

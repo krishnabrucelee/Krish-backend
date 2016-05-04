@@ -86,4 +86,16 @@ public interface ComputeOfferingService extends CRUDService<ComputeOffering> {
      */
     Page<ComputeOffering> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
 
+    /**
+     * Find all compute offering by domain id and search text.
+     *
+     * @param domainId of the domain.
+     * @param pagingAndSorting for pagination.
+     * @param searchText for string search.
+     * @return compute offering.
+     * @throws Exception if error occurs.
+     */
+    Page<ComputeOffering> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting,
+            String searchText) throws Exception;
+
    }

@@ -342,10 +342,10 @@ public class TemplateServiceImpl implements TemplateService {
         List<User> userList = userService.findByRootAdminUser();
         Domain domain = domainService.find(user.getDomainId());
         List<Template> templates = null;
-        for(User rootUser: userList) {
+        List<Template> listAllTemplate = new ArrayList<Template>();
         for(User rootUser: userList) {
         if (domain != null && domain.getName().equals(DOMAIN_ROOT_ADMIN)) {
-        	templates = csPrepareTemplate((List<Template>) templateRepository.findByTemplateAndFeature(ALL_TEMPLATE,
+            templates = csPrepareTemplate((List<Template>) templateRepository.findByTemplateAndFeature(ALL_TEMPLATE,
                    TemplateType.SYSTEM, Status.ACTIVE, true));
         }
         else {
@@ -356,11 +356,12 @@ public class TemplateServiceImpl implements TemplateService {
                             Status.ACTIVE, true,user.getDomainId(),rootUser.getId());
             }        }
         }
-		return templates;
+        if(templates != null && templates.size() > 0) {
             listAllTemplate.addAll(templates);
          }
         return templates;
     }
+
     @Override
     public List<Template> findTemplateByFilters(Template template, Long id) throws Exception {
         User user = convertEntityService.getOwnerById(id);
@@ -962,7 +963,7 @@ public class TemplateServiceImpl implements TemplateService {
         User user = convertEntityService.getOwnerById(userId);
         if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
             if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
-                return templateRepository.findAllByCommunity(type, true, Template.Status.ACTIVE, true);
+            	return templateRepository.findAllByDomainIdIsActiveAndShare(type, false, true, user.getDomainId());
             } else {
                 return templateRepository.findAllByUserId(type, userId, user.getDepartmentId(), true);
             }

@@ -553,8 +553,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<User> findAllByUserPanelAndDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
-        return userRepository.findAllByUserPanelAndDomainId(domainId, User.Status.DELETED, pagingAndSorting.toPageRequest());
+    public Page<User> findAllByUserPanelAndDomainId(Long domainId, String searchText, PagingAndSorting pagingAndSorting) throws Exception {
+        List<UserType> userType = new ArrayList<UserType>();
+        if (searchText.equals(UserType.DOMAIN_ADMIN.toString())) {
+            userType.add(UserType.DOMAIN_ADMIN);
+            return userRepository.findAllByDomainId(domainId, true, userType, pagingAndSorting.toPageRequest());
+        }
+        if (searchText.equals(UserType.ROOT_ADMIN.toString())) {
+            userType.add(UserType.ROOT_ADMIN);
+            return userRepository.findAllByDomainId(domainId, true, userType, pagingAndSorting.toPageRequest());
+        }
+        if (searchText.equals(UserType.USER.toString())) {
+            userType.add(UserType.USER);
+            return userRepository.findAllByDomainId(domainId, true, userType, pagingAndSorting.toPageRequest());
+        }
+        return userRepository.findAllByUserPanelAndDomainId(domainId, searchText, User.Status.DELETED, pagingAndSorting.toPageRequest());
     }
 
     @Override
@@ -563,15 +576,15 @@ public class UserServiceImpl implements UserService {
         List<UserType> userType = new ArrayList<UserType>();
         if (searchText.equals(UserType.DOMAIN_ADMIN.toString())) {
             userType.add(UserType.DOMAIN_ADMIN);
-            return userRepository.findAllByDomainId(true, userType, pagingAndSorting.toPageRequest());
+            return userRepository.findAllByDomainId(domainId, true, userType, pagingAndSorting.toPageRequest());
         }
         if (searchText.equals(UserType.ROOT_ADMIN.toString())) {
             userType.add(UserType.ROOT_ADMIN);
-            return userRepository.findAllByDomainId(true, userType, pagingAndSorting.toPageRequest());
+            return userRepository.findAllByDomainId(domainId, true, userType, pagingAndSorting.toPageRequest());
         }
         if (searchText.equals(UserType.USER.toString())) {
             userType.add(UserType.USER);
-            return userRepository.findAllByDomainId(true, userType, pagingAndSorting.toPageRequest());
+            return userRepository.findAllByDomainId(domainId, true, userType, pagingAndSorting.toPageRequest());
         }
         return userRepository.findAllByDomainId(domainId, searchText, pagingAndSorting.toPageRequest());
     }
@@ -659,8 +672,8 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByRootAdminUser(UserType.ROOT_ADMIN,true);
     }
 
-	@Override
-	public List<User> findAllByDomain(Domain domain) throws Exception {
-		return userRepository.findAllUserByDomain(domain);
-	}
+    @Override
+    public List<User> findAllByDomain(Domain domain) throws Exception {
+        return userRepository.findAllUserByDomain(domain);
+    }
 }

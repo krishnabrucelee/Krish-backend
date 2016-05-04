@@ -410,10 +410,11 @@ public class NetworkServiceImpl implements NetworkService {
             }
             }
             ipService.ruleDelete(ip);
-
             IpAddress ipAddress = new IpAddress();
             ipAddress.setId(ip.getId());
             ipAddress.setState(State.FREE);
+            ipAddress.setIsStaticnat(false);
+            ipAddress.setIsSourcenat(false);
             ipAddress.setDepartmentId(ip.getDepartmentId());
             ipAddress.setZoneId(ip.getZoneId());
             ipAddress.setDisplay(ip.getDisplay());
@@ -425,13 +426,6 @@ public class NetworkServiceImpl implements NetworkService {
             ipAddress.setCreatedBy(ip.getCreatedBy());
             ipAddress.setCreatedDateTime(ip.getCreatedDateTime());
             ipAddress = ipService.update(ipAddress);
-            if (ipAddress.getProjectId() != null) {
-            	updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
-                            ipAddress.getProjectId(), CS_Project, Delete);
-            } else {
-            	updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
-                            ipAddress.getDepartmentId(), CS_Department, Delete);
-            }
         }
         return network;
     }

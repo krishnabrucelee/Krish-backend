@@ -68,25 +68,33 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
 
     @Override
     public ResourceLimitDepartment save(ResourceLimitDepartment resource) throws Exception {
-        Errors errors = validator.rejectIfNullEntity("resourcelimits", resource);
-        errors = validator.validateEntity(resource, errors);
-        if (errors.hasErrors()) {
-            throw new ApplicationException(errors);
-        } else {
-            return resourceLimitDepartmentRepo.save(resource);
-        }
+		if (resource.getIsSyncFlag()) {
+			Errors errors = validator.rejectIfNullEntity("resourcelimits", resource);
+			errors = validator.validateEntity(resource, errors);
+			if (errors.hasErrors()) {
+				throw new ApplicationException(errors);
+			} else {
+				return resourceLimitDepartmentRepo.save(resource);
+			}
+		} else {
+			return resourceLimitDepartmentRepo.save(resource);
+		}
     }
 
     @Override
     public ResourceLimitDepartment update(ResourceLimitDepartment resource) throws Exception {
-        Errors errors = validator.rejectIfNullEntity("resourcelimits", resource);
-        errors = validator.validateEntity(resource, errors);
+		if (resource.getIsSyncFlag()) {
+			Errors errors = validator.rejectIfNullEntity("resourcelimits", resource);
+			errors = validator.validateEntity(resource, errors);
 
-        if (errors.hasErrors()) {
-            throw new ApplicationException(errors);
-        } else {
-            return resourceLimitDepartmentRepo.save(resource);
-        }
+			if (errors.hasErrors()) {
+				throw new ApplicationException(errors);
+			} else {
+				return resourceLimitDepartmentRepo.save(resource);
+			}
+		} else {
+			return resourceLimitDepartmentRepo.save(resource);
+		}
     }
 
     @Override
@@ -164,6 +172,7 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
                     ResourceLimitDomain resourceDatas = resourceLimitDomainService.findByDomainAndResourceCount(resource.getDomainId(), updateUsedCount(resourceData), true);
                     Long resourceCount = resourceLimitDepartmentRepo.findByDomainIdAndResourceType(resource.getDomainId(),resource.getResourceType(),true);
                     Long resourceCounts = resourceLimitDepartmentRepo.findByDomainIdAndResourceTypeAndResourceMax(resource.getDomainId(),resource.getResourceType(),true);
+                    resourceDatas.setMax(resourceDatas.getMax());
                     resourceDatas.setUsedLimit((EmptytoLong(resourceCounts) + EmptytoLong(resourceCount)));
                     resourceDatas.setIsSyncFlag(false);
                     resourceLimitDomainService.save(resourceDatas);
@@ -174,6 +183,7 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
                     ResourceLimitDomain resourceDatas = resourceLimitDomainService.findByDomainAndResourceCount(resource.getDomainId(), updateUsedCount(resource), true);
                     Long resourceCount = resourceLimitDepartmentRepo.findByDomainIdAndResourceType(resource.getDomainId(),resource.getResourceType(),true);
                     Long resourceCounts = resourceLimitDepartmentRepo.findByDomainIdAndResourceTypeAndResourceMax(resource.getDomainId(),resource.getResourceType(),true);
+                    resourceDatas.setMax(resourceDatas.getMax());
                     resourceDatas.setUsedLimit(EmptytoLong(resourceCount) + EmptytoLong(resourceCounts));
                     resourceDatas.setIsSyncFlag(false);
                     resourceLimitDomainService.save(resourceDatas);
