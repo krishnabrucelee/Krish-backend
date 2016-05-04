@@ -18,6 +18,7 @@ import ck.panda.domain.repository.jpa.SSHKeyRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackSSHService;
 import ck.panda.util.ConfigUtil;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -82,6 +83,10 @@ public class SSHKeyServiceImpl implements SSHKeyService {
 
     /** Constant for private key response from cloudStack. */
     public static final String CS_PRIVATE_KEY = "privatekey";
+
+    /** Token details reference. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     @Override
     @PreAuthorize("hasPermission(#sshkey.getIsSyncFlag(), 'CREATE_SSH_KEY')")
@@ -334,7 +339,7 @@ public class SSHKeyServiceImpl implements SSHKeyService {
                 // 2.1 Call convert by passing JSONObject to User entity and Add
                 // the converted User entity to list
                 SSHKey sshkey = SSHKey.convert(sshKeyListJSON.getJSONObject(i));
-                if(domainService.findByUUIDAndIsActive(sshkey.getTransDomainId()) != null) {
+                if (domainService.findByUUIDAndIsActive(sshkey.getTransDomainId()) != null) {
                     sshkey.setDomainId(convertEntity.getDomainId(sshkey.getTransDomainId()));
                     sshkey.setDepartmentId(convertEntity.getDepartmentByUsername(sshkey.getTransDepartment(),
                     domainService.findByUUIDAndIsActive(sshkey.getTransDomainId()).getId()));
@@ -416,4 +421,19 @@ public class SSHKeyServiceImpl implements SSHKeyService {
     public Page<SSHKey> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
         return sshkeyRepo.findAllByDomainIdAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
     }
+
+    @Override
+    public Page<SSHKey> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText, Long userId) throws Exception {
+        User user = convertEntity.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
+        if (convertEntity.getOwnerById(user.getId()).getType().equals(User.UserType.ROOT_ADMIN)) {
+            return sshkeyRepo.findDomainBySearchText(domainId, pagingAndSorting.toPageRequest(), searchText, true);
+        } else if ((convertEntity.getOwnerById(user.getId()).getType()).equals(User.UserType.DOMAIN_ADMIN)) {
+            Page<SSHKey> allSSHKeyList = sshkeyRepo.findDomainBySearchText((convertEntity.getOwnerById(user.getId())
+                    .getDomainId()), pagingAndSorting.toPageRequest(), searchText, true);
+            return allSSHKeyList;
+        }
+        return sshkeyRepo.findAllByDepartmentIsActiveAndSearchText((convertEntity.getOwnerById(user.getId()).getDomainId()), (convertEntity.getOwnerById(user.getId()).getDepartmentId()),
+                pagingAndSorting.toPageRequest(), searchText, true);
+    }
+
 }

@@ -110,4 +110,16 @@ public interface SSHKeyService extends CRUDService<SSHKey> {
      * @throws Exception error occurs
      */
     Page<SSHKey> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
+
+    /**
+     * Find domain based list on sshKey with pagination.
+     *
+     * @param pagingAndSorting parameters.
+     * @param domainId domain id.
+     * @param searchText quick search text
+     * @param userId user id.
+     * @return page result of SSH key.
+     * @throws Exception if error occurs.
+     */
+    Page<SSHKey> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText, Long userId) throws Exception;
 }
