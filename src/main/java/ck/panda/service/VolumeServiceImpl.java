@@ -84,9 +84,6 @@ public class VolumeServiceImpl implements VolumeService {
     /** Constant for Cloud stack volume conversation in GiB. */
     public static final Integer CS_CONVERTION_GIB = 1024 * 1024 * 1024;
 
-    /** Constant for empty string search. */
-    public static final String EMPTY_SEARCH_FILTER = "";
-
     /** Validator attribute. */
     @Autowired
     private AppValidator validator;
