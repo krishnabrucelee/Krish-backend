@@ -733,7 +733,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             network.setIsActive(false);
             Errors errors = new Errors(messageSource);
             networkService.softDelete(network);
-            networkService.ipRelease(network);
             if (network.getProjectId() != null) {
                 updateResourceCountService.QuotaUpdateByResourceObject(network, CS_Network, network.getProjectId(),
                             CS_Project, Delete);
@@ -741,6 +740,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 updateResourceCountService.QuotaUpdateByResourceObject(network, CS_Network,
                             network.getDepartmentId(), CS_Department, Delete);
             }
+            networkService.ipRelease(network);
         }
 
         if (eventObject.getString("commandEventType").equals("NETWORK.RESTART")) {

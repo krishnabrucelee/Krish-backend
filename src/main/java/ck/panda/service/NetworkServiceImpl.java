@@ -386,7 +386,6 @@ public class NetworkServiceImpl implements NetworkService {
 								CloudStackConstants.JSON);
 						JSONObject jobresult = new JSONObject(jobResponse)
 								.getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
-						this.ipRelease(network);
 					}
 				}
 			} else {
