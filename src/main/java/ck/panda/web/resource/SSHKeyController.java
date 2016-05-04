@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
+import ck.panda.domain.entity.Application;
 import ck.panda.domain.entity.SSHKey;
 import ck.panda.service.SSHKeyService;
 import ck.panda.util.TokenDetails;
@@ -129,27 +130,29 @@ public class SSHKeyController extends CRUDController<SSHKey> implements ApiContr
     }
 
     /**
-     * Get all SSH key list by domain.
+     * Get all sshKey list by domain.
      *
      * @param sortBy asc/desc
-     * @param domainId domain id of SSH key.
+     * @param domainId domain id of sshKey.
+     * @param searchText search text.
      * @param range pagination range.
      * @param limit per page limit.
      * @param request page request.
      * @param response response content.
-     * @return SSH key list.
+     * @return sshKey list.
      * @throws Exception unhandled exception.
      */
     @RequestMapping(value = "/listByDomain", method = RequestMethod.GET, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<SSHKey> listSshByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
+    public List<SSHKey> listSshByDomainId(@RequestParam String sortBy, @RequestParam Long domainId, @RequestParam String searchText,
             @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
-        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, SSHKey.class);
-        Page<SSHKey> pageResponse = sshkeyService.findAllByDomainId(domainId, page);
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Application.class);
+        Page<SSHKey> pageResponse = sshkeyService.findAllByDomainIdAndSearchText(domainId, page, searchText, Long.valueOf(tokenDetails.getTokenDetails("id")));
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
+
 }
