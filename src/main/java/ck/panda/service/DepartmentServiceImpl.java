@@ -321,6 +321,7 @@ public class DepartmentServiceImpl implements DepartmentService {
                     domainLimit.setIsSyncFlag(false);
                     resourceLimitDomainService.save(domainLimit);
                     departmentLimit.setIsActive(false);
+                    departmentLimit.setIsSyncFlag(false);
                     resourceLimitDepartmentService.save(departmentLimit);
                 }
             }
