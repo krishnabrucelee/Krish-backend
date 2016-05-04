@@ -1256,7 +1256,7 @@ public class VolumeServiceImpl implements VolumeService {
     @Override
     public Page<Volume> findAllByDomainAndSearchText(Long domainId, String searchText, PagingAndSorting pagingAndSorting) throws Exception {
         User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
-        if (!convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.ROOT_ADMIN)) {
+        if (convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.DOMAIN_ADMIN)) {
             domainId = user.getDomainId();
         }
         List<VolumeType> volumeType = new ArrayList<VolumeType>();
@@ -1267,17 +1267,67 @@ public class VolumeServiceImpl implements VolumeService {
             } else if (searchText.equals("ROOT")) {
                 volumeType.add(VolumeType.ROOT);
             }
-            listVolume = volumeRepo.findAllByDomainAndSearchText(domainId, true, searchText, volumeType, pagingAndSorting.toPageRequest());
+            if (convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.USER)) {
+                listVolume = volumeUserFilter(user, pagingAndSorting, searchText, volumeType);
+            } else {
+                listVolume = volumeRepo.findAllByDomainAndSearchText(domainId, true, searchText, volumeType, pagingAndSorting.toPageRequest());
+            }
         } else {
-            listVolume = volumeRepo.findAllByDomainAndSearchText(domainId, true, searchText, pagingAndSorting.toPageRequest());
+             if (convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.USER)) {
+                 listVolume = volumeUserFilter(user, pagingAndSorting, searchText, volumeType);
+             } else {
+                 listVolume = volumeRepo.findAllByDomainAndSearchText(domainId, true, searchText, pagingAndSorting.toPageRequest());
+             }
         }
         return listVolume;
+    }
+
+
+    /**
+     * User volume quick search filter.
+     *
+     * @param user user object
+     * @param pagingAndSorting pagination and sorting values
+     * @param searchText search text
+     * @param volumeType volume type
+     * @return list of volumes with pagination.
+     * @throws Exception raise if error
+     */
+    public Page<Volume> volumeUserFilter(User user, PagingAndSorting pagingAndSorting, String searchText, List<VolumeType> volumeType)
+            throws Exception {
+        if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
+            List<Project> allProjectList = new ArrayList<Project>();
+            for (Project project : projectService.findAllByUserAndIsActive(user.getId(), true)) {
+                allProjectList.add(project);
+            }
+            Page<Volume> allProjectTempList = null;
+            if (volumeType.size() == 0) {
+                allProjectTempList = volumeRepo.findByProjectAndVolumeTypeAndPage(allProjectList,
+                    convertEntityService.getOwnerById(user.getId()).getDepartmentId(), true,
+                    pagingAndSorting.toPageRequest(), searchText);
+            } else {
+                allProjectTempList = volumeRepo.findByProjectAndVolumeTypeAndPage(allProjectList,
+                    convertEntityService.getOwnerById(user.getId()).getDepartmentId(), volumeType, true,
+                    pagingAndSorting.toPageRequest());
+            }
+            return allProjectTempList;
+        } else {
+            if (volumeType.size() == 0) {
+                return volumeRepo.findByDepartmentAndVolumeTypeAndPage(
+                    convertEntityService.getOwnerById(user.getId()).getDepartmentId(), true,
+                    pagingAndSorting.toPageRequest(), searchText);
+            } else {
+                return volumeRepo.findByDepartmentAndVolumeTypeAndPage(
+                        convertEntityService.getOwnerById(user.getId()).getDepartmentId(), volumeType, true,
+                        pagingAndSorting.toPageRequest());
+            }
+        }
     }
 
     @Override
     public Integer findAttachedCountByDomain(Long domainId, String searchText) throws NumberFormatException, Exception {
         User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
-        if (!convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.ROOT_ADMIN)) {
+        if (convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.DOMAIN_ADMIN)) {
             domainId = user.getDomainId();
         }
         List<VolumeType> volumeType = new ArrayList<VolumeType>();
@@ -1288,13 +1338,58 @@ public class VolumeServiceImpl implements VolumeService {
             } else if (searchText.equals("ROOT")) {
                 volumeType.add(VolumeType.ROOT);
             }
-            listVolume = volumeRepo.getAttachedCountByDomainAndIsActive(domainId, true, searchText, volumeType);
+            if (convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.USER)) {
+                listVolume = volumeUserFilterCount(user, searchText, volumeType);
+            } else {
+                listVolume = volumeRepo.getAttachedCountByDomainAndIsActive(domainId, true, searchText, volumeType);
+            }
         } else {
-            listVolume = volumeRepo.getAttachedCountByDomainAndIsActive(domainId, true, searchText);
+            if (convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.USER)) {
+                listVolume = volumeUserFilterCount(user, searchText, volumeType);
+            } else {
+                listVolume = volumeRepo.getAttachedCountByDomainAndIsActive(domainId, true, searchText);
+            }
+
         }
 
         Integer adminAttachedCount = listVolume.size();
         return adminAttachedCount;
+    }
+
+    /**
+     * User volume count quick search filter.
+     *
+     * @param user user object
+     * @param searchText search text
+     * @param volumeType volume type
+     * @return list of volumes with pagination.
+     * @throws Exception raise if error
+     */
+    public List<Volume> volumeUserFilterCount(User user, String searchText, List<VolumeType> volumeType)
+            throws Exception {
+        if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
+            List<Project> allProjectList = new ArrayList<Project>();
+            for (Project project : projectService.findAllByUserAndIsActive(user.getId(), true)) {
+                allProjectList.add(project);
+            }
+            List<Volume> allProjectTempList = null;
+            if (volumeType.size() == 0) {
+                allProjectTempList = volumeRepo.findByProjectAndVolumeTypeCount(allProjectList,
+                    convertEntityService.getOwnerById(user.getId()).getDepartmentId(), true, searchText);
+            } else {
+                allProjectTempList = volumeRepo.findByProjectAndVolumeTypeCount(allProjectList,
+                    convertEntityService.getOwnerById(user.getId()).getDepartmentId(), true, volumeType);
+            }
+            return allProjectTempList;
+        } else {
+            if (volumeType.size() == 0) {
+                return volumeRepo.findByDepartmentAndVolumeTypeCount(
+                    convertEntityService.getOwnerById(user.getId()).getDepartmentId(), true, searchText);
+            } else {
+                return volumeRepo.findByDepartmentAndVolumeTypeCount(
+                        convertEntityService.getOwnerById(user.getId()).getDepartmentId(), true, volumeType);
+            }
+        }
     }
 
     @Override
