@@ -799,9 +799,9 @@ public class VolumeServiceImpl implements VolumeService {
         HashMap<String, String> optional = new HashMap<String, String>();
         if (volume.getVmInstanceId() != null) {
             VmInstance instance = virtualMachineService.find(volume.getVmInstanceId());
-            optional.put(CloudStackConstants.CS_VIRTUAL_MACHINE_ID, instance.getUuid());
+            optional.put(CloudStackConstants.CS_JOB_VM_ID, instance.getUuid());
         } else {
-            optional.put(CloudStackConstants.CS_VIRTUAL_MACHINE_ID, volume.getVmInstance().getUuid());
+            optional.put(CloudStackConstants.CS_JOB_VM_ID, volume.getVmInstance().getUuid());
         }
         config.setUserServer();
         String volumeS = csVolumeService.attachVolume(volume.getUuid(), CloudStackConstants.JSON, optional);
