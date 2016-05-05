@@ -9,9 +9,13 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
+import ck.panda.service.ThemeSettingService;
 
 /**
  * SimpleCORSFilter to allow cross domain call.
@@ -21,6 +25,8 @@ import org.springframework.stereotype.Component;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class SimpleCORSFilter implements Filter {
 
+    @Autowired
+    private ThemeSettingService themeSettingService;
     /**
      * Overriden method.
      */
@@ -39,7 +45,10 @@ public class SimpleCORSFilter implements Filter {
         if (request.getRequestURI().contains("socket")) {
 
         }
+        System.out.println(request.getHeader("x-requested-with"));
         if (request.getRequestURI().contains("panda")) {
+        }
+        if (request.getRequestURI().contains("resources")) {
         }
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);
@@ -64,5 +73,6 @@ public class SimpleCORSFilter implements Filter {
     public void destroy() {
 
     }
+
 
 }

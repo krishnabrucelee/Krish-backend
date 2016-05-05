@@ -151,6 +151,14 @@ public class AuthenticationFilter extends GenericFilterBean {
                 authenticatedExternalWebService.setExternalWebService(externalWebService);
                 SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);
             }
+            if (resourcePath.contains("resources")) {
+                LOGGER.debug("Trying to authenticate user by x-auth-token method : ", token);
+                ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
+                AuthenticatedExternalWebService authenticatedExternalWebService = new AuthenticatedExternalWebService(
+                        "pandasocket", null, AuthorityUtils.commaSeparatedStringToAuthorityList("BACKEND_ADMIN"));
+                authenticatedExternalWebService.setExternalWebService(externalWebService);
+                SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);
+            }
             if (resourcePath.contains("panda") && !resourcePath.contains("usersessiondetails")) {
                 ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
                 AuthenticatedExternalWebService authenticatedExternalWebService = new AuthenticatedExternalWebService(
@@ -166,6 +174,9 @@ public class AuthenticationFilter extends GenericFilterBean {
             }
             if (token.isPresent()) {
                 if (!token.get().isEmpty()) {
+                    if (domain.equals("Image")) {
+
+                    }
                     LOGGER.debug("Trying to authenticate user by x-auth-token method : ", token);
                     processTokenAuthentication(token, loginToken, userId, httpRequest);
                 }

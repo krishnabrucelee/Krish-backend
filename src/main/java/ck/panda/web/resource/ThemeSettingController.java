@@ -40,12 +40,8 @@ public class ThemeSettingController extends CRUDController<ThemeSetting> impleme
     private ThemeSettingService themeSettingService;
 
     /** Background image directory. */
-    @Value("${background.image.dir}")
-    private String backgroundImageDir;
-
-    /** Logo image directory */
-    @Value("${logo.image.dir}")
-    private String logoImageDir;
+    @Value("${background.logo.dir}")
+    private String backgroundLogoDir;
 
     @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Theme setting.", response = ThemeSetting.class)
     @Override
@@ -85,6 +81,7 @@ public class ThemeSettingController extends CRUDController<ThemeSetting> impleme
         InputStream inputStream = null;
         OutputStream outputStream = null;
         int i = 0;
+        BufferedImage image = null;
         ThemeSetting theme = themeSettingService.findByThemeAndIsActive(true);
         if (theme == null) {
             theme = new ThemeSetting();
@@ -94,13 +91,13 @@ public class ThemeSettingController extends CRUDController<ThemeSetting> impleme
                 i++;
                 if ((backgroundImageFile.length == 1) || (backgroundImageFile.length > 1) && i == 2) {
                     String fileName = file.getOriginalFilename();
-                    File newFile = new File(backgroundImageDir + "/" + "theme_background.jpg");
-                    BufferedImage image = ImageIO.read(newFile);
+                    File newFile = new File(backgroundLogoDir + "/" + "theme_background.jpg");
+                    image = ImageIO.read(file.getInputStream());
                     int height = image.getHeight();
                     int width = image.getWidth();
-                    if (width >= 1300 && height >= 650) {
+                    if (width >= 700 && height >= 400) {
                         theme.setBackgroundImgFile(fileName);
-                        theme.setBackgroundImgPath(backgroundImageDir);
+                        theme.setBackgroundImgPath(backgroundLogoDir);
                         try {
                             inputStream = file.getInputStream();
                             if (!newFile.exists()) {
@@ -130,12 +127,12 @@ public class ThemeSettingController extends CRUDController<ThemeSetting> impleme
                 i++;
                 if ((logoImageFile.length == 1) || (logoImageFile.length > 1) && i == 2) {
                     String fileName = file.getOriginalFilename();
-                    File newFile = new File(logoImageDir + "/" + "theme_logo.jpg");
-                    BufferedImage image = ImageIO.read(newFile);
+                    File newFile = new File(backgroundLogoDir + "/" + "theme_logo.jpg");
+                    image = ImageIO.read(file.getInputStream());
                     int height = image.getHeight();
                     int width = image.getWidth();
                     if (width <= 180 && height <= 55) {
-                        theme.setLogoImgPath(logoImageDir);
+                        theme.setLogoImgPath(backgroundLogoDir);
                         theme.setLogoImgFile(fileName);
                         try {
                             inputStream = file.getInputStream();
@@ -164,4 +161,5 @@ public class ThemeSettingController extends CRUDController<ThemeSetting> impleme
         themeSettingService.saveThemeCustomisation(theme, headers, footers);
         return null;
     }
+
 }
