@@ -613,6 +613,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Page<User> findAllByActive(PagingAndSorting pagingAndSorting, Long id) throws Exception {
+            return userRepository.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
+    }
+
+    @Override
     public User updateSuspended(User user) throws Exception {
         User users = userRepository.findOne(user.getId());
         users.setStatus(User.Status.SUSPENDED);

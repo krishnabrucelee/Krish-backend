@@ -30,7 +30,7 @@ import ck.panda.util.web.CRUDController;
 /** SSHKey controller. */
 @RestController
 @RequestMapping("/api/sshkeys")
-@Api(value = "SSHKeys", description = "Operations with sshkeys", produces = "sshkey/json")
+@Api(value = "SSHKeys", description = "Operations with sshkeys", produces = "application/json")
 public class SSHKeyController extends CRUDController<SSHKey> implements ApiController {
 
     /** Service reference to SSH Key. */
