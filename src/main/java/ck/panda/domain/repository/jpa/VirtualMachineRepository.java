@@ -348,7 +348,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      * @param statusCode list of status.
      * @return instance list.
      */
-    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.departmentId = :departmentId AND vm.status IN :statusCode")
+    @Query(value = "SELECT vm FROM VmInstance vm WHERE vm.departmentId = :departmentId AND vm.projectId IS NULL AND vm.status IN :statusCode")
     List<VmInstance> findByDepartmentAndStatus(@Param("departmentId") Long departmentId,
             @Param("statusCode") List<Status> statusCode);
 
