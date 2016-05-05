@@ -3,6 +3,8 @@ package ck.panda.util.infrastructure.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+
+import ck.panda.SimpleCORSFilter;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.RolePrincipal;
@@ -143,26 +145,26 @@ public class AuthenticationFilter extends GenericFilterBean {
         Optional<String> forwardedFor = Optional.fromNullable(httpRequest.getRemoteAddr());
         String resourcePath = new UrlPathHelper().getPathWithinApplication(httpRequest);
         try {
-            if (resourcePath.contains("socket")) {
+            if (resourcePath.contains(SimpleCORSFilter.SOCKET)) {
                 LOGGER.debug("Trying to authenticate user by x-auth-token method : ", token);
                 ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
                 AuthenticatedExternalWebService authenticatedExternalWebService = new AuthenticatedExternalWebService(
-                        "pandasocket", null, AuthorityUtils.commaSeparatedStringToAuthorityList("BACKEND_ADMIN"));
+                        "pandasocket", null, AuthorityUtils.commaSeparatedStringToAuthorityList(DatabaseAuthenticationManager.BACKEND_ADMIN));
                 authenticatedExternalWebService.setExternalWebService(externalWebService);
                 SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);
             }
-            if (resourcePath.contains("resources")) {
+            if (resourcePath.contains(SimpleCORSFilter.RESOURCES)) {
                 LOGGER.debug("Trying to authenticate user by x-auth-token method : ", token);
                 ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
                 AuthenticatedExternalWebService authenticatedExternalWebService = new AuthenticatedExternalWebService(
-                        "pandasocket", null, AuthorityUtils.commaSeparatedStringToAuthorityList("BACKEND_ADMIN"));
+                        "pandasocket", null, AuthorityUtils.commaSeparatedStringToAuthorityList(DatabaseAuthenticationManager.BACKEND_ADMIN));
                 authenticatedExternalWebService.setExternalWebService(externalWebService);
                 SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);
             }
-            if (resourcePath.contains("panda") && !resourcePath.contains("usersessiondetails")) {
+            if (resourcePath.contains(SimpleCORSFilter.PANDA) && !resourcePath.contains("usersessiondetails")) {
                 ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
                 AuthenticatedExternalWebService authenticatedExternalWebService = new AuthenticatedExternalWebService(
-                        "pandapay", null, AuthorityUtils.commaSeparatedStringToAuthorityList("BACKEND_ADMIN"));
+                        "pandapay", null, AuthorityUtils.commaSeparatedStringToAuthorityList(DatabaseAuthenticationManager.BACKEND_ADMIN));
                 authenticatedExternalWebService.setExternalWebService(externalWebService);
                 SecurityContextHolder.getContext().setAuthentication(authenticatedExternalWebService);
             }
@@ -174,9 +176,6 @@ public class AuthenticationFilter extends GenericFilterBean {
             }
             if (token.isPresent()) {
                 if (!token.get().isEmpty()) {
-                    if (domain.equals("Image")) {
-
-                    }
                     LOGGER.debug("Trying to authenticate user by x-auth-token method : ", token);
                     processTokenAuthentication(token, loginToken, userId, httpRequest);
                 }
