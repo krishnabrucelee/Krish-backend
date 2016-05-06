@@ -185,9 +185,5 @@ payment:
 
 ---
 background:
-    image:
-        dir: ${BACKGROUND_IMAGE_DIR:/home/Assistanz/Repository/Admin-master/pandaadminui/src/main/webapp/images}
-
-logo:
-    image:
-        dir: ${LOGO_IMAGE_DIR:/home/Assistanz/Repository/Admin-master/pandaadminui/src/main/webapp/images}
+    logo:
+        dir: ${BACKGROUNG_LOGO_PATH}
