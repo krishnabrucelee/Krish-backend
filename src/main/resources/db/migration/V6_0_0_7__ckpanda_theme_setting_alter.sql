@@ -1,0 +1,2 @@
+INSERT INTO `ckpanda`.`theme_setting` (`id`, `background_img_file`, `background_img_path`, `created_user_id`, `is_active`, `logo_img_file`, `logo_img_path`)
+        VALUES ('1', 'theme_background.jpg', '/home/Assistanz/theme/images', 0, 1, 'theme_logo.jpg', '/home/Assistanz/theme/images');
