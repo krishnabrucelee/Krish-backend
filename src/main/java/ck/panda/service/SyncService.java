@@ -356,4 +356,20 @@ public interface SyncService {
      * @throws Exception cloudstack unhandled errors
      */
     void syncAffinityGroup() throws ApplicationException, Exception;
+
+    /**
+     * Sync with Cloud Server VPC offering.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    void syncVpcOffering() throws ApplicationException, Exception;
+
+    /**
+     * Sync with Cloud Server VPC ACL.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    void syncVpcAcl() throws ApplicationException, Exception;
 }
