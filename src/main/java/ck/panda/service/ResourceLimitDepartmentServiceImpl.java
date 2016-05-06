@@ -399,7 +399,11 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
         for (String name : resourceTypeMap.keySet()) {
             ResourceLimitDepartment resourceLimitDepartment = resourceLimitDepartmentRepo.findByDepartmentAndResourceType(id, ResourceLimitDepartment.ResourceType.valueOf(resourceTypeMap.get(name)), true);
             if (resourceLimitDepartment != null) {
-                resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitDepartment.getUsedLimit()));
+                if (resourceTypeMap.get(name).equals("Memory")) {
+                    resourceMap.put(resourceTypeMap.get(name), (EmptytoLong(resourceLimitDepartment.getUsedLimit())) / 1024);
+                } else {
+                    resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitDepartment.getUsedLimit()));
+                }
             }
         }
         return resourceMap;
@@ -419,7 +423,11 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
                 if (resourceLimitDomain.getMax() == -1) {
                     resourceMap.put(resourceTypeMap.get(name), -1L);
                 } else {
-                    resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitDepartment.getMax()) +(EmptytoLong(resourceLimitDomain.getMax()) - EmptytoLong(resourceLimitDomain.getUsedLimit())));
+                    if (resourceTypeMap.get(name).equals("Memory")) {
+                        resourceMap.put(resourceTypeMap.get(name), (EmptytoLong(resourceLimitDepartment.getMax()) + (EmptytoLong(resourceLimitDomain.getMax()) - EmptytoLong(resourceLimitDomain.getUsedLimit()))) / 1024);
+                    } else {
+                    resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitDepartment.getMax()) + (EmptytoLong(resourceLimitDomain.getMax()) - EmptytoLong(resourceLimitDomain.getUsedLimit())));
+                    }
                 }
             }
         }
