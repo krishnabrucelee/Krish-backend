@@ -12,6 +12,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -31,7 +33,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Table(name = "vpc")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
-public class Vpc implements Serializable {
+public class VPC implements Serializable {
 
     /** Id of the VPC. */
     @Id
@@ -136,6 +138,10 @@ public class Vpc implements Serializable {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    /** Set syncFlag. */
+    @Transient
+    private Boolean syncFlag;
 
     /** Enum type for Vpc Status. */
     public enum Status {
@@ -549,4 +555,22 @@ public class Vpc implements Serializable {
     public void setStatus(Status status) {
         this.status = status;
     }
+
+	/**
+	 * Get sync flag.
+	 *
+	 * @return the syncFlag
+	 */
+	public Boolean getSyncFlag() {
+		return syncFlag;
+	}
+
+	/**
+	 * Set sync flag.
+	 *
+	 * @param syncFlag the syncFlag to set
+	 */
+	public void setSyncFlag(Boolean syncFlag) {
+		this.syncFlag = syncFlag;
+	}
 }

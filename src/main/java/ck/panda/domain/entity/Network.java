@@ -105,7 +105,7 @@ public class Network implements Serializable {
     /** Zone Object for the Network. */
     @JoinColumn(name = "vpc_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
-    private Vpc vpc;
+    private VPC vpc;
 
     /** id for the Zone. */
     @Column(name = "vpc_id")
@@ -904,7 +904,7 @@ public class Network implements Serializable {
      *
      * @return the vpc
      */
-    public Vpc getVpc() {
+    public VPC getVpc() {
         return vpc;
     }
 
@@ -913,7 +913,7 @@ public class Network implements Serializable {
      *
      * @param vpc the vpc to set
      */
-    public void setVpc(Vpc vpc) {
+    public void setVpc(VPC vpc) {
         this.vpc = vpc;
     }
 
