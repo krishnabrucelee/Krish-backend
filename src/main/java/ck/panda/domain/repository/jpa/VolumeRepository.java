@@ -307,7 +307,7 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      * @param isActive true/false
      * @return volume attached Count
      */
-    @Query(value = "SELECT volume FROM Volume volume WHERE volume.departmentId = :departmentId AND volume.volumeType in :volumeType AND volume.isActive = :isActive AND volume.projectId IS NULL AND volume.vmInstanceId IS NULL")
+    @Query(value = "SELECT volume FROM Volume volume WHERE volume.departmentId = :departmentId AND volume.volumeType in :volumeType AND volume.isActive = :isActive AND volume.projectId IS NULL AND volume.vmInstanceId IS NOT NULL")
     List<Volume> getAttachedCountByDepartment(@Param("departmentId") Long departmentId,
             @Param("volumeType") List<VolumeType> volumeType, @Param("isActive") Boolean isActive);
 
@@ -319,7 +319,7 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      * @param isActive true/false
      * @return volume detached Count
      */
-    @Query(value = "SELECT volume FROM Volume volume WHERE volume.departmentId = :departmentId AND volume.volumeType in :volumeType AND volume.isActive = :isActive AND volume.projectId IS NULL AND volume.vmInstanceId IS NOT NULL")
+    @Query(value = "SELECT volume FROM Volume volume WHERE volume.departmentId = :departmentId AND volume.volumeType in :volumeType AND volume.isActive = :isActive AND volume.projectId IS NULL AND volume.vmInstanceId IS NULL")
     List<Volume> getDetachedCountByDepartment(@Param("departmentId") Long departmentId,
             @Param("volumeType") List<VolumeType> volumeType, @Param("isActive") Boolean isActive);
 
@@ -365,14 +365,14 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      *
      * @param domainId domain id of the volume
      * @param isActive get the department list based on active/inactive status
-     * @param searchText search text.
+     * @param search search text.
      * @param pageable to get the list with pagination
      * @return list of volumes
      */
     @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE "
             + "(0L = :domainId OR volume.domainId = :domainId) AND volume.isActive = :isActive AND (volume.name LIKE %:search% OR volume.department.userName LIKE %:search% "
             + "OR volume.project.name LIKE %:search% OR volume.storageOffering.name LIKE %:search% OR volume.vmInstance.name LIKE %:search% "
-            + "OR volume.diskSize/POWER(2, 30) LIKE %:search% OR volume.storageOffering.diskSize/POWER(2, 30) LIKE %:search%)")
+            + "OR volume.diskSize/POWER(2, 30) LIKE %:search% OR volume.storageOffering.diskSize/POWER(2, 30) LIKE %:search% OR volume.createdDateTime LIKE %:search%)")
     Page<Volume> findAllByDomainAndSearchText(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, @Param("search") String search, Pageable pageable);
 
     /**
@@ -380,13 +380,13 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      *
      * @param domainId domain id of the volume
      * @param isActive true/false
-     * @param searchText search text.
+     * @param search search text.
      * @return volume attached count
      */
     @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE "
             + "(0L = :domainId OR volume.domainId = :domainId) AND volume.isActive = :isActive AND volume.vmInstanceId IS NOT NULL AND (volume.name LIKE %:search% OR volume.department.userName LIKE %:search% "
             + "OR volume.project.name LIKE %:search% OR volume.storageOffering.name LIKE %:search% OR volume.vmInstance.name LIKE %:search% "
-            + "OR volume.diskSize/POWER(2, 30) LIKE %:search% OR volume.storageOffering.diskSize/POWER(2, 30) LIKE %:search%)")
+            + "OR volume.diskSize/POWER(2, 30) LIKE %:search% OR volume.storageOffering.diskSize/POWER(2, 30) LIKE %:search% OR volume.createdDateTime LIKE %:search%)")
     List<Volume> getAttachedCountByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, @Param("search") String search);
 
     /**
@@ -394,14 +394,15 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      *
      * @param domainId domain id of the volume
      * @param isActive get the department list based on active/inactive status
-     * @param searchText search text.
+     * @param search search text.
+     * @param volumeType volume type
      * @param pageable to get the list with pagination
      * @return list of volumes
      */
     @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE "
             + "(0L = :domainId OR volume.domainId = :domainId) AND volume.isActive = :isActive AND (volume.name LIKE %:search% OR volume.department.userName LIKE %:search% "
             + "OR volume.project.name LIKE %:search% OR volume.storageOffering.name LIKE %:search% OR volume.vmInstance.name LIKE %:search% "
-            + "OR volume.diskSize/POWER(2, 30) LIKE %:search% OR volume.storageOffering.diskSize/POWER(2, 30) LIKE %:search% OR volume.volumeType IN :volumeType)")
+            + "OR volume.diskSize/POWER(2, 30) LIKE %:search% OR volume.storageOffering.diskSize/POWER(2, 30) LIKE %:search% OR volume.createdDateTime LIKE %:search% OR volume.volumeType IN :volumeType)")
     Page<Volume> findAllByDomainAndSearchText(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, @Param("search") String search, @Param("volumeType") List<VolumeType> volumeType, Pageable pageable);
 
     /**
@@ -409,13 +410,14 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      *
      * @param domainId domain id of the volume
      * @param isActive true/false
-     * @param searchText search text.
+     * @param search search text.
+     * @param volumeType volume type
      * @return volume attached count
      */
     @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE "
             + "(0L = :domainId OR volume.domainId = :domainId) AND volume.isActive = :isActive AND volume.vmInstanceId IS NOT NULL AND (volume.name LIKE %:search% OR volume.department.userName LIKE %:search% "
             + "OR volume.project.name LIKE %:search% OR volume.storageOffering.name LIKE %:search% OR volume.vmInstance.name LIKE %:search% "
-            + "OR volume.diskSize/POWER(2, 30) LIKE %:search% OR volume.storageOffering.diskSize/POWER(2, 30) LIKE %:search% OR volume.volumeType IN :volumeType)")
+            + "OR volume.diskSize/POWER(2, 30) LIKE %:search% OR volume.storageOffering.diskSize/POWER(2, 30) LIKE %:search% OR volume.createdDateTime LIKE %:search% OR volume.volumeType IN :volumeType)")
     List<Volume> getAttachedCountByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, @Param("search") String search, @Param("volumeType") List<VolumeType> volumeType);
 
     /**
@@ -448,7 +450,7 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
     /**
      * Get the volumes based on project, department and volume type.
      *
-     * @param allProjectList project list
+     * @param projectList project list
      * @param departmentId department id
      * @param volumeType volume type
      * @param isActive true/false
@@ -467,4 +469,101 @@ public interface VolumeRepository extends PagingAndSortingRepository<Volume, Lon
      */
     @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE volume.isActive = :isActive")
     List<Volume> findAllVolumesByActive(@Param("isActive") Boolean isActive);
+
+    /**
+     * Get volumes by Department, VolumeType and search text.
+     *
+     * @param departmentId department id
+     * @param isActive true/false
+     * @param search search text
+     * @param pageable page
+     * @return volumes
+     */
+    @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE volume.departmentId = :departmentId AND volume.isActive = :isActive AND volume.projectId IS NULL "
+            + "AND (volume.name LIKE %:search% OR volume.department.userName LIKE %:search% "
+            + "OR volume.project.name LIKE %:search% OR volume.storageOffering.name LIKE %:search% OR volume.vmInstance.name LIKE %:search% "
+            + "OR volume.diskSize/POWER(2, 30) LIKE %:search% OR volume.storageOffering.diskSize/POWER(2, 30) LIKE %:search% OR volume.createdDateTime LIKE %:search%)")
+    Page<Volume> findByDepartmentAndVolumeTypeAndPage(@Param("departmentId") Long departmentId,
+            @Param("isActive") Boolean isActive, Pageable pageable, @Param("search") String search);
+
+
+    /**
+     * Get the volumes based on project, department, volume type and search text with pagination.
+     *
+     * @param allProjectList project list
+     * @param departmentId department id
+     * @param isActive true/false
+     * @param search search text
+     * @param pageable to get the list with pagination.
+     * @return volume
+     */
+    @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE (volume.project in :allProjectList OR volume.departmentId = :departmentId) AND volume.isActive = :isActive "
+            + "AND (volume.name LIKE %:search% OR volume.department.userName LIKE %:search% "
+            + "OR volume.project.name LIKE %:search% OR volume.storageOffering.name LIKE %:search% OR volume.vmInstance.name LIKE %:search% "
+            + "OR volume.diskSize/POWER(2, 30) LIKE %:search% OR volume.storageOffering.diskSize/POWER(2, 30) LIKE %:search% OR volume.createdDateTime LIKE %:search%)")
+    Page<Volume> findByProjectAndVolumeTypeAndPage(@Param("allProjectList") List<Project> allProjectList,
+            @Param("departmentId") Long departmentId, @Param("isActive") Boolean isActive, Pageable pageable,
+            @Param("search") String search);
+
+    /**
+     * Get volumes count by Department and search text.
+     *
+     * @param departmentId department id
+     * @param isActive true/false
+     * @param search search text
+     * @return volumes
+     */
+    @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE volume.departmentId = :departmentId AND volume.isActive = :isActive AND volume.projectId IS NULL "
+            + "AND (volume.name LIKE %:search% OR volume.department.userName LIKE %:search% "
+            + "OR volume.project.name LIKE %:search% OR volume.storageOffering.name LIKE %:search% OR volume.vmInstance.name LIKE %:search% "
+            + "OR volume.diskSize/POWER(2, 30) LIKE %:search% OR volume.storageOffering.diskSize/POWER(2, 30) LIKE %:search% OR volume.createdDateTime LIKE %:search%)")
+    List<Volume> findByDepartmentAndVolumeTypeCount(@Param("departmentId") Long departmentId,
+            @Param("isActive") Boolean isActive, @Param("search") String search);
+
+
+    /**
+     * Get the volumes count based on project, department and search text.
+     *
+     * @param allProjectList project list
+     * @param departmentId department id
+     * @param isActive true/false
+     * @param search search text
+     * @return volume
+     */
+    @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE (volume.project in :allProjectList OR volume.departmentId = :departmentId) AND volume.isActive = :isActive "
+            + "AND (volume.name LIKE %:search% OR volume.department.userName LIKE %:search% "
+            + "OR volume.project.name LIKE %:search% OR volume.storageOffering.name LIKE %:search% OR volume.vmInstance.name LIKE %:search% "
+            + "OR volume.diskSize/POWER(2, 30) LIKE %:search% OR volume.storageOffering.diskSize/POWER(2, 30) LIKE %:search% OR volume.createdDateTime LIKE %:search%)")
+    List<Volume> findByProjectAndVolumeTypeCount(@Param("allProjectList") List<Project> allProjectList,
+            @Param("departmentId") Long departmentId, @Param("isActive") Boolean isActive,
+            @Param("search") String search);
+
+    /**
+     * Get volumes count by Department and VolumeType.
+     *
+     * @param departmentId department id
+     * @param isActive true/false
+     * @param volumeType volume type
+     * @return volumes
+     */
+    @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE volume.departmentId = :departmentId AND volume.isActive = :isActive AND volume.projectId IS NULL "
+            + "AND volume.volumeType IN :volumeType")
+    List<Volume> findByDepartmentAndVolumeTypeCount(@Param("departmentId") Long departmentId,
+            @Param("isActive") Boolean isActive, @Param("volumeType") List<VolumeType> volumeType);
+
+
+    /**
+     * Get the volumes count based on project, department and volume type.
+     *
+     * @param allProjectList project list
+     * @param departmentId department id
+     * @param isActive true/false
+     * @param volumeType volume type
+     * @return volume
+     */
+    @Query(value = "SELECT volume FROM Volume volume LEFT JOIN volume.project LEFT JOIN volume.storageOffering LEFT JOIN volume.vmInstance WHERE (volume.project in :allProjectList OR volume.departmentId = :departmentId) AND volume.isActive = :isActive "
+            + "AND volume.volumeType IN :volumeType")
+    List<Volume> findByProjectAndVolumeTypeCount(@Param("allProjectList") List<Project> allProjectList,
+            @Param("departmentId") Long departmentId, @Param("isActive") Boolean isActive,
+            @Param("volumeType") List<VolumeType> volumeType);
 }

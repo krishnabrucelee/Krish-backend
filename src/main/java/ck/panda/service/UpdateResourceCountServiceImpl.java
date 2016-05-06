@@ -27,6 +27,7 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
     @Autowired
     private ConvertEntityService convertEntityService;
 
+    /** Reference of the ipaddress entity service. */
     @Autowired
     private IpaddressService ipaddressService;
 

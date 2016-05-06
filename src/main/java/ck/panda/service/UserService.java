@@ -3,8 +3,6 @@ package ck.panda.service;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.repository.query.Param;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.Status;
@@ -24,6 +22,16 @@ public interface UserService extends CRUDService<User> {
      * @throws Exception error occurs
      */
     User save(User user, Long id) throws Exception;
+
+    /**
+     * To get list of user.
+     *
+     * @param pagingAndSorting parameters
+     * @param id of the login user
+     * @return user list with pagination
+     * @throws Exception unhandled errors
+     */
+    Page<User> findAllByActive(PagingAndSorting pagingAndSorting, Long id) throws Exception;
 
     /**
      * To get list of users from cloudstack server.

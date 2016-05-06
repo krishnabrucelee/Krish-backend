@@ -1,6 +1,3 @@
-/**
- *
- */
 package ck.panda.web.resource;
 
 import java.util.ArrayList;
