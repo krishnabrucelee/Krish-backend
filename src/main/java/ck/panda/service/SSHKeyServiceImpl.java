@@ -267,8 +267,31 @@ public class SSHKeyServiceImpl implements SSHKeyService {
                 .getDomainId()), true, pagingAndSorting.toPageRequest());
             return allSSHKeyList;
         }
-        return sshkeyRepo.findAllByDepartmentIsActive((convertEntity.getOwnerById(id).getDepartmentId()), true,
-            pagingAndSorting.toPageRequest());
+        Page<SSHKey> sshKey = this.getSSHKeyListByUser(pagingAndSorting, id);
+        return sshKey;
+    }
+
+    /**
+     * Get the SSH Key list based on the active status.
+     *
+     * @param pagingAndSorting do pagination with sorting for ssh key.
+     * @param id of the login user.
+     * @return ssh key
+     * @throws Exception exception
+     */
+    private Page<SSHKey> getSSHKeyListByUser(PagingAndSorting pagingAndSorting, Long id) throws  Exception {
+        User user = convertEntity.getOwnerById(id);
+        if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
+            List<Project> allProjectList = new ArrayList<Project>();
+            for (Project project : projectService.findAllByUserAndIsActive(user.getId(), true)) {
+                allProjectList.add(project);
+            }
+            Page<SSHKey> projectSSHKey = sshkeyRepo.findByProjectDepartmentAndIsActive(allProjectList,
+                    user.getDepartmentId(), true, pagingAndSorting.toPageRequest());
+            return projectSSHKey;
+        } else {
+            return sshkeyRepo.findAllByDepartmentIsActive(user.getDepartmentId(), true, pagingAndSorting.toPageRequest());
+        }
     }
 
     @Override
@@ -424,16 +447,24 @@ public class SSHKeyServiceImpl implements SSHKeyService {
 
     @Override
     public Page<SSHKey> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText, Long userId) throws Exception {
+        Page<SSHKey> sshKeys = null;
         User user = convertEntity.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
         if (convertEntity.getOwnerById(user.getId()).getType().equals(User.UserType.ROOT_ADMIN)) {
-            return sshkeyRepo.findDomainBySearchText(domainId, pagingAndSorting.toPageRequest(), searchText, true);
+            sshKeys = sshkeyRepo.findDomainBySearchText(domainId, pagingAndSorting.toPageRequest(), searchText, true);
         } else if ((convertEntity.getOwnerById(user.getId()).getType()).equals(User.UserType.DOMAIN_ADMIN)) {
-            Page<SSHKey> allSSHKeyList = sshkeyRepo.findDomainBySearchText((convertEntity.getOwnerById(user.getId())
+            sshKeys = sshkeyRepo.findDomainBySearchText((convertEntity.getOwnerById(user.getId())
                     .getDomainId()), pagingAndSorting.toPageRequest(), searchText, true);
-            return allSSHKeyList;
-        }
-        return sshkeyRepo.findAllByDepartmentIsActiveAndSearchText((convertEntity.getOwnerById(user.getId()).getDomainId()), (convertEntity.getOwnerById(user.getId()).getDepartmentId()),
-                pagingAndSorting.toPageRequest(), searchText, true);
+        } else if (convertEntity.getOwnerById(user.getId()).getType().equals(User.UserType.USER)) {
+            if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
+                List<Project> allProjectList = projectService.findAllByUserAndIsActive(user.getId(), true);
+                Page<SSHKey> projectSSHKey = sshkeyRepo.findByProjectDepartmentAndIsActiveAndSearchText(allProjectList, user.getDepartmentId(),true, pagingAndSorting.toPageRequest(),searchText,user.getDomainId());
+                sshKeys = projectSSHKey;
+            } else {
+                sshKeys = sshkeyRepo.findAllByDepartmentIsActiveAndSearchText((convertEntity.getOwnerById(user.getId()).getDomainId()), (convertEntity.getOwnerById(user.getId()).getDepartmentId()),
+                     pagingAndSorting.toPageRequest(), searchText, true);
+            }
+         }
+        return sshKeys;
     }
 
 }
