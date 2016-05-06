@@ -9,12 +9,10 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-
 import ck.panda.service.ThemeSettingService;
 
 /**
@@ -25,8 +23,18 @@ import ck.panda.service.ThemeSettingService;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class SimpleCORSFilter implements Filter {
 
-    @Autowired
-    private ThemeSettingService themeSettingService;
+    /** Constant for socket. */
+    public static final String SOCKET = "socket";
+
+    /** Constant for panda. */
+    public static final String PANDA = "panda";
+
+    /** Constant for resources. */
+    public static final String RESOURCES = "resources";
+
+    /** Constant for OPTIONS. */
+    public static final String OPTIONS = "OPTIONS";
+
     /**
      * Overriden method.
      */
@@ -42,13 +50,11 @@ public class SimpleCORSFilter implements Filter {
         response.setHeader("Access-Control-Allow-Headers",
                 "Origin, Range, x-requested-with, x-auth-token, x-auth-username, x-auth-password, x-auth-remember, x-auth-login-token, x-auth-user-id, x-auth-login-time, Content-Type, Accept, x-force-login");
         response.setHeader("Access-Control-Expose-Headers", "Rage, Content-Range");
-        if (request.getRequestURI().contains("socket")) {
-
+        if (request.getRequestURI().contains(SOCKET)) {
         }
-        System.out.println(request.getHeader("x-requested-with"));
-        if (request.getRequestURI().contains("panda")) {
+        if (request.getRequestURI().contains(PANDA)) {
         }
-        if (request.getRequestURI().contains("resources")) {
+        if (request.getRequestURI().contains(RESOURCES)) {
         }
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);
