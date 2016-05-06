@@ -102,10 +102,24 @@ public class Network implements Serializable {
     @Column(name = "networkoffering_id")
     private Long networkOfferingId;
 
+    /** Zone Object for the Network. */
+    @JoinColumn(name = "vpc_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private VPC vpc;
+
+    /** id for the Zone. */
+    @Column(name = "vpc_id")
+    private Long vpcId;
+
     /** Type of the Network. */
     @Column(name = "network_type")
     @Enumerated(EnumType.STRING)
     private NetworkType networkType;
+
+    /** Type of the Network creation. */
+    @Column(name = "network_creation_type")
+    @Enumerated(EnumType.STRING)
+    private NetworkCreationType networkCreationType;
 
     /** CIDR Range of the IP address. */
     @Column(name = "cidr")
@@ -204,6 +218,15 @@ public class Network implements Serializable {
         Isolated,
         /** Network type be Shared. */
         Shared
+    }
+
+    /** Enum type for Network Type. */
+    public enum NetworkCreationType {
+
+        /** Network type is Vpc. */
+        VPC,
+        /** Network type is Advanced Network. */
+        ADVANCED_NETWORK
     }
 
     /** Enum type for Network Status. */
@@ -874,6 +897,60 @@ public class Network implements Serializable {
      */
     public void setNetworkRestart(Boolean networkRestart) {
         this.networkRestart = networkRestart;
+    }
+
+    /**
+     * Get vpc for network.
+     *
+     * @return the vpc
+     */
+    public VPC getVpc() {
+        return vpc;
+    }
+
+    /**
+     * Set Vpc for network.
+     *
+     * @param vpc the vpc to set
+     */
+    public void setVpc(VPC vpc) {
+        this.vpc = vpc;
+    }
+
+    /**
+     * Get Vpc id of the network.
+     *
+     * @return the vpcId
+     */
+    public Long getVpcId() {
+        return vpcId;
+    }
+
+    /**
+     * Set Vpc id of the network.
+     *
+     * @param vpcId the vpcId to set
+     */
+    public void setVpcId(Long vpcId) {
+        this.vpcId = vpcId;
+    }
+
+    /**
+     * Get the network creation type.
+     *
+     * @return the networkCreationType
+     */
+    public NetworkCreationType getNetworkCreationType() {
+        return networkCreationType;
+    }
+
+    /**
+     * Set the network creation type.
+     *
+     * @param networkCreationType to set
+     */
+    public void setNetworkCreationType(NetworkCreationType networkCreationType) {
+        this.networkCreationType = networkCreationType;
     }
 
     /**

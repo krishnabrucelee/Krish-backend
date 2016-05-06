@@ -206,6 +206,15 @@ public class IpAddress implements Serializable {
     @Transient
     private String transZoneId;
 
+    /** Zone Object for the Network. */
+    @JoinColumn(name = "vpc_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private VPC vpc;
+
+    /** id for the Zone. */
+    @Column(name = "vpc_id")
+    private Long vpcId;
+
     /**
      * Enumeration state for ipaddress.
      */
@@ -892,6 +901,42 @@ public class IpAddress implements Serializable {
      */
     public void setIsStaticnat(Boolean isStaticnat) {
         this.isStaticnat = isStaticnat;
+    }
+
+    /**
+     * Get vpc for network.
+     *
+     * @return the vpc
+     */
+    public VPC getVpc() {
+        return vpc;
+    }
+
+    /**
+     * Set Vpc for network.
+     *
+     * @param vpc the vpc to set
+     */
+    public void setVpc(VPC vpc) {
+        this.vpc = vpc;
+    }
+
+    /**
+     * Get Vpc id of the network.
+     *
+     * @return the vpcId
+     */
+    public Long getVpcId() {
+        return vpcId;
+    }
+
+    /**
+     * Set Vpc id of the network.
+     *
+     * @param vpcId the vpcId to set
+     */
+    public void setVpcId(Long vpcId) {
+        this.vpcId = vpcId;
     }
 
     /**
