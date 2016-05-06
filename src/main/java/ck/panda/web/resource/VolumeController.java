@@ -1,6 +1,3 @@
-/**
- *
- */
 package ck.panda.web.resource;
 
 import java.util.ArrayList;
@@ -300,6 +297,7 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
      *
      * @param sortBy asc/desc
      * @param domainId domain id of volume.
+     * @param searchText search text.
      * @param range pagination range.
      * @param limit per page limit.
      * @param request page request.
@@ -307,15 +305,15 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
      * @return volume list.
      * @throws Exception unhandled exception.
      */
-    @RequestMapping(value = "/listByDomain", method = RequestMethod.GET, produces = {
+    @RequestMapping(value = "/listByFilter", method = RequestMethod.GET, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<Volume> listVolumeByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
+    public List<Volume> listVolumeByDomainId(@RequestParam String sortBy, @RequestParam Long domainId, @RequestParam String searchText,
             @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Volume.class);
-        Page<Volume> pageResponse = volumeService.findAllByDomainId(domainId, page);
+        Page<Volume> pageResponse = volumeService.findAllByDomainAndSearchText(domainId, searchText, page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
@@ -324,14 +322,15 @@ public class VolumeController extends CRUDController<Volume> implements ApiContr
      * Get the domain based volume counts for attached, detached and total count.
      *
      * @param domainId domain id of the volume
+     * @param searchText search text.
      * @return attached/detached count
      * @throws Exception error
      */
     @RequestMapping(value = "volumeCountsByDomain", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public String getVolumeCountsByDomain(@RequestParam("domainId") Long domainId) throws Exception {
-        Integer attachedCount = volumeService.findAttachedCountByDomain(domainId);
+    public String getVolumeCountsByDomain(@RequestParam("domainId") Long domainId, @RequestParam String searchText) throws Exception {
+        Integer attachedCount = volumeService.findAttachedCountByDomain(domainId, searchText);
         return "{\"attachedCount\":" + attachedCount + "}";
     }
 

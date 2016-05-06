@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.SSHKey;
 
 /**
@@ -33,7 +34,7 @@ public interface SSHKeyRepository extends PagingAndSortingRepository<SSHKey, Lon
      * @param isActive get the SSH Key list based on active/inactive status
      * @return list of SSH Keys
      */
-    @Query(value = "SELECT ssh FROM SSHKey ssh WHERE ssh.isActive =:isActive")
+    @Query(value = "SELECT ssh FROM SSHKey ssh LEFT JOIN ssh.project WHERE ssh.isActive =:isActive")
     Page<SSHKey> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
 
     /**
@@ -42,7 +43,7 @@ public interface SSHKeyRepository extends PagingAndSortingRepository<SSHKey, Lon
      * @param isActive get the SSH Key list based on active/inactive status
      * @return list of SSH Keys
      */
-    @Query(value = "SELECT ssh FROM SSHKey ssh WHERE ssh.isActive =:isActive")
+    @Query(value = "SELECT ssh FROM SSHKey ssh  WHERE ssh.isActive =:isActive")
     List<SSHKey> findAllByIsActive(@Param("isActive") Boolean isActive);
 
     /**
@@ -52,7 +53,7 @@ public interface SSHKeyRepository extends PagingAndSortingRepository<SSHKey, Lon
      * @param pageable to get the list with pagination
      * @return list of SSH Keys
      */
-    @Query(value = "SELECT ssh FROM SSHKey ssh WHERE ssh.departmentId=:departmentId")
+    @Query(value = "SELECT ssh FROM SSHKey ssh LEFT JOIN ssh.project WHERE ssh.departmentId=:departmentId")
     Page<SSHKey> findAllByDepartment(@Param("departmentId") Long departmentId, Pageable pageable);
 
     /**
@@ -63,7 +64,7 @@ public interface SSHKeyRepository extends PagingAndSortingRepository<SSHKey, Lon
      * @param pageable to get the list with pagination
      * @return list of SSH Keys
      */
-    @Query(value = "SELECT ssh FROM SSHKey ssh WHERE ssh.departmentId=:departmentId AND ssh.isActive =:isActive")
+    @Query(value = "SELECT ssh FROM SSHKey ssh LEFT JOIN ssh.project WHERE ssh.departmentId=:departmentId AND ssh.projectId  = NULL AND ssh.isActive =:isActive")
     Page<SSHKey> findAllByDepartmentIsActive(@Param("departmentId") Long departmentId,
             @Param("isActive") Boolean isActive, Pageable pageable);
 
@@ -74,7 +75,7 @@ public interface SSHKeyRepository extends PagingAndSortingRepository<SSHKey, Lon
      * @param isActive get the SSH Key list based on active/inactive status
      * @return list of SSH Keys
      */
-    @Query(value = "SELECT ssh FROM SSHKey ssh WHERE ssh.departmentId=:departmentId AND ssh.isActive =:isActive AND ssh.projectId = NULL")
+    @Query(value = "SELECT ssh FROM SSHKey ssh  WHERE ssh.departmentId=:departmentId AND ssh.isActive =:isActive AND ssh.projectId = NULL")
     List<SSHKey> findByDepartmentAndIsActive(@Param("departmentId") Long departmentId,
             @Param("isActive") Boolean isActive);
 
@@ -97,7 +98,7 @@ public interface SSHKeyRepository extends PagingAndSortingRepository<SSHKey, Lon
      * @param pageable to get the list with pagination
      * @return list of SSH Keys
      */
-    @Query(value = "SELECT ssh FROM SSHKey ssh WHERE ssh.domainId=:domainId AND ssh.isActive =:isActive")
+    @Query(value = "SELECT ssh FROM SSHKey ssh LEFT JOIN ssh.project WHERE ssh.domainId=:domainId AND ssh.isActive =:isActive")
     Page<SSHKey> findAllByDomainIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive,
         Pageable pageable);
 
@@ -130,6 +131,69 @@ public interface SSHKeyRepository extends PagingAndSortingRepository<SSHKey, Lon
      * @param pageable to get the list with pagination
      * @return list of SSH Keys
      */
-    @Query(value = "SELECT ssh FROM SSHKey ssh WHERE ssh.domainId =:domainId AND ssh.isActive =:isActive")
+    @Query(value = "SELECT ssh FROM SSHKey ssh LEFT JOIN ssh.project WHERE ssh.domainId =:domainId AND ssh.isActive =:isActive")
     Page<SSHKey> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, Pageable pageable);
+
+    /**
+     * Find all the domain based active or inactive SSH Keys with pagination.
+     *
+     * @param domainId domain id of the SSH Key
+     * @param search search text.
+     * @param isActive get the SSH Keys list based on active/inactive status
+     * @param pageable to get the list with pagination
+     * @return list of SSH Keys
+     */
+    @Query(value = "SELECT ssh FROM SSHKey ssh LEFT JOIN ssh.project WHERE (ssh.domainId=:domainId OR 0 = :domainId) AND ssh.isActive = :isActive AND (ssh.name LIKE %:search% OR ssh.department.userName LIKE %:search% OR ssh.department.domain.name LIKE %:search% OR ssh.project.name LIKE %:search%)")
+    Page<SSHKey> findDomainBySearchText(@Param("domainId") Long domainId, Pageable pageable, @Param("search") String search, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find all the domain based active or inactive SSH Keys with pagination.
+     *
+     * @param domainId domain id of the SSH Key
+     * @param departmentId department id of the SSH Key
+     * @param search search text.
+     * @param isActive get the SSH Keys list based on active/inactive status
+     * @param pageable to get the list with pagination
+     * @return list of SSH Keys
+     */
+    @Query(value = "SELECT ssh FROM SSHKey ssh LEFT JOIN ssh.project WHERE (ssh.domainId=:domainId OR 0 = :domainId) AND ssh.departmentId = :departmentId AND ssh.projectId  = NULL AND ssh.isActive = :isActive AND (ssh.name LIKE %:search% OR ssh.department.userName LIKE %:search% OR ssh.department.domain.name LIKE %:search% OR ssh.project.name LIKE %:search%)")
+    Page<SSHKey> findAllByDepartmentIsActiveAndSearchText(@Param("domainId") Long domainId, @Param("departmentId") Long departmentId, Pageable pageable, @Param("search") String search, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find all SSHkeys by project and department with pagination.
+     *
+     * @param domainId domain id of the SSH Key
+     * @param allProjectList project list.
+     * @param departmentId of the SSH key.
+     * @param search search text.
+     * @param isActive status of the SSH key.
+     * @param pageable to get the list with pagination.
+     * @return list of SSH Keys.
+     */
+    @Query(value = "SELECT ssh FROM SSHKey ssh LEFT JOIN ssh.project WHERE (ssh.domainId=:domainId OR 0 = :domainId) AND (ssh.project in :allProjectList OR ssh.departmentId=:departmentId ) AND ssh.isActive =:isActive AND (ssh.name LIKE %:search% OR ssh.department.userName LIKE %:search% OR ssh.department.domain.name LIKE %:search% OR ssh.project.name LIKE %:search%)")
+    Page<SSHKey> findByProjectDepartmentAndIsActiveAndSearchText(@Param("allProjectList") List<Project> allProjectList, @Param("departmentId") Long departmentId,
+            @Param("isActive") Boolean isActive, Pageable pageable, @Param("search") String search, @Param("domainId") Long domainId);
+
+    /**
+     * Find all SSHkeys by project and department with pagination.
+     *
+     * @param allProjectList project list.
+     * @param departmentId of the SSH key.
+     * @param isActive status of the SSH key.
+     * @param pageable to get the list with pagination.
+     * @return list of SSH Keys.
+     */
+    @Query(value = "SELECT ssh FROM SSHKey ssh LEFT JOIN ssh.project WHERE (ssh.project in :allProjectList OR ssh.departmentId=:departmentId ) AND ssh.isActive =:isActive")
+    Page<SSHKey> findByProjectDepartmentAndIsActive(@Param("allProjectList") List<Project> allProjectList, @Param("departmentId") Long departmentId, @Param("isActive") Boolean isActive, Pageable pageable);
+
+    /**
+     * Find all SSHkeys by project and department with pagination.
+     *
+     * @param allProjectList project list.
+     * @param departmentId of the SSH key.
+     * @param isActive status of the SSH key.
+     * @return list of SSH keys.
+     */
+    @Query(value = "SELECT ssh FROM SSHKey ssh LEFT JOIN ssh.project WHERE (ssh.project in :allProjectList OR ssh.departmentId=:departmentId ) AND ssh.isActive =:isActive")
+    List<SSHKey> findAByProjectDepartmentAndIsActiveWithoutPaging(@Param("allProjectList") List<Project> allProjectList, @Param("departmentId") Long departmentId, @Param("isActive") Boolean isActive);
 }

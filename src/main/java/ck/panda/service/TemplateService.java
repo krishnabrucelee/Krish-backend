@@ -6,6 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.Template;
+import ck.panda.domain.entity.Template.Status;
+import ck.panda.domain.entity.Template.TemplateType;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
@@ -108,7 +110,7 @@ public interface TemplateService extends CRUDService<Template> {
      * @param shared template
      * @return type of the template
      */
-    Page<Template> findAllByType(PagingAndSorting pagingAndSorting, String type, Boolean featured, Boolean shared);
+    Page<Template> findAllByType(PagingAndSorting pagingAndSorting, String type, Boolean featured, Boolean shared,Long userId)throws Exception;
 
     /**
      * To save the created template based on user id.
@@ -149,4 +151,29 @@ public interface TemplateService extends CRUDService<Template> {
      * @throws Exception if error occurs.
      */
     List<Template> findAllTemplatesByIsActiveAndType(Boolean isActive) throws Exception;
+    
+    /**
+     * Find all by domain id, is active and share
+     * 
+     * @param type template type.
+     * @param status template status.
+     * @param isActive true/false.
+     * @param userId user id.
+     * @return template list.
+     * @throws Exception if errors.
+     */
+    List<Template> findAllByUserIdIsActiveAndShare(TemplateType type, Status status, Boolean isActive, Long userId) throws Exception;    
+
+    /**
+     * Find all the templates by type, isActive status and user Id.
+     *
+     * @param type of the template.
+     * @param featured type of the template.
+     * @param shared type of the template.
+     * @param userId of the template.
+     * @return templates.
+     * @throws Exception if error occurs.
+     */
+	List<Template> findAllTemplateByType(String type, Boolean featured, Boolean shared,Long userId) throws Exception;
 }
+	

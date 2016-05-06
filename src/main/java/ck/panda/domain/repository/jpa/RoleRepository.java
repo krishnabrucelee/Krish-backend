@@ -98,10 +98,12 @@ public interface RoleRepository extends PagingAndSortingRepository<Role, Long> {
      *
      * @param domainId domain id of the role.
      * @param isActive get the role list based on active/inactive status.
+     * @param searchText search text.
      * @param pageable pagination information.
      * @return list of role.
      */
-    @Query(value = "SELECT role FROM Role AS role WHERE role.domainId = :domainId AND role.isActive = :isActive AND role.name != 'FULL_PERMISSION'")
-    Page<Role> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, Pageable pageable);
+    @Query(value = "SELECT role FROM Role AS role WHERE (role.domainId = :domainId OR 0 = :domainId) AND (role.name LIKE %:search% OR role.department.userName LIKE %:search% OR role.domain.name LIKE %:search%"
+            + " OR role.description LIKE %:search%) AND role.isActive = :isActive AND role.name != 'FULL_PERMISSION'")
+    Page<Role> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, @Param("search") String searchText, Pageable pageable);
 
 }

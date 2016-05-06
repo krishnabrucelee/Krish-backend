@@ -16,6 +16,7 @@ import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
+import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.Network.Status;
 import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
@@ -62,6 +63,9 @@ public class NetworkServiceImpl implements NetworkService {
 
     /** Constant for cloudstack response restart. */
     private static final String CS_RESTART_NETWORK_RESPONSE = "restartnetworkresponse";
+
+    /** Update quota constants. */
+    public static final String  CS_Network = "Network", CS_IP = "IP", Update = "update", Delete = "delete", CS_Project = "Project", CS_Department = "Department";
 
     /** Constant for clean up. */
     private static final String CS_CLEAN_UP = "cleanup";
@@ -178,21 +182,23 @@ public class NetworkServiceImpl implements NetworkService {
                 // check department and project quota validation.
                 ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
                         .findByDepartmentAndResourceType(network.getDepartmentId(), ResourceType.Instance, true);
+                ResourceLimitProject projectLimit = resourceLimitProjectService
+                        .findByProjectAndResourceType(network.getProjectId(), ResourceLimitProject.ResourceType.Instance, true);
                 if (departmentLimit != null && convertEntityService.getDepartmentById(network.getDepartmentId()).getType()
                         .equals(AccountType.USER)) {
                     if (network.getProjectId() != null) {
-//                        syncService
-//                                .syncResourceLimitProject(convertEntityService.getProjectById(network.getProjectId()));
-                        quotaLimitValidation.QuotaLimitCheckByResourceObject(network, NETWORK,
+                    	if (projectLimit != null) {
+                    		quotaLimitValidation.QuotaLimitCheckByResourceObject(network, NETWORK,
                                 network.getProjectId(), "Project");
+                    	} else {
+                    		errors.addGlobalError(
+                                    "Resource limit for project has not been set. Please update project quota");
+                            throw new ApplicationException(errors);
+                    	}
                     } else {
                         quotaLimitValidation.QuotaLimitCheckByResourceObject(network, NETWORK,
                                 network.getDepartmentId(), "Department");
                     }
-                   /* if (network.getDomainId() != null) {
-                        quotaLimitValidation.QuotaLimitCheckByResourceObject(network, NETWORK,
-                                network.getDomainId(), "Domain");
-                    }*/
                     try {
                         config.setUserServer();
                         Zone zoneObject = convertEntityService.getZoneById(network.getZoneId());
@@ -239,17 +245,12 @@ public class NetworkServiceImpl implements NetworkService {
                         LOGGER.error("ERROR AT NETWORK CREATION", e);
                         throw new ApplicationException(e.getErrors());
                     }
-                    if (!convertEntityService.getDepartmentById(network.getDepartmentId()).getType().equals(AccountType.USER)) {
-                        updateResourceCountService.QuotaUpdateByResourceObject(network, NETWORK, network.getDomainId(),
-                                "Domain", "update");
-                    } else {
-                        if (network.getProjectId() != null) {
-                            updateResourceCountService.QuotaUpdateByResourceObject(network, NETWORK, network.getProjectId(),
+                    if (network.getProjectId() != null) {
+                    	updateResourceCountService.QuotaUpdateByResourceObject(network, NETWORK, network.getProjectId(),
                                     "Project", "update");
-                        } else {
-                            updateResourceCountService.QuotaUpdateByResourceObject(network, NETWORK,
+                    } else {
+                    	updateResourceCountService.QuotaUpdateByResourceObject(network, NETWORK,
                                     network.getDepartmentId(), "Department", "update");
-                        }
                     }
                     return networkRepo.save(network);
 
@@ -342,49 +343,58 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     @PreAuthorize("hasPermission(#network.getSyncFlag(), 'DELETE_NETWORK')")
-    public Network softDelete(Network network) throws Exception {
-        network.setIsActive(false);
-            if (network.getSyncFlag()) {
-                List<VmInstance> vmResponse = vmService.findAllByNetworkAndVmStatus(network.getId(),
-                        VmInstance.Status.EXPUNGING);
-                List<Nic> nicResponse = nicService.findAllByNetworkAndIsActive(network.getId(), true);
-                if (vmResponse.size() != 0 || nicResponse.size() != 0) {
-                    throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,"Network is associated with Vm instances. You cannot delete this network");
-                  }
+	public Network softDelete(Network network) throws Exception {
+		network.setIsActive(false);
+		if (network.getSyncFlag()) {
+			List<VmInstance> vmResponse = vmService.findAllByNetworkAndVmStatus(network.getId(),
+					VmInstance.Status.EXPUNGING);
+			List<Nic> nicResponse = nicService.findAllByNetworkAndIsActive(network.getId(), true);
+			if (vmResponse.size() != 0 || nicResponse.size() != 0) {
+				throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
+						"Network is associated with Vm instances. You cannot delete this network");
+			}
+			Errors errors = validator.rejectIfNullEntity(NETWORK, network);
+			errors = validator.validateEntity(network, errors);
+			if (errors.hasErrors()) {
+				throw new ApplicationException(errors);
+			}
+			// check department and project quota validation.
+			ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
+					.findByDepartmentAndResourceType(network.getDepartmentId(), ResourceType.Instance, true);
+			if (departmentLimit != null) {
+				if (network.getProjectId() != null) {
+					// syncService.syncResourceLimitProject(convertEntityService.getProjectById(network.getProjectId()));
+				}
+				network.setIsActive(false);
+				network.setStatus(Network.Status.DESTROY);
+				if (network.getSyncFlag()) {
+					/*if (network.getProjectId() != null) {
+						quotaLimitValidation.QuotaLimitCheckByResourceObject(
+								convertEntityService.getNetworkById(network.getId()), "IP",
+								convertEntityService.getNetworkById(network.getId()).getProjectId(), "Project");
 
-                Errors errors = validator.rejectIfNullEntity(NETWORK, network);
-                errors = validator.validateEntity(network, errors);
-                if (errors.hasErrors()) {
-                    throw new ApplicationException(errors);
-                }
-                // check department and project quota validation.
-               ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
-                       .findByDepartmentAndResourceType(network.getDepartmentId(), ResourceType.Instance, true);
-               if (departmentLimit != null) {
-                   if (network.getProjectId() != null) {
-//                       syncService.syncResourceLimitProject(convertEntityService.getProjectById(network.getProjectId()));
-                   }
-               network.setIsActive(false);
-               network.setStatus(Network.Status.DESTROY);
-               if (network.getSyncFlag()) {
-                   config.setUserServer();
-                   String networkResponse = csNetwork.deleteNetwork(network.getUuid(), CloudStackConstants.JSON);
-                   JSONObject jobId = new JSONObject(networkResponse).getJSONObject(CS_DELETE_NETWORK_RESPONSE);
-                   if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
-                       String jobResponse = csNetwork.networkJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
-                               CloudStackConstants.JSON);
-                       JSONObject jobresult = new JSONObject(jobResponse)
-                               .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
-                       this.ipRelease(network);
-                   }
-               }
-           }
-               else {
-                   throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,"Resource limit for department has not been set. Please update department quota");
-               }
-            }
-        return networkRepo.save(network);
-    }
+					} else if (network.getDepartmentId() != null) {
+						quotaLimitValidation.QuotaLimitCheckByResourceObject(
+								convertEntityService.getNetworkById(network.getId()), "IP",
+								convertEntityService.getNetworkById(network.getId()).getDepartmentId(), "Department");
+					}*/
+					config.setUserServer();
+					String networkResponse = csNetwork.deleteNetwork(network.getUuid(), CloudStackConstants.JSON);
+					JSONObject jobId = new JSONObject(networkResponse).getJSONObject(CS_DELETE_NETWORK_RESPONSE);
+					if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
+						String jobResponse = csNetwork.networkJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
+								CloudStackConstants.JSON);
+						JSONObject jobresult = new JSONObject(jobResponse)
+								.getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+					}
+				}
+			} else {
+				throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
+						"Resource limit for department has not been set. Please update department quota");
+			}
+		}
+		return networkRepo.save(network);
+	}
 
     @Override
     public Network ipRelease(Network network) throws Exception {
@@ -402,6 +412,8 @@ public class NetworkServiceImpl implements NetworkService {
             IpAddress ipAddress = new IpAddress();
             ipAddress.setId(ip.getId());
             ipAddress.setState(State.FREE);
+            ipAddress.setIsStaticnat(false);
+            ipAddress.setIsSourcenat(false);
             ipAddress.setDepartmentId(ip.getDepartmentId());
             ipAddress.setZoneId(ip.getZoneId());
             ipAddress.setDisplay(ip.getDisplay());
@@ -412,7 +424,7 @@ public class NetworkServiceImpl implements NetworkService {
             ipAddress.setVlan(ip.getVlan());
             ipAddress.setCreatedBy(ip.getCreatedBy());
             ipAddress.setCreatedDateTime(ip.getCreatedDateTime());
-            ipService.update(ipAddress);
+            ipAddress = ipService.update(ipAddress);
         }
         return network;
     }
@@ -737,4 +749,50 @@ public class NetworkServiceImpl implements NetworkService {
     public Page<Network> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
         return networkRepo.findAllByDomainIdAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
     }
+
+    @Override
+    public List<Network> findAllByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception {
+        return networkRepo.findAllByDomainAndIsActive(domainId, isActive);
+    }
+
+
+    @Override
+    public List<Network> findAllByUserId(Long userId) throws Exception {
+       User user = convertEntityService.getOwnerById(userId);
+       // Check the user is not a root and admin and set the domain value from login detail
+       if (user.getType().equals(User.UserType.ROOT_ADMIN)) {
+           return networkRepo.findAllByIsActiveWihtoutPaging(true);
+       }
+       if (user.getType().equals(User.UserType.DOMAIN_ADMIN)) {
+           return networkRepo.findAllByDomainIsActive(true, user.getDomainId());
+       }
+       List<Network> network = this.getNetworkListByUserWihtoutPaging(userId);
+        return network;
+    }
+
+
+    /**
+     * Get the Network list based on the active status.
+     *
+     * @param pagingAndSorting do pagination with sorting for network.
+     * @param userId id of the user.
+     * @return network
+     * @throws Exception exception
+     */
+    private List<Network> getNetworkListByUserWihtoutPaging(Long userId) throws  Exception {
+        User user = convertEntityService.getOwnerById(userId);
+        if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
+            List<Project> allProjectList = projectService.findAllByUserAndIsActive(user.getId(), true);
+            List<Network> projectNetwork = networkRepo.findAByProjectDepartmentAndIsActiveWithoutPaging(allProjectList,
+                    user.getDepartmentId(), true);
+            return projectNetwork;
+        } else {
+            return networkRepo.findByDepartment(user.getDepartmentId(), true);
+        }
+    }
+
+	@Override
+	public List<Network> findAllByDomainId(Long domainId) throws Exception {
+		return networkRepo.findAllByDomainIsActive(true, domainId);
+	}
 }

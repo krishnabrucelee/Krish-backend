@@ -24,6 +24,14 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      */
     VmInstance findByUUID(String uuid);
 
+    /**
+     * Find vm instance by id with specified field.
+     *
+     * @param vmId instance id.
+     * @return instance.
+     */
+    VmInstance findVMByIDWithSpecifiedField(Long vmId);
+
    /**
     * Create new instance from panda.
     *
@@ -327,4 +335,22 @@ public interface VirtualMachineService extends CRUDService<VmInstance> {
      * @param status status of the instance.
      */
     void updateVmToStoppedByOwnerAndStatus(User user, Status status);
+
+    /**
+     * Update the affinity group for created instance.
+     *
+     * @param vminstance virtual machine.
+     * @return instance.
+     * @throws Exception if error occurs.
+     */
+    VmInstance affinityGroup(VmInstance vminstance) throws Exception;
+
+    /**
+     * Get instance list by affinity group id.
+     *
+     * @param id group id
+     * @return list of instances
+     * @throws Exception if error occurs.
+     */
+    List<VmInstance> findInstanceByGroup(Long id) throws Exception;
 }

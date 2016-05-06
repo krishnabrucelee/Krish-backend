@@ -27,6 +27,9 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 
@@ -38,6 +41,7 @@ import ck.panda.util.JsonUtil;
 @Table(name = "vm_instances")
 @EntityListeners(AuditingEntityListener.class)
 @SuppressWarnings("serial")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class VmInstance implements Serializable {
     /** Unique Id of the instance. */
     @Id
@@ -359,6 +363,10 @@ public class VmInstance implements Serializable {
     @Column(name = "ssh_key_id")
     private Long keypairId;
 
+    /** List of affinity group for an instance. */
+    @ManyToMany
+    private List<AffinityGroup> affinityGroupList;
+
     /** Version attribute to handle optimistic locking. */
     @Version
     @Column(name = "version")
@@ -387,6 +395,18 @@ public class VmInstance implements Serializable {
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
+
+    @Column(name = "instance_public_ipaddress")
+    private Long instancePublicIp;
+
+    @Column(name = "Instance_guest_ipaddress")
+    private Long instanceGuestIp;
+
+    @Column(name = "instance_username")
+    private String instanceUserName;
+
+    @Column(name = "instance_osType")
+    private String instanceOsType;
 
     /** Transient domain of the instance. */
     @Transient
@@ -736,6 +756,24 @@ public class VmInstance implements Serializable {
      */
     public void setKeypairId(Long keypairId) {
         this.keypairId = keypairId;
+    }
+
+    /**
+     * Get the affinity group list.
+     *
+     * @return the affinity group list.
+     */
+    public List<AffinityGroup> getAffinityGroupList() {
+        return affinityGroupList;
+    }
+
+    /**
+     * Set the affinity group list.
+     *
+     * @param affinityGroupList the affinity group list to set.
+     */
+    public void setAffinityGroupList(List<AffinityGroup> affinityGroupList) {
+        this.affinityGroupList = affinityGroupList;
     }
 
     /**
@@ -2045,7 +2083,63 @@ public class VmInstance implements Serializable {
         this.publicIpAddress = publicIpAddress;
     }
 
-    @Override
+    /**
+	 * @return the instancePublicIp
+	 */
+	public Long getInstancePublicIp() {
+		return instancePublicIp;
+	}
+
+	/**
+	 * @return the instanceGuestIp
+	 */
+	public Long getInstanceGuestIp() {
+		return instanceGuestIp;
+	}
+
+	/**
+	 * @return the instanceUserName
+	 */
+	public String getInstanceUserName() {
+		return instanceUserName;
+	}
+
+	/**
+	 * @return the instanceOsType
+	 */
+	public String getInstanceOsType() {
+		return instanceOsType;
+	}
+
+	/**
+	 * @param instancePublicIp the instancePublicIp to set
+	 */
+	public void setInstancePublicIp(Long instancePublicIp) {
+		this.instancePublicIp = instancePublicIp;
+	}
+
+	/**
+	 * @param instanceGuestIp the instanceGuestIp to set
+	 */
+	public void setInstanceGuestIp(Long instanceGuestIp) {
+		this.instanceGuestIp = instanceGuestIp;
+	}
+
+	/**
+	 * @param instanceUserName the instanceUserName to set
+	 */
+	public void setInstanceUserName(String instanceUserName) {
+		this.instanceUserName = instanceUserName;
+	}
+
+	/**
+	 * @param instanceOsType the instanceOsType to set
+	 */
+	public void setInstanceOsType(String instanceOsType) {
+		this.instanceOsType = instanceOsType;
+	}
+
+	@Override
     public String toString() {
         return "VmInstance [Id=" + id + ", name=" + name + ", uuid=" + uuid + ", vncPassword=" + vncPassword
                 + ", instanceOwner=" + instanceOwner + ", instanceOwnerId=" + instanceOwnerId + ", application="

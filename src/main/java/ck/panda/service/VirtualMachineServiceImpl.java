@@ -15,6 +15,7 @@ import ck.panda.domain.entity.Event;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
+import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
@@ -27,6 +28,7 @@ import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.CloudStackIsoService;
 import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.CloudStackServer;
+import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.EncryptionUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -61,6 +63,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     /** Constant for empty string search. */
     public static final String EMPTY_SEARCH_FILTER = "";
 
+    /** Cloud stack user key response. */
+    public static final String USER_KEYS = "userkeys";
+
     /** Validator attribute. */
     @Autowired
     private AppValidator validator;
@@ -80,6 +85,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     /** Volume service reference. */
     @Autowired
     private VolumeService volumeService;
+
+    /** User service reference. */
+    @Autowired
+    private UserService userService;
 
     /** Project service reference. */
     @Autowired
@@ -121,6 +130,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Autowired
     private ResourceLimitDepartmentService resourceLimitDepartmentService;
 
+    /** Resource Limit Project service reference. */
+    @Autowired
+    private ResourceLimitProjectService resourceLimitProjectService;
+
     /** Sync Service reference. */
     @Autowired
     private SyncService syncService;
@@ -128,6 +141,10 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     /** Nic service reference. */
     @Autowired
     private NicService nicService;
+
+    /** Cloud stack user service. */
+    @Autowired
+    private CloudStackUserService cloudStackUserService;
 
     @Override
     @PreAuthorize("hasPermission(#vmInstance.getSyncFlag(), 'CREATE_VM')")
@@ -146,8 +163,6 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
     @Override
     @PreAuthorize("hasPermission(#vmInstance.getSyncFlag(), 'CREATE_VM')")
     public VmInstance saveVmInstance(VmInstance vmInstance, Long userId) throws Exception {
-        // 1. Event record.
-        Event vmEvent = new Event();
         // 2. Entity validation.
         Errors errors = validator.rejectIfNullEntity(CloudStackConstants.ENTITY_VMINSTANCE, vmInstance);
         errors = validator.validateEntity(vmInstance, errors);
@@ -159,17 +174,28 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             HashMap<String, String> optionalMap = new HashMap<String, String>();
             optionalMap.put(CloudStackConstants.CS_ZONE_ID,
                     convertEntityService.getZoneById(vmInstance.getZoneId()).getUuid());
-
+            if (vmInstance.getNetworkUuid().contains(",")) {
+                String[] networkIds = vmInstance.getNetworkUuid().split(",");
+                vmInstance.setNetworkId(convertEntityService.getNetworkByUuid(networkIds[0]));
+            } else {
+                vmInstance.setNetworkId(convertEntityService.getNetworkByUuid(vmInstance.getNetworkUuid()));
+            }
             // check department and project quota validation.
             ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService.findByDepartmentAndResourceType(
                     vmInstance.getDepartmentId(), ResourceType.valueOf("Instance"), true);
+            ResourceLimitProject projectLimit = resourceLimitProjectService
+                    .findByProjectAndResourceType(vmInstance.getProjectId(), ResourceLimitProject.ResourceType.Instance, true);
             if (departmentLimit != null && convertEntityService.getDepartmentById(vmInstance.getDepartmentId())
                     .getType().equals(AccountType.USER)) {
                 if (vmInstance.getProjectId() != null) {
-//                    syncService
-//                            .syncResourceLimitProject(convertEntityService.getProjectById(vmInstance.getProjectId()));
-                    quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
-                            vmInstance.getProjectId(), "Project");
+                    if (projectLimit != null) {
+                        quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
+                                vmInstance.getProjectId(), "Project");
+                    } else {
+                        errors.addGlobalError(
+                                "Resource limit for project has not been set. Please update project quota");
+                        throw new ApplicationException(errors);
+                    }
                 } else {
                     quotaLimitValidation.QuotaLimitCheckByResourceObject(vmInstance, "Instance",
                             vmInstance.getDepartmentId(), "Department");
@@ -183,13 +209,9 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     // 4. set optionalMap arguments for deploy vm API call.
                     optionalMap.clear();
                     vmInstance.setDisplayName(vmInstance.getName());
+                    vmInstance.setInstanceUserName(userService.find(vmInstance.getInstanceOwnerId()).getUserName());
+                    vmInstance.setInstanceOsType(convertEntityService.getTemplateById(vmInstance.getTemplateId()).getDisplayText());
                     optionalMap.put(CloudStackConstants.CS_NAME, vmInstance.getName());
-                    if (vmInstance.getNetworkUuid().contains(",")) {
-                        String[] networkIds = vmInstance.getNetworkUuid().split(",");
-                        vmInstance.setNetworkId(convertEntityService.getNetworkByUuid(networkIds[0]));
-                    } else {
-                        vmInstance.setNetworkId(convertEntityService.getNetworkByUuid(vmInstance.getNetworkUuid()));
-                    }
                     optionalMap.put(CloudStackConstants.CS_NETWORK_IDS, vmInstance.getNetworkUuid());
                     optionalMap.put(CloudStackConstants.CS_DISPLAY_VM, CloudStackConstants.CS_ACTIVE_VM);
                     optionalMap.put(CloudStackConstants.CS_KEYBOARD_TYPE, CloudStackConstants.KEYBOARD_VALUE);
@@ -1142,7 +1164,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                     }
                 }
                 // 2.2 update vm entity by transient variable.
-
+                vmInstance.setInstanceGuestIp(ipToLong(vmInstance.getIpAddress()));
                 vmInstance.setDomainId(convertEntityService.getDomainId(vmInstance.getTransDomainId()));
                 vmInstance.setZoneId(convertEntityService.getZoneId(vmInstance.getTransZoneId()));
                 vmInstance.setNetworkId(convertEntityService.getNetworkId(vmInstance.getTransNetworkId()));
@@ -1162,6 +1184,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 vmInstance.setHostId(convertEntityService.getHostId(vmInstance.getTransHostId()));
                 vmInstance.setInstanceOwnerId(convertEntityService.getOwnerByUuid(vmInstance.getTransOwnerId()));
                 vmInstance.setTemplateId(convertEntityService.getTemplateId(vmInstance.getTransTemplateId()));
+                vmInstance.setInstanceOsType(convertEntityService.getTemplateById(convertEntityService.getTemplateId(vmInstance.getTransTemplateId())).getDisplayText());
                 vmInstance.setComputeOfferingId(
                         convertEntityService.getComputeOfferId(vmInstance.getTransComputeOfferingId()));
                 if (vmInstance.getHostId() != null) {
@@ -1170,6 +1193,7 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                 }
                 if (vmInstance.getTemplateId() != null) {
                     vmInstance.setOsType(convertEntityService.getTemplateById(vmInstance.getTemplateId()).getDisplayText());
+                    vmInstance.setInstanceOsType(convertEntityService.getTemplateById(vmInstance.getTemplateId()).getDisplayText());
                 }
                 if (vmInstance.getTransKeypairName() != null) {
                     vmInstance.setKeypairId(convertEntityService.getSSHKeyByNameAndDepartment(vmInstance.getTransKeypairName(), vmInstance.getDepartmentId()).getId());
@@ -1486,4 +1510,121 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
             virtualmachinerepository.save(vm);
         }
     }
+
+    @Override
+    public VmInstance affinityGroup(VmInstance vmInstance) throws Exception {
+        Errors errors = validator.rejectIfNullEntity(CloudStackConstants.ENTITY_VMINSTANCE, vmInstance);
+        errors = validator.validateEntity(vmInstance, errors);
+        HashMap<String, String> optionalMap = new HashMap<String, String>();
+        String affinityGroupIds = "";
+        for (int j = 0; j < vmInstance.getAffinityGroupList().size(); j++) {
+            if (j == vmInstance.getAffinityGroupList().size() - 1) {
+                affinityGroupIds = affinityGroupIds + vmInstance.getAffinityGroupList().get(j).getUuid();
+            } else {
+                affinityGroupIds = affinityGroupIds + vmInstance.getAffinityGroupList().get(j).getUuid() + ",";
+            }
+        }
+        if (vmInstance.getAffinityGroupList().size() != 0) {
+            optionalMap.put(CloudStackConstants.CS_AFFINITY_GROUP_IDS, affinityGroupIds);
+        } else {
+            optionalMap.put(CloudStackConstants.CS_AFFINITY_GROUP_IDS, "");
+        }
+        User user = convertEntityService.getOwnerById(vmInstance.getInstanceOwnerId());
+        if (user == null || !apiSecretKeyGeneration(user)) {
+            config.setUserServer();
+        }
+        String affinityGroupResponse = cloudStackInstanceService.updateVMAffinityGroup(vmInstance.getUuid(),
+            CloudStackConstants.JSON, optionalMap);
+        JSONObject jobId = new JSONObject(affinityGroupResponse).getJSONObject(CloudStackConstants.CS_UPDATE_VM_RESPONSE);
+        if (jobId.has(CloudStackConstants.CS_ERROR_CODE)) {
+            errors = this.validateEvent(errors, jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
+            throw new ApplicationException(errors);
+        } else {
+            String jobState = jobStatus(jobId, vmInstance);
+            if (jobState.equals(GenericConstants.ERROR_JOB_STATUS)) {
+                errors = this.validateEvent(errors, jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
+                throw new ApplicationException(errors);
+            } else {
+                virtualmachinerepository.save(convertEncryptPassword(vmInstance));
+            }
+        }
+        return vmInstance;
+    }
+
+    @Override
+    public List<VmInstance> findInstanceByGroup(Long id) throws Exception {
+        List<VmInstance> allInstance = new ArrayList<VmInstance>();
+        for (VmInstance instance : virtualmachinerepository.findAll()) {
+            for (int i = 0; i < instance.getAffinityGroupList().size(); i++) {
+                if (instance.getAffinityGroupList().get(i).getId() == id) {
+                    allInstance.add(instance);
+                }
+            }
+        }
+        return allInstance;
+    }
+
+    /**
+     * Get the API and Secret key for a user.
+     *
+     * @param user to set
+     * @return API and Secret key status true/false
+     * @throws Exception unhandled exceptions.
+     */
+    private Boolean apiSecretKeyGeneration(User user) throws Exception {
+        config.setServer(1L);
+        HashMap<String, String> optional = new HashMap<String, String>();
+        optional.put(CloudStackConstants.CS_ID, user.getUuid());
+        String listUserByIdResponse = cloudStackUserService.listUsers(optional, CloudStackConstants.JSON);
+        JSONObject listUsersResponse = new JSONObject(listUserByIdResponse)
+                .getJSONObject(CloudStackConstants.CS_LIST_USER_RESPONSE);
+        if (listUsersResponse.has(CloudStackConstants.CS_ERROR_CODE)) {
+            return false;
+        } else {
+            JSONArray userJsonobject = (JSONArray) listUsersResponse.get(CloudStackConstants.CS_USER);
+            if (userJsonobject.getJSONObject(0).has(CloudStackConstants.CS_API_KEY)) {
+                user.setApiKey(userJsonobject.getJSONObject(0).get(CloudStackConstants.CS_API_KEY).toString());
+                user.setSecretKey(userJsonobject.getJSONObject(0).get(CloudStackConstants.CS_SECRET_KEY).toString());
+                config.setInstanceUserServer(user.getSecretKey(), user.getApiKey());
+                return true;
+            } else {
+                String keyValueResponse = cloudStackUserService.registerUserKeys(user.getUuid(),
+                        CloudStackConstants.JSON);
+                JSONObject keyValue = new JSONObject(keyValueResponse)
+                        .getJSONObject(CloudStackConstants.CS_REGISTER_KEY_RESPONSE);
+                if (keyValue.has(CloudStackConstants.CS_ERROR_CODE)) {
+                    return false;
+                } else {
+                    user.setApiKey(keyValue.getJSONObject(USER_KEYS).getString(CloudStackConstants.CS_API_KEY));
+                    user.setSecretKey(keyValue.getJSONObject(USER_KEYS).getString(CloudStackConstants.CS_SECRET_KEY));
+                    config.setInstanceUserServer(user.getSecretKey(), user.getApiKey());
+                    return true;
+                }
+            }
+        }
+    }
+
+    @Override
+    public VmInstance findVMByIDWithSpecifiedField(Long vmId) {
+        return virtualmachinerepository.findVMByIDWithSpecifiedField(vmId);
+    }
+
+    public long ipToLong(String ipAddress) {
+        long result = 0;
+        if (ipAddress != null) {
+            String[] ipAddressInArray = ipAddress.split("\\.");
+
+            for (int i = 0; i < ipAddressInArray.length; i++) {
+
+                int power = 3 - i;
+                int ip = Integer.parseInt(ipAddressInArray[i]);
+                result += ip * Math.pow(256, power);
+
+            }
+        } else {
+            result = 0;
+        }
+
+        return result;
+      }
 }

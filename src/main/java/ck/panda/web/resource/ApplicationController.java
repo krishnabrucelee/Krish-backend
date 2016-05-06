@@ -116,6 +116,7 @@ public class ApplicationController extends CRUDController<Application> implement
      *
      * @param sortBy asc/desc
      * @param domainId domain id of application.
+     * @param searchText search text.
      * @param range pagination range.
      * @param limit per page limit.
      * @param request page request.
@@ -123,16 +124,17 @@ public class ApplicationController extends CRUDController<Application> implement
      * @return application list.
      * @throws Exception unhandled exception.
      */
-    @RequestMapping(value = "/listByDomain", method = RequestMethod.GET, produces = {
+    @RequestMapping(value = "/listByFilter", method = RequestMethod.GET, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<Application> listApplicationByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
+    public List<Application> listApplicationByDomain(@RequestParam String sortBy, @RequestParam Long domainId, @RequestParam String searchText,
             @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Application.class);
-        Page<Application> pageResponse = applicationService.findAllByDomainId(domainId, page);
+        Page<Application> pageResponse = applicationService.findAllByDomainIdAndSearchText(domainId, page, searchText, Long.valueOf(tokenDetails.getTokenDetails("id")));
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
+
 }

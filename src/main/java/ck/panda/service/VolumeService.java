@@ -1,14 +1,9 @@
-/**
- *
- */
 package ck.panda.service;
 
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.util.domain.CRUDService;
@@ -233,20 +228,48 @@ public interface VolumeService extends CRUDService<Volume> {
      * Find all the domain based Volume list.
      *
      * @param domainId domain id of the volume
+     * @param searchText search text.
      * @param page pagination and sorting values.
      * @return list of volumes with pagination.
      * @throws Exception error occurs
      */
-    Page<Volume> findAllByDomainId(Long domainId, PagingAndSorting page) throws Exception;
+    Page<Volume> findAllByDomainAndSearchText(Long domainId, String searchText, PagingAndSorting page) throws Exception;
 
     /**
      * Get the count of the volume based on the attached.
      *
      * @param domainId user details
+     * @param searchText search text.
      * @return volume count
      * @throws NumberFormatException Number format
      * @throws Exception error occurs
      */
-    Integer findAttachedCountByDomain(Long domainId) throws NumberFormatException, Exception;
+    Integer findAttachedCountByDomain(Long domainId, String searchText) throws NumberFormatException, Exception;
+
+    /**
+     * Find all the volumes by user id.
+     * @param userId user id.
+     * @return volumes list
+     * @throws Exception if errors.
+     */
+    List<Volume> findAllVolumeByUserId(Long userId) throws Exception;
+
+    /**
+     * Find all the volumes by domain id.
+     * @param domainId domain id.
+     * @return volumes list
+     * @throws Exception if errors.
+     */
+    List<Volume> findAllVolumeByDomainId(Long domainId) throws Exception;
+
+    /**
+     * Find all volumes by projects.
+     *
+     * @param projectId of the project.
+     * @param isActive status of the project.
+     * @return project.
+     * @throws Exception if error occurs.
+     */
+    List<Volume> findAllByProjectAndIsActive(Long projectId, Boolean isActive) throws Exception;
 
 }

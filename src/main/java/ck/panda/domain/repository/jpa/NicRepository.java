@@ -32,7 +32,7 @@ public interface NicRepository extends PagingAndSortingRepository<Nic, Long> {
      * @param vmInstanceId from nic
      * @return nic.
      */
-    @Query(value = "select nic from Nic nic where  nic.vmInstanceId=:vmInstanceId AND nic.isActive =:isActive")
+    @Query(value = "select nic from Nic nic where  nic.vmInstanceId=:vmInstanceId AND nic.isActive =:isActive ORDER BY nic.isDefault DESC")
     List<Nic> findByInstanceAndIsActive(@Param("vmInstanceId") Long vmInstanceId, @Param("isActive") Boolean isActive);
 
     /**

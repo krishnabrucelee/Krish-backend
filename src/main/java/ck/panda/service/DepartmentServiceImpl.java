@@ -20,7 +20,6 @@ import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitDomain;
-import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.SSHKey;
 import ck.panda.domain.entity.User;
@@ -37,6 +36,7 @@ import ck.panda.util.error.exception.ApplicationException;
 import ck.panda.util.error.exception.EntityNotFoundException;
 import ck.panda.constants.PingConstants;
 import ck.panda.util.PingService;
+import ck.panda.util.TokenDetails;
 
 /**
  * Department service implementation class.
@@ -115,6 +115,10 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Autowired
     private PingService pingService;
 
+    /** Token details reference. */
+    @Autowired
+    private TokenDetails tokenDetails;
+
     /** Baremetal system constant. */
     public static final String BAREMETAL_SYSTEM_ACCOUNT = "baremetal-system-account";
 
@@ -155,7 +159,29 @@ public class DepartmentServiceImpl implements DepartmentService {
             LOGGER.debug("Department created successfully" + department.getUserName());
             saveDepartmentToPingProject(department);
         }
-        return departmentRepo.save(department);
+        department = departmentRepo.save(department);
+        if (department.getSyncFlag()) {
+            for (String keys : convertEntityService.getResourceTypeValue().keySet()) {
+                ResourceLimitDepartment persistDepartment = resourceLimitDepartmentService
+                        .findByDepartmentAndResourceType(department.getId(), ResourceLimitDepartment.ResourceType
+                                .valueOf(convertEntityService.getResourceTypeValue().get(keys)), true);
+                if (persistDepartment != null) {
+                    resourceLimitDepartmentService.delete(persistDepartment);
+                }
+                ResourceLimitDepartment resourceLimitDepartment = new ResourceLimitDepartment();
+                resourceLimitDepartment.setDepartmentId(department.getId());
+                resourceLimitDepartment.setDomainId(department.getDomainId());
+                resourceLimitDepartment.setMax(0L);
+                resourceLimitDepartment.setAvailable(0L);
+                resourceLimitDepartment.setUsedLimit(0L);
+                resourceLimitDepartment.setResourceType(ResourceLimitDepartment.ResourceType
+                        .valueOf(convertEntityService.getResourceTypeValue().get(keys)));
+                resourceLimitDepartment.setIsSyncFlag(false);
+                resourceLimitDepartment.setIsActive(true);
+                resourceLimitDepartmentService.update(resourceLimitDepartment);
+            }
+        }
+        return department;
     }
 
     /**
@@ -252,7 +278,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             List<SSHKey> sshkeyResponse = sshkeyService.findAllByDepartmentAndIsActive(department.getId(), true);
             List<Network> networkResponse = networkService.findByDepartmentAndNetworkIsActive(department.getId(), true);
             if (projectResponse.size() != 0 || vmResponse.size() != 0
-                    || roleResponse.size() != 0 || volumeResponse.size() != 0 || sshkeyResponse.size() != 0 ) {
+                    || roleResponse.size() != 0 || volumeResponse.size() != 0 || sshkeyResponse.size() != 0 || networkResponse.size() != 0 || userResponse.size() != 0 ) {
                 errors.addGlobalError(GenericConstants.PAGE_ERROR_SEPARATOR + GenericConstants.TOKEN_SEPARATOR
                         + projectResponse.size() + GenericConstants.TOKEN_SEPARATOR
                         + vmResponse.size() + GenericConstants.TOKEN_SEPARATOR
@@ -284,15 +310,21 @@ public class DepartmentServiceImpl implements DepartmentService {
         List<ResourceLimitDomain> resourceLimitDomain = resourceLimitDomainService.findAllByDomainIdAndIsActive(department.getDomainId(), true);
         List<ResourceLimitDepartment> resourceLimitDepartment = resourceLimitDepartmentService.findAllByDepartmentIdAndIsActive(department.getId(), true);
         for (ResourceLimitDomain domainLimit : resourceLimitDomain) {
-        	for (ResourceLimitDepartment departmentLimit : resourceLimitDepartment) {
-        		if (domainLimit.getResourceType().toString().equals(departmentLimit.getResourceType().toString())) {
-        			domainLimit.setUsedLimit(domainLimit.getUsedLimit() - departmentLimit.getMax());
-        			domainLimit.setIsSyncFlag(false);
+            for (ResourceLimitDepartment departmentLimit : resourceLimitDepartment) {
+                if (domainLimit.getResourceType().toString().equals(departmentLimit.getResourceType().toString())) {
+                    if (departmentLimit.getMax() == -1L) {
+                        domainLimit.setUsedLimit(EmptytoLong(domainLimit.getUsedLimit()));
+                    } else {
+                        domainLimit.setUsedLimit(
+                                EmptytoLong(domainLimit.getUsedLimit()) - EmptytoLong(departmentLimit.getMax()));
+                    }
+                    domainLimit.setIsSyncFlag(false);
                     resourceLimitDomainService.save(domainLimit);
                     departmentLimit.setIsActive(false);
+                    departmentLimit.setIsSyncFlag(false);
                     resourceLimitDepartmentService.save(departmentLimit);
-        		}
-        	}
+                }
+            }
         }
         return departmentRepo.save(department);
     }
@@ -409,12 +441,35 @@ public class DepartmentServiceImpl implements DepartmentService {
         return true;
     }
 
-	@Override
-	public List<Department> findAllByActive(Boolean isActive) throws Exception {
-		List<Department.AccountType> accountTypes = new  ArrayList<Department.AccountType>();
-    	accountTypes.add(Department.AccountType.USER);
-    	accountTypes.add(Department.AccountType.DOMAIN_ADMIN);
-    	accountTypes.add(Department.AccountType.ROOT_ADMIN);
-		return findByAccountTypesAndActive(accountTypes, isActive);
-	}
+    @Override
+    public List<Department> findAllByActive(Boolean isActive) throws Exception {
+        List<Department.AccountType> accountTypes = new  ArrayList<Department.AccountType>();
+        accountTypes.add(Department.AccountType.USER);
+        accountTypes.add(Department.AccountType.DOMAIN_ADMIN);
+        accountTypes.add(Department.AccountType.ROOT_ADMIN);
+        return findByAccountTypesAndActive(accountTypes, isActive);
+    }
+
+    /**
+     * Empty check.
+     *
+     * @param value long value
+     * @return long.
+     */
+    public Long EmptytoLong(Long value) {
+        if (value == null) {
+            return 0L;
+        }
+        return value;
+    }
+
+    @Override
+    public Page<Department> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText, Long userId) throws Exception {
+        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
+        if (!convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.ROOT_ADMIN)) {
+            domainId = user.getDomainId();
+        }
+        return departmentRepo.findDomainBySearchText(domainId, pagingAndSorting.toPageRequest(), searchText, true);
+    }
+
 }

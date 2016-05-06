@@ -270,6 +270,12 @@ public class EventTypes {
     /** Volume Delete Events. */
     public static final String EVENT_VOLUME_DELETE = "VOLUME.DELETE";
 
+    /** Volume attach Events. */
+    public static final String EVENT_VOLUME_ATTACH = "VOLUME.ATTACH";
+
+    /** Volume attach Events. */
+    public static final String EVENT_VOLUME_DETACH = "VOLUME.DETACH";
+
     /** Network Create Events. */
     public static final String EVENT_NETWORK_CREATE = "NETWORK.CREATE";
 

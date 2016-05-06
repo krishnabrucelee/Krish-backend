@@ -45,8 +45,22 @@ public interface ResourceLimitProjectRepository extends PagingAndSortingReposito
      * @param projectId project id.
      * @return resource count of project.
      */
-    @Query(value = "select coalesce(sum(resource.max),0) from ResourceLimitProject resource where resource.isActive =:isActive AND resource.departmentId =:departmentId AND resource.resourceType =:resourceType AND resource.projectId !=:projectId")
+    @Query(value = "select coalesce(sum(resource.max),0) from ResourceLimitProject resource where resource.isActive =:isActive AND resource.departmentId =:departmentId AND resource.resourceType =:resourceType AND resource.projectId !=:projectId AND resource.max <> -1")
     Long findByResourceCountByProjectAndResourceType(@Param("departmentId") Long departmentId,
+            @Param("resourceType") ResourceLimitProject.ResourceType resourceType, @Param("projectId") Long projectId,
+            @Param("isActive") Boolean isActive);
+
+    /**
+     * Find by resource count by domain and resourceType.
+     *
+     * @param departmentId department id.
+     * @param isActive true/false
+     * @param resourceType resource type
+     * @param projectId project id.
+     * @return resource count of project.
+     */
+    @Query(value = "select coalesce(sum(resource.usedLimit),0) from ResourceLimitProject resource where resource.isActive =:isActive AND resource.departmentId =:departmentId AND resource.resourceType =:resourceType AND resource.projectId !=:projectId AND resource.max = -1")
+    Long findByResourceCountByProjectAndResourceTypes(@Param("departmentId") Long departmentId,
             @Param("resourceType") ResourceLimitProject.ResourceType resourceType, @Param("projectId") Long projectId,
             @Param("isActive") Boolean isActive);
 
@@ -82,8 +96,18 @@ public interface ResourceLimitProjectRepository extends PagingAndSortingReposito
      * @param isActive true/false.
      * @return department resource type.
      */
-    @Query(value = "select sum(resource.max) from ResourceLimitProject resource where resource.isActive = :isActive AND resource.departmentId = :departmentId AND resource.resourceType in :resourceType")
+    @Query(value = "select sum(resource.usedLimit) from ResourceLimitProject resource where resource.isActive = :isActive AND resource.departmentId = :departmentId AND resource.max = -1 AND resource.resourceType in :resourceType ")
     Long findByDepartmentIdAndResourceType(@Param("departmentId") Long departmentId, @Param("resourceType") ResourceLimitProject.ResourceType resourceType, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find all the active resource limits based on the department id and resource max.
+     *
+     * @param departmentId department id.
+     * @param isActive true/false.
+     * @return department resource type.
+     */
+    @Query(value = "select sum(resource.max) from ResourceLimitProject resource where resource.isActive = :isActive AND resource.departmentId = :departmentId AND resource.resourceType in :resourceType AND resource.max <> -1")
+    Long findByDepartmentIdAndResourceTypeAndResourceMax(@Param("departmentId") Long departmentId, @Param("resourceType") ResourceLimitProject.ResourceType resourceType, @Param("isActive") Boolean isActive);
 
     /**
      * @param domainId
@@ -91,7 +115,7 @@ public interface ResourceLimitProjectRepository extends PagingAndSortingReposito
      * @param isActive
      * @return
      */
-    @Query(value = "select sum(resource.max) from ResourceLimitProject resource where resource.isActive = :isActive AND resource.domainId = :domainId AND resource.resourceType = :resourceType ")
+    @Query(value = "select sum(resource.max) from ResourceLimitProject resource where resource.isActive = :isActive AND resource.domainId = :domainId AND resource.resourceType = :resourceType AND resource.max <> -1 ")
     Long findTotalCountOfResourceProject(@Param("domainId") Long domainId, @Param("resourceType") ResourceLimitProject.ResourceType resourceType, @Param("isActive") Boolean isActive);
 
     /**
@@ -100,8 +124,27 @@ public interface ResourceLimitProjectRepository extends PagingAndSortingReposito
      * @param isActive
      * @return
      */
-    @Query(value = "select sum(resource.max) from ResourceLimitProject resource where resource.isActive = :isActive AND resource.departmentId = :departmentId AND resource.resourceType = :resourceType ")
+    @Query(value = "select sum(resource.usedLimit) from ResourceLimitProject resource where resource.isActive = :isActive AND resource.domainId = :domainId AND resource.resourceType = :resourceType AND resource.max = -1 ")
+    Long findTotalCountOfResourceProjects(@Param("domainId") Long domainId, @Param("resourceType") ResourceLimitProject.ResourceType resourceType, @Param("isActive") Boolean isActive);
+
+    /**
+     * @param domainId
+     * @param resourceType
+     * @param isActive
+     * @return
+     */
+    @Query(value = "select sum(resource.usedLimit) from ResourceLimitProject resource where resource.isActive = :isActive AND resource.departmentId = :departmentId AND resource.resourceType = :resourceType AND resource.max = -1 ")
+    Long findTotalCountOfResourceDepartments(@Param("departmentId") Long departmentId, @Param("resourceType") ResourceLimitProject.ResourceType resourceType, @Param("isActive") Boolean isActive);
+
+    /**
+     * @param domainId
+     * @param resourceType
+     * @param isActive
+     * @return
+     */
+    @Query(value = "select sum(resource.max) from ResourceLimitProject resource where resource.isActive = :isActive AND resource.departmentId = :departmentId AND resource.resourceType = :resourceType AND resource.max <> -1 ")
     Long findTotalCountOfResourceDepartment(@Param("departmentId") Long departmentId, @Param("resourceType") ResourceLimitProject.ResourceType resourceType, @Param("isActive") Boolean isActive);
+
 
     /**
      * @param domainId

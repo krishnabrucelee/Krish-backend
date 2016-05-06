@@ -24,6 +24,9 @@ public class CloudStackConstants {
     /** Constant for job types. */
     public static final String CS_JOB_INSTANCE_ID = "jobinstanceid";
 
+    /** Constant for job types. */
+    public static final String CS_JOB_VM_ID = "virtualMachineId";
+
     /** Constant for asynchronous job result response. */
     public static final String QUERY_ASYNC_JOB_RESULT_RESPONSE = "queryasyncjobresultresponse";
 
@@ -165,6 +168,9 @@ public class CloudStackConstants {
 
     /** Constant for generic name. */
     public static final String CS_NAME = "name";
+
+    /** Constant for generic url. */
+    public static final String CS_URL = "url";
 
     /** Constant for cloudStack error response. */
     public static final String CS_ERROR_CODE = "errorcode", CS_ERROR_TEXT = "errortext";
@@ -704,5 +710,32 @@ public class CloudStackConstants {
 
     /** Constant for admin. */
     public static final String CS_ADMIN = "admin";
+
+    /** Constant for project. */
+    public static final String CS_PROJECT = "project";
+
+    /** Constant for virtual machine ids. */
+    public static final String CS_VIRTUAL_MACHINE_IDS = "virtualmachineIds";
+
+    /** Constant for affinity group ids. */
+    public static final String CS_AFFINITY_GROUP_IDS = "affinitygroupids";
+
+    /** Constant for update virtual machine response. */
+    public static final String CS_UPDATE_VM_RESPONSE = "updatevirtualmachineresponse";
+
+    /** Constant for project. */
+    public static final String PROJECT = "project";
+
+    /** Constant for distributed VPC router. */
+    public static final String CS_DISTRIBUTED_VPC_ROUTER = "distributedvpcrouter";
+
+    /** Constant for is default. */
+    public static final String CS_IS_DEFAULT = "isdefault";
+
+    /** Constant for supports region level VPC. */
+    public static final String CS_SUPPORTS_REGION_LEVEL_VPC = "supportsregionLevelvpc";
+
+    /** Constant for enabled state. */
+    public static final String CS_ENABLED = "Enabled";
 
 }

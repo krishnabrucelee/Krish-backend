@@ -3,14 +3,8 @@ package ck.panda.service;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
-import ck.panda.domain.entity.SSHKey;
 import ck.panda.domain.entity.User;
-import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.User.Status;
 import ck.panda.domain.entity.User.UserType;
 import ck.panda.util.domain.CRUDService;
@@ -28,6 +22,16 @@ public interface UserService extends CRUDService<User> {
      * @throws Exception error occurs
      */
     User save(User user, Long id) throws Exception;
+
+    /**
+     * To get list of user.
+     *
+     * @param pagingAndSorting parameters
+     * @param id of the login user
+     * @return user list with pagination
+     * @throws Exception unhandled errors
+     */
+    Page<User> findAllByActive(PagingAndSorting pagingAndSorting, Long id) throws Exception;
 
     /**
      * To get list of users from cloudstack server.
@@ -194,11 +198,12 @@ public interface UserService extends CRUDService<User> {
      * Find all the user by domain in user panel.
      *
      * @param domainId domain id of the user.
+     * @param searchText search text.
      * @param pagingAndSorting paging and sorting information.
      * @return list of user.
      * @throws Exception if error occurs.
      */
-    Page<User> findAllByUserPanelAndDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
+    Page<User> findAllByUserPanelAndDomainId(Long domainId, String searchText, PagingAndSorting pagingAndSorting) throws Exception;
 
     /**
      * Find all the user by domain.
@@ -208,7 +213,7 @@ public interface UserService extends CRUDService<User> {
      * @return list of user.
      * @throws Exception if error occurs.
      */
-    Page<User> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
+    Page<User> findAllByDomainId(Long domainId, String searchText, PagingAndSorting pagingAndSorting) throws Exception;
 
 
     /**
@@ -272,5 +277,23 @@ public interface UserService extends CRUDService<User> {
     User findByUserNameAndActive(String username, Boolean isActive);
 
     String findByUserSessionDetails(Long id) throws Exception;
+
+    /**
+     * Find root admin user.
+     *
+     * @return user.
+     * @throws Exception if error occurs.
+     */
+    List<User> findByRootAdminUser() throws Exception;
+
+
+    /**
+     * Find all the user by domain.
+     *
+     * @param domain domain reference.
+     * @return list of user.
+     * @throws Exception if error occurs.
+     */
+    List<User> findAllByDomain(Domain domain) throws Exception;
 
 }

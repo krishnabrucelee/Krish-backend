@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +15,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EventsUtil;
 import ck.panda.constants.PermissionUtil;
 import ck.panda.constants.PingConstants;
+import ck.panda.domain.entity.AffinityGroup;
+import ck.panda.domain.entity.AffinityGroupType;
 import ck.panda.domain.entity.CloudStackConfiguration;
 import ck.panda.domain.entity.Cluster;
 import ck.panda.domain.entity.ComputeOffering;
@@ -67,6 +66,8 @@ import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.VolumeType;
+import ck.panda.domain.entity.VpcAcl;
+import ck.panda.domain.entity.VpcOffering;
 import ck.panda.domain.entity.VpnUser;
 import ck.panda.domain.entity.Zone;
 import ck.panda.util.CloudStackInstanceService;
@@ -309,6 +310,14 @@ public class SyncServiceImpl implements SyncService {
     @Autowired
     private ManualCloudSyncService manualCloudSyncService;
 
+    /** VPC ACL service reference. */
+    @Autowired
+    private VpcAclService vpcAclService;
+
+    /** VPC offering service reference. */
+    @Autowired
+    private VpcOfferingService vpcOfferingService;
+
     /** Permission instance properties. */
     @Value(value = "${permission.instance}")
     private String instance;
@@ -456,6 +465,14 @@ public class SyncServiceImpl implements SyncService {
     @Autowired
     private VpnUserService vpnUserService;
 
+    /** Service reference to affinity group type. */
+    @Autowired
+    private AffinityGroupTypeService affinityGroupTypeService;
+
+    /** Service reference to affinity group. */
+    @Autowired
+    private AffinityGroupService affinityGroupService;
+
     @Override
     public void init(CloudStackServer server) throws Exception {
         CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
@@ -549,7 +566,7 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.error("ERROR AT synch OS Category", e);
         }
         try {
-            // 12. Sync OSType entity
+            // 12. Sync OSType entity.
             this.syncOsTypes();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch OS Types", e);
@@ -697,10 +714,34 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.error("ERROR AT synch Event List", e);
         }
         try {
-            // 36. Sync general configuration
+            // 36. Sync affinity group type
+            this.syncAffinityGroupType();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Affinity group type", e);
+        }
+        try {
+            // 37. Sync affinity group
+            this.syncAffinityGroup();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Affinity group", e);
+        }
+        try {
+            // 38. Sync general configuration
             this.syncGeneralConfiguration();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch General Configuration", e);
+        }
+        try {
+            // 39. Sync VPC offering entity
+            this.syncVpcOffering();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPC offering", e);
+        }
+        try {
+            // 40. Sync VPC ACL entity
+            this.syncVpcAcl();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPC ACL", e);
         }
 
     }
@@ -1454,6 +1495,7 @@ public class SyncServiceImpl implements SyncService {
                 instance.setIsoName(csVm.getIsoName());
                 if (csVm.getIpAddress() != null) {
                     instance.setIpAddress(csVm.getIpAddress());
+                    instance.setInstanceGuestIp(ipToLong(csVm.getIpAddress()));
                 }
                 if (csVm.getNetworkId() != null) {
                     instance.setNetworkId(csVm.getNetworkId());
@@ -1474,9 +1516,11 @@ public class SyncServiceImpl implements SyncService {
                 }
                 if (csVm.getInstanceOwnerId() != null) {
                     instance.setInstanceOwnerId(csVm.getInstanceOwnerId());
+                    instance.setInstanceUserName(userService.find(csVm.getInstanceOwnerId()).getUserName());
                 }
                 if (instance.getTemplateId() != null) {
                     instance.setOsType(convertEntityService.getTemplateById(instance.getTemplateId()).getDisplayText());
+                    instance.setInstanceOsType(convertEntityService.getTemplateById(instance.getTemplateId()).getDisplayText());
                 }
                 instance.setTemplateName(csVm.getTemplateName());
                 LOGGER.debug("sync VM for ASYNC");
@@ -1491,6 +1535,7 @@ public class SyncServiceImpl implements SyncService {
                 IpAddress ipAddress = ipService.UpdateIPByNetwork(convertEntityService.getNetworkById(instance.getNetworkId()).getUuid());
                 if (ipAddress != null) {
                     instance.setPublicIpAddress(ipAddress.getPublicIpAddress());
+                    instance.setInstancePublicIp(ipToLong(ipAddress.getPublicIpAddress()));
                 }
                 // 3.2 If found, update the vm object in app db
                 virtualMachineService.update(instance);
@@ -1509,10 +1554,16 @@ public class SyncServiceImpl implements SyncService {
         // add it to app db
         for (String key : vmMap.keySet()) {
             VmInstance instances = virtualMachineService.save(vmMap.get(key));
+            if (instances.getIpAddress() != null) {
+                instances.setInstanceGuestIp(ipToLong(instances.getIpAddress()));
+                virtualMachineService.update(instances);
+            }
             IpAddress ipAddress = ipService.UpdateIPByNetwork(convertEntityService.getNetworkById(instances.getNetworkId()).getUuid());
             if (ipAddress != null) {
                 instances.setSyncFlag(false);
                 instances.setPublicIpAddress(ipAddress.getPublicIpAddress());
+                instances.setInstancePublicIp(ipToLong(ipAddress.getPublicIpAddress()));
+                instances.setInstanceGuestIp(ipToLong(instances.getIpAddress()));
                 virtualMachineService.update(instances);
             }
         }
@@ -1923,6 +1974,7 @@ public class SyncServiceImpl implements SyncService {
                 instance.setIsoName(csVm.getIsoName());
                 if (csVm.getIpAddress() != null) {
                     instance.setIpAddress(csVm.getIpAddress());
+                    instance.setInstanceGuestIp(ipToLong(csVm.getIpAddress()));
                 }
                 if (csVm.getNetworkId() != null) {
                     instance.setNetworkId(csVm.getNetworkId());
@@ -1942,6 +1994,7 @@ public class SyncServiceImpl implements SyncService {
                 }
                 if (csVm.getInstanceOwnerId() != null) {
                     instance.setInstanceOwnerId(csVm.getInstanceOwnerId());
+                    instance.setInstanceUserName(userService.find(csVm.getInstanceOwnerId()).getUserName());
                 }
                 LOGGER.debug("sync VM for ASYNC");
                 // VNC password set.
@@ -1962,32 +2015,33 @@ public class SyncServiceImpl implements SyncService {
 
     @Override
     public void syncResourceLimit() throws ApplicationException, Exception {
-         List<Department> departments = departmentService.findAllByActive(true);
-         for (Department deparment : departments) {
-        	 HashMap<String, String> departmentCountMap = new HashMap<String, String>();
-			for (String key : convertEntityService.getResourceTypeValue().keySet()) {
-				ResourceLimitDepartment persistDepartment = resourceDepartmentService
-						.findByDepartmentAndResourceType(deparment.getId(), ResourceLimitDepartment.ResourceType
-								.valueOf(convertEntityService.getResourceTypeValue().get(key)), true);
-				if (persistDepartment != null) {
-					resourceDepartmentService.delete(persistDepartment);
-				}
-				ResourceLimitDepartment resourceLimitDepartment = new ResourceLimitDepartment();
-				resourceLimitDepartment.setDepartmentId(deparment.getId());
-				resourceLimitDepartment.setDomainId(deparment.getDomainId());
-				resourceLimitDepartment.setMax(0L);
-				resourceLimitDepartment.setAvailable(0L);
-				resourceLimitDepartment.setUsedLimit(0L);
-				resourceLimitDepartment.setResourceType(ResourceLimitDepartment.ResourceType.valueOf(convertEntityService.getResourceTypeValue().get(key)));
-				resourceLimitDepartment.setIsSyncFlag(false);
-				resourceLimitDepartment.setIsActive(true);
-				resourceDepartmentService.update(resourceLimitDepartment);
-			}
-       	   departmentCountMap.put(CloudStackConstants.CS_ACCOUNT, deparment.getUserName());
-            //Sync for resource count in domain
-           String csResponse = cloudStackResourceCapacity.updateResourceCount(
+        List<Department> departments = departmentService.findAllByActive(true);
+        for (Department deparment : departments) {
+             HashMap<String, String> departmentCountMap = new HashMap<String, String>();
+            for (String key : convertEntityService.getResourceTypeValue().keySet()) {
+                ResourceLimitDepartment persistDepartment = resourceDepartmentService
+                        .findByDepartmentAndResourceType(deparment.getId(), ResourceLimitDepartment.ResourceType
+                                .valueOf(convertEntityService.getResourceTypeValue().get(key)), true);
+                if (persistDepartment != null) {
+                    resourceDepartmentService.delete(persistDepartment);
+                }
+                ResourceLimitDepartment resourceLimitDepartment = new ResourceLimitDepartment();
+                resourceLimitDepartment.setDepartmentId(deparment.getId());
+                resourceLimitDepartment.setDomainId(deparment.getDomainId());
+                resourceLimitDepartment.setMax(0L);
+                resourceLimitDepartment.setAvailable(0L);
+                resourceLimitDepartment.setUsedLimit(0L);
+                resourceLimitDepartment.setResourceType(ResourceLimitDepartment.ResourceType
+                        .valueOf(convertEntityService.getResourceTypeValue().get(key)));
+                resourceLimitDepartment.setIsSyncFlag(false);
+                resourceLimitDepartment.setIsActive(true);
+                resourceDepartmentService.update(resourceLimitDepartment);
+            }
+            departmentCountMap.put(CloudStackConstants.CS_ACCOUNT, deparment.getUserName());
+            // Sync for resource count in domain
+            String csResponse = cloudStackResourceCapacity.updateResourceCount(
                     convertEntityService.getDomainById(deparment.getDomainId()).getUuid(), departmentCountMap, "json");
-           convertEntityService.resourceCount(csResponse);
+            convertEntityService.resourceCount(csResponse);
         }
         List<Domain> domains = domainService.findAllDomain();
         for (Domain domain : domains) {
@@ -1997,18 +2051,32 @@ public class SyncServiceImpl implements SyncService {
         List<Project> projects = projectService.findAllByActive(true);
         for (Project project : projects) {
             syncResourceLimitProject(project);
+        }
+
+        syncResourceUpdate();
+    }
+
+    @Override
+    public void syncResourceUpdate() throws ApplicationException, Exception {
+        List<Project> projects = projectService.findAllByActive(true);
+        for (Project project : projects) {
             syncResourceLimitForProject(project);
         }
+        List<Department> departments = departmentService.findAllByActive(true);
+        for (Department persistdepartment : departments) {
+            syncResourceLimitForDepartment(persistdepartment);
+        }
+        List<Domain> domains = domainService.findAllDomain();
         for (Domain domain : domains) {
-        	HashMap<String, String> domainMap = new HashMap<String, String>();
-        	domainMap = resourceDepartmentService.getResourceCountsOfDomain(domain.getId());
-			for (String key : domainMap.keySet()) {
-				ResourceLimitDomain resourceDomain = resourceDomainService.findByDomainAndResourceType(domain.getId(),
-						ResourceLimitDomain.ResourceType.valueOf(key), true);
-				resourceDomain.setUsedLimit(Long.parseLong(domainMap.get(key)));
-				resourceDomain.setIsSyncFlag(false);
-				resourceDomainService.update(resourceDomain);
-			}
+            HashMap<String, String> domainMap = new HashMap<String, String>();
+            domainMap = resourceDepartmentService.getResourceCountsOfDomain(domain.getId());
+            for (String key : domainMap.keySet()) {
+                ResourceLimitDomain resourceDomain = resourceDomainService.findByDomainAndResourceType(domain.getId(),
+                        ResourceLimitDomain.ResourceType.valueOf(key), true);
+                resourceDomain.setUsedLimit(Long.parseLong(domainMap.get(key)));
+                resourceDomain.setIsSyncFlag(false);
+                resourceDomainService.update(resourceDomain);
+            }
         }
         syncResourceLimitUpdateForProjectAndDepartment();
     }
@@ -2031,6 +2099,7 @@ public class SyncServiceImpl implements SyncService {
             if (csResourceMap.containsKey(domain.getUuid() + resource.getResourceType().toString())) {
                     resource.setMax(
                             csResourceMap.get(domain.getUuid() + resource.getResourceType().toString()).getMax());
+                    resource.setUsedLimit(0L);
                     resource.setIsActive(true);
                     resource.setIsSyncFlag(false);
                     resourceDomainService.update(resource);
@@ -2044,11 +2113,6 @@ public class SyncServiceImpl implements SyncService {
             resourceDomainService.save(csResourceMap.get(key));
         }
         LOGGER.debug("Total rows added", (csResourceMap.size()));
-        // Used for setting optional values for resource count.
-        HashMap<String, String> domainCountMap = new HashMap<String, String>();
-        // Sync for resource count in domain
-        String csResponse = cloudStackResourceCapacity.updateResourceCount(domain.getUuid(), domainCountMap, "json");
-        convertEntityService.resourceCount(csResponse);
     }
 
     @Override
@@ -2057,14 +2121,11 @@ public class SyncServiceImpl implements SyncService {
         List<ResourceLimitProject> csResourceList = resourceProjectService.findAllFromCSServerProject(project.getUuid());
                HashMap<String, ResourceLimitProject> csResourceMap = (HashMap<String, ResourceLimitProject>) ResourceLimitProject
                 .convert(csResourceList);
-
         // 2. Get all the resource objects from application
         List<ResourceLimitProject> appResourceList = resourceProjectService.findAllByProjectIdAndIsActive(project.getId(), true);
-
         // 3. Iterate application resource list
         LOGGER.debug("Total rows updated : " + (appResourceList.size()));
         for (ResourceLimitProject resource : appResourceList) {
-
             LOGGER.debug("NEW PROJECT ID " + resource.getProjectId());
             if (csResourceMap.containsKey(convertEntityService.getProjectUuidById(resource.getProjectId()) + resource.getResourceType().toString())) {
                 if (resource != null) {
@@ -2082,9 +2143,7 @@ public class SyncServiceImpl implements SyncService {
                 resourceProjectService.update(resource);
             }
         }
-        // 4. Get the remaining list of cs server hash resource object, then
-        // iterate and
-        // add it to app db
+        // 4. Get the remaining list of cs server hash resource object, then iterate and add it to app db.
         for (String key : csResourceMap.keySet()) {
             LOGGER.debug("Syncservice resource Project id:");
             resourceProjectService.save(csResourceMap.get(key));
@@ -2094,74 +2153,98 @@ public class SyncServiceImpl implements SyncService {
         // Used for setting optional values for resource count.
         HashMap<String, String> projectCountMap = new HashMap<String, String>();
         projectCountMap.put(CloudStackConstants.CS_PROJECT_ID, project.getUuid());
-        //Sync for resource count in domain
+        // Sync for resource count in domain.
         String csResponse = cloudStackResourceCapacity.updateResourceCount(
-                convertEntityService.getDomainById(project.getDomainId()).getUuid(), projectCountMap, "json");
+                convertEntityService.getDomainById(project.getDomainId()).getUuid(), projectCountMap, CloudStackConstants.JSON);
         convertEntityService.resourceCount(csResponse);
     }
 
-	@Override
-	public void syncResourceLimitForProject(Project project) throws ApplicationException, Exception {
+    @Override
+    public void syncResourceLimitForProject(Project project) throws ApplicationException, Exception {
+        // Used for setting optional values for resource count.
+        HashMap<String, String> hashLimitMap = new HashMap<String, String>();
+        HashMap<String, String> projectMap = new HashMap<String, String>();
+        HashMap<String, String> departmentMap = new HashMap<String, String>();
+        HashMap<String, String> domainMap = new HashMap<String, String>();
+        domainMap = resourceDomainService.getResourceLimitsOfDomain(project.getDomainId());
+        projectMap = resourceProjectService.getResourceLimitsOfDepartment(project.getDepartmentId());
+        departmentMap = resourceDepartmentService.getResourceCountsOfDepartment(project.getDepartmentId());
+        for (String key : projectMap.keySet()) {
+            if (!key.equalsIgnoreCase(CloudStackConstants.PROJECT)) {
+                // departmentUsed.
+                ResourceLimitProject resourceLimitProject = resourceProjectService.findByProjectAndResourceType(
+                        project.getId(), ResourceLimitProject.ResourceType.valueOf(key), true);
+                if (Long.parseLong(domainMap.get(key)) == -1L) {
+                    resourceLimitProject.setMax(resourceLimitProject.getMax());
+                } else if ((Long.parseLong(projectMap.get(key)) + Long.parseLong(departmentMap.get(key))) > Long
+                        .parseLong(domainMap.get(key)) && Long.parseLong(domainMap.get(key)) != -1L) {
+                    resourceLimitProject.setMax(resourceLimitProject.getUsedLimit());
+                } else {
+                    resourceLimitProject.setMax(resourceLimitProject.getMax());
+                }
+                resourceLimitProject.setIsSyncFlag(false);
+                resourceProjectService.update(resourceLimitProject);
 
-		// Used for setting optional values for resource count.
-		HashMap<String, String> hashLimitMap = new HashMap<String, String>();
-		HashMap<String, String> projectMap = new HashMap<String, String>();
-		HashMap<String, String> departmentMap = new HashMap<String, String>();
-		HashMap<String, String> domainMap = new HashMap<String, String>();
-		domainMap = resourceDomainService.getResourceLimitsOfDomain(project.getDomainId());
-		projectMap = resourceProjectService.getResourceLimitsOfDepartment(project.getDepartmentId());
-		// Used for setting optional values for resource count.
-		HashMap<String, String> projectCountMap = new HashMap<String, String>();
-		projectCountMap.put(CloudStackConstants.CS_ACCOUNT,
-				convertEntityService.getDepartmentUsernameById(project.getDepartmentId()));
-		// Sync for resource count in domain
-		String csResponse = cloudStackResourceCapacity.updateResourceCount(
-				convertEntityService.getDomainById(project.getDomainId()).getUuid(), projectCountMap, "json");
-		convertEntityService.resourceCount(csResponse);
-		departmentMap = resourceDepartmentService.getResourceCountsOfDepartment(project.getDepartmentId());
-		for (String key : projectMap.keySet()) {
-			if (!key.equalsIgnoreCase("project")) {
-				// departmentUsed
-				ResourceLimitProject resourceLimitProject = resourceProjectService.findByProjectAndResourceType(
-						project.getId(), ResourceLimitProject.ResourceType.valueOf(key), true);
-				ResourceLimitDepartment resourceLimitDepartment = resourceDepartmentService
-						.findByDepartmentAndResourceType(project.getDepartmentId(),
-								ResourceLimitDepartment.ResourceType.valueOf(key), true);
-				if (Long.parseLong(domainMap.get(key)) == -1L) {
-					resourceLimitProject.setMax(resourceLimitProject.getMax());
-				} else if ((Long.parseLong(projectMap.get(key)) + Long.parseLong(departmentMap.get(key))) > Long
-						.parseLong(domainMap.get(key)) && Long.parseLong(domainMap.get(key)) != -1L) {
-					resourceLimitProject.setMax(resourceLimitProject.getUsedLimit());
-				} else {
-					resourceLimitProject.setMax(resourceLimitProject.getMax());
-				}
-				resourceLimitProject.setIsSyncFlag(false);
-				resourceProjectService.update(resourceLimitProject);
-				resourceLimitDepartment
-						.setUsedLimit(Long.parseLong(projectMap.get(key)) + Long.parseLong(departmentMap.get(key)));
-				if (resourceLimitDepartment.getResourceType().equals(ResourceLimitDepartment.ResourceType.Project)) {
-					resourceLimitDepartment.setMax(-1L);
-				} else {
-					resourceLimitDepartment.setMax(resourceLimitDepartment.getUsedLimit());
-				}
-				resourceLimitDepartment.setIsSyncFlag(false);
-				resourceDepartmentService.update(resourceLimitDepartment);
-				hashLimitMap.put(key,
-						String.valueOf(Long.parseLong(projectMap.get(key)) + Long.parseLong(departmentMap.get(key))));
-			}
-		}
-	}
+                hashLimitMap.put(key,
+                        String.valueOf(Long.parseLong(projectMap.get(key)) + Long.parseLong(departmentMap.get(key))));
+            }
+        }
+    }
 
-	public void syncResourceLimitUpdateForProjectAndDepartment() throws Exception{
-		List<ResourceLimitDepartment> persistDepartments = resourceDepartmentService.findAll();
-		List<ResourceLimitProject> persistResourceLimitProjects = resourceProjectService.findAll();
-		for(ResourceLimitDepartment department: persistDepartments) {
-			updateResourceLimit(department, "department");
-		}
-		for(ResourceLimitProject project: persistResourceLimitProjects) {
-			updateResourceLimit(project, "project");
-		}
-	}
+    public void syncResourceLimitForDepartment(Department department) throws ApplicationException, Exception {
+        HashMap<String, String> projectMap = new HashMap<String, String>();
+        HashMap<String, String> departmentMap = new HashMap<String, String>();
+        projectMap = resourceProjectService.getResourceLimitsOfDepartment(department.getId());
+        departmentMap = resourceDepartmentService.getResourceCountsOfDepartment(department.getId());
+        for (String key : departmentMap.keySet()) {
+            if (!key.equalsIgnoreCase(CloudStackConstants.PROJECT)) {
+                ResourceLimitDepartment resourceLimitDepartment = resourceDepartmentService
+                        .findByDepartmentAndResourceType(department.getId(),
+                                ResourceLimitDepartment.ResourceType.valueOf(key), true);
+                if (!projectMap.isEmpty()) {
+                    resourceLimitDepartment
+                            .setUsedLimit(Long.parseLong(projectMap.get(key)) + Long.parseLong(departmentMap.get(key)));
+                } else {
+                    resourceLimitDepartment.setUsedLimit(Long.parseLong(departmentMap.get(key)));
+                }
+                if (resourceLimitDepartment.getResourceType().equals(ResourceLimitDepartment.ResourceType.Project)) {
+                    resourceLimitDepartment.setMax(-1L);
+                } else {
+                    resourceLimitDepartment.setMax(resourceLimitDepartment.getUsedLimit());
+                }
+                resourceLimitDepartment.setIsSyncFlag(false);
+                resourceDepartmentService.update(resourceLimitDepartment);
+            }
+        }
+    }
+
+    public void syncResourceLimitUpdateForProjectAndDepartment() throws Exception {
+        List<ResourceLimitDepartment> persistDepartments = resourceDepartmentService.findAll();
+        List<ResourceLimitProject> persistResourceLimitProjects = resourceProjectService.findAll();
+        int num = 50;
+        int num1 = 0;
+        int num2 = 0;
+        for (ResourceLimitDepartment department : persistDepartments) {
+            if (num1 == num) {
+                Thread.sleep(20000);
+                num1 = 0;
+            }
+            if (!department.getResourceType().equals(ResourceLimitDepartment.ResourceType.Project)) {
+                updateResourceLimit(department, CloudStackConstants.CS_DEPARTMENT);
+            }
+            num1++;
+        }
+        for (ResourceLimitProject project : persistResourceLimitProjects) {
+            if (num2 == num) {
+                Thread.sleep(20000);
+                num2 = 0;
+            }
+            if (!project.getResourceType().equals(ResourceLimitProject.ResourceType.Project)) {
+                updateResourceLimit(project, CloudStackConstants.PROJECT);
+            }
+            num2++;
+        }
+    }
 
     /**
      * Sync with Cloud Server Iso.
@@ -2170,7 +2253,6 @@ public class SyncServiceImpl implements SyncService {
      * @throws Exception cloudstack unhandled errors.
      */
     private void syncIso() throws ApplicationException, Exception {
-
         // 1. Get all the iso objects from CS server as hash
         List<Iso> csIsoService = isoService.findAllFromCSServer();
         HashMap<String, Iso> csIsoMap = (HashMap<String, Iso>) Iso.convert(csIsoService);
@@ -2853,6 +2935,83 @@ public class SyncServiceImpl implements SyncService {
            }
     }
 
+    @Override
+    public void syncAffinityGroupType() throws ApplicationException, Exception {
+
+        // 1. Get all the affinity group objects from CS server as hash
+        List<AffinityGroupType> csAffinityGroupTypesList = affinityGroupTypeService.findAllFromCSServer();
+        HashMap<String, AffinityGroupType> csAffinityGroupTypeMap = (HashMap<String, AffinityGroupType>) AffinityGroupType.convert(csAffinityGroupTypesList);
+
+        // 2. Get all the affinity group objects from application
+        List<AffinityGroupType> appAffinityGroupTypeList = affinityGroupTypeService.findAll();
+
+        // 3. Iterate application affinity group list
+        for (AffinityGroupType affinityGroupType : appAffinityGroupTypeList) {
+            LOGGER.debug("Total rows updated : " + (appAffinityGroupTypeList.size()));
+            // 3.1 Find the corresponding CS server affinity group object by finding
+            // it in a hash using uuid
+            if (csAffinityGroupTypeMap.containsKey(affinityGroupType.getType())) {
+                AffinityGroupType csAffinityGroupType = csAffinityGroupTypeMap.get(affinityGroupType.getType());
+
+                // 3.2 If found, update the affinity group object in app db
+                affinityGroupTypeService.update(affinityGroupType);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // affinity group which is not added in the app
+                csAffinityGroupTypeMap.remove(affinityGroupType.getType());
+            } else {
+                affinityGroupTypeService.delete(affinityGroupType);
+            }
+        }
+        // 4. Get the remaining list of cs server hash affinity group object, then
+        // iterate and
+        // add it to app db
+        for (String key : csAffinityGroupTypeMap.keySet()) {
+            affinityGroupTypeService.save(csAffinityGroupTypeMap.get(key));
+        }
+        LOGGER.debug("Total rows added : " + (csAffinityGroupTypeMap.size()));
+    }
+
+    @Override
+    public void syncAffinityGroup() throws ApplicationException, Exception {
+
+        // 1. Get all the affinity group objects from CS server as hash
+        List<AffinityGroup> csAffinityGroupsList = affinityGroupService.findAllFromCSServer();
+        HashMap<String, AffinityGroup> csAffinityGroupMap = (HashMap<String, AffinityGroup>) AffinityGroup.convert(csAffinityGroupsList);
+
+        // 2. Get all the affinity group objects from application
+        List<AffinityGroup> appAffinityGroupList = affinityGroupService.findAll();
+
+        // 3. Iterate application affinity group list
+        for (AffinityGroup affinityGroup : appAffinityGroupList) {
+            affinityGroup.setIsSyncFlag(false);
+            LOGGER.debug("Total rows updated : " + (appAffinityGroupList.size()));
+            // 3.1 Find the corresponding CS server affinity group object by finding
+            // it in a hash using uuid
+            if (csAffinityGroupMap.containsKey(affinityGroup.getUuid())) {
+                AffinityGroup csAffinityGroup = csAffinityGroupMap.get(affinityGroup.getUuid());
+                affinityGroup.setTransInstanceList(csAffinityGroup.getTransInstanceList());
+
+                // 3.2 If found, update the affinity group object in app db
+                affinityGroupService.update(affinityGroup);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // affinity group which is not added in the app
+                csAffinityGroupMap.remove(affinityGroup.getUuid());
+            } else {
+                affinityGroupService.delete(affinityGroup);
+            }
+        }
+        // 4. Get the remaining list of cs server hash affinity group object, then
+        // iterate and
+        // add it to app db
+        for (String key : csAffinityGroupMap.keySet()) {
+            csAffinityGroupMap.get(key).setIsSyncFlag(false);
+            affinityGroupService.save(csAffinityGroupMap.get(key));
+        }
+        LOGGER.debug("Total rows added : " + (csAffinityGroupMap.size()));
+    }
+
     /**
      * Sync existing template in ping application.
      *
@@ -2889,6 +3048,7 @@ public class SyncServiceImpl implements SyncService {
             generalConfiguration.setMaxLogin(5);
             generalConfiguration.setUnlockTime(5);
             generalConfiguration.setRememberMeExpiredDays(30);
+            generalConfiguration.setSessionTime(14400);
             generalConfiguration.setIsActive(true);
             generalConfigurationService.save(generalConfiguration);
         }
@@ -2902,8 +3062,8 @@ public class SyncServiceImpl implements SyncService {
      * @throws Exception error
      */
     private void updateResourceLimit(Object resourceObject, String type) throws Exception {
-    	String resourceLimits = null;
-    	if (type.equals("project")) {
+        String resourceLimits = null;
+        if (type.equals("project")) {
            ResourceLimitProject resource = (ResourceLimitProject) resourceObject;
            HashMap<String, String> optional = new HashMap<String, String>();
            if (resource.getDomainId() != null) {
@@ -2917,21 +3077,21 @@ public class SyncServiceImpl implements SyncService {
            }
            resourceLimits = csResourceLimitService.updateResourceLimit(resource.getResourceType().ordinal(), "json",
                    optional);
-    	} else if(type.equals("department")) {
-    		  ResourceLimitDepartment resource = (ResourceLimitDepartment) resourceObject;
-    		  HashMap<String, String> optional = new HashMap<String, String>();
-    		  	if (resource.getDomainId() != null) {
+        } else if(type.equals("department")) {
+              ResourceLimitDepartment resource = (ResourceLimitDepartment) resourceObject;
+              HashMap<String, String> optional = new HashMap<String, String>();
+                  if (resource.getDomainId() != null) {
                   optional.put("domainid", convertEntityService.getDomainUuidById(resource.getDomainId()));
-    		  	}
-    	        if (resource.getDepartmentId() != null) {
-    	            optional.put("account", convertEntityService.getDepartmentUsernameById(resource.getDepartmentId()));
-    	        }
-    	        if (resource.getMax() != null) {
-    	            optional.put("max", resource.getMax().toString());
-    	        }
+                  }
+                if (resource.getDepartmentId() != null) {
+                    optional.put("account", convertEntityService.getDepartmentUsernameById(resource.getDepartmentId()));
+                }
+                if (resource.getMax() != null) {
+                    optional.put("max", resource.getMax().toString());
+                }
               resourceLimits = csResourceLimitService.updateResourceLimit(resource.getResourceType().ordinal(), "json",
                       optional);
-    	}
+        }
         LOGGER.info("Resource limit update response " + resourceLimits);
         JSONObject resourceLimitsResponse = new JSONObject(resourceLimits).getJSONObject("updateresourcelimitresponse");
         if (resourceLimitsResponse.has("errorcode")) {
@@ -3012,7 +3172,7 @@ public class SyncServiceImpl implements SyncService {
     }
 
     /**
-     * Update manual sync data count
+     * Update manual sync data count.
      *
      * @param keyName key name
      * @param acsCount ACS count
@@ -3025,5 +3185,105 @@ public class SyncServiceImpl implements SyncService {
         manualSyncItem.setAcsCount(acsCount);
         manualSyncItem.setPandaCount(pandaCount);
         manualCloudSyncService.save(manualSyncItem);
+    }
+
+    public long ipToLong(String ipAddress) {
+        long result = 0;
+        if (ipAddress != null) {
+            String[] ipAddressInArray = ipAddress.split("\\.");
+
+            for (int i = 0; i < ipAddressInArray.length; i++) {
+
+                int power = 3 - i;
+                int ip = Integer.parseInt(ipAddressInArray[i]);
+                result += ip * Math.pow(256, power);
+
+            }
+        } else {
+            result = 0;
+        }
+
+        return result;
+    }
+
+    @Override
+    public void syncVpcOffering() throws ApplicationException, Exception {
+
+        // 1. Get all the VPC offering objects from CS server as hash
+        List<VpcOffering> csVpcOfferingsList = vpcOfferingService.findAllFromCSServer();
+        HashMap<String, VpcOffering> csVpcOfferingMap = (HashMap<String, VpcOffering>) VpcOffering.convert(csVpcOfferingsList);
+
+        // 2. Get all the VPC offering objects from application
+        List<VpcOffering> appVpcOfferingList = vpcOfferingService.findAll();
+
+        // 3. Iterate application VPC offering list
+        for (VpcOffering vpcOffering : appVpcOfferingList) {
+            LOGGER.debug("Total rows updated : " + (appVpcOfferingList.size()));
+            // 3.1 Find the corresponding CS server VPC offering object by finding
+            // it in a hash using uuid
+            if (csVpcOfferingMap.containsKey(vpcOffering.getUuid())) {
+                VpcOffering csVpcOffering = csVpcOfferingMap.get(vpcOffering.getUuid());
+                vpcOffering.setUuid(csVpcOffering.getUuid());
+                vpcOffering.setName(csVpcOffering.getName());
+                vpcOffering.setDisplayText(csVpcOffering.getDisplayText());
+
+                // 3.2 If found, update the VPC offering object in app db
+                vpcOfferingService.update(vpcOffering);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // VPC offering which is not added in the app
+                csVpcOfferingMap.remove(vpcOffering.getUuid());
+            } else {
+                vpcOfferingService.delete(vpcOffering);
+            }
+        }
+        // 4. Get the remaining list of cs server hash VPC offering object, then
+        // iterate and
+        // add it to app db
+        for (String key : csVpcOfferingMap.keySet()) {
+            vpcOfferingService.save(csVpcOfferingMap.get(key));
+        }
+        LOGGER.debug("Total rows added : " + (csVpcOfferingMap.size()));
+    }
+
+    @Override
+    public void syncVpcAcl() throws ApplicationException, Exception {
+
+        // 1. Get all the VPC ACL objects from CS server as hash
+        List<VpcAcl> csVpcAclsList = vpcAclService.findAllFromCSServer();
+        HashMap<String, VpcAcl> csVpcAclMap = (HashMap<String, VpcAcl>) VpcAcl.convert(csVpcAclsList);
+
+        // 2. Get all the VPC ACL objects from application
+        List<VpcAcl> appVpcAclList = vpcAclService.findAll();
+
+        // 3. Iterate application VPC ACL list
+        for (VpcAcl vpcAcl : appVpcAclList) {
+            LOGGER.debug("Total rows updated : " + (appVpcAclList.size()));
+            // 3.1 Find the corresponding CS server VPC ACL object by finding
+            // it in a hash using uuid
+            if (csVpcAclMap.containsKey(vpcAcl.getUuid())) {
+                VpcAcl csVpcAcl = csVpcAclMap.get(vpcAcl.getUuid());
+                vpcAcl.setUuid(csVpcAcl.getUuid());
+                vpcAcl.setName(csVpcAcl.getName());
+                vpcAcl.setDescription(csVpcAcl.getDescription());
+                vpcAcl.setForDisplay(csVpcAcl.getForDisplay());
+
+                // 3.2 If found, update the VPC ACL object in app db
+                vpcAclService.update(vpcAcl);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // VPC ACL which is not added in the app
+                csVpcAclMap.remove(vpcAcl.getUuid());
+            } else {
+                vpcAclService.delete(vpcAcl);
+            }
+        }
+        // 4. Get the remaining list of cs server hash VPC ACL object, then
+        // iterate and
+        // add it to app db
+        for (String key : csVpcAclMap.keySet()) {
+            vpcAclService.save(csVpcAclMap.get(key));
+        }
+        LOGGER.debug("Total rows added : " + (csVpcAclMap.size()));
     }
 }

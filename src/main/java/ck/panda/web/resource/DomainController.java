@@ -21,6 +21,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.repository.jpa.DomainRepository;
 import ck.panda.service.DomainService;
 import ck.panda.util.TokenDetails;
@@ -113,5 +114,46 @@ public class DomainController extends CRUDController<Domain> implements ApiContr
         /** Doing Soft delete from the department table. */
         domain.setSyncFlag(true);
         domainService.softDelete(domain);
+    }
+
+    /**
+     * Get all domain list by quick search.
+     *
+     * @param sortBy asc/desc
+     * @param searchText search text.
+     * @param range pagination range.
+     * @param limit per page limit.
+     * @param request page request.
+     * @param response response content.
+     * @return domain list.
+     * @throws Exception unhandled exception.
+     */
+    @RequestMapping(value = "/listByFilter", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Domain> listBySearchFilter(@RequestParam String sortBy, @RequestParam String searchText,
+            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Domain.class);
+        Page<Domain> pageResponse = domainService.findDomainBySearchText(page, searchText);
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
+    }
+    
+    
+    /**
+     * Update domain to suspended state and deactive all the resources associated to the users.
+     *
+     * @param user reference of the user.
+     * @param id user id.
+     * @return user reference.
+     * @throws Exception if error.
+     */
+    @RequestMapping(value = "suspend/{id}", method = RequestMethod.PUT, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public Domain updateSuspended(@RequestBody Domain domain, @PathVariable(PATH_ID) Long id) throws Exception {
+        return domainService.updateSuspended(domain);
     }
 }

@@ -14,12 +14,15 @@ import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Department;
+import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitProject;
+import ck.panda.domain.entity.SSHKey;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.entity.VmInstance;
+import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.VpnUser;
 import ck.panda.domain.repository.jpa.ProjectRepository;
 import ck.panda.util.AppValidator;
@@ -32,6 +35,7 @@ import ck.panda.util.error.exception.CustomGenericException;
 import ck.panda.util.error.exception.EntityNotFoundException;
 import ck.panda.constants.PingConstants;
 import ck.panda.util.PingService;
+import ck.panda.util.TokenDetails;
 
 /**
  * Project service implementation used to get list of project and save ,delete, update the project in application
@@ -58,6 +62,10 @@ public class ProjectServiceImpl implements ProjectService {
     /** Virtual machine service reference. */
     @Autowired
     private VirtualMachineService virtualMachineService;
+
+    /** Listing resource limit project service. */
+    @Autowired
+    private ResourceLimitProjectService resourceProjectService;
 
     /** project repository reference. */
     @Autowired
@@ -86,6 +94,22 @@ public class ProjectServiceImpl implements ProjectService {
     /** Mr.ping service reference. */
     @Autowired
     private PingService pingService;
+
+    /** Token details reference. */
+    @Autowired
+    private TokenDetails tokenDetails;
+
+    /** Network Service Reference */
+    @Autowired
+    private NetworkService networkService;
+
+    /** Sshkey service reference */
+    @Autowired
+    private SSHKeyService sshKeyService;
+
+    /** Volume Service Reference. */
+    @Autowired
+    private VolumeService volumeService;
 
     @Override
     @PreAuthorize("hasPermission(#project.getSyncFlag(), 'CREATE_PROJECT')")
@@ -143,7 +167,30 @@ public class ProjectServiceImpl implements ProjectService {
             }
         }
         // Save the entity with uuid for created new project in CS.
-        return projectRepository.save(project);
+        project = projectRepository.save(project);
+        if (project.getSyncFlag()) {
+            for (String keys : convertEntityService.getResourceTypeValue().keySet()) {
+                ResourceLimitProject persistProject = resourceProjectService
+                        .findByProjectAndResourceType(project.getId(), ResourceLimitProject.ResourceType
+                                .valueOf(convertEntityService.getResourceTypeValue().get(keys)), true);
+                if (persistProject != null) {
+                    resourceProjectService.delete(persistProject);
+                }
+                ResourceLimitProject resourceLimitProject = new ResourceLimitProject();
+                resourceLimitProject.setDepartmentId(project.getDepartmentId());
+                resourceLimitProject.setDomainId(project.getDomainId());
+                resourceLimitProject.setProjectId(project.getId());
+                resourceLimitProject.setMax(0L);
+                resourceLimitProject.setAvailable(0L);
+                resourceLimitProject.setUsedLimit(0L);
+                resourceLimitProject.setResourceType(ResourceLimitProject.ResourceType
+                        .valueOf(convertEntityService.getResourceTypeValue().get(keys)));
+                resourceLimitProject.setIsSyncFlag(false);
+                resourceLimitProject.setIsActive(true);
+                resourceProjectService.update(resourceLimitProject);
+            }
+        }
+        return project;
     }
 
     @Override
@@ -283,6 +330,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @PreAuthorize("hasPermission(#project.getSyncFlag(), 'DELETE_PROJECT')")
     public Project softDelete(Project project) throws Exception {
+        Errors errors = validator.rejectIfNullEntity(RESPONSE_PROJECT, project);
         List<VmInstance.Status> statusCode = new ArrayList<VmInstance.Status>();
         project.setIsActive(false);
         project.setStatus(Project.Status.DELETED);
@@ -292,9 +340,18 @@ public class ProjectServiceImpl implements ProjectService {
             statusCode.add(VmInstance.Status.STARTING);
             statusCode.add(VmInstance.Status.STOPPING);
             List<VmInstance> vmList = virtualMachineService.findAllByProjectAndStatus(project.getId(), statusCode);
-            if (vmList.size() > 0) {
-                throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
-                        "warning.cannot.delete.project.which.has.instances");
+            List<Network> networkList = networkService.findByProjectAndNetworkIsActive(project.getId(), true);
+            List<SSHKey> sshKeyList = sshKeyService.findAllByProjectAndIsActive(project.getId(), true);
+            List<Volume> volumeList = volumeService.findAllByProjectAndIsActive(project.getId(), true);
+            if (vmList.size() > 0 || networkList.size() > 0 || sshKeyList.size() > 0 || volumeList.size() > 0 ) {
+                errors.addGlobalError(GenericConstants.PAGE_ERROR_SEPARATOR + GenericConstants.TOKEN_SEPARATOR
+                        + vmList.size() + GenericConstants.TOKEN_SEPARATOR
+                        + networkList.size() + GenericConstants.TOKEN_SEPARATOR
+                        + sshKeyList.size() + GenericConstants.TOKEN_SEPARATOR
+                        + volumeList.size());
+            }
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
             }
             HashMap<String, String> optional = new HashMap<String, String>();
             optional.put(CloudStackConstants.CS_DOMAIN_ID, project.getDepartment().getDomain().getUuid());
@@ -311,15 +368,20 @@ public class ProjectServiceImpl implements ProjectService {
         List<ResourceLimitDepartment> resourceLimitDepartment = resourceLimitDepartmentService.findAllByDepartmentIdAndIsActive(project.getDepartmentId(), true);
         List<ResourceLimitProject> resourceLimitProject = resourceLimitProjectService.findAllByProjectIdAndIsActive(project.getId(), true);
         for (ResourceLimitDepartment departmentLimit : resourceLimitDepartment) {
-        	for (ResourceLimitProject projectLimit : resourceLimitProject) {
-        		if (departmentLimit.getResourceType().toString().equals(projectLimit.getResourceType().toString())) {
-        			departmentLimit.setUsedLimit(departmentLimit.getUsedLimit() - projectLimit.getMax());
-        			resourceLimitDepartmentService.save(departmentLimit);
-        			projectLimit.setIsActive(false);
-        			projectLimit.setIsSyncFlag(false);
-        			resourceLimitProjectService.save(projectLimit);
-        		}
-        	}
+            for (ResourceLimitProject projectLimit : resourceLimitProject) {
+                if (departmentLimit.getResourceType().toString().equals(projectLimit.getResourceType().toString())) {
+                    if (projectLimit.getMax() == -1L) {
+                        departmentLimit.setUsedLimit(EmptytoLong(departmentLimit.getUsedLimit()));
+                    } else {
+                        departmentLimit.setUsedLimit(EmptytoLong(departmentLimit.getUsedLimit()) - EmptytoLong(projectLimit.getMax()));
+                    }
+                    departmentLimit.setIsSyncFlag(false);
+                    resourceLimitDepartmentService.save(departmentLimit);
+                    projectLimit.setIsActive(false);
+                    projectLimit.setIsSyncFlag(false);
+                    resourceLimitProjectService.save(projectLimit);
+                }
+            }
         }
         // Update project entity.
         return projectRepository.save(project);
@@ -415,10 +477,24 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Page<Project> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting)
-            throws Exception {
+    public Page<Project> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
         return projectRepository.findAllByDomainIdAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
     }
+
+    @Override
+    public Page<Project> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText)
+            throws Exception {
+          User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
+          if (convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.USER)) {
+              domainId = user.getDomainId();
+               Long departmentId = user.getDepartmentId();
+               return projectRepository.findAllByDomainIdAndIsActiveAndSearchText(domainId, true, pagingAndSorting.toPageRequest(),searchText,departmentId);
+          }
+          if (!convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.ROOT_ADMIN)) {
+              domainId = user.getDomainId();
+          }
+        return projectRepository.findAllByDomainAndSearchText(domainId, true, pagingAndSorting.toPageRequest(),searchText);
+   }
 
     /**
      * Save project details to MR.ping project for usage calculation.
@@ -430,6 +506,7 @@ public class ProjectServiceImpl implements ProjectService {
     public Boolean saveProjectToPing(Project project) throws Exception {
         JSONObject optional = new JSONObject();
         optional.put(PingConstants.UUID, project.getUuid());
+        optional.put(PingConstants.NAME, project.getName());
         optional.put(PingConstants.DOMAIN_ID, convertEntityService.getDomainById(project.getDomainId()).getUuid());
         optional.put(PingConstants.DEPARTMENT_UUID, convertEntityService.getDepartmentById(project.getDepartmentId()).getUuid());
         pingService.addProjectToPing(optional);
@@ -440,4 +517,18 @@ public class ProjectServiceImpl implements ProjectService {
     public Project findByProjectNameAndIsActive(String projectAccountName, Long domainId, Boolean isActive) {
         return projectRepository.findByProjectNameAndIsActive(projectAccountName, domainId, isActive);
     }
+
+    /**
+     * Empty check.
+     *
+     * @param value long value
+     * @return long.
+     */
+    public Long EmptytoLong(Long value) {
+        if (value == null) {
+            return 0L;
+        }
+        return value;
+    }
+
 }

@@ -488,4 +488,20 @@ public class DomainServiceImpl implements DomainService {
         pingService.addDepartmentToPing(optional);
         return true;
     }
+
+    @Override
+    public Page<Domain> findDomainBySearchText(PagingAndSorting pagingAndSorting, String searchText) throws Exception {
+        return domainRepo.findDomainBySearchText(pagingAndSorting.toPageRequest(), searchText, true);
+    }
+
+	@Override
+	public Domain updateSuspended(Domain domain) throws Exception {
+		Domain domains = domainRepo.findOne(domain.getId());
+		List<User> userList = userService.findAllByDomain(domains);
+		for(User user : userList) {
+			userService.updateSuspended(user);
+		}
+		domains.setStatus(Domain.Status.SUSPENDED);
+		return domainRepo.save(domains);
+	}
 }

@@ -135,11 +135,11 @@ public class ComputeOfferingController extends CRUDController<ComputeOffering> i
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<ComputeOffering> listComputeByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
+    public List<ComputeOffering> listComputeByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,@RequestParam String searchText,
             @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, ComputeOffering.class);
-        Page<ComputeOffering> pageResponse = computeService.findAllByDomainId(domainId, page);
+        Page<ComputeOffering> pageResponse = computeService.findAllByDomainIdAndSearchText(domainId, page,searchText);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }

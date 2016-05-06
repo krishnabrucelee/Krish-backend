@@ -4,9 +4,10 @@ import ck.panda.domain.entity.LoginHistory;
 import ck.panda.util.domain.CRUDService;
 
 /**
- * Login history service
+ * Login history service.
+ *
  */
-public interface LoginHistoryService extends CRUDService<LoginHistory>{
+public interface LoginHistoryService extends CRUDService<LoginHistory> {
 
     /**
      * Set the login details history to database.
@@ -50,9 +51,10 @@ public interface LoginHistoryService extends CRUDService<LoginHistory>{
      * Update the logout status.
      *
      * @param id user id
+     * @param type action type
      * @return Login history
      * @throws Exception unhandled exception
      */
-    LoginHistory updateLogoutStatus(Long id) throws Exception;
+    LoginHistory updateLogoutStatus(Long id, String type) throws Exception;
 
 }

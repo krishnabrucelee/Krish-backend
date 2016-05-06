@@ -4,8 +4,6 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.domain.entity.Department;
-import ck.panda.domain.entity.Domain;
-import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -164,5 +162,17 @@ public interface DepartmentService extends CRUDService<Department> {
      * @throws Exception error occurs
      */
     Page<Department> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
+
+    /**
+     * Find domain based list of department with pagination.
+     *
+     * @param pagingAndSorting parameters.
+     * @param domainId domain id.
+     * @param searchText quick search text
+     * @param userId user id.
+     * @return page result of department.
+     * @throws Exception if error occurs.
+     */
+    Page<Department> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText, Long userId) throws Exception;
 
 }

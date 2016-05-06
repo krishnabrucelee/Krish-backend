@@ -1,11 +1,14 @@
 package ck.panda.web.resource;
 
+import java.net.InetAddress;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -13,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,16 +29,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmInstance.Status;
+import ck.panda.rabbitmq.util.ResponseEvent;
 import ck.panda.service.ConvertEntityService;
 import ck.panda.service.VirtualMachineService;
 import ck.panda.util.CloudStackInstanceService;
 import ck.panda.util.ConfigUtil;
+import ck.panda.util.Instance;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -131,11 +140,10 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
         Page<VmInstance> pageResponse = virtualmachineservice.findAllByUser(page, Long.valueOf(tokenDetails.getTokenDetails("id")));
         if (!status.equals("Expunging")) {
             pageResponse = virtualmachineservice.findAllByStatus(page, Status.valueOf(status.toUpperCase()), Long.valueOf(tokenDetails.getTokenDetails("id")));
-        }
-        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
-        return pageResponse.getContent();
-
-    }
+		}
+		response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+		return pageResponse.getContent();
+	}
 
     /**
      * Get the vm counts for stopped, running and total count.
@@ -166,12 +174,12 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public List<VmInstance> getVmList() throws Exception {
-    	List<Status> status = new ArrayList<Status>();
-    	status.add(Status.EXPUNGING);
-    	status.add(Status.ERROR);
-    	status.add(Status.DESTROYED);
-    	status.add(Status.STARTING);
-    	status.add(Status.STOPPING);
+        List<Status> status = new ArrayList<Status>();
+        status.add(Status.EXPUNGING);
+        status.add(Status.ERROR);
+        status.add(Status.DESTROYED);
+        status.add(Status.STARTING);
+        status.add(Status.STOPPING);
         return virtualmachineservice.findByVmStatus(status, Long.valueOf(tokenDetails.getTokenDetails("id")));
     }
 
@@ -236,14 +244,14 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
         // TODO optimize/refactor this console code after completion of Kanaka NoVNC configuration.
         String token = null;
         VmInstance persistInstance = virtualmachineservice.find(vminstance.getId());
-		if (persistInstance.getHost() != null) {
-			String hostUUID = persistInstance.getHost().getUuid(); // VM's the host's UUID.
-			String instanceUUID = persistInstance.getUuid(); // virtual machine UUID.
-			token = hostUUID + "-" + instanceUUID;
-			LOGGER.debug("VNC Token" + token);
-		} else {
-			// VM console issue fixed. PK-557.
-			 HashMap<String, String> vmMap = new HashMap<String, String>();
+        if (persistInstance.getHost() != null) {
+            String hostUUID = persistInstance.getHost().getUuid(); // VM's the host's UUID.
+            String instanceUUID = persistInstance.getUuid(); // virtual machine UUID.
+            token = hostUUID + "-" + instanceUUID;
+            LOGGER.debug("VNC Token" + token);
+        } else {
+            // VM console issue fixed. PK-557.
+             HashMap<String, String> vmMap = new HashMap<String, String>();
              vmMap.put(CloudStackConstants.CS_ID, persistInstance.getUuid());
              configUtil.setServer(1L);
              String response = cloudStackInstanceService.listVirtualMachines(CloudStackConstants.JSON, vmMap);
@@ -264,11 +272,11 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
                  }
                  persistInstance = virtualmachineservice.update(persistInstance);
                  String hostUUID = persistInstance.getHost().getUuid(); // VM's the host's UUID.
-     			 String instanceUUID = persistInstance.getUuid(); // virtual machine UUID.
-     			 token = hostUUID + "-" + instanceUUID;
-     			 LOGGER.debug("VNC Token" + token);
+                  String instanceUUID = persistInstance.getUuid(); // virtual machine UUID.
+                  token = hostUUID + "-" + instanceUUID;
+                  LOGGER.debug("VNC Token" + token);
              }
-		}
+        }
         return "{\"success\":" + "\"" + consoleProxy + "/console/?token=" + token + "\"}";
     }
 
@@ -395,6 +403,34 @@ public class VirtualMachineController extends CRUDController<VmInstance> impleme
     @ResponseBody
     protected VmInstance resetSSHKey(@RequestBody VmInstance vminstance) throws Exception {
         return virtualmachineservice.resetSSHKey(vminstance);
+    }
+
+    /**
+     * Update the affinity group for created instance.
+     *
+     * @param vminstance object.
+     * @return instance
+     * @throws Exception if error occurs.
+     */
+    @RequestMapping(value = "/affinityGroup", method = RequestMethod.PUT, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected VmInstance affinityGroup(@RequestBody VmInstance vminstance) throws Exception {
+        return virtualmachineservice.affinityGroup(vminstance);
+    }
+
+    /**
+     * Get instance list by affinity group id.
+     *
+     * @param id group id
+     * @return affinity group list
+     * @throws Exception error occurs
+     */
+    @RequestMapping(value = "/affinityGroupInstance/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<VmInstance> affinityGroupInstance(@PathVariable(PATH_ID) Long id) throws Exception {
+         return virtualmachineservice.findInstanceByGroup(id);
     }
 
 }

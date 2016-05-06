@@ -164,11 +164,24 @@ public class ProjectController extends CRUDController<Project> implements ApiCon
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<Project> listProjectByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
+    public List<Project> listProjectByDomainId(@RequestParam String sortBy,@RequestParam Long domainId,
             @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Project.class);
         Page<Project> pageResponse = projectService.findAllByDomainId(domainId, page);
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
+    }
+
+    @RequestMapping(value = "/listByDomainAndOwner", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Project> listProjectByDomainIdAndOwner(@RequestParam String sortBy,@RequestParam String searchText,@RequestParam Long domainId,
+            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Project.class);
+        Page<Project> pageResponse = projectService.findAllByDomainIdAndSearchText(domainId, page, searchText);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }

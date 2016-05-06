@@ -20,8 +20,6 @@ import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EventTypes;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Domain;
-import ck.panda.domain.entity.Event;
-import ck.panda.domain.entity.Event.EventType;
 import ck.panda.domain.entity.FirewallRules;
 import ck.panda.domain.entity.FirewallRules.Purpose;
 import ck.panda.domain.entity.IpAddress.VpnState;
@@ -451,6 +449,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     instance.setIsoName(csVm.getIsoName());
                     if (csVm.getIpAddress() != null) {
                         instance.setIpAddress(csVm.getIpAddress());
+                        instance.setInstanceGuestIp(ipToLong(csVm.getIpAddress()));
                     }
                     if (csVm.getNetworkId() != null) {
                         instance.setNetworkId(csVm.getNetworkId());
@@ -475,6 +474,8 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     }
                     if (instance.getTemplateId() != null) {
                         instance.setOsType(
+                                convertEntityService.getTemplateById(instance.getTemplateId()).getDisplayText());
+                        instance.setInstanceOsType(
                                 convertEntityService.getTemplateById(instance.getTemplateId()).getDisplayText());
                     }
                     instance.setTemplateName(csVm.getTemplateName());
@@ -529,11 +530,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             if (eventObject.getString("commandEventType").equals(EventTypes.EVENT_VM_CREATE)) {
                 this.assignNicTovM(vmIn);
                 this.assignVolumeTovM(vmIn);
-                IpAddress ipAddress = ipService.UpdateIPByNetwork(vmIn.getNetwork().getUuid());
-                if (ipAddress != null) {
-                    vmIn.setPublicIpAddress(ipAddress.getPublicIpAddress());
-                    vmIn = virtualMachineService.update(vmIn);
-                }
                 if (volumeService.findByInstanceAndVolumeType(vmIn.getId()) != null) {
                     vmIn.setVolumeSize(volumeService.findByInstanceAndVolumeType(vmIn.getId()).getDiskSize());
                     vmIn = virtualMachineService.update(vmIn);
@@ -568,33 +564,26 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                         }
                     }
                 }
-                if (!convertEntityService.getDepartmentById(vmIn.getDepartmentId()).getType()
-                        .equals(AccountType.USER)) {
-                    updateResourceCountService.QuotaUpdateByResourceObject(vmIn, CS_Instance, vmIn.getDomainId(),
-                            CS_Domain, Update);
+                if (vmIn.getProjectId() != null) {
+                    updateResourceCountService.QuotaUpdateByResourceObject(vmIn, CS_Instance, vmIn.getProjectId(),
+                            CS_Project, Update);
                 } else {
-                    if (vmIn.getProjectId() != null) {
-                        updateResourceCountService.QuotaUpdateByResourceObject(vmIn, CS_Instance, vmIn.getProjectId(),
-                                CS_Project, Update);
-                    } else {
-                        updateResourceCountService.QuotaUpdateByResourceObject(vmIn, CS_Instance,
-                                vmIn.getDepartmentId(), CS_Department, Update);
-                    }
+                    updateResourceCountService.QuotaUpdateByResourceObject(vmIn, CS_Instance, vmIn.getDepartmentId(),
+                            CS_Department, Update);
+                }
+                IpAddress ipAddress = ipService
+                        .UpdateIPByNetwork(convertEntityService.getNetworkById(vmIn.getNetworkId()).getUuid());
+                if (ipAddress != null) {
+                    vmIn.setPublicIpAddress(ipAddress.getPublicIpAddress());
+					vmIn.setInstancePublicIp(ipToLong(ipAddress.getPublicIpAddress()));
+                    vmIn = virtualMachineService.update(vmIn);
                 }
             }
             if (eventObject.getString("commandEventType").equals(EventTypes.EVENT_VM_DESTROY)) {
-                if (!convertEntityService.getDepartmentById(vmIn.getDepartmentId()).getType()
-                        .equals(AccountType.USER)) {
-                    updateResourceCountService.QuotaUpdateByResourceObject(vmIn, CS_Destroy, vmIn.getDomainId(),
-                            CS_Domain, Delete);
+                if (vmIn.getProjectId() != null) {
+                    updateResourceCountService.QuotaUpdateByResourceObject(vmIn, "Destroy", vmIn.getProjectId(), "Project", "delete");
                 } else {
-                    if (vmIn.getProjectId() != null) {
-                        updateResourceCountService.QuotaUpdateByResourceObject(vmIn, CS_Destroy, vmIn.getProjectId(),
-                                CS_Project, Delete);
-                    } else {
-                        updateResourceCountService.QuotaUpdateByResourceObject(vmIn, CS_Destroy, vmIn.getDepartmentId(),
-                                CS_Department, Delete);
-                    }
+                    updateResourceCountService.QuotaUpdateByResourceObject(vmIn, "Destroy", vmIn.getDepartmentId(), "Department", "delete");
                 }
             }
         }
@@ -744,19 +733,14 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             network.setIsActive(false);
             Errors errors = new Errors(messageSource);
             networkService.softDelete(network);
-            networkService.ipRelease(network);
-            if (!convertEntityService.getDepartmentById(network.getDepartmentId()).getType().equals(AccountType.USER)) {
-                updateResourceCountService.QuotaUpdateByResourceObject(network, CS_Network, network.getDomainId(),
-                        CS_Domain, Delete);
-            } else {
-                if (network.getProjectId() != null) {
-                    updateResourceCountService.QuotaUpdateByResourceObject(network, CS_Network, network.getProjectId(),
+            if (network.getProjectId() != null) {
+                updateResourceCountService.QuotaUpdateByResourceObject(network, CS_Network, network.getProjectId(),
                             CS_Project, Delete);
-                } else {
-                    updateResourceCountService.QuotaUpdateByResourceObject(network, CS_Network,
+            } else {
+                updateResourceCountService.QuotaUpdateByResourceObject(network, CS_Network,
                             network.getDepartmentId(), CS_Department, Delete);
-                }
             }
+            networkService.ipRelease(network);
         }
 
         if (eventObject.getString("commandEventType").equals("NETWORK.RESTART")) {
@@ -986,11 +970,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                             .getDomainId());
                     ipService.update(persistIp);
                     // Resource Count update
-                    if (!convertEntityService.getDepartmentById(persistIp.getDepartmentId()).getType()
-                            .equals(AccountType.USER)) {
-                        updateResourceCountService.QuotaUpdateByResourceObject(persistIp, CS_IP,
-                                persistIp.getDomainId(), CS_Domain, Update);
-                    } else {
                         if (persistIp.getProjectId() != null) {
                             updateResourceCountService.QuotaUpdateByResourceObject(persistIp, CS_IP,
                                     persistIp.getProjectId(), CS_Project, Update);
@@ -998,7 +977,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                             updateResourceCountService.QuotaUpdateByResourceObject(persistIp, CS_IP,
                                     persistIp.getDepartmentId(), CS_Department, Update);
                         }
-                    }
                 }
             } else {
                 ipaddress.setState(IpAddress.State.ALLOCATED);
@@ -1027,18 +1005,12 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 ipService.ruleDelete(ipAddress);
                 ipService.softDelete(ipAddress);
                 // Resource Count delete
-                if (!convertEntityService.getDepartmentById(ipAddress.getDepartmentId()).getType()
-                        .equals(AccountType.USER)) {
-                    updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP, ipAddress.getDomainId(),
-                            CS_Domain, Delete);
-                } else {
-                    if (ipAddress.getProjectId() != null) {
-                        updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
+                if (ipAddress.getProjectId() != null) {
+                    updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
                                 ipAddress.getProjectId(), CS_Project, Delete);
-                    } else {
-                        updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
+                } else {
+                    updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
                                 ipAddress.getDepartmentId(), CS_Department, Delete);
-                    }
                 }
             }
         }
@@ -1054,12 +1026,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      */
     public void asyncTemplates(JSONObject eventObject) throws ApplicationException, Exception {
 
-        if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_TEMPLATE_DELETE)) {
-            JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
-            Template template = templateService.findByUUID(json.getString(CloudStackConstants.CS_ID));
-            template.setSyncFlag(false);
-            templateService.softDelete(template);
-        }
         if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
                 .equals(EventTypes.EVENT_ISO_TEMPLATE_DELETE)) {
             JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
@@ -1108,11 +1074,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             }
             if (eventObject.getString("commandEventType").equals("VOLUME.UPLOAD")) {
                 // Resource count update for upload volume.
-                if (!convertEntityService.getDepartmentById(volume.getDepartmentId()).getType()
-                        .equals(AccountType.USER)) {
-                    updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_UploadVolume,
-                            volume.getDomainId(), CS_Domain, Update);
-                } else {
                     if (volume.getProjectId() != null) {
                         updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_UploadVolume,
                                 volume.getProjectId(), CS_Project, Update);
@@ -1120,7 +1081,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                         updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_UploadVolume,
                                 volume.getDepartmentId(), CS_Department, Update);
                     }
-                }
             }
             if (volumeService.findByUUID(volume.getUuid()) == null) {
                 if (eventObject.getString("commandEventType").equals("VOLUME.UPLOAD")) {
@@ -1135,11 +1095,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             }
             if (eventObject.getString("commandEventType").equals("VOLUME.CREATE")) {
                 // Resource count update for volume.
-                if (!convertEntityService.getDepartmentById(volume.getDepartmentId()).getType()
-                        .equals(AccountType.USER)) {
-                    updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_Volume, volume.getDomainId(),
-                            CS_Domain, Update);
-                } else {
                     if (volume.getProjectId() != null) {
                         updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_Volume, volume.getProjectId(),
                                 CS_Project, Update);
@@ -1147,7 +1102,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                         updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_Volume,
                                 volume.getDepartmentId(), CS_Department, Update);
                     }
-                }
             }
         }
         if (eventObject.getString("commandEventType").equals("VOLUME.ATTACH")
@@ -1785,10 +1739,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             Errors errors = new Errors(messageSource);
             volumeService.softDelete(volume);
             // Resource count delete for volume.
-            if (!convertEntityService.getDepartmentById(volume.getDepartmentId()).getType().equals(AccountType.USER)) {
-                updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_Volume, volume.getDomainId(),
-                        CS_Domain, Delete);
-            } else {
                 if (volume.getProjectId() != null) {
                     updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_Volume, volume.getProjectId(),
                             CS_Project, Delete);
@@ -1796,7 +1746,6 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     updateResourceCountService.QuotaUpdateByResourceObject(volume, CS_Volume, volume.getDepartmentId(),
                             CS_Department, Delete);
                 }
-            }
         }
     }
 
@@ -1823,5 +1772,24 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             }
         }
     }
+
+    public long ipToLong(String ipAddress) {
+    	long result = 0;
+		if (ipAddress != null) {
+			String[] ipAddressInArray = ipAddress.split("\\.");
+
+			for (int i = 0; i < ipAddressInArray.length; i++) {
+
+				int power = 3 - i;
+				int ip = Integer.parseInt(ipAddressInArray[i]);
+				result += ip * Math.pow(256, power);
+
+			}
+		} else {
+			result = 0;
+		}
+
+    	return result;
+      }
 
 }

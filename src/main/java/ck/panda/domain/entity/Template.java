@@ -11,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -166,7 +167,7 @@ public class Template implements Serializable {
     private String osVersion;
 
     /** Cost of the template. */
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @OrderBy("id DESC")
     private List<TemplateCost> templateCost;
 

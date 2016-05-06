@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.json.JSONArray;
@@ -18,8 +17,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
+import ck.panda.constants.EmailConstants;
+import ck.panda.constants.EventTypes;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.LoginHistory;
 import ck.panda.domain.entity.Permission;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.Role;
@@ -29,6 +31,7 @@ import ck.panda.domain.entity.User.Status;
 import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.repository.jpa.UserRepository;
+import ck.panda.rabbitmq.util.EmailEvent;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackUserService;
 import ck.panda.util.ConfigUtil;
@@ -95,6 +98,18 @@ public class UserServiceImpl implements UserService {
     /** Role service. */
     @Autowired
     private RoleService roleService;
+
+    /** Role service. */
+    @Autowired
+    private SyncService syncService;
+
+    /** Email job service. */
+    @Autowired
+    private EmailJobService emailJobService;
+
+    /** Login history service attribute. */
+    @Autowired
+    private LoginHistoryService loginHistoryService;
 
     /** Constant for generic UTF. */
     public static final String CS_UTF = "utf-8";
@@ -500,11 +515,31 @@ public class UserServiceImpl implements UserService {
                 String encryptedPassword = new String(EncryptionUtil.encrypt(user.getConfirmPassword(), originalKey));
                 user.setPassword(encryptedPassword);
             }
+            sendEmailForPasswordUpdate(user);
             return userRepository.save(user);
         } else {
             user.setStatus(Status.ACTIVE);
             return userRepository.save(user);
         }
+    }
+
+    /**
+     * Send an email for password updated user.
+     *
+     * @param user updated password details of user
+     * @throws Exception if errors throws exception.
+     */
+    private void sendEmailForPasswordUpdate(User user) throws Exception {
+        syncService.syncUpdateUserRole();
+        EmailEvent emailEvent = new EmailEvent();
+        emailEvent.setEntityUuid(user.getUuid());
+        emailEvent.setResourceUuid(user.getUuid());
+        emailEvent.setEvent(EventTypes.EVENT_USER_UPDATE);
+        emailEvent.setEventType(EmailConstants.ACCOUNT);
+        emailEvent.setEventDateTime(user.getUpdatedDateTime().toString());
+        emailEvent.setUser(convertEntityService.getOwnerByUuid(user.getUuid()).toString());
+        emailEvent.setSubject(EmailConstants.SUBJECT_ACCOUNT_PASSWORD);
+        emailJobService.sendMessageToQueue(emailEvent);
     }
 
     @Override
@@ -518,13 +553,40 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<User> findAllByUserPanelAndDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
-        return userRepository.findAllByUserPanelAndDomainId(domainId, User.Status.DELETED, pagingAndSorting.toPageRequest());
+    public Page<User> findAllByUserPanelAndDomainId(Long domainId, String searchText, PagingAndSorting pagingAndSorting) throws Exception {
+        List<UserType> userType = new ArrayList<UserType>();
+        if (searchText.equals(UserType.DOMAIN_ADMIN.toString())) {
+            userType.add(UserType.DOMAIN_ADMIN);
+            return userRepository.findAllByDomainId(domainId, true, userType, pagingAndSorting.toPageRequest());
+        }
+        if (searchText.equals(UserType.ROOT_ADMIN.toString())) {
+            userType.add(UserType.ROOT_ADMIN);
+            return userRepository.findAllByDomainId(domainId, true, userType, pagingAndSorting.toPageRequest());
+        }
+        if (searchText.equals(UserType.USER.toString())) {
+            userType.add(UserType.USER);
+            return userRepository.findAllByDomainId(domainId, true, userType, pagingAndSorting.toPageRequest());
+        }
+        return userRepository.findAllByUserPanelAndDomainId(domainId, searchText, User.Status.DELETED, pagingAndSorting.toPageRequest());
     }
 
     @Override
-    public Page<User> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception {
-        return userRepository.findAllByDomainId(domainId, pagingAndSorting.toPageRequest());
+    public Page<User> findAllByDomainId(Long domainId, String searchText, PagingAndSorting pagingAndSorting) throws Exception {
+
+        List<UserType> userType = new ArrayList<UserType>();
+        if (searchText.equals(UserType.DOMAIN_ADMIN.toString())) {
+            userType.add(UserType.DOMAIN_ADMIN);
+            return userRepository.findAllByDomainId(domainId, true, userType, pagingAndSorting.toPageRequest());
+        }
+        if (searchText.equals(UserType.ROOT_ADMIN.toString())) {
+            userType.add(UserType.ROOT_ADMIN);
+            return userRepository.findAllByDomainId(domainId, true, userType, pagingAndSorting.toPageRequest());
+        }
+        if (searchText.equals(UserType.USER.toString())) {
+            userType.add(UserType.USER);
+            return userRepository.findAllByDomainId(domainId, true, userType, pagingAndSorting.toPageRequest());
+        }
+        return userRepository.findAllByDomainId(domainId, searchText, pagingAndSorting.toPageRequest());
     }
 
     @Override
@@ -551,13 +613,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Page<User> findAllByActive(PagingAndSorting pagingAndSorting, Long id) throws Exception {
+            return userRepository.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
+    }
+
+    @Override
     public User updateSuspended(User user) throws Exception {
-        user.setStatus(User.Status.SUSPENDED);
+        User users = userRepository.findOne(user.getId());
+        users.setStatus(User.Status.SUSPENDED);
         // Update the vm status to stopped while suspending the account
         if(user.getStatus() == User.Status.SUSPENDED) {
-            virtualMachineService.updateVmToStoppedByOwnerAndStatus(user, VmInstance.Status.RUNNING);
+            virtualMachineService.updateVmToStoppedByOwnerAndStatus(users, VmInstance.Status.RUNNING);
         }
-        return userRepository.save(user);
+        return userRepository.save(users);
     }
 
     @Override
@@ -569,6 +637,7 @@ public class UserServiceImpl implements UserService {
     public String findByUserSessionDetails(Long id) throws Exception {
        User user = userRepository.findOne(id);
        Department department = departmentService.find(user.getDepartment().getId());
+       LoginHistory loginHistory = loginHistoryService.findByUserIdAndAlreadyLogin(user.getId(), true);
        Role role = roleService.findWithPermissionsByNameDepartmentAndIsActive(user.getRole().getName(), department.getId(), true);
        JSONObject jsonObject = new JSONObject();
        try {
@@ -583,6 +652,7 @@ public class UserServiceImpl implements UserService {
            jsonObject.put(RolePrincipal.LOGIN_USER_STATUS, user.getStatus());
            jsonObject.put(RolePrincipal.LOGIN_TIME, DateConvertUtil.getTimestamp());
            jsonObject.put(RolePrincipal.TIME_ZONE, timeZone.getID());
+           jsonObject.put(RolePrincipal.REMEMBER_ME, loginHistory.getRememberMe());
            JSONArray jsonArray = new JSONArray();
            Map<String, Object> hashList = new HashMap<String, Object>();
            for (int i = 0; i < role.getPermissionList().size(); i++) {
@@ -602,4 +672,13 @@ public class UserServiceImpl implements UserService {
        return jsonObject.toString();
     }
 
+    @Override
+    public List<User> findByRootAdminUser() throws Exception {
+        return userRepository.findByRootAdminUser(UserType.ROOT_ADMIN,true);
+    }
+
+    @Override
+    public List<User> findAllByDomain(Domain domain) throws Exception {
+        return userRepository.findAllUserByDomain(domain);
+    }
 }
