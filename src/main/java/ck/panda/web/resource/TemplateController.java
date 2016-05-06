@@ -21,6 +21,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
+import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.Template.TemplateType;
 import ck.panda.service.TemplateService;
@@ -87,25 +88,25 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     @RequestMapping(value = "/listall", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<Template> list(@RequestParam String sortBy, @RequestParam String type, @RequestHeader(value = RANGE) String range,
+    public List<Template> list(@RequestParam String sortBy, @RequestParam String type, @RequestHeader(value = RANGE) String range,@RequestParam String searchText,
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Template.class);
         if (type.contains(CloudStackConstants.TEMPLATE_NAME)) {
-            Page<Template> pageResponse = templateService.findAll(page);
+            Page<Template> pageResponse = templateService.findAllBySearchText(page,searchText);
             response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
             return pageResponse.getContent();
         } else if (type.contains(CloudStackConstants.ISO_TEMPLATE_NAME)) {
-            Page<Template> pageResponse = templateService.findAllIso(page);
+            Page<Template> pageResponse = templateService.findAllIsoAndSearchText(page,searchText);
             response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
             return pageResponse.getContent();
         } else if(type.contains("user")) {
-             Page<Template> pageResponse = templateService.findAllByUserIdAndType(page, type, Long.parseLong(tokenDetails.getTokenDetails("id")));
+             Page<Template> pageResponse = templateService.findAllByUserIdAndTypeSearchText(page, type, Long.parseLong(tokenDetails.getTokenDetails("id")),searchText);
               response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
              return pageResponse.getContent();
         }
         else {
-             Page<Template> pageResponse = templateService.findAllByType(page, type, true, true, Long.parseLong(tokenDetails.getTokenDetails("id")));
+             Page<Template> pageResponse = templateService.findAllByTypeAndSearchText(page, type, true, true, Long.parseLong(tokenDetails.getTokenDetails("id")),searchText);
              response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
              return pageResponse.getContent();
         }
@@ -184,6 +185,19 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     }
 
     /**
+     * List all the Active templates.
+     *
+     * @return templates.
+     * @throws Exception if error occurs.
+     */
+    @RequestMapping(value = "/listalltemplateSearchText", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Template> listAllActiveTemplateAndSearchText(@RequestParam("type") String type,@RequestParam String searchText) throws Exception {
+        return templateService.findAllTemplatesByIsActiveAndTypeSearchText(true,searchText);
+    }
+
+    /**
      * List all the templates by type.
      *
      * @param type of the template.
@@ -196,4 +210,53 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     public List<Template> listAllTemplateByType(@RequestParam("type") String type) throws Exception {
         return templateService.findAllTemplateByType(type, true, true, Long.parseLong(tokenDetails.getTokenDetails("id")));
     }
+
+
+    /**
+     * List all the Active templates.
+     *
+     * @return templates.
+     * @throws Exception if error occurs.
+     */
+    @RequestMapping(value = "/listalltemplateforadmin", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Template> listAllTemplateForAdmin(@RequestParam String sortBy,@RequestParam String type,
+            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Template.class);
+        if (type.contains(CloudStackConstants.TEMPLATE_NAME)) {
+            Page<Template> pageResponse = templateService.findAll(page);
+            response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+            return pageResponse.getContent();
+        } else if (type.contains(CloudStackConstants.ISO_TEMPLATE_NAME)) {
+            Page<Template> pageResponse = templateService.findAllIso(page);
+            response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+            return pageResponse.getContent();
+      } else if(type.contains("user")) {
+          Page<Template> pageResponse = templateService.findAllByUserIdAndType(page, type, Long.parseLong(tokenDetails.getTokenDetails("id")));
+          response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+         return pageResponse.getContent();
+    }
+    else {
+         Page<Template> pageResponse = templateService.findAllByType(page, type, true, true, Long.parseLong(tokenDetails.getTokenDetails("id")));
+         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+         return pageResponse.getContent();
+    }
+    }
+
+    /**
+     * List all the templates by type.
+     *
+     * @param type of the template.
+     * @return template.
+     * @throws Exception if error occurs.
+     */
+    @RequestMapping(value = "/listalltemplateByTypeSearchText", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Template> listAllTemplateByTypeAndSearchText(@RequestParam("type") String type,@RequestParam String searchText) throws Exception {
+        return templateService.findAllTemplateByTypeAndSearchText(type, true, true, Long.parseLong(tokenDetails.getTokenDetails("id")),searchText);
+    }
+
 }

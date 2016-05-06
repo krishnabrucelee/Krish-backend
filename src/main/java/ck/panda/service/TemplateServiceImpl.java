@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
@@ -253,8 +254,19 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
+    public Page<Template> findAllBySearchText(PagingAndSorting pagingAndSorting,String searchText) throws Exception {
+        csPrepareTemplate(templateRepository.findByTemplate(ALL_TEMPLATE, TemplateType.SYSTEM, Status.INACTIVE, true));
+        return templateRepository.findAllByTypeAndSearchText(TemplateType.SYSTEM, Template.Format.ISO, pagingAndSorting.toPageRequest(), true,searchText);
+    }
+
+    @Override
     public Page<Template> findAllIso(PagingAndSorting pagingAndSorting) throws Exception {
         return templateRepository.findAllByFormat(TemplateType.SYSTEM, Template.Format.ISO, pagingAndSorting.toPageRequest(), true);
+    }
+
+    @Override
+    public Page<Template> findAllIsoAndSearchText(PagingAndSorting pagingAndSorting, String searchText) throws Exception {
+        return templateRepository.findAllByFormatAndSearchText(TemplateType.SYSTEM, Template.Format.ISO, pagingAndSorting.toPageRequest(), true,searchText);
     }
 
     @Override
@@ -804,10 +816,46 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
+    public Page<Template> findAllByTypeAndSearchText(PagingAndSorting pagingAndSorting, String type, Boolean featured,Boolean shared, Long userId, String searchText) throws Exception {
+        Page<Template> templates = null;
+        User user = convertEntityService.getOwnerById(userId);
+        if(user.getType().equals(UserType.ROOT_ADMIN)) {
+              if (type.equals(TEMPLATE_FEATURED)) {
+                  templates = templateRepository.findAllTemplateByFeaturedAndSearchText(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), featured, shared, true,searchText);
+              } else if (type.equals(TEMPLATE_COMMUNITY)) {
+                  templates = templateRepository.findAllTemplateByCommunityAndSearchText(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), shared, true,searchText);
+              }
+        }
+        else {
+            List<User> userList = userService.findByRootAdminUser();
+            for(User rootUser: userList) {
+                List<Template> templateList = templateRepository.findByTemplateOwnerIdAndIsActive(rootUser.getId(), true);
+            if (type.equals(TEMPLATE_FEATURED)) {
+                 if(templateList.size() != 0) {
+                templates = templateRepository.findTemplateByFeaturedAndSearchText(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), featured, shared, true,user.getDomainId(),rootUser.getId(),searchText);
+                 }
+            } else if (type.equals(TEMPLATE_COMMUNITY)) {
+                if(templateList.size() != 0) {
+                templates = templateRepository.findTemplateByCommunityAndSearchText(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), shared, true,user.getDomainId(),rootUser.getId(),searchText);
+            }
+               }
+            }
+        }
+         return templates;
+    }
+
+    @Override
     public Page<Template> findAllByUserIdAndType(PagingAndSorting pagingAndSorting, String type, Long userId) throws Exception {
         User user = convertEntityService.getOwnerById(userId);
         return templateRepository.findTemplateByUserId(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), user.getId(),user.getDepartmentId(), true);
     }
+
+    @Override
+    public Page<Template> findAllByUserIdAndTypeSearchText(PagingAndSorting pagingAndSorting, String type, Long userId, String searchText) throws Exception {
+        User user = convertEntityService.getOwnerById(userId);
+        return templateRepository.findTemplateByUserIdAndSearchText(TemplateType.SYSTEM, pagingAndSorting.toPageRequest(), user.getId(),user.getDepartmentId(), true,searchText);
+    }
+
      /**
      * Add cost for newly created template.
      *
@@ -870,6 +918,12 @@ public class TemplateServiceImpl implements TemplateService {
         return (List<Template>) templateRepository.findAllTemplatesByIsActiveAndType(TemplateType.SYSTEM, true);
     }
 
+    @Override
+    public List<Template> findAllTemplatesByIsActiveAndTypeSearchText(Boolean isActive, String searchText) throws Exception {
+        return (List<Template>) templateRepository.findAllTemplatesByIsActiveAndTypeAndSearchText(TemplateType.SYSTEM, true,searchText);
+    }
+
+
     /**
      * Set optional value for MR.ping api call.
      *
@@ -921,6 +975,36 @@ public class TemplateServiceImpl implements TemplateService {
         return templates;
     }
 
+    @Override
+    public List<Template> findAllTemplateByTypeAndSearchText(String type, Boolean featured, Boolean shared,Long userId,String searchText) throws Exception {
+        List<Template> templates = null;
+        User user = convertEntityService.getOwnerById(userId);
+        if(user.getType().equals(UserType.ROOT_ADMIN)) {
+              if (type.equals(TEMPLATE_FEATURED)) {
+                  templates = templateRepository.listAllTemplateByFeaturedAndSearchText(TemplateType.SYSTEM, featured, shared, true,searchText);
+              } else if (type.equals(TEMPLATE_COMMUNITY)) {
+                  templates = templateRepository.listAllTemplateByCommunityAndSearchText(TemplateType.SYSTEM, shared, true,searchText);
+              }
+        }
+        else {
+            List<User> userList = userService.findByRootAdminUser();
+            for(User rootUser: userList) {
+                List<Template> templateList = templateRepository.findByTemplateOwnerIdAndIsActiveSearchText(rootUser.getId(), true,searchText);
+
+            if (type.equals(TEMPLATE_FEATURED)) {
+                if(templateList.size() != 0) {
+                templates = templateRepository.listTemplateByFeaturedAndDomainIdAndSearchText(TemplateType.SYSTEM, featured, shared, true,user.getDomainId(),rootUser.getId(),searchText);
+                }
+            } else if (type.equals(TEMPLATE_COMMUNITY)) {
+                if(templateList.size() != 0) {
+                templates = templateRepository.listTemplateByCommunityAndSearchText(TemplateType.SYSTEM, shared, true,user.getDomainId(),rootUser.getId(),searchText);
+            }
+            }
+          }
+        }
+        return templates;
+    }
+
     /**
      * To save template cost.
      *
@@ -963,11 +1047,13 @@ public class TemplateServiceImpl implements TemplateService {
         User user = convertEntityService.getOwnerById(userId);
         if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
             if (user.getType().equals(UserType.DOMAIN_ADMIN)) {
-            	return templateRepository.findAllByDomainIdIsActiveAndShare(type, false, true, user.getDomainId());
+                return templateRepository.findAllByDomainIdIsActiveAndShare(type, false, true, user.getDomainId());
             } else {
                 return templateRepository.findAllByUserId(type, userId, user.getDepartmentId(), true);
             }
         }
         return templateRepository.findAllByCommunity(type, true, Template.Status.ACTIVE, true);
     }
+
+
 }

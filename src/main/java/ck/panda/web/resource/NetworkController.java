@@ -180,11 +180,11 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<Network> listNetworkByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
+    public List<Network> listNetworkByDomainId(@RequestParam String sortBy, @RequestParam Long domainId, @RequestParam String searchText,
             @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Network.class);
-        Page<Network> pageResponse = networkService.findAllByDomainId(domainId, page);
+        Page<Network> pageResponse = networkService.findAllByDomainIdAndSearchText(domainId, page,searchText);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }

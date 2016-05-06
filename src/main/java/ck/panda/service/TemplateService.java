@@ -113,6 +113,18 @@ public interface TemplateService extends CRUDService<Template> {
     Page<Template> findAllByType(PagingAndSorting pagingAndSorting, String type, Boolean featured, Boolean shared,Long userId)throws Exception;
 
     /**
+     * To get list of template by Community and Featured Templates.
+     *
+     * @param pagingAndSorting page
+     * @param type template type
+     * @param featured template
+     * @param shared template
+     * @return type of the template
+     */
+    Page<Template> findAllByTypeAndSearchText(PagingAndSorting pagingAndSorting, String type, Boolean featured, Boolean shared,Long userId, String searchText)throws Exception;
+
+
+    /**
      * To save the created template based on user id.
      *
      * @param template to be created.
@@ -151,10 +163,10 @@ public interface TemplateService extends CRUDService<Template> {
      * @throws Exception if error occurs.
      */
     List<Template> findAllTemplatesByIsActiveAndType(Boolean isActive) throws Exception;
-    
+
     /**
      * Find all by domain id, is active and share
-     * 
+     *
      * @param type template type.
      * @param status template status.
      * @param isActive true/false.
@@ -162,7 +174,7 @@ public interface TemplateService extends CRUDService<Template> {
      * @return template list.
      * @throws Exception if errors.
      */
-    List<Template> findAllByUserIdIsActiveAndShare(TemplateType type, Status status, Boolean isActive, Long userId) throws Exception;    
+    List<Template> findAllByUserIdIsActiveAndShare(TemplateType type, Status status, Boolean isActive, Long userId) throws Exception;
 
     /**
      * Find all the templates by type, isActive status and user Id.
@@ -174,6 +186,17 @@ public interface TemplateService extends CRUDService<Template> {
      * @return templates.
      * @throws Exception if error occurs.
      */
-	List<Template> findAllTemplateByType(String type, Boolean featured, Boolean shared,Long userId) throws Exception;
+    List<Template> findAllTemplateByType(String type, Boolean featured, Boolean shared,Long userId) throws Exception;
+
+    Page<Template> findAllBySearchText(PagingAndSorting pagingAndSorting, String searchText) throws Exception;
+
+    Page<Template> findAllIsoAndSearchText(PagingAndSorting pagingAndSorting, String searchText) throws Exception;
+
+    Page<Template> findAllByUserIdAndTypeSearchText(PagingAndSorting pagingAndSorting, String type, Long userId,
+            String searchText) throws Exception;
+
+    List<Template> findAllTemplateByTypeAndSearchText(String type, Boolean featured, Boolean shared, Long userId,
+            String searchText) throws Exception;
+
+    List<Template> findAllTemplatesByIsActiveAndTypeSearchText(Boolean isActive, String searchText) throws Exception;
 }
-	

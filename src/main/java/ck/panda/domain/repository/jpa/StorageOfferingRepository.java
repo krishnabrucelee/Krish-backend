@@ -84,4 +84,16 @@ public interface StorageOfferingRepository extends PagingAndSortingRepository<St
      */
     @Query(value = "SELECT storage FROM StorageOffering storage WHERE storage.domainId = :domainId AND storage.isActive = :isActive")
     Page<StorageOffering> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, Pageable pageable);
+
+    /**
+     * Find all storage offerings by domain id and search text along with pagination.
+     *
+     * @param domainId of the storage offering.
+     * @param pagingAndSorting for pagination.
+     * @param searchText for storage offering.
+     * @return storage offering.
+     */
+    @Query(value = "SELECT storage FROM StorageOffering storage WHERE (storage.domainId = :domainId OR 0L = :domainId) AND storage.isActive = :isActive AND (storage.name LIKE %:search% OR storage.diskSize LIKE %:search% "
+            + "OR storage.storageType LIKE %:search% OR storage.isCustomDisk LIKE %:search% )")
+    Page<StorageOffering> findAllByDomainIdAndIsActiveAndSearchText(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, Pageable pageable,@Param("search") String searchText);
 }
