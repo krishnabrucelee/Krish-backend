@@ -25,6 +25,16 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     List<User> findAllByActive(@Param("query") String query);
 
     /**
+     * Find all the active Users with pagination.
+     *
+     * @param pageable to get the list with pagination
+     * @param isActive get the User list based on active/inactive status
+     * @return list of users
+     */
+    @Query(value = "SELECT user FROM User user LEFT JOIN user.role WHERE user.isActive =:isActive")
+    Page<User> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
+
+    /**
      * Find the user already exist for the same domain.
      *
      * @param userName userName of the user
@@ -251,6 +261,5 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      */
     @Query(value = "SELECT user FROM User user WHERE user.type = :type AND user.isActive = :isActive")
     List<User> findByRootAdminUser(@Param("type") UserType type, @Param("isActive") Boolean isActive);
-
 
 }
