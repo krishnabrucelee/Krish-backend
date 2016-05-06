@@ -18,7 +18,7 @@ public class SomeExternalServiceAuthenticator implements ExternalServiceAuthenti
 
     @Override
     public AuthenticationWithToken authenticate(String userName, String roleName, Role role, User user,
-            String buildVersion, String rememberMe, String loginToken) {
+            String buildVersion, String rememberMe, String loginToken, Integer eventTotal) {
         ExternalWebServiceStub externalWebService = new ExternalWebServiceStub();
 
         // Do all authentication mechanisms required by external web service
@@ -49,7 +49,7 @@ public class SomeExternalServiceAuthenticator implements ExternalServiceAuthenti
         } else {
             // Reduced the role principal parameter count
             authenticatedExternalWebService = new AuthenticatedExternalWebService(
-                    new RolePrincipal(user, userName, role, buildVersion, rememberMe, loginToken), null,
+                    new RolePrincipal(user, userName, role, buildVersion, rememberMe, loginToken, eventTotal), null,
                     AuthorityUtils.commaSeparatedStringToAuthorityList(roleName));
         }
         authenticatedExternalWebService.setExternalWebService(externalWebService);

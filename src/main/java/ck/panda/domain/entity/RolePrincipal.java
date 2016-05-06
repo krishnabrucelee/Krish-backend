@@ -75,6 +75,9 @@ public class RolePrincipal {
     /** Login history token. */
     public static final String LOGIN_HISTORY_TOKEN = "loginToken";
 
+    /** Login event list count token. */
+    public static final String EVENT_TOTAL = "eventTotal";
+
     /** User name attributes. */
     private String userName;
 
@@ -93,6 +96,9 @@ public class RolePrincipal {
     /** Login history token attribute. */
     private String loginToken;
 
+    /** Login event list count token attribute. */
+    private Integer eventTotal;
+
     /**
      * Default constructor.
      */
@@ -109,13 +115,14 @@ public class RolePrincipal {
      * @param loginToken to set
      * @param buildVersion to set
      */
-    public RolePrincipal(User user, String userName, Role role, String buildVersion, String rememberMe, String loginToken) {
+    public RolePrincipal(User user, String userName, Role role, String buildVersion, String rememberMe, String loginToken, Integer eventTotal) {
         this.user = user;
         this.userName = userName;
         this.role = role;
         this.buildVersion = buildVersion;
         this.rememberMe = rememberMe;
         this.loginToken = loginToken;
+        this.eventTotal = eventTotal;
     }
 
     @Override
@@ -143,6 +150,8 @@ public class RolePrincipal {
                 jsonObject.put(LOGIN_HISTORY_TOKEN, loginToken);
                 jsonObject.put(LOGIN_TIME, DateConvertUtil.getTimestamp());
                 jsonObject.put(TIME_ZONE, timeZone.getID());
+                jsonObject.put(EVENT_TOTAL, eventTotal);
+
                 JSONArray jsonArray = new JSONArray();
                 Map<String, Object> hashList = new HashMap<String, Object>();
                 for (int i = 0; i < role.getPermissionList().size(); i++) {

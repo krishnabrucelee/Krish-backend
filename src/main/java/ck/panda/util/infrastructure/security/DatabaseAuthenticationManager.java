@@ -1,7 +1,9 @@
 package ck.panda.util.infrastructure.security;
 
 import java.util.Calendar;
+import java.util.EventListener;
 import java.util.HashMap;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
 import org.json.JSONArray;
@@ -24,7 +26,10 @@ import ck.panda.domain.entity.LoginHistory;
 import ck.panda.domain.entity.LoginSecurityTrack;
 import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.Event;
+import ck.panda.domain.entity.Event.EventType;
 import ck.panda.service.DepartmentService;
+import ck.panda.service.EventNotificationService;
 import ck.panda.service.GeneralConfigurationService;
 import ck.panda.service.LoginHistoryService;
 import ck.panda.service.LoginSecurityTrackService;
@@ -78,6 +83,10 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
     /** Cloud stack configuration reference. */
     @Autowired
     private ConfigUtil configUtil;
+
+    /** Cloud stack configuration reference. */
+    @Autowired
+    private EventNotificationService eventNotificationService;
 
     /** Cloud stack authentication service. */
     @Autowired
@@ -223,7 +232,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
         if (userName.get().equals(backendAdminUserName) && password.get().equals(backendAdminPassword)) {
             String loginToken = UUID.randomUUID().toString();
             resultOfAuthentication = externalServiceAuthenticator.authenticate(backendAdminUserName, backendAdminRole,
-                    null, null, buildNumber, rememberMe, loginToken);
+                    null, null, buildNumber, rememberMe, loginToken, 0);
             String newToken = null;
             try {
                 newToken = tokenService.generateNewToken(user, ROOT_DOMAIN, rememberMe);
@@ -255,6 +264,7 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
      */
     public AuthenticationWithToken userLoginAuthentication(Optional<String> userName, String domain, Optional<String> password, String rememberMe,
             AuthenticationWithToken resultOfAuthentication, User user, String forceLogin, String forwardedFor) throws Exception {
+        Integer eventTotal;
         if (user == null) {
             loginAttemptvalidationCheck("error.login.credentials", CloudStackConstants.STATUS_INACTIVE, forwardedFor);
         } else if (user != null && !user.getIsActive()) {
@@ -270,8 +280,18 @@ public class DatabaseAuthenticationManager implements AuthenticationManager {
                 String loginToken = UUID.randomUUID().toString();
                 Department department = departmentService.find(user.getDepartment().getId());
                 Role role = roleService.findWithPermissionsByNameDepartmentAndIsActive(user.getRole().getName(), department.getId(), true);
+                if(domain.equals(BACKEND_ADMIN))
+                {
+                    List<Event> eventList = eventNotificationService.findEventListCountByRootAdmin(EventType.ACTION, true, false);
+                     eventTotal = eventList.size();
+                } else
+                {
+                    List<Event> eventList = eventNotificationService.findAllByOwnerIdAndEventCount(user.getId(), EventType.ACTION, true, false);
+                     eventTotal = eventList.size();
+                }
+
                 resultOfAuthentication = externalServiceAuthenticator.authenticate(userName.get(),
-                        user.getRole().getName(), role, user, buildNumber, rememberMe, loginToken);
+                        user.getRole().getName(), role, user, buildNumber, rememberMe, loginToken, eventTotal);
                 String newToken = null;
                 try {
                     newToken = tokenService.generateNewToken(user, domain, rememberMe);

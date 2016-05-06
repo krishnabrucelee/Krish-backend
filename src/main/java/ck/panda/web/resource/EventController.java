@@ -35,65 +35,84 @@ import ck.panda.util.web.CRUDController;
 @Api(value = "events", description = "Operations with event", produces = "application/json")
 public class EventController extends CRUDController<Event> implements ApiController  {
 
-	/** Event notification service for tracking.*/
-	@Autowired
-	private EventNotificationService eventNotificationService;
+    /** Event notification service for tracking.*/
+    @Autowired
+    private EventNotificationService eventNotificationService;
 
     /** Autowired TokenDetails. */
     @Autowired
     private TokenDetails tokenDetails;
 
-	@Override
-	public List<Event> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
-			@RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
-					throws Exception {
-		PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Event.class);
-		Page<Event> pageResponse = eventNotificationService.findAllByOwnerIdAndEventTypeAndActiveAndExceptArchive(Long.parseLong(tokenDetails.getTokenDetails("id")), page, EventType.ACTION, true, false);
-		response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
-		return pageResponse.getContent();
-	}
+    @Override
+    public List<Event> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
+            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
+                    throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Event.class);
+        Page<Event> pageResponse = eventNotificationService.findAllByOwnerIdAndEventTypeAndActiveAndExceptArchive(Long.parseLong(tokenDetails.getTokenDetails("id")), page, EventType.ACTION, true, false);
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
+    }
 
-	/**
-	 * Get the list of events by user and date range.
-	 *
-	 * @param startDate start date for event.
-	 * @param endDate end date for event.
-	 * @return event list.
-	 * @throws Exception unhandled errors.
-	 */
-	@RequestMapping(value = "/list/date", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	@ResponseStatus(HttpStatus.OK)
-	@ResponseBody
-	public List<Event> findEventListByDateRange(@RequestParam("startDate") String startDate,
-			@RequestParam("endDate") String endDate, @RequestParam String sortBy,
-			@RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
-			HttpServletRequest request, HttpServletResponse response) throws Exception {
-		ZonedDateTime startDateTime = ZonedDateTime.parse(startDate);
-		ZonedDateTime endDateTime = ZonedDateTime.parse(endDate);
-		PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Event.class);
-		Page<Event> pageResponse = eventNotificationService.findAllByUserAndInBetweenEventDates(
-				Long.parseLong(tokenDetails.getTokenDetails("id")), startDateTime, endDateTime, page);
-		response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
-		return pageResponse.getContent();
-	}
+    /**
+     * Get the list of events by user and date range.
+     *
+     * @param startDate start date for event.
+     * @param endDate end date for event.
+     * @return event list.
+     * @throws Exception unhandled errors.
+     */
+    @RequestMapping(value = "/list/date", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Event> findEventListByDateRange(@RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate, @RequestParam String sortBy,
+            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        ZonedDateTime startDateTime = ZonedDateTime.parse(startDate);
+        ZonedDateTime endDateTime = ZonedDateTime.parse(endDate);
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Event.class);
+        Page<Event> pageResponse = eventNotificationService.findAllByUserAndInBetweenEventDates(
+                Long.parseLong(tokenDetails.getTokenDetails("id")), startDateTime, endDateTime, page);
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
+    }
 
-	/**
-	 * Get the list of events by user and date range.
-	 *
-	 * @param startDate start date for event.
-	 * @param endDate end date for event.
-	 * @return event list.
-	 * @throws Exception unhandled errors.
-	 */
-	@RequestMapping(value = "/list/event", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
-	@ResponseStatus(HttpStatus.OK)
-	@ResponseBody
-	public List<Event> findEventListByType(@RequestParam("type") String eventType, @RequestParam String sortBy,
-			@RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
-			HttpServletRequest request, HttpServletResponse response) throws Exception {
-		PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Event.class);
-		Page<Event> pageResponse = eventNotificationService.findAllByEventTypeAndActiveAndExceptArchive( EventType.valueOf(eventType), page, true, false);
-		response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
-		return pageResponse.getContent();
-	}
+    /**
+     * Get the list of events by user and date range.
+     *
+     * @param startDate start date for event.
+     * @param endDate end date for event.
+     * @return event list.
+     * @throws Exception unhandled errors.
+     */
+    @RequestMapping(value = "/list/event", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Event> findEventListByType(@RequestParam("type") String eventType, @RequestParam String sortBy,
+            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Event.class);
+        Page<Event> pageResponse = eventNotificationService.findAllByEventTypeAndActiveAndExceptArchive( EventType.valueOf(eventType), page, true, false);
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
+    }
+
+    /**
+     * Get the list of events by user and date range.
+     *
+     * @param startDate start date for event.
+     * @param endDate end date for event.
+     * @return event list.
+     * @throws Exception unhandled errors.
+     */
+    @RequestMapping(value = "/events/rootadmin", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Event> findEventListByTypes(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
+            @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Event.class);
+        Page<Event> pageResponse = eventNotificationService.findEventListByRootAdmin(page, EventType.ACTION, true, false);
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
+    }
 }
