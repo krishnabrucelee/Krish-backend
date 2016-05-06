@@ -352,7 +352,7 @@ public class VpcOffering implements Serializable {
         vpcOffering.setDisplayText(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_DISPLAY_TEXT));
         vpcOffering.setDistributedVpcRouter(JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_DISTRIBUTED_VPC_ROUTER));
         vpcOffering.setIsDefault(JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_IS_DEFAULT));
-        if (JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_STATE).equals("Enabled")) {
+        if (JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_STATE).equals(CloudStackConstants.CS_ENABLED)) {
             vpcOffering.setStatus(Status.ENABLED);
         } else {
             vpcOffering.setStatus(Status.DISABLED);

@@ -735,4 +735,7 @@ public class CloudStackConstants {
     /** Constant for supports region level VPC. */
     public static final String CS_SUPPORTS_REGION_LEVEL_VPC = "supportsregionLevelvpc";
 
+    /** Constant for enabled state. */
+    public static final String CS_ENABLED = "Enabled";
+
 }
