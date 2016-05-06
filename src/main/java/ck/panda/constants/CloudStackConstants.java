@@ -726,4 +726,13 @@ public class CloudStackConstants {
     /** Constant for project. */
     public static final String PROJECT = "project";
 
+    /** Constant for distributed VPC router. */
+    public static final String CS_DISTRIBUTED_VPC_ROUTER = "distributedvpcrouter";
+
+    /** Constant for is default. */
+    public static final String CS_IS_DEFAULT = "isdefault";
+
+    /** Constant for supports region level VPC. */
+    public static final String CS_SUPPORTS_REGION_LEVEL_VPC = "supportsregionLevelvpc";
+
 }
