@@ -426,7 +426,7 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
                     if (resourceTypeMap.get(name).equals("Memory")) {
                         resourceMap.put(resourceTypeMap.get(name), (EmptytoLong(resourceLimitDepartment.getMax()) + (EmptytoLong(resourceLimitDomain.getMax()) - EmptytoLong(resourceLimitDomain.getUsedLimit()))) / 1024);
                     } else {
-                    resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitDepartment.getMax()) + (EmptytoLong(resourceLimitDomain.getMax()) - EmptytoLong(resourceLimitDomain.getUsedLimit())));
+                        resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitDepartment.getMax()) + (EmptytoLong(resourceLimitDomain.getMax()) - EmptytoLong(resourceLimitDomain.getUsedLimit())));
                     }
                 }
             }
