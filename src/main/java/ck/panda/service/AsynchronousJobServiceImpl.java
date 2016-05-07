@@ -1407,7 +1407,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
 			if (vpc != null) {
 				vpc.setcIDR(jobresultReponse.getString(CloudStackConstants.CS_CIDR));
 				if (jobresultReponse.has(CloudStackConstants.CS_VPC_OFFERING_ID)) {
-					vpc.setVpcoffering_id(convertEntityService.getVpcOfferingByuuid(jobresultReponse.getString(CloudStackConstants.CS_VPC_OFFERING_ID)).getId());
+					vpc.setVpcofferingid(convertEntityService.getVpcOfferingByuuid(jobresultReponse.getString(CloudStackConstants.CS_VPC_OFFERING_ID)).getId());
 				}
 				vpc.setDomainId(convertEntityService.getDomainId(jobresultReponse.getString(CloudStackConstants.CS_DOMAIN_ID)));
 				if(jobresultReponse.has(CloudStackConstants.CS_PROJECT_ID)) {
@@ -1455,7 +1455,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
 			if (vpc != null) {
 				vpc.setcIDR(jobresultReponse.getString(CloudStackConstants.CS_CIDR));
 				if (jobresultReponse.has(CloudStackConstants.CS_VPC_OFFERING_ID)) {
-					vpc.setVpcoffering_id(convertEntityService
+					vpc.setVpcofferingid(convertEntityService
 							.getVpcOfferingByuuid(jobresultReponse.getString(CloudStackConstants.CS_VPC_OFFERING_ID))
 							.getId());
 				}

@@ -537,8 +537,8 @@ public class VPCServiceImpl implements VPCService {
 		if (vpc.getDescription() != null && vpc.getDescription().trim() != "") {
 			optional.put(CloudStackConstants.CS_DISPLAY_TEXT, vpc.getDescription());
 		}
-		if (vpc.getVpcOffering() != null) {
-			optional.put(CloudStackConstants.CS_VPC_OFFERING_ID, vpc.getVpcOffering().getUuid());
+		if (vpc.getVpcofferingid() != null) {
+			optional.put(CloudStackConstants.CS_VPC_OFFERING_ID, convertEntityService.getVpcOfferingById(vpc.getVpcofferingid()).getUuid());
 		}
 		if (vpc.getProjectId() != null) {
 			optional.put(CloudStackConstants.CS_PROJECT_ID,

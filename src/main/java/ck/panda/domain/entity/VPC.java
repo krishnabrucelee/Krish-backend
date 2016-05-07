@@ -77,7 +77,7 @@ public class VPC implements Serializable {
 
     /** Offering id of the VPC. */
     @Column(name = "vpcoffering_id")
-    private Long vpcoffering_id;
+    private Long vpcofferingId;
 
     /** Domain id of the VPC. */
     @Column(name = "domain_id")
@@ -623,8 +623,8 @@ public class VPC implements Serializable {
 	 *
 	 * @return the vpcoffering_id
 	 */
-	public Long getVpcoffering_id() {
-		return vpcoffering_id;
+	public Long getVpcofferingid() {
+		return vpcofferingId;
 	}
 
 	/**
@@ -641,8 +641,8 @@ public class VPC implements Serializable {
 	 *
 	 * @param vpcoffering_id the vpcoffering_id to set
 	 */
-	public void setVpcoffering_id(Long vpcoffering_id) {
-		this.vpcoffering_id = vpcoffering_id;
+	public void setVpcofferingid(Long vpcofferingId) {
+		this.vpcofferingId = vpcofferingId;
 	}
 
 	/**

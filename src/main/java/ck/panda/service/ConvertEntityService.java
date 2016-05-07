@@ -1436,4 +1436,8 @@ public class ConvertEntityService {
         return null;
     }
 
+	public VpcOffering getVpcOfferingById(Long vpcofferingid) throws Exception {
+		return vpcOfferingService.find(vpcofferingid);
+	}
+
 }
