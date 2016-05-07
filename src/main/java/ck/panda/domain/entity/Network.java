@@ -102,12 +102,12 @@ public class Network implements Serializable {
     @Column(name = "networkoffering_id")
     private Long networkOfferingId;
 
-    /** Zone Object for the Network. */
+    /** VPC Object for the Network. */
     @JoinColumn(name = "vpc_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
     private VPC vpc;
 
-    /** id for the Zone. */
+    /** VPC id for the Network. */
     @Column(name = "vpc_id")
     private Long vpcId;
 
@@ -211,6 +211,10 @@ public class Network implements Serializable {
     /** To check whether network is restarted. */
     @Column(name = "network_restart")
     private Boolean networkRestart;
+
+    /** Transient ACL id of the network. */
+    @Transient
+    private String transVpcAclId;
 
     /** Enum type for Network Type. */
     public enum NetworkType {
@@ -792,6 +796,24 @@ public class Network implements Serializable {
     }
 
     /**
+     * Get the transVpcAclId.
+     *
+     * @return the transVpcAclId
+     */
+    public String getTransVpcAclId() {
+        return transVpcAclId;
+    }
+
+    /**
+     * Set the transVpcAclId.
+     *
+     * @param transVpcAclId to set
+     */
+    public void setTransVpcAclId(String transVpcAclId) {
+        this.transVpcAclId = transVpcAclId;
+    }
+
+    /**
      * Get the netMask of the Network.
      *
      * @return the netMask
@@ -978,6 +1000,7 @@ public class Network implements Serializable {
             network.setNetMask(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_NETMASK));
             network.setNetworkDomain(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_NETWORK_DOMAIN));
             network.setTransProjectId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_PROJECT_ID));
+            network.setTransVpcAclId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_VPC_ID));
             network.setIsActive(true);
         } catch (Exception ex) {
             ex.printStackTrace();

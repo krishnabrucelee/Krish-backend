@@ -35,6 +35,7 @@ public class CloudStackVPCService {
      * @param vpcOfferingId vpc offering id
      * @param zoneId zone id
      * @param optional value
+     * @param response format
      * @return response sting
      * @throws Exception unhandled errors.
      */
@@ -54,6 +55,7 @@ public class CloudStackVPCService {
      * List VPCs.
      *
      * @param optional value
+     * @param response format
      * @return string value
      * @throws Exception unhandled errors.
      */
@@ -71,6 +73,7 @@ public class CloudStackVPCService {
      * Retrieves the current status of asynchronous job for vpc.
      *
      * @param asychronousJobid the ID of the asychronous job
+     * @param response format
      * @return string value
      * @throws Exception unhandled errors.
      */
@@ -89,6 +92,7 @@ public class CloudStackVPCService {
      * Retrieves the current status of asynchronous job for vpcoffering.
      *
      * @param asychronousJobid the ID of the asychronous job
+     * @param response format
      * @return string value
      * @throws Exception unhandled errors.
      */
@@ -107,6 +111,7 @@ public class CloudStackVPCService {
      * Retrieves the current status of asynchronous job for privategateway.
      *
      * @param asychronousJobid the ID of the asychronous job
+     * @param response format
      * @return stirng value
      * @throws Exception unhandled errors.
      */
@@ -125,6 +130,7 @@ public class CloudStackVPCService {
      * Retrieves the current status of asynchronous job for staticroute.
      *
      * @param asychronousJobid the ID of the asychronous job
+     * @param response format
      * @return string value
      * @throws Exception unhandled errors.
      */
@@ -143,6 +149,7 @@ public class CloudStackVPCService {
      * Delete VPC.
      *
      * @param vpcId vpc id
+     * @param response format
      * @return string value
      * @throws Exception unhandled errors.
      */
@@ -163,6 +170,7 @@ public class CloudStackVPCService {
      * @param vpcId the id of the VPC
      * @param vpcName name of the VPC
      * @param optional value
+     * @param response format
      * @return string value
      * @throws Exception unhandled errors.
      */
@@ -183,6 +191,7 @@ public class CloudStackVPCService {
      * Restart VPC.
      *
      * @param vpcId vpc id
+     * @param response format
      * @return string value
      * @throws Exception unhandled errors.
      */
@@ -205,6 +214,7 @@ public class CloudStackVPCService {
      * @param vpcOfferingId the id of the vpc offering
      * @param supportedServices services supported by the vpc offering
      * @param optional value
+     * @param response format
      * @return string value
      * @throws Exception unhandled errors.
      */
@@ -228,6 +238,7 @@ public class CloudStackVPCService {
      *
      * @param vpcOfferingId the id of the vpc offering
      * @param optional value
+     * @param response format
      * @return string value
      * @throws Exception unhandled errors.
      */
@@ -247,6 +258,7 @@ public class CloudStackVPCService {
      * Delete VPCOffering.
      *
      * @param vpcOfferingId vpc offering id
+     * @param response format
      * @return string value
      * @throws Exception unhandled errors.
      */
@@ -265,6 +277,7 @@ public class CloudStackVPCService {
      * List VPCOfferings.
      *
      * @param optional value
+     * @param response format
      * @return string value
      * @throws Exception unhandled errors.
      */
@@ -287,6 +300,7 @@ public class CloudStackVPCService {
      * @param vlan the Vlan for the private gateway
      * @param vpcId the VPC network belongs to
      * @param optional value
+     * @param response format
      * @return string value
      * @throws Exception unhandled errors.
      */
@@ -310,6 +324,7 @@ public class CloudStackVPCService {
      * List PrivateGateways.
      *
      * @param optional value
+     * @param response format
      * @return string value
      * @throws Exception unhandled errors.
      */
@@ -327,6 +342,7 @@ public class CloudStackVPCService {
      * Deletes a Private gateway.
      *
      * @param privateGatewayId private gateway id
+     * @param response format
      * @return string value
      * @throws Exception unhandled errors.
      */
@@ -346,6 +362,7 @@ public class CloudStackVPCService {
      *
      * @param cidr cidr address id of the vpc server
      * @param gatewayId gateway id
+     * @param response format
      * @return string value
      * @throws Exception unhandled errors.
      */
@@ -365,6 +382,7 @@ public class CloudStackVPCService {
      * Deletes a Static Route.
      *
      * @param staticRouteId static route id
+     * @param response format
      * @return string value
      * @throws Exception unhandled errors.
      */
@@ -383,6 +401,7 @@ public class CloudStackVPCService {
      * List StaticRoutes.
      *
      * @param optional value
+     * @param response format
      * @return string value
      * @throws Exception unhandled errors.
      */
@@ -400,6 +419,7 @@ public class CloudStackVPCService {
      * List VPCOfferings.
      *
      * @param optional value
+     * @param response format
      * @return string value
      * @throws Exception unhandled errors.
      */
@@ -408,6 +428,42 @@ public class CloudStackVPCService {
 
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("listNetworkACLLists", optional);
+        arguments.add(new NameValuePair("response", response));
+        String responseDocument = server.request(arguments);
+        return responseDocument;
+    }
+
+    /**
+     * List supported network services.
+     *
+     * @param optional value
+     * @param response format
+     * @return string value
+     * @throws Exception unhandled errors.
+     */
+    public String listSupportedNetworkServices(HashMap<String, String> optional, String response)
+            throws Exception {
+
+        LinkedList<NameValuePair> arguments
+                = server.getDefaultQuery("listSupportedNetworkServices", optional);
+        arguments.add(new NameValuePair("response", response));
+        String responseDocument = server.request(arguments);
+        return responseDocument;
+    }
+
+    /**
+     * List network service provider services.
+     *
+     * @param optional value
+     * @param response format
+     * @return string value
+     * @throws Exception unhandled errors.
+     */
+    public String listNetworkServiceProviders(HashMap<String, String> optional, String response)
+            throws Exception {
+
+        LinkedList<NameValuePair> arguments
+                = server.getDefaultQuery("listNetworkServiceProviders", optional);
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
         return responseDocument;

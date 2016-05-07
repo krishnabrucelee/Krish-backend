@@ -738,7 +738,19 @@ public class CloudStackConstants {
     /** Constant for supports region level VPC. */
     public static final String CS_SUPPORTS_REGION_LEVEL_VPC = "supportsregionLevelvpc";
 
-    /** Constant for enabled state. */
-    public static final String CS_ENABLED = "Enabled";
+    /** Constant for VPC. */
+    public static final String CS_FOR_VPC = "forvpc";
+
+    /** Constant for VPC id. */
+    public static final String CS_VPC_ID = "vpcid";
+
+    /** Constant for list VPC response. */
+    public static final String CS_LIST_VPC_RESPONSE = "listvpcsresponse";
+
+    /** Constant for redundant VPC router */
+    public static final String CS_REDUNDANT_VPC_ROUTER = "redundantvpcrouter";
+
+    /** Constant for restart required. */
+    public static final String CS_RESTART_REQUIRED = "restartrequired";
 
 }
