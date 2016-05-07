@@ -345,8 +345,6 @@ public class VPCServiceImpl implements VPCService {
                         }
                         vpc.setUuid(createVpcResponseJSON.getString(CloudStackConstants.CS_ID));
                         vpc.setIsActive(true);
-                        vpc.setForDisplay("true");
-                        vpc.setStart("true");
                     } catch (ApplicationException e) {
                         LOGGER.error("ERROR AT VPC CREATION", e);
                         throw new ApplicationException(e.getErrors());
