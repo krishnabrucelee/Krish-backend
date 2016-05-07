@@ -13,7 +13,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
 import org.hibernate.annotations.Type;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
@@ -76,7 +75,7 @@ public class SupportedNetwork implements Serializable {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime createdDateTime;
 
-    /** modified date and time. */
+    /** Modified date and time. */
     @LastModifiedDate
     @Column(name = "updated_date_time")
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
