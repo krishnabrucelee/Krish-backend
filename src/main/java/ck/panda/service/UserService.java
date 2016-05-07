@@ -296,4 +296,14 @@ public interface UserService extends CRUDService<User> {
      */
     List<User> findAllByDomain(Domain domain) throws Exception;
 
+    /**
+     * Count of users for search.
+     *
+     * @param domainId domain id.
+     * @param searchText search text.
+     * @return user
+     * @throws Exception unhandled errors.
+     */
+    List<User> findBySearchText(Long domainId, String searchText) throws Exception;
+
 }
