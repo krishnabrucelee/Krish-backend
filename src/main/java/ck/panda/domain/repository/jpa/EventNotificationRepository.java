@@ -175,4 +175,45 @@ public interface EventNotificationRepository extends PagingAndSortingRepository<
      */
     @Query(value = "SELECT event FROM Event event WHERE event.eventOwnerId = :ownerId AND event.status = :status AND event.jobId = :jobId")
     Event findByUserAndJobIdAndState(@Param("ownerId") Long ownerId, @Param("jobId") String jobId, @Param("status") Event.Status status);
+
+
+    /**
+     * Get all event based on user and eventType and active and not archive.
+     *
+     * @param ownerId of the event.
+     * @param eventType type of the event.
+     * @param isActive active status for event.
+     * @param isArchive archive status for event .
+     * @param pageable page request.
+     * @return list of events.
+     */
+    @Query(value = "SELECT event  FROM Event event LEFT JOIN event.eventOwner WHERE event.eventOwnerId != NULL AND event.eventType = :eventType AND event.isArchive = :isArchive AND event.isActive = :isActive ORDER BY event.eventDateTime DESC")
+    Page<Event> findAllByRootAdmin(Pageable pageable, @Param("eventType") EventType eventType, @Param("isActive") Boolean isActive, @Param("isArchive") Boolean isArchive);
+
+    /**
+     * Get all event based on user and eventType and active and not archive.
+     *
+     * @param ownerId of the event.
+     * @param eventType type of the event.
+     * @param isActive active status for event.
+     * @param isArchive archive status for event .
+     * @param pageable page request.
+     * @return list of events.
+     */
+    @Query(value = "SELECT event  FROM Event event LEFT JOIN event.eventOwner WHERE event.eventOwnerId != NULL AND event.eventType = :eventType AND event.isArchive = :isArchive AND event.isActive = :isActive ORDER BY event.eventDateTime DESC")
+    List<Event> findAllCountByRootAdmin(@Param("eventType") EventType eventType, @Param("isActive") Boolean isActive, @Param("isArchive") Boolean isArchive);
+
+    /**
+     * Get all event based on user and eventType and active and not archive.
+     *
+     * @param ownerId of the event.
+     * @param eventType type of the event.
+     * @param isActive active status for event.
+     * @param isArchive archive status for event .
+     * @param pageable page request.
+     * @return list of events.
+     */
+    @Query(value = "SELECT event FROM Event event WHERE event.eventOwnerId = :ownerId AND event.eventType = :eventType AND event.isArchive = :isArchive AND event.isActive = :isActive ORDER BY event.eventDateTime DESC")
+    List<Event> findAllByUserAndEventTypeCount(@Param("ownerId") Long ownerId, @Param("eventType") EventType eventType, @Param("isActive") Boolean isActive, @Param("isArchive") Boolean isArchive);
+
 }

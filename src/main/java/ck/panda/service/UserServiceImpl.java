@@ -567,7 +567,7 @@ public class UserServiceImpl implements UserService {
             userType.add(UserType.USER);
             return userRepository.findAllByDomainId(domainId, true, userType, pagingAndSorting.toPageRequest());
         }
-        return userRepository.findAllByUserPanelAndDomainId(domainId, searchText, User.Status.DELETED, pagingAndSorting.toPageRequest());
+        return userRepository.findAllByUserPanelAndDomainId(domainId, searchText, User.Status.DELETED, pagingAndSorting.toPageRequest(), true);
     }
 
     @Override
@@ -586,7 +586,7 @@ public class UserServiceImpl implements UserService {
             userType.add(UserType.USER);
             return userRepository.findAllByDomainId(domainId, true, userType, pagingAndSorting.toPageRequest());
         }
-        return userRepository.findAllByDomainId(domainId, searchText, pagingAndSorting.toPageRequest());
+        return userRepository.findAllByDomainId(domainId, searchText, pagingAndSorting.toPageRequest(), true);
     }
 
     @Override
@@ -680,5 +680,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> findAllByDomain(Domain domain) throws Exception {
         return userRepository.findAllUserByDomain(domain);
+    }
+
+    @Override
+    public List<User> findBySearchText(Long domainId, String searchText) throws Exception {
+        return userRepository.findBySearchText(domainId, searchText);
     }
 }

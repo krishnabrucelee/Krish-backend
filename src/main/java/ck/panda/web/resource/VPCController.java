@@ -19,8 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
-import ck.panda.domain.entity.Network;
+import ck.panda.domain.entity.VPC;
 import ck.panda.service.NetworkService;
+import ck.panda.service.VPCService;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.web.ApiController;
@@ -31,68 +32,68 @@ import ck.panda.util.web.CRUDController;
  *
  */
 @RestController
-@RequestMapping("/api/guestnetwork")
-@Api(value = "Network", description = "Operations with Networks", produces = "application/json")
-public class NetworkController extends CRUDController<Network> implements ApiController {
+@RequestMapping("/api/vpc")
+@Api(value = "VPC", description = "Operations with Vpcs", produces = "application/json")
+public class VPCController extends CRUDController<VPC> implements ApiController {
 
-    /** Service reference to Network. */
+    /** Service reference to vpc. */
     @Autowired
-    private NetworkService networkService;
+    private VPCService vpcService;
 
     /** Token Detail Utilities. */
     @Autowired
     private TokenDetails tokenDetails;
 
-    @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new Network.", response = Network.class)
+    @ApiOperation(value = SW_METHOD_CREATE, notes = "Create a new VPC.", response = VPC.class)
     @Override
-    public Network create(@RequestBody Network network) throws Exception {
-        network.setSyncFlag(true);
-        return networkService.save(network, Long.parseLong(tokenDetails.getTokenDetails("id")));
+    public VPC create(@RequestBody VPC vpc) throws Exception {
+    	vpc.setSyncFlag(true);
+        return vpcService.save(vpc, Long.parseLong(tokenDetails.getTokenDetails("id")));
     }
 
-    @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing Network.", response = Network.class)
+    @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing VPC.", response = VPC.class)
     @Override
-    public Network read(@PathVariable(PATH_ID) Long id) throws Exception {
-        return networkService.find(id);
+    public VPC read(@PathVariable(PATH_ID) Long id) throws Exception {
+        return vpcService.find(id);
     }
 
-    @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing Network.", response = Network.class)
+    @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing VPC.", response = VPC.class)
     @Override
-    public Network update(@RequestBody Network network, @PathVariable(PATH_ID) Long id) throws Exception {
-        network.setSyncFlag(true);
-        return networkService.update(network);
+    public VPC update(@RequestBody VPC vpc, @PathVariable(PATH_ID) Long id) throws Exception {
+        vpc.setSyncFlag(true);
+        return vpcService.update(vpc);
     }
 
     /**
-     * Delete the Network.
+     * Delete the Vpc.
      *
      * @param network reference of the Network.
-     * @param id Network id.
+     * @param id vpc id.
      * @throws Exception error occurs.
      */
-    @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing Network.")
+    @ApiOperation(value = SW_METHOD_DELETE, notes = "Delete an existing VPC.")
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void softDelete(@RequestBody Network network, @PathVariable(PATH_ID) Long id) throws Exception {
-        /** Doing Soft delete from the Network table. */
-        network = networkService.find(id);
-        network.setSyncFlag(true);
-        networkService.softDelete(network);
+    public void softDelete(@RequestBody VPC vpc, @PathVariable(PATH_ID) Long id) throws Exception {
+        /** Doing Soft delete from the vpc table. */
+        vpc = vpcService.find(id);
+        vpc.setSyncFlag(true);
+        vpcService.softDelete(vpc);
     }
 
     @Override
-    public List<Network> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
+    public List<VPC> list(@RequestParam String sortBy, @RequestHeader(value = RANGE) String range,
             @RequestParam(required = false) Integer limit, HttpServletRequest request, HttpServletResponse response)
                     throws Exception {
-        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Network.class);
-        Page<Network> pageResponse = networkService.findAllByActive(page, Long.parseLong(tokenDetails.getTokenDetails("id")));
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, VPC.class);
+        Page<VPC> pageResponse = vpcService.findAllByActive(page, Long.parseLong(tokenDetails.getTokenDetails("id")));
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }
 
     /**
-     * list all network for instance.
+     * list all vpc for instance.
      *
      * @return projects
      * @param deptartment department
@@ -101,12 +102,12 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected List<Network> findByDepartment(@RequestParam("dept") Long deptartment) throws Exception {
-        return networkService.findByDepartmentAndNetworkIsActive(deptartment, true);
+    protected List<VPC> findByDepartment(@RequestParam("dept") Long deptartment) throws Exception {
+        return vpcService.findByDepartmentAndVpcIsActive(deptartment, true);
     }
 
     /**
-     * list all project related network for instance.
+     * list all project related vpc for instance.
      *
      * @return networks
      * @param projectId project id
@@ -115,28 +116,28 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
     @RequestMapping(value = "listall", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected List<Network> findByProject(@RequestParam("projectId") Long projectId) throws Exception {
-        return networkService.findByProjectAndNetworkIsActive(projectId, true);
+    protected List<VPC> findByProject(@RequestParam("projectId") Long projectId) throws Exception {
+        return vpcService.findByProjectAndVpcIsActive(projectId, true);
     }
 
     /**
-     * List all network for instance.
+     * List all vpc for instance.
      *
      * @return department
-     * @param deptartment associated with network
+     * @param deptartment associated with vpc
      * @throws Exception Exception
      */
     @RequestMapping(value = "/list/{id}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected List<Network> findByDepartmentAndNetwork(@PathVariable(PATH_ID) Long deptartment) throws Exception {
-        return networkService.findByDepartmentAndNetworkIsActive(deptartment, true);
+    protected List<VPC> findByDepartmentAndVPC(@PathVariable(PATH_ID) Long deptartment) throws Exception {
+        return vpcService.findByDepartmentAndVpcIsActive(deptartment, true);
     }
 
     /**
-     * List all project related network for instance.
+     * List all project related vpc for instance.
      *
-     * @return networks
+     * @return vpcs
      * @param projectId project id
      * @throws Exception Exception
      */
@@ -144,47 +145,47 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected List<Network> findByProjectAndNetwork(@PathVariable(PATH_ID) Long projectId) throws Exception {
-        return networkService.findByProjectAndNetworkIsActive(projectId, true);
+    protected List<VPC> findByProjectAndVPC(@PathVariable(PATH_ID) Long projectId) throws Exception {
+        return vpcService.findByProjectAndVpcIsActive(projectId, true);
     }
 
     /**
-     * Restart network for reapplying all port forwarding, lb rules and ip addresses.
+     * Restart vpc for reapplying all ip addresses and rules.
      *
-     * @param network to be restarted.
-     * @param id of the network.
-     * @return network.
+     * @param vpc to be restarted.
+     * @param id of the vpc.
+     * @return vpc.
      * @throws Exception if error occurs.
      */
     @RequestMapping(value = "restart/{id}", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected Network restartNetwork(@RequestBody Network network, @PathVariable(PATH_ID) Long id) throws Exception {
-        network.setSyncFlag(true);
-        return networkService.restartNetwork(network);
+    protected VPC restartNetwork(@RequestBody VPC vpc, @PathVariable(PATH_ID) Long id) throws Exception {
+        vpc.setSyncFlag(true);
+        return vpcService.restartVPC(vpc);
     }
 
     /**
-     * Get all volume list by domain.
+     * Get all vpc list by domain.
      *
-     * @param sortBy asc/desc
+     * @param sortBy asc/desc.
      * @param domainId domain id of network.
      * @param range pagination range.
      * @param limit per page limit.
      * @param request page request.
      * @param response response content.
-     * @return network list.
+     * @return vpc list.
      * @throws Exception unhandled exception.
      */
     @RequestMapping(value = "/listByDomain", method = RequestMethod.GET, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<Network> listNetworkByDomainId(@RequestParam String sortBy, @RequestParam Long domainId, @RequestParam String searchText,
+    public List<VPC> listNetworkByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
             @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
-        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Network.class);
-        Page<Network> pageResponse = networkService.findAllByDomainIdAndSearchText(domainId, page,searchText);
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, VPC.class);
+        Page<VPC> pageResponse = vpcService.findAllByDomainId(domainId, page);
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }

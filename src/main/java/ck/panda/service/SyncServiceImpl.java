@@ -66,6 +66,8 @@ import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.VolumeType;
+import ck.panda.domain.entity.VpcAcl;
+import ck.panda.domain.entity.VpcOffering;
 import ck.panda.domain.entity.VpnUser;
 import ck.panda.domain.entity.Zone;
 import ck.panda.util.CloudStackInstanceService;
@@ -307,6 +309,14 @@ public class SyncServiceImpl implements SyncService {
     /** Manual cloud sync service reference. */
     @Autowired
     private ManualCloudSyncService manualCloudSyncService;
+
+    /** VPC ACL service reference. */
+    @Autowired
+    private VpcAclService vpcAclService;
+
+    /** VPC offering service reference. */
+    @Autowired
+    private VpcOfferingService vpcOfferingService;
 
     /** Permission instance properties. */
     @Value(value = "${permission.instance}")
@@ -720,6 +730,18 @@ public class SyncServiceImpl implements SyncService {
             this.syncGeneralConfiguration();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch General Configuration", e);
+        }
+        try {
+            // 39. Sync VPC offering entity
+            this.syncVpcOffering();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPC offering", e);
+        }
+        try {
+            // 40. Sync VPC ACL entity
+            this.syncVpcAcl();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPC ACL", e);
         }
 
     }
@@ -1532,10 +1554,10 @@ public class SyncServiceImpl implements SyncService {
         // add it to app db
         for (String key : vmMap.keySet()) {
             VmInstance instances = virtualMachineService.save(vmMap.get(key));
-			if (instances.getIpAddress() != null) {
-				instances.setInstanceGuestIp(ipToLong(instances.getIpAddress()));
-				virtualMachineService.update(instances);
-			}
+            if (instances.getIpAddress() != null) {
+                instances.setInstanceGuestIp(ipToLong(instances.getIpAddress()));
+                virtualMachineService.update(instances);
+            }
             IpAddress ipAddress = ipService.UpdateIPByNetwork(convertEntityService.getNetworkById(instances.getNetworkId()).getUuid());
             if (ipAddress != null) {
                 instances.setSyncFlag(false);
@@ -2175,54 +2197,54 @@ public class SyncServiceImpl implements SyncService {
         projectMap = resourceProjectService.getResourceLimitsOfDepartment(department.getId());
         departmentMap = resourceDepartmentService.getResourceCountsOfDepartment(department.getId());
         for (String key : departmentMap.keySet()) {
-			if (!key.equalsIgnoreCase(CloudStackConstants.PROJECT)) {
-				ResourceLimitDepartment resourceLimitDepartment = resourceDepartmentService
-						.findByDepartmentAndResourceType(department.getId(),
-								ResourceLimitDepartment.ResourceType.valueOf(key), true);
-				if (!projectMap.isEmpty()) {
-					resourceLimitDepartment
-							.setUsedLimit(Long.parseLong(projectMap.get(key)) + Long.parseLong(departmentMap.get(key)));
-				} else {
-					resourceLimitDepartment.setUsedLimit(Long.parseLong(departmentMap.get(key)));
-				}
-				if (resourceLimitDepartment.getResourceType().equals(ResourceLimitDepartment.ResourceType.Project)) {
-					resourceLimitDepartment.setMax(-1L);
-				} else {
-					resourceLimitDepartment.setMax(resourceLimitDepartment.getUsedLimit());
-				}
-				resourceLimitDepartment.setIsSyncFlag(false);
-				resourceDepartmentService.update(resourceLimitDepartment);
-			}
+            if (!key.equalsIgnoreCase(CloudStackConstants.PROJECT)) {
+                ResourceLimitDepartment resourceLimitDepartment = resourceDepartmentService
+                        .findByDepartmentAndResourceType(department.getId(),
+                                ResourceLimitDepartment.ResourceType.valueOf(key), true);
+                if (!projectMap.isEmpty()) {
+                    resourceLimitDepartment
+                            .setUsedLimit(Long.parseLong(projectMap.get(key)) + Long.parseLong(departmentMap.get(key)));
+                } else {
+                    resourceLimitDepartment.setUsedLimit(Long.parseLong(departmentMap.get(key)));
+                }
+                if (resourceLimitDepartment.getResourceType().equals(ResourceLimitDepartment.ResourceType.Project)) {
+                    resourceLimitDepartment.setMax(-1L);
+                } else {
+                    resourceLimitDepartment.setMax(resourceLimitDepartment.getUsedLimit());
+                }
+                resourceLimitDepartment.setIsSyncFlag(false);
+                resourceDepartmentService.update(resourceLimitDepartment);
+            }
         }
     }
 
-	public void syncResourceLimitUpdateForProjectAndDepartment() throws Exception {
-		List<ResourceLimitDepartment> persistDepartments = resourceDepartmentService.findAll();
-		List<ResourceLimitProject> persistResourceLimitProjects = resourceProjectService.findAll();
-		int num = 50;
-		int num1 = 0;
-		int num2 = 0;
-		for (ResourceLimitDepartment department : persistDepartments) {
-			if (num1 == num) {
-				Thread.sleep(20000);
-				num1 = 0;
-			}
-			if (!department.getResourceType().equals(ResourceLimitDepartment.ResourceType.Project)) {
-				updateResourceLimit(department, CloudStackConstants.CS_DEPARTMENT);
-			}
-			num1++;
-		}
-		for (ResourceLimitProject project : persistResourceLimitProjects) {
-			if (num2 == num) {
-				Thread.sleep(20000);
-				num2 = 0;
-			}
-			if (!project.getResourceType().equals(ResourceLimitProject.ResourceType.Project)) {
-				updateResourceLimit(project, CloudStackConstants.PROJECT);
-			}
-			num2++;
-		}
-	}
+    public void syncResourceLimitUpdateForProjectAndDepartment() throws Exception {
+        List<ResourceLimitDepartment> persistDepartments = resourceDepartmentService.findAll();
+        List<ResourceLimitProject> persistResourceLimitProjects = resourceProjectService.findAll();
+        int num = 50;
+        int num1 = 0;
+        int num2 = 0;
+        for (ResourceLimitDepartment department : persistDepartments) {
+            if (num1 == num) {
+                Thread.sleep(20000);
+                num1 = 0;
+            }
+            if (!department.getResourceType().equals(ResourceLimitDepartment.ResourceType.Project)) {
+                updateResourceLimit(department, CloudStackConstants.CS_DEPARTMENT);
+            }
+            num1++;
+        }
+        for (ResourceLimitProject project : persistResourceLimitProjects) {
+            if (num2 == num) {
+                Thread.sleep(20000);
+                num2 = 0;
+            }
+            if (!project.getResourceType().equals(ResourceLimitProject.ResourceType.Project)) {
+                updateResourceLimit(project, CloudStackConstants.PROJECT);
+            }
+            num2++;
+        }
+    }
 
     /**
      * Sync with Cloud Server Iso.
@@ -3166,21 +3188,102 @@ public class SyncServiceImpl implements SyncService {
     }
 
     public long ipToLong(String ipAddress) {
-    	long result = 0;
-		if (ipAddress != null) {
-			String[] ipAddressInArray = ipAddress.split("\\.");
+        long result = 0;
+        if (ipAddress != null) {
+            String[] ipAddressInArray = ipAddress.split("\\.");
 
-			for (int i = 0; i < ipAddressInArray.length; i++) {
+            for (int i = 0; i < ipAddressInArray.length; i++) {
 
-				int power = 3 - i;
-				int ip = Integer.parseInt(ipAddressInArray[i]);
-				result += ip * Math.pow(256, power);
+                int power = 3 - i;
+                int ip = Integer.parseInt(ipAddressInArray[i]);
+                result += ip * Math.pow(256, power);
 
-			}
-		} else {
-			result = 0;
-		}
+            }
+        } else {
+            result = 0;
+        }
 
-    	return result;
-      }
+        return result;
+    }
+
+    @Override
+    public void syncVpcOffering() throws ApplicationException, Exception {
+
+        // 1. Get all the VPC offering objects from CS server as hash
+        List<VpcOffering> csVpcOfferingsList = vpcOfferingService.findAllFromCSServer();
+        HashMap<String, VpcOffering> csVpcOfferingMap = (HashMap<String, VpcOffering>) VpcOffering.convert(csVpcOfferingsList);
+
+        // 2. Get all the VPC offering objects from application
+        List<VpcOffering> appVpcOfferingList = vpcOfferingService.findAll();
+
+        // 3. Iterate application VPC offering list
+        for (VpcOffering vpcOffering : appVpcOfferingList) {
+            LOGGER.debug("Total rows updated : " + (appVpcOfferingList.size()));
+            // 3.1 Find the corresponding CS server VPC offering object by finding
+            // it in a hash using uuid
+            if (csVpcOfferingMap.containsKey(vpcOffering.getUuid())) {
+                VpcOffering csVpcOffering = csVpcOfferingMap.get(vpcOffering.getUuid());
+                vpcOffering.setUuid(csVpcOffering.getUuid());
+                vpcOffering.setName(csVpcOffering.getName());
+                vpcOffering.setDisplayText(csVpcOffering.getDisplayText());
+
+                // 3.2 If found, update the VPC offering object in app db
+                vpcOfferingService.update(vpcOffering);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // VPC offering which is not added in the app
+                csVpcOfferingMap.remove(vpcOffering.getUuid());
+            } else {
+                vpcOfferingService.delete(vpcOffering);
+            }
+        }
+        // 4. Get the remaining list of cs server hash VPC offering object, then
+        // iterate and
+        // add it to app db
+        for (String key : csVpcOfferingMap.keySet()) {
+            vpcOfferingService.save(csVpcOfferingMap.get(key));
+        }
+        LOGGER.debug("Total rows added : " + (csVpcOfferingMap.size()));
+    }
+
+    @Override
+    public void syncVpcAcl() throws ApplicationException, Exception {
+
+        // 1. Get all the VPC ACL objects from CS server as hash
+        List<VpcAcl> csVpcAclsList = vpcAclService.findAllFromCSServer();
+        HashMap<String, VpcAcl> csVpcAclMap = (HashMap<String, VpcAcl>) VpcAcl.convert(csVpcAclsList);
+
+        // 2. Get all the VPC ACL objects from application
+        List<VpcAcl> appVpcAclList = vpcAclService.findAll();
+
+        // 3. Iterate application VPC ACL list
+        for (VpcAcl vpcAcl : appVpcAclList) {
+            LOGGER.debug("Total rows updated : " + (appVpcAclList.size()));
+            // 3.1 Find the corresponding CS server VPC ACL object by finding
+            // it in a hash using uuid
+            if (csVpcAclMap.containsKey(vpcAcl.getUuid())) {
+                VpcAcl csVpcAcl = csVpcAclMap.get(vpcAcl.getUuid());
+                vpcAcl.setUuid(csVpcAcl.getUuid());
+                vpcAcl.setName(csVpcAcl.getName());
+                vpcAcl.setDescription(csVpcAcl.getDescription());
+                vpcAcl.setForDisplay(csVpcAcl.getForDisplay());
+
+                // 3.2 If found, update the VPC ACL object in app db
+                vpcAclService.update(vpcAcl);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // VPC ACL which is not added in the app
+                csVpcAclMap.remove(vpcAcl.getUuid());
+            } else {
+                vpcAclService.delete(vpcAcl);
+            }
+        }
+        // 4. Get the remaining list of cs server hash VPC ACL object, then
+        // iterate and
+        // add it to app db
+        for (String key : csVpcAclMap.keySet()) {
+            vpcAclService.save(csVpcAclMap.get(key));
+        }
+        LOGGER.debug("Total rows added : " + (csVpcAclMap.size()));
+    }
 }

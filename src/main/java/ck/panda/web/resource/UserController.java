@@ -329,6 +329,8 @@ public class UserController extends CRUDController<User> implements ApiControlle
             return pageResponse.getContent();
     }
 
+
+
     /**
      * Get all user list by domain.
      *
@@ -355,6 +357,18 @@ public class UserController extends CRUDController<User> implements ApiControlle
             return pageResponse.getContent();
     }
 
+    /**
+     * Count of users for search.
+     *
+     * @return user user
+     * @throws Exception unhandled errors.
+     */
+    @RequestMapping(value = "listBySearchText", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<User> getSearchCount(@RequestParam Long domainId, @RequestParam String searchText) throws Exception {
+        return userService.findBySearchText(domainId,searchText);
+    }
     /**
      * Method to get list of required parameter of user.
      *

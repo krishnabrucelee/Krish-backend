@@ -125,6 +125,7 @@ public interface EventNotificationService extends CRUDService<Event> {
      * @throws Exception unhandled errors.
      */
     Event findByUserAndJobIdAndState(Long ownerId, String jobId, Status status) throws Exception;
+
     /**
      * Find all event by owner id with date range.
      *
@@ -136,4 +137,41 @@ public interface EventNotificationService extends CRUDService<Event> {
      * @throws Exception if error occurs.
      */
     Page<Event> findAllByUserAndInBetweenEventDates(Long ownerId, ZonedDateTime startEventDate, ZonedDateTime endEventDate, PagingAndSorting pagingAndSorting) throws Exception;
+
+    /**
+     * Find all Event list for root admin.
+     *
+     * @param page pagination
+     * @param eventType type of the event
+     * @param isActive Active or not
+     * @param isArchive Archived or not
+     * @return list
+     * @throws Exception exception
+     */
+    Page<Event> findEventListByRootAdmin(PagingAndSorting page, EventType eventType, boolean isActive, boolean isArchive) throws Exception;
+
+    /**
+     * Find all event by owner id.
+     *
+     * @param ownerId id of event owner.
+     * @param eventType type of event type.
+     * @param isActive active status for event.
+     * @param isArchive archive status for event .
+     * @param pagingAndSorting page request.
+     * @return event list.
+     * @throws Exception if error occurs.
+     */
+    List<Event> findAllByOwnerIdAndEventCount(Long ownerId, EventType eventType, Boolean isActive, Boolean isArchive) throws Exception;
+
+    /**
+     * Find all Event list for root admin.
+     *
+     * @param eventType type of the event
+     * @param isActive active status for the event
+     * @param isArchive archive status for event
+     * @return events list.
+     * @throws Exception if error occurs.
+     */
+    List<Event> findEventListCountByRootAdmin(EventType eventType, Boolean isActive, Boolean isArchive) throws Exception;
+
 }

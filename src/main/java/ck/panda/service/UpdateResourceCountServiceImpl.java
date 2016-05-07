@@ -11,6 +11,7 @@ import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitProject;
+import ck.panda.domain.entity.VPC;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.Volume;
 import ck.panda.util.CloudStackResourceCapacity;
@@ -153,6 +154,22 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
 			List<IpAddress> ipaddresse = ipaddressService.findByNetwork(net.getId());
 			if (ipaddresse.size() > 0) {
 				resourceUsageMap.put(ConvertEntityService.CS_IP, Long.valueOf(ipaddresse.size()));
+				resourceList.add(ConvertEntityService.CS_IP);
+			}
+			if (accountType.equals(GenericConstants.PROJECT)) {
+				updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
+			} else if (accountType.equals(GenericConstants.DEPARTMENT)) {
+				updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);
+			}
+			break;
+		case GenericConstants.VPC:
+			VPC vpc = (VPC)resourceObject;
+			resourceList.clear();
+			resourceList.add(ConvertEntityService.CS_VPC);
+			resourceUsageMap.put(ConvertEntityService.CS_VPC, 1L);
+			List<IpAddress> ipaddressVpc = ipaddressService.findByNetwork(vpc.getId());
+			if (ipaddressVpc.size() > 0) {
+				resourceUsageMap.put(ConvertEntityService.CS_IP, Long.valueOf(ipaddressVpc.size()));
 				resourceList.add(ConvertEntityService.CS_IP);
 			}
 			if (accountType.equals(GenericConstants.PROJECT)) {

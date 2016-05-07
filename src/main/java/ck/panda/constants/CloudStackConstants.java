@@ -89,7 +89,7 @@ public class CloudStackConstants {
 
     /** Constant for offerings id. */
     public static final String CS_DISK_OFFERING_ID = "diskofferingid", CS_SERVICE_OFFERING_ID = "serviceofferingid",
-        CS_NETWORK_OFFERING_ID = "networkofferingid";
+        CS_NETWORK_OFFERING_ID = "networkofferingid", CS_VPC_OFFERING_ID = "vpcofferingid";
 
     /** Constant for resource's tags. */
     public static final String CS_TAGS = "tags";
@@ -555,6 +555,9 @@ public class CloudStackConstants {
     /** Constant for remote access VPN. */
     public static final String CS_REMOTE_ACCESS_VPN = "remoteaccessvpn";
 
+    /** Constant for vpc. */
+    public static final String CS_VPC = "vpc";
+
     /** Constant for VPN ipsec preshared key. */
     public static final String CS_PRESHARED_KEY = "presharedkey";
 
@@ -725,5 +728,17 @@ public class CloudStackConstants {
 
     /** Constant for project. */
     public static final String PROJECT = "project";
+
+    /** Constant for distributed VPC router. */
+    public static final String CS_DISTRIBUTED_VPC_ROUTER = "distributedvpcrouter";
+
+    /** Constant for is default. */
+    public static final String CS_IS_DEFAULT = "isdefault";
+
+    /** Constant for supports region level VPC. */
+    public static final String CS_SUPPORTS_REGION_LEVEL_VPC = "supportsregionLevelvpc";
+
+    /** Constant for enabled state. */
+    public static final String CS_ENABLED = "Enabled";
 
 }
