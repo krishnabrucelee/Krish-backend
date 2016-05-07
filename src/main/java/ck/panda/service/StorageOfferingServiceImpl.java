@@ -409,6 +409,11 @@ public class StorageOfferingServiceImpl implements StorageOfferingService {
         return storageOfferingRepo.findAllByDomainIdAndIsActive(domainId, true, pagingAndSorting.toPageRequest());
     }
 
+    @Override
+    public Page<StorageOffering> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText) throws Exception {
+        return storageOfferingRepo.findAllByDomainIdAndIsActiveAndSearchText(domainId, true, pagingAndSorting.toPageRequest(),searchText);
+    }
+
     /**
      * Set optional value for MR.ping api call.
      *
