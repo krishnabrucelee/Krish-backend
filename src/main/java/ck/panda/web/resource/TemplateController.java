@@ -171,6 +171,25 @@ public class TemplateController extends CRUDController<Template> implements ApiC
                 + templateCount.get("linuxIsoCount") + ",\"totalIsoCount\":" + templateCount.get("totalIsoCount") + "}";
     }
 
+
+    /**
+     * Get the template counts for linux, windows and total count.
+     *
+     * @param request page request.
+     * @param response page response content.
+     * @return template count.
+     * @throws Exception unhandled errors.
+     */
+    @RequestMapping(value = "templateCountsSearchText", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public String getTemplateCountsAndSearchText(HttpServletRequest request, HttpServletResponse response,@RequestParam String searchText) throws Exception {
+        HashMap<String, Integer> templateCount = templateService.findTemplateCountsAndSearchText(searchText);
+        return "{\"windowsCount\":" + templateCount.get("windowsCount") + ",\"linuxCount\":" + templateCount.get("linuxCount") + ",\"totalCount\":"
+                + templateCount.get("totalCount") + ",\"windowsIsoCount\":" + templateCount.get("windowsIsoCount") + ",\"linuxIsoCount\":"
+                + templateCount.get("linuxIsoCount") + ",\"totalIsoCount\":" + templateCount.get("totalIsoCount") + "}";
+    }
+
     /**
      * List all the Active templates.
      *

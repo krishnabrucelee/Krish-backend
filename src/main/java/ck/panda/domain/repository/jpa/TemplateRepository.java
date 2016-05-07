@@ -254,6 +254,18 @@ public interface TemplateRepository extends PagingAndSortingRepository<Template,
     List<Template> findTemplateCounts(@Param("type") TemplateType type, @Param("isActive") Boolean isActive);
 
     /**
+     * Get the template count without system type and search text.
+     *
+     * @param type of template
+     * @param isActive true/false
+     * @return template list
+     */
+    @Query(value = "SELECT template FROM Template template LEFT JOIN template.osCategory LEFT JOIN template.templateOwner LEFT JOIN template.osType LEFT JOIN template.zone WHERE template.type <>:type AND template.isActive = :isActive AND (template.name LIKE %:search% OR template.osType.description LIKE %:search% "
+            + "OR template.zone.name LIKE %:search% OR template.hypervisor.name LIKE %:search% OR template.status LIKE %:search% )")
+    List<Template> findTemplateCountsAndSearchText(@Param("type") TemplateType type, @Param("isActive") Boolean isActive,@Param("search") String search);
+
+
+    /**
      * Get the template by the type featured.
      *
      * @param type featured

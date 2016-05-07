@@ -244,4 +244,6 @@ public interface TemplateService extends CRUDService<Template> {
      * @throws Exception if error occurs.
      */
     List<Template> findAllTemplatesByIsActiveAndTypeSearchText(Boolean isActive, String searchText) throws Exception;
+
+    HashMap<String, Integer> findTemplateCountsAndSearchText(String searchTex) throws Exception;
 }

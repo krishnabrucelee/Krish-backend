@@ -1038,7 +1038,6 @@ public class TemplateServiceImpl implements TemplateService {
         return value;
     }
 
-
     @Override
     public List<Template> findAllByUserIdIsActiveAndShare(TemplateType type, Status status, Boolean isActive,
             Long userId) throws Exception {
@@ -1052,6 +1051,40 @@ public class TemplateServiceImpl implements TemplateService {
             }
         }
         return templateRepository.findAllByCommunity(type, true, Template.Status.ACTIVE, true);
+    }
+
+    @Override
+    public HashMap<String, Integer> findTemplateCountsAndSearchText(String searchText) throws Exception {
+        List<Template> template = templateRepository.findTemplateCountsAndSearchText(TemplateType.SYSTEM, true,searchText);
+        Integer windowsCount = 0, linuxCount = 0, totalCount = 0;
+        Integer windowsIsoCount = 0, linuxIsoCount = 0, totalIsoCount = 0;
+        for (int i = 0; i < template.size(); i++) {
+            if (template.get(i).getFormat() == Template.Format.ISO) {
+                if (template.get(i).getOsType().getDescription().contains(WINDOWS_TEMPLATE)) {
+                    windowsIsoCount++;
+                } else {
+                    linuxIsoCount++;
+                }
+                totalIsoCount++;
+                } else {
+                    if (template.get(i).getOsType().getDescription().contains(WINDOWS_TEMPLATE)) {
+                        windowsCount++;
+                    } else {
+                        linuxCount++;
+                    }
+                    totalCount++;
+                }
+            }
+
+        /** Template minimum core. */
+        HashMap<String, Integer> templateCount = new HashMap<String, Integer>();
+        templateCount.put(WINDOWS_COUNT, windowsCount);
+        templateCount.put(LINUX_COUNT, linuxCount);
+        templateCount.put(TOTAL_COUNT, totalCount);
+        templateCount.put(WINDOWS_ISO_COUNT, windowsIsoCount);
+        templateCount.put(LINUX_ISO_COUNT, linuxIsoCount);
+        templateCount.put(TOTAL_ISO_COUNT, totalIsoCount);
+        return templateCount;
     }
 
 
