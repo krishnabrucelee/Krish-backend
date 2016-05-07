@@ -176,8 +176,8 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @return list of user.
      */
     @Query(value = "select user from User user LEFT JOIN user.role where (user.domainId = :domainId OR 0 = :domainId) AND (user.userName LIKE %:search% OR user.department.userName LIKE %:search% OR user.domain.name LIKE %:search% OR user.type LIKE %:search% OR user.role.name LIKE %:search%"
-            + " OR user.email LIKE %:search% OR user.status LIKE %:search%) and user.status <> :status")
-    Page<User> findAllByUserPanelAndDomainId(@Param("domainId") Long domainId, @Param("search") String searchText, @Param("status") Status deleted, Pageable pageable);
+            + " OR user.email LIKE %:search% OR user.status LIKE %:search%) and user.status <> :status AND user.isActive = :isActive")
+    Page<User> findAllByUserPanelAndDomainId(@Param("domainId") Long domainId, @Param("search") String searchText, @Param("status") Status deleted, Pageable pageable, @Param("isActive") Boolean isActive);
 
     /**
      * Find all the user by domain.
@@ -187,8 +187,8 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      * @return list of user.
      */
     @Query(value = "select user from User user LEFT JOIN user.role where (user.domainId = :domainId OR 0 = :domainId) AND (user.userName LIKE %:search% OR user.department.userName LIKE %:search% OR user.domain.name LIKE %:search% OR user.type LIKE %:search% OR user.role.name LIKE %:search%"
-            + " OR user.email LIKE %:search% OR user.status LIKE %:search%)")
-    Page<User> findAllByDomainId(@Param("domainId") Long domainId, @Param("search") String searchText, Pageable pageable);
+            + " OR user.email LIKE %:search% OR user.status LIKE %:search%) AND user.isActive = :isActive")
+    Page<User> findAllByDomainId(@Param("domainId") Long domainId, @Param("search") String searchText, Pageable pageable, @Param("isActive") Boolean isActive);
 
     /**
      * Find all the user by domain.
@@ -261,5 +261,17 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
      */
     @Query(value = "SELECT user FROM User user WHERE user.type = :type AND user.isActive = :isActive")
     List<User> findByRootAdminUser(@Param("type") UserType type, @Param("isActive") Boolean isActive);
+
+    /**
+     * Count of users for search.
+     *
+     * @param domainId domain id.
+     * @param searchText search text.
+     * @return user
+     * @throws Exception unhandled errors.
+     */
+    @Query(value = "select user from User user LEFT JOIN user.role where (user.domainId = :domainId OR 0 = :domainId) AND (user.userName LIKE %:search% OR user.department.userName LIKE %:search% OR user.domain.name LIKE %:search% OR user.type LIKE %:search% OR user.role.name LIKE %:search%"
+            + " OR user.email LIKE %:search% OR user.status LIKE %:search%)")
+    List<User> findBySearchText(@Param("domainId") Long domainId, @Param("search") String searchText);
 
 }
