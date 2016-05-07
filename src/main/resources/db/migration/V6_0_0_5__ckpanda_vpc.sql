@@ -58,7 +58,7 @@ CREATE TABLE `vpc` (
   CONSTRAINT `FK_7wgfpn1hwomq4isjss951bk5l` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`),
   CONSTRAINT `FK_kwh6v9ul9c88smba779743q4p` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`),
   CONSTRAINT `FK_my7aqxabyuj8p55auh15xekej` FOREIGN KEY (`domain_id`) REFERENCES `domains` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
