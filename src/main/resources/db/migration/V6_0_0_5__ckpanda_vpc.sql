@@ -1,8 +1,10 @@
--- MySQL dump 10.13  Distrib 5.7.9, for linux-glibc2.5 (x86_64)
+CREATE DATABASE  IF NOT EXISTS `ckpanda` /*!40100 DEFAULT CHARACTER SET utf8 */;
+USE `ckpanda`;
+-- MySQL dump 10.13  Distrib 5.6.13, for Linux (x86_64)
 --
--- Host: localhost    Database: ckpanda
+-- Host: 127.0.0.1    Database: ckpanda
 -- ------------------------------------------------------
--- Server version	5.6.29
+-- Server version	5.1.73
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -41,6 +43,12 @@ CREATE TABLE `vpc` (
   `uuid` varchar(255) DEFAULT NULL,
   `version` bigint(20) DEFAULT NULL,
   `zone_id` bigint(20) DEFAULT NULL,
+  `clean_up` bit(1) DEFAULT NULL,
+  `distributed_vpc_router` bit(1) DEFAULT NULL,
+  `network_domain` varchar(255) DEFAULT NULL,
+  `redundant_vpc` bit(1) DEFAULT NULL,
+  `restart_vpc` bit(1) DEFAULT NULL,
+  `vpcoffering_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_7wgfpn1hwomq4isjss951bk5l` (`department_id`),
   KEY `FK_my7aqxabyuj8p55auh15xekej` (`domain_id`),
@@ -50,7 +58,7 @@ CREATE TABLE `vpc` (
   CONSTRAINT `FK_7wgfpn1hwomq4isjss951bk5l` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`),
   CONSTRAINT `FK_kwh6v9ul9c88smba779743q4p` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`),
   CONSTRAINT `FK_my7aqxabyuj8p55auh15xekej` FOREIGN KEY (`domain_id`) REFERENCES `domains` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -71,4 +79,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-05-05 18:29:24
+-- Dump completed on 2016-05-07 18:43:35
