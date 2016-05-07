@@ -2,10 +2,13 @@ package ck.panda.service;
 
 import java.util.List;
 import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Service;
+
 import ck.panda.domain.entity.VPC;
 import ck.panda.util.domain.CRUDService;
 import ck.panda.util.domain.vo.PagingAndSorting;
 
+@Service
 public interface VPCService extends CRUDService<VPC> {
 	/**
      * To get list of vpc for sync.
@@ -98,7 +101,7 @@ public interface VPCService extends CRUDService<VPC> {
      * @return vpc.
      * @throws Exception if error occurs.
      */
-    VPC restartNetwork(VPC vpc) throws Exception;
+    VPC restartVPC(VPC vpc) throws Exception;
 
     /**
      * Release ip from vpc

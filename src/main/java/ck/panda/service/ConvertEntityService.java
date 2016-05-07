@@ -31,6 +31,7 @@ import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.entity.Volume;
+import ck.panda.domain.entity.VpcOffering;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
 import ck.panda.domain.entity.ResourceLimitProject;
@@ -231,6 +232,10 @@ public class ConvertEntityService {
     /** SSHKey Service for listing ssh key. */
     @Autowired
     private SSHKeyService sshKeyService;
+
+    /** Vpc offering Service for listing. */
+    @Autowired
+    private VpcOfferingService vpcOfferingService;
 
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
@@ -1315,6 +1320,24 @@ public class ConvertEntityService {
     }
 
     /**
+     * Get VPC offering service object.
+     *
+     * @return vpc offering service object
+     */
+    public VpcOfferingService getVpcOfferingService() {
+        return this.vpcOfferingService;
+    }
+
+    /**
+     * Get VPC by uuid.
+     *
+     * @return vpc offering service object
+     */
+    public VpcOffering getVpcOfferingByuuid(String uuid) throws Exception {
+        return vpcOfferingService.findByUUID(uuid);
+    }
+
+    /**
      * Update the resource count for current resource type.
      *
      * @param csResponse cloud stack response resource type for domain resource.
@@ -1412,5 +1435,9 @@ public class ConvertEntityService {
         }
         return null;
     }
+
+	public VpcOffering getVpcOfferingById(Long vpcofferingid) throws Exception {
+		return vpcOfferingService.find(vpcofferingid);
+	}
 
 }

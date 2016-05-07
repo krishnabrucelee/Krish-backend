@@ -72,7 +72,6 @@ public class VpcOfferingServiceImpl implements VpcOfferingService {
 
     @Override
     public List<VpcOffering> findAllFromCSServer() throws Exception {
-
         List<VpcOffering> vpcOfferingList = new ArrayList<VpcOffering>();
         HashMap<String, String> vpcOfferingMap = new HashMap<String, String>();
         JSONArray vpcOfferingListJSON = null;
@@ -91,4 +90,8 @@ public class VpcOfferingServiceImpl implements VpcOfferingService {
         return vpcOfferingList;
     }
 
+	@Override
+	public VpcOffering findByUUID(String uuid) throws Exception {
+		return vpcOfferingRepo.findByUUID(uuid);
+	}
 }

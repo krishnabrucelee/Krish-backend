@@ -89,7 +89,7 @@ public class CloudStackConstants {
 
     /** Constant for offerings id. */
     public static final String CS_DISK_OFFERING_ID = "diskofferingid", CS_SERVICE_OFFERING_ID = "serviceofferingid",
-        CS_NETWORK_OFFERING_ID = "networkofferingid";
+        CS_NETWORK_OFFERING_ID = "networkofferingid", CS_VPC_OFFERING_ID = "vpcofferingid";
 
     /** Constant for resource's tags. */
     public static final String CS_TAGS = "tags";
@@ -554,6 +554,9 @@ public class CloudStackConstants {
 
     /** Constant for remote access VPN. */
     public static final String CS_REMOTE_ACCESS_VPN = "remoteaccessvpn";
+
+    /** Constant for vpc. */
+    public static final String CS_VPC = "vpc";
 
     /** Constant for VPN ipsec preshared key. */
     public static final String CS_PRESHARED_KEY = "presharedkey";

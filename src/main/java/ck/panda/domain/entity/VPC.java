@@ -70,6 +70,15 @@ public class VPC implements Serializable {
     @OneToOne
     private Domain domain;
 
+    /** Offering of the VPC. */
+    @JoinColumn(name = "vpcoffering_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @OneToOne
+    private VpcOffering vpcOffering;
+
+    /** Offering id of the VPC. */
+    @Column(name = "vpcoffering_id")
+    private Long vpcofferingId;
+
     /** Domain id of the VPC. */
     @Column(name = "domain_id")
     private Long domainId;
@@ -104,6 +113,22 @@ public class VPC implements Serializable {
     /** IsActive attribute to verify Active or Inactive. */
     @Column(name = "is_active")
     private Boolean isActive;
+
+    /** VPC network domain. All networks inside the VPC will belong to this domain. */
+    @Column(name = "network_domain")
+    private String networkDomain;
+
+    /** Removing old elements of the vpc. */
+    @Column(name = "clean_up")
+    private Boolean cleanUpVPC;
+
+    /** Make redundant vpc. */
+    @Column(name = "redundant_vpc")
+    private Boolean redundantVPC;
+
+    /** Make restart required true/false. */
+    @Column(name = "restart_vpc")
+    private Boolean restartRequired;
 
     /** Created by user. */
     @CreatedBy
@@ -145,18 +170,10 @@ public class VPC implements Serializable {
 
     /** Enum type for Vpc Status. */
     public enum Status {
-        /** Indicates the network configuration is in allocated but not setup (Vlan is not set, and network is not ready for use). Isolated network goes to this state right after it's created with NO Vlan passed in. As vlan is optional parameter in createNetwork call only for Isolated networks, you should see this state for isolated networks only. */
-        ALLOCATED,
-        /**  Indicates that the network is destroyed and not displayed to the end user. */
-        DESTROY,
-        /** Indicates the network configuration is ready to be used by VM (Vlan is set for the network). */
-        IMPLEMENTED,
-        /** Indicates the network configuration is being implemented. */
-        IMPLEMENTING,
-        /** Indicates the network configuration is setup with Vlan from the moment it was created. Happens when vlan is passed in to the createNetwork call, so its immutable for the network for its entire lifecycle. Happens for Shared networks. */
-        SETUP,
-        /** Indicates the network configuration is being shutdown (this is intermediate state, although the name doesn't sound so). During this stage Vlan is being released, and the network goes back to Allocated state. */
-        SHUTDOWN
+        /** Enabled. */
+        ENABLED,
+        /** Inactive. */
+        INACTIVE,
     }
 
     /**
@@ -573,4 +590,113 @@ public class VPC implements Serializable {
 	public void setSyncFlag(Boolean syncFlag) {
 		this.syncFlag = syncFlag;
 	}
+
+	/**
+	 * Get network domain for VPC.
+	 *
+	 * @return the networkDomain
+	 */
+	public String getNetworkDomain() {
+		return networkDomain;
+	}
+
+	/**
+	 * Set network domain for VPC.
+	 *
+	 * @param networkDomain the networkDomain to set
+	 */
+	public void setNetworkDomain(String networkDomain) {
+		this.networkDomain = networkDomain;
+	}
+
+	/**
+	 * Get vpc offering.
+	 *
+	 * @return the vpcOffering
+	 */
+	public VpcOffering getVpcOffering() {
+		return vpcOffering;
+	}
+
+	/**
+	 * Set vpc offering id.
+	 *
+	 * @return the vpcoffering_id
+	 */
+	public Long getVpcofferingid() {
+		return vpcofferingId;
+	}
+
+	/**
+	 * Get vpc offering.
+	 *
+	 * @param vpcOffering the vpcOffering to set
+	 */
+	public void setVpcOffering(VpcOffering vpcOffering) {
+		this.vpcOffering = vpcOffering;
+	}
+
+	/**
+	 * Set vpc offering id.
+	 *
+	 * @param vpcoffering_id the vpcoffering_id to set
+	 */
+	public void setVpcofferingid(Long vpcofferingId) {
+		this.vpcofferingId = vpcofferingId;
+	}
+
+	/**
+	 * Get the cleanup vpc.
+	 *
+	 * @return the cleanUpVPC
+	 */
+	public Boolean getCleanUpVPC() {
+		return cleanUpVPC;
+	}
+
+	/**
+	 * Set the cleanup vpc.
+	 *
+	 * @param cleanUpVPC the cleanUpVPC to set
+	 */
+	public void setCleanUpVPC(Boolean cleanUpVPC) {
+		this.cleanUpVPC = cleanUpVPC;
+	}
+
+	/**
+	 * Get redundant VPC details.
+	 *
+	 * @return the redundantVPC
+	 */
+	public Boolean getRedundantVPC() {
+		return redundantVPC;
+	}
+
+	/**
+	 * Make redundant VPC.
+	 *
+	 * @param redundantVPC the redundantVPC to set
+	 */
+	public void setRedundantVPC(Boolean redundantVPC) {
+		this.redundantVPC = redundantVPC;
+	}
+
+	/**
+	 * Get vpc restart required.
+	 *
+	 * @return the restartRequired
+	 */
+	public Boolean getRestartRequired() {
+		return restartRequired;
+	}
+
+	/**
+	 * Set vpc restart required.
+	 *
+	 * @param restartRequired the restartRequired to set
+	 */
+	public void setRestartRequired(Boolean restartRequired) {
+		this.restartRequired = restartRequired;
+	}
+
 }
