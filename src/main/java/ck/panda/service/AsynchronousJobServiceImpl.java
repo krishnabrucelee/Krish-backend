@@ -1436,18 +1436,20 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 .equals(EventTypes.EVENT_VPC_DELETE)){
     		 JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
              VPC vpc = vpcService.findByUUID(json.getString("id"));
-             vpc.setSyncFlag(false);
-             vpc.setIsActive(false);
-             vpc.setStatus(VPC.Status.INACTIVE);
-             vpcService.softDelete(vpc);
-             if (vpc.getProjectId() != null) {
-                 updateResourceCountService.QuotaUpdateByResourceObject(vpc, CS_VPC, vpc.getProjectId(),
-                             CS_Project, Delete);
-             } else {
-                 updateResourceCountService.QuotaUpdateByResourceObject(vpc, CS_VPC,
-                		 vpc.getDepartmentId(), CS_Department, Delete);
-             }
-             vpcService.ipRelease(vpc);
+			if (vpc != null) {
+				vpc.setSyncFlag(false);
+				vpc.setIsActive(false);
+				vpc.setStatus(VPC.Status.INACTIVE);
+				vpcService.softDelete(vpc);
+				if (vpc.getProjectId() != null) {
+					updateResourceCountService.QuotaUpdateByResourceObject(vpc, CS_VPC, vpc.getProjectId(), CS_Project,
+							Delete);
+				} else {
+					updateResourceCountService.QuotaUpdateByResourceObject(vpc, CS_VPC, vpc.getDepartmentId(),
+							CS_Department, Delete);
+				}
+				vpcService.ipRelease(vpc);
+			}
     	}
 		if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VPC_UPDATE)) {
 			JSONObject jobresultReponse = jobResult.getJSONObject(CloudStackConstants.CS_VPC);

@@ -50,7 +50,7 @@ public class VPC implements Serializable {
     private String uuid;
 
     /** CIDR Range of the IP address. */
-    @Column(name = "cidr")
+    @Column(name = "cidr", nullable = false)
     private String cIDR;
 
     /** Description of the VPC. */
@@ -58,11 +58,11 @@ public class VPC implements Serializable {
     private String description;
 
     /** An optional field, whether to the display the vpc to the end user or not. */
-    @Column(name = "for_display", nullable = false)
+    @Column(name = "for_display")
     private String forDisplay;
 
     /**If set to false, the VPC won't start (VPC VR will not get allocated) until its first network gets implemented. True by default. */
-    @Column(name = "start", nullable = false)
+    @Column(name = "start")
     private String start;
 
     /** Domain of the VPC. */

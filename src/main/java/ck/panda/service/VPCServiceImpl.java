@@ -175,6 +175,8 @@ public class VPCServiceImpl implements VPCService {
 	                            }
 	                        }
 	                    }
+	                } else {
+	                	throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
 	                }
 	            }
 	        }
@@ -279,6 +281,7 @@ public class VPCServiceImpl implements VPCService {
 		User user = convertEntityService.getOwnerById(userId);
 		// Check the user is not a root and admin and set the domain value from login detail.
 		if (user.getType().equals(User.UserType.ROOT_ADMIN)) {
+
 			return vpcRepository.findAllByIsActive(page.toPageRequest(), true);
 		}
 		if (user.getType().equals(User.UserType.DOMAIN_ADMIN)) {
@@ -342,6 +345,8 @@ public class VPCServiceImpl implements VPCService {
                         }
                         vpc.setUuid(createVpcResponseJSON.getString(CloudStackConstants.CS_ID));
                         vpc.setIsActive(true);
+                        vpc.setForDisplay("true");
+                        vpc.setStart("true");
                     } catch (ApplicationException e) {
                         LOGGER.error("ERROR AT VPC CREATION", e);
                         throw new ApplicationException(e.getErrors());
