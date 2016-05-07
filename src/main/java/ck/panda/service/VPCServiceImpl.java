@@ -280,7 +280,7 @@ public class VPCServiceImpl implements VPCService {
                     // syncService.syncResourceLimitProject(convertEntityService.getProjectById(network.getProjectId()));
                 }
                 vpc.setIsActive(false);
-                vpc.setStatus(Status.DISABLED);
+                vpc.setStatus(Status.INACTIVE);
                 if (vpc.getSyncFlag()) {
                     config.setUserServer();
                     String networkResponse = cloudStackVpc.deleteVPC(vpc.getUuid(), CloudStackConstants.JSON);

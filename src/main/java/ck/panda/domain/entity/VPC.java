@@ -198,8 +198,8 @@ public class VPC implements Serializable {
 
     /** Enumeration status for VPC. */
     public enum Status {
-        /** Disabled status make VPC as soft deleted and it will not list on the applicaiton. */
-        DISABLED,
+        /** Inactive status make VPC as soft deleted and it will not list on the applicaiton. */
+        INACTIVE,
         /** Enabled status is used to list VPC through out the application. */
         ENABLED
     }
