@@ -372,4 +372,28 @@ public interface SyncService {
      * @throws Exception cloudstack unhandled errors.
      */
     void syncVpcAcl() throws ApplicationException, Exception;
+
+    /**
+     * Sync with Cloud Server VPC.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    void syncVpc() throws ApplicationException, Exception;
+
+    /**
+     * Sync with Cloud Server supported network.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    void syncSupportedNetwork() throws ApplicationException, Exception;
+
+    /**
+     * Sync with Cloud network service provider.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    void syncNetworkServiceProvider() throws ApplicationException, Exception;
 }

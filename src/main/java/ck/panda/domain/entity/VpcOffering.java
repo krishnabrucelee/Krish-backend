@@ -10,7 +10,10 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import org.hibernate.annotations.Type;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
@@ -21,6 +24,7 @@ import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 import ck.panda.constants.CloudStackConstants;
+import ck.panda.util.JsonUtil;
 import ck.panda.util.JsonValidator;
 
 /**
@@ -67,6 +71,10 @@ public class VpcOffering implements Serializable {
     @Column(name = "supports_region_level_vpc")
     private Boolean supportsRegionLevelVpc;
 
+    /** Supported network list. */
+    @ManyToMany
+    private List<SupportedNetwork> supportedNetworkList;
+
     /** Version attribute to handle optimistic locking. */
     @Version
     @Column(name = "version")
@@ -95,6 +103,14 @@ public class VpcOffering implements Serializable {
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
+
+    /** Transient value of VPC offering. */
+    @Transient
+    private String serviceName;
+
+    /** Transient service id list. */
+    @Transient
+    private List<String> transServiceList;
 
     /**
      * Get the id.
@@ -241,6 +257,24 @@ public class VpcOffering implements Serializable {
     }
 
     /**
+     * Get the list of supported network.
+     *
+     * @return the supportedNetworkList
+     */
+    public List<SupportedNetwork> getSupportedNetworkList() {
+        return supportedNetworkList;
+    }
+
+    /**
+     * Set the list of supported network.
+     *
+     * @param supportedNetworkList to set
+     */
+    public void setSupportedNetworkList(List<SupportedNetwork> supportedNetworkList) {
+        this.supportedNetworkList = supportedNetworkList;
+    }
+
+    /**
      * Get the version.
      *
      * @return the version
@@ -330,6 +364,42 @@ public class VpcOffering implements Serializable {
         this.updatedDateTime = updatedDateTime;
     }
 
+    /**
+     * Get the service name.
+     *
+     * @return the serviceName
+     */
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    /**
+     * Set the service name.
+     *
+     * @param serviceName to set
+     */
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
+    }
+
+    /**
+     * Get the transient service list.
+     *
+     * @return transServiceList
+     */
+    public List<String> getTransServiceList() {
+        return transServiceList;
+    }
+
+    /**
+     * Set the transient service list.
+     *
+     * @param transServiceList to set
+     */
+    public void setTransServiceList(List<String> transServiceList) {
+        this.transServiceList = transServiceList;
+    }
+
     /** Enumeration status for VPC offering. */
     public enum Status {
         /** Disabled status make VPC offering as soft deleted and it will not list on the applicaiton. */
@@ -352,11 +422,7 @@ public class VpcOffering implements Serializable {
         vpcOffering.setDisplayText(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_DISPLAY_TEXT));
         vpcOffering.setDistributedVpcRouter(JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_DISTRIBUTED_VPC_ROUTER));
         vpcOffering.setIsDefault(JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_IS_DEFAULT));
-        if (JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_STATE).equals(CloudStackConstants.CS_ENABLED)) {
-            vpcOffering.setStatus(Status.ENABLED);
-        } else {
-            vpcOffering.setStatus(Status.DISABLED);
-        }
+        vpcOffering.setStatus(Status.valueOf(JsonUtil.getStringValue(object, CloudStackConstants.CS_STATE).toUpperCase()));
         vpcOffering.setSupportsRegionLevelVpc(JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_SUPPORTS_REGION_LEVEL_VPC));
         return vpcOffering;
     }

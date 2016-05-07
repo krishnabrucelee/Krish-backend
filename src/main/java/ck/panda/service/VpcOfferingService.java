@@ -20,8 +20,9 @@ public interface VpcOfferingService extends CRUDService<VpcOffering> {
     List<VpcOffering> findAllFromCSServer() throws Exception;
 
     /**
-     * To get vpc offering by uuid.
+     * To get VPC offering from cloudstack server.
      *
+     * @param uuid uuid of VPC offering.
      * @return VPC offering from server
      * @throws Exception unhandled errors.
      */

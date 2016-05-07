@@ -534,8 +534,11 @@ public class NetworkServiceImpl implements NetworkService {
                          network.getTransDepartmentId(), convertEntityService.getDomain(network.getTransDomainId())));
                  if (network.getTransProjectId() != null) {
                     Project project = projectService.findByUuid(network.getTransProjectId());
-                   network.setDepartmentId(project.getDepartmentId());
-                }
+                    network.setDepartmentId(project.getDepartmentId());
+                 }
+                 if (network.getTransVpcAclId() != null) {
+                     network.setVpcId(convertEntityService.getVpcId(network.getTransVpcAclId()));
+                 }
 
                 networkList.add(network);
             }

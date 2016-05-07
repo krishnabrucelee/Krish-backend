@@ -233,7 +233,11 @@ public class ConvertEntityService {
     @Autowired
     private SSHKeyService sshKeyService;
 
-    /** Vpc offering Service for listing. */
+    /** VPC service. */
+    @Autowired
+    private VPCService vpcService;
+
+    /** VPC offering service. */
     @Autowired
     private VpcOfferingService vpcOfferingService;
 
@@ -1439,5 +1443,33 @@ public class ConvertEntityService {
 	public VpcOffering getVpcOfferingById(Long vpcofferingid) throws Exception {
 		return vpcOfferingService.find(vpcofferingid);
 	}
+	
+	/**
+     * Get the VPC id.
+     *
+     * @param uuid of VPC.
+     * @return VPC id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getVpcId(String uuid) throws Exception {
+        if (vpcService.findByUUID(uuid) != null) {
+            return vpcService.findByUUID(uuid).getId();
+        }
+        return null;
+    }
+
+    /**
+     * Get the VPC offering id.
+     *
+     * @param uuid of VPC offering.
+     * @return VPC offering id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getVpcOfferingId(String uuid) throws Exception {
+        if (vpcOfferingService.findByUUID(uuid) != null) {
+            return vpcOfferingService.findByUUID(uuid).getId();
+        }
+        return null;
+    }
 
 }

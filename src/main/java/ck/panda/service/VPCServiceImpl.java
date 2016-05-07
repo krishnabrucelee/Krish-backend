@@ -3,7 +3,7 @@ package ck.panda.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,20 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.IpAddress;
-import ck.panda.domain.entity.Network;
-import ck.panda.domain.entity.NetworkOffering;
-import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VPC;
 import ck.panda.domain.entity.VPC.Status;
-import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VpnUser;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.VPCRepository;
@@ -47,11 +42,11 @@ import ck.panda.util.error.exception.CustomGenericException;
 @Service
 public class VPCServiceImpl implements VPCService {
 
-	/** Logger attribute. */
+    /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(VPCServiceImpl.class);
 
     /** Constant for vpc entity. */
-    private static final String VPC = "VPC";
+    private static final String CS_VPC = "VPC";
 
     /** Constant for vpc response entity. */
     private static final String VPC_CREATE_RESPONSE = "createvpcresponse";
@@ -87,7 +82,7 @@ public class VPCServiceImpl implements VPCService {
     @Autowired
     private ProjectService projectService;
 
-	/** Convert Entity service references. */
+    /** Convert Entity service references. */
     @Autowired
     private ConvertEntityService convertEntityService;
 
@@ -135,178 +130,211 @@ public class VPCServiceImpl implements VPCService {
     @Autowired
     private UpdateResourceCountService updateResourceCountService;
 
-	@Override
-	public VPC save(VPC vpc) throws Exception {
-		return vpcRepository.save(vpc);
-	}
+    /** VPC cloudstack service reference. */
+    @Autowired
+    private CloudStackVPCService cloudStackVPCService;
 
-	@Override
-	@PreAuthorize("hasPermission(#vpc.getSyncFlag(), 'EDIT_VPC')")
-	public VPC update(VPC vpc) throws Exception {
-		 if (vpc.getSyncFlag()) {
-	            Errors errors = validator.rejectIfNullEntity(VPC, vpc);
-	            errors = validator.validateEntity(vpc, errors);
-	            if (errors.hasErrors()) {
-	                throw new ApplicationException(errors);
-	            } else {
-	                HashMap<String, String> optional = new HashMap<String, String>();
-	                if (vpc.getName() != null && vpc.getName().trim() != "") {
-	                    optional.put(CloudStackConstants.CS_NAME, vpc.getName());
-	                }
-	                if (vpc.getDescription() != null && vpc.getDescription().trim() != "") {
-	                    optional.put(CloudStackConstants.CS_DISPLAY_TEXT, vpc.getDescription());
-	                }
-	                config.setUserServer();
-	                String updateVPCResponse = cloudStackVpc.updateVPC(vpc.getUuid(), vpc.getName(), optional, CloudStackConstants.JSON);
-	                JSONObject jobId = new JSONObject(updateVPCResponse).getJSONObject(CS_UPDATE_VPC_RESPONSE);
-	                if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
-	                    String jobResponse = cloudStackVpc.vpcJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
-	                    JSONObject jobresults = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
-	                    if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.PROGRESS_JOB_STATUS)) {
-	                    	vpc.setStatus(Status.ENABLED);
-	                    	vpc.setIsActive(true);
-	                    	vpc.setName(vpc.getName());
-	                    	vpc.setDescription(vpc.getDescription());
-	                    } else {
-	                        JSONObject jobresponse = jobresults.getJSONObject(CloudStackConstants.CS_JOB_RESULT);
-	                        if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.ERROR_JOB_STATUS)) {
-	                            if (jobresponse.has(CloudStackConstants.CS_ERROR_CODE)) {
-	                                throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, jobresponse.getString(CloudStackConstants.CS_ERROR_TEXT));
-	                            }
-	                        }
-	                    }
-	                } else {
-	                	throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
-	                }
-	            }
-	        }
-	        return vpcRepository.save(vpc);
-	}
+    @Override
+    public VPC save(VPC vpc) throws Exception {
+        return vpcRepository.save(vpc);
+    }
 
-	@Override
-	public void delete(VPC vpc) throws Exception {
-		vpcRepository.delete(vpc);
-	}
+    @Override
+    @PreAuthorize("hasPermission(#vpc.getSyncFlag(), 'EDIT_VPC')")
+    public VPC update(VPC vpc) throws Exception {
+         if (vpc.getSyncFlag()) {
+                Errors errors = validator.rejectIfNullEntity(CS_VPC, vpc);
+                errors = validator.validateEntity(vpc, errors);
+                if (errors.hasErrors()) {
+                    throw new ApplicationException(errors);
+                } else {
+                    HashMap<String, String> optional = new HashMap<String, String>();
+                    if (vpc.getName() != null && vpc.getName().trim() != "") {
+                        optional.put(CloudStackConstants.CS_NAME, vpc.getName());
+                    }
+                    if (vpc.getDescription() != null && vpc.getDescription().trim() != "") {
+                        optional.put(CloudStackConstants.CS_DISPLAY_TEXT, vpc.getDescription());
+                    }
+                    config.setUserServer();
+                    String updateVPCResponse = cloudStackVpc.updateVPC(vpc.getUuid(), vpc.getName(), optional, CloudStackConstants.JSON);
+                    JSONObject jobId = new JSONObject(updateVPCResponse).getJSONObject(CS_UPDATE_VPC_RESPONSE);
+                    if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
+                        String jobResponse = cloudStackVpc.vpcJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
+                        JSONObject jobresults = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+                        if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.PROGRESS_JOB_STATUS)) {
+                            vpc.setStatus(Status.ENABLED);
+                            vpc.setIsActive(true);
+                            vpc.setName(vpc.getName());
+                            vpc.setDescription(vpc.getDescription());
+                        } else {
+                            JSONObject jobresponse = jobresults.getJSONObject(CloudStackConstants.CS_JOB_RESULT);
+                            if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.ERROR_JOB_STATUS)) {
+                                if (jobresponse.has(CloudStackConstants.CS_ERROR_CODE)) {
+                                    throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, jobresponse.getString(CloudStackConstants.CS_ERROR_TEXT));
+                                }
+                            }
+                        }
+                    } else {
+                        throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
+                    }
+                }
+            }
+            return vpcRepository.save(vpc);
+    }
 
-	@Override
-	public void delete(Long id) throws Exception {
-		vpcRepository.delete(id);
-	}
+    @Override
+    public void delete(VPC vpc) throws Exception {
+        vpcRepository.delete(vpc);
+    }
 
-	@Override
-	public VPC find(Long id) throws Exception {
-		return vpcRepository.findOne(id);
-	}
+    @Override
+    public void delete(Long id) throws Exception {
+        vpcRepository.delete(id);
+    }
 
-	@Override
-	public Page<VPC> findAll(PagingAndSorting pagingAndSorting) throws Exception {
-		return vpcRepository.findAll(pagingAndSorting.toPageRequest());
-	}
+    @Override
+    public VPC find(Long id) throws Exception {
+        return vpcRepository.findOne(id);
+    }
 
-	@Override
-	public List<VPC> findAll() throws Exception {
-		return (List<VPC>) vpcRepository.findAll();
-	}
-	@Override
-	public List<VPC> findAllFromCSServerByDomain() throws Exception {
-		return null;
-	}
+    @Override
+    public Page<VPC> findAll(PagingAndSorting pagingAndSorting) throws Exception {
+        return vpcRepository.findAll(pagingAndSorting.toPageRequest());
+    }
 
-	@Override
-	public VPC findByUUID(String uuid) throws Exception {
-		return vpcRepository.findByUUID(uuid);
-	}
+    @Override
+    public List<VPC> findAll() throws Exception {
+        return (List<VPC>) vpcRepository.findAll();
+    }
 
-	@Override
-	public VPC findById(Long id) throws Exception {
-		return vpcRepository.findOne(id);
-	}
+    @Override
+    public List<VPC> findAllFromCSServer() throws Exception {
 
-	@Override
-	public List<VPC> findByDepartmentAndVpcIsActive(Long department, Boolean isActive) throws Exception {
-		return vpcRepository.findByDepartmentAndVpcIsActive(department, isActive);
-	}
+        List<VPC> vpcList = new ArrayList<VPC>();
+        HashMap<String, String> vpcMap = new HashMap<String, String>();
+        JSONArray vpcListJSON = null;
+        // 1. Get the list of VPC from CS server using CS connector
+        vpcMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
+        String response = cloudStackVPCService.listVPCs(vpcMap, CloudStackConstants.JSON);
+        JSONObject responseObject = new JSONObject(response).getJSONObject(CloudStackConstants.CS_LIST_VPC_RESPONSE);
+        if (responseObject.has(CloudStackConstants.CS_VPC)) {
+            vpcListJSON = responseObject.getJSONArray(CloudStackConstants.CS_VPC);
+            // 2. Iterate the json list, convert the single json entity to VPC
+            for (int i = 0, size = vpcListJSON.length(); i < size; i++) {
+                // 2.1 Call convert by passing JSONObject to VPC entity and Add
+                // the converted VPC entity to list
+                VPC vpc = VPC.convert(vpcListJSON.getJSONObject(i));
+                vpc.setDomainId(convertEntityService.getDomainId(vpc.getTransDomainId()));
+                vpc.setZoneId(convertEntityService.getZoneId(vpc.getTransZoneId()));
+                vpc.setVpcofferingid(convertEntityService.getVpcOfferingId(vpc.getTransVpcOfferingId()));
+                vpc.setDepartmentId(convertEntityService.getDepartmentByUsernameAndDomains(
+                        vpc.getTransAccount(), convertEntityService.getDomain(vpc.getTransDomainId())));
+                vpc.setProjectId(convertEntityService.getProjectId(vpc.getTransProjectId()));
+                if (vpc.getTransProjectId() != null) {
+                    Project project = projectService.findByUuid(vpc.getTransProjectId());
+                    vpc.setDepartmentId(project.getDepartmentId());
+                }
+                vpcList.add(vpc);
+            }
+        }
+        return vpcList;
+    }
 
-	@Override
-	@PreAuthorize("hasPermission(#vpc.getSyncFlag(), 'DELETE_VPC')")
-	public VPC softDelete(VPC vpc) throws Exception {
-		vpc.setIsActive(false);
-		if (vpc.getSyncFlag()) {
-			/*List<VmInstance> vmResponse = vmService.findAllByNetworkAndVmStatus(network.getId(),
-					VmInstance.Status.EXPUNGING);
-			List<Nic> nicResponse = nicService.findAllByNetworkAndIsActive(network.getId(), true);
-			if (vmResponse.size() != 0 || nicResponse.size() != 0) {
-				throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
-						"VPC tiers is associated with Vm instances. You cannot delete this vpc");
-			}*/
-			Errors errors = validator.rejectIfNullEntity(VPC, vpc);
-			errors = validator.validateEntity(vpc, errors);
-			if (errors.hasErrors()) {
-				throw new ApplicationException(errors);
-			}
-			// check department and project quota validation.
-			ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
-					.findByDepartmentAndResourceType(vpc.getDepartmentId(), ResourceType.Instance, true);
-			if (departmentLimit != null) {
-				if (vpc.getProjectId() != null) {
-					// syncService.syncResourceLimitProject(convertEntityService.getProjectById(network.getProjectId()));
-				}
-				vpc.setIsActive(false);
-				vpc.setStatus(Status.INACTIVE);
-				if (vpc.getSyncFlag()) {
-					config.setUserServer();
-					String networkResponse = cloudStackVpc.deleteVPC(vpc.getUuid(), CloudStackConstants.JSON);
-					JSONObject jobId = new JSONObject(networkResponse).getJSONObject(CS_DELETE_VPC_RESPONSE);
-					if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
-						String jobResponse = cloudStackVpc.vpcJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
-								CloudStackConstants.JSON);
-						JSONObject jobresult = new JSONObject(jobResponse)
-								.getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
-						if(jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
+    @Override
+    public VPC findByUUID(String uuid) throws Exception {
+        return vpcRepository.findByUUID(uuid);
+    }
+
+    @Override
+    public VPC findById(Long id) throws Exception {
+        return vpcRepository.findOne(id);
+    }
+
+    @Override
+    public List<VPC> findByDepartmentAndVpcIsActive(Long department, Boolean isActive) throws Exception {
+        return vpcRepository.findByDepartmentAndVpcIsActive(department, isActive);
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#vpc.getSyncFlag(), 'DELETE_VPC')")
+    public VPC softDelete(VPC vpc) throws Exception {
+        vpc.setIsActive(false);
+        if (vpc.getSyncFlag()) {
+            /*List<VmInstance> vmResponse = vmService.findAllByNetworkAndVmStatus(network.getId(),
+                    VmInstance.Status.EXPUNGING);
+            List<Nic> nicResponse = nicService.findAllByNetworkAndIsActive(network.getId(), true);
+            if (vmResponse.size() != 0 || nicResponse.size() != 0) {
+                throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
+                        "VPC tiers is associated with Vm instances. You cannot delete this vpc");
+            }*/
+            Errors errors = validator.rejectIfNullEntity(CS_VPC, vpc);
+            errors = validator.validateEntity(vpc, errors);
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
+            }
+            // check department and project quota validation.
+            ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
+                    .findByDepartmentAndResourceType(vpc.getDepartmentId(), ResourceType.Instance, true);
+            if (departmentLimit != null) {
+                if (vpc.getProjectId() != null) {
+                    // syncService.syncResourceLimitProject(convertEntityService.getProjectById(network.getProjectId()));
+                }
+                vpc.setIsActive(false);
+                vpc.setStatus(Status.INACTIVE);
+                if (vpc.getSyncFlag()) {
+                    config.setUserServer();
+                    String networkResponse = cloudStackVpc.deleteVPC(vpc.getUuid(), CloudStackConstants.JSON);
+                    JSONObject jobId = new JSONObject(networkResponse).getJSONObject(CS_DELETE_VPC_RESPONSE);
+                    if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
+                        String jobResponse = cloudStackVpc.vpcJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
+                                CloudStackConstants.JSON);
+                        JSONObject jobresult = new JSONObject(jobResponse)
+                                .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+                        if(jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
                                 .equals(GenericConstants.ERROR_JOB_STATUS)){
-							throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
-						}
-					}
-				}
-			} else {
-				throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
-						"Resource limit for department has not been set. Please update department quota");
-			}
-		}
-		return vpcRepository.save(vpc);
-	}
+                            throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, jobId.getString(CloudStackConstants.CS_ERROR_TEXT));
+                        }
+                    }
+                }
+            } else {
+                throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
+                        "Resource limit for department has not been set. Please update department quota");
+            }
+        }
+        return vpcRepository.save(vpc);
+    }
 
-	@Override
-	public Page<VPC> findAllByActive(PagingAndSorting page, Long userId) throws Exception {
-		User user = convertEntityService.getOwnerById(userId);
-		// Check the user is not a root and admin and set the domain value from login detail.
-		if (user.getType().equals(User.UserType.ROOT_ADMIN)) {
+    @Override
+    public Page<VPC> findAllByActive(PagingAndSorting page, Long userId) throws Exception {
+        User user = convertEntityService.getOwnerById(userId);
+        // Check the user is not a root and admin and set the domain value from login detail.
+        if (user.getType().equals(User.UserType.ROOT_ADMIN)) {
 
-			return vpcRepository.findAllByIsActive(page.toPageRequest(), true);
-		}
-		if (user.getType().equals(User.UserType.DOMAIN_ADMIN)) {
-			return vpcRepository.findByDomainIsActive(page.toPageRequest(), true, user.getDomainId());
-		}
-		Page<VPC> vpcs = this.getVPCListByUser(page, userId);
-		return vpcs;
-	}
+            return vpcRepository.findAllByIsActive(page.toPageRequest(), true);
+        }
+        if (user.getType().equals(User.UserType.DOMAIN_ADMIN)) {
+            return vpcRepository.findByDomainIsActive(page.toPageRequest(), true, user.getDomainId());
+        }
+        Page<VPC> vpcs = this.getVPCListByUser(page, userId);
+        return vpcs;
+    }
 
-	@Override
-	public List<VPC> findByProjectAndVpcIsActive(Long projectId, Boolean isActive) throws Exception {
-		return vpcRepository.findByProjectAndVpcIsActive(projectId, isActive);
-	}
+    @Override
+    public List<VPC> findByProjectAndVpcIsActive(Long projectId, Boolean isActive) throws Exception {
+        return vpcRepository.findByProjectAndVpcIsActive(projectId, isActive);
+    }
 
-	@Override
-	public List<VPC> findAllByActive(Boolean isActive) throws Exception {
-		return vpcRepository.findAllByIsActive(isActive);
-	}
+    @Override
+    public List<VPC> findAllByActive(Boolean isActive) throws Exception {
+        return vpcRepository.findAllByIsActive(isActive);
+    }
 
-	@Override
-	@PreAuthorize("hasPermission(#vpc.getSyncFlag(), 'CREATE_VPC')")
-	public VPC save(VPC vpc, Long userId) throws Exception {
-		if (vpc.getSyncFlag()) {
-			User user = convertEntityService.getOwnerById(userId);
-            Errors errors = validator.rejectIfNullEntity(VPC, vpc);
+    @Override
+    @PreAuthorize("hasPermission(#vpc.getSyncFlag(), 'CREATE_VPC')")
+    public VPC save(VPC vpc, Long userId) throws Exception {
+        if (vpc.getSyncFlag()) {
+            User user = convertEntityService.getOwnerById(userId);
+            Errors errors = validator.rejectIfNullEntity(CS_VPC, vpc);
             errors = validator.validateEntity(vpc, errors);
             HashMap<String, String> optionalMap = new HashMap<String, String>();
             optionalMap.put(CloudStackConstants.CS_ZONE_ID,
@@ -322,17 +350,17 @@ public class VPCServiceImpl implements VPCService {
                 if (departmentLimit != null && convertEntityService.getDepartmentById(vpc.getDepartmentId()).getType()
                         .equals(AccountType.USER)) {
                     if (vpc.getProjectId() != null) {
-                    	if (projectLimit != null) {
-                    		quotaLimitValidation.QuotaLimitCheckByResourceObject(vpc, VPC,
-                    				vpc.getProjectId(), "Project");
-                    	} else {
-                    		errors.addGlobalError(
+                        if (projectLimit != null) {
+                            quotaLimitValidation.QuotaLimitCheckByResourceObject(vpc, CS_VPC,
+                                    vpc.getProjectId(), "Project");
+                        } else {
+                            errors.addGlobalError(
                                     "Resource limit for project has not been set. Please update project quota");
                             throw new ApplicationException(errors);
-                    	}
+                        }
                     } else {
-                        quotaLimitValidation.QuotaLimitCheckByResourceObject(vpc, VPC,
-                        		vpc.getDepartmentId(), "Department");
+                        quotaLimitValidation.QuotaLimitCheckByResourceObject(vpc, CS_VPC,
+                                vpc.getDepartmentId(), "Department");
                     }
                     try {
                         config.setUserServer();
@@ -345,8 +373,8 @@ public class VPCServiceImpl implements VPCService {
                         }
                         vpc.setUuid(createVpcResponseJSON.getString(CloudStackConstants.CS_ID));
                         vpc.setIsActive(true);
-                        vpc.setForDisplay("true");
-                        vpc.setStart("true");
+                        vpc.setForDisplay(true);
+                        vpc.setStart(true);
                     } catch (ApplicationException e) {
                         LOGGER.error("ERROR AT VPC CREATION", e);
                         throw new ApplicationException(e.getErrors());
@@ -365,114 +393,114 @@ public class VPCServiceImpl implements VPCService {
             vpc.setIsActive(true);
             return vpcRepository.save(vpc);
         }
-	}
+    }
 
-	@Override
-	@PreAuthorize("hasPermission(#vpc.getSyncFlag(), 'RESTART_VPC')")
-	public VPC restartVPC(VPC vpc) throws Exception {
-		Errors errors = validator.rejectIfNullEntity(VPC, vpc);
-		errors = validator.validateEntity(vpc, errors);
-		if (vpc.getSyncFlag()) {
-			HashMap<String, String> optionalParams = new HashMap<String, String>();
-			// Mapping optional parameters.
-			CloudStackOptionalUtil.updateOptionalBooleanValue(CS_CLEAN_UP, vpc.getCleanUpVPC(), optionalParams);
-			// Mapping optional parameters.
-			CloudStackOptionalUtil.updateOptionalBooleanValue(CS_MAKE_REDUNDANT, vpc.getRedundantVPC(), optionalParams);
-			// Configuration value to ACS.
-			config.setUserServer();
-			// Restart vpc call to ACS
-			String restartResponse = cloudStackVpc.restartVPC(vpc.getUuid(), CloudStackConstants.JSON, optionalParams);
-			JSONObject jobId = new JSONObject(restartResponse).getJSONObject(CS_RESTART_VPC_RESPONSE);
-			// Checking job id.
-			if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
-				String jobResponse = cloudStackVpc.vpcJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
-						CloudStackConstants.JSON);
-				JSONObject jobresult = new JSONObject(jobResponse)
-						.getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
-				if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
-						.equals(CloudStackConstants.PROGRESS_JOB_STATUS)
-						|| (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
-								.equals(CloudStackConstants.PROGRESS_JOB_STATUS))) {
-					vpc.setRestartRequired(true);
-				} else {
-					JSONObject jobresponse = jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT);
-					if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
-							.equals(CloudStackConstants.ERROR_JOB_STATUS)) {
-						if (jobresponse.has(CloudStackConstants.CS_ERROR_CODE)) {
-							throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
-									jobresponse.getString(CloudStackConstants.CS_ERROR_TEXT));
-						}
-					}
-				}
-			}
-		}
-		return vpcRepository.save(vpc);
-	}
+    @Override
+    @PreAuthorize("hasPermission(#vpc.getSyncFlag(), 'RESTART_VPC')")
+    public VPC restartVPC(VPC vpc) throws Exception {
+        Errors errors = validator.rejectIfNullEntity(CS_VPC, vpc);
+        errors = validator.validateEntity(vpc, errors);
+        if (vpc.getSyncFlag()) {
+            HashMap<String, String> optionalParams = new HashMap<String, String>();
+            // Mapping optional parameters.
+            CloudStackOptionalUtil.updateOptionalBooleanValue(CS_CLEAN_UP, vpc.getCleanUpVPC(), optionalParams);
+            // Mapping optional parameters.
+            CloudStackOptionalUtil.updateOptionalBooleanValue(CS_MAKE_REDUNDANT, vpc.getRedundantVPC(), optionalParams);
+            // Configuration value to ACS.
+            config.setUserServer();
+            // Restart vpc call to ACS
+            String restartResponse = cloudStackVpc.restartVPC(vpc.getUuid(), CloudStackConstants.JSON, optionalParams);
+            JSONObject jobId = new JSONObject(restartResponse).getJSONObject(CS_RESTART_VPC_RESPONSE);
+            // Checking job id.
+            if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
+                String jobResponse = cloudStackVpc.vpcJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
+                        CloudStackConstants.JSON);
+                JSONObject jobresult = new JSONObject(jobResponse)
+                        .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+                if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
+                        .equals(CloudStackConstants.PROGRESS_JOB_STATUS)
+                        || (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
+                                .equals(CloudStackConstants.PROGRESS_JOB_STATUS))) {
+                    vpc.setRestartRequired(true);
+                } else {
+                    JSONObject jobresponse = jobresult.getJSONObject(CloudStackConstants.CS_JOB_RESULT);
+                    if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
+                            .equals(CloudStackConstants.ERROR_JOB_STATUS)) {
+                        if (jobresponse.has(CloudStackConstants.CS_ERROR_CODE)) {
+                            throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
+                                    jobresponse.getString(CloudStackConstants.CS_ERROR_TEXT));
+                        }
+                    }
+                }
+            }
+        }
+        return vpcRepository.save(vpc);
+    }
 
-	@Override
-	public VPC ipRelease(VPC vpc) throws Exception {
-		List<IpAddress> ipList = ipService.findByNetwork(vpc.getId());
-		for (IpAddress ip : ipList) {
-			List<VpnUser> vpnUserList = vpnUserService.findAllByDepartmentAndDomainAndIsActive(vpc.getDepartmentId(),
-					vpc.getDomainId(), true);
-			if (vpnUserList.size() != 0) {
-				for (VpnUser vpnUser : vpnUserList) {
-					vpnUser.setIsActive(false);
-					vpnUser.setSyncFlag(false);
-					vpnUserService.softDelete(vpnUser);
-				}
-			}
-			ipService.ruleDelete(ip);
-			IpAddress ipAddress = new IpAddress();
-			ipAddress.setId(ip.getId());
-			ipAddress.setState(State.FREE);
-			ipAddress.setIsStaticnat(false);
-			ipAddress.setIsSourcenat(false);
-			ipAddress.setDepartmentId(ip.getDepartmentId());
-			ipAddress.setZoneId(ip.getZoneId());
-			ipAddress.setDisplay(ip.getDisplay());
-			ipAddress.setProjectId(ip.getProjectId());
-			ipAddress.setUuid(ip.getUuid());
-			ipAddress.setPublicIpAddress(ip.getPublicIpAddress());
-			ipAddress.setVmInstanceId(ip.getVmInstanceId());
-			ipAddress.setVlan(ip.getVlan());
-			ipAddress.setCreatedBy(ip.getCreatedBy());
-			ipAddress.setCreatedDateTime(ip.getCreatedDateTime());
-			ipAddress = ipService.update(ipAddress);
-		}
+    @Override
+    public VPC ipRelease(VPC vpc) throws Exception {
+        List<IpAddress> ipList = ipService.findByNetwork(vpc.getId());
+        for (IpAddress ip : ipList) {
+            List<VpnUser> vpnUserList = vpnUserService.findAllByDepartmentAndDomainAndIsActive(vpc.getDepartmentId(),
+                    vpc.getDomainId(), true);
+            if (vpnUserList.size() != 0) {
+                for (VpnUser vpnUser : vpnUserList) {
+                    vpnUser.setIsActive(false);
+                    vpnUser.setSyncFlag(false);
+                    vpnUserService.softDelete(vpnUser);
+                }
+            }
+            ipService.ruleDelete(ip);
+            IpAddress ipAddress = new IpAddress();
+            ipAddress.setId(ip.getId());
+            ipAddress.setState(State.FREE);
+            ipAddress.setIsStaticnat(false);
+            ipAddress.setIsSourcenat(false);
+            ipAddress.setDepartmentId(ip.getDepartmentId());
+            ipAddress.setZoneId(ip.getZoneId());
+            ipAddress.setDisplay(ip.getDisplay());
+            ipAddress.setProjectId(ip.getProjectId());
+            ipAddress.setUuid(ip.getUuid());
+            ipAddress.setPublicIpAddress(ip.getPublicIpAddress());
+            ipAddress.setVmInstanceId(ip.getVmInstanceId());
+            ipAddress.setVlan(ip.getVlan());
+            ipAddress.setCreatedBy(ip.getCreatedBy());
+            ipAddress.setCreatedDateTime(ip.getCreatedDateTime());
+            ipAddress = ipService.update(ipAddress);
+        }
         return vpc;
-	}
+    }
 
-	@Override
-	public Page<VPC> findAllByDomainId(Long domainId, PagingAndSorting page) throws Exception {
-		return vpcRepository.findByDomainIsActive(page.toPageRequest(), true, domainId);
-	}
+    @Override
+    public Page<VPC> findAllByDomainId(Long domainId, PagingAndSorting page) throws Exception {
+        return vpcRepository.findByDomainIsActive(page.toPageRequest(), true, domainId);
+    }
 
-	@Override
-	public List<VPC> findAllByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception {
-		return vpcRepository.findAllByDomainAndIsActive(domainId, isActive);
-	}
+    @Override
+    public List<VPC> findAllByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception {
+        return vpcRepository.findAllByDomainAndIsActive(domainId, isActive);
+    }
 
-	@Override
-	public List<VPC> findAllByUserId(Long userId) throws Exception {
-		User user = convertEntityService.getOwnerById(userId);
-		// Check the user is not a root and admin and set the domain value from login detail.
-		if (user.getType().equals(User.UserType.ROOT_ADMIN)) {
-			return vpcRepository.findAllByIsActiveWihtoutPaging(true);
-		}
-		if (user.getType().equals(User.UserType.DOMAIN_ADMIN)) {
-			return vpcRepository.findAllByDomainIsActive(true, user.getDomainId());
-		}
-		List<VPC> vpcs = this.getVPCListByUserWihtoutPaging(userId);
-		return vpcs;
-	}
+    @Override
+    public List<VPC> findAllByUserId(Long userId) throws Exception {
+        User user = convertEntityService.getOwnerById(userId);
+        // Check the user is not a root and admin and set the domain value from login detail.
+        if (user.getType().equals(User.UserType.ROOT_ADMIN)) {
+            return vpcRepository.findAllByIsActiveWihtoutPaging(true);
+        }
+        if (user.getType().equals(User.UserType.DOMAIN_ADMIN)) {
+            return vpcRepository.findAllByDomainIsActive(true, user.getDomainId());
+        }
+        List<VPC> vpcs = this.getVPCListByUserWihtoutPaging(userId);
+        return vpcs;
+    }
 
-	@Override
-	public List<VPC> findAllByDomainId(Long domainId) throws Exception {
-		return vpcRepository.findAllByDomainAndIsActive(domainId, true);
-	}
+    @Override
+    public List<VPC> findAllByDomainId(Long domainId) throws Exception {
+        return vpcRepository.findAllByDomainAndIsActive(domainId, true);
+    }
 
-	/**
+    /**
      * Get the vpc list based on the active status.
      *
      * @param pagingAndSorting do pagination with sorting for vpc.
@@ -516,7 +544,7 @@ public class VPCServiceImpl implements VPCService {
         }
     }
 
-	/**
+    /**
      * Hash Map to map the optional values to cloudstack.
      *
      * @return optional
@@ -524,40 +552,40 @@ public class VPCServiceImpl implements VPCService {
      * @param userId idof the user
      * @throws Exception Exception
      */
-	public HashMap<String, String> optional(VPC vpc, Long userId) throws Exception {
-		User user = convertEntityService.getOwnerById(userId);
-		HashMap<String, String> optional = new HashMap<String, String>();
-		if (vpc.getNetworkDomain() != null && vpc.getNetworkDomain().trim() != "") {
-			optional.put(CloudStackConstants.CS_NETWORK_DOMAIN, vpc.getNetworkDomain());
-		}
-		if (vpc.getDomainId() != null) {
-			optional.put(CloudStackConstants.CS_DOMAIN_ID,
-					convertEntityService.getDomainById(vpc.getDomainId()).getUuid());
-		} else {
-			optional.put(CloudStackConstants.CS_DOMAIN_ID, domainService.find(user.getDomainId()).getUuid());
-		}
-		if (vpc.getName() != null && vpc.getName().trim() != "") {
-			optional.put(CloudStackConstants.CS_NAME, vpc.getName());
-		}
-		if (vpc.getDescription() != null && vpc.getDescription().trim() != "") {
-			optional.put(CloudStackConstants.CS_DISPLAY_TEXT, vpc.getDescription());
-		}
-		if (vpc.getVpcofferingid() != null) {
-			optional.put(CloudStackConstants.CS_VPC_OFFERING_ID, convertEntityService.getVpcOfferingById(vpc.getVpcofferingid()).getUuid());
-		}
-		if (vpc.getProjectId() != null) {
-			optional.put(CloudStackConstants.CS_PROJECT_ID,
-					convertEntityService.getProjectById(vpc.getProjectId()).getUuid());
+    public HashMap<String, String> optional(VPC vpc, Long userId) throws Exception {
+        User user = convertEntityService.getOwnerById(userId);
+        HashMap<String, String> optional = new HashMap<String, String>();
+        if (vpc.getNetworkDomain() != null && vpc.getNetworkDomain().trim() != "") {
+            optional.put(CloudStackConstants.CS_NETWORK_DOMAIN, vpc.getNetworkDomain());
+        }
+        if (vpc.getDomainId() != null) {
+            optional.put(CloudStackConstants.CS_DOMAIN_ID,
+                    convertEntityService.getDomainById(vpc.getDomainId()).getUuid());
+        } else {
+            optional.put(CloudStackConstants.CS_DOMAIN_ID, domainService.find(user.getDomainId()).getUuid());
+        }
+        if (vpc.getName() != null && vpc.getName().trim() != "") {
+            optional.put(CloudStackConstants.CS_NAME, vpc.getName());
+        }
+        if (vpc.getDescription() != null && vpc.getDescription().trim() != "") {
+            optional.put(CloudStackConstants.CS_DISPLAY_TEXT, vpc.getDescription());
+        }
+        if (vpc.getVpcofferingid() != null) {
+            optional.put(CloudStackConstants.CS_VPC_OFFERING_ID, convertEntityService.getVpcOfferingById(vpc.getVpcofferingid()).getUuid());
+        }
+        if (vpc.getProjectId() != null) {
+            optional.put(CloudStackConstants.CS_PROJECT_ID,
+                    convertEntityService.getProjectById(vpc.getProjectId()).getUuid());
 
-		} else {
-			if (vpc.getDepartmentId() != null) {
-				optional.put(CloudStackConstants.CS_ACCOUNT,
-						departmentService.find(vpc.getDepartmentId()).getUserName());
-			} else {
-				optional.put(CloudStackConstants.CS_ACCOUNT,
-						departmentService.find(user.getDepartmentId()).getUserName());
-			}
-		}
-		return optional;
-	}
+        } else {
+            if (vpc.getDepartmentId() != null) {
+                optional.put(CloudStackConstants.CS_ACCOUNT,
+                        departmentService.find(vpc.getDepartmentId()).getUserName());
+            } else {
+                optional.put(CloudStackConstants.CS_ACCOUNT,
+                        departmentService.find(user.getDepartmentId()).getUserName());
+            }
+        }
+        return optional;
+    }
 }
