@@ -38,16 +38,12 @@ public class CloudStackVPCService {
      * @return response sting
      * @throws Exception unhandled errors.
      */
-    public String createVPC(String cidr, String displayText, String name,
-            String vpcOfferingId, String zoneId, HashMap<String, String> optional, String response)
+    public String createVPC(String cidr, String zoneId, HashMap<String, String> optional, String response)
             throws Exception {
 
         LinkedList<NameValuePair> arguments
                 = server.getDefaultQuery("createVPC", optional);
         arguments.add(new NameValuePair("cidr", cidr));
-        arguments.add(new NameValuePair("displaytext", displayText));
-        arguments.add(new NameValuePair("name", name));
-        arguments.add(new NameValuePair("vpcofferingid", vpcOfferingId));
         arguments.add(new NameValuePair("zoneid", zoneId));
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);
@@ -190,11 +186,11 @@ public class CloudStackVPCService {
      * @return string value
      * @throws Exception unhandled errors.
      */
-    public String restartVPC(String vpcId, String response)
+    public String restartVPC(String vpcId, String response, HashMap<String, String> optional)
             throws Exception {
 
         LinkedList<NameValuePair> arguments
-                = server.getDefaultQuery("restartVPC", null);
+                = server.getDefaultQuery("restartVPC", optional);
         arguments.add(new NameValuePair("id", vpcId));
         arguments.add(new NameValuePair("response", response));
         String responseDocument = server.request(arguments);

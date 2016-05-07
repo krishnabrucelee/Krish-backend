@@ -36,6 +36,7 @@ import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.VPC;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.entity.VmIpaddress.IpType;
@@ -73,11 +74,15 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     /** Update quota constants. */
     public static final String CS_Instance = "Instance", CS_Network = "Network", CS_IP = "IP", CS_Volume = "Volume",
             CS_Domain = "Domain", CS_Project = "Project", CS_Department = "Department", CS_Expunging = "Expunging",
-            CS_UploadVolume = "UploadVolume", CS_Destroy = "Destroy", Update = "update", Delete = "delete";
+            CS_UploadVolume = "UploadVolume", CS_Destroy = "Destroy", Update = "update", Delete = "delete", CS_VPC = "VPC";
 
     /** Cloud stack configuration reference. */
     @Autowired
     private ConfigUtil configUtil;
+
+    /** Cloud stack vpc service reference. */
+    @Autowired
+    private VPCService vpcService;
 
     /** Virtual machine Service for listing vms. */
     @Autowired
@@ -337,6 +342,11 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 LOGGER.debug("VPN sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
                         + eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
                 asyncVpn(jobResult, eventObject);
+                break;
+            case EventTypes.EVENT_VPC:
+                LOGGER.debug("VPC sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
+                        + eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE));
+                asyncVpc(jobResult, eventObject);
                 break;
             case EventTypes.EVENT_USER:
                 LOGGER.debug("User sync", eventObject.getString(CS_ASYNC_JOB_ID) + "==="
@@ -1379,6 +1389,105 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             vmsnapshot.setSyncFlag(false);
             vmSnapshotService.save(vmsnapshot);
         }
+    }
+
+    /**
+     * Sync VPC details from the Cloud Server.
+     *
+     * @param jobResult job result
+     * @param eventObject VPC event object
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    public void asyncVpc(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
+    	if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
+                .equals(EventTypes.EVENT_VPC_CREATE)) {
+    		JSONObject jobresultReponse = jobResult.getJSONObject(CloudStackConstants.CS_VPC);
+    		VPC vpc = vpcService.findByUUID(jobresultReponse.getString(CloudStackConstants.CS_ID));
+			if (vpc != null) {
+				vpc.setcIDR(jobresultReponse.getString(CloudStackConstants.CS_CIDR));
+				if (jobresultReponse.has(CloudStackConstants.CS_VPC_OFFERING_ID)) {
+					vpc.setVpcoffering_id(convertEntityService.getVpcOfferingByuuid(jobresultReponse.getString(CloudStackConstants.CS_VPC_OFFERING_ID)).getId());
+				}
+				vpc.setDomainId(convertEntityService.getDomainId(jobresultReponse.getString(CloudStackConstants.CS_DOMAIN_ID)));
+				if(jobresultReponse.has(CloudStackConstants.CS_PROJECT_ID)) {
+					vpc.setProjectId(convertEntityService.getProjectId(jobresultReponse.getString(CloudStackConstants.CS_PROJECT_ID)));
+				} else {
+					vpc.setDepartmentId(convertEntityService.getDepartmentByUsername(jobresultReponse.getString(CloudStackConstants.CS_ACCOUNT), vpc.getDomainId()));
+				}
+				vpc.setNetworkDomain(jobresultReponse.getString(CloudStackConstants.CS_NETWORK_DOMAIN));
+				vpc.setForDisplay(jobresultReponse.getString(CloudStackConstants.CS_FOR_DISPLAY));
+				vpc.setIsActive(true);
+				vpc.setName(jobresultReponse.getString(CloudStackConstants.CS_NAME));
+				vpc.setDescription(jobresultReponse.getString(CloudStackConstants.CS_DISPLAY_TEXT));
+				vpc.setStatus(VPC.Status.valueOf(jobresultReponse.getString(CloudStackConstants.CS_STATE)));
+				vpc.setSyncFlag(false);
+				if (vpc.getProjectId() != null) {
+	                 updateResourceCountService.QuotaUpdateByResourceObject(vpc, CS_VPC, vpc.getProjectId(),
+	                             CS_Project, Update);
+	             } else {
+	                 updateResourceCountService.QuotaUpdateByResourceObject(vpc, CS_VPC,
+	                		 vpc.getDepartmentId(), CS_Department, Update);
+	             }
+				vpcService.save(vpc);
+			}
+    	}
+    	if(eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
+                .equals(EventTypes.EVENT_VPC_DELETE)){
+    		 JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
+             VPC vpc = vpcService.findByUUID(json.getString("id"));
+             vpc.setSyncFlag(false);
+             vpc.setIsActive(false);
+             vpc.setStatus(VPC.Status.INACTIVE);
+             vpcService.softDelete(vpc);
+             if (vpc.getProjectId() != null) {
+                 updateResourceCountService.QuotaUpdateByResourceObject(vpc, CS_VPC, vpc.getProjectId(),
+                             CS_Project, Delete);
+             } else {
+                 updateResourceCountService.QuotaUpdateByResourceObject(vpc, CS_VPC,
+                		 vpc.getDepartmentId(), CS_Department, Delete);
+             }
+             vpcService.ipRelease(vpc);
+    	}
+		if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VPC_UPDATE)) {
+			JSONObject jobresultReponse = jobResult.getJSONObject(CloudStackConstants.CS_VPC);
+			VPC vpc = vpcService.findByUUID(jobresultReponse.getString(CloudStackConstants.CS_ID));
+			if (vpc != null) {
+				vpc.setcIDR(jobresultReponse.getString(CloudStackConstants.CS_CIDR));
+				if (jobresultReponse.has(CloudStackConstants.CS_VPC_OFFERING_ID)) {
+					vpc.setVpcoffering_id(convertEntityService
+							.getVpcOfferingByuuid(jobresultReponse.getString(CloudStackConstants.CS_VPC_OFFERING_ID))
+							.getId());
+				}
+				vpc.setDomainId(
+						convertEntityService.getDomainId(jobresultReponse.getString(CloudStackConstants.CS_DOMAIN_ID)));
+				if (jobresultReponse.has(CloudStackConstants.CS_PROJECT_ID)) {
+					vpc.setProjectId(convertEntityService
+							.getProjectId(jobresultReponse.getString(CloudStackConstants.CS_PROJECT_ID)));
+				} else {
+					vpc.setDepartmentId(convertEntityService.getDepartmentByUsername(
+							jobresultReponse.getString(CloudStackConstants.CS_ACCOUNT), vpc.getDomainId()));
+				}
+				vpc.setNetworkDomain(jobresultReponse.getString(CloudStackConstants.CS_NETWORK_DOMAIN));
+				vpc.setForDisplay(jobresultReponse.getString(CloudStackConstants.CS_FOR_DISPLAY));
+				vpc.setIsActive(true);
+				vpc.setName(jobresultReponse.getString(CloudStackConstants.CS_NAME));
+				vpc.setDescription(jobresultReponse.getString(CloudStackConstants.CS_DISPLAY_TEXT));
+				vpc.setStatus(VPC.Status.valueOf(jobresultReponse.getString(CloudStackConstants.CS_STATE)));
+				vpc.setSyncFlag(false);
+				vpcService.save(vpc);
+			}
+    	}
+
+		if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VPC_RESTART)) {
+			 JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
+             VPC vpc = vpcService.findByUUID(json.getString("id"));
+             vpc.setRedundantVPC(json.getBoolean("makeredundant"));
+             vpc.setCleanUpVPC(json.getBoolean("cleanup"));
+             vpc.setRestartRequired(false);
+             vpc.setSyncFlag(false);
+             vpcService.save(vpc);
+		}
     }
 
     /**
