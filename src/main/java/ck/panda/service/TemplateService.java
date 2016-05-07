@@ -188,15 +188,60 @@ public interface TemplateService extends CRUDService<Template> {
      */
     List<Template> findAllTemplateByType(String type, Boolean featured, Boolean shared,Long userId) throws Exception;
 
+    /**
+     * Find all the template by search text.
+     *
+     * @param pagingAndSorting for pagination
+     * @param searchText of the template.
+     * @return template.
+     * @throws Exception if error occurs.
+     */
     Page<Template> findAllBySearchText(PagingAndSorting pagingAndSorting, String searchText) throws Exception;
 
+    /**
+     * Find all the template by iso and search text.
+     *
+     * @param pagingAndSorting for pagination.
+     * @param searchText of the template.
+     * @return template.
+     * @throws Exception if error occurs.
+     */
     Page<Template> findAllIsoAndSearchText(PagingAndSorting pagingAndSorting, String searchText) throws Exception;
 
+    /**
+     * Find all templates by user id , template type and search text.
+     *
+     * @param pagingAndSorting for pagination.
+     * @param type of the template.
+     * @param userId of the template.
+     * @param searchText of the template.
+     * @return templates.
+     * @throws Exception if error occurs.
+     */
     Page<Template> findAllByUserIdAndTypeSearchText(PagingAndSorting pagingAndSorting, String type, Long userId,
             String searchText) throws Exception;
 
+    /**
+     * List all template by type and search text.
+     *
+     * @param type of the template.
+     * @param featured type
+     * @param shared type
+     * @param userId of the template.
+     * @param searchText of the template.
+     * @return templates.
+     * @throws Exception if error exception.
+     */
     List<Template> findAllTemplateByTypeAndSearchText(String type, Boolean featured, Boolean shared, Long userId,
             String searchText) throws Exception;
 
+    /**
+     * List all templates by isactive status and search text.
+     *
+     * @param isActive status of the template.
+     * @param searchText of the template.
+     * @return template.
+     * @throws Exception if error occurs.
+     */
     List<Template> findAllTemplatesByIsActiveAndTypeSearchText(Boolean isActive, String searchText) throws Exception;
 }

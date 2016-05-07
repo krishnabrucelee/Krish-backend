@@ -185,8 +185,10 @@ public class TemplateController extends CRUDController<Template> implements ApiC
     }
 
     /**
-     * List all the Active templates.
+     * List all the templates by search text.
      *
+     * @param type of the template.
+     * @param search text of the template.
      * @return templates.
      * @throws Exception if error occurs.
      */
