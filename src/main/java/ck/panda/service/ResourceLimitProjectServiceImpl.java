@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
+import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
@@ -436,7 +437,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
         for (String name : resourceTypeMap.keySet()) {
             ResourceLimitProject resourceLimitProject = resourceLimitProjectRepo.findByProjectAndResourceType(id, ResourceLimitProject.ResourceType.valueOf(resourceTypeMap.get(name)), true);
             if (resourceLimitProject != null) {
-                if (resourceTypeMap.get(name).equals("Memory")) {
+                if (resourceTypeMap.get(name).equals(GenericConstants.MEMORY)) {
                     resourceMap.put(resourceTypeMap.get(name), (EmptytoLong(resourceLimitProject.getUsedLimit())) / 1024);
                 } else {
                     resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitProject.getUsedLimit()));
@@ -458,7 +459,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
                 if (resourceLimitDepartment.getMax() == -1) {
                     resourceMap.put(resourceTypeMap.get(name), -1L);
                 } else {
-                    if (resourceTypeMap.get(name).equals("Memory")) {
+                    if (resourceTypeMap.get(name).equals(GenericConstants.MEMORY)) {
                         resourceMap.put(resourceTypeMap.get(name), (EmptytoLong(resourceLimitProject.getMax()) + (EmptytoLong(resourceLimitDepartment.getMax()) - EmptytoLong(resourceLimitDepartment.getUsedLimit()))) / 1024);
                     } else {
                         resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitProject.getMax()) + (EmptytoLong(resourceLimitDepartment.getMax()) - EmptytoLong(resourceLimitDepartment.getUsedLimit())));

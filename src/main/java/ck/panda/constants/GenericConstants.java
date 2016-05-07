@@ -123,4 +123,7 @@ public class GenericConstants {
 
     /** Constant for delete status. */
     public static final String DELETE = "delete";
+
+    /** Constant for memory. */
+    public static final String MEMORY = "Memory";
    }
