@@ -63,6 +63,10 @@ public class NetworkOffering implements Serializable {
     @Column(name = "traffic_type", nullable = false)
     private String trafficType;
 
+    /** For VPC network status. */
+    @Column(name = "for_vpc")
+    private Boolean forVpc;
+
     /** IsActive attribute to verify Active or Inactive. */
     @Column(name = "is_active")
     private Boolean isActive;
@@ -146,6 +150,24 @@ public class NetworkOffering implements Serializable {
      */
     public String getDisplayText() {
         return displayText;
+    }
+
+    /**
+     * Get the for VPC status.
+     *
+     * @return the forVpc
+     */
+    public Boolean getForVpc() {
+        return forVpc;
+    }
+
+    /**
+     * Set the for VPC status.
+     *
+     * @param forVpc to set
+     */
+    public void setForVpc(Boolean forVpc) {
+        this.forVpc = forVpc;
     }
 
     /**
@@ -380,6 +402,7 @@ public class NetworkOffering implements Serializable {
             networkOffering.guestIpType = JsonUtil.getStringValue(object, CloudStackConstants.CS_GUEST_IP_TYPE);
             networkOffering.displayText = JsonUtil.getStringValue(object, CloudStackConstants.CS_DISPLAY_TEXT);
             networkOffering.availability = JsonUtil.getStringValue(object, CloudStackConstants.CS_AVAILABILITY);
+            networkOffering.forVpc = JsonUtil.getBooleanValue(object, CloudStackConstants.CS_FOR_VPC);
             networkOffering.status = Status.valueOf(JsonUtil.getStringValue(object, CloudStackConstants.CS_STATE).toUpperCase());
             networkOffering.setIsActive(true);
         } catch (Exception e) {

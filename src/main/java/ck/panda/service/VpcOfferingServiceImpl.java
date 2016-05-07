@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
+import ck.panda.domain.entity.SupportedNetwork;
 import ck.panda.domain.entity.VpcOffering;
 import ck.panda.domain.repository.jpa.VpcOfferingRepository;
 import ck.panda.util.CloudStackVPCService;
@@ -29,19 +30,48 @@ public class VpcOfferingServiceImpl implements VpcOfferingService {
     @Autowired
     private CloudStackVPCService cloudStackVPCService;
 
+    /** Supported network cloudstack service reference. */
+    @Autowired
+    private SupportedNetworkService supportedNetworkService;
+
     /** Constant for list VPC offering response. */
     public static final String CS_LIST_VPC_OFFERING_RESOPNSE = "listvpcofferingsresponse";
 
     /** Constant for list VPC offering. */
     public static final String CS_VPC_OFFERING = "vpcoffering";
 
+    /** Constant for list VPC service. */
+    public static final String CS_VPC_SERVICE = "service";
+
     @Override
     public VpcOffering save(VpcOffering vpcOffering) throws Exception {
+        vpcOfferingRepo.save(vpcOffering);
+        List<SupportedNetwork> supportedNetworkList = new ArrayList<SupportedNetwork>();
+        if (vpcOffering.getTransServiceList() != null) {
+            for (int i = 0; i < vpcOffering.getTransServiceList().size(); i++) {
+                SupportedNetwork supportedNetwork = supportedNetworkService.findByName(vpcOffering.getTransServiceList().get(i));
+                if (supportedNetwork != null) {
+                    supportedNetworkList.add(supportedNetwork);
+                    vpcOffering.setSupportedNetworkList(supportedNetworkList);
+                }
+            }
+        }
         return vpcOfferingRepo.save(vpcOffering);
     }
 
     @Override
     public VpcOffering update(VpcOffering vpcOffering) throws Exception {
+        vpcOfferingRepo.save(vpcOffering);
+        List<SupportedNetwork> supportedNetworkList = new ArrayList<SupportedNetwork>();
+        if (vpcOffering.getTransServiceList() != null) {
+            for (int i = 0; i < vpcOffering.getTransServiceList().size(); i++) {
+                SupportedNetwork supportedNetwork = supportedNetworkService.findByName(vpcOffering.getTransServiceList().get(i));
+                if (supportedNetwork != null) {
+                    supportedNetworkList.add(supportedNetwork);
+                    vpcOffering.setSupportedNetworkList(supportedNetworkList);
+                }
+            }
+        }
         return vpcOfferingRepo.save(vpcOffering);
     }
 
@@ -72,6 +102,7 @@ public class VpcOfferingServiceImpl implements VpcOfferingService {
 
     @Override
     public List<VpcOffering> findAllFromCSServer() throws Exception {
+
         List<VpcOffering> vpcOfferingList = new ArrayList<VpcOffering>();
         HashMap<String, String> vpcOfferingMap = new HashMap<String, String>();
         JSONArray vpcOfferingListJSON = null;
@@ -84,14 +115,24 @@ public class VpcOfferingServiceImpl implements VpcOfferingService {
             for (int i = 0, size = vpcOfferingListJSON.length(); i < size; i++) {
                 // 2.1 Call convert by passing JSONObject to VPC offering entity and Add
                 // the converted VPC offering entity to list
-                vpcOfferingList.add(VpcOffering.convert(vpcOfferingListJSON.getJSONObject(i)));
+                VpcOffering vpcOffering = VpcOffering.convert(vpcOfferingListJSON.getJSONObject(i));
+                List<String> serviceList = new ArrayList<String>();
+                if (vpcOfferingListJSON.getJSONObject(i).has(CS_VPC_SERVICE)) {
+                    for (int j = 0; j < vpcOfferingListJSON.getJSONObject(i).getJSONArray(CS_VPC_SERVICE).length(); j++) {
+                        JSONObject serviceResponseObject = (JSONObject) vpcOfferingListJSON.getJSONObject(i).getJSONArray(CS_VPC_SERVICE).get(j);
+                        serviceList.add(serviceResponseObject.getString(CloudStackConstants.CS_NAME));
+                    }
+                }
+                vpcOffering.setTransServiceList(serviceList);
+                vpcOfferingList.add(vpcOffering);
             }
         }
         return vpcOfferingList;
     }
 
-	@Override
-	public VpcOffering findByUUID(String uuid) throws Exception {
-		return vpcOfferingRepo.findByUUID(uuid);
-	}
+    @Override
+    public VpcOffering findByUUID(String uuid) throws Exception {
+        return vpcOfferingRepo.findByUUID(uuid);
+    }
+
 }

@@ -43,7 +43,6 @@ import ck.panda.domain.entity.VmIpaddress.IpType;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.VpnUser;
-import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.Volume.Status;
 import ck.panda.rabbitmq.util.ResponseEvent;
 import ck.panda.util.CloudStackInstanceService;
@@ -585,7 +584,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                         .UpdateIPByNetwork(convertEntityService.getNetworkById(vmIn.getNetworkId()).getUuid());
                 if (ipAddress != null) {
                     vmIn.setPublicIpAddress(ipAddress.getPublicIpAddress());
-					vmIn.setInstancePublicIp(ipToLong(ipAddress.getPublicIpAddress()));
+                    vmIn.setInstancePublicIp(ipToLong(ipAddress.getPublicIpAddress()));
                     vmIn = virtualMachineService.update(vmIn);
                 }
             }
@@ -1400,46 +1399,46 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
      * @throws Exception cloudstack unhandled errors.
      */
     public void asyncVpc(JSONObject jobResult, JSONObject eventObject) throws ApplicationException, Exception {
-    	if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
+        if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
                 .equals(EventTypes.EVENT_VPC_CREATE)) {
-    		JSONObject jobresultReponse = jobResult.getJSONObject(CloudStackConstants.CS_VPC);
-    		VPC vpc = vpcService.findByUUID(jobresultReponse.getString(CloudStackConstants.CS_ID));
-			if (vpc != null) {
-				vpc.setcIDR(jobresultReponse.getString(CloudStackConstants.CS_CIDR));
-				if (jobresultReponse.has(CloudStackConstants.CS_VPC_OFFERING_ID)) {
-					vpc.setVpcofferingid(convertEntityService.getVpcOfferingByuuid(jobresultReponse.getString(CloudStackConstants.CS_VPC_OFFERING_ID)).getId());
-				}
-				vpc.setDomainId(convertEntityService.getDomainId(jobresultReponse.getString(CloudStackConstants.CS_DOMAIN_ID)));
-				if(jobresultReponse.has(CloudStackConstants.CS_PROJECT_ID)) {
-					vpc.setProjectId(convertEntityService.getProjectId(jobresultReponse.getString(CloudStackConstants.CS_PROJECT_ID)));
-				} else {
-					vpc.setDepartmentId(convertEntityService.getDepartmentByUsername(jobresultReponse.getString(CloudStackConstants.CS_ACCOUNT), vpc.getDomainId()));
-				}
-				vpc.setNetworkDomain(jobresultReponse.getString(CloudStackConstants.CS_NETWORK_DOMAIN));
-				vpc.setForDisplay(jobresultReponse.getString(CloudStackConstants.CS_FOR_DISPLAY));
-				vpc.setIsActive(true);
-				vpc.setName(jobresultReponse.getString(CloudStackConstants.CS_NAME));
-				vpc.setDescription(jobresultReponse.getString(CloudStackConstants.CS_DISPLAY_TEXT));
-				vpc.setStatus(VPC.Status.valueOf(jobresultReponse.getString(CloudStackConstants.CS_STATE)));
-				vpc.setSyncFlag(false);
-				if (vpc.getProjectId() != null) {
-	                 updateResourceCountService.QuotaUpdateByResourceObject(vpc, CS_VPC, vpc.getProjectId(),
-	                             CS_Project, Update);
-	             } else {
-	                 updateResourceCountService.QuotaUpdateByResourceObject(vpc, CS_VPC,
-	                		 vpc.getDepartmentId(), CS_Department, Update);
-	             }
-				vpcService.save(vpc);
-			}
-    	}
-    	if(eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
+            JSONObject jobresultReponse = jobResult.getJSONObject(CloudStackConstants.CS_VPC);
+            VPC vpc = vpcService.findByUUID(jobresultReponse.getString(CloudStackConstants.CS_ID));
+            if (vpc != null) {
+                vpc.setcIDR(jobresultReponse.getString(CloudStackConstants.CS_CIDR));
+                if (jobresultReponse.has(CloudStackConstants.CS_VPC_OFFERING_ID)) {
+                    vpc.setVpcofferingid(convertEntityService.getVpcOfferingByuuid(jobresultReponse.getString(CloudStackConstants.CS_VPC_OFFERING_ID)).getId());
+                }
+                vpc.setDomainId(convertEntityService.getDomainId(jobresultReponse.getString(CloudStackConstants.CS_DOMAIN_ID)));
+                if(jobresultReponse.has(CloudStackConstants.CS_PROJECT_ID)) {
+                    vpc.setProjectId(convertEntityService.getProjectId(jobresultReponse.getString(CloudStackConstants.CS_PROJECT_ID)));
+                } else {
+                    vpc.setDepartmentId(convertEntityService.getDepartmentByUsername(jobresultReponse.getString(CloudStackConstants.CS_ACCOUNT), vpc.getDomainId()));
+                }
+                vpc.setNetworkDomain(jobresultReponse.getString(CloudStackConstants.CS_NETWORK_DOMAIN));
+                vpc.setForDisplay(jobresultReponse.getBoolean(CloudStackConstants.CS_FOR_DISPLAY));
+                vpc.setIsActive(true);
+                vpc.setName(jobresultReponse.getString(CloudStackConstants.CS_NAME));
+                vpc.setDescription(jobresultReponse.getString(CloudStackConstants.CS_DISPLAY_TEXT));
+                vpc.setStatus(VPC.Status.valueOf(jobresultReponse.getString(CloudStackConstants.CS_STATE)));
+                vpc.setSyncFlag(false);
+                if (vpc.getProjectId() != null) {
+                     updateResourceCountService.QuotaUpdateByResourceObject(vpc, CS_VPC, vpc.getProjectId(),
+                                 CS_Project, Update);
+                 } else {
+                     updateResourceCountService.QuotaUpdateByResourceObject(vpc, CS_VPC,
+                             vpc.getDepartmentId(), CS_Department, Update);
+                 }
+                vpcService.save(vpc);
+            }
+        }
+        if(eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
                 .equals(EventTypes.EVENT_VPC_DELETE)){
-    		 JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
+             JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
              VPC vpc = vpcService.findByUUID(json.getString("id"));
 			if (vpc != null) {
 				vpc.setSyncFlag(false);
 				vpc.setIsActive(false);
-				vpc.setStatus(VPC.Status.INACTIVE);
+                                vpc.setStatus(VPC.Status.DISABLED);
 				vpcService.softDelete(vpc);
 				if (vpc.getProjectId() != null) {
 					updateResourceCountService.QuotaUpdateByResourceObject(vpc, CS_VPC, vpc.getProjectId(), CS_Project,
@@ -1450,46 +1449,46 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
 				}
 				vpcService.ipRelease(vpc);
 			}
-    	}
-		if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VPC_UPDATE)) {
-			JSONObject jobresultReponse = jobResult.getJSONObject(CloudStackConstants.CS_VPC);
-			VPC vpc = vpcService.findByUUID(jobresultReponse.getString(CloudStackConstants.CS_ID));
-			if (vpc != null) {
-				vpc.setcIDR(jobresultReponse.getString(CloudStackConstants.CS_CIDR));
-				if (jobresultReponse.has(CloudStackConstants.CS_VPC_OFFERING_ID)) {
-					vpc.setVpcofferingid(convertEntityService
-							.getVpcOfferingByuuid(jobresultReponse.getString(CloudStackConstants.CS_VPC_OFFERING_ID))
-							.getId());
-				}
-				vpc.setDomainId(
-						convertEntityService.getDomainId(jobresultReponse.getString(CloudStackConstants.CS_DOMAIN_ID)));
-				if (jobresultReponse.has(CloudStackConstants.CS_PROJECT_ID)) {
-					vpc.setProjectId(convertEntityService
-							.getProjectId(jobresultReponse.getString(CloudStackConstants.CS_PROJECT_ID)));
-				} else {
-					vpc.setDepartmentId(convertEntityService.getDepartmentByUsername(
-							jobresultReponse.getString(CloudStackConstants.CS_ACCOUNT), vpc.getDomainId()));
-				}
-				vpc.setNetworkDomain(jobresultReponse.getString(CloudStackConstants.CS_NETWORK_DOMAIN));
-				vpc.setForDisplay(jobresultReponse.getString(CloudStackConstants.CS_FOR_DISPLAY));
-				vpc.setIsActive(true);
-				vpc.setName(jobresultReponse.getString(CloudStackConstants.CS_NAME));
-				vpc.setDescription(jobresultReponse.getString(CloudStackConstants.CS_DISPLAY_TEXT));
-				vpc.setStatus(VPC.Status.valueOf(jobresultReponse.getString(CloudStackConstants.CS_STATE)));
-				vpc.setSyncFlag(false);
-				vpcService.save(vpc);
-			}
-    	}
+        }
+        if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VPC_UPDATE)) {
+            JSONObject jobresultReponse = jobResult.getJSONObject(CloudStackConstants.CS_VPC);
+            VPC vpc = vpcService.findByUUID(jobresultReponse.getString(CloudStackConstants.CS_ID));
+            if (vpc != null) {
+                vpc.setcIDR(jobresultReponse.getString(CloudStackConstants.CS_CIDR));
+                if (jobresultReponse.has(CloudStackConstants.CS_VPC_OFFERING_ID)) {
+                    vpc.setVpcofferingid(convertEntityService
+                            .getVpcOfferingByuuid(jobresultReponse.getString(CloudStackConstants.CS_VPC_OFFERING_ID))
+                            .getId());
+                }
+                vpc.setDomainId(
+                        convertEntityService.getDomainId(jobresultReponse.getString(CloudStackConstants.CS_DOMAIN_ID)));
+                if (jobresultReponse.has(CloudStackConstants.CS_PROJECT_ID)) {
+                    vpc.setProjectId(convertEntityService
+                            .getProjectId(jobresultReponse.getString(CloudStackConstants.CS_PROJECT_ID)));
+                } else {
+                    vpc.setDepartmentId(convertEntityService.getDepartmentByUsername(
+                            jobresultReponse.getString(CloudStackConstants.CS_ACCOUNT), vpc.getDomainId()));
+                }
+                vpc.setNetworkDomain(jobresultReponse.getString(CloudStackConstants.CS_NETWORK_DOMAIN));
+                vpc.setForDisplay(jobresultReponse.getBoolean(CloudStackConstants.CS_FOR_DISPLAY));
+                vpc.setIsActive(true);
+                vpc.setName(jobresultReponse.getString(CloudStackConstants.CS_NAME));
+                vpc.setDescription(jobresultReponse.getString(CloudStackConstants.CS_DISPLAY_TEXT));
+                vpc.setStatus(VPC.Status.valueOf(jobresultReponse.getString(CloudStackConstants.CS_STATE)));
+                vpc.setSyncFlag(false);
+                vpcService.save(vpc);
+            }
+        }
 
-		if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VPC_RESTART)) {
-			 JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
+        if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).equals(EventTypes.EVENT_VPC_RESTART)) {
+             JSONObject json = new JSONObject(eventObject.getString("cmdInfo"));
              VPC vpc = vpcService.findByUUID(json.getString("id"));
              vpc.setRedundantVPC(json.getBoolean("makeredundant"));
              vpc.setCleanUpVPC(json.getBoolean("cleanup"));
              vpc.setRestartRequired(false);
              vpc.setSyncFlag(false);
              vpcService.save(vpc);
-		}
+        }
     }
 
     /**
@@ -1826,6 +1825,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 networkOffering.setName(csNetworkOffering.getName());
                 networkOffering.setDisplayText(csNetworkOffering.getDisplayText());
                 networkOffering.setAvailability(csNetworkOffering.getAvailability());
+                networkOffering.setForVpc(csNetworkOffering.getForVpc());
                 networkOfferingService.update(networkOffering);
             }
         }
@@ -1885,22 +1885,22 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
     }
 
     public long ipToLong(String ipAddress) {
-    	long result = 0;
-		if (ipAddress != null) {
-			String[] ipAddressInArray = ipAddress.split("\\.");
+        long result = 0;
+        if (ipAddress != null) {
+            String[] ipAddressInArray = ipAddress.split("\\.");
 
-			for (int i = 0; i < ipAddressInArray.length; i++) {
+            for (int i = 0; i < ipAddressInArray.length; i++) {
 
-				int power = 3 - i;
-				int ip = Integer.parseInt(ipAddressInArray[i]);
-				result += ip * Math.pow(256, power);
+                int power = 3 - i;
+                int ip = Integer.parseInt(ipAddressInArray[i]);
+                result += ip * Math.pow(256, power);
 
-			}
-		} else {
-			result = 0;
-		}
+            }
+        } else {
+            result = 0;
+        }
 
-    	return result;
+        return result;
       }
 
 }
