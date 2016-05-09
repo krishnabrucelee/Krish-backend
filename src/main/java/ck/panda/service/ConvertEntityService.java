@@ -31,6 +31,7 @@ import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.entity.Volume;
+import ck.panda.domain.entity.VpcOffering;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
 import ck.panda.domain.entity.ResourceLimitProject;
@@ -231,6 +232,14 @@ public class ConvertEntityService {
     /** SSHKey Service for listing ssh key. */
     @Autowired
     private SSHKeyService sshKeyService;
+
+    /** VPC service. */
+    @Autowired
+    private VPCService vpcService;
+
+    /** VPC offering service. */
+    @Autowired
+    private VpcOfferingService vpcOfferingService;
 
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
@@ -1315,6 +1324,24 @@ public class ConvertEntityService {
     }
 
     /**
+     * Get VPC offering service object.
+     *
+     * @return vpc offering service object
+     */
+    public VpcOfferingService getVpcOfferingService() {
+        return this.vpcOfferingService;
+    }
+
+    /**
+     * Get VPC by uuid.
+     *
+     * @return vpc offering service object
+     */
+    public VpcOffering getVpcOfferingByuuid(String uuid) throws Exception {
+        return vpcOfferingService.findByUUID(uuid);
+    }
+
+    /**
      * Update the resource count for current resource type.
      *
      * @param csResponse cloud stack response resource type for domain resource.
@@ -1409,6 +1436,38 @@ public class ConvertEntityService {
         User user = userService.findByUserNameAndDomain(name, domain);
         if (user != null) {
             return user;
+        }
+        return null;
+    }
+
+	public VpcOffering getVpcOfferingById(Long vpcofferingid) throws Exception {
+		return vpcOfferingService.find(vpcofferingid);
+	}
+	
+	/**
+     * Get the VPC id.
+     *
+     * @param uuid of VPC.
+     * @return VPC id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getVpcId(String uuid) throws Exception {
+        if (vpcService.findByUUID(uuid) != null) {
+            return vpcService.findByUUID(uuid).getId();
+        }
+        return null;
+    }
+
+    /**
+     * Get the VPC offering id.
+     *
+     * @param uuid of VPC offering.
+     * @return VPC offering id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getVpcOfferingId(String uuid) throws Exception {
+        if (vpcOfferingService.findByUUID(uuid) != null) {
+            return vpcOfferingService.findByUUID(uuid).getId();
         }
         return null;
     }

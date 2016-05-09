@@ -41,6 +41,7 @@ import ck.panda.domain.entity.LoadBalancerRule;
 import ck.panda.domain.entity.ManualCloudSync;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
+import ck.panda.domain.entity.NetworkServiceProvider;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.OsCategory;
 import ck.panda.domain.entity.OsType;
@@ -57,9 +58,11 @@ import ck.panda.domain.entity.SSHKey;
 import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.SnapshotPolicy;
 import ck.panda.domain.entity.StorageOffering;
+import ck.panda.domain.entity.SupportedNetwork;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.User.UserType;
+import ck.panda.domain.entity.VPC;
 import ck.panda.domain.repository.jpa.VirtualMachineRepository;
 import ck.panda.rabbitmq.util.ResponseEvent;
 import ck.panda.domain.entity.VmInstance;
@@ -317,6 +320,18 @@ public class SyncServiceImpl implements SyncService {
     /** VPC offering service reference. */
     @Autowired
     private VpcOfferingService vpcOfferingService;
+
+    /** Supported network service reference. */
+    @Autowired
+    private SupportedNetworkService supportedNetworkService;
+
+    /** Network service provider reference. */
+    @Autowired
+    private NetworkServiceProviderService networkServiceProviderService;
+
+    /** VPC service reference. */
+    @Autowired
+    private VPCService vpcService;
 
     /** Permission instance properties. */
     @Value(value = "${permission.instance}")
@@ -596,6 +611,36 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.error("ERROR AT synch Iso", e);
         }
         try {
+            // 39. Sync network service provider entity
+            this.syncNetworkServiceProvider();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPC offering", e);
+        }
+        try {
+            // 40. Sync supported network entity
+            this.syncSupportedNetwork();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPC offering", e);
+        }
+        try {
+            // 41. Sync VPC offering entity
+            this.syncVpcOffering();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPC offering", e);
+        }
+        try {
+            // 42. Sync VPC ACL entity
+            this.syncVpcAcl();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPC ACL", e);
+        }
+        try {
+            // 43. Sync VPC entity
+            this.syncVpc();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPC", e);
+        }
+        try {
             // 17. Sync Network entity
             this.syncNetwork();
         } catch (Exception e) {
@@ -615,7 +660,7 @@ public class SyncServiceImpl implements SyncService {
         }
         try {
             // 20. Sync ResourceLimit entity
-            this.syncResourceLimit();
+            //this.syncResourceLimit();
         } catch (Exception e) {
             LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
         }
@@ -730,18 +775,6 @@ public class SyncServiceImpl implements SyncService {
             this.syncGeneralConfiguration();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch General Configuration", e);
-        }
-        try {
-            // 39. Sync VPC offering entity
-            this.syncVpcOffering();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch VPC offering", e);
-        }
-        try {
-            // 40. Sync VPC ACL entity
-            this.syncVpcAcl();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch VPC ACL", e);
         }
 
     }
@@ -1237,6 +1270,7 @@ public class SyncServiceImpl implements SyncService {
                 network.setNetworkDomain(csNetwork.getNetworkDomain());
                 network.setNetMask(csNetwork.getNetMask());
                 network.setNetworkOfferingId(csNetwork.getNetworkOfferingId());
+                network.setVpcId(csNetwork.getVpcId());
                 network.setIsActive(true);
 
                 // 3.2 If found, update the network object in app db
@@ -3207,6 +3241,85 @@ public class SyncServiceImpl implements SyncService {
     }
 
     @Override
+    public void syncNetworkServiceProvider() throws ApplicationException, Exception {
+
+        // 1. Get all the network service provider objects from CS server as hash
+        List<NetworkServiceProvider> csNetworkServiceProvidersList = networkServiceProviderService.findAllFromCSServer();
+        HashMap<String, NetworkServiceProvider> csNetworkServiceProviderMap = (HashMap<String, NetworkServiceProvider>) NetworkServiceProvider.convert(csNetworkServiceProvidersList);
+
+        // 2. Get all the network service provider objects from application
+        List<NetworkServiceProvider> appNetworkServiceProviderList = networkServiceProviderService.findAll();
+
+        // 3. Iterate application network service provider list
+        for (NetworkServiceProvider networkServiceProvider : appNetworkServiceProviderList) {
+            LOGGER.debug("Total rows updated : " + (appNetworkServiceProviderList.size()));
+            // 3.1 Find the corresponding CS server network service provider object by finding
+            // it in a hash using uuid
+            if (csNetworkServiceProviderMap.containsKey(networkServiceProvider.getUuid())) {
+                NetworkServiceProvider csNetworkServiceProvider = csNetworkServiceProviderMap.get(networkServiceProvider.getUuid());
+                networkServiceProvider.setUuid(csNetworkServiceProvider.getUuid());
+                networkServiceProvider.setName(csNetworkServiceProvider.getName());
+
+                // 3.2 If found, update the network service provider object in app db
+                networkServiceProviderService.update(networkServiceProvider);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // network service provider which is not added in the app
+                csNetworkServiceProviderMap.remove(networkServiceProvider.getUuid());
+            } else {
+                networkServiceProviderService.delete(networkServiceProvider);
+            }
+        }
+        // 4. Get the remaining list of cs server hash network service provider object, then
+        // iterate and
+        // add it to app db
+        for (String key : csNetworkServiceProviderMap.keySet()) {
+            networkServiceProviderService.save(csNetworkServiceProviderMap.get(key));
+        }
+        LOGGER.debug("Total rows added : " + (csNetworkServiceProviderMap.size()));
+    }
+
+    @Override
+    public void syncSupportedNetwork() throws ApplicationException, Exception {
+
+        // 1. Get all the supported network objects from CS server as hash
+        List<SupportedNetwork> csSupportedNetworksList = supportedNetworkService.findAllFromCSServer();
+        HashMap<String, SupportedNetwork> csSupportedNetworkMap = (HashMap<String, SupportedNetwork>) SupportedNetwork.convert(csSupportedNetworksList);
+
+        // 2. Get all the supported network objects from application
+        List<SupportedNetwork> appSupportedNetworkList = supportedNetworkService.findAll();
+
+        // 3. Iterate application supported network list
+        for (SupportedNetwork supportedNetwork : appSupportedNetworkList) {
+            LOGGER.debug("Total rows updated : " + (appSupportedNetworkList.size()));
+            // 3.1 Find the corresponding CS server supported network object by finding
+            // it in a hash using uuid
+            if (csSupportedNetworkMap.containsKey(supportedNetwork.getName())) {
+                SupportedNetwork csSupportedNetwork = csSupportedNetworkMap.get(supportedNetwork.getName());
+                supportedNetwork.setName(csSupportedNetwork.getName());
+                supportedNetwork.setProviderName(csSupportedNetwork.getProviderName());
+                supportedNetwork.setTransProviderList(csSupportedNetwork.getTransProviderList());
+
+                // 3.2 If found, update the supported network object in app db
+                supportedNetworkService.update(supportedNetwork);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // supported network which is not added in the app
+                csSupportedNetworkMap.remove(supportedNetwork.getName());
+            } else {
+                supportedNetworkService.delete(supportedNetwork);
+            }
+        }
+        // 4. Get the remaining list of cs server hash supported network object, then
+        // iterate and
+        // add it to app db
+        for (String key : csSupportedNetworkMap.keySet()) {
+            supportedNetworkService.save(csSupportedNetworkMap.get(key));
+        }
+        LOGGER.debug("Total rows added : " + (csSupportedNetworkMap.size()));
+    }
+
+    @Override
     public void syncVpcOffering() throws ApplicationException, Exception {
 
         // 1. Get all the VPC offering objects from CS server as hash
@@ -3226,6 +3339,7 @@ public class SyncServiceImpl implements SyncService {
                 vpcOffering.setUuid(csVpcOffering.getUuid());
                 vpcOffering.setName(csVpcOffering.getName());
                 vpcOffering.setDisplayText(csVpcOffering.getDisplayText());
+                vpcOffering.setTransServiceList(csVpcOffering.getTransServiceList());
 
                 // 3.2 If found, update the VPC offering object in app db
                 vpcOfferingService.update(vpcOffering);
@@ -3285,5 +3399,46 @@ public class SyncServiceImpl implements SyncService {
             vpcAclService.save(csVpcAclMap.get(key));
         }
         LOGGER.debug("Total rows added : " + (csVpcAclMap.size()));
+    }
+
+    @Override
+    public void syncVpc() throws ApplicationException, Exception {
+
+        // 1. Get all the VPC objects from CS server as hash
+        List<VPC> csVpcsList = vpcService.findAllFromCSServer();
+        HashMap<String, VPC> csVpcMap = (HashMap<String, VPC>) VPC.convert(csVpcsList);
+
+        // 2. Get all the VPC objects from application
+        List<VPC> appVpcList = vpcService.findAll();
+
+        // 3. Iterate application VPC list
+        for (VPC vpc : appVpcList) {
+            vpc.setSyncFlag(false);
+            LOGGER.debug("Total rows updated : " + (appVpcList.size()));
+            // 3.1 Find the corresponding CS server VPC object by finding
+            // it in a hash using uuid
+            if (csVpcMap.containsKey(vpc.getUuid())) {
+                VPC csVpc = csVpcMap.get(vpc.getUuid());
+                vpc.setUuid(csVpc.getUuid());
+                vpc.setName(csVpc.getName());
+                vpc.setDescription(csVpc.getDescription());
+
+                // 3.2 If found, update the VPC object in app db
+                vpcService.update(vpc);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // VPC which is not added in the app
+                csVpcMap.remove(vpc.getUuid());
+            } else {
+                vpcService.delete(vpc);
+            }
+        }
+        // 4. Get the remaining list of cs server hash VPC object, then
+        // iterate and
+        // add it to app db
+        for (String key : csVpcMap.keySet()) {
+            vpcService.save(csVpcMap.get(key));
+        }
+        LOGGER.debug("Total rows added : " + (csVpcMap.size()));
     }
 }

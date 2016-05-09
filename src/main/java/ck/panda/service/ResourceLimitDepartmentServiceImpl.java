@@ -11,13 +11,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitDomain;
-import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.repository.jpa.ResourceLimitDepartmentRepository;
 import ck.panda.util.AppValidator;
-import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.CloudStackResourceLimitService;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -399,7 +398,11 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
         for (String name : resourceTypeMap.keySet()) {
             ResourceLimitDepartment resourceLimitDepartment = resourceLimitDepartmentRepo.findByDepartmentAndResourceType(id, ResourceLimitDepartment.ResourceType.valueOf(resourceTypeMap.get(name)), true);
             if (resourceLimitDepartment != null) {
-                resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitDepartment.getUsedLimit()));
+                if (resourceTypeMap.get(name).equals(GenericConstants.MEMORY)) {
+                    resourceMap.put(resourceTypeMap.get(name), (EmptytoLong(resourceLimitDepartment.getUsedLimit())) / 1024);
+                } else {
+                    resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitDepartment.getUsedLimit()));
+                }
             }
         }
         return resourceMap;
@@ -419,7 +422,11 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
                 if (resourceLimitDomain.getMax() == -1) {
                     resourceMap.put(resourceTypeMap.get(name), -1L);
                 } else {
-                    resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitDepartment.getMax()) +(EmptytoLong(resourceLimitDomain.getMax()) - EmptytoLong(resourceLimitDomain.getUsedLimit())));
+                    if (resourceTypeMap.get(name).equals(GenericConstants.MEMORY)) {
+                        resourceMap.put(resourceTypeMap.get(name), (EmptytoLong(resourceLimitDepartment.getMax()) + (EmptytoLong(resourceLimitDomain.getMax()) - EmptytoLong(resourceLimitDomain.getUsedLimit()))) / 1024);
+                    } else {
+                        resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitDepartment.getMax()) + (EmptytoLong(resourceLimitDomain.getMax()) - EmptytoLong(resourceLimitDomain.getUsedLimit())));
+                    }
                 }
             }
         }

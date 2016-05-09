@@ -115,7 +115,7 @@ public interface NetworkService extends CRUDService<Network> {
      * @throws Exception if error occurs.
      */
     Network ipRelease(Network network) throws Exception;
-    
+
     /**
      * Find all the domain based Network list.
      *
@@ -125,7 +125,7 @@ public interface NetworkService extends CRUDService<Network> {
      * @throws Exception unhandled errors.
      */
     Page<Network> findAllByDomainId(Long domainId, PagingAndSorting page) throws Exception;
-    
+
     /**
      * Find all by domain and isactive.
      * @param domainId domain id.
@@ -134,23 +134,26 @@ public interface NetworkService extends CRUDService<Network> {
      * @throws Exception if error.
      */
     List<Network> findAllByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception;
-    
+
     /**
      * Find all the network by user id.
-     * 
+     *
      * @param userId user id.
      * @return network list.
      * @throws Exception if error.
      */
     List<Network> findAllByUserId(Long userId) throws Exception;
-    
+
     /**
      * Find all the networks by domain id.
-     * 
+     *
      * @param userId user id.
      * @return network list.
      * @throws Exception if error.
      */
     List<Network> findAllByDomainId(Long domainId) throws Exception;
+
+    Page<Network> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText)
+            throws Exception;
 
 }

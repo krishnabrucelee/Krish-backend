@@ -194,6 +194,27 @@ public class QuotaValidationServiceImpl implements QuotaValidationService{
                 }
             }
             break;
+        case "VPC":
+            resourceList.clear();
+            resourceList.add(ConvertEntityService.CS_VPC);
+            resourceUsageMap.put(ConvertEntityService.CS_VPC, 1L);
+            if (accountType.equals("Project")) {
+                String validateMessage = checkResourceAvailablity(accountTypeId, accountType, resourceList, resourceUsageMap);
+                if (validateMessage != null) {
+                    throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, validateMessage);
+                }
+            } else if (accountType.equals("Department")) {
+                String validateMessage = checkResourceAvailablity(accountTypeId, accountType, resourceList, resourceUsageMap);
+                if (validateMessage != null) {
+                    throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, validateMessage);
+                }
+            } else {
+                String validateMessage = checkResourceAvailablity(accountTypeId, accountType, resourceList, resourceUsageMap);
+                if (validateMessage != null) {
+                    throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, validateMessage);
+                }
+            }
+            break;
         case "IP":
             resourceList.clear();
             resourceList.add(ConvertEntityService.CS_IP);

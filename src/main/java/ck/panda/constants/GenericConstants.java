@@ -103,6 +103,9 @@ public class GenericConstants {
     /** Constant for IP. */
     public static final String IP = "IP";
 
+    /** Constant for VPC. */
+    public static final String VPC = "VPC";
+
     /** Constant for restore instance. */
     public static final String RESTORE_INSTANCE = "RestoreInstance";
 
@@ -123,4 +126,7 @@ public class GenericConstants {
 
     /** Constant for delete status. */
     public static final String DELETE = "delete";
+
+    /** Constant for memory. */
+    public static final String MEMORY = "Memory";
    }

@@ -18,6 +18,8 @@ import ck.panda.domain.entity.Event;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Nic;
 import ck.panda.domain.entity.PortForwarding;
+import ck.panda.domain.entity.VPC;
+import ck.panda.domain.entity.VPC.Status;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
@@ -39,6 +41,10 @@ public class WebsocketServiceImpl implements WebsocketService {
 
     /** Constant for Cloud stack volume list response. */
     public static final String CS_LIST_VOLUME_RESPONSE = "listvolumesresponse";
+
+    /** Cloud stack vpc service reference. */
+    @Autowired
+    private VPCService vpcService;
 
     /** Simple messaging template for send and receive messages. */
     @Autowired
@@ -168,8 +174,7 @@ public class WebsocketServiceImpl implements WebsocketService {
                 if (event.getMessage() != null && (event.getStatus().equals(Event.Status.FAILED)
                         || event.getStatus().equals(Event.Status.ERROR))) {
                     String message = eventmapper.writeValueAsString(event);
-					if (event.getStatus().equals(Event.Status.FAILED) && (event.getEvent().equalsIgnoreCase(EventTypes.EVENT_VM_SNAPSHOT_DELETE)
-							|| event.getEvent().equalsIgnoreCase(EventTypes.EVENT_VM_SNAPSHOT_REVERT))) {
+					if (event.getStatus().equals(Event.Status.FAILED) && (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).startsWith(EventTypes.EVENT_VM_SNAPSHOT))) {
 						if (eventObject.has(CloudStackConstants.CS_CMD_INFO)) {
 							JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
 							if (eventObject.getString(CloudStackConstants.CS_STATUS)
@@ -204,8 +209,7 @@ public class WebsocketServiceImpl implements WebsocketService {
 						}
                     }
 					if (event.getStatus().equals(Event.Status.FAILED)
-							&& (event.getEvent().equalsIgnoreCase(EventTypes.EVENT_VOLUME_ATTACH)
-									|| event.getEvent().equalsIgnoreCase(EventTypes.EVENT_VOLUME_DETACH))) {
+							&& eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).startsWith(EventTypes.EVENT_VOLUME_ATTACH)) {
 						if (eventObject.has(CloudStackConstants.CS_CMD_INFO)) {
 							JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
 							if (eventObject.getString(CloudStackConstants.CS_STATUS)
@@ -245,6 +249,52 @@ public class WebsocketServiceImpl implements WebsocketService {
 										}
 										persistVolume.setIsSyncFlag(false);
 										volumeService.update(persistVolume);
+									}
+								}
+							}
+						}
+					}
+
+					if (event.getStatus().equals(Event.Status.FAILED) && eventObject
+							.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE).startsWith(EventTypes.EVENT_VPC)) {
+						if (eventObject.has(CloudStackConstants.CS_CMD_INFO)) {
+							JSONObject json = new JSONObject(eventObject.getString(CloudStackConstants.CS_CMD_INFO));
+							if (eventObject.getString(CloudStackConstants.CS_STATUS)
+									.equalsIgnoreCase(CloudStackConstants.CS_STATUS_FAILED)) {
+								if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
+										.equalsIgnoreCase(EventTypes.EVENT_VPC_CREATE)) {
+									VPC persistVpc = vpcService.findByUUID(json.getString(CloudStackConstants.CS_ID));
+									if (persistVpc != null) {
+										persistVpc.setIsActive(false);
+										persistVpc.setStatus(Status.INACTIVE);
+										persistVpc.setSyncFlag(false);
+										vpcService.save(persistVpc);
+									}
+								} if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
+										.equalsIgnoreCase(EventTypes.EVENT_VPC_DELETE)) {
+									VPC persistVpc = vpcService.findByUUID(json.getString(CloudStackConstants.CS_ID));
+									if (persistVpc != null) {
+										persistVpc.setIsActive(true);
+										persistVpc.setSyncFlag(false);
+										vpcService.save(persistVpc);
+									}
+								} if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
+										.equalsIgnoreCase(EventTypes.EVENT_VPC_UPDATE)) {
+									VPC persistVpc = vpcService.findByUUID(json.getString(CloudStackConstants.CS_ID));
+									if (persistVpc != null) {
+										persistVpc.setIsActive(true);
+										persistVpc.setSyncFlag(false);
+										vpcService.save(persistVpc);
+									}
+								} if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
+										.equalsIgnoreCase(EventTypes.EVENT_VPC_RESTART)) {
+									VPC persistVpc = vpcService.findByUUID(json.getString(CloudStackConstants.CS_ID));
+									if (persistVpc != null) {
+										persistVpc.setIsActive(true);
+										persistVpc.setRedundantVPC(false);
+										persistVpc.setCleanUpVPC(false);
+										persistVpc.setSyncFlag(false);
+										vpcService.save(persistVpc);
 									}
 								}
 							}
@@ -403,29 +453,15 @@ public class WebsocketServiceImpl implements WebsocketService {
 														if (responseObject.has(CloudStackConstants.CS_VM)) {
 															vmListJSON = responseObject
 																	.getJSONArray(CloudStackConstants.CS_VM);
-															// 2. Iterate the
-															// json
-															// list, convert
-															// the single json
-															// entity to vm.
+															// 2. Iterate the json list, convert the single json entity to vm.
 															for (int i = 0, size = vmListJSON.length(); i < size; i++) {
-																// 2.1 Call
-																// convert
-																// by passing
-																// JSONObject to
-																// vm
-																// entity.
+																// 2.1 Call convert by passing JSONObject to vm entity.
 																VmInstance CsVmInstance = VmInstance
 																		.convert(vmListJSON.getJSONObject(i));
-																// 2.2 Update vm
-																// host by
-																// transient
-																// variable.
+																// 2.2 Update vm host by transient variable.
 																vmInstance.setHostId(convertEntityService
 																		.getHostId(CsVmInstance.getTransHostId()));
-																// 2.3 Update
-																// internal
-																// name.
+																// 2.3 Update internal name.
 																vmInstance.setInstanceInternalName(
 																		CsVmInstance.getInstanceInternalName());
 																if (vmInstance.getHostId() != null) {
@@ -434,10 +470,7 @@ public class WebsocketServiceImpl implements WebsocketService {
 																					.getHostId(CsVmInstance
 																							.getTransHostId())));
 																}
-																// 3. Update vm
-																// for
-																// user vm
-																// creation.
+																// 3. Update vm for user vm creation.
 																vmInstance = virtualMachineService.update(vmInstance);
 															}
 														}

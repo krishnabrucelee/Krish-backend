@@ -78,4 +78,15 @@ public interface StorageOfferingService extends CRUDService<StorageOffering> {
      */
     Page<StorageOffering> findAllByDomainId(Long domainId, PagingAndSorting pagingAndSorting) throws Exception;
 
+    /**
+     * Find all storage offerings by domain id and search text along with pagination.
+     *
+     * @param domainId of the storage offering.
+     * @param pagingAndSorting for pagination.
+     * @param searchText for storage offering.
+     * @return storage offering.
+     * @throws Exception if error occurs.
+     */
+    Page<StorageOffering> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting,
+            String searchText) throws Exception;
 }

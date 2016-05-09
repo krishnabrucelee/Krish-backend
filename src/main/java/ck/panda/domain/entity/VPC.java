@@ -2,6 +2,9 @@ package ck.panda.domain.entity;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -13,8 +16,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
 import org.hibernate.annotations.Type;
+import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -22,13 +25,15 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+import ck.panda.constants.CloudStackConstants;
+import ck.panda.util.JsonUtil;
+import ck.panda.util.JsonValidator;
 
 /**
  *  A VPC can have its own virtual network topology that resembles a traditional physical network. You can
  *  launch VMs in the virtual network that can have private addresses in the range of your choice.
  *
  */
-
 @Entity
 @Table(name = "vpc")
 @EntityListeners(AuditingEntityListener.class)
@@ -50,7 +55,7 @@ public class VPC implements Serializable {
     private String uuid;
 
     /** CIDR Range of the IP address. */
-    @Column(name = "cidr")
+    @Column(name = "cidr", nullable = false)
     private String cIDR;
 
     /** Description of the VPC. */
@@ -58,17 +63,26 @@ public class VPC implements Serializable {
     private String description;
 
     /** An optional field, whether to the display the vpc to the end user or not. */
-    @Column(name = "for_display", nullable = false)
-    private String forDisplay;
+    @Column(name = "for_display")
+    private Boolean forDisplay;
 
     /**If set to false, the VPC won't start (VPC VR will not get allocated) until its first network gets implemented. True by default. */
-    @Column(name = "start", nullable = false)
-    private String start;
+    @Column(name = "start", columnDefinition = "tinyint default 1")
+    private Boolean start;
 
     /** Domain of the VPC. */
     @JoinColumn(name = "domain_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @OneToOne
     private Domain domain;
+
+    /** Offering of the VPC. */
+    @JoinColumn(name = "vpcoffering_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @OneToOne
+    private VpcOffering vpcOffering;
+
+    /** Offering id of the VPC. */
+    @Column(name = "vpcoffering_id")
+    private Long vpcofferingId;
 
     /** Domain id of the VPC. */
     @Column(name = "domain_id")
@@ -101,9 +115,28 @@ public class VPC implements Serializable {
     @Column(name = "zone_id")
     private Long zoneId;
 
+    /** Distributed VPC router status. */
+    @Column(name = "distributed_vpc_router")
+    private Boolean distributedVpcRouter;
     /** IsActive attribute to verify Active or Inactive. */
     @Column(name = "is_active")
     private Boolean isActive;
+
+    /** VPC network domain. All networks inside the VPC will belong to this domain. */
+    @Column(name = "network_domain")
+    private String networkDomain;
+
+    /** Removing old elements of the vpc. */
+    @Column(name = "clean_up")
+    private Boolean cleanUpVPC;
+
+    /** Make redundant vpc. */
+    @Column(name = "redundant_vpc")
+    private Boolean redundantVPC;
+
+    /** Make restart required true/false. */
+    @Column(name = "restart_vpc")
+    private Boolean restartRequired;
 
     /** Created by user. */
     @CreatedBy
@@ -143,20 +176,32 @@ public class VPC implements Serializable {
     @Transient
     private Boolean syncFlag;
 
-    /** Enum type for Vpc Status. */
+    /** Transient VPC offering id. */
+    @Transient
+    private String transVpcOfferingId;
+
+    /** Transient account of the VPC. */
+    @Transient
+    private String transAccount;
+
+    /** Transient domain id of the VPC. */
+    @Transient
+    private String transDomainId;
+
+    /** Transient project id of the VPC. */
+    @Transient
+    private String transProjectId;
+
+    /** Transient zone of the VPC. */
+    @Transient
+    private String transZoneId;
+
+    /** Enumeration status for VPC. */
     public enum Status {
-        /** Indicates the network configuration is in allocated but not setup (Vlan is not set, and network is not ready for use). Isolated network goes to this state right after it's created with NO Vlan passed in. As vlan is optional parameter in createNetwork call only for Isolated networks, you should see this state for isolated networks only. */
-        ALLOCATED,
-        /**  Indicates that the network is destroyed and not displayed to the end user. */
-        DESTROY,
-        /** Indicates the network configuration is ready to be used by VM (Vlan is set for the network). */
-        IMPLEMENTED,
-        /** Indicates the network configuration is being implemented. */
-        IMPLEMENTING,
-        /** Indicates the network configuration is setup with Vlan from the moment it was created. Happens when vlan is passed in to the createNetwork call, so its immutable for the network for its entire lifecycle. Happens for Shared networks. */
-        SETUP,
-        /** Indicates the network configuration is being shutdown (this is intermediate state, although the name doesn't sound so). During this stage Vlan is being released, and the network goes back to Allocated state. */
-        SHUTDOWN
+        /** Inactive status make VPC as soft deleted and it will not list on the applicaiton. */
+        INACTIVE,
+        /** Enabled status is used to list VPC through out the application. */
+        ENABLED
     }
 
     /**
@@ -236,7 +281,7 @@ public class VPC implements Serializable {
      *
      * @return the for display.
      */
-    public String getForDisplay() {
+    public Boolean getForDisplay() {
         return forDisplay;
     }
 
@@ -245,7 +290,7 @@ public class VPC implements Serializable {
      *
      * @param forDisplay  to set
      */
-    public void setForDisplay(String forDisplay) {
+    public void setForDisplay(Boolean forDisplay) {
         this.forDisplay = forDisplay;
     }
 
@@ -254,7 +299,7 @@ public class VPC implements Serializable {
      *
      * @return the start
      */
-    public String getStart() {
+    public Boolean getStart() {
         return start;
     }
 
@@ -263,7 +308,7 @@ public class VPC implements Serializable {
      *
      * @param start  to set
      */
-    public void setStart(String start) {
+    public void setStart(Boolean start) {
         this.start = start;
     }
 
@@ -411,6 +456,23 @@ public class VPC implements Serializable {
         this.zoneId = zoneId;
     }
 
+    /**
+     * Get the distributed VPC router.
+     *
+     * @return the distributedVpcRouter.
+     */
+    public Boolean getDistributedVpcRouter() {
+        return distributedVpcRouter;
+    }
+
+    /**
+     * Set the distributed VPC router.
+     *
+     * @param distributedVpcRouter to set
+     */
+    public void setDistributedVpcRouter(Boolean distributedVpcRouter) {
+        this.distributedVpcRouter = distributedVpcRouter;
+    }
 
     /**
      * Get the created date and time.
@@ -556,21 +618,264 @@ public class VPC implements Serializable {
         this.status = status;
     }
 
-	/**
-	 * Get sync flag.
-	 *
-	 * @return the syncFlag
-	 */
-	public Boolean getSyncFlag() {
-		return syncFlag;
-	}
+    /**
+     * Get sync flag.
+     *
+     * @return the syncFlag
+     */
+    public Boolean getSyncFlag() {
+        return syncFlag;
+    }
 
-	/**
-	 * Set sync flag.
-	 *
-	 * @param syncFlag the syncFlag to set
-	 */
-	public void setSyncFlag(Boolean syncFlag) {
-		this.syncFlag = syncFlag;
-	}
+    /**
+     * Set sync flag.
+     *
+     * @param syncFlag the syncFlag to set
+     */
+    public void setSyncFlag(Boolean syncFlag) {
+        this.syncFlag = syncFlag;
+    }
+
+    /**
+     * Get network domain for VPC.
+     *
+     * @return the networkDomain
+     */
+    public String getNetworkDomain() {
+        return networkDomain;
+    }
+
+    /**
+     * Set network domain for VPC.
+     *
+     * @param networkDomain the networkDomain to set
+     */
+    public void setNetworkDomain(String networkDomain) {
+        this.networkDomain = networkDomain;
+    }
+
+    /**
+     * Get vpc offering.
+     *
+     * @return the vpcOffering
+     */
+    public VpcOffering getVpcOffering() {
+        return vpcOffering;
+    }
+
+    /**
+     * Set vpc offering id.
+     *
+     * @return the vpcoffering_id
+     */
+    public Long getVpcofferingid() {
+        return vpcofferingId;
+    }
+
+    /**
+     * Get vpc offering.
+     *
+     * @param vpcOffering the vpcOffering to set
+     */
+    public void setVpcOffering(VpcOffering vpcOffering) {
+        this.vpcOffering = vpcOffering;
+    }
+
+    /**
+     * Set vpc offering id.
+     *
+     * @param vpcoffering_id the vpcoffering_id to set
+     */
+    public void setVpcofferingid(Long vpcofferingId) {
+        this.vpcofferingId = vpcofferingId;
+    }
+
+    /**
+     * Get the cleanup vpc.
+     *
+     * @return the cleanUpVPC
+     */
+    public Boolean getCleanUpVPC() {
+        return cleanUpVPC;
+    }
+
+    /**
+     * Set the cleanup vpc.
+     *
+     * @param cleanUpVPC the cleanUpVPC to set
+     */
+    public void setCleanUpVPC(Boolean cleanUpVPC) {
+        this.cleanUpVPC = cleanUpVPC;
+    }
+
+    /**
+     * Get redundant VPC details.
+     *
+     * @return the redundantVPC
+     */
+    public Boolean getRedundantVPC() {
+        return redundantVPC;
+    }
+
+    /**
+     * Make redundant VPC.
+     *
+     * @param redundantVPC the redundantVPC to set
+     */
+    public void setRedundantVPC(Boolean redundantVPC) {
+        this.redundantVPC = redundantVPC;
+    }
+
+    /**
+     * Get vpc restart required.
+     *
+     * @return the restartRequired
+     */
+    public Boolean getRestartRequired() {
+        return restartRequired;
+    }
+
+    /**
+     * Set vpc restart required.
+     *
+     * @param restartRequired the restartRequired to set
+     */
+    public void setRestartRequired(Boolean restartRequired) {
+        this.restartRequired = restartRequired;
+    }
+
+    /**
+     * Get transient VPC Offering id.
+     *
+     * @return the transVpcOfferingId
+     */
+    public String getTransVpcOfferingId() {
+        return transVpcOfferingId;
+    }
+
+    /**
+     * Set transient VPC Offering id.
+     *
+     * @param transVpcOfferingId to set
+     */
+    public void setTransVpcOfferingId(String transVpcOfferingId) {
+        this.transVpcOfferingId = transVpcOfferingId;
+    }
+
+    /**
+     * Get transient VPC account.
+     *
+     * @return the transAccount
+     */
+    public String getTransAccount() {
+        return transAccount;
+    }
+
+    /**
+     * Set transient VPC account.
+     *
+     * @param transAccount to set
+     */
+    public void setTransAccount(String transAccount) {
+        this.transAccount = transAccount;
+    }
+
+    /**
+     * Get transient VPC domain id.
+     *
+     * @return the transDomainId
+     */
+    public String getTransDomainId() {
+        return transDomainId;
+    }
+
+    /**
+     * Set transient VPC domain id.
+     *
+     * @param transDomainId to set
+     */
+    public void setTransDomainId(String transDomainId) {
+        this.transDomainId = transDomainId;
+    }
+
+    /**
+     * Get the transProjectId.
+     *
+     * @return the transProjectId
+     */
+    public String getTransProjectId() {
+        return transProjectId;
+    }
+
+    /**
+     * Set the transProjectId.
+     *
+     * @param transProjectId to set
+     */
+    public void setTransProjectId(String transProjectId) {
+        this.transProjectId = transProjectId;
+    }
+
+    /**
+     * Get the Zone Id.
+     *
+     * @return the transZoneId
+     */
+    public String getTransZoneId() {
+        return transZoneId;
+    }
+
+    /**
+     * Set the Zone Id.
+     *
+     * @param transZoneId the transZoneId to set
+     */
+    public void setTransZoneId(String transZoneId) {
+        this.transZoneId = transZoneId;
+    }
+
+    /**
+     * Convert JSONObject to VPC offering entity.
+     *
+     * @param object json object
+     * @return VPC offering entity objects
+     * @throws Exception unhandled errors.
+     */
+    public static VPC convert(JSONObject object) throws Exception {
+        VPC vpc = new VPC();
+        vpc.setSyncFlag(false);
+        vpc.setIsActive(true);
+        vpc.setUuid(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_ID));
+        vpc.setName(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_NAME));
+        vpc.setcIDR(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_CIDR));
+        vpc.setDescription(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_DISPLAY_TEXT));
+        vpc.setDistributedVpcRouter(JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_DISTRIBUTED_VPC_ROUTER));
+        vpc.setForDisplay(JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_FOR_DISPLAY));
+        vpc.setNetworkDomain(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_NETWORK_DOMAIN));
+        vpc.setRedundantVPC(JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_REDUNDANT_VPC_ROUTER));
+        vpc.setRestartRequired(JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_RESTART_REQUIRED));
+        vpc.setTransVpcOfferingId(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_VPC_OFFERING_ID));
+        vpc.setTransAccount(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_ACCOUNT));
+        vpc.setTransDomainId(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_DOMAIN_ID));
+        vpc.setTransProjectId(JsonUtil.getStringValue(object, CloudStackConstants.CS_PROJECT_ID));
+        vpc.setTransZoneId((JsonUtil.getStringValue(object, CloudStackConstants.CS_ZONE_ID)));
+        vpc.setStatus(Status.valueOf(JsonUtil.getStringValue(object, CloudStackConstants.CS_STATE).toUpperCase()));
+        vpc.setStart(true);
+        return vpc;
+    }
+
+    /**
+     * Mapping VPC entity object in list.
+     *
+     * @param vpcList list of VPC offerings
+     * @return VPC mapped values.
+     */
+    public static Map<String, VPC> convert(List<VPC> vpcList) {
+        Map<String, VPC> vpcMap = new HashMap<String, VPC>();
+        for (VPC vpc : vpcList) {
+            vpcMap.put(vpc.getUuid(), vpc);
+        }
+        return vpcMap;
+    }
+
 }

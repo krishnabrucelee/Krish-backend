@@ -1,5 +1,7 @@
 package ck.panda.constants;
 
+import ck.panda.domain.entity.VPC;
+
 /**
  * Event Types from Cloudstack Server.
  */
@@ -177,6 +179,9 @@ public class EventTypes {
     /** VPC. */
     public static final String EVENT_VPC = "VPC.";
 
+    /** VPC create. */
+    public static final String EVENT_VPC_CREATE = "VPC.CREATE";
+
     /** FIREWALL. */
     public static final String EVENT_FIREWALL = "FIREWALL.";
 
@@ -326,5 +331,14 @@ public class EventTypes {
 
     /** Email constant. */
     public static final String EVENT_Email = "Email";
+
+    /** VPC delete. */
+	public static final String EVENT_VPC_DELETE = "VPC.DELETE";
+
+	/** VPC update. */
+	public static final String EVENT_VPC_UPDATE = "VPC.UPDATE";
+
+	/** VPC restart. */
+	public static final String EVENT_VPC_RESTART = "VPC.RESTART";
 
 }

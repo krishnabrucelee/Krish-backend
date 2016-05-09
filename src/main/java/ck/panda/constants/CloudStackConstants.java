@@ -89,7 +89,7 @@ public class CloudStackConstants {
 
     /** Constant for offerings id. */
     public static final String CS_DISK_OFFERING_ID = "diskofferingid", CS_SERVICE_OFFERING_ID = "serviceofferingid",
-        CS_NETWORK_OFFERING_ID = "networkofferingid";
+        CS_NETWORK_OFFERING_ID = "networkofferingid", CS_VPC_OFFERING_ID = "vpcofferingid";
 
     /** Constant for resource's tags. */
     public static final String CS_TAGS = "tags";
@@ -555,6 +555,9 @@ public class CloudStackConstants {
     /** Constant for remote access VPN. */
     public static final String CS_REMOTE_ACCESS_VPN = "remoteaccessvpn";
 
+    /** Constant for vpc. */
+    public static final String CS_VPC = "vpc";
+
     /** Constant for VPN ipsec preshared key. */
     public static final String CS_PRESHARED_KEY = "presharedkey";
 
@@ -735,7 +738,19 @@ public class CloudStackConstants {
     /** Constant for supports region level VPC. */
     public static final String CS_SUPPORTS_REGION_LEVEL_VPC = "supportsregionLevelvpc";
 
-    /** Constant for enabled state. */
-    public static final String CS_ENABLED = "Enabled";
+    /** Constant for VPC. */
+    public static final String CS_FOR_VPC = "forvpc";
+
+    /** Constant for VPC id. */
+    public static final String CS_VPC_ID = "vpcid";
+
+    /** Constant for list VPC response. */
+    public static final String CS_LIST_VPC_RESPONSE = "listvpcsresponse";
+
+    /** Constant for redundant VPC router */
+    public static final String CS_REDUNDANT_VPC_ROUTER = "redundantvpcrouter";
+
+    /** Constant for restart required. */
+    public static final String CS_RESTART_REQUIRED = "restartrequired";
 
 }
