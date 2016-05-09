@@ -372,6 +372,13 @@ public class UserServiceImpl implements UserService {
             // set server for finding value in configuration
             config.setServer(1L);
             csUserService.deleteUser((user.getUuid()), cloudStackConstants.JSON);
+            if(user.getType() == UserType.DOMAIN_ADMIN) {
+                Role role = roleService.find(user.getRoleId());
+                role.setStatus(Role.Status.DISABLED);
+                role.setIsActive(false);
+                role.setSyncFlag(false);
+                roleService.save(role);
+            }
         }
         return userRepository.save(user);
     }
