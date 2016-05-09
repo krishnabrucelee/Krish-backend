@@ -263,7 +263,7 @@ public class WebsocketServiceImpl implements WebsocketService {
 									.equalsIgnoreCase(CloudStackConstants.CS_STATUS_FAILED)) {
 								if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
 										.equalsIgnoreCase(EventTypes.EVENT_VPC_CREATE)) {
-									VPC persistVpc = vpcService.findByUUID(json.getString(CloudStackConstants.CS_ID));
+									VPC persistVpc = vpcService.findByUUID(json.getString(CloudStackConstants.CS_UUID));
 									if (persistVpc != null) {
 										persistVpc.setIsActive(false);
 										persistVpc.setStatus(Status.INACTIVE);
@@ -272,7 +272,7 @@ public class WebsocketServiceImpl implements WebsocketService {
 									}
 								} if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
 										.equalsIgnoreCase(EventTypes.EVENT_VPC_DELETE)) {
-									VPC persistVpc = vpcService.findByUUID(json.getString(CloudStackConstants.CS_ID));
+									VPC persistVpc = vpcService.findByUUID(json.getString(CloudStackConstants.CS_UUID));
 									if (persistVpc != null) {
 										persistVpc.setIsActive(true);
 										persistVpc.setSyncFlag(false);
@@ -280,7 +280,7 @@ public class WebsocketServiceImpl implements WebsocketService {
 									}
 								} if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
 										.equalsIgnoreCase(EventTypes.EVENT_VPC_UPDATE)) {
-									VPC persistVpc = vpcService.findByUUID(json.getString(CloudStackConstants.CS_ID));
+									VPC persistVpc = vpcService.findByUUID(json.getString(CloudStackConstants.CS_UUID));
 									if (persistVpc != null) {
 										persistVpc.setIsActive(true);
 										persistVpc.setSyncFlag(false);
@@ -288,7 +288,7 @@ public class WebsocketServiceImpl implements WebsocketService {
 									}
 								} if (eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
 										.equalsIgnoreCase(EventTypes.EVENT_VPC_RESTART)) {
-									VPC persistVpc = vpcService.findByUUID(json.getString(CloudStackConstants.CS_ID));
+									VPC persistVpc = vpcService.findByUUID(json.getString(CloudStackConstants.CS_UUID));
 									if (persistVpc != null) {
 										persistVpc.setIsActive(true);
 										persistVpc.setRedundantVPC(false);
