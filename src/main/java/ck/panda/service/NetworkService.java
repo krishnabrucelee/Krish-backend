@@ -156,4 +156,14 @@ public interface NetworkService extends CRUDService<Network> {
     Page<Network> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText)
             throws Exception;
 
+    /**
+     * To get list of networks by VPC id.
+     *
+     * @param vpcId VPC id.
+     * @param isActive true/false.
+     * @return network list from server.
+     * @throws Exception unhandled errors.
+     */
+    List<Network> findNetworkByVpcIdAndIsActive(Long vpcId, Boolean isActive) throws Exception;
+
 }

@@ -18,9 +18,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
+import ck.panda.domain.entity.Application;
 import ck.panda.domain.entity.VPC;
-import ck.panda.service.NetworkService;
 import ck.panda.service.VPCService;
 import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -168,24 +169,25 @@ public class VPCController extends CRUDController<VPC> implements ApiController 
     /**
      * Get all vpc list by domain.
      *
-     * @param sortBy asc/desc.
-     * @param domainId domain id of network.
+     * @param sortBy asc/desc
+     * @param domainId domain id of vpc.
+     * @param searchText search text.
      * @param range pagination range.
      * @param limit per page limit.
      * @param request page request.
      * @param response response content.
-     * @return vpc list.
+     * @return VPC list.
      * @throws Exception unhandled exception.
      */
     @RequestMapping(value = "/listByDomain", method = RequestMethod.GET, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<VPC> listNetworkByDomainId(@RequestParam String sortBy, @RequestParam Long domainId,
+    public List<VPC> listNetworkByDomainId(@RequestParam String sortBy, @RequestParam Long domainId, @RequestParam String searchText,
             @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
-        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, VPC.class);
-        Page<VPC> pageResponse = vpcService.findAllByDomainId(domainId, page);
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Application.class);
+        Page<VPC> pageResponse = vpcService.findAllByDomainIdAndSearchText(domainId, page, searchText, Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
         response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
         return pageResponse.getContent();
     }

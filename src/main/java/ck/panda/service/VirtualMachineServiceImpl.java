@@ -995,31 +995,34 @@ public class VirtualMachineServiceImpl implements VirtualMachineService {
                         break;
                     // 4.5 Check public ip address availability.
                     case GenericConstants.RESOURCE_IP_ADDRESS:
-                        if (vm.getNetworkUuid() != null || vm.getNetworkId() != null) {
-                            if (vm.getNetworkUuid() != null) {
-                                optionalMap.put(CloudStackConstants.CS_ASSOCIATE_NETWORK, vm.getNetworkUuid());
-                            } else {
-                                optionalMap.put(CloudStackConstants.CS_ASSOCIATE_NETWORK,
-                                        convertEntityService.getNetworkById(vm.getNetworkId()).getUuid());
-                            }
-                            if (vm.getProjectId() != null) {
-                                optionalMap.put("projectid",
-                                        convertEntityService.getProjectById(vm.getProjectId()).getUuid());
-                            }
-                            optionalMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
-                            optionalMap.put(CloudStackConstants.CS_FOR_VM_NETWORK, CloudStackConstants.STATUS_ACTIVE);
-                            config.setServer(1L);
-                            String csIpResponse = cloudStackResourceCapacity.listPublicIpAddress(optionalMap,
-                                    CloudStackConstants.JSON);
-                            JSONObject csIpCapacity = new JSONObject(csIpResponse)
-                                    .getJSONObject(CloudStackConstants.CS_PUBLIC_IPADDRESS_RESPONSE);
-                            if (csIpCapacity.has(CloudStackConstants.CS_CAPACITY_COUNT)) {
-                                LOGGER.debug("Already IP address acquired ", resourceType);
-                            } else if (resourceUsage < 1) {
-                                errMessage = CloudStackConstants.RESOURCE_CHECK + " public.ip.available "
-                                        + CloudStackConstants.CONTACT_CLOUD_ADMIN;
-                            }
-                        }
+						if (vm.getNetworkUuid() != null || vm.getNetworkId() != null) {
+							if (convertEntityService.getNetworkById(vm.getNetworkId()).getVpcId() == null) {
+								if (vm.getNetworkUuid() != null) {
+									optionalMap.put(CloudStackConstants.CS_ASSOCIATE_NETWORK, vm.getNetworkUuid());
+								} else {
+									optionalMap.put(CloudStackConstants.CS_ASSOCIATE_NETWORK,
+											convertEntityService.getNetworkById(vm.getNetworkId()).getUuid());
+								}
+								if (vm.getProjectId() != null) {
+									optionalMap.put("projectid",
+											convertEntityService.getProjectById(vm.getProjectId()).getUuid());
+								}
+								optionalMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
+								optionalMap.put(CloudStackConstants.CS_FOR_VM_NETWORK,
+										CloudStackConstants.STATUS_ACTIVE);
+								config.setServer(1L);
+								String csIpResponse = cloudStackResourceCapacity.listPublicIpAddress(optionalMap,
+										CloudStackConstants.JSON);
+								JSONObject csIpCapacity = new JSONObject(csIpResponse)
+										.getJSONObject(CloudStackConstants.CS_PUBLIC_IPADDRESS_RESPONSE);
+								if (csIpCapacity.has(CloudStackConstants.CS_CAPACITY_COUNT)) {
+									LOGGER.debug("Already IP address acquired ", resourceType);
+								} else if (resourceUsage < 1) {
+									errMessage = CloudStackConstants.RESOURCE_CHECK + " public.ip.available "
+											+ CloudStackConstants.CONTACT_CLOUD_ADMIN;
+								}
+							}
+						}
                         break;
                     default:
                         LOGGER.debug("No Resource ", resourceType);

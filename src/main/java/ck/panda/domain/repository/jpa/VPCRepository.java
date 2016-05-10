@@ -191,4 +191,44 @@ public interface VPCRepository extends PagingAndSortingRepository<VPC, Long> {
      */
     @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE vpc.domainId =:domainId AND vpc.isActive =:isActive")
     List<VPC> findAllByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find all the domain based active or inactive VPC with pagination.
+     *
+     * @param domainId domain id of the VPC
+     * @param search search text.
+     * @param isActive get the VPC list based on active/inactive status
+     * @param pageable to get the list with pagination
+     * @return list of VPCs
+     */
+    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE (vpc.domainId=:domainId OR 0 = :domainId) AND vpc.isActive = :isActive AND (vpc.name LIKE %:search% OR vpc.description LIKE %:search% OR vpc.cIDR LIKE %:search% OR vpc.department.userName LIKE %:search% OR vpc.domain.name LIKE %:search% OR vpc.zone.name LIKE %:search% OR vpc.project.name LIKE %:search% OR vpc.status LIKE %:search%)")
+    Page<VPC> findDomainBySearchText(@Param("domainId") Long domainId, Pageable pageable, @Param("search") String search, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find all VPCs by project and department with pagination.
+     *
+     * @param domainId domain id of the VPC
+     * @param allProjectList project list.
+     * @param departmentId of the VPC.
+     * @param search search text.
+     * @param isActive status of the VPC.
+     * @param pageable to get the list with pagination.
+     * @return list of VPCs.
+     */
+    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE (vpc.domainId=:domainId OR 0 = :domainId) AND (vpc.project in :allProjectList OR vpc.departmentId=:departmentId ) AND vpc.isActive =:isActive AND (vpc.name LIKE %:search% OR vpc.description LIKE %:search% OR vpc.cIDR LIKE %:search% OR vpc.department.userName LIKE %:search% OR vpc.domain.name LIKE %:search% OR vpc.zone.name LIKE %:search% OR vpc.project.name LIKE %:search% OR vpc.status LIKE %:search%)")
+    Page<VPC> findByProjectDepartmentAndIsActiveAndSearchText(@Param("allProjectList") List<Project> allProjectList, @Param("departmentId") Long departmentId,
+            @Param("isActive") Boolean isActive, Pageable pageable, @Param("search") String search, @Param("domainId") Long domainId);
+
+    /**
+     * Find all the domain based active or inactive VPC with pagination.
+     *
+     * @param domainId domain id of the VPC
+     * @param departmentId department id of the VPC
+     * @param search search text.
+     * @param isActive get the VPC list based on active/inactive status
+     * @param pageable to get the list with pagination
+     * @return list of VPCs
+     */
+    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE (vpc.domainId=:domainId OR 0 = :domainId) AND vpc.departmentId = :departmentId AND vpc.projectId  = NULL AND vpc.isActive = :isActive AND (vpc.name LIKE %:search% OR vpc.description LIKE %:search% OR vpc.cIDR LIKE %:search% OR vpc.department.userName LIKE %:search% OR vpc.domain.name LIKE %:search% OR vpc.zone.name LIKE %:search% OR vpc.project.name LIKE %:search% OR vpc.status LIKE %:search%)")
+    Page<VPC> findAllByDepartmentIsActiveAndSearchText(@Param("domainId") Long domainId, @Param("departmentId") Long departmentId, Pageable pageable, @Param("search") String search, @Param("isActive") Boolean isActive);
 }
