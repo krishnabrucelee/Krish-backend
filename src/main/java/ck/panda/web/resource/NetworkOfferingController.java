@@ -104,4 +104,17 @@ public class NetworkOfferingController extends CRUDController<NetworkOffering> i
     protected List<NetworkOffering> getIsolated() throws Exception {
         return networkOffer.findByIsolatedAndRequired(CS_ISOLATED, CS_REQUIRED);
     }
+
+    /**
+     * list all the VPC Networks Offerings.
+     *
+     * @return NetworkOffering
+     * @throws Exception raise if error
+     */
+    @RequestMapping(value = "vpcList", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<NetworkOffering> getVpcList() throws Exception {
+        return networkOffer.findVpcList();
+    }
 }

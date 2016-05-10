@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.NetworkOffering;
+import ck.panda.domain.entity.NetworkOffering.Status;
 import ck.panda.domain.repository.jpa.NetworkOfferingRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackNetworkOfferingService;
@@ -132,6 +133,11 @@ public class NetworkOfferingServiceImpl implements NetworkOfferingService {
     @Override
     public NetworkOffering findById(Long id) throws Exception {
         return networkRepo.findById(id);
+    }
+
+    @Override
+    public List<NetworkOffering> findVpcList() throws Exception {
+        return networkRepo.findVpcList(true, Status.ENABLED);
     }
 
 }

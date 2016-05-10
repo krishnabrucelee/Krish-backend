@@ -615,4 +615,9 @@ public class VPCServiceImpl implements VPCService {
          }
         return vpcs;
     }
+
+    @Override
+    public VPC findVpcById(Long id) throws Exception {
+        return vpcRepository.findOne(id);
+    }
 }

@@ -19,4 +19,13 @@ public interface VpcAclService extends CRUDService<VpcAcl> {
      */
     List<VpcAcl> findAllFromCSServer() throws Exception;
 
+    /**
+     * Get the VPC ACL by id.
+     *
+     * @param id VPC ACL id
+     * @return VPC ACL from server
+     * @throws Exception unhandled errors.
+     */
+    VpcAcl findVpcAclById(Long id) throws Exception;
+
 }

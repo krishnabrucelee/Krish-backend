@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.NetworkOffering;
+import ck.panda.domain.entity.NetworkOffering.Status;
 
 /**
  * JPA repository for NetworkOffering entity.
@@ -47,5 +48,15 @@ public interface NetworkOfferingRepository extends PagingAndSortingRepository<Ne
      */
     @Query(value = "SELECT networkOffer FROM NetworkOffering networkOffer WHERE networkOffer.guestIpType = :guestIpType AND networkOffer.availability = :availability")
     List<NetworkOffering> findByIsolatedAndRequired(@Param("guestIpType") String guestIpType, @Param("availability") String availability);
+
+    /**
+     * Find NetworkOffering by VPC.
+     *
+     * @param forVpc Network VPC status
+     * @param status Network Enabled/Disabled status
+     * @return Network offering list
+     */
+    @Query(value = "SELECT networkOffer FROM NetworkOffering networkOffer WHERE networkOffer.forVpc = :forVpc AND networkOffer.status = :status")
+    List<NetworkOffering> findVpcList(@Param("forVpc") Boolean forVpc, @Param("status") Status status);
 
 }
