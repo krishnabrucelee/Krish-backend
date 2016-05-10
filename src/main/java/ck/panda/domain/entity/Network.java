@@ -111,6 +111,15 @@ public class Network implements Serializable {
     @Column(name = "vpc_id")
     private Long vpcId;
 
+    /** ACL Object for the Network Offer. */
+    @ManyToOne
+    @JoinColumn(name = "acl_id", referencedColumnName = "id", updatable = false, insertable = false)
+    private NetworkOffering acl;
+
+    /** ACL id for the Network Offer. */
+    @Column(name = "acl_id")
+    private Long aclId;
+
     /** Type of the Network. */
     @Column(name = "network_type")
     @Enumerated(EnumType.STRING)
@@ -214,7 +223,11 @@ public class Network implements Serializable {
 
     /** Transient ACL id of the network. */
     @Transient
-    private String transVpcAclId;
+    private String transAclId;
+
+    /** Transient VPC id of the network. */
+    @Transient
+    private String transVpcId;
 
     /** Enum type for Network Type. */
     public enum NetworkType {
@@ -796,21 +809,39 @@ public class Network implements Serializable {
     }
 
     /**
-     * Get the transVpcAclId.
+     * Get the transAclId.
      *
-     * @return the transVpcAclId
+     * @return the transAclId
      */
-    public String getTransVpcAclId() {
-        return transVpcAclId;
+    public String getTransAclId() {
+        return transAclId;
     }
 
     /**
-     * Set the transVpcAclId.
+     * Set the transAclId.
      *
-     * @param transVpcAclId to set
+     * @param transAclId to set
      */
-    public void setTransVpcAclId(String transVpcAclId) {
-        this.transVpcAclId = transVpcAclId;
+    public void setTransAclId(String transAclId) {
+        this.transAclId = transAclId;
+    }
+
+    /**
+     * Get the transVpcId.
+     *
+     * @return the transVpcId
+     */
+    public String getTransVpcId() {
+        return transVpcId;
+    }
+
+    /**
+     * Set the transVpcId.
+     *
+     * @param transVpcId to set
+     */
+    public void setTransVpcId(String transVpcId) {
+        this.transVpcId = transVpcId;
     }
 
     /**
@@ -958,6 +989,42 @@ public class Network implements Serializable {
     }
 
     /**
+     * Get ACL for network.
+     *
+     * @return the ACL
+     */
+    public NetworkOffering getAcl() {
+        return acl;
+    }
+
+    /**
+     * Set ACL for network.
+     *
+     * @param acl the ACL to set
+     */
+    public void setAcl(NetworkOffering acl) {
+        this.acl = acl;
+    }
+
+    /**
+     * Get ACL id of the network.
+     *
+     * @return the aclId
+     */
+    public Long getAclId() {
+        return aclId;
+    }
+
+    /**
+     * Set ACL id of the network.
+     *
+     * @param aclId the aclId to set
+     */
+    public void setAclId(Long aclId) {
+        this.aclId = aclId;
+    }
+
+    /**
      * Get the network creation type.
      *
      * @return the networkCreationType
@@ -1000,7 +1067,8 @@ public class Network implements Serializable {
             network.setNetMask(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_NETMASK));
             network.setNetworkDomain(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_NETWORK_DOMAIN));
             network.setTransProjectId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_PROJECT_ID));
-            network.setTransVpcAclId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_VPC_ID));
+            network.setTransVpcId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_VPC_ID));
+            network.setTransAclId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ACL_ID));
             network.setIsActive(true);
         } catch (Exception ex) {
             ex.printStackTrace();

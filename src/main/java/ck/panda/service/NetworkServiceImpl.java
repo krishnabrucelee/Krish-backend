@@ -18,6 +18,7 @@ import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.Network.NetworkCreationType;
 import ck.panda.domain.entity.Network.Status;
 import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
 import ck.panda.domain.entity.NetworkOffering;
@@ -256,6 +257,11 @@ public class NetworkServiceImpl implements NetworkService {
                     } else {
                         updateResourceCountService.QuotaUpdateByResourceObject(network, NETWORK,
                                     network.getDepartmentId(), "Department", "update");
+                    }
+                    if (network.getVpcId() != null) {
+                        network.setNetworkCreationType(NetworkCreationType.VPC);
+                    } else {
+                        network.setNetworkCreationType(NetworkCreationType.ADVANCED_NETWORK);
                     }
                     return networkRepo.save(network);
 
@@ -536,8 +542,14 @@ public class NetworkServiceImpl implements NetworkService {
                     Project project = projectService.findByUuid(network.getTransProjectId());
                     network.setDepartmentId(project.getDepartmentId());
                  }
-                 if (network.getTransVpcAclId() != null) {
-                     network.setVpcId(convertEntityService.getVpcId(network.getTransVpcAclId()));
+                 if (network.getTransVpcId() != null) {
+                     network.setVpcId(convertEntityService.getVpcId(network.getTransVpcId()));
+                     network.setNetworkCreationType(NetworkCreationType.VPC);
+                 } else {
+                     network.setNetworkCreationType(NetworkCreationType.ADVANCED_NETWORK);
+                 }
+                 if (network.getTransAclId() != null) {
+                     network.setAclId(convertEntityService.getVpcId(network.getTransAclId()));
                  }
 
                 networkList.add(network);
@@ -612,6 +624,12 @@ public class NetworkServiceImpl implements NetworkService {
                 optional.put(CloudStackConstants.CS_ACCOUNT,
                         departmentService.find(user.getDepartmentId()).getUserName());
             }
+        }
+        if (network.getAclId() != null) {
+            optional.put(CloudStackConstants.CS_ACL_ID, convertEntityService.getVpcAclById(network.getAclId()).getUuid());
+        }
+        if (network.getVpcId() != null) {
+            optional.put(CloudStackConstants.CS_VPC_ID, convertEntityService.getVpcById(network.getVpcId()).getUuid());
         }
         return optional;
     }
@@ -828,4 +846,9 @@ public class NetworkServiceImpl implements NetworkService {
            }
          return networks;
       }
+
+    @Override
+    public List<Network> findNetworkByVpcIdAndIsActive(Long vpcId, Boolean isActive) throws Exception {
+        return networkRepo.findNetworkByVpcIdAndIsActive(vpcId, isActive);
+    }
 }

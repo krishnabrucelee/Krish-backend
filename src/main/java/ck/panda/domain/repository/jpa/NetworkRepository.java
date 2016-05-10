@@ -245,4 +245,14 @@ public interface NetworkRepository extends PagingAndSortingRepository<Network, L
             + "OR net.project.name LIKE %:search% OR net.networkType LIKE %:search% OR net.cIDR LIKE %:search% OR net.gateway LIKE %:search%)")
     Page<Network> findByProjectDepartmentAndIsActiveWithPagingAndSorting(@Param("allProjectList") List<Project> allProjectList,
             @Param("departmentId") Long departmentId, @Param("isActive") Boolean isActive, Pageable pageable, @Param("search") String search,@Param("domainId") Long domainId);
+
+    /**
+     * Find all the VPC based active or inactive network.
+     *
+     * @param vpcId get the id of the VPC
+     * @param isActive get the network list based on active/inactive status.
+     * @return list of network.
+     */
+    @Query(value = "SELECT net FROM Network net LEFT JOIN net.project WHERE net.vpcId =:vpcId AND net.isActive =:isActive ORDER BY net.id DESC")
+    List<Network> findNetworkByVpcIdAndIsActive(@Param("vpcId") Long vpcId, @Param("isActive") Boolean isActive);
 }

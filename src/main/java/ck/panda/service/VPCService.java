@@ -159,4 +159,14 @@ public interface VPCService extends CRUDService<VPC> {
      * @throws Exception if error occurs.
      */
     Page<VPC> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText, Long userId) throws Exception;
+    
+    /**
+     * To get vpc from cloudstack server.
+     *
+     * @param id VPC id.
+     * @return vpc from server
+     * @throws Exception unhandled errors.
+     */
+    VPC findVpcById(Long id) throws Exception;
+
 }
