@@ -13,10 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import ck.panda.constants.EmailConstants;
 import ck.panda.constants.PingConstants;
+import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.Organization;
 import ck.panda.domain.entity.Payment;
 import ck.panda.domain.entity.Payment.PaymentStatus;
 import ck.panda.domain.repository.jpa.PaymentRepository;
+import ck.panda.email.util.EmailPayment;
 import ck.panda.payment.util.AlipayNotify;
 import ck.panda.util.PingService;
 import ck.panda.util.audit.DateTimeService;
@@ -46,6 +50,18 @@ public class PaymentServiceImpl implements PaymentService {
     /** Payment repository reference. */
     @Autowired
     private AlipayNotify aliPayNotify;
+
+    /** Email job service reference. */
+    @Autowired
+    private EmailJobService emailJobService;
+
+    /** Domain service reference. */
+    @Autowired
+    private DomainService domainService;
+
+    /** Organization service reference. */
+    @Autowired
+    private OrganizationService organizationService;
 
     @Override
     public Payment save(Payment payment) throws Exception {
@@ -142,6 +158,7 @@ public class PaymentServiceImpl implements PaymentService {
                 optional.put("paidOn", date.getTime());
                 optional.put("status", "PAID");
                 pingService.updateInvoiceToPing(optional);
+                emailPayment(payment);
             } else {
                 Payment persistPayment = getPaymentDetailByOrderNo(out_trade_no);
                 if (persistPayment == null) {
@@ -155,6 +172,8 @@ public class PaymentServiceImpl implements PaymentService {
                     optional.put("invoiceNumber", payment.getSubject());
                     optional.put("paymentMethod", "ALI_PAY");
                     optional.put("transactionReference", payment.getTransactionId());
+                    payment.setCreatedDateTime(dateTimeService.getCurrentDateAndTime());
+                    emailPayment(payment);
                     SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     Date date = dt.parse(payment.getNotifyTime());
                     optional.put("paidOn", date.getTime());
@@ -170,6 +189,30 @@ public class PaymentServiceImpl implements PaymentService {
             return payment;
         }
         return paymentRepo.save(payment);
+    }
+
+    private void emailPayment(Payment payment) throws Exception {
+      //Payment gateway email.
+        EmailPayment emailPayment = new EmailPayment();
+        Domain domain = domainService.find(payment.getDomainId());
+        Organization organisation = organizationService.findByIsActive(true);
+        emailPayment.setCompanyFirstName(domain.getPrimaryFirstName());
+        emailPayment.setCompanyLastName(domain.getLastName());
+        emailPayment.setCompanyAbbrevation(domain.getCompanyNameAbbreviation());
+        emailPayment.setCompanyEmail(domain.getEmail());
+        emailPayment.setInvoiceNumber(payment.getSubject());
+        emailPayment.setTransactionId(payment.getTransactionId());
+        emailPayment.setTransactionDate(payment.getCreatedDateTime().toString());
+        emailPayment.setTransactionStatus(payment.getPaymentStatus().toString());
+        emailPayment.setPaymentTotal(payment.getTotalFee());
+        emailPayment.setOrganisationName(organisation.getName());
+        emailPayment.setOrganisationEmail(organisation.getEmail());
+        emailPayment.setOrganisationAddress(organisation.getAddress());
+        emailPayment.setOrganisationPhone(organisation.getPhone());
+        emailPayment.setEventType(EmailConstants.EMAIL_PAYMENT);
+        emailPayment.setEvent(EmailConstants.EMAIL_PAYMENT);
+        emailJobService.sendMessageToEmailPaymentQueue(emailPayment);
+
     }
 
     @Override

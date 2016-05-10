@@ -321,4 +321,5 @@ public class Invoice {
     public void setGeneratedDate(Date generatedDate) {
         this.generatedDate = generatedDate;
     }
+
 }

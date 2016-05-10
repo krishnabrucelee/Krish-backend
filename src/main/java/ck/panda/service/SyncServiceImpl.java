@@ -421,6 +421,14 @@ public class SyncServiceImpl implements SyncService {
     @Value(value = "${test.invoice}")
     private String invoice;
 
+    /** receipient properties. */
+    @Value(value = "${test.usage}")
+    private String usage;
+
+    /** receipient properties. */
+    @Value(value = "${test.payment}")
+    private String payment;
+
     /** Manual sync domain properties. */
     @Value(value = "${manualsync.domain}")
     private String manualSyncDomain;
@@ -611,7 +619,7 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.error("ERROR AT synch Iso", e);
         }
         try {
-            // 39. Sync network service provider entity
+       //      39. Sync network service provider entity
             this.syncNetworkServiceProvider();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch VPC offering", e);
@@ -660,7 +668,7 @@ public class SyncServiceImpl implements SyncService {
         }
         try {
             // 20. Sync ResourceLimit entity
-            //this.syncResourceLimit();
+            this.syncResourceLimit();
         } catch (Exception e) {
             LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
         }
@@ -2953,7 +2961,7 @@ public class SyncServiceImpl implements SyncService {
 
     @Override
     public void syncEventList() throws Exception {
-        List<EventLiterals> userLists = EventsUtil.createEventsList(account,users,accountremoval,resource,systemerror,invoice);
+        List<EventLiterals> userLists = EventsUtil.createEventsList(account,users,accountremoval,resource,systemerror,invoice,usage,payment);
         List<EventLiterals> eventTest = eventService.findAllByIsActive(true);
             for (EventLiterals events : userLists) {
                 if (eventTest.size() ==0) {

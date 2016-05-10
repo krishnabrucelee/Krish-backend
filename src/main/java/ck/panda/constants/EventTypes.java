@@ -341,4 +341,7 @@ public class EventTypes {
 	/** VPC restart. */
 	public static final String EVENT_VPC_RESTART = "VPC.RESTART";
 
+    /** usage update failed. */
+    public static final Object EVENT_USAGE_UPDATE_FAILED = "USAGE_UPDATE_FAILED";
+
 }

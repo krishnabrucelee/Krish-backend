@@ -1,5 +1,6 @@
 package ck.panda.rabbitmq.util;
 
+import java.util.Date;
 import java.util.HashMap;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -15,6 +16,9 @@ public class EmailEvent {
 
     /** Event date and time. */
     private String eventDateTime;
+
+    /** Domain Id. */
+    private String domainId;
 
     /** Invoice Id. */
     private String invoiceId;
@@ -45,6 +49,12 @@ public class EmailEvent {
 
     /** Event resource type. */
     private HashMap<String, String> resources;
+
+    /** start date. */
+    private String startDate;
+
+    /** End date. */
+    private String endDate;
 
     /**
      * Get entity uuid.
@@ -260,6 +270,60 @@ public class EmailEvent {
      */
     public void setResources(HashMap<String, String> resources) {
         this.resources = resources;
+    }
+
+    /**
+     * Get the domainId of EmailEvent.
+     *
+     * @return the domainId
+     */
+    public String getDomainId() {
+        return domainId;
+    }
+
+    /**
+     * Set the domainId of EmailEvent.
+     *
+     * @param domainId the domainId to set
+     */
+    public void setDomainId(String domainId) {
+        this.domainId = domainId;
+    }
+
+    /**
+     * Get the startDate of EmailEvent.
+     *
+     * @return the startDate
+     */
+    public String getStartDate() {
+        return startDate;
+    }
+
+    /**
+     * Set the startDate of EmailEvent.
+     *
+     * @param startDate the startDate to set
+     */
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
+
+    /**
+     * Get the endDate of EmailEvent.
+     *
+     * @return the endDate
+     */
+    public String getEndDate() {
+        return endDate;
+    }
+
+    /**
+     * Set the endDate of EmailEvent.
+     *
+     * @param endDate the endDate to set
+     */
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
     }
 
 }

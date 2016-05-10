@@ -140,4 +140,16 @@ public class EmailConstants {
     /** Constant for invoice date format. */
     public static final String EMAIL_INVOIVE_DATE_FORMAT = "dd/MM/yyyy";
 
+    /** Constant for invoice usage update failed. */
+    public static final String EMAIL_USAGE_UPDATE_FAILED = "USAGE UPDATE FAILED";
+
+    /** Constant for invoice usage. */
+    public static final String EMAIL_usage = "usage";
+
+    /** Constant for email payment. */
+    public static final String EMAIL_PAYMENT = "PAYMENT";
+
+    /** Constant for payment. */
+    public static final String EMAIL_payment = "payment";
+
 }
