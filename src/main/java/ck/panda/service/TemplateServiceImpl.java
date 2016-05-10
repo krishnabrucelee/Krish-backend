@@ -1087,5 +1087,12 @@ public class TemplateServiceImpl implements TemplateService {
         return templateCount;
     }
 
+    @Override
+    public List<Template> findAllByDomainIdIsActiveAndShare(TemplateType type, Status status, Boolean isActive,
+            Long domainId) throws Exception {
+        return templateRepository.findAllByDomainIdIsActiveAndShare(type, false, true, domainId);
+
+    }
+
 
 }
