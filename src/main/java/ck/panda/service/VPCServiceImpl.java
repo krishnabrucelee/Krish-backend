@@ -31,6 +31,7 @@ import ck.panda.util.CloudStackOptionalUtil;
 import ck.panda.util.CloudStackResourceCapacity;
 import ck.panda.util.CloudStackVPCService;
 import ck.panda.util.ConfigUtil;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -133,6 +134,10 @@ public class VPCServiceImpl implements VPCService {
     /** VPC cloudstack service reference. */
     @Autowired
     private CloudStackVPCService cloudStackVPCService;
+
+    /** Token details reference. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     @Override
     public VPC save(VPC vpc) throws Exception {
@@ -587,5 +592,27 @@ public class VPCServiceImpl implements VPCService {
             }
         }
         return optional;
+    }
+
+    @Override
+    public Page<VPC> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText, Long userId) throws Exception {
+        Page<VPC> vpcs = null;
+        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
+        if (convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.ROOT_ADMIN)) {
+            vpcs = vpcRepository.findDomainBySearchText(domainId, pagingAndSorting.toPageRequest(), searchText, true);
+        } else if ((convertEntityService.getOwnerById(user.getId()).getType()).equals(User.UserType.DOMAIN_ADMIN)) {
+            vpcs = vpcRepository.findDomainBySearchText((convertEntityService.getOwnerById(user.getId())
+                    .getDomainId()), pagingAndSorting.toPageRequest(), searchText, true);
+        } else if (convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.USER)) {
+            if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
+                List<Project> allProjectList = projectService.findAllByUserAndIsActive(user.getId(), true);
+                Page<VPC> projectVPC = vpcRepository.findByProjectDepartmentAndIsActiveAndSearchText(allProjectList, user.getDepartmentId(),true, pagingAndSorting.toPageRequest(),searchText,user.getDomainId());
+                vpcs = projectVPC;
+            } else {
+                vpcs = vpcRepository.findAllByDepartmentIsActiveAndSearchText((convertEntityService.getOwnerById(user.getId()).getDomainId()), (convertEntityService.getOwnerById(user.getId()).getDepartmentId()),
+                     pagingAndSorting.toPageRequest(), searchText, true);
+            }
+         }
+        return vpcs;
     }
 }

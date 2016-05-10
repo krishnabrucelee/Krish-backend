@@ -91,16 +91,18 @@ public class UpdateResourceCountServiceImpl implements UpdateResourceCountServic
 			resourceList.add(ConvertEntityService.CS_VOLUME);
 			resourceList.add(ConvertEntityService.CS_MEMORY);
 			resourceList.add(ConvertEntityService.CS_PRIMARY_STORAGE);
-			resourceList.add(ConvertEntityService.CS_IP);
-			List<IpAddress> ipaddresses = ipaddressService.findByNetwork(vmInstance.getNetworkId());
-			Boolean isCheck =false;
-			for (IpAddress ipaddress : ipaddresses) {
-				if (ipaddress.getIsSourcenat()) {
-					isCheck = true;
+			if (convertEntityService.getNetworkById(vmInstance.getNetworkId()).getVpcId() == null) {
+				resourceList.add(ConvertEntityService.CS_IP);
+				List<IpAddress> ipaddresses = ipaddressService.findByNetwork(vmInstance.getNetworkId());
+				Boolean isCheck = false;
+				for (IpAddress ipaddress : ipaddresses) {
+					if (ipaddress.getIsSourcenat()) {
+						isCheck = true;
+					}
 				}
-			}
-			if(!isCheck){
-				resourceUsageMap.put(ConvertEntityService.CS_IP, 1L);
+				if (!isCheck) {
+					resourceUsageMap.put(ConvertEntityService.CS_IP, 1L);
+				}
 			}
 			if (accountType.equals(GenericConstants.PROJECT)) {
 				updateResourceCount(accountTypeId, accountType, resourceList, resourceUsageMap, status);

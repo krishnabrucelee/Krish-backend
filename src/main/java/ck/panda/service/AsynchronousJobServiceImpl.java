@@ -1419,7 +1419,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 vpc.setIsActive(true);
                 vpc.setName(jobresultReponse.getString(CloudStackConstants.CS_NAME));
                 vpc.setDescription(jobresultReponse.getString(CloudStackConstants.CS_DISPLAY_TEXT));
-                vpc.setStatus(VPC.Status.valueOf(jobresultReponse.getString(CloudStackConstants.CS_STATE)));
+                vpc.setStatus(VPC.Status.valueOf(jobresultReponse.getString(CloudStackConstants.CS_STATE).toUpperCase()));
                 vpc.setSyncFlag(false);
                 if (vpc.getProjectId() != null) {
                      updateResourceCountService.QuotaUpdateByResourceObject(vpc, CS_VPC, vpc.getProjectId(),
@@ -1474,7 +1474,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 vpc.setIsActive(true);
                 vpc.setName(jobresultReponse.getString(CloudStackConstants.CS_NAME));
                 vpc.setDescription(jobresultReponse.getString(CloudStackConstants.CS_DISPLAY_TEXT));
-                vpc.setStatus(VPC.Status.valueOf(jobresultReponse.getString(CloudStackConstants.CS_STATE)));
+                vpc.setStatus(VPC.Status.valueOf(jobresultReponse.getString(CloudStackConstants.CS_STATE).toUpperCase()));
                 vpc.setSyncFlag(false);
                 vpcService.save(vpc);
             }
