@@ -179,9 +179,6 @@ public class PaymentServiceImpl implements PaymentService {
                     optional.put("paidOn", date.getTime());
                     optional.put("status", "UNPAID");
                     pingService.updateInvoiceToPing(optional);
-                } else {
-                    payment = new Payment();
-                    return payment;
                 }
             }
         } catch (Exception ce) {
