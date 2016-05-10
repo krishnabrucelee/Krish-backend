@@ -421,6 +421,14 @@ public class SyncServiceImpl implements SyncService {
     @Value(value = "${test.invoice}")
     private String invoice;
 
+    /** receipient properties. */
+    @Value(value = "${test.usage}")
+    private String usage;
+
+    /** receipient properties. */
+    @Value(value = "${test.payment}")
+    private String payment;
+
     /** Manual sync domain properties. */
     @Value(value = "${manualsync.domain}")
     private String manualSyncDomain;
@@ -2953,7 +2961,7 @@ public class SyncServiceImpl implements SyncService {
 
     @Override
     public void syncEventList() throws Exception {
-        List<EventLiterals> userLists = EventsUtil.createEventsList(account,users,accountremoval,resource,systemerror,invoice);
+        List<EventLiterals> userLists = EventsUtil.createEventsList(account,users,accountremoval,resource,systemerror,invoice,usage,payment);
         List<EventLiterals> eventTest = eventService.findAllByIsActive(true);
             for (EventLiterals events : userLists) {
                 if (eventTest.size() ==0) {
