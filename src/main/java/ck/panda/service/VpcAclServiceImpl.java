@@ -91,4 +91,9 @@ public class VpcAclServiceImpl implements VpcAclService {
         return vpcAclList;
     }
 
+    @Override
+    public VpcAcl findVpcAclById(Long id) throws Exception {
+        return vpcAclRepo.findOne(id);
+    }
+
 }

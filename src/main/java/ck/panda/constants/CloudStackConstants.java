@@ -753,4 +753,7 @@ public class CloudStackConstants {
     /** Constant for restart required. */
     public static final String CS_RESTART_REQUIRED = "restartrequired";
 
+    /** Constant for ACL id. */
+    public static final String CS_ACL_ID = "aclid";
+
 }

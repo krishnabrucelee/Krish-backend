@@ -28,9 +28,11 @@ import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.StorageOffering;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.VPC;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
 import ck.panda.domain.entity.Volume;
+import ck.panda.domain.entity.VpcAcl;
 import ck.panda.domain.entity.VpcOffering;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.entity.ResourceLimitDomain.ResourceType;
@@ -240,6 +242,10 @@ public class ConvertEntityService {
     /** VPC offering service. */
     @Autowired
     private VpcOfferingService vpcOfferingService;
+
+    /** VPC ACL service. */
+    @Autowired
+    private VpcAclService vpcAclService;
 
     /** Secret key value is append. */
     @Value(value = "${aes.salt.secretKey}")
@@ -1361,33 +1367,33 @@ public class ConvertEntityService {
                 String resourceType = resourceCountArrayJSON.getJSONObject(i).getString(CS_RESOUCE_TYPE);
                 String resourceCount = resourceCountArrayJSON.getJSONObject(i).getString(CS_RESOUCE_COUNT);
                 if (resourceType.equals(CS_PRIMARY_STORAGE) || resourceType.equals(CS_SECONDARY_STORAGE)) {
-                	resourceCount = String.valueOf((Long.parseLong(resourceCount) / (1024 * 1024 * 1024)));
+                    resourceCount = String.valueOf((Long.parseLong(resourceCount) / (1024 * 1024 * 1024)));
                 }
                 if (resourceCountArrayJSON.getJSONObject(i).has(CloudStackConstants.CS_DOMAIN_ID) && !resourceCountArrayJSON.getJSONObject(i).has(CloudStackConstants.CS_ACCOUNT)) {
                     String domainId = resourceCountArrayJSON.getJSONObject(i)
                             .getString(CloudStackConstants.CS_DOMAIN_ID);
                         // Get all the resource objects from application.
-                    	ResourceLimitDomain appDomainResource = resourceDomainService.findByDomainAndResourceType(getDomainId(domainId), ResourceLimitDomain.ResourceType.valueOf(getResourceTypeValue().get(resourceType)),
+                        ResourceLimitDomain appDomainResource = resourceDomainService.findByDomainAndResourceType(getDomainId(domainId), ResourceLimitDomain.ResourceType.valueOf(getResourceTypeValue().get(resourceType)),
                                 true);
-                    	appDomainResource.setUsedLimit(Long.parseLong(resourceCount));
-                    	appDomainResource.setIsSyncFlag(false);
+                        appDomainResource.setUsedLimit(Long.parseLong(resourceCount));
+                        appDomainResource.setIsSyncFlag(false);
                         resourceDomainService.update(appDomainResource);
                 }
                 if (resourceCountArrayJSON.getJSONObject(i).has(CloudStackConstants.CS_PROJECT_ID)) {
-                	String projectId = resourceCountArrayJSON.getJSONObject(i)
+                    String projectId = resourceCountArrayJSON.getJSONObject(i)
                             .getString(CloudStackConstants.CS_PROJECT_ID);
-                	// Get all the resource objects from application.
+                    // Get all the resource objects from application.
                     ResourceLimitProject appProjectResource = resourceProjectService.findByProjectAndResourceType(getProjectId(projectId), ResourceLimitProject.ResourceType.valueOf(getResourceTypeValue().get(resourceType)), true);
                     appProjectResource.setUsedLimit(Long.parseLong(resourceCount));
                     appProjectResource.setIsSyncFlag(false);
                     resourceProjectService.update(appProjectResource);
                 }
                 if (resourceCountArrayJSON.getJSONObject(i).has(CloudStackConstants.CS_ACCOUNT) && !resourceCountArrayJSON.getJSONObject(i).has(CloudStackConstants.CS_PROJECT_ID)) {
-                	String account = resourceCountArrayJSON.getJSONObject(i)
+                    String account = resourceCountArrayJSON.getJSONObject(i)
                             .getString(CloudStackConstants.CS_ACCOUNT);
-                	String domainId = resourceCountArrayJSON.getJSONObject(i)
+                    String domainId = resourceCountArrayJSON.getJSONObject(i)
                             .getString(CloudStackConstants.CS_DOMAIN_ID);
-                	// Get all the resource objects from application.
+                    // Get all the resource objects from application.
                     ResourceLimitDepartment appDepartmentResource = resourceLimitDepartmentService.findByDepartmentAndResourceType(getDepartmentByUsernameAndDomains(account, getDomain(domainId)), ResourceLimitDepartment.ResourceType.valueOf(getResourceTypeValue().get(resourceType)), true);
                     appDepartmentResource.setUsedLimit(Long.parseLong(resourceCount));
                     appDepartmentResource.setMax(Long.parseLong(resourceCount));
@@ -1440,11 +1446,11 @@ public class ConvertEntityService {
         return null;
     }
 
-	public VpcOffering getVpcOfferingById(Long vpcofferingid) throws Exception {
-		return vpcOfferingService.find(vpcofferingid);
-	}
-	
-	/**
+    public VpcOffering getVpcOfferingById(Long vpcofferingid) throws Exception {
+        return vpcOfferingService.find(vpcofferingid);
+    }
+
+    /**
      * Get the VPC id.
      *
      * @param uuid of VPC.
@@ -1470,6 +1476,28 @@ public class ConvertEntityService {
             return vpcOfferingService.findByUUID(uuid).getId();
         }
         return null;
+    }
+
+    /**
+     * Get VPC ACL object.
+     *
+     * @param id of VPC ACL id
+     * @return VPC ACL.
+     * @throws Exception unhandled exception.
+     */
+    public VpcAcl getVpcAclById(Long id) throws Exception {
+        return vpcAclService.findVpcAclById(id);
+    }
+
+    /**
+     * Get VPC object.
+     *
+     * @param id of VPC id
+     * @return VPC.
+     * @throws Exception unhandled exception.
+     */
+    public VPC getVpcById(Long id) throws Exception {
+        return vpcService.findVpcById(id);
     }
 
 }

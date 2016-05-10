@@ -48,4 +48,12 @@ public interface NetworkOfferingService extends CRUDService<NetworkOffering> {
      */
     List<NetworkOffering> findByIsolatedAndRequired(String csIsolated, String csRequired) throws Exception;
 
+    /**
+     * To get list of VPC network offering from cloudstack server.
+     *
+     * @return VPC network offering list from server
+     * @throws Exception unhandled errors.
+     */
+    List<NetworkOffering> findVpcList() throws Exception;
+
 }
