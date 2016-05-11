@@ -668,7 +668,7 @@ public class SyncServiceImpl implements SyncService {
         }
         try {
             // 26. Sync ResourceLimit entity
-            this.syncResourceLimit();
+            //this.syncResourceLimit();
         } catch (Exception e) {
             LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
         }
@@ -2597,6 +2597,7 @@ public class SyncServiceImpl implements SyncService {
                 ipAddress.setIsSourcenat(csIp.getIsSourcenat());
                 ipAddress.setIsStaticnat(csIp.getIsStaticnat());
                 ipAddress.setNetworkId(csIp.getNetworkId());
+                ipAddress.setVpcId(csIp.getVpcId());
                 ipAddress.setVpnUuid(csIp.getVpnUuid());
                 ipAddress.setVpnPresharedKey(csIp.getVpnPresharedKey());
                 ipAddress.setVpnState(csIp.getVpnState());
