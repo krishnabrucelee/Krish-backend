@@ -22,7 +22,6 @@ import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.LoadBalancerRule;
 import ck.panda.domain.entity.IpAddress.State;
 import ck.panda.domain.entity.IpAddress.VpnState;
-import ck.panda.domain.entity.Network.NetworkCreationType;
 import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.PortForwarding;
