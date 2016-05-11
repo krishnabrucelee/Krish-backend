@@ -18,6 +18,7 @@ import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.User;
+import ck.panda.domain.entity.VPC;
 import ck.panda.domain.entity.Network.NetworkCreationType;
 import ck.panda.domain.entity.Network.Status;
 import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
@@ -169,6 +170,9 @@ public class NetworkServiceImpl implements NetworkService {
     /** Token details reference. */
     @Autowired
     private TokenDetails tokenDetails;
+
+    @Autowired
+    private VPCService vpcService;
 
     @Override
     @PreAuthorize("hasPermission(#network.getSyncFlag(), 'ADD_ISOLATED_NETWORK')")
@@ -850,5 +854,11 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public List<Network> findNetworkByVpcIdAndIsActive(Long vpcId, Boolean isActive) throws Exception {
         return networkRepo.findNetworkByVpcIdAndIsActive(vpcId, isActive);
+    }
+
+    @Override
+    public List<Network> findNetworkByVpcIdAndIsActiveForLB(Long vpcId, Boolean isActive) throws Exception {
+        VPC vpc =  vpcService.findbyVpcId(vpcId);
+        return networkRepo.findNetworkByVpcIdAndIsActive(vpc.getId(), true);
     }
 }

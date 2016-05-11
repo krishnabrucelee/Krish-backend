@@ -17,9 +17,11 @@ import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitProject;
+import ck.panda.domain.entity.SupportedNetwork;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VPC;
 import ck.panda.domain.entity.VPC.Status;
+import ck.panda.domain.entity.VpcOffering;
 import ck.panda.domain.entity.VpnUser;
 import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.VPCRepository;
@@ -138,6 +140,12 @@ public class VPCServiceImpl implements VPCService {
     /** Token details reference. */
     @Autowired
     private TokenDetails tokenDetails;
+
+    @Autowired
+    private VpcOfferingService vpcOfferingService;
+
+    @Autowired
+    private SupportedNetworkService supportedNetworkService;
 
     @Override
     public VPC save(VPC vpc) throws Exception {
@@ -619,5 +627,17 @@ public class VPCServiceImpl implements VPCService {
     @Override
     public VPC findVpcById(Long id) throws Exception {
         return vpcRepository.findOne(id);
+    }
+    @Override
+    public VPC findbyVpcId(Long id) throws Exception {
+        VPC vpc = vpcRepository.findOne(id);
+        VpcOffering vpcOffering = vpcOfferingService.find(vpc.getVpcofferingid());
+        for(SupportedNetwork support :vpcOffering.getSupportedNetworkList()) {
+            //SupportedNetwork supportedNetwork = supportedNetworkService.find(support.getId());
+            if(support.getName().equals("Lb")) {
+                return vpc;
+            }
+    }
+        return vpc;
     }
 }
