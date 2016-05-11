@@ -301,8 +301,11 @@ public class ActionListener implements MessageListener {
                 }
                 break;
             case EventTypes.EVENT_VPC:
-                LOGGER.debug("VPC sync", eventMessage);
-                break;
+                if (eventName.contains(EventTypes.EVENT_NETWORK_OFFERING)) {
+                    LOGGER.debug("VPC sync", eventMessage);
+                    syncService.syncVpcOffering();
+               }
+               break;
             case EventTypes.EVENT_STATIC_NAT:
                 LOGGER.debug("Static nat sync", eventMessage);
                 syncService.syncIpAddress();
