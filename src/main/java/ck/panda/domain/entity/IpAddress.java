@@ -206,14 +206,18 @@ public class IpAddress implements Serializable {
     @Transient
     private String transZoneId;
 
-    /** Zone Object for the Network. */
+    /** VPC Object for the Ip address. */
     @JoinColumn(name = "vpc_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
     private VPC vpc;
 
-    /** id for the Zone. */
+    /** id for the VPC. */
     @Column(name = "vpc_id")
     private Long vpcId;
+
+    /** Transient VPC id of the Ip address. */
+    @Transient
+    private String transVpcId;
 
     /**
      * Enumeration state for ipaddress.
@@ -940,6 +944,24 @@ public class IpAddress implements Serializable {
     }
 
     /**
+     * Get the transVpcId.
+     *
+     * @return the transVpcId
+     */
+    public String getTransVpcId() {
+        return transVpcId;
+    }
+
+    /**
+     * Set the transVpcId.
+     *
+     * @param transVpcId to set
+     */
+    public void setTransVpcId(String transVpcId) {
+        this.transVpcId = transVpcId;
+    }
+
+    /**
      * Convert JSONObject into pod object.
      *
      * @param jsonObject JSON object.
@@ -960,6 +982,7 @@ public class IpAddress implements Serializable {
             ipAddress.setDisplay(JsonUtil.getBooleanValue(jsonObject, CloudStackConstants.CS_FOR_DISPLAY));
             ipAddress.setIsSourcenat(JsonUtil.getBooleanValue(jsonObject, CloudStackConstants.CS_IS_SOURCE_NAT));
             ipAddress.setState(State.valueOf(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_STATE).toUpperCase()));
+            ipAddress.setTransVpcId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_VPC_ID));
             ipAddress.setIsActive(true);
             ipAddress.setSyncFlag(false);
         } catch (Exception ex) {

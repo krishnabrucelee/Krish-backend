@@ -22,6 +22,7 @@ import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.LoadBalancerRule;
 import ck.panda.domain.entity.IpAddress.State;
 import ck.panda.domain.entity.IpAddress.VpnState;
+import ck.panda.domain.entity.Network.NetworkCreationType;
 import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.PortForwarding;
@@ -157,12 +158,12 @@ public class IpaddressServiceImpl implements IpaddressService {
                 .getDepartmentById(convertEntityService.getNetworkById(networkId).getDepartmentId()).getType()
                 .equals(AccountType.USER)) {
             if (convertEntityService.getNetworkById(networkId).getProjectId() != null) {
-            	if (projectLimit != null) {
+                if (projectLimit != null) {
                 quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getNetworkById(networkId),
                         "IP", convertEntityService.getNetworkById(networkId).getProjectId(), "Project");
-            	} else {
+                } else {
                     throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Resource limit for project has not been set. Please update project quota");
-            	}
+                }
             }
             else {
                 quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getNetworkById(networkId),
@@ -330,6 +331,9 @@ public class IpaddressServiceImpl implements IpaddressService {
                 ipAddress.setZoneId(convertEntityService.getZoneId(ipAddress.getTransZoneId()));
                 ipAddress.setNetworkId(convertEntityService.getNetworkId(ipAddress.getTransNetworkId()));
                 ipAddress.setProjectId(convertEntityService.getProjectId(ipAddress.getTransProjectId()));
+                if (ipAddress.getTransVpcId() != null) {
+                    ipAddress.setVpcId(convertEntityService.getVpcId(ipAddress.getTransVpcId()));
+                }
 
                 //Get all the VPN details
                 HashMap<String, String> vpnOptional = new HashMap<String, String>();

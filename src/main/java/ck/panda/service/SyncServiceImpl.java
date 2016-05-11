@@ -2601,6 +2601,7 @@ public class SyncServiceImpl implements SyncService {
                 ipAddress.setVpnPresharedKey(csIp.getVpnPresharedKey());
                 ipAddress.setVpnState(csIp.getVpnState());
                 ipAddress.setVpnForDisplay(csIp.getVpnForDisplay());
+                ipAddress.setVpcId(csIp.getVpcId());
 
                 // 3.2 If found, update the nic object in app db
                 ipAddressService.update(ipAddress);
