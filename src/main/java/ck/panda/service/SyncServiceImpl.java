@@ -421,6 +421,14 @@ public class SyncServiceImpl implements SyncService {
     @Value(value = "${test.invoice}")
     private String invoice;
 
+    /** receipient properties. */
+    @Value(value = "${test.usage}")
+    private String usage;
+
+    /** receipient properties. */
+    @Value(value = "${test.payment}")
+    private String payment;
+
     /** Manual sync domain properties. */
     @Value(value = "${manualsync.domain}")
     private String manualSyncDomain;
@@ -2953,7 +2961,7 @@ public class SyncServiceImpl implements SyncService {
 
     @Override
     public void syncEventList() throws Exception {
-        List<EventLiterals> userLists = EventsUtil.createEventsList(account,users,accountremoval,resource,systemerror,invoice);
+        List<EventLiterals> userLists = EventsUtil.createEventsList(account,users,accountremoval,resource,systemerror,invoice,usage,payment);
         List<EventLiterals> eventTest = eventService.findAllByIsActive(true);
             for (EventLiterals events : userLists) {
                 if (eventTest.size() ==0) {
@@ -3259,6 +3267,7 @@ public class SyncServiceImpl implements SyncService {
                 NetworkServiceProvider csNetworkServiceProvider = csNetworkServiceProviderMap.get(networkServiceProvider.getUuid());
                 networkServiceProvider.setUuid(csNetworkServiceProvider.getUuid());
                 networkServiceProvider.setName(csNetworkServiceProvider.getName());
+                networkServiceProvider.setStatus(csNetworkServiceProvider.getStatus());
 
                 // 3.2 If found, update the network service provider object in app db
                 networkServiceProviderService.update(networkServiceProvider);
@@ -3299,6 +3308,7 @@ public class SyncServiceImpl implements SyncService {
                 supportedNetwork.setName(csSupportedNetwork.getName());
                 supportedNetwork.setProviderName(csSupportedNetwork.getProviderName());
                 supportedNetwork.setTransProviderList(csSupportedNetwork.getTransProviderList());
+                supportedNetwork.setStatus(csSupportedNetwork.getStatus());
 
                 // 3.2 If found, update the supported network object in app db
                 supportedNetworkService.update(supportedNetwork);
@@ -3340,6 +3350,10 @@ public class SyncServiceImpl implements SyncService {
                 vpcOffering.setName(csVpcOffering.getName());
                 vpcOffering.setDisplayText(csVpcOffering.getDisplayText());
                 vpcOffering.setTransServiceList(csVpcOffering.getTransServiceList());
+                vpcOffering.setDistributedVpcRouter(csVpcOffering.getDistributedVpcRouter());
+                vpcOffering.setIsDefault(csVpcOffering.getIsDefault());
+                vpcOffering.setStatus(csVpcOffering.getStatus());
+                vpcOffering.setSupportsRegionLevelVpc(csVpcOffering.getSupportsRegionLevelVpc());
 
                 // 3.2 If found, update the VPC offering object in app db
                 vpcOfferingService.update(vpcOffering);
@@ -3422,6 +3436,14 @@ public class SyncServiceImpl implements SyncService {
                 vpc.setUuid(csVpc.getUuid());
                 vpc.setName(csVpc.getName());
                 vpc.setDescription(csVpc.getDescription());
+                vpc.setDistributedVpcRouter(csVpc.getDistributedVpcRouter());
+                vpc.setDomainId(csVpc.getDomainId());
+                vpc.setDepartmentId(csVpc.getDepartmentId());
+                vpc.setProjectId(csVpc.getProjectId());
+                vpc.setNetworkDomain(csVpc.getNetworkDomain());
+                vpc.setRedundantVPC(csVpc.getRedundantVPC());
+                vpc.setRestartRequired(csVpc.getRestartRequired());
+                vpc.setStatus(csVpc.getStatus());
 
                 // 3.2 If found, update the VPC object in app db
                 vpcService.update(vpc);

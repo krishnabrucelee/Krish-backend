@@ -20,17 +20,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.EmailConstants;
 import ck.panda.constants.EventTypes;
+import ck.panda.domain.entity.Domain;
 import ck.panda.domain.entity.EmailConfiguration;
 import ck.panda.domain.entity.EmailTemplate;
 import ck.panda.domain.entity.Organization;
 import ck.panda.domain.entity.User;
-import ck.panda.domain.entity.User.UserType;
 import ck.panda.domain.entity.Zone;
 import ck.panda.email.util.Account;
 import ck.panda.email.util.Alert;
 import ck.panda.email.util.Email;
+import ck.panda.email.util.EmailPayment;
 import ck.panda.email.util.Invoice;
 import ck.panda.email.util.Resource;
+import ck.panda.email.util.Usage;
 import ck.panda.rabbitmq.util.EmailEvent;
 import ck.panda.util.EncryptionUtil;
 import ck.panda.util.PingService;
@@ -98,6 +100,9 @@ public class EmailJobServiceImpl implements EmailJobService {
     /** Email event entity. */
     private EmailEvent eventResponse = null;
 
+    /** Email payment event entity. */
+    private EmailPayment eventPaymentResponse = null;
+
     /** Zone service reference. */
     @Autowired
     private ZoneService zoneService;
@@ -114,6 +119,10 @@ public class EmailJobServiceImpl implements EmailJobService {
     @Autowired
     private PingService pingService;
 
+    /** Domain service reference. */
+    @Autowired
+    private DomainService domainService;
+
     @Override
     public void sendEmail(String eventObject) throws Exception {
         EmailConfiguration emailConfiguration = emailServiceConfig.findByIsActive(true);
@@ -122,35 +131,62 @@ public class EmailJobServiceImpl implements EmailJobService {
         eventResponse = eventmapper.readValue(eventObject, EmailEvent.class);
         Email mimeEmail = new Email();
         EmailTemplate templateName = new EmailTemplate();
+        Domain domain = domainService.findbyUUID(eventResponse.getDomainId());
+        if (eventResponse.getEventType().equals(EventTypes.EVENT_USAGE_UPDATE_FAILED)) {
+            User user = null;
+            eventResponse.setEvent(eventResponse.getEventType());
+            mimeEmail.setFrom(emailConfiguration.getEmailFrom());
+            mimeEmail.setTo(domain.getEmail());
+            mimeEmail.setBody(generateCountContent(eventResponse, user, domain, emailConfiguration, templateName, mimeEmail, eventPaymentResponse));
+            emailService.sendMail(mimeEmail);
+        }
         if (eventResponse.getEventType().equals(EventTypes.EVENT_MONTHLY_INVOICE)) {
-            User user = userService.findAllByUserTypeAndIsActive(true, UserType.ROOT_ADMIN);
+            User user = null;
             String usageResponse = pingService.getInvoiceById(eventResponse.getInvoiceId());
             eventResponse.setEvent(eventResponse.getEventType());
             mimeEmail.setInvoice(usageResponse);
-            mimeEmail.setBody(generateCountContent(eventResponse, user, emailConfiguration, templateName, mimeEmail));
+            mimeEmail.setBody(generateCountContent(eventResponse, user, domain, emailConfiguration, templateName, mimeEmail, eventPaymentResponse));
+            emailService.sendMail(mimeEmail);
+        }
+        if (eventResponse.getEventType().equals(EmailConstants.EMAIL_PAYMENT)) {
+            User user = null;
+            eventPaymentResponse = eventmapper.readValue(eventObject, EmailPayment.class);
+            eventResponse.setEvent(eventPaymentResponse.getEventType());
+            mimeEmail.setFrom(eventPaymentResponse.getOrganisationEmail());
+            mimeEmail.setTo(eventPaymentResponse.getCompanyEmail());
+            mimeEmail.setBody(generateCountContent(eventResponse, user, domain, emailConfiguration, templateName, mimeEmail, eventPaymentResponse));
             emailService.sendMail(mimeEmail);
         }
         if (eventResponse.getEventType().equals(EmailConstants.EMAIL_CAPACITY)
                 || eventResponse.getEventType().equals(EmailConstants.SYSTEM_ERROR)) {
-            User user = userService.findAllByUserTypeAndIsActive(true, UserType.ROOT_ADMIN);
+            User user = null;
             Organization orgnizationDetails = organizationService.findByIsActive(true);
             mimeEmail.setFrom(emailConfiguration.getEmailFrom());
             mimeEmail.setTo(orgnizationDetails.getEmail());
-            mimeEmail.setBody(generateCountContent(eventResponse, user, emailConfiguration, templateName, mimeEmail));
+            mimeEmail.setBody(generateCountContent(eventResponse, user, domain, emailConfiguration, templateName, mimeEmail, eventPaymentResponse));
             emailService.sendMail(mimeEmail);
-        } else if (eventResponse.getEvent() != null && eventResponse.getEvent().equals(EventTypes.EVENT_USER_CREATE)
+        }
+        if (eventResponse.getEvent() != null && eventResponse.getEvent().equals(EventTypes.EVENT_USER_CREATE)
                 || eventResponse.getEvent().equals(EventTypes.EVENT_USER_DELETE)
                 || eventResponse.getEvent().equals(EventTypes.EVENT_USER_UPDATE)) {
             User user = userService.find(Long.parseLong(eventResponse.getUser()));
             mimeEmail.setFrom(emailConfiguration.getEmailFrom());
             mimeEmail.setTo(user.getEmail());
-            mimeEmail.setBody(generateCountContent(eventResponse, user, emailConfiguration, templateName, mimeEmail));
+            mimeEmail.setBody(generateCountContent(eventResponse, user, domain, emailConfiguration, templateName, mimeEmail, eventPaymentResponse));
             emailService.sendMail(mimeEmail);
         }
     }
 
     @Override
     public void sendMessageToQueue(EmailEvent emailEvent) throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        String message = mapper.writeValueAsString(emailEvent);
+        // send message to email queue.
+        emailTemplate.convertAndSend(routingKey, MessageBuilder.withBody(message.getBytes()).build());
+    }
+
+    @Override
+    public void sendMessageToEmailPaymentQueue(EmailPayment emailEvent) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         String message = mapper.writeValueAsString(emailEvent);
         // send message to email queue.
@@ -168,8 +204,8 @@ public class EmailJobServiceImpl implements EmailJobService {
      * @return mimeEmail email details.
      * @throws Exception unhandled error
      */
-    private String generateCountContent(EmailEvent email, User user, EmailConfiguration emailConfiguration,
-            EmailTemplate templateName, Email mimeEmail) throws Exception {
+    private String generateCountContent(EmailEvent email, User user, Domain domain, EmailConfiguration emailConfiguration,
+            EmailTemplate templateName, Email mimeEmail, EmailPayment emailPayment) throws Exception {
         // Defining the model object for the given Freemarker template
         Map<String, Object> context = new HashMap<String, Object>();
         Account account = new Account();
@@ -254,6 +290,7 @@ public class EmailJobServiceImpl implements EmailJobService {
             }
         }
         if (email.getEventType().equals(EmailConstants.SYSTEM_ERROR)) {
+            context.clear();
             Alert alert = new Alert();
             alert.setSubject(email.getSubject());
             alert.setDetails(email.getMessageBody());
@@ -270,7 +307,26 @@ public class EmailJobServiceImpl implements EmailJobService {
                 return validateTemplate(user, templateName, context, emailConfiguration);
             }
         }
+        if (email.getEventType().equals(EventTypes.EVENT_USAGE_UPDATE_FAILED)) {
+            context.clear();
+            Usage usage = new Usage();
+            usage.setDomainUserName(domain.getPrimaryFirstName() + " " + domain.getLastName());
+            usage.setDomainName(domain.getPortalUserName());
+            //Start date
+            usage.setStartDate(email.getStartDate());
+            //End date
+            usage.setEndDate(email.getEndDate());
+            usage.setStatus(email.getMessageBody());
+            context.put(EmailConstants.EMAIL_usage, usage);
+            templateName = emailTypeTemplateService.findByEventAndIsActive(EmailConstants.EMAIL_USAGE_UPDATE_FAILED, true);
+            if (templateName != null) {
+                mimeEmail.setRecipientType(templateName.getRecipientType().toString());
+                mimeEmail.setSubject(templateName.getSubject());
+                return validateTemplate(user, templateName, context, emailConfiguration);
+            }
+        }
         if (email.getEventType().equals(EmailConstants.EMAIL_CAPACITY)) {
+            context.clear();
             Resource resource = new Resource();
             templateName = emailTypeTemplateService.findByEventAndIsActive(EmailConstants.EMAIL_CAPACITY, true);
             if (templateName != null) {
@@ -345,6 +401,17 @@ public class EmailJobServiceImpl implements EmailJobService {
                 return validateTemplate(user, templateName, context, emailConfiguration);
             }
         }
+
+        if (email.getEventType().equals(EmailConstants.EMAIL_PAYMENT)) {
+            context.clear();
+            context.put(EmailConstants.EMAIL_payment, emailPayment);
+            templateName = emailTypeTemplateService.findByEventAndIsActive(EmailConstants.EMAIL_PAYMENT, true);
+            if (templateName != null) {
+                mimeEmail.setRecipientType(templateName.getRecipientType().toString());
+                mimeEmail.setSubject(templateName.getSubject());
+                return validateTemplate(user, templateName, context, emailConfiguration);
+            }
+        }
         return null;
     }
 
@@ -360,18 +427,24 @@ public class EmailJobServiceImpl implements EmailJobService {
      */
     private String validateTemplate(User user, EmailTemplate templateName, Map<String, Object> context,
             EmailConfiguration emailConfiguration) throws MessagingException {
-        if (user.getLanguage() != null) {
-            if (user.getLanguage().equals(EmailConstants.EMAIL_English) && templateName.getEnglishLanguage() != null) {
-                return generateContent(context, templateName.getEventName(), englishTemplatePath);
-            }
-            if (user.getLanguage().equals(EmailConstants.EMAIL_English) && templateName.getEnglishLanguage() == null) {
-                return generateContent(context, templateName.getEventName(), chineseTemplatePath);
-            }
-            if (user.getLanguage().equals(EmailConstants.EMAIL_Chinese) && templateName.getChineseLanguage() != null) {
-                return generateContent(context, templateName.getEventName(), chineseTemplatePath);
-            }
-            if (user.getLanguage().equals(EmailConstants.EMAIL_Chinese) && templateName.getChineseLanguage() == null) {
-                return generateContent(context, templateName.getEventName(), englishTemplatePath);
+        if (user != null) {
+            if (user.getLanguage() != null) {
+                if (user.getLanguage().equals(EmailConstants.EMAIL_English)
+                        && templateName.getEnglishLanguage() != null) {
+                    return generateContent(context, templateName.getEventName(), englishTemplatePath);
+                }
+                if (user.getLanguage().equals(EmailConstants.EMAIL_English)
+                        && templateName.getEnglishLanguage() == null) {
+                    return generateContent(context, templateName.getEventName(), chineseTemplatePath);
+                }
+                if (user.getLanguage().equals(EmailConstants.EMAIL_Chinese)
+                        && templateName.getChineseLanguage() != null) {
+                    return generateContent(context, templateName.getEventName(), chineseTemplatePath);
+                }
+                if (user.getLanguage().equals(EmailConstants.EMAIL_Chinese)
+                        && templateName.getChineseLanguage() == null) {
+                    return generateContent(context, templateName.getEventName(), englishTemplatePath);
+                }
             }
         }
         if (templateName.getEnglishLanguage() != null && templateName.getChineseLanguage() == null) {
