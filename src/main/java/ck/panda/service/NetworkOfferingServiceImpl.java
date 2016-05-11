@@ -12,14 +12,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.NetworkOffering;
+import ck.panda.domain.entity.SupportedNetwork;
 import ck.panda.domain.entity.NetworkOffering.Status;
 import ck.panda.domain.repository.jpa.NetworkOfferingRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackNetworkOfferingService;
 import ck.panda.util.ConfigUtil;
 import ck.panda.util.domain.vo.PagingAndSorting;
-import ck.panda.util.error.Errors;
-import ck.panda.util.error.exception.ApplicationException;
 
 /**
  * Service implementation for NetworkOffering entity.
@@ -47,27 +46,48 @@ public class NetworkOfferingServiceImpl implements NetworkOfferingService {
     @Autowired
     private ConfigUtil configServer;
 
+    /** Supported network cloudstack service reference. */
+    @Autowired
+    private SupportedNetworkService supportedNetworkService;
+
     /** Constant for cloudStack networkOffering list response. */
     private static final String CS_LIST_NETWORK_OFFERING_RESPONSE = "listnetworkofferingsresponse";
 
     /** Constant for cloudStack networkOffering. */
     private static final String CS_NETWORK_OFFERING = "networkoffering";
 
+    /** Constant for list VPC service. */
+    public static final String CS_VPC_SERVICE = "service";
+
     @Override
     public NetworkOffering save(NetworkOffering network) throws Exception {
-        Errors errors = validator.rejectIfNullEntity(CS_NETWORK_OFFERING, network);
-        errors = validator.validateEntity(network, errors);
-
-        if (errors.hasErrors()) {
-            throw new ApplicationException(errors);
-        } else {
-
-            return networkRepo.save(network);
+        networkRepo.save(network);
+        List<SupportedNetwork> supportedNetworkList = new ArrayList<SupportedNetwork>();
+        if (network.getTransServiceList() != null) {
+            for (int i = 0; i < network.getTransServiceList().size(); i++) {
+                SupportedNetwork supportedNetwork = supportedNetworkService.findByName(network.getTransServiceList().get(i));
+                if (supportedNetwork != null) {
+                    supportedNetworkList.add(supportedNetwork);
+                    network.setSupportedNetworkList(supportedNetworkList);
+                }
+            }
         }
+        return networkRepo.save(network);
     }
 
     @Override
     public NetworkOffering update(NetworkOffering network) throws Exception {
+        networkRepo.save(network);
+        List<SupportedNetwork> supportedNetworkList = new ArrayList<SupportedNetwork>();
+        if (network.getTransServiceList() != null) {
+            for (int i = 0; i < network.getTransServiceList().size(); i++) {
+                SupportedNetwork supportedNetwork = supportedNetworkService.findByName(network.getTransServiceList().get(i));
+                if (supportedNetwork != null) {
+                    supportedNetworkList.add(supportedNetwork);
+                    network.setSupportedNetworkList(supportedNetworkList);
+                }
+            }
+        }
         return networkRepo.save(network);
     }
 
@@ -114,7 +134,16 @@ public class NetworkOfferingServiceImpl implements NetworkOfferingService {
                 // 2.1 Call convert by passing JSONObject to Domain entity and
                 // Add
                 // the converted networkOffering entity to list
-                networkOfferingList.add(NetworkOffering.convert(networkOfferingListJSON.getJSONObject(i)));
+                NetworkOffering networkOffering = NetworkOffering.convert(networkOfferingListJSON.getJSONObject(i));
+                List<String> serviceList = new ArrayList<String>();
+                if (networkOfferingListJSON.getJSONObject(i).has(CS_VPC_SERVICE)) {
+                    for (int j = 0; j < networkOfferingListJSON.getJSONObject(i).getJSONArray(CS_VPC_SERVICE).length(); j++) {
+                        JSONObject serviceResponseObject = (JSONObject) networkOfferingListJSON.getJSONObject(i).getJSONArray(CS_VPC_SERVICE).get(j);
+                        serviceList.add(serviceResponseObject.getString(CloudStackConstants.CS_NAME));
+                    }
+                }
+                networkOffering.setTransServiceList(serviceList);
+                networkOfferingList.add(networkOffering);
             }
         }
         return networkOfferingList;

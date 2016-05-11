@@ -1218,6 +1218,8 @@ public class SyncServiceImpl implements SyncService {
                 NetworkOffering csNetworkOffering = csNetworkOfferingMap.get(networkOffering.getUuid());
 
                 networkOffering.setName(csNetworkOffering.getName());
+                networkOffering.setDisplayText(csNetworkOffering.getDisplayText());
+                networkOffering.setTransServiceList(csNetworkOffering.getTransServiceList());
 
                 // 3.2 If found, update the networkOffering object in app db
                 networkOfferingService.update(networkOffering);
