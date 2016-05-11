@@ -162,9 +162,6 @@ public class VPCServiceImpl implements VPCService {
                     throw new ApplicationException(errors);
                 } else {
                     HashMap<String, String> optional = new HashMap<String, String>();
-                    if (vpc.getName() != null && vpc.getName().trim() != "") {
-                        optional.put(CloudStackConstants.CS_NAME, vpc.getName());
-                    }
                     if (vpc.getDescription() != null && vpc.getDescription().trim() != "") {
                         optional.put(CloudStackConstants.CS_DISPLAY_TEXT, vpc.getDescription());
                     }

@@ -176,6 +176,18 @@ public interface TemplateService extends CRUDService<Template> {
      */
     List<Template> findAllByUserIdIsActiveAndShare(TemplateType type, Status status, Boolean isActive, Long userId) throws Exception;
 
+   /**
+    * Find all by domain id, is active and share
+    *
+    * @param type template type.
+    * @param status template status.
+    * @param isActive true/false.
+    * @param domainId domain id.
+    * @return template list.
+    * @throws Exception if errors.
+    */
+   List<Template> findAllByDomainIdIsActiveAndShare(TemplateType type, Status status, Boolean isActive, Long domainId) throws Exception;
+
     /**
      * Find all the templates by type, isActive status and user Id.
      *

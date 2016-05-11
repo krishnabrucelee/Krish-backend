@@ -16,7 +16,7 @@ public final class EventsUtil {
     }
 
     @SuppressWarnings("rawtypes")
-    public static List<EventLiterals> createEventsList(String account, String users, String accountremoval, String resource, String systemError, String invoice) {
+    public static List<EventLiterals> createEventsList(String account, String users, String accountremoval, String resource, String systemError, String invoice, String usage, String payment) {
         List<String> stringList = new ArrayList<String>();
         List<EventLiterals> moduleList = new ArrayList<EventLiterals>();
         stringList.add(account);
@@ -25,6 +25,8 @@ public final class EventsUtil {
         stringList.add(resource);
         stringList.add(systemError);
         stringList.add(invoice);
+        stringList.add(usage);
+        stringList.add(payment);
         for (String string : stringList) {
             List<String> actionList = new ArrayList<String>();
             String[] stringArray = string.split("-");

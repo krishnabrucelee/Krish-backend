@@ -266,7 +266,7 @@ public interface VirtualMachineRepository extends PagingAndSortingRepository<VmI
      * @param search search text.
      * @return instance list.
      */
-    @Query(value = "SELECT vm.cpuCore as cpuCore, vm.memory as memory, vm.ipAddress as ipAddress, vm.network as network, vm.displayName as displayName, vm.publicIpAddress as publicIpAddress, owner.userName as instanceOwner, vm.application as application, vm.osType as template, vm.volumeSize as volumeSize, vm.domainId as domainId, vm.ipAddress as ipAddress, vm.status as status, vm.id as id FROM VmInstance vm LEFT JOIN vm.instanceOwner owner WHERE vm.status <> :status  AND (vm.project = :project OR (vm.project IS NULL AND vm.department = :department))"
+    @Query(value = "SELECT vm FROM VmInstance vm LEFT JOIN vm.instanceOwner owner WHERE vm.status <> :status  AND (vm.project = :project OR (vm.project IS NULL AND vm.department = :department))"
             + " AND (vm.displayName LIKE %:search% OR owner.userName LIKE %:search% OR vm.application LIKE %:search% OR vm.osType LIKE %:search% OR vm.cpuCore LIKE %:search%"
             + " OR vm.memory LIKE %:search% OR CONCAT(vm.volumeSize/POWER(2, 30), LOWER(' GB')) LIKE LOWER(%:search%) OR vm.publicIpAddress LIKE %:search% OR vm.ipAddress LIKE %:search%)")
     List<VmInstance> findAllByDepartmentAndProjectAndExceptStatus(@Param("status") Status status,

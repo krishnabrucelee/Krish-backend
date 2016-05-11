@@ -1,6 +1,8 @@
 package ck.panda.service;
 
 import org.springframework.stereotype.Service;
+
+import ck.panda.email.util.EmailPayment;
 import ck.panda.rabbitmq.util.EmailEvent;
 
 /**
@@ -24,5 +26,13 @@ public interface EmailJobService {
      * @throws Exception unhandled errors
      */
     void sendMessageToQueue(EmailEvent emailEvent) throws Exception;
+
+    /**
+     * Send message to email payment Queue.
+     *
+     * @param emailEvent email event.
+     * @throws Exception unhandled errors
+     */
+    void sendMessageToEmailPaymentQueue(EmailPayment emailPayment) throws Exception;
 
 }
