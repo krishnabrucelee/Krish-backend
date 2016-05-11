@@ -333,13 +333,13 @@ public class EventTypes {
     public static final String EVENT_Email = "Email";
 
     /** VPC delete. */
-	public static final String EVENT_VPC_DELETE = "VPC.DELETE";
+    public static final String EVENT_VPC_DELETE = "VPC.DELETE";
 
-	/** VPC update. */
-	public static final String EVENT_VPC_UPDATE = "VPC.UPDATE";
+    /** VPC update. */
+    public static final String EVENT_VPC_UPDATE = "VPC.UPDATE";
 
-	/** VPC restart. */
-	public static final String EVENT_VPC_RESTART = "VPC.RESTART";
+    /** VPC restart. */
+    public static final String EVENT_VPC_RESTART = "VPC.RESTART";
 
     /** usage update failed. */
     public static final Object EVENT_USAGE_UPDATE_FAILED = "USAGE_UPDATE_FAILED";
