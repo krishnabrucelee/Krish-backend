@@ -1219,6 +1219,7 @@ public class SyncServiceImpl implements SyncService {
 
                 networkOffering.setName(csNetworkOffering.getName());
                 networkOffering.setDisplayText(csNetworkOffering.getDisplayText());
+                networkOffering.setForVpc(csNetworkOffering.getForVpc());
                 networkOffering.setTransServiceList(csNetworkOffering.getTransServiceList());
 
                 // 3.2 If found, update the networkOffering object in app db
