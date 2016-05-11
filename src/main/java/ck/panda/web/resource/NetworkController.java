@@ -200,8 +200,8 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected List<Network> getVpcNetworkList(@RequestParam("vpcId") Long vpcId) throws Exception {
-        return networkService.findNetworkByVpcIdAndIsActiveForLB(vpcId, true);
+    protected List<Network> getVpcNetworkList(@RequestParam("vpcId") Long vpcId,@RequestParam("type")String type) throws Exception {
+        return networkService.findNetworkByVpcIdAndIsActiveForLB(vpcId, true,type);
     }
 
 

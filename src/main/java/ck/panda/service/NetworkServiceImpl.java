@@ -17,6 +17,7 @@ import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitProject;
+import ck.panda.domain.entity.SupportedNetwork;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VPC;
 import ck.panda.domain.entity.Network.NetworkCreationType;
@@ -902,8 +903,17 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public List<Network> findNetworkByVpcIdAndIsActiveForLB(Long vpcId, Boolean isActive) throws Exception {
-        VPC vpc =  vpcService.findbyVpcId(vpcId);
-        return networkRepo.findNetworkByVpcIdAndIsActive(vpc.getId(), true);
+    public List<Network> findNetworkByVpcIdAndIsActiveForLB(Long vpcId, Boolean isActive,String type) throws Exception {
+        List<Network> networkLists = new ArrayList<Network>();
+        List<Network> networkList = networkRepo.findNetworkByVpcIdAndIsActive(vpcId, true);
+        for (Network network: networkList) {
+            NetworkOffering networkOffering = networkOfferingService.find(network.getNetworkOfferingId());
+            for(SupportedNetwork support :networkOffering.getSupportedNetworkList()){
+                if(support.getName().equals(type)) {
+                    networkLists.add(network);
+                }
+            }
+        }
+        return networkLists;
     }
 }

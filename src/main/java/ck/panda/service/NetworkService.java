@@ -166,6 +166,6 @@ public interface NetworkService extends CRUDService<Network> {
      */
     List<Network> findNetworkByVpcIdAndIsActive(Long vpcId, Boolean isActive) throws Exception;
 
-    List<Network> findNetworkByVpcIdAndIsActiveForLB(Long vpcId, Boolean isActive) throws Exception;
+    List<Network> findNetworkByVpcIdAndIsActiveForLB(Long vpcId, Boolean isActive,String type) throws Exception;
 
 }
