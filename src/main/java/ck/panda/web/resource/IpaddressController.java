@@ -84,6 +84,22 @@ public class IpaddressController extends CRUDController<IpAddress> implements Ap
     }
 
     /**
+     * Get the detached IP address by uuid.
+     *
+     * @param ipUuid of the ip address
+     * @return ip address
+     * @throws Exception unhandled exception.
+     */
+    @RequestMapping(value = "/vpc/dissociate", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected IpAddress detachIpAddressFoVPC(@RequestParam("ipuuid") String ipUuid)
+            throws Exception {
+        return ipAddressService.dissocitateIpAddressForVPC(ipUuid);
+    }
+
+    /**
      * Get list of ipaddresses with pagination object.
      *
      * @param networkId network's id.
@@ -108,6 +124,30 @@ public class IpaddressController extends CRUDController<IpAddress> implements Ap
     }
 
     /**
+     * Get list of ipaddresses with pagination object.
+     *
+     * @param vpcId vpc id.
+     * @param sortBy asc/desc.
+     * @param range range per page.
+     * @param limit limit rows per page.
+     * @param request servlet request.
+     * @param response servlet response.
+     * @return list of ipaddress.
+     * @throws Exception unhandled exception.
+     */
+    @RequestMapping(value = "/vpc/iplist", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<IpAddress> listbyVpck(@RequestParam("vpc") Long vpcId, @RequestParam String sortBy,
+            @RequestHeader(value = RANGE) String range, @RequestParam Integer limit, HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, IpAddress.class);
+        Page<IpAddress> pageResponse = ipAddressService.findAllByVpc(vpcId, page);
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
+    }
+
+    /**
      * Get new ip from zone for current network.
      *
      * @param networkId network id.
@@ -119,6 +159,20 @@ public class IpaddressController extends CRUDController<IpAddress> implements Ap
     @ResponseBody
     public List<IpAddress> handleEventWithIPAddress(@RequestParam("network") Long networkId) throws Exception {
         return ipAddressService.acquireIP(networkId);
+    }
+
+    /**
+     * Get new ip from zone for current vpc.
+     *
+     * @param vpcId vpc id.
+     * @throws Exception if error occurs.
+     * @return ip address list.
+     */
+    @RequestMapping(value = "/vpc/acquireip", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<IpAddress> handleEventWithIPAddressForVpc(@RequestParam("vpc") Long vpcId) throws Exception {
+        return ipAddressService.acquireVPCIP(vpcId);
     }
 
     /**
