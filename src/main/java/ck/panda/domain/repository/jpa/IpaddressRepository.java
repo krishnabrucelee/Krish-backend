@@ -35,6 +35,16 @@ public interface IpaddressRepository extends PagingAndSortingRepository<IpAddres
     List<IpAddress> findByNetwork(@Param("networkId") Long networkId, @Param("state") IpAddress.State state);
 
     /**
+     * Find all ipaddresses by vpc Id.
+     *
+     * @param state get the ipaddress state.
+     * @param vpcId from ipaddress
+     * @return ipaddress list.
+     */
+    @Query(value = "SELECT ip FROM IpAddress ip WHERE ip.vpcId=:vpcId AND ip.state =:state")
+    List<IpAddress> findByVPC(@Param("vpcId") Long vpcId, @Param("state") IpAddress.State state);
+
+    /**
      * Find all ipaddresses by network Id.
      *
      * @param state get the ipaddress state.
@@ -44,6 +54,17 @@ public interface IpaddressRepository extends PagingAndSortingRepository<IpAddres
      */
     @Query(value = "SELECT ip FROM IpAddress ip WHERE ip.networkId=:networkId AND ip.state =:state")
     Page<IpAddress> findByNetwork(Pageable pageable, @Param("networkId") Long networkId, @Param("state") IpAddress.State state);
+
+    /**
+     * Find all ipaddresses by vpc Id.
+     *
+     * @param state get the ipaddress state.
+     * @param pageable to get the list with pagination.
+     * @param vpcId from ipaddress
+     * @return ipaddress list.
+     */
+    @Query(value = "SELECT ip FROM IpAddress ip WHERE ip.vpcId=:vpcId AND ip.state =:state")
+    Page<IpAddress> findByVPCWithPaging(Pageable pageable, @Param("vpcId") Long vpcId, @Param("state") IpAddress.State state);
 
     /**
      * Find all the Allocate or Free ipaddress with pagination.

@@ -965,6 +965,21 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     persistIp.setIsActive(true);
                     persistIp.setSyncFlag(false);
                     persistIp.setNetworkId(convertEntityService.getNetworkByUuid(csIp.getTransNetworkId()));
+                    persistIp.setVpcId(convertEntityService.getVpcByUuid(csIp.getTransVpcId()));
+					if (persistIp.getVpcId() != null) {
+						  persistIp.setDepartmentId(convertEntityService
+		                            .getVpcById(convertEntityService.getVpcByUuid(csIp.getTransVpcId()))
+		                            .getDepartmentId());
+		                    persistIp.setProjectId(convertEntityService
+		                            .getVpcById(convertEntityService.getVpcByUuid(csIp.getTransVpcId()))
+		                            .getProjectId());
+		                    persistIp.setZoneId(convertEntityService
+		                            .getVpcById(convertEntityService.getVpcByUuid(csIp.getTransVpcId()))
+		                            .getZoneId());
+		                    persistIp.setDomainId(convertEntityService
+		                            .getVpcById(convertEntityService.getVpcByUuid(csIp.getTransVpcId()))
+		                            .getDomainId());
+					} else {
                     persistIp.setDepartmentId(convertEntityService
                             .getNetworkById(convertEntityService.getNetworkByUuid(csIp.getTransNetworkId()))
                             .getDepartmentId());
@@ -977,6 +992,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     persistIp.setDomainId(convertEntityService
                             .getNetworkById(convertEntityService.getNetworkByUuid(csIp.getTransNetworkId()))
                             .getDomainId());
+                    }
                     ipService.update(persistIp);
                     // Resource Count update
                         if (persistIp.getProjectId() != null) {
@@ -991,19 +1007,31 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 ipaddress.setState(IpAddress.State.ALLOCATED);
                 ipaddress.setIsActive(ipaddress.getIsActive());
                 ipaddress.setNetworkId(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()));
-                ipaddress.setDepartmentId(convertEntityService
-                        .getNetworkById(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()))
-                        .getDepartmentId());
-                ipaddress.setZoneId(convertEntityService
-                        .getNetworkById(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()))
-                        .getZoneId());
-                ipaddress.setProjectId(convertEntityService
-                        .getNetworkById(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()))
-                        .getProjectId());
-                ipaddress.setDomainId(convertEntityService
-                        .getNetworkById(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()))
-                        .getDomainId());
-                ipService.save(ipaddress);
+                ipaddress.setVpcId(convertEntityService.getVpcByUuid(ipaddress.getTransVpcId()));
+				if (ipaddress.getVpcId() != null) {
+					ipaddress.setDepartmentId(convertEntityService
+							.getVpcById(convertEntityService.getVpcByUuid(ipaddress.getTransVpcId())).getDepartmentId());
+					ipaddress.setProjectId(convertEntityService
+							.getVpcById(convertEntityService.getVpcByUuid(ipaddress.getTransVpcId())).getProjectId());
+					ipaddress.setZoneId(convertEntityService
+							.getVpcById(convertEntityService.getVpcByUuid(ipaddress.getTransVpcId())).getZoneId());
+					ipaddress.setDomainId(convertEntityService
+							.getVpcById(convertEntityService.getVpcByUuid(ipaddress.getTransVpcId())).getDomainId());
+				} else {
+					ipaddress.setDepartmentId(convertEntityService
+							.getNetworkById(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()))
+							.getDepartmentId());
+					ipaddress.setZoneId(convertEntityService
+							.getNetworkById(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()))
+							.getZoneId());
+					ipaddress.setProjectId(convertEntityService
+							.getNetworkById(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()))
+							.getProjectId());
+					ipaddress.setDomainId(convertEntityService
+							.getNetworkById(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()))
+							.getDomainId());
+				}
+				ipService.save(ipaddress);
             }
         }
         if (eventObject.getString("commandEventType").equals("NET.IPRELEASE")) {
