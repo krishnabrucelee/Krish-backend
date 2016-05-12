@@ -625,16 +625,4 @@ public class VPCServiceImpl implements VPCService {
     public VPC findVpcById(Long id) throws Exception {
         return vpcRepository.findOne(id);
     }
-    @Override
-    public VPC findbyVpcId(Long id) throws Exception {
-        VPC vpc = vpcRepository.findOne(id);
-        VpcOffering vpcOffering = vpcOfferingService.find(vpc.getVpcofferingid());
-        for(SupportedNetwork support :vpcOffering.getSupportedNetworkList()) {
-            //SupportedNetwork supportedNetwork = supportedNetworkService.find(support.getId());
-            if(support.getName().equals("Lb")) {
-                return vpc;
-            }
-    }
-        return vpc;
-    }
 }

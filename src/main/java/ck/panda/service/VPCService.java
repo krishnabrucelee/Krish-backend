@@ -169,6 +169,4 @@ public interface VPCService extends CRUDService<VPC> {
      */
     VPC findVpcById(Long id) throws Exception;
 
-    VPC findbyVpcId(Long id) throws Exception;
-
 }
