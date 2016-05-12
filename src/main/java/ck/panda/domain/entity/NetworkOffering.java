@@ -10,7 +10,9 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
 import org.json.JSONException;
@@ -67,6 +69,10 @@ public class NetworkOffering implements Serializable {
     @Column(name = "for_vpc")
     private Boolean forVpc;
 
+    /** For VPC network list. */
+    @ManyToMany
+    private List<SupportedNetwork> supportedNetworkList;
+
     /** IsActive attribute to verify Active or Inactive. */
     @Column(name = "is_active")
     private Boolean isActive;
@@ -104,6 +110,10 @@ public class NetworkOffering implements Serializable {
     @Type(type = "org.jadira.usertype.dateandtime.threeten.PersistentZonedDateTime")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private DateTime updatedDateTime;
+
+    /** Transient service id list. */
+    @Transient
+    private List<String> transServiceList;
 
     /**
      * Enum type for Network Offering Status.
@@ -168,6 +178,24 @@ public class NetworkOffering implements Serializable {
      */
     public void setForVpc(Boolean forVpc) {
         this.forVpc = forVpc;
+    }
+
+    /**
+     * Get the list of supported network.
+     *
+     * @return the supportedNetworkList
+     */
+    public List<SupportedNetwork> getSupportedNetworkList() {
+        return supportedNetworkList;
+    }
+
+    /**
+     * Set the list of supported network.
+     *
+     * @param supportedNetworkList to set
+     */
+    public void setSupportedNetworkList(List<SupportedNetwork> supportedNetworkList) {
+        this.supportedNetworkList = supportedNetworkList;
     }
 
     /**
@@ -384,6 +412,24 @@ public class NetworkOffering implements Serializable {
      */
     public void setAvailability(String availability) {
         this.availability = availability;
+    }
+
+    /**
+     * Get the transient service list.
+     *
+     * @return transServiceList
+     */
+    public List<String> getTransServiceList() {
+        return transServiceList;
+    }
+
+    /**
+     * Set the transient service list.
+     *
+     * @param transServiceList to set
+     */
+    public void setTransServiceList(List<String> transServiceList) {
+        this.transServiceList = transServiceList;
     }
 
     /**

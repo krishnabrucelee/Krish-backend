@@ -140,11 +140,12 @@ public interface DepartmentRepository extends PagingAndSortingRepository<Departm
      *
      * @param domainId domain id of the department
      * @param search search text.
+     * @param type for account.
      * @param isActive get the department list based on active/inactive status
      * @param pageable to get the list with pagination
      * @return list of departments
      */
-    @Query(value = "SELECT dpt FROM Department dpt WHERE (dpt.domainId=:domainId OR 0 = :domainId) AND dpt.isActive = :isActive AND (dpt.userName LIKE %:search% OR dpt.description LIKE %:search% OR dpt.domain.name LIKE %:search%)")
-    Page<Department> findDomainBySearchText(@Param("domainId") Long domainId, Pageable pageable, @Param("search") String search, @Param("isActive") Boolean isActive);
+    @Query(value = "SELECT dpt FROM Department dpt WHERE (dpt.domainId = :domainId OR 0 = :domainId) AND dpt.type = :type AND dpt.isActive = :isActive AND (dpt.userName LIKE %:search% OR dpt.description LIKE %:search% OR dpt.domain.name LIKE %:search%)")
+    Page<Department> findDomainBySearchText(@Param("domainId") Long domainId, Pageable pageable, @Param("type") AccountType type, @Param("search") String search, @Param("isActive") Boolean isActive);
 
 }

@@ -430,6 +430,39 @@ public class ConvertEntityService {
     }
 
     /**
+     * Get the vpc.
+     *
+     * @param id of vpc network.
+     * @return vpc.
+     * @throws Exception unhandled exception.
+     */
+    public VPC getVPCId(Long id) throws Exception {
+        if (vpcService.find(id) != null) {
+            return vpcService.find(id);
+        } else {
+            return null;
+        }
+    }
+
+
+    /**
+     * Get the vpc id.
+     *
+     * @param uuid
+     *            uuid of vpc network.
+     * @return vpc id.
+     * @throws Exception
+     *             unhandled exception.
+     */
+    public Long getVpcByUuid(String uuid) throws Exception {
+        if (vpcService.findByUUID(uuid) != null) {
+            return vpcService.findByUUID(uuid).getId();
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Get the networkoffering id.
      *
      * @param uuid

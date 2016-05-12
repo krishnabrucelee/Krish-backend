@@ -595,40 +595,40 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.error("ERROR AT synch OS Types", e);
         }
         try {
-            // 14. Sync Network offering entity
-            this.syncNetworkOffering();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch NetworkOffering", e);
-        }
-        try {
-            // 15. Sync Compute Offering entity
-            this.syncComputeOffering();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch Compute Offering", e);
-        }
-        try {
-            // 16. Sync Storage offering entity
-            this.syncStorageOffering();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch Storage Offering", e);
-        }
-        try {
-            // 17. Sync Iso entity
-            this.syncIso();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch Iso", e);
-        }
-        try {
-            // 18. Sync network service provider entity
+            // 14. Sync network service provider entity
             this.syncNetworkServiceProvider();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch VPC offering", e);
         }
         try {
-            // 19. Sync supported network entity
+            // 15. Sync supported network entity
             this.syncSupportedNetwork();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch VPC offering", e);
+        }
+        try {
+            // 16. Sync Network offering entity
+            this.syncNetworkOffering();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch NetworkOffering", e);
+        }
+        try {
+            // 17. Sync Compute Offering entity
+            this.syncComputeOffering();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Compute Offering", e);
+        }
+        try {
+            // 18. Sync Storage offering entity
+            this.syncStorageOffering();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Storage Offering", e);
+        }
+        try {
+            // 19. Sync Iso entity
+            this.syncIso();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Iso", e);
         }
         try {
             // 20. Sync VPC offering entity
@@ -668,7 +668,7 @@ public class SyncServiceImpl implements SyncService {
         }
         try {
             // 26. Sync ResourceLimit entity
-            this.syncResourceLimit();
+            //this.syncResourceLimit();
         } catch (Exception e) {
             LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
         }
@@ -1218,6 +1218,9 @@ public class SyncServiceImpl implements SyncService {
                 NetworkOffering csNetworkOffering = csNetworkOfferingMap.get(networkOffering.getUuid());
 
                 networkOffering.setName(csNetworkOffering.getName());
+                networkOffering.setDisplayText(csNetworkOffering.getDisplayText());
+                networkOffering.setForVpc(csNetworkOffering.getForVpc());
+                networkOffering.setTransServiceList(csNetworkOffering.getTransServiceList());
 
                 // 3.2 If found, update the networkOffering object in app db
                 networkOfferingService.update(networkOffering);
@@ -2594,6 +2597,7 @@ public class SyncServiceImpl implements SyncService {
                 ipAddress.setIsSourcenat(csIp.getIsSourcenat());
                 ipAddress.setIsStaticnat(csIp.getIsStaticnat());
                 ipAddress.setNetworkId(csIp.getNetworkId());
+                ipAddress.setVpcId(csIp.getVpcId());
                 ipAddress.setVpnUuid(csIp.getVpnUuid());
                 ipAddress.setVpnPresharedKey(csIp.getVpnPresharedKey());
                 ipAddress.setVpnState(csIp.getVpnState());

@@ -88,6 +88,15 @@ public interface IpaddressService extends CRUDService<IpAddress> {
     IpAddress dissocitateIpAddress(String ipUuid) throws Exception;
 
     /**
+     * Dissociate IP address.
+     *
+     * @param ipUuid of the IP address.
+     * @return ip address.
+     * @throws Exception if error occurs.
+     */
+    IpAddress dissocitateIpAddressForVPC(String ipUuid) throws Exception;
+
+    /**
      * Enable static NAT for IP address.
      *
      * @param ipAddressId to be enable static nat.
@@ -117,6 +126,15 @@ public interface IpaddressService extends CRUDService<IpAddress> {
     List<IpAddress> acquireIP(Long networkId) throws Exception;
 
     /**
+     * Acquire IP address.
+     *
+     * @param vpcId for vpc.
+     * @return ip address.
+     * @throws Exception if error occurs.
+     */
+    List<IpAddress> acquireVPCIP(Long vpcId) throws Exception;
+
+    /**
      * List by network acquired to ipaddress.
      *
      * @param networkId network id.
@@ -125,6 +143,16 @@ public interface IpaddressService extends CRUDService<IpAddress> {
      * @throws Exception exception
      */
     Page<IpAddress> findByNetwork(Long networkId, PagingAndSorting pagingAndSorting) throws Exception;
+
+    /**
+     * List by vpc acquired to ipaddress.
+     *
+     * @param vpcId vpc id.
+     * @param pagingAndSorting page request.
+     * @return list of ipaddresses.
+     * @throws Exception exception
+     */
+    Page<IpAddress> findAllByVpc(Long vpcId, PagingAndSorting pagingAndSorting) throws Exception;
 
     /**
      * Enable remote access VPN for IP address.

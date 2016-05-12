@@ -339,7 +339,7 @@ public class TemplateServiceImpl implements TemplateService {
                 if (!template.getTransZone().equals("")) {
                     template.setZoneId(zoneService.findByUUID(template.getTransZone()).getId());
                 }
-                template.setHypervisorId(8L);
+                template.setHypervisorId(1L);
                 template.setTemplateOwnerId(convertEntityService.getUserByName(template.getTransCreatedName(),
                     convertEntityService.getDomain(template.getTransDomain())));
                 templateList.add(template);
