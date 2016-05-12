@@ -618,6 +618,38 @@ public class IpaddressServiceImpl implements IpaddressService {
     }
 
     @Override
+    public IpAddress enableStaticNatForVpc(Long ipAddressId, Long vmId, String ipAddress, String networkId) throws Exception {
+        IpAddress ipaddress = ipRepo.findOne(ipAddressId);
+        String vmid = null;
+        if (convertEntityService.getVmInstanceById(vmId) != null) {
+            ipaddress.setVmInstanceId(vmId);
+            vmid = convertEntityService.getVmInstanceById(vmId).getUuid();
+        }
+        try {
+            HashMap<String, String> ipMap = new HashMap<String, String>();
+            configServer.setUserServer();
+            ipMap.put("vmguestip", ipAddress);
+            if (ipaddress.getVpcId() != null) {
+            	ipMap.put(CloudStackConstants.CS_NETWORK_ID, networkId);
+            }
+            String enableResponse = csipaddressService.enableStaticNat(ipaddress.getUuid(), vmid, ipMap);
+            JSONObject jobId = new JSONObject(enableResponse).getJSONObject("enablestaticnatresponse");
+            if (jobId.has("errorcode")) {
+                Errors errors = validator.sendGlobalError(jobId.getString("errortext"));
+                if (errors.hasErrors()) {
+                    throw new BadCredentialsException(jobId.getString("errortext"));
+                }
+            } else {
+                ipaddress.setIsStaticnat(true);
+            }
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException(e.getMessage());
+        }
+        return ipRepo.save(ipaddress);
+    }
+
+
+    @Override
     public IpAddress disableStaticNat(Long ipAddressId) throws Exception {
         IpAddress ipaddress = ipRepo.findOne(ipAddressId);
         try {

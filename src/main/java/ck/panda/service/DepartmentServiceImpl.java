@@ -465,11 +465,11 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public Page<Department> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText, Long userId) throws Exception {
-        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
-        if (!convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.ROOT_ADMIN)) {
-            domainId = user.getDomainId();
+        Domain domain = convertEntityService.getOwnerById(userId).getDomain();
+        if (domain != null && !domain.getName().equals("ROOT")) {
+            return departmentRepo.findDomainBySearchText(domain.getId(), pagingAndSorting.toPageRequest(), AccountType.USER, searchText, true);
         }
-        return departmentRepo.findDomainBySearchText(domainId, pagingAndSorting.toPageRequest(), searchText, true);
+        return departmentRepo.findDomainBySearchText(domainId, pagingAndSorting.toPageRequest(), AccountType.USER, searchText, true);
     }
 
 }

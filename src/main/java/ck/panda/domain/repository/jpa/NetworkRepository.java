@@ -256,15 +256,15 @@ public interface NetworkRepository extends PagingAndSortingRepository<Network, L
     @Query(value = "SELECT net FROM Network net LEFT JOIN net.project WHERE net.vpcId =:vpcId AND net.isActive =:isActive ORDER BY net.id DESC")
     List<Network> findNetworkByVpcIdAndIsActive(@Param("vpcId") Long vpcId, @Param("isActive") Boolean isActive);
 
-
     /**
-     * Find all the network by vpc id, is active status and supported service.
+     * Find all the VPC based active or inactive network with supported services.
      *
-     * @param vpcId of the network.
-     * @param isActive status of the network.
-     * @param type of the network.
-     * @return networks.
+     * @param vpcId get the id of the VPC.
+     * @param isActive get the network list based on active/inactive status.
+     * @param serviceId service's type.
+     * @return list of network.
      */
-    @Query(value = "SELECT net FROM Network net JOIN net.networkOffering.supportedNetworkList supportedService WHERE net.vpcId =:vpcId AND net.isActive =:isActive AND supportedService.name = :type ORDER BY net.id DESC")
-    List<Network> findNetworkByVpcIdAndIsActiveAndSupportedService(@Param("vpcId") Long vpcId, @Param("isActive") Boolean isActive, @Param("type") String type );
+    @Query(value = "SELECT net FROM Network net JOIN net.networkOffering.supportedNetworkList supportedService WHERE net.vpcId =:vpcId AND net.isActive =:isActive AND supportedService.id = :serviceId ORDER BY net.id DESC")
+    List<Network> findNetworkByVpcIdAndIsActiveAndType(@Param("vpcId") Long vpcId, @Param("isActive") Boolean isActive, @Param("serviceId") Long serviceId);
+
 }
