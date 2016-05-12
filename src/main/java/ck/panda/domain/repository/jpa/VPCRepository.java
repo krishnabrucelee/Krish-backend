@@ -9,6 +9,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.VPC;
+import ck.panda.domain.entity.VPC.Status;
 
 /**
  * JPA repository for VPC entity.
@@ -30,9 +31,9 @@ public interface VPCRepository extends PagingAndSortingRepository<VPC, Long> {
      * @param isActive true/false.
      * @return vpc list.
      */
-    @Query(value = "SELECT vpc FROM VPC vpc WHERE vpc.projectId is NULL AND vpc.departmentId=:departmentId AND vpc.isActive =:isActive ")
+    @Query(value = "SELECT vpc FROM VPC vpc WHERE vpc.projectId is NULL AND vpc.departmentId=:departmentId AND vpc.isActive =:isActive AND vpc.status =:status ")
     List<VPC> findByDepartmentAndVpcIsActive(@Param("departmentId") Long departmentId,
-            @Param("isActive") Boolean isActive);
+            @Param("isActive") Boolean isActive, @Param("status") Status status);
 
     /**
      * Find Vpc list by department.
@@ -41,9 +42,9 @@ public interface VPCRepository extends PagingAndSortingRepository<VPC, Long> {
      * @param isActive true/false.
      * @return vpc list.
      */
-    @Query(value = "SELECT vpc FROM VPC vpc WHERE vpc.projectId=:projectId AND vpc.isActive =:isActive ")
+    @Query(value = "SELECT vpc FROM VPC vpc WHERE vpc.projectId=:projectId AND vpc.isActive =:isActive AND vpc.status =:status ")
     List<VPC> findByProjectAndVpcIsActive(@Param("projectId") Long projectId,
-            @Param("isActive") Boolean isActive);
+            @Param("isActive") Boolean isActive, @Param("status") Status status);
 
     /**
      * Find all the active or inactive vpcs with pagination.
@@ -52,8 +53,8 @@ public interface VPCRepository extends PagingAndSortingRepository<VPC, Long> {
      * @param isActive get the vpc list based on active/inactive status.
      * @return list of vpcs.
      */
-    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE vpc.isActive =:isActive")
-    Page<VPC> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
+    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE vpc.isActive =:isActive AND vpc.status =:status")
+    Page<VPC> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive, @Param("status") Status status);
 
     /**
      * Find all the active or inactive vpcs with pagination.
@@ -62,8 +63,8 @@ public interface VPCRepository extends PagingAndSortingRepository<VPC, Long> {
      * @param isActive get the vpc list based on active/inactive status.
      * @return list of vpcs.
      */
-    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE vpc.isActive =:isActive")
-    List<VPC> findAllByIsActiveWihtoutPaging(@Param("isActive") Boolean isActive);
+    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE vpc.isActive =:isActive AND vpc.status =:status")
+    List<VPC> findAllByIsActiveWihtoutPaging(@Param("isActive") Boolean isActive, @Param("status") Status status);
 
     /**
      * Find all the active or inactive domain vpc.
@@ -73,9 +74,9 @@ public interface VPCRepository extends PagingAndSortingRepository<VPC, Long> {
      * @param domainId get the id of the domain
      * @return list of vpc.
      */
-    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE vpc.isActive =:isActive AND vpc.domainId =:domainId")
+    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE vpc.isActive =:isActive AND vpc.domainId =:domainId AND vpc.status =:status")
     Page<VPC> findByDomainIsActive(Pageable pageable, @Param("isActive") Boolean isActive,
-            @Param("domainId") Long domainId);
+            @Param("domainId") Long domainId, @Param("status") Status status);
 
     /**
      * Find all the active or inactive domain vpc.
@@ -85,8 +86,8 @@ public interface VPCRepository extends PagingAndSortingRepository<VPC, Long> {
      * @param domainId get the id of the domain
      * @return list of vpc.
      */
-    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE vpc.isActive =:isActive AND vpc.domainId =:domainId")
-    List<VPC> findAllByDomainIsActive(@Param("isActive") Boolean isActive, @Param("domainId") Long domainId);
+    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE vpc.isActive =:isActive AND vpc.domainId =:domainId AND vpc.status =:status  ")
+    List<VPC> findAllByDomainIsActive(@Param("isActive") Boolean isActive, @Param("domainId") Long domainId, @Param("status") Status status);
 
     /**
      * Find by name of the vpc.
@@ -103,8 +104,8 @@ public interface VPCRepository extends PagingAndSortingRepository<VPC, Long> {
      * @param isActive get the vpc list based on active/inactive status.
      * @return list of vpc.
      */
-    @Query(value = "SELECT vpc FROM VPC vpc WHERE vpc.isActive =:isActive")
-    List<VPC> findAllByIsActive(@Param("isActive") Boolean isActive);
+    @Query(value = "SELECT vpc FROM VPC vpc WHERE vpc.isActive =:isActive AND vpc.status = :status")
+    List<VPC> findAllByIsActive(@Param("isActive") Boolean isActive, @Param("status") Status status);
 
     /**
      * Find all vpcs by project and deparment.
@@ -114,10 +115,10 @@ public interface VPCRepository extends PagingAndSortingRepository<VPC, Long> {
      * @param isActive status of the vpc.
      * @return list of vpcs.
      */
-    @Query(value = "SELECT vpc FROM VPC vpc WHERE (vpc.projectId = :projectId OR vpc.departmentId=:departmentId ) AND vpc.isActive =:isActive")
+    @Query(value = "SELECT vpc FROM VPC vpc WHERE (vpc.projectId = :projectId OR vpc.departmentId=:departmentId ) AND vpc.isActive =:isActive AND vpc.status =:status")
     List<VPC> findByProjectDepartmentAndVpc(@Param("projectId") Long projectId,
             @Param("departmentId") Long departmentId,
-            @Param("isActive") Boolean isActive);
+            @Param("isActive") Boolean isActive, @Param("status") Status status);
 
     /**
      * Find all active vpcs by department.
@@ -127,9 +128,9 @@ public interface VPCRepository extends PagingAndSortingRepository<VPC, Long> {
      * @param pageable for pagination.
      * @return vpcs.
      */
-    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE vpc.departmentId=:departmentId AND vpc.isActive =:isActive AND vpc.projectId IS NULL ")
+    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE vpc.departmentId=:departmentId AND vpc.isActive =:isActive AND vpc.projectId IS NULL AND vpc.status =:status ")
     Page<VPC> findByDepartmentAndPagination(@Param("departmentId") Long departmentId,
-            @Param("isActive") Boolean isActive, Pageable pageable);
+            @Param("isActive") Boolean isActive, Pageable pageable, @Param("status") Status status);
 
     /**
      * Find all active vpcs by department.
@@ -139,8 +140,8 @@ public interface VPCRepository extends PagingAndSortingRepository<VPC, Long> {
      * @param pageable for pagination.
      * @return vpcs.
      */
-    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE vpc.departmentId=:departmentId AND vpc.isActive =:isActive AND vpc.projectId IS NULL ")
-    List<VPC> findByDepartment(@Param("departmentId") Long departmentId, @Param("isActive") Boolean isActive);
+    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE vpc.departmentId=:departmentId AND vpc.isActive =:isActive AND vpc.projectId IS NULL AND vpc.status =:status ")
+    List<VPC> findByDepartment(@Param("departmentId") Long departmentId, @Param("isActive") Boolean isActive, @Param("status") Status status);
 
     /**
      * Find all the domain based active or inactive vpc with pagination.
@@ -150,8 +151,8 @@ public interface VPCRepository extends PagingAndSortingRepository<VPC, Long> {
      * @param pageable to get the list with pagination.
      * @return list of vpcs.
      */
-    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE vpc.domainId =:domainId AND vpc.isActive =:isActive")
-    Page<VPC> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, Pageable pageable);
+    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE vpc.domainId =:domainId AND vpc.isActive =:isActive AND vpc.status =:status")
+    Page<VPC> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, Pageable pageable, @Param("status") Status status);
 
     /**
      * Find all vpcs by project and deparment with pagination.
@@ -162,10 +163,10 @@ public interface VPCRepository extends PagingAndSortingRepository<VPC, Long> {
      * @param pageable to get the list with pagination.
      * @return list of vpcs.
      */
-    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE (vpc.project in :allProjectList OR vpc.departmentId=:departmentId ) AND vpc.isActive =:isActive")
+    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE (vpc.project in :allProjectList OR vpc.departmentId=:departmentId ) AND vpc.isActive =:isActive AND vpc.status =:status")
     Page<VPC> findByProjectDepartmentAndIsActive(@Param("allProjectList") List<Project> allProjectList,
             @Param("departmentId") Long departmentId,
-            @Param("isActive") Boolean isActive, Pageable pageable);
+            @Param("isActive") Boolean isActive, Pageable pageable, @Param("status") Status status);
 
     /**
      * Find all vpcs by project and deparment with pagination.
@@ -176,10 +177,10 @@ public interface VPCRepository extends PagingAndSortingRepository<VPC, Long> {
      * @param pageable to get the list with pagination.
      * @return list of vpcs.
      */
-    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE (vpc.project in :allProjectList OR vpc.departmentId=:departmentId ) AND vpc.isActive =:isActive")
+    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE (vpc.project in :allProjectList OR vpc.departmentId=:departmentId ) AND vpc.isActive =:isActive AND vpc.status =:status")
     List<VPC> findAByProjectDepartmentAndIsActiveWithoutPaging(@Param("allProjectList") List<Project> allProjectList,
             @Param("departmentId") Long departmentId,
-            @Param("isActive") Boolean isActive);
+            @Param("isActive") Boolean isActive, @Param("status") Status status);
 
 
     /**
@@ -189,8 +190,8 @@ public interface VPCRepository extends PagingAndSortingRepository<VPC, Long> {
      * @param isActive get the vpc list based on active/inactive status.
      * @return list of vpcs.
      */
-    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE vpc.domainId =:domainId AND vpc.isActive =:isActive")
-    List<VPC> findAllByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive);
+    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE vpc.domainId =:domainId AND vpc.isActive =:isActive AND vpc.status =:status")
+    List<VPC> findAllByDomainAndIsActive(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, @Param("status") Status status);
 
     /**
      * Find all the domain based active or inactive VPC with pagination.
@@ -201,8 +202,8 @@ public interface VPCRepository extends PagingAndSortingRepository<VPC, Long> {
      * @param pageable to get the list with pagination
      * @return list of VPCs
      */
-    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE (vpc.domainId=:domainId OR 0 = :domainId) AND vpc.isActive = :isActive AND (vpc.name LIKE %:search% OR vpc.description LIKE %:search% OR vpc.cIDR LIKE %:search% OR vpc.department.userName LIKE %:search% OR vpc.domain.name LIKE %:search% OR vpc.zone.name LIKE %:search% OR vpc.project.name LIKE %:search% OR vpc.status LIKE %:search%)")
-    Page<VPC> findDomainBySearchText(@Param("domainId") Long domainId, Pageable pageable, @Param("search") String search, @Param("isActive") Boolean isActive);
+    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE (vpc.domainId=:domainId OR 0 = :domainId) AND vpc.isActive = :isActive AND vpc.status =:status AND (vpc.name LIKE %:search% OR vpc.description LIKE %:search% OR vpc.cIDR LIKE %:search% OR vpc.department.userName LIKE %:search% OR vpc.domain.name LIKE %:search% OR vpc.zone.name LIKE %:search% OR vpc.project.name LIKE %:search% OR vpc.status LIKE %:search%)")
+    Page<VPC> findDomainBySearchText(@Param("domainId") Long domainId, Pageable pageable, @Param("search") String search, @Param("isActive") Boolean isActive, @Param("status") Status status);
 
     /**
      * Find all VPCs by project and department with pagination.
@@ -215,9 +216,9 @@ public interface VPCRepository extends PagingAndSortingRepository<VPC, Long> {
      * @param pageable to get the list with pagination.
      * @return list of VPCs.
      */
-    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE (vpc.domainId=:domainId OR 0 = :domainId) AND (vpc.project in :allProjectList OR vpc.departmentId=:departmentId ) AND vpc.isActive =:isActive AND (vpc.name LIKE %:search% OR vpc.description LIKE %:search% OR vpc.cIDR LIKE %:search% OR vpc.department.userName LIKE %:search% OR vpc.domain.name LIKE %:search% OR vpc.zone.name LIKE %:search% OR vpc.project.name LIKE %:search% OR vpc.status LIKE %:search%)")
+    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE (vpc.domainId=:domainId OR 0 = :domainId) AND (vpc.project in :allProjectList OR vpc.departmentId=:departmentId ) AND vpc.isActive =:isActive AND vpc.status =:status AND (vpc.name LIKE %:search% OR vpc.description LIKE %:search% OR vpc.cIDR LIKE %:search% OR vpc.department.userName LIKE %:search% OR vpc.domain.name LIKE %:search% OR vpc.zone.name LIKE %:search% OR vpc.project.name LIKE %:search% OR vpc.status LIKE %:search%)")
     Page<VPC> findByProjectDepartmentAndIsActiveAndSearchText(@Param("allProjectList") List<Project> allProjectList, @Param("departmentId") Long departmentId,
-            @Param("isActive") Boolean isActive, Pageable pageable, @Param("search") String search, @Param("domainId") Long domainId);
+            @Param("isActive") Boolean isActive, Pageable pageable, @Param("search") String search, @Param("domainId") Long domainId, @Param("status") Status status);
 
     /**
      * Find all the domain based active or inactive VPC with pagination.
@@ -229,6 +230,6 @@ public interface VPCRepository extends PagingAndSortingRepository<VPC, Long> {
      * @param pageable to get the list with pagination
      * @return list of VPCs
      */
-    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE (vpc.domainId=:domainId OR 0 = :domainId) AND vpc.departmentId = :departmentId AND vpc.projectId  = NULL AND vpc.isActive = :isActive AND (vpc.name LIKE %:search% OR vpc.description LIKE %:search% OR vpc.cIDR LIKE %:search% OR vpc.department.userName LIKE %:search% OR vpc.domain.name LIKE %:search% OR vpc.zone.name LIKE %:search% OR vpc.project.name LIKE %:search% OR vpc.status LIKE %:search%)")
-    Page<VPC> findAllByDepartmentIsActiveAndSearchText(@Param("domainId") Long domainId, @Param("departmentId") Long departmentId, Pageable pageable, @Param("search") String search, @Param("isActive") Boolean isActive);
+    @Query(value = "SELECT vpc FROM VPC vpc LEFT JOIN vpc.project WHERE (vpc.domainId=:domainId OR 0 = :domainId) AND vpc.departmentId = :departmentId AND vpc.projectId  = NULL AND vpc.isActive = :isActive AND vpc.status =:status AND (vpc.name LIKE %:search% OR vpc.description LIKE %:search% OR vpc.cIDR LIKE %:search% OR vpc.department.userName LIKE %:search% OR vpc.domain.name LIKE %:search% OR vpc.zone.name LIKE %:search% OR vpc.project.name LIKE %:search% OR vpc.status LIKE %:search%)")
+    Page<VPC> findAllByDepartmentIsActiveAndSearchText(@Param("domainId") Long domainId, @Param("departmentId") Long departmentId, Pageable pageable, @Param("search") String search, @Param("isActive") Boolean isActive, @Param("status") Status status);
 }
