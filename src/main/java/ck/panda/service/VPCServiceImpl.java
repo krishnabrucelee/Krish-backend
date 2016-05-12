@@ -254,7 +254,7 @@ public class VPCServiceImpl implements VPCService {
 
     @Override
     public List<VPC> findByDepartmentAndVpcIsActive(Long department, Boolean isActive) throws Exception {
-        return vpcRepository.findByDepartmentAndVpcIsActive(department, isActive);
+        return vpcRepository.findByDepartmentAndVpcIsActive(department, isActive, Status.ENABLED);
     }
 
     @Override
@@ -312,10 +312,10 @@ public class VPCServiceImpl implements VPCService {
         // Check the user is not a root and admin and set the domain value from login detail.
         if (user.getType().equals(User.UserType.ROOT_ADMIN)) {
 
-            return vpcRepository.findAllByIsActive(page.toPageRequest(), true);
+            return vpcRepository.findAllByIsActive(page.toPageRequest(), true, Status.ENABLED);
         }
         if (user.getType().equals(User.UserType.DOMAIN_ADMIN)) {
-            return vpcRepository.findByDomainIsActive(page.toPageRequest(), true, user.getDomainId());
+            return vpcRepository.findByDomainIsActive(page.toPageRequest(), true, user.getDomainId(), Status.ENABLED);
         }
         Page<VPC> vpcs = this.getVPCListByUser(page, userId);
         return vpcs;
@@ -323,12 +323,12 @@ public class VPCServiceImpl implements VPCService {
 
     @Override
     public List<VPC> findByProjectAndVpcIsActive(Long projectId, Boolean isActive) throws Exception {
-        return vpcRepository.findByProjectAndVpcIsActive(projectId, isActive);
+        return vpcRepository.findByProjectAndVpcIsActive(projectId, isActive, Status.ENABLED);
     }
 
     @Override
     public List<VPC> findAllByActive(Boolean isActive) throws Exception {
-        return vpcRepository.findAllByIsActive(isActive);
+        return vpcRepository.findAllByIsActive(isActive, Status.ENABLED);
     }
 
     @Override
@@ -475,12 +475,12 @@ public class VPCServiceImpl implements VPCService {
 
     @Override
     public Page<VPC> findAllByDomainId(Long domainId, PagingAndSorting page) throws Exception {
-        return vpcRepository.findByDomainIsActive(page.toPageRequest(), true, domainId);
+        return vpcRepository.findByDomainIsActive(page.toPageRequest(), true, domainId, Status.ENABLED);
     }
 
     @Override
     public List<VPC> findAllByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception {
-        return vpcRepository.findAllByDomainAndIsActive(domainId, isActive);
+        return vpcRepository.findAllByDomainAndIsActive(domainId, isActive, Status.ENABLED);
     }
 
     @Override
@@ -488,10 +488,10 @@ public class VPCServiceImpl implements VPCService {
         User user = convertEntityService.getOwnerById(userId);
         // Check the user is not a root and admin and set the domain value from login detail.
         if (user.getType().equals(User.UserType.ROOT_ADMIN)) {
-            return vpcRepository.findAllByIsActiveWihtoutPaging(true);
+            return vpcRepository.findAllByIsActiveWihtoutPaging(true, Status.ENABLED);
         }
         if (user.getType().equals(User.UserType.DOMAIN_ADMIN)) {
-            return vpcRepository.findAllByDomainIsActive(true, user.getDomainId());
+            return vpcRepository.findAllByDomainIsActive(true, user.getDomainId(), Status.ENABLED);
         }
         List<VPC> vpcs = this.getVPCListByUserWihtoutPaging(userId);
         return vpcs;
@@ -499,7 +499,7 @@ public class VPCServiceImpl implements VPCService {
 
     @Override
     public List<VPC> findAllByDomainId(Long domainId) throws Exception {
-        return vpcRepository.findAllByDomainAndIsActive(domainId, true);
+        return vpcRepository.findAllByDomainAndIsActive(domainId, true, Status.ENABLED);
     }
 
     /**
@@ -515,10 +515,10 @@ public class VPCServiceImpl implements VPCService {
         if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
             List<Project> allProjectList = projectService.findAllByUserAndIsActive(user.getId(), true);
             List<VPC> projectVPC = vpcRepository.findAByProjectDepartmentAndIsActiveWithoutPaging(allProjectList,
-                    user.getDepartmentId(), true);
+                    user.getDepartmentId(), true, Status.ENABLED);
             return projectVPC;
         } else {
-            return vpcRepository.findByDepartment(user.getDepartmentId(), true);
+            return vpcRepository.findByDepartment(user.getDepartmentId(), true, Status.ENABLED);
         }
     }
 
@@ -538,11 +538,11 @@ public class VPCServiceImpl implements VPCService {
                 allProjectList.add(project);
             }
             Page<VPC> projectVpc = vpcRepository.findByProjectDepartmentAndIsActive(allProjectList,
-                    user.getDepartmentId(), true, pagingAndSorting.toPageRequest());
+                    user.getDepartmentId(), true, pagingAndSorting.toPageRequest(), Status.ENABLED);
             return projectVpc;
         } else {
             return vpcRepository.findByDepartmentAndPagination(user.getDepartmentId(), true,
-                    pagingAndSorting.toPageRequest());
+                    pagingAndSorting.toPageRequest(), Status.ENABLED);
         }
     }
 
@@ -596,18 +596,18 @@ public class VPCServiceImpl implements VPCService {
         Page<VPC> vpcs = null;
         User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
         if (convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.ROOT_ADMIN)) {
-            vpcs = vpcRepository.findDomainBySearchText(domainId, pagingAndSorting.toPageRequest(), searchText, true);
+            vpcs = vpcRepository.findDomainBySearchText(domainId, pagingAndSorting.toPageRequest(), searchText, true, Status.ENABLED);
         } else if ((convertEntityService.getOwnerById(user.getId()).getType()).equals(User.UserType.DOMAIN_ADMIN)) {
             vpcs = vpcRepository.findDomainBySearchText((convertEntityService.getOwnerById(user.getId())
-                    .getDomainId()), pagingAndSorting.toPageRequest(), searchText, true);
+                    .getDomainId()), pagingAndSorting.toPageRequest(), searchText, true, Status.ENABLED);
         } else if (convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.USER)) {
             if (projectService.findAllByUserAndIsActive(user.getId(), true).size() > 0) {
                 List<Project> allProjectList = projectService.findAllByUserAndIsActive(user.getId(), true);
-                Page<VPC> projectVPC = vpcRepository.findByProjectDepartmentAndIsActiveAndSearchText(allProjectList, user.getDepartmentId(),true, pagingAndSorting.toPageRequest(),searchText,user.getDomainId());
+                Page<VPC> projectVPC = vpcRepository.findByProjectDepartmentAndIsActiveAndSearchText(allProjectList, user.getDepartmentId(),true, pagingAndSorting.toPageRequest(),searchText,user.getDomainId(), Status.ENABLED);
                 vpcs = projectVPC;
             } else {
                 vpcs = vpcRepository.findAllByDepartmentIsActiveAndSearchText((convertEntityService.getOwnerById(user.getId()).getDomainId()), (convertEntityService.getOwnerById(user.getId()).getDepartmentId()),
-                     pagingAndSorting.toPageRequest(), searchText, true);
+                     pagingAndSorting.toPageRequest(), searchText, true, Status.ENABLED);
             }
          }
         return vpcs;

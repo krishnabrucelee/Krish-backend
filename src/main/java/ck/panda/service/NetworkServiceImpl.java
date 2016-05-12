@@ -81,7 +81,11 @@ public class NetworkServiceImpl implements NetworkService {
 
     /** Quota limit validation reference. */
     @Autowired
-    QuotaValidationService quotaLimitValidation;
+    private QuotaValidationService quotaLimitValidation;
+
+    /** support service reference. */
+    @Autowired
+    private SupportedNetworkService supportedNetworkService;
 
     /** Logger attribute. */
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkServiceImpl.class);
@@ -895,5 +899,11 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public List<Network> findNetworkByVpcIdAndIsActive(Long vpcId, Boolean isActive) throws Exception {
         return networkRepo.findNetworkByVpcIdAndIsActive(vpcId, isActive);
+    }
+
+    @Override
+    public List<Network> findNetworkByVpcIdAndIsActiveAndType(Long vpcId, Boolean isActive, String type) throws Exception {
+    	Long serviceId = supportedNetworkService.findByName(type).getId();
+    	return networkRepo.findNetworkByVpcIdAndIsActiveAndType(vpcId, isActive, serviceId);
     }
 }

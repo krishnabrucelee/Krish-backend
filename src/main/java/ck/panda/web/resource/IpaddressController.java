@@ -198,6 +198,28 @@ public class IpaddressController extends CRUDController<IpAddress> implements Ap
     }
 
     /**
+     * Set static NAT for ipaddress that doesn't have source nat.
+     *
+     * @param ipaddressId ipaddress's id.
+     * @param vmId virtual machine's id.
+     * @param guestip guest ipaddress.
+     * @param type of the network.
+     * @throws Exception unhandled exception.
+     * @return ip address.
+     */
+    @RequestMapping(value = "/vpc/nat", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public IpAddress enableStaticForVpc(@RequestParam("ipaddress") Long ipaddressId, @RequestParam("vm") Long vmId,
+            @RequestParam("guestip") String guestip, @RequestParam("type") String type, @RequestParam("networkId") String networkId ) throws Exception {
+        if (type.equalsIgnoreCase("enable")) {
+            return ipAddressService.enableStaticNatForVpc(ipaddressId, vmId, guestip, networkId);
+        } else {
+            return ipAddressService.disableStaticNat(ipaddressId);
+        }
+    }
+
+    /**
      * Enable the remote VPN access.
      *
      * @param uuid of the ip address
