@@ -141,12 +141,6 @@ public class VPCServiceImpl implements VPCService {
     @Autowired
     private TokenDetails tokenDetails;
 
-    @Autowired
-    private VpcOfferingService vpcOfferingService;
-
-    @Autowired
-    private SupportedNetworkService supportedNetworkService;
-
     @Override
     public VPC save(VPC vpc) throws Exception {
         return vpcRepository.save(vpc);
