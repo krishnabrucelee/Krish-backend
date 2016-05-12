@@ -198,6 +198,10 @@ public class IpAddress implements Serializable {
     @Transient
     private String transNetworkId;
 
+    /** Transient vpc of the ip Address. */
+    @Transient
+    private String transVpcId;
+
     /** Transient department id of the ip Address. */
     @Transient
     private String transDepartmentId;
@@ -724,6 +728,24 @@ public class IpAddress implements Serializable {
     }
 
     /**
+     * Get the transVpcId.
+     *
+     * @return the transVpcId
+     */
+    public String getTransVpcId() {
+        return transVpcId;
+    }
+
+    /**
+     * Set the transVpcId.
+     *
+     * @param transVpcId to set
+     */
+    public void setTransVpcId(String transVpcId) {
+        this.transVpcId = transVpcId;
+    }
+
+    /**
      * Get the transient domain id.
      *
      * @return the transDomainId
@@ -954,6 +976,7 @@ public class IpAddress implements Serializable {
             ipAddress.setTransZoneId((JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ZONE_ID)));
             ipAddress.setTransDomainId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_DOMAIN_ID));
             ipAddress.setTransNetworkId(JsonUtil.getStringValue(jsonObject,CloudStackConstants.CS_ASSOCIATED_NETWORK_ID));
+            ipAddress.setTransVpcId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_VPC_ID));
             ipAddress.setTransDepartmentId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ACCOUNT));
             ipAddress.setTransProjectId(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_PROJECT_ID));
             ipAddress.setPublicIpAddress(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_IP_ADDRESS));

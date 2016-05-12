@@ -27,6 +27,7 @@ import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.PortForwarding;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitProject;
+import ck.panda.domain.entity.VPC;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.repository.jpa.IpaddressRepository;
 import ck.panda.util.AppValidator;
@@ -219,6 +220,82 @@ public class IpaddressServiceImpl implements IpaddressService {
     }
 
     @Override
+    public List<IpAddress> acquireVPCIP(Long vpcId) throws Exception {
+        Errors errors = null;
+        HashMap<String, String> optionalMap = new HashMap<String, String>();
+        optionalMap.put(CloudStackConstants.CS_ZONE_ID,
+                convertEntityService.getZoneById(convertEntityService.getVPCId(vpcId).getZoneId()).getUuid());
+        // check department and project quota validation.
+        ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService.findByDepartmentAndResourceType(
+                convertEntityService.getVPCId(vpcId).getDepartmentId(), ResourceType.Instance, true);
+        ResourceLimitProject projectLimit = resourceLimitProjectService
+                .findByProjectAndResourceType(convertEntityService.getVPCId(vpcId).getProjectId(), ResourceLimitProject.ResourceType.Instance, true);
+        if (departmentLimit != null && convertEntityService
+                .getDepartmentById(convertEntityService.getVPCId(vpcId).getDepartmentId()).getType()
+                .equals(AccountType.USER)) {
+            if (convertEntityService.getVPCId(vpcId).getProjectId() != null) {
+            	if (projectLimit != null) {
+                quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getVPCId(vpcId),
+                        "IP", convertEntityService.getVPCId(vpcId).getProjectId(), "Project");
+            	} else {
+                    throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Resource limit for project has not been set. Please update project quota");
+            	}
+            }
+            else {
+                quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getVPCId(vpcId),
+                        "IP", convertEntityService.getVPCId(vpcId).getDepartmentId(), "Department");
+            }
+            // 3. Check the resource availability to acquire new ip.
+            String isAvailable = isResourceAvailableForVPC(convertEntityService.getVPCId(vpcId), optionalMap);
+            if (isAvailable != null) {
+                // 3.1 throws error message about resource shortage.
+                throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, isAvailable);
+            } else {
+                try {
+                    // updateResourceForIpCreation(convertEntityService.getNetworkById(networkId),
+                    // errors);
+                    configServer.setUserServer();
+                    VPC vpc = convertEntityService.getVPCId(vpcId);
+                    HashMap<String, String> ipMap = new HashMap<String, String>();
+                    ipMap.put("domainid", vpc.getDomain().getUuid());
+                    if (vpc.getProjectId() != null) {
+                        ipMap.put("projectid", convertEntityService.getProjectById(vpc.getProjectId()).getUuid());
+                    } else {
+                        ipMap.put("account",
+                                departmentService
+                                        .find(convertEntityService.getDepartmentById(vpc.getDepartmentId()).getId())
+                                        .getUserName());
+                    }
+                    ipMap.put("zoneid", vpc.getZone().getUuid());
+                    ipMap.put("vpcid", vpc.getUuid());
+                    String associatedResponse = csipaddressService.associateIpAddress("json", ipMap);
+                    JSONObject csassociatedIPResponseJSON = new JSONObject(associatedResponse)
+                            .getJSONObject("associateipaddressresponse");
+                    if (csassociatedIPResponseJSON.has("errorcode")) {
+                        errors = validator.sendGlobalError(csassociatedIPResponseJSON.getString("errortext"));
+                        if (errors.hasErrors()) {
+                            throw new BadCredentialsException(csassociatedIPResponseJSON.getString("errortext"));
+                        }
+                    } else if (csassociatedIPResponseJSON.has("jobid")) {
+                        String jobResponse = csipaddressService
+                                .associatedJobResult(csassociatedIPResponseJSON.getString("jobid"), "json");
+                        JSONObject jobresult = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+                        List<IpAddress> iplist = new ArrayList<IpAddress>();
+                        iplist.add(ipRepo.findByUUID(csassociatedIPResponseJSON.getString("id")));
+                        return iplist;
+                        }
+                    return (List<IpAddress>) ipRepo.findByVPC(vpcId, IpAddress.State.ALLOCATED);
+                } catch (ApplicationException e) {
+                    LOGGER.error("ERROR AT IP AQUIRE", e);
+                    throw new ApplicationException(e.getErrors());
+                }
+            }
+        } else {
+            throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Resource limit for department has not been set. Please update department quota");
+        }
+    }
+
+    @Override
     public IpAddress update(IpAddress ipAddress) throws Exception {
         return ipRepo.save(ipAddress);
     }
@@ -328,9 +405,13 @@ public class IpaddressServiceImpl implements IpaddressService {
                 IpAddress ipAddress = IpAddress.convert(ipAddressListJSON.getJSONObject(i));
                 ipAddress.setDomainId(convertEntityService.getDomainId(ipAddress.getTransDomainId()));
                 ipAddress.setZoneId(convertEntityService.getZoneId(ipAddress.getTransZoneId()));
-                ipAddress.setNetworkId(convertEntityService.getNetworkId(ipAddress.getTransNetworkId()));
+                if(ipAddress.getTransNetworkId() != null) {
+                	ipAddress.setNetworkId(convertEntityService.getNetworkId(ipAddress.getTransNetworkId()));
+                }
+                if(ipAddress.getTransVpcId() != null) {
+                	ipAddress.setVpcId(convertEntityService.getVpcId(ipAddress.getTransVpcId()));
+                }
                 ipAddress.setProjectId(convertEntityService.getProjectId(ipAddress.getTransProjectId()));
-
                 //Get all the VPN details
                 HashMap<String, String> vpnOptional = new HashMap<String, String>();
                 vpnOptional.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
@@ -381,8 +462,10 @@ public class IpaddressServiceImpl implements IpaddressService {
                 ipAddress.setDomainId(convertEntityService.getDomainId(ipAddress.getTransDomainId()));
                 ipAddress.setZoneId(convertEntityService.getZoneId(ipAddress.getTransZoneId()));
                 ipAddress.setNetworkId(convertEntityService.getNetworkId(ipAddress.getTransNetworkId()));
+				if (ipAddress.getTransVpcId() != null) {
+					ipAddress.setVpcId(convertEntityService.getVpcId(ipAddress.getTransVpcId()));
+				}
                 ipAddress.setProjectId(convertEntityService.getProjectId(ipAddress.getTransProjectId()));
-
                 IpAddress ipAddresses = ipRepo.findByUUID(ipAddress.getUuid());
                 if (ipAddresses != null) {
                     ipAddresses.setUuid(ipAddress.getUuid());
@@ -391,6 +474,7 @@ public class IpaddressServiceImpl implements IpaddressService {
                     ipAddresses.setIsSourcenat(ipAddress.getIsSourcenat());
                     ipAddresses.setIsStaticnat(ipAddress.getIsStaticnat());
                     ipAddresses.setNetworkId(ipAddress.getNetworkId());
+                    ipAddresses.setVpcId(ipAddress.getVpcId());
                     ipAddresses.setDomainId(ipAddress.getDomainId());
                     ipAddresses.setZoneId(ipAddress.getZoneId());
                     ipAddresses.setProjectId(ipAddress.getProjectId());
@@ -420,6 +504,45 @@ public class IpaddressServiceImpl implements IpaddressService {
     private Errors validateEvent(Errors errors, String errmessage) throws Exception {
         errors.addGlobalError(errmessage);
         return errors;
+    }
+
+    @Override
+    public IpAddress dissocitateIpAddressForVPC(String ipUuid) throws Exception {
+        Errors errors = null;
+        IpAddress ipAddress = findbyUUID(ipUuid);
+        // TODO //check department and project quota validation.
+        ResourceLimitDepartment departmentLimit = resourceLimitDepartmentService
+                .findByDepartmentAndResourceType(convertEntityService.getVpcById(ipAddress.getVpcId()).getDepartmentId(), ResourceType.Instance, true);
+
+        if (departmentLimit != null) {
+            if (convertEntityService.getVpcById(ipAddress.getVpcId()).getProjectId() != null) {
+//                syncService.syncResourceLimitProject(
+//                        convertEntityService.getProjectById(convertEntityService.getNetworkById(ipAddress.getNetworkId()).getProjectId()));
+            }
+
+        try {
+            configServer.setUserServer();
+            String deleteResponse = csipaddressService.disassociateIpAddress(ipUuid, "json");
+            JSONObject jobId = new JSONObject(deleteResponse).getJSONObject("disassociateipaddressresponse");
+            if (jobId.has("errorcode")) {
+                errors = validator.sendGlobalError(jobId.getString("errortext"));
+                if (errors.hasErrors()) {
+                    throw new BadCredentialsException(jobId.getString("errortext"));
+                }
+            }
+            if (jobId.has("jobid")) {
+                String jobResponse = csipaddressService.associatedJobResult(jobId.getString("jobid"), "json");
+                JSONObject jobresults = new JSONObject(jobResponse).getJSONObject("queryasyncjobresultresponse");
+            }
+            ipAddress.setIsActive(false);
+            ipAddress.setState(State.FREE);
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException(e.getMessage());
+        }
+        return ipAddress;
+        } else {
+            throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Resource limit for department has not been set. Please update department quota");
+        }
     }
 
     @Override
@@ -554,6 +677,66 @@ public class IpaddressServiceImpl implements IpaddressService {
                     // 4.5 Check public ip address availability.
                     case GenericConstants.RESOURCE_IP_ADDRESS:
                         optionalMap.put(CloudStackConstants.CS_ASSOCIATE_NETWORK, network.getUuid());
+                        optionalMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
+                        optionalMap.put(CloudStackConstants.CS_FOR_VM_NETWORK, CloudStackConstants.STATUS_ACTIVE);
+                        config.setServer(1L);
+                        String csIpResponse = cloudStackResourceCapacity.listPublicIpAddress(optionalMap,
+                                CloudStackConstants.JSON);
+                        JSONObject csIpCapacity = new JSONObject(csIpResponse)
+                                .getJSONObject(CloudStackConstants.CS_PUBLIC_IPADDRESS_RESPONSE);
+                        if (csIpCapacity.has(CloudStackConstants.CS_CAPACITY_COUNT)) {
+                            LOGGER.debug("Already IP address acquired ", resourceType);
+                        } else if (resourceUsage < 1) {
+                            errMessage = CloudStackConstants.RESOURCE_CHECK + " public.ip.available " + CloudStackConstants.CONTACT_CLOUD_ADMIN;
+                        }
+                        break;
+                    default:
+                        LOGGER.debug("No Resource ", resourceType);
+                    }
+                }
+            }
+        }
+        // 5. If any resource shortage then return error message otherwise
+        // return empty string.
+        return errMessage;
+    }
+
+    /**
+     * Check resouce capacity to create new Vpc.
+     *
+     * @param vpc VPC.
+     * @param optionalMap arguments.
+     * @return error message.
+     * @throws Exception unhandled errors.
+     */
+    public String isResourceAvailableForVPC(VPC vpc, HashMap<String, String> optionalMap) throws Exception {
+        Long resourceUsage = 0L, tempCount = 0L;
+        String errMessage = null;
+        // 1. Initiate CS server connection as ROOT admin.
+        config.setServer(1L);
+        // 2. List capacity CS API call.
+        String csResponse = cloudStackResourceCapacity.listCapacity(optionalMap, CloudStackConstants.JSON);
+        JSONObject csCapacity = new JSONObject(csResponse).getJSONObject(CloudStackConstants.CS_CAPACITY_LIST_RESPONSE);
+        if (csCapacity.has(CloudStackConstants.CS_CAPACITY)) {
+            JSONArray capacityArrayJSON = csCapacity.getJSONArray(CloudStackConstants.CS_CAPACITY);
+            for (int i = 0, size = capacityArrayJSON.length(); i < size; i++) {
+                String resourceType = capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CAPACITY_TYPE);
+                // 2.1 Total capacity in public pool for each resource type.
+                Long tempTotalCapacity = Long
+                        .valueOf(capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CS_CAPACITY_TOTAL));
+                // 2.2 Used capacity in public pool for each resource type.
+                Long tempCapacityUsed = Long
+                        .valueOf(capacityArrayJSON.getJSONObject(i).getString(CloudStackConstants.CS_CAPACITY_USED));
+                if (GenericConstants.RESOURCE_CAPACITY.containsKey(resourceType)) {
+                    // 3.1 Total available resource in public pool for each
+                    // resource type.
+                    resourceUsage = tempTotalCapacity - tempCapacityUsed;
+                    // 4. Check whether resource is available to acquire new ip
+                    // with resource type.
+                    switch (resourceType) {
+                    // 4.5 Check public ip address availability.
+                    case GenericConstants.RESOURCE_IP_ADDRESS:
+                        optionalMap.put(CloudStackConstants.CS_ASSOCIATE_NETWORK, vpc.getUuid());
                         optionalMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
                         optionalMap.put(CloudStackConstants.CS_FOR_VM_NETWORK, CloudStackConstants.STATUS_ACTIVE);
                         config.setServer(1L);
@@ -745,5 +928,10 @@ public class IpaddressServiceImpl implements IpaddressService {
         }
         return ipAddress;
     }
+
+	@Override
+	public Page<IpAddress> findAllByVpc(Long vpcId, PagingAndSorting pagingAndSorting) throws Exception {
+		return ipRepo.findByVPCWithPaging(pagingAndSorting.toPageRequest(), vpcId, State.ALLOCATED);
+	}
 
 }
