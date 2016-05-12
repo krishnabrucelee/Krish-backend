@@ -903,17 +903,7 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public List<Network> findNetworkByVpcIdAndIsActiveForLB(Long vpcId, Boolean isActive,String type) throws Exception {
-        List<Network> networkLists = new ArrayList<Network>();
-        List<Network> networkList = networkRepo.findNetworkByVpcIdAndIsActive(vpcId, true);
-        for (Network network: networkList) {
-            NetworkOffering networkOffering = networkOfferingService.find(network.getNetworkOfferingId());
-            for(SupportedNetwork support :networkOffering.getSupportedNetworkList()){
-                if(support.getName().equals(type)) {
-                    networkLists.add(network);
-                }
-            }
-        }
-        return networkLists;
+    public List<Network> findNetworkByVpcIdAndIsActiveForRule(Long vpcId, Boolean isActive,String type) throws Exception {
+        return networkRepo.findNetworkByVpcIdAndIsActiveAndSupportedService(vpcId, true, type);
     }
 }

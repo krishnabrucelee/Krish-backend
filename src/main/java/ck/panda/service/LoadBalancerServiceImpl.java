@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.LoadBalancerRule;
+import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
@@ -74,6 +75,9 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     /** Project service reference. */
     @Autowired
     private ProjectService projectService;
+
+    @Autowired
+    private NetworkService networkService;
 
     /** Constant for load balancer. */
     private static final String CS_LOADBALANCER = "loadbalancer";
@@ -293,6 +297,10 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         configUtil.setUserServer();
         HashMap<String, String> optional = new HashMap<String, String>();
         IpAddress ipAddress = convertEntityService.getIpAddress(loadBalancer.getIpAddressId());
+        if(loadBalancer.getNetworkId() != null) {
+            Network network = networkService.find(loadBalancer.getNetworkId());
+            optional.put("networkid", network.getUuid());
+        }
         optional.put(CloudStackConstants.CS_DOMAIN_ID, domainService.find(user.getDomainId()).getUuid());
         optional.put("publicipid", ipAddress.getUuid());
         String csResponse = cloudStackLoadBalancerService.createLoadBalancerRule(loadBalancer.getAlgorithm(), loadBalancer.getName(),

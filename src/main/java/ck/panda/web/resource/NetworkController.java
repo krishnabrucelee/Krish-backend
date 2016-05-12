@@ -206,17 +206,18 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
 
 
     /**
-     * List all project related network for instance.
+     * List all Network by vpc id and type of the supported service.
      *
-     * @return networks
-     * @param projectId project id
-     * @throws Exception Exception
+     * @param vpcId of the network.
+     * @param type of the network.
+     * @return networks.
+     * @throws Exception if error occurs.
      */
-    @RequestMapping(value = "vpcNetworkListforlb", method = RequestMethod.GET, produces = {
+    @RequestMapping(value = "vpcNetworkListForRule", method = RequestMethod.GET, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected List<Network> getVpcNetworkListForLB(@RequestParam("vpcId") Long vpcId,@RequestParam("type")String type) throws Exception {
-        return networkService.findNetworkByVpcIdAndIsActiveForLB(vpcId, true,type);
+    protected List<Network> getVpcNetworkListForRule(@RequestParam("vpcId") Long vpcId,@RequestParam("type")String type) throws Exception {
+        return networkService.findNetworkByVpcIdAndIsActiveForRule(vpcId, true,type);
     }
 }

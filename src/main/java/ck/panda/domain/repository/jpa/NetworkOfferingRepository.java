@@ -58,5 +58,4 @@ public interface NetworkOfferingRepository extends PagingAndSortingRepository<Ne
      */
     @Query(value = "SELECT networkOffer FROM NetworkOffering networkOffer WHERE networkOffer.forVpc = :forVpc AND networkOffer.status = :status")
     List<NetworkOffering> findVpcList(@Param("forVpc") Boolean forVpc, @Param("status") Status status);
-
 }
