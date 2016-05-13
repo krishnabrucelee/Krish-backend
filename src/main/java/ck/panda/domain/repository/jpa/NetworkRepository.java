@@ -264,6 +264,7 @@ public interface NetworkRepository extends PagingAndSortingRepository<Network, L
      * @param serviceId service's type.
      * @return list of network.
      */
-	@Query(value = "SELECT net FROM Network net JOIN net.networkOffering.supportedNetworkList supportedService WHERE net.vpcId =:vpcId AND net.isActive =:isActive AND supportedService.id = :serviceId ORDER BY net.id DESC")
-	List<Network> findNetworkByVpcIdAndIsActiveAndType(@Param("vpcId") Long vpcId, @Param("isActive") Boolean isActive, @Param("serviceId") Long serviceId);
+    @Query(value = "SELECT net FROM Network net JOIN net.networkOffering.supportedNetworkList supportedService WHERE net.vpcId =:vpcId AND net.isActive =:isActive AND supportedService.id = :serviceId ORDER BY net.id DESC")
+    List<Network> findNetworkByVpcIdAndIsActiveAndType(@Param("vpcId") Long vpcId, @Param("isActive") Boolean isActive, @Param("serviceId") Long serviceId);
+
 }
