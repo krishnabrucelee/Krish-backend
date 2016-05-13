@@ -28,4 +28,31 @@ public interface VpcAclService extends CRUDService<VpcAcl> {
      */
     VpcAcl findVpcAclById(Long id) throws Exception;
 
+    /**
+     * Add network acl for vpc.
+     *
+     * @param vpcAcl vpc acl
+     * @param vpcId vpc id
+     * @return network acl
+     * @throws Exception exception
+     */
+    VpcAcl addVpcAcl(VpcAcl vpcAcl, Long vpcId) throws Exception;
+
+    /**
+     * List network acl list from vpc id.
+     *
+     * @param vpcId vpc id
+     * @return network acl
+     * @throws Exception exception
+     */
+    List<VpcAcl> findByVpcIdAndIsActive(Long vpcId) throws Exception;
+
+    /**
+     * Soft delete for vpc acl
+     * @param vpcAcl vpc acl
+     * @return vpc acl
+     * @throws Exception
+     */
+    VpcAcl softDelete(VpcAcl vpcAcl) throws Exception;
+
 }
