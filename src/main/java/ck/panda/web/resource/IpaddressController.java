@@ -176,6 +176,34 @@ public class IpaddressController extends CRUDController<IpAddress> implements Ap
     }
 
     /**
+     * Get new ip from zone for current vpc.
+     *
+     * @param vpcId vpc id.
+     * @throws Exception if error occurs.
+     * @return ip address list.
+     */
+    @RequestMapping(value = "/vpc/nat/list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<IpAddress> IpaddressListForVpcWithNAT(@RequestParam("networkId") Long networkId) throws Exception {
+        return ipAddressService.vpcNatList(networkId);
+    }
+
+    /**
+     * Get new ip from zone for current vpc.
+     *
+     * @param vpcId vpc id.
+     * @throws Exception if error occurs.
+     * @return ip address list.
+     */
+    @RequestMapping(value = "/vpc/lb/list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<IpAddress> IpaddressListForVpcWithLB(@RequestParam("networkId") Long networkId) throws Exception {
+        return ipAddressService.vpcLBList(networkId);
+    }
+
+    /**
      * Set static NAT for ipaddress that doesn't have source nat.
      *
      * @param ipaddressId ipaddress's id.

@@ -35,6 +35,26 @@ public interface IpaddressRepository extends PagingAndSortingRepository<IpAddres
     List<IpAddress> findByNetwork(@Param("networkId") Long networkId, @Param("state") IpAddress.State state);
 
     /**
+     * Find all ipaddresses by network Id and Nat.
+     *
+     * @param state get the ipaddress state.
+     * @param networkId from ipaddress
+     * @return ipaddress list.
+     */
+    @Query(value = "SELECT ip FROM IpAddress ip WHERE ip.networkId=:networkId AND ip.state =:state AND isStaticnat = :isStaticNat")
+    List<IpAddress> findByNetworkAndNat(@Param("networkId") Long networkId, @Param("state") IpAddress.State state, @Param("isStaticNat") Boolean nat);
+
+    /**
+     * Find all ipaddresses by network Id and Nat.
+     *
+     * @param state get the ipaddress state.
+     * @param networkId from ipaddress
+     * @return ipaddress list.
+     */
+    @Query(value = "SELECT ip FROM IpAddress ip WHERE ip.networkId=:networkId AND ip.state =:state AND isStaticnat = :isStaticNat")
+    List<IpAddress> findByNetworkAndLB(@Param("networkId") Long networkId, @Param("state") IpAddress.State state, @Param("isStaticNat") Boolean nat);
+
+    /**
      * Find all ipaddresses by vpc Id.
      *
      * @param state get the ipaddress state.

@@ -983,4 +983,13 @@ public class IpaddressServiceImpl implements IpaddressService {
 		return ipRepo.findByVPCWithPaging(pagingAndSorting.toPageRequest(), vpcId, State.ALLOCATED);
 	}
 
+	@Override
+	public List<IpAddress> vpcNatList(Long networkId) throws Exception {
+		return ipRepo.findByNetworkAndNat(networkId, State.ALLOCATED, true);
+	}
+
+	@Override
+	public List<IpAddress> vpcLBList(Long networkId) throws Exception {
+		return loadBalancerService.vpcLBList(networkId);
+	}
 }
