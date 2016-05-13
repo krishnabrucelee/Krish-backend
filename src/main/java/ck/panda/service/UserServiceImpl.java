@@ -372,7 +372,7 @@ public class UserServiceImpl implements UserService {
             // set server for finding value in configuration
             config.setServer(1L);
             csUserService.deleteUser((user.getUuid()), cloudStackConstants.JSON);
-            if(user.getType() == UserType.DOMAIN_ADMIN) {
+            if (user.getType() == UserType.DOMAIN_ADMIN) {
                 Role role = roleService.find(user.getRoleId());
                 role.setStatus(Role.Status.DISABLED);
                 role.setIsActive(false);
@@ -560,40 +560,56 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<User> findAllByUserPanelAndDomainId(Long domainId, String searchText, PagingAndSorting pagingAndSorting) throws Exception {
+    public Page<User> findAllByUserPanelAndDomainId(Long domainId, String searchText, PagingAndSorting pagingAndSorting, Long userId) throws Exception {
+        User user = convertEntityService.getOwnerById(userId);
+        if (convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.DOMAIN_ADMIN)) {
+            domainId = user.getDomainId();
+        }
         List<UserType> userType = new ArrayList<UserType>();
-        if (searchText.equals(UserType.DOMAIN_ADMIN.toString())) {
-            userType.add(UserType.DOMAIN_ADMIN);
-            return userRepository.findAllByDomainId(domainId, true, userType, pagingAndSorting.toPageRequest());
+        Page<User> listUser = null;
+        if (searchText.equals(UserType.DOMAIN_ADMIN.toString()) || searchText.equals(UserType.ROOT_ADMIN.toString())
+                || searchText.equals(UserType.USER.toString())) {
+            if (searchText.equals(UserType.DOMAIN_ADMIN.toString())) {
+                userType.add(UserType.DOMAIN_ADMIN);
+            } else if (searchText.equals(UserType.ROOT_ADMIN.toString())) {
+                userType.add(UserType.ROOT_ADMIN);
+            } else if (searchText.equals(UserType.USER.toString())) {
+                userType.add(UserType.USER);
+            }
+            if (user.getType().equals(User.UserType.USER)) {
+                listUser = userRepository.findAllByUserPanelAndDomainIdAndUserId(domainId, searchText, userType, User.Status.DELETED, pagingAndSorting.toPageRequest(), true, userId);
+            } else {
+                listUser = userRepository.findAllByUserPanelAndDomainId(domainId, searchText, userType, User.Status.DELETED, pagingAndSorting.toPageRequest(), true);
+            }
+        } else {
+            if (user.getType().equals(User.UserType.USER)) {
+                listUser = userRepository.findAllByUserPanelAndDomainIdAndUserId(domainId, searchText, User.Status.DELETED, pagingAndSorting.toPageRequest(), true, userId);
+            } else {
+                listUser = userRepository.findAllByUserPanelAndDomainId(domainId, searchText, User.Status.DELETED, pagingAndSorting.toPageRequest(), true);
+            }
         }
-        if (searchText.equals(UserType.ROOT_ADMIN.toString())) {
-            userType.add(UserType.ROOT_ADMIN);
-            return userRepository.findAllByDomainId(domainId, true, userType, pagingAndSorting.toPageRequest());
-        }
-        if (searchText.equals(UserType.USER.toString())) {
-            userType.add(UserType.USER);
-            return userRepository.findAllByDomainId(domainId, true, userType, pagingAndSorting.toPageRequest());
-        }
-        return userRepository.findAllByUserPanelAndDomainId(domainId, searchText, User.Status.DELETED, pagingAndSorting.toPageRequest(), true);
+        return listUser;
     }
 
     @Override
-    public Page<User> findAllByDomainId(Long domainId, String searchText, PagingAndSorting pagingAndSorting) throws Exception {
+    public Page<User> findAllByDomainId(Long domainId, String searchText, PagingAndSorting pagingAndSorting, Long userId) throws Exception {
 
         List<UserType> userType = new ArrayList<UserType>();
-        if (searchText.equals(UserType.DOMAIN_ADMIN.toString())) {
-            userType.add(UserType.DOMAIN_ADMIN);
-            return userRepository.findAllByDomainId(domainId, true, userType, pagingAndSorting.toPageRequest());
+        Page<User> listUser = null;
+        if (searchText.equals(UserType.DOMAIN_ADMIN.toString()) || searchText.equals(UserType.ROOT_ADMIN.toString())
+                || searchText.equals(UserType.USER.toString())) {
+            if (searchText.equals(UserType.DOMAIN_ADMIN.toString())) {
+                userType.add(UserType.DOMAIN_ADMIN);
+            } else if (searchText.equals(UserType.ROOT_ADMIN.toString())) {
+                userType.add(UserType.ROOT_ADMIN);
+            } else if (searchText.equals(UserType.USER.toString())) {
+                userType.add(UserType.USER);
+            }
+            userRepository.findAllByDomainId(domainId, searchText, true, userType, pagingAndSorting.toPageRequest());
+        } else {
+            userRepository.findAllByDomainId(domainId, searchText, pagingAndSorting.toPageRequest(), true);
         }
-        if (searchText.equals(UserType.ROOT_ADMIN.toString())) {
-            userType.add(UserType.ROOT_ADMIN);
-            return userRepository.findAllByDomainId(domainId, true, userType, pagingAndSorting.toPageRequest());
-        }
-        if (searchText.equals(UserType.USER.toString())) {
-            userType.add(UserType.USER);
-            return userRepository.findAllByDomainId(domainId, true, userType, pagingAndSorting.toPageRequest());
-        }
-        return userRepository.findAllByDomainId(domainId, searchText, pagingAndSorting.toPageRequest(), true);
+        return listUser;
     }
 
     @Override
@@ -629,7 +645,7 @@ public class UserServiceImpl implements UserService {
         User users = userRepository.findOne(user.getId());
         users.setStatus(User.Status.SUSPENDED);
         // Update the vm status to stopped while suspending the account
-        if(user.getStatus() == User.Status.SUSPENDED) {
+        if (user.getStatus() == User.Status.SUSPENDED) {
             virtualMachineService.updateVmToStoppedByOwnerAndStatus(users, VmInstance.Status.RUNNING);
         }
         return userRepository.save(users);
@@ -690,7 +706,34 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> findBySearchText(Long domainId, String searchText) throws Exception {
-        return userRepository.findBySearchText(domainId, searchText);
+    public List<User> findBySearchCount(Long domainId, String searchText, Long userId) throws Exception {
+        User user = convertEntityService.getOwnerById(userId);
+        if (convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.DOMAIN_ADMIN)) {
+            domainId = user.getDomainId();
+        }
+        List<UserType> userType = new ArrayList<UserType>();
+        List<User> listUser = null;
+        if (searchText.equals(UserType.DOMAIN_ADMIN.toString()) || searchText.equals(UserType.ROOT_ADMIN.toString())
+                || searchText.equals(UserType.USER.toString())) {
+            if (searchText.equals(UserType.DOMAIN_ADMIN.toString())) {
+                userType.add(UserType.DOMAIN_ADMIN);
+            } else if (searchText.equals(UserType.ROOT_ADMIN.toString())) {
+                userType.add(UserType.ROOT_ADMIN);
+            } else if (searchText.equals(UserType.USER.toString())) {
+                userType.add(UserType.USER);
+            }
+            if (user.getType().equals(User.UserType.USER)) {
+                listUser = userRepository.findAllByDomainIdAndSearchTextAndUserIdAndUserTypeCount(domainId, searchText, userType, User.Status.DELETED, true, userId);
+            } else {
+                listUser = userRepository.findAllByDomainIdAndUserTypeAndStatusCount(domainId, searchText, userType, User.Status.DELETED, true);
+            }
+        } else {
+            if (user.getType().equals(User.UserType.USER)) {
+                listUser = userRepository.findAllByDomainIdAndSearchTextAndUserIdCount(domainId, searchText, User.Status.DELETED, true, userId);
+            } else {
+                listUser = userRepository.findAllByDomainIdAndSearchTextAndStatusCount(domainId, searchText, User.Status.DELETED, true);
+            }
+        }
+        return listUser;
     }
 }

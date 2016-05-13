@@ -84,4 +84,16 @@ public interface SnapshotService extends CRUDService<Snapshot> {
      * @throws Exception if error occurs.
      */
     List<Snapshot> findAllByActive(Boolean isActive) throws Exception;
+
+    /**
+     * Find all snapshots by search text and domain id.
+     *
+     * @param domainId of the domain.
+     * @param pagingAndSorting for pagination.
+     * @param searchText for snaphsot.
+     * @return vm snapshot.
+     * @throws Exception if error occurs.
+     */
+    Page<Snapshot> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText)
+            throws Exception;
 }

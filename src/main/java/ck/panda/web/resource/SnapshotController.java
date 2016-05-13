@@ -119,10 +119,41 @@ public class SnapshotController extends CRUDController<Snapshot> implements ApiC
         return snapshotService.revertSnapshot(snapshot);
     }
 
+    /**
+     * Get active snapshot list
+     *
+     * @return snapshot
+     * @throws Exception if error occurs.
+     */
     @RequestMapping(value = "list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<Snapshot> getSearch() throws Exception {
         return snapshotService.findAllByActive(true);
+    }
+
+    /**
+     * Get all snapshot list by domain.
+     *
+     * @param sortBy asc/desc
+     * @param domainId domain id of snapshot.
+     * @param range pagination range.
+     * @param limit per page limit.
+     * @param request page request.
+     * @param response response content.
+     * @return snapshot list.
+     * @throws Exception unhandled exception.
+     */
+    @RequestMapping(value = "/listByDomain", method = RequestMethod.GET, produces = {
+            MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public List<Snapshot> listSnapshotByDomainId(@RequestParam String sortBy, @RequestParam Long domainId, @RequestParam String searchText,
+            @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, Snapshot.class);
+        Page<Snapshot> pageResponse = snapshotService.findAllByDomainIdAndSearchText(domainId, page, searchText);
+        response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
+        return pageResponse.getContent();
     }
 }

@@ -277,7 +277,7 @@ public class UserController extends CRUDController<User> implements ApiControlle
     /**
      * Update password of user.
      *
-     * @param users user.
+     * @param user user.
      * @return users.
      * @throws Exception error
      */
@@ -312,6 +312,8 @@ public class UserController extends CRUDController<User> implements ApiControlle
      * @param limit per page limit.
      * @param request page request.
      * @param response response content.
+     * @param searchText search text
+     * @param flag value
      * @return user list.
      * @throws Exception unhandled exception.
      */
@@ -324,12 +326,10 @@ public class UserController extends CRUDController<User> implements ApiControlle
             HttpServletRequest request, HttpServletResponse response) throws Exception {
 
             PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, User.class);
-            Page<User> pageResponse = userService.findAllByUserPanelAndDomainId(domainId, searchText, page);
+            Page<User> pageResponse = userService.findAllByUserPanelAndDomainId(domainId, searchText, page, Long.valueOf(tokenDetails.getTokenDetails("id")));
             response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
             return pageResponse.getContent();
     }
-
-
 
     /**
      * Get all user list by domain.
@@ -340,6 +340,8 @@ public class UserController extends CRUDController<User> implements ApiControlle
      * @param limit per page limit.
      * @param request page request.
      * @param response response content.
+     * @param searchText search text
+     * @param flag value
      * @return user list.
      * @throws Exception unhandled exception.
      */
@@ -347,12 +349,12 @@ public class UserController extends CRUDController<User> implements ApiControlle
             MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public List<User> listUserByFilter(@RequestParam String sortBy, @RequestParam Long domainId, @RequestParam String searchText,
+    public List<User> listAdminByFilter(@RequestParam String sortBy, @RequestParam Long domainId, @RequestParam String searchText,
             @RequestParam String flag, @RequestHeader(value = RANGE) String range, @RequestParam(required = false) Integer limit,
             HttpServletRequest request, HttpServletResponse response) throws Exception {
 
             PagingAndSorting page = new PagingAndSorting(range, sortBy, limit, User.class);
-            Page<User> pageResponse = userService.findAllByDomainId(domainId, searchText, page);
+            Page<User> pageResponse = userService.findAllByDomainId(domainId, searchText, page, Long.valueOf(tokenDetails.getTokenDetails("id")));
             response.setHeader(GenericConstants.CONTENT_RANGE_HEADER, page.getPageHeaderValue(pageResponse));
             return pageResponse.getContent();
     }
@@ -360,6 +362,8 @@ public class UserController extends CRUDController<User> implements ApiControlle
     /**
      * Count of users for search.
      *
+     * @param domainId domain id
+     * @param searchText search text
      * @return user user
      * @throws Exception unhandled errors.
      */
@@ -367,8 +371,9 @@ public class UserController extends CRUDController<User> implements ApiControlle
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<User> getSearchCount(@RequestParam Long domainId, @RequestParam String searchText) throws Exception {
-        return userService.findBySearchText(domainId,searchText);
+        return userService.findBySearchCount(domainId, searchText, Long.valueOf(tokenDetails.getTokenDetails("id")));
     }
+
     /**
      * Method to get list of required parameter of user.
      *

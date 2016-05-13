@@ -200,26 +200,28 @@ public interface UserService extends CRUDService<User> {
      * @param domainId domain id of the user.
      * @param searchText search text.
      * @param pagingAndSorting paging and sorting information.
+     * @param userId user id
      * @return list of user.
      * @throws Exception if error occurs.
      */
-    Page<User> findAllByUserPanelAndDomainId(Long domainId, String searchText, PagingAndSorting pagingAndSorting) throws Exception;
+    Page<User> findAllByUserPanelAndDomainId(Long domainId, String searchText, PagingAndSorting pagingAndSorting, Long userId) throws Exception;
 
     /**
      * Find all the user by domain.
      *
      * @param domainId domain id of the user.
      * @param pagingAndSorting paging and sorting information.
+     * @param userId user id
+     * @param searchText search text
      * @return list of user.
      * @throws Exception if error occurs.
      */
-    Page<User> findAllByDomainId(Long domainId, String searchText, PagingAndSorting pagingAndSorting) throws Exception;
-
+    Page<User> findAllByDomainId(Long domainId, String searchText, PagingAndSorting pagingAndSorting, Long userId) throws Exception;
 
     /**
      * Update password of user.
      *
-     * @param users user.
+     * @param user user.
      * @return users.
      * @throws Exception error
      */
@@ -258,7 +260,7 @@ public interface UserService extends CRUDService<User> {
     /**
      * Find the user type based on the isActive status.
      *
-     * @param type for user.
+     * @param rootAdmin for user type.
      * @param isActive user status Active/Inactive
      * @throws Exception error occur
      * @return users.
@@ -274,8 +276,22 @@ public interface UserService extends CRUDService<User> {
      */
     User updateSuspended(User user) throws Exception;
 
+    /**
+     * Get user details by name and status.
+     *
+     * @param username user name
+     * @param isActive user status Active/Inactive
+     * @return user
+     */
     User findByUserNameAndActive(String username, Boolean isActive);
 
+    /**
+     * Get user session details.
+     *
+     * @param id user id
+     * @return session details
+     * @throws Exception Exception if error.
+     */
     String findByUserSessionDetails(Long id) throws Exception;
 
     /**
@@ -285,7 +301,6 @@ public interface UserService extends CRUDService<User> {
      * @throws Exception if error occurs.
      */
     List<User> findByRootAdminUser() throws Exception;
-
 
     /**
      * Find all the user by domain.
@@ -301,9 +316,10 @@ public interface UserService extends CRUDService<User> {
      *
      * @param domainId domain id.
      * @param searchText search text.
+     * @param userId user id
      * @return user
      * @throws Exception unhandled errors.
      */
-    List<User> findBySearchText(Long domainId, String searchText) throws Exception;
+    List<User> findBySearchCount(Long domainId, String searchText, Long userId) throws Exception;
 
 }
