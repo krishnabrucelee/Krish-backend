@@ -108,6 +108,18 @@ public interface IpaddressService extends CRUDService<IpAddress> {
     IpAddress enableStaticNat(Long ipAddressId, Long vmId, String ipaddress) throws Exception;
 
     /**
+     * Enable static NAT for IP address.
+     *
+     * @param ipAddressId to be enable static nat.
+     * @param vmId virtual machine id.
+     * @param ipaddress guest ipaddress.
+     * @param networkId network's uuid.
+     * @return ip address.
+     * @throws Exception if error occurs.
+     */
+    IpAddress enableStaticNatForVpc(Long ipAddressId, Long vmId, String ipaddress, String networkId) throws Exception;
+
+    /**
      * Disable static NAT for IP address.
      *
      * @param ipAddressId for network.

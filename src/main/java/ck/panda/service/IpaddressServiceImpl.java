@@ -619,6 +619,38 @@ public class IpaddressServiceImpl implements IpaddressService {
     }
 
     @Override
+    public IpAddress enableStaticNatForVpc(Long ipAddressId, Long vmId, String ipAddress, String networkId) throws Exception {
+        IpAddress ipaddress = ipRepo.findOne(ipAddressId);
+        String vmid = null;
+        if (convertEntityService.getVmInstanceById(vmId) != null) {
+            ipaddress.setVmInstanceId(vmId);
+            vmid = convertEntityService.getVmInstanceById(vmId).getUuid();
+        }
+        try {
+            HashMap<String, String> ipMap = new HashMap<String, String>();
+            configServer.setUserServer();
+            ipMap.put("vmguestip", ipAddress);
+            if (ipaddress.getVpcId() != null) {
+            	ipMap.put(CloudStackConstants.CS_NETWORK_ID, networkId);
+            }
+            String enableResponse = csipaddressService.enableStaticNat(ipaddress.getUuid(), vmid, ipMap);
+            JSONObject jobId = new JSONObject(enableResponse).getJSONObject("enablestaticnatresponse");
+            if (jobId.has("errorcode")) {
+                Errors errors = validator.sendGlobalError(jobId.getString("errortext"));
+                if (errors.hasErrors()) {
+                    throw new BadCredentialsException(jobId.getString("errortext"));
+                }
+            } else {
+                ipaddress.setIsStaticnat(true);
+            }
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException(e.getMessage());
+        }
+        return ipRepo.save(ipaddress);
+    }
+
+
+    @Override
     public IpAddress disableStaticNat(Long ipAddressId) throws Exception {
         IpAddress ipaddress = ipRepo.findOne(ipAddressId);
         try {
@@ -758,7 +790,7 @@ public class IpaddressServiceImpl implements IpaddressService {
             }
         }
         // 5. If any resource shortage then return error message otherwise
-        // return empty string.
+        // return empty string.setVpnState
         return errMessage;
     }
 
@@ -766,18 +798,32 @@ public class IpaddressServiceImpl implements IpaddressService {
     public IpAddress enableRemoteAccessVpn(String uuid) throws Exception {
         Errors errors = null;
         IpAddress ipAddress = findbyUUID(uuid);
+        Boolean routerStatus = false;
         try {
             String projectUuid = null;
             if (ipAddress.getProject() != null) {
                 projectUuid = ipAddress.getProject().getUuid();
             }
-            Boolean routerStatus = virtualRoutersStatusCheck(ipAddress.getNetwork().getDomain().getUuid(),
-                    ipAddress.getNetwork().getDepartment().getUserName(), ipAddress.getNetwork().getUuid(), projectUuid);
+            if(ipAddress.getVpcId() != null) {
+                if (ipAddress.getVpc().getProject() != null) {
+                    projectUuid = ipAddress.getVpc().getProject().getUuid();
+                }
+            	routerStatus = virtualRoutersStatusCheck(ipAddress.getVpc().getDomain().getUuid(),
+                        ipAddress.getVpc().getDepartment().getUserName(), ipAddress.getVpc().getUuid(), projectUuid, ipAddress.getVpc().getUuid());
+            } else {
+                routerStatus = virtualRoutersStatusCheck(ipAddress.getNetwork().getDomain().getUuid(),
+                        ipAddress.getNetwork().getDepartment().getUserName(), ipAddress.getNetwork().getUuid(), projectUuid, null);
+            }
             if (routerStatus) {
                 configServer.setUserServer();
                 HashMap<String, String> optional = new HashMap<String, String>();
-                optional.put(CloudStackConstants.CS_DOMAIN_ID, ipAddress.getNetwork().getDomain().getUuid());
-                optional.put(CloudStackConstants.CS_ACCOUNT, ipAddress.getNetwork().getDepartment().getUserName());
+				if (ipAddress.getVpcId() != null) {
+					optional.put(CloudStackConstants.CS_DOMAIN_ID, ipAddress.getVpc().getDomain().getUuid());
+					optional.put(CloudStackConstants.CS_ACCOUNT, ipAddress.getVpc().getDepartment().getUserName());
+				} else {
+					optional.put(CloudStackConstants.CS_DOMAIN_ID, ipAddress.getNetwork().getDomain().getUuid());
+					optional.put(CloudStackConstants.CS_ACCOUNT, ipAddress.getNetwork().getDepartment().getUserName());
+				}
                 String createRemoteAccess = csVPNService.createRemoteAccessVpn(ipAddress.getUuid(), optional, CloudStackConstants.JSON);
                 JSONObject jobId = new JSONObject(createRemoteAccess).getJSONObject(CloudStackConstants.CS_CREATE_REMOTE_ACCESS_VPN);
                 if (jobId.has(CloudStackConstants.CS_ERROR_CODE)) {
@@ -831,12 +877,16 @@ public class IpaddressServiceImpl implements IpaddressService {
      * @return encrypted value
      * @throws Exception unhandled errors.
      */
-    private Boolean virtualRoutersStatusCheck(String domainId, String accountName, String networkId, String projectId) throws Exception {
+    private Boolean virtualRoutersStatusCheck(String domainId, String accountName, String networkId, String projectId, String vpcId) throws Exception {
         Boolean routerState = false;
         JSONArray routerListJSON = null;
         HashMap<String, String> routerOptional = new HashMap<String, String>();
         routerOptional.put(CloudStackConstants.CS_DOMAIN_ID, domainId);
-        routerOptional.put(CloudStackConstants.CS_NETWORK_ID, networkId);
+		if (vpcId != null) {
+			routerOptional.put(CloudStackConstants.CS_VPC_ID, vpcId);
+		} else {
+			routerOptional.put(CloudStackConstants.CS_NETWORK_ID, networkId);
+		}
         if (projectId !=null) {
             routerOptional.put(CloudStackConstants.CS_PROJECT_ID, projectId);
         } else {
@@ -860,7 +910,6 @@ public class IpaddressServiceImpl implements IpaddressService {
         IpAddress ipAddress = findbyUUID(uuid);
         try {
             configServer.setUserServer();
-
             String createRemoteAccess = csVPNService.deleteRemoteAccessVpn(ipAddress.getUuid(), CloudStackConstants.JSON);
             JSONObject jobId = new JSONObject(createRemoteAccess).getJSONObject(CloudStackConstants.CS_DELETE_REMOTE_ACCESS_VPN);
             if (jobId.has(CloudStackConstants.CS_ERROR_CODE)) {

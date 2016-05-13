@@ -166,4 +166,14 @@ public interface NetworkService extends CRUDService<Network> {
      */
     List<Network> findNetworkByVpcIdAndIsActive(Long vpcId, Boolean isActive) throws Exception;
 
-}
+    /**
+     * To get list of networks by VPC id.
+     *
+     * @param vpcId VPC id.
+     * @param isActive true/false.
+     * @param type type of service.
+     * @return network list from server.
+     * @throws Exception unhandled errors.
+     */
+    List<Network> findNetworkByVpcIdAndIsActiveAndType(Long vpcId, Boolean isActive, String type) throws Exception;
+  }
