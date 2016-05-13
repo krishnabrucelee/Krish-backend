@@ -14,7 +14,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
 import org.hibernate.annotations.Type;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
@@ -160,7 +159,7 @@ public class VpcAcl implements Serializable {
     }
 
     /**
-     * Get the vpcId of VpcAcl.java
+     * Get the vpcId of VpcAcl
      *
      * @return the vpcId
      */
@@ -169,7 +168,7 @@ public class VpcAcl implements Serializable {
     }
 
     /**
-     * Set the vpcId of VpcAcl.java
+     * Set the vpcId of VpcAcl
      *
      * @param vpcId the vpcId to set
      */

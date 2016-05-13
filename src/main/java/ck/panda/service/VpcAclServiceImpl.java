@@ -118,28 +118,27 @@ public class VpcAclServiceImpl implements VpcAclService {
         HashMap<String, String> vpcAclMap = new HashMap<String, String>();
         vpcAclMap.put("vpcid", vpcService.find(vpcId).getUuid());
         try {
-        config.setUserServer();
-        String vpcAclResponse= cloudStackVPCService.createNetworkACLList(vpcAcl.getName(),
-                vpcAcl.getDescription(), CloudStackConstants.JSON, vpcAclMap);
-        JSONObject createVpcResponseJSON = new JSONObject(vpcAclResponse)
-                .getJSONObject("createnetworkacllistresponse");
-
-        JSONObject jobId = new JSONObject(vpcAclResponse).getJSONObject("createnetworkacllistresponse");
-        // Checking job id.
-        if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
-            String jobResponse = cloudStackVPCService.vpcJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
-                    CloudStackConstants.JSON);
-            JSONObject jobresult = new JSONObject(jobResponse)
-                    .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
-            if(jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
-                    .equals(GenericConstants.ERROR_JOB_STATUS)){
-                throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, jobresult.getString(CloudStackConstants.CS_ERROR_TEXT));
+            config.setUserServer();
+            String vpcAclResponse = cloudStackVPCService.createNetworkACLList(vpcAcl.getName(), vpcAcl.getDescription(),
+                    CloudStackConstants.JSON, vpcAclMap);
+            JSONObject createVpcResponseJSON = new JSONObject(vpcAclResponse)
+                    .getJSONObject("createnetworkacllistresponse");
+            JSONObject jobId = new JSONObject(vpcAclResponse).getJSONObject("createnetworkacllistresponse");
+            // Checking job id.
+            if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
+                String jobResponse = cloudStackVPCService.vpcJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID),
+                        CloudStackConstants.JSON);
+                JSONObject jobresult = new JSONObject(jobResponse)
+                        .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+                if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS).equals(GenericConstants.ERROR_JOB_STATUS)) {
+                    throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
+                            jobresult.getString(CloudStackConstants.CS_ERROR_TEXT));
+                }
             }
-        }
-        vpcAcl.setUuid(createVpcResponseJSON.getString(CloudStackConstants.CS_ID));
-        vpcAcl.setVpcId(vpcId);
-        vpcAcl.setForDisplay(true);
-        vpcAcl.setIsActive(true);
+            vpcAcl.setUuid(createVpcResponseJSON.getString(CloudStackConstants.CS_ID));
+            vpcAcl.setVpcId(vpcId);
+            vpcAcl.setForDisplay(true);
+            vpcAcl.setIsActive(true);
         } catch (ApplicationException e) {
             LOGGER.error("ERROR AT VPC ACL CREATION", e);
             throw new ApplicationException(e.getErrors());
@@ -158,7 +157,8 @@ public class VpcAclServiceImpl implements VpcAclService {
         HashMap<String, String> vpcAclMap = new HashMap<String, String>();
         try {
             config.setUserServer();
-            String vpcAclResponse= cloudStackVPCService.deleteNetworkACLList(vpcAcl.getUuid(), CloudStackConstants.JSON, vpcAclMap);
+            String vpcAclResponse = cloudStackVPCService.deleteNetworkACLList(vpcAcl.getUuid(),
+                    CloudStackConstants.JSON, vpcAclMap);
             JSONObject jobId = new JSONObject(vpcAclResponse).getJSONObject("deletenetworkacllistresponse");
             // Checking job id.
             if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
@@ -166,16 +166,16 @@ public class VpcAclServiceImpl implements VpcAclService {
                         CloudStackConstants.JSON);
                 JSONObject jobresult = new JSONObject(jobResponse)
                         .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
-                if(jobresult.getString(CloudStackConstants.CS_JOB_STATUS)
-                        .equals(GenericConstants.ERROR_JOB_STATUS)){
-                    throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, jobresult.getString(CloudStackConstants.CS_ERROR_TEXT));
+                if (jobresult.getString(CloudStackConstants.CS_JOB_STATUS).equals(GenericConstants.ERROR_JOB_STATUS)) {
+                    throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED,
+                            jobresult.getString(CloudStackConstants.CS_ERROR_TEXT));
                 }
             }
             vpcAcl.setIsActive(false);
-            } catch (ApplicationException e) {
-                LOGGER.error("ERROR AT VPC ACL DELETION", e);
-                throw new ApplicationException(e.getErrors());
-            }
+        } catch (ApplicationException e) {
+            LOGGER.error("ERROR AT VPC ACL DELETION", e);
+            throw new ApplicationException(e.getErrors());
+        }
         return vpcAclRepo.save(vpcAcl);
     }
 

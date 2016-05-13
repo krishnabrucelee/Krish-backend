@@ -1,7 +1,6 @@
 package ck.panda.web.resource;
 
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,10 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
-
-import ck.panda.domain.entity.VpcAcl;
 import ck.panda.domain.entity.VpcNetworkAcl;
-import ck.panda.service.VpcAclService;
 import ck.panda.service.VpcNetworkAclService;
 import ck.panda.util.web.ApiController;
 import ck.panda.util.web.CRUDController;
