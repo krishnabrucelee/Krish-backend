@@ -224,7 +224,6 @@ public class UserServiceImpl implements UserService {
                 HashMap<String, String> optional = new HashMap<String, String>();
                 optional.put(cloudStackConstants.CS_DOMAIN_ID, user.getDomain().getUuid());
                 optional.put(cloudStackConstants.CS_USER_NAME, user.getUserName());
-                optional.put(cloudStackConstants.CS_PASSWORD, user.getPassword());
                 config.setServer(1L);
                 csUserService.updateUser(user.getUuid(), optional, cloudStackConstants.JSON);
                 if (user.getType() == User.UserType.DOMAIN_ADMIN) {
