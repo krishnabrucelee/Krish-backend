@@ -216,18 +216,20 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
      */
     private void updateResourceProject(ResourceLimitProject resource) throws Exception {
         config.setServer(1L);
-        String resourceLimits = csResourceLimitService.updateResourceLimit(resource.getResourceType().ordinal(), CloudStackConstants.JSON,
-                optionalValues(resource));
-        LOGGER.info("Resource limit project update response " + resourceLimits);
-        JSONObject resourceLimitsResponse = new JSONObject(resourceLimits).getJSONObject(CS_UPDATE_RESOURCE_RESPONSE)
-                .getJSONObject(CS_RESOUCE_LIMIT);
-        if (resourceLimitsResponse.has(CloudStackConstants.CS_ERROR_CODE)) {
-            LOGGER.debug("ERROR IN RESOURCE PROJECT");
-        } else {
-            resource.setDomainId(resource.getDomain().getId());
-            resource.setResourceType(resource.getResourceType());
-            resource.setMax(resource.getMax());
-        }
+		if (!resource.getResourceType().equals(ResourceLimitProject.ResourceType.Project)) {
+			String resourceLimits = csResourceLimitService.updateResourceLimit(resource.getResourceType().ordinal(),
+					CloudStackConstants.JSON, optionalValues(resource));
+			LOGGER.info("Resource limit project update response " + resourceLimits);
+			JSONObject resourceLimitsResponse = new JSONObject(resourceLimits)
+					.getJSONObject(CS_UPDATE_RESOURCE_RESPONSE).getJSONObject(CS_RESOUCE_LIMIT);
+			if (resourceLimitsResponse.has(CloudStackConstants.CS_ERROR_CODE)) {
+				LOGGER.debug("ERROR IN RESOURCE PROJECT");
+			} else {
+				resource.setDomainId(resource.getDomain().getId());
+				resource.setResourceType(resource.getResourceType());
+				resource.setMax(resource.getMax());
+			}
+		}
     }
 
     @Override

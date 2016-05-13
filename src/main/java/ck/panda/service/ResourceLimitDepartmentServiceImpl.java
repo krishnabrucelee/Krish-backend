@@ -214,18 +214,20 @@ public class ResourceLimitDepartmentServiceImpl implements ResourceLimitDepartme
      */
     private void updateResourceDepartment(ResourceLimitDepartment resource) throws Exception {
         config.setServer(1L);
-        String resourceLimits = csResourceLimitService.updateResourceLimit(resource.getResourceType().ordinal(), "json",
-                optional(resource));
-        LOGGER.info("Resource limit update response " + resourceLimits);
-        JSONObject resourceLimitsResponse = new JSONObject(resourceLimits).getJSONObject("updateresourcelimitresponse")
-                .getJSONObject("resourcelimit");
-        if (resourceLimitsResponse.has("errorcode")) {
-            LOGGER.debug("ERROR IN RESOURCE DEPARTMENT");
-        } else {
-            resource.setDomainId(resource.getDomain().getId());
-            resource.setResourceType(resource.getResourceType());
-            resource.setMax(resource.getMax());
-        }
+        if(!resource.getResourceType().equals(ResourceLimitDepartment.ResourceType.Project)) {
+			String resourceLimits = csResourceLimitService.updateResourceLimit(resource.getResourceType().ordinal(),
+					"json", optional(resource));
+			LOGGER.info("Resource limit update response " + resourceLimits);
+			JSONObject resourceLimitsResponse = new JSONObject(resourceLimits)
+					.getJSONObject("updateresourcelimitresponse").getJSONObject("resourcelimit");
+			if (resourceLimitsResponse.has("errorcode")) {
+				LOGGER.debug("ERROR IN RESOURCE DEPARTMENT");
+			} else {
+				resource.setDomainId(resource.getDomain().getId());
+				resource.setResourceType(resource.getResourceType());
+				resource.setMax(resource.getMax());
+			}
+		}
     }
 
     /**
