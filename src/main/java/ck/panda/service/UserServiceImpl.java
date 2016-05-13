@@ -273,6 +273,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> findAll() throws Exception {
+        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails("id")));
+        if (user.getType().equals(User.UserType.DOMAIN_ADMIN)) {
+            return userRepository.findAllByDomainIdAndSearchTextAndStatusCount(user.getDomainId(), "", User.Status.DELETED, true);
+        } else if (user.getType().equals(User.UserType.USER)) {
+            return userRepository.findAllByDomainIdAndSearchTextAndUserIdCount(user.getDomainId(), "", User.Status.DELETED, true, user.getId());
+        }
         return (List<User>) userRepository.findAll();
     }
 
@@ -398,9 +404,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<User> findAllUserByDomain(PagingAndSorting pagingAndSorting, Long userId, Status status) throws Exception {
-        User user = userRepository.findOne(userId);
-        if (user != null && !user.getType().equals(UserType.ROOT_ADMIN)) {
-            return userRepository.findAllUserByDomain(pagingAndSorting.toPageRequest(), user.getDomain(), status);
+        User user = convertEntityService.getOwnerById(userId);
+        if (user.getType().equals(User.UserType.DOMAIN_ADMIN)) {
+            return userRepository.findAllByUserPanelAndDomainId(user.getDomainId(), "", status, pagingAndSorting.toPageRequest(), true);
+        } else if (user.getType().equals(User.UserType.USER)) {
+            return userRepository.findAllByUserPanelAndDomainIdAndUserId(user.getDomainId(), "", status, pagingAndSorting.toPageRequest(), true, user.getId());
         }
         return userRepository.findAllUserByStatus(pagingAndSorting.toPageRequest(), status);
     }
@@ -605,9 +613,9 @@ public class UserServiceImpl implements UserService {
             } else if (searchText.equals(UserType.USER.toString())) {
                 userType.add(UserType.USER);
             }
-            userRepository.findAllByDomainId(domainId, searchText, true, userType, pagingAndSorting.toPageRequest());
+            listUser = userRepository.findAllByDomainId(domainId, searchText, true, userType, pagingAndSorting.toPageRequest());
         } else {
-            userRepository.findAllByDomainId(domainId, searchText, pagingAndSorting.toPageRequest(), true);
+            listUser = userRepository.findAllByDomainId(domainId, searchText, pagingAndSorting.toPageRequest(), true);
         }
         return listUser;
     }
@@ -637,7 +645,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<User> findAllByActive(PagingAndSorting pagingAndSorting, Long id) throws Exception {
-            return userRepository.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
+        User user = convertEntityService.getOwnerById(id);
+        if (user.getType().equals(User.UserType.DOMAIN_ADMIN)) {
+            return userRepository.findAllByUserPanelAndDomainId(user.getDomainId(), "", User.Status.DELETED, pagingAndSorting.toPageRequest(), true);
+        } else if (user.getType().equals(User.UserType.USER)) {
+            return userRepository.findAllByUserPanelAndDomainIdAndUserId(user.getDomainId(), "", User.Status.DELETED, pagingAndSorting.toPageRequest(), true, user.getId());
+        }
+        return userRepository.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
     }
 
     @Override
@@ -706,7 +720,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> findBySearchCount(Long domainId, String searchText, Long userId) throws Exception {
+    public List<User> findBySearchCount(Long domainId, String searchText, Long userId, String flag) throws Exception {
         User user = convertEntityService.getOwnerById(userId);
         if (convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.DOMAIN_ADMIN)) {
             domainId = user.getDomainId();
@@ -725,13 +739,21 @@ public class UserServiceImpl implements UserService {
             if (user.getType().equals(User.UserType.USER)) {
                 listUser = userRepository.findAllByDomainIdAndSearchTextAndUserIdAndUserTypeCount(domainId, searchText, userType, User.Status.DELETED, true, userId);
             } else {
-                listUser = userRepository.findAllByDomainIdAndUserTypeAndStatusCount(domainId, searchText, userType, User.Status.DELETED, true);
+                if (flag.equals("pandaAdminPanel")) {
+                    listUser = userRepository.findAllByDomainIdAndUserTypeAndStatusWithDeletedCount(domainId, searchText, userType, true);
+                } else {
+                    listUser = userRepository.findAllByDomainIdAndUserTypeAndStatusCount(domainId, searchText, userType, User.Status.DELETED, true);
+                }
             }
         } else {
             if (user.getType().equals(User.UserType.USER)) {
                 listUser = userRepository.findAllByDomainIdAndSearchTextAndUserIdCount(domainId, searchText, User.Status.DELETED, true, userId);
             } else {
-                listUser = userRepository.findAllByDomainIdAndSearchTextAndStatusCount(domainId, searchText, User.Status.DELETED, true);
+                if (flag.equals("pandaAdminPanel")) {
+                    listUser = userRepository.findAllByDomainIdAndSearchTextAndStatusWithDeletedCount(domainId, searchText, true);
+                } else {
+                    listUser = userRepository.findAllByDomainIdAndSearchTextAndStatusCount(domainId, searchText, User.Status.DELETED, true);
+                }
             }
         }
         return listUser;

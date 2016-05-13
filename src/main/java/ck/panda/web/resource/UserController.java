@@ -364,14 +364,15 @@ public class UserController extends CRUDController<User> implements ApiControlle
      *
      * @param domainId domain id
      * @param searchText search text
+     * @param flag value
      * @return user user
      * @throws Exception unhandled errors.
      */
     @RequestMapping(value = "listBySearchText", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    protected List<User> getSearchCount(@RequestParam Long domainId, @RequestParam String searchText) throws Exception {
-        return userService.findBySearchCount(domainId, searchText, Long.valueOf(tokenDetails.getTokenDetails("id")));
+    protected List<User> getSearchCount(@RequestParam Long domainId, @RequestParam String searchText, @RequestParam String flag) throws Exception {
+        return userService.findBySearchCount(domainId, searchText, Long.valueOf(tokenDetails.getTokenDetails("id")), flag);
     }
 
     /**

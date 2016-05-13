@@ -317,9 +317,10 @@ public interface UserService extends CRUDService<User> {
      * @param domainId domain id.
      * @param searchText search text.
      * @param userId user id
+     * @param flag value
      * @return user
      * @throws Exception unhandled errors.
      */
-    List<User> findBySearchCount(Long domainId, String searchText, Long userId) throws Exception;
+    List<User> findBySearchCount(Long domainId, String searchText, Long userId, String flag) throws Exception;
 
 }

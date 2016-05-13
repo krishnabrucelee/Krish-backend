@@ -23,7 +23,7 @@ public interface SnapshotRepository extends PagingAndSortingRepository<Snapshot,
      * @param isActive get the snapshot list based on active/inactive status.
      * @return list of snapshots.
      */
-    @Query(value = "select snap from Snapshot snap where snap.isActive =:isActive")
+    @Query(value = "SELECT snap FROM Snapshot snap WHERE snap.isActive =:isActive")
     Page<Snapshot> findAllByIsActive(Pageable pageable, @Param("isActive") Boolean isActive);
 
     /**
@@ -33,7 +33,7 @@ public interface SnapshotRepository extends PagingAndSortingRepository<Snapshot,
      * @param isActive get the snapshot list based on active/inactive status.
      * @return snapshot name.
      */
-    @Query(value = "select snap from Snapshot snap where snap.name=:name AND snap.isActive =:isActive")
+    @Query(value = "SELECT snap FROM Snapshot snap WHERE snap.name=:name AND snap.isActive =:isActive")
     Snapshot findByNameAndIsActive(@Param("name") String name, @Param("isActive") Boolean isActive);
 
     /**
@@ -51,7 +51,7 @@ public interface SnapshotRepository extends PagingAndSortingRepository<Snapshot,
      * @param isActive get the snapshot list based on active/inactive status.
      * @return Vm snapshot.
      */
-    @Query(value = "select snap from Snapshot snap where snap.policyIsActive = :isActive")
+    @Query(value = "SELECT snap FROM Snapshot snap WHERE snap.policyIsActive = :isActive")
     List<Snapshot> findAllByIsActive(@Param("isActive") Boolean isActive);
 
     /**
@@ -63,7 +63,7 @@ public interface SnapshotRepository extends PagingAndSortingRepository<Snapshot,
      * @param search search text
      * @return Vm snapshot.
      */
-    @Query(value = "select snapshot from Snapshot snapshot where (snapshot.domainId =:domainId OR 0L = :domainId) AND snapshot.isActive =:isActive AND (snapshot.name LIKE %:search% OR snapshot.volume.name LIKE %:search% "
+    @Query(value = "SELECT snapshot FROM Snapshot snapshot WHERE (snapshot.domainId =:domainId OR 0L = :domainId) AND snapshot.isActive =:isActive AND (snapshot.name LIKE %:search% OR snapshot.volume.name LIKE %:search% "
             + "OR snapshot.createdDateTime LIKE %:search% )")
     Page<Snapshot> findAllByDomainIdAndIsActiveSearchText(@Param("domainId") Long domainId, @Param("isActive") Boolean isActive, Pageable pageable, @Param("search") String search);
 

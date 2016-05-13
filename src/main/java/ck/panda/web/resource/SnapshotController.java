@@ -120,7 +120,7 @@ public class SnapshotController extends CRUDController<Snapshot> implements ApiC
     }
 
     /**
-     * Get active snapshot list
+     * Get active snapshot list.
      *
      * @return snapshot
      * @throws Exception if error occurs.
