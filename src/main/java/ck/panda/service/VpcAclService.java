@@ -48,11 +48,30 @@ public interface VpcAclService extends CRUDService<VpcAcl> {
     List<VpcAcl> findByVpcIdAndIsActive(Long vpcId) throws Exception;
 
     /**
-     * Soft delete for vpc acl
+     * Soft delete for vpc acl.
+     *
      * @param vpcAcl vpc acl
      * @return vpc acl
-     * @throws Exception
+     * @throws Exception exception
      */
     VpcAcl softDelete(VpcAcl vpcAcl) throws Exception;
+
+    /**
+     * Find all vpc acl by active.
+     *
+     * @param isActive true / false
+     * @return vpc acl
+     * @throws Exception exception
+     */
+    List<VpcAcl> findAllByIsActive(Boolean isActive) throws Exception;
+
+    /**
+     * Find vpc acl by uuid.
+     *
+     * @param uuid unique id of acl
+     * @return vpc acl
+     * @throws Exception exception
+     */
+    VpcAcl findbyUUID(String uuid) throws Exception;
 
 }

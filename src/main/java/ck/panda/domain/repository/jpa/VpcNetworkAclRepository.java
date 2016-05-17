@@ -17,7 +17,7 @@ public interface VpcNetworkAclRepository extends PagingAndSortingRepository<VpcN
      * @return VPC ACL list.
      * @throws Exception unhandled errors.
      */
-    @Query(value = "SELECT acl FROM VpcNetworkAcl acl WHERE acl.vpcAclId = :vpcAclId AND acl.isActive = :isActive")
+    @Query(value = "SELECT acl FROM VpcNetworkAcl acl WHERE acl.vpcAclId = :vpcAclId AND acl.isActive = :isActive ORDER BY acl.ruleNumber ASC")
     List<VpcNetworkAcl> findByAclIdAndIsActive(@Param("vpcAclId") Long vpcAclId, @Param("isActive") Boolean isActive);
 
 }

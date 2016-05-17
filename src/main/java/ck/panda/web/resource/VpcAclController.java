@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import ck.panda.constants.GenericConstants;
-import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.VpcAcl;
 import ck.panda.service.VpcAclService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -39,7 +38,7 @@ public class VpcAclController extends CRUDController<VpcAcl> implements ApiContr
     @Autowired
     private VpcAclService vpcAclService;
 
-    @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing acl list.", response = Volume.class)
+    @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing acl list.", response = VpcAcl.class)
     @Override
     public VpcAcl read(@PathVariable(PATH_ID) Long id) throws Exception {
         return vpcAclService.find(id);

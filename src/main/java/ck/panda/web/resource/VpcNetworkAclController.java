@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.VpcNetworkAcl;
 import ck.panda.service.VpcNetworkAclService;
 import ck.panda.util.web.ApiController;
@@ -30,6 +31,12 @@ public class VpcNetworkAclController extends CRUDController<VpcNetworkAcl> imple
     /** VPC ACL service reference. */
     @Autowired
     private VpcNetworkAclService vpcNetworkAclService;
+
+    @ApiOperation(value = SW_METHOD_READ, notes = "Read an existing acl list.", response = VpcNetworkAcl.class)
+    @Override
+    public VpcNetworkAcl read(@PathVariable(PATH_ID) Long id) throws Exception {
+        return vpcNetworkAclService.find(id);
+    }
 
     /**
      * Add network acl for vpc.
@@ -73,4 +80,11 @@ public class VpcNetworkAclController extends CRUDController<VpcNetworkAcl> imple
     public VpcNetworkAcl softDelete(@RequestBody VpcNetworkAcl vpcNetworkAcl, @PathVariable(PATH_ID) Long id) throws Exception {
         return vpcNetworkAclService.softDelete(vpcNetworkAcl);
     }
+
+    @ApiOperation(value = SW_METHOD_UPDATE, notes = "Update an existing Department.", response = Department.class)
+    @Override
+    public VpcNetworkAcl update(@RequestBody VpcNetworkAcl vpcNetworkAcl, @PathVariable(PATH_ID) Long id) throws Exception {
+        vpcNetworkAcl.setSyncFlag(true);
+        return vpcNetworkAclService.update(vpcNetworkAcl);
+     }
 }

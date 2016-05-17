@@ -70,6 +70,7 @@ import ck.panda.domain.entity.VmSnapshot;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Volume.VolumeType;
 import ck.panda.domain.entity.VpcAcl;
+import ck.panda.domain.entity.VpcNetworkAcl;
 import ck.panda.domain.entity.VpcOffering;
 import ck.panda.domain.entity.VpnUser;
 import ck.panda.domain.entity.Zone;
@@ -332,6 +333,11 @@ public class SyncServiceImpl implements SyncService {
     /** VPC service reference. */
     @Autowired
     private VPCService vpcService;
+
+    /** VPC ACL service reference. */
+    @Autowired
+    private VpcNetworkAclService vpcAclNetworkService;
+
 
     /** Permission instance properties. */
     @Value(value = "${permission.instance}")
@@ -777,6 +783,12 @@ public class SyncServiceImpl implements SyncService {
             this.syncAffinityGroup();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch Affinity group", e);
+        }
+        try {
+            // 21. Sync VPC ACL entity
+            this.syncVpcNetworkAcl();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPC NETWORK ACL", e);
         }
         try {
             // 44. Sync general configuration
@@ -3471,5 +3483,46 @@ public class SyncServiceImpl implements SyncService {
             vpcService.save(csVpcMap.get(key));
         }
         LOGGER.debug("Total rows added : " + (csVpcMap.size()));
+    }
+
+    @Override
+    public void syncVpcNetworkAcl() throws ApplicationException, Exception {
+
+        // 1. Get all the VPC ACL objects from CS server as hash
+        List<VpcNetworkAcl> csVpcAclsList = vpcAclNetworkService.findAllFromCSServer();
+        HashMap<String, VpcNetworkAcl> csVpcAclMap = (HashMap<String, VpcNetworkAcl>) VpcNetworkAcl.convert(csVpcAclsList);
+
+        // 2. Get all the VPC ACL objects from application
+        List<VpcNetworkAcl> appVpcAclList = vpcAclNetworkService.findAll();
+
+        // 3. Iterate application VPC ACL list
+        for (VpcNetworkAcl vpcAcl : appVpcAclList) {
+            LOGGER.debug("Total rows updated : " + (appVpcAclList.size()));
+            // 3.1 Find the corresponding CS server VPC ACL object by finding
+            // it in a hash using uuid
+            if (csVpcAclMap.containsKey(vpcAcl.getUuid())) {
+                VpcNetworkAcl csVpcAcl = csVpcAclMap.get(vpcAcl.getUuid());
+                vpcAcl.setUuid(csVpcAcl.getUuid());
+                vpcAcl.setForDisplay(csVpcAcl.getForDisplay());
+                vpcAcl.setIsActive(true);
+
+                // 3.2 If found, update the VPC ACL object in app db
+                vpcAclNetworkService.update(vpcAcl);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // VPC ACL which is not added in the app
+                csVpcAclMap.remove(vpcAcl.getUuid());
+            } else {
+                vpcAcl.setSyncFlag(false);
+                vpcAclNetworkService.delete(vpcAcl);
+            }
+        }
+        // 4. Get the remaining list of cs server hash VPC ACL object, then
+        // iterate and
+        // add it to app db
+        for (String key : csVpcAclMap.keySet()) {
+            vpcAclNetworkService.save(csVpcAclMap.get(key));
+        }
+        LOGGER.debug("Total rows added : " + (csVpcAclMap.size()));
     }
 }
