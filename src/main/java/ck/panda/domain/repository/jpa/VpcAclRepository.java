@@ -18,7 +18,27 @@ public interface VpcAclRepository extends PagingAndSortingRepository<VpcAcl, Lon
      * @param isActive true/false.
      * @return vpc acl.
      */
-    @Query(value = "SELECT vpcAcl FROM VpcAcl vpcAcl WHERE (vpcAcl.vpcId = :vpcId OR vpcAcl.vpcId IS NULL) AND vpcAcl.isActive = :isActive")
+    @Query(value = "SELECT vpcAcl FROM VpcAcl vpcAcl WHERE (vpcAcl.vpcId = :vpcId OR vpcAcl.vpcId IS NULL) AND vpcAcl.isActive = :isActive ")
     List<VpcAcl> findByVpcIdAndIsActive(@Param("vpcId") Long vpcId, @Param("isActive") Boolean isActive);
+
+    /**
+     * Find all vpc acl by active.
+     *
+     * @param isActive true / false
+     * @return vpc acl
+     * @throws Exception exception
+     */
+    @Query(value = "SELECT vpcAcl FROM VpcAcl vpcAcl WHERE vpcAcl.isActive = :isActive")
+    List<VpcAcl> findAllByIsActive(@Param("isActive") Boolean isActive);
+
+    /**
+     * Find vpc acl by uuid.
+     *
+     * @param uuid unique id of acl
+     * @return vpc acl
+     * @throws Exception exception
+     */
+    @Query(value = "SELECT vpcAcl FROM VpcAcl vpcAcl WHERE vpcAcl.uuid = :uuid AND vpcAcl.isActive = :isActive")
+    VpcAcl findByUuid(@Param("uuid") String uuid, @Param("isActive") Boolean isActive);
 
 }

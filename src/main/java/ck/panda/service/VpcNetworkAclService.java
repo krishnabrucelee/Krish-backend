@@ -38,4 +38,12 @@ public interface VpcNetworkAclService extends CRUDService<VpcNetworkAcl> {
      */
     VpcNetworkAcl softDelete(VpcNetworkAcl vpcNetworkAcl) throws Exception;
 
+    /**
+     * Find all from cloud stack server.
+     *
+     * @return vpc Network Acl
+     * @throws Exception error
+     */
+    List<VpcNetworkAcl> findAllFromCSServer() throws Exception;
+
 }

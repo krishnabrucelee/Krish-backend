@@ -78,6 +78,11 @@ public class VpcAclServiceImpl implements VpcAclService {
     }
 
     @Override
+    public VpcAcl findbyUUID(String uuid) throws Exception {
+        return vpcAclRepo.findByUuid(uuid, true);
+    }
+
+    @Override
     public Page<VpcAcl> findAll(PagingAndSorting pagingAndSorting) throws Exception {
         return vpcAclRepo.findAll(pagingAndSorting.toPageRequest());
     }
@@ -85,6 +90,11 @@ public class VpcAclServiceImpl implements VpcAclService {
     @Override
     public List<VpcAcl> findAll() throws Exception {
         return (List<VpcAcl>) vpcAclRepo.findAll();
+    }
+
+    @Override
+    public List<VpcAcl> findAllByIsActive(Boolean isActive) throws Exception {
+        return (List<VpcAcl>) vpcAclRepo.findAllByIsActive(true);
     }
 
     @Override
