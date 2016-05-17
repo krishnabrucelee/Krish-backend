@@ -210,12 +210,12 @@ public class IpAddress implements Serializable {
     @Transient
     private String transZoneId;
 
-    /** Zone Object for the Network. */
+    /** VPC Object for the Ip address. */
     @JoinColumn(name = "vpc_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
     private VPC vpc;
 
-    /** id for the Zone. */
+    /** id for the VPC. */
     @Column(name = "vpc_id")
     private Long vpcId;
 

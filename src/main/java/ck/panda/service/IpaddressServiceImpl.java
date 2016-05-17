@@ -158,12 +158,12 @@ public class IpaddressServiceImpl implements IpaddressService {
                 .getDepartmentById(convertEntityService.getNetworkById(networkId).getDepartmentId()).getType()
                 .equals(AccountType.USER)) {
             if (convertEntityService.getNetworkById(networkId).getProjectId() != null) {
-            	if (projectLimit != null) {
+                if (projectLimit != null) {
                 quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getNetworkById(networkId),
                         "IP", convertEntityService.getNetworkById(networkId).getProjectId(), "Project");
-            	} else {
+                } else {
                     throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Resource limit for project has not been set. Please update project quota");
-            	}
+                }
             }
             else {
                 quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getNetworkById(networkId),
@@ -234,12 +234,12 @@ public class IpaddressServiceImpl implements IpaddressService {
                 .getDepartmentById(convertEntityService.getVPCId(vpcId).getDepartmentId()).getType()
                 .equals(AccountType.USER)) {
             if (convertEntityService.getVPCId(vpcId).getProjectId() != null) {
-            	if (projectLimit != null) {
+                if (projectLimit != null) {
                 quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getVPCId(vpcId),
                         "IP", convertEntityService.getVPCId(vpcId).getProjectId(), "Project");
-            	} else {
+                } else {
                     throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Resource limit for project has not been set. Please update project quota");
-            	}
+                }
             }
             else {
                 quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getVPCId(vpcId),
@@ -406,12 +406,13 @@ public class IpaddressServiceImpl implements IpaddressService {
                 ipAddress.setDomainId(convertEntityService.getDomainId(ipAddress.getTransDomainId()));
                 ipAddress.setZoneId(convertEntityService.getZoneId(ipAddress.getTransZoneId()));
                 if(ipAddress.getTransNetworkId() != null) {
-                	ipAddress.setNetworkId(convertEntityService.getNetworkId(ipAddress.getTransNetworkId()));
+                    ipAddress.setNetworkId(convertEntityService.getNetworkId(ipAddress.getTransNetworkId()));
                 }
                 if(ipAddress.getTransVpcId() != null) {
-                	ipAddress.setVpcId(convertEntityService.getVpcId(ipAddress.getTransVpcId()));
+                    ipAddress.setVpcId(convertEntityService.getVpcId(ipAddress.getTransVpcId()));
                 }
                 ipAddress.setProjectId(convertEntityService.getProjectId(ipAddress.getTransProjectId()));
+
                 //Get all the VPN details
                 HashMap<String, String> vpnOptional = new HashMap<String, String>();
                 vpnOptional.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
@@ -462,9 +463,9 @@ public class IpaddressServiceImpl implements IpaddressService {
                 ipAddress.setDomainId(convertEntityService.getDomainId(ipAddress.getTransDomainId()));
                 ipAddress.setZoneId(convertEntityService.getZoneId(ipAddress.getTransZoneId()));
                 ipAddress.setNetworkId(convertEntityService.getNetworkId(ipAddress.getTransNetworkId()));
-				if (ipAddress.getTransVpcId() != null) {
-					ipAddress.setVpcId(convertEntityService.getVpcId(ipAddress.getTransVpcId()));
-				}
+                if (ipAddress.getTransVpcId() != null) {
+                    ipAddress.setVpcId(convertEntityService.getVpcId(ipAddress.getTransVpcId()));
+                }
                 ipAddress.setProjectId(convertEntityService.getProjectId(ipAddress.getTransProjectId()));
                 IpAddress ipAddresses = ipRepo.findByUUID(ipAddress.getUuid());
                 if (ipAddresses != null) {
@@ -789,7 +790,7 @@ public class IpaddressServiceImpl implements IpaddressService {
             }
         }
         // 5. If any resource shortage then return error message otherwise
-        // return empty string.
+        // return empty string.setVpnState
         return errMessage;
     }
 
@@ -797,18 +798,32 @@ public class IpaddressServiceImpl implements IpaddressService {
     public IpAddress enableRemoteAccessVpn(String uuid) throws Exception {
         Errors errors = null;
         IpAddress ipAddress = findbyUUID(uuid);
+        Boolean routerStatus = false;
         try {
             String projectUuid = null;
             if (ipAddress.getProject() != null) {
                 projectUuid = ipAddress.getProject().getUuid();
             }
-            Boolean routerStatus = virtualRoutersStatusCheck(ipAddress.getNetwork().getDomain().getUuid(),
-                    ipAddress.getNetwork().getDepartment().getUserName(), ipAddress.getNetwork().getUuid(), projectUuid);
+            if(ipAddress.getVpcId() != null) {
+                if (ipAddress.getVpc().getProject() != null) {
+                    projectUuid = ipAddress.getVpc().getProject().getUuid();
+                }
+            	routerStatus = virtualRoutersStatusCheck(ipAddress.getVpc().getDomain().getUuid(),
+                        ipAddress.getVpc().getDepartment().getUserName(), ipAddress.getVpc().getUuid(), projectUuid, ipAddress.getVpc().getUuid());
+            } else {
+                routerStatus = virtualRoutersStatusCheck(ipAddress.getNetwork().getDomain().getUuid(),
+                        ipAddress.getNetwork().getDepartment().getUserName(), ipAddress.getNetwork().getUuid(), projectUuid, null);
+            }
             if (routerStatus) {
                 configServer.setUserServer();
                 HashMap<String, String> optional = new HashMap<String, String>();
-                optional.put(CloudStackConstants.CS_DOMAIN_ID, ipAddress.getNetwork().getDomain().getUuid());
-                optional.put(CloudStackConstants.CS_ACCOUNT, ipAddress.getNetwork().getDepartment().getUserName());
+				if (ipAddress.getVpcId() != null) {
+					optional.put(CloudStackConstants.CS_DOMAIN_ID, ipAddress.getVpc().getDomain().getUuid());
+					optional.put(CloudStackConstants.CS_ACCOUNT, ipAddress.getVpc().getDepartment().getUserName());
+				} else {
+					optional.put(CloudStackConstants.CS_DOMAIN_ID, ipAddress.getNetwork().getDomain().getUuid());
+					optional.put(CloudStackConstants.CS_ACCOUNT, ipAddress.getNetwork().getDepartment().getUserName());
+				}
                 String createRemoteAccess = csVPNService.createRemoteAccessVpn(ipAddress.getUuid(), optional, CloudStackConstants.JSON);
                 JSONObject jobId = new JSONObject(createRemoteAccess).getJSONObject(CloudStackConstants.CS_CREATE_REMOTE_ACCESS_VPN);
                 if (jobId.has(CloudStackConstants.CS_ERROR_CODE)) {
@@ -862,12 +877,16 @@ public class IpaddressServiceImpl implements IpaddressService {
      * @return encrypted value
      * @throws Exception unhandled errors.
      */
-    private Boolean virtualRoutersStatusCheck(String domainId, String accountName, String networkId, String projectId) throws Exception {
+    private Boolean virtualRoutersStatusCheck(String domainId, String accountName, String networkId, String projectId, String vpcId) throws Exception {
         Boolean routerState = false;
         JSONArray routerListJSON = null;
         HashMap<String, String> routerOptional = new HashMap<String, String>();
         routerOptional.put(CloudStackConstants.CS_DOMAIN_ID, domainId);
-        routerOptional.put(CloudStackConstants.CS_NETWORK_ID, networkId);
+		if (vpcId != null) {
+			routerOptional.put(CloudStackConstants.CS_VPC_ID, vpcId);
+		} else {
+			routerOptional.put(CloudStackConstants.CS_NETWORK_ID, networkId);
+		}
         if (projectId !=null) {
             routerOptional.put(CloudStackConstants.CS_PROJECT_ID, projectId);
         } else {
@@ -891,7 +910,6 @@ public class IpaddressServiceImpl implements IpaddressService {
         IpAddress ipAddress = findbyUUID(uuid);
         try {
             configServer.setUserServer();
-
             String createRemoteAccess = csVPNService.deleteRemoteAccessVpn(ipAddress.getUuid(), CloudStackConstants.JSON);
             JSONObject jobId = new JSONObject(createRemoteAccess).getJSONObject(CloudStackConstants.CS_DELETE_REMOTE_ACCESS_VPN);
             if (jobId.has(CloudStackConstants.CS_ERROR_CODE)) {
@@ -961,9 +979,18 @@ public class IpaddressServiceImpl implements IpaddressService {
         return ipAddress;
     }
 
+    @Override
+    public Page<IpAddress> findAllByVpc(Long vpcId, PagingAndSorting pagingAndSorting) throws Exception {
+        return ipRepo.findByVPCWithPaging(pagingAndSorting.toPageRequest(), vpcId, State.ALLOCATED);
+    }
+
 	@Override
-	public Page<IpAddress> findAllByVpc(Long vpcId, PagingAndSorting pagingAndSorting) throws Exception {
-		return ipRepo.findByVPCWithPaging(pagingAndSorting.toPageRequest(), vpcId, State.ALLOCATED);
+	public List<IpAddress> vpcNatList(Long networkId) throws Exception {
+		return ipRepo.findByNetworkAndNat(networkId, State.ALLOCATED, true);
 	}
 
+	@Override
+	public List<IpAddress> vpcLBList(Long networkId) throws Exception {
+		return loadBalancerService.vpcLBList(networkId);
+	}
 }

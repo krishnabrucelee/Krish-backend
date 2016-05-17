@@ -310,10 +310,14 @@ public class VmSnapshotServiceImpl implements VmSnapshotService {
     @Override
     public Page<VmSnapshot> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText) throws Exception {
           User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
-          if (!convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.ROOT_ADMIN)) {
+          if (!user.getType().equals(User.UserType.ROOT_ADMIN)) {
               domainId = user.getDomainId();
           }
-        return vmSnapshotRepository.findAllByDomainIdAndIsActiveSearchText(domainId, false, Status.Expunging, pagingAndSorting.toPageRequest(),searchText);
+          if (user.getType().equals(User.UserType.USER)) {
+              return vmSnapshotRepository.findAllByDomainIdAndIsActiveSearchTextAndUserId(domainId, false, Status.Expunging, pagingAndSorting.toPageRequest(),searchText, user.getId());
+          } else {
+              return vmSnapshotRepository.findAllByDomainIdAndIsActiveSearchText(domainId, false, Status.Expunging, pagingAndSorting.toPageRequest(),searchText);
+          }
     }
 
     @Override

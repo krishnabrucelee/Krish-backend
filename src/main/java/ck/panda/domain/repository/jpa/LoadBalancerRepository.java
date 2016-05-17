@@ -76,6 +76,17 @@ public interface LoadBalancerRepository extends PagingAndSortingRepository<LoadB
     List<LoadBalancerRule> findAllByIpaddressAndIsActive(@Param("ipAddressId") Long ipAddressId, @Param("isActive") Boolean isActive);
 
     /**
+     * Find all by network and is active.
+     *
+     * @param networkId of the load balancer.
+     * @param isActive status of the load balancer.
+     * @return load balancer.
+     */
+    @Query(value = "select lb from LoadBalancerRule lb where lb.networkId =:networkId AND lb.isActive =:isActive")
+    List<LoadBalancerRule> findAllByNetworkAndIsActive(@Param("networkId") Long networkId, @Param("isActive") Boolean isActive);
+
+
+    /**
      * List all load balancer by is Active status.
      *
      * @param isActive status of the load balancer.

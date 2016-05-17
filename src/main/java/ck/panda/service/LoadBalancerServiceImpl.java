@@ -3,6 +3,8 @@ package ck.panda.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -10,6 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import com.mysql.fabric.xmlrpc.base.Array;
+
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.LoadBalancerRule;
@@ -18,6 +23,7 @@ import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.VmInstance;
 import ck.panda.domain.entity.VmIpaddress;
+import ck.panda.domain.entity.IpAddress.State;
 import ck.panda.domain.repository.jpa.LoadBalancerRepository;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackLoadBalancerService;
@@ -34,7 +40,7 @@ import ck.panda.util.error.exception.ApplicationException;
 public class LoadBalancerServiceImpl implements LoadBalancerService {
 
     /** Logger attribute. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(VirtualMachineServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoadBalancerServiceImpl.class);
 
     /** Validator attribute. */
     @Autowired
@@ -398,6 +404,11 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
     }
 
     @Override
+    public List<LoadBalancerRule> findByNetwork(Long networkId, Boolean isActive) {
+        return loadBalancerRepo.findAllByNetworkAndIsActive(networkId, true);
+    }
+
+    @Override
     public LoadBalancerRule save(LoadBalancerRule loadBalancer) throws Exception {
           if (!loadBalancer.getSyncFlag()) {
                 return loadBalancerRepo.save(loadBalancer);
@@ -444,4 +455,16 @@ public class LoadBalancerServiceImpl implements LoadBalancerService {
         return loadBalancerRepo.findAllByIpAddressAndIsActive(id, true);
     }
 
-   }
+	@Override
+	public List<IpAddress> vpcLBList(Long networkId) throws Exception {
+		List<IpAddress> ipaddresses = new ArrayList<>();
+		List<LoadBalancerRule> LBrules = loadBalancerRepo.findAllByNetworkAndIsActive(networkId, true);
+		for (LoadBalancerRule LB : LBrules) {
+			if (!ipaddresses.contains(LB.getIpAddress())) {
+				ipaddresses.add(LB.getIpAddress());
+			}
+		}
+		ipaddresses.stream().distinct().collect(Collectors.toList());
+		return ipaddresses;
+	}
+}

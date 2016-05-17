@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.Snapshot;
+import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.Volume;
 import ck.panda.domain.entity.Snapshot.Status;
 import ck.panda.domain.repository.jpa.SnapshotRepository;
@@ -20,6 +21,7 @@ import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackSnapshotService;
 import ck.panda.util.CloudStackVolumeService;
 import ck.panda.util.ConfigUtil;
+import ck.panda.util.TokenDetails;
 import ck.panda.util.domain.vo.PagingAndSorting;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
@@ -61,6 +63,10 @@ public class SnapshotServiceImpl implements SnapshotService {
     /** CloudStack Domain service for connectivity with cloudstack. */
     @Autowired
     private CloudStackSnapshotService snapshotService;
+
+    /** Token details reference. */
+    @Autowired
+    private TokenDetails tokenDetails;
 
     /** Constant for snapshot. */
     public static final String CS_SNAPSHOT = "snapshot";
@@ -150,6 +156,10 @@ public class SnapshotServiceImpl implements SnapshotService {
      * @return list of departments.
      */
     public Page<Snapshot> findAllByActive(PagingAndSorting pagingAndSorting) throws Exception {
+        User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
+        if (!convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.ROOT_ADMIN)) {
+            return snapshotRepo.findAllByDomainIdAndIsActiveSearchText(user.getDomainId(), true, pagingAndSorting.toPageRequest(), "");
+        }
         return snapshotRepo.findAllByIsActive(pagingAndSorting.toPageRequest(), true);
     }
     @Override
@@ -312,5 +322,14 @@ public class SnapshotServiceImpl implements SnapshotService {
              snapshot = this.updateSnapshotByJobResponse(snapshot, jobId, errors);
          }
         return snapshot;
+    }
+
+    @Override
+    public Page<Snapshot> findAllByDomainIdAndSearchText(Long domainId, PagingAndSorting pagingAndSorting, String searchText) throws Exception {
+          User user = convertEntityService.getOwnerById(Long.valueOf(tokenDetails.getTokenDetails(CloudStackConstants.CS_ID)));
+          if (!convertEntityService.getOwnerById(user.getId()).getType().equals(User.UserType.ROOT_ADMIN)) {
+              domainId = user.getDomainId();
+          }
+        return snapshotRepo.findAllByDomainIdAndIsActiveSearchText(domainId, true, pagingAndSorting.toPageRequest(), searchText);
     }
 }

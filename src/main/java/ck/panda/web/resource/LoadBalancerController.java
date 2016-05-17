@@ -98,6 +98,20 @@ public class LoadBalancerController extends CRUDController<LoadBalancerRule> imp
         return loadBalancerService.findByIpaddress(ipAddressId, true);
     }
 
+    /**
+     * List all Load balancer by ip address.
+     *
+     * @param ipAddressId of the network.
+     * @return list of load balancer.
+     * @throws Exception if error occurs.
+     */
+    @RequestMapping(value = "/network/list", method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    protected List<LoadBalancerRule> listbyNetwork(@RequestParam("networkId") Long networkId) throws Exception {
+        return loadBalancerService.findByNetwork(networkId, true);
+    }
+
     @RequestMapping(value = "removerule", method = RequestMethod.PUT, produces = { MediaType.APPLICATION_JSON_VALUE })
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody

@@ -3399,6 +3399,11 @@ public class SyncServiceImpl implements SyncService {
                 vpcAcl.setName(csVpcAcl.getName());
                 vpcAcl.setDescription(csVpcAcl.getDescription());
                 vpcAcl.setForDisplay(csVpcAcl.getForDisplay());
+                VPC vpc = vpcService.findByUUID(csVpcAcl.getTransvpcId());
+                if (vpc != null) {
+                    vpcAcl.setVpcId(vpc.getId());
+                }
+                vpcAcl.setIsActive(true);
 
                 // 3.2 If found, update the VPC ACL object in app db
                 vpcAclService.update(vpcAcl);

@@ -2,6 +2,8 @@ package ck.panda.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+
+import ck.panda.domain.entity.IpAddress;
 import ck.panda.domain.entity.LoadBalancerRule;
 import ck.panda.util.domain.CRUDService;
 
@@ -29,6 +31,15 @@ public interface LoadBalancerService extends CRUDService<LoadBalancerRule> {
      * @throws Exception unhandled errors.
      */
     List<LoadBalancerRule> findAllFromCSServer() throws Exception;
+
+    /**
+     * IP address list for tier.
+     *
+     * @param networkId for vpc's tier.
+     * @return ip address list.
+     * @throws Exception if error occurs.
+     */
+    List<IpAddress> vpcLBList(Long networkId) throws Exception;
 
     /**
      * Soft delete for LoadBalancer.
@@ -64,6 +75,15 @@ public interface LoadBalancerService extends CRUDService<LoadBalancerRule> {
      * @return load balancer.
      */
     List<LoadBalancerRule> findByIpaddress(Long ipAddressId, Boolean isActive);
+
+    /**
+     * List load balancer by network.
+     *
+     * @param networkId of the load balancer.
+     * @param isActive of the load balancer.
+     * @return load balancer.
+     */
+    List<LoadBalancerRule> findByNetwork(Long networkId, Boolean isActive);
 
     /**
      * Save load balancer with user id.

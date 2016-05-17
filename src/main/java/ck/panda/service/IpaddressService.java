@@ -147,6 +147,24 @@ public interface IpaddressService extends CRUDService<IpAddress> {
     List<IpAddress> acquireVPCIP(Long vpcId) throws Exception;
 
     /**
+     * IP address list for tier.
+     *
+     * @param networkId for vpc's tier.
+     * @return ip address list.
+     * @throws Exception if error occurs.
+     */
+    List<IpAddress> vpcNatList(Long networkId) throws Exception;
+
+    /**
+     * IP address list for tier.
+     *
+     * @param networkId for vpc's tier.
+     * @return ip address list.
+     * @throws Exception if error occurs.
+     */
+    List<IpAddress> vpcLBList(Long networkId) throws Exception;
+
+    /**
      * List by network acquired to ipaddress.
      *
      * @param networkId network id.

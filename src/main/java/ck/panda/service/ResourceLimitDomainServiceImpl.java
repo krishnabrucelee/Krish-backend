@@ -274,13 +274,16 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
     private String updateResourceDomain(ResourceLimitDomain resource, Errors errors) throws Exception {
         String errMessage = null;
         config.setServer(1L);
-        String resourceLimits = csResourceLimitService.updateResourceLimit(resource.getResourceType().ordinal(), "json",
-                optional(resource));
-        LOGGER.info("Resource limit update response " + resourceLimits);
-        JSONObject resourceLimitsResponse = new JSONObject(resourceLimits).getJSONObject("updateresourcelimitresponse");
-        if (resourceLimitsResponse.has("errorcode")) {
-            errMessage = resourceLimitsResponse.getString("errortext");
-        }
+		if (!resource.getResourceType().equals(ResourceLimitDomain.ResourceType.Project)) {
+			String resourceLimits = csResourceLimitService.updateResourceLimit(resource.getResourceType().ordinal(),
+					"json", optional(resource));
+			LOGGER.info("Resource limit update response " + resourceLimits);
+			JSONObject resourceLimitsResponse = new JSONObject(resourceLimits)
+					.getJSONObject("updateresourcelimitresponse");
+			if (resourceLimitsResponse.has("errorcode")) {
+				errMessage = resourceLimitsResponse.getString("errortext");
+			}
+		}
         return errMessage;
     }
 

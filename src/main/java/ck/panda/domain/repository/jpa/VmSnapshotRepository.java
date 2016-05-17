@@ -22,7 +22,7 @@ public interface VmSnapshotRepository extends PagingAndSortingRepository<VmSnaps
      * @param uuid snapshot uuid.
      * @return Vm snapshot.
      */
-    @Query(value = "select snapshot from VmSnapshot snapshot where snapshot.uuid LIKE :uuid ")
+    @Query(value = "SELECT snapshot FROM VmSnapshot snapshot WHERE snapshot.uuid LIKE :uuid ")
     VmSnapshot findByUUID(@Param("uuid") String uuid);
 
     /**
@@ -32,7 +32,7 @@ public interface VmSnapshotRepository extends PagingAndSortingRepository<VmSnaps
      * @param isRemoved check whether removed or not.
      * @return Vm snapshot.
      */
-    @Query(value = "select snapshot from VmSnapshot snapshot where snapshot.vmId=:vmId AND snapshot.isRemoved IS :isRemoved )")
+    @Query(value = "SELECT snapshot FROM VmSnapshot snapshot WHERE snapshot.vmId=:vmId AND snapshot.isRemoved IS :isRemoved )")
     List<VmSnapshot> findByVmInstance(@Param("vmId") Long vmId, @Param("isRemoved") Boolean isRemoved);
 
     /**
@@ -43,7 +43,7 @@ public interface VmSnapshotRepository extends PagingAndSortingRepository<VmSnaps
      * @param isRemoved check whether removed or not.
      * @return Vm snapshot.
      */
-    @Query(value = "select snapshot from VmSnapshot snapshot LEFT JOIN snapshot.vm where snapshot.isRemoved IS :isRemoved AND snapshot.status <>:status)")
+    @Query(value = "SELECT snapshot FROM VmSnapshot snapshot LEFT JOIN snapshot.vm WHERE snapshot.isRemoved IS :isRemoved AND snapshot.status <>:status)")
     Page<VmSnapshot> findAllByActiveAndExpunging(Pageable pageable, @Param("isRemoved") Boolean isRemoved, @Param("status") Status status);
 
     /**
@@ -55,7 +55,7 @@ public interface VmSnapshotRepository extends PagingAndSortingRepository<VmSnaps
      * @param status of the snapshot
      * @return Vm snapshot.
      */
-    @Query(value = "select snapshot from VmSnapshot snapshot LEFT JOIN snapshot.vm where snapshot.domainId =:domainId AND snapshot.isRemoved IS :isRemoved AND snapshot.status <>:status)")
+    @Query(value = "SELECT snapshot FROM VmSnapshot snapshot LEFT JOIN snapshot.vm WHERE snapshot.domainId =:domainId AND snapshot.isRemoved IS :isRemoved AND snapshot.status <>:status)")
     Page<VmSnapshot> findAllByDomainIdAndIsActive(@Param("domainId") Long domainId, @Param("isRemoved") Boolean isRemoved, @Param("status") Status status, Pageable pageable);
 
 
@@ -68,7 +68,7 @@ public interface VmSnapshotRepository extends PagingAndSortingRepository<VmSnaps
      * @param status of the snapshot
      * @return Vm snapshot.
      */
-    @Query(value = "select snapshot from VmSnapshot snapshot LEFT JOIN snapshot.vm where (snapshot.domainId =:domainId OR 0L = :domainId) AND snapshot.isRemoved IS :isRemoved AND snapshot.status <>:status AND (snapshot.name LIKE %:search% OR snapshot.description LIKE %:search% "
+    @Query(value = "SELECT snapshot FROM VmSnapshot snapshot LEFT JOIN snapshot.vm WHERE (snapshot.domainId =:domainId OR 0L = :domainId) AND snapshot.isRemoved IS :isRemoved AND snapshot.status <>:status AND (snapshot.name LIKE %:search% OR snapshot.description LIKE %:search% "
             + "OR snapshot.vm.name LIKE %:search% OR snapshot.createdDateTime LIKE %:search% )")
     Page<VmSnapshot> findAllByDomainIdAndIsActiveSearchText(@Param("domainId") Long domainId, @Param("isRemoved") Boolean isRemoved, @Param("status") Status status, Pageable pageable,@Param("search") String search);
 
@@ -80,7 +80,7 @@ public interface VmSnapshotRepository extends PagingAndSortingRepository<VmSnaps
      * @param isRemoved check whether removed or not.
      * @return Vm snapshot.
      */
-    @Query(value = "SELECT snapshot from VmSnapshot snapshot LEFT JOIN snapshot.vm WHERE (snapshot.domainId =:domainId OR 0L = :domainId) AND snapshot.departmentId= :departmentId AND snapshot.isRemoved IS :isRemoved AND snapshot.status <>:status AND (snapshot.name LIKE %:search% OR snapshot.description LIKE %:search% "
+    @Query(value = "SELECT snapshot FROM VmSnapshot snapshot LEFT JOIN snapshot.vm WHERE (snapshot.domainId =:domainId OR 0L = :domainId) AND snapshot.departmentId= :departmentId AND snapshot.isRemoved IS :isRemoved AND snapshot.status <>:status AND (snapshot.name LIKE %:search% OR snapshot.description LIKE %:search% "
             + "OR snapshot.vm.name LIKE %:search% OR snapshot.createdDateTime LIKE %:search% )")
     Page<VmSnapshot> findAllByDomainIdDepartmentIdAndIsActiveSearchText(@Param("domainId") Long domainId, @Param("isRemoved") Boolean isRemoved, Pageable pageable,@Param("search") String search,@Param("status") Status status,@Param("departmentId") Long departmentId);
 
@@ -112,4 +112,18 @@ public interface VmSnapshotRepository extends PagingAndSortingRepository<VmSnaps
     @Query(value = "SELECT snapshot FROM VmSnapshot snapshot LEFT JOIN snapshot.project WHERE snapshot.departmentId= :departmentId AND snapshot.isRemoved IS :isRemoved AND snapshot.projectId = NULL AND snapshot.status <>:status ")
     Page<VmSnapshot> findByDepartmentAndPagination(@Param("departmentId") Long departmentId,
             @Param("isRemoved") Boolean isRemoved, Pageable pageable,@Param("status") Status status);
+
+    /**
+     * Find all domain based vm snapshot without expunging status by active.
+     *
+     * @param domainId domain id of the vm snapshot
+     * @param pageable paging and sorting.
+     * @param isRemoved check whether removed or not.
+     * @param status of the snapshot
+     * @return Vm snapshot.
+     */
+    @Query(value = "SELECT snapshot FROM VmSnapshot snapshot LEFT JOIN snapshot.vm WHERE (snapshot.domainId =:domainId OR 0L = :domainId) AND snapshot.isRemoved IS :isRemoved AND snapshot.status <>:status AND (snapshot.name LIKE %:search% OR snapshot.description LIKE %:search% "
+            + "OR snapshot.vm.name LIKE %:search% OR snapshot.createdDateTime LIKE %:search%) AND snapshot.ownerId= :ownerId")
+    Page<VmSnapshot> findAllByDomainIdAndIsActiveSearchTextAndUserId(@Param("domainId") Long domainId, @Param("isRemoved") Boolean isRemoved, @Param("status") Status status, Pageable pageable,@Param("search") String search, @Param("ownerId") Long ownerId);
+
 }

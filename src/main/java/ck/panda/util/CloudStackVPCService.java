@@ -469,4 +469,101 @@ public class CloudStackVPCService {
         return responseDocument;
     }
 
+    /**
+     * Creates a PrivateGateway.
+     *
+     * @param gateway the gateway of the Private gateway
+     * @param ipAddress the IP address of the Private gateway
+     * @param netmask the netmask of the Private gateway
+     * @param vlan the Vlan for the private gateway
+     * @param vpcId the VPC network belongs to
+     * @param optional value
+     * @param response format
+     * @return string value
+     * @throws Exception unhandled errors.
+     */
+    public String createNetworkACLList(String gateway, String ipAddress, String netmask,
+            String vlan, String vpcId, HashMap<String, String> optional, String response)
+            throws Exception {
+
+        LinkedList<NameValuePair> arguments
+                = server.getDefaultQuery("createPrivateGateway", optional);
+        arguments.add(new NameValuePair("gateway", gateway));
+        arguments.add(new NameValuePair("ipaddress", ipAddress));
+        arguments.add(new NameValuePair("netmask", netmask));
+        arguments.add(new NameValuePair("vlan", vlan));
+        arguments.add(new NameValuePair("vpcid", vpcId));
+        arguments.add(new NameValuePair("response", response));
+        String responseDocument = server.request(arguments);
+        return responseDocument;
+    }
+
+    /**
+     * Create Network ACL List.
+     *
+     * @param name name of the acl
+     * @param description of the acl
+     * @param response json response
+     * @param optional value
+     * @return created acl
+     * @throws Exception
+     */
+    public String createNetworkACLList(String name, String description, String response,
+            HashMap<String, String> optional) throws Exception {
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("createNetworkACLList", optional);
+        arguments.add(new NameValuePair("name", name));
+        arguments.add(new NameValuePair("description", description));
+        arguments.add(new NameValuePair("response", response));
+        String responseDocument = server.request(arguments);
+        return responseDocument;
+    }
+
+    /**
+     * Create Network ACL
+     *
+     * @param response json
+     * @param optional value
+     * @return created acl
+     * @throws Exception
+     */
+    public String createNetworkACL(String response, HashMap<String, String> optional) throws Exception {
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("createNetworkACL", optional);
+        arguments.add(new NameValuePair("response", response));
+        String responseDocument = server.request(arguments);
+        return responseDocument;
+    }
+
+    /**
+     * Delete Network ACL List.
+     *
+     * @param uuid of acl
+     * @param response json
+     * @param optional value
+     * @return deleted acl
+     * @throws Exception
+     */
+    public String deleteNetworkACLList(String uuid, String response, HashMap<String, String> optional) throws Exception {
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("deleteNetworkACLList", optional);
+        arguments.add(new NameValuePair("id", uuid));
+        arguments.add(new NameValuePair("response", response));
+        String responseDocument = server.request(arguments);
+        return responseDocument;
+    }
+
+    /**
+     * Delete Network ACL.
+     *
+     * @param uuid of acl
+     * @param response json
+     * @param optional value
+     * @return deleted acl
+     * @throws Exception
+     */
+    public String deleteNetworkACL(String uuid, String response, HashMap<String, String> optional) throws Exception {
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("deleteNetworkACL", optional);
+        arguments.add(new NameValuePair("id", uuid));
+        arguments.add(new NameValuePair("response", response));
+        String responseDocument = server.request(arguments);
+        return responseDocument;
+    }
 }

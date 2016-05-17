@@ -10,7 +10,10 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import org.hibernate.annotations.Type;
 import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
@@ -43,6 +46,19 @@ public class VpcAcl implements Serializable {
     @Column(name = "uuid")
     private String uuid;
 
+    /** Vpc of the VPC NETWORK ACL. */
+    @JoinColumn(name = "vpc_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    @ManyToOne
+    private VPC vpc;
+
+    /** Vpc id of the network. */
+    @Column(name = "vpc_id")
+    private Long vpcId;
+
+    /** Transient vpcAcl of the vpc. */
+    @Transient
+    private String transvpcId;
+
     /** Name of the VPC ACL. */
     @Column(name = "name", nullable = false)
     private String name;
@@ -54,6 +70,10 @@ public class VpcAcl implements Serializable {
     /** For display status. */
     @Column(name = "for_display")
     private Boolean forDisplay;
+
+    /** IsActive attribute to verify Active or Inactive. */
+    @Column(name = "is_active")
+    private Boolean isActive;
 
     /** Version attribute to handle optimistic locking. */
     @Version
@@ -121,6 +141,42 @@ public class VpcAcl implements Serializable {
     }
 
     /**
+     * Get the vpc of VpcAcl.
+     *
+     * @return the vpc
+     */
+    public VPC getVpc() {
+        return vpc;
+    }
+
+    /**
+     * Set the vpc of VpcAcl.
+     *
+     * @param vpc the vpc to set
+     */
+    public void setVpc(VPC vpc) {
+        this.vpc = vpc;
+    }
+
+    /**
+     * Get the vpcId of VpcAcl
+     *
+     * @return the vpcId
+     */
+    public Long getVpcId() {
+        return vpcId;
+    }
+
+    /**
+     * Set the vpcId of VpcAcl
+     *
+     * @param vpcId the vpcId to set
+     */
+    public void setVpcId(Long vpcId) {
+        this.vpcId = vpcId;
+    }
+
+    /**
      * Get the name.
      *
      * @return the name
@@ -172,6 +228,24 @@ public class VpcAcl implements Serializable {
      */
     public void setForDisplay(Boolean forDisplay) {
         this.forDisplay = forDisplay;
+    }
+
+    /**
+     * Get the isActive of VpcAcl.
+     *
+     * @return the isActive
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    /**
+     * Set the isActive of VpcAcl.
+     *
+     * @param isActive the isActive to set
+     */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
     }
 
     /**
@@ -265,6 +339,24 @@ public class VpcAcl implements Serializable {
     }
 
     /**
+     * Get the transvpcId of VpcAcl.
+     *
+     * @return the transvpcId
+     */
+    public String getTransvpcId() {
+        return transvpcId;
+    }
+
+    /**
+     * Set the transvpcId of VpcAcl.
+     *
+     * @param transvpcId the transvpcId to set
+     */
+    public void setTransvpcId(String transvpcId) {
+        this.transvpcId = transvpcId;
+    }
+
+    /**
      * Convert JSONObject to VPC ACL entity.
      *
      * @param object json object
@@ -277,6 +369,7 @@ public class VpcAcl implements Serializable {
         vpcAcl.setName(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_NAME));
         vpcAcl.setDescription(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_DESCRIPTION));
         vpcAcl.setForDisplay(JsonValidator.jsonBooleanValidation(object, CloudStackConstants.CS_FOR_DISPLAY));
+        vpcAcl.setTransvpcId(JsonValidator.jsonStringValidation(object, CloudStackConstants.CS_VPC_ID));
         return vpcAcl;
     }
 
