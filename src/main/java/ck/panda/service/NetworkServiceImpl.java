@@ -603,7 +603,7 @@ public class NetworkServiceImpl implements NetworkService {
                      network.setNetworkCreationType(NetworkCreationType.ADVANCED_NETWORK);
                  }
                  if (network.getTransAclId() != null) {
-                     network.setAclId(convertEntityService.getVpcId(network.getTransAclId()));
+                     network.setAclId(convertEntityService.getVpcAclId(network.getTransAclId()));
                  }
 
                 networkList.add(network);
@@ -910,6 +910,43 @@ public class NetworkServiceImpl implements NetworkService {
     public List<Network> findNetworkByVpcIdAndIsActiveAndType(Long vpcId, Boolean isActive, String type) throws Exception {
         Long serviceId = supportedNetworkService.findByName(type).getId();
         return networkRepo.findNetworkByVpcIdAndIsActiveAndType(vpcId, isActive, serviceId);
+    }
+
+    @Override
+    @PreAuthorize("hasPermission(#network.getSyncFlag(), 'EDIT_NETWORK')")
+    public Network replaceAcl(Network network) throws Exception {
+        if (network.getSyncFlag()) {
+            Errors errors = validator.rejectIfNullEntity(NETWORK, network);
+            errors = validator.validateEntity(network, errors);
+            if (errors.hasErrors()) {
+                throw new ApplicationException(errors);
+            } else {
+                HashMap<String, String> optional = new HashMap<String, String>();
+                optional.put(CloudStackConstants.CS_NETWORK_ID, network.getUuid());
+                config.setUserServer();
+                String updateNetworkResponse = csNetwork.replaceNetworkACLList(network.getAcl().getUuid(), optional, CloudStackConstants.JSON);
+                JSONObject jobId = new JSONObject(updateNetworkResponse).getJSONObject("replacenetworkacllistresponse");
+                if (jobId.has(CloudStackConstants.CS_JOB_ID)) {
+                    Thread.sleep(5000);
+                    String jobResponse = csNetwork.networkJobResult(jobId.getString(CloudStackConstants.CS_JOB_ID), CloudStackConstants.JSON);
+                    JSONObject jobresults = new JSONObject(jobResponse).getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
+                    if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.SUCCEEDED_JOB_STATUS)) {
+                        Network persistNetwork = networkRepo.findByUUID(network.getUuid());
+                        persistNetwork.setAclId(network.getAcl().getId());
+                        return networkRepo.save(persistNetwork);
+                    } else {
+                        JSONObject jobresponse = jobresults.getJSONObject(CloudStackConstants.CS_JOB_RESULT);
+                        if (jobresults.getString(CloudStackConstants.CS_JOB_STATUS).equals(CloudStackConstants.ERROR_JOB_STATUS)) {
+                            if (jobresponse.has(CloudStackConstants.CS_ERROR_CODE)) {
+                                errors = this.validateEvent(errors, jobresponse.getString(CloudStackConstants.CS_ERROR_TEXT));
+                                throw new ApplicationException(errors);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return networkRepo.save(network);
     }
 
 }

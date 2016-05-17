@@ -74,4 +74,13 @@ public interface VpcAclService extends CRUDService<VpcAcl> {
      */
     VpcAcl findbyUUID(String uuid) throws Exception;
 
+    /**
+     * To get vpc acl from cloudstack server.
+     *
+     * @param uuid network uuid.
+     * @return vpc acl from server
+     * @throws Exception unhandled errors.
+     */
+    VpcAcl findByUUID(String uuid) throws Exception;
+
 }

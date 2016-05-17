@@ -643,16 +643,16 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.error("ERROR AT synch VPC offering", e);
         }
         try {
-            // 21. Sync VPC ACL entity
-            this.syncVpcAcl();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch VPC ACL", e);
-        }
-        try {
-            // 22. Sync VPC entity
+            // 21. Sync VPC entity
             this.syncVpc();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch VPC", e);
+        }
+        try {
+            // 22. Sync VPC ACL entity
+            this.syncVpcAcl();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch VPC ACL", e);
         }
         try {
             // 23. Sync Network entity
@@ -1294,6 +1294,7 @@ public class SyncServiceImpl implements SyncService {
                 network.setNetMask(csNetwork.getNetMask());
                 network.setNetworkOfferingId(csNetwork.getNetworkOfferingId());
                 network.setVpcId(csNetwork.getVpcId());
+                network.setAclId(csNetwork.getAclId());
                 network.setIsActive(true);
 
                 // 3.2 If found, update the network object in app db

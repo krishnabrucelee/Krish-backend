@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
+import ck.panda.domain.entity.VPC;
 import ck.panda.domain.entity.VpcAcl;
 import ck.panda.domain.repository.jpa.VpcAclRepository;
 import ck.panda.util.CloudStackVPCService;
@@ -187,6 +188,11 @@ public class VpcAclServiceImpl implements VpcAclService {
             throw new ApplicationException(e.getErrors());
         }
         return vpcAclRepo.save(vpcAcl);
+    }
+
+    @Override
+    public VpcAcl findByUUID(String uuid) throws Exception {
+        return vpcAclRepo.findByUUID(uuid);
     }
 
 }
