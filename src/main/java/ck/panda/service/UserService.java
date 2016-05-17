@@ -323,4 +323,12 @@ public interface UserService extends CRUDService<User> {
      */
     List<User> findBySearchCount(Long domainId, String searchText, Long userId, String flag) throws Exception;
 
+    /**
+     * Find all the user by sync
+     *
+     * @return users.
+     * @throws Exception if error occurs.
+     */
+    List<User> findBySync() throws Exception;
+
 }
