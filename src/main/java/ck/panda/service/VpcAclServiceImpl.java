@@ -189,4 +189,9 @@ public class VpcAclServiceImpl implements VpcAclService {
         return vpcAclRepo.save(vpcAcl);
     }
 
+    @Override
+    public VpcAcl findByUUID(String uuid) throws Exception {
+        return vpcAclRepo.findByUUID(uuid);
+    }
+
 }

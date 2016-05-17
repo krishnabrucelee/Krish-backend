@@ -219,4 +219,21 @@ public class NetworkController extends CRUDController<Network> implements ApiCon
         return networkService.findNetworkByVpcIdAndIsActiveAndType(vpcId, true, type);
     }
 
+    /**
+     * Update the ACL list for network.
+     *
+     * @param network object
+     * @param id acl id
+     * @return network
+     * @throws Exception raise if error
+     */
+    @RequestMapping(value = "replaceAcl/{id}", method = RequestMethod.PUT, produces = {
+            MediaType.APPLICATION_JSON_VALUE }, consumes = { MediaType.APPLICATION_JSON_VALUE })
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ResponseBody
+    public Network replaceAcl(@RequestBody Network network, @PathVariable(PATH_ID) Long id) throws Exception {
+        network.setSyncFlag(true);
+        return networkService.replaceAcl(network);
+    }
+
 }

@@ -41,4 +41,13 @@ public interface VpcAclRepository extends PagingAndSortingRepository<VpcAcl, Lon
     @Query(value = "SELECT vpcAcl FROM VpcAcl vpcAcl WHERE vpcAcl.uuid = :uuid AND vpcAcl.isActive = :isActive")
     VpcAcl findByUuid(@Param("uuid") String uuid, @Param("isActive") Boolean isActive);
 
+    /**
+     * Find Vpc acl by uuid.
+     *
+     * @param uuid Vpc acl uuid.
+     * @return uuid
+     */
+    @Query(value = "SELECT vpcAcl FROM VpcAcl vpcAcl WHERE vpcAcl.uuid LIKE :uuid ")
+    VpcAcl findByUUID(@Param("uuid") String uuid);
+
 }

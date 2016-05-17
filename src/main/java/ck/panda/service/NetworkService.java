@@ -176,4 +176,13 @@ public interface NetworkService extends CRUDService<Network> {
      * @throws Exception unhandled errors.
      */
     List<Network> findNetworkByVpcIdAndIsActiveAndType(Long vpcId, Boolean isActive, String type) throws Exception;
+
+    /**
+     * Update the ACL for network.
+     *
+     * @param network network
+     * @return network
+     * @throws Exception unHandled errors
+     */
+    Network replaceAcl(Network network) throws Exception;
   }
