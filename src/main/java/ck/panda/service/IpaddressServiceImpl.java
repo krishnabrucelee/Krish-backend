@@ -158,12 +158,12 @@ public class IpaddressServiceImpl implements IpaddressService {
                 .getDepartmentById(convertEntityService.getNetworkById(networkId).getDepartmentId()).getType()
                 .equals(AccountType.USER)) {
             if (convertEntityService.getNetworkById(networkId).getProjectId() != null) {
-            	if (projectLimit != null) {
+                if (projectLimit != null) {
                 quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getNetworkById(networkId),
                         "IP", convertEntityService.getNetworkById(networkId).getProjectId(), "Project");
-            	} else {
+                } else {
                     throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Resource limit for project has not been set. Please update project quota");
-            	}
+                }
             }
             else {
                 quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getNetworkById(networkId),
@@ -234,12 +234,12 @@ public class IpaddressServiceImpl implements IpaddressService {
                 .getDepartmentById(convertEntityService.getVPCId(vpcId).getDepartmentId()).getType()
                 .equals(AccountType.USER)) {
             if (convertEntityService.getVPCId(vpcId).getProjectId() != null) {
-            	if (projectLimit != null) {
+                if (projectLimit != null) {
                 quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getVPCId(vpcId),
                         "IP", convertEntityService.getVPCId(vpcId).getProjectId(), "Project");
-            	} else {
+                } else {
                     throw new CustomGenericException(GenericConstants.NOT_IMPLEMENTED, "Resource limit for project has not been set. Please update project quota");
-            	}
+                }
             }
             else {
                 quotaLimitValidation.QuotaLimitCheckByResourceObject(convertEntityService.getVPCId(vpcId),
@@ -406,12 +406,13 @@ public class IpaddressServiceImpl implements IpaddressService {
                 ipAddress.setDomainId(convertEntityService.getDomainId(ipAddress.getTransDomainId()));
                 ipAddress.setZoneId(convertEntityService.getZoneId(ipAddress.getTransZoneId()));
                 if(ipAddress.getTransNetworkId() != null) {
-                	ipAddress.setNetworkId(convertEntityService.getNetworkId(ipAddress.getTransNetworkId()));
+                    ipAddress.setNetworkId(convertEntityService.getNetworkId(ipAddress.getTransNetworkId()));
                 }
                 if(ipAddress.getTransVpcId() != null) {
-                	ipAddress.setVpcId(convertEntityService.getVpcId(ipAddress.getTransVpcId()));
+                    ipAddress.setVpcId(convertEntityService.getVpcId(ipAddress.getTransVpcId()));
                 }
                 ipAddress.setProjectId(convertEntityService.getProjectId(ipAddress.getTransProjectId()));
+
                 //Get all the VPN details
                 HashMap<String, String> vpnOptional = new HashMap<String, String>();
                 vpnOptional.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
@@ -462,9 +463,9 @@ public class IpaddressServiceImpl implements IpaddressService {
                 ipAddress.setDomainId(convertEntityService.getDomainId(ipAddress.getTransDomainId()));
                 ipAddress.setZoneId(convertEntityService.getZoneId(ipAddress.getTransZoneId()));
                 ipAddress.setNetworkId(convertEntityService.getNetworkId(ipAddress.getTransNetworkId()));
-				if (ipAddress.getTransVpcId() != null) {
-					ipAddress.setVpcId(convertEntityService.getVpcId(ipAddress.getTransVpcId()));
-				}
+                if (ipAddress.getTransVpcId() != null) {
+                    ipAddress.setVpcId(convertEntityService.getVpcId(ipAddress.getTransVpcId()));
+                }
                 ipAddress.setProjectId(convertEntityService.getProjectId(ipAddress.getTransProjectId()));
                 IpAddress ipAddresses = ipRepo.findByUUID(ipAddress.getUuid());
                 if (ipAddresses != null) {
@@ -978,9 +979,18 @@ public class IpaddressServiceImpl implements IpaddressService {
         return ipAddress;
     }
 
+    @Override
+    public Page<IpAddress> findAllByVpc(Long vpcId, PagingAndSorting pagingAndSorting) throws Exception {
+        return ipRepo.findByVPCWithPaging(pagingAndSorting.toPageRequest(), vpcId, State.ALLOCATED);
+    }
+
 	@Override
-	public Page<IpAddress> findAllByVpc(Long vpcId, PagingAndSorting pagingAndSorting) throws Exception {
-		return ipRepo.findByVPCWithPaging(pagingAndSorting.toPageRequest(), vpcId, State.ALLOCATED);
+	public List<IpAddress> vpcNatList(Long networkId) throws Exception {
+		return ipRepo.findByNetworkAndNat(networkId, State.ALLOCATED, true);
 	}
 
+	@Override
+	public List<IpAddress> vpcLBList(Long networkId) throws Exception {
+		return loadBalancerService.vpcLBList(networkId);
+	}
 }
