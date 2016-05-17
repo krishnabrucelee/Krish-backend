@@ -282,6 +282,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<User> findBySync() throws Exception {
+         return (List<User>) userRepository.findAll();
+    }
+
+    @Override
     public List<User> findAllFromCSServerByDomain() throws Exception {
         List<User> userList = new ArrayList<User>();
         HashMap<String, String> userMap = new HashMap<String, String>();

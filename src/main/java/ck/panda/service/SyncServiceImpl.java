@@ -668,7 +668,7 @@ public class SyncServiceImpl implements SyncService {
         }
         try {
             // 26. Sync ResourceLimit entity
-            //this.syncResourceLimit();
+            this.syncResourceLimit();
         } catch (Exception e) {
             LOGGER.error("ERROR AT sync ResourceLimit Domain", e);
         }
@@ -1146,7 +1146,7 @@ public class SyncServiceImpl implements SyncService {
         HashMap<String, User> csUserMap = (HashMap<String, User>) User.convert(csUserService);
 
         // 2. Get all the user objects from application
-        List<User> appUserList = userService.findAll();
+        List<User> appUserList = userService.findBySync();
 
         // 3. Iterate application user list
         for (User user : appUserList) {
