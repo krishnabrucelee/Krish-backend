@@ -65,7 +65,8 @@ public class VpcAclServiceImpl implements VpcAclService {
 
     @Override
     public void delete(VpcAcl vpcAcl) throws Exception {
-        vpcAclRepo.delete(vpcAcl);
+        vpcAcl.setIsActive(false);
+        vpcAclRepo.save(vpcAcl);
     }
 
     @Override

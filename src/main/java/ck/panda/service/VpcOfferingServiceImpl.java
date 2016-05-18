@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.SupportedNetwork;
 import ck.panda.domain.entity.VpcOffering;
+import ck.panda.domain.entity.VpcOffering.Status;
 import ck.panda.domain.repository.jpa.VpcOfferingRepository;
 import ck.panda.util.CloudStackVPCService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -77,7 +78,8 @@ public class VpcOfferingServiceImpl implements VpcOfferingService {
 
     @Override
     public void delete(VpcOffering vpcOffering) throws Exception {
-        vpcOfferingRepo.delete(vpcOffering);
+        vpcOffering.setStatus(Status.DISABLED);
+        vpcOfferingRepo.save(vpcOffering);
     }
 
     @Override

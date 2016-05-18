@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.domain.entity.NetworkServiceProvider;
 import ck.panda.domain.entity.SupportedNetwork;
+import ck.panda.domain.entity.SupportedNetwork.Status;
 import ck.panda.domain.repository.jpa.SupportedNetworkRepository;
 import ck.panda.util.CloudStackVPCService;
 import ck.panda.util.domain.vo.PagingAndSorting;
@@ -77,7 +78,8 @@ public class SupportedNetworkServiceImpl implements SupportedNetworkService {
 
     @Override
     public void delete(SupportedNetwork supportedNetwork) throws Exception {
-        supportedNetworkRepo.delete(supportedNetwork);
+        supportedNetwork.setStatus(Status.DISABLED);
+        supportedNetworkRepo.save(supportedNetwork);
     }
 
     @Override
