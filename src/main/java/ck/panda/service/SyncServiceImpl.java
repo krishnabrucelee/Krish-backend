@@ -3506,7 +3506,7 @@ public class SyncServiceImpl implements SyncService {
                 vpcAcl.setUuid(csVpcAcl.getUuid());
                 vpcAcl.setForDisplay(csVpcAcl.getForDisplay());
                 vpcAcl.setIsActive(true);
-
+                vpcAcl.setSyncFlag(false);
                 // 3.2 If found, update the VPC ACL object in app db
                 vpcAclNetworkService.update(vpcAcl);
 
