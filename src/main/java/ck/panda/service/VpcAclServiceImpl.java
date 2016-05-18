@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
+import ck.panda.domain.entity.VPC;
 import ck.panda.domain.entity.VpcAcl;
 import ck.panda.domain.repository.jpa.VpcAclRepository;
 import ck.panda.util.CloudStackVPCService;
@@ -112,7 +113,13 @@ public class VpcAclServiceImpl implements VpcAclService {
             for (int i = 0, size = vpcAclListJSON.length(); i < size; i++) {
                 // 2.1 Call convert by passing JSONObject to VPC ACL entity and Add
                 // the converted VPC ACL entity to list
-                vpcAclList.add(VpcAcl.convert(vpcAclListJSON.getJSONObject(i)));
+                VpcAcl vpcAcl = VpcAcl.convert(vpcAclListJSON.getJSONObject(i));
+                VPC vpc = vpcService.findByUUID(vpcAcl.getTransvpcId());
+                if (vpc != null) {
+                    vpcAcl.setVpcId(vpc.getId());
+                }
+                vpcAcl.setIsActive(true);
+                vpcAclList.add(vpcAcl);
             }
         }
         return vpcAclList;
