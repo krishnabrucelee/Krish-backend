@@ -103,6 +103,7 @@ public class VpcAclServiceImpl implements VpcAclService {
 
         List<VpcAcl> vpcAclList = new ArrayList<VpcAcl>();
         HashMap<String, String> vpcAclMap = new HashMap<String, String>();
+        vpcAclMap.put("listall", "true");
         JSONArray vpcAclListJSON = null;
         // 1. Get the list of VPC ACL from CS server using CS connector
         String response = cloudStackVPCService.listNetworkACLLists(vpcAclMap, CloudStackConstants.JSON);
