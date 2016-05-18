@@ -188,7 +188,9 @@ public class VPCServiceImpl implements VPCService {
 
     @Override
     public void delete(VPC vpc) throws Exception {
-        vpcRepository.delete(vpc);
+        vpc.setIsActive(false);
+        vpc.setStatus(Status.INACTIVE);
+        vpcRepository.save(vpc);
     }
 
     @Override
