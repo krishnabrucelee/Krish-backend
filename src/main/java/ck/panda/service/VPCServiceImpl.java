@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import ck.panda.constants.CloudStackConstants;
 import ck.panda.constants.GenericConstants;
 import ck.panda.domain.entity.IpAddress;
+import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.ResourceLimitDepartment;
 import ck.panda.domain.entity.ResourceLimitProject;
@@ -27,6 +28,7 @@ import ck.panda.domain.entity.Zone;
 import ck.panda.domain.repository.jpa.VPCRepository;
 import ck.panda.domain.entity.Department.AccountType;
 import ck.panda.domain.entity.IpAddress.State;
+import ck.panda.domain.entity.Network.NetworkCreationType;
 import ck.panda.domain.entity.ResourceLimitDepartment.ResourceType;
 import ck.panda.util.AppValidator;
 import ck.panda.util.CloudStackOptionalUtil;
@@ -215,13 +217,25 @@ public class VPCServiceImpl implements VPCService {
 
     @Override
     public List<VPC> findAllFromCSServer() throws Exception {
-
+        List<Project> projectList = projectService.findAllByActive(true);
         List<VPC> vpcList = new ArrayList<VPC>();
+        for (Project project: projectList) {
+            HashMap<String, String> vpcMap = new HashMap<String, String>();
+            vpcMap.put(CloudStackConstants.CS_PROJECT_ID, project.getUuid());
+            vpcList = getNetworkList(vpcMap, vpcList);
+        }
+
         HashMap<String, String> vpcMap = new HashMap<String, String>();
-        JSONArray vpcListJSON = null;
-        // 1. Get the list of VPC from CS server using CS connector
         vpcMap.put(CloudStackConstants.CS_LIST_ALL, CloudStackConstants.STATUS_ACTIVE);
-        String response = cloudStackVPCService.listVPCs(vpcMap, CloudStackConstants.JSON);
+        vpcList = getNetworkList(vpcMap, vpcList);
+        return vpcList;
+    }
+
+    private List<VPC> getNetworkList(HashMap<String, String> networkMap, List<VPC> vpcList) throws Exception {
+        config.setServer(1L);
+        // 1. Get the list of domains from CS server using CS connector
+        String response = cloudStackVPCService.listVPCs(networkMap, CloudStackConstants.JSON);
+        JSONArray vpcListJSON = null;
         JSONObject responseObject = new JSONObject(response).getJSONObject(CloudStackConstants.CS_LIST_VPC_RESPONSE);
         if (responseObject.has(CloudStackConstants.CS_VPC)) {
             vpcListJSON = responseObject.getJSONArray(CloudStackConstants.CS_VPC);
