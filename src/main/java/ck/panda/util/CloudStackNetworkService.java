@@ -149,4 +149,22 @@ public class CloudStackNetworkService {
         String responseDocument = server.request(arguments);
         return responseDocument;
     }
+
+    /**
+     * Updates a network ACL list.
+     *
+     * @param aclid acl id
+     * @param optional optional
+     * @param response response
+     * @return response
+     * @throws Exception exception
+     */
+    public String replaceNetworkACLList(String aclId, HashMap<String, String> optional, String response) throws Exception {
+
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("replaceNetworkACLList", optional);
+        arguments.add(new NameValuePair("aclid", aclId));
+        arguments.add(new NameValuePair("response", response));
+        String responseDocument = server.request(arguments);
+        return responseDocument;
+    }
 }

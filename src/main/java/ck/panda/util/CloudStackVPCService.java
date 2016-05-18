@@ -566,4 +566,40 @@ public class CloudStackVPCService {
         String responseDocument = server.request(arguments);
         return responseDocument;
     }
+
+    /**
+     * Update Network ACL.
+     *
+     * @param uuid of acl
+     * @param response json
+     * @param optional value
+     * @return deleted acl
+     * @throws Exception
+     */
+    public String updateNetworkACL(String uuid, String response, HashMap<String, String> optional) throws Exception {
+        LinkedList<NameValuePair> arguments = server.getDefaultQuery("updateNetworkACLItem", optional);
+        arguments.add(new NameValuePair("id", uuid));
+        arguments.add(new NameValuePair("response", response));
+        String responseDocument = server.request(arguments);
+        return responseDocument;
+    }
+
+    /**
+     * List Network ACL Items.
+     *
+     * @param optional value
+     * @param response format
+     * @return string value
+     * @throws Exception unhandled errors.
+     */
+    public String listNetworkACLItems(HashMap<String, String> optional, String response)
+            throws Exception {
+
+        LinkedList<NameValuePair> arguments
+                = server.getDefaultQuery("listNetworkACLs", optional);
+        arguments.add(new NameValuePair("response", response));
+        String responseDocument = server.request(arguments);
+        return responseDocument;
+    }
+
 }

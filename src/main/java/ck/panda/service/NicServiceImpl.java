@@ -451,7 +451,9 @@ public class NicServiceImpl implements NicService {
          configServer.setUserServer();
          Nic nics = convertEntityService.getNicById(nic.getId());
          HashMap<String, String> nicMap = new HashMap<String, String>();
-         nicMap.put(CloudStackConstants.CS_IP_ADDRESS, nic.getSecondaryIpAddress());
+         if(nic.getSecondaryIpAddress() != null) {
+             nicMap.put(CloudStackConstants.CS_IP_ADDRESS, nic.getSecondaryIpAddress());
+         }
          String acquireIPResponse = cloudStackNicService.addIpToNic(nics.getUuid(), CloudStackConstants.JSON, nicMap);
          JSONObject csacquireIPResponseJSON = new JSONObject(acquireIPResponse)
                  .getJSONObject(CS_ADD_IPTONIC);

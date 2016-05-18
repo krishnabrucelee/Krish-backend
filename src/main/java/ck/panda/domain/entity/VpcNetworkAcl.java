@@ -1,6 +1,9 @@
 package ck.panda.domain.entity;
 
 import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -9,7 +12,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import org.hibernate.annotations.Type;
+import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -17,6 +22,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+import ck.panda.util.JsonUtil;
 
 /**
  * Get the VPC NETWORK ACL list from cloud stack server and push into the application database.
@@ -124,6 +130,14 @@ public class VpcNetworkAcl {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime updatedDateTime;
 
+    /** Temporary variable. */
+    @Transient
+    private Boolean syncFlag;
+
+    /** Transient network of the instance. */
+    @Transient
+    private String aclId;
+
     /**
      * Get the id of VpcNetworkAcl.java
      *
@@ -223,14 +237,6 @@ public class VpcNetworkAcl {
         return cidrList;
     }
 
-    /**
-     * Set the cidrlist of VpcNetworkAcl.
-     *
-     * @param cidrlist the cidrlist to set
-     */
-    public void setCidrlist(String cidrList) {
-        this.cidrList = cidrList;
-    }
 
     /**
      * Get the action of VpcNetworkAcl.
@@ -349,14 +355,6 @@ public class VpcNetworkAcl {
         return icmpCode;
     }
 
-    /**
-     * Set the icmpcode of VpcNetworkAcl.
-     *
-     * @param icmpcode the icmpcode to set
-     */
-    public void setIcmpcode(String icmpCode) {
-        this.icmpCode = icmpCode;
-    }
 
     /**
      * Get the traffictype of VpcNetworkAcl.
@@ -500,5 +498,102 @@ public class VpcNetworkAcl {
      */
     public void setUpdatedDateTime(ZonedDateTime updatedDateTime) {
         this.updatedDateTime = updatedDateTime;
+    }
+
+    /**
+     * Get the syncFlag.
+     *
+     * @return the syncFlag
+     */
+    public Boolean getSyncFlag() {
+        return syncFlag;
+    }
+
+    /**
+     * Set the syncFlag.
+     *
+     * @param syncFlag to set
+     */
+    public void setSyncFlag(Boolean syncFlag) {
+        this.syncFlag = syncFlag;
+    }
+
+
+    /**
+     * Get the aclId of VpcNetworkAcl.java
+     *
+     * @return the aclId
+     */
+    public String getAclId() {
+        return aclId;
+    }
+
+    /**
+     * Set the aclId of VpcNetworkAcl.java
+     *
+     * @param aclId the aclId to set
+     */
+    public void setAclId(String aclId) {
+        this.aclId = aclId;
+    }
+
+    /**
+     * Set the cidrList of Vpc Network Acl
+     *
+     * @param cidrList the cidrList to set
+     */
+    public void setCidrList(String cidrList) {
+        this.cidrList = cidrList;
+    }
+
+    /**
+     * Set the icmpCode of Vpc Network Acl
+     *
+     * @param icmpCode the icmpCode to set
+     */
+    public void setIcmpCode(String icmpCode) {
+        this.icmpCode = icmpCode;
+    }
+
+    /**
+     * Convert JSONObject to domain entity.
+     *
+     * @param jsonObject json object
+     * @return domain entity object.
+     * @throws Exception unhandled errors.
+     */
+    public static VpcNetworkAcl convert(JSONObject jsonObject) throws Exception {
+        VpcNetworkAcl acl = new VpcNetworkAcl();
+        acl.setSyncFlag(false);
+        acl.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
+        acl.setForDisplay(JsonUtil.getBooleanValue(jsonObject, "fordisplay"));
+        acl.setIcmpCode(JsonUtil.getStringValue(jsonObject, "icmpcode"));
+        acl.setIcmpType(JsonUtil.getStringValue(jsonObject, "icmptype"));
+        acl.setTrafficType(JsonUtil.getStringValue(jsonObject, "traffictype"));
+        acl.setStartPort(JsonUtil.getStringValue(jsonObject, "startport"));
+        acl.setEndPort(JsonUtil.getStringValue(jsonObject, "endport"));
+        acl.setCidrList(JsonUtil.getStringValue(jsonObject, "cidrlist"));
+        acl.setProtocol(JsonUtil.getStringValue(jsonObject, "protocol").toUpperCase());
+        acl.setRuleNumber(JsonUtil.getStringValue(jsonObject, "number"));
+        acl.setAction(JsonUtil.getStringValue(jsonObject, "action"));
+        acl.setAclId(JsonUtil.getStringValue(jsonObject, "aclid"));
+        acl.setIsActive(true);
+        return acl;
+    }
+
+    /**
+     * Mapping entity object into list.
+     *
+     * @param domainList list of domains.
+     * @return domain map
+     */
+    public static Map<String, VpcNetworkAcl> convert(List<VpcNetworkAcl> aclList) {
+        Map<String, VpcNetworkAcl> aclMap = new HashMap<String, VpcNetworkAcl>();
+
+        for (VpcNetworkAcl acl : aclList) {
+            aclMap.put(acl.getUuid(), acl);
+        }
+
+        return aclMap;
     }
 }

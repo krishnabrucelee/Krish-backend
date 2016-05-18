@@ -114,7 +114,7 @@ public class Network implements Serializable {
     /** ACL Object for the Network Offer. */
     @ManyToOne
     @JoinColumn(name = "acl_id", referencedColumnName = "id", updatable = false, insertable = false)
-    private NetworkOffering acl;
+    private VpcAcl acl;
 
     /** ACL id for the Network Offer. */
     @Column(name = "acl_id")
@@ -993,7 +993,7 @@ public class Network implements Serializable {
      *
      * @return the ACL
      */
-    public NetworkOffering getAcl() {
+    public VpcAcl getAcl() {
         return acl;
     }
 
@@ -1002,7 +1002,7 @@ public class Network implements Serializable {
      *
      * @param acl the ACL to set
      */
-    public void setAcl(NetworkOffering acl) {
+    public void setAcl(VpcAcl acl) {
         this.acl = acl;
     }
 

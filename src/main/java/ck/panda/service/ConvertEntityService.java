@@ -1533,4 +1533,18 @@ public class ConvertEntityService {
         return vpcService.findVpcById(id);
     }
 
+    /**
+     * Get the VPC id.
+     *
+     * @param uuid of VPC.
+     * @return VPC id.
+     * @throws Exception unhandled exception.
+     */
+    public Long getVpcAclId(String uuid) throws Exception {
+        if (vpcAclService.findByUUID(uuid) != null) {
+            return vpcAclService.findByUUID(uuid).getId();
+        }
+        return null;
+    }
+
 }
