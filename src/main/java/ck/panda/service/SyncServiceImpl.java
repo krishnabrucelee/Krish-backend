@@ -1633,7 +1633,8 @@ public class SyncServiceImpl implements SyncService {
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    private void syncHost() throws ApplicationException, Exception {
+    @Override
+    public void syncHost() throws ApplicationException, Exception {
 
         // 1. Get all the host objects from CS server as hash
         List<Host> csHostService = hostService.findAllFromCSServer();
@@ -1788,7 +1789,8 @@ public class SyncServiceImpl implements SyncService {
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    private void syncPod() throws ApplicationException, Exception {
+    @Override
+    public void syncPod() throws ApplicationException, Exception {
 
         // 1. Get all the pod objects from CS server as hash
         List<Pod> csPodService = podService.findAllFromCSServer();
@@ -1832,7 +1834,8 @@ public class SyncServiceImpl implements SyncService {
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    private void syncCluster() throws ApplicationException, Exception {
+    @Override
+    public void syncCluster() throws ApplicationException, Exception {
 
         // 1. Get all the cluster objects from CS server as hash
         List<Cluster> csClusterService = clusterService.findAllFromCSServer();
