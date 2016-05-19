@@ -123,7 +123,7 @@ public class VpcNetworkAclServiceImpl implements VpcNetworkAclService {
         if (!vpcNetworkAcl.getSyncFlag()) {
             vpcNetworkAcl.setIsActive(false);
         }
-        vpcNetworkAclRepo.delete(vpcNetworkAcl);
+        vpcNetworkAclRepo.save(vpcNetworkAcl);
 
     }
 
