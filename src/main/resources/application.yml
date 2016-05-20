@@ -2,7 +2,7 @@
 spring:
     datasource:
         driverClassName: com.mysql.jdbc.Driver
-        url: jdbc:mysql://localhost:3306/${DB_NAME:ckpanda}?characterEncoding=utf8
+        url: jdbc:mysql://${DB_HOST:localhost}:3306/${DB_NAME:ckpanda}?characterEncoding=utf8
         username: ${DB_USERNAME:root}
         password: ${DB_PASSWORD:l3tm3in}
         testWhileIdle: true
