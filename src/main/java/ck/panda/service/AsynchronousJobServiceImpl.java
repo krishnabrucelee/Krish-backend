@@ -55,6 +55,7 @@ import ck.panda.util.EncryptionUtil;
 import ck.panda.util.JsonUtil;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
+import net.sf.ehcache.concurrent.Sync;
 
 /**
  * Synchronization of all the asynchronous data from the cloudStack.
@@ -1459,6 +1460,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                              vpc.getDepartmentId(), CS_Department, Update);
                  }
                 vpcService.save(vpc);
+                syncService.syncIpAddress();
             }
         }
         if(eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)
