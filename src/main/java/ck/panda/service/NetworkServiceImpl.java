@@ -451,7 +451,6 @@ public class NetworkServiceImpl implements NetworkService {
                                 CloudStackConstants.JSON);
                         JSONObject jobresult = new JSONObject(jobResponse)
                                 .getJSONObject(CloudStackConstants.QUERY_ASYNC_JOB_RESULT_RESPONSE);
-                        this.ipRelease(network);
                     }
                 }
             } else {
@@ -475,29 +474,35 @@ public class NetworkServiceImpl implements NetworkService {
             }
             }
             ipService.ruleDelete(ip);
-            IpAddress ipAddress = new IpAddress();
-            ipAddress.setId(ip.getId());
-            ipAddress.setState(State.FREE);
-            ipAddress.setIsStaticnat(false);
-            ipAddress.setIsSourcenat(false);
-            ipAddress.setDepartmentId(ip.getDepartmentId());
-            ipAddress.setZoneId(ip.getZoneId());
-            ipAddress.setDisplay(ip.getDisplay());
-            ipAddress.setProjectId(ip.getProjectId());
-            ipAddress.setUuid(ip.getUuid());
-            ipAddress.setPublicIpAddress(ip.getPublicIpAddress());
-            ipAddress.setVmInstanceId(ip.getVmInstanceId());
-            ipAddress.setVlan(ip.getVlan());
-            ipAddress.setCreatedBy(ip.getCreatedBy());
-            ipAddress.setCreatedDateTime(ip.getCreatedDateTime());
-            ipAddress = ipService.update(ipAddress);
-            // Resource Count delete
-            if (ipAddress.getProjectId() != null) {
-                updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
-                            ipAddress.getProjectId(), CS_Project, Delete);
+            if (network.getVpcId() != null) {
+                ip.setNetworkId(null);
+                ip.setSyncFlag(false);
+                ipService.update(ip);
             } else {
-                updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
+                IpAddress ipAddress = new IpAddress();
+                ipAddress.setId(ip.getId());
+                ipAddress.setState(State.FREE);
+                ipAddress.setIsStaticnat(false);
+                ipAddress.setIsSourcenat(false);
+                ipAddress.setDepartmentId(ip.getDepartmentId());
+                ipAddress.setZoneId(ip.getZoneId());
+                ipAddress.setDisplay(ip.getDisplay());
+                ipAddress.setProjectId(ip.getProjectId());
+                ipAddress.setUuid(ip.getUuid());
+                ipAddress.setPublicIpAddress(ip.getPublicIpAddress());
+                ipAddress.setVmInstanceId(ip.getVmInstanceId());
+                ipAddress.setVlan(ip.getVlan());
+                ipAddress.setCreatedBy(ip.getCreatedBy());
+                ipAddress.setCreatedDateTime(ip.getCreatedDateTime());
+                ipAddress = ipService.update(ipAddress);
+                // Resource Count delete
+                if (ipAddress.getProjectId() != null) {
+                    updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP, ipAddress.getProjectId(),
+                            CS_Project, Delete);
+                } else {
+                    updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
                             ipAddress.getDepartmentId(), CS_Department, Delete);
+                }
             }
         }
         return network;
