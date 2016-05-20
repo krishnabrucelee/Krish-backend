@@ -50,7 +50,7 @@ public interface SyncService {
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    void syncRegion() throws ApplicationException, Exception;
+    void syncRegion(String action) throws ApplicationException, Exception;
 
     /**
      * Sync with Cloud Server Hypervisor.
@@ -414,12 +414,34 @@ public interface SyncService {
     void syncPod() throws ApplicationException, Exception;
 
     /**
-     * Sync with Cloud network network acl.
+     * Sync with Cloud cluster.
      *
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
     void syncCluster() throws ApplicationException, Exception;
 
+    /**
+     * Sync with Host.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
     void syncHost() throws ApplicationException, Exception;
+
+    /**
+     * Sync with Secondary storage.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    void syncSecondaryStorage() throws ApplicationException, Exception;
+
+    /**
+     * Sync with Primary Storage.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    void syncPrimaryStorage() throws ApplicationException, Exception;
 }
