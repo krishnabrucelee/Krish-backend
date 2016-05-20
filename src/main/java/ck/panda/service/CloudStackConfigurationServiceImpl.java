@@ -119,39 +119,51 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
     @Autowired
     private ManualCloudSyncService manualCloudSyncService;
 
+    /** Host service for reference */
     @Autowired
     private HostService hostService;
 
+    /** Pod service for reference */
     @Autowired
     private PodService podService;
 
+    /** Cluster service for reference */
     @Autowired
     private ClusterService clusterService;
 
+    /** Hypervisor service for reference .*/
     @Autowired
     private HypervisorService hypervisorService;
 
+    /** Region service for reference */
     @Autowired
     private RegionService regionService;
 
+    /** Supported service for reference */
     @Autowired
     private SupportedNetworkService supportService;
 
+    /** Network provider service for reference */
     @Autowired
     private NetworkServiceProviderService networkProviderService;
 
+    /** Affinity group type service for reference */
     @Autowired
     private AffinityGroupTypeService affinityGroupTypeService;
 
+    /** Primary storage service for reference. */
     @Autowired
     private PrimaryStorageService primaryStorageService;
 
+    /** Secondary storage service for reference. */
     @Autowired
     private SecondaryStorageService secondaryStorageService;
 
+    /** VPC service for reference. */
     @Autowired
     private VPCService vpcService;
 
+    /** Vpc offering service for reference. */
     @Autowired
     private VpcOfferingService vpcOfferingService;
 
@@ -215,10 +227,10 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
     /** Manual sync affinity group type. */
     public static final String AFFINITYGROUPTYPE = "AFFINITY_GROUP_TYPE";
 
-    /** Manual sync affinity group type. */
+    /** Manual sync primary storage type. */
     public static final String PRIMARYSTORAGE = "PRIMARY_STORAGE";
 
-    /** Manual sync affinity group type. */
+    /** Manual sync secondary storage type. */
     public static final String SECONDARYSTORAGE = "SECONDARY_STORAGE";
 
     /** Manual sync type. */

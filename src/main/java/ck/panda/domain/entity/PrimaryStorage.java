@@ -22,6 +22,8 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 
 @Entity
@@ -30,13 +32,22 @@ import ck.panda.util.JsonUtil;
 @EntityListeners(AuditingEntityListener.class)
 public class PrimaryStorage implements Serializable{
 
+     /** Constant for state. */
+    public static final String CS_STATE = "state";
+
+    /** Constant for cluster id. */
+    public static final String CS_CLUSTER_ID = "clusterid";
+
+    /** Constant for path. */
+    public static final String CS_PATH = "path";
+
      /** Unique id of the primary storage. */
     @Id
     @GeneratedValue
     @Column(name = "id")
     private Long id;
 
-    /** Cloudstack's Secondary storage uuid. */
+    /** Cloudstack's Primary storage uuid. */
     @Column(name = "uuid")
     private String uuid;
 
@@ -68,21 +79,21 @@ public class PrimaryStorage implements Serializable{
     @Column(name = "state")
     private String state;
 
-    /** Instance zone. */
+    /** Zone object for primary storage. */
     @JoinColumn(name = "zone_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
     private Zone zone;
 
-    /** Instance zone id. */
+    /** Zone id for primary storage. */
     @Column(name = "zone_id")
     private Long zoneId;
 
-    /** Zone Object for the pod. */
+    /** Cluster object of the primary storage. */
     @JoinColumn(name = "cluster_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
     private Cluster cluster;
 
-    /** id for the Zone. */
+    /** Cluster id of the primary storage. */
     @Column(name = "cluster_id")
     private Long clusterId;
 
@@ -504,24 +515,24 @@ public class PrimaryStorage implements Serializable{
     }
 
     /**
-     * Convert JSONObject into pod object.
+     * Convert JSONObject into primary storage object.
      *
      * @param jsonObject JSON object.
-     * @return pod object.
+     * @return primary storage object.
      */
     public static PrimaryStorage convert(JSONObject jsonObject) {
         PrimaryStorage storage = new PrimaryStorage();
         try {
-            storage.setName(JsonUtil.getStringValue(jsonObject, "name"));
-            storage.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            storage.setTransZoneId((JsonUtil.getStringValue(jsonObject, "zoneid")));
-            storage.setType(JsonUtil.getStringValue(jsonObject, "type"));
-            storage.setState(JsonUtil.getStringValue(jsonObject, "state"));
-            storage.setIpAddress(JsonUtil.getStringValue(jsonObject, "ipaddress"));
-            storage.setScope(JsonUtil.getStringValue(jsonObject, "scope"));
-            storage.setHypervisor(JsonUtil.getStringValue(jsonObject, "hypervisor"));
-            storage.setTransClusterId(JsonUtil.getStringValue(jsonObject, "clusterid"));
-            storage.setPath(JsonUtil.getStringValue(jsonObject, "path"));
+            storage.setName(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_NAME));
+            storage.setUuid(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ID));
+            storage.setTransZoneId((JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ZONE_ID)));
+            storage.setType(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CAPACITY_TYPE));
+            storage.setState(JsonUtil.getStringValue(jsonObject, CS_STATE));
+            storage.setIpAddress(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_IP_ADDRESS));
+            storage.setScope(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_SCOPE));
+            storage.setHypervisor(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_HYPERVISOR));
+            storage.setTransClusterId(JsonUtil.getStringValue(jsonObject, CS_CLUSTER_ID));
+            storage.setPath(JsonUtil.getStringValue(jsonObject, CS_PATH));
             storage.setIsActive(true);
         } catch (Exception ex) {
             ex.printStackTrace();

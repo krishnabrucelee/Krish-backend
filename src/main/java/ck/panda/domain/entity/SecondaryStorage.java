@@ -22,6 +22,8 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import ck.panda.constants.CloudStackConstants;
 import ck.panda.util.JsonUtil;
 
 @Entity
@@ -29,6 +31,15 @@ import ck.panda.util.JsonUtil;
 @SuppressWarnings("serial")
 @EntityListeners(AuditingEntityListener.class)
 public class SecondaryStorage implements Serializable{
+
+      /** Constant for protocol. */
+    public static final String CS_PROTOCOL = "protocol";
+
+    /** Constant for provider name. */
+    public static final String CS_PROVIDERNAME = "providername";
+
+    /** Constant for provider name. */
+    public static final String CS_URL = "url";
 
      /** Unique id of the secondary storage. */
     @Id
@@ -402,13 +413,13 @@ public class SecondaryStorage implements Serializable{
     public static SecondaryStorage convert(JSONObject jsonObject) {
         SecondaryStorage storage = new SecondaryStorage();
         try {
-            storage.setName(JsonUtil.getStringValue(jsonObject, "name"));
-            storage.setUuid(JsonUtil.getStringValue(jsonObject, "id"));
-            storage.setTransZoneId((JsonUtil.getStringValue(jsonObject, "zoneid")));
-            storage.setProtocol(JsonUtil.getStringValue(jsonObject, "protocol"));
-            storage.setProviderName(JsonUtil.getStringValue(jsonObject, "providername"));
-            storage.setScope(JsonUtil.getStringValue(jsonObject, "scope"));
-            storage.setUrl(JsonUtil.getStringValue(jsonObject, "url"));
+            storage.setName(JsonUtil.getStringValue(jsonObject,  CloudStackConstants.CS_NAME));
+            storage.setUuid(JsonUtil.getStringValue(jsonObject, CloudStackConstants.CS_ID));
+            storage.setTransZoneId((JsonUtil.getStringValue(jsonObject,  CloudStackConstants.CS_ZONE_ID)));
+            storage.setProtocol(JsonUtil.getStringValue(jsonObject, CS_PROTOCOL));
+            storage.setProviderName(JsonUtil.getStringValue(jsonObject, CS_PROVIDERNAME));
+            storage.setScope(JsonUtil.getStringValue(jsonObject,  CloudStackConstants.CS_SCOPE));
+            storage.setUrl(JsonUtil.getStringValue(jsonObject, CS_URL));
             storage.setIsActive(true);
         } catch (Exception ex) {
             ex.printStackTrace();
