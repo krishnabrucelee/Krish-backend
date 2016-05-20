@@ -439,11 +439,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
         for (String name : resourceTypeMap.keySet()) {
             ResourceLimitProject resourceLimitProject = resourceLimitProjectRepo.findByProjectAndResourceType(id, ResourceLimitProject.ResourceType.valueOf(resourceTypeMap.get(name)), true);
             if (resourceLimitProject != null) {
-                if (resourceTypeMap.get(name).equals(GenericConstants.MEMORY)) {
-                    resourceMap.put(resourceTypeMap.get(name), (EmptytoLong(resourceLimitProject.getUsedLimit())) / 1024);
-                } else {
-                    resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitProject.getUsedLimit()));
-                }
+                resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitProject.getUsedLimit()));
             }
         }
         return resourceMap;
@@ -461,11 +457,7 @@ public class ResourceLimitProjectServiceImpl implements ResourceLimitProjectServ
                 if (resourceLimitDepartment.getMax() == -1) {
                     resourceMap.put(resourceTypeMap.get(name), -1L);
                 } else {
-                    if (resourceTypeMap.get(name).equals(GenericConstants.MEMORY)) {
-                        resourceMap.put(resourceTypeMap.get(name), (EmptytoLong(resourceLimitProject.getMax()) + (EmptytoLong(resourceLimitDepartment.getMax()) - EmptytoLong(resourceLimitDepartment.getUsedLimit()))) / 1024);
-                    } else {
-                        resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitProject.getMax()) + (EmptytoLong(resourceLimitDepartment.getMax()) - EmptytoLong(resourceLimitDepartment.getUsedLimit())));
-                    }
+                    resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitProject.getMax()) + (EmptytoLong(resourceLimitDepartment.getMax()) - EmptytoLong(resourceLimitDepartment.getUsedLimit())));
                 }
             }
         }

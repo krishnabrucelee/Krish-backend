@@ -370,11 +370,7 @@ public class ResourceLimitDomainServiceImpl implements ResourceLimitDomainServic
         HashMap<String, Long> resourceMap = new HashMap<String, Long>();
         for (String name : resourceTypeMap.keySet()) {
             ResourceLimitDomain resourceLimitDomain = resourceLimitDomainRepo.findByDomainAndResourceCount(id, ResourceLimitDomain.ResourceType.valueOf(resourceTypeMap.get(name)), true);
-            if (resourceTypeMap.get(name).equals(GenericConstants.MEMORY)) {
-                resourceMap.put(resourceTypeMap.get(name), (EmptytoLong(resourceLimitDomain.getUsedLimit())) / 1024);
-            } else {
-                resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitDomain.getUsedLimit()));
-            }
+            resourceMap.put(resourceTypeMap.get(name), EmptytoLong(resourceLimitDomain.getUsedLimit()));
         }
         return resourceMap;
     }
