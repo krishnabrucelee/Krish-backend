@@ -82,8 +82,8 @@ public class Host implements Serializable {
     @Column(name = "host_ipaddress")
     private String hostIpaddress;
 
-    /** Zone Object for the pod. */
-    @JoinColumn(name = "zone_id", referencedColumnName = "Id", updatable = false, insertable = false)
+    /** Cluster Object for the host. */
+    @JoinColumn(name = "cluster_id", referencedColumnName = "Id", updatable = false, insertable = false)
     @ManyToOne
     private Cluster cluster;
 

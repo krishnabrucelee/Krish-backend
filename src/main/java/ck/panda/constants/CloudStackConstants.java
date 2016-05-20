@@ -756,4 +756,8 @@ public class CloudStackConstants {
     /** Constant for ACL id. */
     public static final String CS_ACL_ID = "aclid";
 
+    /** Constant for scope. */
+    public static final String CS_SCOPE = "scope";
+
+
 }
