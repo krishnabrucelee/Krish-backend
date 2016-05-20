@@ -491,6 +491,14 @@ public class NetworkServiceImpl implements NetworkService {
             ipAddress.setCreatedBy(ip.getCreatedBy());
             ipAddress.setCreatedDateTime(ip.getCreatedDateTime());
             ipAddress = ipService.update(ipAddress);
+            // Resource Count delete
+            if (ipAddress.getProjectId() != null) {
+                updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
+                            ipAddress.getProjectId(), CS_Project, Delete);
+            } else {
+                updateResourceCountService.QuotaUpdateByResourceObject(ipAddress, CS_IP,
+                            ipAddress.getDepartmentId(), CS_Department, Delete);
+            }
         }
         return network;
     }
