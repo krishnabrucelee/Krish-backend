@@ -8,15 +8,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import ck.panda.constants.PingConstants;
+import ck.panda.domain.entity.AffinityGroupType;
 import ck.panda.domain.entity.CloudStackConfiguration;
+import ck.panda.domain.entity.Cluster;
 import ck.panda.domain.entity.ComputeOffering;
 import ck.panda.domain.entity.Department;
 import ck.panda.domain.entity.Domain;
+import ck.panda.domain.entity.Host;
+import ck.panda.domain.entity.Hypervisor;
 import ck.panda.domain.entity.ManualCloudSync;
 import ck.panda.domain.entity.Network;
 import ck.panda.domain.entity.NetworkOffering;
+import ck.panda.domain.entity.NetworkServiceProvider;
+import ck.panda.domain.entity.Pod;
+import ck.panda.domain.entity.VPC;
+import ck.panda.domain.entity.VpcOffering;
+import ck.panda.domain.entity.PrimaryStorage;
 import ck.panda.domain.entity.Project;
+import ck.panda.domain.entity.Region;
+import ck.panda.domain.entity.SecondaryStorage;
 import ck.panda.domain.entity.StorageOffering;
+import ck.panda.domain.entity.SupportedNetwork;
 import ck.panda.domain.entity.Template;
 import ck.panda.domain.entity.User;
 import ck.panda.domain.entity.Zone;
@@ -107,6 +119,54 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
     @Autowired
     private ManualCloudSyncService manualCloudSyncService;
 
+    /** Host service for reference */
+    @Autowired
+    private HostService hostService;
+
+    /** Pod service for reference */
+    @Autowired
+    private PodService podService;
+
+    /** Cluster service for reference */
+    @Autowired
+    private ClusterService clusterService;
+
+    /** Hypervisor service for reference .*/
+    @Autowired
+    private HypervisorService hypervisorService;
+
+    /** Region service for reference */
+    @Autowired
+    private RegionService regionService;
+
+    /** Supported service for reference */
+    @Autowired
+    private SupportedNetworkService supportService;
+
+    /** Network provider service for reference */
+    @Autowired
+    private NetworkServiceProviderService networkProviderService;
+
+    /** Affinity group type service for reference */
+    @Autowired
+    private AffinityGroupTypeService affinityGroupTypeService;
+
+    /** Primary storage service for reference. */
+    @Autowired
+    private PrimaryStorageService primaryStorageService;
+
+    /** Secondary storage service for reference. */
+    @Autowired
+    private SecondaryStorageService secondaryStorageService;
+
+    /** VPC service for reference. */
+    @Autowired
+    private VPCService vpcService;
+
+    /** Vpc offering service for reference. */
+    @Autowired
+    private VpcOfferingService vpcOfferingService;
+
     /** Manual sync domain key. */
     public static final String DOMAIN = "DOMAIN";
 
@@ -143,6 +203,36 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
     /** Manual sync vpc key. */
     public static final String VPC = "VPC";
 
+    /** Manual sync pod. */
+    public static final String POD = "POD";
+
+    /** Manual sync host. */
+    public static final String HOST = "HOST";
+
+    /** Manual sync cluster. */
+    public static final String CLUSTER = "CLUSTER";
+
+    /** Manual sync region. */
+    public static final String REGION = "REGION";
+
+    /** Manual sync hypervisor. */
+    public static final String HYPERVISOR = "HYPERVISOR";
+
+    /** Manual sync supported network. */
+    public static final String SUPPORTEDNETWORK = "SUPPORTED_NETWORK";
+
+    /** Manual sync network service provider. */
+    public static final String NETWORKSERVICEPROVIDER = "NETWORK_SERVICE_PROVIDER";
+
+    /** Manual sync affinity group type. */
+    public static final String AFFINITYGROUPTYPE = "AFFINITY_GROUP_TYPE";
+
+    /** Manual sync primary storage type. */
+    public static final String PRIMARYSTORAGE = "PRIMARY_STORAGE";
+
+    /** Manual sync secondary storage type. */
+    public static final String SECONDARYSTORAGE = "SECONDARY_STORAGE";
+
     /** Manual sync type. */
     public static final String IMPORT = "import", CHECK = "check", CHECKALL = "checkall";
 
@@ -156,7 +246,7 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
             throw new ApplicationException(errors);
         }
         server.setServer(config.getApiURL(), config.getSecretKey(), config.getApiKey());
-        syncService.syncRegion();
+        syncService.syncRegion("CONNECTION_CHECK");
         pingConfigurationSetup(config, errors);
         configRepo.save(config);
         syncService.sync();
@@ -300,7 +390,12 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
             }
             break;
         case VPC_OFFER:
-            //Sync VPC offerings
+             //Sync VPC
+            if (type.equals(IMPORT)) {
+                syncService.syncVpcOffering();
+            } else {
+                syncVPCOfferingCount(keyName, type);
+            }
             break;
         case NETWORK:
             //Sync network and dependent functionality
@@ -310,8 +405,103 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
                 syncNetworkWithDependencyCount(keyName, type);
             }
             break;
+        case HOST:
+            //Sync network offering
+            if (type.equals(IMPORT)) {
+                syncService.syncHost();
+            } else {
+                syncHostCount(keyName, type);
+            }
+            break;
+
+        case POD:
+            //Sync pod
+            if (type.equals(IMPORT)) {
+                syncService.syncPod();
+            } else {
+                syncPodCount(keyName, type);
+            }
+            break;
+
+        case HYPERVISOR:
+            //Sync hypervisor
+            if (type.equals(IMPORT)) {
+                syncService.syncHypervisor();
+            } else {
+                syncHypervisorCount(keyName, type);
+            }
+            break;
+
+        case CLUSTER:
+            //Sync cluster
+            if (type.equals(IMPORT)) {
+                syncService.syncCluster();
+            } else {
+                syncClusterCount(keyName, type);
+            }
+            break;
+
+        case REGION:
+            //Sync region
+            if (type.equals(IMPORT)) {
+                syncService.syncRegion("CONNECTION_CHECK");
+            } else {
+                syncClusterCount(keyName, type);
+            }
+            break;
+
+        case SUPPORTEDNETWORK:
+            //Sync supported network
+            if (type.equals(IMPORT)) {
+                syncService.syncSupportedNetwork();
+            } else {
+                syncSuppportedNetworkCount(keyName, type);
+            }
+            break;
+
+        case NETWORKSERVICEPROVIDER:
+            //Sync network service provider
+            if (type.equals(IMPORT)) {
+                syncService.syncNetworkServiceProvider();
+            } else {
+                syncNetworkServiceProviderCount(keyName, type);
+            }
+            break;
+
+        case AFFINITYGROUPTYPE:
+            //Sync affinity group type count
+            if (type.equals(IMPORT)) {
+                syncService.syncAffinityGroupType();
+            } else {
+                syncAffinityGroupTypeCount(keyName, type);
+            }
+            break;
+
+        case PRIMARYSTORAGE:
+            //Sync primary storage count
+            if (type.equals(IMPORT)) {
+                syncService.syncPrimaryStorage();
+            } else {
+                syncPrimaryStorageCount(keyName, type);
+            }
+            break;
+
+        case SECONDARYSTORAGE:
+            //Sync secondary storage count
+            if (type.equals(IMPORT)) {
+                syncService.syncSecondaryStorage();
+            } else {
+                syncSecondaryStorageCount(keyName, type);
+            }
+            break;
+
         case VPC:
             //Sync VPC
+            if (type.equals(IMPORT)) {
+                syncService.syncVpc();
+            } else {
+                syncVPCCount(keyName, type);
+            }
             break;
         case CHECKALL:
             //Sync count
@@ -324,6 +514,17 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
             syncStorageOfferingCount(keyName, type);
             syncNetworkOfferingCount(keyName, type);
             syncTemplatesCount(keyName, type);
+            syncPodCount(keyName, type);
+            syncHostCount(keyName, type);
+            syncClusterCount(keyName, type);
+            syncHypervisorCount(keyName, type);
+            syncAffinityGroupTypeCount(keyName, type);
+            syncNetworkServiceProviderCount(keyName, type);
+            syncSuppportedNetworkCount(keyName, type);
+            syncPrimaryStorageCount(keyName, type);
+            syncSecondaryStorageCount(keyName, type);
+            syncVPCCount(keyName, type);
+            syncVPCOfferingCount(keyName, type);
             syncNetworkWithDependencyCount(keyName, type);
             break;
         default:
@@ -537,6 +738,150 @@ public class CloudStackConfigurationServiceImpl implements CloudStackConfigurati
     public void syncNetworkWithDependencyCount(String keyName, String type) throws Exception {
         List<Network> csNetworkList = networkService.findAllFromCSServerByDomain();
         updateManualSyncCount("NETWORK", csNetworkList.size());
+    }
+
+    /**
+     * Sync Host count.
+     *
+     * @param keyName key name
+     * @param type key type
+     * @throws Exception raise if error
+     */
+    public void syncHostCount(String keyName, String type) throws Exception {
+        List<Host> csHostList = hostService.findAllFromCSServer();
+        updateManualSyncCount("HOST", csHostList.size());
+    }
+
+    /**
+     * Sync Pod count.
+     *
+     * @param keyName key name
+     * @param type key type
+     * @throws Exception raise if error
+     */
+    public void syncPodCount(String keyName, String type) throws Exception {
+        List<Pod> cspodList = podService.findAllFromCSServer();
+        updateManualSyncCount("POD", cspodList.size());
+    }
+
+    /**
+     * Sync Cluster count.
+     *
+     * @param keyName key name
+     * @param type key type
+     * @throws Exception raise if error
+     */
+    public void syncClusterCount(String keyName, String type) throws Exception {
+        List<Cluster> csClusterList = clusterService.findAllFromCSServer();
+        updateManualSyncCount("CLUSTER", csClusterList.size());
+    }
+
+    /**
+     * Sync Hypervisor count.
+     *
+     * @param keyName key name
+     * @param type key type
+     * @throws Exception raise if error
+     */
+    public void syncHypervisorCount(String keyName, String type) throws Exception {
+        List<Hypervisor> csHypervsiorList = hypervisorService.findAllFromCSServer();
+        updateManualSyncCount("HYPERVISOR", csHypervsiorList.size());
+    }
+
+    /**
+     * Sync Region count.
+     *
+     * @param keyName key name
+     * @param type key type
+     * @throws Exception raise if error
+     */
+    public void syncRegionCount(String keyName, String type) throws Exception {
+        List<Region> csHypervsiorList = regionService.findAllFromCSServer();
+        updateManualSyncCount("REGION", csHypervsiorList.size());
+    }
+
+    /**
+     * Sync SupportList count.
+     *
+     * @param keyName key name
+     * @param type key type
+     * @throws Exception raise if error
+     */
+    public void syncSuppportedNetworkCount(String keyName, String type) throws Exception {
+        List<SupportedNetwork> csSupportList = supportService.findAllFromCSServer();
+        updateManualSyncCount("SUPPORTED_NETWORK", csSupportList.size());
+    }
+
+    /**
+     * Sync Network Service provider count.
+     *
+     * @param keyName key name
+     * @param type key type
+     * @throws Exception raise if error
+     */
+    public void syncNetworkServiceProviderCount(String keyName, String type) throws Exception {
+        List<NetworkServiceProvider> csProviderList = networkProviderService.findAllFromCSServer();
+        updateManualSyncCount("NETWORK_SERVICE_PROVIDER", csProviderList.size());
+    }
+
+    /**
+     * Sync Affinity group type count.
+     *
+     * @param keyName key name
+     * @param type key type
+     * @throws Exception raise if error
+     */
+    public void syncAffinityGroupTypeCount(String keyName, String type) throws Exception {
+        List<AffinityGroupType> csAffinityList = affinityGroupTypeService.findAllFromCSServer();
+        updateManualSyncCount("AFFINITY_GROUP_TYPE", csAffinityList.size());
+    }
+
+    /**
+     * Sync Primary storage list count.
+     *
+     * @param keyName key name
+     * @param type key type
+     * @throws Exception raise if error
+     */
+    public void syncPrimaryStorageCount(String keyName, String type) throws Exception {
+        List<PrimaryStorage> csPrimaryList = primaryStorageService.findAllFromCSServer();
+        updateManualSyncCount("PRIMARY_STORAGE", csPrimaryList.size());
+    }
+
+    /**
+     * Sync Secondary storage list count.
+     *
+     * @param keyName key name
+     * @param type key type
+     * @throws Exception raise if error
+     */
+    public void syncSecondaryStorageCount(String keyName, String type) throws Exception {
+        List<SecondaryStorage> csSecondaryList = secondaryStorageService.findAllFromCSServer();
+        updateManualSyncCount("SECONDARY_STORAGE", csSecondaryList.size());
+    }
+
+    /**
+     * Sync Vpc list count.
+     *
+     * @param keyName key name
+     * @param type key type
+     * @throws Exception raise if error
+     */
+    public void syncVPCCount(String keyName, String type) throws Exception {
+        List<VPC> csVpcList = vpcService.findAllFromCSServer();
+        updateManualSyncCount("VPC", csVpcList.size());
+    }
+
+    /**
+     * Sync Vpc Offering list count.
+     *
+     * @param keyName key name
+     * @param type key type
+     * @throws Exception raise if error
+     */
+    public void syncVPCOfferingCount(String keyName, String type) throws Exception {
+        List<VpcOffering> csVpcOfferingList = vpcOfferingService.findAllFromCSServer();
+        updateManualSyncCount("VPC_OFFER", csVpcOfferingList.size());
     }
 
     /**

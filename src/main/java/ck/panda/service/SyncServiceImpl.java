@@ -48,6 +48,7 @@ import ck.panda.domain.entity.OsType;
 import ck.panda.domain.entity.Permission;
 import ck.panda.domain.entity.Pod;
 import ck.panda.domain.entity.PortForwarding;
+import ck.panda.domain.entity.PrimaryStorage;
 import ck.panda.domain.entity.Project;
 import ck.panda.domain.entity.Region;
 import ck.panda.domain.entity.ResourceLimitDepartment;
@@ -55,6 +56,7 @@ import ck.panda.domain.entity.ResourceLimitDomain;
 import ck.panda.domain.entity.ResourceLimitProject;
 import ck.panda.domain.entity.Role;
 import ck.panda.domain.entity.SSHKey;
+import ck.panda.domain.entity.SecondaryStorage;
 import ck.panda.domain.entity.Snapshot;
 import ck.panda.domain.entity.SnapshotPolicy;
 import ck.panda.domain.entity.StorageOffering;
@@ -338,6 +340,10 @@ public class SyncServiceImpl implements SyncService {
     @Autowired
     private VpcNetworkAclService vpcAclNetworkService;
 
+    /** Secondary secondary reference. */
+    @Autowired
+    private SecondaryStorageService secondaryStorageService;
+
 
     /** Permission instance properties. */
     @Value(value = "${permission.instance}")
@@ -483,6 +489,46 @@ public class SyncServiceImpl implements SyncService {
     @Value(value = "${manualsync.vpc}")
     private String manualSyncVpc;
 
+    /** Manual sync host properties. */
+    @Value(value = "${manualsync.host}")
+    private String manualSyncHost;
+
+    /** Manual sync cluster properties. */
+    @Value(value = "${manualsync.cluster}")
+    private String manualSyncCluster;
+
+    /** Manual sync hypervisor properties. */
+    @Value(value = "${manualsync.hypervisor}")
+    private String manualSyncHypervisor;
+
+    /** Manual sync region properties. */
+    @Value(value = "${manualsync.region}")
+    private String manualSyncRegion;
+
+    /** Manual sync pod properties. */
+    @Value(value = "${manualsync.pod}")
+    private String manualSyncPod;
+
+    /** Manual sync supported network properties. */
+    @Value(value = "${manualsync.supportednetwork}")
+    private String manualSyncSupportedNetwork;
+
+    /** Manual sync Affinity group type properties. */
+    @Value(value = "${manualsync.affinitygrouptype}")
+    private String manualSyncAffinityGroupType;
+
+    /** Manual sync network service provider properties. */
+    @Value(value = "${manualsync.networkserviceprovider}")
+    private String manualSyncNetworkServiceProvider;
+
+    /** Manual sync primary storage properties. */
+    @Value(value = "${manualsync.primarystorage}")
+    private String manualSyncPrimaryStorage;
+
+    /** Manual sync secondary storage properties. */
+    @Value(value = "${manualsync.secondarystorage}")
+    private String manualSyncSecondaryStorage;
+
     /** Full permission for root and domain admin. */
     public static final String ADMIN_PERMISSION = "FULL_PERMISSION";
 
@@ -502,6 +548,9 @@ public class SyncServiceImpl implements SyncService {
     @Autowired
     private AffinityGroupService affinityGroupService;
 
+    @Autowired
+    private PrimaryStorageService primaryStorageService;
+
     @Override
     public void init(CloudStackServer server) throws Exception {
         CloudStackConfiguration cloudConfig = cloudConfigService.find(1L);
@@ -517,9 +566,16 @@ public class SyncServiceImpl implements SyncService {
     @Override
     public void sync() throws Exception {
 
+
         try {
-            // 1. Sync Region entity
-            this.syncRegion();
+            // 1. Sync manual sync items
+            this.syncManualImportData();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Manual Import Data", e);
+        }
+        try {
+            // 2. Sync Region entity
+            this.syncRegion("EXECUTE");
         } catch (Exception e) {
             Errors errors = new Errors(messageSource);
             errors.addGlobalError(
@@ -527,12 +583,6 @@ public class SyncServiceImpl implements SyncService {
             if (errors.hasErrors()) {
                 throw new ApplicationException(errors);
             }
-        }
-        try {
-            // 2. Sync manual sync items
-            this.syncManualImportData();
-        } catch (Exception e) {
-            LOGGER.error("ERROR AT synch Manual Import Data", e);
         }
         try {
             // 3. Sync Zone entity
@@ -785,13 +835,26 @@ public class SyncServiceImpl implements SyncService {
             LOGGER.error("ERROR AT synch Affinity group", e);
         }
         try {
-            // 21. Sync VPC ACL entity
+            // 44. Sync VPC ACL entity
             this.syncVpcNetworkAcl();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch VPC NETWORK ACL", e);
         }
         try {
-            // 44. Sync general configuration
+            // 45. Sync Secondary storage entity
+            this.syncSecondaryStorage();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Secondary storage", e);
+        }
+        try {
+            // 46. Sync Primary storage entity
+            this. syncPrimaryStorage();
+        } catch (Exception e) {
+            LOGGER.error("ERROR AT synch Primary storage", e);
+        }
+
+        try {
+            // 47. Sync general configuration
             this.syncGeneralConfiguration();
         } catch (Exception e) {
             LOGGER.error("ERROR AT synch General Configuration", e);
@@ -907,7 +970,7 @@ public class SyncServiceImpl implements SyncService {
      * @throws Exception cloudstack unhandled errors.
      */
     @Override
-    public void syncRegion() throws ApplicationException, Exception {
+    public void syncRegion(String action) throws ApplicationException, Exception {
 
         // 1. Get all the region objects from CS server as hash
         List<Region> csRegionList = regionService.findAllFromCSServer();
@@ -945,7 +1008,9 @@ public class SyncServiceImpl implements SyncService {
             regionService.save(csRegionMap.get(key));
         }
         LOGGER.debug("Total rows added : " + (csRegionMap.size()));
-
+        if(action.equals("EXECUTE") ) {
+            updateManualSyncCount("REGION", csRegionList.size(), csRegionList.size());
+        }
     }
 
     /**
@@ -992,6 +1057,8 @@ public class SyncServiceImpl implements SyncService {
             hypervisorService.save(csHypervisorMap.get(key));
         }
         LOGGER.debug("Total rows added : " + (csHypervisorMap.size()));
+        updateManualSyncCount("HYPERVISOR", csHypervisorList.size(), csHypervisorList.size());
+
 
     }
 
@@ -1633,7 +1700,8 @@ public class SyncServiceImpl implements SyncService {
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    private void syncHost() throws ApplicationException, Exception {
+    @Override
+    public void syncHost() throws ApplicationException, Exception {
 
         // 1. Get all the host objects from CS server as hash
         List<Host> csHostService = hostService.findAllFromCSServer();
@@ -1668,6 +1736,8 @@ public class SyncServiceImpl implements SyncService {
         for (String key : csHostMap.keySet()) {
             hostService.save(csHostMap.get(key));
         }
+        updateManualSyncCount("HOST", csHostService.size(), csHostService.size());
+
     }
 
     /**
@@ -1788,7 +1858,8 @@ public class SyncServiceImpl implements SyncService {
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    private void syncPod() throws ApplicationException, Exception {
+    @Override
+    public void syncPod() throws ApplicationException, Exception {
 
         // 1. Get all the pod objects from CS server as hash
         List<Pod> csPodService = podService.findAllFromCSServer();
@@ -1824,6 +1895,8 @@ public class SyncServiceImpl implements SyncService {
         for (String key : csPodMap.keySet()) {
             podService.save(csPodMap.get(key));
         }
+        updateManualSyncCount("POD", csPodService.size(), csPodService.size());
+
     }
 
     /**
@@ -1832,7 +1905,8 @@ public class SyncServiceImpl implements SyncService {
      * @throws ApplicationException unhandled application errors.
      * @throws Exception cloudstack unhandled errors.
      */
-    private void syncCluster() throws ApplicationException, Exception {
+    @Override
+    public void syncCluster() throws ApplicationException, Exception {
 
         // 1. Get all the cluster objects from CS server as hash
         List<Cluster> csClusterService = clusterService.findAllFromCSServer();
@@ -1870,6 +1944,8 @@ public class SyncServiceImpl implements SyncService {
         for (String key : csClusterMap.keySet()) {
             clusterService.save(csClusterMap.get(key));
         }
+        updateManualSyncCount("CLUSTER", csClusterService.size(), csClusterService.size());
+
     }
 
     /**
@@ -3029,6 +3105,8 @@ public class SyncServiceImpl implements SyncService {
             affinityGroupTypeService.save(csAffinityGroupTypeMap.get(key));
         }
         LOGGER.debug("Total rows added : " + (csAffinityGroupTypeMap.size()));
+        updateManualSyncCount("AFFINITY_GROUP_TYPE", csAffinityGroupTypesList.size(), csAffinityGroupTypesList.size());
+
     }
 
     @Override
@@ -3168,7 +3246,7 @@ public class SyncServiceImpl implements SyncService {
         if (manualCloudSync.size() == 0) {
             createManualSyncItem(manualSyncDomain, manualSyncZone, manualSyncDepartment, manualSyncUsers, manualSyncProjects,
                     manualSyncComputeOffer, manualSyncDiskOffer, manualSyncNetworkOffer, manualSyncOsTemplate, manualSyncVpcOffer,
-                    manualSyncNetwork, manualSyncVpc);
+                    manualSyncNetwork, manualSyncVpc,manualSyncHost,manualSyncCluster,manualSyncPod,manualSyncRegion,manualSyncHypervisor,manualSyncSupportedNetwork,manualSyncAffinityGroupType,manualSyncNetworkServiceProvider,manualSyncPrimaryStorage,manualSyncSecondaryStorage);
         }
     }
 
@@ -3191,7 +3269,7 @@ public class SyncServiceImpl implements SyncService {
      */
     public void createManualSyncItem(String manualSyncDomain, String manualSyncZone, String manualSyncDepartment, String manualSyncUsers,
             String manualSyncProjects, String manualSyncComputeOffer, String manualSyncDiskOffer, String manualSyncNetworkOffer,
-            String manualSyncOsTemplate, String manualSyncVpcOffer, String manualSyncNetwork, String manualSyncVpc) throws Exception {
+            String manualSyncOsTemplate, String manualSyncVpcOffer, String manualSyncNetwork, String manualSyncVpc,String manualSyncCluster, String manualSyncHost, String manualSyncPod, String manualSyncHypervisor, String manualSyncRegion,String manualSyncSupportedNetwork, String manualSyncAffinityGroupType, String manualSyncNetworkServiceProvider, String manualSyncPrimaryStorage, String manualSyncSecondaryStorage) throws Exception {
         List<String> stringList = new ArrayList<String>();
         Map<Integer, List<String>> actionMap = new HashMap<Integer, List<String>>();
         stringList.add(manualSyncDomain);
@@ -3206,7 +3284,16 @@ public class SyncServiceImpl implements SyncService {
         stringList.add(manualSyncVpcOffer);
         stringList.add(manualSyncNetwork);
         stringList.add(manualSyncVpc);
-
+        stringList.add(manualSyncHost);
+        stringList.add(manualSyncCluster);
+        stringList.add(manualSyncHypervisor);
+        stringList.add(manualSyncRegion);
+        stringList.add(manualSyncPod);
+        stringList.add(manualSyncSupportedNetwork);
+        stringList.add(manualSyncAffinityGroupType);
+        stringList.add(manualSyncNetworkServiceProvider);
+        stringList.add(manualSyncPrimaryStorage);
+        stringList.add(manualSyncSecondaryStorage);
         int i = 0;
         for (String string : stringList) {
             List<String> actionList = new ArrayList<String>();
@@ -3302,7 +3389,9 @@ public class SyncServiceImpl implements SyncService {
         for (String key : csNetworkServiceProviderMap.keySet()) {
             networkServiceProviderService.save(csNetworkServiceProviderMap.get(key));
         }
-        LOGGER.debug("Total rows added : " + (csNetworkServiceProviderMap.size()));
+        LOGGER.debug("Total rows added : " + (csNetworkServiceProvidersList.size()));
+        updateManualSyncCount("NETWORK_SERVICE_PROVIDER", csNetworkServiceProvidersList.size(), csNetworkServiceProvidersList.size());
+
     }
 
     @Override
@@ -3344,6 +3433,8 @@ public class SyncServiceImpl implements SyncService {
             supportedNetworkService.save(csSupportedNetworkMap.get(key));
         }
         LOGGER.debug("Total rows added : " + (csSupportedNetworkMap.size()));
+        updateManualSyncCount("SUPPORTED_NETWORK", csSupportedNetworksList.size(), csSupportedNetworksList.size());
+
     }
 
     @Override
@@ -3389,6 +3480,8 @@ public class SyncServiceImpl implements SyncService {
             vpcOfferingService.save(csVpcOfferingMap.get(key));
         }
         LOGGER.debug("Total rows added : " + (csVpcOfferingMap.size()));
+        updateManualSyncCount("VPC_OFFER", csVpcOfferingsList.size(), csVpcOfferingsList.size());
+
     }
 
     @Override
@@ -3484,6 +3577,8 @@ public class SyncServiceImpl implements SyncService {
             vpcService.save(csVpcMap.get(key));
         }
         LOGGER.debug("Total rows added : " + (csVpcMap.size()));
+        updateManualSyncCount("VPC", csVpcsList.size(), csVpcsList.size());
+
     }
 
     @Override
@@ -3526,4 +3621,93 @@ public class SyncServiceImpl implements SyncService {
         }
         LOGGER.debug("Total rows added : " + (csVpcAclMap.size()));
     }
+
+    /**
+     * Sync with Cloud Server Secondary storage.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    @Override
+    public void syncSecondaryStorage() throws ApplicationException, Exception {
+
+        // 1. Get all the pod objects from CS server as hash
+        List<SecondaryStorage> csSecondaryStorageList = secondaryStorageService.findAllFromCSServer();
+        HashMap<String, SecondaryStorage> csStorageMap = (HashMap<String, SecondaryStorage>) SecondaryStorage.convert(csSecondaryStorageList);
+
+        // 2. Get all the pod objects from application
+        List<SecondaryStorage> appStorageList = secondaryStorageService.findAll();
+
+        // 3. Iterate application pod list
+        for (SecondaryStorage storage : appStorageList) {
+            // 3.1 Find the corresponding CS server host object by finding it in
+            // a hash using uuid
+            if (csStorageMap.containsKey(storage.getUuid())) {
+                SecondaryStorage csStorage = csStorageMap.get(storage.getUuid());
+                storage.setName(csStorage.getName());
+
+                // 3.2 If found, update the pod object in app db
+                secondaryStorageService.update(storage);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // host which is not added in the app
+                csStorageMap.remove(storage.getUuid());
+            } else {
+                secondaryStorageService.delete(storage);
+            }
+
+        }
+        // 4. Get the remaining list of cs server hash user object, then iterate
+        // and
+        // add it to app db
+        for (String key : csStorageMap.keySet()) {
+            secondaryStorageService.save(csStorageMap.get(key));
+        }
+        updateManualSyncCount("SECONDARY_STORAGE", csSecondaryStorageList.size(), csSecondaryStorageList.size());
+    }
+
+    /**
+     * Sync with Cloud Server Primary storage.
+     *
+     * @throws ApplicationException unhandled application errors.
+     * @throws Exception cloudstack unhandled errors.
+     */
+    @Override
+    public void syncPrimaryStorage() throws ApplicationException, Exception {
+
+        // 1. Get all the pod objects from CS server as hash
+        List<PrimaryStorage> csPrimaryStorageList = primaryStorageService.findAllFromCSServer();
+        HashMap<String, PrimaryStorage> csStorageMap = (HashMap<String, PrimaryStorage>) PrimaryStorage.convert(csPrimaryStorageList);
+
+        // 2. Get all the pod objects from application
+        List<PrimaryStorage> appStorageList = primaryStorageService.findAll();
+
+        // 3. Iterate application pod list
+        for (PrimaryStorage storage : appStorageList) {
+            // 3.1 Find the corresponding CS server host object by finding it in
+            // a hash using uuid
+            if (csStorageMap.containsKey(storage.getUuid())) {
+                PrimaryStorage csStorage = csStorageMap.get(storage.getUuid());
+                storage.setName(csStorage.getName());
+
+                // 3.2 If found, update the pod object in app db
+                primaryStorageService.update(storage);
+
+                // 3.3 Remove once updated, so that we can have the list of cs
+                // host which is not added in the app
+                csStorageMap.remove(storage.getUuid());
+            } else {
+                primaryStorageService.delete(storage);
+            }
+
+        }
+        // 4. Get the remaining list of cs server hash user object, then iterate
+        // and
+        // add it to app db
+        for (String key : csStorageMap.keySet()) {
+            primaryStorageService.save(csStorageMap.get(key));
+        }
+        updateManualSyncCount("PRIMARY_STORAGE", csPrimaryStorageList.size(), csPrimaryStorageList.size());
+    }
+
 }

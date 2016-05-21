@@ -55,6 +55,7 @@ import ck.panda.util.EncryptionUtil;
 import ck.panda.util.JsonUtil;
 import ck.panda.util.error.Errors;
 import ck.panda.util.error.exception.ApplicationException;
+import net.sf.ehcache.concurrent.Sync;
 
 /**
  * Synchronization of all the asynchronous data from the cloudStack.
@@ -742,12 +743,14 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
             network.setIsActive(false);
             Errors errors = new Errors(messageSource);
             networkService.softDelete(network);
-            if (network.getProjectId() != null) {
-                updateResourceCountService.QuotaUpdateByResourceObject(network, CS_Network, network.getProjectId(),
+            if (network.getVpcId() == null) {
+                if (network.getProjectId() != null) {
+                    updateResourceCountService.QuotaUpdateByResourceObject(network, CS_Network, network.getProjectId(),
                             CS_Project, Delete);
-            } else {
-                updateResourceCountService.QuotaUpdateByResourceObject(network, CS_Network,
+                } else {
+                    updateResourceCountService.QuotaUpdateByResourceObject(network, CS_Network,
                             network.getDepartmentId(), CS_Department, Delete);
+                }
             }
             networkService.ipRelease(network);
         }
@@ -966,20 +969,20 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                     persistIp.setSyncFlag(false);
                     persistIp.setNetworkId(convertEntityService.getNetworkByUuid(csIp.getTransNetworkId()));
                     persistIp.setVpcId(convertEntityService.getVpcByUuid(csIp.getTransVpcId()));
-					if (persistIp.getVpcId() != null) {
-						  persistIp.setDepartmentId(convertEntityService
-		                            .getVpcById(convertEntityService.getVpcByUuid(csIp.getTransVpcId()))
-		                            .getDepartmentId());
-		                    persistIp.setProjectId(convertEntityService
-		                            .getVpcById(convertEntityService.getVpcByUuid(csIp.getTransVpcId()))
-		                            .getProjectId());
-		                    persistIp.setZoneId(convertEntityService
-		                            .getVpcById(convertEntityService.getVpcByUuid(csIp.getTransVpcId()))
-		                            .getZoneId());
-		                    persistIp.setDomainId(convertEntityService
-		                            .getVpcById(convertEntityService.getVpcByUuid(csIp.getTransVpcId()))
-		                            .getDomainId());
-					} else {
+                    if (persistIp.getVpcId() != null) {
+                          persistIp.setDepartmentId(convertEntityService
+                                    .getVpcById(convertEntityService.getVpcByUuid(csIp.getTransVpcId()))
+                                    .getDepartmentId());
+                            persistIp.setProjectId(convertEntityService
+                                    .getVpcById(convertEntityService.getVpcByUuid(csIp.getTransVpcId()))
+                                    .getProjectId());
+                            persistIp.setZoneId(convertEntityService
+                                    .getVpcById(convertEntityService.getVpcByUuid(csIp.getTransVpcId()))
+                                    .getZoneId());
+                            persistIp.setDomainId(convertEntityService
+                                    .getVpcById(convertEntityService.getVpcByUuid(csIp.getTransVpcId()))
+                                    .getDomainId());
+                    } else {
                     persistIp.setDepartmentId(convertEntityService
                             .getNetworkById(convertEntityService.getNetworkByUuid(csIp.getTransNetworkId()))
                             .getDepartmentId());
@@ -1008,30 +1011,30 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                 ipaddress.setIsActive(ipaddress.getIsActive());
                 ipaddress.setNetworkId(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()));
                 ipaddress.setVpcId(convertEntityService.getVpcByUuid(ipaddress.getTransVpcId()));
-				if (ipaddress.getVpcId() != null) {
-					ipaddress.setDepartmentId(convertEntityService
-							.getVpcById(convertEntityService.getVpcByUuid(ipaddress.getTransVpcId())).getDepartmentId());
-					ipaddress.setProjectId(convertEntityService
-							.getVpcById(convertEntityService.getVpcByUuid(ipaddress.getTransVpcId())).getProjectId());
-					ipaddress.setZoneId(convertEntityService
-							.getVpcById(convertEntityService.getVpcByUuid(ipaddress.getTransVpcId())).getZoneId());
-					ipaddress.setDomainId(convertEntityService
-							.getVpcById(convertEntityService.getVpcByUuid(ipaddress.getTransVpcId())).getDomainId());
-				} else {
-					ipaddress.setDepartmentId(convertEntityService
-							.getNetworkById(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()))
-							.getDepartmentId());
-					ipaddress.setZoneId(convertEntityService
-							.getNetworkById(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()))
-							.getZoneId());
-					ipaddress.setProjectId(convertEntityService
-							.getNetworkById(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()))
-							.getProjectId());
-					ipaddress.setDomainId(convertEntityService
-							.getNetworkById(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()))
-							.getDomainId());
-				}
-				ipService.save(ipaddress);
+                if (ipaddress.getVpcId() != null) {
+                    ipaddress.setDepartmentId(convertEntityService
+                            .getVpcById(convertEntityService.getVpcByUuid(ipaddress.getTransVpcId())).getDepartmentId());
+                    ipaddress.setProjectId(convertEntityService
+                            .getVpcById(convertEntityService.getVpcByUuid(ipaddress.getTransVpcId())).getProjectId());
+                    ipaddress.setZoneId(convertEntityService
+                            .getVpcById(convertEntityService.getVpcByUuid(ipaddress.getTransVpcId())).getZoneId());
+                    ipaddress.setDomainId(convertEntityService
+                            .getVpcById(convertEntityService.getVpcByUuid(ipaddress.getTransVpcId())).getDomainId());
+                } else {
+                    ipaddress.setDepartmentId(convertEntityService
+                            .getNetworkById(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()))
+                            .getDepartmentId());
+                    ipaddress.setZoneId(convertEntityService
+                            .getNetworkById(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()))
+                            .getZoneId());
+                    ipaddress.setProjectId(convertEntityService
+                            .getNetworkById(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()))
+                            .getProjectId());
+                    ipaddress.setDomainId(convertEntityService
+                            .getNetworkById(convertEntityService.getNetworkByUuid(ipaddress.getTransNetworkId()))
+                            .getDomainId());
+                }
+                ipService.save(ipaddress);
             }
         }
         if (eventObject.getString("commandEventType").equals("NET.IPRELEASE")) {
@@ -1457,6 +1460,7 @@ public class AsynchronousJobServiceImpl implements AsynchronousJobService {
                              vpc.getDepartmentId(), CS_Department, Update);
                  }
                 vpcService.save(vpc);
+                syncService.syncIpAddress();
             }
         }
         if(eventObject.getString(CloudStackConstants.CS_COMMAND_EVENT_TYPE)

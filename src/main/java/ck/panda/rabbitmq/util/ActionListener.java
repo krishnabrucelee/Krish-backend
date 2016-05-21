@@ -238,9 +238,11 @@ public class ActionListener implements MessageListener {
                 LOGGER.debug("Physical Network sync", eventMessage);
                 break;
             case EventTypes.EVENT_POD:
+                syncService.syncPod();
                 LOGGER.debug("POD sync", eventMessage);
                 break;
             case EventTypes.EVENT_HOST:
+                syncService.syncHost();
                 LOGGER.debug("Host sync", eventMessage);
                 break;
             case EventTypes.EVENT_PROXY:
