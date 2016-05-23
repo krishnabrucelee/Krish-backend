@@ -65,11 +65,11 @@ public interface DepartmentService extends CRUDService<Department> {
     /**
      * Find the departments based on the given domain id and isActive status.
      *
-     * @param domainId domain id.
+     * @param userId user id.
      * @param isActive department status Active/Inactive
      * @return department.
      */
-    List<Department> findByDomainAndIsActive(Long domainId, Boolean isActive) throws Exception;
+    List<Department> findByDomainAndIsActive(Long userId, Boolean isActive) throws Exception;
 
     /**
      * Find by username domain id and isActive status.

@@ -108,8 +108,7 @@ public class DepartmentController extends CRUDController<Department> implements 
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     protected List<Department> getDepartmentList() throws Exception {
-        Long domainId = convertEntityService.getOwnerById(Long.parseLong(tokenDetails.getTokenDetails("id"))).getDomainId();
-        return departmentService.findByDomainAndIsActive(domainId, true);
+        return departmentService.findByDomainAndIsActive(Long.parseLong(tokenDetails.getTokenDetails("id")), true);
     }
 
     /**
@@ -125,6 +124,8 @@ public class DepartmentController extends CRUDController<Department> implements 
     protected List<Department> getDepartmentListByDomain(@RequestParam("dept") Long domainId) throws Exception {
         List<AccountType> types = new ArrayList<AccountType>();
         types.add(Department.AccountType.USER);
+        types.add(Department.AccountType.DOMAIN_ADMIN);
+        types.add(Department.AccountType.ROOT_ADMIN);
         return departmentService.findByDomainAndAccountTypesAndActive(domainId, types, true);
     }
 
